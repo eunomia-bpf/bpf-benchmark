@@ -1,0 +1,61 @@
+{
+  "completed_benchmarks": 7,
+  "current_benchmark": "map_lru_hash_counter",
+  "current_benchmark_index": 8,
+  "current_benchmark_record": {
+    "expected_result": 1,
+    "expected_retval": 2,
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+    "io_mode": "packet",
+    "name": "map_lru_hash_counter",
+    "runs": [
+      {
+        "inner_repeat": 1000,
+        "runtime": "kernel",
+        "samples": [
+          {
+            "code_size": {
+              "bpf_bytecode_bytes": 472,
+              "native_code_bytes": 265
+            },
+            "compile_ns": 438977,
+            "exec_cycles": 147305,
+            "exec_ns": 236,
+            "jited_prog_len": 265,
+            "perf_counters": {},
+            "perf_counters_meta": {
+              "collected": false,
+              "error": "",
+              "include_kernel": true,
+              "requested": false,
+              "scope": "full_repeat_raw"
+            },
+            "phases_ns": {
+              "memory_prepare_ns": 24054,
+              "object_load_ns": 309463,
+              "object_open_ns": 129514,
+              "packet_prepare_ns": 645,
+              "prog_run_wall_ns": 39959742,
+              "result_extract_ns": 270
+            },
+            "result": 1,
+            "retval": 2,
+            "sample_index": 0,
+            "timing_source": "ktime",
+            "timing_source_wall": "rdtsc",
+            "tsc_freq_hz": 3686365453,
+            "wall_exec_ns": 39959,
+            "xlated_prog_len": 472
+          }
+        ]
+      }
+    ],
+    "tags": [
+      "stage2",
+      "maps",
+      "lru_hash"
+    ]
+  },
+  "status": "running",
+  "total_benchmarks": 13
+}

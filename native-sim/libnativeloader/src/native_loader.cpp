@@ -260,11 +260,9 @@ private:
     int fd_ = -1;
 };
 
-/* Stage 2 helpers that native-link can lower. For companion-object loads the
- * helper address usually comes from the companion program's JIT oracle. For
- * already-loaded app programs, the verifier may leave no usable oracle target
- * for map helpers, so native-loader also resolves supported helper symbols
- * through /proc/kallsyms and passes them as explicit per-site targets. */
+/* Stage 2 helper names that native-link can match against native relocations.
+ * Runtime helper targets come from the loaded program's JIT/xlated oracle, not
+ * from kernel symbol lookup. */
 struct SupportedHelper {
     int id;
     const char *symbol;
@@ -361,28 +359,6 @@ constexpr SupportedHelper kSupportedHelpers[] = {
     {BPF_FUNC_redirect_peer, "bpf_redirect_peer"},
 };
 
-constexpr const char *kRuntimeCallSymbols[] = {
-    "memset",
-    "memcpy",
-    "memmove",
-};
-
-constexpr const char *kTypedHelperSymbols[] = {
-    "bpf_user_rnd_u32",
-    "bpf_xdp_fib_lookup",
-    "bpf_skb_fib_lookup",
-    "bpf_xdp_redirect_map",
-    "bpf_tc_skc_lookup_tcp",
-    "bpf_xdp_skc_lookup_tcp",
-    "bpf_skc_lookup_tcp",
-    "bpf_tc_sk_lookup_udp",
-    "bpf_xdp_sk_lookup_udp",
-    "bpf_sock_addr_sk_lookup_udp",
-    "bpf_sk_lookup_udp",
-};
-
-constexpr const char *kX86CpuNumberHelperKey = "__native_x86_cpu_number";
-constexpr const char *kX86ThisCpuOffHelperKey = "__native_x86_this_cpu_off";
 constexpr const char *kX86BpfMapMaxEntriesOffsetKey =
     "__native_x86_bpf_map_max_entries_offset";
 constexpr const char *kX86BpfArrayPtrsOffsetKey = "__native_x86_bpf_array_ptrs_offset";
@@ -394,17 +370,9 @@ constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 #endif
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v41";
-constexpr const char *kKallsymsCachePath = "/tmp/native_kernel_kallsyms.tsv";
-constexpr const char *kKallsymsCacheVersion = "native-kallsyms-cache-v3";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v43";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
 constexpr const char *kNativeStubBtfCacheVersion = "native-stub-btf-cache-v1";
-constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";
-constexpr const char *kArrayOfMapLookupElemSymbol = "array_of_map_lookup_elem";
-constexpr const char *kHtabLruPercpuMapLookupElemSymbol =
-    "htab_lru_percpu_map_lookup_elem";
-constexpr const char *kHtabLruPercpuMapUpdateElemSymbol =
-    "htab_lru_percpu_map_update_elem";
 constexpr int kLibbpfCoreBadRelocPoison = 195896080; // 0xbad2310
 
 #ifndef BPF_PSEUDO_KINSN_SIDECAR
@@ -1355,251 +1323,12 @@ const char *native_arch_name()
 #endif
 }
 
-bool has_all_wanted_symbols(const std::unordered_map<std::string, uint64_t> &table,
-                            const char *const *wanted,
-                            size_t wanted_count)
-{
-    for (size_t i = 0; i < wanted_count; i++) {
-        if (table.find(wanted[i]) == table.end()) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool load_kallsyms_cache(std::unordered_map<std::string, uint64_t> &table,
-                         const char *const *wanted,
-                         size_t wanted_count,
-                         const std::string &boot_id)
-{
-    FILE *f = std::fopen(kKallsymsCachePath, "re");
-    if (!f) {
-        if (errno == ENOENT) {
-            return false;
-        }
-        fail("open " + std::string(kKallsymsCachePath) + ": " +
-             std::strerror(errno));
-    }
-
-    bool valid_version = false;
-    bool valid_arch = false;
-    bool valid_boot = false;
-    std::unordered_map<std::string, uint64_t> cached;
-    char line[512];
-    while (std::fgets(line, sizeof(line), f)) {
-        char key[256] = {};
-        char value[256] = {};
-        if (std::sscanf(line, "%255s %255s", key, value) != 2) {
-            std::fclose(f);
-            fail("malformed native_kernel kallsyms cache line");
-        }
-        if (std::strcmp(key, "version") == 0) {
-            valid_version = std::strcmp(value, kKallsymsCacheVersion) == 0;
-            continue;
-        }
-        if (std::strcmp(key, "arch") == 0) {
-            valid_arch = std::strcmp(value, native_arch_name()) == 0;
-            continue;
-        }
-        if (std::strcmp(key, "boot_id") == 0) {
-            valid_boot = boot_id == value;
-            continue;
-        }
-        for (size_t i = 0; i < wanted_count; i++) {
-            if (std::strcmp(key, wanted[i]) == 0) {
-                cached.emplace(wanted[i], std::strtoull(value, nullptr, 16));
-                break;
-            }
-        }
-    }
-    std::fclose(f);
-
-    if (!valid_version || !valid_arch || !valid_boot ||
-        !has_all_wanted_symbols(cached, wanted, wanted_count)) {
-        return false;
-    }
-
-    table = std::move(cached);
-    return true;
-}
-
-void store_kallsyms_cache(const std::unordered_map<std::string, uint64_t> &table,
-                          const char *const *wanted,
-                          size_t wanted_count,
-                          const std::string &boot_id)
-{
-    if (!has_all_wanted_symbols(table, wanted, wanted_count)) {
-        return;
-    }
-
-    std::filesystem::path tmp =
-        std::string(kKallsymsCachePath) + "." + std::to_string(getpid()) + ".tmp";
-    std::ofstream out(tmp);
-    if (!out) {
-        fail("open " + tmp.string() + ": " + std::strerror(errno));
-    }
-    out << "version " << kKallsymsCacheVersion << "\n";
-    out << "arch " << native_arch_name() << "\n";
-    out << "boot_id " << boot_id << "\n";
-    for (size_t i = 0; i < wanted_count; i++) {
-        auto it = table.find(wanted[i]);
-        if (it == table.end()) {
-            fail("native_kernel kallsyms cache missing " + std::string(wanted[i]));
-        }
-        char addr[32];
-        std::snprintf(addr, sizeof(addr), "0x%llx",
-                      static_cast<unsigned long long>(it->second));
-        out << wanted[i] << " " << addr << "\n";
-    }
-    out.close();
-    if (!out) {
-        fail("write " + tmp.string() + ": " + std::strerror(errno));
-    }
-
-    std::error_code ec;
-    std::filesystem::rename(tmp, kKallsymsCachePath, ec);
-    if (ec) {
-        fail("publish " + std::string(kKallsymsCachePath) + ": " + ec.message());
-    }
-}
-
 const char *helper_symbol_for_id(int helper_id);
-
-const std::unordered_map<std::string, uint64_t> &kallsyms_table()
-{
-    static std::unordered_map<std::string, uint64_t> table;
-    if (!table.empty()) {
-        return table;
-    }
-
-    std::vector<const char *> wanted;
-#if defined(__x86_64__)
-    wanted.push_back("cpu_number");
-    wanted.push_back("this_cpu_off");
-#endif
-    for (const auto &helper : kSupportedHelpers) {
-        wanted.push_back(helper.symbol);
-    }
-    for (const char *symbol : kTypedHelperSymbols) {
-        wanted.push_back(symbol);
-    }
-    for (const char *symbol : kRuntimeCallSymbols) {
-        wanted.push_back(symbol);
-    }
-    wanted.push_back(kHtabLookupElemSymbol);
-    wanted.push_back(kArrayOfMapLookupElemSymbol);
-    wanted.push_back(kHtabLruPercpuMapLookupElemSymbol);
-    wanted.push_back(kHtabLruPercpuMapUpdateElemSymbol);
-    const size_t wanted_count = wanted.size();
-
-    const std::string boot_id =
-        read_first_line_required("/proc/sys/kernel/random/boot_id");
-    if (load_kallsyms_cache(table, wanted.data(), wanted_count, boot_id)) {
-        return table;
-    }
-
-    FILE *f = std::fopen("/proc/kallsyms", "re");
-    if (!f) {
-        fail("open /proc/kallsyms: " + std::string(std::strerror(errno)));
-    }
-    char line[512];
-    size_t found = 0;
-    while (std::fgets(line, sizeof(line), f)) {
-        char addr_text[32] = {};
-        char type = '\0';
-        char name[256] = {};
-        if (std::sscanf(line, "%31s %c %255s", addr_text, &type, name) != 3) {
-            continue;
-        }
-        (void)type;
-        for (size_t i = 0; i < wanted_count; i++) {
-            if (std::strcmp(name, wanted[i]) != 0 || table.count(wanted[i])) {
-                continue;
-            }
-            uint64_t addr = std::strtoull(addr_text, nullptr, 16);
-            table.emplace(wanted[i], addr);
-            found++;
-            break;
-        }
-        if (found == wanted_count) {
-            break;
-        }
-    }
-    std::fclose(f);
-    store_kallsyms_cache(table, wanted.data(), wanted_count, boot_id);
-    return table;
-}
-
-/* Look up non-helper kernel implementation details that the current map and
- * per-cpu lowerings still need. BPF helper call targets must come from the
- * companion JIT oracle instead. */
-uint64_t kallsyms_lookup(const std::string &name)
-{
-    const auto &table = kallsyms_table();
-    auto it = table.find(name);
-    if (it != table.end()) {
-        return it->second;
-    }
-    return 0;
-}
-
-uint64_t helper_kernel_addr(int helper_id)
-{
-    const char *symbol = helper_symbol_for_id(helper_id);
-    if (!symbol) {
-        return 0;
-    }
-    return kallsyms_lookup(symbol);
-}
-
-uint64_t htab_lookup_elem_kernel_addr()
-{
-    uint64_t addr = kallsyms_lookup(kHtabLookupElemSymbol);
-    if (addr == 0) {
-        fail(std::string("native_kernel: ") + kHtabLookupElemSymbol +
-             " is missing from /proc/kallsyms");
-    }
-    return addr;
-}
-
-uint64_t array_of_map_lookup_elem_kernel_addr()
-{
-    uint64_t addr = kallsyms_lookup(kArrayOfMapLookupElemSymbol);
-    if (addr == 0) {
-        fail(std::string("native_kernel: ") + kArrayOfMapLookupElemSymbol +
-             " is missing from /proc/kallsyms");
-    }
-    return addr;
-}
-
-uint64_t htab_lru_percpu_map_lookup_elem_kernel_addr()
-{
-    uint64_t addr = kallsyms_lookup(kHtabLruPercpuMapLookupElemSymbol);
-    if (addr == 0) {
-        fail(std::string("native_kernel: ") + kHtabLruPercpuMapLookupElemSymbol +
-             " is missing from /proc/kallsyms");
-    }
-    return addr;
-}
-
-uint64_t htab_lru_percpu_map_update_elem_kernel_addr()
-{
-    uint64_t addr = kallsyms_lookup(kHtabLruPercpuMapUpdateElemSymbol);
-    if (addr == 0) {
-        fail(std::string("native_kernel: ") + kHtabLruPercpuMapUpdateElemSymbol +
-             " is missing from /proc/kallsyms");
-    }
-    return addr;
-}
 
 struct BpfArrayOffsets {
     uint32_t value;
-    uint32_t pptrs;
-};
-
-struct BpfHtabOffsets {
-    uint32_t key;
-    uint32_t lru_ref;
+    uint32_t ptrs;
+    uint64_t this_cpu_off;
 };
 
 struct MapMeta {
@@ -1617,7 +1346,6 @@ struct MapMeta {
 struct HelperAlias {
     int id;
     const char *link_name;
-    const char *kernel_symbol;
 };
 
 bool ends_with(const std::string &value, const std::string &suffix)
@@ -2000,74 +1728,24 @@ const char *helper_symbol_for_id(int helper_id)
 
 HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type)
 {
+    (void)prog_type;
     if (helper_id == BPF_FUNC_get_prandom_u32) {
-        return HelperAlias{helper_id, "bpf_get_prandom_u32", "bpf_user_rnd_u32"};
+        return HelperAlias{helper_id, "bpf_get_prandom_u32"};
     }
     if (helper_id == BPF_FUNC_fib_lookup) {
-        if (prog_type == BPF_PROG_TYPE_XDP) {
-            return HelperAlias{helper_id, "bpf_fib_lookup", "bpf_xdp_fib_lookup"};
-        }
-        if (prog_type == BPF_PROG_TYPE_SCHED_CLS ||
-            prog_type == BPF_PROG_TYPE_SCHED_ACT) {
-            return HelperAlias{helper_id, "bpf_fib_lookup", "bpf_skb_fib_lookup"};
-        }
-        return HelperAlias{helper_id, "bpf_fib_lookup", nullptr};
+        return HelperAlias{helper_id, "bpf_fib_lookup"};
     }
     if (helper_id == BPF_FUNC_redirect_map) {
-        if (prog_type == BPF_PROG_TYPE_XDP) {
-            return HelperAlias{helper_id, "bpf_redirect_map", "bpf_xdp_redirect_map"};
-        }
-        return HelperAlias{helper_id, "bpf_redirect_map", nullptr};
+        return HelperAlias{helper_id, "bpf_redirect_map"};
     }
     if (helper_id == BPF_FUNC_skc_lookup_tcp) {
-        if (prog_type == BPF_PROG_TYPE_XDP) {
-            return HelperAlias{helper_id, "bpf_skc_lookup_tcp", "bpf_xdp_skc_lookup_tcp"};
-        }
-        if (prog_type == BPF_PROG_TYPE_SCHED_CLS ||
-            prog_type == BPF_PROG_TYPE_SCHED_ACT) {
-            return HelperAlias{helper_id, "bpf_skc_lookup_tcp", "bpf_tc_skc_lookup_tcp"};
-        }
-        return HelperAlias{helper_id, "bpf_skc_lookup_tcp", "bpf_skc_lookup_tcp"};
+        return HelperAlias{helper_id, "bpf_skc_lookup_tcp"};
     }
     if (helper_id == BPF_FUNC_sk_lookup_udp) {
-        if (prog_type == BPF_PROG_TYPE_XDP) {
-            return HelperAlias{helper_id, "bpf_sk_lookup_udp", "bpf_xdp_sk_lookup_udp"};
-        }
-        if (prog_type == BPF_PROG_TYPE_SCHED_CLS ||
-            prog_type == BPF_PROG_TYPE_SCHED_ACT) {
-            return HelperAlias{helper_id, "bpf_sk_lookup_udp", "bpf_tc_sk_lookup_udp"};
-        }
-        if (prog_type == BPF_PROG_TYPE_CGROUP_SOCK_ADDR) {
-            return HelperAlias{helper_id, "bpf_sk_lookup_udp", "bpf_sock_addr_sk_lookup_udp"};
-        }
-        return HelperAlias{helper_id, "bpf_sk_lookup_udp", "bpf_sk_lookup_udp"};
+        return HelperAlias{helper_id, "bpf_sk_lookup_udp"};
     }
     const char *symbol = helper_symbol_for_id(helper_id);
-    return HelperAlias{helper_id, symbol, symbol};
-}
-
-void add_contextual_helper_alias_if_available(std::vector<std::string> &helpers,
-                                              int helper_id,
-                                              uint32_t prog_type)
-{
-    const HelperAlias alias = helper_alias_for_call(helper_id, prog_type);
-    if (!alias.link_name || !alias.kernel_symbol) {
-        return;
-    }
-    const uint64_t addr = kallsyms_lookup(alias.kernel_symbol);
-    if (addr == 0) {
-        return;
-    }
-    char value_buf[32];
-    std::snprintf(value_buf, sizeof(value_buf), "0x%llx",
-                  static_cast<unsigned long long>(addr));
-    const std::string arg = std::string(alias.link_name) + "=" + value_buf;
-    for (const std::string &existing : helpers) {
-        if (existing == arg) {
-            return;
-        }
-    }
-    helpers.push_back(arg);
+    return HelperAlias{helper_id, symbol};
 }
 
 std::vector<uint64_t> load_jited_ksyms(int program_fd, uint32_t count)
@@ -2522,7 +2200,7 @@ std::filesystem::path native_link_binary(const std::filesystem::path &override_p
     fail("native_kernel: native-link not found; set BPFREJIT_NATIVE_LINK_BINARY or install /usr/local/bin/native-link");
 }
 
-/* Stage 2: given an ELF .native.o input, pass the companion program's JIT
+/* Stage 2: given an ELF .native.o input, pass the loaded program's JIT
  * oracle and map metadata into native-link. native-link owns target decoding
  * and machine-code lowering; the runner only loads kernel facts and uploads
  * the resulting blob + relocs. */
@@ -2557,29 +2235,19 @@ struct LinkedBlob {
     std::vector<uint32_t> relocated_map_ids;
 };
 
-/* Libbpf-load the canonical `.bpf.o` companion so the kernel allocates
- * maps, then ask the native_lab kernel module to translate map fds into
- * kernel pointers. The caller MUST keep the returned bpf_object alive
- * while the native_kernel run executes -- closing it frees the maps. */
-struct CompanionLoad {
-    bpf_object *obj = nullptr;
-    uint64_t open_ns = 0;
+struct ProgramLoadPlan {
     uint64_t object_load_ns = 0;
     uint64_t map_ptr_extract_ns = 0;
     uint64_t lookup_spec_ns = 0;
     uint64_t oracle_jit_base = 0;
     std::vector<uint8_t> oracle_jited;
     std::vector<uint8_t> oracle_xlated;
-    bool use_helper_oracle = true;
-    bool allow_kernel_symbol_lookup = true;
     bool has_tail_call = false;
     std::unordered_map<std::string, uint64_t> map_addrs;
     std::unordered_map<std::string, uint32_t> map_addr_ids;
     std::unordered_map<std::string, std::string> native_map_symbols;
     std::unordered_map<std::string, MapMeta> exact_map_addrs;
     std::unordered_set<std::string> ambiguous_exact_maps;
-    std::vector<std::string> helper_args;
-    uint32_t prog_type = 0;
     std::vector<MapMeta> maps;
     /* Per-call-site spec for every `bpf_map_lookup_elem` invocation in
      * the entry program, listed in BPF-source order. Each entry is a
@@ -2591,12 +2259,11 @@ struct CompanionLoad {
      *
      * The pair is decided per-call from the map type discovered by
      * walking the program's BPF source bytecode (track r1's binding
-     * through the most recent BPF_LD_IMM64 pseudo_map_fd) and the
-     * per-kernel `struct htab_elem` offsets read from BTF. ARRAY and
-     * PERCPU_ARRAY sites carry enough metadata for native-link to emit
-     * the same bounds-check + pointer arithmetic shape that the kernel
-     * JIT emits. Other map types stay on the plain helper until they get
-     * their own concrete lowering. */
+     * through the most recent BPF_LD_IMM64 pseudo_map_fd). ARRAY sites
+     * carry enough metadata for native-link to emit direct bounds-check
+     * + pointer arithmetic. Other map types stay on the oracle helper
+     * call unless their lowering can be expressed without private kernel
+     * symbol addresses. */
     struct LookupSite {
         enum class Kind {
             Call,
@@ -2629,7 +2296,7 @@ struct CompanionLoad {
     std::vector<UpdateSite> update_sites;
 };
 
-void add_exact_map_meta(CompanionLoad &load, const MapMeta &meta)
+void add_exact_map_meta(ProgramLoadPlan &load, const MapMeta &meta)
 {
     const std::string truncated = bpf_obj_name_truncation(meta.name);
     const std::string keys[] = {meta.name, truncated};
@@ -2650,7 +2317,7 @@ void add_exact_map_meta(CompanionLoad &load, const MapMeta &meta)
     }
 }
 
-const MapMeta *find_exact_map_meta(const CompanionLoad &load,
+const MapMeta *find_exact_map_meta(const ProgramLoadPlan &load,
                                    const std::string &name)
 {
     const std::string truncated = bpf_obj_name_truncation(name);
@@ -2671,7 +2338,7 @@ const MapMeta *find_exact_map_meta(const CompanionLoad &load,
     return nullptr;
 }
 
-void add_map_meta(CompanionLoad &load, const MapMeta &meta)
+void add_map_meta(ProgramLoadPlan &load, const MapMeta &meta)
 {
     bool duplicate = false;
     for (const MapMeta &existing : load.maps) {
@@ -2714,7 +2381,7 @@ void add_map_meta(CompanionLoad &load, const MapMeta &meta)
     }
 }
 
-void add_map_symbol_alias_meta(CompanionLoad &load,
+void add_map_symbol_alias_meta(ProgramLoadPlan &load,
                                const std::string &alias,
                                const MapMeta &meta)
 {
@@ -2738,7 +2405,7 @@ void add_map_symbol_alias_meta(CompanionLoad &load,
     load.native_map_symbols[alias] = alias;
 }
 
-const MapMeta *find_single_cilium_calls_map(const CompanionLoad &load)
+const MapMeta *find_single_cilium_calls_map(const ProgramLoadPlan &load)
 {
     const MapMeta *match = nullptr;
     for (const MapMeta &meta : load.maps) {
@@ -2808,7 +2475,7 @@ bool find_open_process_cilium_calls_map(MapMeta &out)
     return true;
 }
 
-const MapMeta *find_singleton_array_data_map(const CompanionLoad &load,
+const MapMeta *find_singleton_array_data_map(const ProgramLoadPlan &load,
                                              const std::string &section_name,
                                              uint64_t min_value_size)
 {
@@ -2842,7 +2509,7 @@ const MapMeta *find_singleton_array_data_map(const CompanionLoad &load,
     return match;
 }
 
-const MapMeta *find_array_data_map(CompanionLoad &load,
+const MapMeta *find_array_data_map(ProgramLoadPlan &load,
                                    const std::string &section_name,
                                    uint64_t min_value_size)
 {
@@ -2867,7 +2534,7 @@ const MapMeta *find_array_data_map(CompanionLoad &load,
     fail("internal error: added native data map disappeared from metadata");
 }
 
-const MapMeta *find_singleton_kconfig_map(const CompanionLoad &load)
+const MapMeta *find_singleton_kconfig_map(const ProgramLoadPlan &load)
 {
     const MapMeta *match = nullptr;
     for (const MapMeta &meta : load.maps) {
@@ -2887,7 +2554,7 @@ const MapMeta *find_singleton_kconfig_map(const CompanionLoad &load)
     return match;
 }
 
-void add_known_kconfig_symbol_addrs(CompanionLoad &load)
+void add_known_kconfig_symbol_addrs(ProgramLoadPlan &load)
 {
     const MapMeta *map = find_singleton_kconfig_map(load);
     if (!map) {
@@ -2917,7 +2584,7 @@ std::string bpf_obj_name_truncation(const std::string &name)
     return name.substr(0, kMaxBpfObjNameLen);
 }
 
-void add_native_map_symbol_alias(CompanionLoad &load, const std::string &name)
+void add_native_map_symbol_alias(ProgramLoadPlan &load, const std::string &name)
 {
     if (load.map_addrs.count(name)) {
         return;
@@ -2983,7 +2650,7 @@ void add_native_map_symbol_alias(CompanionLoad &load, const std::string &name)
     }
 }
 
-const MapMeta *find_map_meta_by_loaded_name(const CompanionLoad &load,
+const MapMeta *find_map_meta_by_loaded_name(const ProgramLoadPlan &load,
                                             const std::string &loaded_name)
 {
     const MapMeta *match = nullptr;
@@ -3002,6 +2669,34 @@ const MapMeta *find_map_meta_by_loaded_name(const CompanionLoad &load,
 bool has_native_map_shape(const NativeMapShape &shape)
 {
     return shape.type >= 0;
+}
+
+uint64_t decode_x86_this_cpu_off_from_jit(const std::vector<uint8_t> &jited)
+{
+#if defined(__x86_64__)
+    constexpr uint8_t kPrefix[] = {0x65, 0x48, 0x03, 0x04, 0x25};
+    uint64_t found = 0;
+    bool have = false;
+    for (size_t i = 0; i + sizeof(kPrefix) + sizeof(uint32_t) <= jited.size(); i++) {
+        if (std::memcmp(jited.data() + i, kPrefix, sizeof(kPrefix)) != 0) {
+            continue;
+        }
+        uint32_t disp = 0;
+        std::memcpy(&disp, jited.data() + i + sizeof(kPrefix), sizeof(disp));
+        if (!have) {
+            found = disp;
+            have = true;
+            continue;
+        }
+        if (found != disp) {
+            fail("native_kernel: original JIT contains multiple gs:this_cpu_off displacements");
+        }
+    }
+    return have ? found : 0;
+#else
+    (void)jited;
+    return 0;
+#endif
 }
 
 NativeMapShape map_shape_from_meta(const MapMeta &meta)
@@ -3040,115 +2735,42 @@ NativeMapShape inner_map_shape_for_outer_map(const MapMeta &meta)
     return NativeMapShape{};
 }
 
-bool configure_lookup_site_for_shape(CompanionLoad::LookupSite &site,
+bool configure_lookup_site_for_shape(ProgramLoadPlan::LookupSite &site,
                                      const NativeMapShape &shape,
-                                     const BpfArrayOffsets &array_offsets,
-                                     const BpfHtabOffsets &htab_offsets,
-                                     uint64_t this_cpu_off_addr)
+                                     const BpfArrayOffsets &array_offsets)
 {
     if (!has_native_map_shape(shape)) {
         return false;
     }
 
-    int t = shape.type;
-    if (t == BPF_MAP_TYPE_ARRAY) {
-        site.kind = CompanionLoad::LookupSite::Kind::Array;
+    if (shape.type == BPF_MAP_TYPE_ARRAY) {
+        site.kind = ProgramLoadPlan::LookupSite::Kind::Array;
         site.max_entries = shape.max_entries;
         site.elem_size = (shape.value_size + 7u) & ~7u;
         site.index_mask = roundup_pow2_mask(shape.max_entries);
         site.value_offset = array_offsets.value;
         return true;
     }
-    if (t == BPF_MAP_TYPE_PERCPU_ARRAY) {
-#if defined(__x86_64__)
-        if (this_cpu_off_addr == 0) {
-            fail("this_cpu_off not in /proc/kallsyms");
+    if (shape.type == BPF_MAP_TYPE_PERCPU_ARRAY) {
+        if (array_offsets.this_cpu_off == 0) {
+            fail("native_kernel: PERCPU_ARRAY lookup needs gs:this_cpu_off from original JIT");
         }
-#endif
-        site.kind = CompanionLoad::LookupSite::Kind::PerCpuArray;
+        site.kind = ProgramLoadPlan::LookupSite::Kind::PerCpuArray;
         site.max_entries = shape.max_entries;
-        site.elem_size = sizeof(void *);
+        site.elem_size = (shape.value_size + 7u) & ~7u;
         site.index_mask = roundup_pow2_mask(shape.max_entries);
-        site.value_offset = array_offsets.pptrs;
-        site.percpu_base_addr = this_cpu_off_addr;
-        return true;
-    }
-    if (t == BPF_MAP_TYPE_HASH) {
-        uint32_t rounded = (shape.key_size + 7) & ~7u;
-        site.target_addr = htab_lookup_elem_kernel_addr();
-        site.kind = CompanionLoad::LookupSite::Kind::Hash;
-        site.key_offset = htab_offsets.key + rounded;
-        return true;
-    }
-    if (t == BPF_MAP_TYPE_LRU_HASH) {
-        uint32_t rounded = (shape.key_size + 7) & ~7u;
-        site.target_addr = htab_lookup_elem_kernel_addr();
-        site.kind = CompanionLoad::LookupSite::Kind::LruHash;
-        site.key_offset = htab_offsets.key + rounded;
-        site.value_offset = htab_offsets.lru_ref;
-        return true;
-    }
-    if (t == BPF_MAP_TYPE_PERCPU_HASH) {
-        uint32_t rounded = (shape.key_size + 7) & ~7u;
-        site.target_addr = htab_lookup_elem_kernel_addr();
-        site.kind = CompanionLoad::LookupSite::Kind::PerCpuHash;
-        site.key_offset = htab_offsets.key + rounded;
-#if defined(__x86_64__)
-        if (this_cpu_off_addr == 0) {
-            fail("this_cpu_off not in /proc/kallsyms");
-        }
-#endif
-        site.percpu_base_addr = this_cpu_off_addr;
-        return true;
-    }
-    if (t == BPF_MAP_TYPE_LRU_PERCPU_HASH) {
-        site.kind = CompanionLoad::LookupSite::Kind::Call;
-        site.target_addr = htab_lru_percpu_map_lookup_elem_kernel_addr();
-        return true;
-    }
-    if (t == BPF_MAP_TYPE_HASH_OF_MAPS) {
-        uint32_t rounded = (shape.key_size + 7) & ~7u;
-        site.kind = CompanionLoad::LookupSite::Kind::HashOfMaps;
-        site.target_addr = htab_lookup_elem_kernel_addr();
-        site.key_offset = htab_offsets.key + rounded;
-        return true;
-    }
-    if (t == BPF_MAP_TYPE_ARRAY_OF_MAPS) {
-        site.kind = CompanionLoad::LookupSite::Kind::Call;
-        site.target_addr = array_of_map_lookup_elem_kernel_addr();
+        site.value_offset = array_offsets.ptrs;
+        site.percpu_base_addr = array_offsets.this_cpu_off;
         return true;
     }
 
     return false;
 }
 
-CompanionLoad::LookupSite lookup_site_for_map_meta(const MapMeta &meta,
-                                                   const BpfArrayOffsets &array_offsets,
-                                                   const BpfHtabOffsets &htab_offsets,
-                                                   uint64_t this_cpu_off_addr)
+ProgramLoadPlan::LookupSite oracle_call_lookup_site_for_map_meta(const MapMeta &meta)
 {
-    CompanionLoad::LookupSite site{
-        CompanionLoad::LookupSite::Kind::Call,
-        helper_kernel_addr(BPF_FUNC_map_lookup_elem),
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-    };
-    site.map_name = meta.name;
-
-    configure_lookup_site_for_shape(site, map_shape_from_meta(meta),
-                                    array_offsets, htab_offsets,
-                                    this_cpu_off_addr);
-    return site;
-}
-
-CompanionLoad::LookupSite oracle_call_lookup_site_for_map_meta(const MapMeta &meta)
-{
-    CompanionLoad::LookupSite site{
-        CompanionLoad::LookupSite::Kind::Call,
+    ProgramLoadPlan::LookupSite site{
+        ProgramLoadPlan::LookupSite::Kind::Call,
         0,
         0,
         0,
@@ -3162,7 +2784,7 @@ CompanionLoad::LookupSite oracle_call_lookup_site_for_map_meta(const MapMeta &me
 }
 
 void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
-                                  CompanionLoad &load)
+                                  ProgramLoadPlan &load)
 {
     int fd = open(native_object.c_str(), O_RDONLY | O_CLOEXEC);
     if (fd < 0) {
@@ -3275,209 +2897,12 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
 
 #include "native_loader_bytecode.hpp"
 
-CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
-{
-    CompanionLoad out{};
-    struct stat st {};
-    std::string bpf_path = bpf_o_path.string();
-    if (stat(bpf_path.c_str(), &st) != 0) {
-        fail("native_kernel companion .bpf.o is missing: " + bpf_path);
-    }
-
-    const auto open_start = std::chrono::steady_clock::now();
-    bpf_object *obj = bpf_object__open_file(bpf_path.c_str(), nullptr);
-    if (!obj || libbpf_get_error(obj)) {
-        fail(std::string("bpf_object__open_file ") + bpf_path);
-    }
-    const auto open_end = std::chrono::steady_clock::now();
-    out.open_ns = elapsed_ns(open_start, open_end);
-
-    bpf_program *prog = nullptr;
-    bpf_program *entry_prog = nullptr;
-    bpf_object__for_each_program(prog, obj) {
-        if (entry_prog != nullptr) {
-            bpf_object__close(obj);
-            fail("native_kernel companion .bpf.o has multiple BPF programs: " + bpf_path);
-        }
-        entry_prog = prog;
-    }
-    if (!entry_prog) {
-        bpf_object__close(obj);
-        fail("native_kernel companion .bpf.o has no BPF programs: " + bpf_path);
-    }
-
-    const auto object_load_start = std::chrono::steady_clock::now();
-    if (bpf_object__load(obj) != 0) {
-        bpf_object__close(obj);
-        fail(std::string("bpf_object__load ") + bpf_path + ": "
-             + std::strerror(errno));
-    }
-    const auto object_load_end = std::chrono::steady_clock::now();
-    out.object_load_ns = elapsed_ns(object_load_start, object_load_end);
-
-    const auto map_ptr_start = std::chrono::steady_clock::now();
-    bpf_map *map = nullptr;
-    bpf_object__for_each_map(map, obj) {
-        int fd = bpf_map__fd(map);
-        if (fd >= 0) {
-            MapMeta meta = load_map_meta_from_fd(fd);
-            add_map_meta(out, meta);
-            add_exact_map_meta(out, meta);
-        }
-    }
-    const auto map_ptr_end = std::chrono::steady_clock::now();
-    out.map_ptr_extract_ns = elapsed_ns(map_ptr_start, map_ptr_end);
-
-    /* Build per-call-site map specs for the entry program. The runner walks
-     * source BPF only to associate helper sites with map metadata; native-link
-     * reads the companion JIT/xlated oracle and fills helper call targets. */
-    const auto lookup_spec_start = std::chrono::steady_clock::now();
-    {
-        int entry_fd = bpf_program__fd(entry_prog);
-        if (entry_fd < 0) {
-            bpf_object__close(obj);
-            fail("native_kernel companion entry program has no fd after load: " + bpf_path);
-        }
-
-        const bpf_prog_info prog_info = load_prog_info(entry_fd);
-        out.prog_type = prog_info.type;
-        const auto jited_ksyms = load_jited_ksyms(entry_fd, prog_info.nr_jited_ksyms);
-        out.oracle_jit_base = jited_ksyms[0];
-        out.oracle_jited = load_jited_program(entry_fd, prog_info.jited_prog_len);
-        out.oracle_xlated = load_xlated_program(entry_fd, prog_info.xlated_prog_len);
-
-        /* Collect map metadata by fd for quick lookup. */
-        std::unordered_map<int, MapMeta> meta_by_fd;
-        map = nullptr;
-        bpf_object__for_each_map(map, obj) {
-            int fd = bpf_map__fd(map);
-            if (fd >= 0) {
-                meta_by_fd[fd] = load_map_meta_from_fd(fd);
-            }
-        }
-
-        BpfArrayOffsets array_offsets{
-            K_BPF_ARRAY_VALUE_OFFSET,
-            K_BPF_ARRAY_PPTRS_OFFSET,
-        };
-        BpfHtabOffsets htab_offsets{
-            K_HTAB_ELEM_KEY_OFFSET,
-            K_HTAB_ELEM_LRU_REF_OFFSET,
-        };
-#if defined(__x86_64__)
-        uint64_t this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
-#else
-        uint64_t this_cpu_off_addr = 0;
-#endif
-
-        /* Walk the entry program's BPF source bytecode and build the
-         * per-call-site spec list. */
-        const struct bpf_insn *insns = bpf_program__insns(entry_prog);
-        size_t insn_cnt = bpf_program__insn_cnt(entry_prog);
-        std::vector<SourceHelperCall> source_calls =
-            collect_source_helper_calls(insns, insn_cnt, &meta_by_fd);
-        for (const SourceHelperCall &call : source_calls) {
-            if (call.helper_id == BPF_FUNC_tail_call) {
-                out.has_tail_call = true;
-                continue;
-            }
-            if (!helper_alias_for_call(call.helper_id, prog_info.type).link_name) {
-                bpf_object__close(obj);
-                fail("native_kernel: unsupported helper id "
-                     + std::to_string(call.helper_id));
-            }
-
-            auto map_it = (call.map_fd >= 0) ? meta_by_fd.find(call.map_fd) : meta_by_fd.end();
-            if (call.helper_id == BPF_FUNC_map_lookup_elem) {
-                CompanionLoad::LookupSite site{
-                    CompanionLoad::LookupSite::Kind::Call,
-                    helper_kernel_addr(BPF_FUNC_map_lookup_elem),
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                };
-                if (map_it != meta_by_fd.end()) {
-                    site.map_name = map_it->second.name;
-                    configure_lookup_site_for_shape(site,
-                                                    map_shape_from_meta(map_it->second),
-                                                    array_offsets,
-                                                    htab_offsets,
-                                                    this_cpu_off_addr);
-                } else {
-                    configure_lookup_site_for_shape(site,
-                                                    call.dynamic_map_shape,
-                                                    array_offsets,
-                                                    htab_offsets,
-                                                    this_cpu_off_addr);
-                }
-                out.lookup_sites.push_back(site);
-                continue;
-            }
-
-            if (call.helper_id == BPF_FUNC_map_update_elem) {
-                CompanionLoad::UpdateSite site{
-                    CompanionLoad::UpdateSite::Kind::Call,
-                    helper_kernel_addr(BPF_FUNC_map_update_elem),
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                };
-                if (map_it != meta_by_fd.end()) {
-                    const uint32_t value_size = map_it->second.value_size;
-                    const bool simple_value =
-                        value_size == 1 || value_size == 2 ||
-                        value_size == 4 || value_size == 8;
-                    int t = map_it->second.type;
-                    if (simple_value && t == BPF_MAP_TYPE_ARRAY) {
-                        site.kind = CompanionLoad::UpdateSite::Kind::Array;
-                        site.max_entries = map_it->second.max_entries;
-                        site.elem_size = (value_size + 7u) & ~7u;
-                        site.value_size = value_size;
-                        site.value_offset = array_offsets.value;
-                    } else if (simple_value && t == BPF_MAP_TYPE_PERCPU_ARRAY) {
-#if defined(__x86_64__)
-                        if (this_cpu_off_addr == 0) {
-                            fail("this_cpu_off not in /proc/kallsyms");
-                        }
-#endif
-                        site.kind = CompanionLoad::UpdateSite::Kind::PerCpuArray;
-                        site.max_entries = map_it->second.max_entries;
-                        site.elem_size = sizeof(void *);
-                        site.value_size = value_size;
-                        site.value_offset = array_offsets.pptrs;
-                        site.percpu_base_addr = this_cpu_off_addr;
-                    } else if (t == BPF_MAP_TYPE_LRU_PERCPU_HASH) {
-                        site.target_addr =
-                            htab_lru_percpu_map_update_elem_kernel_addr();
-                    }
-                }
-                out.update_sites.push_back(site);
-                continue;
-            }
-        }
-    }
-    const auto lookup_spec_end = std::chrono::steady_clock::now();
-    out.lookup_spec_ns = elapsed_ns(lookup_spec_start, lookup_spec_end);
-
-    out.obj = obj;
-    return out;
-}
-
-CompanionLoad load_from_loaded_program_fd(int program_fd,
+ProgramLoadPlan load_from_loaded_program_fd(int program_fd,
                                           const bpf_prog_info &prog_info,
                                           const bpf_insn *source_insns,
                                           size_t source_insn_cnt)
 {
-    CompanionLoad out{};
-    out.use_helper_oracle = true;
-    out.allow_kernel_symbol_lookup = false;
-    out.prog_type = prog_info.type;
-
+    ProgramLoadPlan out{};
     const auto oracle_start = std::chrono::steady_clock::now();
     const auto jited_ksyms = load_jited_ksyms(program_fd, prog_info.nr_jited_ksyms);
     out.oracle_jit_base = jited_ksyms[0];
@@ -3528,6 +2953,11 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
     }
     std::vector<SourceHelperCall> source_calls =
         collect_source_helper_calls(insns, insn_cnt, &meta_by_source_fd);
+    BpfArrayOffsets array_offsets{
+        K_BPF_ARRAY_VALUE_OFFSET,
+        K_BPF_ARRAY_PTRS_OFFSET,
+        decode_x86_this_cpu_off_from_jit(out.oracle_jited),
+    };
 
     for (const SourceHelperCall &call : source_calls) {
         if (call.helper_id == BPF_FUNC_tail_call) {
@@ -3540,8 +2970,8 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
         }
         auto map_it = (call.map_fd >= 0) ? meta_by_source_fd.find(call.map_fd) : meta_by_source_fd.end();
         if (call.helper_id == BPF_FUNC_map_lookup_elem) {
-            CompanionLoad::LookupSite site{
-                CompanionLoad::LookupSite::Kind::Call,
+            ProgramLoadPlan::LookupSite site{
+                ProgramLoadPlan::LookupSite::Kind::Call,
                 0,
                 0,
                 0,
@@ -3552,11 +2982,16 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
             };
             if (map_it != meta_by_source_fd.end()) {
                 site.map_name = map_it->second.name;
+                configure_lookup_site_for_shape(
+                    site, map_shape_from_meta(map_it->second), array_offsets);
+            } else {
+                configure_lookup_site_for_shape(
+                    site, call.dynamic_map_shape, array_offsets);
             }
             out.lookup_sites.push_back(site);
         } else if (call.helper_id == BPF_FUNC_map_update_elem) {
-            CompanionLoad::UpdateSite site{
-                CompanionLoad::UpdateSite::Kind::Call,
+            ProgramLoadPlan::UpdateSite site{
+                ProgramLoadPlan::UpdateSite::Kind::Call,
                 0,
                 0,
                 0,
@@ -3564,6 +2999,29 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
                 0,
                 0,
             };
+            if (map_it != meta_by_source_fd.end()) {
+                const uint32_t value_size = map_it->second.value_size;
+                const bool simple_value =
+                    value_size == 1 || value_size == 2 ||
+                    value_size == 4 || value_size == 8;
+                if (simple_value && (map_it->second.type == BPF_MAP_TYPE_ARRAY ||
+                                     map_it->second.type == BPF_MAP_TYPE_PERCPU_ARRAY)) {
+                    if (map_it->second.type == BPF_MAP_TYPE_PERCPU_ARRAY) {
+                        if (array_offsets.this_cpu_off == 0) {
+                            fail("native_kernel: PERCPU_ARRAY update needs gs:this_cpu_off from original JIT");
+                        }
+                        site.kind = ProgramLoadPlan::UpdateSite::Kind::PerCpuArray;
+                        site.value_offset = array_offsets.ptrs;
+                        site.percpu_base_addr = array_offsets.this_cpu_off;
+                    } else {
+                        site.kind = ProgramLoadPlan::UpdateSite::Kind::Array;
+                        site.value_offset = array_offsets.value;
+                    }
+                    site.max_entries = map_it->second.max_entries;
+                    site.elem_size = (value_size + 7u) & ~7u;
+                    site.value_size = value_size;
+                }
+            }
             out.update_sites.push_back(site);
         }
     }
@@ -3576,7 +3034,6 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
 #include "native_loader_link_schema.hpp"
 
 std::string native_link_cache_key(const std::filesystem::path &native_elf,
-                                  const std::filesystem::path &bpf_obj,
                                   const std::string &symbol_name,
                                   const NativeLinkArgs &link_args)
 {
@@ -3588,12 +3045,8 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
     hash.add_string("x86_64");
 #endif
     hash_file_contents(hash, native_elf, "native_elf");
-    if (bpf_obj.empty()) {
-        hash.add_string("loaded_prog_oracle_xlated");
-        hash.add_bytes(link_args.oracle_xlated.data(), link_args.oracle_xlated.size());
-    } else {
-        hash_file_contents(hash, bpf_obj, "companion_bpf");
-    }
+    hash.add_string("loaded_prog_oracle_xlated");
+    hash.add_bytes(link_args.oracle_xlated.data(), link_args.oracle_xlated.size());
     hash_file_identity(hash, link_args.linker, "native_linker");
     hash.add_string(symbol_name);
     hash.add_string("oracle_jit_base");
@@ -3697,7 +3150,7 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
                                 !link_args.oracle_jited.empty() ||
                                 !link_args.oracle_xlated.empty();
     if (partial_oracle && !has_oracle) {
-        fail("native_kernel: incomplete companion JIT oracle");
+        fail("native_kernel: incomplete plan JIT oracle");
     }
     std::filesystem::path oracle_jited;
     std::filesystem::path oracle_xlated;
@@ -3778,14 +3231,14 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     return out;
 }
 
-LinkedBlob load_or_link_native_blob(const native_loader::LoadOptions &options,
+LinkedBlob load_or_link_native_blob(const native_loader::ProgramLoadOptions &options,
                                     const std::filesystem::path &elf_path,
                                     const std::string &symbol_name,
-                                    const CompanionLoad &companion)
+                                    const ProgramLoadPlan &plan)
 {
     const auto cache_lookup_start = std::chrono::steady_clock::now();
     NativeLinkArgs link_args =
-        build_native_link_args(options, companion.map_addrs, companion);
+        build_native_link_args(options, plan.map_addrs, plan);
     const std::filesystem::path cache_dir = kNativeLinkCacheDir;
     std::error_code ec;
     std::filesystem::create_directories(cache_dir, ec);
@@ -3794,7 +3247,7 @@ LinkedBlob load_or_link_native_blob(const native_loader::LoadOptions &options,
     }
 
     const std::string key =
-        native_link_cache_key(elf_path, options.bpf_object_path, symbol_name, link_args);
+        native_link_cache_key(elf_path, symbol_name, link_args);
     LinkerOutput cache{};
     cache.proof = cache_dir / (key + ".proof.o");
     cache.blob = cache_dir / (key + ".blob.bin");
@@ -3825,7 +3278,7 @@ LinkedBlob load_or_link_native_blob(const native_loader::LoadOptions &options,
         };
         auto map_patches = read_map_patch_file(source.map_patches);
         linked.relocated_map_ids =
-            collect_relocated_map_ids(map_patches, companion.map_addr_ids);
+            collect_relocated_map_ids(map_patches, plan.map_addr_ids);
         linked.callee_saved_mask = read_link_abi_file(source.abi);
         const auto read_end = std::chrono::steady_clock::now();
         publish_cache_file(tmp.proof, cache.proof);
@@ -3834,7 +3287,7 @@ LinkedBlob load_or_link_native_blob(const native_loader::LoadOptions &options,
         publish_cache_file(tmp.map_patches, cache.map_patches);
         publish_cache_file(tmp.abi, cache.abi);
         const auto patch_start = std::chrono::steady_clock::now();
-        patch_map_literals(linked.blob, map_patches, companion.map_addrs);
+        patch_map_literals(linked.blob, map_patches, plan.map_addrs);
         const auto patch_end = std::chrono::steady_clock::now();
         linked.native_link_read_ns = elapsed_ns(read_start, read_end);
         linked.map_patch_ns = elapsed_ns(patch_start, patch_end);
@@ -3850,11 +3303,11 @@ LinkedBlob load_or_link_native_blob(const native_loader::LoadOptions &options,
     };
     auto map_patches = read_map_patch_file(source.map_patches);
     linked.relocated_map_ids =
-        collect_relocated_map_ids(map_patches, companion.map_addr_ids);
+        collect_relocated_map_ids(map_patches, plan.map_addr_ids);
     linked.callee_saved_mask = read_link_abi_file(source.abi);
     const auto read_end = std::chrono::steady_clock::now();
     const auto patch_start = std::chrono::steady_clock::now();
-    patch_map_literals(linked.blob, map_patches, companion.map_addrs);
+    patch_map_literals(linked.blob, map_patches, plan.map_addrs);
     const auto patch_end = std::chrono::steady_clock::now();
     linked.native_link_read_ns = elapsed_ns(read_start, read_end);
     linked.map_patch_ns = elapsed_ns(patch_start, patch_end);
@@ -3951,69 +3404,7 @@ void close_fd_vector(std::vector<int> &fds)
 
 namespace native_loader {
 
-LoadedProgram load_from_companion_object(const LoadOptions &options)
-{
-    if (options.bpf_object_path.empty()) {
-        fail("native_loader: missing bpf_object_path");
-    }
-    if (options.native_object_path.empty()) {
-        fail("native_loader: missing native_object_path");
-    }
-    if (options.symbol_name.empty()) {
-        fail("native_loader: missing symbol_name");
-    }
-    if (options.prog_type == 0) {
-        fail("native_loader: missing prog_type");
-    }
-
-    LoadedProgram out{};
-    const auto companion_load_start = std::chrono::steady_clock::now();
-    CompanionLoad companion = load_bpf_companion(options.bpf_object_path);
-    add_native_data_symbol_addrs(options.native_object_path, companion);
-    const auto companion_load_end = std::chrono::steady_clock::now();
-
-    LinkedBlob linked = load_or_link_native_blob(
-        options,
-        options.native_object_path,
-        options.symbol_name,
-        companion);
-
-    std::vector<int> map_ref_fds =
-        reopen_relocated_map_fds(linked.relocated_map_ids);
-    LoadedStub loaded_stub{};
-    try {
-        loaded_stub = upload_and_load_stub(
-            linked,
-            options.prog_type,
-            StubLoadAttrs{},
-            companion.has_tail_call,
-            map_ref_fds);
-        close_fd_vector(map_ref_fds);
-    } catch (...) {
-        close_fd_vector(map_ref_fds);
-        throw;
-    }
-
-    out.prog_fd = loaded_stub.prog_fd;
-    out.companion_object = companion.obj;
-    out.callee_saved_mask = linked.callee_saved_mask;
-    out.bpf_bytecode_bytes = companion.oracle_xlated.size();
-    out.native_code_bytes = linked.blob.size();
-    out.timings.companion_load_ns = elapsed_ns(companion_load_start, companion_load_end);
-    out.timings.companion_open_ns = companion.open_ns;
-    out.timings.companion_object_load_ns = companion.object_load_ns;
-    out.timings.companion_map_ptr_extract_ns = companion.map_ptr_extract_ns;
-    out.timings.companion_lookup_spec_ns = companion.lookup_spec_ns;
-    out.timings.cache_lookup_ns = linked.cache_lookup_ns;
-    out.timings.native_link_exec_ns = linked.native_link_exec_ns;
-    out.timings.native_link_read_ns = linked.native_link_read_ns;
-    out.timings.map_patch_ns = linked.map_patch_ns;
-    out.timings.upload_ns = loaded_stub.upload_ns;
-    out.timings.prog_load_ns = loaded_stub.prog_load_ns;
-    return out;
-}
-
-LoadedProgram load_from_fd(const FdLoadOptions &options)
+LoadedProgram load_from_program_fd(const ProgramLoadOptions &options)
 {
     if (options.original_prog_fd < 0) {
         fail("native_loader: missing original_prog_fd");
@@ -4021,36 +3412,29 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     if (options.native_object_path.empty()) {
         fail("native_loader: missing native_object_path");
     }
+    if (!options.source_insns || options.source_insn_cnt == 0) {
+        fail("native_loader: missing source BPF bytecode");
+    }
     LoadedProgram out{};
     const auto companion_load_start = std::chrono::steady_clock::now();
     const bpf_prog_info prog_info = load_prog_info(options.original_prog_fd);
     std::string symbol_name = options.symbol_name.empty()
         ? load_prog_btf_symbol_name(options.original_prog_fd, prog_info)
         : options.symbol_name;
-    std::vector<bpf_insn> source_insns;
-    if (!options.source_bpf_path.empty()) {
-        source_insns = read_bpf_insn_file(options.source_bpf_path);
-    }
-    CompanionLoad companion =
+    ProgramLoadPlan plan =
         load_from_loaded_program_fd(
             options.original_prog_fd,
             prog_info,
-            source_insns.empty() ? nullptr : source_insns.data(),
-            source_insns.size());
-    add_native_data_symbol_addrs(options.native_object_path, companion);
+            options.source_insns,
+            options.source_insn_cnt);
+    add_native_data_symbol_addrs(options.native_object_path, plan);
     const auto companion_load_end = std::chrono::steady_clock::now();
 
-    LoadOptions link_options{};
-    link_options.native_object_path = options.native_object_path;
-    link_options.symbol_name = symbol_name;
-    link_options.prog_type = prog_info.type;
-    link_options.native_link_path = options.native_link_path;
-
     LinkedBlob linked = load_or_link_native_blob(
-        link_options,
+        options,
         options.native_object_path,
         symbol_name,
-        companion);
+        plan);
 
     StubLoadAttrs stub_attrs{};
     stub_attrs.expected_attach_type = options.expected_attach_type;
@@ -4071,7 +3455,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             linked,
             prog_info.type,
             stub_attrs,
-            companion.has_tail_call,
+            plan.has_tail_call,
             map_ref_fds);
         close_fd_vector(map_ref_fds);
     } catch (...) {
@@ -4080,15 +3464,13 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     }
 
     out.prog_fd = loaded_stub.prog_fd;
-    out.companion_object = nullptr;
     out.callee_saved_mask = linked.callee_saved_mask;
-    out.bpf_bytecode_bytes = companion.oracle_xlated.size();
+    out.bpf_bytecode_bytes = plan.oracle_xlated.size();
     out.native_code_bytes = linked.blob.size();
     out.timings.companion_load_ns = elapsed_ns(companion_load_start, companion_load_end);
-    out.timings.companion_open_ns = companion.open_ns;
-    out.timings.companion_object_load_ns = companion.object_load_ns;
-    out.timings.companion_map_ptr_extract_ns = companion.map_ptr_extract_ns;
-    out.timings.companion_lookup_spec_ns = companion.lookup_spec_ns;
+    out.timings.companion_object_load_ns = plan.object_load_ns;
+    out.timings.companion_map_ptr_extract_ns = plan.map_ptr_extract_ns;
+    out.timings.companion_lookup_spec_ns = plan.lookup_spec_ns;
     out.timings.cache_lookup_ns = linked.cache_lookup_ns;
     out.timings.native_link_exec_ns = linked.native_link_exec_ns;
     out.timings.native_link_read_ns = linked.native_link_read_ns;
@@ -4106,10 +3488,6 @@ void close_loaded_program(LoadedProgram *program)
     if (program->prog_fd >= 0) {
         close(program->prog_fd);
         program->prog_fd = -1;
-    }
-    if (program->companion_object) {
-        bpf_object__close(program->companion_object);
-        program->companion_object = nullptr;
     }
 }
 
@@ -4158,19 +3536,22 @@ extern "C" int native_loader_load_from_fd_with_source_path_and_attach(
     }
 
     try {
-        native_loader::FdLoadOptions options{};
+        std::vector<bpf_insn> source_insns = read_bpf_insn_file(source_bpf_path);
+        native_loader::ProgramLoadOptions options{};
         options.original_prog_fd = original_prog_fd;
         options.native_object_path = native_object_path;
         if (symbol_name && symbol_name[0]) {
             options.symbol_name = symbol_name;
         }
-        options.source_bpf_path = source_bpf_path;
+        options.source_insns = source_insns.data();
+        options.source_insn_cnt = source_insns.size();
         options.expected_attach_type = expected_attach_type;
         options.attach_btf_id = attach_btf_id;
         options.prog_btf_id = prog_btf_id;
         options.attach_btf_obj_id = attach_btf_obj_id;
         options.attach_prog_id = attach_prog_id;
-        native_loader::LoadedProgram loaded = native_loader::load_from_fd(options);
+        native_loader::LoadedProgram loaded =
+            native_loader::load_from_program_fd(options);
         transfer_loaded_program_to_c_result(loaded, out);
         return 0;
     } catch (const std::exception &e) {

@@ -666,9 +666,13 @@ fn resolve_lookup_site_target(
         | LookupKind::LruHash
         | LookupKind::PerCpuHash
         | LookupKind::HashOfMaps => {
-            let _ = consume_oracle_target(oracle_targets, next_oracle_target, context)?;
+            if let Some(oracle_target) =
+                consume_oracle_target(oracle_targets, next_oracle_target, context)?
+            {
+                return Ok(oracle_target);
+            }
             if spec.target_addr == 0 {
-                bail!("{context} lowered map lookup has no target address");
+                bail!("{context} lowered map lookup has no target address and companion JIT oracle is exhausted");
             }
             Ok(spec.target_addr)
         }

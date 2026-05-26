@@ -14,29 +14,29 @@ std::string format_name_hex(const std::string &name, uint64_t value)
 }
 
 std::string format_lookup_site_arg(size_t index,
-                                   const CompanionLoad::LookupSite &site)
+                                   const ProgramLoadPlan::LookupSite &site)
 {
     const char *kind = "call";
     switch (site.kind) {
-    case CompanionLoad::LookupSite::Kind::Call:
+    case ProgramLoadPlan::LookupSite::Kind::Call:
         kind = "call";
         break;
-    case CompanionLoad::LookupSite::Kind::Hash:
+    case ProgramLoadPlan::LookupSite::Kind::Hash:
         kind = "hash";
         break;
-    case CompanionLoad::LookupSite::Kind::LruHash:
+    case ProgramLoadPlan::LookupSite::Kind::LruHash:
         kind = "lru_hash";
         break;
-    case CompanionLoad::LookupSite::Kind::PerCpuHash:
+    case ProgramLoadPlan::LookupSite::Kind::PerCpuHash:
         kind = "percpu_hash";
         break;
-    case CompanionLoad::LookupSite::Kind::HashOfMaps:
+    case ProgramLoadPlan::LookupSite::Kind::HashOfMaps:
         kind = "hash_of_maps";
         break;
-    case CompanionLoad::LookupSite::Kind::Array:
+    case ProgramLoadPlan::LookupSite::Kind::Array:
         kind = "array";
         break;
-    case CompanionLoad::LookupSite::Kind::PerCpuArray:
+    case ProgramLoadPlan::LookupSite::Kind::PerCpuArray:
         kind = "percpu_array";
         break;
     }
@@ -61,29 +61,29 @@ std::string format_lookup_site_arg(size_t index,
 }
 
 std::string format_lookup_map_arg(const std::string &name,
-                                  const CompanionLoad::LookupSite &site)
+                                  const ProgramLoadPlan::LookupSite &site)
 {
     const char *kind = "call";
     switch (site.kind) {
-    case CompanionLoad::LookupSite::Kind::Call:
+    case ProgramLoadPlan::LookupSite::Kind::Call:
         kind = "call";
         break;
-    case CompanionLoad::LookupSite::Kind::Hash:
+    case ProgramLoadPlan::LookupSite::Kind::Hash:
         kind = "hash";
         break;
-    case CompanionLoad::LookupSite::Kind::LruHash:
+    case ProgramLoadPlan::LookupSite::Kind::LruHash:
         kind = "lru_hash";
         break;
-    case CompanionLoad::LookupSite::Kind::PerCpuHash:
+    case ProgramLoadPlan::LookupSite::Kind::PerCpuHash:
         kind = "percpu_hash";
         break;
-    case CompanionLoad::LookupSite::Kind::HashOfMaps:
+    case ProgramLoadPlan::LookupSite::Kind::HashOfMaps:
         kind = "hash_of_maps";
         break;
-    case CompanionLoad::LookupSite::Kind::Array:
+    case ProgramLoadPlan::LookupSite::Kind::Array:
         kind = "array";
         break;
-    case CompanionLoad::LookupSite::Kind::PerCpuArray:
+    case ProgramLoadPlan::LookupSite::Kind::PerCpuArray:
         kind = "percpu_array";
         break;
     }
@@ -103,17 +103,17 @@ std::string format_lookup_map_arg(const std::string &name,
 }
 
 std::string format_update_site_arg(size_t index,
-                                   const CompanionLoad::UpdateSite &site)
+                                   const ProgramLoadPlan::UpdateSite &site)
 {
     const char *kind = "call";
     switch (site.kind) {
-    case CompanionLoad::UpdateSite::Kind::Call:
+    case ProgramLoadPlan::UpdateSite::Kind::Call:
         kind = "call";
         break;
-    case CompanionLoad::UpdateSite::Kind::Array:
+    case ProgramLoadPlan::UpdateSite::Kind::Array:
         kind = "array";
         break;
-    case CompanionLoad::UpdateSite::Kind::PerCpuArray:
+    case ProgramLoadPlan::UpdateSite::Kind::PerCpuArray:
         kind = "percpu_array";
         break;
     }
@@ -132,35 +132,16 @@ std::string format_update_site_arg(size_t index,
 }
 
 NativeLinkArgs build_native_link_args(
-    const native_loader::LoadOptions &options,
+    const native_loader::ProgramLoadOptions &options,
     const std::unordered_map<std::string, uint64_t> &map_addrs,
-    const CompanionLoad &companion)
+    const ProgramLoadPlan &plan)
 {
     NativeLinkArgs out{};
     out.linker = native_link_binary(options.native_link_path);
-    if (companion.use_helper_oracle) {
-        out.oracle_jit_base = companion.oracle_jit_base;
-        out.oracle_jited = companion.oracle_jited;
-        out.oracle_xlated = companion.oracle_xlated;
-    }
-    BpfArrayOffsets array_offsets{
-        K_BPF_ARRAY_VALUE_OFFSET,
-        K_BPF_ARRAY_PPTRS_OFFSET,
-    };
-    BpfHtabOffsets htab_offsets{
-        K_HTAB_ELEM_KEY_OFFSET,
-        K_HTAB_ELEM_LRU_REF_OFFSET,
-    };
-    uint64_t this_cpu_off_addr = 0;
+    out.oracle_jit_base = plan.oracle_jit_base;
+    out.oracle_jited = plan.oracle_jited;
+    out.oracle_xlated = plan.oracle_xlated;
 #if defined(__x86_64__)
-    if (companion.allow_kernel_symbol_lookup) {
-        uint64_t cpu_number_addr = kallsyms_lookup("cpu_number");
-        this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
-        if (cpu_number_addr != 0 && this_cpu_off_addr != 0) {
-            out.helpers.push_back(format_name_hex(kX86CpuNumberHelperKey, cpu_number_addr));
-            out.helpers.push_back(format_name_hex(kX86ThisCpuOffHelperKey, this_cpu_off_addr));
-        }
-    }
     out.helpers.push_back(format_name_hex(
         kX86BpfMapMaxEntriesOffsetKey, K_BPF_MAP_MAX_ENTRIES_OFFSET));
     out.helpers.push_back(format_name_hex(
@@ -175,66 +156,33 @@ NativeLinkArgs build_native_link_args(
     }
 #endif
 
-    if (companion.allow_kernel_symbol_lookup) {
-        for (const auto &helper : kSupportedHelpers) {
-            uint64_t addr = kallsyms_lookup(helper.symbol);
-            if (addr != 0) {
-                out.helpers.push_back(format_name_hex(helper.symbol, addr));
-            }
-        }
-        out.helpers.insert(out.helpers.end(),
-                           companion.helper_args.begin(),
-                           companion.helper_args.end());
-        static constexpr int kContextualHelperIds[] = {
-            BPF_FUNC_get_prandom_u32,
-            BPF_FUNC_fib_lookup,
-            BPF_FUNC_redirect_map,
-            BPF_FUNC_skc_lookup_tcp,
-            BPF_FUNC_sk_lookup_udp,
-        };
-        for (int helper_id : kContextualHelperIds) {
-            add_contextual_helper_alias_if_available(out.helpers, helper_id,
-                                                     companion.prog_type);
-        }
-        for (const char *symbol : kRuntimeCallSymbols) {
-            uint64_t addr = kallsyms_lookup(symbol);
-            if (addr != 0) {
-                out.helpers.push_back(format_name_hex(symbol, addr));
-            }
-        }
-    } else if (!companion.helper_args.empty()) {
-        fail("native_kernel: helper address args require kernel symbol lookup");
-    }
-
     std::vector<std::pair<std::string, uint64_t>> maps(
         map_addrs.begin(), map_addrs.end());
     std::sort(maps.begin(), maps.end(),
               [](const auto &a, const auto &b) { return a.first < b.first; });
     for (const auto &kv : maps) {
-        out.maps.push_back(format_name_hex(kv.first, 0));
+        out.maps.push_back(format_name_hex(kv.first, kv.second));
     }
 
-    for (size_t i = 0; i < companion.lookup_sites.size(); i++) {
-        out.lookup_sites.push_back(format_lookup_site_arg(i, companion.lookup_sites[i]));
+    for (size_t i = 0; i < plan.lookup_sites.size(); i++) {
+        out.lookup_sites.push_back(format_lookup_site_arg(i, plan.lookup_sites[i]));
     }
     std::vector<std::pair<std::string, std::string>> native_map_symbols(
-        companion.native_map_symbols.begin(), companion.native_map_symbols.end());
+        plan.native_map_symbols.begin(), plan.native_map_symbols.end());
     std::sort(native_map_symbols.begin(), native_map_symbols.end(),
               [](const auto &a, const auto &b) { return a.first < b.first; });
     for (const auto &kv : native_map_symbols) {
-        const MapMeta *meta = find_map_meta_by_loaded_name(companion, kv.second);
+        const MapMeta *meta = find_map_meta_by_loaded_name(plan, kv.second);
         if (!meta) {
             fail("native map symbol " + kv.first +
                  " references unknown loaded map " + kv.second);
         }
-        CompanionLoad::LookupSite site = companion.allow_kernel_symbol_lookup
-            ? lookup_site_for_map_meta(*meta, array_offsets, htab_offsets, this_cpu_off_addr)
-            : oracle_call_lookup_site_for_map_meta(*meta);
+        ProgramLoadPlan::LookupSite site = oracle_call_lookup_site_for_map_meta(*meta);
         site.map_name = kv.first;
         out.lookup_maps.push_back(format_lookup_map_arg(kv.first, site));
     }
-    for (size_t i = 0; i < companion.update_sites.size(); i++) {
-        out.update_sites.push_back(format_update_site_arg(i, companion.update_sites[i]));
+    for (size_t i = 0; i < plan.update_sites.size(); i++) {
+        out.update_sites.push_back(format_update_site_arg(i, plan.update_sites[i]));
     }
     return out;
 }

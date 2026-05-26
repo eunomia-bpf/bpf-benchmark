@@ -12,6 +12,7 @@
 #include "native_loader.hpp"
 
 #include <bpf/bpf.h>
+#include <bpf/libbpf.h>
 #include <linux/bpf.h>
 #include <errno.h>
 #include <unistd.h>
@@ -49,6 +50,81 @@ uint32_t prog_type_from_option(const std::string &name)
     return 0; // unreachable
 }
 
+struct CompanionProgram {
+    bpf_object *object = nullptr;
+    bpf_program *program = nullptr;
+    uint64_t open_ns = 0;
+    uint64_t object_load_ns = 0;
+
+    CompanionProgram() = default;
+    CompanionProgram(const CompanionProgram &) = delete;
+    CompanionProgram &operator=(const CompanionProgram &) = delete;
+    CompanionProgram(CompanionProgram &&other) noexcept
+        : object(std::exchange(other.object, nullptr)),
+          program(std::exchange(other.program, nullptr)),
+          open_ns(other.open_ns),
+          object_load_ns(other.object_load_ns)
+    {
+    }
+    CompanionProgram &operator=(CompanionProgram &&other) noexcept
+    {
+        if (this != &other) {
+            if (object) {
+                bpf_object__close(object);
+            }
+            object = std::exchange(other.object, nullptr);
+            program = std::exchange(other.program, nullptr);
+            open_ns = other.open_ns;
+            object_load_ns = other.object_load_ns;
+        }
+        return *this;
+    }
+
+    ~CompanionProgram()
+    {
+        if (object) {
+            bpf_object__close(object);
+        }
+    }
+};
+
+CompanionProgram load_companion_program(const std::filesystem::path &path)
+{
+    CompanionProgram out{};
+    const std::string bpf_path = path.string();
+
+    const auto open_start = std::chrono::steady_clock::now();
+    out.object = bpf_object__open_file(bpf_path.c_str(), nullptr);
+    const long open_err = libbpf_get_error(out.object);
+    if (!out.object || open_err) {
+        fail("bpf_object__open_file failed: " +
+             libbpf_error_string(static_cast<int>(open_err)));
+    }
+    const auto open_end = std::chrono::steady_clock::now();
+    out.open_ns = elapsed_ns(open_start, open_end);
+
+    bpf_program *program = nullptr;
+    bpf_object__for_each_program(program, out.object) {
+        if (out.program) {
+            fail("native_kernel companion .bpf.o has multiple BPF programs: " +
+                 bpf_path);
+        }
+        out.program = program;
+    }
+    if (!out.program) {
+        fail("native_kernel companion .bpf.o has no BPF programs: " + bpf_path);
+    }
+
+    const auto load_start = std::chrono::steady_clock::now();
+    const int load_err = bpf_object__load(out.object);
+    if (load_err != 0) {
+        fail("bpf_object__load failed: " + libbpf_error_string(-load_err));
+    }
+    const auto load_end = std::chrono::steady_clock::now();
+    out.object_load_ns = elapsed_ns(load_start, load_end);
+    return out;
+}
+
 } // namespace
 
 std::vector<sample_result> run_native_kernel(const cli_options &options)
@@ -83,15 +159,28 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
     const auto image = load_program_image(options.program);
     const std::string &symbol = image.program_name;
 
-    native_loader::LoadOptions load_options{
-        .bpf_object_path = options.program,
+    CompanionProgram companion = load_companion_program(options.program);
+    const int companion_prog_fd = bpf_program__fd(companion.program);
+    if (companion_prog_fd < 0) {
+        fail("native_kernel companion program has no fd after load");
+    }
+    const bpf_insn *source_insns = bpf_program__insns(companion.program);
+    const size_t source_insn_cnt = bpf_program__insn_cnt(companion.program);
+
+    native_loader::ProgramLoadOptions load_options{
+        .original_prog_fd = companion_prog_fd,
+        .source_insns = source_insns,
+        .source_insn_cnt = source_insn_cnt,
         .native_object_path = *options.native_program,
         .symbol_name = symbol,
-        .prog_type = prog_type_value,
         .native_link_path = options.native_kernel_linker_path,
     };
     native_loader::LoadedProgram native_loaded =
-        native_loader::load_from_companion_object(load_options);
+        native_loader::load_from_program_fd(load_options);
+    native_loaded.timings.companion_open_ns = companion.open_ns;
+    native_loaded.timings.companion_object_load_ns = companion.object_load_ns;
+    native_loaded.timings.companion_load_ns +=
+        companion.open_ns + companion.object_load_ns;
     const auto native_load_end = std::chrono::steady_clock::now();
 
     int prog_fd = native_loaded.prog_fd;
