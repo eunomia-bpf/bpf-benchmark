@@ -389,10 +389,12 @@ constexpr const char *kX86BpfArrayPtrsOffsetKey = "__native_x86_bpf_array_ptrs_o
 constexpr const char *kX86BpfProgBpfFuncOffsetKey =
     "__native_x86_bpf_prog_bpf_func_offset";
 constexpr const char *kX86TailCallOffsetKey = "__native_x86_tail_call_offset";
+#if defined(__aarch64__)
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
+#endif
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v40";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v41";
 constexpr const char *kKallsymsCachePath = "/tmp/native_kernel_kallsyms.tsv";
 constexpr const char *kKallsymsCacheVersion = "native-kallsyms-cache-v3";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
@@ -2044,35 +2046,6 @@ HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type)
     return HelperAlias{helper_id, symbol, symbol};
 }
 
-void add_helper_alias_arg(std::vector<std::string> &helpers,
-                          const HelperAlias &alias)
-{
-    if (!alias.link_name || !alias.kernel_symbol) {
-        fail("native_kernel: unsupported helper id " + std::to_string(alias.id));
-    }
-    const uint64_t addr = kallsyms_lookup(alias.kernel_symbol);
-    if (addr == 0) {
-        fail("native_kernel: helper " + std::string(alias.link_name) +
-             " needs missing kernel symbol " + alias.kernel_symbol);
-    }
-    char value_buf[32];
-    std::snprintf(value_buf, sizeof(value_buf), "0x%llx",
-                  static_cast<unsigned long long>(addr));
-    const std::string arg = std::string(alias.link_name) + "=" + value_buf;
-    for (const std::string &existing : helpers) {
-        if (existing == arg) {
-            return;
-        }
-        const size_t eq = existing.find('=');
-        if (eq != std::string::npos &&
-            existing.compare(0, eq, alias.link_name) == 0) {
-            fail("native_kernel: helper " + std::string(alias.link_name) +
-                 " resolved to multiple kernel symbols");
-        }
-    }
-    helpers.push_back(arg);
-}
-
 void add_contextual_helper_alias_if_available(std::vector<std::string> &helpers,
                                               int helper_id,
                                               uint32_t prog_type)
@@ -2598,6 +2571,7 @@ struct CompanionLoad {
     std::vector<uint8_t> oracle_jited;
     std::vector<uint8_t> oracle_xlated;
     bool use_helper_oracle = true;
+    bool allow_kernel_symbol_lookup = true;
     bool has_tail_call = false;
     std::unordered_map<std::string, uint64_t> map_addrs;
     std::unordered_map<std::string, uint32_t> map_addr_ids;
@@ -3171,6 +3145,22 @@ CompanionLoad::LookupSite lookup_site_for_map_meta(const MapMeta &meta,
     return site;
 }
 
+CompanionLoad::LookupSite oracle_call_lookup_site_for_map_meta(const MapMeta &meta)
+{
+    CompanionLoad::LookupSite site{
+        CompanionLoad::LookupSite::Kind::Call,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    };
+    site.map_name = meta.name;
+    return site;
+}
+
 void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
                                   CompanionLoad &load)
 {
@@ -3484,7 +3474,8 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
                                           size_t source_insn_cnt)
 {
     CompanionLoad out{};
-    out.use_helper_oracle = false;
+    out.use_helper_oracle = true;
+    out.allow_kernel_symbol_lookup = false;
     out.prog_type = prog_info.type;
 
     const auto oracle_start = std::chrono::steady_clock::now();
@@ -3538,32 +3529,20 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
     std::vector<SourceHelperCall> source_calls =
         collect_source_helper_calls(insns, insn_cnt, &meta_by_source_fd);
 
-    BpfArrayOffsets array_offsets{
-        K_BPF_ARRAY_VALUE_OFFSET,
-        K_BPF_ARRAY_PPTRS_OFFSET,
-    };
-    BpfHtabOffsets htab_offsets{
-        K_HTAB_ELEM_KEY_OFFSET,
-        K_HTAB_ELEM_LRU_REF_OFFSET,
-    };
-#if defined(__x86_64__)
-    uint64_t this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
-#else
-    uint64_t this_cpu_off_addr = 0;
-#endif
-
     for (const SourceHelperCall &call : source_calls) {
         if (call.helper_id == BPF_FUNC_tail_call) {
             out.has_tail_call = true;
             continue;
         }
-        add_helper_alias_arg(out.helper_args,
-                             helper_alias_for_call(call.helper_id, prog_info.type));
+        if (!helper_alias_for_call(call.helper_id, prog_info.type).link_name) {
+            fail("native_kernel: unsupported helper id "
+                 + std::to_string(call.helper_id));
+        }
         auto map_it = (call.map_fd >= 0) ? meta_by_source_fd.find(call.map_fd) : meta_by_source_fd.end();
         if (call.helper_id == BPF_FUNC_map_lookup_elem) {
             CompanionLoad::LookupSite site{
                 CompanionLoad::LookupSite::Kind::Call,
-                helper_kernel_addr(BPF_FUNC_map_lookup_elem),
+                0,
                 0,
                 0,
                 0,
@@ -3573,58 +3552,18 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
             };
             if (map_it != meta_by_source_fd.end()) {
                 site.map_name = map_it->second.name;
-                configure_lookup_site_for_shape(site,
-                                                map_shape_from_meta(map_it->second),
-                                                array_offsets,
-                                                htab_offsets,
-                                                this_cpu_off_addr);
-            } else {
-                configure_lookup_site_for_shape(site,
-                                                call.dynamic_map_shape,
-                                                array_offsets,
-                                                htab_offsets,
-                                                this_cpu_off_addr);
             }
             out.lookup_sites.push_back(site);
         } else if (call.helper_id == BPF_FUNC_map_update_elem) {
             CompanionLoad::UpdateSite site{
                 CompanionLoad::UpdateSite::Kind::Call,
-                helper_kernel_addr(BPF_FUNC_map_update_elem),
+                0,
                 0,
                 0,
                 0,
                 0,
                 0,
             };
-            if (map_it != meta_by_source_fd.end()) {
-                const uint32_t value_size = map_it->second.value_size;
-                const bool simple_value =
-                    value_size == 1 || value_size == 2 ||
-                    value_size == 4 || value_size == 8;
-                int t = map_it->second.type;
-                if (simple_value && t == BPF_MAP_TYPE_ARRAY) {
-                    site.kind = CompanionLoad::UpdateSite::Kind::Array;
-                    site.max_entries = map_it->second.max_entries;
-                    site.elem_size = (value_size + 7u) & ~7u;
-                    site.value_size = value_size;
-                    site.value_offset = array_offsets.value;
-                } else if (simple_value && t == BPF_MAP_TYPE_PERCPU_ARRAY) {
-#if defined(__x86_64__)
-                    if (this_cpu_off_addr == 0) {
-                        fail("this_cpu_off not in /proc/kallsyms");
-                    }
-#endif
-                    site.kind = CompanionLoad::UpdateSite::Kind::PerCpuArray;
-                    site.max_entries = map_it->second.max_entries;
-                    site.elem_size = sizeof(void *);
-                    site.value_size = value_size;
-                    site.value_offset = array_offsets.pptrs;
-                    site.percpu_base_addr = this_cpu_off_addr;
-                } else if (t == BPF_MAP_TYPE_LRU_PERCPU_HASH) {
-                    site.target_addr =
-                        htab_lru_percpu_map_update_elem_kernel_addr();
-                }
-            }
             out.update_sites.push_back(site);
         }
     }

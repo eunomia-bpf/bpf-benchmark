@@ -153,21 +153,21 @@ NativeLinkArgs build_native_link_args(
     };
     uint64_t this_cpu_off_addr = 0;
 #if defined(__x86_64__)
-    {
+    if (companion.allow_kernel_symbol_lookup) {
         uint64_t cpu_number_addr = kallsyms_lookup("cpu_number");
         this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
         if (cpu_number_addr != 0 && this_cpu_off_addr != 0) {
             out.helpers.push_back(format_name_hex(kX86CpuNumberHelperKey, cpu_number_addr));
             out.helpers.push_back(format_name_hex(kX86ThisCpuOffHelperKey, this_cpu_off_addr));
         }
-        out.helpers.push_back(format_name_hex(
-            kX86BpfMapMaxEntriesOffsetKey, K_BPF_MAP_MAX_ENTRIES_OFFSET));
-        out.helpers.push_back(format_name_hex(
-            kX86BpfArrayPtrsOffsetKey, K_BPF_ARRAY_PTRS_OFFSET));
-        out.helpers.push_back(format_name_hex(
-            kX86BpfProgBpfFuncOffsetKey, K_BPF_PROG_BPF_FUNC_OFFSET));
-        out.helpers.push_back(format_name_hex(kX86TailCallOffsetKey, 12));
     }
+    out.helpers.push_back(format_name_hex(
+        kX86BpfMapMaxEntriesOffsetKey, K_BPF_MAP_MAX_ENTRIES_OFFSET));
+    out.helpers.push_back(format_name_hex(
+        kX86BpfArrayPtrsOffsetKey, K_BPF_ARRAY_PTRS_OFFSET));
+    out.helpers.push_back(format_name_hex(
+        kX86BpfProgBpfFuncOffsetKey, K_BPF_PROG_BPF_FUNC_OFFSET));
+    out.helpers.push_back(format_name_hex(kX86TailCallOffsetKey, 12));
 #elif defined(__aarch64__)
     {
         uint32_t cpu_offset = K_THREAD_INFO_CPU_OFFSET;
@@ -175,31 +175,35 @@ NativeLinkArgs build_native_link_args(
     }
 #endif
 
-    for (const auto &helper : kSupportedHelpers) {
-        uint64_t addr = kallsyms_lookup(helper.symbol);
-        if (addr != 0) {
-            out.helpers.push_back(format_name_hex(helper.symbol, addr));
+    if (companion.allow_kernel_symbol_lookup) {
+        for (const auto &helper : kSupportedHelpers) {
+            uint64_t addr = kallsyms_lookup(helper.symbol);
+            if (addr != 0) {
+                out.helpers.push_back(format_name_hex(helper.symbol, addr));
+            }
         }
-    }
-    out.helpers.insert(out.helpers.end(),
-                       companion.helper_args.begin(),
-                       companion.helper_args.end());
-    static constexpr int kContextualHelperIds[] = {
-        BPF_FUNC_get_prandom_u32,
-        BPF_FUNC_fib_lookup,
-        BPF_FUNC_redirect_map,
-        BPF_FUNC_skc_lookup_tcp,
-        BPF_FUNC_sk_lookup_udp,
-    };
-    for (int helper_id : kContextualHelperIds) {
-        add_contextual_helper_alias_if_available(out.helpers, helper_id,
-                                                 companion.prog_type);
-    }
-    for (const char *symbol : kRuntimeCallSymbols) {
-        uint64_t addr = kallsyms_lookup(symbol);
-        if (addr != 0) {
-            out.helpers.push_back(format_name_hex(symbol, addr));
+        out.helpers.insert(out.helpers.end(),
+                           companion.helper_args.begin(),
+                           companion.helper_args.end());
+        static constexpr int kContextualHelperIds[] = {
+            BPF_FUNC_get_prandom_u32,
+            BPF_FUNC_fib_lookup,
+            BPF_FUNC_redirect_map,
+            BPF_FUNC_skc_lookup_tcp,
+            BPF_FUNC_sk_lookup_udp,
+        };
+        for (int helper_id : kContextualHelperIds) {
+            add_contextual_helper_alias_if_available(out.helpers, helper_id,
+                                                     companion.prog_type);
         }
+        for (const char *symbol : kRuntimeCallSymbols) {
+            uint64_t addr = kallsyms_lookup(symbol);
+            if (addr != 0) {
+                out.helpers.push_back(format_name_hex(symbol, addr));
+            }
+        }
+    } else if (!companion.helper_args.empty()) {
+        fail("native_kernel: helper address args require kernel symbol lookup");
     }
 
     std::vector<std::pair<std::string, uint64_t>> maps(
@@ -223,8 +227,9 @@ NativeLinkArgs build_native_link_args(
             fail("native map symbol " + kv.first +
                  " references unknown loaded map " + kv.second);
         }
-        CompanionLoad::LookupSite site =
-            lookup_site_for_map_meta(*meta, array_offsets, htab_offsets, this_cpu_off_addr);
+        CompanionLoad::LookupSite site = companion.allow_kernel_symbol_lookup
+            ? lookup_site_for_map_meta(*meta, array_offsets, htab_offsets, this_cpu_off_addr)
+            : oracle_call_lookup_site_for_map_meta(*meta);
         site.map_name = kv.first;
         out.lookup_maps.push_back(format_lookup_map_arg(kv.first, site));
     }
