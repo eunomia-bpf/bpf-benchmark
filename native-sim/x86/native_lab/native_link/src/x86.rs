@@ -310,13 +310,17 @@ fn find_symbol_in_section_at_address(
     best
 }
 
-fn find_non_section_symbol_at_address(elf: &object::File, address: u64) -> Option<SymInfo> {
+fn find_text_symbol_in_section_at_address(
+    elf: &object::File,
+    section_index: object::SectionIndex,
+    address: u64,
+) -> Option<SymInfo> {
     let mut best: Option<SymInfo> = None;
     for sym in elf.symbols().chain(elf.dynamic_symbols()) {
-        if matches!(
-            sym.kind(),
-            object::SymbolKind::Section | object::SymbolKind::File
-        ) {
+        if sym.kind() != object::SymbolKind::Text {
+            continue;
+        }
+        if sym.section_index()? != section_index {
             continue;
         }
         let addr = sym.address();
@@ -328,7 +332,7 @@ fn find_non_section_symbol_at_address(elf: &object::File, address: u64) -> Optio
             name: sym.name().ok()?.to_string(),
             address: addr,
             size,
-            section_index: sym.section_index()?,
+            section_index,
         };
         if candidate.address == address {
             return Some(candidate);
@@ -345,8 +349,7 @@ fn find_non_section_symbol_at_address(elf: &object::File, address: u64) -> Optio
 }
 
 fn find_decoded_call_target(elf: &object::File, caller: &SymInfo, target: u64) -> Option<SymInfo> {
-    find_symbol_in_section_at_address(elf, caller.section_index, target)
-        .or_else(|| find_non_section_symbol_at_address(elf, target))
+    find_text_symbol_in_section_at_address(elf, caller.section_index, target)
 }
 
 fn resolve_x86_plt32_defined_target_addr(
@@ -418,7 +421,7 @@ fn resolve_x86_pc32_defined_text_target(
     if target_addr < 0 || target_addr > i128::from(u64::MAX) {
         return Ok(None);
     }
-    Ok(find_symbol_in_section_at_address(
+    Ok(find_text_symbol_in_section_at_address(
         elf,
         section_index,
         target_addr as u64,
@@ -1423,9 +1426,10 @@ pub(super) fn rewrite_x86(
                             LookupKind::Call
                             | LookupKind::Hash
                             | LookupKind::LruHash
-                            | LookupKind::PerCpuHash => {
-                                let helper_addr = resolve_site_target(
-                                    spec.target_addr,
+                            | LookupKind::PerCpuHash
+                            | LookupKind::HashOfMaps => {
+                                let helper_addr = resolve_lookup_site_target(
+                                    &spec,
                                     oracle_targets,
                                     &mut next_oracle_target,
                                     &format!("x86 lookup-site {site_label} ({:?})", spec.kind),
@@ -1481,7 +1485,7 @@ pub(super) fn rewrite_x86(
                                     continue;
                                 }
                                 UpdateKind::Call => {
-                                    let helper_addr = resolve_site_target(
+                                    let helper_addr = resolve_oracle_preferred_site_target(
                                         spec.target_addr,
                                         oracle_targets,
                                         &mut next_oracle_target,
@@ -3770,6 +3774,10 @@ fn build_x86_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<Instru
         LookupKind::Call | LookupKind::Array | LookupKind::PerCpuArray => {}
         LookupKind::Hash => {
             append_x86_add_rax_imm(&mut body, spec.key_offset);
+        }
+        LookupKind::HashOfMaps => {
+            append_x86_add_rax_imm(&mut body, spec.key_offset);
+            body.extend_from_slice(&[0x48, 0x8B, 0x00]); // mov rax, [rax]
         }
         LookupKind::LruHash => {
             append_x86_cmp_byte_rax_disp32_imm(&mut body, spec.value_offset, 0);

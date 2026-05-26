@@ -139,7 +139,7 @@ struct Args {
     ///
     /// Format:
     /// INDEX=KIND,HEXADDR,RESERVED,MAX_ENTRIES,ELEM_SIZE,INDEX_MASK,VALUE_OFFSET,PERCPU_BASE
-    /// where KIND is call/hash/lru_hash/percpu_hash/array/percpu_array.
+    /// where KIND is call/hash/lru_hash/percpu_hash/hash_of_maps/array/percpu_array.
     #[arg(
         long = "lookup-site",
         value_name = "INDEX=KIND,ADDR,RESERVED,MAX,ELEM,MASK,VALUE_OFF,PERCPU"
@@ -152,7 +152,7 @@ struct Args {
     ///
     /// Format:
     /// NAME=KIND,HEXADDR,RESERVED,MAX_ENTRIES,ELEM_SIZE,INDEX_MASK,VALUE_OFFSET,PERCPU_BASE
-    /// where KIND is call/hash/lru_hash/percpu_hash/array/percpu_array.
+    /// where KIND is call/hash/lru_hash/percpu_hash/hash_of_maps/array/percpu_array.
     #[arg(
         long = "lookup-map",
         value_name = "NAME=KIND,ADDR,RESERVED,MAX,ELEM,MASK,VALUE_OFF,PERCPU"
@@ -196,6 +196,7 @@ enum LookupKind {
     Hash,
     LruHash,
     PerCpuHash,
+    HashOfMaps,
     Array,
     PerCpuArray,
 }
@@ -330,6 +331,7 @@ fn parse_lookup_kind(s: &str) -> Result<LookupKind> {
         "hash" => Ok(LookupKind::Hash),
         "lru_hash" => Ok(LookupKind::LruHash),
         "percpu_hash" => Ok(LookupKind::PerCpuHash),
+        "hash_of_maps" => Ok(LookupKind::HashOfMaps),
         "array" => Ok(LookupKind::Array),
         "percpu_array" => Ok(LookupKind::PerCpuArray),
         _ => bail!("unknown --lookup-site KIND {s:?}"),
@@ -631,7 +633,7 @@ fn consume_oracle_target(
     Ok(Some(target))
 }
 
-fn resolve_site_target(
+fn resolve_oracle_preferred_site_target(
     encoded_target: u64,
     oracle_targets: &[u64],
     next_oracle_target: &mut usize,
@@ -639,17 +641,41 @@ fn resolve_site_target(
 ) -> Result<u64> {
     if let Some(oracle_target) = consume_oracle_target(oracle_targets, next_oracle_target, context)?
     {
-        if encoded_target != 0 && encoded_target != oracle_target {
-            bail!(
-                "{context} target {encoded_target:#x} conflicts with companion JIT oracle target {oracle_target:#x}"
-            );
-        }
         return Ok(oracle_target);
     }
     if encoded_target == 0 {
         bail!("{context} has no target address and companion JIT oracle is exhausted");
     }
     Ok(encoded_target)
+}
+
+fn resolve_lookup_site_target(
+    spec: &LookupSiteSpec,
+    oracle_targets: &[u64],
+    next_oracle_target: &mut usize,
+    context: &str,
+) -> Result<u64> {
+    match spec.kind {
+        LookupKind::Call => resolve_oracle_preferred_site_target(
+            spec.target_addr,
+            oracle_targets,
+            next_oracle_target,
+            context,
+        ),
+        LookupKind::Hash
+        | LookupKind::LruHash
+        | LookupKind::PerCpuHash
+        | LookupKind::HashOfMaps => {
+            let _ = consume_oracle_target(oracle_targets, next_oracle_target, context)?;
+            if spec.target_addr == 0 {
+                bail!("{context} lowered map lookup has no target address");
+            }
+            Ok(spec.target_addr)
+        }
+        LookupKind::Array | LookupKind::PerCpuArray => {
+            bail!("{context} inline array lookup should not resolve a call target")
+        }
+    }
 }
 
 fn resolve_helper_target(
@@ -659,6 +685,14 @@ fn resolve_helper_target(
     next_oracle_target: &mut usize,
     context: &str,
 ) -> Result<u64> {
+    if helper_name == "bpf_map_delete_elem" {
+        return resolve_oracle_preferred_site_target(
+            helper_addrs.get(helper_name).copied().unwrap_or(0),
+            oracle_targets,
+            next_oracle_target,
+            context,
+        );
+    }
     if let Some(oracle_target) = consume_oracle_target(oracle_targets, next_oracle_target, context)?
     {
         if let Some(&encoded_target) = helper_addrs.get(helper_name) {
@@ -1642,6 +1676,10 @@ fn build_arm64_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<u32>
         LookupKind::Hash => {
             words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
         }
+        LookupKind::HashOfMaps => {
+            words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
+            words.push(a64_ldr_u64(X0, X0, 0)?);
+        }
         LookupKind::LruHash => {
             words.push(a64_ldr_u8(X8, X0, spec.value_offset)?);
             let skip_store = words.len();
@@ -2367,9 +2405,10 @@ fn rewrite_arm64(
                                 LookupKind::Call
                                 | LookupKind::Hash
                                 | LookupKind::LruHash
-                                | LookupKind::PerCpuHash => {
-                                    helper_addr = Some(resolve_site_target(
-                                        spec.target_addr,
+                                | LookupKind::PerCpuHash
+                                | LookupKind::HashOfMaps => {
+                                    helper_addr = Some(resolve_lookup_site_target(
+                                        spec,
                                         oracle_targets,
                                         &mut next_oracle_target,
                                         &format!("arm64 lookup-site {ordinal} ({:?})", spec.kind),
@@ -2408,7 +2447,7 @@ fn rewrite_arm64(
                                         continue;
                                     }
                                     UpdateKind::Call => {
-                                        helper_addr = Some(resolve_site_target(
+                                        helper_addr = Some(resolve_oracle_preferred_site_target(
                                             spec.target_addr,
                                             oracle_targets,
                                             &mut next_oracle_target,

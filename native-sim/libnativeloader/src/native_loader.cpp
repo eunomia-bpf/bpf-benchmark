@@ -392,7 +392,7 @@ constexpr const char *kX86TailCallOffsetKey = "__native_x86_tail_call_offset";
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v36";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v40";
 constexpr const char *kKallsymsCachePath = "/tmp/native_kernel_kallsyms.tsv";
 constexpr const char *kKallsymsCacheVersion = "native-kallsyms-cache-v3";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
@@ -400,6 +400,10 @@ constexpr const char *kNativeStubBtfCacheVersion = "native-stub-btf-cache-v1";
 constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";
 constexpr const char *kHtabOfMapLookupElemSymbol = "htab_of_map_lookup_elem";
 constexpr const char *kArrayOfMapLookupElemSymbol = "array_of_map_lookup_elem";
+constexpr const char *kHtabLruPercpuMapLookupElemSymbol =
+    "htab_lru_percpu_map_lookup_elem";
+constexpr const char *kHtabLruPercpuMapUpdateElemSymbol =
+    "htab_lru_percpu_map_update_elem";
 constexpr int kLibbpfCoreBadRelocPoison = 195896080; // 0xbad2310
 
 #ifndef BPF_PSEUDO_KINSN_SIDECAR
@@ -956,14 +960,14 @@ void append_dummy_map_refs(std::vector<bpf_insn> &insns,
 
     insns.push_back(bpf_insn{
         .code = BPF_ALU64 | BPF_MOV | BPF_K,
-        .dst_reg = BPF_REG_9,
+        .dst_reg = BPF_REG_1,
         .src_reg = 0,
         .off = 0,
         .imm = 1,
     });
     insns.push_back(bpf_insn{
         .code = BPF_JMP | BPF_JEQ | BPF_K,
-        .dst_reg = BPF_REG_9,
+        .dst_reg = BPF_REG_1,
         .src_reg = 0,
         .off = static_cast<int16_t>(map_ref_fds.size() * 2),
         .imm = 1,
@@ -974,7 +978,7 @@ void append_dummy_map_refs(std::vector<bpf_insn> &insns,
         }
         insns.push_back(bpf_insn{
             .code = BPF_LD | BPF_DW | BPF_IMM,
-            .dst_reg = BPF_REG_9,
+            .dst_reg = BPF_REG_1,
             .src_reg = BPF_PSEUDO_MAP_FD,
             .off = 0,
             .imm = fd,
@@ -1484,6 +1488,8 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
     wanted.push_back(kHtabLookupElemSymbol);
     wanted.push_back(kHtabOfMapLookupElemSymbol);
     wanted.push_back(kArrayOfMapLookupElemSymbol);
+    wanted.push_back(kHtabLruPercpuMapLookupElemSymbol);
+    wanted.push_back(kHtabLruPercpuMapUpdateElemSymbol);
     const size_t wanted_count = wanted.size();
 
     const std::string boot_id =
@@ -1571,6 +1577,26 @@ uint64_t array_of_map_lookup_elem_kernel_addr()
     uint64_t addr = kallsyms_lookup(kArrayOfMapLookupElemSymbol);
     if (addr == 0) {
         fail(std::string("native_kernel: ") + kArrayOfMapLookupElemSymbol +
+             " is missing from /proc/kallsyms");
+    }
+    return addr;
+}
+
+uint64_t htab_lru_percpu_map_lookup_elem_kernel_addr()
+{
+    uint64_t addr = kallsyms_lookup(kHtabLruPercpuMapLookupElemSymbol);
+    if (addr == 0) {
+        fail(std::string("native_kernel: ") + kHtabLruPercpuMapLookupElemSymbol +
+             " is missing from /proc/kallsyms");
+    }
+    return addr;
+}
+
+uint64_t htab_lru_percpu_map_update_elem_kernel_addr()
+{
+    uint64_t addr = kallsyms_lookup(kHtabLruPercpuMapUpdateElemSymbol);
+    if (addr == 0) {
+        fail(std::string("native_kernel: ") + kHtabLruPercpuMapUpdateElemSymbol +
              " is missing from /proc/kallsyms");
     }
     return addr;
@@ -2570,7 +2596,15 @@ struct CompanionLoad {
      * JIT emits. Other map types stay on the plain helper until they get
      * their own concrete lowering. */
     struct LookupSite {
-        enum class Kind { Call, Hash, LruHash, PerCpuHash, Array, PerCpuArray } kind;
+        enum class Kind {
+            Call,
+            Hash,
+            LruHash,
+            PerCpuHash,
+            HashOfMaps,
+            Array,
+            PerCpuArray,
+        } kind;
         uint64_t target_addr;
         uint32_t key_offset;
         uint32_t max_entries;
@@ -3065,9 +3099,16 @@ bool configure_lookup_site_for_shape(CompanionLoad::LookupSite &site,
         site.percpu_base_addr = this_cpu_off_addr;
         return true;
     }
-    if (t == BPF_MAP_TYPE_HASH_OF_MAPS) {
+    if (t == BPF_MAP_TYPE_LRU_PERCPU_HASH) {
         site.kind = CompanionLoad::LookupSite::Kind::Call;
-        site.target_addr = htab_of_map_lookup_elem_kernel_addr();
+        site.target_addr = htab_lru_percpu_map_lookup_elem_kernel_addr();
+        return true;
+    }
+    if (t == BPF_MAP_TYPE_HASH_OF_MAPS) {
+        uint32_t rounded = (shape.key_size + 7) & ~7u;
+        site.kind = CompanionLoad::LookupSite::Kind::HashOfMaps;
+        site.target_addr = htab_lookup_elem_kernel_addr();
+        site.key_offset = htab_offsets.key + rounded;
         return true;
     }
     if (t == BPF_MAP_TYPE_ARRAY_OF_MAPS) {
@@ -3535,6 +3576,9 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
                         site.value_size = value_size;
                         site.value_offset = array_offsets.pptrs;
                         site.percpu_base_addr = this_cpu_off_addr;
+                    } else if (t == BPF_MAP_TYPE_LRU_PERCPU_HASH) {
+                        site.target_addr =
+                            htab_lru_percpu_map_update_elem_kernel_addr();
                     }
                 }
                 out.update_sites.push_back(site);
@@ -3691,6 +3735,9 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
                     site.value_size = value_size;
                     site.value_offset = array_offsets.pptrs;
                     site.percpu_base_addr = this_cpu_off_addr;
+                } else if (t == BPF_MAP_TYPE_LRU_PERCPU_HASH) {
+                    site.target_addr =
+                        htab_lru_percpu_map_update_elem_kernel_addr();
                 }
             }
             out.update_sites.push_back(site);
@@ -3731,6 +3778,9 @@ std::string format_lookup_site_arg(size_t index,
         break;
     case CompanionLoad::LookupSite::Kind::PerCpuHash:
         kind = "percpu_hash";
+        break;
+    case CompanionLoad::LookupSite::Kind::HashOfMaps:
+        kind = "hash_of_maps";
         break;
     case CompanionLoad::LookupSite::Kind::Array:
         kind = "array";
@@ -3775,6 +3825,9 @@ std::string format_lookup_map_arg(const std::string &name,
         break;
     case CompanionLoad::LookupSite::Kind::PerCpuHash:
         kind = "percpu_hash";
+        break;
+    case CompanionLoad::LookupSite::Kind::HashOfMaps:
+        kind = "hash_of_maps";
         break;
     case CompanionLoad::LookupSite::Kind::Array:
         kind = "array";
@@ -4120,12 +4173,12 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     if (rc != 0) {
         std::ostringstream msg;
         msg << "native-link kernel failed (rc=" << rc << ")";
+        msg << "\ncommand: ";
+        for (auto &a : argv) msg << a << " ";
         const std::string stderr_text = read_text_file_limited(kernel_stderr, 8192);
         if (!stderr_text.empty()) {
             msg << "\nstderr:\n" << stderr_text;
         }
-        msg << "\ncommand: ";
-        for (auto &a : argv) msg << a << " ";
         fail(msg.str());
     }
     std::error_code kernel_ec;

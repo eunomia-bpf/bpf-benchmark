@@ -401,7 +401,8 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h native_compat.h $(
 	rm -f "$(TETRAGON_NATIVE_STAGE_OUT)"/*.native.o
 	native_out="$(NATIVE_OUT)/tetragon"; \
 	stage_out="$(TETRAGON_NATIVE_STAGE_OUT)"; \
-	common_flags=($(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS -D__TARGET_ARCH_x86 \
+	common_flags=($(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS -DMICRO_NATIVE_TETRAGON \
+		-D__TARGET_ARCH_x86 \
 		-include "$(CURDIR)/native_compat.h" \
 		-I"$(CURDIR)/tetragon/bpf" \
 		-I"$(CURDIR)/tetragon/bpf/include" \

@@ -289,7 +289,24 @@ ____##name(struct pt_regs *ctx, ##args)
                        __native_core_read_into_1)(fn, dst, src, args)
 
 #ifndef bpf_core_field_exists
+#ifdef MICRO_NATIVE_TETRAGON
+/*
+ * Native objects are compiled against the generated target vmlinux header, not
+ * libbpf-relocated BPF CO-RE metadata. Most field-existence probes used by the
+ * corpus should therefore fold to true when the expression compiles. CO-RE
+ * flavor structs are the exception. Their fields exist in the source C type,
+ * but their offsets are synthetic until libbpf CO-RE relocates them against
+ * the target kernel BTF. Taking those branches in native C reads the synthetic
+ * layout instead of the real vmlinux_generated_*.h layout.
+ */
+#define __native_bpf_core_field_exists_text(field_text) \
+    (__builtin_strcmp((field_text), "((struct kernfs_node___old *)0)->id.id") != 0 && \
+     __builtin_strcmp((field_text), "cgrp_new->ancestors") != 0)
+#define bpf_core_field_exists(field...) \
+    __native_bpf_core_field_exists_text(#field)
+#else
 #define bpf_core_field_exists(field...) (1)
+#endif
 #endif
 #ifndef bpf_core_type_exists
 #define bpf_core_type_exists(type) (1)

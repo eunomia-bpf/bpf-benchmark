@@ -100,9 +100,22 @@ FUNC_INLINE void event_set_clone(struct msg_process *pid)
 FUNC_INLINE void
 __get_caps(struct msg_capabilities *msg, const struct cred *cred)
 {
+#ifdef MICRO_NATIVE_TETRAGON
+	if (!cred) {
+		msg->effective = 0;
+		msg->inheritable = 0;
+		msg->permitted = 0;
+		return;
+	}
+
+	msg->effective = cred->cap_effective.val;
+	msg->inheritable = cred->cap_inheritable.val;
+	msg->permitted = cred->cap_permitted.val;
+#else
 	probe_read(&msg->effective, sizeof(__u64), _(&cred->cap_effective));
 	probe_read(&msg->inheritable, sizeof(__u64), _(&cred->cap_inheritable));
 	probe_read(&msg->permitted, sizeof(__u64), _(&cred->cap_permitted));
+#endif
 }
 
 /* @get_current_subj_caps:
@@ -142,7 +155,11 @@ get_current_subj_caps(struct msg_capabilities *msg, struct task_struct *task)
 	const struct cred *cred;
 
 	/* Get the task's subjective creds */
+#ifdef MICRO_NATIVE_TETRAGON
+	cred = task ? task->cred : 0;
+#else
 	probe_read(&cred, sizeof(cred), _(&task->cred));
+#endif
 	__get_caps(msg, cred);
 }
 
@@ -171,6 +188,52 @@ get_current_subj_creds(struct msg_cred *info, struct task_struct *task)
 FUNC_INLINE void
 get_namespaces(struct msg_ns *msg, struct task_struct *task)
 {
+#ifdef MICRO_NATIVE_TETRAGON
+	struct nsproxy *nsp = task ? task->nsproxy : 0;
+	struct pid *p = task ? task->thread_pid : 0;
+	struct mm_struct *mm = task ? task->mm : 0;
+	struct user_namespace *user_ns = mm ? mm->user_ns : 0;
+
+	msg->uts_inum = 0;
+	msg->ipc_inum = 0;
+	msg->mnt_inum = 0;
+	msg->pid_inum = 0;
+	msg->pid_for_children_inum = 0;
+	msg->net_inum = 0;
+	msg->time_inum = 0;
+	msg->time_for_children_inum = 0;
+	msg->cgroup_inum = 0;
+	msg->user_inum = 0;
+
+	if (!nsp)
+		return;
+
+	if (nsp->uts_ns)
+		msg->uts_inum = nsp->uts_ns->ns.inum;
+	if (nsp->ipc_ns)
+		msg->ipc_inum = nsp->ipc_ns->ns.inum;
+	if (nsp->mnt_ns)
+		msg->mnt_inum = nsp->mnt_ns->ns.inum;
+	if (p) {
+		int level = p->level;
+
+		if (level >= 0 && p->numbers[level].ns)
+			msg->pid_inum = p->numbers[level].ns->ns.inum;
+	}
+	if (nsp->pid_ns_for_children)
+		msg->pid_for_children_inum = nsp->pid_ns_for_children->ns.inum;
+	if (nsp->net_ns)
+		msg->net_inum = nsp->net_ns->ns.inum;
+	if (nsp->time_ns)
+		msg->time_inum = nsp->time_ns->ns.inum;
+	if (nsp->time_ns_for_children)
+		msg->time_for_children_inum =
+			nsp->time_ns_for_children->ns.inum;
+	if (nsp->cgroup_ns)
+		msg->cgroup_inum = nsp->cgroup_ns->ns.inum;
+	if (user_ns)
+		msg->user_inum = user_ns->ns.inum;
+#else
 	struct nsproxy *nsproxy;
 	struct nsproxy nsp;
 
@@ -271,6 +334,7 @@ get_namespaces(struct msg_ns *msg, struct task_struct *task)
 			msg->user_inum = 0;
 		}
 	}
+#endif
 }
 
 /* Gather current task cgroup name */

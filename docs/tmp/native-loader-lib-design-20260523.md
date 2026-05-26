@@ -1935,6 +1935,56 @@ Validation:
   helper-slot `0f 1f 80 00 00 00 00` padding. The native JIT dump prefixes
   contain 147 observed `e8` rel32 call opcodes per phase, and no
   `e8 rel32; nop7` helper-call slots.
+- Focused bcc/set workload smoke with BPF stats disabled and native-loader
+  enabled only in post:
+  `BPFREJIT_CORPUS_APPS=bcc/set BPFREJIT_SHIM_NATIVE_LOADER=post BPFREJIT_CORPUS_BPF_STATS=0 SKIP_REJIT=norejit SAMPLES=1 WARMUPS=0 WORKLOAD_DURATION=10 KEEP_WORKDIRS=1 TIMEOUT=2400 make corpus`
+  passed in `corpus/results/x86_kvm_corpus_20260525_233006_724489`.
+  `result.json` records `bpf_stats=false`, `workload_only=false`, and app
+  status `ok`. Baseline is the normal kernel JIT path; post replaced 25
+  programs through native-loader, with zero native-loader failures, zero
+  stale reloc-bounds failures, zero `ff d0`, and zero legacy helper-slot
+  padding hits in shim logs. Raw workload throughput was:
+  syscall 48.57 -> 48.76 ops/s (+0.39%), cap 420377.24 -> 421625.56 ops/s
+  (+0.30%), set 29922.96 -> 31328.02 ops/s (+4.70%), and sockfd
+  260895.11 -> 262066.54 ops/s (+0.45%). This is a smoke result, not a
+  paper-grade repeated run; it shows no obvious stats-off workload regression
+  and a small positive signal on the set-heavy path.
+- Native/kernel JIT dump comparison for the same bcc/set smokes shows one
+  clear fixed-overhead issue to fix next. Helper calls are now direct `e8`
+  rel32 calls in the final runtime dump, with no `call *%rax` and no legacy
+  helper-slot nop padding. However, native-loader's retained-map-reference
+  stub currently emits a runtime `r9 = 1; if r9 == 1 jump over map refs`
+  pattern. Final x86 JIT turns this into `mov r15d, 1`, and because BPF r9
+  maps to host r15, many tiny native stubs also pay `push r15` / `pop r15`.
+  Example: bcc `fentry_vfs_read` is 36 bytes in the original kernel JIT and
+  40 bytes in native JIT. Native gets the expected `lock incq` improvement,
+  but the retained-map bookkeeping erases it. Across the focused bcc/set
+  smokes, 22/25 final native JIT images are larger than the original kernel
+  JIT image even though native xlated stubs are much smaller. The next fix to
+  test is a non-runtime map-retention encoding, for example an unconditional
+  BPF jump over the `LD_IMM64 BPF_PSEUDO_MAP_FD` records if the kernel still
+  reports the maps in `prog_info.used_maps`. If that does not retain maps,
+  this needs a different kernel-owned map-retention mechanism rather than a
+  silent loader fallback.
+
+Follow-up implementation note, 2026-05-26: the first low-risk fix keeps the
+existing verifier-visible conditional shape but moves the runtime-true
+predicate from BPF `r9` to BPF `r1`. This should remove the artificial `%r15`
+callee-saved pressure without depending on verifier handling of unreachable
+map-ref records. The validation target is a native-loader smoke that exercises
+retained map refs and confirms the final runtime dumps no longer grow just
+because the dummy map-retention branch touched BPF `r9`.
+
+Validation, 2026-05-26:
+`corpus/results/x86_kvm_corpus_20260526_030917_287805` is a focused bcc/set
+native-loader smoke with JIT dumps enabled after the `r1` change. It replaced
+25 programs with zero native-loader failures. Tiny vfsstat stubs now stay at
+35-36 final JIT bytes (`fentry_vfs_read` 36 -> 35; write/fsync/open/create
+36 -> 36), so the retained-map branch is no longer forcing the previous
+`%r15` save/restore overhead. Raw stats-disabled workload counters were:
+baseline syscall 101.80, cap 409458.45, set 31175.64, sockfd 261453.00; post
+syscall 91.30, cap 414402.13, set 32190.44, sockfd 264212.37. This is still a
+smoke, but it validates the targeted code-size/prologue fix.
 
 The proof/source/native input objects may still contain indirect-looking
 helper-call idioms before final linking. The authoritative runtime check is
