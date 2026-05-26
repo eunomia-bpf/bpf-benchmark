@@ -34,7 +34,6 @@ struct LoadOptions {
 
 struct LoadedProgram {
     int prog_fd = -1;
-    std::vector<int> retained_map_fds;
     bpf_object *companion_object = nullptr;
     uint32_t callee_saved_mask = 0;
     uint64_t bpf_bytecode_bytes = 0;
@@ -65,8 +64,6 @@ extern "C" {
 
 struct native_loader_c_result {
     int prog_fd;
-    int *retained_map_fds;
-    uint32_t retained_map_fds_n;
     char error[4096];
 };
 

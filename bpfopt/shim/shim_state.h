@@ -131,18 +131,6 @@ struct native_loader_map_ref_entry {
 static struct native_loader_map_ref_entry *native_loader_map_ref_table[BPF_STATE_BUCKETS];
 static int native_loader_fd_keeper_sock = -1;
 
-static int native_loader_map_ref_fd_is_retained_locked(int fd) {
-    (void)fd;
-    return 0;
-}
-
-static int native_loader_map_ref_has_fd_in_range_locked(unsigned int first,
-                                                        unsigned int last) {
-    (void)first;
-    (void)last;
-    return 0;
-}
-
 /* ---- link table (records BPF_LINK_CREATE for future detach/re-attach) ---- */
 struct link_entry {
     int fd;

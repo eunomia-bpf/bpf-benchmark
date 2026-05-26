@@ -398,7 +398,6 @@ constexpr const char *kKallsymsCacheVersion = "native-kallsyms-cache-v3";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
 constexpr const char *kNativeStubBtfCacheVersion = "native-stub-btf-cache-v1";
 constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";
-constexpr const char *kHtabOfMapLookupElemSymbol = "htab_of_map_lookup_elem";
 constexpr const char *kArrayOfMapLookupElemSymbol = "array_of_map_lookup_elem";
 constexpr const char *kHtabLruPercpuMapLookupElemSymbol =
     "htab_lru_percpu_map_lookup_elem";
@@ -1486,7 +1485,6 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
         wanted.push_back(symbol);
     }
     wanted.push_back(kHtabLookupElemSymbol);
-    wanted.push_back(kHtabOfMapLookupElemSymbol);
     wanted.push_back(kArrayOfMapLookupElemSymbol);
     wanted.push_back(kHtabLruPercpuMapLookupElemSymbol);
     wanted.push_back(kHtabLruPercpuMapUpdateElemSymbol);
@@ -1557,16 +1555,6 @@ uint64_t htab_lookup_elem_kernel_addr()
     uint64_t addr = kallsyms_lookup(kHtabLookupElemSymbol);
     if (addr == 0) {
         fail(std::string("native_kernel: ") + kHtabLookupElemSymbol +
-             " is missing from /proc/kallsyms");
-    }
-    return addr;
-}
-
-uint64_t htab_of_map_lookup_elem_kernel_addr()
-{
-    uint64_t addr = kallsyms_lookup(kHtabOfMapLookupElemSymbol);
-    if (addr == 0) {
-        fail(std::string("native_kernel: ") + kHtabOfMapLookupElemSymbol +
              " is missing from /proc/kallsyms");
     }
     return addr;
@@ -2253,6 +2241,46 @@ std::vector<uint32_t> load_prog_map_ids(int program_fd, uint32_t count)
     }
     ids.resize(info.nr_map_ids);
     return ids;
+}
+
+std::vector<uint32_t> load_prog_map_ids(int program_fd)
+{
+    const bpf_prog_info info = load_prog_info(program_fd);
+    return load_prog_map_ids(program_fd, info.nr_map_ids);
+}
+
+void verify_loaded_prog_uses_maps(int program_fd,
+                                  const std::vector<uint32_t> &expected_map_ids)
+{
+    std::unordered_set<uint32_t> expected;
+    for (uint32_t id : expected_map_ids) {
+        if (id != 0) {
+            expected.insert(id);
+        }
+    }
+    if (expected.empty()) {
+        return;
+    }
+
+    const std::vector<uint32_t> actual_ids = load_prog_map_ids(program_fd);
+    std::unordered_set<uint32_t> actual(actual_ids.begin(), actual_ids.end());
+    std::vector<uint32_t> missing;
+    for (uint32_t id : expected) {
+        if (!actual.count(id)) {
+            missing.push_back(id);
+        }
+    }
+    if (missing.empty()) {
+        return;
+    }
+
+    std::sort(missing.begin(), missing.end());
+    std::ostringstream msg;
+    msg << "native_loader: loaded native stub missing used_maps for relocated map id(s)";
+    for (uint32_t id : missing) {
+        msg << " " << id;
+    }
+    fail(msg.str());
 }
 
 bpf_map_info load_map_info(int map_fd)
@@ -3255,150 +3283,7 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
     add_known_kconfig_symbol_addrs(load);
 }
 
-struct SourceHelperCall {
-    int helper_id;
-    int map_fd;
-    NativeMapShape dynamic_map_shape;
-};
-
-struct SourceMapBinding {
-    int map_fd = -1;
-    NativeMapShape dynamic_map_shape;
-};
-
-/* Walk a BPF program's original (pre-verifier) bytecode and identify every
- * helper call in source order, plus the map fd currently bound to that
- * helper's map argument register when the call occurs. map_fd is -1 when the
- * binding is ambiguous. If a previous map-in-map lookup returned a verifier
- * tracked inner map pointer, dynamic_map_shape records the inner map shape so
- * the next map_lookup_elem call can use the same map-specific lowering as the
- * kernel JIT.
- *
- * Tracking is intentionally minimal:
- *   - LD_IMM64 with src_reg=BPF_PSEUDO_MAP_FD binds dst_reg -> imm (map fd).
- *   - ALU64|MOV|X copies the binding from src_reg to dst_reg.
- *   - map-in-map lookup return in R0 carries a known inner-map shape when the
- *     outer map shape is recognized.
- *   - Any other write to a register clears that register's binding.
- *   - CALL clobbers r0..r5.
- * This matches the simple "load map fd into r1 just before the call"
- * pattern clang emits at -O2 for the test programs and most real
- * BPF code. Anything fancier (spill/reload via stack, conditional
- * map selection) falls through to fd=-1 -> no inline. */
-std::vector<SourceHelperCall> collect_source_helper_calls(
-    const struct bpf_insn *insns,
-    size_t cnt,
-    const std::unordered_map<int, MapMeta> *meta_by_fd = nullptr)
-{
-    std::vector<SourceHelperCall> sites;
-    SourceMapBinding reg_map[11];
-    for (size_t i = 0; i < cnt; i++) {
-        const struct bpf_insn &in = insns[i];
-        uint8_t code = in.code;
-        if (code == (BPF_LD | BPF_DW | BPF_IMM)) {
-            if (in.dst_reg < 11) {
-                reg_map[in.dst_reg] = SourceMapBinding{};
-                if (in.src_reg == BPF_PSEUDO_MAP_FD) {
-                    reg_map[in.dst_reg].map_fd = (int)in.imm;
-                }
-            }
-            i++; /* skip second slot (high 32 bits of imm64) */
-            continue;
-        }
-        if (code == (BPF_ALU64 | BPF_MOV | BPF_X)) {
-            if (in.dst_reg < 11 && in.src_reg < 11) {
-                reg_map[in.dst_reg] = reg_map[in.src_reg];
-            } else if (in.dst_reg < 11) {
-                reg_map[in.dst_reg] = SourceMapBinding{};
-            }
-            continue;
-        }
-        if (code == (BPF_JMP | BPF_CALL)) {
-            if (in.src_reg == BPF_PSEUDO_CALL ||
-                in.src_reg == BPF_PSEUDO_KFUNC_CALL ||
-                in.src_reg == BPF_PSEUDO_KINSN_CALL) {
-                for (int r = 0; r <= 5; r++) reg_map[r] = SourceMapBinding{};
-                continue;
-            }
-            if (in.src_reg == 0 && in.imm == kLibbpfCoreBadRelocPoison) {
-                for (int r = 0; r <= 5; r++) reg_map[r] = SourceMapBinding{};
-                continue;
-            }
-            if (in.src_reg != 0) {
-                fail("native_kernel: unsupported non-helper BPF call src_reg="
-                     + std::to_string(static_cast<unsigned>(in.src_reg)));
-            }
-            int map_arg_reg = 1;
-            if (in.imm == BPF_FUNC_tail_call ||
-                in.imm == BPF_FUNC_perf_event_output) {
-                map_arg_reg = 2;
-            }
-            SourceMapBinding map_binding = reg_map[map_arg_reg];
-            sites.push_back(SourceHelperCall{
-                in.imm,
-                map_binding.map_fd,
-                map_binding.dynamic_map_shape,
-            });
-
-            NativeMapShape return_shape;
-            if (in.imm == BPF_FUNC_map_lookup_elem &&
-                map_binding.map_fd >= 0 &&
-                meta_by_fd) {
-                auto meta_it = meta_by_fd->find(map_binding.map_fd);
-                if (meta_it != meta_by_fd->end()) {
-                    return_shape = inner_map_shape_for_outer_map(meta_it->second);
-                }
-            }
-
-            for (int r = 0; r <= 5; r++) reg_map[r] = SourceMapBinding{};
-            if (has_native_map_shape(return_shape)) {
-                reg_map[0].dynamic_map_shape = return_shape;
-            }
-            continue;
-        }
-        /* Conservative: invalidate dst_reg for any other ALU/LDX/JMP-class
-         * insn that writes a reg. Stores (BPF_STX/BPF_ST) don't write
-         * dst_reg, conditional jumps don't either. */
-        uint8_t cls = BPF_CLASS(code);
-        if (cls == BPF_ALU || cls == BPF_ALU64 || cls == BPF_LDX) {
-            if (in.dst_reg < 11) reg_map[in.dst_reg] = SourceMapBinding{};
-        }
-    }
-    return sites;
-}
-
-std::vector<int> collect_source_map_fds(const struct bpf_insn *insns, size_t cnt)
-{
-    std::vector<int> fds;
-    std::unordered_set<int> seen;
-    for (size_t i = 0; i < cnt; i++) {
-        const struct bpf_insn &in = insns[i];
-        if (in.code == (BPF_LD | BPF_DW | BPF_IMM)) {
-            if (in.src_reg == BPF_PSEUDO_MAP_FD ||
-                in.src_reg == BPF_PSEUDO_MAP_VALUE) {
-                int fd = static_cast<int>(in.imm);
-                if (fd >= 0 && seen.insert(fd).second) {
-                    fds.push_back(fd);
-                }
-            }
-            i++; /* skip second slot (high 32 bits of imm64) */
-        }
-    }
-    return fds;
-}
-
-std::vector<int> walk_map_helper_call_maps(const struct bpf_insn *insns,
-                                           size_t cnt,
-                                           int helper_id)
-{
-    std::vector<int> maps;
-    for (const auto &site : collect_source_helper_calls(insns, cnt)) {
-        if (site.helper_id == helper_id) {
-            maps.push_back(site.map_fd);
-        }
-    }
-    return maps;
-}
+#include "native_loader_bytecode.hpp"
 
 CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
 {
@@ -3749,239 +3634,7 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
     return out;
 }
 
-std::string format_hex(uint64_t value)
-{
-    char value_buf[32];
-    std::snprintf(value_buf, sizeof(value_buf), "0x%llx",
-                  static_cast<unsigned long long>(value));
-    return value_buf;
-}
-
-std::string format_name_hex(const std::string &name, uint64_t value)
-{
-    return name + "=" + format_hex(value);
-}
-
-std::string format_lookup_site_arg(size_t index,
-                                   const CompanionLoad::LookupSite &site)
-{
-    const char *kind = "call";
-    switch (site.kind) {
-    case CompanionLoad::LookupSite::Kind::Call:
-        kind = "call";
-        break;
-    case CompanionLoad::LookupSite::Kind::Hash:
-        kind = "hash";
-        break;
-    case CompanionLoad::LookupSite::Kind::LruHash:
-        kind = "lru_hash";
-        break;
-    case CompanionLoad::LookupSite::Kind::PerCpuHash:
-        kind = "percpu_hash";
-        break;
-    case CompanionLoad::LookupSite::Kind::HashOfMaps:
-        kind = "hash_of_maps";
-        break;
-    case CompanionLoad::LookupSite::Kind::Array:
-        kind = "array";
-        break;
-    case CompanionLoad::LookupSite::Kind::PerCpuArray:
-        kind = "percpu_array";
-        break;
-    }
-
-    char buf[384];
-    std::snprintf(buf, sizeof(buf), "%zu=%s,0x%llx,%u,%u,%u,%u,%u,0x%llx",
-                  index,
-                  kind,
-                  static_cast<unsigned long long>(site.target_addr),
-                  static_cast<unsigned>(site.key_offset),
-                  static_cast<unsigned>(site.max_entries),
-                  static_cast<unsigned>(site.elem_size),
-                  static_cast<unsigned>(site.index_mask),
-                  static_cast<unsigned>(site.value_offset),
-                  static_cast<unsigned long long>(site.percpu_base_addr));
-    std::string out(buf);
-    if (!site.map_name.empty()) {
-        out.push_back(',');
-        out += site.map_name;
-    }
-    return out;
-}
-
-std::string format_lookup_map_arg(const std::string &name,
-                                  const CompanionLoad::LookupSite &site)
-{
-    const char *kind = "call";
-    switch (site.kind) {
-    case CompanionLoad::LookupSite::Kind::Call:
-        kind = "call";
-        break;
-    case CompanionLoad::LookupSite::Kind::Hash:
-        kind = "hash";
-        break;
-    case CompanionLoad::LookupSite::Kind::LruHash:
-        kind = "lru_hash";
-        break;
-    case CompanionLoad::LookupSite::Kind::PerCpuHash:
-        kind = "percpu_hash";
-        break;
-    case CompanionLoad::LookupSite::Kind::HashOfMaps:
-        kind = "hash_of_maps";
-        break;
-    case CompanionLoad::LookupSite::Kind::Array:
-        kind = "array";
-        break;
-    case CompanionLoad::LookupSite::Kind::PerCpuArray:
-        kind = "percpu_array";
-        break;
-    }
-
-    char buf[384];
-    std::snprintf(buf, sizeof(buf), "%s=%s,0x%llx,%u,%u,%u,%u,%u,0x%llx",
-                  name.c_str(),
-                  kind,
-                  static_cast<unsigned long long>(site.target_addr),
-                  static_cast<unsigned>(site.key_offset),
-                  static_cast<unsigned>(site.max_entries),
-                  static_cast<unsigned>(site.elem_size),
-                  static_cast<unsigned>(site.index_mask),
-                  static_cast<unsigned>(site.value_offset),
-                  static_cast<unsigned long long>(site.percpu_base_addr));
-    return std::string(buf);
-}
-
-std::string format_update_site_arg(size_t index,
-                                   const CompanionLoad::UpdateSite &site)
-{
-    const char *kind = "call";
-    switch (site.kind) {
-    case CompanionLoad::UpdateSite::Kind::Call:
-        kind = "call";
-        break;
-    case CompanionLoad::UpdateSite::Kind::Array:
-        kind = "array";
-        break;
-    case CompanionLoad::UpdateSite::Kind::PerCpuArray:
-        kind = "percpu_array";
-        break;
-    }
-
-    char buf[280];
-    std::snprintf(buf, sizeof(buf), "%zu=%s,0x%llx,%u,%u,%u,%u,0x%llx",
-                  index,
-                  kind,
-                  static_cast<unsigned long long>(site.target_addr),
-                  static_cast<unsigned>(site.max_entries),
-                  static_cast<unsigned>(site.elem_size),
-                  static_cast<unsigned>(site.value_size),
-                  static_cast<unsigned>(site.value_offset),
-                  static_cast<unsigned long long>(site.percpu_base_addr));
-    return std::string(buf);
-}
-
-NativeLinkArgs build_native_link_args(
-    const native_loader::LoadOptions &options,
-    const std::unordered_map<std::string, uint64_t> &map_addrs,
-    const CompanionLoad &companion)
-{
-    NativeLinkArgs out{};
-    out.linker = native_link_binary(options.native_link_path);
-    if (companion.use_helper_oracle) {
-        out.oracle_jit_base = companion.oracle_jit_base;
-        out.oracle_jited = companion.oracle_jited;
-        out.oracle_xlated = companion.oracle_xlated;
-    }
-    BpfArrayOffsets array_offsets{
-        K_BPF_ARRAY_VALUE_OFFSET,
-        K_BPF_ARRAY_PPTRS_OFFSET,
-    };
-    BpfHtabOffsets htab_offsets{
-        K_HTAB_ELEM_KEY_OFFSET,
-        K_HTAB_ELEM_LRU_REF_OFFSET,
-    };
-    uint64_t this_cpu_off_addr = 0;
-#if defined(__x86_64__)
-    {
-        uint64_t cpu_number_addr = kallsyms_lookup("cpu_number");
-        this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
-        if (cpu_number_addr != 0 && this_cpu_off_addr != 0) {
-            out.helpers.push_back(format_name_hex(kX86CpuNumberHelperKey, cpu_number_addr));
-            out.helpers.push_back(format_name_hex(kX86ThisCpuOffHelperKey, this_cpu_off_addr));
-        }
-        out.helpers.push_back(format_name_hex(
-            kX86BpfMapMaxEntriesOffsetKey, K_BPF_MAP_MAX_ENTRIES_OFFSET));
-        out.helpers.push_back(format_name_hex(
-            kX86BpfArrayPtrsOffsetKey, K_BPF_ARRAY_PTRS_OFFSET));
-        out.helpers.push_back(format_name_hex(
-            kX86BpfProgBpfFuncOffsetKey, K_BPF_PROG_BPF_FUNC_OFFSET));
-        out.helpers.push_back(format_name_hex(kX86TailCallOffsetKey, 12));
-    }
-#elif defined(__aarch64__)
-    {
-        uint32_t cpu_offset = K_THREAD_INFO_CPU_OFFSET;
-        out.helpers.push_back(format_name_hex(kArm64ThreadInfoCpuOffsetHelperKey, cpu_offset));
-    }
-#endif
-
-    for (const auto &helper : kSupportedHelpers) {
-        uint64_t addr = kallsyms_lookup(helper.symbol);
-        if (addr != 0) {
-            out.helpers.push_back(format_name_hex(helper.symbol, addr));
-        }
-    }
-    out.helpers.insert(out.helpers.end(),
-                       companion.helper_args.begin(),
-                       companion.helper_args.end());
-    static constexpr int kContextualHelperIds[] = {
-        BPF_FUNC_get_prandom_u32,
-        BPF_FUNC_fib_lookup,
-        BPF_FUNC_redirect_map,
-        BPF_FUNC_skc_lookup_tcp,
-        BPF_FUNC_sk_lookup_udp,
-    };
-    for (int helper_id : kContextualHelperIds) {
-        add_contextual_helper_alias_if_available(out.helpers, helper_id,
-                                                 companion.prog_type);
-    }
-    for (const char *symbol : kRuntimeCallSymbols) {
-        uint64_t addr = kallsyms_lookup(symbol);
-        if (addr != 0) {
-            out.helpers.push_back(format_name_hex(symbol, addr));
-        }
-    }
-
-    std::vector<std::pair<std::string, uint64_t>> maps(
-        map_addrs.begin(), map_addrs.end());
-    std::sort(maps.begin(), maps.end(),
-              [](const auto &a, const auto &b) { return a.first < b.first; });
-    for (const auto &kv : maps) {
-        out.maps.push_back(format_name_hex(kv.first, 0));
-    }
-
-    for (size_t i = 0; i < companion.lookup_sites.size(); i++) {
-        out.lookup_sites.push_back(format_lookup_site_arg(i, companion.lookup_sites[i]));
-    }
-    std::vector<std::pair<std::string, std::string>> native_map_symbols(
-        companion.native_map_symbols.begin(), companion.native_map_symbols.end());
-    std::sort(native_map_symbols.begin(), native_map_symbols.end(),
-              [](const auto &a, const auto &b) { return a.first < b.first; });
-    for (const auto &kv : native_map_symbols) {
-        const MapMeta *meta = find_map_meta_by_loaded_name(companion, kv.second);
-        if (!meta) {
-            fail("native map symbol " + kv.first +
-                 " references unknown loaded map " + kv.second);
-        }
-        CompanionLoad::LookupSite site =
-            lookup_site_for_map_meta(*meta, array_offsets, htab_offsets, this_cpu_off_addr);
-        site.map_name = kv.first;
-        out.lookup_maps.push_back(format_lookup_map_arg(kv.first, site));
-    }
-    for (size_t i = 0; i < companion.update_sites.size(); i++) {
-        out.update_sites.push_back(format_update_site_arg(i, companion.update_sites[i]));
-    }
-    return out;
-}
+#include "native_loader_link_schema.hpp"
 
 std::string native_link_cache_key(const std::filesystem::path &native_elf,
                                   const std::filesystem::path &bpf_obj,
@@ -4298,18 +3951,24 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
 
         const auto prog_load_start = std::chrono::steady_clock::now();
         NativeStubBtfIds stub_btf = find_native_stub_btf_ids();
-        int mod_btf_fd = open_module_btf_fd_by_id(stub_btf.module_btf_id);
+        ScopedFd mod_btf_fd(open_module_btf_fd_by_id(stub_btf.module_btf_id));
         out.prog_fd = load_stub_prog(
             stub_btf.kfunc_btf_id,
-            mod_btf_fd,
+            mod_btf_fd.get(),
             static_cast<uint32_t>(chunks.size()),
             linked.callee_saved_mask,
             prog_type,
             attrs,
             tail_call_reachable,
             map_ref_fds);
+        try {
+            verify_loaded_prog_uses_maps(out.prog_fd, linked.relocated_map_ids);
+        } catch (...) {
+            close(out.prog_fd);
+            out.prog_fd = -1;
+            throw;
+        }
         const auto prog_load_end = std::chrono::steady_clock::now();
-        close(mod_btf_fd);
         out.prog_load_ns = elapsed_ns(prog_load_start, prog_load_end);
     }
     out.upload_ns = elapsed_ns(upload_start, upload_end);
@@ -4336,6 +3995,16 @@ std::vector<int> reopen_relocated_map_fds(const std::vector<uint32_t> &map_ids)
         fds.push_back(fd);
     }
     return fds;
+}
+
+void close_fd_vector(std::vector<int> &fds)
+{
+    for (int fd : fds) {
+        if (fd >= 0) {
+            close(fd);
+        }
+    }
+    fds.clear();
 }
 
 
@@ -4372,15 +4041,21 @@ LoadedProgram load_from_companion_object(const LoadOptions &options)
 
     std::vector<int> map_ref_fds =
         reopen_relocated_map_fds(linked.relocated_map_ids);
-    LoadedStub loaded_stub = upload_and_load_stub(
-        linked,
-        options.prog_type,
-        StubLoadAttrs{},
-        companion.has_tail_call,
-        map_ref_fds);
+    LoadedStub loaded_stub{};
+    try {
+        loaded_stub = upload_and_load_stub(
+            linked,
+            options.prog_type,
+            StubLoadAttrs{},
+            companion.has_tail_call,
+            map_ref_fds);
+        close_fd_vector(map_ref_fds);
+    } catch (...) {
+        close_fd_vector(map_ref_fds);
+        throw;
+    }
 
     out.prog_fd = loaded_stub.prog_fd;
-    out.retained_map_fds = std::move(map_ref_fds);
     out.companion_object = companion.obj;
     out.callee_saved_mask = linked.callee_saved_mask;
     out.bpf_bytecode_bytes = companion.oracle_xlated.size();
@@ -4451,15 +4126,21 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
 
     std::vector<int> map_ref_fds =
         reopen_relocated_map_fds(linked.relocated_map_ids);
-    LoadedStub loaded_stub = upload_and_load_stub(
-        linked,
-        prog_info.type,
-        stub_attrs,
-        companion.has_tail_call,
-        map_ref_fds);
+    LoadedStub loaded_stub{};
+    try {
+        loaded_stub = upload_and_load_stub(
+            linked,
+            prog_info.type,
+            stub_attrs,
+            companion.has_tail_call,
+            map_ref_fds);
+        close_fd_vector(map_ref_fds);
+    } catch (...) {
+        close_fd_vector(map_ref_fds);
+        throw;
+    }
 
     out.prog_fd = loaded_stub.prog_fd;
-    out.retained_map_fds = std::move(map_ref_fds);
     out.companion_object = nullptr;
     out.callee_saved_mask = linked.callee_saved_mask;
     out.bpf_bytecode_bytes = companion.oracle_xlated.size();
@@ -4487,12 +4168,6 @@ void close_loaded_program(LoadedProgram *program)
         close(program->prog_fd);
         program->prog_fd = -1;
     }
-    for (int fd : program->retained_map_fds) {
-        if (fd >= 0) {
-            close(fd);
-        }
-    }
-    program->retained_map_fds.clear();
     if (program->companion_object) {
         bpf_object__close(program->companion_object);
         program->companion_object = nullptr;
@@ -4513,24 +4188,6 @@ void transfer_loaded_program_to_c_result(native_loader::LoadedProgram &loaded,
 
     out->prog_fd = loaded.prog_fd;
     loaded.prog_fd = -1;
-
-    out->retained_map_fds = nullptr;
-    out->retained_map_fds_n = 0;
-    if (loaded.retained_map_fds.empty()) {
-        return;
-    }
-
-    const size_t bytes = loaded.retained_map_fds.size() * sizeof(int);
-    int *fds = static_cast<int *>(std::malloc(bytes));
-    if (!fds) {
-        native_loader::close_loaded_program(&loaded);
-        fail("native_loader: malloc retained map fd result");
-    }
-    std::memcpy(fds, loaded.retained_map_fds.data(), bytes);
-    out->retained_map_fds = fds;
-    out->retained_map_fds_n =
-        static_cast<uint32_t>(loaded.retained_map_fds.size());
-    loaded.retained_map_fds.clear();
 }
 
 } // namespace
@@ -4549,8 +4206,6 @@ extern "C" int native_loader_load_from_fd_with_source_path_and_attach(
 {
     if (out) {
         out->prog_fd = -1;
-        out->retained_map_fds = nullptr;
-        out->retained_map_fds_n = 0;
         out->error[0] = '\0';
     }
     if (original_prog_fd < 0 || !native_object_path || !native_object_path[0] ||

@@ -216,10 +216,6 @@ static int shim_close_observed_fd(int fd) {
     ensure_syms_resolved();
     if (fd >= 0) {
         pthread_mutex_lock(&state_mutex);
-        if (native_loader_map_ref_fd_is_retained_locked(fd)) {
-            pthread_mutex_unlock(&state_mutex);
-            return 0;
-        }
         prog_forget_loader_fd(fd);
         map_remove(fd);
         link_remove(fd);
@@ -257,48 +253,12 @@ static long shim_close_range(unsigned int first, unsigned int last,
         return ret;
     }
 
-    pthread_mutex_lock(&state_mutex);
-    int protects_native_maps =
-        native_loader_map_ref_has_fd_in_range_locked(first, last);
-    pthread_mutex_unlock(&state_mutex);
-    if (!protects_native_maps) {
-        in_shim = 1;
-        long ret = real_syscall(SYS_close_range, first, last, flags);
-        int saved_errno = errno;
-        in_shim = 0;
-        errno = saved_errno;
-        return ret;
-    }
-
-    if (flags & CLOSE_RANGE_UNSHARE) {
-        in_shim = 1;
-        long ret = real_syscall(SYS_unshare, CLONE_FILES);
-        int saved_errno = errno;
-        in_shim = 0;
-        if (ret < 0) {
-            errno = saved_errno;
-            return -1;
-        }
-    }
-
-    DIR *fd_dir = opendir("/proc/self/fd");
-    if (!fd_dir)
-        return -1;
-    int fd_dir_fd = dirfd(fd_dir);
-    struct dirent *de;
-    while ((de = readdir(fd_dir)) != NULL) {
-        if (de->d_name[0] < '0' || de->d_name[0] > '9')
-            continue;
-        int fd = atoi(de->d_name);
-        if (fd < 0 || fd == fd_dir_fd)
-            continue;
-        unsigned int ufd = (unsigned int)fd;
-        if (ufd < first || ufd > last)
-            continue;
-        (void)shim_close_observed_fd(fd);
-    }
-    closedir(fd_dir);
-    return 0;
+    in_shim = 1;
+    long ret = real_syscall(SYS_close_range, first, last, flags);
+    int saved_errno = errno;
+    in_shim = 0;
+    errno = saved_errno;
+    return ret;
 }
 
 static void log_prog_array_update(const union bpf_attr *attr, long ret,

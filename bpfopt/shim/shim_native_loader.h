@@ -3,8 +3,6 @@
 
 struct native_loader_c_result {
     int prog_fd;
-    int *retained_map_fds;
-    uint32_t retained_map_fds_n;
     char error[4096];
 };
 
@@ -681,274 +679,6 @@ static void shim_native_loader_log_jit_dump(const char *label, int fd) {
     free(insns);
 }
 
-static void shim_native_loader_close_retained_maps(int *fds, uint32_t n) {
-    if (!fds)
-        return;
-    for (uint32_t i = 0; i < n; i++)
-        if (fds[i] >= 0)
-            real_close(fds[i]);
-    free(fds);
-}
-
-static int shim_native_loader_append_owned_map_fds(int **fds,
-                                                   uint32_t *n,
-                                                   int *extra,
-                                                   uint32_t extra_n) {
-    if (!extra || extra_n == 0) {
-        free(extra);
-        return 0;
-    }
-    if (extra_n > UINT32_MAX - *n) {
-        shim_native_loader_close_retained_maps(extra, extra_n);
-        errno = EOVERFLOW;
-        return -1;
-    }
-    int *merged = (int *)realloc(*fds, (size_t)(*n + extra_n) * sizeof(**fds));
-    if (!merged) {
-        int saved = errno ? errno : ENOMEM;
-        shim_native_loader_close_retained_maps(extra, extra_n);
-        errno = saved;
-        return -1;
-    }
-    memcpy(merged + *n, extra, (size_t)extra_n * sizeof(*extra));
-    *fds = merged;
-    *n += extra_n;
-    free(extra);
-    return 0;
-}
-
-static int shim_native_loader_retained_has_kid(const uint32_t *kids,
-                                               uint32_t n,
-                                               uint32_t kid) {
-    if (!kid)
-        return 0;
-    for (uint32_t i = 0; i < n; i++)
-        if (kids[i] == kid)
-            return 1;
-    return 0;
-}
-
-static int shim_native_loader_retained_push(int **fds,
-                                            uint32_t **kids,
-                                            uint32_t *n,
-                                            uint32_t *cap,
-                                            int fd,
-                                            uint32_t kid) {
-    if (shim_native_loader_retained_has_kid(*kids, *n, kid)) {
-        real_close(fd);
-        return 0;
-    }
-    if (*n == *cap) {
-        uint32_t new_cap = *cap ? *cap * 2 : 16;
-        int *new_fds = (int *)realloc(*fds, new_cap * sizeof(**fds));
-        if (!new_fds) {
-            int saved = errno ? errno : ENOMEM;
-            real_close(fd);
-            errno = saved;
-            return -1;
-        }
-        *fds = new_fds;
-        uint32_t *new_kids =
-            (uint32_t *)realloc(*kids, new_cap * sizeof(**kids));
-        if (!new_kids) {
-            int saved = errno ? errno : ENOMEM;
-            real_close(fd);
-            errno = saved;
-            return -1;
-        }
-        *kids = new_kids;
-        *cap = new_cap;
-    }
-    (*fds)[*n] = fd;
-    (*kids)[*n] = kid;
-    (*n)++;
-    return 0;
-}
-
-static int shim_native_loader_map_info(int fd, struct bpf_map_info *info) {
-    memset(info, 0, sizeof(*info));
-    union bpf_attr attr;
-    memset(&attr, 0, sizeof(attr));
-    attr.info.bpf_fd = (uint32_t)fd;
-    attr.info.info_len = sizeof(*info);
-    attr.info.info = (uintptr_t)info;
-    return real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) < 0
-               ? -1
-               : 0;
-}
-
-static int shim_native_loader_retain_map_id(int **fds,
-                                            uint32_t **kids,
-                                            uint32_t *n,
-                                            uint32_t *cap,
-                                            uint32_t kid) {
-    if (shim_native_loader_retained_has_kid(*kids, *n, kid))
-        return 0;
-    union bpf_attr attr;
-    memset(&attr, 0, sizeof(attr));
-    attr.map_id = kid;
-    long map_fd = real_syscall(SYS_bpf, BPF_MAP_GET_FD_BY_ID,
-                               &attr, sizeof(attr));
-    if (map_fd < 0)
-        return -1;
-    fcntl((int)map_fd, F_SETFD, FD_CLOEXEC);
-    if (shim_native_loader_retained_push(fds, kids, n, cap,
-                                         (int)map_fd, kid) != 0)
-        return -1;
-    return 0;
-}
-
-static int shim_native_loader_retain_map_fd(int **fds,
-                                            uint32_t **kids,
-                                            uint32_t *n,
-                                            uint32_t *cap,
-                                            int map_fd) {
-    struct bpf_map_info info;
-    if (shim_native_loader_map_info(map_fd, &info) != 0)
-        return 0;
-    if (shim_native_loader_retained_has_kid(*kids, *n, info.id))
-        return 0;
-    int dup_fd = fcntl(map_fd, F_DUPFD_CLOEXEC, 3);
-    if (dup_fd < 0) {
-        if (errno == EBADF || errno == ENOENT)
-            return 0;
-        return -1;
-    }
-    struct bpf_map_info dup_info;
-    if (shim_native_loader_map_info(dup_fd, &dup_info) != 0 ||
-        dup_info.id != info.id) {
-        real_close(dup_fd);
-        return 0;
-    }
-    if (shim_native_loader_retained_push(fds, kids, n, cap,
-                                         dup_fd, info.id) != 0)
-        return -1;
-    return 0;
-}
-
-static int shim_native_loader_capture_source_map_fds(const char *source_path,
-                                                     int **fds,
-                                                     uint32_t **kids,
-                                                     uint32_t *n,
-                                                     uint32_t *cap) {
-    int fd = open(source_path, O_RDONLY);
-    if (fd < 0)
-        return -1;
-    struct stat st;
-    if (fstat(fd, &st) != 0 || st.st_size < 0 ||
-        ((size_t)st.st_size % sizeof(struct bpf_insn)) != 0) {
-        int saved = errno ? errno : EINVAL;
-        close(fd);
-        errno = saved;
-        return -1;
-    }
-    size_t bytes = (size_t)st.st_size;
-    struct bpf_insn *insns = (struct bpf_insn *)malloc(bytes);
-    if (!insns) {
-        close(fd);
-        errno = ENOMEM;
-        return -1;
-    }
-    size_t off = 0;
-    while (off < bytes) {
-        ssize_t r = read(fd, ((char *)insns) + off, bytes - off);
-        if (r < 0) {
-            if (errno == EINTR)
-                continue;
-            int saved = errno;
-            free(insns);
-            close(fd);
-            errno = saved;
-            return -1;
-        }
-        if (r == 0) {
-            free(insns);
-            close(fd);
-            errno = EIO;
-            return -1;
-        }
-        off += (size_t)r;
-    }
-    close(fd);
-
-    uint32_t insn_cnt = (uint32_t)(bytes / sizeof(*insns));
-    for (uint32_t i = 0; i < insn_cnt; i++) {
-        const struct bpf_insn *insn = &insns[i];
-        if (insn->code != (BPF_LD | BPF_DW | BPF_IMM))
-            continue;
-        if (insn->src_reg == BPF_PSEUDO_MAP_FD ||
-            insn->src_reg == BPF_PSEUDO_MAP_VALUE) {
-            if (insn->imm >= 0 &&
-                shim_native_loader_retain_map_fd(fds, kids, n, cap,
-                                                 insn->imm) != 0) {
-                int saved = errno;
-                free(insns);
-                errno = saved;
-                return -1;
-            }
-        }
-        i++;
-    }
-    free(insns);
-    return 0;
-}
-
-static int shim_native_loader_capture_referenced_map_fds(
-    int original_fd,
-    const char *source_path,
-    int **fds_out,
-    uint32_t *n_out) {
-    *fds_out = NULL;
-    *n_out = 0;
-
-    int *fds = NULL;
-    uint32_t *kids = NULL;
-    uint32_t n = 0, cap = 0;
-
-    uint32_t map_ids[256] = {0};
-    struct bpf_prog_info info;
-    memset(&info, 0, sizeof(info));
-    info.nr_map_ids = (uint32_t)(sizeof(map_ids) / sizeof(map_ids[0]));
-    info.map_ids = (uintptr_t)map_ids;
-    union bpf_attr attr;
-    memset(&attr, 0, sizeof(attr));
-    attr.info.bpf_fd = (uint32_t)original_fd;
-    attr.info.info_len = sizeof(info);
-    attr.info.info = (uintptr_t)&info;
-    if (real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD,
-                     &attr, sizeof(attr)) < 0)
-        return -1;
-    if (info.nr_map_ids > sizeof(map_ids) / sizeof(map_ids[0])) {
-        errno = E2BIG;
-        return -1;
-    }
-    for (uint32_t i = 0; i < info.nr_map_ids; i++) {
-        if (shim_native_loader_retain_map_id(&fds, &kids, &n, &cap,
-                                             map_ids[i]) != 0) {
-            int saved = errno;
-            shim_native_loader_close_retained_maps(fds, n);
-            free(kids);
-            errno = saved;
-            return -1;
-        }
-    }
-
-    if (source_path && source_path[0] &&
-        shim_native_loader_capture_source_map_fds(source_path, &fds, &kids,
-                                                  &n, &cap) != 0) {
-        int saved = errno;
-        shim_native_loader_close_retained_maps(fds, n);
-        free(kids);
-        errno = saved;
-        return -1;
-    }
-
-    free(kids);
-    *fds_out = fds;
-    *n_out = n;
-    return 0;
-}
-
 static long shim_maybe_replace_with_native_fd(long original_fd,
                                               struct prog_entry *prog) {
     const char *prog_name = prog ? prog->name : "";
@@ -990,17 +720,6 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
         return -1;
     }
 
-    int *retained_map_fds = NULL;
-    uint32_t retained_map_fds_n = 0;
-    if (shim_native_loader_capture_referenced_map_fds(
-            (int)original_fd, source_path, &retained_map_fds,
-            &retained_map_fds_n) != 0) {
-        log_line("native-loader failed to retain referenced map fds prog=%s errno=%d",
-                 prog_name ? prog_name : "", errno);
-        errno = EINVAL;
-        return -1;
-    }
-
     char native_object[SHIM_NATIVE_LOADER_PATH_MAX];
     char native_symbol[SHIM_NATIVE_LOADER_SYMBOL_MAX];
     if (shim_native_loader_resolve_object(prog, source_path, native_object,
@@ -1009,8 +728,6 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
                                           sizeof(native_symbol)) != 0) {
         log_line("native-loader enabled but no manifest object for prog=%s",
                  prog_name ? prog_name : "");
-        shim_native_loader_close_retained_maps(retained_map_fds,
-                                               retained_map_fds_n);
         errno = ENOENT;
         return -1;
     }
@@ -1021,8 +738,6 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     void *handle = dlopen(so_path, RTLD_NOW | RTLD_LOCAL);
     if (!handle) {
         log_line("native-loader dlopen %s failed: %s", so_path, dlerror());
-        shim_native_loader_close_retained_maps(retained_map_fds,
-                                               retained_map_fds_n);
         errno = ENOENT;
         return -1;
     }
@@ -1035,8 +750,6 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     if (sym_err || !load) {
         log_line("native-loader dlsym failed: %s", sym_err ? sym_err : "null");
         dlclose(handle);
-        shim_native_loader_close_retained_maps(retained_map_fds,
-                                               retained_map_fds_n);
         errno = ENOENT;
         return -1;
     }
@@ -1053,10 +766,6 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
                  prog_name ? prog_name : "", native_symbol,
                  native_object, source_path, result.error);
         dlclose(handle);
-        shim_native_loader_close_retained_maps(result.retained_map_fds,
-                                               result.retained_map_fds_n);
-        shim_native_loader_close_retained_maps(retained_map_fds,
-                                               retained_map_fds_n);
         errno = EINVAL;
         return -1;
     }
@@ -1064,58 +773,28 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
         log_line("native-loader returned invalid fd for prog=%s",
                  prog_name ? prog_name : "");
         dlclose(handle);
-        shim_native_loader_close_retained_maps(result.retained_map_fds,
-                                               result.retained_map_fds_n);
-        shim_native_loader_close_retained_maps(retained_map_fds,
-                                               retained_map_fds_n);
         errno = EINVAL;
         return -1;
     }
-    if (shim_native_loader_append_owned_map_fds(
-            &retained_map_fds, &retained_map_fds_n,
-            result.retained_map_fds, result.retained_map_fds_n) != 0) {
-        int saved = errno ? errno : ENOMEM;
-        real_close(result.prog_fd);
-        dlclose(handle);
-        shim_native_loader_close_retained_maps(retained_map_fds,
-                                               retained_map_fds_n);
-        errno = saved;
-        return -1;
-    }
-    result.retained_map_fds = NULL;
-    result.retained_map_fds_n = 0;
 
     shim_native_loader_log_jit_info("original", (int)original_fd);
     shim_native_loader_log_jit_info("native", result.prog_fd);
     shim_native_loader_log_jit_dump("original", (int)original_fd);
     shim_native_loader_log_jit_dump("native", result.prog_fd);
-    uint32_t *retained_map_kids = NULL;
-    uint32_t retained_map_kids_n = 0;
-    if (native_loader_map_refs_take_owned_fds(retained_map_fds,
-                                              retained_map_fds_n,
-                                              &retained_map_kids,
-                                              &retained_map_kids_n) != 0) {
-        int saved = errno ? errno : EINVAL;
+
+    if (real_close((int)original_fd) != 0) {
+        int saved = errno ? errno : EIO;
+        log_line("native-loader failed to close replaced original fd=%ld errno=%d",
+                 original_fd, errno);
         real_close(result.prog_fd);
         dlclose(handle);
         errno = saved;
         return -1;
     }
-    retained_map_fds = NULL;
-    retained_map_fds_n = 0;
-
-    prog->native_loader_original_fd = -1;
-    if (real_close((int)original_fd) != 0) {
-        log_line("native-loader failed to close replaced original fd=%ld errno=%d",
-                 original_fd, errno);
-        prog->native_loader_original_fd = (int)original_fd;
-    }
-    prog->native_loader_map_kids = retained_map_kids;
-    prog->native_loader_map_kids_n = retained_map_kids_n;
     log_line("native-loader replaced prog=%s original_fd=%ld native_fd=%d "
-             "symbol=%s object=%s source=%s retained_map_refs=%u",
+             "symbol=%s object=%s source=%s",
              prog_name ? prog_name : "", original_fd, result.prog_fd,
-             native_symbol, native_object, source_path, retained_map_kids_n);
+             native_symbol, native_object, source_path);
     dlclose(handle);
     return result.prog_fd;
 }
