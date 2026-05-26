@@ -149,6 +149,12 @@ NativeLinkArgs build_native_link_args(
     out.helpers.push_back(format_name_hex(
         kX86BpfProgBpfFuncOffsetKey, K_BPF_PROG_BPF_FUNC_OFFSET));
     out.helpers.push_back(format_name_hex(kX86TailCallOffsetKey, 12));
+    if (plan.x86_cpu_number_addr != 0 && plan.x86_this_cpu_off != 0) {
+        out.helpers.push_back(format_name_hex(
+            kX86CpuNumberHelperKey, plan.x86_cpu_number_addr));
+        out.helpers.push_back(format_name_hex(
+            kX86ThisCpuOffHelperKey, plan.x86_this_cpu_off));
+    }
 #elif defined(__aarch64__)
     {
         uint32_t cpu_offset = K_THREAD_INFO_CPU_OFFSET;

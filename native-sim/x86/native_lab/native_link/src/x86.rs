@@ -1377,20 +1377,28 @@ pub(super) fn rewrite_x86(
                         continue;
                     }
                     if name == "bpf_get_smp_processor_id" {
-                        if let Some(inline) = build_x86_get_smp_processor_id_inline(helper_addrs)? {
-                            for ib in inline {
-                                push_x86_synthetic(
-                                    &mut local,
-                                    &mut kinds,
-                                    &mut insn_local_ip,
-                                    &mut next_synthetic_ip,
-                                    ib,
-                                )?;
-                            }
-                            resolved_helper_call_sites.insert(site_key);
-                            clear_x86_call_clobbered_registers(&mut map_symbol_registers);
-                            continue;
+                        let inline =
+                            build_x86_get_smp_processor_id_inline(helper_addrs)?.ok_or_else(
+                                || {
+                                    anyhow!(
+                                        "x86 bpf_get_smp_processor_id requires JIT-decoded {} and {}; refusing to consume the generic helper oracle",
+                                        X86_CPU_NUMBER_HELPER_KEY,
+                                        X86_THIS_CPU_OFF_HELPER_KEY
+                                    )
+                                },
+                            )?;
+                        for ib in inline {
+                            push_x86_synthetic(
+                                &mut local,
+                                &mut kinds,
+                                &mut insn_local_ip,
+                                &mut next_synthetic_ip,
+                                ib,
+                            )?;
                         }
+                        resolved_helper_call_sites.insert(site_key);
+                        clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                        continue;
                     }
 
                     if name == "bpf_map_lookup_elem" {

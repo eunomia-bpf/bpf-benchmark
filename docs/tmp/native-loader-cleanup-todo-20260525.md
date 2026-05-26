@@ -14,7 +14,7 @@ fallback lifetime handling.
   no-op because both guard functions return false.
 - [x] Split `native_loader.cpp` by moving pure logic into internal header-only
   modules. Keep syscall, libbpf, debugfs, and C ABI code in `.cpp` files.
-- [ ] Move source bytecode parsing/canonicalization responsibility out of the
+- [x] Move source bytecode parsing/canonicalization responsibility out of the
   shim and into native-loader.
 - [x] Remove `retained_map_fds` and the shim fd-keeper path after native-loader
   verifies that loaded native stubs retain all relocated maps through kernel
@@ -25,8 +25,9 @@ fallback lifetime handling.
 - [x] Make corpus helper target resolution use the original loaded program's
   JIT/xlated oracle only. Do not resolve BPF helper/kernel function targets from
   `/proc/kallsyms` in corpus mode.
-- [ ] Keep micro companion-object loading valid, because micro is an experiment
-  frontend, not a corpus app loader replacement.
+- [x] Keep micro companion-object loading valid, because micro is an experiment
+  frontend, not a corpus app loader replacement. The companion `.bpf.o` load now
+  lives in the micro runner frontend, not in native-loader.
 
 ## Verification gates
 
@@ -49,12 +50,16 @@ fallback lifetime handling.
 - If native stub map retention does not show every relocated map id in
   `prog_info.map_ids`, native loading should fail-fast instead of asking the
   shim to keep extra fds alive.
-- Current implementation note: corpus `load_from_fd()` now sets
-  `use_helper_oracle=true` and `allow_kernel_symbol_lookup=false`. In this mode
-  source map helper sites stay as call sites with target address `0`; native-link
-  must resolve them from the original program JIT/xlated oracle. Map-specific
-  hash/array/percpu lowering is still available only on the micro companion path
-  until it can be derived without `/proc/kallsyms`.
+- Current implementation note: native-loader has a single core path,
+  `load_from_program_fd(original_prog_fd, source_insns, native_object_path)`.
+  The micro runner frontend owns `.bpf.o` companion loading and passes the
+  loaded program fd plus libbpf source bytecode. The corpus shim owns
+  `BPF_PROG_LOAD` interception and passes the real app program fd plus captured
+  source bytecode. After that boundary, both flows share the same native-loader
+  logic.
+- Kernel symbol lookup is removed from this path. Helper/map targets come from
+  the original loaded program's JIT/xlated oracle and captured source bytecode;
+  missing oracle data is a native-load failure, not a `/proc/kallsyms` fallback.
 - The old shim fd-keeper child and retained-map C ABI are removed. Loader now
   reopens relocated map fds only for stub verification/load, validates
   `prog_info.map_ids` on the native program, and closes the temporary fds before
@@ -67,3 +72,16 @@ fallback lifetime handling.
   passed all 13 stage2 benchmarks. Result path:
   `micro/results/x86_kvm_micro_20260526_040828_768796`. Kernel and
   `native_kernel` returned matching values for every benchmark.
+- 2026-05-26 cleanup issue: removing kallsyms exposed an x86 helper-oracle skew
+  in `combined_helper_map`. `bpf_get_smp_processor_id` needed special
+  JIT-decoded `cpu_number`/`this_cpu_off` inputs; otherwise subsequent helper
+  call sites consumed the wrong oracle target. The fix is fail-fast when those
+  values cannot be decoded. Targeted verification:
+  `SAMPLES=1 WARMUPS=0 INNER_REPEAT=1000 SUITE=micro/config/micro_stage2.yaml RUNTIMES="kernel native_kernel" BENCH="combined_helper_map" make micro`
+  passed with result path
+  `micro/results/x86_kvm_micro_20260526_045907_110344`.
+- 2026-05-26 full micro re-run after the single-path/no-kallsyms cleanup:
+  `SAMPLES=1 WARMUPS=0 INNER_REPEAT=1000 SUITE=micro/config/micro_stage2.yaml RUNTIMES="kernel native_kernel" make micro`
+  passed all 13 stage2 benchmarks. Result path:
+  `micro/results/x86_kvm_micro_20260526_050316_297141`. Kernel and
+  `native_kernel` returned matching `result`/`retval` for every benchmark.

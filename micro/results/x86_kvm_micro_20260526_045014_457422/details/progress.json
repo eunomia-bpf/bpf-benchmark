@@ -1,0 +1,62 @@
+{
+  "completed_benchmarks": 9,
+  "current_benchmark": "combined_helper_map",
+  "current_benchmark_index": 10,
+  "current_benchmark_record": {
+    "expected_result": 0,
+    "expected_retval": 2,
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+    "io_mode": "packet",
+    "name": "combined_helper_map",
+    "runs": [
+      {
+        "inner_repeat": 1000,
+        "runtime": "kernel",
+        "samples": [
+          {
+            "code_size": {
+              "bpf_bytecode_bytes": 472,
+              "native_code_bytes": 270
+            },
+            "compile_ns": 446232,
+            "exec_cycles": 147031,
+            "exec_ns": 24,
+            "jited_prog_len": 270,
+            "perf_counters": {},
+            "perf_counters_meta": {
+              "collected": false,
+              "error": "",
+              "include_kernel": true,
+              "requested": false,
+              "scope": "full_repeat_raw"
+            },
+            "phases_ns": {
+              "memory_prepare_ns": 26599,
+              "object_load_ns": 306661,
+              "object_open_ns": 139571,
+              "packet_prepare_ns": 681,
+              "prog_run_wall_ns": 39885451,
+              "result_extract_ns": 305
+            },
+            "result": 0,
+            "retval": 2,
+            "sample_index": 0,
+            "timing_source": "ktime",
+            "timing_source_wall": "rdtsc",
+            "tsc_freq_hz": 3686109803,
+            "wall_exec_ns": 39888,
+            "xlated_prog_len": 472
+          }
+        ]
+      }
+    ],
+    "tags": [
+      "stage2",
+      "maps",
+      "percpu",
+      "helpers"
+    ]
+  },
+  "status": "running",
+  "total_benchmarks": 13
+}

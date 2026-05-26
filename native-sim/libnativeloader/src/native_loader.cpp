@@ -365,6 +365,8 @@ constexpr const char *kX86BpfArrayPtrsOffsetKey = "__native_x86_bpf_array_ptrs_o
 constexpr const char *kX86BpfProgBpfFuncOffsetKey =
     "__native_x86_bpf_prog_bpf_func_offset";
 constexpr const char *kX86TailCallOffsetKey = "__native_x86_tail_call_offset";
+constexpr const char *kX86CpuNumberHelperKey = "__native_x86_cpu_number";
+constexpr const char *kX86ThisCpuOffHelperKey = "__native_x86_this_cpu_off";
 #if defined(__aarch64__)
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
@@ -386,6 +388,12 @@ constexpr int kLibbpfCoreBadRelocPoison = 195896080; // 0xbad2310
 #endif
 #ifndef K_BPF_ARRAY_PTRS_OFFSET
 #define K_BPF_ARRAY_PTRS_OFFSET K_BPF_ARRAY_VALUE_OFFSET
+#endif
+#ifndef K_HTAB_ELEM_KEY_OFFSET
+#define K_HTAB_ELEM_KEY_OFFSET 48u
+#endif
+#ifndef K_HTAB_ELEM_LRU_REF_OFFSET
+#define K_HTAB_ELEM_LRU_REF_OFFSET 35u
 #endif
 #ifndef K_BPF_PROG_BPF_FUNC_OFFSET
 #define K_BPF_PROG_BPF_FUNC_OFFSET 72u
@@ -1328,6 +1336,8 @@ const char *helper_symbol_for_id(int helper_id);
 struct BpfArrayOffsets {
     uint32_t value;
     uint32_t ptrs;
+    uint32_t htab_key;
+    uint32_t htab_lru_ref;
     uint64_t this_cpu_off;
 };
 
@@ -2240,6 +2250,8 @@ struct ProgramLoadPlan {
     uint64_t map_ptr_extract_ns = 0;
     uint64_t lookup_spec_ns = 0;
     uint64_t oracle_jit_base = 0;
+    uint64_t x86_cpu_number_addr = 0;
+    uint64_t x86_this_cpu_off = 0;
     std::vector<uint8_t> oracle_jited;
     std::vector<uint8_t> oracle_xlated;
     bool has_tail_call = false;
@@ -2699,6 +2711,47 @@ uint64_t decode_x86_this_cpu_off_from_jit(const std::vector<uint8_t> &jited)
 #endif
 }
 
+uint64_t decode_x86_cpu_number_from_jit(const std::vector<uint8_t> &jited)
+{
+#if defined(__x86_64__)
+    constexpr uint8_t kMovRaxImm32[] = {0x48, 0xc7, 0xc0};
+    constexpr uint8_t kAddGsThisCpuOff[] = {0x65, 0x48, 0x03, 0x04, 0x25};
+    constexpr uint8_t kLoadCpuNumber[] = {0x8b, 0x40, 0x00};
+    constexpr size_t kAddOffset = sizeof(kMovRaxImm32) + sizeof(uint32_t);
+    constexpr size_t kLoadOffset = kAddOffset + sizeof(kAddGsThisCpuOff) + sizeof(uint32_t);
+    constexpr size_t kPatternSize = kLoadOffset + sizeof(kLoadCpuNumber);
+    uint64_t found = 0;
+    bool have = false;
+    for (size_t i = 0; i + kPatternSize <= jited.size(); i++) {
+        if (std::memcmp(jited.data() + i, kMovRaxImm32, sizeof(kMovRaxImm32)) != 0 ||
+            std::memcmp(jited.data() + i + kAddOffset,
+                        kAddGsThisCpuOff,
+                        sizeof(kAddGsThisCpuOff)) != 0 ||
+            std::memcmp(jited.data() + i + kLoadOffset,
+                        kLoadCpuNumber,
+                        sizeof(kLoadCpuNumber)) != 0) {
+            continue;
+        }
+        uint32_t imm = 0;
+        std::memcpy(&imm, jited.data() + i + sizeof(kMovRaxImm32), sizeof(imm));
+        const uint64_t value =
+            static_cast<uint64_t>(static_cast<int64_t>(static_cast<int32_t>(imm)));
+        if (!have) {
+            found = value;
+            have = true;
+            continue;
+        }
+        if (found != value) {
+            fail("native_kernel: original JIT contains multiple cpu_number addresses");
+        }
+    }
+    return have ? found : 0;
+#else
+    (void)jited;
+    return 0;
+#endif
+}
+
 NativeMapShape map_shape_from_meta(const MapMeta &meta)
 {
     return NativeMapShape{
@@ -2761,6 +2814,28 @@ bool configure_lookup_site_for_shape(ProgramLoadPlan::LookupSite &site,
         site.index_mask = roundup_pow2_mask(shape.max_entries);
         site.value_offset = array_offsets.ptrs;
         site.percpu_base_addr = array_offsets.this_cpu_off;
+        return true;
+    }
+    if (shape.type == BPF_MAP_TYPE_HASH ||
+        shape.type == BPF_MAP_TYPE_LRU_HASH ||
+        shape.type == BPF_MAP_TYPE_PERCPU_HASH ||
+        shape.type == BPF_MAP_TYPE_LRU_PERCPU_HASH ||
+        shape.type == BPF_MAP_TYPE_HASH_OF_MAPS) {
+        site.kind = ProgramLoadPlan::LookupSite::Kind::Hash;
+        if (shape.type == BPF_MAP_TYPE_LRU_HASH) {
+            site.kind = ProgramLoadPlan::LookupSite::Kind::LruHash;
+            site.value_offset = array_offsets.htab_lru_ref;
+        } else if (shape.type == BPF_MAP_TYPE_PERCPU_HASH ||
+                   shape.type == BPF_MAP_TYPE_LRU_PERCPU_HASH) {
+            if (array_offsets.this_cpu_off == 0) {
+                fail("native_kernel: PERCPU_HASH lookup needs gs:this_cpu_off from original JIT");
+            }
+            site.kind = ProgramLoadPlan::LookupSite::Kind::PerCpuHash;
+            site.percpu_base_addr = array_offsets.this_cpu_off;
+        } else if (shape.type == BPF_MAP_TYPE_HASH_OF_MAPS) {
+            site.kind = ProgramLoadPlan::LookupSite::Kind::HashOfMaps;
+        }
+        site.key_offset = array_offsets.htab_key + ((shape.key_size + 7u) & ~7u);
         return true;
     }
 
@@ -2908,6 +2983,8 @@ ProgramLoadPlan load_from_loaded_program_fd(int program_fd,
     out.oracle_jit_base = jited_ksyms[0];
     out.oracle_jited = load_jited_program(program_fd, prog_info.jited_prog_len);
     out.oracle_xlated = load_xlated_program(program_fd, prog_info.xlated_prog_len);
+    out.x86_cpu_number_addr = decode_x86_cpu_number_from_jit(out.oracle_jited);
+    out.x86_this_cpu_off = decode_x86_this_cpu_off_from_jit(out.oracle_jited);
     const auto oracle_end = std::chrono::steady_clock::now();
     out.object_load_ns = elapsed_ns(oracle_start, oracle_end);
 
@@ -2956,7 +3033,9 @@ ProgramLoadPlan load_from_loaded_program_fd(int program_fd,
     BpfArrayOffsets array_offsets{
         K_BPF_ARRAY_VALUE_OFFSET,
         K_BPF_ARRAY_PTRS_OFFSET,
-        decode_x86_this_cpu_off_from_jit(out.oracle_jited),
+        K_HTAB_ELEM_KEY_OFFSET,
+        K_HTAB_ELEM_LRU_REF_OFFSET,
+        out.x86_this_cpu_off,
     };
 
     for (const SourceHelperCall &call : source_calls) {
