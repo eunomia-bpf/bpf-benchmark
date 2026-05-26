@@ -3,7 +3,7 @@
 
 struct native_loader_c_result {
     int prog_fd;
-    char error[4096];
+    char error[32768];
 };
 
 #define SHIM_NATIVE_LOADER_PATH_MAX 512

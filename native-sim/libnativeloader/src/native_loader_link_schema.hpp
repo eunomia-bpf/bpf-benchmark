@@ -144,6 +144,11 @@ std::string format_update_site_arg(size_t index,
     return std::string(buf);
 }
 
+std::string format_update_map_arg(const std::string &name, uint64_t target_addr)
+{
+    return format_name_hex(name, target_addr);
+}
+
 NativeLinkArgs build_native_link_args(
     const native_loader::ProgramLoadOptions &options,
     const std::unordered_map<std::string, uint64_t> &map_addrs,
@@ -185,6 +190,13 @@ NativeLinkArgs build_native_link_args(
         out.helpers.push_back(format_name_hex(
             "bpf_map_delete_elem", plan.map_delete_elem_addr));
     }
+    std::vector<std::pair<std::string, uint64_t>> helpers(
+        plan.helper_addrs.begin(), plan.helper_addrs.end());
+    std::sort(helpers.begin(), helpers.end(),
+              [](const auto &a, const auto &b) { return a.first < b.first; });
+    for (const auto &kv : helpers) {
+        out.helpers.push_back(format_name_hex(kv.first, kv.second));
+    }
 
     std::vector<std::pair<std::string, uint64_t>> maps(
         map_addrs.begin(), map_addrs.end());
@@ -200,6 +212,13 @@ NativeLinkArgs build_native_link_args(
             out.lookup_gens.push_back(format_lookup_gen_arg(i, plan.lookup_sites[i]));
         }
     }
+    BpfArrayOffsets array_offsets{
+        K_BPF_ARRAY_VALUE_OFFSET,
+        K_BPF_ARRAY_PTRS_OFFSET,
+        K_HTAB_ELEM_KEY_OFFSET,
+        K_HTAB_ELEM_LRU_REF_OFFSET,
+        plan.x86_this_cpu_off,
+    };
     std::vector<std::pair<std::string, std::string>> native_map_symbols(
         plan.native_map_symbols.begin(), plan.native_map_symbols.end());
     std::sort(native_map_symbols.begin(), native_map_symbols.end(),
@@ -210,9 +229,16 @@ NativeLinkArgs build_native_link_args(
             fail("native map symbol " + kv.first +
                  " references unknown loaded map " + kv.second);
         }
-        ProgramLoadPlan::LookupSite site = oracle_call_lookup_site_for_map_meta(*meta);
+        ProgramLoadPlan::LookupSite site =
+            native_lookup_site_for_map_meta(*meta, array_offsets);
         site.map_name = kv.first;
         out.lookup_maps.push_back(format_lookup_map_arg(kv.first, site));
+        if (fd_is_bpf_map(meta->fd)) {
+            uint64_t update_target = 0;
+            if (try_lookup_kernel_map_update_ptr_by_fd(meta->fd, update_target)) {
+                out.update_maps.push_back(format_update_map_arg(kv.first, update_target));
+            }
+        }
     }
     for (size_t i = 0; i < plan.update_sites.size(); i++) {
         out.update_sites.push_back(format_update_site_arg(i, plan.update_sites[i]));

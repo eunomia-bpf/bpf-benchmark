@@ -199,6 +199,12 @@ struct Args {
     )]
     lookup_maps: Vec<String>,
 
+    /// Per-map `bpf_map_update_elem` target, keyed by native map symbol name.
+    /// Used when source bytecode site tracking cannot bind a source update
+    /// site to a concrete map, but native code still carries the map symbol.
+    #[arg(long = "update-map", value_name = "NAME=ADDR")]
+    update_maps: Vec<String>,
+
     /// Per-call-site spec for every `bpf_map_update_elem` site in the
     /// entry program, given in BPF-source order. Only ARRAY/PERCPU_ARRAY
     /// sites with simple value widths are currently inlined; `call`
@@ -596,7 +602,10 @@ fn collect_xlated_call_imms(
         }
         let imm = insn.imm;
         match imm {
-            BPF_FUNC_GET_SMP_PROCESSOR_ID | BPF_FUNC_TAIL_CALL => continue,
+            BPF_FUNC_GET_SMP_PROCESSOR_ID
+            | BPF_FUNC_TAIL_CALL
+            | BPF_FUNC_GET_CURRENT_TASK
+            | BPF_FUNC_GET_CURRENT_TASK_BTF => continue,
             BPF_FUNC_MAP_LOOKUP_ELEM => {
                 let site = lookup_sites.get(lookup_ordinal);
                 lookup_ordinal += 1;
@@ -619,137 +628,209 @@ fn collect_xlated_call_imms(
     Ok(calls)
 }
 
-fn lookup_gen_len_at(
-    xlated_insns: &[BpfInsn],
-    idx: usize,
-    lookup_sites: &[LookupSiteSpec],
-) -> Option<usize> {
-    lookup_sites.iter().find_map(|site| {
-        let gen_len = site.gen_insns.len();
-        if gen_len == 0 {
-            return None;
-        }
-        let end = idx.checked_add(gen_len)?;
-        if end <= xlated_insns.len() && xlated_insns[idx..end] == site.gen_insns[..] {
-            Some(gen_len)
+fn helper_target_for_id(helper_addrs: &HashMap<String, u64>, helper_id: i32) -> Option<u64> {
+    helper_addrs.iter().find_map(|(name, &target)| {
+        if helper_id_for_name(name) == Some(helper_id) {
+            Some(target)
         } else {
             None
         }
     })
 }
 
-fn collect_xlated_external_call_imms(
-    xlated: &[u8],
-    lookup_sites: &[LookupSiteSpec],
-) -> Result<Vec<i32>> {
-    if xlated.len() % 8 != 0 {
-        bail!("--oracle-xlated has truncated BPF instructions");
+fn maybe_consume_direct_source_order_target(
+    xlated_calls: &[OracleCall],
+    next_xlated_target: &mut usize,
+    helper_id: i32,
+    direct_target: u64,
+) {
+    if direct_target == 0 {
+        return;
     }
-    let mut out = Vec::new();
-    let xlated_insns = xlated
-        .chunks_exact(8)
-        .map(BpfInsn::from_bytes)
-        .collect::<Result<Vec<_>>>()?;
-    let mut idx = 0usize;
-    while idx < xlated_insns.len() {
-        if let Some(gen_len) = lookup_gen_len_at(&xlated_insns, idx, lookup_sites) {
-            idx += gen_len;
-            continue;
-        }
-        let insn = xlated_insns[idx];
-        idx += 1;
-        if insn.code != BPF_JMP_CALL {
-            continue;
-        }
-        if matches!(
-            insn.src_reg,
-            BPF_PSEUDO_CALL | BPF_PSEUDO_KFUNC_CALL | BPF_PSEUDO_KINSN_CALL
-        ) {
-            continue;
-        }
-        if insn.src_reg != 0 {
-            bail!(
-                "--oracle-xlated has unsupported helper call src_reg={}",
-                insn.src_reg
-            );
-        }
-        out.push(insn.imm);
+    if xlated_calls
+        .get(*next_xlated_target)
+        .is_some_and(|call| call.helper_id == Some(helper_id) && call.target == direct_target)
+    {
+        *next_xlated_target += 1;
     }
-    Ok(out)
+}
+
+fn try_record_source_order_oracle_target(
+    out: &mut Vec<OracleCall>,
+    xlated_calls: &[OracleCall],
+    next_xlated_target: &mut usize,
+    helper_id: i32,
+    helper_target: Option<u64>,
+) {
+    if let Some(target) = helper_target.filter(|target| *target != 0) {
+        maybe_consume_direct_source_order_target(
+            xlated_calls,
+            next_xlated_target,
+            helper_id,
+            target,
+        );
+        out.push(OracleCall {
+            helper_id: Some(helper_id),
+            target,
+        });
+        return;
+    }
+    if let Some(call) = xlated_calls
+        .get(*next_xlated_target)
+        .filter(|call| call.helper_id == Some(helper_id))
+    {
+        *next_xlated_target += 1;
+        out.push(*call);
+    }
+}
+
+fn maybe_record_source_order_oracle_target(
+    out: &mut Vec<OracleCall>,
+    xlated_calls: &[OracleCall],
+    next_xlated_target: &mut usize,
+    helper_id: i32,
+    helper_target: Option<u64>,
+) {
+    let Some(target) = helper_target.filter(|target| *target != 0) else {
+        return;
+    };
+    maybe_consume_direct_source_order_target(
+        xlated_calls,
+        next_xlated_target,
+        helper_id,
+        target,
+    );
+    out.push(OracleCall {
+        helper_id: Some(helper_id),
+        target,
+    });
 }
 
 fn collect_typed_source_oracle_calls(
     xlated: &[u8],
+    jit_targets: &[u64],
     source_helpers: &[i32],
     lookup_sites: &[LookupSiteSpec],
     update_sites: &[UpdateSiteSpec],
-) -> Result<Vec<(Option<i32>, i32)>> {
+    helper_addrs: &HashMap<String, u64>,
+) -> Result<Vec<OracleCall>> {
     let mut out = Vec::new();
-    let xlated_calls = collect_xlated_external_call_imms(xlated, lookup_sites)?;
-    let mut xlated_ordinal = 0usize;
+    let xlated_calls = collect_xlated_call_imms(xlated, lookup_sites, update_sites)?;
+    let matched_indices = match_jit_target_indices_to_xlated_calls(jit_targets, &xlated_calls)?;
+    if xlated_calls.len() != matched_indices.len() {
+        bail!(
+            "typed xlated helper count {} does not match companion JIT oracle target count {}",
+            xlated_calls.len(),
+            matched_indices.len()
+        );
+    }
+    let xlated_oracle_calls = matched_indices
+        .iter()
+        .enumerate()
+        .map(|(idx, &jit_idx)| OracleCall {
+            helper_id: Some(xlated_calls[idx]),
+            target: jit_targets[jit_idx],
+        })
+        .collect::<Vec<_>>();
+    let mut next_xlated_target = 0usize;
     let mut lookup_ordinal = 0usize;
     let mut update_ordinal = 0usize;
-
-    let mut push_xlated_call = |helper_id: Option<i32>, context: &str| -> Result<()> {
-        let Some(&imm) = xlated_calls.get(xlated_ordinal) else {
-            bail!(
-                "source helper {context} has no matching --oracle-xlated call (consumed {}, available {})",
-                xlated_ordinal,
-                xlated_calls.len()
-            );
-        };
-        xlated_ordinal += 1;
-        out.push((helper_id, imm));
-        Ok(())
-    };
 
     for &helper_id in source_helpers {
         match helper_id {
             BPF_FUNC_MAP_LOOKUP_ELEM => {
                 let site = lookup_sites.get(lookup_ordinal);
-                let context = format!("#{lookup_ordinal} map_lookup");
                 lookup_ordinal += 1;
                 match site.map(|s| s.kind) {
                     Some(LookupKind::Array | LookupKind::PerCpuArray) => {}
                     Some(_) if site.is_some_and(|s| !s.gen_insns.is_empty()) => {}
                     Some(_) if lookup_site_needs_oracle(site) => {
-                        push_xlated_call(Some(helper_id), &context)?;
+                        try_record_source_order_oracle_target(
+                            &mut out,
+                            &xlated_oracle_calls,
+                            &mut next_xlated_target,
+                            helper_id,
+                            helper_target_for_id(helper_addrs, helper_id),
+                        );
                     }
                     Some(_) => {
-                        push_xlated_call(None, &context)?;
+                        if let Some(spec) = site {
+                            maybe_consume_direct_source_order_target(
+                                &xlated_oracle_calls,
+                                &mut next_xlated_target,
+                                helper_id,
+                                spec.target_addr,
+                            );
+                        }
                     }
                     None => {
-                        push_xlated_call(Some(helper_id), &context)?;
+                        try_record_source_order_oracle_target(
+                            &mut out,
+                            &xlated_oracle_calls,
+                            &mut next_xlated_target,
+                            helper_id,
+                            helper_target_for_id(helper_addrs, helper_id),
+                        );
                     }
                 }
             }
             BPF_FUNC_MAP_UPDATE_ELEM => {
                 let site = update_sites.get(update_ordinal);
-                let context = format!("#{update_ordinal} map_update");
                 update_ordinal += 1;
                 match site.map(|s| s.kind) {
                     Some(UpdateKind::Array | UpdateKind::PerCpuArray) => {}
                     Some(UpdateKind::Call) if update_site_needs_oracle(site) => {
-                        push_xlated_call(Some(helper_id), &context)?;
+                        try_record_source_order_oracle_target(
+                            &mut out,
+                            &xlated_oracle_calls,
+                            &mut next_xlated_target,
+                            helper_id,
+                            helper_target_for_id(helper_addrs, helper_id),
+                        );
                     }
                     Some(UpdateKind::Call) => {
-                        push_xlated_call(None, &context)?;
+                        if let Some(spec) = site {
+                            maybe_consume_direct_source_order_target(
+                                &xlated_oracle_calls,
+                                &mut next_xlated_target,
+                                helper_id,
+                                spec.target_addr,
+                            );
+                        }
                     }
                     None => {
-                        push_xlated_call(Some(helper_id), &context)?;
+                        try_record_source_order_oracle_target(
+                            &mut out,
+                            &xlated_oracle_calls,
+                            &mut next_xlated_target,
+                            helper_id,
+                            helper_target_for_id(helper_addrs, helper_id),
+                        );
                     }
                 }
             }
             BPF_FUNC_MAP_DELETE_ELEM => {
-                push_xlated_call(None, "#map_delete")?;
+                if let Some(&target) = helper_addrs.get("bpf_map_delete_elem") {
+                    maybe_consume_direct_source_order_target(
+                        &xlated_oracle_calls,
+                        &mut next_xlated_target,
+                        helper_id,
+                        target,
+                    );
+                }
             }
             BPF_FUNC_TAIL_CALL
             | BPF_FUNC_GET_SMP_PROCESSOR_ID
             | BPF_FUNC_GET_CURRENT_TASK
             | BPF_FUNC_GET_CURRENT_TASK_BTF => {}
             _ => {
-                let context = format!("#{helper_id}");
-                push_xlated_call(Some(helper_id), &context)?;
+                maybe_record_source_order_oracle_target(
+                    &mut out,
+                    &xlated_oracle_calls,
+                    &mut next_xlated_target,
+                    helper_id,
+                    helper_target_for_id(helper_addrs, helper_id),
+                );
             }
         }
     }
@@ -1019,6 +1100,7 @@ fn helper_id_for_name(helper_name: &str) -> Option<i32> {
         "bpf_probe_read_user_str" => Some(114),
         "bpf_probe_read_kernel_str" => Some(115),
         "bpf_jiffies64" => Some(118),
+        "bpf_sk_assign" => Some(124),
         "bpf_ktime_get_boot_ns" => Some(125),
         "bpf_seq_write" => Some(127),
         "bpf_ringbuf_output" => Some(130),
@@ -1052,6 +1134,7 @@ fn load_helper_call_oracle(
     arch: object::Architecture,
     lookup_sites: &[LookupSiteSpec],
     update_sites: &[UpdateSiteSpec],
+    helper_addrs: &HashMap<String, u64>,
 ) -> Result<Vec<OracleCall>> {
     match (
         &args.oracle_jited,
@@ -1064,53 +1147,19 @@ fn load_helper_call_oracle(
                 fs::read(jited_path).with_context(|| format!("read {}", jited_path.display()))?;
             let jit_base = parse_u64_auto(base_text, "--oracle-jit-base")?;
             let jit_targets = decode_external_call_targets(arch, &jited, jit_base)?;
+            let xlated =
+                fs::read(xlated_path).with_context(|| format!("read {}", xlated_path.display()))?;
             if !args.source_helpers.is_empty() {
-                let xlated = fs::read(xlated_path)
-                    .with_context(|| format!("read {}", xlated_path.display()))?;
                 let typed_calls = collect_typed_source_oracle_calls(
                     &xlated,
+                    &jit_targets,
                     &args.source_helpers,
                     lookup_sites,
                     update_sites,
+                    helper_addrs,
                 )?;
-                let xlated_call_imms: Vec<i32> = typed_calls.iter().map(|(_, imm)| *imm).collect();
-                let matched_indices =
-                    match_jit_target_indices_to_xlated_calls(&jit_targets, &xlated_call_imms)?;
-                let targets = matched_targets_from_indices(&jit_targets, &matched_indices);
-                if typed_calls.len() != targets.len() {
-                    bail!(
-                        "typed xlated helper count {} does not match companion JIT oracle target count {}",
-                        typed_calls.len(),
-                        targets.len()
-                    );
-                }
-                let mut target_by_helper = HashMap::new();
-                for ((helper_id, _), target) in typed_calls.iter().zip(targets.iter()) {
-                    let Some(helper_id) = helper_id else {
-                        continue;
-                    };
-                    if let Some(prev) = target_by_helper.insert(*helper_id, *target) {
-                        if prev != *target {
-                            bail!(
-                                "typed companion JIT oracle helper id {helper_id} has conflicting targets {prev:#x} and {target:#x}"
-                            );
-                        }
-                    }
-                }
-                return Ok(typed_calls
-                    .into_iter()
-                    .zip(targets)
-                    .filter_map(|((helper_id, _), target)| {
-                        helper_id.map(|helper_id| OracleCall {
-                            helper_id: Some(helper_id),
-                            target,
-                        })
-                    })
-                    .collect());
+                return Ok(typed_calls);
             }
-
-            let xlated =
-                fs::read(xlated_path).with_context(|| format!("read {}", xlated_path.display()))?;
             let xlated_call_imms = collect_xlated_call_imms(&xlated, lookup_sites, update_sites)?;
             let matched_indices =
                 match_jit_target_indices_to_xlated_calls(&jit_targets, &xlated_call_imms)?;
@@ -1226,6 +1275,14 @@ fn resolve_helper_target(
             .filter(|target| *target != 0)
             .ok_or_else(|| anyhow!("{context} has no bpf_map_delete_elem target address"));
     }
+    if oracle.typed {
+        if let Some(&encoded_target) = helper_addrs.get(helper_name) {
+            if encoded_target == 0 {
+                bail!("{context} has zero helper target address");
+            }
+            return Ok(encoded_target);
+        }
+    }
     if let Some(oracle_target) = consume_oracle_target(oracle, helper_id, context)? {
         if let Some(&encoded_target) = helper_addrs.get(helper_name) {
             if encoded_target != oracle_target {
@@ -1283,11 +1340,18 @@ fn main() -> Result<()> {
     let mut lookup_sites = parse_lookup_sites(&args.lookup_sites)?;
     parse_lookup_gens(&args.lookup_gens, &mut lookup_sites)?;
     let lookup_maps = parse_lookup_map_specs(&args.lookup_maps)?;
+    let update_maps = parse_name_addr_args(&args.update_maps, "update-map")?;
     let update_sites = parse_update_sites(&args.update_sites)?;
     let oracle_targets = if proof_mode {
         Vec::new()
     } else {
-        load_helper_call_oracle(&args, elf.architecture(), &lookup_sites, &update_sites)?
+        load_helper_call_oracle(
+            &args,
+            elf.architecture(),
+            &lookup_sites,
+            &update_sites,
+            &helper_addrs,
+        )?
     };
     let RewriteResult {
         blob,
@@ -1329,6 +1393,7 @@ fn main() -> Result<()> {
                 &map_addrs,
                 &lookup_sites,
                 &lookup_maps,
+                &update_maps,
                 &update_sites,
                 &oracle_targets,
                 proof_mode,
@@ -1364,6 +1429,7 @@ fn main() -> Result<()> {
                 &helper_addrs,
                 &map_addrs,
                 &lookup_sites,
+                &update_maps,
                 &update_sites,
                 &oracle_targets,
                 proof_mode,
@@ -2809,6 +2875,7 @@ fn rewrite_arm64(
     helper_addrs: &HashMap<String, u64>,
     map_addrs: &HashMap<String, u64>,
     lookup_sites: &[LookupSiteSpec],
+    _update_maps: &HashMap<String, u64>,
     update_sites: &[UpdateSiteSpec],
     oracle_targets: &[OracleCall],
     proof_mode: bool,

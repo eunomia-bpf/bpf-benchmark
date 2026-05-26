@@ -243,6 +243,17 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 					break;
 			}
 			if (err) {
+				const struct native_lab_reloc_record *r =
+					i < blobs[blob_id].reloc_count ?
+					&blobs[blob_id].relocs[i] : NULL;
+				pr_err_ratelimited("bpf_x86_native_lab: emit failed blob=%u len=%zu reloc=%zu/%zu err=%d offset=%u kind=%u target=0x%llx final=0x%llx\n",
+						   blob_id, snapshot_len, i,
+						   blobs[blob_id].reloc_count,
+						   err, r ? r->offset : 0,
+						   r ? r->kind : 0,
+						   r ? r->target : 0,
+						   final_emit_at && r ?
+						   (u64)(final_emit_at + r->offset) : 0);
 				mutex_unlock(&blobs_lock);
 				return err;
 			}
@@ -250,8 +261,11 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	}
 	mutex_unlock(&blobs_lock);
 
-	if (!snapshot_len)
+	if (!snapshot_len) {
+		pr_err_ratelimited("bpf_x86_native_lab: emit missing blob=%u\n",
+				   blob_id);
 		return -ENOENT;
+	}
 
 	*off += snapshot_len;
 	return snapshot_len;
@@ -287,6 +301,7 @@ enum map_ptr_query_kind {
 	MAP_PTR_QUERY_UPDATE = 3,
 	MAP_PTR_QUERY_DELETE = 4,
 	MAP_PTR_QUERY_LOOKUP_GEN = 5,
+	MAP_PTR_QUERY_LOOKUP_ELEM = 6,
 };
 
 struct map_ptr_file_priv {
@@ -583,6 +598,13 @@ static ssize_t map_ptr_query_write(struct file *file, const char __user *ubuf,
 		if (err)
 			goto out_put;
 		break;
+	case MAP_PTR_QUERY_LOOKUP_ELEM:
+		if (!map->ops || !map->ops->map_lookup_elem) {
+			err = -EOPNOTSUPP;
+			goto out_put;
+		}
+		ptr = (unsigned long)map->ops->map_lookup_elem;
+		break;
 	case MAP_PTR_QUERY_LOOKUP_GEN:
 		err = map_lookup_gen_response(map, priv);
 		if (err)
@@ -705,6 +727,9 @@ static int __init bpf_x86_native_lab_debugfs_init(void)
 			    &map_lookup_ptr_fops);
 	debugfs_create_file("map_lookup_gen", 0600, debugfs_root,
 			    (void *)MAP_PTR_QUERY_LOOKUP_GEN,
+			    &map_lookup_ptr_fops);
+	debugfs_create_file("map_lookup_elem_ptr", 0600, debugfs_root,
+			    (void *)MAP_PTR_QUERY_LOOKUP_ELEM,
 			    &map_lookup_ptr_fops);
 	debugfs_create_file("map_update_ptr", 0600, debugfs_root,
 			    (void *)MAP_PTR_QUERY_UPDATE,

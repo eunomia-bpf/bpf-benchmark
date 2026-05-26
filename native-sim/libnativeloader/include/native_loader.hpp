@@ -56,7 +56,7 @@ extern "C" {
 
 struct native_loader_c_result {
     int prog_fd;
-    char error[4096];
+    char error[32768];
 };
 
 int native_loader_load_from_fd_with_source_path_and_attach(

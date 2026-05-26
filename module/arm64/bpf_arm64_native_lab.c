@@ -185,6 +185,7 @@ enum map_ptr_query_kind {
 	MAP_PTR_QUERY_UPDATE = 3,
 	MAP_PTR_QUERY_DELETE = 4,
 	MAP_PTR_QUERY_LOOKUP_GEN = 5,
+	MAP_PTR_QUERY_LOOKUP_ELEM = 6,
 };
 
 struct map_ptr_file_priv {
@@ -427,6 +428,13 @@ static ssize_t map_ptr_query_write(struct file *file, const char __user *ubuf,
 		if (err)
 			goto out_put;
 		break;
+	case MAP_PTR_QUERY_LOOKUP_ELEM:
+		if (!map->ops || !map->ops->map_lookup_elem) {
+			err = -EOPNOTSUPP;
+			goto out_put;
+		}
+		ptr = (unsigned long)map->ops->map_lookup_elem;
+		break;
 	case MAP_PTR_QUERY_LOOKUP_GEN:
 		err = map_lookup_gen_response(map, priv);
 		if (err)
@@ -549,6 +557,9 @@ static int __init bpf_arm64_native_lab_debugfs_init(void)
 			    &map_lookup_ptr_fops);
 	debugfs_create_file("map_lookup_gen", 0600, debugfs_root,
 			    (void *)MAP_PTR_QUERY_LOOKUP_GEN,
+			    &map_lookup_ptr_fops);
+	debugfs_create_file("map_lookup_elem_ptr", 0600, debugfs_root,
+			    (void *)MAP_PTR_QUERY_LOOKUP_ELEM,
 			    &map_lookup_ptr_fops);
 	debugfs_create_file("map_update_ptr", 0600, debugfs_root,
 			    (void *)MAP_PTR_QUERY_UPDATE,

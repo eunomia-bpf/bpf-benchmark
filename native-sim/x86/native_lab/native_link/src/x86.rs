@@ -20,6 +20,7 @@ const NATIVE_LAB_RELOC_HELPER_CALL_REL32: u32 = 1;
 const X86_HELPER_CALL_REL32_SLOT: [u8; 5] = [0xE8, 0, 0, 0, 0];
 type SymbolKey = (object::SectionIndex, u64);
 type LocalSiteKey = (object::SectionIndex, u64, u64);
+type StackSlotKey = (Register, u64);
 
 fn symbol_key(sym: &SymInfo) -> SymbolKey {
     (sym.section_index, sym.address)
@@ -65,6 +66,33 @@ fn lookup_map_spec(
         match_spec = Some(spec.clone());
     }
     Ok(match_spec)
+}
+
+fn named_map_target(
+    targets: &HashMap<String, u64>,
+    native_map_name: &str,
+    arg_name: &str,
+) -> Result<Option<u64>> {
+    if let Some(&target) = targets.get(native_map_name) {
+        return Ok(Some(target));
+    }
+
+    let native_truncated = truncate_bpf_obj_name(native_map_name);
+    let mut match_target: Option<u64> = None;
+    let mut match_name: Option<&str> = None;
+    for (name, &target) in targets {
+        if truncate_bpf_obj_name(name) != native_truncated {
+            continue;
+        }
+        if let Some(existing) = match_name {
+            bail!(
+                "native map name {native_map_name:?} matches multiple --{arg_name} entries: {existing:?} and {name:?}"
+            );
+        }
+        match_name = Some(name.as_str());
+        match_target = Some(target);
+    }
+    Ok(match_target)
 }
 
 fn generic_lookup_site(target_addr: u64, map_name: Option<&str>) -> Option<LookupSiteSpec> {
@@ -880,6 +908,46 @@ fn x86_mov_gpr64_to_gpr64(insn: &Instruction) -> Option<(Register, Register)> {
     Some((dst, src))
 }
 
+fn x86_stack_slot(insn: &Instruction, op: u32) -> Option<StackSlotKey> {
+    if insn.op_kind(op) != OpKind::Memory || insn.is_ip_rel_memory_operand() {
+        return None;
+    }
+    if insn.memory_index() != Register::None {
+        return None;
+    }
+    let base = x86_gpr64_family(insn.memory_base())?;
+    if !matches!(base, Register::RSP | Register::RBP) {
+        return None;
+    }
+    Some((base, insn.memory_displacement64()))
+}
+
+fn x86_mov_stack_to_gpr64(insn: &Instruction) -> Option<(Register, StackSlotKey)> {
+    if insn.mnemonic() != Mnemonic::Mov
+        || insn.op_count() < 2
+        || insn.op0_kind() != OpKind::Register
+        || insn.op1_kind() != OpKind::Memory
+    {
+        return None;
+    }
+    let dst = x86_gpr64_family(insn.op0_register())?;
+    let slot = x86_stack_slot(insn, 1)?;
+    Some((dst, slot))
+}
+
+fn x86_stack_write(insn: &Instruction) -> Option<(StackSlotKey, Option<Register>)> {
+    if insn.op_count() < 2 || insn.op0_kind() != OpKind::Memory {
+        return None;
+    }
+    let slot = x86_stack_slot(insn, 0)?;
+    let src = if insn.mnemonic() == Mnemonic::Mov && insn.op1_kind() == OpKind::Register {
+        x86_gpr64_family(insn.op1_register())
+    } else {
+        None
+    };
+    Some((slot, src))
+}
+
 fn clear_x86_call_clobbered_registers<V>(registers: &mut HashMap<Register, V>) {
     for reg in [
         Register::RAX,
@@ -894,6 +962,28 @@ fn clear_x86_call_clobbered_registers<V>(registers: &mut HashMap<Register, V>) {
     ] {
         registers.remove(&reg);
     }
+}
+
+fn clear_x86_stack_slots_for_base(slots: &mut HashMap<StackSlotKey, String>, base: Register) {
+    slots.retain(|(slot_base, _), _| *slot_base != base);
+}
+
+fn x86_is_rsp_restore_add(insn: &Instruction) -> bool {
+    insn.mnemonic() == Mnemonic::Add
+        && insn.op_count() >= 2
+        && insn.op0_kind() == OpKind::Register
+        && x86_gpr64_family(insn.op0_register()) == Some(Register::RSP)
+        && matches!(
+            insn.op1_kind(),
+            OpKind::Immediate8
+                | OpKind::Immediate8to16
+                | OpKind::Immediate8to32
+                | OpKind::Immediate8to64
+                | OpKind::Immediate16
+                | OpKind::Immediate32
+                | OpKind::Immediate32to64
+                | OpKind::Immediate64
+        )
 }
 
 fn x86_lookahead_indirect_call_uses_register(
@@ -1070,6 +1160,7 @@ pub(super) fn rewrite_x86(
     map_addrs: &HashMap<String, u64>,
     lookup_sites: &[LookupSiteSpec],
     lookup_maps: &HashMap<String, LookupSiteSpec>,
+    update_maps: &HashMap<String, u64>,
     update_sites: &[UpdateSiteSpec],
     oracle_targets: &[OracleCall],
     proof_mode: bool,
@@ -1151,6 +1242,7 @@ pub(super) fn rewrite_x86(
         let mut helper_got_registers: HashMap<Register, String> = HashMap::new();
         let mut helper_imm_registers: HashMap<Register, u64> = HashMap::new();
         let mut map_symbol_registers: HashMap<Register, String> = HashMap::new();
+        let mut map_stack_slots: HashMap<StackSlotKey, String> = HashMap::new();
 
         // Side table: per-entry patch kind, paired with each kept Instruction
         // in the symbol-local stream. `insn_local_ip` records the byte
@@ -1341,7 +1433,10 @@ pub(super) fn rewrite_x86(
             // falls *inside* the current symbol but is NOT a symbol entry.
             // We must NOT treat those as cross-symbol calls; the ELF reloc
             // pass below picks them up instead.
-            if matches!(insn.flow_control(), FlowControl::Call) && original_target != 0 {
+            if matches!(insn.flow_control(), FlowControl::Call)
+                && original_target != 0
+                && !helper_call_sites.contains_key(&site_key)
+            {
                 let target_symbol =
                     find_decoded_call_target(elf, sym, original_target).and_then(|called| {
                         included
@@ -1454,52 +1549,38 @@ pub(super) fn rewrite_x86(
                         continue;
                     }
                     if name == "bpf_get_smp_processor_id" {
-                        let inline =
-                            build_x86_get_smp_processor_id_inline(helper_addrs)?.ok_or_else(
-                                || {
-                                    anyhow!(
-                                        "x86 bpf_get_smp_processor_id requires JIT-decoded {} and {}; refusing to consume the generic helper oracle",
-                                        X86_CPU_NUMBER_HELPER_KEY,
-                                        X86_THIS_CPU_OFF_HELPER_KEY
-                                    )
-                                },
-                            )?;
-                        for ib in inline {
-                            push_x86_synthetic(
-                                &mut local,
-                                &mut kinds,
-                                &mut insn_local_ip,
-                                &mut next_synthetic_ip,
-                                ib,
-                            )?;
+                        if let Some(inline) = build_x86_get_smp_processor_id_inline(helper_addrs)?
+                        {
+                            for ib in inline {
+                                push_x86_synthetic(
+                                    &mut local,
+                                    &mut kinds,
+                                    &mut insn_local_ip,
+                                    &mut next_synthetic_ip,
+                                    ib,
+                                )?;
+                            }
+                            resolved_helper_call_sites.insert(site_key);
+                            clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                            continue;
                         }
-                        resolved_helper_call_sites.insert(site_key);
-                        clear_x86_call_clobbered_registers(&mut map_symbol_registers);
-                        continue;
                     }
 
                     if name == "bpf_get_current_task" || name == "bpf_get_current_task_btf" {
-                        let inline = build_x86_get_current_task_inline(helper_addrs)?.ok_or_else(
-                            || {
-                                anyhow!(
-                                    "x86 {name} requires JIT-decoded {} and {}; refusing to consume the generic helper oracle",
-                                    X86_CURRENT_TASK_HELPER_KEY,
-                                    X86_THIS_CPU_OFF_HELPER_KEY
-                                )
-                            },
-                        )?;
-                        for ib in inline {
-                            push_x86_synthetic(
-                                &mut local,
-                                &mut kinds,
-                                &mut insn_local_ip,
-                                &mut next_synthetic_ip,
-                                ib,
-                            )?;
+                        if let Some(inline) = build_x86_get_current_task_inline(helper_addrs)? {
+                            for ib in inline {
+                                push_x86_synthetic(
+                                    &mut local,
+                                    &mut kinds,
+                                    &mut insn_local_ip,
+                                    &mut next_synthetic_ip,
+                                    ib,
+                                )?;
+                            }
+                            resolved_helper_call_sites.insert(site_key);
+                            clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                            continue;
                         }
-                        resolved_helper_call_sites.insert(site_key);
-                        clear_x86_call_clobbered_registers(&mut map_symbol_registers);
-                        continue;
                     }
 
                     if name == "bpf_map_lookup_elem" {
@@ -1583,6 +1664,12 @@ pub(super) fn rewrite_x86(
                     if name == "bpf_map_update_elem" {
                         let ordinal = update_call_counter;
                         update_call_counter += 1;
+                        let native_map_name =
+                            map_symbol_registers.get(&Register::RDI).map(String::as_str);
+                        let native_map_target = match native_map_name {
+                            Some(map_name) => named_map_target(update_maps, map_name, "update-map")?,
+                            None => None,
+                        };
                         if let Some(spec) = update_sites.get(ordinal) {
                             match spec.kind {
                                 UpdateKind::Array | UpdateKind::PerCpuArray => {
@@ -1600,8 +1687,13 @@ pub(super) fn rewrite_x86(
                                     continue;
                                 }
                                 UpdateKind::Call => {
+                                    let target_addr = if spec.target_addr != 0 {
+                                        spec.target_addr
+                                    } else {
+                                        native_map_target.unwrap_or(0)
+                                    };
                                     let helper_addr = resolve_oracle_preferred_site_target(
-                                        spec.target_addr,
+                                        target_addr,
                                         &mut oracle,
                                         BPF_FUNC_MAP_UPDATE_ELEM,
                                         &format!("x86 update-site {ordinal}"),
@@ -1618,6 +1710,23 @@ pub(super) fn rewrite_x86(
                                     continue;
                                 }
                             }
+                        } else if let Some(target_addr) = native_map_target {
+                            let helper_addr = resolve_oracle_preferred_site_target(
+                                target_addr,
+                                &mut oracle,
+                                BPF_FUNC_MAP_UPDATE_ELEM,
+                                &format!("x86 update-site map fallback {ordinal}"),
+                            )?;
+                            push_x86_helper_call_reloc(
+                                &mut local,
+                                &mut kinds,
+                                &mut insn_local_ip,
+                                local_ip,
+                                helper_addr,
+                            )?;
+                            resolved_helper_call_sites.insert(site_key);
+                            clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                            continue;
                         }
                     }
 
@@ -1668,6 +1777,18 @@ pub(super) fn rewrite_x86(
                     .cloned()
                     .map(|name| (dst, name))
             });
+            let map_stack_load = x86_mov_stack_to_gpr64(&insn).and_then(|(dst, slot)| {
+                map_stack_slots
+                    .get(&slot)
+                    .cloned()
+                    .map(|name| (dst, name))
+            });
+            let map_stack_write = x86_stack_write(&insn).map(|(slot, src)| {
+                (
+                    slot,
+                    src.and_then(|reg| map_symbol_registers.get(&reg).cloned()),
+                )
+            });
             let written_reg = x86_written_gpr_family(&insn);
             local.push(insn);
             kinds.push(None);
@@ -1697,10 +1818,21 @@ pub(super) fn rewrite_x86(
                 clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                 clear_x86_call_clobbered_registers(&mut helper_got_registers);
                 clear_x86_call_clobbered_registers(&mut helper_imm_registers);
+            } else if let Some((slot, maybe_name)) = map_stack_write {
+                if let Some(name) = maybe_name {
+                    map_stack_slots.insert(slot, name);
+                }
+            } else if let Some((dst, name)) = map_stack_load {
+                map_symbol_registers.insert(dst, name);
             } else if let Some((dst, name)) = map_reg_move {
                 map_symbol_registers.insert(dst, name);
             } else if let Some(reg) = written_reg {
                 map_symbol_registers.remove(&reg);
+                if reg == Register::RSP && !x86_is_rsp_restore_add(&insn) {
+                    clear_x86_stack_slots_for_base(&mut map_stack_slots, reg);
+                } else if reg == Register::RBP {
+                    clear_x86_stack_slots_for_base(&mut map_stack_slots, reg);
+                }
             }
             if let Some(reg) = written_reg {
                 if helper_got_load_reg != Some(reg) {

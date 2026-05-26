@@ -508,15 +508,26 @@ class CiliumRunner(NativeProcessRunner):
             time.sleep(0.2)
 
     def _setup_managed_endpoints(self) -> None:
-        self._wait_for_api()
-        self._managed_endpoint_ids = []
-        for spec in _CILIUM_ENDPOINT_SPECS:
-            endpoint_id = self._create_endpoint(spec)
-            self._managed_endpoint_ids.append(endpoint_id)
-            self._wait_endpoint_ready(endpoint_id)
-        run_command(
-            ["ip", "-n", BENCHMARK_NETNS, "route", "replace", self.ipv4_range, "via", BENCHMARK_IFACE_CIDR.split("/", 1)[0]],
-        )
+        try:
+            self._wait_for_api()
+            self._managed_endpoint_ids = []
+            for spec in _CILIUM_ENDPOINT_SPECS:
+                endpoint_id = self._create_endpoint(spec)
+                self._managed_endpoint_ids.append(endpoint_id)
+                self._wait_endpoint_ready(endpoint_id)
+            run_command(
+                ["ip", "-n", BENCHMARK_NETNS, "route", "replace", self.ipv4_range, "via", BENCHMARK_IFACE_CIDR.split("/", 1)[0]],
+            )
+        except Exception as exc:
+            if self.session is not None:
+                snapshot = self.session.collector_snapshot()
+                details = tail_text(
+                    "\n".join((snapshot.get("stderr_tail") or []) + (snapshot.get("stdout_tail") or [])),
+                    max_lines=60,
+                    max_chars=12000,
+                )
+                raise RuntimeError(f"Cilium endpoint setup failed: {exc}\nagent output tail:\n{details}") from exc
+            raise
 
     def refresh_programs(self) -> list[dict[str, object]]:
         return []

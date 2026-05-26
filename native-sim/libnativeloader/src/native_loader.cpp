@@ -21,16 +21,20 @@
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
+#include <cctype>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <array>
+#include <deque>
 #include <filesystem>
 #include <fstream>
 #include <limits>
 #include <stdexcept>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -194,6 +198,7 @@ struct NativeLabTarget {
     const char *map_value_ptr_path;
     const char *map_lookup_ptr_path;
     const char *map_lookup_gen_path;
+    const char *map_lookup_elem_ptr_path;
     const char *map_update_ptr_path;
     const char *map_delete_ptr_path;
     uint32_t chunk_bytes;
@@ -211,6 +216,7 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .map_value_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_value_ptr",
     .map_lookup_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_lookup_ptr",
     .map_lookup_gen_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_lookup_gen",
+    .map_lookup_elem_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_lookup_elem_ptr",
     .map_update_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_update_ptr",
     .map_delete_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_delete_ptr",
     .chunk_bytes = 256,
@@ -227,6 +233,7 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .map_value_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_value_ptr",
     .map_lookup_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_lookup_ptr",
     .map_lookup_gen_path = "/sys/kernel/debug/bpf_x86_native_lab/map_lookup_gen",
+    .map_lookup_elem_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_lookup_elem_ptr",
     .map_update_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_update_ptr",
     .map_delete_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_delete_ptr",
     .chunk_bytes = 128,
@@ -329,6 +336,7 @@ constexpr SupportedHelper kSupportedHelpers[] = {
     {BPF_FUNC_get_route_realm, "bpf_get_route_realm"},
     {BPF_FUNC_skb_load_bytes, "bpf_skb_load_bytes"},
     {BPF_FUNC_skb_load_bytes_relative, "bpf_skb_load_bytes_relative"},
+    {BPF_FUNC_fib_lookup, "bpf_fib_lookup"},
     {BPF_FUNC_csum_diff, "bpf_csum_diff"},
     {BPF_FUNC_skb_get_tunnel_opt, "bpf_skb_get_tunnel_opt"},
     {BPF_FUNC_skb_set_tunnel_opt, "bpf_skb_set_tunnel_opt"},
@@ -345,11 +353,13 @@ constexpr SupportedHelper kSupportedHelpers[] = {
     {BPF_FUNC_skb_change_head, "bpf_skb_change_head"},
     {BPF_FUNC_get_socket_cookie, "bpf_get_socket_cookie"},
     {BPF_FUNC_get_socket_uid, "bpf_get_socket_uid"},
+    {BPF_FUNC_sk_lookup_tcp, "bpf_sk_lookup_tcp"},
     {BPF_FUNC_sk_lookup_udp, "bpf_sk_lookup_udp"},
     {BPF_FUNC_sk_release, "bpf_sk_release"},
     {BPF_FUNC_map_push_elem, "bpf_map_push_elem"},
     {BPF_FUNC_map_pop_elem, "bpf_map_pop_elem"},
     {BPF_FUNC_sk_fullsock, "bpf_sk_fullsock"},
+    {BPF_FUNC_skc_lookup_tcp, "bpf_skc_lookup_tcp"},
     {BPF_FUNC_override_return, "bpf_override_return"},
     {BPF_FUNC_send_signal, "bpf_send_signal"},
     {BPF_FUNC_seq_write, "bpf_seq_write"},
@@ -385,7 +395,7 @@ constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 #endif
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v43";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v47";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
 constexpr const char *kNativeStubBtfCacheVersion = "native-stub-btf-cache-v1";
 constexpr int kLibbpfCoreBadRelocPoison = 195896080; // 0xbad2310
@@ -424,10 +434,11 @@ void ensure_debugfs_mounted()
     (void)mount("none", kDebugfsDir, "debugfs", 0, nullptr);
 }
 
-std::string query_native_lab_by_fd(int map_fd,
-                                   const char *path,
-                                   const char *label,
-                                   size_t max_response)
+bool try_query_native_lab_by_fd(int map_fd,
+                                const char *path,
+                                const char *label,
+                                size_t max_response,
+                                std::string &out)
 {
     ensure_debugfs_mounted();
     int fd = open(path, O_RDWR | O_CLOEXEC);
@@ -446,6 +457,9 @@ std::string query_native_lab_by_fd(int map_fd,
     int saved = errno;
     if (written != request_len) {
         close(fd);
+        if (saved == EOPNOTSUPP) {
+            return false;
+        }
         fail(std::string("write ") + path + ": " + std::strerror(saved));
     }
 
@@ -460,20 +474,56 @@ std::string query_native_lab_by_fd(int map_fd,
     saved = errno;
     close(fd);
     if (n <= 0) {
+        if (saved == EOPNOTSUPP) {
+            return false;
+        }
         fail(std::string("read ") + path + ": " + std::strerror(saved));
     }
     if (static_cast<size_t>(n) == max_response) {
         fail(std::string("native_kernel: truncated ") + label + " response");
     }
     response[static_cast<size_t>(n)] = '\0';
-    return std::string(response.data(), static_cast<size_t>(n));
+    out.assign(response.data(), static_cast<size_t>(n));
+    return true;
 }
+
+std::string query_native_lab_by_fd(int map_fd,
+                                   const char *path,
+                                   const char *label,
+                                   size_t max_response)
+{
+    std::string response;
+    if (!try_query_native_lab_by_fd(map_fd, path, label, max_response, response)) {
+        fail(std::string("query ") + path + ": " + std::strerror(EOPNOTSUPP));
+    }
+    return response;
+}
+
+bool try_lookup_native_lab_ptr_by_fd(int map_fd,
+                                     const char *path,
+                                     const char *label,
+                                     uint64_t &out);
 
 uint64_t lookup_native_lab_ptr_by_fd(int map_fd,
                                      const char *path,
                                      const char *label)
 {
-    std::string response = query_native_lab_by_fd(map_fd, path, label, 64);
+    uint64_t value = 0;
+    if (!try_lookup_native_lab_ptr_by_fd(map_fd, path, label, value)) {
+        fail(std::string("query ") + path + ": " + std::strerror(EOPNOTSUPP));
+    }
+    return value;
+}
+
+bool try_lookup_native_lab_ptr_by_fd(int map_fd,
+                                     const char *path,
+                                     const char *label,
+                                     uint64_t &out)
+{
+    std::string response;
+    if (!try_query_native_lab_by_fd(map_fd, path, label, 64, response)) {
+        return false;
+    }
 
     errno = 0;
     char *end = nullptr;
@@ -481,7 +531,8 @@ uint64_t lookup_native_lab_ptr_by_fd(int map_fd,
     if (errno != 0 || end == response.c_str() || value == 0) {
         fail(std::string("native_kernel: invalid ") + label + " response: " + response);
     }
-    return static_cast<uint64_t>(value);
+    out = static_cast<uint64_t>(value);
+    return true;
 }
 
 uint8_t parse_hex_nibble(char ch, const std::string &label)
@@ -532,10 +583,20 @@ uint64_t lookup_kernel_map_lookup_ptr_by_fd(int map_fd)
         map_fd, kNativeLabTarget.map_lookup_ptr_path, "map_lookup_ptr");
 }
 
+uint64_t lookup_kernel_map_lookup_elem_ptr_by_fd(int map_fd)
+{
+    return lookup_native_lab_ptr_by_fd(
+        map_fd, kNativeLabTarget.map_lookup_elem_ptr_path, "map_lookup_elem_ptr");
+}
+
 std::vector<uint8_t> lookup_kernel_map_lookup_gen_by_fd(int map_fd)
 {
-    std::string response = query_native_lab_by_fd(
-        map_fd, kNativeLabTarget.map_lookup_gen_path, "map_lookup_gen", 8192);
+    std::string response;
+    if (!try_query_native_lab_by_fd(
+            map_fd, kNativeLabTarget.map_lookup_gen_path, "map_lookup_gen",
+            8192, response)) {
+        return {};
+    }
     std::istringstream input(response);
     size_t insn_count = 0;
     std::string hex;
@@ -555,6 +616,12 @@ uint64_t lookup_kernel_map_update_ptr_by_fd(int map_fd)
 {
     return lookup_native_lab_ptr_by_fd(
         map_fd, kNativeLabTarget.map_update_ptr_path, "map_update_ptr");
+}
+
+bool try_lookup_kernel_map_update_ptr_by_fd(int map_fd, uint64_t &out)
+{
+    return try_lookup_native_lab_ptr_by_fd(
+        map_fd, kNativeLabTarget.map_update_ptr_path, "map_update_ptr", out);
 }
 
 uint64_t lookup_kernel_map_delete_ptr_by_fd(int map_fd)
@@ -875,6 +942,18 @@ struct ScopedFd {
     explicit ScopedFd(int value) : fd(value) {}
     ScopedFd(const ScopedFd &) = delete;
     ScopedFd &operator=(const ScopedFd &) = delete;
+    ScopedFd(ScopedFd &&other) noexcept : fd(other.fd) { other.fd = -1; }
+    ScopedFd &operator=(ScopedFd &&other) noexcept
+    {
+        if (this != &other) {
+            if (fd >= 0) {
+                close(fd);
+            }
+            fd = other.fd;
+            other.fd = -1;
+        }
+        return *this;
+    }
     ~ScopedFd()
     {
         if (fd >= 0) {
@@ -1028,11 +1107,18 @@ void append_dummy_map_refs(std::vector<bpf_insn> &insns,
         fail("native_kernel dummy map ref jump offset exceeds int16");
     }
     insns.push_back(bpf_insn{
-        .code = BPF_JMP | BPF_JA,
-        .dst_reg = 0,
+        .code = BPF_ALU64 | BPF_MOV | BPF_K,
+        .dst_reg = BPF_REG_1,
+        .src_reg = 0,
+        .off = 0,
+        .imm = 1,
+    });
+    insns.push_back(bpf_insn{
+        .code = BPF_JMP | BPF_JEQ | BPF_K,
+        .dst_reg = BPF_REG_1,
         .src_reg = 0,
         .off = static_cast<int16_t>(map_ref_fds.size() * 2),
-        .imm = 0,
+        .imm = 1,
     });
     for (int fd : map_ref_fds) {
         if (fd < 0) {
@@ -1082,7 +1168,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
 
     std::vector<bpf_insn> insns;
     const size_t dummy_ref_insns =
-        map_ref_fds.empty() ? 0 : 1 + map_ref_fds.size() * 2;
+        map_ref_fds.empty() ? 0 : 2 + map_ref_fds.size() * 2;
     insns.reserve(static_cast<size_t>(2) * chunks + dummy_ref_insns +
                   (tail_call_reachable ? 8 : 1));
     if (tail_call_reachable) {
@@ -1169,7 +1255,6 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     ScopedFd attach_prog_fd(open_prog_fd_by_id_required(
         attrs.attach_prog_id, "attach_prog_id"));
 
-    std::vector<char> verifier_log(1 << 20);
     LIBBPF_OPTS(bpf_prog_load_opts, opts,
         .expected_attach_type = static_cast<bpf_attach_type>(attrs.expected_attach_type),
         .prog_btf_fd = static_cast<uint32_t>(prog_btf_fd.get() >= 0 ? prog_btf_fd.get() : 0),
@@ -1177,16 +1262,30 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         .attach_prog_fd = static_cast<uint32_t>(attach_prog_fd.get() >= 0 ? attach_prog_fd.get() : 0),
         .attach_btf_obj_fd = static_cast<uint32_t>(attach_btf_obj_fd.get() >= 0 ? attach_btf_obj_fd.get() : 0),
         .fd_array = fd_array,
-        .log_level = 1,
-        .log_size = static_cast<__u32>(verifier_log.size()),
-        .log_buf = verifier_log.data(),
     );
     int fd = bpf_prog_load(static_cast<bpf_prog_type>(prog_type_value),
                            "native_lab_stub", "GPL",
                            insns.data(), insns.size(), &opts);
     if (fd < 0) {
-        fail(std::string("bpf_prog_load (native_lab stub): ")
-             + std::strerror(errno) + "\n" + verifier_log.data());
+        const int saved_errno = errno;
+        std::vector<char> log_buf(256 * 1024);
+        auto log_opts = opts;
+        log_opts.log_level = 1;
+        log_opts.log_size = static_cast<__u32>(log_buf.size());
+        log_opts.log_buf = log_buf.data();
+        int diag_fd = bpf_prog_load(static_cast<bpf_prog_type>(prog_type_value),
+                                    "native_lab_stub", "GPL",
+                                    insns.data(), insns.size(), &log_opts);
+        if (diag_fd >= 0) {
+            close(diag_fd);
+        }
+        std::string message = std::string("bpf_prog_load (native_lab stub): ")
+            + std::strerror(saved_errno);
+        if (log_buf[0] != '\0') {
+            message += "\nverifier log:\n";
+            message += log_buf.data();
+        }
+        fail(message);
     }
     return fd;
 }
@@ -1459,6 +1558,29 @@ bool starts_with(const std::string &value, const std::string &prefix)
            value.compare(0, prefix.size(), prefix) == 0;
 }
 
+int parse_otel_stack_delta_bucket(const std::string &name)
+{
+    constexpr std::string_view prefix = "exe_id_to_";
+    if (name.compare(0, prefix.size(), prefix) != 0) {
+        return -1;
+    }
+    size_t pos = prefix.size();
+    int bucket = 0;
+    bool saw_digit = false;
+    while (pos < name.size() && std::isdigit(static_cast<unsigned char>(name[pos]))) {
+        saw_digit = true;
+        bucket = bucket * 10 + (name[pos] - '0');
+        pos++;
+    }
+    if (!saw_digit || pos >= name.size() || name[pos] != '_') {
+        return -1;
+    }
+    if (bucket < 8 || bucket > 23) {
+        return -1;
+    }
+    return bucket;
+}
+
 struct NativeMapShape {
     int type = -1;
     uint32_t key_size = 0;
@@ -1468,6 +1590,9 @@ struct NativeMapShape {
 
 NativeMapShape expected_native_map_shape(const std::string &name)
 {
+    if (parse_otel_stack_delta_bucket(name) >= 0) {
+        return NativeMapShape{BPF_MAP_TYPE_HASH_OF_MAPS, 8, 4, 0};
+    }
     if (ends_with(name, "_fix")) {
         return NativeMapShape{BPF_MAP_TYPE_HASH, 0, 0, 0};
     }
@@ -1524,6 +1649,9 @@ NativeMapShape expected_native_map_shape(const std::string &name)
     }
     if (name == "execve_calls") {
         return NativeMapShape{BPF_MAP_TYPE_PROG_ARRAY, 4, 4, 2};
+    }
+    if (name == "perf_progs" || name == "kprobe_progs") {
+        return NativeMapShape{BPF_MAP_TYPE_PROG_ARRAY, 4, 4, 10};
     }
     if (name == "tcpmon_map") {
         return NativeMapShape{BPF_MAP_TYPE_PERF_EVENT_ARRAY, 4, 4, 8};
@@ -2044,6 +2172,89 @@ bpf_map_info load_map_info(int map_fd)
     return info;
 }
 
+std::string map_info_name(const bpf_map_info &info)
+{
+    char name[sizeof(info.name) + 1] = {};
+    std::memcpy(name, info.name, sizeof(info.name));
+    return std::string(name);
+}
+
+std::string format_map_fd(int fd)
+{
+    if (fd < 0) {
+        return "fd=-1";
+    }
+    bpf_map_info info = {};
+    __u32 info_len = sizeof(info);
+    const int err = bpf_obj_get_info_by_fd(fd, &info, &info_len);
+    if (err != 0) {
+        std::ostringstream out;
+        out << "fd=" << fd << "(info_errno=" << errno << ")";
+        return out.str();
+    }
+    std::ostringstream out;
+    out << "fd=" << fd
+        << ":id=" << info.id
+        << ":type=" << info.type
+        << ":name=" << map_info_name(info)
+        << ":key=" << info.key_size
+        << ":value=" << info.value_size
+        << ":max=" << info.max_entries;
+    return out.str();
+}
+
+std::string format_map_id(uint32_t id)
+{
+    if (id == 0) {
+        return "id=0";
+    }
+    int fd = bpf_map_get_fd_by_id(id);
+    if (fd < 0) {
+        std::ostringstream out;
+        out << "id=" << id << "(open_errno=" << errno << ")";
+        return out.str();
+    }
+    std::string formatted = format_map_fd(fd);
+    close(fd);
+    return formatted;
+}
+
+std::string format_map_ids(const std::vector<uint32_t> &ids)
+{
+    std::ostringstream out;
+    out << "[";
+    for (size_t i = 0; i < ids.size(); i++) {
+        if (i != 0) {
+            out << ", ";
+        }
+        if (i >= 32) {
+            out << "...";
+            break;
+        }
+        out << format_map_id(ids[i]);
+    }
+    out << "]";
+    return out.str();
+}
+
+std::string format_map_fds(const std::vector<int> &fds)
+{
+    std::ostringstream out;
+    out << "[";
+    for (size_t i = 0; i < fds.size(); i++) {
+        if (i != 0) {
+            out << ", ";
+        }
+        if (i >= 32) {
+            out << "...";
+            break;
+        }
+        out << format_map_fd(fds[i]);
+    }
+    out << "]";
+    return out.str();
+}
+
 uint64_t lookup_array_value_addr_if_direct(const bpf_map_info &info, int map_fd)
 {
     if (info.type != BPF_MAP_TYPE_ARRAY || info.max_entries != 1) {
@@ -2322,6 +2533,7 @@ struct NativeLinkArgs {
     std::vector<std::string> lookup_sites;
     std::vector<std::string> lookup_gens;
     std::vector<std::string> lookup_maps;
+    std::vector<std::string> update_maps;
     std::vector<std::string> update_sites;
 };
 
@@ -2347,7 +2559,9 @@ struct ProgramLoadPlan {
     std::vector<uint8_t> oracle_jited;
     std::vector<uint8_t> oracle_xlated;
     std::vector<int> source_helper_ids;
+    std::vector<int> native_helper_ids;
     uint64_t map_delete_elem_addr = 0;
+    std::unordered_map<std::string, uint64_t> helper_addrs;
     bool has_tail_call = false;
     std::unordered_map<std::string, uint64_t> map_addrs;
     std::unordered_map<std::string, uint32_t> map_addr_ids;
@@ -2355,6 +2569,7 @@ struct ProgramLoadPlan {
     std::unordered_map<std::string, MapMeta> exact_map_addrs;
     std::unordered_set<std::string> ambiguous_exact_maps;
     std::vector<MapMeta> maps;
+    std::vector<MapMeta> source_tail_call_maps;
     /* Per-call-site spec for every `bpf_map_lookup_elem` invocation in
      * the entry program, listed in BPF-source order. Each entry is a
      * (target_kernel_address, key_offset) pair. native-link routes the
@@ -2447,10 +2662,17 @@ const MapMeta *find_exact_map_meta(const ProgramLoadPlan &load,
 
 void add_map_meta(ProgramLoadPlan &load, const MapMeta &meta)
 {
+    const bool incoming_fd_valid = fd_is_bpf_map(meta.fd);
     bool duplicate = false;
-    for (const MapMeta &existing : load.maps) {
+    for (MapMeta &existing : load.maps) {
         if (existing.name == meta.name &&
             existing.kernel_addr == meta.kernel_addr) {
+            if (!fd_is_bpf_map(existing.fd) && incoming_fd_valid) {
+                existing.fd = meta.fd;
+            }
+            if (existing.value_addr == 0 && meta.value_addr != 0) {
+                existing.value_addr = meta.value_addr;
+            }
             duplicate = true;
             break;
         }
@@ -2493,6 +2715,15 @@ void add_map_symbol_alias_meta(ProgramLoadPlan &load,
                                const MapMeta &meta)
 {
     MapMeta alias_meta = meta;
+    if (!fd_is_bpf_map(alias_meta.fd)) {
+        for (const MapMeta &candidate : load.maps) {
+            if (candidate.kernel_addr == meta.kernel_addr &&
+                fd_is_bpf_map(candidate.fd)) {
+                alias_meta = candidate;
+                break;
+            }
+        }
+    }
     alias_meta.name = alias;
 
     auto existing = std::find_if(load.maps.begin(), load.maps.end(),
@@ -2503,6 +2734,17 @@ void add_map_symbol_alias_meta(ProgramLoadPlan &load,
         if (existing->kernel_addr != meta.kernel_addr) {
             fail("native map symbol " + alias +
                  " resolves to multiple kernel addresses");
+        }
+        if (!fd_is_bpf_map(existing->fd) && fd_is_bpf_map(alias_meta.fd)) {
+            existing->fd = alias_meta.fd;
+            existing->kernel_id = alias_meta.kernel_id;
+            existing->type = alias_meta.type;
+            existing->key_size = alias_meta.key_size;
+            existing->value_size = alias_meta.value_size;
+            existing->max_entries = alias_meta.max_entries;
+        }
+        if (existing->value_addr == 0 && alias_meta.value_addr != 0) {
+            existing->value_addr = alias_meta.value_addr;
         }
     } else {
         load.maps.push_back(alias_meta);
@@ -2522,6 +2764,28 @@ const MapMeta *find_single_cilium_calls_map(const ProgramLoadPlan &load)
         }
         if (match && match->kernel_addr != meta.kernel_addr) {
             fail("native map symbol cilium_calls matches multiple loaded Cilium prog arrays");
+        }
+        match = &meta;
+    }
+    return match;
+}
+
+const MapMeta *find_source_tail_call_map_alias(const ProgramLoadPlan &load,
+                                               const std::string &name)
+{
+    const NativeMapShape want_shape = expected_native_map_shape(name);
+    if (want_shape.type != BPF_MAP_TYPE_PROG_ARRAY) {
+        return nullptr;
+    }
+
+    const MapMeta *match = nullptr;
+    for (const MapMeta &meta : load.source_tail_call_maps) {
+        if (!map_matches_shape(meta, want_shape)) {
+            continue;
+        }
+        if (match && match->kernel_addr != meta.kernel_addr) {
+            fail("native map symbol " + name +
+                 " matches multiple source tail-call prog arrays");
         }
         match = &meta;
     }
@@ -2750,6 +3014,12 @@ void add_native_map_symbol_alias(ProgramLoadPlan &load, const std::string &name)
         return;
     }
 
+    if (const MapMeta *source_tail_call_map =
+            find_source_tail_call_map_alias(load, name)) {
+        add_map_symbol_alias_meta(load, name, *source_tail_call_map);
+        return;
+    }
+
     MapMeta process_map{};
     if (find_open_process_map_by_name(name, process_map)) {
         add_map_meta(load, process_map);
@@ -2766,6 +3036,10 @@ const MapMeta *find_map_meta_by_loaded_name(const ProgramLoadPlan &load,
             if (match && match->kernel_addr != meta.kernel_addr) {
                 fail("loaded map name " + loaded_name +
                      " is ambiguous in native metadata");
+            }
+            if (match && !fd_is_bpf_map(match->fd) && fd_is_bpf_map(meta.fd)) {
+                match = &meta;
+                continue;
             }
             match = &meta;
         }
@@ -2920,6 +3194,15 @@ NativeMapShape inner_map_shape_for_outer_map(const MapMeta &meta)
             return NativeMapShape{BPF_MAP_TYPE_HASH, 4, 1, 128};
         }
     }
+    if (meta.type == BPF_MAP_TYPE_HASH_OF_MAPS &&
+        meta.key_size == 8 &&
+        meta.value_size == 4 &&
+        meta.max_entries == 65536) {
+        const int bucket = parse_otel_stack_delta_bucket(meta.name);
+        if (bucket >= 0) {
+            return NativeMapShape{BPF_MAP_TYPE_ARRAY, 4, 4, 1u << bucket};
+        }
+    }
 
     return NativeMapShape{};
 }
@@ -2978,7 +3261,9 @@ bool configure_lookup_site_for_shape(ProgramLoadPlan::LookupSite &site,
     return false;
 }
 
-ProgramLoadPlan::LookupSite oracle_call_lookup_site_for_map_meta(const MapMeta &meta)
+ProgramLoadPlan::LookupSite native_lookup_site_for_map_meta(
+    const MapMeta &meta,
+    const BpfArrayOffsets &array_offsets)
 {
     ProgramLoadPlan::LookupSite site{
         ProgramLoadPlan::LookupSite::Kind::Call,
@@ -2992,6 +3277,17 @@ ProgramLoadPlan::LookupSite oracle_call_lookup_site_for_map_meta(const MapMeta &
         {},
     };
     site.map_name = meta.name;
+    ProgramLoadPlan::LookupSite shaped = site;
+    if (configure_lookup_site_for_shape(
+            shaped, map_shape_from_meta(meta), array_offsets) &&
+        (shaped.kind == ProgramLoadPlan::LookupSite::Kind::Array ||
+         shaped.kind == ProgramLoadPlan::LookupSite::Kind::PerCpuArray)) {
+        shaped.map_name = meta.name;
+        return shaped;
+    }
+    if (fd_is_bpf_map(meta.fd)) {
+        site.target_addr = lookup_kernel_map_lookup_elem_ptr_by_fd(meta.fd);
+    }
     return site;
 }
 
@@ -3107,12 +3403,1195 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
     add_known_kconfig_symbol_addrs(load);
 }
 
+struct NativeTextSymbol {
+    std::string name;
+    size_t section_index = 0;
+    uint64_t address = 0;
+    uint64_t size = 0;
+};
+
+struct NativeTextSection {
+    uint64_t address = 0;
+    std::vector<uint8_t> bytes;
+};
+
+std::vector<uint8_t> read_elf_section_bytes(Elf *elf, Elf_Scn *scn,
+                                            const GElf_Shdr &shdr,
+                                            const std::filesystem::path &path)
+{
+    std::vector<uint8_t> bytes(shdr.sh_size);
+    Elf_Data *data = nullptr;
+    while ((data = elf_getdata(scn, data)) != nullptr) {
+        if (!data->d_buf || data->d_size == 0) {
+            continue;
+        }
+        if (data->d_off > bytes.size() ||
+            data->d_size > bytes.size() - data->d_off) {
+            fail("ELF section data exceeds section bounds in " + path.string());
+        }
+        std::memcpy(bytes.data() + data->d_off, data->d_buf, data->d_size);
+    }
+    return bytes;
+}
+
+std::vector<int> scan_x86_native_helper_calls(
+    const NativeTextSymbol &sym,
+    const NativeTextSection &section,
+    const std::vector<NativeTextSymbol> &symbols,
+    std::unordered_set<std::string> &visited)
+{
+    struct RegImm {
+        bool valid = false;
+        int64_t value = 0;
+    };
+
+    auto clear_call_clobbered = [](std::array<RegImm, 16> &regs) {
+        for (int reg : {0, 1, 2, 6, 7, 8, 9, 10, 11}) {
+            regs[static_cast<size_t>(reg)] = RegImm{};
+        }
+    };
+    auto helper_id_from_reg = [](const std::array<RegImm, 16> &regs, int reg) -> int {
+        const RegImm &state = regs[static_cast<size_t>(reg)];
+        if (!state.valid || state.value < 0 ||
+            state.value > std::numeric_limits<int>::max()) {
+            return -1;
+        }
+        return static_cast<int>(state.value);
+    };
+    auto find_symbol_at = [&](uint64_t section_addr,
+                              uint64_t target) -> const NativeTextSymbol * {
+        for (const NativeTextSymbol &candidate : symbols) {
+            if (candidate.section_index == sym.section_index &&
+                section_addr + candidate.address == target) {
+                return &candidate;
+            }
+        }
+        return nullptr;
+    };
+    auto decode_prefix = [](const std::vector<uint8_t> &bytes,
+                            size_t i,
+                            uint8_t &rex) -> size_t {
+        rex = 0;
+        while (i < bytes.size()) {
+            const uint8_t byte = bytes[i];
+            if (byte >= 0x40 && byte <= 0x4f) {
+                rex = byte;
+                i++;
+                continue;
+            }
+            if (byte == 0x66 || byte == 0x67 ||
+                byte == 0xf2 || byte == 0xf3 ||
+                byte == 0x2e || byte == 0x36 ||
+                byte == 0x3e || byte == 0x26 ||
+                byte == 0x64 || byte == 0x65) {
+                i++;
+                continue;
+            }
+            break;
+        }
+        return i;
+    };
+
+    std::vector<int> helper_ids;
+    const uint64_t section_addr = section.address;
+    if (sym.address < section_addr) {
+        fail("native symbol " + sym.name + " is below executable section base");
+    }
+    const uint64_t start64 = sym.address - section_addr;
+    if (start64 > section.bytes.size()) {
+        fail("native symbol " + sym.name + " starts past executable section data");
+    }
+    const size_t start = static_cast<size_t>(start64);
+    const size_t end = static_cast<size_t>(
+        std::min<uint64_t>(section.bytes.size(), start64 + sym.size));
+    const std::vector<uint8_t> &bytes = section.bytes;
+
+    auto modrm_end_from = [&](size_t modrm_index, size_t imm_size) -> size_t {
+        if (modrm_index >= end) {
+            return 0;
+        }
+        const uint8_t modrm = bytes[modrm_index];
+        const uint8_t mod = modrm & 0xc0;
+        const uint8_t rm = modrm & 0x7;
+        size_t idx = modrm_index + 1;
+        uint8_t base = rm;
+        if (mod != 0xc0 && rm == 4) {
+            if (idx >= end) {
+                return 0;
+            }
+            const uint8_t sib = bytes[idx++];
+            base = sib & 0x7;
+        }
+        if (mod == 0x00) {
+            if (rm == 5 || (rm == 4 && base == 5)) {
+                idx += 4;
+            }
+        } else if (mod == 0x40) {
+            idx += 1;
+        } else if (mod == 0x80) {
+            idx += 4;
+        }
+        idx += imm_size;
+        return idx <= end ? idx : 0;
+    };
+    auto modrm_insn_end = [&](size_t opcode_index,
+                              size_t opcode_len,
+                              size_t imm_size) -> size_t {
+        return modrm_end_from(opcode_index + opcode_len, imm_size);
+    };
+    auto known_insn_end = [&](size_t opcode_index, uint8_t rex) -> size_t {
+        const uint8_t op = bytes[opcode_index];
+        if ((op >= 0x50 && op <= 0x5f) || op == 0x90 ||
+            op == 0xc3 || op == 0xcb || op == 0xf9 ||
+            op == 0xfc || op == 0xfd) {
+            return opcode_index + 1 <= end ? opcode_index + 1 : 0;
+        }
+        if (op >= 0x70 && op <= 0x7f) {
+            return opcode_index + 2 <= end ? opcode_index + 2 : 0;
+        }
+        if (op == 0xeb) {
+            return opcode_index + 2 <= end ? opcode_index + 2 : 0;
+        }
+        if (op == 0xe9 || op == 0xe8) {
+            return opcode_index + 5 <= end ? opcode_index + 5 : 0;
+        }
+        if (op == 0x6a) {
+            return opcode_index + 2 <= end ? opcode_index + 2 : 0;
+        }
+        if (op == 0x68) {
+            return opcode_index + 5 <= end ? opcode_index + 5 : 0;
+        }
+        if ((op & 0xf8) == 0xb8) {
+            const size_t imm_size = (rex & 0x8) ? 8 : 4;
+            return opcode_index + 1 + imm_size <= end
+                ? opcode_index + 1 + imm_size
+                : 0;
+        }
+        if (op == 0x04 || op == 0x0c || op == 0x14 || op == 0x1c ||
+            op == 0x24 || op == 0x2c || op == 0x34 || op == 0x3c) {
+            return opcode_index + 2 <= end ? opcode_index + 2 : 0;
+        }
+        if (op == 0x05 || op == 0x0d || op == 0x15 || op == 0x1d ||
+            op == 0x25 || op == 0x2d || op == 0x35 || op == 0x3d) {
+            return opcode_index + 5 <= end ? opcode_index + 5 : 0;
+        }
+        switch (op) {
+        case 0x00: case 0x01: case 0x02: case 0x03:
+        case 0x08: case 0x09: case 0x0a: case 0x0b:
+        case 0x10: case 0x11: case 0x12: case 0x13:
+        case 0x18: case 0x19: case 0x1a: case 0x1b:
+        case 0x20: case 0x21: case 0x22: case 0x23:
+        case 0x28: case 0x29: case 0x2a: case 0x2b:
+        case 0x30: case 0x31: case 0x32: case 0x33:
+        case 0x38: case 0x39: case 0x3a: case 0x3b:
+        case 0x84: case 0x85: case 0x87:
+        case 0x88: case 0x89: case 0x8a: case 0x8b:
+        case 0x8d: case 0x8f: case 0x63:
+        case 0xd1: case 0xd3: case 0xf6: case 0xf7:
+        case 0xfe: case 0xff:
+            return modrm_insn_end(opcode_index, 1, 0);
+        case 0x80: case 0x82: case 0x83:
+        case 0xc0: case 0xc1: case 0xc6:
+            return modrm_insn_end(opcode_index, 1, 1);
+        case 0x81: case 0xc7:
+            return modrm_insn_end(opcode_index, 1, 4);
+        default:
+            break;
+        }
+        if (op == 0x0f && opcode_index + 1 < end) {
+            const uint8_t op2 = bytes[opcode_index + 1];
+            if (op2 >= 0x80 && op2 <= 0x8f) {
+                return opcode_index + 6 <= end ? opcode_index + 6 : 0;
+            }
+            if (op2 == 0x38 && opcode_index + 2 < end) {
+                return modrm_insn_end(opcode_index, 3, 0);
+            }
+            switch (op2) {
+            case 0x1f:
+            case 0x40: case 0x41: case 0x42: case 0x43:
+            case 0x44: case 0x45: case 0x46: case 0x47:
+            case 0x48: case 0x49: case 0x4a: case 0x4b:
+            case 0x4c: case 0x4d: case 0x4e: case 0x4f:
+            case 0xaf:
+            case 0xb6: case 0xb7: case 0xbe: case 0xbf:
+                return modrm_insn_end(opcode_index, 2, 0);
+            case 0xba:
+                return modrm_insn_end(opcode_index, 2, 1);
+            default:
+                break;
+            }
+        }
+        if (op == 0xc5 && opcode_index + 2 < end) {
+            return modrm_end_from(opcode_index + 3, 0);
+        }
+        if (op == 0xc4 && opcode_index + 3 < end) {
+            return modrm_end_from(opcode_index + 4, 0);
+        }
+        return 0;
+    };
+
+    const std::string visit_key =
+        std::to_string(sym.section_index) + ":" + std::to_string(sym.address);
+    if (!visited.insert(visit_key).second) {
+        return {};
+    }
+
+    std::array<RegImm, 16> regs{};
+
+    for (size_t i = start; i < end;) {
+        uint8_t rex = 0;
+        const size_t p = decode_prefix(bytes, i, rex);
+        if (p >= end) {
+            break;
+        }
+        const uint8_t op = bytes[p];
+
+        if ((op & 0xf8) == 0xb8 && (rex & 0x8) && p + 9 <= end) {
+            uint64_t imm = 0;
+            std::memcpy(&imm, bytes.data() + p + 1, sizeof(imm));
+            const int reg = (op & 0x7) + ((rex & 0x1) ? 8 : 0);
+            regs[static_cast<size_t>(reg)] = imm <=
+                    static_cast<uint64_t>(std::numeric_limits<int64_t>::max())
+                ? RegImm{true, static_cast<int64_t>(imm)}
+                : RegImm{};
+            i = p + 9;
+            continue;
+        }
+
+        if ((op & 0xf8) == 0xb8 && p + 5 <= end) {
+            int32_t imm = 0;
+            std::memcpy(&imm, bytes.data() + p + 1, sizeof(imm));
+            const int reg = (op & 0x7) + ((rex & 0x1) ? 8 : 0);
+            regs[static_cast<size_t>(reg)] =
+                RegImm{true, static_cast<int64_t>(imm)};
+            i = p + 5;
+            continue;
+        }
+
+        if (op == 0xc7 && p + 2 <= end) {
+            const size_t insn_end = modrm_insn_end(p, 1, 4);
+            if (insn_end == 0) {
+                fail("native helper scanner hit truncated x86 C7 instruction in "
+                     + sym.name);
+            }
+            const uint8_t modrm = bytes[p + 1];
+            if ((modrm & 0xc0) == 0xc0 && ((modrm >> 3) & 0x7) == 0) {
+                int32_t imm = 0;
+                std::memcpy(&imm, bytes.data() + p + 2, sizeof(imm));
+                const int reg = (modrm & 0x7) + ((rex & 0x1) ? 8 : 0);
+                regs[static_cast<size_t>(reg)] =
+                    RegImm{true, static_cast<int64_t>(imm)};
+            }
+            i = insn_end;
+            continue;
+        }
+
+        if ((op == 0x89 || op == 0x8b) && p + 2 <= end) {
+            const size_t insn_end = modrm_insn_end(p, 1, 0);
+            if (insn_end == 0) {
+                fail("native helper scanner hit truncated x86 mov instruction in "
+                     + sym.name);
+            }
+            const uint8_t modrm = bytes[p + 1];
+            const int reg_field = ((modrm >> 3) & 0x7) + ((rex & 0x4) ? 8 : 0);
+            if ((modrm & 0xc0) == 0xc0) {
+                const int rm_field = (modrm & 0x7) + ((rex & 0x1) ? 8 : 0);
+                const int dst = op == 0x89 ? rm_field : reg_field;
+                const int src = op == 0x89 ? reg_field : rm_field;
+                regs[static_cast<size_t>(dst)] = regs[static_cast<size_t>(src)];
+                i = insn_end;
+                continue;
+            }
+            if (op == 0x8b) {
+                regs[static_cast<size_t>(reg_field)] = RegImm{};
+            }
+            i = insn_end;
+            continue;
+        }
+
+        if ((op == 0x31 || op == 0x33 || op == 0x29 || op == 0x2b ||
+             op == 0x01 || op == 0x03 || op == 0x09 || op == 0x0b ||
+             op == 0x21 || op == 0x23) &&
+            p + 2 <= end) {
+            const size_t insn_end = modrm_insn_end(p, 1, 0);
+            if (insn_end == 0) {
+                fail("native helper scanner hit truncated x86 ALU instruction in "
+                     + sym.name);
+            }
+            const uint8_t modrm = bytes[p + 1];
+            const int reg_field =
+                ((modrm >> 3) & 0x7) + ((rex & 0x4) ? 8 : 0);
+            const bool dst_is_reg_field =
+                op == 0x33 || op == 0x2b || op == 0x03 ||
+                op == 0x0b || op == 0x23;
+            if ((modrm & 0xc0) == 0xc0) {
+                const int rm_field = (modrm & 0x7) + ((rex & 0x1) ? 8 : 0);
+                const int dst = dst_is_reg_field ? reg_field : rm_field;
+                regs[static_cast<size_t>(dst)] = RegImm{};
+            } else if (dst_is_reg_field) {
+                regs[static_cast<size_t>(reg_field)] = RegImm{};
+            }
+            i = insn_end;
+            continue;
+        }
+
+        if (op == 0x8d && p + 2 <= end) {
+            const size_t insn_end = modrm_insn_end(p, 1, 0);
+            if (insn_end == 0) {
+                fail("native helper scanner hit truncated x86 lea instruction in "
+                     + sym.name);
+            }
+            const uint8_t modrm = bytes[p + 1];
+            const int dst = ((modrm >> 3) & 0x7) + ((rex & 0x4) ? 8 : 0);
+            regs[static_cast<size_t>(dst)] = RegImm{};
+            i = insn_end;
+            continue;
+        }
+
+        if (op == 0xff && p + 2 <= end) {
+            const size_t insn_end = modrm_insn_end(p, 1, 0);
+            if (insn_end == 0) {
+                fail("native helper scanner hit truncated x86 FF instruction in "
+                     + sym.name);
+            }
+            const uint8_t modrm = bytes[p + 1];
+            const uint8_t mod = modrm & 0xc0;
+            const uint8_t subop = (modrm >> 3) & 0x7;
+            if (mod == 0xc0 && subop == 2) {
+                const int reg = (modrm & 0x7) + ((rex & 0x1) ? 8 : 0);
+                const int helper_id = helper_id_from_reg(regs, reg);
+                if (helper_id >= 0) {
+                    helper_ids.push_back(helper_id);
+                }
+                clear_call_clobbered(regs);
+            }
+            i = insn_end;
+            continue;
+        }
+
+        if (op == 0xe8 && p + 5 <= end) {
+            int32_t disp = 0;
+            std::memcpy(&disp, bytes.data() + p + 1, sizeof(disp));
+            const uint64_t next = section_addr + p + 5;
+            const uint64_t target =
+                static_cast<uint64_t>(static_cast<int64_t>(next) + disp);
+            const NativeTextSymbol *target_sym = find_symbol_at(section_addr, target);
+            if (target_sym) {
+                for (int helper_id : scan_x86_native_helper_calls(
+                         *target_sym, section, symbols, visited)) {
+                    helper_ids.push_back(helper_id);
+                }
+            }
+            clear_call_clobbered(regs);
+            i = p + 5;
+            continue;
+        }
+
+        if (op == 0xc3 || op == 0xcb || op == 0xc2 || op == 0xca) {
+            clear_call_clobbered(regs);
+        }
+
+        const size_t insn_end = known_insn_end(p, rex);
+        i = insn_end != 0 ? insn_end : i + 1;
+    }
+    return helper_ids;
+}
+
+std::vector<int> collect_native_helper_call_ids(
+    const std::filesystem::path &native_object,
+    const std::string &symbol_name)
+{
+    int fd = open(native_object.c_str(), O_RDONLY | O_CLOEXEC);
+    if (fd < 0) {
+        fail("open native object " + native_object.string() + ": " + std::strerror(errno));
+    }
+    if (elf_version(EV_CURRENT) == EV_NONE) {
+        close(fd);
+        fail("libelf initialization failed");
+    }
+    Elf *elf = elf_begin(fd, ELF_C_READ, nullptr);
+    if (!elf) {
+        close(fd);
+        fail("elf_begin " + native_object.string() + ": " + elf_errmsg(-1));
+    }
+
+    std::unordered_map<size_t, NativeTextSection> sections;
+    Elf_Scn *scn = nullptr;
+    while ((scn = elf_nextscn(elf, scn)) != nullptr) {
+        GElf_Shdr shdr = {};
+        if (!gelf_getshdr(scn, &shdr)) {
+            elf_end(elf);
+            close(fd);
+            fail("gelf_getshdr " + native_object.string() + ": " + elf_errmsg(-1));
+        }
+        if ((shdr.sh_flags & SHF_EXECINSTR) == 0 || shdr.sh_size == 0) {
+            continue;
+        }
+        sections.emplace(
+            elf_ndxscn(scn),
+            NativeTextSection{shdr.sh_addr,
+                              read_elf_section_bytes(elf, scn, shdr, native_object)});
+    }
+
+    std::vector<NativeTextSymbol> symbols;
+    scn = nullptr;
+    while ((scn = elf_nextscn(elf, scn)) != nullptr) {
+        GElf_Shdr shdr = {};
+        if (!gelf_getshdr(scn, &shdr)) {
+            elf_end(elf);
+            close(fd);
+            fail("gelf_getshdr " + native_object.string() + ": " + elf_errmsg(-1));
+        }
+        if (shdr.sh_type != SHT_SYMTAB && shdr.sh_type != SHT_DYNSYM) {
+            continue;
+        }
+        Elf_Data *data = elf_getdata(scn, nullptr);
+        if (!data || shdr.sh_entsize == 0) {
+            continue;
+        }
+        const size_t count = shdr.sh_size / shdr.sh_entsize;
+        for (size_t i = 0; i < count; i++) {
+            GElf_Sym sym = {};
+            if (!gelf_getsym(data, static_cast<int>(i), &sym)) {
+                elf_end(elf);
+                close(fd);
+                fail("gelf_getsym " + native_object.string() + ": " + elf_errmsg(-1));
+            }
+            if (GELF_ST_TYPE(sym.st_info) != STT_FUNC ||
+                sym.st_size == 0 ||
+                sym.st_shndx == SHN_UNDEF ||
+                sym.st_shndx >= SHN_LORESERVE) {
+                continue;
+            }
+            if (!sections.count(sym.st_shndx)) {
+                continue;
+            }
+            const char *name = elf_strptr(elf, shdr.sh_link, sym.st_name);
+            if (!name || !name[0]) {
+                continue;
+            }
+            symbols.push_back(NativeTextSymbol{
+                name,
+                static_cast<size_t>(sym.st_shndx),
+                sym.st_value,
+                sym.st_size,
+            });
+        }
+    }
+
+    std::vector<int> helper_ids;
+    bool found_entry = false;
+    for (const NativeTextSymbol &sym : symbols) {
+        if (sym.name != symbol_name) {
+            continue;
+        }
+        auto sec_it = sections.find(sym.section_index);
+        if (sec_it == sections.end()) {
+            continue;
+        }
+        found_entry = true;
+#if defined(__x86_64__)
+        std::unordered_set<std::string> visited;
+        helper_ids = scan_x86_native_helper_calls(
+            sym, sec_it->second, symbols, visited);
+#endif
+        break;
+    }
+    elf_end(elf);
+    close(fd);
+    if (!found_entry) {
+        fail("native object " + native_object.string() +
+             " does not contain entry symbol " + symbol_name);
+    }
+    return helper_ids;
+}
+
+bool native_link_resolves_helper_target(int helper_id)
+{
+    switch (helper_id) {
+    case BPF_FUNC_map_lookup_elem:
+    case BPF_FUNC_map_update_elem:
+    case BPF_FUNC_map_delete_elem:
+    case BPF_FUNC_tail_call:
+    case BPF_FUNC_get_smp_processor_id:
+    case BPF_FUNC_get_current_task:
+    case BPF_FUNC_get_current_task_btf:
+        return false;
+    default:
+        return true;
+    }
+}
+
+std::vector<int> collect_xlated_call_imms(const std::vector<uint8_t> &xlated)
+{
+    if (xlated.size() % sizeof(bpf_insn) != 0) {
+        fail("native_kernel helper target oracle xlated image is truncated");
+    }
+    std::vector<int> ids;
+    const bpf_insn *insns =
+        reinterpret_cast<const bpf_insn *>(xlated.data());
+    const size_t cnt = xlated.size() / sizeof(bpf_insn);
+    for (size_t i = 0; i < cnt; i++) {
+        const bpf_insn &in = insns[i];
+        if (in.code == (BPF_LD | BPF_DW | BPF_IMM)) {
+            i++;
+            continue;
+        }
+        if (in.code != (BPF_JMP | BPF_CALL)) {
+            continue;
+        }
+        if (in.src_reg == BPF_PSEUDO_CALL ||
+            in.src_reg == BPF_PSEUDO_KFUNC_CALL ||
+            in.src_reg == BPF_PSEUDO_KINSN_CALL) {
+            continue;
+        }
+        if (in.src_reg != 0) {
+            fail("native_kernel helper target oracle has unsupported xlated call src_reg="
+                 + std::to_string(static_cast<unsigned>(in.src_reg)));
+        }
+        ids.push_back(in.imm);
+    }
+    return ids;
+}
+
+bpf_insn bpf_insn_make(uint8_t code, uint8_t dst, uint8_t src,
+                       int16_t off, int32_t imm)
+{
+    return bpf_insn{code, dst, src, off, imm};
+}
+
+void emit_mov_imm(std::vector<bpf_insn> &insns, uint8_t dst, int32_t imm)
+{
+    insns.push_back(
+        bpf_insn_make(BPF_ALU64 | BPF_MOV | BPF_K, dst, 0, 0, imm));
+}
+
+void emit_mov_reg(std::vector<bpf_insn> &insns, uint8_t dst, uint8_t src)
+{
+    insns.push_back(
+        bpf_insn_make(BPF_ALU64 | BPF_MOV | BPF_X, dst, src, 0, 0));
+}
+
+void emit_ld_map_fd(std::vector<bpf_insn> &insns, uint8_t dst, int map_fd)
+{
+    if (map_fd < 0) {
+        fail("native_kernel helper target oracle got invalid map fd");
+    }
+    insns.push_back(bpf_insn{
+        .code = BPF_LD | BPF_DW | BPF_IMM,
+        .dst_reg = dst,
+        .src_reg = BPF_PSEUDO_MAP_FD,
+        .off = 0,
+        .imm = map_fd,
+    });
+    insns.push_back(bpf_insn{
+        .code = 0, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
+    });
+}
+
+void emit_add_imm(std::vector<bpf_insn> &insns, uint8_t dst, int32_t imm)
+{
+    insns.push_back(
+        bpf_insn_make(BPF_ALU64 | BPF_ADD | BPF_K, dst, 0, 0, imm));
+}
+
+void emit_stack_ptr(std::vector<bpf_insn> &insns, uint8_t dst, int16_t off)
+{
+    emit_mov_reg(insns, dst, BPF_REG_10);
+    emit_add_imm(insns, dst, off);
+}
+
+void emit_stack_zero(std::vector<bpf_insn> &insns, int16_t off)
+{
+    insns.push_back(
+        bpf_insn_make(BPF_ST | BPF_MEM | BPF_DW, BPF_REG_10, 0, off, 0));
+}
+
+void emit_stack_zero_range(std::vector<bpf_insn> &insns, int16_t first_off,
+                           int size)
+{
+    if (first_off >= 0 || size <= 0 ||
+        (static_cast<int>(first_off) + size) > 0) {
+        fail("native_kernel helper target oracle got invalid stack range");
+    }
+    for (int off = first_off; off < first_off + size; off += 8) {
+        emit_stack_zero(insns, static_cast<int16_t>(off));
+    }
+}
+
+void emit_call(std::vector<bpf_insn> &insns, int helper_id)
+{
+    insns.push_back(
+        bpf_insn_make(BPF_JMP | BPF_CALL, 0, 0, 0, helper_id));
+}
+
+void emit_jeq_imm(std::vector<bpf_insn> &insns, uint8_t dst, int32_t imm,
+                  int16_t off)
+{
+    insns.push_back(
+        bpf_insn_make(BPF_JMP | BPF_JEQ | BPF_K, dst, 0, off, imm));
+}
+
+void emit_exit(std::vector<bpf_insn> &insns)
+{
+    insns.push_back(bpf_insn_make(BPF_JMP | BPF_EXIT, 0, 0, 0, 0));
+}
+
+void emit_helper_target_oracle_invocation(int helper_id,
+                                          std::vector<bpf_insn> &insns,
+                                          int helper_map_fd)
+{
+    auto finish = [&]() {
+        emit_call(insns, helper_id);
+    };
+    auto prepare_stack = [&]() {
+        emit_stack_zero(insns, -8);
+        emit_stack_zero(insns, -16);
+    };
+    auto prepare_sock_tuple = [&]() -> std::pair<int16_t, int> {
+        const int tuple_size =
+            static_cast<int>(sizeof(((struct bpf_sock_tuple *)0)->ipv4));
+        const int tuple_aligned = (tuple_size + 7) & ~7;
+        const int16_t tuple_off = static_cast<int16_t>(-tuple_aligned);
+        emit_stack_zero_range(insns, tuple_off, tuple_aligned);
+        return {tuple_off, tuple_size};
+    };
+
+    switch (helper_id) {
+    case BPF_FUNC_ktime_get_ns:
+    case BPF_FUNC_ktime_get_boot_ns:
+    case BPF_FUNC_get_smp_processor_id:
+    case BPF_FUNC_get_prandom_u32:
+    case BPF_FUNC_get_numa_node_id:
+    case BPF_FUNC_jiffies64:
+        finish();
+        return;
+    case BPF_FUNC_xdp_adjust_meta:
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_mov_imm(insns, BPF_REG_2, -4);
+        finish();
+        return;
+    case BPF_FUNC_xdp_adjust_head:
+    case BPF_FUNC_xdp_adjust_tail:
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_mov_imm(insns, BPF_REG_2, 1);
+        finish();
+        return;
+    case BPF_FUNC_xdp_get_buff_len:
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        finish();
+        return;
+    case BPF_FUNC_xdp_load_bytes:
+    case BPF_FUNC_xdp_store_bytes:
+        prepare_stack();
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_mov_imm(insns, BPF_REG_2, 0);
+        emit_stack_ptr(insns, BPF_REG_3, -16);
+        emit_mov_imm(insns, BPF_REG_4, 1);
+        finish();
+        return;
+    case BPF_FUNC_perf_event_output:
+        prepare_stack();
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_ld_map_fd(insns, BPF_REG_2, helper_map_fd);
+        emit_mov_imm(insns, BPF_REG_3, -1);
+        emit_stack_ptr(insns, BPF_REG_4, -16);
+        emit_mov_imm(insns, BPF_REG_5, 1);
+        finish();
+        return;
+    case BPF_FUNC_skb_load_bytes:
+        prepare_stack();
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_mov_imm(insns, BPF_REG_2, 0);
+        emit_stack_ptr(insns, BPF_REG_3, -16);
+        emit_mov_imm(insns, BPF_REG_4, 1);
+        finish();
+        return;
+    case BPF_FUNC_skb_store_bytes:
+        prepare_stack();
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_mov_imm(insns, BPF_REG_2, 0);
+        emit_stack_ptr(insns, BPF_REG_3, -16);
+        emit_mov_imm(insns, BPF_REG_4, 1);
+        emit_mov_imm(insns, BPF_REG_5, 0);
+        finish();
+        return;
+    case BPF_FUNC_l3_csum_replace:
+    case BPF_FUNC_l4_csum_replace:
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_mov_imm(insns, BPF_REG_2, 0);
+        emit_mov_imm(insns, BPF_REG_3, 0);
+        emit_mov_imm(insns, BPF_REG_4, 0);
+        emit_mov_imm(insns, BPF_REG_5, 0);
+        finish();
+        return;
+    case BPF_FUNC_csum_diff:
+        prepare_stack();
+        emit_stack_ptr(insns, BPF_REG_1, -16);
+        emit_mov_imm(insns, BPF_REG_2, 4);
+        emit_stack_ptr(insns, BPF_REG_3, -8);
+        emit_mov_imm(insns, BPF_REG_4, 4);
+        emit_mov_imm(insns, BPF_REG_5, 0);
+        finish();
+        return;
+    case BPF_FUNC_clone_redirect:
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_mov_imm(insns, BPF_REG_2, 1);
+        emit_mov_imm(insns, BPF_REG_3, 0);
+        finish();
+        return;
+    case BPF_FUNC_redirect:
+        emit_mov_imm(insns, BPF_REG_1, 1);
+        emit_mov_imm(insns, BPF_REG_2, 0);
+        finish();
+        return;
+    case BPF_FUNC_redirect_neigh:
+        emit_mov_imm(insns, BPF_REG_1, 1);
+        emit_mov_imm(insns, BPF_REG_2, 0);
+        emit_mov_imm(insns, BPF_REG_3, 0);
+        emit_mov_imm(insns, BPF_REG_4, 0);
+        finish();
+        return;
+    case BPF_FUNC_redirect_peer:
+        emit_mov_imm(insns, BPF_REG_1, 1);
+        emit_mov_imm(insns, BPF_REG_2, 0);
+        finish();
+        return;
+    case BPF_FUNC_skb_pull_data:
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_mov_imm(insns, BPF_REG_2, 0);
+        finish();
+        return;
+    case BPF_FUNC_skb_change_tail:
+    case BPF_FUNC_skb_change_head:
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_mov_imm(insns, BPF_REG_2, 0);
+        emit_mov_imm(insns, BPF_REG_3, 0);
+        finish();
+        return;
+    case BPF_FUNC_skb_change_type:
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_mov_imm(insns, BPF_REG_2, 0);
+        finish();
+        return;
+    case BPF_FUNC_skb_change_proto:
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_mov_imm(insns, BPF_REG_2, 0x0800);
+        emit_mov_imm(insns, BPF_REG_3, 0);
+        finish();
+        return;
+    case BPF_FUNC_skb_adjust_room:
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_mov_imm(insns, BPF_REG_2, 0);
+        emit_mov_imm(insns, BPF_REG_3, 0);
+        emit_mov_imm(insns, BPF_REG_4, 0);
+        emit_mov_imm(insns, BPF_REG_5, 0);
+        finish();
+        return;
+    case BPF_FUNC_sk_lookup_tcp:
+    case BPF_FUNC_sk_lookup_udp:
+    case BPF_FUNC_skc_lookup_tcp: {
+        const auto [tuple_off, tuple_size] = prepare_sock_tuple();
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_stack_ptr(insns, BPF_REG_2, tuple_off);
+        emit_mov_imm(insns, BPF_REG_3, tuple_size);
+        emit_mov_imm(insns, BPF_REG_4, -1);
+        emit_mov_imm(insns, BPF_REG_5, 0);
+        finish();
+        emit_jeq_imm(insns, BPF_REG_0, 0, 2);
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_0);
+        emit_call(insns, BPF_FUNC_sk_release);
+        return;
+    }
+    case BPF_FUNC_sk_release: {
+        const auto [tuple_off, tuple_size] = prepare_sock_tuple();
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_stack_ptr(insns, BPF_REG_2, tuple_off);
+        emit_mov_imm(insns, BPF_REG_3, tuple_size);
+        emit_mov_imm(insns, BPF_REG_4, -1);
+        emit_mov_imm(insns, BPF_REG_5, 0);
+        emit_call(insns, BPF_FUNC_skc_lookup_tcp);
+        emit_jeq_imm(insns, BPF_REG_0, 0, 2);
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_0);
+        emit_call(insns, BPF_FUNC_sk_release);
+        return;
+    }
+    case BPF_FUNC_sk_assign: {
+        const auto [tuple_off, tuple_size] = prepare_sock_tuple();
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_stack_ptr(insns, BPF_REG_2, tuple_off);
+        emit_mov_imm(insns, BPF_REG_3, tuple_size);
+        emit_mov_imm(insns, BPF_REG_4, -1);
+        emit_mov_imm(insns, BPF_REG_5, 0);
+        emit_call(insns, BPF_FUNC_skc_lookup_tcp);
+        emit_jeq_imm(insns, BPF_REG_0, 0, 7);
+        emit_mov_reg(insns, BPF_REG_7, BPF_REG_0);
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_mov_reg(insns, BPF_REG_2, BPF_REG_7);
+        emit_mov_imm(insns, BPF_REG_3, 0);
+        emit_call(insns, BPF_FUNC_sk_assign);
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_7);
+        emit_call(insns, BPF_FUNC_sk_release);
+        return;
+    }
+    case BPF_FUNC_fib_lookup: {
+        const int fib_size = static_cast<int>(sizeof(struct bpf_fib_lookup));
+        const int fib_aligned = (fib_size + 7) & ~7;
+        const int16_t fib_off = static_cast<int16_t>(-fib_aligned);
+        emit_stack_zero_range(insns, fib_off, fib_aligned);
+        emit_mov_reg(insns, BPF_REG_1, BPF_REG_6);
+        emit_stack_ptr(insns, BPF_REG_2, fib_off);
+        emit_mov_imm(insns, BPF_REG_3, fib_size);
+        emit_mov_imm(insns, BPF_REG_4, 0);
+        finish();
+        return;
+    }
+    default:
+        fail("native_kernel helper target oracle has no verifier template for helper id "
+             + std::to_string(helper_id));
+    }
+}
+
+void build_helper_target_oracle_program(int helper_id,
+                                        std::vector<bpf_insn> &insns,
+                                        int helper_map_fd)
+{
+    emit_mov_reg(insns, BPF_REG_6, BPF_REG_1);
+    emit_helper_target_oracle_invocation(helper_id, insns, helper_map_fd);
+    emit_helper_target_oracle_invocation(
+        helper_id == BPF_FUNC_get_prandom_u32
+            ? BPF_FUNC_ktime_get_ns
+            : BPF_FUNC_get_prandom_u32,
+        insns,
+        -1);
+    emit_exit(insns);
+}
+
+bool jit_target_is_inside_image(uint64_t target, uint64_t base, size_t len)
+{
+    if (target < base) {
+        return false;
+    }
+    return target - base < len;
+}
+
+#if defined(__x86_64__)
+void clear_x86_oracle_call_clobbered(std::unordered_map<int, uint64_t> &regs)
+{
+    for (int reg : {0, 1, 2, 6, 7, 8, 9, 10, 11}) {
+        regs.erase(reg);
+    }
+}
+
+std::vector<uint64_t> decode_external_call_targets_from_jit(
+    const std::vector<uint8_t> &jited,
+    uint64_t base)
+{
+    std::vector<uint64_t> targets;
+    std::unordered_map<int, uint64_t> regs;
+    for (size_t i = 0; i < jited.size();) {
+        const uint8_t b0 = jited[i];
+        if (b0 == 0xe8 && i + 5 <= jited.size()) {
+            int32_t disp = 0;
+            std::memcpy(&disp, jited.data() + i + 1, sizeof(disp));
+            const uint64_t ip_after = base + i + 5;
+            const uint64_t target =
+                static_cast<uint64_t>(static_cast<int64_t>(ip_after) + disp);
+            if (!jit_target_is_inside_image(target, base, jited.size())) {
+                targets.push_back(target);
+            }
+            clear_x86_oracle_call_clobbered(regs);
+            i += 5;
+            continue;
+        }
+        if ((b0 == 0x48 || b0 == 0x49) && i + 10 <= jited.size() &&
+            (jited[i + 1] & 0xf8) == 0xb8) {
+            uint64_t imm = 0;
+            std::memcpy(&imm, jited.data() + i + 2, sizeof(imm));
+            const int reg = (jited[i + 1] & 0x7) + (b0 == 0x49 ? 8 : 0);
+            regs[reg] = imm;
+            i += 10;
+            continue;
+        }
+        if ((b0 == 0x48 || b0 == 0x49) && i + 7 <= jited.size() &&
+            jited[i + 1] == 0xc7 && (jited[i + 2] & 0xf8) == 0xc0) {
+            int32_t imm = 0;
+            std::memcpy(&imm, jited.data() + i + 3, sizeof(imm));
+            const int reg = (jited[i + 2] & 0x7) + (b0 == 0x49 ? 8 : 0);
+            regs[reg] = static_cast<uint64_t>(static_cast<int64_t>(imm));
+            i += 7;
+            continue;
+        }
+        if (b0 == 0xff && i + 2 <= jited.size() &&
+            (jited[i + 1] & 0xf8) == 0xd0) {
+            const int reg = jited[i + 1] & 0x7;
+            auto it = regs.find(reg);
+            if (it != regs.end() &&
+                !jit_target_is_inside_image(it->second, base, jited.size())) {
+                targets.push_back(it->second);
+            }
+            clear_x86_oracle_call_clobbered(regs);
+            i += 2;
+            continue;
+        }
+        if (b0 == 0x41 && i + 3 <= jited.size() && jited[i + 1] == 0xff &&
+            (jited[i + 2] & 0xf8) == 0xd0) {
+            const int reg = 8 + (jited[i + 2] & 0x7);
+            auto it = regs.find(reg);
+            if (it != regs.end() &&
+                !jit_target_is_inside_image(it->second, base, jited.size())) {
+                targets.push_back(it->second);
+            }
+            clear_x86_oracle_call_clobbered(regs);
+            i += 3;
+            continue;
+        }
+        i++;
+    }
+    return targets;
+}
+#elif defined(__aarch64__)
+struct Arm64OracleReg {
+    bool valid = false;
+    uint64_t value = 0;
+};
+
+int64_t sign_extend_bits(uint64_t value, unsigned bits)
+{
+    const uint64_t sign = 1ULL << (bits - 1);
+    const uint64_t mask = (1ULL << bits) - 1;
+    return static_cast<int64_t>(((value & mask) ^ sign) - sign);
+}
+
+std::vector<uint64_t> decode_external_call_targets_from_jit(
+    const std::vector<uint8_t> &jited,
+    uint64_t base)
+{
+    if (jited.size() % 4 != 0) {
+        fail("native_kernel helper target oracle arm64 JIT length is not 4-byte aligned");
+    }
+    std::vector<uint64_t> targets;
+    Arm64OracleReg regs[32];
+    for (size_t idx = 0; idx < jited.size() / 4; idx++) {
+        uint32_t word = 0;
+        std::memcpy(&word, jited.data() + idx * 4, sizeof(word));
+        const uint32_t kind = word & 0xff80'0000u;
+        if (kind == 0x9280'0000u || kind == 0xd280'0000u ||
+            kind == 0xf280'0000u) {
+            const size_t rd = word & 0x1fu;
+            const unsigned shift = ((word >> 21) & 0x3u) * 16u;
+            const uint64_t imm = (word >> 5) & 0xffffu;
+            const bool movk = kind == 0xf280'0000u;
+            const uint64_t value =
+                kind == 0x9280'0000u ? ~(imm << shift) : (imm << shift);
+            if (movk) {
+                if (regs[rd].valid) {
+                    const uint64_t mask = 0xffffULL << shift;
+                    regs[rd].value = (regs[rd].value & ~mask) | value;
+                }
+            } else {
+                regs[rd] = Arm64OracleReg{true, value};
+            }
+            continue;
+        }
+        if ((word & 0xfc00'0000u) == 0x9400'0000u) {
+            const int64_t disp = sign_extend_bits(word & 0x03ff'ffffu, 26) << 2;
+            const uint64_t pc = base + idx * 4;
+            const uint64_t target = static_cast<uint64_t>(
+                static_cast<int64_t>(pc) + disp);
+            if (!jit_target_is_inside_image(target, base, jited.size())) {
+                targets.push_back(target);
+            }
+            continue;
+        }
+        if ((word & 0xffff'fc1fu) == 0xd63f'0000u) {
+            const size_t rn = (word >> 5) & 0x1fu;
+            if (regs[rn].valid &&
+                !jit_target_is_inside_image(regs[rn].value, base, jited.size())) {
+                targets.push_back(regs[rn].value);
+            }
+            regs[rn].valid = false;
+        }
+    }
+    return targets;
+}
+#endif
+
+std::vector<size_t> match_jit_targets_to_xlated_calls(
+    const std::vector<uint64_t> &jit_targets,
+    const std::vector<int> &xlated_call_imms)
+{
+    std::vector<size_t> matched;
+    if (xlated_call_imms.empty()) {
+        return matched;
+    }
+    if (jit_targets.size() < xlated_call_imms.size()) {
+        fail("native_kernel helper target oracle found fewer native calls than xlated BPF calls");
+    }
+    for (size_t start = 0; start < jit_targets.size(); start++) {
+        const int64_t first_imm = xlated_call_imms[0];
+        const uint64_t call_base = first_imm >= 0
+            ? jit_targets[start] - static_cast<uint64_t>(first_imm)
+            : jit_targets[start] + static_cast<uint64_t>(-first_imm);
+        std::vector<size_t> candidate;
+        candidate.reserve(xlated_call_imms.size());
+        candidate.push_back(start);
+        size_t next_jit = start + 1;
+        bool ok = true;
+        for (size_t i = 1; i < xlated_call_imms.size(); i++) {
+            const int64_t imm = xlated_call_imms[i];
+            const uint64_t expected = imm >= 0
+                ? call_base + static_cast<uint64_t>(imm)
+                : call_base - static_cast<uint64_t>(-imm);
+            bool found = false;
+            while (next_jit < jit_targets.size()) {
+                if (jit_targets[next_jit] == expected) {
+                    candidate.push_back(next_jit);
+                    next_jit++;
+                    found = true;
+                    break;
+                }
+                next_jit++;
+            }
+            if (!found) {
+                ok = false;
+                break;
+            }
+        }
+        if (ok) {
+            return candidate;
+        }
+    }
+    fail("native_kernel helper target oracle could not align xlated BPF calls with native calls");
+}
+
+size_t helper_target_oracle_call_index(int helper_id)
+{
+    if (helper_id == BPF_FUNC_sk_release ||
+        helper_id == BPF_FUNC_sk_assign) {
+        return 1;
+    }
+    return 0;
+}
+
+uint64_t decode_helper_target_oracle(int prog_fd, int helper_id)
+{
+    const bpf_prog_info info = load_prog_info(prog_fd);
+    const auto ksyms = load_jited_ksyms(prog_fd, info.nr_jited_ksyms);
+    const uint64_t base = ksyms[0];
+    const std::vector<uint8_t> jited =
+        load_jited_program(prog_fd, info.jited_prog_len);
+    const std::vector<uint8_t> xlated =
+        load_xlated_program(prog_fd, info.xlated_prog_len);
+    const std::vector<int> xlated_call_imms = collect_xlated_call_imms(xlated);
+    const std::vector<uint64_t> targets =
+        decode_external_call_targets_from_jit(jited, base);
+    const std::vector<size_t> matched =
+        match_jit_targets_to_xlated_calls(targets, xlated_call_imms);
+    const size_t call_index = helper_target_oracle_call_index(helper_id);
+    if (call_index < matched.size()) {
+        return targets[matched[call_index]];
+    }
+    std::ostringstream msg;
+    msg << "native_kernel helper target oracle did not retain helper call index "
+        << call_index << " for helper id " << helper_id << " xlated_calls=[";
+    for (size_t i = 0; i < xlated_call_imms.size(); i++) {
+        if (i != 0) {
+            msg << ",";
+        }
+        msg << xlated_call_imms[i];
+    }
+    msg << "] external_targets=" << targets.size()
+        << " matched_calls=" << matched.size();
+    fail(msg.str());
+}
+
+uint64_t load_helper_target_oracle(uint32_t prog_type_value,
+                                   const StubLoadAttrs &attrs,
+                                   int helper_id)
+{
+    ScopedFd helper_map_fd;
+    if (helper_id == BPF_FUNC_perf_event_output) {
+        LIBBPF_OPTS(bpf_map_create_opts, map_opts);
+        int fd = bpf_map_create(BPF_MAP_TYPE_PERF_EVENT_ARRAY,
+                                "native_perf_oracle",
+                                sizeof(uint32_t),
+                                sizeof(uint32_t),
+                                1,
+                                &map_opts);
+        if (fd < 0) {
+            fail("bpf_map_create native helper target perf-event map: "
+                 + std::string(std::strerror(errno)));
+        }
+        helper_map_fd.fd = fd;
+    }
+
+    std::vector<bpf_insn> insns;
+    build_helper_target_oracle_program(helper_id, insns, helper_map_fd.get());
+
+    ScopedFd prog_btf_fd(open_btf_fd_by_id_required(
+        attrs.prog_btf_id, "prog_btf_id"));
+    ScopedFd attach_btf_obj_fd(open_btf_fd_by_id_required(
+        attrs.attach_btf_obj_id, "attach_btf_obj_id"));
+    ScopedFd attach_prog_fd(open_prog_fd_by_id_required(
+        attrs.attach_prog_id, "attach_prog_id"));
+
+    LIBBPF_OPTS(bpf_prog_load_opts, opts,
+        .expected_attach_type = static_cast<bpf_attach_type>(attrs.expected_attach_type),
+        .prog_btf_fd = static_cast<uint32_t>(prog_btf_fd.get() >= 0 ? prog_btf_fd.get() : 0),
+        .attach_btf_id = attrs.attach_btf_id,
+        .attach_prog_fd = static_cast<uint32_t>(attach_prog_fd.get() >= 0 ? attach_prog_fd.get() : 0),
+        .attach_btf_obj_fd = static_cast<uint32_t>(attach_btf_obj_fd.get() >= 0 ? attach_btf_obj_fd.get() : 0),
+    );
+    int fd = bpf_prog_load(static_cast<bpf_prog_type>(prog_type_value),
+                           "native_h_target", "GPL",
+                           insns.data(), insns.size(), &opts);
+    if (fd < 0) {
+        fail("bpf_prog_load native helper target oracle id "
+             + std::to_string(helper_id) + ": " + std::strerror(errno));
+    }
+    ScopedFd oracle_prog(fd);
+    return decode_helper_target_oracle(oracle_prog.get(), helper_id);
+}
+
+void add_native_helper_target_addrs(const std::filesystem::path &native_object,
+                                    const std::string &symbol_name,
+                                    uint32_t prog_type_value,
+                                    const StubLoadAttrs &attrs,
+                                    ProgramLoadPlan &plan)
+{
+    const std::vector<int> native_helper_ids =
+        collect_native_helper_call_ids(native_object, symbol_name);
+    plan.native_helper_ids = native_helper_ids;
+    std::unordered_set<int> native_helpers;
+    for (int helper_id : native_helper_ids) {
+        if (native_link_resolves_helper_target(helper_id)) {
+            native_helpers.insert(helper_id);
+        }
+    }
+
+    for (int helper_id : native_helpers) {
+        const char *symbol = helper_symbol_for_id(helper_id);
+        if (!symbol) {
+            fail("native_kernel: unsupported native helper id "
+                 + std::to_string(helper_id) + " in " + symbol_name);
+        }
+        if (plan.helper_addrs.count(symbol)) {
+            continue;
+        }
+        const uint64_t target =
+            load_helper_target_oracle(prog_type_value, attrs, helper_id);
+        plan.helper_addrs.emplace(symbol, target);
+    }
+}
+
 #include "native_loader_bytecode.hpp"
 
 ProgramLoadPlan load_from_loaded_program_fd(int program_fd,
                                           const bpf_prog_info &prog_info,
                                           const bpf_insn *source_insns,
-                                          size_t source_insn_cnt)
+                                          size_t source_insn_cnt,
+                                          const StubLoadAttrs &attrs)
 {
     ProgramLoadPlan out{};
     const auto oracle_start = std::chrono::steady_clock::now();
@@ -3176,17 +4655,33 @@ ProgramLoadPlan load_from_loaded_program_fd(int program_fd,
         out.x86_this_cpu_off,
     };
 
+    auto remember_source_tail_call_map = [&](const MapMeta &meta) {
+        if (meta.type != BPF_MAP_TYPE_PROG_ARRAY) {
+            fail("native_kernel: source tail_call uses non-PROG_ARRAY map "
+                 + meta.name);
+        }
+        for (const MapMeta &existing : out.source_tail_call_maps) {
+            if (existing.kernel_addr == meta.kernel_addr) {
+                return;
+            }
+        }
+        out.source_tail_call_maps.push_back(meta);
+    };
+
     for (const SourceHelperCall &call : source_calls) {
         out.source_helper_ids.push_back(call.helper_id);
+        auto map_it = (call.map_fd >= 0) ? meta_by_source_fd.find(call.map_fd) : meta_by_source_fd.end();
         if (call.helper_id == BPF_FUNC_tail_call) {
             out.has_tail_call = true;
+            if (map_it != meta_by_source_fd.end()) {
+                remember_source_tail_call_map(map_it->second);
+            }
             continue;
         }
         if (!helper_alias_for_call(call.helper_id, prog_info.type).link_name) {
             fail("native_kernel: unsupported helper id "
                  + std::to_string(call.helper_id));
         }
-        auto map_it = (call.map_fd >= 0) ? meta_by_source_fd.find(call.map_fd) : meta_by_source_fd.end();
         if (call.helper_id == BPF_FUNC_map_lookup_elem) {
             ProgramLoadPlan::LookupSite site{
                 ProgramLoadPlan::LookupSite::Kind::Call,
@@ -3201,13 +4696,23 @@ ProgramLoadPlan load_from_loaded_program_fd(int program_fd,
             };
             if (map_it != meta_by_source_fd.end()) {
                 site.map_name = map_it->second.name;
-                configure_lookup_site_for_shape(
+                const bool configured = configure_lookup_site_for_shape(
                     site, map_shape_from_meta(map_it->second), array_offsets);
-                site.gen_lookup = lookup_kernel_map_lookup_gen_by_fd(call.map_fd);
-                if (site.kind != ProgramLoadPlan::LookupSite::Kind::Array &&
-                    site.kind != ProgramLoadPlan::LookupSite::Kind::PerCpuArray) {
+                if (configured) {
+                    site.gen_lookup =
+                        lookup_kernel_map_lookup_gen_by_fd(call.map_fd);
+                }
+                if (!site.gen_lookup.empty()) {
+                    if (site.kind != ProgramLoadPlan::LookupSite::Kind::Array &&
+                        site.kind != ProgramLoadPlan::LookupSite::Kind::PerCpuArray) {
+                        site.target_addr =
+                            lookup_kernel_map_lookup_ptr_by_fd(call.map_fd);
+                    }
+                } else if (site.kind != ProgramLoadPlan::LookupSite::Kind::Array &&
+                           site.kind != ProgramLoadPlan::LookupSite::Kind::PerCpuArray) {
+                    site.kind = ProgramLoadPlan::LookupSite::Kind::Call;
                     site.target_addr =
-                        lookup_kernel_map_lookup_ptr_by_fd(call.map_fd);
+                        lookup_kernel_map_lookup_elem_ptr_by_fd(call.map_fd);
                 }
             } else {
                 configure_lookup_site_for_shape(
@@ -3316,6 +4821,10 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
     }
     for (const auto &arg : link_args.lookup_maps) {
         hash.add_string("lookup_map");
+        hash.add_string(arg);
+    }
+    for (const auto &arg : link_args.update_maps) {
+        hash.add_string("update_map");
         hash.add_string(arg);
     }
     for (const auto &arg : link_args.update_sites) {
@@ -3463,6 +4972,10 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
         argv.push_back("--lookup-map");
         argv.push_back(arg);
     }
+    for (const auto &arg : link_args.update_maps) {
+        argv.push_back("--update-map");
+        argv.push_back(arg);
+    }
     for (const auto &arg : link_args.update_sites) {
         argv.push_back("--update-site");
         argv.push_back(arg);
@@ -3473,12 +4986,12 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     if (rc != 0) {
         std::ostringstream msg;
         msg << "native-link kernel failed (rc=" << rc << ")";
-        msg << "\ncommand: ";
-        for (auto &a : argv) msg << a << " ";
         const std::string stderr_text = read_text_file_limited(kernel_stderr, 8192);
         if (!stderr_text.empty()) {
             msg << "\nstderr:\n" << stderr_text;
         }
+        msg << "\ncommand: ";
+        for (auto &a : argv) msg << a << " ";
         fail(msg.str());
     }
     std::error_code kernel_ec;
@@ -3676,21 +5189,6 @@ LoadedProgram load_from_program_fd(const ProgramLoadOptions &options)
     std::string symbol_name = options.symbol_name.empty()
         ? load_prog_btf_symbol_name(options.original_prog_fd, prog_info)
         : options.symbol_name;
-    ProgramLoadPlan plan =
-        load_from_loaded_program_fd(
-            options.original_prog_fd,
-            prog_info,
-            options.source_insns,
-            options.source_insn_cnt);
-    add_native_data_symbol_addrs(options.native_object_path, plan);
-    const auto companion_load_end = std::chrono::steady_clock::now();
-
-    LinkedBlob linked = load_or_link_native_blob(
-        options,
-        options.native_object_path,
-        symbol_name,
-        plan);
-
     StubLoadAttrs stub_attrs{};
     stub_attrs.expected_attach_type = options.expected_attach_type;
     stub_attrs.attach_btf_id = options.attach_btf_id
@@ -3701,7 +5199,30 @@ LoadedProgram load_from_program_fd(const ProgramLoadOptions &options)
         ? options.attach_btf_obj_id
         : prog_info.attach_btf_obj_id;
     stub_attrs.attach_prog_id = options.attach_prog_id;
+    ProgramLoadPlan plan =
+        load_from_loaded_program_fd(
+            options.original_prog_fd,
+            prog_info,
+            options.source_insns,
+            options.source_insn_cnt,
+            stub_attrs);
+    add_native_data_symbol_addrs(options.native_object_path, plan);
+    add_native_helper_target_addrs(
+        options.native_object_path,
+        symbol_name,
+        prog_info.type,
+        stub_attrs,
+        plan);
+    const auto companion_load_end = std::chrono::steady_clock::now();
 
+    LinkedBlob linked = load_or_link_native_blob(
+        options,
+        options.native_object_path,
+        symbol_name,
+        plan);
+
+    std::vector<uint32_t> original_map_ids =
+        load_prog_map_ids(options.original_prog_fd);
     std::vector<int> map_ref_fds =
         reopen_relocated_map_fds(linked.relocated_map_ids);
     LoadedStub loaded_stub{};
@@ -3713,6 +5234,23 @@ LoadedProgram load_from_program_fd(const ProgramLoadOptions &options)
             plan.has_tail_call,
             map_ref_fds);
         close_fd_vector(map_ref_fds);
+    } catch (const std::exception &e) {
+        std::ostringstream msg;
+        msg << e.what()
+            << "\nnative_loader context: prog_type=" << prog_info.type
+            << " expected_attach=" << stub_attrs.expected_attach_type
+            << " attach_btf_id=" << stub_attrs.attach_btf_id
+            << " prog_btf_id=" << stub_attrs.prog_btf_id
+            << " attach_btf_obj_id=" << stub_attrs.attach_btf_obj_id
+            << " attach_prog_id=" << stub_attrs.attach_prog_id
+            << " tail_call_reachable=" << (plan.has_tail_call ? 1 : 0)
+            << " native_blob_bytes=" << linked.blob.size()
+            << " native_reloc_bytes=" << linked.relocs.size()
+            << " original_map_ids=" << format_map_ids(original_map_ids)
+            << " relocated_map_ids=" << format_map_ids(linked.relocated_map_ids)
+            << " map_ref_fds=" << format_map_fds(map_ref_fds);
+        close_fd_vector(map_ref_fds);
+        fail(msg.str());
     } catch (...) {
         close_fd_vector(map_ref_fds);
         throw;

@@ -28,8 +28,8 @@ directly.
 
 Supported corpus apps:
 
-- [ ] `bcc/set`
-- [ ] `otelcol-ebpf-profiler/profiling`
+- [x] `bcc/set`
+- [x] `otelcol-ebpf-profiler/profiling`
 - [ ] `cilium/agent`
 - [ ] `tetragon/observer`
 - [ ] `katran`
@@ -92,12 +92,12 @@ Authoritative micro stage2 command:
 ```sh
 SAMPLES=3 WARMUPS=1 INNER_REPEAT=100000 \
 SUITE=micro/config/micro_stage2.yaml \
-RUNTIMES="native native_kernel kernel" \
+RUNTIMES="native llvmbpf native_kernel kernel" \
 make micro
 ```
 
-Stage2 has no `llvmbpf` runtime in the suite catalog, so userspace eBPF is not
-part of the stage2 four-way comparison unless the catalog grows that runtime.
+Stage2 now includes the `llvmbpf` runtime, so the four-way comparison is
+userspace native, userspace eBPF, kernel native, and kernel eBPF.
 
 ## Todo
 
@@ -110,8 +110,8 @@ part of the stage2 four-way comparison unless the catalog grows that runtime.
 - [ ] Run authoritative corpus stats-on configuration for every app.
 - [ ] Run authoritative corpus stats-off configuration for every app.
 - [ ] Run authoritative workload-only/no-eBPF configuration for every app.
-- [ ] Run authoritative micro stage1.
-- [ ] Run authoritative micro stage2.
+- [x] Run authoritative micro stage1.
+- [x] Run authoritative micro stage2.
 - [ ] Cross-check function correctness: app status, workload success counters,
   native replacement count, and matching expected micro results.
 - [ ] Cross-check performance sanity: stats-on per-program data vs stats-off
@@ -213,3 +213,84 @@ part of the stage2 four-way comparison unless the catalog grows that runtime.
   libnativeloader, x86 native_lab, arm64 native_lab with
   `CROSS_COMPILE=aarch64-linux-gnu-`, and runner
   `micro_exec/native_loader_shared`.
+- 2026-05-26: micro stage2 userspace runtime support was made functional by
+  sharing map/helper state between `native` and `llvmbpf`, adding stage2
+  `.native.so` builds, and teaching `micro_stage2.yaml` to run all four
+  runtimes. Functional smokes passed:
+  `micro/results/x86_kvm_micro_20260526_084235_234271`,
+  `micro/results/x86_kvm_micro_20260526_084642_830655`,
+  `micro/results/x86_kvm_micro_20260526_091105_928226`, and
+  `micro/results/x86_kvm_micro_20260526_091516_932919`.
+- 2026-05-26: stage2 stable run before the x86 map-gen encoding cleanup:
+  `micro/results/x86_kvm_micro_20260526_092046_061746`.
+  Native-kernel/kernel per-bench geometric mean was 0.742
+  (1.348x speedup), with 10 wins, 1 loss, and 2 ties. This was below older
+  stage2 runs from 2026-05-22/2026-05-23, which were around 1.45x.
+- 2026-05-26: tested a map-retention cleanup that put the map FD references
+  behind a direct `BPF_JA`. The kernel verifier rejected it with unreachable
+  instructions, so it was not kept. The currently working stub still uses the
+  verifier-accepted `MOV r1 = 1; JEQ r1, 1` retention form. Final x86 JIT
+  keeps only the `mov edi, 1` residue and removes the skipped map-FD loads.
+- 2026-05-26: implemented a small x86 native-link cleanup for verifier-generated
+  map lookup bodies: `cmp reg, 0` lowers to `test reg, reg`, and group-1
+  immediates use imm8 encoding when possible. This is a code-size cleanup, not
+  a semantic fallback.
+- 2026-05-26: micro stage2 smoke after the x86 cleanup passed at
+  `micro/results/x86_kvm_micro_20260526_100409_068990` and
+  `micro/results/x86_kvm_micro_20260526_100914_334801`.
+- 2026-05-26: authoritative micro stage2 after the x86 cleanup passed at
+  `micro/results/x86_kvm_micro_20260526_101329_551095`.
+  Native-kernel/kernel per-bench geometric mean was 0.744
+  (1.344x speedup), with 9 wins, 1 loss, and 3 ties. The cleanup reduced some
+  final JIT size (for example `map_hash_lookup` native-kernel sample00 from
+  162 to 155 bytes), but did not recover the older 1.45x stage2 number.
+  The main reason is not a native correctness bug: current hash-map kernel
+  baseline samples are much faster than the earlier run (`map_hash_lookup`
+  kernel 31/31/32 ns now vs 81/80/80 ns in
+  `x86_kvm_micro_20260526_092046_061746`), so native has less headroom.
+  `map_percpu_hash_counter` has one low kernel sample (27/75/75 ns), which
+  makes the three-sample mean look like a slowdown; the other two samples are
+  essentially tied with native-kernel (75 vs 74 ns). Packet and mixed-helper
+  programs remain tied because the fixed stub cost and map-retention residue
+  offset the shorter native body on these tiny hooks.
+- 2026-05-26: authoritative micro stage1 passed at
+  `micro/results/x86_kvm_micro_20260526_102643_925420` with all 29 pure-JIT
+  benches returning matching results across `native`, `llvmbpf`, `kernel`, and
+  `native_kernel`. Post-hoc analysis of raw `exec_ns` samples gives:
+  native-kernel/kernel geometric mean ratio 0.701 (1.427x speedup),
+  userspace-native/llvmbpf ratio 0.861 (1.161x speedup),
+  userspace-native/kernel ratio 0.600 (1.668x speedup), and
+  native-kernel/userspace-native ratio 1.169 (kernel native is 0.856x of
+  userspace native). The only native-kernel slowdowns are the two trivial
+  `simple*` benches, where absolute times are 5-6 ns and the fixed kernel
+  entry/native stub cost dominates. Large pure-JIT programs still show the
+  expected benefit, for example `packet_checksum_fold` and
+  `tc_packet_checksum_fold` are both about 13.2 us native-kernel vs 17.6 us
+  kernel eBPF.
+- 2026-05-26: `bcc/set` native-loader smoke is now passing at
+  `corpus/results/x86_kvm_corpus_20260526_123450_295749`. This run loaded 25
+  baseline programs and 25 post native replacements, and both baseline and
+  post workloads completed with status `ok`.
+- 2026-05-26: the final `bcc/set` blocker had two parts. First,
+  `sched_switch` still used an old positional source-helper/xlated-oracle
+  invariant even though loader now passes explicit helper targets from helper
+  oracle loads. The fix keeps the fail-fast positional check only for helper
+  targets that are actually taken from xlated/JIT oracle order; explicit
+  helper targets no longer depend on source/xlated helper order. Second,
+  x86 proof objects encode unresolved helper PLT32 calls as local-looking
+  `call` instructions, so kernel-mode rewrite misclassified `bpf_map_update_elem`
+  as a local `handle_switch` call before helper rewrite. The fix makes
+  relocation-marked helper call sites bypass the cross-symbol call path, so
+  map update and lookup calls are routed through their per-site metadata.
+- 2026-05-26: `otelcol-ebpf-profiler/profiling` smoke passed at
+  `corpus/results/x86_kvm_corpus_20260526_145323_965689`. The post shim log
+  has 14 native replacements, including `custom__generic`, and no
+  `native-loader failed`, relocation-bounds, `ff d0`, or legacy nop7 hits.
+  The OTel-specific blocker was dynamic tail-call map rewriting in the real Go
+  loader: source bytecode for `custom__generic` rewrites the symbolic
+  `perf_progs` tail-call map to the runtime `kprobe_progs` map, while the
+  native object relocation still names `perf_progs`. The fix records
+  tail-call prog-array maps from the captured source bytecode and aliases the
+  native prog-array symbol to that actual source map when the native symbol has
+  the expected prog-array shape. This keeps corpus on original app bytecode and
+  avoids `/proc/kallsyms` or process-map-name fallback.
