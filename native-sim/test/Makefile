@@ -35,6 +35,12 @@ NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -Wall -Wextra -O3 -g -fPIC -c -fno-plt -
     -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
     -mllvm -switch-to-lookup=false \
     $(SYS_INCLUDE_FLAGS) -MMD -MP
+NATIVE_SO_CFLAGS := $(NATIVE_TARGET_FLAGS) -Wall -Wextra -O3 -g -fPIC -shared -fno-plt \
+    -DMICRO_NATIVE -DMICRO_NATIVE_USERSPACE \
+    -fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
+    -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
+    -mllvm -switch-to-lookup=false \
+    $(SYS_INCLUDE_FLAGS) -MMD -MP
 
 # Reuse the kernel_offsets.h that micro/programs generates from BTF, so the
 # context-struct offsets in common.h's MICRO_NATIVE branch match the host
@@ -58,11 +64,12 @@ SHIM_SO ?= $(REPO_ROOT)/bpfopt/shim/libbpfrejit_shim.so
 BPF_SRCS := $(wildcard *.bpf.c)
 BPF_OBJS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.bpf.o,$(BPF_SRCS))
 NATIVE_OBJS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.native.o,$(BPF_SRCS))
-DEPS := $(BPF_OBJS:.o=.d) $(NATIVE_OBJS:.o=.d)
+NATIVE_SOS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.native.so,$(BPF_SRCS))
+DEPS := $(BPF_OBJS:.o=.d) $(NATIVE_OBJS:.o=.d) $(NATIVE_SOS:.so=-so.d)
 MULTI_PROG_TOOL := $(OUTPUT_DIR)/multi_prog_tool
 
 .PHONY: all clean multi-prog-tool shim-multi-prog-smoke
-all: $(BPF_OBJS) $(NATIVE_OBJS)
+all: $(BPF_OBJS) $(NATIVE_OBJS) $(NATIVE_SOS)
 
 $(OUTPUT_DIR):
 	install -d "$@"
@@ -76,6 +83,10 @@ $(OUTPUT_DIR)/%.bpf.o: %.bpf.c | $(OUTPUT_DIR)
 $(OUTPUT_DIR)/%.native.o: %.bpf.c $(KERNEL_OFFSETS) Makefile | $(OUTPUT_DIR)
 	$(CLANG) $(NATIVE_CFLAGS) -I"$(MICRO_PROGRAMS_DIR)" -I"$(KERNEL_OFFSETS_INCLUDE)" \
 	    -MF "$(OUTPUT_DIR)/$*.native.d" -MT "$@" -o "$@" "$<"
+
+$(OUTPUT_DIR)/%.native.so: %.bpf.c $(KERNEL_OFFSETS) Makefile | $(OUTPUT_DIR)
+	$(CLANG) $(NATIVE_SO_CFLAGS) -I"$(MICRO_PROGRAMS_DIR)" -I"$(KERNEL_OFFSETS_INCLUDE)" \
+	    -MF "$(OUTPUT_DIR)/$*.native-so.d" -MT "$@" -o "$@" "$<"
 
 $(MULTI_PROG_TOOL): multi_prog_tool.c | $(OUTPUT_DIR)
 	$(CC) -O2 -g -Wall -Wextra $(LIBBPF_CFLAGS) -o "$@" "$<" $(LIBBPF_LDFLAGS)

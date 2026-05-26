@@ -204,10 +204,14 @@ def require_suite_artifacts(
     selected_runtime_names = {runtime.name for runtime in runtimes}
     for benchmark in benchmarks:
         required_paths.append(benchmark.object_path)
-        if selected_runtime_names & NATIVE_ARTIFACT_RUNTIMES:
+        if "native" in selected_runtime_names:
             if benchmark.native_object_path is None:
                 raise RuntimeError(f"{benchmark.name} is missing a native artifact path")
             required_paths.append(benchmark.native_object_path)
+        if "native_kernel" in selected_runtime_names:
+            if benchmark.native_kernel_object_path is None:
+                raise RuntimeError(f"{benchmark.name} is missing a native_kernel artifact path")
+            required_paths.append(benchmark.native_kernel_object_path)
         if "native_proof" in selected_runtime_names:
             if benchmark.proof_object_path is None or benchmark.proof_compile_metadata_path is None:
                 raise RuntimeError(f"{benchmark.name} is missing native_proof artifact paths")
@@ -279,9 +283,14 @@ def build_runner_command(
 
     command.extend(["--program", str(program_path)])
     if runtime.name in NATIVE_ARTIFACT_RUNTIMES:
-        if benchmark.native_object_path is None:
-            raise RuntimeError(f"{benchmark.name} is missing a native object path")
-        command.extend(["--native-program", str(benchmark.native_object_path)])
+        native_path = (
+            benchmark.native_kernel_object_path
+            if runtime.name == "native_kernel"
+            else benchmark.native_object_path
+        )
+        if native_path is None:
+            raise RuntimeError(f"{benchmark.name} is missing a {runtime.name} native object path")
+        command.extend(["--native-program", str(native_path)])
     if memory_file is not None:
         command.extend(["--memory", str(memory_file)])
     if benchmark.io_mode:

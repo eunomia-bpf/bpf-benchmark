@@ -1,0 +1,9 @@
+{
+  "completed_benchmarks": 1,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "error_message": "helper_only_uid_gid: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native --program /artifacts/user/stage2-programs/x86_64/helper_only_uid_gid.bpf.o --native-program /artifacts/user/stage2-programs/x86_64/helper_only_uid_gid.native.so --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem --io-mode packet --input-size 64 --inner-repeat 1000\ndlopen failed for /artifacts/user/stage2-programs/x86_64/helper_only_uid_gid.native.so: /artifacts/user/stage2-programs/x86_64/helper_only_uid_gid.native.so: undefined symbol: micro_native_bpf_get_current_uid_gid",
+  "status": "error",
+  "total_benchmarks": 1
+}

@@ -218,6 +218,39 @@ std::string select_single_program_name(const std::filesystem::path &path)
     return *selected;
 }
 
+std::vector<map_spec> load_map_specs(const std::filesystem::path &path)
+{
+    bpf_object_open_opts open_opts = {};
+    open_opts.sz = sizeof(open_opts);
+    bpf_object *raw_object = bpf_object__open_file(path.c_str(), &open_opts);
+    const int open_error = libbpf_get_error(raw_object);
+    if (open_error != 0) {
+        fail("bpf_object__open_file failed while reading map metadata: " +
+             libbpf_error_string(open_error));
+    }
+    bpf_object_ptr object(raw_object);
+
+    std::vector<map_spec> maps;
+    uint32_t next_id = 1;
+    bpf_map *map = nullptr;
+    while ((map = bpf_object__next_map(object.get(), map)) != nullptr) {
+        const char *name = bpf_map__name(map);
+        if (name == nullptr || name[0] == '\0') {
+            fail("BPF map has no name in object: " + path.string());
+        }
+        maps.push_back({
+            .id = next_id++,
+            .name = name,
+            .type = static_cast<uint32_t>(bpf_map__type(map)),
+            .key_size = bpf_map__key_size(map),
+            .value_size = bpf_map__value_size(map),
+            .max_entries = bpf_map__max_entries(map),
+            .internal = bpf_map__is_internal(map),
+        });
+    }
+    return maps;
+}
+
 std::string section_name_by_index(Elf *elf, size_t shstrndx, size_t section_index)
 {
     Elf_Scn *section = elf_getscn(elf, section_index);
@@ -728,7 +761,11 @@ program_image load_program_image(const std::filesystem::path &path)
         static_cast<const uint8_t *>(target_data->d_buf) + selected_symbol->offset_bytes,
         image.code.size());
 
+    image.maps = load_map_specs(path);
     std::unordered_map<std::string, uint32_t> map_ids;
+    for (const auto &map : image.maps) {
+        map_ids.emplace(map.name, map.id);
+    }
 
     std::vector<section_slice> code_slices;
     code_slices.push_back(

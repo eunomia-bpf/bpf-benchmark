@@ -44,6 +44,7 @@ set(MICRO_EXEC_SOURCES
     src/native_lab_runner.cpp
     src/native_runner.cpp
     src/perf_counters.cpp
+    src/userspace_bpf_runtime.cpp
 )
 
 set(NATIVE_LOADER_REPO_ROOT "${MICRO_REPO_ROOT}" CACHE PATH "" FORCE)
@@ -136,7 +137,8 @@ endif()
 
 add_executable(micro_exec ${MICRO_EXEC_SOURCES})
 
-target_link_options(micro_exec PRIVATE -static-libstdc++)
+set_target_properties(micro_exec PROPERTIES ENABLE_EXPORTS ON)
+target_link_options(micro_exec PRIVATE -static-libstdc++ -Wl,-E)
 
 target_include_directories(micro_exec
     PRIVATE

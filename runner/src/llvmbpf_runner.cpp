@@ -1,4 +1,5 @@
 #include "micro_exec.hpp"
+#include "userspace_bpf_runtime.hpp"
 
 #include <llvmbpf.hpp>
 
@@ -15,16 +16,12 @@
 #include <thread>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <unordered_map>
 #include <utility>
 
 namespace {
 
 using clock_type = std::chrono::steady_clock;
 
-constexpr uint32_t kMapTypeHash = 1;
-constexpr uint32_t kMapTypeArray = 2;
-constexpr uint32_t kMapTypePercpuArray = 6;
 constexpr uint32_t kProgTypeSchedCls = 3;
 constexpr uint32_t kProgTypeSchedAct = 4;
 constexpr uint32_t kProgTypeXdp = 6;
@@ -254,12 +251,6 @@ std::optional<uint64_t> detect_tsc_freq_hz()
     return calibrate_tsc_freq_hz();
 }
 
-struct userspace_map {
-    map_spec spec;
-    std::vector<uint8_t> storage;
-    std::unordered_map<uint32_t, std::vector<uint8_t>> hash_storage;
-};
-
 struct xdp_md_ctx {
     uint32_t data = 0;
     uint32_t data_end = 0;
@@ -310,147 +301,6 @@ struct sk_buff_ctx {
 static_assert(offsetof(sk_buff_ctx, data) == 76);
 static_assert(offsetof(sk_buff_ctx, data_end) == 80);
 static_assert(offsetof(sk_buff_ctx, data_meta) == 140);
-
-struct userspace_map_state {
-    std::unordered_map<uint32_t, userspace_map> maps_by_id;
-
-    userspace_map *find_by_name(const std::string &name)
-    {
-        for (auto &[id, map] : maps_by_id) {
-            (void)id;
-            if (map.spec.name == name) {
-                return &map;
-            }
-        }
-        return nullptr;
-    }
-};
-
-thread_local userspace_map_state *active_map_state = nullptr;
-
-userspace_map *lookup_map(uint64_t map_id)
-{
-    if (active_map_state == nullptr) {
-        return nullptr;
-    }
-    const auto iter = active_map_state->maps_by_id.find(static_cast<uint32_t>(map_id));
-    if (iter == active_map_state->maps_by_id.end()) {
-        return nullptr;
-    }
-    return &iter->second;
-}
-
-uint8_t *lookup_slot(userspace_map *map, uint64_t key_ptr)
-{
-    if (map == nullptr || key_ptr == 0 || map->spec.key_size != sizeof(uint32_t)) {
-        return nullptr;
-    }
-    uint32_t key = 0;
-    std::memcpy(&key, reinterpret_cast<const void *>(key_ptr), sizeof(key));
-
-    if (map->spec.type == kMapTypeArray || map->spec.type == kMapTypePercpuArray) {
-        if (key >= map->spec.max_entries) {
-            return nullptr;
-        }
-        return map->storage.data() + static_cast<size_t>(key) * map->spec.value_size;
-    }
-    if (map->spec.type == kMapTypeHash) {
-        const auto iter = map->hash_storage.find(key);
-        if (iter == map->hash_storage.end()) {
-            return nullptr;
-        }
-        return iter->second.data();
-    }
-
-    return nullptr;
-}
-
-bool update_slot(userspace_map *map, uint64_t key_ptr, uint64_t value_ptr)
-{
-    if (map == nullptr || key_ptr == 0 || value_ptr == 0 || map->spec.key_size != sizeof(uint32_t)) {
-        return false;
-    }
-
-    uint32_t key = 0;
-    std::memcpy(&key, reinterpret_cast<const void *>(key_ptr), sizeof(key));
-    if (map->spec.type == kMapTypeArray || map->spec.type == kMapTypePercpuArray) {
-        if (key >= map->spec.max_entries) {
-            return false;
-        }
-
-        auto *slot = map->storage.data() + static_cast<size_t>(key) * map->spec.value_size;
-        std::memcpy(slot, reinterpret_cast<const void *>(value_ptr), map->spec.value_size);
-        return true;
-    }
-    if (map->spec.type == kMapTypeHash) {
-        if (map->hash_storage.find(key) == map->hash_storage.end() &&
-            map->hash_storage.size() >= map->spec.max_entries) {
-            return false;
-        }
-
-        auto &value = map->hash_storage[key];
-        value.resize(map->spec.value_size);
-        std::memcpy(value.data(), reinterpret_cast<const void *>(value_ptr), map->spec.value_size);
-        return true;
-    }
-
-    return false;
-}
-
-uint64_t helper_bpf_map_lookup_elem(
-    uint64_t map_id,
-    uint64_t key_ptr,
-    uint64_t,
-    uint64_t,
-    uint64_t)
-{
-    auto *map = lookup_map(map_id);
-    auto *slot = lookup_slot(map, key_ptr);
-    return reinterpret_cast<uint64_t>(slot);
-}
-
-uint64_t helper_bpf_map_update_elem(
-    uint64_t map_id,
-    uint64_t key_ptr,
-    uint64_t value_ptr,
-    uint64_t,
-    uint64_t)
-{
-    auto *map = lookup_map(map_id);
-    if (!update_slot(map, key_ptr, value_ptr)) {
-        return static_cast<uint64_t>(-1);
-    }
-    return 0;
-}
-
-uint64_t helper_bpf_probe_read_kernel(
-    uint64_t dst_ptr,
-    uint64_t size,
-    uint64_t src_ptr,
-    uint64_t,
-    uint64_t)
-{
-    if (dst_ptr == 0 || src_ptr == 0) {
-        return static_cast<uint64_t>(-1);
-    }
-    std::memcpy(
-        reinterpret_cast<void *>(dst_ptr),
-        reinterpret_cast<const void *>(src_ptr),
-        static_cast<size_t>(size));
-    return 0;
-}
-
-uint64_t helper_bpf_ktime_get_ns(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t)
-{
-    const auto now = std::chrono::steady_clock::now().time_since_epoch();
-    return static_cast<uint64_t>(
-        std::chrono::duration_cast<std::chrono::nanoseconds>(now).count());
-}
-
-static uint64_t helper_noop(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t)
-{
-    return 0;
-}
 
 class lowmem_buffer {
 public:
@@ -578,47 +428,6 @@ std::string resolve_effective_io_mode(const cli_options &options,
     return options.io_mode;
 }
 
-userspace_map_state initialize_map_state(const program_image &image, const std::vector<uint8_t> &input_bytes)
-{
-    userspace_map_state state;
-    for (const auto &spec : image.maps) {
-        userspace_map map;
-        map.spec = spec;
-        if (spec.type == kMapTypeArray || spec.type == kMapTypePercpuArray) {
-            map.storage.assign(static_cast<size_t>(spec.value_size) * spec.max_entries, 0);
-        } else if (spec.type == kMapTypeHash) {
-            map.hash_storage.reserve(spec.max_entries);
-        } else {
-            fail("unsupported llvmbpf map type: " + std::to_string(spec.type));
-        }
-        state.maps_by_id.emplace(spec.id, std::move(map));
-    }
-
-    if (auto *input_map = state.find_by_name("input_map"); input_map != nullptr) {
-        const size_t copy_len = std::min(input_map->storage.size(), input_bytes.size());
-        std::memcpy(input_map->storage.data(), input_bytes.data(), copy_len);
-    }
-    if (auto *result_map = state.find_by_name("result_map"); result_map != nullptr) {
-        std::fill(result_map->storage.begin(), result_map->storage.end(), 0);
-    }
-    return state;
-}
-
-uint64_t read_result_value(const userspace_map_state &state)
-{
-    for (const auto &[id, map] : state.maps_by_id) {
-        (void)id;
-        if (map.spec.name != "result_map") {
-            continue;
-        }
-        uint64_t result = 0;
-        const size_t copy_len = std::min(sizeof(result), map.storage.size());
-        std::memcpy(&result, map.storage.data(), copy_len);
-        return result;
-    }
-    fail("result_map not found in llvmbpf map state");
-}
-
 } // namespace
 
 sample_result run_llvmbpf(const cli_options &options)
@@ -634,7 +443,6 @@ sample_result run_llvmbpf(const cli_options &options)
     auto input_bytes = materialize_memory(options.memory, options.input_size);
     const auto memory_prepare_end = clock_type::now();
     const bool has_input_map = image_has_map(image, "input_map");
-    const bool has_result_map = image_has_map(image, "result_map");
     const bool result_from_map = effective_io_mode == "map";
     const bool input_from_packet =
         effective_io_mode == "packet" ||
@@ -643,10 +451,10 @@ sample_result run_llvmbpf(const cli_options &options)
     const auto packet_kind = resolve_packet_context_kind(image.prog_type);
 
     const auto exec_input_prepare_start = clock_type::now();
-    auto map_state = userspace_map_state {};
+    auto map_state = userspace_bpf_map_state {};
     auto packet_input = std::vector<uint8_t> {};
-    if ((effective_io_mode == "map" && has_input_map) || has_result_map) {
-        map_state = initialize_map_state(image, input_bytes);
+    if (!image.maps.empty()) {
+        map_state = initialize_userspace_bpf_map_state(image, input_bytes);
     }
     if (input_from_packet) {
         if (options.raw_packet) {
@@ -669,15 +477,16 @@ sample_result run_llvmbpf(const cli_options &options)
         fail("llvmbpf load_code failed: " + vm.get_error_message());
     }
     const auto load_code_end = clock_type::now();
-    vm.register_external_function(1, "bpf_map_lookup_elem", (void *)helper_bpf_map_lookup_elem);
-    vm.register_external_function(2, "bpf_map_update_elem", (void *)helper_bpf_map_update_elem);
-    vm.register_external_function(5, "bpf_ktime_get_ns", (void *)helper_bpf_ktime_get_ns);
-    vm.register_external_function(113, "bpf_probe_read_kernel", (void *)helper_bpf_probe_read_kernel);
+    vm.register_external_function(1, "bpf_map_lookup_elem", (void *)llvmbpf_helper_bpf_map_lookup_elem);
+    vm.register_external_function(2, "bpf_map_update_elem", (void *)llvmbpf_helper_bpf_map_update_elem);
+    vm.register_external_function(3, "bpf_map_delete_elem", (void *)llvmbpf_helper_bpf_map_delete_elem);
+    vm.register_external_function(5, "bpf_ktime_get_ns", (void *)llvmbpf_helper_bpf_ktime_get_ns);
+    vm.register_external_function(113, "bpf_probe_read_kernel", (void *)llvmbpf_helper_bpf_probe_read_kernel);
     for (int id = 3; id <= 220; id++) {
-        if (id == 5 || id == 113) {
+        if (id == 3 || id == 5 || id == 113) {
             continue;
         }
-        vm.register_external_function(id, "bpf_helper_" + std::to_string(id), (void *)helper_noop);
+        vm.register_external_function(id, "bpf_helper_" + std::to_string(id), (void *)llvmbpf_helper_noop);
     }
 
     const auto compile_start = clock_type::now();
@@ -711,10 +520,7 @@ sample_result run_llvmbpf(const cli_options &options)
     const auto tsc_freq_hz = detect_tsc_freq_hz();
     const bool use_tsc_timing = tsc_freq_hz.has_value();
     const uint32_t repeat = options.repeat > 0 ? options.repeat : 1;
-    active_map_state =
-        ((effective_io_mode == "map" && has_input_map) || has_result_map)
-            ? &map_state
-            : nullptr;
+    set_active_userspace_bpf_map_state(!image.maps.empty() ? &map_state : nullptr);
     clock_type::time_point exec_start {};
     clock_type::time_point exec_end {};
     const auto run_timed_repeat = [&](auto &&exec_once) {
@@ -805,7 +611,7 @@ sample_result run_llvmbpf(const cli_options &options)
         }
         exec_end = clock_type::now();
     });
-    active_map_state = nullptr;
+    set_active_userspace_bpf_map_state(nullptr);
 
     if (tsc_freq_hz.has_value()) {
         sample.exec_ns = static_cast<uint64_t>(std::llround(
@@ -822,7 +628,7 @@ sample_result run_llvmbpf(const cli_options &options)
     }
     sample.wall_exec_ns = elapsed_ns(exec_start, exec_end) / repeat;
     sample.perf_counters = std::move(perf_counters);
-    sample.result = result_from_map ? read_result_value(map_state) : result;
+    sample.result = result_from_map ? read_userspace_bpf_result_value(map_state) : result;
     sample.retval = static_cast<uint32_t>(retval);
     sample.phases_ns = {
         {"program_image_ns", elapsed_ns(program_image_start, program_image_end)},

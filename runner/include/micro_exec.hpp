@@ -19,6 +19,7 @@ struct map_spec {
     uint32_t key_size = 0;
     uint32_t value_size = 0;
     uint32_t max_entries = 0;
+    bool internal = false;
 };
 
 struct kinsn_call_relocation {

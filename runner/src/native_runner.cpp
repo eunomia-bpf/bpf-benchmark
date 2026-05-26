@@ -1,11 +1,12 @@
 #include "micro_exec.hpp"
+#include "userspace_bpf_runtime.hpp"
 #include "kernel_offsets.h"
 #include <chrono>
 #include <cstring>
 #include <dlfcn.h>
 #include <link.h>
 #include <utility>
-namespace { using clock_type = std::chrono::steady_clock; using native_prog_fn = int (*)(void *);
+namespace native_runner_detail { using clock_type = std::chrono::steady_clock; using native_prog_fn = int (*)(void *);
 constexpr size_t kEthernetHeaderSize = 14; struct native_xdp_md { uintptr_t data, data_end; };
 struct native_skb {
     alignas(uintptr_t) uint8_t storage[(K_SK_BUFF_DATA_OFFSET > K_SK_BUFF_BPF_DATA_END_OFFSET ? K_SK_BUFF_DATA_OFFSET : K_SK_BUFF_BPF_DATA_END_OFFSET) + sizeof(uintptr_t)] {};
@@ -29,7 +30,15 @@ struct native_skb {
         std::memcpy(&hi, storage + K_SK_BUFF_BPF_CB_OFFSET + sizeof(lo), sizeof(hi));
         return static_cast<uint64_t>(lo) | (static_cast<uint64_t>(hi) << 32);
     }
-}; }
+};
+}
+
+using native_runner_detail::clock_type;
+using native_runner_detail::kEthernetHeaderSize;
+using native_runner_detail::native_prog_fn;
+using native_runner_detail::native_skb;
+using native_runner_detail::native_xdp_md;
+
 sample_result run_native(const cli_options &options) {
     const auto memory_start = clock_type::now(); auto input = materialize_memory(options.memory, options.input_size);
     const auto memory_end = clock_type::now();
@@ -38,6 +47,8 @@ sample_result run_native(const cli_options &options) {
     const auto so = *options.native_program;
     const auto load_start = clock_type::now();
     void *handle = dlopen(so.c_str(), RTLD_NOW | RTLD_LOCAL); if (handle == nullptr) fail("dlopen failed for " + so.string() + ": " + dlerror());
+    auto map_state = initialize_userspace_bpf_map_state(image, input);
+    bind_native_map_symbols(map_state, handle);
     const std::string &symbol = image.program_name;
     dlerror();
     auto *fn = reinterpret_cast<native_prog_fn>(dlsym(handle, symbol.c_str())); const char *sym_error = dlerror();
@@ -68,11 +79,14 @@ sample_result run_native(const cli_options &options) {
         .include_kernel = false,
     };
     auto perf_counters = measure_perf_counters(perf_options, [&]() {
+        set_active_userspace_bpf_map_state(image.maps.empty() ? nullptr : &map_state);
         exec_start = clock_type::now();
         for (uint32_t index = 0; index < repeat; ++index)
             retval = static_cast<uint32_t>(fn(is_skb ? static_cast<void *>(skb.storage) : static_cast<void *>(&xdp)));
         exec_end = clock_type::now();
+        set_active_userspace_bpf_map_state(nullptr);
     });
+    set_active_userspace_bpf_map_state(nullptr);
     uint64_t packet_result = 0; std::memcpy(&packet_result, data, sizeof(packet_result));
     const uint64_t result = is_skb ? skb.read_result() : packet_result;
     sample_result sample {.compile_ns = elapsed_ns(load_start, load_end), .exec_ns = elapsed_ns(exec_start, exec_end) / repeat};

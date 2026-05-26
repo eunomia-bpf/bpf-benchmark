@@ -49,6 +49,7 @@ class CatalogTarget:
     name: str
     object_path: Path
     native_object_path: Path | None = None
+    native_kernel_object_path: Path | None = None
     proof_object_path: Path | None = None
     proof_compile_metadata_path: Path | None = None
     io_mode: str | None = None
@@ -146,8 +147,12 @@ def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
         base_name = str(benchmark["base_name"])
         object_path = (program_dir / f"{base_name}.bpf.o").resolve()
         tags = tuple(str(tag) for tag in benchmark.get("tags", ()))
-        native_suffix = ".native.o" if "stage2" in tags else ".native.so"
-        native_object_path = (program_dir / f"{base_name}{native_suffix}").resolve()
+        native_object_path = (program_dir / f"{base_name}.native.so").resolve()
+        native_kernel_object_path = (
+            (program_dir / f"{base_name}.native.o").resolve()
+            if "stage2" in tags
+            else native_object_path
+        )
         proof_object_path = None
         proof_compile_metadata_path = None
         if proof_dir is not None:
@@ -159,6 +164,7 @@ def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
                 name=str(benchmark["name"]),
                 object_path=object_path,
                 native_object_path=native_object_path,
+                native_kernel_object_path=native_kernel_object_path,
                 proof_object_path=proof_object_path,
                 proof_compile_metadata_path=proof_compile_metadata_path,
                 io_mode=str(benchmark.get("io_mode", default_io_mode)),

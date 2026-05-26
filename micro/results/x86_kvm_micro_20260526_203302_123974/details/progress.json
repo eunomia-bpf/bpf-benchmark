@@ -1,0 +1,9 @@
+{
+  "completed_benchmarks": 1,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "error_message": "map_hash_lookup: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native --program /artifacts/user/stage2-programs/x86_64/map_hash_lookup.bpf.o --native-program /artifacts/user/stage2-programs/x86_64/map_hash_lookup.native.so --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem --io-mode packet --input-size 64 --inner-repeat 10\ndlopen failed for /artifacts/user/stage2-programs/x86_64/map_hash_lookup.native.so: /artifacts/user/stage2-programs/x86_64/map_hash_lookup.native.so: undefined symbol: micro_native_bpf_map_lookup_elem",
+  "status": "error",
+  "total_benchmarks": 1
+}
