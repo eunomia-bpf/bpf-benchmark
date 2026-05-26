@@ -8,6 +8,14 @@ simple_packet:
   kind: plain_bytes
   count: 64
 
+csel_select64:
+  kind: plain_bytes
+  count: 64
+
+ccmp_all_nonzero:
+  kind: plain_bytes
+  count: 64
+
 stage2_zero64:
   kind: zero_bytes
   count: 64

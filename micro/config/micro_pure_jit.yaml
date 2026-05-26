@@ -43,6 +43,20 @@ benchmarks:
     expected_result: 12345678
     tags: [baseline, packet-backed, helper-free]
 
+  - name: csel_select64
+    base_name: csel_select64
+    kernel_input_size: 64
+    input_generator: csel_select64
+    expected_result: 15327322346016019187
+    tags: [select, csel, pure-jit, coverage]
+
+  - name: ccmp_all_nonzero
+    base_name: ccmp_all_nonzero
+    kernel_input_size: 64
+    input_generator: ccmp_all_nonzero
+    expected_result: 1
+    tags: [compare, ccmp, pure-jit, coverage]
+
   - name: bitmap_popcount_scan
     base_name: bitmap_popcount_scan
     kernel_input_size: 2056
