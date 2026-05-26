@@ -60,6 +60,19 @@ std::string format_lookup_site_arg(size_t index,
     return out;
 }
 
+std::string format_lookup_gen_arg(size_t index,
+                                  const ProgramLoadPlan::LookupSite &site)
+{
+    static const char hex_chars[] = "0123456789abcdef";
+    std::string out = std::to_string(index) + "=";
+    out.reserve(out.size() + site.gen_lookup.size() * 2);
+    for (uint8_t byte : site.gen_lookup) {
+        out.push_back(hex_chars[byte >> 4]);
+        out.push_back(hex_chars[byte & 0xf]);
+    }
+    return out;
+}
+
 std::string format_lookup_map_arg(const std::string &name,
                                   const ProgramLoadPlan::LookupSite &site)
 {
@@ -141,6 +154,7 @@ NativeLinkArgs build_native_link_args(
     out.oracle_jit_base = plan.oracle_jit_base;
     out.oracle_jited = plan.oracle_jited;
     out.oracle_xlated = plan.oracle_xlated;
+    out.source_helper_ids = plan.source_helper_ids;
 #if defined(__x86_64__)
     out.helpers.push_back(format_name_hex(
         kX86BpfMapMaxEntriesOffsetKey, K_BPF_MAP_MAX_ENTRIES_OFFSET));
@@ -155,12 +169,22 @@ NativeLinkArgs build_native_link_args(
         out.helpers.push_back(format_name_hex(
             kX86ThisCpuOffHelperKey, plan.x86_this_cpu_off));
     }
+    if (plan.x86_current_task_addr != 0 && plan.x86_this_cpu_off != 0) {
+        out.helpers.push_back(format_name_hex(
+            kX86CurrentTaskHelperKey, plan.x86_current_task_addr));
+        out.helpers.push_back(format_name_hex(
+            kX86ThisCpuOffHelperKey, plan.x86_this_cpu_off));
+    }
 #elif defined(__aarch64__)
     {
         uint32_t cpu_offset = K_THREAD_INFO_CPU_OFFSET;
         out.helpers.push_back(format_name_hex(kArm64ThreadInfoCpuOffsetHelperKey, cpu_offset));
     }
 #endif
+    if (plan.map_delete_elem_addr != 0) {
+        out.helpers.push_back(format_name_hex(
+            "bpf_map_delete_elem", plan.map_delete_elem_addr));
+    }
 
     std::vector<std::pair<std::string, uint64_t>> maps(
         map_addrs.begin(), map_addrs.end());
@@ -172,6 +196,9 @@ NativeLinkArgs build_native_link_args(
 
     for (size_t i = 0; i < plan.lookup_sites.size(); i++) {
         out.lookup_sites.push_back(format_lookup_site_arg(i, plan.lookup_sites[i]));
+        if (!plan.lookup_sites[i].gen_lookup.empty()) {
+            out.lookup_gens.push_back(format_lookup_gen_arg(i, plan.lookup_sites[i]));
+        }
     }
     std::vector<std::pair<std::string, std::string>> native_map_symbols(
         plan.native_map_symbols.begin(), plan.native_map_symbols.end());

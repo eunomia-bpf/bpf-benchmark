@@ -10,6 +10,7 @@ use crate::*;
 
 const X86_CPU_NUMBER_HELPER_KEY: &str = "__native_x86_cpu_number";
 const X86_THIS_CPU_OFF_HELPER_KEY: &str = "__native_x86_this_cpu_off";
+const X86_CURRENT_TASK_HELPER_KEY: &str = "__native_x86_current_task";
 const X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY: &str = "__native_x86_bpf_map_max_entries_offset";
 const X86_BPF_ARRAY_PTRS_OFFSET_KEY: &str = "__native_x86_bpf_array_ptrs_offset";
 const X86_BPF_PROG_BPF_FUNC_OFFSET_KEY: &str = "__native_x86_bpf_prog_bpf_func_offset";
@@ -80,6 +81,7 @@ fn generic_lookup_site(target_addr: u64, map_name: Option<&str>) -> Option<Looku
         value_offset: 0,
         percpu_base_addr: 0,
         map_name: map_name.map(ToOwned::to_owned),
+        gen_insns: Vec::new(),
     })
 }
 
@@ -237,15 +239,37 @@ fn bpf_helper_name_from_id(helper_id: u64) -> Option<&'static str> {
 
 pub(super) fn decode_x86_external_call_targets(jited: &[u8], jit_base: u64) -> Result<Vec<u64>> {
     let mut targets = Vec::new();
+    let mut reg_values: HashMap<Register, u64> = HashMap::new();
     let mut decoder = Decoder::with_ip(64, jited, jit_base, DecoderOptions::NONE);
     while decoder.can_decode() {
         let insn = decoder.decode();
-        if !insn.is_call_near() {
+
+        if let Some((reg, value)) = x86_mov_imm_to_gpr64(&insn) {
+            reg_values.insert(reg, value);
             continue;
         }
-        let target = insn.near_branch_target();
-        if !target_is_inside_jit_image(target, jit_base, jited.len()) {
-            targets.push(target);
+
+        if insn.is_call_near() {
+            let target = insn.near_branch_target();
+            if !target_is_inside_jit_image(target, jit_base, jited.len()) {
+                targets.push(target);
+            }
+            clear_x86_call_clobbered_registers(&mut reg_values);
+            continue;
+        }
+
+        if let Some(reg) = x86_indirect_call_register(&insn) {
+            if let Some(&target) = reg_values.get(&reg) {
+                if !target_is_inside_jit_image(target, jit_base, jited.len()) {
+                    targets.push(target);
+                }
+            }
+            clear_x86_call_clobbered_registers(&mut reg_values);
+            continue;
+        }
+
+        if let Some(reg) = x86_written_gpr_family(&insn) {
+            reg_values.remove(&reg);
         }
     }
     Ok(targets)
@@ -266,6 +290,24 @@ fn build_x86_get_smp_processor_id_inline(
     bytes.extend_from_slice(&[0x65, 0x48, 0x03, 0x04, 0x25]); // add rax, gs:[this_cpu_off]
     bytes.extend_from_slice(&(this_cpu_off as u32).to_le_bytes());
     bytes.extend_from_slice(&[0x8B, 0x40, 0x00]); // mov eax, [rax]
+    Ok(Some(declared_byte_chunks(&bytes)?))
+}
+
+fn build_x86_get_current_task_inline(
+    helper_addrs: &HashMap<String, u64>,
+) -> Result<Option<Vec<Instruction>>> {
+    let (Some(&current_task), Some(&this_cpu_off)) = (
+        helper_addrs.get(X86_CURRENT_TASK_HELPER_KEY),
+        helper_addrs.get(X86_THIS_CPU_OFF_HELPER_KEY),
+    ) else {
+        return Ok(None);
+    };
+    let mut bytes = Vec::new();
+    bytes.extend_from_slice(&[0x48, 0xC7, 0xC0]); // mov rax, sign_extend32(&current_task)
+    bytes.extend_from_slice(&(current_task as u32).to_le_bytes());
+    bytes.extend_from_slice(&[0x65, 0x48, 0x03, 0x04, 0x25]); // add rax, gs:[this_cpu_off]
+    bytes.extend_from_slice(&(this_cpu_off as u32).to_le_bytes());
+    bytes.extend_from_slice(&[0x48, 0x8B, 0x00]); // mov rax, [rax]
     Ok(Some(declared_byte_chunks(&bytes)?))
 }
 
@@ -776,6 +818,9 @@ fn scan_helper_calls(
                     .to_string(),
                 _ => continue,
             };
+            if helper_id_for_name(&target_name).is_none() && !x86_known_libcall(&target_name) {
+                continue;
+            }
             let local_opcode_off = match r_type {
                 4 => reloc_offset.checked_sub(1),
                 9 | 41 | 42 => reloc_offset.checked_sub(2),
@@ -804,6 +849,10 @@ fn scan_helper_calls(
         }
     }
     Ok(out)
+}
+
+fn x86_known_libcall(name: &str) -> bool {
+    matches!(name, "memset" | "memcpy")
 }
 
 fn x86_mov_imm_to_gpr64(insn: &Instruction) -> Option<(Register, u64)> {
@@ -1022,7 +1071,7 @@ pub(super) fn rewrite_x86(
     lookup_sites: &[LookupSiteSpec],
     lookup_maps: &HashMap<String, LookupSiteSpec>,
     update_sites: &[UpdateSiteSpec],
-    oracle_targets: &[u64],
+    oracle_targets: &[OracleCall],
     proof_mode: bool,
     show: bool,
 ) -> Result<RewriteResult> {
@@ -1064,7 +1113,7 @@ pub(super) fn rewrite_x86(
         .copied()
         .unwrap_or(0);
     let mut update_call_counter: usize = 0;
-    let mut next_oracle_target: usize = 0;
+    let mut oracle = OracleCursor::new(oracle_targets);
     let mut resolved_helper_call_sites: HashSet<LocalSiteKey> = HashSet::new();
     let mut resolved_got_relocations: HashSet<LocalSiteKey> = HashSet::new();
 
@@ -1349,6 +1398,34 @@ pub(super) fn rewrite_x86(
                         clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                         continue;
                     }
+                    if name == "memset" {
+                        for ib in build_x86_memset_inline()? {
+                            push_x86_synthetic(
+                                &mut local,
+                                &mut kinds,
+                                &mut insn_local_ip,
+                                &mut next_synthetic_ip,
+                                ib,
+                            )?;
+                        }
+                        resolved_helper_call_sites.insert(site_key);
+                        clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                        continue;
+                    }
+                    if name == "memcpy" {
+                        for ib in build_x86_memcpy_inline()? {
+                            push_x86_synthetic(
+                                &mut local,
+                                &mut kinds,
+                                &mut insn_local_ip,
+                                &mut next_synthetic_ip,
+                                ib,
+                            )?;
+                        }
+                        resolved_helper_call_sites.insert(site_key);
+                        clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                        continue;
+                    }
                     if name == "bpf_tail_call" {
                         if !is_entry {
                             bail!(
@@ -1401,6 +1478,30 @@ pub(super) fn rewrite_x86(
                         continue;
                     }
 
+                    if name == "bpf_get_current_task" || name == "bpf_get_current_task_btf" {
+                        let inline = build_x86_get_current_task_inline(helper_addrs)?.ok_or_else(
+                            || {
+                                anyhow!(
+                                    "x86 {name} requires JIT-decoded {} and {}; refusing to consume the generic helper oracle",
+                                    X86_CURRENT_TASK_HELPER_KEY,
+                                    X86_THIS_CPU_OFF_HELPER_KEY
+                                )
+                            },
+                        )?;
+                        for ib in inline {
+                            push_x86_synthetic(
+                                &mut local,
+                                &mut kinds,
+                                &mut insn_local_ip,
+                                &mut next_synthetic_ip,
+                                ib,
+                            )?;
+                        }
+                        resolved_helper_call_sites.insert(site_key);
+                        clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                        continue;
+                    }
+
                     if name == "bpf_map_lookup_elem" {
                         let native_call_index = lookup_call_counter;
                         lookup_call_counter += 1;
@@ -1416,6 +1517,21 @@ pub(super) fn rewrite_x86(
                             map_lookup_helper_addr,
                         )?;
                         lookup_call_specs.insert(site_key, spec.clone());
+                        if !spec.gen_insns.is_empty() {
+                            push_x86_lookup_gen_sequence(
+                                &mut local,
+                                &mut kinds,
+                                &mut insn_local_ip,
+                                &mut next_synthetic_ip,
+                                local_ip,
+                                &spec,
+                                &mut oracle,
+                                &format!("x86 lookup-site {site_label} ({:?})", spec.kind),
+                            )?;
+                            resolved_helper_call_sites.insert(site_key);
+                            clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                            continue;
+                        }
                         match spec.kind {
                             LookupKind::Array | LookupKind::PerCpuArray => {
                                 for ib in build_x86_array_lookup(&spec)? {
@@ -1438,8 +1554,7 @@ pub(super) fn rewrite_x86(
                             | LookupKind::HashOfMaps => {
                                 let helper_addr = resolve_lookup_site_target(
                                     &spec,
-                                    oracle_targets,
-                                    &mut next_oracle_target,
+                                    &mut oracle,
                                     &format!("x86 lookup-site {site_label} ({:?})", spec.kind),
                                 )?;
                                 push_x86_helper_call_reloc(
@@ -1471,14 +1586,6 @@ pub(super) fn rewrite_x86(
                         if let Some(spec) = update_sites.get(ordinal) {
                             match spec.kind {
                                 UpdateKind::Array | UpdateKind::PerCpuArray => {
-                                    let _ = consume_oracle_target(
-                                        oracle_targets,
-                                        &mut next_oracle_target,
-                                        &format!(
-                                            "x86 update-site {ordinal} ({:?}) late inline",
-                                            spec.kind
-                                        ),
-                                    )?;
                                     for ib in build_x86_array_update(spec)? {
                                         push_x86_synthetic(
                                             &mut local,
@@ -1495,8 +1602,8 @@ pub(super) fn rewrite_x86(
                                 UpdateKind::Call => {
                                     let helper_addr = resolve_oracle_preferred_site_target(
                                         spec.target_addr,
-                                        oracle_targets,
-                                        &mut next_oracle_target,
+                                        &mut oracle,
+                                        BPF_FUNC_MAP_UPDATE_ELEM,
                                         &format!("x86 update-site {ordinal}"),
                                     )?;
                                     push_x86_helper_call_reloc(
@@ -1517,8 +1624,7 @@ pub(super) fn rewrite_x86(
                     let helper_addr = resolve_helper_target(
                         &name,
                         helper_addrs,
-                        oracle_targets,
-                        &mut next_oracle_target,
+                        &mut oracle,
                         &format!("x86 helper call {name}"),
                     )?;
                     push_x86_helper_call_reloc(
@@ -1637,12 +1743,7 @@ pub(super) fn rewrite_x86(
         blob.extend_from_slice(&encoded.code_buffer);
     }
 
-    if !proof_mode && next_oracle_target != oracle_targets.len() {
-        bail!(
-            "companion JIT oracle has {} unused x86 helper target(s)",
-            oracle_targets.len() - next_oracle_target
-        );
-    }
+    oracle.finish("x86", proof_mode)?;
 
     // Apply intra-blob Call patches first (cross-symbol direct calls);
     // those need only `sym_global_offset` which is already known.
@@ -3477,6 +3578,40 @@ fn build_x86_helper_call_rel32_slot() -> Result<Instruction> {
     declared_bytes(&X86_HELPER_CALL_REL32_SLOT)
 }
 
+fn build_x86_memset_inline() -> Result<Vec<Instruction>> {
+    let mut bytes = Vec::new();
+    bytes.extend_from_slice(&[0x48, 0x89, 0xF8]); // mov rax, rdi
+    bytes.extend_from_slice(&[0x48, 0x85, 0xD2]); // test rdx, rdx
+    let done_jmp = append_x86_jcc_rel8(&mut bytes, 0x74); // je done
+    let loop_off = bytes.len();
+    bytes.extend_from_slice(&[0x40, 0x88, 0x37]); // mov [rdi], sil
+    bytes.extend_from_slice(&[0x48, 0xFF, 0xC7]); // inc rdi
+    bytes.extend_from_slice(&[0x48, 0xFF, 0xCA]); // dec rdx
+    let loop_jmp = append_x86_jcc_rel8(&mut bytes, 0x75); // jne loop
+    let done_off = bytes.len();
+    patch_x86_rel8(&mut bytes, done_jmp, done_off)?;
+    patch_x86_rel8(&mut bytes, loop_jmp, loop_off)?;
+    declared_byte_chunks(&bytes)
+}
+
+fn build_x86_memcpy_inline() -> Result<Vec<Instruction>> {
+    let mut bytes = Vec::new();
+    bytes.extend_from_slice(&[0x48, 0x89, 0xF8]); // mov rax, rdi
+    bytes.extend_from_slice(&[0x48, 0x85, 0xD2]); // test rdx, rdx
+    let done_jmp = append_x86_jcc_rel8(&mut bytes, 0x74); // je done
+    let loop_off = bytes.len();
+    bytes.extend_from_slice(&[0x8A, 0x0E]); // mov cl, [rsi]
+    bytes.extend_from_slice(&[0x88, 0x0F]); // mov [rdi], cl
+    bytes.extend_from_slice(&[0x48, 0xFF, 0xC6]); // inc rsi
+    bytes.extend_from_slice(&[0x48, 0xFF, 0xC7]); // inc rdi
+    bytes.extend_from_slice(&[0x48, 0xFF, 0xCA]); // dec rdx
+    let loop_jmp = append_x86_jcc_rel8(&mut bytes, 0x75); // jne loop
+    let done_off = bytes.len();
+    patch_x86_rel8(&mut bytes, done_jmp, done_off)?;
+    patch_x86_rel8(&mut bytes, loop_jmp, loop_off)?;
+    declared_byte_chunks(&bytes)
+}
+
 fn push_x86_helper_call_reloc(
     local: &mut Vec<Instruction>,
     kinds: &mut Vec<Option<PatchKind>>,
@@ -3774,6 +3909,383 @@ fn append_x86_mov_byte_rax_disp32_imm(bytes: &mut Vec<u8>, disp: u32, imm: u8) {
     bytes.extend_from_slice(&[0xC6, 0x80]); // mov byte ptr [rax+disp32], imm8
     bytes.extend_from_slice(&disp.to_le_bytes());
     bytes.push(imm);
+}
+
+struct X86GenBranchPatch {
+    disp_offset: usize,
+    target_insn: usize,
+}
+
+fn x86_bpf_reg64(reg: u8) -> Result<Register> {
+    match reg {
+        0 => Ok(Register::RAX),
+        1 => Ok(Register::RDI),
+        2 => Ok(Register::RSI),
+        3 => Ok(Register::RDX),
+        4 => Ok(Register::RCX),
+        5 => Ok(Register::R8),
+        6 => Ok(Register::RBX),
+        7 => Ok(Register::R13),
+        8 => Ok(Register::R14),
+        9 => Ok(Register::R15),
+        10 => Ok(Register::RBP),
+        11 => Ok(Register::R10),
+        _ => bail!("unsupported BPF register r{reg} in map_gen_lookup"),
+    }
+}
+
+fn x86_modrm(mode: u8, reg: u8, rm: u8) -> u8 {
+    ((mode & 0x3) << 6) | ((reg & 0x7) << 3) | (rm & 0x7)
+}
+
+fn append_x86_rex(bytes: &mut Vec<u8>, w: bool, r: bool, x: bool, b: bool) {
+    let rex = 0x40
+        | if w { 0x08 } else { 0 }
+        | if r { 0x04 } else { 0 }
+        | if x { 0x02 } else { 0 }
+        | if b { 0x01 } else { 0 };
+    if rex != 0x40 {
+        bytes.push(rex);
+    }
+}
+
+fn append_x86_modrm_reg_reg(
+    bytes: &mut Vec<u8>,
+    w: bool,
+    opcode: u8,
+    reg_field: Register,
+    rm_field: Register,
+) -> Result<()> {
+    let (reg_low, reg_high) = x86_gpr64_encoding(reg_field)?;
+    let (rm_low, rm_high) = x86_gpr64_encoding(rm_field)?;
+    append_x86_rex(bytes, w, reg_high, false, rm_high);
+    bytes.push(opcode);
+    bytes.push(x86_modrm(3, reg_low, rm_low));
+    Ok(())
+}
+
+fn append_x86_modrm_mem(bytes: &mut Vec<u8>, reg_low: u8, base: Register, disp: i32) -> Result<()> {
+    let (base_low, _) = x86_gpr64_encoding(base)?;
+    let needs_sib = base_low == 4;
+    let force_disp = base_low == 5;
+    let (mode, disp_size) = if disp == 0 && !force_disp {
+        (0, 0)
+    } else if let Ok(disp8) = i8::try_from(disp) {
+        let _ = disp8;
+        (1, 1)
+    } else {
+        (2, 4)
+    };
+    bytes.push(x86_modrm(
+        mode,
+        reg_low,
+        if needs_sib { 4 } else { base_low },
+    ));
+    if needs_sib {
+        bytes.push(0x24); // scale=1, no index, base=rsp/r12
+    }
+    match disp_size {
+        0 => {}
+        1 => bytes.push(disp as i8 as u8),
+        4 => bytes.extend_from_slice(&disp.to_le_bytes()),
+        _ => unreachable!(),
+    }
+    Ok(())
+}
+
+fn append_x86_group1_imm32(
+    bytes: &mut Vec<u8>,
+    w: bool,
+    op_ext: u8,
+    dst: Register,
+    imm: i32,
+) -> Result<()> {
+    let (dst_low, dst_high) = x86_gpr64_encoding(dst)?;
+    append_x86_rex(bytes, w, false, false, dst_high);
+    bytes.push(0x81);
+    bytes.push(x86_modrm(3, op_ext, dst_low));
+    bytes.extend_from_slice(&imm.to_le_bytes());
+    Ok(())
+}
+
+fn append_x86_shift_imm(bytes: &mut Vec<u8>, dst: Register, imm: i32) -> Result<()> {
+    if !(0..=63).contains(&imm) {
+        bail!("map_gen_lookup shift amount out of range: {imm}");
+    }
+    let (dst_low, dst_high) = x86_gpr64_encoding(dst)?;
+    append_x86_rex(bytes, true, false, false, dst_high);
+    bytes.push(0xC1);
+    bytes.push(x86_modrm(3, 4, dst_low));
+    bytes.push(imm as u8);
+    Ok(())
+}
+
+fn append_x86_imul_imm32(bytes: &mut Vec<u8>, dst: Register, imm: i32) -> Result<()> {
+    let (dst_low, dst_high) = x86_gpr64_encoding(dst)?;
+    append_x86_rex(bytes, true, dst_high, false, dst_high);
+    bytes.push(0x69);
+    bytes.push(x86_modrm(3, dst_low, dst_low));
+    bytes.extend_from_slice(&imm.to_le_bytes());
+    Ok(())
+}
+
+fn append_x86_load_mem(
+    bytes: &mut Vec<u8>,
+    dst: Register,
+    base: Register,
+    off: i16,
+    size: u8,
+) -> Result<()> {
+    let (dst_low, dst_high) = x86_gpr64_encoding(dst)?;
+    let (_, base_high) = x86_gpr64_encoding(base)?;
+    match size {
+        BPF_B => {
+            append_x86_rex(bytes, false, dst_high, false, base_high);
+            bytes.extend_from_slice(&[0x0F, 0xB6]);
+        }
+        BPF_W => {
+            append_x86_rex(bytes, false, dst_high, false, base_high);
+            bytes.push(0x8B);
+        }
+        BPF_DW => {
+            append_x86_rex(bytes, true, dst_high, false, base_high);
+            bytes.push(0x8B);
+        }
+        _ => bail!("unsupported map_gen_lookup LDX size {size:#x}"),
+    }
+    append_x86_modrm_mem(bytes, dst_low, base, i32::from(off))
+}
+
+fn append_x86_store_mem_imm(
+    bytes: &mut Vec<u8>,
+    base: Register,
+    off: i16,
+    size: u8,
+    imm: i32,
+) -> Result<()> {
+    let (_, base_high) = x86_gpr64_encoding(base)?;
+    match size {
+        BPF_B => {
+            let imm8 = u8::try_from(imm)
+                .map_err(|_| anyhow!("map_gen_lookup byte store imm out of range: {imm}"))?;
+            append_x86_rex(bytes, false, false, false, base_high);
+            bytes.push(0xC6);
+            append_x86_modrm_mem(bytes, 0, base, i32::from(off))?;
+            bytes.push(imm8);
+            Ok(())
+        }
+        _ => bail!("unsupported map_gen_lookup ST size {size:#x}"),
+    }
+}
+
+fn append_x86_add_percpu_reg(bytes: &mut Vec<u8>, dst: Register, percpu_base: u64) -> Result<()> {
+    let disp = u32::try_from(percpu_base)
+        .map_err(|_| anyhow!("x86 percpu base offset does not fit disp32: {percpu_base:#x}"))?;
+    let (dst_low, dst_high) = x86_gpr64_encoding(dst)?;
+    bytes.push(0x65); // GS segment override
+    append_x86_rex(bytes, true, dst_high, false, false);
+    bytes.push(0x03); // add r64, r/m64
+    bytes.push(x86_modrm(0, dst_low, 4));
+    bytes.push(0x25); // no base, disp32
+    bytes.extend_from_slice(&disp.to_le_bytes());
+    Ok(())
+}
+
+fn x86_gen_branch_target(base_index: usize, local_index: usize, off: i16) -> Result<usize> {
+    let original = base_index
+        .checked_add(local_index)
+        .ok_or_else(|| anyhow!("map_gen_lookup branch index overflow"))?;
+    let target = original as isize + 1 + isize::from(off);
+    if target < base_index as isize {
+        bail!("map_gen_lookup branch target {target} jumps before lowered slice base {base_index}");
+    }
+    usize::try_from(target - base_index as isize)
+        .map_err(|_| anyhow!("map_gen_lookup branch target conversion failed"))
+}
+
+fn build_x86_map_gen_body(
+    gen: &[BpfInsn],
+    spec: &LookupSiteSpec,
+    base_index: usize,
+) -> Result<Vec<Instruction>> {
+    let mut bytes = Vec::new();
+    let mut offsets = vec![0usize; gen.len() + 1];
+    let mut patches = Vec::new();
+
+    for (idx, insn) in gen.iter().copied().enumerate() {
+        offsets[idx] = bytes.len();
+        match insn.code {
+            code if code == (BPF_ALU64 | BPF_ADD | BPF_K) => {
+                append_x86_group1_imm32(
+                    &mut bytes,
+                    true,
+                    0,
+                    x86_bpf_reg64(insn.dst_reg)?,
+                    insn.imm,
+                )?;
+            }
+            code if code == (BPF_ALU64 | BPF_ADD | BPF_X) => {
+                append_x86_modrm_reg_reg(
+                    &mut bytes,
+                    true,
+                    0x01,
+                    x86_bpf_reg64(insn.src_reg)?,
+                    x86_bpf_reg64(insn.dst_reg)?,
+                )?;
+            }
+            code if code == (BPF_ALU64 | BPF_LSH | BPF_K) => {
+                append_x86_shift_imm(&mut bytes, x86_bpf_reg64(insn.dst_reg)?, insn.imm)?;
+            }
+            code if code == (BPF_ALU64 | BPF_MUL | BPF_K) => {
+                append_x86_imul_imm32(&mut bytes, x86_bpf_reg64(insn.dst_reg)?, insn.imm)?;
+            }
+            code if code == (BPF_ALU64 | BPF_MOV | BPF_K) => {
+                append_x86_mov_reg_imm64(
+                    &mut bytes,
+                    x86_bpf_reg64(insn.dst_reg)?,
+                    insn.imm as i64 as u64,
+                )?;
+            }
+            code if code == (BPF_ALU64 | BPF_MOV | BPF_X) => {
+                let dst = x86_bpf_reg64(insn.dst_reg)?;
+                let src = x86_bpf_reg64(insn.src_reg)?;
+                if insn.off == BPF_ADDR_PERCPU {
+                    if spec.percpu_base_addr == 0 {
+                        bail!("map_gen_lookup percpu move missing this_cpu_off address");
+                    }
+                    if dst != src {
+                        append_x86_modrm_reg_reg(&mut bytes, true, 0x89, src, dst)?;
+                    }
+                    append_x86_add_percpu_reg(&mut bytes, dst, spec.percpu_base_addr)?;
+                } else {
+                    append_x86_modrm_reg_reg(&mut bytes, true, 0x89, src, dst)?;
+                }
+            }
+            code if code == (BPF_ALU | BPF_AND | BPF_K) => {
+                append_x86_group1_imm32(
+                    &mut bytes,
+                    false,
+                    4,
+                    x86_bpf_reg64(insn.dst_reg)?,
+                    insn.imm,
+                )?;
+            }
+            code if code == (BPF_LDX | BPF_MEM | BPF_B)
+                || code == (BPF_LDX | BPF_MEM | BPF_W)
+                || code == (BPF_LDX | BPF_MEM | BPF_DW) =>
+            {
+                append_x86_load_mem(
+                    &mut bytes,
+                    x86_bpf_reg64(insn.dst_reg)?,
+                    x86_bpf_reg64(insn.src_reg)?,
+                    insn.off,
+                    insn.code & 0x18,
+                )?;
+            }
+            code if code == (BPF_ST | BPF_MEM | BPF_B) => {
+                append_x86_store_mem_imm(
+                    &mut bytes,
+                    x86_bpf_reg64(insn.dst_reg)?,
+                    insn.off,
+                    insn.code & 0x18,
+                    insn.imm,
+                )?;
+            }
+            code if code == (BPF_JMP | BPF_JEQ | BPF_K)
+                || code == (BPF_JMP | BPF_JNE | BPF_K)
+                || code == (BPF_JMP | BPF_JGE | BPF_K) =>
+            {
+                append_x86_group1_imm32(
+                    &mut bytes,
+                    true,
+                    7,
+                    x86_bpf_reg64(insn.dst_reg)?,
+                    insn.imm,
+                )?;
+                let opcode = match insn.code & 0xf0 {
+                    BPF_JEQ => 0x84,
+                    BPF_JNE => 0x85,
+                    BPF_JGE => 0x83,
+                    _ => unreachable!(),
+                };
+                let disp_offset = append_x86_jcc_rel32(&mut bytes, opcode);
+                patches.push(X86GenBranchPatch {
+                    disp_offset,
+                    target_insn: x86_gen_branch_target(base_index, idx, insn.off)?,
+                });
+            }
+            code if code == (BPF_JMP | BPF_JA) => {
+                bytes.push(0xE9);
+                let disp_offset = bytes.len();
+                bytes.extend_from_slice(&0i32.to_le_bytes());
+                patches.push(X86GenBranchPatch {
+                    disp_offset,
+                    target_insn: x86_gen_branch_target(base_index, idx, insn.off)?,
+                });
+            }
+            code if code == (BPF_JMP | BPF_CALL) => {
+                bail!("map_gen_lookup helper call must be lowered outside byte body")
+            }
+            _ => bail!(
+                "unsupported map_gen_lookup insn code={:#x} dst=r{} src=r{} off={} imm={}",
+                insn.code,
+                insn.dst_reg,
+                insn.src_reg,
+                insn.off,
+                insn.imm
+            ),
+        }
+    }
+    offsets[gen.len()] = bytes.len();
+    for patch in patches {
+        let Some(&target) = offsets.get(patch.target_insn) else {
+            bail!(
+                "map_gen_lookup branch target {} exceeds lowered insn count {}",
+                patch.target_insn,
+                gen.len()
+            );
+        };
+        patch_x86_rel32(&mut bytes, patch.disp_offset, target)?;
+    }
+    declared_byte_chunks(&bytes)
+}
+
+fn push_x86_lookup_gen_sequence(
+    local: &mut Vec<Instruction>,
+    kinds: &mut Vec<Option<PatchKind>>,
+    insn_local_ip: &mut Vec<u64>,
+    next_synthetic_ip: &mut u64,
+    local_ip: u64,
+    spec: &LookupSiteSpec,
+    oracle: &mut OracleCursor<'_>,
+    context: &str,
+) -> Result<()> {
+    if spec.gen_insns.is_empty() {
+        bail!("map_gen_lookup lowering called without generated instructions");
+    }
+    let call_count = spec
+        .gen_insns
+        .iter()
+        .filter(|insn| insn.is_helper_call())
+        .count();
+    let body_start = if spec.gen_insns[0].is_helper_call() {
+        if call_count != 1 {
+            bail!("{context} has {call_count} map_gen_lookup calls; expected one leading call");
+        }
+        let helper_addr = resolve_lookup_site_target(spec, oracle, context)?;
+        push_x86_helper_call_reloc(local, kinds, insn_local_ip, local_ip, helper_addr)?;
+        1
+    } else {
+        if call_count != 0 {
+            bail!("{context} has a non-leading map_gen_lookup helper call");
+        }
+        0
+    };
+
+    for ib in build_x86_map_gen_body(&spec.gen_insns[body_start..], spec, body_start)? {
+        push_x86_synthetic(local, kinds, insn_local_ip, next_synthetic_ip, ib)?;
+    }
+    Ok(())
 }
 
 fn build_x86_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<Instruction>> {

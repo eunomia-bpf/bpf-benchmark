@@ -36,6 +36,7 @@
 #include <linux/bpf.h>
 #include <linux/debugfs.h>
 #include <linux/err.h>
+#include <linux/filter.h>
 #include <linux/fs.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -69,6 +70,7 @@
  */
 #define NATIVE_LAB_RELOC_HELPER_CALL_REL32	1
 #define NATIVE_LAB_MAX_RELOCS		32
+#define NATIVE_LAB_MAP_GEN_MAX_INSN	256
 #define NATIVE_LAB_ABI_RBX		(1U << 0)
 #define NATIVE_LAB_ABI_R13		(1U << 1)
 #define NATIVE_LAB_ABI_R14		(1U << 2)
@@ -278,10 +280,101 @@ struct blob_file_priv {
 	u32 id;
 };
 
-struct map_ptr_file_priv {
-	char response[32];
-	size_t len;
+enum map_ptr_query_kind {
+	MAP_PTR_QUERY_MAP = 0,
+	MAP_PTR_QUERY_VALUE = 1,
+	MAP_PTR_QUERY_LOOKUP = 2,
+	MAP_PTR_QUERY_UPDATE = 3,
+	MAP_PTR_QUERY_DELETE = 4,
+	MAP_PTR_QUERY_LOOKUP_GEN = 5,
 };
+
+struct map_ptr_file_priv {
+	char response[8192];
+	size_t len;
+	enum map_ptr_query_kind kind;
+};
+
+static int map_lookup_gen_insns(struct bpf_map *map, struct bpf_insn *insns)
+{
+	int cnt;
+
+	if (!map->ops || !map->ops->map_gen_lookup)
+		return -EOPNOTSUPP;
+	cnt = map->ops->map_gen_lookup(map, insns);
+	if (cnt <= 0)
+		return cnt ?: -EINVAL;
+	if (cnt > NATIVE_LAB_MAP_GEN_MAX_INSN)
+		return -E2BIG;
+	return cnt;
+}
+
+static int map_lookup_gen_call_target(struct bpf_map *map, unsigned long *ptr)
+{
+	struct bpf_insn *insns;
+	int cnt, i;
+
+	insns = kcalloc(NATIVE_LAB_MAP_GEN_MAX_INSN, sizeof(*insns), GFP_KERNEL);
+	if (!insns)
+		return -ENOMEM;
+	cnt = map_lookup_gen_insns(map, insns);
+	if (cnt < 0)
+		goto out;
+
+	for (i = 0; i < cnt; i++) {
+		if (insns[i].code == (BPF_JMP | BPF_CALL) &&
+		    insns[i].src_reg == 0) {
+			*ptr = (unsigned long)__bpf_call_base + insns[i].imm;
+			cnt = 0;
+			goto out;
+		}
+	}
+	cnt = -ENOENT;
+out:
+	kfree(insns);
+	return cnt;
+}
+
+static int map_lookup_gen_response(struct bpf_map *map,
+				   struct map_ptr_file_priv *priv)
+{
+	struct bpf_insn *insns;
+	const u8 *bytes;
+	size_t byte_len;
+	int cnt, pos;
+	size_t i;
+
+	insns = kcalloc(NATIVE_LAB_MAP_GEN_MAX_INSN, sizeof(*insns), GFP_KERNEL);
+	if (!insns)
+		return -ENOMEM;
+	cnt = map_lookup_gen_insns(map, insns);
+	if (cnt < 0)
+		goto out;
+
+	bytes = (const u8 *)insns;
+	byte_len = cnt * sizeof(struct bpf_insn);
+	pos = scnprintf(priv->response, sizeof(priv->response), "%d ", cnt);
+	for (i = 0; i < byte_len; i++) {
+		if (pos + 3 >= sizeof(priv->response)) {
+			cnt = -E2BIG;
+			goto out;
+		}
+		pos += scnprintf(priv->response + pos,
+				 sizeof(priv->response) - pos,
+				 "%02x", bytes[i]);
+	}
+	if (pos + 2 >= sizeof(priv->response)) {
+		cnt = -E2BIG;
+		goto out;
+	}
+	priv->response[pos++] = '\n';
+	priv->response[pos] = '\0';
+	priv->len = pos;
+	cnt = 0;
+out:
+	kfree(insns);
+	return cnt;
+}
 
 static ssize_t blob_write(struct file *file, const char __user *ubuf,
 			  size_t len, loff_t *ppos)
@@ -429,6 +522,7 @@ static int map_ptr_open(struct inode *inode, struct file *file)
 	priv = kzalloc(sizeof(*priv), GFP_KERNEL);
 	if (!priv)
 		return -ENOMEM;
+	priv->kind = (enum map_ptr_query_kind)(unsigned long)inode->i_private;
 	file->private_data = priv;
 	return 0;
 }
@@ -440,7 +534,7 @@ static int map_ptr_release(struct inode *inode, struct file *file)
 }
 
 static ssize_t map_ptr_query_write(struct file *file, const char __user *ubuf,
-				   size_t len, loff_t *ppos, bool direct_value)
+				   size_t len, loff_t *ppos)
 {
 	struct map_ptr_file_priv *priv = file->private_data;
 	struct bpf_map *map;
@@ -467,8 +561,11 @@ static ssize_t map_ptr_query_write(struct file *file, const char __user *ubuf,
 	if (IS_ERR(map))
 		return PTR_ERR(map);
 
-	ptr = (unsigned long)map;
-	if (direct_value) {
+	switch (priv->kind) {
+	case MAP_PTR_QUERY_MAP:
+		ptr = (unsigned long)map;
+		break;
+	case MAP_PTR_QUERY_VALUE: {
 		u64 value = 0;
 
 		if (!map->ops || !map->ops->map_direct_value_addr) {
@@ -479,6 +576,37 @@ static ssize_t map_ptr_query_write(struct file *file, const char __user *ubuf,
 		if (err)
 			goto out_put;
 		ptr = (unsigned long)value;
+		break;
+	}
+	case MAP_PTR_QUERY_LOOKUP:
+		err = map_lookup_gen_call_target(map, &ptr);
+		if (err)
+			goto out_put;
+		break;
+	case MAP_PTR_QUERY_LOOKUP_GEN:
+		err = map_lookup_gen_response(map, priv);
+		if (err)
+			goto out_put;
+		err = len;
+		goto out_put;
+		break;
+	case MAP_PTR_QUERY_UPDATE:
+		if (!map->ops || !map->ops->map_update_elem) {
+			err = -EOPNOTSUPP;
+			goto out_put;
+		}
+		ptr = (unsigned long)map->ops->map_update_elem;
+		break;
+	case MAP_PTR_QUERY_DELETE:
+		if (!map->ops || !map->ops->map_delete_elem) {
+			err = -EOPNOTSUPP;
+			goto out_put;
+		}
+		ptr = (unsigned long)map->ops->map_delete_elem;
+		break;
+	default:
+		err = -EINVAL;
+		goto out_put;
 	}
 
 	priv->len = scnprintf(priv->response, sizeof(priv->response),
@@ -495,13 +623,13 @@ out_put:
 static ssize_t map_ptr_write(struct file *file, const char __user *ubuf,
 			     size_t len, loff_t *ppos)
 {
-	return map_ptr_query_write(file, ubuf, len, ppos, false);
+	return map_ptr_query_write(file, ubuf, len, ppos);
 }
 
 static ssize_t map_value_ptr_write(struct file *file, const char __user *ubuf,
 				   size_t len, loff_t *ppos)
 {
-	return map_ptr_query_write(file, ubuf, len, ppos, true);
+	return map_ptr_query_write(file, ubuf, len, ppos);
 }
 
 static ssize_t map_ptr_read(struct file *file, char __user *ubuf, size_t len,
@@ -531,6 +659,33 @@ static const struct file_operations map_value_ptr_fops = {
 	.llseek = default_llseek,
 };
 
+static const struct file_operations map_lookup_ptr_fops = {
+	.owner = THIS_MODULE,
+	.open = map_ptr_open,
+	.release = map_ptr_release,
+	.read = map_ptr_read,
+	.write = map_ptr_write,
+	.llseek = default_llseek,
+};
+
+static const struct file_operations map_update_ptr_fops = {
+	.owner = THIS_MODULE,
+	.open = map_ptr_open,
+	.release = map_ptr_release,
+	.read = map_ptr_read,
+	.write = map_ptr_write,
+	.llseek = default_llseek,
+};
+
+static const struct file_operations map_delete_ptr_fops = {
+	.owner = THIS_MODULE,
+	.open = map_ptr_open,
+	.release = map_ptr_release,
+	.read = map_ptr_read,
+	.write = map_ptr_write,
+	.llseek = default_llseek,
+};
+
 static int __init bpf_x86_native_lab_debugfs_init(void)
 {
 	long i;
@@ -539,10 +694,24 @@ static int __init bpf_x86_native_lab_debugfs_init(void)
 	if (IS_ERR(debugfs_root))
 		return PTR_ERR(debugfs_root);
 
-	debugfs_create_file("map_ptr", 0600, debugfs_root, NULL,
+	debugfs_create_file("map_ptr", 0600, debugfs_root,
+			    (void *)MAP_PTR_QUERY_MAP,
 			    &map_ptr_fops);
-	debugfs_create_file("map_value_ptr", 0600, debugfs_root, NULL,
+	debugfs_create_file("map_value_ptr", 0600, debugfs_root,
+			    (void *)MAP_PTR_QUERY_VALUE,
 			    &map_value_ptr_fops);
+	debugfs_create_file("map_lookup_ptr", 0600, debugfs_root,
+			    (void *)MAP_PTR_QUERY_LOOKUP,
+			    &map_lookup_ptr_fops);
+	debugfs_create_file("map_lookup_gen", 0600, debugfs_root,
+			    (void *)MAP_PTR_QUERY_LOOKUP_GEN,
+			    &map_lookup_ptr_fops);
+	debugfs_create_file("map_update_ptr", 0600, debugfs_root,
+			    (void *)MAP_PTR_QUERY_UPDATE,
+			    &map_update_ptr_fops);
+	debugfs_create_file("map_delete_ptr", 0600, debugfs_root,
+			    (void *)MAP_PTR_QUERY_DELETE,
+			    &map_delete_ptr_fops);
 
 	for (i = 0; i < NATIVE_LAB_MAX_BLOBS; i++) {
 		char name[24];

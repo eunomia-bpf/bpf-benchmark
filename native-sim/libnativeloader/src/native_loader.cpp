@@ -192,6 +192,10 @@ struct NativeLabTarget {
     const char *relocs_path_fmt;
     const char *map_ptr_path;
     const char *map_value_ptr_path;
+    const char *map_lookup_ptr_path;
+    const char *map_lookup_gen_path;
+    const char *map_update_ptr_path;
+    const char *map_delete_ptr_path;
     uint32_t chunk_bytes;
 };
 
@@ -205,6 +209,10 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .relocs_path_fmt = nullptr,
     .map_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_ptr",
     .map_value_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_value_ptr",
+    .map_lookup_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_lookup_ptr",
+    .map_lookup_gen_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_lookup_gen",
+    .map_update_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_update_ptr",
+    .map_delete_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_delete_ptr",
     .chunk_bytes = 256,
 };
 #else
@@ -217,6 +225,10 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .relocs_path_fmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u.relocs",
     .map_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_ptr",
     .map_value_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_value_ptr",
+    .map_lookup_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_lookup_ptr",
+    .map_lookup_gen_path = "/sys/kernel/debug/bpf_x86_native_lab/map_lookup_gen",
+    .map_update_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_update_ptr",
+    .map_delete_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_delete_ptr",
     .chunk_bytes = 128,
 };
 #endif
@@ -367,6 +379,7 @@ constexpr const char *kX86BpfProgBpfFuncOffsetKey =
 constexpr const char *kX86TailCallOffsetKey = "__native_x86_tail_call_offset";
 constexpr const char *kX86CpuNumberHelperKey = "__native_x86_cpu_number";
 constexpr const char *kX86ThisCpuOffHelperKey = "__native_x86_this_cpu_off";
+constexpr const char *kX86CurrentTaskHelperKey = "__native_x86_current_task";
 #if defined(__aarch64__)
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
@@ -411,9 +424,10 @@ void ensure_debugfs_mounted()
     (void)mount("none", kDebugfsDir, "debugfs", 0, nullptr);
 }
 
-uint64_t lookup_native_lab_ptr_by_fd(int map_fd,
-                                     const char *path,
-                                     const char *label)
+std::string query_native_lab_by_fd(int map_fd,
+                                   const char *path,
+                                   const char *label,
+                                   size_t max_response)
 {
     ensure_debugfs_mounted();
     int fd = open(path, O_RDWR | O_CLOEXEC);
@@ -441,22 +455,63 @@ uint64_t lookup_native_lab_ptr_by_fd(int map_fd,
         fail(std::string("lseek ") + path + ": " + std::strerror(saved));
     }
 
-    char response[64] = {};
-    ssize_t n = read(fd, response, sizeof(response) - 1);
+    std::vector<char> response(max_response + 1, '\0');
+    ssize_t n = read(fd, response.data(), max_response);
     saved = errno;
     close(fd);
     if (n <= 0) {
         fail(std::string("read ") + path + ": " + std::strerror(saved));
     }
-    response[n] = '\0';
+    if (static_cast<size_t>(n) == max_response) {
+        fail(std::string("native_kernel: truncated ") + label + " response");
+    }
+    response[static_cast<size_t>(n)] = '\0';
+    return std::string(response.data(), static_cast<size_t>(n));
+}
+
+uint64_t lookup_native_lab_ptr_by_fd(int map_fd,
+                                     const char *path,
+                                     const char *label)
+{
+    std::string response = query_native_lab_by_fd(map_fd, path, label, 64);
 
     errno = 0;
     char *end = nullptr;
-    unsigned long long value = std::strtoull(response, &end, 0);
-    if (errno != 0 || end == response || value == 0) {
+    unsigned long long value = std::strtoull(response.c_str(), &end, 0);
+    if (errno != 0 || end == response.c_str() || value == 0) {
         fail(std::string("native_kernel: invalid ") + label + " response: " + response);
     }
     return static_cast<uint64_t>(value);
+}
+
+uint8_t parse_hex_nibble(char ch, const std::string &label)
+{
+    if (ch >= '0' && ch <= '9') {
+        return static_cast<uint8_t>(ch - '0');
+    }
+    if (ch >= 'a' && ch <= 'f') {
+        return static_cast<uint8_t>(ch - 'a' + 10);
+    }
+    if (ch >= 'A' && ch <= 'F') {
+        return static_cast<uint8_t>(ch - 'A' + 10);
+    }
+    fail("native_kernel: non-hex character in " + label);
+}
+
+std::vector<uint8_t> parse_hex_bytes(const std::string &hex,
+                                     const std::string &label)
+{
+    if (hex.size() % 2 != 0) {
+        fail("native_kernel: odd-length hex in " + label);
+    }
+    std::vector<uint8_t> out;
+    out.reserve(hex.size() / 2);
+    for (size_t i = 0; i < hex.size(); i += 2) {
+        uint8_t hi = parse_hex_nibble(hex[i], label);
+        uint8_t lo = parse_hex_nibble(hex[i + 1], label);
+        out.push_back(static_cast<uint8_t>((hi << 4) | lo));
+    }
+    return out;
 }
 
 uint64_t lookup_kernel_map_ptr_by_fd(int map_fd)
@@ -469,6 +524,43 @@ uint64_t lookup_kernel_map_value_ptr_by_fd(int map_fd)
 {
     return lookup_native_lab_ptr_by_fd(
         map_fd, kNativeLabTarget.map_value_ptr_path, "map_value_ptr");
+}
+
+uint64_t lookup_kernel_map_lookup_ptr_by_fd(int map_fd)
+{
+    return lookup_native_lab_ptr_by_fd(
+        map_fd, kNativeLabTarget.map_lookup_ptr_path, "map_lookup_ptr");
+}
+
+std::vector<uint8_t> lookup_kernel_map_lookup_gen_by_fd(int map_fd)
+{
+    std::string response = query_native_lab_by_fd(
+        map_fd, kNativeLabTarget.map_lookup_gen_path, "map_lookup_gen", 8192);
+    std::istringstream input(response);
+    size_t insn_count = 0;
+    std::string hex;
+    if (!(input >> insn_count >> hex)) {
+        fail("native_kernel: invalid map_lookup_gen response: " + response);
+    }
+    if (insn_count == 0) {
+        fail("native_kernel: empty map_lookup_gen response");
+    }
+    if (hex.size() != insn_count * sizeof(bpf_insn) * 2) {
+        fail("native_kernel: map_lookup_gen length mismatch in response: " + response);
+    }
+    return parse_hex_bytes(hex, "map_lookup_gen");
+}
+
+uint64_t lookup_kernel_map_update_ptr_by_fd(int map_fd)
+{
+    return lookup_native_lab_ptr_by_fd(
+        map_fd, kNativeLabTarget.map_update_ptr_path, "map_update_ptr");
+}
+
+uint64_t lookup_kernel_map_delete_ptr_by_fd(int map_fd)
+{
+    return lookup_native_lab_ptr_by_fd(
+        map_fd, kNativeLabTarget.map_delete_ptr_path, "map_delete_ptr");
 }
 
 constexpr size_t kRelocRecordBytes = 16;
@@ -2227,9 +2319,11 @@ struct NativeLinkArgs {
     uint64_t oracle_jit_base = 0;
     std::vector<uint8_t> oracle_jited;
     std::vector<uint8_t> oracle_xlated;
+    std::vector<int> source_helper_ids;
     std::vector<std::string> helpers;
     std::vector<std::string> maps;
     std::vector<std::string> lookup_sites;
+    std::vector<std::string> lookup_gens;
     std::vector<std::string> lookup_maps;
     std::vector<std::string> update_sites;
 };
@@ -2252,8 +2346,11 @@ struct ProgramLoadPlan {
     uint64_t oracle_jit_base = 0;
     uint64_t x86_cpu_number_addr = 0;
     uint64_t x86_this_cpu_off = 0;
+    uint64_t x86_current_task_addr = 0;
     std::vector<uint8_t> oracle_jited;
     std::vector<uint8_t> oracle_xlated;
+    std::vector<int> source_helper_ids;
+    uint64_t map_delete_elem_addr = 0;
     bool has_tail_call = false;
     std::unordered_map<std::string, uint64_t> map_addrs;
     std::unordered_map<std::string, uint32_t> map_addr_ids;
@@ -2264,16 +2361,16 @@ struct ProgramLoadPlan {
     /* Per-call-site spec for every `bpf_map_lookup_elem` invocation in
      * the entry program, listed in BPF-source order. Each entry is a
      * (target_kernel_address, key_offset) pair. native-link routes the
-     * i-th `bpf_map_lookup_elem` call site to this entry; key_offset>0
-     * additionally triggers a 9- or 11-byte post-call inline sequence
-     * `test rax,rax; je; add rax, KEY_OFFSET` matching the kernel BPF
-     * JIT's `map_gen_lookup` expansion.
+     * i-th `bpf_map_lookup_elem` call site to this entry. ARRAY/PERCPU_ARRAY
+     * sites carry enough metadata for native-link to emit direct pointer
+     * arithmetic. Other map types either remain a normal helper-ABI call or
+     * fail fast if no helper-ABI target is available.
      *
      * The pair is decided per-call from the map type discovered by
      * walking the program's BPF source bytecode (track r1's binding
      * through the most recent BPF_LD_IMM64 pseudo_map_fd). ARRAY sites
      * carry enough metadata for native-link to emit direct bounds-check
-     * + pointer arithmetic. Other map types stay on the oracle helper
+     * + pointer arithmetic. Other map types stay on the helper
      * call unless their lowering can be expressed without private kernel
      * symbol addresses. */
     struct LookupSite {
@@ -2294,6 +2391,7 @@ struct ProgramLoadPlan {
         uint32_t value_offset;
         uint64_t percpu_base_addr;
         std::string map_name;
+        std::vector<uint8_t> gen_lookup;
     };
     std::vector<LookupSite> lookup_sites;
     struct UpdateSite {
@@ -2752,6 +2850,47 @@ uint64_t decode_x86_cpu_number_from_jit(const std::vector<uint8_t> &jited)
 #endif
 }
 
+uint64_t decode_x86_current_task_from_jit(const std::vector<uint8_t> &jited)
+{
+#if defined(__x86_64__)
+    constexpr uint8_t kMovRaxImm32[] = {0x48, 0xc7, 0xc0};
+    constexpr uint8_t kAddGsThisCpuOff[] = {0x65, 0x48, 0x03, 0x04, 0x25};
+    constexpr uint8_t kLoadCurrentTask[] = {0x48, 0x8b, 0x00};
+    constexpr size_t kAddOffset = sizeof(kMovRaxImm32) + sizeof(uint32_t);
+    constexpr size_t kLoadOffset = kAddOffset + sizeof(kAddGsThisCpuOff) + sizeof(uint32_t);
+    constexpr size_t kPatternSize = kLoadOffset + sizeof(kLoadCurrentTask);
+    uint64_t found = 0;
+    bool have = false;
+    for (size_t i = 0; i + kPatternSize <= jited.size(); i++) {
+        if (std::memcmp(jited.data() + i, kMovRaxImm32, sizeof(kMovRaxImm32)) != 0 ||
+            std::memcmp(jited.data() + i + kAddOffset,
+                        kAddGsThisCpuOff,
+                        sizeof(kAddGsThisCpuOff)) != 0 ||
+            std::memcmp(jited.data() + i + kLoadOffset,
+                        kLoadCurrentTask,
+                        sizeof(kLoadCurrentTask)) != 0) {
+            continue;
+        }
+        uint32_t imm = 0;
+        std::memcpy(&imm, jited.data() + i + sizeof(kMovRaxImm32), sizeof(imm));
+        const uint64_t value =
+            static_cast<uint64_t>(static_cast<int64_t>(static_cast<int32_t>(imm)));
+        if (!have) {
+            found = value;
+            have = true;
+            continue;
+        }
+        if (found != value) {
+            fail("native_kernel: original JIT contains multiple current_task addresses");
+        }
+    }
+    return have ? found : 0;
+#else
+    (void)jited;
+    return 0;
+#endif
+}
+
 NativeMapShape map_shape_from_meta(const MapMeta &meta)
 {
     return NativeMapShape{
@@ -2853,6 +2992,7 @@ ProgramLoadPlan::LookupSite oracle_call_lookup_site_for_map_meta(const MapMeta &
         0,
         0,
         0,
+        {},
     };
     site.map_name = meta.name;
     return site;
@@ -2985,6 +3125,7 @@ ProgramLoadPlan load_from_loaded_program_fd(int program_fd,
     out.oracle_xlated = load_xlated_program(program_fd, prog_info.xlated_prog_len);
     out.x86_cpu_number_addr = decode_x86_cpu_number_from_jit(out.oracle_jited);
     out.x86_this_cpu_off = decode_x86_this_cpu_off_from_jit(out.oracle_jited);
+    out.x86_current_task_addr = decode_x86_current_task_from_jit(out.oracle_jited);
     const auto oracle_end = std::chrono::steady_clock::now();
     out.object_load_ns = elapsed_ns(oracle_start, oracle_end);
 
@@ -3039,6 +3180,7 @@ ProgramLoadPlan load_from_loaded_program_fd(int program_fd,
     };
 
     for (const SourceHelperCall &call : source_calls) {
+        out.source_helper_ids.push_back(call.helper_id);
         if (call.helper_id == BPF_FUNC_tail_call) {
             out.has_tail_call = true;
             continue;
@@ -3058,11 +3200,18 @@ ProgramLoadPlan load_from_loaded_program_fd(int program_fd,
                 0,
                 0,
                 0,
+                {},
             };
             if (map_it != meta_by_source_fd.end()) {
                 site.map_name = map_it->second.name;
                 configure_lookup_site_for_shape(
                     site, map_shape_from_meta(map_it->second), array_offsets);
+                site.gen_lookup = lookup_kernel_map_lookup_gen_by_fd(call.map_fd);
+                if (site.kind != ProgramLoadPlan::LookupSite::Kind::Array &&
+                    site.kind != ProgramLoadPlan::LookupSite::Kind::PerCpuArray) {
+                    site.target_addr =
+                        lookup_kernel_map_lookup_ptr_by_fd(call.map_fd);
+                }
             } else {
                 configure_lookup_site_for_shape(
                     site, call.dynamic_map_shape, array_offsets);
@@ -3079,6 +3228,7 @@ ProgramLoadPlan load_from_loaded_program_fd(int program_fd,
                 0,
             };
             if (map_it != meta_by_source_fd.end()) {
+                site.target_addr = lookup_kernel_map_update_ptr_by_fd(call.map_fd);
                 const uint32_t value_size = map_it->second.value_size;
                 const bool simple_value =
                     value_size == 1 || value_size == 2 ||
@@ -3102,6 +3252,19 @@ ProgramLoadPlan load_from_loaded_program_fd(int program_fd,
                 }
             }
             out.update_sites.push_back(site);
+        } else if (call.helper_id == BPF_FUNC_map_delete_elem) {
+            if (map_it == meta_by_source_fd.end()) {
+                continue;
+            }
+            const uint64_t delete_addr =
+                lookup_kernel_map_delete_ptr_by_fd(call.map_fd);
+            if (out.map_delete_elem_addr != 0 &&
+                out.map_delete_elem_addr != delete_addr) {
+                fail("native_kernel: one program deletes from maps with "
+                     "different map_delete_elem targets; per-site delete "
+                     "metadata is required");
+            }
+            out.map_delete_elem_addr = delete_addr;
         }
     }
     const auto lookup_spec_end = std::chrono::steady_clock::now();
@@ -3134,6 +3297,10 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
     hash.add_bytes(link_args.oracle_jited.data(), link_args.oracle_jited.size());
     hash.add_string("oracle_xlated");
     hash.add_bytes(link_args.oracle_xlated.data(), link_args.oracle_xlated.size());
+    for (int helper_id : link_args.source_helper_ids) {
+        hash.add_string("source_helper");
+        hash.add_u64(static_cast<uint64_t>(helper_id));
+    }
     for (const auto &arg : link_args.helpers) {
         hash.add_string("helper");
         hash.add_string(arg);
@@ -3144,6 +3311,10 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
     }
     for (const auto &arg : link_args.lookup_sites) {
         hash.add_string("lookup");
+        hash.add_string(arg);
+    }
+    for (const auto &arg : link_args.lookup_gens) {
+        hash.add_string("lookup_gen");
         hash.add_string(arg);
     }
     for (const auto &arg : link_args.lookup_maps) {
@@ -3269,6 +3440,10 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
         argv.push_back(format_hex(link_args.oracle_jit_base));
         argv.push_back("--oracle-xlated");
         argv.push_back(oracle_xlated.string());
+        for (int helper_id : link_args.source_helper_ids) {
+            argv.push_back("--source-helper");
+            argv.push_back(std::to_string(helper_id));
+        }
     }
 
     for (const auto &arg : link_args.helpers) {
@@ -3281,6 +3456,10 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     }
     for (const auto &arg : link_args.lookup_sites) {
         argv.push_back("--lookup-site");
+        argv.push_back(arg);
+    }
+    for (const auto &arg : link_args.lookup_gens) {
+        argv.push_back("--lookup-gen");
         argv.push_back(arg);
     }
     for (const auto &arg : link_args.lookup_maps) {
