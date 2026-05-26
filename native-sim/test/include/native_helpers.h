@@ -24,6 +24,19 @@
  * extern declarations below can use those typedefs. */
 #include "../../../micro/programs/common.h"
 
+#ifdef MICRO_NATIVE_USERSPACE
+#define bpf_map_lookup_elem micro_native_bpf_map_lookup_elem
+#define bpf_map_update_elem micro_native_bpf_map_update_elem
+#define bpf_map_delete_elem micro_native_bpf_map_delete_elem
+#define bpf_ktime_get_ns micro_native_bpf_ktime_get_ns
+#define bpf_ktime_get_boot_ns micro_native_bpf_ktime_get_boot_ns
+#define bpf_get_current_pid_tgid micro_native_bpf_get_current_pid_tgid
+#define bpf_get_smp_processor_id micro_native_bpf_get_smp_processor_id
+#define bpf_get_current_uid_gid micro_native_bpf_get_current_uid_gid
+#define bpf_get_prandom_u32 micro_native_bpf_get_prandom_u32
+#define bpf_probe_read_kernel micro_native_bpf_probe_read_kernel
+#endif
+
 extern void *bpf_map_lookup_elem(void *map, const void *key);
 extern long  bpf_map_update_elem(void *map, const void *key, const void *value,
                                  unsigned long long flags);

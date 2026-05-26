@@ -1,0 +1,9 @@
+{
+  "completed_benchmarks": 1,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "error_message": "packet_5tuple_classify: command failed (1): taskset -c 0 /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native-kernel --program /artifacts/user/stage2-programs/x86_64/packet_5tuple_classify.bpf.o --native-program /artifacts/user/stage2-programs/x86_64/packet_5tuple_classify.native.o --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem --io-mode packet --input-size 64 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260526_094826_138202/details/jit_dumps/packet_5tuple_classify__native_kernel__sample00.jited.bin\nbpf_prog_load (native_lab stub): Invalid argument",
+  "status": "error",
+  "total_benchmarks": 1
+}

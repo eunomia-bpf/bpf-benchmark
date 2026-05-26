@@ -1022,24 +1022,17 @@ void append_dummy_map_refs(std::vector<bpf_insn> &insns,
     if (map_ref_fds.empty()) {
         return;
     }
+
     if (map_ref_fds.size() >
         static_cast<size_t>(std::numeric_limits<int16_t>::max() / 2)) {
         fail("native_kernel dummy map ref jump offset exceeds int16");
     }
-
     insns.push_back(bpf_insn{
-        .code = BPF_ALU64 | BPF_MOV | BPF_K,
-        .dst_reg = BPF_REG_1,
-        .src_reg = 0,
-        .off = 0,
-        .imm = 1,
-    });
-    insns.push_back(bpf_insn{
-        .code = BPF_JMP | BPF_JEQ | BPF_K,
-        .dst_reg = BPF_REG_1,
+        .code = BPF_JMP | BPF_JA,
+        .dst_reg = 0,
         .src_reg = 0,
         .off = static_cast<int16_t>(map_ref_fds.size() * 2),
-        .imm = 1,
+        .imm = 0,
     });
     for (int fd : map_ref_fds) {
         if (fd < 0) {
@@ -1089,7 +1082,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
 
     std::vector<bpf_insn> insns;
     const size_t dummy_ref_insns =
-        map_ref_fds.empty() ? 0 : 2 + map_ref_fds.size() * 2;
+        map_ref_fds.empty() ? 0 : 1 + map_ref_fds.size() * 2;
     insns.reserve(static_cast<size_t>(2) * chunks + dummy_ref_insns +
                   (tail_call_reachable ? 8 : 1));
     if (tail_call_reachable) {
@@ -1176,6 +1169,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     ScopedFd attach_prog_fd(open_prog_fd_by_id_required(
         attrs.attach_prog_id, "attach_prog_id"));
 
+    std::vector<char> verifier_log(1 << 20);
     LIBBPF_OPTS(bpf_prog_load_opts, opts,
         .expected_attach_type = static_cast<bpf_attach_type>(attrs.expected_attach_type),
         .prog_btf_fd = static_cast<uint32_t>(prog_btf_fd.get() >= 0 ? prog_btf_fd.get() : 0),
@@ -1183,13 +1177,16 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         .attach_prog_fd = static_cast<uint32_t>(attach_prog_fd.get() >= 0 ? attach_prog_fd.get() : 0),
         .attach_btf_obj_fd = static_cast<uint32_t>(attach_btf_obj_fd.get() >= 0 ? attach_btf_obj_fd.get() : 0),
         .fd_array = fd_array,
+        .log_level = 1,
+        .log_size = static_cast<__u32>(verifier_log.size()),
+        .log_buf = verifier_log.data(),
     );
     int fd = bpf_prog_load(static_cast<bpf_prog_type>(prog_type_value),
                            "native_lab_stub", "GPL",
                            insns.data(), insns.size(), &opts);
     if (fd < 0) {
         fail(std::string("bpf_prog_load (native_lab stub): ")
-             + std::strerror(errno));
+             + std::strerror(errno) + "\n" + verifier_log.data());
     }
     return fd;
 }

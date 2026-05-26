@@ -1,5 +1,6 @@
 #include "micro_exec.hpp"
 #include "kernel_offsets.h"
+#include "userspace_bpf_runtime.hpp"
 #include <chrono>
 #include <cstring>
 #include <dlfcn.h>
@@ -48,6 +49,8 @@ sample_result run_native(const cli_options &options) {
     const auto *elf_symbol = static_cast<const ElfW(Sym) *>(raw_symbol);
     if (elf_symbol->st_size == 0) fail("empty native symbol size for " + symbol);
     const uint64_t native_code_bytes = elf_symbol->st_size;
+    auto map_state = initialize_userspace_bpf_map_state(image, input);
+    bind_native_map_symbols(map_state, handle);
     const auto load_end = clock_type::now();
     const bool is_skb = symbol.ends_with("_prog"); const size_t offset = is_skb && symbol.starts_with("cgroup_") ? kEthernetHeaderSize : 0;
     std::vector<uint8_t> packet(offset + sizeof(uint64_t) + input.size(), 0);
@@ -68,11 +71,14 @@ sample_result run_native(const cli_options &options) {
         .include_kernel = false,
     };
     auto perf_counters = measure_perf_counters(perf_options, [&]() {
+        set_active_userspace_bpf_map_state(&map_state);
         exec_start = clock_type::now();
         for (uint32_t index = 0; index < repeat; ++index)
             retval = static_cast<uint32_t>(fn(is_skb ? static_cast<void *>(skb.storage) : static_cast<void *>(&xdp)));
         exec_end = clock_type::now();
+        set_active_userspace_bpf_map_state(nullptr);
     });
+    set_active_userspace_bpf_map_state(nullptr);
     uint64_t packet_result = 0; std::memcpy(&packet_result, data, sizeof(packet_result));
     const uint64_t result = is_skb ? skb.read_result() : packet_result;
     sample_result sample {.compile_ns = elapsed_ns(load_start, load_end), .exec_ns = elapsed_ns(exec_start, exec_end) / repeat};

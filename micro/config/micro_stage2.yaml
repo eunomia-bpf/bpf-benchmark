@@ -24,6 +24,10 @@ benchmark_defaults:
   expected_retval: 2
 
 runtimes:
+  - name: native
+
+  - name: llvmbpf
+
   - name: kernel
 
   - name: kernel_rejit

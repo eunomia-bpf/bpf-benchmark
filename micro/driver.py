@@ -56,6 +56,15 @@ RUNTIME_COMMANDS = {
 NATIVE_ARTIFACT_RUNTIMES = {"native", "native_kernel"}
 
 
+def native_artifact_path(benchmark: CatalogTarget, runtime_name: str) -> Path | None:
+    path = benchmark.native_object_path
+    if path is None:
+        return None
+    if runtime_name == "native" and "stage2" in benchmark.tags and path.name.endswith(".native.o"):
+        return path.with_suffix(".so")
+    return path
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run declarative micro benchmark suites.")
     parser.add_argument("--suite", default=str(CONFIG_PATH), help="Path to suite YAML.")
@@ -204,10 +213,11 @@ def require_suite_artifacts(
     selected_runtime_names = {runtime.name for runtime in runtimes}
     for benchmark in benchmarks:
         required_paths.append(benchmark.object_path)
-        if selected_runtime_names & NATIVE_ARTIFACT_RUNTIMES:
-            if benchmark.native_object_path is None:
+        for runtime_name in sorted(selected_runtime_names & NATIVE_ARTIFACT_RUNTIMES):
+            path = native_artifact_path(benchmark, runtime_name)
+            if path is None:
                 raise RuntimeError(f"{benchmark.name} is missing a native artifact path")
-            required_paths.append(benchmark.native_object_path)
+            required_paths.append(path)
         if "native_proof" in selected_runtime_names:
             if benchmark.proof_object_path is None or benchmark.proof_compile_metadata_path is None:
                 raise RuntimeError(f"{benchmark.name} is missing native_proof artifact paths")
@@ -279,9 +289,10 @@ def build_runner_command(
 
     command.extend(["--program", str(program_path)])
     if runtime.name in NATIVE_ARTIFACT_RUNTIMES:
-        if benchmark.native_object_path is None:
+        native_path = native_artifact_path(benchmark, runtime.name)
+        if native_path is None:
             raise RuntimeError(f"{benchmark.name} is missing a native object path")
-        command.extend(["--native-program", str(benchmark.native_object_path)])
+        command.extend(["--native-program", str(native_path)])
     if memory_file is not None:
         command.extend(["--memory", str(memory_file)])
     if benchmark.io_mode:

@@ -4008,6 +4008,35 @@ fn append_x86_group1_imm32(
     Ok(())
 }
 
+fn append_x86_test_reg_reg(bytes: &mut Vec<u8>, w: bool, reg: Register) -> Result<()> {
+    let (reg_low, reg_high) = x86_gpr64_encoding(reg)?;
+    append_x86_rex(bytes, w, reg_high, false, reg_high);
+    bytes.push(0x85);
+    bytes.push(x86_modrm(3, reg_low, reg_low));
+    Ok(())
+}
+
+fn append_x86_group1_imm(
+    bytes: &mut Vec<u8>,
+    w: bool,
+    op_ext: u8,
+    dst: Register,
+    imm: i32,
+) -> Result<()> {
+    if op_ext == 7 && imm == 0 {
+        return append_x86_test_reg_reg(bytes, w, dst);
+    }
+    if let Ok(imm8) = i8::try_from(imm) {
+        let (dst_low, dst_high) = x86_gpr64_encoding(dst)?;
+        append_x86_rex(bytes, w, false, false, dst_high);
+        bytes.push(0x83);
+        bytes.push(x86_modrm(3, op_ext, dst_low));
+        bytes.push(imm8 as u8);
+        return Ok(());
+    }
+    append_x86_group1_imm32(bytes, w, op_ext, dst, imm)
+}
+
 fn append_x86_shift_imm(bytes: &mut Vec<u8>, dst: Register, imm: i32) -> Result<()> {
     if !(0..=63).contains(&imm) {
         bail!("map_gen_lookup shift amount out of range: {imm}");
@@ -4116,7 +4145,7 @@ fn build_x86_map_gen_body(
         offsets[idx] = bytes.len();
         match insn.code {
             code if code == (BPF_ALU64 | BPF_ADD | BPF_K) => {
-                append_x86_group1_imm32(
+                append_x86_group1_imm(
                     &mut bytes,
                     true,
                     0,
@@ -4162,7 +4191,7 @@ fn build_x86_map_gen_body(
                 }
             }
             code if code == (BPF_ALU | BPF_AND | BPF_K) => {
-                append_x86_group1_imm32(
+                append_x86_group1_imm(
                     &mut bytes,
                     false,
                     4,
@@ -4195,7 +4224,7 @@ fn build_x86_map_gen_body(
                 || code == (BPF_JMP | BPF_JNE | BPF_K)
                 || code == (BPF_JMP | BPF_JGE | BPF_K) =>
             {
-                append_x86_group1_imm32(
+                append_x86_group1_imm(
                     &mut bytes,
                     true,
                     7,
