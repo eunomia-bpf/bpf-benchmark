@@ -1,0 +1,4 @@
+group	instance_id	instance_type	state	launch_time_utc	end_time_utc	wall_seconds	compute_usd	ebs_usd	total_usd
+baseline	i-0e4d362a7e76883e1	t4g.small	terminated	2026-05-26T08:18:01+00:00	2026-05-26T08:24:13+00:00	372	0.00173600	0.00036741	0.00210341
+control-disabled	i-000efc17c8f4e994b	t4g.small	terminated	2026-05-26T08:28:54+00:00	2026-05-26T08:40:00+00:00	666	0.00310800	0.00065778	0.00376578
+treatment-ccmp-only	i-02ae9e706334f516a	t4g.small	terminated	2026-05-26T08:43:33+00:00	2026-05-26T08:50:00+00:00	387	0.00180600	0.00038222	0.00218822

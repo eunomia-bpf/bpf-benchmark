@@ -1,0 +1,5 @@
+ir_load	instances	objects	source
+load_i8	744	26	/home/ruoji/github/bpf-opt/experiments/2026-05-25-arm64-rev-extr-ubfm-ldr-combined-regression/data/object-programs-arm64-all-disable/*.bpf.ll
+load_i16	2	1	/home/ruoji/github/bpf-opt/experiments/2026-05-25-arm64-rev-extr-ubfm-ldr-combined-regression/data/object-programs-arm64-all-disable/*.bpf.ll
+load_i32	63	29	/home/ruoji/github/bpf-opt/experiments/2026-05-25-arm64-rev-extr-ubfm-ldr-combined-regression/data/object-programs-arm64-all-disable/*.bpf.ll
+load_i64	2	1	/home/ruoji/github/bpf-opt/experiments/2026-05-25-arm64-rev-extr-ubfm-ldr-combined-regression/data/object-programs-arm64-all-disable/*.bpf.ll

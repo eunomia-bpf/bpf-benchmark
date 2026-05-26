@@ -1,0 +1,7 @@
+katran_lb_consistent_hash_select.bpf.o	bpf_arm64_ldrh	7
+packet_checksum_fold.bpf.o	bpf_arm64_ldr_w	2
+packet_checksum_fold.bpf.o	bpf_arm64_ldrh	1
+packet_record_bounds_window.bpf.o	bpf_arm64_ldr_w	6
+packet_record_bounds_window.bpf.o	bpf_arm64_ldrh	2
+tc_packet_checksum_fold.bpf.o	bpf_arm64_ldr_w	2
+tc_packet_checksum_fold.bpf.o	bpf_arm64_ldrh	1

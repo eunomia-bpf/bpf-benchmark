@@ -1,0 +1,5 @@
+scope	runtime	benchmarks	geomean_treatment_over_control	wins_lt_0.98	losses_gt_1.02	neutral
+all	kernel	30	1.002833111504977	2	3	25
+all	native	30	1.0236538606421075	0	6	24
+selected-csel	kernel	1	1.0689655172413792	0	1	0
+selected-csel	native	1	1.25	0	1	0

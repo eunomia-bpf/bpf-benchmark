@@ -1,0 +1,4 @@
+group	instance_id	instance_type	state	launch_time_utc	terminate_time_utc	aws_wall_seconds	compute_usd	ebs_usd	estimated_total_usd
+baseline	i-0ef80beb39b1c2eef	t4g.small	terminated	2026-05-25T09:30:54+00:00	2026-05-25T09:39:10+00:00	496.0	0.002315	0.000483	0.002798
+control-disabled	i-0f918033bf63649f9	t4g.small	terminated	2026-05-25T09:40:52+00:00	2026-05-25T09:50:28+00:00	576.0	0.002688	0.000561	0.003249
+treatment-ldr-only	i-04444af67cbc1f39c	t4g.small	terminated	2026-05-25T09:51:56+00:00	2026-05-25T10:00:18+00:00	502.0	0.002343	0.000489	0.002832
