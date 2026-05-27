@@ -231,8 +231,11 @@ static int shim_native_loader_resolve_manifest(const char *manifest_path,
                                                char *symbol,
                                                size_t symbol_sz) {
     char *manifest = NULL;
-    if (loadtime_read_text_file(manifest_path, &manifest) != 0)
+    if (loadtime_read_text_file(manifest_path, &manifest) != 0) {
+        if (!errno)
+            errno = ENOENT;
         return -1;
+    }
 
     const char *objects_end = NULL;
     const char *objects = json_array_at(manifest, "objects", &objects_end);
@@ -240,6 +243,7 @@ static int shim_native_loader_resolve_manifest(const char *manifest_path,
         log_line("native-loader manifest has no objects array: %s",
                  manifest_path);
         free(manifest);
+        errno = EINVAL;
         return -1;
     }
 
@@ -273,6 +277,7 @@ static int shim_native_loader_resolve_manifest(const char *manifest_path,
                      prog ? prog->name : "");
             free(entry);
             free(manifest);
+            errno = EINVAL;
             return -1;
         }
         (void)json_get_str(entry, "symbol", entry_symbol,
@@ -284,6 +289,7 @@ static int shim_native_loader_resolve_manifest(const char *manifest_path,
                                              sizeof(full_object)) != 0) {
             free(entry);
             free(manifest);
+            errno = ENAMETOOLONG;
             return -1;
         }
         if (matched &&
@@ -293,6 +299,7 @@ static int shim_native_loader_resolve_manifest(const char *manifest_path,
                      prog ? prog->name : "");
             free(entry);
             free(manifest);
+            errno = EINVAL;
             return -1;
         }
         if (!matched) {
@@ -302,6 +309,7 @@ static int shim_native_loader_resolve_manifest(const char *manifest_path,
                     (int)symbol_sz) {
                 free(entry);
                 free(manifest);
+                errno = ENAMETOOLONG;
                 return -1;
             }
         }
@@ -310,11 +318,15 @@ static int shim_native_loader_resolve_manifest(const char *manifest_path,
     }
 
     free(manifest);
-    if (!matched)
+    if (!matched) {
+        errno = ENOMSG;
         return -1;
+    }
     if (access(native_object, R_OK) != 0) {
         log_line("native-loader manifest object unreadable prog=%s path=%s errno=%d",
                  prog ? prog->name : "", native_object, errno);
+        if (!errno)
+            errno = ENOENT;
         return -1;
     }
     return 0;
@@ -726,9 +738,17 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
                                           sizeof(native_object),
                                           native_symbol,
                                           sizeof(native_symbol)) != 0) {
-        log_line("native-loader enabled but no manifest object for prog=%s",
-                 prog_name ? prog_name : "");
-        errno = ENOENT;
+        int resolve_errno = errno ? errno : EINVAL;
+        if (resolve_errno == ENOMSG) {
+            log_line("native-loader no manifest match for prog=%s; "
+                     "passing original BPF_PROG_LOAD through",
+                     prog_name ? prog_name : "");
+            return original_fd;
+        }
+        log_line("native-loader failed to resolve manifest object for prog=%s "
+                 "errno=%d",
+                 prog_name ? prog_name : "", resolve_errno);
+        errno = resolve_errno;
         return -1;
     }
 
@@ -782,11 +802,27 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     shim_native_loader_log_jit_dump("original", (int)original_fd);
     shim_native_loader_log_jit_dump("native", result.prog_fd);
 
+    int shadow_original_fd = fcntl((int)original_fd, F_DUPFD_CLOEXEC, 3);
+    if (shadow_original_fd < 0) {
+        int saved = errno ? errno : EIO;
+        log_line("native-loader failed to dup original fd=%ld errno=%d",
+                 original_fd, errno);
+        real_close(result.prog_fd);
+        dlclose(handle);
+        errno = saved;
+        return -1;
+    }
+    if (prog->native_loader_original_fd >= 0)
+        real_close(prog->native_loader_original_fd);
+    prog->native_loader_original_fd = shadow_original_fd;
+
     if (real_close((int)original_fd) != 0) {
         int saved = errno ? errno : EIO;
         log_line("native-loader failed to close replaced original fd=%ld errno=%d",
                  original_fd, errno);
         real_close(result.prog_fd);
+        real_close(shadow_original_fd);
+        prog->native_loader_original_fd = -1;
         dlclose(handle);
         errno = saved;
         return -1;

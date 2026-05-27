@@ -371,6 +371,16 @@ class CiliumRunner(NativeProcessRunner):
                     pass
             time.sleep(0.2)
 
+    def _agent_output_tail(self) -> str:
+        if self.session is None:
+            return ""
+        snapshot = self.session.collector_snapshot()
+        return tail_text(
+            "\n".join((snapshot.get("stderr_tail") or []) + (snapshot.get("stdout_tail") or [])),
+            max_lines=80,
+            max_chars=16000,
+        )
+
     def _allocate_endpoint_ip(self, spec: _CiliumEndpointSpec) -> Mapping[str, object]:
         owner = urllib.parse.quote(spec.container_id, safe="")
         payload = _api_json(
@@ -463,13 +473,19 @@ class CiliumRunner(NativeProcessRunner):
             "state": "waiting-for-identity",
             "sync-build-endpoint": True,
         }
-        response = _api_json(
-            self._api_socket_path(),
-            "PUT",
-            _endpoint_api_path("0"),
-            body=endpoint_request,
-            expected_status=(201,),
-        )
+        try:
+            response = _api_json(
+                self._api_socket_path(),
+                "PUT",
+                _endpoint_api_path("0"),
+                body=endpoint_request,
+                expected_status=(201,),
+            )
+        except Exception as exc:
+            details = self._agent_output_tail()
+            if details:
+                raise RuntimeError(f"{exc}; cilium-agent output tail:\n{details}") from exc
+            raise
         if not isinstance(response, Mapping):
             raise RuntimeError(f"Cilium endpoint create returned a non-object payload for {spec.container_id}")
         endpoint_id = int(response.get("id", 0) or 0)
@@ -498,7 +514,13 @@ class CiliumRunner(NativeProcessRunner):
                         max_chars=8000,
                     )
                     raise RuntimeError(f"cilium-agent exited before endpoint {endpoint_id} became ready (rc={returncode}): {details}")
-            payload = _api_json(self._api_socket_path(), "GET", _endpoint_api_path(endpoint_id), expected_status=(200,))
+            try:
+                payload = _api_json(self._api_socket_path(), "GET", _endpoint_api_path(endpoint_id), expected_status=(200,))
+            except Exception as exc:
+                details = self._agent_output_tail()
+                if details:
+                    raise RuntimeError(f"{exc}; cilium-agent output tail:\n{details}") from exc
+                raise
             if isinstance(payload, Mapping):
                 status = payload.get("status")
                 if isinstance(status, Mapping):

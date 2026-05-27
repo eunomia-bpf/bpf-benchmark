@@ -212,6 +212,18 @@ static void log_task_fd_query(uint32_t target_fd, uint32_t attach_type) {
     errno = saved_errno;
 }
 
+static int fd_is_bpf_prog(int fd) {
+    if (fd < 0)
+        return 0;
+    char fdpath[64], link_target[64];
+    snprintf(fdpath, sizeof(fdpath), "/proc/self/fd/%d", fd);
+    ssize_t lr = readlink(fdpath, link_target, sizeof(link_target) - 1);
+    if (lr <= 0)
+        return 0;
+    link_target[lr] = 0;
+    return strcmp(link_target, "anon_inode:bpf-prog") == 0;
+}
+
 static int shim_close_observed_fd(int fd) {
     ensure_syms_resolved();
     if (fd >= 0) {
@@ -432,6 +444,10 @@ long syscall(long number, ...) {
                     memcpy(e->attr_blob, pa, asize);
                     e->attr_size = asize;
                     pthread_mutex_lock(&state_mutex);
+                    prog_forget_loader_fd(e->fd);
+                    map_remove(e->fd);
+                    link_remove(e->fd);
+                    raw_tp_remove(e->fd);
                     perf_insert(e);
                     pthread_mutex_unlock(&state_mutex);
                 }
@@ -457,6 +473,45 @@ long syscall(long number, ...) {
     int cmd = (int)a0;
     union bpf_attr *attr = (union bpf_attr *)a1;
     unsigned int size = (unsigned int)a2;
+
+    if (!in_shim && cmd == BPF_OBJ_GET_INFO_BY_FD && attr) {
+        int query_fd = (int)attr->info.bpf_fd;
+        int original_info_fd = -1;
+        int is_prog_fd = fd_is_bpf_prog(query_fd);
+        uint32_t actual_prog_id = 0;
+        if (is_prog_fd) {
+            int probe_errno = errno;
+            actual_prog_id = resolve_kernel_id(query_fd);
+            errno = probe_errno;
+        }
+        pthread_mutex_lock(&state_mutex);
+        struct prog_entry *pe = prog_find(query_fd);
+        if (pe && is_prog_fd && actual_prog_id != 0 &&
+            pe->kernel_prog_id == actual_prog_id &&
+            pe->native_loader_original_fd >= 0) {
+            original_info_fd = pe->native_loader_original_fd;
+        } else if (pe && (!is_prog_fd ||
+                          (actual_prog_id != 0 &&
+                           pe->kernel_prog_id != actual_prog_id))) {
+            prog_forget_loader_fd(query_fd);
+        }
+        pthread_mutex_unlock(&state_mutex);
+        if (original_info_fd >= 0) {
+            union bpf_attr rewritten = *attr;
+            rewritten.info.bpf_fd = (uint32_t)original_info_fd;
+            in_shim = 1;
+            long info_ret = real_syscall(number, a0, &rewritten, a2,
+                                         a3, a4, a5);
+            int info_errno = errno;
+            in_shim = 0;
+            log_line("native-loader redirected OBJ_GET_INFO_BY_FD fd=%u "
+                     "original_fd=%d -> ret=%ld errno=%d",
+                     attr->info.bpf_fd, original_info_fd, info_ret,
+                     info_ret < 0 ? info_errno : 0);
+            errno = info_errno;
+            return info_ret;
+        }
+    }
 
     /* Pre-call captures: one pending pointer per kind. Each capture_*
      * allocates a heap entry we insert into the corresponding table iff
@@ -544,6 +599,10 @@ long syscall(long number, ...) {
              * with -E2BIG once nr_maps > MAX_USED_MAPS=64. Use the prog's own
              * used_maps list (kernel-authoritative) and only map those ids
              * back to loader fds via a single /proc/self/fd scan. */
+            int map_info_fd =
+                pending_prog->native_loader_original_fd >= 0
+                    ? pending_prog->native_loader_original_fd
+                    : (int)ret;
             uint32_t pmap_ids[64] = {0};
             uint32_t pmap_n = 0;
             {
@@ -552,7 +611,7 @@ long syscall(long number, ...) {
                 pi.nr_map_ids = 64;
                 pi.map_ids = (uintptr_t)pmap_ids;
                 union bpf_attr pa = {0};
-                pa.info.bpf_fd = (uint32_t)ret;
+                pa.info.bpf_fd = (uint32_t)map_info_fd;
                 pa.info.info_len = sizeof(pi);
                 pa.info.info = (uintptr_t)&pi;
                 long pr = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD,
@@ -614,6 +673,11 @@ long syscall(long number, ...) {
             }
             if (fd_dir) closedir(fd_dir);
             pthread_mutex_lock(&state_mutex);
+            prog_forget_loader_fd(pending_prog->fd);
+            map_remove(pending_prog->fd);
+            link_remove(pending_prog->fd);
+            raw_tp_remove(pending_prog->fd);
+            perf_remove(pending_prog->fd);
             prog_insert(pending_prog);
             pthread_mutex_unlock(&state_mutex);
         } else {
@@ -626,6 +690,10 @@ long syscall(long number, ...) {
             resolved_id = resolve_kernel_id((int)ret);
             pending_map->kernel_map_id = resolved_id;
             pthread_mutex_lock(&state_mutex);
+            prog_forget_loader_fd(pending_map->fd);
+            link_remove(pending_map->fd);
+            raw_tp_remove(pending_map->fd);
+            perf_remove(pending_map->fd);
             map_insert(pending_map);
             pthread_mutex_unlock(&state_mutex);
         } else {
@@ -638,6 +706,10 @@ long syscall(long number, ...) {
             resolved_id = resolve_kernel_id((int)ret);
             pending_link->kernel_link_id = resolved_id;
             pthread_mutex_lock(&state_mutex);
+            prog_forget_loader_fd(pending_link->fd);
+            map_remove(pending_link->fd);
+            raw_tp_remove(pending_link->fd);
+            perf_remove(pending_link->fd);
             link_insert(pending_link);
             /* Record this attach on the prog so reload_and_reattach can
              * BPF_LINK_UPDATE us to the optimized prog later. */
@@ -671,6 +743,10 @@ long syscall(long number, ...) {
         if (ret >= 0) {
             pending_raw_tp->fd = (int)ret;
             pthread_mutex_lock(&state_mutex);
+            prog_forget_loader_fd(pending_raw_tp->fd);
+            map_remove(pending_raw_tp->fd);
+            link_remove(pending_raw_tp->fd);
+            perf_remove(pending_raw_tp->fd);
             raw_tp_insert(pending_raw_tp);
             struct prog_entry *pe = prog_find((int)pending_raw_tp->prog_fd);
             if (pe)
