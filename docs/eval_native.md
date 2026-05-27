@@ -236,6 +236,22 @@ native cleanup, and `jmp` to `bpf_prog->bpf_func + X86_TAIL_CALL_OFFSET`.
 That cost is real on deep unwind chains, but it is not the dominant explanation
 for the observed OTEL entry speedup.
 
+BCC is neutral because its hottest retained programs are already tiny and
+kernel-JIT efficient. The dominant `sys_enter`/`sys_exit` tracepoints run about
+3.5B times each and stay essentially unchanged (`79.9 -> 80.7 ns/run` and
+`85.8 -> 85.1 ns/run`); the expensive `tracepoint__sys` instance is also
+unchanged (`1212 -> 1220 ns/run`). Native shrinks translated bytecode for many
+programs, but the remaining cost is hook dispatch, helper/map work, and fixed
+entry/exit overhead that native code does not remove.
+
+Tracee is a slight regression for the same reason plus cancellation among hot
+raw-tracepoint dispatchers. The four hottest raw tracepoint entries run about
+1.6B times each: two improve (`198.9 -> 168.9 ns/run`, `421.1 -> 404.0
+ns/run`) and two regress (`356.2 -> 374.6 ns/run`, `358.1 -> 381.2 ns/run`).
+Tracee's workload path also includes event construction, tail-call dispatch,
+map traffic, and userspace event processing, so a near-neutral BPF `ns/run`
+result can still appear as a small workload throughput loss.
+
 Cilium also needs careful interpretation. The measured result is steady-state
 datapath throughput after endpoint setup. The runner disables drift checker,
 dynamic config, dynamic lifecycle manager, endpoint BPF watchdog, and endpoint
@@ -374,6 +390,10 @@ make corpus
   eBPF stores into a `memset(..., 0x29c)` call. Clarified that x86 native
   tail calls are lowered inline at link time, so tail-call accounting/chain
   cost matters but does not explain the OTEL speedup by itself.
+- 2026-05-27: Added the BCC/Tracee neutral-regression interpretation. BCC's
+  hottest tracepoints remain around the same `ns/run`, while Tracee's hottest
+  raw tracepoint dispatchers contain both wins and losses that cancel at the
+  aggregate counter level and leave workload throughput slightly lower.
 - 2026-05-27: Reorganized this document into a paper-facing structure modeled
   after `docs/micro-bench-status.md`: framing, research questions,
   methodology, main results, RQ answers, discussion, and threats to validity.

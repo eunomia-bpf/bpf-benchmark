@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cctype>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -28,6 +29,7 @@
 #include <filesystem>
 #include <fstream>
 #include <limits>
+#include <optional>
 #include <stdexcept>
 #include <sstream>
 #include <string>
@@ -1637,309 +1639,78 @@ struct NativeMapShape {
     uint32_t max_entries = 0;
 };
 
-NativeMapShape expected_native_map_shape(const std::string &name)
+enum class NativeMapRuleMatch {
+    Exact,
+    Prefix,
+    Suffix,
+};
+
+struct NativeMapRule {
+    NativeMapRuleMatch match = NativeMapRuleMatch::Exact;
+    std::string pattern;
+    std::string exclude;
+    NativeMapShape shape;
+    bool object_scoped = false;
+};
+
+bool native_map_rule_matches(const NativeMapRule &rule, const std::string &name)
 {
-    if (ends_with(name, "_fix")) {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 0, 0, 0};
-    }
-    if (ends_with(name, "_dyn")) {
-        return NativeMapShape{BPF_MAP_TYPE_LPM_TRIE, 0, 0, 0};
-    }
-    if (ends_with(name, "_version")) {
-        return NativeMapShape{BPF_MAP_TYPE_HASH_OF_MAPS, 0, 4, 64};
-    }
-    if (name == "cilium_ratelimit_metrics") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 4, 8, 64};
-    }
-    if (name == "cilium_ratelimit") {
-        return NativeMapShape{BPF_MAP_TYPE_LRU_HASH, 8, 16, 1024};
-    }
-    if (name == "cilium_lb4_reverse_nat") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 2, 6, 65536};
-    }
-    if (name == "cilium_lb6_reverse_nat") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 2, 18, 65536};
-    }
-    if (name == "cilium_snat_v4_external") {
-        return NativeMapShape{BPF_MAP_TYPE_LRU_HASH, 14, 40, 591428};
-    }
-    if (name == "cilium_snat_v4_alloc_retries") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 4, 33};
-    }
-    if (name == "cilium_l2_responder_v4") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 8, 8, 4096};
-    }
-    if (name == "cilium_l2_responder_v6") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 24, 8, 4096};
-    }
-    if (name == "cilium_devices") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 4, 16, 512};
-    }
-    if (name == "cilium_policy_v2") {
-        return NativeMapShape{BPF_MAP_TYPE_LPM_TRIE, 12, 12, 16384};
-    }
-    if (name == "cilium_nodeport_nat_buffer") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 18, 1};
-    }
-    if (name == "cilium_nodeport_neigh4") {
-        return NativeMapShape{BPF_MAP_TYPE_LRU_HASH, 4, 8, 0};
-    }
-    if (name == "cilium_nodeport_neigh6") {
-        return NativeMapShape{BPF_MAP_TYPE_LRU_HASH, 16, 8, 0};
-    }
-    if (name == "cilium_tail_call_buffer6") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 60, 1};
-    }
-    if (name == "cilium_tail_call_buffer4") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 60, 1};
-    }
-    if (name == "execve_calls") {
-        return NativeMapShape{BPF_MAP_TYPE_PROG_ARRAY, 4, 4, 2};
-    }
-    if (name == "tcpmon_map") {
-        return NativeMapShape{BPF_MAP_TYPE_PERF_EVENT_ARRAY, 4, 4, 8};
-    }
-    if (name == "tg_rb_events") {
-        return NativeMapShape{BPF_MAP_TYPE_RINGBUF, 0, 0, 524288};
-    }
-    if (name == "buffer_heap_map") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 4352, 1};
-    }
-    if (starts_with(name, "string_maps_") && name != "string_maps_heap") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4, 8};
-    }
-    if (name == "string_maps_heap") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 16384, 1};
-    }
-    if (name == "substring_map") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY, 4, 100, 1};
-    }
-    if (name == "tg_errmetrics_map") {
-        return NativeMapShape{BPF_MAP_TYPE_LRU_PERCPU_HASH, 12, 4, 1024};
-    }
-    if (name == "tg_conf_map") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY, 4, 48, 1};
-    }
-    if (name == "policy_conf") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY, 4, 1, 1};
-    }
-    if (name == "execve_msg_heap_map") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 6224, 1};
-    }
-    if (name == "tg_binary_heap") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 792, 1};
-    }
-    if (name == "tg_parents_bin") {
-        return NativeMapShape{BPF_MAP_TYPE_LRU_HASH, 4, 792, 1};
-    }
-    if (name == "execve_map") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 4, 896, 32768};
-    }
-    if (name == "execve_map_stats") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 8, 3};
-    }
-    if (name == "execve_val") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 896, 1};
-    }
-    if (name == "execve_heap") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 4112, 1};
-    }
-    if (name == "tg_execve_joined_info_map") {
-        return NativeMapShape{BPF_MAP_TYPE_LRU_HASH, 8, 16, 8192};
-    }
-    if (name == "tg_execve_joined_info_map_stats") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 8, 3};
-    }
-    if (name == "tg_stats_map") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 14336, 1};
-    }
-    if (name == "tg_cgrps_tracking_map") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 8, 144, 32768};
-    }
-    if (name == "tg_cgrps_tracking_heap") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 144, 1};
-    }
-    if (name == "tg_cgrps_msg_heap") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 4312, 1};
-    }
-    if (name == "tg_cgtracker_map") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 8, 8, 1};
-    }
-    if (name == "string_prefix_maps") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4, 8};
-    }
-    if (name == "string_prefix_maps_heap") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 260, 1};
-    }
-    if (name == "string_postfix_maps") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4, 8};
-    }
-    if (name == "string_postfix_maps_heap") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 132, 1};
-    }
-    if (name == "cgroup_rate_options_map") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY, 4, 16, 1};
-    }
-    if (name == "cgroup_rate_map") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_HASH, 8, 40, 1};
-    }
-    if (name == "throttle_heap_map") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 160, 1};
-    }
-    if (name == "tg_mbset_map") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 256, 8, 1024};
-    }
-    if (name == "tg_mbset_gen") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY, 4, 8, 1};
-    }
-    if (name == "data_heap") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 32768, 1};
-    }
-    if (name == "heap_ro_zero") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY, 4, 16384, 1};
-    }
-    if (name == "heap") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 4104, 1};
-    }
-    if (name == "process_call_heap") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 25632, 1};
-    }
-    if (name == "override_tasks") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 8, 4, 1};
-    }
-    if (name == "enforcer_data") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 8, 12, 1};
-    }
-    if (name == "enforcer_missed_notifications") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 12, 4, 128};
-    }
-    if (name == "ratelimit_map") {
-        return NativeMapShape{BPF_MAP_TYPE_LRU_HASH, 224, 8, 0};
-    }
-    if (name == "ratelimit_heap") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 352, 1};
-    }
-    if (name == "retprobe_map") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 16, 24, 1024};
-    }
-    if (name == "fdinstall_map") {
-        return NativeMapShape{BPF_MAP_TYPE_LRU_HASH, 16, 4104, 0};
-    }
-    if (name == "stack_trace_map") {
-        return NativeMapShape{BPF_MAP_TYPE_STACK_TRACE, 4, 1016, 0};
-    }
-    if (name == "sleepable_preload") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 8, 4100, 0};
-    }
-    if (name == "tg_ipv6_ext_heap") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 8, 1};
-    }
-    if (name == "tg_mb_sel_opts") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY, 4, 12, 10};
-    }
-    if (name == "tg_mb_paths") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4, 10};
-    }
-    if (name == "addr4lpm_maps") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4, 8};
-    }
-    if (name == "addr6lpm_maps") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4, 8};
-    }
-    if (name == "policy_stats") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY, 4, 80, 1};
-    }
-    if (name == "filter_map") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY, 4, 4096, 1};
-    }
-    if (name == "config_map") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY, 4, 736, 1};
-    }
-    if (name == "write_offload") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH, 8, 16, 1};
-    }
-    if (name == "argfilter_maps") {
-        return NativeMapShape{BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4, 8};
-    }
-    if (name == "policy_filter_maps") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH_OF_MAPS, 4, 4, 128};
-    }
-    if (name == "policy_filter_cgroup_maps") {
-        return NativeMapShape{BPF_MAP_TYPE_HASH_OF_MAPS, 8, 4, 1024};
-    }
-    if (name == "exit_heap_map") {
-        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 40, 1};
-    }
-    return NativeMapShape{};
+    if (!rule.exclude.empty() && name == rule.exclude) {
+        return false;
+    }
+    switch (rule.match) {
+    case NativeMapRuleMatch::Exact:
+        return name == rule.pattern;
+    case NativeMapRuleMatch::Prefix:
+        return starts_with(name, rule.pattern);
+    case NativeMapRuleMatch::Suffix:
+        return ends_with(name, rule.pattern);
+    }
+    fail("native_loader: unknown manifest map rule match kind");
+    return false;
 }
 
-bool newest_open_process_map_is_object_scoped(const std::string &name)
+bool native_map_shape_equal(const NativeMapShape &a, const NativeMapShape &b)
 {
-    return name == "cilium_devices" ||
-           name == "cilium_policy_v2" ||
-           name == "cilium_nodeport_nat_buffer" ||
-           name == "cilium_nodeport_neigh4" ||
-           name == "cilium_nodeport_neigh6" ||
-           name == "cilium_tail_call_buffer6" ||
-           name == "cilium_tail_call_buffer4" ||
-           name == "execve_calls" ||
-           name == "tcpmon_map" ||
-           name == "tg_rb_events" ||
-           name == "buffer_heap_map" ||
-           starts_with(name, "string_maps_") ||
-           name == "substring_map" ||
-           name == "tg_errmetrics_map" ||
-           name == "tg_conf_map" ||
-           name == "policy_conf" ||
-           name == "execve_msg_heap_map" ||
-           name == "tg_binary_heap" ||
-           name == "tg_parents_bin" ||
-           name == "execve_map" ||
-           name == "execve_map_stats" ||
-           name == "execve_val" ||
-           name == "execve_heap" ||
-           name == "tg_execve_joined_info_map" ||
-           name == "tg_execve_joined_info_map_stats" ||
-           name == "tg_stats_map" ||
-           name == "tg_cgrps_tracking_map" ||
-           name == "tg_cgrps_tracking_heap" ||
-           name == "tg_cgrps_msg_heap" ||
-           name == "tg_cgtracker_map" ||
-           name == "string_prefix_maps" ||
-           name == "string_prefix_maps_heap" ||
-           name == "string_postfix_maps" ||
-           name == "string_postfix_maps_heap" ||
-           name == "cgroup_rate_options_map" ||
-           name == "cgroup_rate_map" ||
-           name == "throttle_heap_map" ||
-           name == "tg_mbset_map" ||
-           name == "tg_mbset_gen" ||
-           name == "data_heap" ||
-           name == "heap_ro_zero" ||
-           name == "heap" ||
-           name == "process_call_heap" ||
-           name == "override_tasks" ||
-           name == "enforcer_data" ||
-           name == "enforcer_missed_notifications" ||
-           name == "ratelimit_map" ||
-           name == "ratelimit_heap" ||
-           name == "retprobe_map" ||
-           name == "fdinstall_map" ||
-           name == "stack_trace_map" ||
-           name == "sleepable_preload" ||
-           name == "tg_ipv6_ext_heap" ||
-           name == "tg_mb_sel_opts" ||
-           name == "tg_mb_paths" ||
-           name == "addr4lpm_maps" ||
-           name == "addr6lpm_maps" ||
-           name == "policy_stats" ||
-           name == "filter_map" ||
-           name == "config_map" ||
-           name == "write_offload" ||
-           name == "argfilter_maps" ||
-           name == "policy_filter_maps" ||
-           name == "policy_filter_cgroup_maps" ||
-           name == "exit_heap_map";
+    return a.type == b.type &&
+           a.key_size == b.key_size &&
+           a.value_size == b.value_size &&
+           a.max_entries == b.max_entries;
+}
+
+const NativeMapRule *find_native_map_rule(const std::vector<NativeMapRule> &rules,
+                                          const std::string &name)
+{
+    const NativeMapRule *match = nullptr;
+    for (const NativeMapRule &rule : rules) {
+        if (!native_map_rule_matches(rule, name)) {
+            continue;
+        }
+        if (match &&
+            (!native_map_shape_equal(match->shape, rule.shape) ||
+             match->object_scoped != rule.object_scoped)) {
+            fail("native_loader: manifest map_rules are ambiguous for map " + name);
+        }
+        match = &rule;
+    }
+    return match;
+}
+
+NativeMapShape expected_native_map_shape(const std::vector<NativeMapRule> &rules,
+                                         const std::string &name)
+{
+    const NativeMapRule *rule = find_native_map_rule(rules, name);
+    if (!rule) {
+        return NativeMapShape{};
+    }
+    return rule->shape;
+}
+
+bool native_map_symbol_is_object_scoped(const std::vector<NativeMapRule> &rules,
+                                        const std::string &name)
+{
+    const NativeMapRule *rule = find_native_map_rule(rules, name);
+    return rule && rule->object_scoped;
 }
 
 bool map_matches_shape(const MapMeta &meta, const NativeMapShape &shape)
@@ -2323,9 +2094,501 @@ MapMeta load_map_meta_from_fd(int map_fd)
     };
 }
 
+size_t json_skip_ws(const std::string &text, size_t pos)
+{
+    while (pos < text.size() &&
+           std::isspace(static_cast<unsigned char>(text[pos]))) {
+        pos++;
+    }
+    return pos;
+}
+
+[[noreturn]] void json_fail(const std::string &message)
+{
+    fail("native manifest JSON: " + message);
+}
+
+std::string json_parse_string_value(const std::string &text, size_t &pos)
+{
+    if (pos >= text.size() || text[pos] != '"') {
+        json_fail("expected string");
+    }
+    pos++;
+    std::string out;
+    while (pos < text.size()) {
+        char c = text[pos++];
+        if (c == '"') {
+            return out;
+        }
+        if (c != '\\') {
+            out.push_back(c);
+            continue;
+        }
+        if (pos >= text.size()) {
+            json_fail("unterminated escape");
+        }
+        char esc = text[pos++];
+        switch (esc) {
+        case '"': out.push_back('"'); break;
+        case '\\': out.push_back('\\'); break;
+        case '/': out.push_back('/'); break;
+        case 'b': out.push_back('\b'); break;
+        case 'f': out.push_back('\f'); break;
+        case 'n': out.push_back('\n'); break;
+        case 'r': out.push_back('\r'); break;
+        case 't': out.push_back('\t'); break;
+        case 'u':
+            if (pos + 4 > text.size()) {
+                json_fail("short unicode escape");
+            }
+            pos += 4;
+            out.push_back('?');
+            break;
+        default:
+            json_fail("invalid string escape");
+        }
+    }
+    json_fail("unterminated string");
+}
+
+size_t json_skip_value(const std::string &text, size_t pos);
+
+size_t json_skip_array(const std::string &text, size_t pos)
+{
+    if (pos >= text.size() || text[pos] != '[') {
+        json_fail("expected array");
+    }
+    pos++;
+    for (;;) {
+        pos = json_skip_ws(text, pos);
+        if (pos >= text.size()) {
+            json_fail("unterminated array");
+        }
+        if (text[pos] == ']') {
+            return pos + 1;
+        }
+        pos = json_skip_value(text, pos);
+        pos = json_skip_ws(text, pos);
+        if (pos < text.size() && text[pos] == ',') {
+            pos++;
+            continue;
+        }
+        if (pos < text.size() && text[pos] == ']') {
+            return pos + 1;
+        }
+        json_fail("expected array separator");
+    }
+}
+
+size_t json_skip_object(const std::string &text, size_t pos)
+{
+    if (pos >= text.size() || text[pos] != '{') {
+        json_fail("expected object");
+    }
+    pos++;
+    for (;;) {
+        pos = json_skip_ws(text, pos);
+        if (pos >= text.size()) {
+            json_fail("unterminated object");
+        }
+        if (text[pos] == '}') {
+            return pos + 1;
+        }
+        (void)json_parse_string_value(text, pos);
+        pos = json_skip_ws(text, pos);
+        if (pos >= text.size() || text[pos] != ':') {
+            json_fail("expected object colon");
+        }
+        pos = json_skip_value(text, pos + 1);
+        pos = json_skip_ws(text, pos);
+        if (pos < text.size() && text[pos] == ',') {
+            pos++;
+            continue;
+        }
+        if (pos < text.size() && text[pos] == '}') {
+            return pos + 1;
+        }
+        json_fail("expected object separator");
+    }
+}
+
+size_t json_skip_value(const std::string &text, size_t pos)
+{
+    pos = json_skip_ws(text, pos);
+    if (pos >= text.size()) {
+        json_fail("expected value");
+    }
+    if (text[pos] == '"') {
+        (void)json_parse_string_value(text, pos);
+        return pos;
+    }
+    if (text[pos] == '{') {
+        return json_skip_object(text, pos);
+    }
+    if (text[pos] == '[') {
+        return json_skip_array(text, pos);
+    }
+    if (std::strncmp(text.c_str() + pos, "true", 4) == 0) {
+        return pos + 4;
+    }
+    if (std::strncmp(text.c_str() + pos, "false", 5) == 0) {
+        return pos + 5;
+    }
+    if (std::strncmp(text.c_str() + pos, "null", 4) == 0) {
+        return pos + 4;
+    }
+    if (text[pos] == '-' || std::isdigit(static_cast<unsigned char>(text[pos]))) {
+        pos++;
+        while (pos < text.size() &&
+               (std::isdigit(static_cast<unsigned char>(text[pos])) ||
+                text[pos] == '.' || text[pos] == 'e' || text[pos] == 'E' ||
+                text[pos] == '+' || text[pos] == '-')) {
+            pos++;
+        }
+        return pos;
+    }
+    json_fail("invalid value");
+}
+
+std::optional<size_t> json_find_key_value(const std::string &object,
+                                          const std::string &key)
+{
+    size_t pos = json_skip_ws(object, 0);
+    if (pos >= object.size() || object[pos] != '{') {
+        json_fail("root is not an object");
+    }
+    pos++;
+    for (;;) {
+        pos = json_skip_ws(object, pos);
+        if (pos >= object.size()) {
+            json_fail("unterminated object while finding key " + key);
+        }
+        if (object[pos] == '}') {
+            return std::nullopt;
+        }
+        std::string parsed_key = json_parse_string_value(object, pos);
+        pos = json_skip_ws(object, pos);
+        if (pos >= object.size() || object[pos] != ':') {
+            json_fail("expected colon after key " + parsed_key);
+        }
+        pos = json_skip_ws(object, pos + 1);
+        if (parsed_key == key) {
+            return pos;
+        }
+        pos = json_skip_value(object, pos);
+        pos = json_skip_ws(object, pos);
+        if (pos < object.size() && object[pos] == ',') {
+            pos++;
+            continue;
+        }
+        if (pos < object.size() && object[pos] == '}') {
+            return std::nullopt;
+        }
+        json_fail("expected separator after key " + parsed_key);
+    }
+}
+
+std::optional<std::string> json_object_string(const std::string &object,
+                                              const std::string &key)
+{
+    std::optional<size_t> pos = json_find_key_value(object, key);
+    if (!pos) {
+        return std::nullopt;
+    }
+    size_t value_pos = *pos;
+    return json_parse_string_value(object, value_pos);
+}
+
+std::string json_required_string(const std::string &object,
+                                 const std::string &key)
+{
+    std::optional<std::string> value = json_object_string(object, key);
+    if (!value || value->empty()) {
+        json_fail("object missing required string key " + key);
+    }
+    return *value;
+}
+
+std::optional<uint64_t> json_object_u64(const std::string &object,
+                                        const std::string &key)
+{
+    std::optional<size_t> found = json_find_key_value(object, key);
+    if (!found) {
+        return std::nullopt;
+    }
+    size_t pos = json_skip_ws(object, *found);
+    if (pos >= object.size() || !std::isdigit(static_cast<unsigned char>(object[pos]))) {
+        json_fail("key " + key + " must be a non-negative integer");
+    }
+    uint64_t value = 0;
+    while (pos < object.size() &&
+           std::isdigit(static_cast<unsigned char>(object[pos]))) {
+        uint64_t digit = static_cast<uint64_t>(object[pos] - '0');
+        if (value > (std::numeric_limits<uint64_t>::max() - digit) / 10) {
+            json_fail("integer overflow for key " + key);
+        }
+        value = value * 10 + digit;
+        pos++;
+    }
+    return value;
+}
+
+uint32_t json_required_u32(const std::string &object, const std::string &key)
+{
+    std::optional<uint64_t> value = json_object_u64(object, key);
+    if (!value || *value > std::numeric_limits<uint32_t>::max()) {
+        json_fail("object missing required u32 key " + key);
+    }
+    return static_cast<uint32_t>(*value);
+}
+
+std::optional<bool> json_object_bool(const std::string &object,
+                                     const std::string &key)
+{
+    std::optional<size_t> found = json_find_key_value(object, key);
+    if (!found) {
+        return std::nullopt;
+    }
+    size_t pos = json_skip_ws(object, *found);
+    if (std::strncmp(object.c_str() + pos, "true", 4) == 0) {
+        return true;
+    }
+    if (std::strncmp(object.c_str() + pos, "false", 5) == 0) {
+        return false;
+    }
+    json_fail("key " + key + " must be boolean");
+}
+
+std::vector<std::string> json_array_objects(const std::string &manifest,
+                                            const std::string &key)
+{
+    std::optional<size_t> found = json_find_key_value(manifest, key);
+    if (!found) {
+        return {};
+    }
+    size_t pos = json_skip_ws(manifest, *found);
+    if (pos >= manifest.size() || manifest[pos] != '[') {
+        json_fail("key " + key + " must be an array");
+    }
+    pos++;
+    std::vector<std::string> out;
+    for (;;) {
+        pos = json_skip_ws(manifest, pos);
+        if (pos >= manifest.size()) {
+            json_fail("unterminated array " + key);
+        }
+        if (manifest[pos] == ']') {
+            return out;
+        }
+        if (manifest[pos] != '{') {
+            json_fail("array " + key + " contains non-object value");
+        }
+        const size_t start = pos;
+        pos = json_skip_object(manifest, pos);
+        out.push_back(manifest.substr(start, pos - start));
+        pos = json_skip_ws(manifest, pos);
+        if (pos < manifest.size() && manifest[pos] == ',') {
+            pos++;
+            continue;
+        }
+        if (pos < manifest.size() && manifest[pos] == ']') {
+            return out;
+        }
+        json_fail("expected separator in array " + key);
+    }
+}
+
+std::string read_text_file_required(const std::filesystem::path &path)
+{
+    std::vector<uint8_t> bytes = read_binary_file(path);
+    return std::string(reinterpret_cast<const char *>(bytes.data()), bytes.size());
+}
+
+void canonicalize_source_fd_array(std::vector<bpf_insn> &insns,
+                                  const std::vector<int> &fd_array)
+{
+    for (size_t i = 0; i < insns.size(); i++) {
+        bpf_insn &insn = insns[i];
+        if (insn.code != (BPF_LD | BPF_DW | BPF_IMM)) {
+            continue;
+        }
+        if (insn.src_reg == BPF_PSEUDO_MAP_IDX ||
+            insn.src_reg == BPF_PSEUDO_MAP_IDX_VALUE) {
+            if (insn.imm < 0 ||
+                static_cast<size_t>(insn.imm) >= fd_array.size() ||
+                fd_array[static_cast<size_t>(insn.imm)] < 0) {
+                fail("native_loader: source bytecode references invalid fd_array index " +
+                     std::to_string(insn.imm));
+            }
+            const bool value_ref = insn.src_reg == BPF_PSEUDO_MAP_IDX_VALUE;
+            insn.imm = fd_array[static_cast<size_t>(insn.imm)];
+            insn.src_reg = value_ref ? BPF_PSEUDO_MAP_VALUE : BPF_PSEUDO_MAP_FD;
+        }
+        i++;
+    }
+}
+
+bool source_has_helper(const std::vector<bpf_insn> &source_insns, int helper_id)
+{
+    for (const bpf_insn &insn : source_insns) {
+        if (insn.code == (BPF_JMP | BPF_CALL) &&
+            insn.src_reg == 0 &&
+            insn.imm == helper_id) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool source_has_map_prefix(const std::vector<bpf_insn> &source_insns,
+                           const std::string &prefix)
+{
+    if (prefix.empty()) {
+        return false;
+    }
+    for (size_t i = 0; i < source_insns.size(); i++) {
+        const bpf_insn &insn = source_insns[i];
+        if (insn.code != (BPF_LD | BPF_DW | BPF_IMM)) {
+            continue;
+        }
+        if (insn.src_reg == BPF_PSEUDO_MAP_FD ||
+            insn.src_reg == BPF_PSEUDO_MAP_VALUE) {
+            bpf_map_info info = load_map_info(static_cast<int>(insn.imm));
+            char name[sizeof(info.name) + 1] = {};
+            std::memcpy(name, info.name, sizeof(info.name));
+            if (starts_with(name, prefix)) {
+                return true;
+            }
+        }
+        i++;
+    }
+    return false;
+}
+
+std::filesystem::path manifest_relative_path(const std::filesystem::path &manifest_path,
+                                             const std::string &native_object)
+{
+    std::filesystem::path object_path(native_object);
+    if (object_path.is_absolute()) {
+        return object_path;
+    }
+    return manifest_path.parent_path() / object_path;
+}
+
+NativeMapRule parse_native_map_rule(const std::string &entry)
+{
+    const std::string match = json_required_string(entry, "match");
+    NativeMapRule rule{};
+    if (match == "exact") {
+        rule.match = NativeMapRuleMatch::Exact;
+    } else if (match == "prefix") {
+        rule.match = NativeMapRuleMatch::Prefix;
+    } else if (match == "suffix") {
+        rule.match = NativeMapRuleMatch::Suffix;
+    } else {
+        json_fail("unsupported map rule match " + match);
+    }
+    rule.pattern = json_required_string(entry, "pattern");
+    if (std::optional<std::string> exclude = json_object_string(entry, "exclude")) {
+        rule.exclude = *exclude;
+    }
+    rule.shape.type = static_cast<int>(json_required_u32(entry, "type"));
+    rule.shape.key_size = static_cast<uint32_t>(json_object_u64(entry, "key_size").value_or(0));
+    rule.shape.value_size = static_cast<uint32_t>(json_object_u64(entry, "value_size").value_or(0));
+    rule.shape.max_entries = static_cast<uint32_t>(json_object_u64(entry, "max_entries").value_or(0));
+    rule.object_scoped = json_object_bool(entry, "object_scoped").value_or(false);
+    return rule;
+}
+
+std::vector<NativeMapRule> parse_manifest_map_rules(const std::string &manifest)
+{
+    std::vector<NativeMapRule> rules;
+    for (const std::string &entry : json_array_objects(manifest, "map_rules")) {
+        rules.push_back(parse_native_map_rule(entry));
+    }
+    return rules;
+}
+
+struct ManifestResolution {
+    std::filesystem::path native_object_path;
+    std::string symbol_name;
+    std::vector<NativeMapRule> map_rules;
+};
+
+std::optional<ManifestResolution> resolve_native_manifest(
+    const std::filesystem::path &manifest_path,
+    const bpf_prog_info &prog_info,
+    const std::vector<bpf_insn> &source_insns)
+{
+    const std::string manifest = read_text_file_required(manifest_path);
+    std::vector<std::string> objects = json_array_objects(manifest, "objects");
+    if (objects.empty()) {
+        fail("native_loader: manifest has no objects: " + manifest_path.string());
+    }
+
+    char prog_name_buf[sizeof(prog_info.name) + 1] = {};
+    std::memcpy(prog_name_buf, prog_info.name, sizeof(prog_info.name));
+    const std::string prog_name(prog_name_buf);
+
+    std::optional<ManifestResolution> selected;
+    for (const std::string &entry : objects) {
+        const std::string entry_program = json_required_string(entry, "program");
+        if (entry_program != prog_name) {
+            continue;
+        }
+        std::optional<uint64_t> prog_type = json_object_u64(entry, "prog_type");
+        if (prog_type && *prog_type != prog_info.type) {
+            continue;
+        }
+        std::optional<std::string> map_prefix =
+            json_object_string(entry, "source_map_prefix");
+        if (map_prefix && !map_prefix->empty() &&
+            !source_has_map_prefix(source_insns, *map_prefix)) {
+            continue;
+        }
+        std::optional<uint64_t> required_helper =
+            json_object_u64(entry, "source_has_helper");
+        if (required_helper &&
+            !source_has_helper(source_insns, static_cast<int>(*required_helper))) {
+            continue;
+        }
+        std::optional<uint64_t> forbidden_helper =
+            json_object_u64(entry, "source_lacks_helper");
+        if (forbidden_helper &&
+            source_has_helper(source_insns, static_cast<int>(*forbidden_helper))) {
+            continue;
+        }
+
+        ManifestResolution candidate{};
+        candidate.native_object_path =
+            manifest_relative_path(manifest_path,
+                                   json_required_string(entry, "native_object"));
+        candidate.symbol_name = json_object_string(entry, "symbol").value_or("");
+        if (selected &&
+            (selected->native_object_path != candidate.native_object_path ||
+             selected->symbol_name != candidate.symbol_name)) {
+            fail("native_loader: manifest has ambiguous entries for prog=" + prog_name);
+        }
+        selected = std::move(candidate);
+    }
+
+    if (!selected) {
+        return std::nullopt;
+    }
+    std::error_code ec;
+    if (!std::filesystem::exists(selected->native_object_path, ec) || ec) {
+        fail("native_loader: manifest native object is unreadable: " +
+             selected->native_object_path.string());
+    }
+    selected->map_rules = parse_manifest_map_rules(manifest);
+    return *selected;
+}
+
 std::string bpf_obj_name_truncation(const std::string &name);
 
-bool find_open_process_map_by_name(const std::string &name, MapMeta &out)
+bool find_open_process_map_by_name(const std::string &name,
+                                   const std::vector<NativeMapRule> &map_rules,
+                                   MapMeta &out)
 {
     DIR *fd_dir = opendir("/proc/self/fd");
     if (!fd_dir) {
@@ -2374,7 +2637,7 @@ bool find_open_process_map_by_name(const std::string &name, MapMeta &out)
         return false;
     }
 
-    const NativeMapShape want_shape = expected_native_map_shape(name);
+    const NativeMapShape want_shape = expected_native_map_shape(map_rules, name);
     std::vector<MapMeta> shaped;
     for (const MapMeta &meta : matches) {
         if (!map_matches_shape(meta, want_shape)) {
@@ -2386,7 +2649,7 @@ bool find_open_process_map_by_name(const std::string &name, MapMeta &out)
         return false;
     }
 
-    if (shaped.size() > 1 && newest_open_process_map_is_object_scoped(name)) {
+    if (shaped.size() > 1 && native_map_symbol_is_object_scoped(map_rules, name)) {
         out = *std::max_element(shaped.begin(), shaped.end(),
                                 [](const MapMeta &a, const MapMeta &b) {
                                     return a.fd < b.fd;
@@ -2607,6 +2870,7 @@ struct CompanionLoad {
     std::vector<std::string> helper_args;
     uint32_t prog_type = 0;
     std::vector<MapMeta> maps;
+    std::vector<NativeMapRule> map_rules;
     /* Per-call-site spec for every `bpf_map_lookup_elem` invocation in
      * the entry program, listed in BPF-source order. Each entry is a
      * (target_kernel_address, key_offset) pair. native-link routes the
@@ -2980,7 +3244,8 @@ void add_native_map_symbol_alias(CompanionLoad &load, const std::string &name)
         if (matches.size() == 1) {
             match = matches[0];
         } else {
-            const NativeMapShape want_shape = expected_native_map_shape(name);
+            const NativeMapShape want_shape =
+                expected_native_map_shape(load.map_rules, name);
             if (want_shape.type >= 0) {
                 for (const MapMeta *candidate : matches) {
                     if (!map_matches_shape(*candidate, want_shape)) {
@@ -3003,7 +3268,7 @@ void add_native_map_symbol_alias(CompanionLoad &load, const std::string &name)
     }
 
     MapMeta process_map{};
-    if (find_open_process_map_by_name(name, process_map)) {
+    if (find_open_process_map_by_name(name, load.map_rules, process_map)) {
         add_map_meta(load, process_map);
         add_map_symbol_alias_meta(load, name, process_map);
     }
@@ -4056,6 +4321,7 @@ LoadedProgram load_from_companion_object(const LoadOptions &options)
     }
 
     out.prog_fd = loaded_stub.prog_fd;
+    out.replaced = true;
     out.companion_object = companion.obj;
     out.callee_saved_mask = linked.callee_saved_mask;
     out.bpf_bytecode_bytes = companion.oracle_xlated.size();
@@ -4079,18 +4345,35 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     if (options.original_prog_fd < 0) {
         fail("native_loader: missing original_prog_fd");
     }
-    if (options.native_object_path.empty()) {
-        fail("native_loader: missing native_object_path");
+    if (options.native_object_path.empty() && options.manifest_path.empty()) {
+        fail("native_loader: missing native_object_path or manifest_path");
     }
     LoadedProgram out{};
     const auto companion_load_start = std::chrono::steady_clock::now();
     const bpf_prog_info prog_info = load_prog_info(options.original_prog_fd);
-    std::string symbol_name = options.symbol_name.empty()
-        ? load_prog_btf_symbol_name(options.original_prog_fd, prog_info)
-        : options.symbol_name;
     std::vector<bpf_insn> source_insns;
     if (!options.source_bpf_path.empty()) {
         source_insns = read_bpf_insn_file(options.source_bpf_path);
+        canonicalize_source_fd_array(source_insns, options.source_fd_array);
+    }
+    std::filesystem::path native_object_path = options.native_object_path;
+    std::string symbol_name = options.symbol_name;
+    std::vector<NativeMapRule> map_rules;
+    if (native_object_path.empty()) {
+        if (source_insns.empty()) {
+            fail("native_loader: manifest resolution requires source BPF bytecode");
+        }
+        std::optional<ManifestResolution> resolution =
+            resolve_native_manifest(options.manifest_path, prog_info, source_insns);
+        if (!resolution) {
+            return out;
+        }
+        native_object_path = resolution->native_object_path;
+        symbol_name = resolution->symbol_name;
+        map_rules = std::move(resolution->map_rules);
+    }
+    if (symbol_name.empty()) {
+        symbol_name = load_prog_btf_symbol_name(options.original_prog_fd, prog_info);
     }
     CompanionLoad companion =
         load_from_loaded_program_fd(
@@ -4098,18 +4381,19 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             prog_info,
             source_insns.empty() ? nullptr : source_insns.data(),
             source_insns.size());
-    add_native_data_symbol_addrs(options.native_object_path, companion);
+    companion.map_rules = std::move(map_rules);
+    add_native_data_symbol_addrs(native_object_path, companion);
     const auto companion_load_end = std::chrono::steady_clock::now();
 
     LoadOptions link_options{};
-    link_options.native_object_path = options.native_object_path;
+    link_options.native_object_path = native_object_path;
     link_options.symbol_name = symbol_name;
     link_options.prog_type = prog_info.type;
     link_options.native_link_path = options.native_link_path;
 
     LinkedBlob linked = load_or_link_native_blob(
         link_options,
-        options.native_object_path,
+        native_object_path,
         symbol_name,
         companion);
 
@@ -4141,6 +4425,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     }
 
     out.prog_fd = loaded_stub.prog_fd;
+    out.replaced = true;
     out.companion_object = nullptr;
     out.callee_saved_mask = linked.callee_saved_mask;
     out.bpf_bytecode_bytes = companion.oracle_xlated.size();
@@ -4187,16 +4472,18 @@ void transfer_loaded_program_to_c_result(native_loader::LoadedProgram &loaded,
     }
 
     out->prog_fd = loaded.prog_fd;
+    out->replaced = loaded.replaced ? 1 : 0;
     loaded.prog_fd = -1;
 }
 
 } // namespace
 
-extern "C" int native_loader_load_from_fd_with_source_path_and_attach(
+extern "C" int native_loader_load_from_fd_with_manifest_path_and_attach(
     int original_prog_fd,
-    const char *native_object_path,
-    const char *symbol_name,
+    const char *manifest_path,
     const char *source_bpf_path,
+    const int *source_fd_array,
+    uint32_t source_fd_array_count,
     uint32_t expected_attach_type,
     uint32_t attach_btf_id,
     uint32_t prog_btf_id,
@@ -4206,13 +4493,14 @@ extern "C" int native_loader_load_from_fd_with_source_path_and_attach(
 {
     if (out) {
         out->prog_fd = -1;
+        out->replaced = 0;
         out->error[0] = '\0';
     }
-    if (original_prog_fd < 0 || !native_object_path || !native_object_path[0] ||
+    if (original_prog_fd < 0 || !manifest_path || !manifest_path[0] ||
         !source_bpf_path || !source_bpf_path[0]) {
         if (out) {
             std::snprintf(out->error, sizeof(out->error),
-                          "native_loader_load_from_fd_with_source_path_and_attach requires fd, native object, and source BPF path");
+                          "native_loader_load_from_fd_with_manifest_path_and_attach requires fd, manifest, and source BPF path");
         }
         errno = EINVAL;
         return -1;
@@ -4221,11 +4509,15 @@ extern "C" int native_loader_load_from_fd_with_source_path_and_attach(
     try {
         native_loader::FdLoadOptions options{};
         options.original_prog_fd = original_prog_fd;
-        options.native_object_path = native_object_path;
-        if (symbol_name && symbol_name[0]) {
-            options.symbol_name = symbol_name;
-        }
+        options.manifest_path = manifest_path;
         options.source_bpf_path = source_bpf_path;
+        if (source_fd_array_count > 0) {
+            if (!source_fd_array) {
+                fail("native_loader: source_fd_array_count is non-zero with null fd array");
+            }
+            options.source_fd_array.assign(
+                source_fd_array, source_fd_array + source_fd_array_count);
+        }
         options.expected_attach_type = expected_attach_type;
         options.attach_btf_id = attach_btf_id;
         options.prog_btf_id = prog_btf_id;
