@@ -30,6 +30,10 @@ The current research questions are:
   ABI?
 - **RQ4 Kernel-native portability:** does the kernel-native result also hold on
   arm64 when compared against arm64 kernel eBPF?
+- **RQ5 Machine-code footprint:** how does generated machine-code size compare
+  against kernel eBPF JIT output?
+- **RQ6 LLVM-kinsn upper-bound opportunity:** what speedups are visible in the
+  best local full-suite LLVM-kinsn candidate?
 
 The full four-way comparison is available in the latest x86 KVM artifacts:
 `llvmbpf` is userspace eBPF, `native` is userspace native, `kernel` is kernel
@@ -79,6 +83,9 @@ The platform details recorded in the artifacts are:
 Each benchmark/runtime pair records three samples after zero warmups. Each
 sample runs the benchmark body `INNER_REPEAT=100000` times. Correctness is
 gated by exact expected result and retval checks for every recorded sample.
+Runtime figures measure steady-state `BPF_PROG_TEST_RUN` execution time only;
+load, link, and compile phases are recorded separately and excluded from runtime
+ratios.
 
 For each benchmark and runtime, the analysis uses the median `exec_ns` across
 the three samples. For each suite, the reported aggregate is the geomean of
@@ -163,11 +170,25 @@ than arm64 kernel eBPF: 1.800x on pure bytecode and 1.170x with helpers/maps.
 The helper/map gain is smaller than the pure-bytecode gain, consistent with
 helper/map boundary costs.
 
+**RQ5 Machine-code footprint.** The generated machine code is consistently
+smaller than kernel eBPF JIT output. On x86 KVM pure bytecode, code-size ratios
+are 0.541x for kernel native, 0.565x for userspace eBPF, and 0.539x for
+userspace native. Kernel native is also smaller on x86 with helpers/maps
+(0.610x), arm64 pure bytecode (0.495x), and arm64 with helpers/maps (0.724x).
+
+**RQ6 LLVM-kinsn upper-bound opportunity.** The best local raw LLVM-kinsn
+candidate shows a 1.216x all-29 geomean speedup over the latest stock-kernel
+baseline, with top individual cases reaching 2.267x. This is an exploratory
+upper-bound datapoint because the artifact does not record an exact matched
+compiler-control run.
+
 The concise paper claim supported by these data is:
 
 - x86 KVM pure bytecode remains strong at 1.474x and with helpers/maps is
   positive at 1.409x.
 - arm64 AWS is positive on both suites, with a larger pure-bytecode gain.
+- Generated machine-code size is 0.49-0.72x of kernel eBPF JIT size across the
+  measured authoritative kernel-native suites.
 
 ## Threats To Validity
 
@@ -182,6 +203,13 @@ The concise paper claim supported by these data is:
 - Userspace runtime data for the with-helpers/maps suite exists in the raw
   artifact but is not a kernel-helper/map-path comparison, so it is
   intentionally excluded from the main helper/map claim.
+- The LLVM-kinsn result is reported as an upper-bound opportunity only. It uses
+  a real full-suite raw artifact but lacks an exact matched compiler-control
+  artifact in metadata.
+- Some very small x86 helper/map kernel baselines show high per-sample CV
+  because one of three samples can be an outlier at tens-of-nanoseconds scale.
+  The reported aggregate therefore uses per-case medians and the outliers are
+  documented in Appendix E.
 
 ## Appendix A: Artifact Manifest
 
@@ -283,7 +311,32 @@ across three samples with `INNER_REPEAT=100000`. The geomean speedup is 1.216x
 over 29 cases with zero correctness mismatches, but this is not a matched
 compiler-control comparison.*
 
-## Appendix E: Figure Generation
+## Appendix E: Artifact And Noise Checks
+
+The LLVM-kinsn upper-bound figures use these raw artifacts:
+
+| Role | Result source | Generated at | Runtimes | Benchmarks | Samples | Expected-result mismatches |
+|---|---|---|---|---:|---:|---:|
+| LLVM-kinsn upper-bound candidate | `micro/results/x86_kvm_micro_20260519_114214_364050` | 2026-05-19T11:42:14Z | kernel | 29 | 87 | 0 |
+| Stock-kernel baseline | `micro/results/x86_kvm_micro_20260526_210351_224315` | 2026-05-26T21:03:51Z | kernel, llvmbpf, native, native_kernel | 29 | 348 | 0 |
+
+Per-run variability check. For each benchmark/runtime pair, this computes the
+CV of the three `exec_ns` samples; runtime aggregates use the median sample.
+
+| Platform | Suite | Benchmark/runtime pairs | Median CV | p95 CV | Max CV | Pairs within 2% of median |
+|---|---|---:|---:|---:|---:|---:|
+| x86 KVM | pure bytecode 29 | 116 | 0.57% | 19.54% | 28.37% | 75 / 116 |
+| x86 KVM | with helpers/maps 13 | 26 | 0.40% | 60.91% | 61.02% | 16 / 26 |
+| arm64 AWS | pure bytecode 29 | 58 | 1.55% | 8.86% | 23.40% | 26 / 58 |
+| arm64 AWS | with helpers/maps 13 | 26 | 0.54% | 4.03% | 6.13% | 17 / 26 |
+
+The high x86 helper/map p95/max CV comes from tiny absolute-time kernel
+baselines with one outlier sample, for example `map_lru_hash_counter` kernel
+`[225, 85, 86]`, `stats_mixed_helpers` kernel `[59, 59, 155]`, and
+`map_hash_str_key` kernel `[33, 86, 33]`. Median aggregation is used to avoid
+letting these one-sample outliers dominate per-case ratios.
+
+## Appendix F: Figure Generation
 
 The plotting script for Figures 1-4 is
 `docs/tmp/plot_micro_characterization_20260527.py`. It is an analysis-side
