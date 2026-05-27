@@ -114,15 +114,15 @@ that every retained BPF program improved.
 
 Latest authoritative datasets are all complete: micro stage1, micro stage2,
 six-app corpus with BPF stats enabled, six-app corpus with BPF stats disabled,
-and six-app workload-only no-eBPF baseline.
+and six-app workload-only no-agent/no-eBPF baseline.
 
 ![Corpus workload and BPF per-run cost](figures/eval-native-corpus-combined-side-by-side-ns-bars.png)
 
 *Figure 1: Corpus end-to-end workload throughput and aggregate BPF per-run
-cost. The left subplot normalizes workload throughput to the no-eBPF baseline
-for each app. The right subplot reports raw aggregate BPF `ns/run` for the
-retained counter population (`run_cnt_delta >= 100`). For workload throughput,
-higher is better. For BPF `ns/run`, lower is better.*
+cost. The left subplot normalizes workload throughput to the no-agent/no-eBPF
+baseline for each app. The right subplot reports raw aggregate BPF `ns/run`
+for the retained counter population (`run_cnt_delta >= 100`). For workload
+throughput, higher is better. For BPF `ns/run`, lower is better.*
 
 ![Micro stage1 runtime](figures/eval-native-micro-stage1-runtime.png)
 
@@ -140,7 +140,7 @@ Micro four-runtime result:
 Corpus workload throughput. The `native/eBPF` headline is the unweighted
 geomean across the six per-app ratios (`1.23x`):
 
-| App | no-eBPF throughput | eBPF/no-eBPF | native/no-eBPF | native/eBPF |
+| App | no-agent/no-eBPF throughput | eBPF/no-eBPF | native/no-eBPF | native/eBPF |
 | --- | ---: | ---: | ---: | ---: |
 | `bcc` | 1574097 | 0.45x | 0.46x | 1.01x |
 | `otel` | 110063016 | 0.40x | 0.73x | 1.84x |
@@ -216,6 +216,25 @@ calls are patched to direct calls. The real blockers exposed by the corpus run
 were startup correctness and native-loader/app metadata mismatches: manifest
 no-match handling, native replacement fd semantics, app-visible program-info
 queries, stale fd reuse, and Tetragon map-id assumptions.
+
+OTEL's `15.21x` aggregate BPF `ns/run` speedup is dominated by the directly
+attached `native_tracer_entry` perf-event program. In the BPF-stats artifact,
+baseline `native_tracer_e` ran 420.7M times at 3224.9 ns/run, while the native
+replacement ran 432.1M times at 212.1 ns/run. The tail-called
+`perf_unwind_*` programs still report zero own `run_cnt`, so their work is
+charged to this caller. Inspection of the saved BPF bytecode and native object
+shows a concrete hot-path cause: `get_pristine_per_cpu_record()` expands in
+eBPF into many per-field stores, including the unrolled custom-label clear,
+while the native object lowers the same contiguous clear to one kernel
+`memset(..., 0x29c)` call. This is a real native-code advantage for this
+profiler workload, but it is a caller-accounted OTEL-chain result rather than a
+per-tail-target counter result. The tail call itself still matters, but mostly
+as accounting and control-flow structure here: the link-time x86 native path
+does not leave `bpf_tail_call` as an ordinary helper call; it lowers the
+placeholder into an inline prog-array bounds check, tail-call-count check,
+native cleanup, and `jmp` to `bpf_prog->bpf_func + X86_TAIL_CALL_OFFSET`.
+That cost is real on deep unwind chains, but it is not the dominant explanation
+for the observed OTEL entry speedup.
 
 Cilium also needs careful interpretation. The measured result is steady-state
 datapath throughput after endpoint setup. The runner disables drift checker,
@@ -343,6 +362,18 @@ make corpus
 
 ## Appendix D: Progress Log
 
+- 2026-05-27: Added OSDI-reviewer-facing clarifications: a precise workload
+  headline (`1.23x` unweighted geomean across six apps), workload intent and
+  limitation table, native/eBPF three-sample spread, run-weighted aggregate
+  wording for BPF `ns/run`, explicit no-agent/no-eBPF baseline terminology,
+  Cilium steady-state datapath scope, and artifact timing/mode metadata.
+- 2026-05-27: Added the OTEL native-speedup interpretation: the `15.21x`
+  aggregate BPF `ns/run` speedup is dominated by directly attached
+  `native_tracer_entry`; tail-call descendants are charged to that caller; and
+  the native object compacts the hot-path per-CPU record clear from unrolled
+  eBPF stores into a `memset(..., 0x29c)` call. Clarified that x86 native
+  tail calls are lowered inline at link time, so tail-call accounting/chain
+  cost matters but does not explain the OTEL speedup by itself.
 - 2026-05-27: Reorganized this document into a paper-facing structure modeled
   after `docs/micro-bench-status.md`: framing, research questions,
   methodology, main results, RQ answers, discussion, and threats to validity.
