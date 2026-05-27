@@ -27,11 +27,17 @@ The current research questions are:
 - **RQ4 End-to-end workload impact:** does lower BPF execution cost translate
   into higher application workload throughput?
 
+Headline result: **on x86 KVM, kernel-native execution improves workload
+throughput by `1.23x` unweighted geomean over eBPF JIT across six real-app
+workloads, with four wins, one neutral result, and one slight regression.** It
+also reduces aggregate BPF `ns/run` in five of the six retained counter
+populations.
+
 The narrow claim supported by the current x86 KVM data is: native kernel
 execution is consistently positive on controlled microbenchmarks, and it fixes
-the previous Tetragon native-path slowdown at the BPF counter level. End-to-end
-workload gains are app-dependent because BPF instruction execution is only one
-part of tracing/security/networking application cost.
+the previous Tetragon native-path slowdown at the BPF counter level. The
+end-to-end workload result is app-dependent because BPF instruction execution
+is only one part of tracing/security/networking application cost.
 
 ## Experimental Setup
 
@@ -56,8 +62,13 @@ Three corpus datasets are used:
   for per-run `ns/run`.
 - **BPF stats off:** native-post six-app run with BPF runtime counters
   disabled, used for workload throughput without BPF stats overhead.
-- **Workload-only:** six-app no-eBPF baseline, used as the workload throughput
-  denominator.
+- **Workload-only:** six-app no-agent/no-eBPF baseline, used as the workload
+  throughput denominator.
+
+The Cilium corpus result is a steady-state datapath measurement. The runner
+disables runtime reload/regeneration controllers and pauses `cilium-agent`
+during measured workload samples after endpoint setup; it is not a Cilium
+control-plane throughput benchmark.
 
 ## Methodology
 
@@ -74,6 +85,17 @@ or threads. For the OTEL mixed workload, it sums each worker's
 `bogo ops/s`. These units are app-local, so only ratios within the same app
 are meaningful.
 
+Workload intent and limits:
+
+| App | Domain | Generator | Intended hot path | Interpretation limit |
+| --- | --- | --- | --- | --- |
+| `bcc/set` | tracing tools | `stress-ng` fast syscalls, cap, set, sockfd | syscall tracepoint/kprobe dispatch | synthetic high-rate syscall mix |
+| `otel` | continuous profiling | language interpreter loops plus `stress-ng cpu` | perf-event sampling and unwind tail-call chain | CPU-loop profiler workload, not a full service |
+| `cilium` | Kubernetes datapath | bidirectional endpoint `pktgen` | steady-state endpoint datapath | control plane paused during measured phase |
+| `tetragon` | runtime security | `stress-ng` eventfd, mmap, UDP, sock, sockfd, sockpair | generic tracepoint/kprobe event path | synthetic policy-hot syscall/socket mix |
+| `katran` | L4 XDP load balancer | kernel `pktgen` UDP to VIP | standalone XDP balancer ingress | datapath-only packet generator |
+| `tracee` | runtime security | `stress-ng` cap, set, sigfd, eventfd, kill, futex, prctl | syscall tracing/security hooks | synthetic syscall mix |
+
 Corpus BPF per-run cost is computed from the BPF-stats-on artifacts. The
 analysis keeps records with `run_cnt_delta >= 100`, then computes aggregate
 `ns/run` per phase as:
@@ -84,7 +106,9 @@ ns_per_run = sum(run_time_ns_delta) / sum(run_cnt_delta)
 
 The BPF table also reports `native/eBPF cost` and `speedup =
 eBPF_ns_per_run / native_ns_per_run`, but the main corpus figure plots raw
-`ns/run` bars for direct inspection.
+`ns/run` bars for direct inspection. This is a run-weighted aggregate over the
+retained counter population, not a per-program paired geomean and not a claim
+that every retained BPF program improved.
 
 ## Main Results
 
@@ -113,7 +137,8 @@ Micro four-runtime result:
 | Stage1 normalized runtime | 0.58x | 0.65x | 0.68x | 1.00x |
 | Stage2 normalized runtime | 2.29x | 1.01x | 0.71x | 1.00x |
 
-Corpus workload throughput:
+Corpus workload throughput. The `native/eBPF` headline is the unweighted
+geomean across the six per-app ratios (`1.23x`):
 
 | App | no-eBPF throughput | eBPF/no-eBPF | native/no-eBPF | native/eBPF |
 | --- | ---: | ---: | ---: | ---: |
@@ -124,7 +149,19 @@ Corpus workload throughput:
 | `katran` | 7507097 | 0.38x | 0.43x | 1.14x |
 | `tracee` | 3327639 | 0.14x | 0.13x | 0.95x |
 
-Corpus BPF per-run counters:
+Native/eBPF workload sample spread:
+
+| App | native/eBPF samples | Mean | CV |
+| --- | --- | ---: | ---: |
+| `bcc` | 1.006x, 1.008x, 1.005x | 1.007x | 0.1% |
+| `otel` | 1.791x, 1.877x, 1.865x | 1.844x | 2.5% |
+| `cilium` | 1.374x, 1.387x, 1.379x | 1.380x | 0.5% |
+| `tetragon` | 1.211x, 1.216x, 1.285x | 1.237x | 3.3% |
+| `katran` | 1.133x, 1.136x, 1.137x | 1.135x | 0.1% |
+| `tracee` | 0.961x, 0.957x, 0.942x | 0.954x | 1.0% |
+
+Corpus BPF per-run counters, reported as run-weighted aggregate `ns/run` over
+retained records:
 
 | App | eBPF ns/run | native ns/run | native/eBPF cost | speedup | retained eBPF/native |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -149,18 +186,20 @@ stage2. Userspace native is faster than kernel eBPF on stage1 but slower on
 stage2 because stage2 includes helper/map-heavy paths where userspace-native
 emulation is not a kernel ABI comparison.
 
-**RQ3 BPF per-run cost in real apps.** Native reduces aggregate BPF `ns/run` on
-five of six apps and is neutral/slightly slower on Tracee. Tetragon's previous
-native slowdown is fixed: aggregate BPF per-run cost is now `304.1 ns/run`
-versus `701.2 ns/run` for eBPF (`0.43x` cost, `2.31x` speedup).
+**RQ3 BPF per-run cost in real apps.** Native reduces run-weighted aggregate
+BPF `ns/run` on five of six retained counter populations and is
+neutral/slightly slower on Tracee. Tetragon's previous native slowdown is
+fixed: aggregate BPF per-run cost is now `304.1 ns/run` versus `701.2 ns/run`
+for eBPF (`0.43x` cost, `2.31x` speedup).
 
-**RQ4 End-to-end workload impact.** Native improves workload throughput over
-eBPF on OTEL (`1.84x`), Cilium (`1.38x`), Tetragon (`1.24x`), and Katran
-(`1.14x`), is neutral on BCC (`1.01x`), and is slightly lower on Tracee
-(`0.95x`). No-eBPF remains much faster for several tracing/security workloads,
-showing that hook frequency, event construction, map traffic, perf/ring-buffer
-traffic, and application-side processing remain major costs outside BPF
-instruction execution.
+**RQ4 End-to-end workload impact.** Native improves workload throughput by
+`1.23x` unweighted geomean across the six app workloads. It improves over eBPF
+on OTEL (`1.84x`), steady-state Cilium datapath (`1.38x`), Tetragon (`1.24x`),
+and Katran (`1.14x`), is neutral on BCC (`1.01x`), and is slightly lower on
+Tracee (`0.95x`). The no-agent/no-eBPF baseline remains much faster for several
+tracing/security workloads, showing that hook frequency, event construction,
+map traffic, perf/ring-buffer traffic, and application-side processing remain
+major costs outside BPF instruction execution.
 
 ## Discussion
 
@@ -178,7 +217,8 @@ were startup correctness and native-loader/app metadata mismatches: manifest
 no-match handling, native replacement fd semantics, app-visible program-info
 queries, stale fd reuse, and Tetragon map-id assumptions.
 
-Cilium also needs careful interpretation. The runner disables drift checker,
+Cilium also needs careful interpretation. The measured result is steady-state
+datapath throughput after endpoint setup. The runner disables drift checker,
 dynamic config, dynamic lifecycle manager, endpoint BPF watchdog, and endpoint
 regen interval, and stops `cilium-agent` during measured workload samples.
 Those controls suppress runtime reload/regeneration during measurement. They
@@ -196,28 +236,37 @@ and native-loader matching bugs, not as a missing autoreload flag.
 - Native replacement programs are named `native_lab_stub`, so current corpus
   BPF results are app-level aggregates rather than strict program-name paired
   geomeans.
+- BPF `ns/run` is a run-weighted aggregate over retained records, not a
+  per-program distribution. It can be dominated by the hottest directly
+  attached programs.
 - Tail-called BPF programs do not increment their own `run_cnt`/`run_time` in
   normal kernel accounting. Their cost is accounted at the directly attached
   caller, so retained counter coverage must be interpreted through the call
   tree.
 - Workload throughput uses the BPF-stats-off artifact to avoid stats overhead;
   BPF per-run uses the BPF-stats-on artifact. These answer different questions
-  and should not be mixed as a single run.
+  and should not be mixed as a single run. The artifacts were collected
+  sequentially on the same x86 KVM setup and kernel image during the
+  2026-05-26 to 2026-05-27 evaluation window, so time drift remains a possible
+  source of variance even though the three-sample workload CVs are small.
+- `SAMPLES=3` is sufficient for the current benchmark contract but is not a
+  substitute for a full confidence-interval study over independent machine
+  restarts. The table reports sample spread to make this limitation explicit.
 
 ## Appendix A: Artifact Manifest
 
-| Dataset | Status | Artifact |
-| --- | --- | --- |
-| Micro stage1, 4 runtimes | complete | `micro/results/x86_kvm_micro_20260526_210952_650695/metadata.json` |
-| Micro stage2, 4 runtimes | complete | `micro/results/x86_kvm_micro_20260526_210434_440390/metadata.json` |
-| `bcc/set`, BPF stats on | complete | `corpus/results/x86_kvm_corpus_20260526_211758_813406/metadata.json` |
-| `otelcol-ebpf-profiler/profiling`, BPF stats on | complete | `corpus/results/x86_kvm_corpus_20260526_214808_410996/metadata.json` |
-| `cilium/agent`, BPF stats on | complete | `corpus/results/x86_kvm_corpus_20260526_230251_020975/metadata.json` |
-| `tetragon/observer`, BPF stats on | complete | `corpus/results/x86_kvm_corpus_20260527_002557_893190/metadata.json` |
-| `katran`, BPF stats on | complete | `corpus/results/x86_kvm_corpus_20260527_005602_704153/metadata.json` |
-| `tracee/monitor`, BPF stats on | complete | `corpus/results/x86_kvm_corpus_20260527_012602_194852/metadata.json` |
-| Six-app native, BPF stats off | complete | `corpus/results/x86_kvm_corpus_20260527_015711_134639/metadata.json` |
-| Six-app workload-only no eBPF | complete | `corpus/results/x86_kvm_corpus_20260527_043130_139245/metadata.json` |
+| Dataset | Status | Generated at (UTC) | Mode | Artifact |
+| --- | --- | --- | --- | --- |
+| Micro stage1, 4 runtimes | complete | 2026-05-26T21:09:52 | micro | `micro/results/x86_kvm_micro_20260526_210952_650695/metadata.json` |
+| Micro stage2, 4 runtimes | complete | 2026-05-26T21:04:34 | micro | `micro/results/x86_kvm_micro_20260526_210434_440390/metadata.json` |
+| `bcc/set`, BPF stats on | complete | 2026-05-26T21:42:45 | stats on | `corpus/results/x86_kvm_corpus_20260526_211758_813406/metadata.json` |
+| `otelcol-ebpf-profiler/profiling`, BPF stats on | complete | 2026-05-26T22:12:22 | stats on | `corpus/results/x86_kvm_corpus_20260526_214808_410996/metadata.json` |
+| `cilium/agent`, BPF stats on | complete | 2026-05-26T23:27:22 | stats on | `corpus/results/x86_kvm_corpus_20260526_230251_020975/metadata.json` |
+| `tetragon/observer`, BPF stats on | complete | 2026-05-27T00:50:35 | stats on | `corpus/results/x86_kvm_corpus_20260527_002557_893190/metadata.json` |
+| `katran`, BPF stats on | complete | 2026-05-27T01:20:29 | stats on | `corpus/results/x86_kvm_corpus_20260527_005602_704153/metadata.json` |
+| `tracee/monitor`, BPF stats on | complete | 2026-05-27T01:51:22 | stats on | `corpus/results/x86_kvm_corpus_20260527_012602_194852/metadata.json` |
+| Six-app native, BPF stats off | complete | 2026-05-27T04:25:20 | stats off | `corpus/results/x86_kvm_corpus_20260527_015711_134639/metadata.json` |
+| Six-app workload-only no-agent/no-eBPF | complete | 2026-05-27T05:44:16 | workload-only | `corpus/results/x86_kvm_corpus_20260527_043130_139245/metadata.json` |
 
 ## Appendix B: Reproduction Commands
 
@@ -265,7 +314,7 @@ TIMEOUT=14400 \
 make corpus
 ```
 
-Corpus workload-only no-eBPF baseline:
+Corpus workload-only no-agent/no-eBPF baseline:
 
 ```sh
 BPFREJIT_CORPUS_APPS="bcc/set,otelcol-ebpf-profiler/profiling,cilium/agent,tetragon/observer,katran,tracee/monitor" \
