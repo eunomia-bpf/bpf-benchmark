@@ -1,0 +1,125 @@
+{
+  "app": "bcc/set",
+  "baseline": {
+    "bpf": {},
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--syscall",
+          "1",
+          "--syscall-method",
+          "fast75",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockfd-port",
+          "14748",
+          "--timeout",
+          "180s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/9a004b2d"
+        ],
+        "config": {
+          "stressors": [
+            "syscall",
+            "cap",
+            "set",
+            "sockfd"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 180.01362334399997,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1894] setting to a 3 mins, 0 secs run per stressor\nstress-ng: info:  [1894] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [1894] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [1895] syscall: using method 'fast75'\nstress-ng: info:  [1895] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [1895] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [1895] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [1895] syscall:                  pkey_get       59.8         35\nstress-ng: info:  [1895] syscall:                      time       73.2         44\nstress-ng: info:  [1895] syscall:              gettimeofday       88.9         55\nstress-ng: info:  [1895] syscall:                  pkey_set       89.3         49\nstress-ng: info:  [1895] syscall:                    getcpu      105.5         77\nstress-ng: info:  [1895] syscall:           set_robust_list      210.8        121\nstress-ng: info:  [1895] syscall:                 pkey_free      227.1        121\nstress-ng: info:  [1895] syscall:    sched_get_priority_min      229.7        152\nstress-ng: info:  [1895] syscall:                     umask      241.2        198\nstress-ng: info:  [1895] syscall:                    getgid      259.4        204\nstress-ng: metrc: [1894] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1894]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1894] syscall            8434    180.00      0.03      0.26        46.86       29288.89\nstress-ng: metrc: [1894] cap           164448153    180.00     42.60    137.24    913600.84      914368.75\nstress-ng: metrc: [1894] set            15019330    180.00     33.78    134.48     83440.66       89259.93\nstress-ng: metrc: [1894] sockfd        104107596    180.00     29.26    271.30    578373.29      346381.33\nstress-ng: info:  [1894] skipped: 0\nstress-ng: info:  [1894] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [1894] failed: 0\nstress-ng: info:  [1894] metrics untrustworthy: 0\nstress-ng: info:  [1894] successful run completed in 3 mins, 0.00 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      },
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--syscall",
+          "1",
+          "--syscall-method",
+          "fast75",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockfd-port",
+          "15260",
+          "--timeout",
+          "180s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/9a004b2d"
+        ],
+        "config": {
+          "stressors": [
+            "syscall",
+            "cap",
+            "set",
+            "sockfd"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 182.01340323099998,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1967] setting to a 3 mins, 0 secs run per stressor\nstress-ng: info:  [1967] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [1967] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [1968] syscall: using method 'fast75'\nstress-ng: info:  [1968] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [1968] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [1968] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [1968] syscall:                  pkey_get       69.5         67\nstress-ng: info:  [1968] syscall:                  pkey_set       90.0         89\nstress-ng: info:  [1968] syscall:              gettimeofday      110.5         83\nstress-ng: info:  [1968] syscall:                 pkey_free      197.0        187\nstress-ng: info:  [1968] syscall:    sched_get_priority_min      219.5        213\nstress-ng: info:  [1968] syscall:           set_robust_list      220.5        212\nstress-ng: info:  [1968] syscall:                    getcpu      239.5        236\nstress-ng: info:  [1968] syscall:                      time      250.0         79\nstress-ng: info:  [1968] syscall:                epoll_wait      252.5        251\nstress-ng: info:  [1968] syscall:                   geteuid      260.0        248\nstress-ng: metrc: [1967] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1967]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1967] syscall             514    182.00      0.02      0.02         2.82       13525.25\nstress-ng: metrc: [1967] cap           164062889    180.00     43.74    136.10    911459.87      912281.54\nstress-ng: metrc: [1967] set            14928227    180.00     33.95    133.48     82934.56       89163.06\nstress-ng: metrc: [1967] sockfd        103913207    180.00     29.79    272.31    577293.97      343972.55\nstress-ng: info:  [1967] skipped: 0\nstress-ng: info:  [1967] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [1967] failed: 0\nstress-ng: info:  [1967] metrics untrustworthy: 0\nstress-ng: info:  [1967] successful run completed in 3 mins, 2.00 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      },
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--syscall",
+          "1",
+          "--syscall-method",
+          "fast75",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockfd-port",
+          "15772",
+          "--timeout",
+          "180s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/9a004b2d"
+        ],
+        "config": {
+          "stressors": [
+            "syscall",
+            "cap",
+            "set",
+            "sockfd"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 180.01546856699997,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [2007] setting to a 3 mins, 0 secs run per stressor\nstress-ng: info:  [2007] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [2007] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [2008] syscall: using method 'fast75'\nstress-ng: info:  [2008] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [2008] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [2008] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [2008] syscall:                  pkey_get       52.0         52\nstress-ng: info:  [2008] syscall:                  pkey_set       65.0         54\nstress-ng: info:  [2008] syscall:              gettimeofday       96.0         66\nstress-ng: info:  [2008] syscall:                 pkey_free      121.0        110\nstress-ng: info:  [2008] syscall:                    getgid      132.5        122\nstress-ng: info:  [2008] syscall:                epoll_wait      140.0        136\nstress-ng: info:  [2008] syscall:    sched_get_priority_min      142.5        135\nstress-ng: info:  [2008] syscall:           set_robust_list      150.0        144\nstress-ng: info:  [2008] syscall:                   geteuid      162.0        155\nstress-ng: info:  [2008] syscall:                    getpid      162.5        133\nstress-ng: metrc: [2007] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2007]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2007] syscall             514    180.00      0.04      0.26         2.86        1680.99\nstress-ng: metrc: [2007] cap           164365989    180.00     42.79    137.01    913144.40      914116.40\nstress-ng: metrc: [2007] set            15043833    180.00     35.91    132.66     83576.83       89242.30\nstress-ng: metrc: [2007] sockfd        104115174    180.00     29.19    270.63    578415.04      347258.14\nstress-ng: info:  [2007] skipped: 0\nstress-ng: info:  [2007] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [2007] failed: 0\nstress-ng: info:  [2007] metrics untrustworthy: 0\nstress-ng: info:  [2007] successful run completed in 3 mins, 0.00 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": null,
+  "rejit_result": {
+    "mode": "workload_only",
+    "status": "skipped"
+  },
+  "runner": "bcc_set",
+  "selected_workload": "stress_ng_bcc_hook_hot",
+  "status": "ok"
+}
