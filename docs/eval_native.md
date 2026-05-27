@@ -21,19 +21,15 @@ scripts.
 ## Current Figures
 
 Micro runtime is normalized to kernel eBPF (`kernel = 1.0`); lower is faster.
-Corpus workload throughput is normalized to no-eBPF workload-only; higher is
-better. Corpus BPF per-run cost is native aggregate ns/run divided by eBPF
-aggregate ns/run; lower is faster.
+The corpus figure shows the current authoritative six-app result set:
+workload throughput normalized to the no-eBPF baseline, and BPF per-run cost
+as raw aggregate `ns/run` for eBPF JIT and native-in-kernel.
 
 ![Micro stage1 runtime](figures/eval-native-micro-stage1-runtime.png)
 
 ![Micro stage2 runtime](figures/eval-native-micro-stage2-runtime.png)
 
-![Corpus workload normalized](figures/eval-native-corpus-workload-normalized.png)
-
-![Corpus native workload ratio](figures/eval-native-corpus-workload-native-vs-ebpf.png)
-
-![Corpus BPF per-run ratio](figures/eval-native-corpus-bpf-per-run-ratio.png)
+![Corpus workload and BPF per-run cost](figures/eval-native-corpus-combined-side-by-side-ns-bars.png)
 
 ## Setup
 
@@ -85,31 +81,128 @@ make micro
 Corpus native with BPF runtime counters enabled:
 
 ```sh
-BPFREJIT_CORPUS_APPS="<app>" \
+BPFREJIT_CORPUS_APPS="<one of the six apps listed above>" \
 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 BPFREJIT_CORPUS_BPF_STATS=1 \
-SAMPLES=3 WORKLOAD_DURATION=180 TIMEOUT=14400 \
+SAMPLES=3 WORKLOAD_DURATION=180 BPFREJIT_CORPUS_APP_TIMEOUT=3600 \
+TIMEOUT=14400 \
 make corpus
 ```
+
+The BPF-stats-on run was collected one app at a time so any loader/startup
+failure would surface with a small artifact and could be fixed before moving
+to the next app. The stats-off and workload-only runs below were collected as
+six-app suite runs.
 
 Corpus native with BPF runtime counters disabled:
 
 ```sh
-BPFREJIT_CORPUS_APPS="<app>" \
+BPFREJIT_CORPUS_APPS="bcc/set,otelcol-ebpf-profiler/profiling,cilium/agent,tetragon/observer,katran,tracee/monitor" \
 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 BPFREJIT_CORPUS_BPF_STATS=0 \
-SAMPLES=3 WORKLOAD_DURATION=180 TIMEOUT=14400 \
+SAMPLES=3 WORKLOAD_DURATION=180 BPFREJIT_CORPUS_APP_TIMEOUT=3600 \
+TIMEOUT=14400 \
 make corpus
 ```
 
 Corpus workload-only no-eBPF baseline:
 
 ```sh
-BPFREJIT_CORPUS_APPS="<app>" \
+BPFREJIT_CORPUS_APPS="bcc/set,otelcol-ebpf-profiler/profiling,cilium/agent,tetragon/observer,katran,tracee/monitor" \
 BPFREJIT_CORPUS_WORKLOAD_ONLY=1 BPFREJIT_CORPUS_BPF_STATS=0 \
-SAMPLES=3 WORKLOAD_DURATION=180 TIMEOUT=14400 \
+SAMPLES=3 WORKLOAD_DURATION=180 BPFREJIT_CORPUS_APP_TIMEOUT=3600 \
+TIMEOUT=14400 \
 make corpus
 ```
+
+## Analysis Method
+
+Workload throughput is computed only from raw per-app workload payloads. For
+`stress-ng` workloads, the analysis sums real-time `bogo ops/s` across the
+configured stressors in each sample. For kernel `pktgen` workloads, it sums
+`pps` across components or threads. For the OTEL mixed workload, it sums each
+worker's `ops / elapsed_s` and includes the `stress-ng cpu` component's
+real-time `bogo ops/s`. These units are app-local, so only ratios within the
+same app are meaningful.
+
+BPF per-run cost is computed from the BPF-stats-on artifacts only. The analysis
+keeps records with `run_cnt_delta >= 100`, then computes aggregate ns/run as
+`sum(run_time_ns_delta) / sum(run_cnt_delta)` per phase. The figure reports
+speedup as `eBPF ns/run / native ns/run`, so values above `1.0x` mean the
+native path is faster on that app's retained counter population.
+
+## Results
+
+Micro four-runtime result, normalized to kernel eBPF:
+
+| Suite | userspace native | userspace eBPF | kernel native | kernel eBPF |
+| --- | ---: | ---: | ---: | ---: |
+| Stage1 normalized runtime | 0.58x | 0.65x | 0.68x | 1.00x |
+| Stage2 normalized runtime | 2.29x | 1.01x | 0.71x | 1.00x |
+
+Corpus workload throughput, normalized to no eBPF:
+
+| App | no-eBPF throughput | eBPF/no-eBPF | native/no-eBPF | native/eBPF |
+| --- | ---: | ---: | ---: | ---: |
+| `bcc` | 1574097 | 0.45x | 0.46x | 1.01x |
+| `otel` | 110063016 | 0.40x | 0.73x | 1.84x |
+| `cilium` | 2373714 | 0.61x | 0.84x | 1.38x |
+| `tetragon` | 1559214 | 0.23x | 0.29x | 1.24x |
+| `katran` | 7507097 | 0.38x | 0.43x | 1.14x |
+| `tracee` | 3327639 | 0.14x | 0.13x | 0.95x |
+
+Corpus BPF per-run counters:
+
+| App | eBPF ns/run | native ns/run | native/eBPF cost | speedup | retained eBPF/native |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `bcc` | 103.8 | 102.9 | 0.99x | 1.01x | 15/16 |
+| `otel` | 3224.9 | 212.1 | 0.07x | 15.21x | 2/1 |
+| `cilium` | 443.5 | 133.5 | 0.30x | 3.32x | 2/4 |
+| `tetragon` | 701.2 | 304.1 | 0.43x | 2.31x | 21/23 |
+| `katran` | 177.3 | 144.9 | 0.82x | 1.22x | 1/1 |
+| `tracee` | 321.4 | 324.4 | 1.01x | 0.99x | 41/41 |
+
+Tetragon's earlier native slowdown is fixed in the authoritative artifact:
+aggregate BPF per-run cost is now `0.43x` of eBPF, and workload throughput
+improves from `0.23x` to `0.29x` of the no-eBPF baseline. The workload still
+does not return near no-eBPF throughput because hook frequency, event-building,
+map traffic, ring/perf-buffer traffic, and application-side processing remain
+in the measured path.
+
+## Fixes In This Evaluation
+
+- Native-loader manifest no-match handling now passes through the original
+  `BPF_PROG_LOAD` fd when a manifest exists but has no matching native entry.
+  This fixed Cilium short/special program variants that were previously turned
+  into post-startup endpoint regeneration failures.
+- The shim preserves the original program fd for native replacements and
+  redirects app-visible `BPF_OBJ_GET_INFO_BY_FD` queries for replacement fds
+  back to the original program metadata. This fixed Tetragon observing
+  native-loader stub map ids instead of original BPF program map ids.
+- The shim validates current fd type and kernel program id before redirecting
+  info queries, and forgets stale loader-fd associations on fd reuse while
+  preserving historical program records for runner discovery.
+- Tetragon's loader now tolerates map ids that are absent from `coll.Maps` by
+  falling back to map-id based metadata lookup, with a nil guard in the map
+  helper path.
+- Cilium measurement controls disable drift checker, dynamic config, dynamic
+  lifecycle manager, endpoint BPF watchdog, and endpoint regen interval; the
+  runner also stops `cilium-agent` during measured workload samples. These
+  controls suppress runtime reload/regeneration during measurement. They do
+  not suppress required initial endpoint BPF build/regeneration during startup,
+  so the earlier repeated post-native loads were treated and fixed as startup
+  path/native-loader matching bugs, not merely as a missing autoreload flag.
+
+## Caveats
+
+Native replacement programs are named `native_lab_stub`, so the current corpus
+BPF table is an app-level aggregate rather than a strict program-name paired
+geomean. Tail-called BPF programs still have the normal kernel accounting
+caveat: tail targets entered through `bpf_tail_call()` do not increment their
+own `run_cnt`/`run_time`, and their cost is accounted at the directly attached
+caller. Workload units differ by app, so cross-app absolute throughput is not a
+single physical unit; the workload figure is intended for within-app
+comparison across no-eBPF, eBPF, and native.
 
 ## Progress Log
 
@@ -316,3 +409,10 @@ make corpus
   `.post_rejit.workloads[]` is empty, `rejit_result.mode` is
   `workload_only`, and no BPF program counter records are present. This
   artifact is the no-eBPF workload baseline.
+- 2026-05-27: Generated the combined corpus figure requested for result
+  inspection:
+  `docs/figures/eval-native-corpus-combined-side-by-side-ns-bars.png`. The
+  left subplot is workload throughput normalized to no eBPF with three
+  vertical bars per app; the right subplot is raw BPF per-run cost in ns/run
+  with two vertical bars per app, eBPF JIT and native-in-kernel. Older corpus
+  figure files were kept in place.
