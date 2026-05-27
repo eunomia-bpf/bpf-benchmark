@@ -1,6 +1,6 @@
 # Native Execution Evaluation
 
-Date: 2026-05-26
+Date: 2026-05-26 to 2026-05-27
 
 This document tracks the authoritative evaluation of the native execution path
 against the existing eBPF JIT paths. It is intentionally a post-hoc analysis
@@ -16,17 +16,24 @@ scripts.
 | Micro stage2 | complete | `micro/results/x86_kvm_micro_20260526_210434_440390/metadata.json` |
 | Corpus, BPF stats on | complete | six app authoritative run set complete |
 | Corpus, BPF stats off | complete | `corpus/results/x86_kvm_corpus_20260527_015711_134639/metadata.json` |
-| Corpus, workload-only no eBPF | pending | pending |
+| Corpus, workload-only no eBPF | complete | `corpus/results/x86_kvm_corpus_20260527_043130_139245/metadata.json` |
 
 ## Current Figures
 
-The current complete figures cover the authoritative micro runs that have
-already finished. Runtime is normalized to kernel eBPF (`kernel = 1.0`);
-lower is faster.
+Micro runtime is normalized to kernel eBPF (`kernel = 1.0`); lower is faster.
+Corpus workload throughput is normalized to no-eBPF workload-only; higher is
+better. Corpus BPF per-run cost is native aggregate ns/run divided by eBPF
+aggregate ns/run; lower is faster.
 
 ![Micro stage1 runtime](figures/eval-native-micro-stage1-runtime.png)
 
 ![Micro stage2 runtime](figures/eval-native-micro-stage2-runtime.png)
+
+![Corpus workload normalized](figures/eval-native-corpus-workload-normalized.png)
+
+![Corpus native workload ratio](figures/eval-native-corpus-workload-native-vs-ebpf.png)
+
+![Corpus BPF per-run ratio](figures/eval-native-corpus-bpf-per-run-ratio.png)
 
 ## Setup
 
@@ -40,6 +47,21 @@ lower is faster.
   phase.
 - Corpus apps: `bcc/set`, `otelcol-ebpf-profiler/profiling`,
   `cilium/agent`, `tetragon/observer`, `katran`, `tracee/monitor`.
+
+## Artifact Matrix
+
+| Dataset | Artifact |
+| --- | --- |
+| Micro stage1, 4 runtimes | `micro/results/x86_kvm_micro_20260526_210952_650695/metadata.json` |
+| Micro stage2, 4 runtimes | `micro/results/x86_kvm_micro_20260526_210434_440390/metadata.json` |
+| `bcc/set`, BPF stats on | `corpus/results/x86_kvm_corpus_20260526_211758_813406/metadata.json` |
+| `otelcol-ebpf-profiler/profiling`, BPF stats on | `corpus/results/x86_kvm_corpus_20260526_214808_410996/metadata.json` |
+| `cilium/agent`, BPF stats on | `corpus/results/x86_kvm_corpus_20260526_230251_020975/metadata.json` |
+| `tetragon/observer`, BPF stats on | `corpus/results/x86_kvm_corpus_20260527_002557_893190/metadata.json` |
+| `katran`, BPF stats on | `corpus/results/x86_kvm_corpus_20260527_005602_704153/metadata.json` |
+| `tracee/monitor`, BPF stats on | `corpus/results/x86_kvm_corpus_20260527_012602_194852/metadata.json` |
+| Six-app native, BPF stats off | `corpus/results/x86_kvm_corpus_20260527_015711_134639/metadata.json` |
+| Six-app workload-only no eBPF | `corpus/results/x86_kvm_corpus_20260527_043130_139245/metadata.json` |
 
 ## Commands
 
@@ -282,3 +304,15 @@ make corpus
   `map spec is incompatible`, `load program: no such file`,
   `native-loader enabled but no manifest object`, `phase_error`, or endpoint
   regeneration failure string was found in the artifact.
+- 2026-05-27: Authoritative six-app corpus workload-only no-eBPF run
+  completed successfully. Artifact:
+  `corpus/results/x86_kvm_corpus_20260527_043130_139245/metadata.json`.
+  Command knobs: `BPFREJIT_CORPUS_WORKLOAD_ONLY=1`,
+  `BPFREJIT_CORPUS_BPF_STATS=0`, `SAMPLES=3`, and
+  `WORKLOAD_DURATION=180`. Metadata status is `completed`, with
+  `bpf_stats=false` and `workload_only=true`. All six app payloads have
+  status `ok`, empty error strings, and 3 stored workload samples. In
+  workload-only mode those samples are stored under `.baseline.workloads[]`;
+  `.post_rejit.workloads[]` is empty, `rejit_result.mode` is
+  `workload_only`, and no BPF program counter records are present. This
+  artifact is the no-eBPF workload baseline.
