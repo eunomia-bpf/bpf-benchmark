@@ -14,8 +14,8 @@ scripts.
 | --- | --- | --- |
 | Micro stage1 | complete | `micro/results/x86_kvm_micro_20260526_210952_650695/metadata.json` |
 | Micro stage2 | complete | `micro/results/x86_kvm_micro_20260526_210434_440390/metadata.json` |
-| Corpus, BPF stats on | running | `bcc/set`, `otelcol-ebpf-profiler/profiling`, `cilium/agent` complete |
-| Corpus, BPF stats off | pending | pending |
+| Corpus, BPF stats on | complete | six app authoritative run set complete |
+| Corpus, BPF stats off | complete | `corpus/results/x86_kvm_corpus_20260527_015711_134639/metadata.json` |
 | Corpus, workload-only no eBPF | pending | pending |
 
 ## Current Figures
@@ -229,3 +229,56 @@ make corpus
   chain: native replacement keeps original program info visible to the app,
   Tetragon handles map ids absent from `coll.Maps`, and fd reuse no longer
   redirects map info queries to stale program fds.
+- 2026-05-27: Authoritative `tetragon/observer` corpus native-post run with
+  BPF stats enabled completed successfully after the startup correctness
+  fixes. Artifact:
+  `corpus/results/x86_kvm_corpus_20260527_002557_893190/metadata.json`.
+  The metadata status is `completed`, with `samples=3`,
+  `workload_seconds=180.0`, `bpf_stats=true`, and `workload_only=false`.
+  The app payload has status `ok`, empty error string, 3 baseline workloads,
+  3 post-native workloads, 287 baseline BPF counter records, and 287
+  post-native BPF counter records. The post shim log shows 316
+  `BPF_PROG_LOAD` calls, 288 native replacements, 5 manifest no-match
+  pass-throughs, and 864 program-info redirects. No `panic`,
+  `map spec is incompatible`, `load program: no such file`,
+  `native-loader enabled but no manifest object`, or `phase_error` string was
+  found in the artifact.
+- 2026-05-27: Authoritative `katran` corpus native-post run with BPF stats
+  enabled completed successfully. Artifact:
+  `corpus/results/x86_kvm_corpus_20260527_005602_704153/metadata.json`.
+  The metadata status is `completed`, with `samples=3`,
+  `workload_seconds=180.0`, `bpf_stats=true`, and `workload_only=false`.
+  The app payload has status `ok`, empty error string, 3 baseline workloads,
+  3 post-native workloads, 1 baseline BPF counter record, and 1 post-native
+  BPF counter record. The post shim log shows the expected replacement of the
+  standalone XDP program `balancer_ingres` with native symbol
+  `balancer_ingress`; feature-probe programs were skipped. No `panic`,
+  `map spec is incompatible`, `load program: no such file`,
+  `native-loader enabled but no manifest object`, `phase_error`, or endpoint
+  regeneration failure string was found in the artifact.
+- 2026-05-27: Authoritative `tracee/monitor` corpus native-post run with BPF
+  stats enabled completed successfully. Artifact:
+  `corpus/results/x86_kvm_corpus_20260527_012602_194852/metadata.json`.
+  The metadata status is `completed`, with `samples=3`,
+  `workload_seconds=180.0`, `bpf_stats=true`, and `workload_only=false`.
+  The app payload has status `ok`, empty error string, 3 baseline workloads,
+  3 post-native workloads, 167 baseline BPF counter records, and 167
+  post-native BPF counter records. The post shim log shows 183
+  `BPF_PROG_LOAD` calls and 169 native replacements. No `panic`,
+  `map spec is incompatible`, `load program: no such file`,
+  `native-loader enabled but no manifest object`, `phase_error`, or endpoint
+  regeneration failure string was found in the artifact.
+- 2026-05-27: Authoritative six-app corpus native-post run with BPF stats
+  disabled completed successfully. Artifact:
+  `corpus/results/x86_kvm_corpus_20260527_015711_134639/metadata.json`.
+  Command knobs: `BPFREJIT_CORPUS_BPF_STATS=0`,
+  `BPFREJIT_SHIM_NATIVE_LOADER=post`, `SKIP_REJIT=norejit`, `SAMPLES=3`,
+  and `WORKLOAD_DURATION=180`. Metadata status is `completed`, with
+  `bpf_stats=false` and `workload_only=false`. All six app payloads have
+  status `ok`, empty error strings, and 3 baseline plus 3 post-native stored
+  workload samples. Program metadata lists are still present in app JSON, but
+  all BPF `run_cnt_delta` and `run_time_ns_delta` values sum to zero, so this
+  artifact is for workload raw-metric comparison only. No `panic`,
+  `map spec is incompatible`, `load program: no such file`,
+  `native-loader enabled but no manifest object`, `phase_error`, or endpoint
+  regeneration failure string was found in the artifact.

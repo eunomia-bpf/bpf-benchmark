@@ -1,290 +1,260 @@
 # Micro Benchmark Status
 
-Last updated: 2026-05-22
+Last updated: 2026-05-27
 
-This is the current short status page for micro benchmark data. The previous
-long evaluation note is archived at
+This is the current paper-facing status page for microbenchmark data. The
+previous long evaluation note is archived at
 `docs/tmp/micro-bench-status-20260520-archive.md`.
 
 All ratios, speedups, and win/loss counts below are post-hoc analysis from raw
-`metadata.json` files. The benchmark framework still records raw measurements
+`result.json` files. The benchmark framework still records raw measurements
 only.
 
-## Headline Table
+## Paper Framing
 
-### x86 KVM
+This section should read like a characterization study, not like an
+implementation status log. The microbenchmark claim is intentionally narrow:
+native kernel execution changes the cost of BPF instruction execution and
+helper/map access patterns under controlled `BPF_PROG_TEST_RUN` workloads.
+Corpus/app results are required separately for end-to-end application claims.
 
-Source: `micro/results/x86_kvm_micro_20260520_044439_120822/metadata.json`
+The current research questions are:
 
-| Metric | Result |
-|---|---:|
-| Benchmarks completed | 29 / 29 |
-| Runtimes | native userspace, kernel eBPF, native kernel |
-| Expected-result mismatches | 0 |
-| native userspace / kernel runtime geomean | 0.588 |
-| native userspace speedup vs kernel | 1.70x |
-| native userspace / kernel wins / losses / ties, +/-2% | 25 / 1 / 3 |
-| native kernel / kernel runtime geomean | 0.707 |
-| native kernel speedup vs kernel | 1.41x |
-| native kernel / kernel wins / losses / ties, +/-2% | 23 / 3 / 3 |
+- **RQ1 Correctness:** does native kernel execution preserve the expected
+  result and retval on the microbenchmark suites?
+- **RQ2 Instruction-path performance:** how much does native kernel execution
+  improve pure compute and packet-manipulation BPF programs relative to the
+  kernel eBPF JIT?
+- **RQ3 Helper/map sensitivity:** how does native kernel execution behave on
+  helper-heavy and map-heavy programs?
+- **RQ4 Platform sensitivity:** are the effects consistent across local x86
+  KVM, x86 AWS, and arm64 AWS?
 
-### arm64 AWS
+The x86 KVM run also reports userspace native and LLVM-BPF userspace runtimes as
+secondary baselines. They are useful for understanding code-generation quality,
+but they are not the primary kernel-native claim.
 
-Source: `micro/results/aws_arm64_micro_20260520_052452_727433/metadata.json`
+## Experimental Setup
 
-| Metric | Result |
-|---|---:|
-| Benchmarks completed | 29 / 29 |
-| Runtimes | native userspace, LLVM-BPF, kernel eBPF |
-| Expected-result mismatches | 0 |
-| native userspace / kernel runtime geomean | 0.488 |
-| native userspace speedup vs kernel | 2.05x |
-| native userspace / kernel wins / losses / ties, +/-2% | 29 / 0 / 0 |
-| LLVM-BPF / kernel runtime geomean | 0.521 |
-| LLVM-BPF speedup vs kernel | 1.92x |
-| native userspace / LLVM-BPF runtime geomean | 0.935 |
-
-## Setup
-
-### x86 KVM
-
-Command:
+The authoritative micro runs use:
 
 ```sh
-make micro RUNTIMES="native kernel native_lab" \
-  SAMPLES=3 WARMUPS=1 INNER_REPEAT=100000
+SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 make micro
+
+PLATFORM=aws ARCH=x86 SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 make micro
+
+PLATFORM=aws ARCH=arm64 SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 make micro
 ```
 
-This run uses the current x86 native ABI work, including the native kernel
-result-channel fix for TC/cgroup skb programs. It is the current full x86
-native userspace / kernel eBPF / native kernel dataset. The command uses raw
-runtime ids: `native` means native userspace and `native_lab` means native
-kernel.
+The measured suites are:
 
-### arm64 AWS
+- **Stage1 pure 29:** compute, branch, local-call, parser, checksum, string, and
+  packet microbenchmarks with no external map/helper bottleneck as the dominant
+  cost.
+- **Stage2 helpers/maps 13:** deterministic helper and map-access benchmarks
+  covering arrays, hash maps, percpu maps, LRU maps, mixed helper/map paths, and
+  packet classification.
 
-Command:
+The measured runtimes are:
 
-```sh
-PLATFORM=aws ARCH=arm64 SAMPLES=1 WARMUPS=0 INNER_REPEAT=10000 make micro
+- **kernel:** baseline kernel eBPF JIT.
+- **native_kernel:** native object linked and loaded into the kernel native
+  execution path.
+- **native:** userspace native runtime, available in the latest x86 KVM run.
+- **llvmbpf:** LLVM-BPF userspace runtime, available in the latest x86 KVM run.
+
+The platform details recorded in the artifacts are:
+
+| Platform | Executor | CPU recorded by artifact | Kernel | AWS bench instance default |
+|---|---|---|---|---|
+| x86 KVM | virtme-ng VM | Intel Core Ultra 9 285K | 7.0.0-rc2+ | N/A |
+| x86 AWS | EC2 VM | Intel Xeon Platinum 8259CL @ 2.50GHz | 7.0.0-rc2+ | `t3.small` |
+| arm64 AWS | EC2 instance | aarch64 | 7.0.0-rc2+ | `t4g.small` |
+
+## Methodology
+
+Each benchmark/runtime pair records three samples after zero warmups. Each
+sample runs the benchmark body `INNER_REPEAT=100000` times. Correctness is
+gated by exact expected result and retval checks for every recorded sample.
+
+For each benchmark and runtime, the analysis uses the median `exec_ns` across
+the three samples. For each suite, the reported aggregate is the geomean of
+per-benchmark ratios:
+
+```text
+ratio = median_runtime_exec_ns / median_kernel_exec_ns
+speedup = 1 / ratio
 ```
 
-This is an arm64 smoke run on one `t4g.small`. It validates the arm64 micro
-runtime path and gives directional native userspace / LLVM-BPF / kernel eBPF
-data. It is not a paper-grade arm64 run.
+A ratio below 1.0 means the runtime is faster than the kernel eBPF JIT.
+Wins/losses/ties use a +/-2% band around the kernel baseline. No benchmark is
+filtered out of these micro aggregates.
 
-## Kernel vs Native Performance
+## Main Results
 
-2026-05-22 current native-kernel validation:
+Latest representative full runs:
 
-- x86 uses KVM; arm64 uses AWS `t4g.small`.
-- Commands use `SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000`.
-- Runtimes are `native_kernel kernel`.
-- Metric is post-hoc geomean of per-benchmark median `exec_ns` speedups
-  (`kernel eBPF ns / native_kernel ns`).
-- All four runs completed with zero `retval` / result mismatches.
+| Platform | Suite | Result source | Runtimes | Samples | Expected-result mismatches |
+|---|---|---|---|---:|---:|
+| x86 KVM | stage1 pure 29 | `micro/results/x86_kvm_micro_20260526_210952_650695` | kernel, llvmbpf, native, native_kernel | 348 | 0 |
+| x86 KVM | stage2 helpers/maps | `micro/results/x86_kvm_micro_20260526_210434_440390` | kernel, llvmbpf, native, native_kernel | 156 | 0 |
+| x86 AWS | stage1 pure 29 | `micro/results/aws_x86_micro_20260521_032223_857289` | kernel, native_kernel | 174 | 0 |
+| x86 AWS | stage2 helpers/maps | `micro/results/aws_x86_micro_20260521_033443_371646` | kernel, native_kernel | 78 | 0 |
+| arm64 AWS | stage1 pure 29 | `micro/results/aws_arm64_micro_20260523_091516_610343` | kernel, native_kernel | 174 | 0 |
+| arm64 AWS | stage2 helpers/maps | `micro/results/aws_arm64_micro_20260523_092823_183684` | kernel, native_kernel | 78 | 0 |
 
-![Current native_kernel speedup over kernel eBPF](figures/micro-native-kernel-current-20260522.png)
+Aggregate runtime ratios:
 
-| Arch / platform | Suite | Result source | Benchmarks | Samples | native/kernel geomean | Speedup vs kernel eBPF | Wins / losses / ties, +/-2% |
-|---|---|---|---:|---:|---:|---:|---:|
-| x86 KVM | pure 29 | `micro/results/x86_kvm_micro_20260522_201404_601577` | 29 / 29 | 174 | 0.712 | 1.404x | 22 / 0 / 7 |
-| x86 KVM | stage2 helpers/maps | `micro/results/x86_kvm_micro_20260522_201850_232073` | 13 / 13 | 78 | 0.777 | 1.287x | 6 / 2 / 5 |
-| arm64 AWS | pure 29 | `micro/results/aws_arm64_micro_20260522_202706_798878` | 29 / 29 | 174 | 0.569 | 1.756x | 27 / 0 / 2 |
-| arm64 AWS | stage2 helpers/maps | `micro/results/aws_arm64_micro_20260522_200701_786527` | 13 / 13 | 78 | 0.865 | 1.156x | 12 / 0 / 1 |
+| Platform | Suite | Runtime vs kernel eBPF | Runtime/kernel geomean | Speedup vs kernel eBPF | Wins / losses / ties |
+|---|---|---|---:|---:|---:|
+| x86 KVM | stage1 pure 29 | native userspace | 0.583 | 1.716x | 27 / 1 / 1 |
+| x86 KVM | stage1 pure 29 | LLVM-BPF userspace | 0.650 | 1.538x | 27 / 1 / 1 |
+| x86 KVM | stage1 pure 29 | native kernel | 0.678 | 1.474x | 24 / 2 / 3 |
+| x86 KVM | stage2 helpers/maps | native userspace | 2.291 | 0.436x | 1 / 12 / 0 |
+| x86 KVM | stage2 helpers/maps | LLVM-BPF userspace | 1.006 | 0.994x | 6 / 7 / 0 |
+| x86 KVM | stage2 helpers/maps | native kernel | 0.710 | 1.409x | 9 / 0 / 4 |
+| x86 AWS | stage1 pure 29 | native kernel | 0.666 | 1.503x | 26 / 2 / 1 |
+| x86 AWS | stage2 helpers/maps | native kernel | 1.449 | 0.690x | 0 / 12 / 1 |
+| arm64 AWS | stage1 pure 29 | native kernel | 0.556 | 1.800x | 28 / 0 / 1 |
+| arm64 AWS | stage2 helpers/maps | native kernel | 0.855 | 1.170x | 9 / 0 / 4 |
 
-Earlier arm64 stage2 smoke speedups used `SAMPLES=1 INNER_REPEAT=10` and are
-not comparable with the current authoritative-parameter row. The current arm64
-stage2 number above is the passing native-kernel/helper-map result.
+![Native kernel execution speedup on microbenchmarks](figures/micro-characterization-native-kernel-speedup-20260527.png)
 
-### Current Trend Check
+*Figure 1: Native kernel speedup over kernel eBPF JIT for the authoritative
+stage1 and stage2 microbenchmark artifacts. Higher is better; the dashed line
+is parity.*
 
-The 2026-05-22 graph is not a monotonic slowdown. With
-`SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000`, the pure suites are stable and the
-visible dip is concentrated in stage2 helper/map programs.
+![x86 KVM runtime comparison](figures/micro-characterization-x86-kvm-runtimes-20260527.png)
 
-| Arch / platform | Suite | Recent comparable speedups | Current speedup | Note |
-|---|---|---:|---:|---|
-| x86 KVM | pure 29 | 1.425x, 1.468x, 1.338x, 1.316x | 1.404x | Within recent KVM range. |
-| x86 KVM | stage2 helpers/maps | 1.300x, 1.344x, 1.289x, 1.344x | 1.287x | Mostly pulled down by `map_hash_lookup`. |
-| arm64 AWS | pure 29 | 1.754x, 1.764x, 1.794x, 1.771x | 1.756x | Stable. |
-| arm64 AWS | stage2 helpers/maps | 1.162x | 1.156x | Stable; most hash/helper cases are near parity. |
+*Figure 2: x86 KVM secondary runtime comparison. Userspace native and LLVM-BPF
+are included to characterize code-generation quality, but the paper's primary
+kernel execution claim is the native-kernel bar.*
 
-For current x86 KVM stage2, removing only `map_hash_lookup` changes the
-post-hoc geomean speedup from 1.287x to 1.424x. That benchmark is unstable at
-this scale: the full stage2 run recorded native/kernel medians of 81/31 ns,
-while an immediate single-benchmark rerun
-`micro/results/x86_kvm_micro_20260522_205257_986766` recorded 32/32/32 ns for
-both `native_kernel` and `kernel`. The xlated/JIT dump sizes stayed the same
-(`416` BPF bytes, `235` kernel-JIT bytes, `154` native-kernel bytes), so the
-current evidence points to `bpf_prog_test_run` duration sensitivity on a tiny
-hash-map benchmark rather than a native-code regression.
+## RQ Answers
 
-`native_proof` is also wired through the micro runner for the helper/map suite:
-x86 KVM smoke `micro/results/x86_kvm_micro_20260522_204037_190084` and arm64
-AWS smoke `micro/results/aws_arm64_micro_20260522_204804_171708` both loaded
-and ran `helper_chain_simple` with the expected result and retval.
+**RQ1 Correctness.** All current full micro artifacts have zero expected-result
+or retval mismatches. This covers 29/29 stage1 benchmarks and 13/13 stage2
+benchmarks on x86 KVM, x86 AWS, and arm64 AWS.
 
-### x86 KVM Current Detail
+**RQ2 Instruction-path performance.** Native kernel execution improves the
+stage1 pure suite on all measured platforms: 1.474x on x86 KVM, 1.503x on x86
+AWS, and 1.800x on arm64 AWS. The per-benchmark wins are broad, not isolated to
+one benchmark: 24/29 wins on x86 KVM, 26/29 wins on x86 AWS, and 28/29 wins on
+arm64 AWS.
 
-| Suite | Benchmark | Native kernel ns | Kernel eBPF ns | Speedup |
+**RQ3 Helper/map sensitivity.** Stage2 is mixed. x86 KVM remains positive at
+1.409x and arm64 AWS remains positive at 1.170x, but x86 AWS regresses to
+0.690x. The x86 AWS regression is concentrated across map/helper benchmarks,
+not a single outlier, so it should be treated as a real current artifact until a
+new full AWS run or lower-level profiling explains it.
+
+**RQ4 Platform sensitivity.** The pure-instruction result is stable across all
+three platforms. Helper/map behavior is platform-sensitive: x86 KVM and arm64
+AWS are positive, while x86 AWS stage2 is negative. This is the main
+microbenchmark caveat for a paper claim.
+
+The concise paper claim supported by these data is:
+
+- x86 KVM stage1 remains strong at 1.474x and stage2 is positive at 1.409x.
+- x86 AWS stage1 is positive at 1.503x, but x86 AWS stage2 is a real regression
+  in the latest full artifact.
+- arm64 AWS is positive on both stage1 and stage2, with a larger stage1 gain.
+
+## Threats To Validity
+
+- The microbenchmark suite isolates native execution costs; it does not replace
+  corpus/app-level workload measurements.
+- AWS CPU governor and turbo state are recorded as unknown in the artifacts.
+  Cross-platform comparisons should therefore focus on ratios within the same
+  platform, not absolute nanoseconds across platforms.
+- AWS full authoritative artifacts currently cover `kernel` and
+  `native_kernel`; userspace native and LLVM-BPF baselines are only available in
+  the latest x86 KVM full run.
+- The x86 AWS stage2 regression needs follow-up profiling before a root cause is
+  claimed.
+
+## Appendix A: Artifact Manifest
+
+| Platform | Suite | Generated at | Result source |
+|---|---|---|---|
+| x86 KVM | stage1 pure 29 | 2026-05-26T21:09:52Z | `micro/results/x86_kvm_micro_20260526_210952_650695/details/result.json` |
+| x86 KVM | stage2 helpers/maps | 2026-05-26T21:04:34Z | `micro/results/x86_kvm_micro_20260526_210434_440390/details/result.json` |
+| x86 AWS | stage1 pure 29 | 2026-05-21T03:22:23Z | `micro/results/aws_x86_micro_20260521_032223_857289/details/result.json` |
+| x86 AWS | stage2 helpers/maps | 2026-05-21T03:34:43Z | `micro/results/aws_x86_micro_20260521_033443_371646/details/result.json` |
+| arm64 AWS | stage1 pure 29 | 2026-05-23T09:15:16Z | `micro/results/aws_arm64_micro_20260523_091516_610343/details/result.json` |
+| arm64 AWS | stage2 helpers/maps | 2026-05-23T09:28:23Z | `micro/results/aws_arm64_micro_20260523_092823_183684/details/result.json` |
+
+## Appendix B: Native Kernel Stage2 Detail
+
+Stage2 is the helper/map suite and is the most sensitive current native-kernel
+micro workload. Values are median `exec_ns`; speedup is
+`kernel_ns / native_kernel_ns`.
+
+![Stage2 helper/map microbenchmark detail](figures/micro-characterization-stage2-detail-20260527.png)
+
+*Figure 3: Per-benchmark stage2 native-kernel speedup. The log-scaled x-axis
+shows that x86 AWS regresses broadly on helper/map benchmarks, while x86 KVM and
+arm64 AWS are mostly at or above parity.*
+
+| Platform | Benchmark | Native kernel ns | Kernel eBPF ns | Speedup |
 |---|---|---:|---:|---:|
-| pure 29 | `simple` | 6 | 6 | 1.000x |
-| pure 29 | `simple_packet` | 6 | 6 | 1.000x |
-| pure 29 | `bitmap_popcount_scan` | 468 | 1113 | 2.378x |
-| pure 29 | `sorted_rule_binary_search` | 308 | 527 | 1.711x |
-| pure 29 | `bcc_runqlat_log2_histogram_bucket` | 1141 | 1151 | 1.009x |
-| pure 29 | `trace_event_type_switch_dispatch` | 279 | 283 | 1.014x |
-| pure 29 | `packet_checksum_fold` | 13341 | 17623 | 1.321x |
-| pure 29 | `payload_prefix_memcmp_scan` | 51 | 86 | 1.686x |
-| pure 29 | `packet_vlan_tcpopt_parser` | 11 | 12 | 1.091x |
-| pure 29 | `bpf_local_call_fanout_dispatch` | 70 | 124 | 1.771x |
-| pure 29 | `flow_5tuple_rss_hash` | 10 | 16 | 1.600x |
-| pure 29 | `katran_lb_consistent_hash_select` | 14 | 22 | 1.571x |
-| pure 29 | `cilium_policy_guard_tree_filter` | 63 | 75 | 1.190x |
-| pure 29 | `siphash_rotate64_mixer` | 28 | 54 | 1.929x |
-| pure 29 | `packet_record_bounds_window` | 64 | 118 | 1.844x |
-| pure 29 | `flow_record_field_scan` | 52 | 63 | 1.212x |
-| pure 29 | `packed_header_bitfield_decode` | 201 | 276 | 1.373x |
-| pure 29 | `bpftrace_string_search_prefix_scan` | 147 | 189 | 1.286x |
-| pure 29 | `tracee_syscall_name_table_lookup` | 103 | 117 | 1.136x |
-| pure 29 | `tracee_http_method_prefix_detect` | 18 | 18 | 1.000x |
-| pure 29 | `cilium_socket_lb_service_select` | 172 | 372 | 2.163x |
-| pure 29 | `bcc_tcpconnect_ipv4_tuple_filter` | 64 | 106 | 1.656x |
-| pure 29 | `tetragon_process_event_arg_filter` | 109 | 155 | 1.422x |
-| pure 29 | `otel_stack_frame_unwind_scan` | 43 | 112 | 2.605x |
-| pure 29 | `cilium_ct_nat_tuple_rewrite` | 79 | 147 | 1.861x |
-| pure 29 | `packet_toeplitz_rss_hash` | 208 | 266 | 1.279x |
-| pure 29 | `bpftrace_comm_key_fnv_hash` | 437 | 435 | 0.995x |
-| pure 29 | `tc_packet_checksum_fold` | 13332 | 17628 | 1.322x |
-| pure 29 | `cgroup_skb_hash_chain` | 291 | 286 | 0.983x |
-| stage2 13 | `helper_only_uid_gid` | 10 | 8 | 0.800x |
-| stage2 13 | `helper_chain_simple` | 186 | 185 | 0.995x |
-| stage2 13 | `map_array_lookup` | 7 | 17 | 2.429x |
-| stage2 13 | `map_array_index_packet` | 7 | 17 | 2.429x |
-| stage2 13 | `map_hash_lookup` | 81 | 31 | 0.383x |
-| stage2 13 | `map_hash_str_key` | 84 | 85 | 1.012x |
-| stage2 13 | `map_percpu_array` | 7 | 17 | 2.429x |
-| stage2 13 | `map_lru_hash_counter` | 228 | 228 | 1.000x |
-| stage2 13 | `map_percpu_hash_counter` | 75 | 75 | 1.000x |
-| stage2 13 | `combined_helper_map` | 13 | 24 | 1.846x |
-| stage2 13 | `multi_map_policy` | 80 | 103 | 1.288x |
-| stage2 13 | `packet_5tuple_classify` | 36 | 92 | 2.556x |
-| stage2 13 | `stats_mixed_helpers` | 157 | 156 | 0.994x |
+| x86 KVM | `helper_only_uid_gid` | 7 | 7 | 1.000x |
+| x86 KVM | `helper_chain_simple` | 72 | 74 | 1.028x |
+| x86 KVM | `map_array_lookup` | 6 | 18 | 3.000x |
+| x86 KVM | `map_array_index_packet` | 6 | 17 | 2.833x |
+| x86 KVM | `map_hash_lookup` | 32 | 32 | 1.000x |
+| x86 KVM | `map_hash_str_key` | 33 | 33 | 1.000x |
+| x86 KVM | `map_percpu_array` | 6 | 17 | 2.833x |
+| x86 KVM | `map_lru_hash_counter` | 84 | 86 | 1.024x |
+| x86 KVM | `map_percpu_hash_counter` | 27 | 28 | 1.037x |
+| x86 KVM | `combined_helper_map` | 8 | 19 | 2.375x |
+| x86 KVM | `multi_map_policy` | 32 | 44 | 1.375x |
+| x86 KVM | `packet_5tuple_classify` | 40 | 41 | 1.025x |
+| x86 KVM | `stats_mixed_helpers` | 60 | 59 | 0.983x |
+| x86 AWS | `helper_only_uid_gid` | 23 | 23 | 1.000x |
+| x86 AWS | `helper_chain_simple` | 159 | 133 | 0.836x |
+| x86 AWS | `map_array_lookup` | 51 | 25 | 0.490x |
+| x86 AWS | `map_array_index_packet` | 50 | 24 | 0.480x |
+| x86 AWS | `map_hash_lookup` | 85 | 73 | 0.859x |
+| x86 AWS | `map_hash_str_key` | 86 | 75 | 0.872x |
+| x86 AWS | `map_percpu_array` | 58 | 25 | 0.431x |
+| x86 AWS | `map_lru_hash_counter` | 174 | 143 | 0.822x |
+| x86 AWS | `map_percpu_hash_counter` | 97 | 68 | 0.701x |
+| x86 AWS | `combined_helper_map` | 69 | 42 | 0.609x |
+| x86 AWS | `multi_map_policy` | 162 | 96 | 0.593x |
+| x86 AWS | `packet_5tuple_classify` | 92 | 78 | 0.848x |
+| x86 AWS | `stats_mixed_helpers` | 197 | 142 | 0.721x |
+| arm64 AWS | `helper_only_uid_gid` | 30 | 32 | 1.067x |
+| arm64 AWS | `helper_chain_simple` | 242 | 247 | 1.021x |
+| arm64 AWS | `map_array_lookup` | 17 | 28 | 1.647x |
+| arm64 AWS | `map_array_index_packet` | 18 | 29 | 1.611x |
+| arm64 AWS | `map_hash_lookup` | 96 | 100 | 1.042x |
+| arm64 AWS | `map_hash_str_key` | 107 | 109 | 1.019x |
+| arm64 AWS | `map_percpu_array` | 19 | 31 | 1.632x |
+| arm64 AWS | `map_lru_hash_counter` | 215 | 220 | 1.023x |
+| arm64 AWS | `map_percpu_hash_counter` | 90 | 91 | 1.011x |
+| arm64 AWS | `combined_helper_map` | 37 | 46 | 1.243x |
+| arm64 AWS | `multi_map_policy` | 108 | 125 | 1.157x |
+| arm64 AWS | `packet_5tuple_classify` | 107 | 109 | 1.019x |
+| arm64 AWS | `stats_mixed_helpers` | 188 | 190 | 1.011x |
 
-### arm64 AWS Current Detail
+## Appendix C: Code Size
 
-| Suite | Benchmark | Native kernel ns | Kernel eBPF ns | Speedup |
-|---|---|---:|---:|---:|
-| pure 29 | `simple` | 14 | 14 | 1.000x |
-| pure 29 | `simple_packet` | 14 | 14 | 1.000x |
-| pure 29 | `bitmap_popcount_scan` | 1649 | 2186 | 1.326x |
-| pure 29 | `sorted_rule_binary_search` | 746 | 1933 | 2.591x |
-| pure 29 | `bcc_runqlat_log2_histogram_bucket` | 2378 | 4452 | 1.872x |
-| pure 29 | `trace_event_type_switch_dispatch` | 625 | 666 | 1.066x |
-| pure 29 | `packet_checksum_fold` | 26073 | 39543 | 1.517x |
-| pure 29 | `payload_prefix_memcmp_scan` | 179 | 303 | 1.693x |
-| pure 29 | `packet_vlan_tcpopt_parser` | 28 | 43 | 1.536x |
-| pure 29 | `bpf_local_call_fanout_dispatch` | 151 | 359 | 2.377x |
-| pure 29 | `flow_5tuple_rss_hash` | 28 | 52 | 1.857x |
-| pure 29 | `katran_lb_consistent_hash_select` | 38 | 68 | 1.789x |
-| pure 29 | `cilium_policy_guard_tree_filter` | 145 | 251 | 1.731x |
-| pure 29 | `siphash_rotate64_mixer` | 54 | 159 | 2.944x |
-| pure 29 | `packet_record_bounds_window` | 161 | 354 | 2.199x |
-| pure 29 | `flow_record_field_scan` | 127 | 195 | 1.535x |
-| pure 29 | `packed_header_bitfield_decode` | 508 | 857 | 1.687x |
-| pure 29 | `bpftrace_string_search_prefix_scan` | 373 | 641 | 1.718x |
-| pure 29 | `tracee_syscall_name_table_lookup` | 319 | 394 | 1.235x |
-| pure 29 | `tracee_http_method_prefix_detect` | 47 | 59 | 1.255x |
-| pure 29 | `cilium_socket_lb_service_select` | 339 | 1124 | 3.316x |
-| pure 29 | `bcc_tcpconnect_ipv4_tuple_filter` | 161 | 341 | 2.118x |
-| pure 29 | `tetragon_process_event_arg_filter` | 287 | 572 | 1.993x |
-| pure 29 | `otel_stack_frame_unwind_scan` | 112 | 407 | 3.634x |
-| pure 29 | `cilium_ct_nat_tuple_rewrite` | 207 | 495 | 2.391x |
-| pure 29 | `packet_toeplitz_rss_hash` | 376 | 489 | 1.301x |
-| pure 29 | `bpftrace_comm_key_fnv_hash` | 1301 | 1578 | 1.213x |
-| pure 29 | `tc_packet_checksum_fold` | 26074 | 39538 | 1.516x |
-| pure 29 | `cgroup_skb_hash_chain` | 375 | 964 | 2.571x |
-| stage2 13 | `helper_only_uid_gid` | 30 | 32 | 1.067x |
-| stage2 13 | `helper_chain_simple` | 242 | 247 | 1.021x |
-| stage2 13 | `map_array_lookup` | 18 | 28 | 1.556x |
-| stage2 13 | `map_array_index_packet` | 19 | 29 | 1.526x |
-| stage2 13 | `map_hash_lookup` | 97 | 100 | 1.031x |
-| stage2 13 | `map_hash_str_key` | 107 | 110 | 1.028x |
-| stage2 13 | `map_percpu_array` | 20 | 31 | 1.550x |
-| stage2 13 | `map_lru_hash_counter` | 216 | 221 | 1.023x |
-| stage2 13 | `map_percpu_hash_counter` | 90 | 92 | 1.022x |
-| stage2 13 | `combined_helper_map` | 38 | 46 | 1.211x |
-| stage2 13 | `multi_map_policy` | 110 | 126 | 1.145x |
-| stage2 13 | `packet_5tuple_classify` | 107 | 113 | 1.056x |
-| stage2 13 | `stats_mixed_helpers` | 188 | 190 | 1.011x |
+The code-size comparison uses median `code_size.native_code_bytes` from the
+same authoritative artifacts. This is machine-code size, not BPF bytecode size.
+The ratio is `native_kernel_code_bytes / kernel_jit_code_bytes`, so lower means
+the native-kernel image is smaller than the kernel eBPF JIT image.
 
-![Micro runtime speedup over kernel eBPF](figures/micro-current-runtime-speedup.png)
+![Native kernel machine-code size ratio](figures/micro-characterization-code-size-20260527.png)
 
-2026-05-21 AWS native-kernel snapshot:
-`docs/tmp/aws_micro_native_kernel_vs_kernel_bpf_20260521.md` covers x86 and
-arm64 `native_kernel` vs kernel eBPF across the 29 pure micro programs plus the
-13 stage2 helper/map programs.
+*Figure 4: Native-kernel machine-code size relative to kernel eBPF JIT code size
+for the same stage1/stage2 artifacts used in the runtime figures.*
 
-![AWS micro native_kernel speedup over kernel eBPF](figures/aws-micro-native-kernel-vs-kernel-bpf-20260521.png)
-
-2026-05-21 KVM/AWS trend cross-check:
-the current x86 KVM pure run is consistent with the previous x86 KVM native
-kernel baseline, while x86 AWS stage2 helper/map results are the outlier.
-
-![Micro native runtime KVM/AWS trend](figures/micro-native-kernel-kvm-aws-trend-20260521.png)
-
-| Result | Suite | Runtime | Speedup vs kernel eBPF |
-|---|---|---|---:|
-| x86 KVM previous | pure | native kernel (`native_lab`) | 1.414x |
-| x86 KVM current | pure | `native_kernel` | 1.425x |
-| x86 AWS current | pure | `native_kernel` | 1.503x |
-| x86 AWS current | stage2 helpers/maps | `native_kernel` | 0.690x |
-| x86 KVM current | stage2 helpers/maps | `native_kernel` | 1.300x |
-| arm64 AWS smoke | pure | `native_kernel` | 2.318x |
-| arm64 AWS smoke | stage2 helpers/maps | `native_kernel` | 2.460x |
-
-### x86 KVM
-
-The x86 run compares kernel eBPF JIT against native userspace timing and
-in-kernel direct native execution through the native kernel path.
-
-| Case | Native userspace ns | Native kernel ns | Kernel eBPF ns |
-|---|---:|---:|---:|
-| `bitmap_popcount_scan` | 464 | 466 | 1113 |
-| `packet_checksum_fold` | 13358 | 13337 | 17635 |
-| `bpf_local_call_fanout_dispatch` | 68 | 70 | 123 |
-| `cgroup_skb_hash_chain` | 288 | 291 | 285 |
-
-### arm64 AWS
-
-The arm64 run compares kernel BPF JIT against userspace native code and the
-LLVM-BPF runtime.
-
-| Case | Native userspace ns | LLVM-BPF ns | Kernel eBPF ns |
-|---|---:|---:|---:|
-| `bitmap_popcount_scan` | 1614 | 1633 | 2226 |
-| `packet_checksum_fold` | 26085 | 26162 | 39543 |
-| `bpf_local_call_fanout_dispatch` | 164 | 121 | 358 |
-| `cgroup_skb_hash_chain` | 368 | 372 | 964 |
-
-## Size Compare
-
-![Micro machine-code size ratio vs kernel eBPF JIT](figures/micro-current-size-ratio.png)
-
-The size comparison uses median `code_size.native_code_bytes`. This is machine
-code size, not BPF bytecode size.
-
-### x86 KVM
-
-| Comparison | Programs | Geomean size ratio vs kernel | Smaller / larger / tie, +/-2% |
-|---|---:|---:|---:|
-| native userspace / kernel | 29 | 0.491 | 28 / 0 / 1 |
-| native kernel / kernel | 29 | 0.500 | 28 / 0 / 1 |
-
-### arm64 AWS
-
-| Comparison | Programs | Geomean size ratio vs kernel | Smaller / larger / tie, +/-2% |
-|---|---:|---:|---:|
-| native userspace / kernel | 29 | 0.445 | 28 / 1 / 0 |
-| LLVM-BPF / kernel | 29 | 0.452 | 29 / 0 / 0 |
+| Platform | Suite | native_kernel/kernel code-size geomean |
+|---|---|---:|
+| x86 KVM | stage1 pure 29 | 0.541 |
+| x86 KVM | stage2 helpers/maps | 0.610 |
+| x86 AWS | stage1 pure 29 | 0.497 |
+| x86 AWS | stage2 helpers/maps | 0.634 |
+| arm64 AWS | stage1 pure 29 | 0.495 |
+| arm64 AWS | stage2 helpers/maps | 0.724 |
