@@ -16,6 +16,18 @@ ccmp_all_nonzero:
   kind: plain_bytes
   count: 64
 
+stp_stack_pair:
+  kind: plain_bytes
+  count: 64
+
+ldp_stack_pair:
+  kind: plain_bytes
+  count: 64
+
+arm64_direct_abi_coverage:
+  kind: plain_bytes
+  count: 64
+
 stage2_zero64:
   kind: zero_bytes
   count: 64

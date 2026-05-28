@@ -57,6 +57,27 @@ benchmarks:
     expected_result: 1
     tags: [compare, ccmp, pure-jit, coverage]
 
+  - name: stp_stack_pair
+    base_name: stp_stack_pair
+    kernel_input_size: 64
+    input_generator: stp_stack_pair
+    expected_result: 274886295554
+    tags: [memory, pair-store, stp, pure-jit, coverage]
+
+  - name: ldp_stack_pair
+    base_name: ldp_stack_pair
+    kernel_input_size: 64
+    input_generator: ldp_stack_pair
+    expected_result: 274886295554
+    tags: [memory, pair-load, ldp, pure-jit, coverage]
+
+  - name: arm64_direct_abi_coverage
+    base_name: arm64_direct_abi_coverage
+    kernel_input_size: 64
+    input_generator: arm64_direct_abi_coverage
+    expected_result: 7417481844698149974
+    tags: [memory, direct-load, direct-store, arm64-abi, pure-jit, coverage]
+
   - name: bitmap_popcount_scan
     base_name: bitmap_popcount_scan
     kernel_input_size: 2056
