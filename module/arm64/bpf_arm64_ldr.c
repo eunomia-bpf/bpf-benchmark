@@ -22,6 +22,7 @@ BTF_KFUNCS_END(bpf_arm64_ldr_kfunc_ids)
 static __always_inline int decode_ldr_payload(u64 payload, u8 *dst_reg,
 					      u8 *base_reg, s16 *offset)
 {
+	payload = kinsn_payload_decode(payload);
 	*dst_reg = kinsn_payload_reg(payload, 0);
 	*base_reg = kinsn_payload_reg(payload, 4);
 	*offset = kinsn_payload_s16(payload, 8);

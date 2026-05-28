@@ -51,7 +51,7 @@ static __always_inline int decode_pair_payload(u64 payload, u8 *lane0_reg,
 	*base_reg = kinsn_payload_reg(payload, 8);
 	*offset = kinsn_payload_s16(payload, 12);
 
-	if (kinsn_payload_reg(payload, 28))
+	if (payload >> 28)
 		return -EINVAL;
 	if (*lane0_reg > BPF_REG_10 || *lane1_reg > BPF_REG_10 ||
 	    *base_reg > BPF_REG_10)
