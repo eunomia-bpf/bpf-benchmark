@@ -197,6 +197,9 @@ host-runtime-libs-arm64: aarch64-sysroot
 	touch "$(RUNTIME_LIBS_ARM64)/.keep"
 	cp -a "$(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu"/libspdlog.so* "$(RUNTIME_LIBS_ARM64)/"
 	cp -a "$(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu"/libfmt.so* "$(RUNTIME_LIBS_ARM64)/"
+	cp -a "$(ARM64_RUNNER_LLVM_SYSROOT)/usr/lib/aarch64-linux-gnu"/libbfd*.so* "$(RUNTIME_LIBS_ARM64)/"
+	cp -a "$(ARM64_RUNNER_LLVM_SYSROOT)/usr/lib/aarch64-linux-gnu"/libopcodes*.so* "$(RUNTIME_LIBS_ARM64)/"
+	cp -a "$(ARM64_RUNNER_LLVM_SYSROOT)/usr/lib/aarch64-linux-gnu"/libsframe.so* "$(RUNTIME_LIBS_ARM64)/"
 
 x86-runner-runtime-image-tar: host-kernel-x86 host-kinsn-x86 host-rust-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86 host-unittest-x86 host-negative-x86 host-runtime-libs-x86
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"

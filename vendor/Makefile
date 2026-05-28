@@ -30,7 +30,9 @@ GO_DYNAMIC_LDFLAGS := -linkmode external
 KATRAN_BPF_OBJS := balancer.bpf.o healthchecking_ipip.bpf.o healthchecking.bpf.o xdp_root.bpf.o
 KATRAN_BPF_DEPS := $(wildcard $(KATRAN)/katran/lib/bpf/*.h $(KATRAN)/katran/lib/linux_includes/*.h)
 KATRAN_BPF_CC = "$(CLANG)" -I"$(KATRAN)" -I"$(KATRAN)/katran/lib/linux_includes" -DDEBUG -D__KERNEL__ -Wno-unused-value -Wno-pointer-sign -Wno-compare-distinct-pointer-types -O2 -emit-llvm -c -g "$<" -o - | "$(LLC)" -march=bpf -filetype=obj -o "$@"
-BPFTOOL_FLAGS := VMLINUX_BTF= feature-libbfd=0 feature-libbfd-liberty=0 feature-libbfd-liberty-z=0
+BPFTOOL_FLAGS := VMLINUX_BTF=
+BPFTOOL_NO_LIBBFD_FLAGS := feature-libbfd=0 feature-libbfd-liberty=0 feature-libbfd-liberty-z=0
+BPFTOOL_LIBBFD_FLAGS := feature-libbfd=1 feature-libbfd-liberty=0 feature-libbfd-liberty-z=0 feature-disassembler-four-args=1 feature-disassembler-init-styled=1
 BCC_LIBBPF_TOOLS := capable biosnoop vfsstat opensnoop syscount tcpconnect tcplife runqlat
 BCC_LIBBPF_FLAGS = -f "$(BCC)/libbpf-tools/Makefile" -C "$(BUILD)/.bcc-libbpf/$*" VPATH="$(BCC)/libbpf-tools:$(BCC)/libbpf-tools/$(BCC_ARCH)" APPS="$(BCC_LIBBPF_TOOLS)" APP_ALIASES= BZ_APPS= OUTPUT="$(BUILD)/.bcc-libbpf/$*/output" BPFTOOL_SRC="$(BCC)/libbpf-tools/bpftool/src" LIBBPF_SRC="$(BCC)/src/cc/libbpf/src" EXTRA_CFLAGS="-I$(BCC)/src/cc/libbpf/include/uapi" ARCH="$(BCC_ARCH)" USE_BLAZESYM=0 CLANG="$(CLANG)" LLVM_STRIP=llvm-strip-18
 
@@ -152,9 +154,11 @@ $(BUILD)/arm64/katran/bpf/%.bpf.o: $(KATRAN)/katran/lib/bpf/%.c $(KATRAN_BPF_DEP
 	$(KATRAN_BPF_CC)
 
 bpftool-x86: BPFTOOL_LLVM := 1
+bpftool-x86: BPFTOOL_FEATURE_FLAGS := $(BPFTOOL_NO_LIBBFD_FLAGS)
 bpftool-arm64: BPFTOOL_LLVM := 0
-bpftool-arm64: BPFTOOL_CROSS := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- EXTRA_LDFLAGS="-L/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/usr/lib/aarch64-linux-gnu"
+bpftool-arm64: BPFTOOL_FEATURE_FLAGS := $(BPFTOOL_LIBBFD_FLAGS)
+bpftool-arm64: BPFTOOL_CROSS := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- EXTRA_CFLAGS="-I$(ARM64_SYSROOT)/usr/include" EXTRA_LDFLAGS="-L$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu"
 bpftool-x86 bpftool-arm64: bpftool-%:
 	install -d "$(BUILD)/.bpftool/$*" "$(BUILD)/$*/bpftool/bin"
-	$(MAKE) -C "$(BPFTOOL)" OUTPUT="$(BUILD)/.bpftool/$*/" $(BPFTOOL_FLAGS) feature-llvm="$(BPFTOOL_LLVM)" $(BPFTOOL_CROSS) -j"$(JOBS)"
+	$(MAKE) -C "$(BPFTOOL)" OUTPUT="$(BUILD)/.bpftool/$*/" $(BPFTOOL_FLAGS) $(BPFTOOL_FEATURE_FLAGS) feature-llvm="$(BPFTOOL_LLVM)" $(BPFTOOL_CROSS) -j"$(JOBS)"
 	install -m 0755 "$(BUILD)/.bpftool/$*/bpftool" "$(BUILD)/$*/bpftool/bin/bpftool"
