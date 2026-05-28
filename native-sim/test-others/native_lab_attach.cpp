@@ -10,7 +10,7 @@
  *      as a `movabs reg, imm64` -- the verifier rewrites PSEUDO_MAP_FD
  *      ld_imm64 to this canonical kernel-half pointer.
  *   3. Resolve every BPF helper used by the program from /proc/kallsyms.
- *   4. fork+exec the native-link binary with --helper / --map flags.
+ *   4. Write a typed native-link plan and fork+exec native-link.
  *   5. Upload the resulting blob (and reloc table, if any) into
  *      /sys/kernel/debug/bpf_x86_native_lab/blob<N>[.relocs].
  *   6. Build a stub program `(sidecar; call kinsn)*chunks; exit` with
@@ -47,6 +47,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #ifndef BPF_PSEUDO_KINSN_SIDECAR
@@ -233,6 +234,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         .log_level = 1,
         .log_size = static_cast<uint32_t>(log_buf.size()),
         .log_buf = log_buf.data(),
+        .fd_array_cnt = 3,
     );
     int fd = bpf_prog_load(static_cast<bpf_prog_type>(prog_type_value),
                            "nl_others_stub", "GPL",
@@ -243,6 +245,58 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         return -1;
     }
     return fd;
+}
+
+void write_json_string(std::ostream &out, const std::string &s)
+{
+    out << '"';
+    for (unsigned char c : s) {
+        switch (c) {
+        case '"': out << "\\\""; break;
+        case '\\': out << "\\\\"; break;
+        case '\b': out << "\\b"; break;
+        case '\f': out << "\\f"; break;
+        case '\n': out << "\\n"; break;
+        case '\r': out << "\\r"; break;
+        case '\t': out << "\\t"; break;
+        default:
+            if (c < 0x20) {
+                char buf[8];
+                std::snprintf(buf, sizeof(buf), "\\u%04x", c);
+                out << buf;
+            } else {
+                out << static_cast<char>(c);
+            }
+            break;
+        }
+    }
+    out << '"';
+}
+
+int write_link_plan(const std::string &path,
+                    const std::vector<std::pair<std::string, uint64_t>> &helpers,
+                    uint64_t count_map_addr)
+{
+    std::ofstream out(path, std::ios::trunc);
+    if (!out) {
+        std::fprintf(stderr, "nl: open %s: %s\n", path.c_str(), std::strerror(errno));
+        return -1;
+    }
+    out << "{\n  \"version\": 1,\n  \"helpers\": [\n";
+    for (size_t i = 0; i < helpers.size(); i++) {
+        out << "    {\"name\": ";
+        write_json_string(out, helpers[i].first);
+        out << ", \"addr\": " << helpers[i].second << "}";
+        if (i + 1 != helpers.size()) out << ",";
+        out << "\n";
+    }
+    out << "  ],\n  \"maps\": [\n    {\"name\": \"count_map\", \"addr\": "
+        << count_map_addr << "}\n  ]\n}\n";
+    if (!out) {
+        std::fprintf(stderr, "nl: write %s failed\n", path.c_str());
+        return -1;
+    }
+    return 0;
 }
 
 uint64_t kallsyms_lookup(const std::string &name)
@@ -590,31 +644,34 @@ int nl_load_only(const char *bpf_o_path, const char *prog_name,
         return -1;
     }
 
-    std::vector<std::string> helper_args;
+    std::vector<std::pair<std::string, uint64_t>> helper_addrs;
     for (const char *h : kHelpers) {
         uint64_t addr = kallsyms_lookup(h);
         if (addr == 0) {
             std::fprintf(stderr, "nl: kallsyms miss %s\n", h);
             return -1;
         }
-        char buf[160];
-        std::snprintf(buf, sizeof(buf), "%s=0x%lx", h,
-                      static_cast<unsigned long>(addr));
-        helper_args.emplace_back(buf);
+        helper_addrs.emplace_back(h, addr);
     }
 
     std::string native_o = native_o_from_bpf_o(bpf_o_path);
+    char tmpl_plan[] = "/tmp/nl_others_XXXXXX.link-plan.json";
     char tmpl_blob[] = "/tmp/nl_others_XXXXXX.blob";
     char tmpl_rel[] = "/tmp/nl_others_XXXXXX.relocs";
+    int p_fd = mkstemps(tmpl_plan, 15);
     int b_fd = mkstemps(tmpl_blob, 5);
     int r_fd = mkstemps(tmpl_rel, 7);
-    if (b_fd < 0 || r_fd < 0) {
+    if (p_fd < 0 || b_fd < 0 || r_fd < 0) {
         std::fprintf(stderr, "nl: mkstemps failed\n");
         return -1;
     }
-    close(b_fd); close(r_fd);
+    close(p_fd); close(b_fd); close(r_fd);
+    out->link_plan_path = tmpl_plan;
     out->blob_path = tmpl_blob;
     out->relocs_path = tmpl_rel;
+    if (write_link_plan(out->link_plan_path, helper_addrs, map_kaddr) != 0) {
+        return -1;
+    }
 
     std::vector<std::string> argv = {
         native_link_binary(),
@@ -622,18 +679,8 @@ int nl_load_only(const char *bpf_o_path, const char *prog_name,
         "--symbol", prog_name,
         "--output", out->blob_path,
         "--output-relocs", out->relocs_path,
+        "--link-plan", out->link_plan_path,
     };
-    for (auto &h : helper_args) {
-        argv.emplace_back("--helper");
-        argv.push_back(h);
-    }
-    {
-        char buf[64];
-        std::snprintf(buf, sizeof(buf), "count_map=0x%lx",
-                      static_cast<unsigned long>(map_kaddr));
-        argv.emplace_back("--map");
-        argv.emplace_back(buf);
-    }
     if (run_subprocess(argv) != 0) {
         std::fprintf(stderr, "nl: native-link failed\n");
         return -1;
@@ -737,6 +784,7 @@ void nl_close(NlSession *s)
     }
     if (!s->blob_path.empty()) (void)unlink(s->blob_path.c_str());
     if (!s->relocs_path.empty()) (void)unlink(s->relocs_path.c_str());
+    if (!s->link_plan_path.empty()) (void)unlink(s->link_plan_path.c_str());
     if (s->companion) {
         bpf_object__close(s->companion);
         s->companion = nullptr;

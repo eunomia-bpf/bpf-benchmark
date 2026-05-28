@@ -917,50 +917,6 @@ int open_prog_fd_by_id_required(uint32_t id, const char *field_name)
     return fd;
 }
 
-// Build the (sidecar; call kinsn)*N; exit stub and BPF_PROG_LOAD it via
-// libbpf's bpf_prog_load + bpf_prog_load_opts.fd_array. Returns prog fd.
-void append_dummy_map_refs(std::vector<bpf_insn> &insns,
-                           const std::vector<int> &map_ref_fds)
-{
-    if (map_ref_fds.empty()) {
-        return;
-    }
-    if (map_ref_fds.size() >
-        static_cast<size_t>(std::numeric_limits<int16_t>::max() / 2)) {
-        fail("native_kernel dummy map ref jump offset exceeds int16");
-    }
-
-    insns.push_back(bpf_insn{
-        .code = BPF_ALU64 | BPF_MOV | BPF_K,
-        .dst_reg = BPF_REG_1,
-        .src_reg = 0,
-        .off = 0,
-        .imm = 1,
-    });
-    insns.push_back(bpf_insn{
-        .code = BPF_JMP | BPF_JEQ | BPF_K,
-        .dst_reg = BPF_REG_1,
-        .src_reg = 0,
-        .off = static_cast<int16_t>(map_ref_fds.size() * 2),
-        .imm = 1,
-    });
-    for (int fd : map_ref_fds) {
-        if (fd < 0) {
-            fail("native_kernel dummy map ref has invalid fd");
-        }
-        insns.push_back(bpf_insn{
-            .code = BPF_LD | BPF_DW | BPF_IMM,
-            .dst_reg = BPF_REG_1,
-            .src_reg = BPF_PSEUDO_MAP_FD,
-            .off = 0,
-            .imm = fd,
-        });
-        insns.push_back(bpf_insn{
-            .code = 0, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
-        });
-    }
-}
-
 int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
                    uint32_t callee_saved_mask,
                    uint32_t prog_type_value,
@@ -991,13 +947,10 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     }
 
     std::vector<bpf_insn> insns;
-    const size_t dummy_ref_insns =
-        map_ref_fds.empty() ? 0 : 2 + map_ref_fds.size() * 2;
-    insns.reserve(static_cast<size_t>(2) * chunks + dummy_ref_insns +
+    insns.reserve(static_cast<size_t>(2) * chunks +
                   (tail_call_reachable ? 8 : 1));
     if (tail_call_reachable) {
-        const size_t probe_off = 1 + static_cast<size_t>(2) * chunks +
-                                 dummy_ref_insns;
+        const size_t probe_off = 1 + static_cast<size_t>(2) * chunks;
         if (probe_off > static_cast<size_t>(std::numeric_limits<int16_t>::max())) {
             fail("native_kernel tail-call probe jump offset exceeds int16");
         }
@@ -1034,7 +987,6 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         };
         insns.push_back(call);
     }
-    append_dummy_map_refs(insns, map_ref_fds);
     insns.push_back(bpf_insn{
         .code = BPF_JMP | BPF_EXIT, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
     });
@@ -1068,10 +1020,22 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         });
     }
 
-    // fd_array[0] is the verifier's pre-scan slot; the ReJIT path duplicates
-    // the module BTF fd there. fd_array[1] is what `off=1` in the
-    // kinsn call insn resolves to.
-    int fd_array[2] = {mod_btf_fd, mod_btf_fd};
+    // fd_array[0] is the verifier pre-scan slot; fd_array[1] is what `off=1`
+    // in the kinsn call resolves to. Retained map fds follow and are bound via
+    // fd_array_cnt instead of dummy runtime BPF instructions.
+    std::vector<int> fd_array;
+    fd_array.reserve(2 + map_ref_fds.size());
+    fd_array.push_back(mod_btf_fd);
+    fd_array.push_back(mod_btf_fd);
+    for (int fd : map_ref_fds) {
+        if (fd < 0) {
+            fail("native_kernel retained map ref has invalid fd");
+        }
+        fd_array.push_back(fd);
+    }
+    if (fd_array.size() > std::numeric_limits<uint32_t>::max()) {
+        fail("native_kernel fd_array too large");
+    }
     ScopedFd prog_btf_fd(open_btf_fd_by_id_required(
         attrs.prog_btf_id, "prog_btf_id"));
     ScopedFd attach_btf_obj_fd(open_btf_fd_by_id_required(
@@ -1085,7 +1049,8 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         .attach_btf_id = attrs.attach_btf_id,
         .attach_prog_fd = static_cast<uint32_t>(attach_prog_fd.get() >= 0 ? attach_prog_fd.get() : 0),
         .attach_btf_obj_fd = static_cast<uint32_t>(attach_btf_obj_fd.get() >= 0 ? attach_btf_obj_fd.get() : 0),
-        .fd_array = fd_array,
+        .fd_array = fd_array.data(),
+        .fd_array_cnt = static_cast<uint32_t>(fd_array.size()),
     );
     int fd = bpf_prog_load(static_cast<bpf_prog_type>(prog_type_value),
                            "native_lab_stub", "GPL",
@@ -1681,28 +1646,18 @@ HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type)
     return HelperAlias{helper_id, symbol, symbol};
 }
 
-void add_contextual_helper_alias_if_available(std::vector<std::string> &helpers,
-                                              int helper_id,
-                                              uint32_t prog_type)
+std::optional<std::pair<std::string, uint64_t>>
+contextual_helper_alias_if_available(int helper_id, uint32_t prog_type)
 {
     const HelperAlias alias = helper_alias_for_call(helper_id, prog_type);
     if (!alias.link_name || !alias.kernel_symbol) {
-        return;
+        return std::nullopt;
     }
     const uint64_t addr = kallsyms_lookup(alias.kernel_symbol);
     if (addr == 0) {
-        return;
+        return std::nullopt;
     }
-    char value_buf[32];
-    std::snprintf(value_buf, sizeof(value_buf), "0x%llx",
-                  static_cast<unsigned long long>(addr));
-    const std::string arg = std::string(alias.link_name) + "=" + value_buf;
-    for (const std::string &existing : helpers) {
-        if (existing == arg) {
-            return;
-        }
-    }
-    helpers.push_back(arg);
+    return std::make_pair(std::string(alias.link_name), addr);
 }
 
 std::string load_prog_btf_symbol_name(int program_fd,
@@ -2167,11 +2122,39 @@ struct LinkerOutput {
 
 struct NativeLinkArgs {
     std::filesystem::path linker;
-    std::vector<std::string> helpers;
-    std::vector<std::string> maps;
-    std::vector<std::string> lookup_sites;
-    std::vector<std::string> lookup_maps;
-    std::vector<std::string> update_sites;
+    struct NameAddr {
+        std::string name;
+        uint64_t addr = 0;
+    };
+    struct LookupSite {
+        std::string kind;
+        uint64_t target_addr = 0;
+        uint32_t key_offset = 0;
+        uint32_t max_entries = 0;
+        uint32_t elem_size = 0;
+        uint32_t index_mask = 0;
+        uint32_t value_offset = 0;
+        uint64_t percpu_base_addr = 0;
+        std::string map_name;
+    };
+    struct LookupMap {
+        std::string name;
+        LookupSite site;
+    };
+    struct UpdateSite {
+        std::string kind;
+        uint64_t target_addr = 0;
+        uint32_t max_entries = 0;
+        uint32_t elem_size = 0;
+        uint32_t value_size = 0;
+        uint32_t value_offset = 0;
+        uint64_t percpu_base_addr = 0;
+    };
+    std::vector<NameAddr> helpers;
+    std::vector<NameAddr> maps;
+    std::vector<LookupSite> lookup_sites;
+    std::vector<LookupMap> lookup_maps;
+    std::vector<UpdateSite> update_sites;
 };
 
 struct LinkedBlob {
@@ -3242,25 +3225,190 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
     hash.add_string(symbol_name);
     for (const auto &arg : link_args.helpers) {
         hash.add_string("helper");
-        hash.add_string(arg);
+        hash.add_string(arg.name);
+        hash.add_u64(arg.addr);
     }
     for (const auto &arg : link_args.maps) {
         hash.add_string("map");
-        hash.add_string(arg);
+        hash.add_string(arg.name);
+        hash.add_u64(arg.addr);
     }
-    for (const auto &arg : link_args.lookup_sites) {
+    for (const NativeLinkArgs::LookupSite &arg : link_args.lookup_sites) {
         hash.add_string("lookup");
-        hash.add_string(arg);
+        hash.add_string(arg.kind);
+        hash.add_u64(arg.target_addr);
+        hash.add_u64(arg.key_offset);
+        hash.add_u64(arg.max_entries);
+        hash.add_u64(arg.elem_size);
+        hash.add_u64(arg.index_mask);
+        hash.add_u64(arg.value_offset);
+        hash.add_u64(arg.percpu_base_addr);
+        hash.add_string(arg.map_name);
     }
-    for (const auto &arg : link_args.lookup_maps) {
+    for (const NativeLinkArgs::LookupMap &arg : link_args.lookup_maps) {
         hash.add_string("lookup_map");
-        hash.add_string(arg);
+        hash.add_string(arg.name);
+        hash.add_string(arg.site.kind);
+        hash.add_u64(arg.site.target_addr);
+        hash.add_u64(arg.site.key_offset);
+        hash.add_u64(arg.site.max_entries);
+        hash.add_u64(arg.site.elem_size);
+        hash.add_u64(arg.site.index_mask);
+        hash.add_u64(arg.site.value_offset);
+        hash.add_u64(arg.site.percpu_base_addr);
     }
-    for (const auto &arg : link_args.update_sites) {
+    for (const NativeLinkArgs::UpdateSite &arg : link_args.update_sites) {
         hash.add_string("update");
-        hash.add_string(arg);
+        hash.add_string(arg.kind);
+        hash.add_u64(arg.target_addr);
+        hash.add_u64(arg.max_entries);
+        hash.add_u64(arg.elem_size);
+        hash.add_u64(arg.value_size);
+        hash.add_u64(arg.value_offset);
+        hash.add_u64(arg.percpu_base_addr);
     }
     return hash.hex();
+}
+
+void write_json_string(std::ostream &out, const std::string &value)
+{
+    out << '"';
+    for (unsigned char ch : value) {
+        switch (ch) {
+        case '"':
+            out << "\\\"";
+            break;
+        case '\\':
+            out << "\\\\";
+            break;
+        case '\b':
+            out << "\\b";
+            break;
+        case '\f':
+            out << "\\f";
+            break;
+        case '\n':
+            out << "\\n";
+            break;
+        case '\r':
+            out << "\\r";
+            break;
+        case '\t':
+            out << "\\t";
+            break;
+        default:
+            if (ch < 0x20) {
+                char buf[7];
+                std::snprintf(buf, sizeof(buf), "\\u%04x", ch);
+                out << buf;
+            } else {
+                out << static_cast<char>(ch);
+            }
+            break;
+        }
+    }
+    out << '"';
+}
+
+void write_json_name_addr(std::ostream &out,
+                          const NativeLinkArgs::NameAddr &item)
+{
+    out << "{\"name\":";
+    write_json_string(out, item.name);
+    out << ",\"addr\":" << item.addr << "}";
+}
+
+void write_json_lookup_site_fields(std::ostream &out,
+                                   const NativeLinkArgs::LookupSite &site)
+{
+    out << "\"kind\":";
+    write_json_string(out, site.kind);
+    out << ",\"target_addr\":" << site.target_addr
+        << ",\"key_offset\":" << site.key_offset
+        << ",\"max_entries\":" << site.max_entries
+        << ",\"elem_size\":" << site.elem_size
+        << ",\"index_mask\":" << site.index_mask
+        << ",\"value_offset\":" << site.value_offset
+        << ",\"percpu_base_addr\":" << site.percpu_base_addr;
+    if (!site.map_name.empty()) {
+        out << ",\"map_name\":";
+        write_json_string(out, site.map_name);
+    }
+}
+
+void write_json_lookup_site(std::ostream &out,
+                            const NativeLinkArgs::LookupSite &site)
+{
+    out << "{";
+    write_json_lookup_site_fields(out, site);
+    out << "}";
+}
+
+void write_json_lookup_map(std::ostream &out,
+                           const NativeLinkArgs::LookupMap &item)
+{
+    out << "{\"name\":";
+    write_json_string(out, item.name);
+    out << ",";
+    write_json_lookup_site_fields(out, item.site);
+    out << "}";
+}
+
+void write_json_update_site(std::ostream &out,
+                            const NativeLinkArgs::UpdateSite &site)
+{
+    out << "{\"kind\":";
+    write_json_string(out, site.kind);
+    out << ",\"target_addr\":" << site.target_addr
+        << ",\"max_entries\":" << site.max_entries
+        << ",\"elem_size\":" << site.elem_size
+        << ",\"value_size\":" << site.value_size
+        << ",\"value_offset\":" << site.value_offset
+        << ",\"percpu_base_addr\":" << site.percpu_base_addr
+        << "}";
+}
+
+template <typename T, typename Writer>
+void write_json_array(std::ostream &out,
+                      const std::vector<T> &items,
+                      Writer writer)
+{
+    out << "[";
+    for (size_t i = 0; i < items.size(); i++) {
+        if (i != 0) {
+            out << ",";
+        }
+        writer(out, items[i]);
+    }
+    out << "]";
+}
+
+std::filesystem::path write_native_link_plan(
+    const NativeLinkArgs &link_args,
+    const std::filesystem::path &base)
+{
+    const std::filesystem::path path = base.string() + ".link-plan.json";
+    std::ofstream out(path, std::ios::binary | std::ios::trunc);
+    if (!out) {
+        fail("open native-link plan " + path.string());
+    }
+    out << "{\"version\":1";
+    out << ",\"helpers\":";
+    write_json_array(out, link_args.helpers, write_json_name_addr);
+    out << ",\"maps\":";
+    write_json_array(out, link_args.maps, write_json_name_addr);
+    out << ",\"lookup_sites\":";
+    write_json_array(out, link_args.lookup_sites, write_json_lookup_site);
+    out << ",\"lookup_maps\":";
+    write_json_array(out, link_args.lookup_maps, write_json_lookup_map);
+    out << ",\"update_sites\":";
+    write_json_array(out, link_args.update_sites, write_json_update_site);
+    out << "}\n";
+    out.close();
+    if (!out) {
+        fail("write native-link plan " + path.string());
+    }
+    return path;
 }
 
 bool linker_output_exists(const LinkerOutput &out)
@@ -3344,26 +3492,10 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     argv.push_back(out.map_patches.string());
     argv.push_back("--output-abi");
     argv.push_back(out.abi.string());
-    for (const auto &arg : link_args.helpers) {
-        argv.push_back("--helper");
-        argv.push_back(arg);
-    }
-    for (const auto &arg : link_args.maps) {
-        argv.push_back("--map");
-        argv.push_back(arg);
-    }
-    for (const auto &arg : link_args.lookup_sites) {
-        argv.push_back("--lookup-site");
-        argv.push_back(arg);
-    }
-    for (const auto &arg : link_args.lookup_maps) {
-        argv.push_back("--lookup-map");
-        argv.push_back(arg);
-    }
-    for (const auto &arg : link_args.update_sites) {
-        argv.push_back("--update-site");
-        argv.push_back(arg);
-    }
+    const std::filesystem::path link_plan =
+        write_native_link_plan(link_args, base);
+    argv.push_back("--link-plan");
+    argv.push_back(link_plan.string());
 
     const std::filesystem::path kernel_stderr = base.string() + ".kernel.stderr.txt";
     int rc = run_subprocess(argv, kernel_stderr);

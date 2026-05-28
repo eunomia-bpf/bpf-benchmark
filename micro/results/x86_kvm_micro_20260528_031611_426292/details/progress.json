@@ -1,0 +1,9 @@
+{
+  "completed_benchmarks": 1,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "error_message": "helper_only_uid_gid: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native-kernel --program /artifacts/user/stage2-programs/x86_64/helper_only_uid_gid.bpf.o --native-program /artifacts/user/stage2-programs/x86_64/helper_only_uid_gid.native.o --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem --io-mode packet --input-size 64 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260528_031611_426292/details/jit_dumps/helper_only_uid_gid__native_kernel__sample00.jited.bin\nnative-link kernel failed (rc=1)\nstderr:\nError: duplicate link-plan helpers entry \"bpf_sk_lookup_udp\"\ncommand: /usr/local/bin/native-link --input /tmp/native_kernel_link_cache/b2c7a1517ffde7b2.tmp.1888.proof.o --symbol helper_only_uid_gid --mode kernel --output /tmp/native_kernel_link_cache/b2c7a1517ffde7b2.tmp.1888.blob.bin --output-relocs /tmp/native_kernel_link_cache/b2c7a1517ffde7b2.tmp.1888.relocs.bin --output-map-patches /tmp/native_kernel_link_cache/b2c7a1517ffde7b2.tmp.1888.map-patches.tsv --output-abi /tmp/native_kernel_link_cache/b2c7a1517ffde7b2.tmp.1888.abi.tsv --link-plan /tmp/native_kernel_link_cache/b2c7a1517ffde7b2.tmp.1888.link-plan.json",
+  "status": "error",
+  "total_benchmarks": 1
+}

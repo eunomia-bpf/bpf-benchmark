@@ -54,6 +54,7 @@ use object::{
     BinaryFormat, Endianness, Object, ObjectSection, ObjectSymbol, RelocationFlags,
     RelocationTarget, SectionKind, SymbolFlags, SymbolKind, SymbolScope,
 };
+use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::PathBuf;
@@ -97,59 +98,10 @@ struct Args {
     #[arg(long)]
     output_abi: Option<PathBuf>,
 
-    /// BPF helper to kernel-address mapping. Repeatable.
-    /// Format: NAME=HEXADDR (e.g. bpf_ktime_get_ns=0xffffffff81234567).
-    /// Helper call sites against listed names are rewritten into relocatable
-    /// helper-call slots.
-    #[arg(long = "helper", value_name = "NAME=ADDR")]
-    helpers: Vec<String>,
-
-    /// BPF map symbol to kernel-pointer mapping. Repeatable.
-    /// Format: NAME=HEXADDR. Each GOTPCREL/PC32 relocation against the
-    /// listed name is satisfied by appending a u64 literal-pool entry to
-    /// the blob and rewriting the mov disp32 to point at it.
-    #[arg(long = "map", value_name = "NAME=ADDR")]
-    maps: Vec<String>,
-
-    /// Per-call-site spec for every `bpf_map_lookup_elem` site in the
-    /// entry program, given in BPF-source order. The runner walks the
-    /// companion `.bpf.o`'s bytecode to identify which map each call uses.
-    ///
-    /// Format:
-    /// INDEX=KIND,HEXADDR,RESERVED,MAX_ENTRIES,ELEM_SIZE,INDEX_MASK,VALUE_OFFSET,PERCPU_BASE
-    /// where KIND is call/hash/lru_hash/percpu_hash/hash_of_maps/array/percpu_array.
-    #[arg(
-        long = "lookup-site",
-        value_name = "INDEX=KIND,ADDR,RESERVED,MAX,ELEM,MASK,VALUE_OFF,PERCPU"
-    )]
-    lookup_sites: Vec<String>,
-
-    /// Per-map fallback spec for native-only `bpf_map_lookup_elem` sites.
-    /// Used only when the target-specific linker can trace the native
-    /// callsite's map argument to a concrete map symbol.
-    ///
-    /// Format:
-    /// NAME=KIND,HEXADDR,RESERVED,MAX_ENTRIES,ELEM_SIZE,INDEX_MASK,VALUE_OFFSET,PERCPU_BASE
-    /// where KIND is call/hash/lru_hash/percpu_hash/hash_of_maps/array/percpu_array.
-    #[arg(
-        long = "lookup-map",
-        value_name = "NAME=KIND,ADDR,RESERVED,MAX,ELEM,MASK,VALUE_OFF,PERCPU"
-    )]
-    lookup_maps: Vec<String>,
-
-    /// Per-call-site spec for every `bpf_map_update_elem` site in the
-    /// entry program, given in BPF-source order. Only ARRAY/PERCPU_ARRAY
-    /// sites with simple value widths are currently inlined; `call`
-    /// entries keep the normal helper call.
-    ///
-    /// Format:
-    /// INDEX=KIND,ADDR,MAX_ENTRIES,ELEM_SIZE,VALUE_SIZE,VALUE_OFFSET,PERCPU_BASE
-    /// where KIND is call/array/percpu_array.
-    #[arg(
-        long = "update-site",
-        value_name = "INDEX=KIND,ADDR,MAX,ELEM,VALUE_SIZE,VALUE_OFF,PERCPU"
-    )]
-    update_sites: Vec<String>,
+    /// Versioned structured link plan containing helper/map/callsite facts.
+    /// This is the stable loader/native-link boundary for kernel mode.
+    #[arg(long)]
+    link_plan: Option<PathBuf>,
 
     /// Print a human-readable disassembly of the rewritten blob to stderr.
     #[arg(long)]
@@ -214,93 +166,175 @@ struct UpdateSiteSpec {
     percpu_base_addr: u64,
 }
 
-fn parse_lookup_sites(args: &[String]) -> Result<Vec<LookupSiteSpec>> {
-    let mut by_index: Vec<(usize, LookupSiteSpec)> = Vec::new();
-    for a in args {
-        let (idx_s, payload) = a
-            .split_once('=')
-            .ok_or_else(|| anyhow!("--lookup-site expects INDEX=KIND,ADDR,KEY_OFFSET,MAX,ELEM,MASK,VALUE_OFF,PERCPU; got {a:?}"))?;
-        let idx: usize = idx_s
-            .parse()
-            .map_err(|e| anyhow!("--lookup-site INDEX parse: {e}"))?;
-        let parts: Vec<&str> = payload.split(',').collect();
-        let spec = if parts.len() == 8 || parts.len() == 9 {
-            let kind = parse_lookup_kind(parts[0])?;
-            let target_addr = parse_u64_auto(parts[1], "--lookup-site ADDR")?;
-            let key_offset = parse_u32_auto(parts[2], "--lookup-site KEY_OFFSET")?;
-            let max_entries = parse_u32_auto(parts[3], "--lookup-site MAX_ENTRIES")?;
-            let elem_size = parse_u32_auto(parts[4], "--lookup-site ELEM_SIZE")?;
-            let index_mask = parse_u32_auto(parts[5], "--lookup-site INDEX_MASK")?;
-            let value_offset = parse_u32_auto(parts[6], "--lookup-site VALUE_OFFSET")?;
-            let percpu_base_addr = parse_u64_auto(parts[7], "--lookup-site PERCPU_BASE")?;
-            let map_name = if parts.len() == 9 && !parts[8].is_empty() {
-                Some(parts[8].to_string())
-            } else {
-                None
-            };
-            LookupSiteSpec {
-                kind,
-                target_addr,
-                key_offset,
-                max_entries,
-                elem_size,
-                index_mask,
-                value_offset,
-                percpu_base_addr,
-                map_name,
-            }
-        } else {
-            bail!(
-                "--lookup-site payload has {} comma-separated fields; expected 8 or 9: {payload:?}",
-                parts.len()
-            );
-        };
-        by_index.push((idx, spec));
-    }
-    by_index.sort_by_key(|(i, _)| *i);
-    for (expected, (i, _)) in by_index.iter().enumerate() {
-        if *i != expected {
-            bail!(
-                "--lookup-site indices must be contiguous 0..N-1; missing index {expected}, \
-                 found {i} at position {expected}"
-            );
-        }
-    }
-    Ok(by_index.into_iter().map(|(_, s)| s).collect())
+#[derive(Debug)]
+struct LinkSideInputs {
+    helper_addrs: HashMap<String, u64>,
+    map_addrs: HashMap<String, u64>,
+    lookup_sites: Vec<LookupSiteSpec>,
+    lookup_maps: HashMap<String, LookupSiteSpec>,
+    update_sites: Vec<UpdateSiteSpec>,
 }
 
-fn parse_lookup_map_specs(args: &[String]) -> Result<HashMap<String, LookupSiteSpec>> {
+#[derive(Deserialize)]
+struct LinkPlan {
+    version: u32,
+    #[serde(default)]
+    helpers: Vec<LinkPlanNameAddr>,
+    #[serde(default)]
+    maps: Vec<LinkPlanNameAddr>,
+    #[serde(default)]
+    lookup_sites: Vec<LinkPlanLookupSite>,
+    #[serde(default)]
+    lookup_maps: Vec<LinkPlanLookupMap>,
+    #[serde(default)]
+    update_sites: Vec<LinkPlanUpdateSite>,
+}
+
+#[derive(Deserialize)]
+struct LinkPlanNameAddr {
+    name: String,
+    addr: u64,
+}
+
+#[derive(Deserialize)]
+struct LinkPlanLookupSite {
+    kind: String,
+    target_addr: u64,
+    key_offset: u32,
+    max_entries: u32,
+    elem_size: u32,
+    index_mask: u32,
+    value_offset: u32,
+    percpu_base_addr: u64,
+    map_name: Option<String>,
+}
+
+#[derive(Deserialize)]
+struct LinkPlanLookupMap {
+    name: String,
+    kind: String,
+    target_addr: u64,
+    key_offset: u32,
+    max_entries: u32,
+    elem_size: u32,
+    index_mask: u32,
+    value_offset: u32,
+    percpu_base_addr: u64,
+}
+
+#[derive(Deserialize)]
+struct LinkPlanUpdateSite {
+    kind: String,
+    target_addr: u64,
+    max_entries: u32,
+    elem_size: u32,
+    value_size: u32,
+    value_offset: u32,
+    percpu_base_addr: u64,
+}
+
+fn name_addr_vec_to_map(items: Vec<LinkPlanNameAddr>, label: &str) -> Result<HashMap<String, u64>> {
     let mut out = HashMap::new();
-    for a in args {
-        let (name, payload) = a
-            .split_once('=')
-            .ok_or_else(|| anyhow!("--lookup-map expects NAME=KIND,ADDR,KEY_OFFSET,MAX,ELEM,MASK,VALUE_OFF,PERCPU; got {a:?}"))?;
-        if name.is_empty() {
-            bail!("--lookup-map name must not be empty");
+    for item in items {
+        if item.name.is_empty() {
+            bail!("link-plan {label} entry has empty name");
         }
-        let parts: Vec<&str> = payload.split(',').collect();
-        if parts.len() != 8 {
-            bail!(
-                "--lookup-map payload has {} comma-separated fields; expected 8: {payload:?}",
-                parts.len()
-            );
-        }
-        let spec = LookupSiteSpec {
-            kind: parse_lookup_kind(parts[0])?,
-            target_addr: parse_u64_auto(parts[1], "--lookup-map ADDR")?,
-            key_offset: parse_u32_auto(parts[2], "--lookup-map KEY_OFFSET")?,
-            max_entries: parse_u32_auto(parts[3], "--lookup-map MAX_ENTRIES")?,
-            elem_size: parse_u32_auto(parts[4], "--lookup-map ELEM_SIZE")?,
-            index_mask: parse_u32_auto(parts[5], "--lookup-map INDEX_MASK")?,
-            value_offset: parse_u32_auto(parts[6], "--lookup-map VALUE_OFFSET")?,
-            percpu_base_addr: parse_u64_auto(parts[7], "--lookup-map PERCPU_BASE")?,
-            map_name: Some(name.to_string()),
-        };
-        if out.insert(name.to_string(), spec).is_some() {
-            bail!("duplicate --lookup-map entry for {name:?}");
+        if out.insert(item.name.clone(), item.addr).is_some() {
+            bail!("duplicate link-plan {label} entry {:?}", item.name);
         }
     }
     Ok(out)
+}
+
+fn lookup_site_from_plan(site: LinkPlanLookupSite) -> Result<LookupSiteSpec> {
+    Ok(LookupSiteSpec {
+        kind: parse_lookup_kind(&site.kind)?,
+        target_addr: site.target_addr,
+        key_offset: site.key_offset,
+        max_entries: site.max_entries,
+        elem_size: site.elem_size,
+        index_mask: site.index_mask,
+        value_offset: site.value_offset,
+        percpu_base_addr: site.percpu_base_addr,
+        map_name: site.map_name,
+    })
+}
+
+fn lookup_map_from_plan(site: LinkPlanLookupMap) -> Result<(String, LookupSiteSpec)> {
+    if site.name.is_empty() {
+        bail!("link-plan lookup_maps entry has empty name");
+    }
+    let name = site.name;
+    Ok((
+        name.clone(),
+        LookupSiteSpec {
+            kind: parse_lookup_kind(&site.kind)?,
+            target_addr: site.target_addr,
+            key_offset: site.key_offset,
+            max_entries: site.max_entries,
+            elem_size: site.elem_size,
+            index_mask: site.index_mask,
+            value_offset: site.value_offset,
+            percpu_base_addr: site.percpu_base_addr,
+            map_name: Some(name),
+        },
+    ))
+}
+
+fn update_site_from_plan(site: LinkPlanUpdateSite) -> Result<UpdateSiteSpec> {
+    Ok(UpdateSiteSpec {
+        kind: parse_update_kind(&site.kind)?,
+        target_addr: site.target_addr,
+        max_entries: site.max_entries,
+        elem_size: site.elem_size,
+        value_size: site.value_size,
+        value_offset: site.value_offset,
+        percpu_base_addr: site.percpu_base_addr,
+    })
+}
+
+fn load_link_plan(path: &PathBuf) -> Result<LinkSideInputs> {
+    let bytes = fs::read(path).with_context(|| format!("read {}", path.display()))?;
+    let plan: LinkPlan = serde_json::from_slice(&bytes)
+        .with_context(|| format!("parse native-link plan {}", path.display()))?;
+    if plan.version != 1 {
+        bail!("unsupported native-link plan version {}", plan.version);
+    }
+    let mut lookup_maps = HashMap::new();
+    for item in plan.lookup_maps {
+        let (name, spec) = lookup_map_from_plan(item)?;
+        if lookup_maps.insert(name.clone(), spec).is_some() {
+            bail!("duplicate link-plan lookup_maps entry {name:?}");
+        }
+    }
+    Ok(LinkSideInputs {
+        helper_addrs: name_addr_vec_to_map(plan.helpers, "helpers")?,
+        map_addrs: name_addr_vec_to_map(plan.maps, "maps")?,
+        lookup_sites: plan
+            .lookup_sites
+            .into_iter()
+            .map(lookup_site_from_plan)
+            .collect::<Result<Vec<_>>>()?,
+        lookup_maps,
+        update_sites: plan
+            .update_sites
+            .into_iter()
+            .map(update_site_from_plan)
+            .collect::<Result<Vec<_>>>()?,
+    })
+}
+
+fn load_link_side_inputs(args: &Args) -> Result<LinkSideInputs> {
+    if let Some(path) = &args.link_plan {
+        return load_link_plan(path);
+    }
+    Ok(LinkSideInputs {
+        helper_addrs: HashMap::new(),
+        map_addrs: HashMap::new(),
+        lookup_sites: Vec::new(),
+        lookup_maps: HashMap::new(),
+        update_sites: Vec::new(),
+    })
 }
 
 fn parse_lookup_kind(s: &str) -> Result<LookupKind> {
@@ -312,47 +346,8 @@ fn parse_lookup_kind(s: &str) -> Result<LookupKind> {
         "hash_of_maps" => Ok(LookupKind::HashOfMaps),
         "array" => Ok(LookupKind::Array),
         "percpu_array" => Ok(LookupKind::PerCpuArray),
-        _ => bail!("unknown --lookup-site KIND {s:?}"),
+        _ => bail!("unknown lookup kind {s:?}"),
     }
-}
-
-fn parse_update_sites(args: &[String]) -> Result<Vec<UpdateSiteSpec>> {
-    let mut by_index: Vec<(usize, UpdateSiteSpec)> = Vec::new();
-    for a in args {
-        let (idx_s, payload) = a
-            .split_once('=')
-            .ok_or_else(|| anyhow!("--update-site expects INDEX=KIND,...; got {a:?}"))?;
-        let idx: usize = idx_s
-            .parse()
-            .map_err(|e| anyhow!("--update-site INDEX parse: {e}"))?;
-        let parts: Vec<&str> = payload.split(',').collect();
-        if parts.len() != 7 {
-            bail!(
-                "--update-site payload has {} comma-separated fields; expected 7: {payload:?}",
-                parts.len()
-            );
-        }
-        let spec = UpdateSiteSpec {
-            kind: parse_update_kind(parts[0])?,
-            target_addr: parse_u64_auto(parts[1], "--update-site ADDR")?,
-            max_entries: parse_u32_auto(parts[2], "--update-site MAX_ENTRIES")?,
-            elem_size: parse_u32_auto(parts[3], "--update-site ELEM_SIZE")?,
-            value_size: parse_u32_auto(parts[4], "--update-site VALUE_SIZE")?,
-            value_offset: parse_u32_auto(parts[5], "--update-site VALUE_OFFSET")?,
-            percpu_base_addr: parse_u64_auto(parts[6], "--update-site PERCPU_BASE")?,
-        };
-        by_index.push((idx, spec));
-    }
-    by_index.sort_by_key(|(i, _)| *i);
-    for (expected, (i, _)) in by_index.iter().enumerate() {
-        if *i != expected {
-            bail!(
-                "--update-site indices must be contiguous 0..N-1; missing index {expected}, \
-                 found {i} at position {expected}"
-            );
-        }
-    }
-    Ok(by_index.into_iter().map(|(_, s)| s).collect())
 }
 
 fn parse_update_kind(s: &str) -> Result<UpdateKind> {
@@ -360,22 +355,8 @@ fn parse_update_kind(s: &str) -> Result<UpdateKind> {
         "call" => Ok(UpdateKind::Call),
         "array" => Ok(UpdateKind::Array),
         "percpu_array" => Ok(UpdateKind::PerCpuArray),
-        _ => bail!("unknown --update-site KIND {s:?}"),
+        _ => bail!("unknown update kind {s:?}"),
     }
-}
-
-fn parse_u64_auto(s: &str, label: &str) -> Result<u64> {
-    let s = s.trim();
-    if let Some(hex) = s.strip_prefix("0x") {
-        u64::from_str_radix(hex, 16).map_err(|e| anyhow!("{label} parse: {e}"))
-    } else {
-        s.parse::<u64>().map_err(|e| anyhow!("{label} parse: {e}"))
-    }
-}
-
-fn parse_u32_auto(s: &str, label: &str) -> Result<u32> {
-    let value = parse_u64_auto(s, label)?;
-    u32::try_from(value).map_err(|_| anyhow!("{label} does not fit u32: {value}"))
 }
 
 fn require_call_target(target: u64, context: &str) -> Result<u64> {
@@ -446,11 +427,13 @@ fn main() -> Result<()> {
     if !proof_mode && !proof_input {
         bail!("--mode kernel requires a .proof.o produced by --mode proof");
     }
-    let helper_addrs = parse_name_addr_args(&args.helpers, "helper")?;
-    let map_addrs = parse_name_addr_args(&args.maps, "map")?;
-    let lookup_sites = parse_lookup_sites(&args.lookup_sites)?;
-    let lookup_maps = parse_lookup_map_specs(&args.lookup_maps)?;
-    let update_sites = parse_update_sites(&args.update_sites)?;
+    let LinkSideInputs {
+        helper_addrs,
+        map_addrs,
+        lookup_sites,
+        lookup_maps,
+        update_sites,
+    } = load_link_side_inputs(&args)?;
     let RewriteResult {
         blob,
         relocs,
@@ -810,20 +793,6 @@ fn read_proof_abi(elf: &object::File) -> Result<Option<u8>> {
         bail!(".native_link_abi missing required keys");
     }
     Ok(mask)
-}
-
-fn parse_name_addr_args(args: &[String], kind: &str) -> Result<HashMap<String, u64>> {
-    let mut out = HashMap::new();
-    for a in args {
-        let (name, addr) = a
-            .split_once('=')
-            .ok_or_else(|| anyhow!("invalid --{kind} {a:?}; expected NAME=HEXADDR"))?;
-        let addr = addr.strip_prefix("0x").unwrap_or(addr);
-        let addr =
-            u64::from_str_radix(addr, 16).map_err(|e| anyhow!("invalid --{kind} {a:?}: {e}"))?;
-        out.insert(name.to_string(), addr);
-    }
-    Ok(out)
 }
 
 fn find_symbol_by_name(elf: &object::File, name: &str) -> Result<SymInfo> {
@@ -2079,7 +2048,7 @@ fn rewrite_arm64(
                             )
                             .ok_or_else(|| {
                                 anyhow!(
-                                    "arm64 bpf_map_lookup_elem call site {ordinal} in {} is missing --lookup-site metadata",
+                                    "arm64 bpf_map_lookup_elem call site {ordinal} in {} is missing link-plan lookup_sites metadata",
                                     sym.name
                                 )
                             })?;

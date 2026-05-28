@@ -33,8 +33,9 @@ struct NlSession {
      * maps the verifier allocated for it stay live (the same map fds
      * back native_lab side via fd_array + map_ptr literal patching). */
     bpf_object *companion = nullptr;
-    /* Per-instance scratch paths for native-link output blob + relocs.
+    /* Per-instance scratch paths for native-link inputs/outputs.
      * Allocated under /tmp; removed by nl_close. */
+    std::string link_plan_path;
     std::string blob_path;
     std::string relocs_path;
     /* The /sys/kernel/debug/tracing/kprobe_events or uprobe_events

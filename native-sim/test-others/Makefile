@@ -28,7 +28,7 @@ NATIVE_ARCH ?= $(shell uname -m)
 # which is shipped pre-built in the runtime container. For host
 # debugging we fall back to system libbpf (`-lbpf`).
 RUNNER_LIBBPF_DIR := $(REPO_ROOT)/runner/build-llvmbpf/vendor/libbpf/obj
-RUNNER_LIBBPF_HDR := $(REPO_ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/usr/include
+RUNNER_LIBBPF_HDR := $(REPO_ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include
 ifeq ($(wildcard $(RUNNER_LIBBPF_DIR)/libbpf.a),)
 LIBBPF_CFLAGS :=
 LIBBPF_LDFLAGS := -lbpf -lelf -lz

@@ -1,134 +1,80 @@
 #pragma once
 
-std::string format_hex(uint64_t value)
+void add_name_addr(std::vector<NativeLinkArgs::NameAddr> &items,
+                   const std::string &name,
+                   uint64_t addr)
 {
-    char value_buf[32];
-    std::snprintf(value_buf, sizeof(value_buf), "0x%llx",
-                  static_cast<unsigned long long>(value));
-    return value_buf;
+    for (NativeLinkArgs::NameAddr &item : items) {
+        if (item.name == name) {
+            item.addr = addr;
+            return;
+        }
+    }
+    items.push_back(NativeLinkArgs::NameAddr{name, addr});
 }
 
-std::string format_name_hex(const std::string &name, uint64_t value)
+const char *lookup_kind_name(CompanionLoad::LookupSite::Kind kind)
 {
-    return name + "=" + format_hex(value);
-}
-
-std::string format_lookup_site_arg(size_t index,
-                                   const CompanionLoad::LookupSite &site)
-{
-    const char *kind = "call";
-    switch (site.kind) {
+    switch (kind) {
     case CompanionLoad::LookupSite::Kind::Call:
-        kind = "call";
-        break;
+        return "call";
     case CompanionLoad::LookupSite::Kind::Hash:
-        kind = "hash";
-        break;
+        return "hash";
     case CompanionLoad::LookupSite::Kind::LruHash:
-        kind = "lru_hash";
-        break;
+        return "lru_hash";
     case CompanionLoad::LookupSite::Kind::PerCpuHash:
-        kind = "percpu_hash";
-        break;
+        return "percpu_hash";
     case CompanionLoad::LookupSite::Kind::HashOfMaps:
-        kind = "hash_of_maps";
-        break;
+        return "hash_of_maps";
     case CompanionLoad::LookupSite::Kind::Array:
-        kind = "array";
-        break;
+        return "array";
     case CompanionLoad::LookupSite::Kind::PerCpuArray:
-        kind = "percpu_array";
-        break;
+        return "percpu_array";
     }
-
-    char buf[384];
-    std::snprintf(buf, sizeof(buf), "%zu=%s,0x%llx,%u,%u,%u,%u,%u,0x%llx",
-                  index,
-                  kind,
-                  static_cast<unsigned long long>(site.target_addr),
-                  static_cast<unsigned>(site.key_offset),
-                  static_cast<unsigned>(site.max_entries),
-                  static_cast<unsigned>(site.elem_size),
-                  static_cast<unsigned>(site.index_mask),
-                  static_cast<unsigned>(site.value_offset),
-                  static_cast<unsigned long long>(site.percpu_base_addr));
-    std::string out(buf);
-    if (!site.map_name.empty()) {
-        out.push_back(',');
-        out += site.map_name;
-    }
-    return out;
+    fail("native_link: unknown lookup kind");
 }
 
-std::string format_lookup_map_arg(const std::string &name,
-                                  const CompanionLoad::LookupSite &site)
+NativeLinkArgs::LookupSite make_link_lookup_site(
+    const CompanionLoad::LookupSite &site)
 {
-    const char *kind = "call";
-    switch (site.kind) {
-    case CompanionLoad::LookupSite::Kind::Call:
-        kind = "call";
-        break;
-    case CompanionLoad::LookupSite::Kind::Hash:
-        kind = "hash";
-        break;
-    case CompanionLoad::LookupSite::Kind::LruHash:
-        kind = "lru_hash";
-        break;
-    case CompanionLoad::LookupSite::Kind::PerCpuHash:
-        kind = "percpu_hash";
-        break;
-    case CompanionLoad::LookupSite::Kind::HashOfMaps:
-        kind = "hash_of_maps";
-        break;
-    case CompanionLoad::LookupSite::Kind::Array:
-        kind = "array";
-        break;
-    case CompanionLoad::LookupSite::Kind::PerCpuArray:
-        kind = "percpu_array";
-        break;
-    }
-
-    char buf[384];
-    std::snprintf(buf, sizeof(buf), "%s=%s,0x%llx,%u,%u,%u,%u,%u,0x%llx",
-                  name.c_str(),
-                  kind,
-                  static_cast<unsigned long long>(site.target_addr),
-                  static_cast<unsigned>(site.key_offset),
-                  static_cast<unsigned>(site.max_entries),
-                  static_cast<unsigned>(site.elem_size),
-                  static_cast<unsigned>(site.index_mask),
-                  static_cast<unsigned>(site.value_offset),
-                  static_cast<unsigned long long>(site.percpu_base_addr));
-    return std::string(buf);
+    return NativeLinkArgs::LookupSite{
+        lookup_kind_name(site.kind),
+        site.target_addr,
+        site.key_offset,
+        site.max_entries,
+        site.elem_size,
+        site.index_mask,
+        site.value_offset,
+        site.percpu_base_addr,
+        site.map_name,
+    };
 }
 
-std::string format_update_site_arg(size_t index,
-                                   const CompanionLoad::UpdateSite &site)
+const char *update_kind_name(CompanionLoad::UpdateSite::Kind kind)
 {
-    const char *kind = "call";
-    switch (site.kind) {
+    switch (kind) {
     case CompanionLoad::UpdateSite::Kind::Call:
-        kind = "call";
-        break;
+        return "call";
     case CompanionLoad::UpdateSite::Kind::Array:
-        kind = "array";
-        break;
+        return "array";
     case CompanionLoad::UpdateSite::Kind::PerCpuArray:
-        kind = "percpu_array";
-        break;
+        return "percpu_array";
     }
+    fail("native_link: unknown update kind");
+}
 
-    char buf[384];
-    std::snprintf(buf, sizeof(buf), "%zu=%s,0x%llx,%u,%u,%u,%u,0x%llx",
-                  index,
-                  kind,
-                  static_cast<unsigned long long>(site.target_addr),
-                  static_cast<unsigned>(site.max_entries),
-                  static_cast<unsigned>(site.elem_size),
-                  static_cast<unsigned>(site.value_size),
-                  static_cast<unsigned>(site.value_offset),
-                  static_cast<unsigned long long>(site.percpu_base_addr));
-    return std::string(buf);
+NativeLinkArgs::UpdateSite make_link_update_site(
+    const CompanionLoad::UpdateSite &site)
+{
+    return NativeLinkArgs::UpdateSite{
+        update_kind_name(site.kind),
+        site.target_addr,
+        site.max_entries,
+        site.elem_size,
+        site.value_size,
+        site.value_offset,
+        site.percpu_base_addr,
+    };
 }
 
 NativeLinkArgs build_native_link_args(
@@ -152,28 +98,28 @@ NativeLinkArgs build_native_link_args(
         uint64_t cpu_number_addr = kallsyms_lookup("cpu_number");
         this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
         if (cpu_number_addr != 0 && this_cpu_off_addr != 0) {
-            out.helpers.push_back(format_name_hex(kX86CpuNumberHelperKey, cpu_number_addr));
-            out.helpers.push_back(format_name_hex(kX86ThisCpuOffHelperKey, this_cpu_off_addr));
+            add_name_addr(out.helpers, kX86CpuNumberHelperKey, cpu_number_addr);
+            add_name_addr(out.helpers, kX86ThisCpuOffHelperKey, this_cpu_off_addr);
         }
-        out.helpers.push_back(format_name_hex(
-            kX86BpfMapMaxEntriesOffsetKey, K_BPF_MAP_MAX_ENTRIES_OFFSET));
-        out.helpers.push_back(format_name_hex(
-            kX86BpfArrayPtrsOffsetKey, K_BPF_ARRAY_PTRS_OFFSET));
-        out.helpers.push_back(format_name_hex(
-            kX86BpfProgBpfFuncOffsetKey, K_BPF_PROG_BPF_FUNC_OFFSET));
-        out.helpers.push_back(format_name_hex(kX86TailCallOffsetKey, 12));
+        add_name_addr(out.helpers, kX86BpfMapMaxEntriesOffsetKey,
+                      K_BPF_MAP_MAX_ENTRIES_OFFSET);
+        add_name_addr(out.helpers, kX86BpfArrayPtrsOffsetKey,
+                      K_BPF_ARRAY_PTRS_OFFSET);
+        add_name_addr(out.helpers, kX86BpfProgBpfFuncOffsetKey,
+                      K_BPF_PROG_BPF_FUNC_OFFSET);
+        add_name_addr(out.helpers, kX86TailCallOffsetKey, 12);
     }
 #elif defined(__aarch64__)
     {
         uint32_t cpu_offset = K_THREAD_INFO_CPU_OFFSET;
-        out.helpers.push_back(format_name_hex(kArm64ThreadInfoCpuOffsetHelperKey, cpu_offset));
+        add_name_addr(out.helpers, kArm64ThreadInfoCpuOffsetHelperKey, cpu_offset);
     }
 #endif
 
     for (const auto &helper : kSupportedHelpers) {
         uint64_t addr = kallsyms_lookup(helper.symbol);
         if (addr != 0) {
-            out.helpers.push_back(format_name_hex(helper.symbol, addr));
+            add_name_addr(out.helpers, helper.symbol, addr);
         }
     }
     static constexpr int kContextualHelperIds[] = {
@@ -184,13 +130,17 @@ NativeLinkArgs build_native_link_args(
         BPF_FUNC_sk_lookup_udp,
     };
     for (int helper_id : kContextualHelperIds) {
-        add_contextual_helper_alias_if_available(out.helpers, helper_id,
-                                                 companion.prog_type);
+        std::optional<std::pair<std::string, uint64_t>> alias =
+            contextual_helper_alias_if_available(helper_id, companion.prog_type);
+        if (!alias) {
+            continue;
+        }
+        add_name_addr(out.helpers, alias->first, alias->second);
     }
     for (const char *symbol : kRuntimeCallSymbols) {
         uint64_t addr = kallsyms_lookup(symbol);
         if (addr != 0) {
-            out.helpers.push_back(format_name_hex(symbol, addr));
+            add_name_addr(out.helpers, symbol, addr);
         }
     }
 
@@ -199,11 +149,11 @@ NativeLinkArgs build_native_link_args(
     std::sort(maps.begin(), maps.end(),
               [](const auto &a, const auto &b) { return a.first < b.first; });
     for (const auto &kv : maps) {
-        out.maps.push_back(format_name_hex(kv.first, 0));
+        add_name_addr(out.maps, kv.first, 0);
     }
 
     for (size_t i = 0; i < companion.lookup_sites.size(); i++) {
-        out.lookup_sites.push_back(format_lookup_site_arg(i, companion.lookup_sites[i]));
+        out.lookup_sites.push_back(make_link_lookup_site(companion.lookup_sites[i]));
     }
     std::vector<std::pair<std::string, std::string>> native_map_symbols(
         companion.native_map_symbols.begin(), companion.native_map_symbols.end());
@@ -218,10 +168,13 @@ NativeLinkArgs build_native_link_args(
         CompanionLoad::LookupSite site =
             lookup_site_for_map_meta(*meta, array_offsets, htab_offsets, this_cpu_off_addr);
         site.map_name = kv.first;
-        out.lookup_maps.push_back(format_lookup_map_arg(kv.first, site));
+        out.lookup_maps.push_back(NativeLinkArgs::LookupMap{
+            kv.first,
+            make_link_lookup_site(site),
+        });
     }
     for (size_t i = 0; i < companion.update_sites.size(); i++) {
-        out.update_sites.push_back(format_update_site_arg(i, companion.update_sites[i]));
+        out.update_sites.push_back(make_link_update_site(companion.update_sites[i]));
     }
     return out;
 }

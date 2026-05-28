@@ -57,7 +57,7 @@ fn lookup_map_spec(
         }
         if let Some(existing) = match_name {
             bail!(
-                "native map name {native_map_name:?} matches multiple --lookup-map entries: {existing:?} and {name:?}"
+                "native map name {native_map_name:?} matches multiple link-plan lookup_maps entries: {existing:?} and {name:?}"
             );
         }
         match_name = Some(name.as_str());
@@ -111,7 +111,7 @@ fn select_lookup_site(
         }
 
         bail!(
-            "x86 bpf_map_lookup_elem native call {native_call_index} in {sym_name} uses map {map_name:?} but no matching --lookup-site or --lookup-map metadata exists"
+            "x86 bpf_map_lookup_elem native call {native_call_index} in {sym_name} uses map {map_name:?} but no matching link-plan lookup_sites or lookup_maps metadata exists"
         );
     }
 
@@ -125,7 +125,7 @@ fn select_lookup_site(
     }
 
     bail!(
-        "x86 bpf_map_lookup_elem native call {native_call_index} in {sym_name} is missing --lookup-site metadata"
+        "x86 bpf_map_lookup_elem native call {native_call_index} in {sym_name} is missing link-plan lookup_sites metadata"
     );
 }
 
@@ -1272,9 +1272,13 @@ pub(super) fn rewrite_x86(
             // A `call rel32` whose ELF reloc carries disp32=0 placeholder
             // (PLT32 against a helper) decodes as `call next_ip` -- target
             // falls *inside* the current symbol but is NOT a symbol entry.
-            // We must NOT treat those as cross-symbol calls; the ELF reloc
-            // pass below picks them up instead.
-            if matches!(insn.flow_control(), FlowControl::Call) && original_target != 0 {
+            // We must NOT treat those as cross-symbol calls. Some proof
+            // objects decode the placeholder as a call to the containing
+            // symbol's first byte, so the relocation pre-scan is authoritative.
+            if matches!(insn.flow_control(), FlowControl::Call)
+                && original_target != 0
+                && !helper_call_sites.contains_key(&site_key)
+            {
                 let target_symbol =
                     find_decoded_call_target(elf, sym, original_target).and_then(|called| {
                         included
@@ -2038,9 +2042,10 @@ fn collect_x86_proof_relocs(
 
 /// Resolve ELF .text relocations attached to the bytes we just encoded.
 ///
-/// Helper calls keep a range-independent in-blob target: GOTPCREL calls point
-/// at literal-pool entries containing helper addresses, and PLT32 calls route
-/// through tail trampolines.
+/// Helper calls must already have been rewritten to side-band `call rel32`
+/// relocation slots by the decode pass. Remaining relocations are for map
+/// literals and local data references; a call-class relocation that reaches
+/// this pass is a linker bug and fails fast.
 fn apply_elf_relocations(
     elf: &object::File,
     layouts: &[SymbolLayout],
@@ -2072,8 +2077,6 @@ fn apply_elf_relocations(
 
     // Cache: map symbol name -> literal-pool entry byte offset in blob.
     let mut map_pool_entry: HashMap<String, usize> = HashMap::new();
-    // Cache: helper symbol name -> tail trampoline byte offset in blob.
-    let mut helper_trampoline: HashMap<String, usize> = HashMap::new();
     // Cache: local rodata/data symbol name -> embedded copy offset.
     // R_X86_64_PC32 against a `.L__const.<fn>.<arr>` symbol (clang puts
     // small const initializers there for 16+ byte loads via SSE) is
@@ -2167,28 +2170,21 @@ fn apply_elf_relocations(
                             .copy_from_slice(&d.to_le_bytes());
                         continue;
                     }
-                    let helper_addr = *helper_addrs.get(&target_name).ok_or_else(|| {
-                        anyhow!(
-                            "PLT32 reloc against unknown helper {}: \
-                             pass --helper {}=0x... on the command line",
+                    if helper_addrs.contains_key(&target_name) {
+                        bail!(
+                            "PLT32 helper call to {} in {} at {:#x} reached relocation pass; \
+                             helper calls must be rewritten to direct rel32 slots",
                             target_name,
-                            target_name
-                        )
-                    })?;
-                    let tramp_off = if let Some(&off) = helper_trampoline.get(&target_name) {
-                        off
-                    } else {
-                        let off = blob.len();
-                        blob.extend_from_slice(&[0xFF, 0x25, 0x00, 0x00, 0x00, 0x00]);
-                        blob.extend_from_slice(&helper_addr.to_le_bytes());
-                        helper_trampoline.insert(target_name.clone(), off);
-                        off
-                    };
-                    let rip_after_call = (new_opcode_off + 5) as i64;
-                    let disp = tramp_off as i64 - rip_after_call;
-                    let d =
-                        i32::try_from(disp).map_err(|_| anyhow!("call disp {disp} exceeds i32"))?;
-                    blob[new_opcode_off + 1..new_opcode_off + 5].copy_from_slice(&d.to_le_bytes());
+                            layout.sym.name,
+                            opcode_local_off
+                        );
+                    }
+                    bail!(
+                        "unsupported PLT32 external call to {} in {} at {:#x}",
+                        target_name,
+                        layout.sym.name,
+                        opcode_local_off
+                    );
                 }
                 // GOT-relative references (R_X86_64_GOTPCREL=9,
                 // _GOTPCRELX=41, _REX_GOTPCRELX=42). clang emits these
@@ -2253,10 +2249,7 @@ fn apply_elf_relocations(
                             .or_else(|| map_addrs.get(&target_name).copied())
                             .ok_or_else(|| {
                                 anyhow!(
-                                    "GOT-relative reloc against unknown symbol {}: \
-                                 pass --helper {}=0x... or --map {}=0x... on the command line",
-                                    target_name,
-                                    target_name,
+                                    "GOT-relative reloc against unknown symbol {}; add it to link-plan helpers or maps",
                                     target_name
                                 )
                             })?
@@ -2292,6 +2285,15 @@ fn apply_elf_relocations(
                     let off_within_insn =
                         (local_patch_off - layout.insn_local_ip[insn_idx]) as usize;
                     let disp32_off = new_insn_off + off_within_insn;
+                    if x86_encoded_instruction_is_indirect_call(blob, new_insn_off)? {
+                        bail!(
+                            "GOT-relative indirect call to {} in {} at {:#x} reached relocation pass; \
+                             call sites must be rewritten to direct rel32 slots",
+                            target_name,
+                            layout.sym.name,
+                            layout.insn_local_ip[insn_idx]
+                        );
+                    }
 
                     // Reserve / reuse a pool entry. For
                     // per-call-site routed `bpf_map_lookup_elem` we
@@ -3264,6 +3266,18 @@ fn x86_indirect_call_register(insn: &Instruction) -> Option<Register> {
     x86_gpr64_family(insn.op0_register())
 }
 
+fn x86_encoded_instruction_is_indirect_call(blob: &[u8], off: usize) -> Result<bool> {
+    if off >= blob.len() {
+        bail!("x86 instruction offset {off:#x} exceeds encoded blob size");
+    }
+    let mut decoder = Decoder::with_ip(64, &blob[off..], off as u64, DecoderOptions::NONE);
+    let insn = decoder.decode();
+    if insn.is_invalid() {
+        bail!("invalid encoded x86 instruction at blob offset {off:#x}");
+    }
+    Ok(matches!(insn.flow_control(), FlowControl::IndirectCall))
+}
+
 fn x86_written_gpr_family(insn: &Instruction) -> Option<Register> {
     if matches!(
         insn.flow_control(),
@@ -3458,7 +3472,7 @@ fn x86_required_u32_helper_arg(
 ) -> Result<u32> {
     let value = *helper_addrs
         .get(key)
-        .ok_or_else(|| anyhow!("x86 tail_call lowering missing --helper {key}=..."))?;
+        .ok_or_else(|| anyhow!("x86 tail_call lowering missing link-plan helper {key}"))?;
     u32::try_from(value).map_err(|_| anyhow!("{label} does not fit u32: {value:#x}"))
 }
 
