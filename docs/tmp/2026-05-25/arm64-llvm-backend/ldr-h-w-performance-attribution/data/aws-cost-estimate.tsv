@@ -1,5 +1,0 @@
-group	instance_id	compute_usd	ebs_usd	total_usd	compute_price_usd_per_hour	ebs_price_usd_per_gb_month	root_volume_gb	notes
-baseline	i-0c37bdfc755e13e77	0.00268333	0.00056012	0.00324346	0.0168000000	0.0800000000	32	price list on-demand Linux t4g.small plus gp3 root only; excludes data transfer, tax, free tier, credits, Savings Plans, Reserved Instances, account discounts
-control-disabled	i-07d728cdcc925459c	0.00277200	0.00057863	0.00335063	0.0168000000	0.0800000000	32	price list on-demand Linux t4g.small plus gp3 root only; excludes data transfer, tax, free tier, credits, Savings Plans, Reserved Instances, account discounts
-treatment-wide-load	i-028f3ad153f92208f	0.00241267	0.00050362	0.00291629	0.0168000000	0.0800000000	32	price list on-demand Linux t4g.small plus gp3 root only; excludes data transfer, tax, free tier, credits, Savings Plans, Reserved Instances, account discounts
-TOTAL	-	-	-	0.00951037	0.0168000000	0.0800000000	32	sum of estimated compute and gp3 root EBS only

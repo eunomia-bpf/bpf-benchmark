@@ -1,4 +1,0 @@
-group	instance_id	instance_type	region	state	launch_time_utc	end_time_utc	wall_seconds	wall_hours	ec2_rate_usd_per_hour	ebs_rate_usd_per_gb_month	root_volume_gb	ec2_cost_usd	ebs_cost_usd	total_cost_usd
-baseline	i-0d1f5cede3e2a5f4f	t4g.small	us-east-1	terminated	2026-05-26T02:00:21+00:00	2026-05-26T02:08:43.315737+00:00	502	0.139532	0.0168000000	0.0800000000	32	0.00234414	0.00048932	0.00283346
-control-disabled	i-080a8b074d1d3a6a7	t4g.small	us-east-1	terminated	2026-05-26T02:10:47+00:00	2026-05-26T02:18:41.594399+00:00	475	0.131832	0.0168000000	0.0800000000	32	0.00221477	0.00046231	0.00267709
-treatment-csel-only	i-05466c6d6c3f53ac9	t4g.small	us-east-1	terminated	2026-05-26T02:20:26+00:00	2026-05-26T02:29:41.235559+00:00	555	0.154232	0.0168000000	0.0800000000	32	0.00259110	0.00054087	0.00313197

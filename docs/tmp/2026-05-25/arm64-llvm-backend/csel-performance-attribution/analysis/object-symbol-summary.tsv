@@ -1,4 +1,0 @@
-group	objects	kfunc_symbol_objects	arm64_symbol_objects	x86_symbol_objects	arm64_tst_objects	arm64_csel_ne_objects	arm64_tst_relocations	arm64_csel_ne_relocations
-baseline	30	0	0	0	0	0	0	0
-control-disabled	30	0	0	0	0	0	0	0
-treatment-csel-only	30	1	1	0	1	1	2	2

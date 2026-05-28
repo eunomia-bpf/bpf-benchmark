@@ -1,4 +1,0 @@
-group	objects	kfunc_symbol_objects	arm64_symbol_objects	x86_symbol_objects	arm64_relocations	x86_relocations	bpf_arm64_cmp_w_relocations	bpf_arm64_ccmp_w_relocations	bpf_arm64_cset_x_cond_relocations	bpf_arm64_cmp_x_relocations	bpf_arm64_ccmp_x_relocations	hit_benchmarks
-baseline	31	0	0	0	0	0	0	0	0	0	0	
-control-disabled	31	0	0	0	0	0	0	0	0	0	0	
-treatment-ccmp-only	31	2	2	0	8	0	2	4	2	0	0	ccmp_all_nonzero,cilium_socket_lb_service_select

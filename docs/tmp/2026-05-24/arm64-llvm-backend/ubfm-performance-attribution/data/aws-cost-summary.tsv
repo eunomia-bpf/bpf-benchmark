@@ -1,4 +1,0 @@
-attempt	instance_id	launch_utc	observed_end_utc	duration_seconds	instance_type	ec2_usd_per_hour	root_volume_gb	ebs_gp3_usd_per_gb_month	compute_cost_usd	ebs_cost_usd	total_cost_usd	final_state
-baseline	i-0dc75f4a9cd8ffba3	2026-05-24T09:17:44+00:00	2026-05-24T09:26:49.681502+00:00	545.682	t4g.small	0.0168000000	32	0.0800000000	0.002547	0.000532	0.003078	terminated
-control-disabled	i-0aadd703ccce49d0a	2026-05-24T09:27:52+00:00	2026-05-24T09:36:55.812851+00:00	543.813	t4g.small	0.0168000000	32	0.0800000000	0.002538	0.000530	0.003068	terminated
-treatment-ubfm-only	i-043db962072bce0dc	2026-05-24T09:37:58+00:00	2026-05-24T09:46:51.421275+00:00	533.421	t4g.small	0.0168000000	32	0.0800000000	0.002489	0.000520	0.003009	terminated

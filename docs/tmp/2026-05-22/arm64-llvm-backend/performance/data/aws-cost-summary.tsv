@@ -1,4 +1,0 @@
-attempt	instance_id	instance_type	launch_time	termination_time	wall_seconds	ec2_rate_usd_per_hour	ebs_rate_usd_per_gb_month	root_gb	ec2_usd	ebs_usd	total_usd	state
-baseline	i-089b8041c31b2abbd	t4g.small	2026-05-22T04:44:12+00:00	2026-05-22T04:53:21+00:00	549	0.01680000	0.08000000	32	0.002562000	0.000534795	0.003096795	terminated
-control-disabled	i-0627910b86b270d2e	t4g.small	2026-05-22T04:55:37+00:00	2026-05-22T05:03:27+00:00	470	0.01680000	0.08000000	32	0.002193333	0.000457839	0.002651172	terminated
-treatment-rev-extr	i-0418498a591888bda	t4g.small	2026-05-22T05:05:37+00:00	2026-05-22T05:14:29+00:00	532	0.01680000	0.08000000	32	0.002482667	0.000518234	0.003000901	terminated

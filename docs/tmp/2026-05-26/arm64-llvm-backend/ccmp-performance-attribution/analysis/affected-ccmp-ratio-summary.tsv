@@ -1,5 +1,0 @@
-benchmark	runtime	baseline_ns	control_ns	treatment_ns	treatment_over_control	baseline_over_control	control_bpf_bytes	treatment_bpf_bytes	control_native_bytes	treatment_native_bytes
-ccmp_all_nonzero	kernel	17	17	17	1.0	1.0	320	376	248	256
-ccmp_all_nonzero	native	5	5	5	1.0	1.0	0	0	100	100
-cilium_socket_lb_service_select	kernel	1180	1049	1049	1.0	1.1248808388941849	1872	1912	1112	1120
-cilium_socket_lb_service_select	native	329	330	329	0.996969696969697	0.996969696969697	0	0	348	348

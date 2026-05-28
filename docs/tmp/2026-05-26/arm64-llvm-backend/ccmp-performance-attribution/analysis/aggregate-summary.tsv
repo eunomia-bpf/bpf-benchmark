@@ -1,7 +1,0 @@
-scope	runtime	benchmarks	geomean_treatment_over_control	wins_lt_0.98	losses_gt_1.02	neutral
-all	kernel	31	1.0100635890268639	1	5	25
-all	native	31	1.0008600010473123	0	1	30
-affected-ccmp	kernel	2	1.0	0	0	2
-affected-ccmp	native	2	0.9984836989003361	0	0	2
-selected-ccmp-target	kernel	1	1.0	0	0	1
-selected-ccmp-target	native	1	1.0	0	0	1

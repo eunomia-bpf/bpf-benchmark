@@ -1,4 +1,0 @@
-group	instance_id	instance_type	region	state	launch_time_utc	local_start	local_end_or_terminate	aws_wall_seconds
-baseline	i-0c37bdfc755e13e77	t4g.small	us-east-1	terminated	2026-05-25T21:50:36+00:00	2026-05-25T17:49:57-04:00	2026-05-25T18:00:11-04:00	575
-control-disabled	i-07d728cdcc925459c	t4g.small	us-east-1	terminated	2026-05-25T22:01:22+00:00	2026-05-25T18:00:41-04:00	2026-05-25T18:11:16-04:00	594
-treatment-wide-load	i-028f3ad153f92208f	t4g.small	us-east-1	terminated	2026-05-25T22:12:14+00:00	2026-05-25T18:11:35-04:00	2026-05-25T18:20:51-04:00	517

@@ -1,0 +1,4 @@
+group	instance_id	instance_type	state	launch_time	terminate_time	wall_seconds	compute_usd	ebs_usd	total_usd
+control-disabled	i-0e94c89b374318c4b	t4g.small	terminated	2026-05-28T00:24:12+00:00	2026-05-28T00:33:47+00:00	575	0.002683333	0.000567901	0.003251235
+treatment-all-existing-abi	i-028d131a6eef3b170	t4g.small	terminated	2026-05-28T00:35:14+00:00	2026-05-28T00:45:04+00:00	590	0.002753333	0.000582716	0.003336049
+baseline	i-095a134ccaf52b006	t4g.small	terminated	2026-05-28T00:13:19+00:00	2026-05-28T00:22:45+00:00	566	0.002641333	0.000559012	0.003200346
