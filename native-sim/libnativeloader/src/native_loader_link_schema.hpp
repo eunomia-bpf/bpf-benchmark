@@ -138,11 +138,6 @@ NativeLinkArgs build_native_link_args(
 {
     NativeLinkArgs out{};
     out.linker = native_link_binary(options.native_link_path);
-    if (companion.use_helper_oracle) {
-        out.oracle_jit_base = companion.oracle_jit_base;
-        out.oracle_jited = companion.oracle_jited;
-        out.oracle_xlated = companion.oracle_xlated;
-    }
     BpfArrayOffsets array_offsets{
         K_BPF_ARRAY_VALUE_OFFSET,
         K_BPF_ARRAY_PPTRS_OFFSET,
@@ -181,9 +176,6 @@ NativeLinkArgs build_native_link_args(
             out.helpers.push_back(format_name_hex(helper.symbol, addr));
         }
     }
-    out.helpers.insert(out.helpers.end(),
-                       companion.helper_args.begin(),
-                       companion.helper_args.end());
     static constexpr int kContextualHelperIds[] = {
         BPF_FUNC_get_prandom_u32,
         BPF_FUNC_fib_lookup,

@@ -91,7 +91,7 @@ fn select_lookup_site(
     native_map_name: Option<&str>,
     sym_name: &str,
     generic_target_addr: u64,
-) -> Result<(String, LookupSiteSpec)> {
+) -> Result<(String, Option<usize>, LookupSiteSpec)> {
     if let Some(map_name) = native_map_name {
         if let Some((idx, spec)) = lookup_sites
             .iter()
@@ -99,15 +99,15 @@ fn select_lookup_site(
             .find(|(idx, spec)| !used[*idx] && lookup_site_matches_native_map(spec, map_name))
         {
             used[idx] = true;
-            return Ok((idx.to_string(), spec.clone()));
+            return Ok((idx.to_string(), Some(idx), spec.clone()));
         }
 
         if let Some(spec) = lookup_map_spec(lookup_maps, map_name)? {
-            return Ok((format!("map:{map_name}"), spec));
+            return Ok((format!("map:{map_name}"), None, spec));
         }
 
         if let Some(spec) = generic_lookup_site(generic_target_addr, Some(map_name)) {
-            return Ok((format!("generic:{map_name}"), spec));
+            return Ok((format!("generic:{map_name}"), None, spec));
         }
 
         bail!(
@@ -117,11 +117,11 @@ fn select_lookup_site(
 
     if let Some((idx, spec)) = lookup_sites.iter().enumerate().find(|(idx, _)| !used[*idx]) {
         used[idx] = true;
-        return Ok((idx.to_string(), spec.clone()));
+        return Ok((idx.to_string(), Some(idx), spec.clone()));
     }
 
     if let Some(spec) = generic_lookup_site(generic_target_addr, None) {
-        return Ok(("generic".to_string(), spec));
+        return Ok(("generic".to_string(), None, spec));
     }
 
     bail!(
@@ -129,7 +129,7 @@ fn select_lookup_site(
     );
 }
 
-fn bpf_helper_name_from_id(helper_id: u64) -> Option<&'static str> {
+pub(super) fn bpf_helper_name_from_id(helper_id: u64) -> Option<&'static str> {
     match helper_id {
         1 => Some("bpf_map_lookup_elem"),
         2 => Some("bpf_map_update_elem"),
@@ -233,22 +233,6 @@ fn bpf_helper_name_from_id(helper_id: u64) -> Option<&'static str> {
         195 => Some("bpf_map_lookup_percpu_elem"),
         _ => None,
     }
-}
-
-pub(super) fn decode_x86_external_call_targets(jited: &[u8], jit_base: u64) -> Result<Vec<u64>> {
-    let mut targets = Vec::new();
-    let mut decoder = Decoder::with_ip(64, jited, jit_base, DecoderOptions::NONE);
-    while decoder.can_decode() {
-        let insn = decoder.decode();
-        if !insn.is_call_near() {
-            continue;
-        }
-        let target = insn.near_branch_target();
-        if !target_is_inside_jit_image(target, jit_base, jited.len()) {
-            targets.push(target);
-        }
-    }
-    Ok(targets)
 }
 
 fn build_x86_get_smp_processor_id_inline(
@@ -1022,7 +1006,6 @@ pub(super) fn rewrite_x86(
     lookup_sites: &[LookupSiteSpec],
     lookup_maps: &HashMap<String, LookupSiteSpec>,
     update_sites: &[UpdateSiteSpec],
-    oracle_targets: &[u64],
     proof_mode: bool,
     show: bool,
 ) -> Result<RewriteResult> {
@@ -1064,7 +1047,6 @@ pub(super) fn rewrite_x86(
         .copied()
         .unwrap_or(0);
     let mut update_call_counter: usize = 0;
-    let mut next_oracle_target: usize = 0;
     let mut resolved_helper_call_sites: HashSet<LocalSiteKey> = HashSet::new();
     let mut resolved_got_relocations: HashSet<LocalSiteKey> = HashSet::new();
 
@@ -1398,7 +1380,7 @@ pub(super) fn rewrite_x86(
                         lookup_call_counter += 1;
                         let native_map_name =
                             map_symbol_registers.get(&Register::RDI).map(String::as_str);
-                        let (site_label, spec) = select_lookup_site(
+                        let (site_label, _site_index, spec) = select_lookup_site(
                             lookup_sites,
                             lookup_maps,
                             &mut lookup_site_used,
@@ -1430,8 +1412,6 @@ pub(super) fn rewrite_x86(
                             | LookupKind::HashOfMaps => {
                                 let helper_addr = resolve_lookup_site_target(
                                     &spec,
-                                    oracle_targets,
-                                    &mut next_oracle_target,
                                     &format!("x86 lookup-site {site_label} ({:?})", spec.kind),
                                 )?;
                                 push_x86_helper_call_reloc(
@@ -1463,14 +1443,6 @@ pub(super) fn rewrite_x86(
                         if let Some(spec) = update_sites.get(ordinal) {
                             match spec.kind {
                                 UpdateKind::Array | UpdateKind::PerCpuArray => {
-                                    let _ = consume_oracle_target(
-                                        oracle_targets,
-                                        &mut next_oracle_target,
-                                        &format!(
-                                            "x86 update-site {ordinal} ({:?}) late inline",
-                                            spec.kind
-                                        ),
-                                    )?;
                                     for ib in build_x86_array_update(spec)? {
                                         push_x86_synthetic(
                                             &mut local,
@@ -1485,10 +1457,8 @@ pub(super) fn rewrite_x86(
                                     continue;
                                 }
                                 UpdateKind::Call => {
-                                    let helper_addr = resolve_oracle_preferred_site_target(
+                                    let helper_addr = require_call_target(
                                         spec.target_addr,
-                                        oracle_targets,
-                                        &mut next_oracle_target,
                                         &format!("x86 update-site {ordinal}"),
                                     )?;
                                     push_x86_helper_call_reloc(
@@ -1509,8 +1479,6 @@ pub(super) fn rewrite_x86(
                     let helper_addr = resolve_helper_target(
                         &name,
                         helper_addrs,
-                        oracle_targets,
-                        &mut next_oracle_target,
                         &format!("x86 helper call {name}"),
                     )?;
                     push_x86_helper_call_reloc(
@@ -1567,7 +1535,7 @@ pub(super) fn rewrite_x86(
                 if name == "bpf_map_lookup_elem" {
                     let native_call_index = lookup_call_counter;
                     lookup_call_counter += 1;
-                    let (_site_label, spec) = select_lookup_site(
+                    let (_site_label, _site_index, spec) = select_lookup_site(
                         lookup_sites,
                         lookup_maps,
                         &mut lookup_site_used,
@@ -1627,13 +1595,6 @@ pub(super) fn rewrite_x86(
             new_offset_in_sym: encoded.new_instruction_offsets.clone(),
         });
         blob.extend_from_slice(&encoded.code_buffer);
-    }
-
-    if !proof_mode && next_oracle_target != oracle_targets.len() {
-        bail!(
-            "companion JIT oracle has {} unused x86 helper target(s)",
-            oracle_targets.len() - next_oracle_target
-        );
     }
 
     // Apply intra-blob Call patches first (cross-symbol direct calls);
