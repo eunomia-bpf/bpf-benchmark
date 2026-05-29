@@ -1,0 +1,4 @@
+item	unit	price	source
+EC2 t4g.small Linux On-Demand us-east-1	USD/hour	0.0168	AWS public On-Demand price assumption used by prior project reports
+EBS gp3 root volume	USD/GB-month	0.08	AWS public gp3 storage price assumption used by prior project reports
+root volume size	GB	32	aws-config RUN_ROOT_VOLUME_GB

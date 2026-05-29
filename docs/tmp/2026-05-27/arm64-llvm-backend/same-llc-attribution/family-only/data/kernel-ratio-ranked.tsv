@@ -1,0 +1,375 @@
+group	benchmark	affected_by_group_symbols	families	control_median_exec_ns	group_median_exec_ns	ratio
+treatment-ldr-wide-load	packet_record_bounds_window	yes	LDR	343	199	0.5801749271137027
+treatment-ldr-wide-load	csel_select64	yes	LDR	28	17	0.6071428571428571
+treatment-extr-rotate	siphash_rotate64_mixer	yes	EXTR	160	107	0.66875
+treatment-extr-rotate	flow_5tuple_rss_hash	yes	EXTR	48	38	0.7916666666666666
+treatment-ldr-wide-load	simple	no		15	13	0.8666666666666667
+treatment-ldr-direct-load	simple	no		15	13	0.8666666666666667
+treatment-ldp-stp-pair-mem	simple	no		15	13	0.8666666666666667
+treatment-csel-cmov	simple	no		15	13	0.8666666666666667
+treatment-ldr-wide-load	siphash_rotate64_mixer	yes	LDR	160	139	0.86875
+treatment-csel-cmov	ccmp_all_nonzero	no		17	15	0.8823529411764706
+treatment-prfm	packet_toeplitz_rss_hash	yes	PRFM	525	470	0.8952380952380953
+treatment-ldr-direct-load	packet_toeplitz_rss_hash	no		525	472	0.8990476190476191
+treatment-csel-cmov	stp_stack_pair	no		21	19	0.9047619047619048
+treatment-ccmp	packet_toeplitz_rss_hash	no		525	478	0.9104761904761904
+treatment-mov	packet_toeplitz_rss_hash	no		525	479	0.9123809523809524
+treatment-ldp-stp-pair-mem	packet_toeplitz_rss_hash	no		525	480	0.9142857142857143
+treatment-ldr-wide-load	simple_packet	no		14	13	0.9285714285714286
+treatment-ldr-direct-load	simple_packet	no		14	13	0.9285714285714286
+treatment-ldp-stp-pair-mem	csel_select64	no		28	26	0.9285714285714286
+treatment-ldp-stp-pair-mem	simple_packet	no		14	13	0.9285714285714286
+treatment-csel-cmov	csel_select64	yes	CCMP/CMP/CSET,CSEL	28	26	0.9285714285714286
+treatment-csel-cmov	simple_packet	no		14	13	0.9285714285714286
+treatment-ldr-wide-load	bpf_local_call_fanout_dispatch	yes	LDR	325	303	0.9323076923076923
+treatment-extr-rotate	simple	no		15	14	0.9333333333333333
+treatment-ccmp	simple	no		15	14	0.9333333333333333
+treatment-mov	simple	no		15	14	0.9333333333333333
+treatment-prfm	simple	yes	PRFM	15	14	0.9333333333333333
+treatment-ubfm-bextr	tracee_syscall_name_table_lookup	no		344	326	0.9476744186046512
+treatment-extr-rotate	arm64_direct_abi_coverage	yes	EXTR	20	19	0.95
+treatment-extr-rotate	katran_lb_consistent_hash_select	yes	EXTR	61	58	0.9508196721311475
+treatment-rev-unary	ldp_stack_pair	no		21	20	0.9523809523809523
+treatment-rev-unary	stp_stack_pair	no		21	20	0.9523809523809523
+treatment-extr-rotate	ldp_stack_pair	yes	EXTR	21	20	0.9523809523809523
+treatment-extr-rotate	stp_stack_pair	no		21	20	0.9523809523809523
+treatment-ubfm-bextr	ldp_stack_pair	no		21	20	0.9523809523809523
+treatment-ldr-wide-load	stp_stack_pair	no		21	20	0.9523809523809523
+treatment-ldr-direct-load	ldp_stack_pair	yes	LDR	21	20	0.9523809523809523
+treatment-str-direct-store	ldp_stack_pair	no		21	20	0.9523809523809523
+treatment-ldp-stp-pair-mem	stp_stack_pair	yes	LDP/STP	21	20	0.9523809523809523
+treatment-csel-cmov	ldp_stack_pair	no		21	20	0.9523809523809523
+treatment-ccmp	ldp_stack_pair	no		21	20	0.9523809523809523
+treatment-ccmp	stp_stack_pair	no		21	20	0.9523809523809523
+treatment-mov	stp_stack_pair	no		21	20	0.9523809523809523
+treatment-ldr-direct-load	tracee_syscall_name_table_lookup	no		344	330	0.9593023255813954
+treatment-extr-rotate	cilium_ct_nat_tuple_rewrite	yes	EXTR	474	455	0.959915611814346
+treatment-mov	tracee_syscall_name_table_lookup	no		344	331	0.9622093023255814
+treatment-ldr-direct-load	csel_select64	no		28	27	0.9642857142857143
+treatment-ldr-wide-load	flow_5tuple_rss_hash	no		48	47	0.9791666666666666
+treatment-csel-cmov	flow_5tuple_rss_hash	no		48	47	0.9791666666666666
+treatment-ldr-wide-load	trace_event_type_switch_dispatch	yes	LDR	680	666	0.9794117647058823
+treatment-ubfm-bextr	packed_header_bitfield_decode	yes	UBFM	937	921	0.9829242262540021
+treatment-ldr-wide-load	katran_lb_consistent_hash_select	yes	LDR	61	60	0.9836065573770492
+treatment-ldr-direct-load	tracee_http_method_prefix_detect	no		61	60	0.9836065573770492
+treatment-extr-rotate	bcc_tcpconnect_ipv4_tuple_filter	yes	EXTR	320	315	0.984375
+treatment-ubfm-bextr	bcc_runqlat_log2_histogram_bucket	yes	UBFM	4001	3954	0.9882529367658085
+treatment-ldr-wide-load	packet_toeplitz_rss_hash	no		525	521	0.9923809523809524
+treatment-ldr-direct-load	bcc_runqlat_log2_histogram_bucket	no		4001	3972	0.9927518120469883
+treatment-ldr-wide-load	payload_prefix_memcmp_scan	yes	LDR	287	285	0.9930313588850174
+treatment-ldr-wide-load	bcc_runqlat_log2_histogram_bucket	yes	LDR	4001	3974	0.9932516870782304
+treatment-ldr-wide-load	bcc_tcpconnect_ipv4_tuple_filter	yes	LDR	320	318	0.99375
+treatment-extr-rotate	packet_toeplitz_rss_hash	no		525	522	0.9942857142857143
+treatment-str-direct-store	packet_toeplitz_rss_hash	no		525	522	0.9942857142857143
+treatment-ldr-wide-load	packed_header_bitfield_decode	yes	LDR	937	932	0.9946638207043756
+treatment-ldr-wide-load	otel_stack_frame_unwind_scan	yes	LDR	382	380	0.9947643979057592
+treatment-str-direct-store	sorted_rule_binary_search	no		1943	1933	0.9948533196088523
+treatment-extr-rotate	sorted_rule_binary_search	no		1943	1934	0.9953679876479671
+treatment-ccmp	sorted_rule_binary_search	no		1943	1934	0.9953679876479671
+treatment-csel-cmov	bcc_runqlat_log2_histogram_bucket	no		4001	3984	0.9957510622344414
+treatment-ldr-wide-load	cilium_ct_nat_tuple_rewrite	yes	LDR	474	472	0.9957805907172996
+treatment-ldr-wide-load	tetragon_process_event_arg_filter	yes	LDR	524	522	0.9961832061068703
+treatment-ubfm-bextr	packet_toeplitz_rss_hash	no		525	523	0.9961904761904762
+treatment-rev-unary	bcc_runqlat_log2_histogram_bucket	no		4001	3986	0.9962509372656836
+treatment-ldr-direct-load	sorted_rule_binary_search	no		1943	1936	0.9963973237261966
+treatment-ldp-stp-pair-mem	bcc_runqlat_log2_histogram_bucket	no		4001	3987	0.9965008747813047
+treatment-ldr-wide-load	bitmap_popcount_scan	yes	LDR	2294	2286	0.9965126416739319
+treatment-mov	bitmap_popcount_scan	no		2294	2286	0.9965126416739319
+treatment-ubfm-bextr	payload_prefix_memcmp_scan	no		287	286	0.9965156794425087
+treatment-ldr-direct-load	payload_prefix_memcmp_scan	no		287	286	0.9965156794425087
+treatment-str-direct-store	payload_prefix_memcmp_scan	no		287	286	0.9965156794425087
+treatment-ldp-stp-pair-mem	payload_prefix_memcmp_scan	no		287	286	0.9965156794425087
+treatment-mov	bcc_runqlat_log2_histogram_bucket	no		4001	3988	0.9967508122969257
+treatment-ldr-wide-load	packet_checksum_fold	yes	LDR	33088	32982	0.996796421663443
+treatment-ubfm-bextr	bcc_tcpconnect_ipv4_tuple_filter	yes	UBFM	320	319	0.996875
+treatment-ldr-direct-load	bcc_tcpconnect_ipv4_tuple_filter	no		320	319	0.996875
+treatment-ccmp	bcc_tcpconnect_ipv4_tuple_filter	no		320	319	0.996875
+treatment-ldr-direct-load	bitmap_popcount_scan	no		2294	2287	0.9969485614646905
+treatment-str-direct-store	packet_record_bounds_window	no		343	342	0.9970845481049563
+treatment-csel-cmov	packet_record_bounds_window	no		343	342	0.9970845481049563
+treatment-ldr-wide-load	cgroup_skb_hash_chain	yes	LDR	1039	1036	0.9971126082771896
+treatment-rev-unary	otel_stack_frame_unwind_scan	no		382	381	0.9973821989528796
+treatment-extr-rotate	otel_stack_frame_unwind_scan	no		382	381	0.9973821989528796
+treatment-ldr-direct-load	otel_stack_frame_unwind_scan	no		382	381	0.9973821989528796
+treatment-str-direct-store	otel_stack_frame_unwind_scan	no		382	381	0.9973821989528796
+treatment-ldp-stp-pair-mem	otel_stack_frame_unwind_scan	no		382	381	0.9973821989528796
+treatment-ccmp	otel_stack_frame_unwind_scan	no		382	381	0.9973821989528796
+treatment-extr-rotate	bitmap_popcount_scan	no		2294	2288	0.997384481255449
+treatment-str-direct-store	bitmap_popcount_scan	no		2294	2289	0.9978204010462075
+treatment-extr-rotate	cilium_socket_lb_service_select	no		1037	1035	0.9980713596914176
+treatment-ubfm-bextr	cilium_socket_lb_service_select	yes	UBFM	1037	1035	0.9980713596914176
+treatment-str-direct-store	cilium_socket_lb_service_select	no		1037	1035	0.9980713596914176
+treatment-ldp-stp-pair-mem	cilium_socket_lb_service_select	no		1037	1035	0.9980713596914176
+treatment-extr-rotate	tetragon_process_event_arg_filter	no		524	523	0.9980916030534351
+treatment-ldr-wide-load	tc_packet_checksum_fold	yes	LDR	33038	32975	0.9980931049094982
+treatment-rev-unary	packet_toeplitz_rss_hash	no		525	524	0.9980952380952381
+treatment-csel-cmov	packet_toeplitz_rss_hash	no		525	524	0.9980952380952381
+treatment-str-direct-store	packet_checksum_fold	no		33088	33033	0.9983377659574468
+treatment-ccmp	packet_checksum_fold	no		33088	33033	0.9983377659574468
+treatment-mov	sorted_rule_binary_search	no		1943	1940	0.9984559958826557
+treatment-rev-unary	packet_checksum_fold	no		33088	33037	0.9984586557059961
+treatment-mov	packet_checksum_fold	no		33088	33038	0.9984888781431335
+treatment-ldp-stp-pair-mem	packet_checksum_fold	no		33088	33039	0.9985191005802708
+treatment-ubfm-bextr	trace_event_type_switch_dispatch	no		680	679	0.9985294117647059
+treatment-csel-cmov	trace_event_type_switch_dispatch	no		680	679	0.9985294117647059
+treatment-extr-rotate	packet_checksum_fold	no		33088	33041	0.9985795454545454
+treatment-csel-cmov	bitmap_popcount_scan	no		2294	2291	0.9986922406277245
+treatment-prfm	bitmap_popcount_scan	yes	PRFM	2294	2291	0.9986922406277245
+treatment-ldr-wide-load	bpftrace_comm_key_fnv_hash	yes	LDR	1656	1654	0.998792270531401
+treatment-extr-rotate	packed_header_bitfield_decode	no		937	936	0.9989327641408752
+treatment-ldr-direct-load	packed_header_bitfield_decode	no		937	936	0.9989327641408752
+treatment-csel-cmov	packed_header_bitfield_decode	no		937	936	0.9989327641408752
+treatment-mov	packed_header_bitfield_decode	no		937	936	0.9989327641408752
+treatment-ldr-wide-load	sorted_rule_binary_search	yes	LDR	1943	1941	0.9989706639217705
+treatment-rev-unary	cilium_socket_lb_service_select	no		1037	1036	0.9990356798457087
+treatment-prfm	cgroup_skb_hash_chain	yes	PRFM	1039	1038	0.9990375360923965
+treatment-mov	tc_packet_checksum_fold	no		33038	33033	0.9998486591198015
+treatment-ubfm-bextr	tc_packet_checksum_fold	no		33038	33037	0.9999697318239603
+treatment-rev-unary	arm64_direct_abi_coverage	no		20	20	1.0
+treatment-rev-unary	bpftrace_comm_key_fnv_hash	no		1656	1656	1.0
+treatment-rev-unary	ccmp_all_nonzero	no		17	17	1.0
+treatment-rev-unary	cgroup_skb_hash_chain	no		1039	1039	1.0
+treatment-rev-unary	cilium_ct_nat_tuple_rewrite	no		474	474	1.0
+treatment-rev-unary	csel_select64	no		28	28	1.0
+treatment-rev-unary	flow_5tuple_rss_hash	no		48	48	1.0
+treatment-rev-unary	flow_record_field_scan	no		186	186	1.0
+treatment-rev-unary	packet_record_bounds_window	no		343	343	1.0
+treatment-rev-unary	packet_vlan_tcpopt_parser	no		45	45	1.0
+treatment-rev-unary	simple	no		15	15	1.0
+treatment-rev-unary	simple_packet	no		14	14	1.0
+treatment-rev-unary	siphash_rotate64_mixer	no		160	160	1.0
+treatment-rev-unary	sorted_rule_binary_search	no		1943	1943	1.0
+treatment-rev-unary	tc_packet_checksum_fold	no		33038	33038	1.0
+treatment-extr-rotate	bpf_local_call_fanout_dispatch	no		325	325	1.0
+treatment-extr-rotate	bpftrace_comm_key_fnv_hash	no		1656	1656	1.0
+treatment-extr-rotate	ccmp_all_nonzero	no		17	17	1.0
+treatment-extr-rotate	csel_select64	yes	EXTR	28	28	1.0
+treatment-extr-rotate	flow_record_field_scan	no		186	186	1.0
+treatment-extr-rotate	packet_record_bounds_window	no		343	343	1.0
+treatment-extr-rotate	packet_vlan_tcpopt_parser	no		45	45	1.0
+treatment-extr-rotate	simple_packet	no		14	14	1.0
+treatment-ubfm-bextr	arm64_direct_abi_coverage	no		20	20	1.0
+treatment-ubfm-bextr	bpf_local_call_fanout_dispatch	no		325	325	1.0
+treatment-ubfm-bextr	bpftrace_comm_key_fnv_hash	yes	UBFM	1656	1656	1.0
+treatment-ubfm-bextr	ccmp_all_nonzero	no		17	17	1.0
+treatment-ubfm-bextr	cilium_ct_nat_tuple_rewrite	no		474	474	1.0
+treatment-ubfm-bextr	flow_5tuple_rss_hash	yes	UBFM	48	48	1.0
+treatment-ubfm-bextr	flow_record_field_scan	yes	UBFM	186	186	1.0
+treatment-ubfm-bextr	katran_lb_consistent_hash_select	yes	UBFM	61	61	1.0
+treatment-ubfm-bextr	packet_record_bounds_window	no		343	343	1.0
+treatment-ubfm-bextr	simple	no		15	15	1.0
+treatment-ubfm-bextr	siphash_rotate64_mixer	no		160	160	1.0
+treatment-ubfm-bextr	stp_stack_pair	no		21	21	1.0
+treatment-ubfm-bextr	tetragon_process_event_arg_filter	no		524	524	1.0
+treatment-ldr-wide-load	arm64_direct_abi_coverage	no		20	20	1.0
+treatment-ldr-wide-load	ccmp_all_nonzero	no		17	17	1.0
+treatment-ldr-wide-load	flow_record_field_scan	no		186	186	1.0
+treatment-ldr-wide-load	ldp_stack_pair	no		21	21	1.0
+treatment-ldr-wide-load	packet_vlan_tcpopt_parser	no		45	45	1.0
+treatment-ldr-direct-load	arm64_direct_abi_coverage	yes	LDR	20	20	1.0
+treatment-ldr-direct-load	bpf_local_call_fanout_dispatch	no		325	325	1.0
+treatment-ldr-direct-load	ccmp_all_nonzero	no		17	17	1.0
+treatment-ldr-direct-load	cilium_ct_nat_tuple_rewrite	no		474	474	1.0
+treatment-ldr-direct-load	flow_5tuple_rss_hash	no		48	48	1.0
+treatment-ldr-direct-load	katran_lb_consistent_hash_select	no		61	61	1.0
+treatment-ldr-direct-load	packet_record_bounds_window	no		343	343	1.0
+treatment-ldr-direct-load	packet_vlan_tcpopt_parser	no		45	45	1.0
+treatment-ldr-direct-load	siphash_rotate64_mixer	no		160	160	1.0
+treatment-ldr-direct-load	stp_stack_pair	no		21	21	1.0
+treatment-ldr-direct-load	tetragon_process_event_arg_filter	no		524	524	1.0
+treatment-str-direct-store	arm64_direct_abi_coverage	yes	STR	20	20	1.0
+treatment-str-direct-store	bcc_tcpconnect_ipv4_tuple_filter	no		320	320	1.0
+treatment-str-direct-store	bpf_local_call_fanout_dispatch	no		325	325	1.0
+treatment-str-direct-store	ccmp_all_nonzero	no		17	17	1.0
+treatment-str-direct-store	cgroup_skb_hash_chain	no		1039	1039	1.0
+treatment-str-direct-store	cilium_policy_guard_tree_filter	no		242	242	1.0
+treatment-str-direct-store	csel_select64	no		28	28	1.0
+treatment-str-direct-store	flow_5tuple_rss_hash	no		48	48	1.0
+treatment-str-direct-store	flow_record_field_scan	no		186	186	1.0
+treatment-str-direct-store	katran_lb_consistent_hash_select	no		61	61	1.0
+treatment-str-direct-store	packed_header_bitfield_decode	no		937	937	1.0
+treatment-str-direct-store	packet_vlan_tcpopt_parser	no		45	45	1.0
+treatment-str-direct-store	simple	no		15	15	1.0
+treatment-str-direct-store	simple_packet	no		14	14	1.0
+treatment-str-direct-store	siphash_rotate64_mixer	no		160	160	1.0
+treatment-str-direct-store	stp_stack_pair	yes	STR	21	21	1.0
+treatment-str-direct-store	tetragon_process_event_arg_filter	no		524	524	1.0
+treatment-ldp-stp-pair-mem	arm64_direct_abi_coverage	no		20	20	1.0
+treatment-ldp-stp-pair-mem	bcc_tcpconnect_ipv4_tuple_filter	no		320	320	1.0
+treatment-ldp-stp-pair-mem	bpf_local_call_fanout_dispatch	no		325	325	1.0
+treatment-ldp-stp-pair-mem	bpftrace_comm_key_fnv_hash	no		1656	1656	1.0
+treatment-ldp-stp-pair-mem	ccmp_all_nonzero	no		17	17	1.0
+treatment-ldp-stp-pair-mem	cgroup_skb_hash_chain	no		1039	1039	1.0
+treatment-ldp-stp-pair-mem	cilium_ct_nat_tuple_rewrite	no		474	474	1.0
+treatment-ldp-stp-pair-mem	flow_5tuple_rss_hash	no		48	48	1.0
+treatment-ldp-stp-pair-mem	flow_record_field_scan	no		186	186	1.0
+treatment-ldp-stp-pair-mem	katran_lb_consistent_hash_select	no		61	61	1.0
+treatment-ldp-stp-pair-mem	packet_record_bounds_window	no		343	343	1.0
+treatment-ldp-stp-pair-mem	packet_vlan_tcpopt_parser	no		45	45	1.0
+treatment-ldp-stp-pair-mem	trace_event_type_switch_dispatch	no		680	680	1.0
+treatment-csel-cmov	arm64_direct_abi_coverage	no		20	20	1.0
+treatment-csel-cmov	bpf_local_call_fanout_dispatch	no		325	325	1.0
+treatment-csel-cmov	bpftrace_string_search_prefix_scan	no		512	512	1.0
+treatment-csel-cmov	cgroup_skb_hash_chain	no		1039	1039	1.0
+treatment-csel-cmov	cilium_policy_guard_tree_filter	no		242	242	1.0
+treatment-csel-cmov	flow_record_field_scan	no		186	186	1.0
+treatment-csel-cmov	katran_lb_consistent_hash_select	no		61	61	1.0
+treatment-csel-cmov	packet_vlan_tcpopt_parser	no		45	45	1.0
+treatment-csel-cmov	payload_prefix_memcmp_scan	no		287	287	1.0
+treatment-csel-cmov	siphash_rotate64_mixer	no		160	160	1.0
+treatment-csel-cmov	sorted_rule_binary_search	no		1943	1943	1.0
+treatment-csel-cmov	tetragon_process_event_arg_filter	no		524	524	1.0
+treatment-csel-cmov	tracee_http_method_prefix_detect	no		61	61	1.0
+treatment-csel-cmov	tracee_syscall_name_table_lookup	no		344	344	1.0
+treatment-ccmp	arm64_direct_abi_coverage	no		20	20	1.0
+treatment-ccmp	bpf_local_call_fanout_dispatch	no		325	325	1.0
+treatment-ccmp	bpftrace_comm_key_fnv_hash	no		1656	1656	1.0
+treatment-ccmp	bpftrace_string_search_prefix_scan	no		512	512	1.0
+treatment-ccmp	ccmp_all_nonzero	yes	CCMP/CMP/CSET	17	17	1.0
+treatment-ccmp	csel_select64	no		28	28	1.0
+treatment-ccmp	flow_5tuple_rss_hash	no		48	48	1.0
+treatment-ccmp	flow_record_field_scan	no		186	186	1.0
+treatment-ccmp	katran_lb_consistent_hash_select	no		61	61	1.0
+treatment-ccmp	packet_record_bounds_window	no		343	343	1.0
+treatment-ccmp	packet_vlan_tcpopt_parser	no		45	45	1.0
+treatment-ccmp	simple_packet	no		14	14	1.0
+treatment-ccmp	siphash_rotate64_mixer	no		160	160	1.0
+treatment-ccmp	tetragon_process_event_arg_filter	no		524	524	1.0
+treatment-ccmp	tracee_http_method_prefix_detect	no		61	61	1.0
+treatment-mov	arm64_direct_abi_coverage	no		20	20	1.0
+treatment-mov	bpf_local_call_fanout_dispatch	no		325	325	1.0
+treatment-mov	bpftrace_comm_key_fnv_hash	no		1656	1656	1.0
+treatment-mov	ccmp_all_nonzero	no		17	17	1.0
+treatment-mov	cgroup_skb_hash_chain	no		1039	1039	1.0
+treatment-mov	cilium_ct_nat_tuple_rewrite	no		474	474	1.0
+treatment-mov	cilium_policy_guard_tree_filter	no		242	242	1.0
+treatment-mov	csel_select64	no		28	28	1.0
+treatment-mov	flow_5tuple_rss_hash	no		48	48	1.0
+treatment-mov	flow_record_field_scan	no		186	186	1.0
+treatment-mov	katran_lb_consistent_hash_select	no		61	61	1.0
+treatment-mov	packet_record_bounds_window	no		343	343	1.0
+treatment-mov	packet_vlan_tcpopt_parser	no		45	45	1.0
+treatment-mov	payload_prefix_memcmp_scan	no		287	287	1.0
+treatment-mov	simple_packet	no		14	14	1.0
+treatment-mov	siphash_rotate64_mixer	no		160	160	1.0
+treatment-prfm	arm64_direct_abi_coverage	yes	PRFM	20	20	1.0
+treatment-prfm	bpf_local_call_fanout_dispatch	yes	PRFM	325	325	1.0
+treatment-prfm	bpftrace_comm_key_fnv_hash	yes	PRFM	1656	1656	1.0
+treatment-prfm	ccmp_all_nonzero	yes	PRFM	17	17	1.0
+treatment-prfm	flow_5tuple_rss_hash	yes	PRFM	48	48	1.0
+treatment-prfm	katran_lb_consistent_hash_select	yes	PRFM	61	61	1.0
+treatment-prfm	packet_vlan_tcpopt_parser	yes	PRFM	45	45	1.0
+treatment-prfm	siphash_rotate64_mixer	yes	PRFM	160	160	1.0
+treatment-prfm	stp_stack_pair	yes	PRFM	21	21	1.0
+treatment-extr-rotate	tc_packet_checksum_fold	no		33038	33041	1.0000908045281192
+treatment-ldp-stp-pair-mem	tc_packet_checksum_fold	no		33038	33042	1.000121072704159
+treatment-ccmp	tc_packet_checksum_fold	no		33038	33043	1.0001513408801985
+treatment-extr-rotate	bcc_runqlat_log2_histogram_bucket	no		4001	4002	1.000249937515621
+treatment-ldr-direct-load	tc_packet_checksum_fold	no		33038	33047	1.0002724135843575
+treatment-ubfm-bextr	sorted_rule_binary_search	no		1943	1944	1.0005146680391148
+treatment-ldr-direct-load	bpftrace_comm_key_fnv_hash	no		1656	1657	1.0006038647342994
+treatment-str-direct-store	bpftrace_comm_key_fnv_hash	no		1656	1657	1.0006038647342994
+treatment-ubfm-bextr	cgroup_skb_hash_chain	yes	UBFM	1039	1040	1.0009624639076036
+treatment-ldr-direct-load	cgroup_skb_hash_chain	no		1039	1040	1.0009624639076036
+treatment-ccmp	packed_header_bitfield_decode	no		937	938	1.0010672358591248
+treatment-str-direct-store	tc_packet_checksum_fold	no		33038	33091	1.0016042133301046
+treatment-str-direct-store	cilium_ct_nat_tuple_rewrite	no		474	475	1.0021097046413503
+treatment-prfm	tc_packet_checksum_fold	no		33038	33108	1.0021187723227798
+treatment-ubfm-bextr	packet_checksum_fold	no		33088	33164	1.002296905222437
+treatment-ldr-direct-load	packet_checksum_fold	no		33088	33178	1.0027200193423598
+treatment-str-direct-store	tracee_syscall_name_table_lookup	no		344	345	1.002906976744186
+treatment-str-direct-store	trace_event_type_switch_dispatch	no		680	682	1.0029411764705882
+treatment-mov	bcc_tcpconnect_ipv4_tuple_filter	no		320	321	1.003125
+treatment-ldp-stp-pair-mem	packed_header_bitfield_decode	no		937	940	1.0032017075773747
+treatment-rev-unary	payload_prefix_memcmp_scan	no		287	288	1.0034843205574913
+treatment-extr-rotate	payload_prefix_memcmp_scan	yes	EXTR	287	288	1.0034843205574913
+treatment-ccmp	payload_prefix_memcmp_scan	no		287	288	1.0034843205574913
+treatment-ccmp	bcc_runqlat_log2_histogram_bucket	no		4001	4015	1.0034991252186953
+treatment-prfm	packet_checksum_fold	yes	PRFM	33088	33204	1.0035058027079304
+treatment-rev-unary	tetragon_process_event_arg_filter	no		524	526	1.0038167938931297
+treatment-extr-rotate	cgroup_skb_hash_chain	no		1039	1043	1.0038498556304138
+treatment-ubfm-bextr	cilium_policy_guard_tree_filter	no		242	243	1.0041322314049588
+treatment-ldr-direct-load	cilium_policy_guard_tree_filter	no		242	243	1.0041322314049588
+treatment-ldp-stp-pair-mem	cilium_policy_guard_tree_filter	no		242	243	1.0041322314049588
+treatment-rev-unary	bitmap_popcount_scan	no		2294	2304	1.004359197907585
+treatment-ubfm-bextr	bitmap_popcount_scan	yes	UBFM	2294	2304	1.004359197907585
+treatment-ccmp	bitmap_popcount_scan	no		2294	2304	1.004359197907585
+treatment-ldp-stp-pair-mem	bitmap_popcount_scan	no		2294	2305	1.0047951176983434
+treatment-csel-cmov	tc_packet_checksum_fold	no		33038	33206	1.0050850535746716
+treatment-ubfm-bextr	otel_stack_frame_unwind_scan	yes	UBFM	382	384	1.0052356020942408
+treatment-csel-cmov	otel_stack_frame_unwind_scan	no		382	384	1.0052356020942408
+treatment-prfm	packed_header_bitfield_decode	yes	PRFM	937	942	1.0053361792956244
+treatment-prfm	flow_record_field_scan	yes	PRFM	186	187	1.0053763440860215
+treatment-ldr-direct-load	cilium_socket_lb_service_select	no		1037	1043	1.0057859209257474
+treatment-csel-cmov	cilium_socket_lb_service_select	no		1037	1043	1.0057859209257474
+treatment-str-direct-store	bcc_runqlat_log2_histogram_bucket	no		4001	4025	1.0059985003749063
+treatment-csel-cmov	cilium_ct_nat_tuple_rewrite	no		474	477	1.0063291139240507
+treatment-ccmp	cilium_ct_nat_tuple_rewrite	no		474	477	1.0063291139240507
+treatment-prfm	bcc_runqlat_log2_histogram_bucket	yes	PRFM	4001	4030	1.0072481879530117
+treatment-ldp-stp-pair-mem	tetragon_process_event_arg_filter	no		524	528	1.0076335877862594
+treatment-mov	tetragon_process_event_arg_filter	no		524	528	1.0076335877862594
+treatment-prfm	cilium_socket_lb_service_select	yes	PRFM	1037	1045	1.00771456123433
+treatment-rev-unary	cilium_policy_guard_tree_filter	no		242	244	1.0082644628099173
+treatment-prfm	packet_record_bounds_window	yes	PRFM	343	346	1.0087463556851313
+treatment-prfm	bcc_tcpconnect_ipv4_tuple_filter	yes	PRFM	320	323	1.009375
+treatment-rev-unary	bpftrace_string_search_prefix_scan	no		512	517	1.009765625
+treatment-extr-rotate	bpftrace_string_search_prefix_scan	yes	EXTR	512	517	1.009765625
+treatment-ubfm-bextr	bpftrace_string_search_prefix_scan	no		512	517	1.009765625
+treatment-str-direct-store	bpftrace_string_search_prefix_scan	no		512	517	1.009765625
+treatment-ldp-stp-pair-mem	bpftrace_string_search_prefix_scan	no		512	517	1.009765625
+treatment-prfm	trace_event_type_switch_dispatch	yes	PRFM	680	687	1.0102941176470588
+treatment-prfm	otel_stack_frame_unwind_scan	yes	PRFM	382	386	1.0104712041884816
+treatment-prfm	bpftrace_string_search_prefix_scan	yes	PRFM	512	518	1.01171875
+treatment-ldr-wide-load	cilium_policy_guard_tree_filter	yes	LDR	242	245	1.012396694214876
+treatment-prfm	cilium_policy_guard_tree_filter	yes	PRFM	242	245	1.012396694214876
+treatment-extr-rotate	trace_event_type_switch_dispatch	no		680	689	1.013235294117647
+treatment-ccmp	trace_event_type_switch_dispatch	no		680	690	1.0147058823529411
+treatment-ccmp	cilium_socket_lb_service_select	yes	CCMP/CMP/CSET	1037	1053	1.0154291224686596
+treatment-mov	cilium_socket_lb_service_select	no		1037	1053	1.0154291224686596
+treatment-ldr-direct-load	bpftrace_string_search_prefix_scan	no		512	520	1.015625
+treatment-rev-unary	katran_lb_consistent_hash_select	yes	REV	61	62	1.0163934426229508
+treatment-str-direct-store	tracee_http_method_prefix_detect	no		61	62	1.0163934426229508
+treatment-ldp-stp-pair-mem	tracee_http_method_prefix_detect	no		61	62	1.0163934426229508
+treatment-mov	tracee_http_method_prefix_detect	no		61	62	1.0163934426229508
+treatment-prfm	tracee_http_method_prefix_detect	yes	PRFM	61	62	1.0163934426229508
+treatment-prfm	cilium_ct_nat_tuple_rewrite	yes	PRFM	474	483	1.018987341772152
+treatment-prfm	tetragon_process_event_arg_filter	yes	PRFM	524	534	1.0190839694656488
+treatment-ccmp	cgroup_skb_hash_chain	no		1039	1060	1.0202117420596728
+treatment-rev-unary	packed_header_bitfield_decode	no		937	956	1.0202774813233724
+treatment-extr-rotate	cilium_policy_guard_tree_filter	no		242	247	1.0206611570247934
+treatment-mov	bpftrace_string_search_prefix_scan	no		512	523	1.021484375
+treatment-rev-unary	bcc_tcpconnect_ipv4_tuple_filter	no		320	327	1.021875
+treatment-ubfm-bextr	packet_vlan_tcpopt_parser	yes	UBFM	45	46	1.0222222222222221
+treatment-ldp-stp-pair-mem	siphash_rotate64_mixer	no		160	164	1.025
+treatment-csel-cmov	bcc_tcpconnect_ipv4_tuple_filter	no		320	328	1.025
+treatment-ldr-direct-load	flow_record_field_scan	no		186	191	1.0268817204301075
+treatment-rev-unary	bpf_local_call_fanout_dispatch	no		325	334	1.0276923076923077
+treatment-ccmp	cilium_policy_guard_tree_filter	no		242	249	1.0289256198347108
+treatment-prfm	sorted_rule_binary_search	yes	PRFM	1943	2010	1.0344827586206897
+treatment-ldp-stp-pair-mem	tracee_syscall_name_table_lookup	no		344	356	1.0348837209302326
+treatment-ccmp	tracee_syscall_name_table_lookup	no		344	356	1.0348837209302326
+treatment-ubfm-bextr	csel_select64	no		28	29	1.0357142857142858
+treatment-prfm	csel_select64	yes	PRFM	28	29	1.0357142857142858
+treatment-ldr-wide-load	bpftrace_string_search_prefix_scan	yes	LDR	512	532	1.0390625
+treatment-mov	otel_stack_frame_unwind_scan	no		382	397	1.0392670157068062
+treatment-ldr-direct-load	trace_event_type_switch_dispatch	no		680	707	1.0397058823529413
+treatment-ldp-stp-pair-mem	ldp_stack_pair	yes	LDP/STP	21	22	1.0476190476190477
+treatment-mov	ldp_stack_pair	no		21	22	1.0476190476190477
+treatment-prfm	ldp_stack_pair	yes	PRFM	21	22	1.0476190476190477
+treatment-ldr-wide-load	cilium_socket_lb_service_select	yes	LDR	1037	1091	1.052073288331726
+treatment-prfm	tracee_syscall_name_table_lookup	yes	PRFM	344	363	1.055232558139535
+treatment-mov	trace_event_type_switch_dispatch	no		680	719	1.0573529411764706
+treatment-rev-unary	tracee_syscall_name_table_lookup	no		344	364	1.058139534883721
+treatment-csel-cmov	packet_checksum_fold	no		33088	35266	1.0658244680851063
+treatment-csel-cmov	bpftrace_comm_key_fnv_hash	no		1656	1773	1.0706521739130435
+treatment-ubfm-bextr	simple_packet	no		14	15	1.0714285714285714
+treatment-prfm	simple_packet	yes	PRFM	14	15	1.0714285714285714
+treatment-extr-rotate	tracee_syscall_name_table_lookup	no		344	372	1.0813953488372092
+treatment-ubfm-bextr	tracee_http_method_prefix_detect	no		61	66	1.0819672131147542
+treatment-rev-unary	trace_event_type_switch_dispatch	no		680	737	1.0838235294117646
+treatment-ldr-wide-load	tracee_syscall_name_table_lookup	yes	LDR	344	384	1.1162790697674418
+treatment-prfm	payload_prefix_memcmp_scan	yes	PRFM	287	322	1.1219512195121952
+treatment-ldp-stp-pair-mem	sorted_rule_binary_search	no		1943	2305	1.1863098301595472
+treatment-extr-rotate	tracee_http_method_prefix_detect	no		61	78	1.278688524590164
+treatment-rev-unary	tracee_http_method_prefix_detect	no		61	79	1.2950819672131149
+treatment-ldr-wide-load	tracee_http_method_prefix_detect	yes	LDR	61	90	1.4754098360655739

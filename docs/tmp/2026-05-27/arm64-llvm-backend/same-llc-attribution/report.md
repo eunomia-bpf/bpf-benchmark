@@ -143,8 +143,18 @@ Estimate excludes data transfer, tax, free tier, credits, Savings Plans, Reserve
 This run is useful for deciding whether the completed ABI set is worth deeper performance work. It shows a
 positive combined signal on micro, but the next rigorous step is not to claim a broad performance win.
 
-Next rigorous performance work:
+PRFM-disabled combined follow-up has now been run:
 
-1. Run PRFM-disabled combined treatment to separate memory-prefetch insertion from replacement-style kinsns.
-2. Run family-only treatment for remaining families that do not already have clean attribution.
-3. For a paper claim, rerun with paper-grade samples and corpus workloads.
+```text
+/home/ruoji/github/bpf-opt/code/docs/tmp/2026-05-27/arm64-llvm-backend/same-llc-attribution/prfm-disabled-combined/report.md
+```
+
+Family-only follow-up has now also been run:
+
+```text
+/home/ruoji/github/bpf-opt/code/docs/tmp/2026-05-27/arm64-llvm-backend/same-llc-attribution/family-only/report.md
+```
+
+That follow-up shows `EXTR / rotate` has the clearest positive family-only signal, `LDR / wide-load` has a
+development-grade positive signal, and `PRFM / prefetch` is not a performance win. For a paper claim, rerun with
+paper-grade samples and corpus workloads.

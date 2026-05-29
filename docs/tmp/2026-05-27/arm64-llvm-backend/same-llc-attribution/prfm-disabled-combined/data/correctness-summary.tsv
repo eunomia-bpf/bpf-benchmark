@@ -1,0 +1,5 @@
+group	runtime	benchmarks	samples	bad_samples	missing_exec_samples	status
+control-disabled	kernel	34	102	0	0	pass
+control-disabled	native	34	102	0	0	pass
+treatment-prfm-disabled	kernel	34	102	0	0	pass
+treatment-prfm-disabled	native	34	102	0	0	pass

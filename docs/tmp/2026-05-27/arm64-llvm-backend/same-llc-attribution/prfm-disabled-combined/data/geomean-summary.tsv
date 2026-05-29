@@ -1,0 +1,7 @@
+runtime	scope	benchmarks	geomean_ratio_treatment_over_control	percent_change
+kernel	all	34	0.968236086	-3.176391
+kernel	affected	21	0.953473712	-4.652629
+kernel	unaffected	13	0.992567348	-0.743265
+native	all	34	0.979571493	-2.042851
+native	affected	21	0.976769097	-2.323090
+native	unaffected	13	0.984115435	-1.588457

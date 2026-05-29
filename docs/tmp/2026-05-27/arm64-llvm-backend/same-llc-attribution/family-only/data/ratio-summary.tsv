@@ -1,0 +1,817 @@
+group	compare_to	benchmark	runtime	affected_by_group_symbols	families	control_median_exec_ns	group_median_exec_ns	ratio
+baseline	control-disabled	arm64_direct_abi_coverage	kernel	no		20	20	1.0
+baseline	control-disabled	bcc_runqlat_log2_histogram_bucket	kernel	no		4001	4028	1.0067483129217696
+baseline	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	kernel	no		320	322	1.00625
+baseline	control-disabled	bitmap_popcount_scan	kernel	no		2294	2306	1.005231037489102
+baseline	control-disabled	bpf_local_call_fanout_dispatch	kernel	no		325	325	1.0
+baseline	control-disabled	bpftrace_comm_key_fnv_hash	kernel	no		1656	1656	1.0
+baseline	control-disabled	bpftrace_string_search_prefix_scan	kernel	no		512	517	1.009765625
+baseline	control-disabled	ccmp_all_nonzero	kernel	no		17	17	1.0
+baseline	control-disabled	cgroup_skb_hash_chain	kernel	no		1039	1039	1.0
+baseline	control-disabled	cilium_ct_nat_tuple_rewrite	kernel	no		474	474	1.0
+baseline	control-disabled	cilium_policy_guard_tree_filter	kernel	no		242	243	1.0041322314049588
+baseline	control-disabled	cilium_socket_lb_service_select	kernel	no		1037	1178	1.1359691417550626
+baseline	control-disabled	csel_select64	kernel	no		28	28	1.0
+baseline	control-disabled	flow_5tuple_rss_hash	kernel	no		48	47	0.9791666666666666
+baseline	control-disabled	flow_record_field_scan	kernel	no		186	186	1.0
+baseline	control-disabled	katran_lb_consistent_hash_select	kernel	no		61	61	1.0
+baseline	control-disabled	ldp_stack_pair	kernel	no		21	20	0.9523809523809523
+baseline	control-disabled	otel_stack_frame_unwind_scan	kernel	no		382	382	1.0
+baseline	control-disabled	packed_header_bitfield_decode	kernel	no		937	936	0.9989327641408752
+baseline	control-disabled	packet_checksum_fold	kernel	no		33088	33043	0.9986399903288201
+baseline	control-disabled	packet_record_bounds_window	kernel	no		343	341	0.9941690962099126
+baseline	control-disabled	packet_toeplitz_rss_hash	kernel	no		525	492	0.9371428571428572
+baseline	control-disabled	packet_vlan_tcpopt_parser	kernel	no		45	45	1.0
+baseline	control-disabled	payload_prefix_memcmp_scan	kernel	no		287	289	1.0069686411149825
+baseline	control-disabled	simple	kernel	no		15	14	0.9333333333333333
+baseline	control-disabled	simple_packet	kernel	no		14	14	1.0
+baseline	control-disabled	siphash_rotate64_mixer	kernel	no		160	160	1.0
+baseline	control-disabled	sorted_rule_binary_search	kernel	no		1943	1947	1.002058672156459
+baseline	control-disabled	stp_stack_pair	kernel	no		21	21	1.0
+baseline	control-disabled	tc_packet_checksum_fold	kernel	no		33038	33055	1.0005145589926752
+baseline	control-disabled	tetragon_process_event_arg_filter	kernel	no		524	527	1.0057251908396947
+baseline	control-disabled	trace_event_type_switch_dispatch	kernel	no		680	688	1.011764705882353
+baseline	control-disabled	tracee_http_method_prefix_detect	kernel	no		61	61	1.0
+baseline	control-disabled	tracee_syscall_name_table_lookup	kernel	no		344	330	0.9593023255813954
+baseline	control-disabled	arm64_direct_abi_coverage	native	no		7	7	1.0
+baseline	control-disabled	bcc_runqlat_log2_histogram_bucket	native	no		2215	2214	0.999548532731377
+baseline	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	native	no		150	150	1.0
+baseline	control-disabled	bitmap_popcount_scan	native	no		1612	1612	1.0
+baseline	control-disabled	bpf_local_call_fanout_dispatch	native	no		115	115	1.0
+baseline	control-disabled	bpftrace_comm_key_fnv_hash	native	no		1288	1287	0.9992236024844721
+baseline	control-disabled	bpftrace_string_search_prefix_scan	native	no		352	357	1.0142045454545454
+baseline	control-disabled	ccmp_all_nonzero	native	no		5	5	1.0
+baseline	control-disabled	cgroup_skb_hash_chain	native	no		421	421	1.0
+baseline	control-disabled	cilium_ct_nat_tuple_rewrite	native	no		197	197	1.0
+baseline	control-disabled	cilium_policy_guard_tree_filter	native	no		123	124	1.008130081300813
+baseline	control-disabled	cilium_socket_lb_service_select	native	no		329	329	1.0
+baseline	control-disabled	csel_select64	native	no		4	4	1.0
+baseline	control-disabled	flow_5tuple_rss_hash	native	no		18	18	1.0
+baseline	control-disabled	flow_record_field_scan	native	no		108	107	0.9907407407407407
+baseline	control-disabled	katran_lb_consistent_hash_select	native	no		27	27	1.0
+baseline	control-disabled	ldp_stack_pair	native	no		6	5	0.8333333333333334
+baseline	control-disabled	otel_stack_frame_unwind_scan	native	no		117	117	1.0
+baseline	control-disabled	packed_header_bitfield_decode	native	no		501	501	1.0
+baseline	control-disabled	packet_checksum_fold	native	no		26111	26084	0.9989659530466087
+baseline	control-disabled	packet_record_bounds_window	native	no		148	148	1.0
+baseline	control-disabled	packet_toeplitz_rss_hash	native	no		372	377	1.0134408602150538
+baseline	control-disabled	packet_vlan_tcpopt_parser	native	no		19	18	0.9473684210526315
+baseline	control-disabled	payload_prefix_memcmp_scan	native	no		169	169	1.0
+baseline	control-disabled	simple	native	no		4	4	1.0
+baseline	control-disabled	simple_packet	native	no		4	4	1.0
+baseline	control-disabled	siphash_rotate64_mixer	native	no		44	44	1.0
+baseline	control-disabled	sorted_rule_binary_search	native	no		720	719	0.9986111111111111
+baseline	control-disabled	stp_stack_pair	native	no		5	5	1.0
+baseline	control-disabled	tc_packet_checksum_fold	native	no		26095	27805	1.0655297949798812
+baseline	control-disabled	tetragon_process_event_arg_filter	native	no		275	275	1.0
+baseline	control-disabled	trace_event_type_switch_dispatch	native	no		633	634	1.0015797788309637
+baseline	control-disabled	tracee_http_method_prefix_detect	native	no		39	38	0.9743589743589743
+baseline	control-disabled	tracee_syscall_name_table_lookup	native	no		259	259	1.0
+treatment-rev-unary	control-disabled	arm64_direct_abi_coverage	kernel	no		20	20	1.0
+treatment-rev-unary	control-disabled	bcc_runqlat_log2_histogram_bucket	kernel	no		4001	3986	0.9962509372656836
+treatment-rev-unary	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	kernel	no		320	327	1.021875
+treatment-rev-unary	control-disabled	bitmap_popcount_scan	kernel	no		2294	2304	1.004359197907585
+treatment-rev-unary	control-disabled	bpf_local_call_fanout_dispatch	kernel	no		325	334	1.0276923076923077
+treatment-rev-unary	control-disabled	bpftrace_comm_key_fnv_hash	kernel	no		1656	1656	1.0
+treatment-rev-unary	control-disabled	bpftrace_string_search_prefix_scan	kernel	no		512	517	1.009765625
+treatment-rev-unary	control-disabled	ccmp_all_nonzero	kernel	no		17	17	1.0
+treatment-rev-unary	control-disabled	cgroup_skb_hash_chain	kernel	no		1039	1039	1.0
+treatment-rev-unary	control-disabled	cilium_ct_nat_tuple_rewrite	kernel	no		474	474	1.0
+treatment-rev-unary	control-disabled	cilium_policy_guard_tree_filter	kernel	no		242	244	1.0082644628099173
+treatment-rev-unary	control-disabled	cilium_socket_lb_service_select	kernel	no		1037	1036	0.9990356798457087
+treatment-rev-unary	control-disabled	csel_select64	kernel	no		28	28	1.0
+treatment-rev-unary	control-disabled	flow_5tuple_rss_hash	kernel	no		48	48	1.0
+treatment-rev-unary	control-disabled	flow_record_field_scan	kernel	no		186	186	1.0
+treatment-rev-unary	control-disabled	katran_lb_consistent_hash_select	kernel	yes	REV	61	62	1.0163934426229508
+treatment-rev-unary	control-disabled	ldp_stack_pair	kernel	no		21	20	0.9523809523809523
+treatment-rev-unary	control-disabled	otel_stack_frame_unwind_scan	kernel	no		382	381	0.9973821989528796
+treatment-rev-unary	control-disabled	packed_header_bitfield_decode	kernel	no		937	956	1.0202774813233724
+treatment-rev-unary	control-disabled	packet_checksum_fold	kernel	no		33088	33037	0.9984586557059961
+treatment-rev-unary	control-disabled	packet_record_bounds_window	kernel	no		343	343	1.0
+treatment-rev-unary	control-disabled	packet_toeplitz_rss_hash	kernel	no		525	524	0.9980952380952381
+treatment-rev-unary	control-disabled	packet_vlan_tcpopt_parser	kernel	no		45	45	1.0
+treatment-rev-unary	control-disabled	payload_prefix_memcmp_scan	kernel	no		287	288	1.0034843205574913
+treatment-rev-unary	control-disabled	simple	kernel	no		15	15	1.0
+treatment-rev-unary	control-disabled	simple_packet	kernel	no		14	14	1.0
+treatment-rev-unary	control-disabled	siphash_rotate64_mixer	kernel	no		160	160	1.0
+treatment-rev-unary	control-disabled	sorted_rule_binary_search	kernel	no		1943	1943	1.0
+treatment-rev-unary	control-disabled	stp_stack_pair	kernel	no		21	20	0.9523809523809523
+treatment-rev-unary	control-disabled	tc_packet_checksum_fold	kernel	no		33038	33038	1.0
+treatment-rev-unary	control-disabled	tetragon_process_event_arg_filter	kernel	no		524	526	1.0038167938931297
+treatment-rev-unary	control-disabled	trace_event_type_switch_dispatch	kernel	no		680	737	1.0838235294117646
+treatment-rev-unary	control-disabled	tracee_http_method_prefix_detect	kernel	no		61	79	1.2950819672131149
+treatment-rev-unary	control-disabled	tracee_syscall_name_table_lookup	kernel	no		344	364	1.058139534883721
+treatment-rev-unary	control-disabled	arm64_direct_abi_coverage	native	no		7	7	1.0
+treatment-rev-unary	control-disabled	bcc_runqlat_log2_histogram_bucket	native	no		2215	2222	1.003160270880361
+treatment-rev-unary	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	native	no		150	154	1.0266666666666666
+treatment-rev-unary	control-disabled	bitmap_popcount_scan	native	no		1612	1612	1.0
+treatment-rev-unary	control-disabled	bpf_local_call_fanout_dispatch	native	no		115	119	1.0347826086956522
+treatment-rev-unary	control-disabled	bpftrace_comm_key_fnv_hash	native	no		1288	1287	0.9992236024844721
+treatment-rev-unary	control-disabled	bpftrace_string_search_prefix_scan	native	no		352	360	1.0227272727272727
+treatment-rev-unary	control-disabled	ccmp_all_nonzero	native	no		5	5	1.0
+treatment-rev-unary	control-disabled	cgroup_skb_hash_chain	native	no		421	421	1.0
+treatment-rev-unary	control-disabled	cilium_ct_nat_tuple_rewrite	native	no		197	198	1.0050761421319796
+treatment-rev-unary	control-disabled	cilium_policy_guard_tree_filter	native	no		123	124	1.008130081300813
+treatment-rev-unary	control-disabled	cilium_socket_lb_service_select	native	no		329	330	1.0030395136778116
+treatment-rev-unary	control-disabled	csel_select64	native	no		4	4	1.0
+treatment-rev-unary	control-disabled	flow_5tuple_rss_hash	native	no		18	19	1.0555555555555556
+treatment-rev-unary	control-disabled	flow_record_field_scan	native	no		108	107	0.9907407407407407
+treatment-rev-unary	control-disabled	katran_lb_consistent_hash_select	native	yes	REV	27	28	1.037037037037037
+treatment-rev-unary	control-disabled	ldp_stack_pair	native	no		6	5	0.8333333333333334
+treatment-rev-unary	control-disabled	otel_stack_frame_unwind_scan	native	no		117	117	1.0
+treatment-rev-unary	control-disabled	packed_header_bitfield_decode	native	no		501	507	1.0119760479041917
+treatment-rev-unary	control-disabled	packet_checksum_fold	native	no		26111	26074	0.9985829726935008
+treatment-rev-unary	control-disabled	packet_record_bounds_window	native	no		148	148	1.0
+treatment-rev-unary	control-disabled	packet_toeplitz_rss_hash	native	no		372	375	1.0080645161290323
+treatment-rev-unary	control-disabled	packet_vlan_tcpopt_parser	native	no		19	18	0.9473684210526315
+treatment-rev-unary	control-disabled	payload_prefix_memcmp_scan	native	no		169	169	1.0
+treatment-rev-unary	control-disabled	simple	native	no		4	4	1.0
+treatment-rev-unary	control-disabled	simple_packet	native	no		4	4	1.0
+treatment-rev-unary	control-disabled	siphash_rotate64_mixer	native	no		44	46	1.0454545454545454
+treatment-rev-unary	control-disabled	sorted_rule_binary_search	native	no		720	719	0.9986111111111111
+treatment-rev-unary	control-disabled	stp_stack_pair	native	no		5	5	1.0
+treatment-rev-unary	control-disabled	tc_packet_checksum_fold	native	no		26095	26096	1.0000383215175321
+treatment-rev-unary	control-disabled	tetragon_process_event_arg_filter	native	no		275	277	1.0072727272727273
+treatment-rev-unary	control-disabled	trace_event_type_switch_dispatch	native	no		633	631	0.9968404423380727
+treatment-rev-unary	control-disabled	tracee_http_method_prefix_detect	native	no		39	38	0.9743589743589743
+treatment-rev-unary	control-disabled	tracee_syscall_name_table_lookup	native	no		259	260	1.0038610038610039
+treatment-extr-rotate	control-disabled	arm64_direct_abi_coverage	kernel	yes	EXTR	20	19	0.95
+treatment-extr-rotate	control-disabled	bcc_runqlat_log2_histogram_bucket	kernel	no		4001	4002	1.000249937515621
+treatment-extr-rotate	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	kernel	yes	EXTR	320	315	0.984375
+treatment-extr-rotate	control-disabled	bitmap_popcount_scan	kernel	no		2294	2288	0.997384481255449
+treatment-extr-rotate	control-disabled	bpf_local_call_fanout_dispatch	kernel	no		325	325	1.0
+treatment-extr-rotate	control-disabled	bpftrace_comm_key_fnv_hash	kernel	no		1656	1656	1.0
+treatment-extr-rotate	control-disabled	bpftrace_string_search_prefix_scan	kernel	yes	EXTR	512	517	1.009765625
+treatment-extr-rotate	control-disabled	ccmp_all_nonzero	kernel	no		17	17	1.0
+treatment-extr-rotate	control-disabled	cgroup_skb_hash_chain	kernel	no		1039	1043	1.0038498556304138
+treatment-extr-rotate	control-disabled	cilium_ct_nat_tuple_rewrite	kernel	yes	EXTR	474	455	0.959915611814346
+treatment-extr-rotate	control-disabled	cilium_policy_guard_tree_filter	kernel	no		242	247	1.0206611570247934
+treatment-extr-rotate	control-disabled	cilium_socket_lb_service_select	kernel	no		1037	1035	0.9980713596914176
+treatment-extr-rotate	control-disabled	csel_select64	kernel	yes	EXTR	28	28	1.0
+treatment-extr-rotate	control-disabled	flow_5tuple_rss_hash	kernel	yes	EXTR	48	38	0.7916666666666666
+treatment-extr-rotate	control-disabled	flow_record_field_scan	kernel	no		186	186	1.0
+treatment-extr-rotate	control-disabled	katran_lb_consistent_hash_select	kernel	yes	EXTR	61	58	0.9508196721311475
+treatment-extr-rotate	control-disabled	ldp_stack_pair	kernel	yes	EXTR	21	20	0.9523809523809523
+treatment-extr-rotate	control-disabled	otel_stack_frame_unwind_scan	kernel	no		382	381	0.9973821989528796
+treatment-extr-rotate	control-disabled	packed_header_bitfield_decode	kernel	no		937	936	0.9989327641408752
+treatment-extr-rotate	control-disabled	packet_checksum_fold	kernel	no		33088	33041	0.9985795454545454
+treatment-extr-rotate	control-disabled	packet_record_bounds_window	kernel	no		343	343	1.0
+treatment-extr-rotate	control-disabled	packet_toeplitz_rss_hash	kernel	no		525	522	0.9942857142857143
+treatment-extr-rotate	control-disabled	packet_vlan_tcpopt_parser	kernel	no		45	45	1.0
+treatment-extr-rotate	control-disabled	payload_prefix_memcmp_scan	kernel	yes	EXTR	287	288	1.0034843205574913
+treatment-extr-rotate	control-disabled	simple	kernel	no		15	14	0.9333333333333333
+treatment-extr-rotate	control-disabled	simple_packet	kernel	no		14	14	1.0
+treatment-extr-rotate	control-disabled	siphash_rotate64_mixer	kernel	yes	EXTR	160	107	0.66875
+treatment-extr-rotate	control-disabled	sorted_rule_binary_search	kernel	no		1943	1934	0.9953679876479671
+treatment-extr-rotate	control-disabled	stp_stack_pair	kernel	no		21	20	0.9523809523809523
+treatment-extr-rotate	control-disabled	tc_packet_checksum_fold	kernel	no		33038	33041	1.0000908045281192
+treatment-extr-rotate	control-disabled	tetragon_process_event_arg_filter	kernel	no		524	523	0.9980916030534351
+treatment-extr-rotate	control-disabled	trace_event_type_switch_dispatch	kernel	no		680	689	1.013235294117647
+treatment-extr-rotate	control-disabled	tracee_http_method_prefix_detect	kernel	no		61	78	1.278688524590164
+treatment-extr-rotate	control-disabled	tracee_syscall_name_table_lookup	kernel	no		344	372	1.0813953488372092
+treatment-extr-rotate	control-disabled	arm64_direct_abi_coverage	native	yes	EXTR	7	7	1.0
+treatment-extr-rotate	control-disabled	bcc_runqlat_log2_histogram_bucket	native	no		2215	2215	1.0
+treatment-extr-rotate	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	native	yes	EXTR	150	149	0.9933333333333333
+treatment-extr-rotate	control-disabled	bitmap_popcount_scan	native	no		1612	1612	1.0
+treatment-extr-rotate	control-disabled	bpf_local_call_fanout_dispatch	native	no		115	115	1.0
+treatment-extr-rotate	control-disabled	bpftrace_comm_key_fnv_hash	native	no		1288	1287	0.9992236024844721
+treatment-extr-rotate	control-disabled	bpftrace_string_search_prefix_scan	native	yes	EXTR	352	357	1.0142045454545454
+treatment-extr-rotate	control-disabled	ccmp_all_nonzero	native	no		5	5	1.0
+treatment-extr-rotate	control-disabled	cgroup_skb_hash_chain	native	no		421	421	1.0
+treatment-extr-rotate	control-disabled	cilium_ct_nat_tuple_rewrite	native	yes	EXTR	197	197	1.0
+treatment-extr-rotate	control-disabled	cilium_policy_guard_tree_filter	native	no		123	124	1.008130081300813
+treatment-extr-rotate	control-disabled	cilium_socket_lb_service_select	native	no		329	329	1.0
+treatment-extr-rotate	control-disabled	csel_select64	native	yes	EXTR	4	4	1.0
+treatment-extr-rotate	control-disabled	flow_5tuple_rss_hash	native	yes	EXTR	18	18	1.0
+treatment-extr-rotate	control-disabled	flow_record_field_scan	native	no		108	107	0.9907407407407407
+treatment-extr-rotate	control-disabled	katran_lb_consistent_hash_select	native	yes	EXTR	27	27	1.0
+treatment-extr-rotate	control-disabled	ldp_stack_pair	native	yes	EXTR	6	5	0.8333333333333334
+treatment-extr-rotate	control-disabled	otel_stack_frame_unwind_scan	native	no		117	116	0.9914529914529915
+treatment-extr-rotate	control-disabled	packed_header_bitfield_decode	native	no		501	501	1.0
+treatment-extr-rotate	control-disabled	packet_checksum_fold	native	no		26111	26138	1.0010340469533914
+treatment-extr-rotate	control-disabled	packet_record_bounds_window	native	no		148	149	1.0067567567567568
+treatment-extr-rotate	control-disabled	packet_toeplitz_rss_hash	native	no		372	374	1.0053763440860215
+treatment-extr-rotate	control-disabled	packet_vlan_tcpopt_parser	native	no		19	18	0.9473684210526315
+treatment-extr-rotate	control-disabled	payload_prefix_memcmp_scan	native	yes	EXTR	169	168	0.9940828402366864
+treatment-extr-rotate	control-disabled	simple	native	no		4	4	1.0
+treatment-extr-rotate	control-disabled	simple_packet	native	no		4	4	1.0
+treatment-extr-rotate	control-disabled	siphash_rotate64_mixer	native	yes	EXTR	44	44	1.0
+treatment-extr-rotate	control-disabled	sorted_rule_binary_search	native	no		720	719	0.9986111111111111
+treatment-extr-rotate	control-disabled	stp_stack_pair	native	no		5	5	1.0
+treatment-extr-rotate	control-disabled	tc_packet_checksum_fold	native	no		26095	26131	1.0013795746311553
+treatment-extr-rotate	control-disabled	tetragon_process_event_arg_filter	native	no		275	275	1.0
+treatment-extr-rotate	control-disabled	trace_event_type_switch_dispatch	native	no		633	632	0.9984202211690363
+treatment-extr-rotate	control-disabled	tracee_http_method_prefix_detect	native	no		39	38	0.9743589743589743
+treatment-extr-rotate	control-disabled	tracee_syscall_name_table_lookup	native	no		259	259	1.0
+treatment-ubfm-bextr	control-disabled	arm64_direct_abi_coverage	kernel	no		20	20	1.0
+treatment-ubfm-bextr	control-disabled	bcc_runqlat_log2_histogram_bucket	kernel	yes	UBFM	4001	3954	0.9882529367658085
+treatment-ubfm-bextr	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	kernel	yes	UBFM	320	319	0.996875
+treatment-ubfm-bextr	control-disabled	bitmap_popcount_scan	kernel	yes	UBFM	2294	2304	1.004359197907585
+treatment-ubfm-bextr	control-disabled	bpf_local_call_fanout_dispatch	kernel	no		325	325	1.0
+treatment-ubfm-bextr	control-disabled	bpftrace_comm_key_fnv_hash	kernel	yes	UBFM	1656	1656	1.0
+treatment-ubfm-bextr	control-disabled	bpftrace_string_search_prefix_scan	kernel	no		512	517	1.009765625
+treatment-ubfm-bextr	control-disabled	ccmp_all_nonzero	kernel	no		17	17	1.0
+treatment-ubfm-bextr	control-disabled	cgroup_skb_hash_chain	kernel	yes	UBFM	1039	1040	1.0009624639076036
+treatment-ubfm-bextr	control-disabled	cilium_ct_nat_tuple_rewrite	kernel	no		474	474	1.0
+treatment-ubfm-bextr	control-disabled	cilium_policy_guard_tree_filter	kernel	no		242	243	1.0041322314049588
+treatment-ubfm-bextr	control-disabled	cilium_socket_lb_service_select	kernel	yes	UBFM	1037	1035	0.9980713596914176
+treatment-ubfm-bextr	control-disabled	csel_select64	kernel	no		28	29	1.0357142857142858
+treatment-ubfm-bextr	control-disabled	flow_5tuple_rss_hash	kernel	yes	UBFM	48	48	1.0
+treatment-ubfm-bextr	control-disabled	flow_record_field_scan	kernel	yes	UBFM	186	186	1.0
+treatment-ubfm-bextr	control-disabled	katran_lb_consistent_hash_select	kernel	yes	UBFM	61	61	1.0
+treatment-ubfm-bextr	control-disabled	ldp_stack_pair	kernel	no		21	20	0.9523809523809523
+treatment-ubfm-bextr	control-disabled	otel_stack_frame_unwind_scan	kernel	yes	UBFM	382	384	1.0052356020942408
+treatment-ubfm-bextr	control-disabled	packed_header_bitfield_decode	kernel	yes	UBFM	937	921	0.9829242262540021
+treatment-ubfm-bextr	control-disabled	packet_checksum_fold	kernel	no		33088	33164	1.002296905222437
+treatment-ubfm-bextr	control-disabled	packet_record_bounds_window	kernel	no		343	343	1.0
+treatment-ubfm-bextr	control-disabled	packet_toeplitz_rss_hash	kernel	no		525	523	0.9961904761904762
+treatment-ubfm-bextr	control-disabled	packet_vlan_tcpopt_parser	kernel	yes	UBFM	45	46	1.0222222222222221
+treatment-ubfm-bextr	control-disabled	payload_prefix_memcmp_scan	kernel	no		287	286	0.9965156794425087
+treatment-ubfm-bextr	control-disabled	simple	kernel	no		15	15	1.0
+treatment-ubfm-bextr	control-disabled	simple_packet	kernel	no		14	15	1.0714285714285714
+treatment-ubfm-bextr	control-disabled	siphash_rotate64_mixer	kernel	no		160	160	1.0
+treatment-ubfm-bextr	control-disabled	sorted_rule_binary_search	kernel	no		1943	1944	1.0005146680391148
+treatment-ubfm-bextr	control-disabled	stp_stack_pair	kernel	no		21	21	1.0
+treatment-ubfm-bextr	control-disabled	tc_packet_checksum_fold	kernel	no		33038	33037	0.9999697318239603
+treatment-ubfm-bextr	control-disabled	tetragon_process_event_arg_filter	kernel	no		524	524	1.0
+treatment-ubfm-bextr	control-disabled	trace_event_type_switch_dispatch	kernel	no		680	679	0.9985294117647059
+treatment-ubfm-bextr	control-disabled	tracee_http_method_prefix_detect	kernel	no		61	66	1.0819672131147542
+treatment-ubfm-bextr	control-disabled	tracee_syscall_name_table_lookup	kernel	no		344	326	0.9476744186046512
+treatment-ubfm-bextr	control-disabled	arm64_direct_abi_coverage	native	no		7	7	1.0
+treatment-ubfm-bextr	control-disabled	bcc_runqlat_log2_histogram_bucket	native	yes	UBFM	2215	2218	1.001354401805869
+treatment-ubfm-bextr	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	native	yes	UBFM	150	149	0.9933333333333333
+treatment-ubfm-bextr	control-disabled	bitmap_popcount_scan	native	yes	UBFM	1612	1612	1.0
+treatment-ubfm-bextr	control-disabled	bpf_local_call_fanout_dispatch	native	no		115	115	1.0
+treatment-ubfm-bextr	control-disabled	bpftrace_comm_key_fnv_hash	native	yes	UBFM	1288	1287	0.9992236024844721
+treatment-ubfm-bextr	control-disabled	bpftrace_string_search_prefix_scan	native	no		352	353	1.0028409090909092
+treatment-ubfm-bextr	control-disabled	ccmp_all_nonzero	native	no		5	5	1.0
+treatment-ubfm-bextr	control-disabled	cgroup_skb_hash_chain	native	yes	UBFM	421	421	1.0
+treatment-ubfm-bextr	control-disabled	cilium_ct_nat_tuple_rewrite	native	no		197	198	1.0050761421319796
+treatment-ubfm-bextr	control-disabled	cilium_policy_guard_tree_filter	native	no		123	124	1.008130081300813
+treatment-ubfm-bextr	control-disabled	cilium_socket_lb_service_select	native	yes	UBFM	329	329	1.0
+treatment-ubfm-bextr	control-disabled	csel_select64	native	no		4	4	1.0
+treatment-ubfm-bextr	control-disabled	flow_5tuple_rss_hash	native	yes	UBFM	18	18	1.0
+treatment-ubfm-bextr	control-disabled	flow_record_field_scan	native	yes	UBFM	108	107	0.9907407407407407
+treatment-ubfm-bextr	control-disabled	katran_lb_consistent_hash_select	native	yes	UBFM	27	27	1.0
+treatment-ubfm-bextr	control-disabled	ldp_stack_pair	native	no		6	5	0.8333333333333334
+treatment-ubfm-bextr	control-disabled	otel_stack_frame_unwind_scan	native	yes	UBFM	117	117	1.0
+treatment-ubfm-bextr	control-disabled	packed_header_bitfield_decode	native	yes	UBFM	501	503	1.003992015968064
+treatment-ubfm-bextr	control-disabled	packet_checksum_fold	native	no		26111	26191	1.003063842824863
+treatment-ubfm-bextr	control-disabled	packet_record_bounds_window	native	no		148	148	1.0
+treatment-ubfm-bextr	control-disabled	packet_toeplitz_rss_hash	native	no		372	377	1.0134408602150538
+treatment-ubfm-bextr	control-disabled	packet_vlan_tcpopt_parser	native	yes	UBFM	19	19	1.0
+treatment-ubfm-bextr	control-disabled	payload_prefix_memcmp_scan	native	no		169	169	1.0
+treatment-ubfm-bextr	control-disabled	simple	native	no		4	4	1.0
+treatment-ubfm-bextr	control-disabled	simple_packet	native	no		4	4	1.0
+treatment-ubfm-bextr	control-disabled	siphash_rotate64_mixer	native	no		44	50	1.1363636363636365
+treatment-ubfm-bextr	control-disabled	sorted_rule_binary_search	native	no		720	729	1.0125
+treatment-ubfm-bextr	control-disabled	stp_stack_pair	native	no		5	5	1.0
+treatment-ubfm-bextr	control-disabled	tc_packet_checksum_fold	native	no		26095	26091	0.9998467139298717
+treatment-ubfm-bextr	control-disabled	tetragon_process_event_arg_filter	native	no		275	275	1.0
+treatment-ubfm-bextr	control-disabled	trace_event_type_switch_dispatch	native	no		633	634	1.0015797788309637
+treatment-ubfm-bextr	control-disabled	tracee_http_method_prefix_detect	native	no		39	38	0.9743589743589743
+treatment-ubfm-bextr	control-disabled	tracee_syscall_name_table_lookup	native	no		259	260	1.0038610038610039
+treatment-ldr-wide-load	control-disabled	arm64_direct_abi_coverage	kernel	no		20	20	1.0
+treatment-ldr-wide-load	control-disabled	bcc_runqlat_log2_histogram_bucket	kernel	yes	LDR	4001	3974	0.9932516870782304
+treatment-ldr-wide-load	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	kernel	yes	LDR	320	318	0.99375
+treatment-ldr-wide-load	control-disabled	bitmap_popcount_scan	kernel	yes	LDR	2294	2286	0.9965126416739319
+treatment-ldr-wide-load	control-disabled	bpf_local_call_fanout_dispatch	kernel	yes	LDR	325	303	0.9323076923076923
+treatment-ldr-wide-load	control-disabled	bpftrace_comm_key_fnv_hash	kernel	yes	LDR	1656	1654	0.998792270531401
+treatment-ldr-wide-load	control-disabled	bpftrace_string_search_prefix_scan	kernel	yes	LDR	512	532	1.0390625
+treatment-ldr-wide-load	control-disabled	ccmp_all_nonzero	kernel	no		17	17	1.0
+treatment-ldr-wide-load	control-disabled	cgroup_skb_hash_chain	kernel	yes	LDR	1039	1036	0.9971126082771896
+treatment-ldr-wide-load	control-disabled	cilium_ct_nat_tuple_rewrite	kernel	yes	LDR	474	472	0.9957805907172996
+treatment-ldr-wide-load	control-disabled	cilium_policy_guard_tree_filter	kernel	yes	LDR	242	245	1.012396694214876
+treatment-ldr-wide-load	control-disabled	cilium_socket_lb_service_select	kernel	yes	LDR	1037	1091	1.052073288331726
+treatment-ldr-wide-load	control-disabled	csel_select64	kernel	yes	LDR	28	17	0.6071428571428571
+treatment-ldr-wide-load	control-disabled	flow_5tuple_rss_hash	kernel	no		48	47	0.9791666666666666
+treatment-ldr-wide-load	control-disabled	flow_record_field_scan	kernel	no		186	186	1.0
+treatment-ldr-wide-load	control-disabled	katran_lb_consistent_hash_select	kernel	yes	LDR	61	60	0.9836065573770492
+treatment-ldr-wide-load	control-disabled	ldp_stack_pair	kernel	no		21	21	1.0
+treatment-ldr-wide-load	control-disabled	otel_stack_frame_unwind_scan	kernel	yes	LDR	382	380	0.9947643979057592
+treatment-ldr-wide-load	control-disabled	packed_header_bitfield_decode	kernel	yes	LDR	937	932	0.9946638207043756
+treatment-ldr-wide-load	control-disabled	packet_checksum_fold	kernel	yes	LDR	33088	32982	0.996796421663443
+treatment-ldr-wide-load	control-disabled	packet_record_bounds_window	kernel	yes	LDR	343	199	0.5801749271137027
+treatment-ldr-wide-load	control-disabled	packet_toeplitz_rss_hash	kernel	no		525	521	0.9923809523809524
+treatment-ldr-wide-load	control-disabled	packet_vlan_tcpopt_parser	kernel	no		45	45	1.0
+treatment-ldr-wide-load	control-disabled	payload_prefix_memcmp_scan	kernel	yes	LDR	287	285	0.9930313588850174
+treatment-ldr-wide-load	control-disabled	simple	kernel	no		15	13	0.8666666666666667
+treatment-ldr-wide-load	control-disabled	simple_packet	kernel	no		14	13	0.9285714285714286
+treatment-ldr-wide-load	control-disabled	siphash_rotate64_mixer	kernel	yes	LDR	160	139	0.86875
+treatment-ldr-wide-load	control-disabled	sorted_rule_binary_search	kernel	yes	LDR	1943	1941	0.9989706639217705
+treatment-ldr-wide-load	control-disabled	stp_stack_pair	kernel	no		21	20	0.9523809523809523
+treatment-ldr-wide-load	control-disabled	tc_packet_checksum_fold	kernel	yes	LDR	33038	32975	0.9980931049094982
+treatment-ldr-wide-load	control-disabled	tetragon_process_event_arg_filter	kernel	yes	LDR	524	522	0.9961832061068703
+treatment-ldr-wide-load	control-disabled	trace_event_type_switch_dispatch	kernel	yes	LDR	680	666	0.9794117647058823
+treatment-ldr-wide-load	control-disabled	tracee_http_method_prefix_detect	kernel	yes	LDR	61	90	1.4754098360655739
+treatment-ldr-wide-load	control-disabled	tracee_syscall_name_table_lookup	kernel	yes	LDR	344	384	1.1162790697674418
+treatment-ldr-wide-load	control-disabled	arm64_direct_abi_coverage	native	no		7	7	1.0
+treatment-ldr-wide-load	control-disabled	bcc_runqlat_log2_histogram_bucket	native	yes	LDR	2215	2215	1.0
+treatment-ldr-wide-load	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	native	yes	LDR	150	150	1.0
+treatment-ldr-wide-load	control-disabled	bitmap_popcount_scan	native	yes	LDR	1612	1612	1.0
+treatment-ldr-wide-load	control-disabled	bpf_local_call_fanout_dispatch	native	yes	LDR	115	114	0.991304347826087
+treatment-ldr-wide-load	control-disabled	bpftrace_comm_key_fnv_hash	native	yes	LDR	1288	1287	0.9992236024844721
+treatment-ldr-wide-load	control-disabled	bpftrace_string_search_prefix_scan	native	yes	LDR	352	357	1.0142045454545454
+treatment-ldr-wide-load	control-disabled	ccmp_all_nonzero	native	no		5	5	1.0
+treatment-ldr-wide-load	control-disabled	cgroup_skb_hash_chain	native	yes	LDR	421	426	1.01187648456057
+treatment-ldr-wide-load	control-disabled	cilium_ct_nat_tuple_rewrite	native	yes	LDR	197	197	1.0
+treatment-ldr-wide-load	control-disabled	cilium_policy_guard_tree_filter	native	yes	LDR	123	148	1.2032520325203253
+treatment-ldr-wide-load	control-disabled	cilium_socket_lb_service_select	native	yes	LDR	329	329	1.0
+treatment-ldr-wide-load	control-disabled	csel_select64	native	yes	LDR	4	4	1.0
+treatment-ldr-wide-load	control-disabled	flow_5tuple_rss_hash	native	no		18	18	1.0
+treatment-ldr-wide-load	control-disabled	flow_record_field_scan	native	no		108	107	0.9907407407407407
+treatment-ldr-wide-load	control-disabled	katran_lb_consistent_hash_select	native	yes	LDR	27	27	1.0
+treatment-ldr-wide-load	control-disabled	ldp_stack_pair	native	no		6	5	0.8333333333333334
+treatment-ldr-wide-load	control-disabled	otel_stack_frame_unwind_scan	native	yes	LDR	117	117	1.0
+treatment-ldr-wide-load	control-disabled	packed_header_bitfield_decode	native	yes	LDR	501	502	1.001996007984032
+treatment-ldr-wide-load	control-disabled	packet_checksum_fold	native	yes	LDR	26111	26085	0.9990042510819195
+treatment-ldr-wide-load	control-disabled	packet_record_bounds_window	native	yes	LDR	148	148	1.0
+treatment-ldr-wide-load	control-disabled	packet_toeplitz_rss_hash	native	no		372	372	1.0
+treatment-ldr-wide-load	control-disabled	packet_vlan_tcpopt_parser	native	no		19	18	0.9473684210526315
+treatment-ldr-wide-load	control-disabled	payload_prefix_memcmp_scan	native	yes	LDR	169	168	0.9940828402366864
+treatment-ldr-wide-load	control-disabled	simple	native	no		4	4	1.0
+treatment-ldr-wide-load	control-disabled	simple_packet	native	no		4	4	1.0
+treatment-ldr-wide-load	control-disabled	siphash_rotate64_mixer	native	yes	LDR	44	44	1.0
+treatment-ldr-wide-load	control-disabled	sorted_rule_binary_search	native	yes	LDR	720	719	0.9986111111111111
+treatment-ldr-wide-load	control-disabled	stp_stack_pair	native	no		5	5	1.0
+treatment-ldr-wide-load	control-disabled	tc_packet_checksum_fold	native	yes	LDR	26095	26491	1.0151753209427092
+treatment-ldr-wide-load	control-disabled	tetragon_process_event_arg_filter	native	yes	LDR	275	275	1.0
+treatment-ldr-wide-load	control-disabled	trace_event_type_switch_dispatch	native	yes	LDR	633	926	1.462875197472354
+treatment-ldr-wide-load	control-disabled	tracee_http_method_prefix_detect	native	yes	LDR	39	38	0.9743589743589743
+treatment-ldr-wide-load	control-disabled	tracee_syscall_name_table_lookup	native	yes	LDR	259	260	1.0038610038610039
+treatment-ldr-direct-load	control-disabled	arm64_direct_abi_coverage	kernel	yes	LDR	20	20	1.0
+treatment-ldr-direct-load	control-disabled	bcc_runqlat_log2_histogram_bucket	kernel	no		4001	3972	0.9927518120469883
+treatment-ldr-direct-load	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	kernel	no		320	319	0.996875
+treatment-ldr-direct-load	control-disabled	bitmap_popcount_scan	kernel	no		2294	2287	0.9969485614646905
+treatment-ldr-direct-load	control-disabled	bpf_local_call_fanout_dispatch	kernel	no		325	325	1.0
+treatment-ldr-direct-load	control-disabled	bpftrace_comm_key_fnv_hash	kernel	no		1656	1657	1.0006038647342994
+treatment-ldr-direct-load	control-disabled	bpftrace_string_search_prefix_scan	kernel	no		512	520	1.015625
+treatment-ldr-direct-load	control-disabled	ccmp_all_nonzero	kernel	no		17	17	1.0
+treatment-ldr-direct-load	control-disabled	cgroup_skb_hash_chain	kernel	no		1039	1040	1.0009624639076036
+treatment-ldr-direct-load	control-disabled	cilium_ct_nat_tuple_rewrite	kernel	no		474	474	1.0
+treatment-ldr-direct-load	control-disabled	cilium_policy_guard_tree_filter	kernel	no		242	243	1.0041322314049588
+treatment-ldr-direct-load	control-disabled	cilium_socket_lb_service_select	kernel	no		1037	1043	1.0057859209257474
+treatment-ldr-direct-load	control-disabled	csel_select64	kernel	no		28	27	0.9642857142857143
+treatment-ldr-direct-load	control-disabled	flow_5tuple_rss_hash	kernel	no		48	48	1.0
+treatment-ldr-direct-load	control-disabled	flow_record_field_scan	kernel	no		186	191	1.0268817204301075
+treatment-ldr-direct-load	control-disabled	katran_lb_consistent_hash_select	kernel	no		61	61	1.0
+treatment-ldr-direct-load	control-disabled	ldp_stack_pair	kernel	yes	LDR	21	20	0.9523809523809523
+treatment-ldr-direct-load	control-disabled	otel_stack_frame_unwind_scan	kernel	no		382	381	0.9973821989528796
+treatment-ldr-direct-load	control-disabled	packed_header_bitfield_decode	kernel	no		937	936	0.9989327641408752
+treatment-ldr-direct-load	control-disabled	packet_checksum_fold	kernel	no		33088	33178	1.0027200193423598
+treatment-ldr-direct-load	control-disabled	packet_record_bounds_window	kernel	no		343	343	1.0
+treatment-ldr-direct-load	control-disabled	packet_toeplitz_rss_hash	kernel	no		525	472	0.8990476190476191
+treatment-ldr-direct-load	control-disabled	packet_vlan_tcpopt_parser	kernel	no		45	45	1.0
+treatment-ldr-direct-load	control-disabled	payload_prefix_memcmp_scan	kernel	no		287	286	0.9965156794425087
+treatment-ldr-direct-load	control-disabled	simple	kernel	no		15	13	0.8666666666666667
+treatment-ldr-direct-load	control-disabled	simple_packet	kernel	no		14	13	0.9285714285714286
+treatment-ldr-direct-load	control-disabled	siphash_rotate64_mixer	kernel	no		160	160	1.0
+treatment-ldr-direct-load	control-disabled	sorted_rule_binary_search	kernel	no		1943	1936	0.9963973237261966
+treatment-ldr-direct-load	control-disabled	stp_stack_pair	kernel	no		21	21	1.0
+treatment-ldr-direct-load	control-disabled	tc_packet_checksum_fold	kernel	no		33038	33047	1.0002724135843575
+treatment-ldr-direct-load	control-disabled	tetragon_process_event_arg_filter	kernel	no		524	524	1.0
+treatment-ldr-direct-load	control-disabled	trace_event_type_switch_dispatch	kernel	no		680	707	1.0397058823529413
+treatment-ldr-direct-load	control-disabled	tracee_http_method_prefix_detect	kernel	no		61	60	0.9836065573770492
+treatment-ldr-direct-load	control-disabled	tracee_syscall_name_table_lookup	kernel	no		344	330	0.9593023255813954
+treatment-ldr-direct-load	control-disabled	arm64_direct_abi_coverage	native	yes	LDR	7	7	1.0
+treatment-ldr-direct-load	control-disabled	bcc_runqlat_log2_histogram_bucket	native	no		2215	2214	0.999548532731377
+treatment-ldr-direct-load	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	native	no		150	150	1.0
+treatment-ldr-direct-load	control-disabled	bitmap_popcount_scan	native	no		1612	1612	1.0
+treatment-ldr-direct-load	control-disabled	bpf_local_call_fanout_dispatch	native	no		115	114	0.991304347826087
+treatment-ldr-direct-load	control-disabled	bpftrace_comm_key_fnv_hash	native	no		1288	1286	0.9984472049689441
+treatment-ldr-direct-load	control-disabled	bpftrace_string_search_prefix_scan	native	no		352	356	1.0113636363636365
+treatment-ldr-direct-load	control-disabled	ccmp_all_nonzero	native	no		5	5	1.0
+treatment-ldr-direct-load	control-disabled	cgroup_skb_hash_chain	native	no		421	429	1.0190023752969122
+treatment-ldr-direct-load	control-disabled	cilium_ct_nat_tuple_rewrite	native	no		197	197	1.0
+treatment-ldr-direct-load	control-disabled	cilium_policy_guard_tree_filter	native	no		123	123	1.0
+treatment-ldr-direct-load	control-disabled	cilium_socket_lb_service_select	native	no		329	329	1.0
+treatment-ldr-direct-load	control-disabled	csel_select64	native	no		4	4	1.0
+treatment-ldr-direct-load	control-disabled	flow_5tuple_rss_hash	native	no		18	18	1.0
+treatment-ldr-direct-load	control-disabled	flow_record_field_scan	native	no		108	113	1.0462962962962963
+treatment-ldr-direct-load	control-disabled	katran_lb_consistent_hash_select	native	no		27	27	1.0
+treatment-ldr-direct-load	control-disabled	ldp_stack_pair	native	yes	LDR	6	5	0.8333333333333334
+treatment-ldr-direct-load	control-disabled	otel_stack_frame_unwind_scan	native	no		117	117	1.0
+treatment-ldr-direct-load	control-disabled	packed_header_bitfield_decode	native	no		501	501	1.0
+treatment-ldr-direct-load	control-disabled	packet_checksum_fold	native	no		26111	26107	0.9998468078587568
+treatment-ldr-direct-load	control-disabled	packet_record_bounds_window	native	no		148	155	1.0472972972972974
+treatment-ldr-direct-load	control-disabled	packet_toeplitz_rss_hash	native	no		372	374	1.0053763440860215
+treatment-ldr-direct-load	control-disabled	packet_vlan_tcpopt_parser	native	no		19	18	0.9473684210526315
+treatment-ldr-direct-load	control-disabled	payload_prefix_memcmp_scan	native	no		169	168	0.9940828402366864
+treatment-ldr-direct-load	control-disabled	simple	native	no		4	4	1.0
+treatment-ldr-direct-load	control-disabled	simple_packet	native	no		4	4	1.0
+treatment-ldr-direct-load	control-disabled	siphash_rotate64_mixer	native	no		44	44	1.0
+treatment-ldr-direct-load	control-disabled	sorted_rule_binary_search	native	no		720	719	0.9986111111111111
+treatment-ldr-direct-load	control-disabled	stp_stack_pair	native	no		5	5	1.0
+treatment-ldr-direct-load	control-disabled	tc_packet_checksum_fold	native	no		26095	26740	1.024717378808201
+treatment-ldr-direct-load	control-disabled	tetragon_process_event_arg_filter	native	no		275	276	1.0036363636363637
+treatment-ldr-direct-load	control-disabled	trace_event_type_switch_dispatch	native	no		633	635	1.0031595576619274
+treatment-ldr-direct-load	control-disabled	tracee_http_method_prefix_detect	native	no		39	39	1.0
+treatment-ldr-direct-load	control-disabled	tracee_syscall_name_table_lookup	native	no		259	261	1.0077220077220077
+treatment-str-direct-store	control-disabled	arm64_direct_abi_coverage	kernel	yes	STR	20	20	1.0
+treatment-str-direct-store	control-disabled	bcc_runqlat_log2_histogram_bucket	kernel	no		4001	4025	1.0059985003749063
+treatment-str-direct-store	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	kernel	no		320	320	1.0
+treatment-str-direct-store	control-disabled	bitmap_popcount_scan	kernel	no		2294	2289	0.9978204010462075
+treatment-str-direct-store	control-disabled	bpf_local_call_fanout_dispatch	kernel	no		325	325	1.0
+treatment-str-direct-store	control-disabled	bpftrace_comm_key_fnv_hash	kernel	no		1656	1657	1.0006038647342994
+treatment-str-direct-store	control-disabled	bpftrace_string_search_prefix_scan	kernel	no		512	517	1.009765625
+treatment-str-direct-store	control-disabled	ccmp_all_nonzero	kernel	no		17	17	1.0
+treatment-str-direct-store	control-disabled	cgroup_skb_hash_chain	kernel	no		1039	1039	1.0
+treatment-str-direct-store	control-disabled	cilium_ct_nat_tuple_rewrite	kernel	no		474	475	1.0021097046413503
+treatment-str-direct-store	control-disabled	cilium_policy_guard_tree_filter	kernel	no		242	242	1.0
+treatment-str-direct-store	control-disabled	cilium_socket_lb_service_select	kernel	no		1037	1035	0.9980713596914176
+treatment-str-direct-store	control-disabled	csel_select64	kernel	no		28	28	1.0
+treatment-str-direct-store	control-disabled	flow_5tuple_rss_hash	kernel	no		48	48	1.0
+treatment-str-direct-store	control-disabled	flow_record_field_scan	kernel	no		186	186	1.0
+treatment-str-direct-store	control-disabled	katran_lb_consistent_hash_select	kernel	no		61	61	1.0
+treatment-str-direct-store	control-disabled	ldp_stack_pair	kernel	no		21	20	0.9523809523809523
+treatment-str-direct-store	control-disabled	otel_stack_frame_unwind_scan	kernel	no		382	381	0.9973821989528796
+treatment-str-direct-store	control-disabled	packed_header_bitfield_decode	kernel	no		937	937	1.0
+treatment-str-direct-store	control-disabled	packet_checksum_fold	kernel	no		33088	33033	0.9983377659574468
+treatment-str-direct-store	control-disabled	packet_record_bounds_window	kernel	no		343	342	0.9970845481049563
+treatment-str-direct-store	control-disabled	packet_toeplitz_rss_hash	kernel	no		525	522	0.9942857142857143
+treatment-str-direct-store	control-disabled	packet_vlan_tcpopt_parser	kernel	no		45	45	1.0
+treatment-str-direct-store	control-disabled	payload_prefix_memcmp_scan	kernel	no		287	286	0.9965156794425087
+treatment-str-direct-store	control-disabled	simple	kernel	no		15	15	1.0
+treatment-str-direct-store	control-disabled	simple_packet	kernel	no		14	14	1.0
+treatment-str-direct-store	control-disabled	siphash_rotate64_mixer	kernel	no		160	160	1.0
+treatment-str-direct-store	control-disabled	sorted_rule_binary_search	kernel	no		1943	1933	0.9948533196088523
+treatment-str-direct-store	control-disabled	stp_stack_pair	kernel	yes	STR	21	21	1.0
+treatment-str-direct-store	control-disabled	tc_packet_checksum_fold	kernel	no		33038	33091	1.0016042133301046
+treatment-str-direct-store	control-disabled	tetragon_process_event_arg_filter	kernel	no		524	524	1.0
+treatment-str-direct-store	control-disabled	trace_event_type_switch_dispatch	kernel	no		680	682	1.0029411764705882
+treatment-str-direct-store	control-disabled	tracee_http_method_prefix_detect	kernel	no		61	62	1.0163934426229508
+treatment-str-direct-store	control-disabled	tracee_syscall_name_table_lookup	kernel	no		344	345	1.002906976744186
+treatment-str-direct-store	control-disabled	arm64_direct_abi_coverage	native	yes	STR	7	8	1.1428571428571428
+treatment-str-direct-store	control-disabled	bcc_runqlat_log2_histogram_bucket	native	no		2215	2217	1.000902934537246
+treatment-str-direct-store	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	native	no		150	159	1.06
+treatment-str-direct-store	control-disabled	bitmap_popcount_scan	native	no		1612	1612	1.0
+treatment-str-direct-store	control-disabled	bpf_local_call_fanout_dispatch	native	no		115	115	1.0
+treatment-str-direct-store	control-disabled	bpftrace_comm_key_fnv_hash	native	no		1288	1288	1.0
+treatment-str-direct-store	control-disabled	bpftrace_string_search_prefix_scan	native	no		352	355	1.0085227272727273
+treatment-str-direct-store	control-disabled	ccmp_all_nonzero	native	no		5	5	1.0
+treatment-str-direct-store	control-disabled	cgroup_skb_hash_chain	native	no		421	421	1.0
+treatment-str-direct-store	control-disabled	cilium_ct_nat_tuple_rewrite	native	no		197	197	1.0
+treatment-str-direct-store	control-disabled	cilium_policy_guard_tree_filter	native	no		123	124	1.008130081300813
+treatment-str-direct-store	control-disabled	cilium_socket_lb_service_select	native	no		329	329	1.0
+treatment-str-direct-store	control-disabled	csel_select64	native	no		4	4	1.0
+treatment-str-direct-store	control-disabled	flow_5tuple_rss_hash	native	no		18	18	1.0
+treatment-str-direct-store	control-disabled	flow_record_field_scan	native	no		108	107	0.9907407407407407
+treatment-str-direct-store	control-disabled	katran_lb_consistent_hash_select	native	no		27	28	1.037037037037037
+treatment-str-direct-store	control-disabled	ldp_stack_pair	native	no		6	5	0.8333333333333334
+treatment-str-direct-store	control-disabled	otel_stack_frame_unwind_scan	native	no		117	117	1.0
+treatment-str-direct-store	control-disabled	packed_header_bitfield_decode	native	no		501	502	1.001996007984032
+treatment-str-direct-store	control-disabled	packet_checksum_fold	native	no		26111	26071	0.9984680785875685
+treatment-str-direct-store	control-disabled	packet_record_bounds_window	native	no		148	148	1.0
+treatment-str-direct-store	control-disabled	packet_toeplitz_rss_hash	native	no		372	376	1.010752688172043
+treatment-str-direct-store	control-disabled	packet_vlan_tcpopt_parser	native	no		19	18	0.9473684210526315
+treatment-str-direct-store	control-disabled	payload_prefix_memcmp_scan	native	no		169	169	1.0
+treatment-str-direct-store	control-disabled	simple	native	no		4	4	1.0
+treatment-str-direct-store	control-disabled	simple_packet	native	no		4	4	1.0
+treatment-str-direct-store	control-disabled	siphash_rotate64_mixer	native	no		44	49	1.1136363636363635
+treatment-str-direct-store	control-disabled	sorted_rule_binary_search	native	no		720	719	0.9986111111111111
+treatment-str-direct-store	control-disabled	stp_stack_pair	native	yes	STR	5	6	1.2
+treatment-str-direct-store	control-disabled	tc_packet_checksum_fold	native	no		26095	26096	1.0000383215175321
+treatment-str-direct-store	control-disabled	tetragon_process_event_arg_filter	native	no		275	275	1.0
+treatment-str-direct-store	control-disabled	trace_event_type_switch_dispatch	native	no		633	635	1.0031595576619274
+treatment-str-direct-store	control-disabled	tracee_http_method_prefix_detect	native	no		39	38	0.9743589743589743
+treatment-str-direct-store	control-disabled	tracee_syscall_name_table_lookup	native	no		259	259	1.0
+treatment-ldp-stp-pair-mem	control-disabled	arm64_direct_abi_coverage	kernel	no		20	20	1.0
+treatment-ldp-stp-pair-mem	control-disabled	bcc_runqlat_log2_histogram_bucket	kernel	no		4001	3987	0.9965008747813047
+treatment-ldp-stp-pair-mem	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	kernel	no		320	320	1.0
+treatment-ldp-stp-pair-mem	control-disabled	bitmap_popcount_scan	kernel	no		2294	2305	1.0047951176983434
+treatment-ldp-stp-pair-mem	control-disabled	bpf_local_call_fanout_dispatch	kernel	no		325	325	1.0
+treatment-ldp-stp-pair-mem	control-disabled	bpftrace_comm_key_fnv_hash	kernel	no		1656	1656	1.0
+treatment-ldp-stp-pair-mem	control-disabled	bpftrace_string_search_prefix_scan	kernel	no		512	517	1.009765625
+treatment-ldp-stp-pair-mem	control-disabled	ccmp_all_nonzero	kernel	no		17	17	1.0
+treatment-ldp-stp-pair-mem	control-disabled	cgroup_skb_hash_chain	kernel	no		1039	1039	1.0
+treatment-ldp-stp-pair-mem	control-disabled	cilium_ct_nat_tuple_rewrite	kernel	no		474	474	1.0
+treatment-ldp-stp-pair-mem	control-disabled	cilium_policy_guard_tree_filter	kernel	no		242	243	1.0041322314049588
+treatment-ldp-stp-pair-mem	control-disabled	cilium_socket_lb_service_select	kernel	no		1037	1035	0.9980713596914176
+treatment-ldp-stp-pair-mem	control-disabled	csel_select64	kernel	no		28	26	0.9285714285714286
+treatment-ldp-stp-pair-mem	control-disabled	flow_5tuple_rss_hash	kernel	no		48	48	1.0
+treatment-ldp-stp-pair-mem	control-disabled	flow_record_field_scan	kernel	no		186	186	1.0
+treatment-ldp-stp-pair-mem	control-disabled	katran_lb_consistent_hash_select	kernel	no		61	61	1.0
+treatment-ldp-stp-pair-mem	control-disabled	ldp_stack_pair	kernel	yes	LDP/STP	21	22	1.0476190476190477
+treatment-ldp-stp-pair-mem	control-disabled	otel_stack_frame_unwind_scan	kernel	no		382	381	0.9973821989528796
+treatment-ldp-stp-pair-mem	control-disabled	packed_header_bitfield_decode	kernel	no		937	940	1.0032017075773747
+treatment-ldp-stp-pair-mem	control-disabled	packet_checksum_fold	kernel	no		33088	33039	0.9985191005802708
+treatment-ldp-stp-pair-mem	control-disabled	packet_record_bounds_window	kernel	no		343	343	1.0
+treatment-ldp-stp-pair-mem	control-disabled	packet_toeplitz_rss_hash	kernel	no		525	480	0.9142857142857143
+treatment-ldp-stp-pair-mem	control-disabled	packet_vlan_tcpopt_parser	kernel	no		45	45	1.0
+treatment-ldp-stp-pair-mem	control-disabled	payload_prefix_memcmp_scan	kernel	no		287	286	0.9965156794425087
+treatment-ldp-stp-pair-mem	control-disabled	simple	kernel	no		15	13	0.8666666666666667
+treatment-ldp-stp-pair-mem	control-disabled	simple_packet	kernel	no		14	13	0.9285714285714286
+treatment-ldp-stp-pair-mem	control-disabled	siphash_rotate64_mixer	kernel	no		160	164	1.025
+treatment-ldp-stp-pair-mem	control-disabled	sorted_rule_binary_search	kernel	no		1943	2305	1.1863098301595472
+treatment-ldp-stp-pair-mem	control-disabled	stp_stack_pair	kernel	yes	LDP/STP	21	20	0.9523809523809523
+treatment-ldp-stp-pair-mem	control-disabled	tc_packet_checksum_fold	kernel	no		33038	33042	1.000121072704159
+treatment-ldp-stp-pair-mem	control-disabled	tetragon_process_event_arg_filter	kernel	no		524	528	1.0076335877862594
+treatment-ldp-stp-pair-mem	control-disabled	trace_event_type_switch_dispatch	kernel	no		680	680	1.0
+treatment-ldp-stp-pair-mem	control-disabled	tracee_http_method_prefix_detect	kernel	no		61	62	1.0163934426229508
+treatment-ldp-stp-pair-mem	control-disabled	tracee_syscall_name_table_lookup	kernel	no		344	356	1.0348837209302326
+treatment-ldp-stp-pair-mem	control-disabled	arm64_direct_abi_coverage	native	no		7	7	1.0
+treatment-ldp-stp-pair-mem	control-disabled	bcc_runqlat_log2_histogram_bucket	native	no		2215	2224	1.0040632054176073
+treatment-ldp-stp-pair-mem	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	native	no		150	150	1.0
+treatment-ldp-stp-pair-mem	control-disabled	bitmap_popcount_scan	native	no		1612	1617	1.0031017369727047
+treatment-ldp-stp-pair-mem	control-disabled	bpf_local_call_fanout_dispatch	native	no		115	116	1.008695652173913
+treatment-ldp-stp-pair-mem	control-disabled	bpftrace_comm_key_fnv_hash	native	no		1288	1287	0.9992236024844721
+treatment-ldp-stp-pair-mem	control-disabled	bpftrace_string_search_prefix_scan	native	no		352	353	1.0028409090909092
+treatment-ldp-stp-pair-mem	control-disabled	ccmp_all_nonzero	native	no		5	5	1.0
+treatment-ldp-stp-pair-mem	control-disabled	cgroup_skb_hash_chain	native	no		421	421	1.0
+treatment-ldp-stp-pair-mem	control-disabled	cilium_ct_nat_tuple_rewrite	native	no		197	197	1.0
+treatment-ldp-stp-pair-mem	control-disabled	cilium_policy_guard_tree_filter	native	no		123	124	1.008130081300813
+treatment-ldp-stp-pair-mem	control-disabled	cilium_socket_lb_service_select	native	no		329	329	1.0
+treatment-ldp-stp-pair-mem	control-disabled	csel_select64	native	no		4	4	1.0
+treatment-ldp-stp-pair-mem	control-disabled	flow_5tuple_rss_hash	native	no		18	17	0.9444444444444444
+treatment-ldp-stp-pair-mem	control-disabled	flow_record_field_scan	native	no		108	107	0.9907407407407407
+treatment-ldp-stp-pair-mem	control-disabled	katran_lb_consistent_hash_select	native	no		27	28	1.037037037037037
+treatment-ldp-stp-pair-mem	control-disabled	ldp_stack_pair	native	yes	LDP/STP	6	6	1.0
+treatment-ldp-stp-pair-mem	control-disabled	otel_stack_frame_unwind_scan	native	no		117	116	0.9914529914529915
+treatment-ldp-stp-pair-mem	control-disabled	packed_header_bitfield_decode	native	no		501	501	1.0
+treatment-ldp-stp-pair-mem	control-disabled	packet_checksum_fold	native	no		26111	26267	1.0059744935084831
+treatment-ldp-stp-pair-mem	control-disabled	packet_record_bounds_window	native	no		148	148	1.0
+treatment-ldp-stp-pair-mem	control-disabled	packet_toeplitz_rss_hash	native	no		372	374	1.0053763440860215
+treatment-ldp-stp-pair-mem	control-disabled	packet_vlan_tcpopt_parser	native	no		19	19	1.0
+treatment-ldp-stp-pair-mem	control-disabled	payload_prefix_memcmp_scan	native	no		169	169	1.0
+treatment-ldp-stp-pair-mem	control-disabled	simple	native	no		4	4	1.0
+treatment-ldp-stp-pair-mem	control-disabled	simple_packet	native	no		4	4	1.0
+treatment-ldp-stp-pair-mem	control-disabled	siphash_rotate64_mixer	native	no		44	44	1.0
+treatment-ldp-stp-pair-mem	control-disabled	sorted_rule_binary_search	native	no		720	727	1.0097222222222222
+treatment-ldp-stp-pair-mem	control-disabled	stp_stack_pair	native	yes	LDP/STP	5	6	1.2
+treatment-ldp-stp-pair-mem	control-disabled	tc_packet_checksum_fold	native	no		26095	26098	1.0001149645525962
+treatment-ldp-stp-pair-mem	control-disabled	tetragon_process_event_arg_filter	native	no		275	275	1.0
+treatment-ldp-stp-pair-mem	control-disabled	trace_event_type_switch_dispatch	native	no		633	653	1.0315955766192733
+treatment-ldp-stp-pair-mem	control-disabled	tracee_http_method_prefix_detect	native	no		39	38	0.9743589743589743
+treatment-ldp-stp-pair-mem	control-disabled	tracee_syscall_name_table_lookup	native	no		259	259	1.0
+treatment-csel-cmov	control-disabled	arm64_direct_abi_coverage	kernel	no		20	20	1.0
+treatment-csel-cmov	control-disabled	bcc_runqlat_log2_histogram_bucket	kernel	no		4001	3984	0.9957510622344414
+treatment-csel-cmov	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	kernel	no		320	328	1.025
+treatment-csel-cmov	control-disabled	bitmap_popcount_scan	kernel	no		2294	2291	0.9986922406277245
+treatment-csel-cmov	control-disabled	bpf_local_call_fanout_dispatch	kernel	no		325	325	1.0
+treatment-csel-cmov	control-disabled	bpftrace_comm_key_fnv_hash	kernel	no		1656	1773	1.0706521739130435
+treatment-csel-cmov	control-disabled	bpftrace_string_search_prefix_scan	kernel	no		512	512	1.0
+treatment-csel-cmov	control-disabled	ccmp_all_nonzero	kernel	no		17	15	0.8823529411764706
+treatment-csel-cmov	control-disabled	cgroup_skb_hash_chain	kernel	no		1039	1039	1.0
+treatment-csel-cmov	control-disabled	cilium_ct_nat_tuple_rewrite	kernel	no		474	477	1.0063291139240507
+treatment-csel-cmov	control-disabled	cilium_policy_guard_tree_filter	kernel	no		242	242	1.0
+treatment-csel-cmov	control-disabled	cilium_socket_lb_service_select	kernel	no		1037	1043	1.0057859209257474
+treatment-csel-cmov	control-disabled	csel_select64	kernel	yes	CCMP/CMP/CSET,CSEL	28	26	0.9285714285714286
+treatment-csel-cmov	control-disabled	flow_5tuple_rss_hash	kernel	no		48	47	0.9791666666666666
+treatment-csel-cmov	control-disabled	flow_record_field_scan	kernel	no		186	186	1.0
+treatment-csel-cmov	control-disabled	katran_lb_consistent_hash_select	kernel	no		61	61	1.0
+treatment-csel-cmov	control-disabled	ldp_stack_pair	kernel	no		21	20	0.9523809523809523
+treatment-csel-cmov	control-disabled	otel_stack_frame_unwind_scan	kernel	no		382	384	1.0052356020942408
+treatment-csel-cmov	control-disabled	packed_header_bitfield_decode	kernel	no		937	936	0.9989327641408752
+treatment-csel-cmov	control-disabled	packet_checksum_fold	kernel	no		33088	35266	1.0658244680851063
+treatment-csel-cmov	control-disabled	packet_record_bounds_window	kernel	no		343	342	0.9970845481049563
+treatment-csel-cmov	control-disabled	packet_toeplitz_rss_hash	kernel	no		525	524	0.9980952380952381
+treatment-csel-cmov	control-disabled	packet_vlan_tcpopt_parser	kernel	no		45	45	1.0
+treatment-csel-cmov	control-disabled	payload_prefix_memcmp_scan	kernel	no		287	287	1.0
+treatment-csel-cmov	control-disabled	simple	kernel	no		15	13	0.8666666666666667
+treatment-csel-cmov	control-disabled	simple_packet	kernel	no		14	13	0.9285714285714286
+treatment-csel-cmov	control-disabled	siphash_rotate64_mixer	kernel	no		160	160	1.0
+treatment-csel-cmov	control-disabled	sorted_rule_binary_search	kernel	no		1943	1943	1.0
+treatment-csel-cmov	control-disabled	stp_stack_pair	kernel	no		21	19	0.9047619047619048
+treatment-csel-cmov	control-disabled	tc_packet_checksum_fold	kernel	no		33038	33206	1.0050850535746716
+treatment-csel-cmov	control-disabled	tetragon_process_event_arg_filter	kernel	no		524	524	1.0
+treatment-csel-cmov	control-disabled	trace_event_type_switch_dispatch	kernel	no		680	679	0.9985294117647059
+treatment-csel-cmov	control-disabled	tracee_http_method_prefix_detect	kernel	no		61	61	1.0
+treatment-csel-cmov	control-disabled	tracee_syscall_name_table_lookup	kernel	no		344	344	1.0
+treatment-csel-cmov	control-disabled	arm64_direct_abi_coverage	native	no		7	7	1.0
+treatment-csel-cmov	control-disabled	bcc_runqlat_log2_histogram_bucket	native	no		2215	2215	1.0
+treatment-csel-cmov	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	native	no		150	150	1.0
+treatment-csel-cmov	control-disabled	bitmap_popcount_scan	native	no		1612	1623	1.0068238213399503
+treatment-csel-cmov	control-disabled	bpf_local_call_fanout_dispatch	native	no		115	116	1.008695652173913
+treatment-csel-cmov	control-disabled	bpftrace_comm_key_fnv_hash	native	no		1288	1287	0.9992236024844721
+treatment-csel-cmov	control-disabled	bpftrace_string_search_prefix_scan	native	no		352	353	1.0028409090909092
+treatment-csel-cmov	control-disabled	ccmp_all_nonzero	native	no		5	4	0.8
+treatment-csel-cmov	control-disabled	cgroup_skb_hash_chain	native	no		421	421	1.0
+treatment-csel-cmov	control-disabled	cilium_ct_nat_tuple_rewrite	native	no		197	198	1.0050761421319796
+treatment-csel-cmov	control-disabled	cilium_policy_guard_tree_filter	native	no		123	124	1.008130081300813
+treatment-csel-cmov	control-disabled	cilium_socket_lb_service_select	native	no		329	356	1.082066869300912
+treatment-csel-cmov	control-disabled	csel_select64	native	yes	CCMP/CMP/CSET,CSEL	4	4	1.0
+treatment-csel-cmov	control-disabled	flow_5tuple_rss_hash	native	no		18	18	1.0
+treatment-csel-cmov	control-disabled	flow_record_field_scan	native	no		108	108	1.0
+treatment-csel-cmov	control-disabled	katran_lb_consistent_hash_select	native	no		27	27	1.0
+treatment-csel-cmov	control-disabled	ldp_stack_pair	native	no		6	5	0.8333333333333334
+treatment-csel-cmov	control-disabled	otel_stack_frame_unwind_scan	native	no		117	117	1.0
+treatment-csel-cmov	control-disabled	packed_header_bitfield_decode	native	no		501	502	1.001996007984032
+treatment-csel-cmov	control-disabled	packet_checksum_fold	native	no		26111	27882	1.0678258205354065
+treatment-csel-cmov	control-disabled	packet_record_bounds_window	native	no		148	148	1.0
+treatment-csel-cmov	control-disabled	packet_toeplitz_rss_hash	native	no		372	377	1.0134408602150538
+treatment-csel-cmov	control-disabled	packet_vlan_tcpopt_parser	native	no		19	18	0.9473684210526315
+treatment-csel-cmov	control-disabled	payload_prefix_memcmp_scan	native	no		169	168	0.9940828402366864
+treatment-csel-cmov	control-disabled	simple	native	no		4	4	1.0
+treatment-csel-cmov	control-disabled	simple_packet	native	no		4	4	1.0
+treatment-csel-cmov	control-disabled	siphash_rotate64_mixer	native	no		44	44	1.0
+treatment-csel-cmov	control-disabled	sorted_rule_binary_search	native	no		720	719	0.9986111111111111
+treatment-csel-cmov	control-disabled	stp_stack_pair	native	no		5	5	1.0
+treatment-csel-cmov	control-disabled	tc_packet_checksum_fold	native	no		26095	26266	1.0065529794979882
+treatment-csel-cmov	control-disabled	tetragon_process_event_arg_filter	native	no		275	275	1.0
+treatment-csel-cmov	control-disabled	trace_event_type_switch_dispatch	native	no		633	638	1.0078988941548184
+treatment-csel-cmov	control-disabled	tracee_http_method_prefix_detect	native	no		39	38	0.9743589743589743
+treatment-csel-cmov	control-disabled	tracee_syscall_name_table_lookup	native	no		259	259	1.0
+treatment-ccmp	control-disabled	arm64_direct_abi_coverage	kernel	no		20	20	1.0
+treatment-ccmp	control-disabled	bcc_runqlat_log2_histogram_bucket	kernel	no		4001	4015	1.0034991252186953
+treatment-ccmp	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	kernel	no		320	319	0.996875
+treatment-ccmp	control-disabled	bitmap_popcount_scan	kernel	no		2294	2304	1.004359197907585
+treatment-ccmp	control-disabled	bpf_local_call_fanout_dispatch	kernel	no		325	325	1.0
+treatment-ccmp	control-disabled	bpftrace_comm_key_fnv_hash	kernel	no		1656	1656	1.0
+treatment-ccmp	control-disabled	bpftrace_string_search_prefix_scan	kernel	no		512	512	1.0
+treatment-ccmp	control-disabled	ccmp_all_nonzero	kernel	yes	CCMP/CMP/CSET	17	17	1.0
+treatment-ccmp	control-disabled	cgroup_skb_hash_chain	kernel	no		1039	1060	1.0202117420596728
+treatment-ccmp	control-disabled	cilium_ct_nat_tuple_rewrite	kernel	no		474	477	1.0063291139240507
+treatment-ccmp	control-disabled	cilium_policy_guard_tree_filter	kernel	no		242	249	1.0289256198347108
+treatment-ccmp	control-disabled	cilium_socket_lb_service_select	kernel	yes	CCMP/CMP/CSET	1037	1053	1.0154291224686596
+treatment-ccmp	control-disabled	csel_select64	kernel	no		28	28	1.0
+treatment-ccmp	control-disabled	flow_5tuple_rss_hash	kernel	no		48	48	1.0
+treatment-ccmp	control-disabled	flow_record_field_scan	kernel	no		186	186	1.0
+treatment-ccmp	control-disabled	katran_lb_consistent_hash_select	kernel	no		61	61	1.0
+treatment-ccmp	control-disabled	ldp_stack_pair	kernel	no		21	20	0.9523809523809523
+treatment-ccmp	control-disabled	otel_stack_frame_unwind_scan	kernel	no		382	381	0.9973821989528796
+treatment-ccmp	control-disabled	packed_header_bitfield_decode	kernel	no		937	938	1.0010672358591248
+treatment-ccmp	control-disabled	packet_checksum_fold	kernel	no		33088	33033	0.9983377659574468
+treatment-ccmp	control-disabled	packet_record_bounds_window	kernel	no		343	343	1.0
+treatment-ccmp	control-disabled	packet_toeplitz_rss_hash	kernel	no		525	478	0.9104761904761904
+treatment-ccmp	control-disabled	packet_vlan_tcpopt_parser	kernel	no		45	45	1.0
+treatment-ccmp	control-disabled	payload_prefix_memcmp_scan	kernel	no		287	288	1.0034843205574913
+treatment-ccmp	control-disabled	simple	kernel	no		15	14	0.9333333333333333
+treatment-ccmp	control-disabled	simple_packet	kernel	no		14	14	1.0
+treatment-ccmp	control-disabled	siphash_rotate64_mixer	kernel	no		160	160	1.0
+treatment-ccmp	control-disabled	sorted_rule_binary_search	kernel	no		1943	1934	0.9953679876479671
+treatment-ccmp	control-disabled	stp_stack_pair	kernel	no		21	20	0.9523809523809523
+treatment-ccmp	control-disabled	tc_packet_checksum_fold	kernel	no		33038	33043	1.0001513408801985
+treatment-ccmp	control-disabled	tetragon_process_event_arg_filter	kernel	no		524	524	1.0
+treatment-ccmp	control-disabled	trace_event_type_switch_dispatch	kernel	no		680	690	1.0147058823529411
+treatment-ccmp	control-disabled	tracee_http_method_prefix_detect	kernel	no		61	61	1.0
+treatment-ccmp	control-disabled	tracee_syscall_name_table_lookup	kernel	no		344	356	1.0348837209302326
+treatment-ccmp	control-disabled	arm64_direct_abi_coverage	native	no		7	7	1.0
+treatment-ccmp	control-disabled	bcc_runqlat_log2_histogram_bucket	native	no		2215	2215	1.0
+treatment-ccmp	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	native	no		150	150	1.0
+treatment-ccmp	control-disabled	bitmap_popcount_scan	native	no		1612	1612	1.0
+treatment-ccmp	control-disabled	bpf_local_call_fanout_dispatch	native	no		115	115	1.0
+treatment-ccmp	control-disabled	bpftrace_comm_key_fnv_hash	native	no		1288	1289	1.000776397515528
+treatment-ccmp	control-disabled	bpftrace_string_search_prefix_scan	native	no		352	355	1.0085227272727273
+treatment-ccmp	control-disabled	ccmp_all_nonzero	native	yes	CCMP/CMP/CSET	5	5	1.0
+treatment-ccmp	control-disabled	cgroup_skb_hash_chain	native	no		421	426	1.01187648456057
+treatment-ccmp	control-disabled	cilium_ct_nat_tuple_rewrite	native	no		197	200	1.015228426395939
+treatment-ccmp	control-disabled	cilium_policy_guard_tree_filter	native	no		123	123	1.0
+treatment-ccmp	control-disabled	cilium_socket_lb_service_select	native	yes	CCMP/CMP/CSET	329	329	1.0
+treatment-ccmp	control-disabled	csel_select64	native	no		4	4	1.0
+treatment-ccmp	control-disabled	flow_5tuple_rss_hash	native	no		18	18	1.0
+treatment-ccmp	control-disabled	flow_record_field_scan	native	no		108	115	1.0648148148148149
+treatment-ccmp	control-disabled	katran_lb_consistent_hash_select	native	no		27	27	1.0
+treatment-ccmp	control-disabled	ldp_stack_pair	native	no		6	5	0.8333333333333334
+treatment-ccmp	control-disabled	otel_stack_frame_unwind_scan	native	no		117	116	0.9914529914529915
+treatment-ccmp	control-disabled	packed_header_bitfield_decode	native	no		501	502	1.001996007984032
+treatment-ccmp	control-disabled	packet_checksum_fold	native	no		26111	26070	0.9984297805522576
+treatment-ccmp	control-disabled	packet_record_bounds_window	native	no		148	175	1.1824324324324325
+treatment-ccmp	control-disabled	packet_toeplitz_rss_hash	native	no		372	373	1.0026881720430108
+treatment-ccmp	control-disabled	packet_vlan_tcpopt_parser	native	no		19	18	0.9473684210526315
+treatment-ccmp	control-disabled	payload_prefix_memcmp_scan	native	no		169	168	0.9940828402366864
+treatment-ccmp	control-disabled	simple	native	no		4	4	1.0
+treatment-ccmp	control-disabled	simple_packet	native	no		4	4	1.0
+treatment-ccmp	control-disabled	siphash_rotate64_mixer	native	no		44	48	1.0909090909090908
+treatment-ccmp	control-disabled	sorted_rule_binary_search	native	no		720	719	0.9986111111111111
+treatment-ccmp	control-disabled	stp_stack_pair	native	no		5	5	1.0
+treatment-ccmp	control-disabled	tc_packet_checksum_fold	native	no		26095	26119	1.0009197164207702
+treatment-ccmp	control-disabled	tetragon_process_event_arg_filter	native	no		275	276	1.0036363636363637
+treatment-ccmp	control-disabled	trace_event_type_switch_dispatch	native	no		633	633	1.0
+treatment-ccmp	control-disabled	tracee_http_method_prefix_detect	native	no		39	38	0.9743589743589743
+treatment-ccmp	control-disabled	tracee_syscall_name_table_lookup	native	no		259	259	1.0
+treatment-mov	control-disabled	arm64_direct_abi_coverage	kernel	no		20	20	1.0
+treatment-mov	control-disabled	bcc_runqlat_log2_histogram_bucket	kernel	no		4001	3988	0.9967508122969257
+treatment-mov	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	kernel	no		320	321	1.003125
+treatment-mov	control-disabled	bitmap_popcount_scan	kernel	no		2294	2286	0.9965126416739319
+treatment-mov	control-disabled	bpf_local_call_fanout_dispatch	kernel	no		325	325	1.0
+treatment-mov	control-disabled	bpftrace_comm_key_fnv_hash	kernel	no		1656	1656	1.0
+treatment-mov	control-disabled	bpftrace_string_search_prefix_scan	kernel	no		512	523	1.021484375
+treatment-mov	control-disabled	ccmp_all_nonzero	kernel	no		17	17	1.0
+treatment-mov	control-disabled	cgroup_skb_hash_chain	kernel	no		1039	1039	1.0
+treatment-mov	control-disabled	cilium_ct_nat_tuple_rewrite	kernel	no		474	474	1.0
+treatment-mov	control-disabled	cilium_policy_guard_tree_filter	kernel	no		242	242	1.0
+treatment-mov	control-disabled	cilium_socket_lb_service_select	kernel	no		1037	1053	1.0154291224686596
+treatment-mov	control-disabled	csel_select64	kernel	no		28	28	1.0
+treatment-mov	control-disabled	flow_5tuple_rss_hash	kernel	no		48	48	1.0
+treatment-mov	control-disabled	flow_record_field_scan	kernel	no		186	186	1.0
+treatment-mov	control-disabled	katran_lb_consistent_hash_select	kernel	no		61	61	1.0
+treatment-mov	control-disabled	ldp_stack_pair	kernel	no		21	22	1.0476190476190477
+treatment-mov	control-disabled	otel_stack_frame_unwind_scan	kernel	no		382	397	1.0392670157068062
+treatment-mov	control-disabled	packed_header_bitfield_decode	kernel	no		937	936	0.9989327641408752
+treatment-mov	control-disabled	packet_checksum_fold	kernel	no		33088	33038	0.9984888781431335
+treatment-mov	control-disabled	packet_record_bounds_window	kernel	no		343	343	1.0
+treatment-mov	control-disabled	packet_toeplitz_rss_hash	kernel	no		525	479	0.9123809523809524
+treatment-mov	control-disabled	packet_vlan_tcpopt_parser	kernel	no		45	45	1.0
+treatment-mov	control-disabled	payload_prefix_memcmp_scan	kernel	no		287	287	1.0
+treatment-mov	control-disabled	simple	kernel	no		15	14	0.9333333333333333
+treatment-mov	control-disabled	simple_packet	kernel	no		14	14	1.0
+treatment-mov	control-disabled	siphash_rotate64_mixer	kernel	no		160	160	1.0
+treatment-mov	control-disabled	sorted_rule_binary_search	kernel	no		1943	1940	0.9984559958826557
+treatment-mov	control-disabled	stp_stack_pair	kernel	no		21	20	0.9523809523809523
+treatment-mov	control-disabled	tc_packet_checksum_fold	kernel	no		33038	33033	0.9998486591198015
+treatment-mov	control-disabled	tetragon_process_event_arg_filter	kernel	no		524	528	1.0076335877862594
+treatment-mov	control-disabled	trace_event_type_switch_dispatch	kernel	no		680	719	1.0573529411764706
+treatment-mov	control-disabled	tracee_http_method_prefix_detect	kernel	no		61	62	1.0163934426229508
+treatment-mov	control-disabled	tracee_syscall_name_table_lookup	kernel	no		344	331	0.9622093023255814
+treatment-mov	control-disabled	arm64_direct_abi_coverage	native	no		7	7	1.0
+treatment-mov	control-disabled	bcc_runqlat_log2_histogram_bucket	native	no		2215	2216	1.000451467268623
+treatment-mov	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	native	no		150	151	1.0066666666666666
+treatment-mov	control-disabled	bitmap_popcount_scan	native	no		1612	1612	1.0
+treatment-mov	control-disabled	bpf_local_call_fanout_dispatch	native	no		115	136	1.182608695652174
+treatment-mov	control-disabled	bpftrace_comm_key_fnv_hash	native	no		1288	1287	0.9992236024844721
+treatment-mov	control-disabled	bpftrace_string_search_prefix_scan	native	no		352	362	1.0284090909090908
+treatment-mov	control-disabled	ccmp_all_nonzero	native	no		5	5	1.0
+treatment-mov	control-disabled	cgroup_skb_hash_chain	native	no		421	421	1.0
+treatment-mov	control-disabled	cilium_ct_nat_tuple_rewrite	native	no		197	197	1.0
+treatment-mov	control-disabled	cilium_policy_guard_tree_filter	native	no		123	124	1.008130081300813
+treatment-mov	control-disabled	cilium_socket_lb_service_select	native	no		329	329	1.0
+treatment-mov	control-disabled	csel_select64	native	no		4	4	1.0
+treatment-mov	control-disabled	flow_5tuple_rss_hash	native	no		18	18	1.0
+treatment-mov	control-disabled	flow_record_field_scan	native	no		108	107	0.9907407407407407
+treatment-mov	control-disabled	katran_lb_consistent_hash_select	native	no		27	27	1.0
+treatment-mov	control-disabled	ldp_stack_pair	native	no		6	5	0.8333333333333334
+treatment-mov	control-disabled	otel_stack_frame_unwind_scan	native	no		117	117	1.0
+treatment-mov	control-disabled	packed_header_bitfield_decode	native	no		501	508	1.0139720558882235
+treatment-mov	control-disabled	packet_checksum_fold	native	no		26111	26075	0.9986212707288116
+treatment-mov	control-disabled	packet_record_bounds_window	native	no		148	148	1.0
+treatment-mov	control-disabled	packet_toeplitz_rss_hash	native	no		372	375	1.0080645161290323
+treatment-mov	control-disabled	packet_vlan_tcpopt_parser	native	no		19	18	0.9473684210526315
+treatment-mov	control-disabled	payload_prefix_memcmp_scan	native	no		169	169	1.0
+treatment-mov	control-disabled	simple	native	no		4	4	1.0
+treatment-mov	control-disabled	simple_packet	native	no		4	4	1.0
+treatment-mov	control-disabled	siphash_rotate64_mixer	native	no		44	44	1.0
+treatment-mov	control-disabled	sorted_rule_binary_search	native	no		720	739	1.0263888888888888
+treatment-mov	control-disabled	stp_stack_pair	native	no		5	5	1.0
+treatment-mov	control-disabled	tc_packet_checksum_fold	native	no		26095	26090	0.9998083924123395
+treatment-mov	control-disabled	tetragon_process_event_arg_filter	native	no		275	276	1.0036363636363637
+treatment-mov	control-disabled	trace_event_type_switch_dispatch	native	no		633	633	1.0
+treatment-mov	control-disabled	tracee_http_method_prefix_detect	native	no		39	38	0.9743589743589743
+treatment-mov	control-disabled	tracee_syscall_name_table_lookup	native	no		259	259	1.0
+treatment-prfm	control-disabled	arm64_direct_abi_coverage	kernel	yes	PRFM	20	20	1.0
+treatment-prfm	control-disabled	bcc_runqlat_log2_histogram_bucket	kernel	yes	PRFM	4001	4030	1.0072481879530117
+treatment-prfm	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	kernel	yes	PRFM	320	323	1.009375
+treatment-prfm	control-disabled	bitmap_popcount_scan	kernel	yes	PRFM	2294	2291	0.9986922406277245
+treatment-prfm	control-disabled	bpf_local_call_fanout_dispatch	kernel	yes	PRFM	325	325	1.0
+treatment-prfm	control-disabled	bpftrace_comm_key_fnv_hash	kernel	yes	PRFM	1656	1656	1.0
+treatment-prfm	control-disabled	bpftrace_string_search_prefix_scan	kernel	yes	PRFM	512	518	1.01171875
+treatment-prfm	control-disabled	ccmp_all_nonzero	kernel	yes	PRFM	17	17	1.0
+treatment-prfm	control-disabled	cgroup_skb_hash_chain	kernel	yes	PRFM	1039	1038	0.9990375360923965
+treatment-prfm	control-disabled	cilium_ct_nat_tuple_rewrite	kernel	yes	PRFM	474	483	1.018987341772152
+treatment-prfm	control-disabled	cilium_policy_guard_tree_filter	kernel	yes	PRFM	242	245	1.012396694214876
+treatment-prfm	control-disabled	cilium_socket_lb_service_select	kernel	yes	PRFM	1037	1045	1.00771456123433
+treatment-prfm	control-disabled	csel_select64	kernel	yes	PRFM	28	29	1.0357142857142858
+treatment-prfm	control-disabled	flow_5tuple_rss_hash	kernel	yes	PRFM	48	48	1.0
+treatment-prfm	control-disabled	flow_record_field_scan	kernel	yes	PRFM	186	187	1.0053763440860215
+treatment-prfm	control-disabled	katran_lb_consistent_hash_select	kernel	yes	PRFM	61	61	1.0
+treatment-prfm	control-disabled	ldp_stack_pair	kernel	yes	PRFM	21	22	1.0476190476190477
+treatment-prfm	control-disabled	otel_stack_frame_unwind_scan	kernel	yes	PRFM	382	386	1.0104712041884816
+treatment-prfm	control-disabled	packed_header_bitfield_decode	kernel	yes	PRFM	937	942	1.0053361792956244
+treatment-prfm	control-disabled	packet_checksum_fold	kernel	yes	PRFM	33088	33204	1.0035058027079304
+treatment-prfm	control-disabled	packet_record_bounds_window	kernel	yes	PRFM	343	346	1.0087463556851313
+treatment-prfm	control-disabled	packet_toeplitz_rss_hash	kernel	yes	PRFM	525	470	0.8952380952380953
+treatment-prfm	control-disabled	packet_vlan_tcpopt_parser	kernel	yes	PRFM	45	45	1.0
+treatment-prfm	control-disabled	payload_prefix_memcmp_scan	kernel	yes	PRFM	287	322	1.1219512195121952
+treatment-prfm	control-disabled	simple	kernel	yes	PRFM	15	14	0.9333333333333333
+treatment-prfm	control-disabled	simple_packet	kernel	yes	PRFM	14	15	1.0714285714285714
+treatment-prfm	control-disabled	siphash_rotate64_mixer	kernel	yes	PRFM	160	160	1.0
+treatment-prfm	control-disabled	sorted_rule_binary_search	kernel	yes	PRFM	1943	2010	1.0344827586206897
+treatment-prfm	control-disabled	stp_stack_pair	kernel	yes	PRFM	21	21	1.0
+treatment-prfm	control-disabled	tc_packet_checksum_fold	kernel	no		33038	33108	1.0021187723227798
+treatment-prfm	control-disabled	tetragon_process_event_arg_filter	kernel	yes	PRFM	524	534	1.0190839694656488
+treatment-prfm	control-disabled	trace_event_type_switch_dispatch	kernel	yes	PRFM	680	687	1.0102941176470588
+treatment-prfm	control-disabled	tracee_http_method_prefix_detect	kernel	yes	PRFM	61	62	1.0163934426229508
+treatment-prfm	control-disabled	tracee_syscall_name_table_lookup	kernel	yes	PRFM	344	363	1.055232558139535
+treatment-prfm	control-disabled	arm64_direct_abi_coverage	native	yes	PRFM	7	7	1.0
+treatment-prfm	control-disabled	bcc_runqlat_log2_histogram_bucket	native	yes	PRFM	2215	2229	1.0063205417607224
+treatment-prfm	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	native	yes	PRFM	150	150	1.0
+treatment-prfm	control-disabled	bitmap_popcount_scan	native	yes	PRFM	1612	1612	1.0
+treatment-prfm	control-disabled	bpf_local_call_fanout_dispatch	native	yes	PRFM	115	115	1.0
+treatment-prfm	control-disabled	bpftrace_comm_key_fnv_hash	native	yes	PRFM	1288	1287	0.9992236024844721
+treatment-prfm	control-disabled	bpftrace_string_search_prefix_scan	native	yes	PRFM	352	356	1.0113636363636365
+treatment-prfm	control-disabled	ccmp_all_nonzero	native	yes	PRFM	5	5	1.0
+treatment-prfm	control-disabled	cgroup_skb_hash_chain	native	yes	PRFM	421	422	1.002375296912114
+treatment-prfm	control-disabled	cilium_ct_nat_tuple_rewrite	native	yes	PRFM	197	199	1.0101522842639594
+treatment-prfm	control-disabled	cilium_policy_guard_tree_filter	native	yes	PRFM	123	127	1.032520325203252
+treatment-prfm	control-disabled	cilium_socket_lb_service_select	native	yes	PRFM	329	328	0.9969604863221885
+treatment-prfm	control-disabled	csel_select64	native	yes	PRFM	4	4	1.0
+treatment-prfm	control-disabled	flow_5tuple_rss_hash	native	yes	PRFM	18	18	1.0
+treatment-prfm	control-disabled	flow_record_field_scan	native	yes	PRFM	108	107	0.9907407407407407
+treatment-prfm	control-disabled	katran_lb_consistent_hash_select	native	yes	PRFM	27	27	1.0
+treatment-prfm	control-disabled	ldp_stack_pair	native	yes	PRFM	6	5	0.8333333333333334
+treatment-prfm	control-disabled	otel_stack_frame_unwind_scan	native	yes	PRFM	117	116	0.9914529914529915
+treatment-prfm	control-disabled	packed_header_bitfield_decode	native	yes	PRFM	501	503	1.003992015968064
+treatment-prfm	control-disabled	packet_checksum_fold	native	yes	PRFM	26111	26099	0.9995404235762705
+treatment-prfm	control-disabled	packet_record_bounds_window	native	yes	PRFM	148	148	1.0
+treatment-prfm	control-disabled	packet_toeplitz_rss_hash	native	yes	PRFM	372	376	1.010752688172043
+treatment-prfm	control-disabled	packet_vlan_tcpopt_parser	native	yes	PRFM	19	18	0.9473684210526315
+treatment-prfm	control-disabled	payload_prefix_memcmp_scan	native	yes	PRFM	169	169	1.0
+treatment-prfm	control-disabled	simple	native	yes	PRFM	4	4	1.0
+treatment-prfm	control-disabled	simple_packet	native	yes	PRFM	4	4	1.0
+treatment-prfm	control-disabled	siphash_rotate64_mixer	native	yes	PRFM	44	44	1.0
+treatment-prfm	control-disabled	sorted_rule_binary_search	native	yes	PRFM	720	736	1.0222222222222221
+treatment-prfm	control-disabled	stp_stack_pair	native	yes	PRFM	5	5	1.0
+treatment-prfm	control-disabled	tc_packet_checksum_fold	native	no		26095	26482	1.0148304272849205
+treatment-prfm	control-disabled	tetragon_process_event_arg_filter	native	yes	PRFM	275	276	1.0036363636363637
+treatment-prfm	control-disabled	trace_event_type_switch_dispatch	native	yes	PRFM	633	635	1.0031595576619274
+treatment-prfm	control-disabled	tracee_http_method_prefix_detect	native	yes	PRFM	39	38	0.9743589743589743
+treatment-prfm	control-disabled	tracee_syscall_name_table_lookup	native	yes	PRFM	259	259	1.0

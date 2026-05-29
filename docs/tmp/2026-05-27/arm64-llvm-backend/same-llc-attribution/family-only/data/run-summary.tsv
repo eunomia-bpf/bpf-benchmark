@@ -1,0 +1,14 @@
+group	kind	token	aws_exit_code	object_exit_code	result_dir	metadata_status	benchmarks	kernel_version	container_image
+baseline	aws	famonlyb	0		attempts/baseline/data/aws_arm64_micro_20260528_022411_085218	completed	34	7.0.0-rc2+	bpf-benchmark/runner-runtime:arm64
+control-disabled	object+aws	famonlyc	0	0	attempts/control-disabled/data/aws_arm64_micro_20260528_023519_430100	completed	34	7.0.0-rc2+	bpf-benchmark/runner-runtime:arm64
+treatment-rev-unary	object+aws	famrev	0	0	attempts/treatment-rev-unary/data/aws_arm64_micro_20260528_024657_042059	completed	34	7.0.0-rc2+	bpf-benchmark/runner-runtime:arm64
+treatment-extr-rotate	object+aws	famextr	0	0	attempts/treatment-extr-rotate/data/aws_arm64_micro_20260528_025724_391365	completed	34	7.0.0-rc2+	bpf-benchmark/runner-runtime:arm64
+treatment-ubfm-bextr	object+aws	famubfm	0	0	attempts/treatment-ubfm-bextr/data/aws_arm64_micro_20260528_030815_698330	completed	34	7.0.0-rc2+	bpf-benchmark/runner-runtime:arm64
+treatment-ldr-wide-load	object+aws	famwload	0	0	attempts/treatment-ldr-wide-load/data/aws_arm64_micro_20260528_031836_076862	completed	34	7.0.0-rc2+	bpf-benchmark/runner-runtime:arm64
+treatment-ldr-direct-load	object+aws	famdload	0	0	attempts/treatment-ldr-direct-load/data/aws_arm64_micro_20260528_032813_887494	completed	34	7.0.0-rc2+	bpf-benchmark/runner-runtime:arm64
+treatment-str-direct-store	object+aws	famdstr	0	0	attempts/treatment-str-direct-store/data/aws_arm64_micro_20260528_033824_191205	completed	34	7.0.0-rc2+	bpf-benchmark/runner-runtime:arm64
+treatment-ldp-stp-pair-mem	object+aws	fampair	0	0	attempts/treatment-ldp-stp-pair-mem/data/aws_arm64_micro_20260528_034812_959536	completed	34	7.0.0-rc2+	bpf-benchmark/runner-runtime:arm64
+treatment-csel-cmov	object+aws	famcmov	0	0	attempts/treatment-csel-cmov/data/aws_arm64_micro_20260528_035831_185429	completed	34	7.0.0-rc2+	bpf-benchmark/runner-runtime:arm64
+treatment-ccmp	object+aws	famccmp	0	0	attempts/treatment-ccmp/data/aws_arm64_micro_20260528_040827_163778	completed	34	7.0.0-rc2+	bpf-benchmark/runner-runtime:arm64
+treatment-mov	object+aws	fammov	0	0	attempts/treatment-mov/data/aws_arm64_micro_20260528_041923_906390	completed	34	7.0.0-rc2+	bpf-benchmark/runner-runtime:arm64
+treatment-prfm	object+aws	famprfm	0	0	attempts/treatment-prfm/data/aws_arm64_micro_20260528_043020_943553	completed	34	7.0.0-rc2+	bpf-benchmark/runner-runtime:arm64
