@@ -618,6 +618,11 @@ std::optional<ManifestResolution> resolve_native_manifest(
         if (prog_type && *prog_type != prog_info.type) {
             continue;
         }
+        std::optional<uint64_t> source_xlated_len =
+            json_object_u64(entry, "source_xlated_len");
+        if (source_xlated_len && *source_xlated_len != prog_info.xlated_prog_len) {
+            continue;
+        }
         std::optional<std::string> map_prefix =
             json_object_string(entry, "source_map_prefix");
         if (map_prefix && !map_prefix->empty() &&

@@ -230,6 +230,10 @@ def parse_object_spec(raw: str) -> tuple[Path, dict[str, object]]:
             raise SystemExit(f"invalid --object attribute: {part!r}")
         if key == "prog_type":
             attrs["prog_type"] = int(value, 0)
+        elif key == "source_xlated_len":
+            attrs["source_xlated_len"] = int(value, 0)
+        elif key == "symbol":
+            attrs["symbol"] = value
         elif key == "source_map_prefix":
             attrs.setdefault("source_map_prefixes", []).append(value)
         else:
@@ -256,6 +260,10 @@ def text_symbols(llvm_nm: str, obj: Path, skip_prefixes: tuple[str, ...]) -> lis
     if not out:
         raise SystemExit(f"no native text symbols in {obj}")
     return out
+
+
+def manifest_sort_key(key: tuple[object, ...]) -> tuple[str, ...]:
+    return tuple("" if value is None else str(value) for value in key)
 
 
 def rel_object(output: Path, obj: Path) -> str:
@@ -297,19 +305,23 @@ def main() -> None:
                 source_obj, scan_bpf_source_helpers(source_obj))
         prefixes = attrs.get("source_map_prefixes") or [None]
         for symbol in text_symbols(args.llvm_nm, obj, tuple(args.skip_prefix)):
+            if attrs.get("symbol") and symbol != attrs["symbol"]:
+                continue
             program = symbol[:15]
             required, forbidden = helper_signature(
                 None if source_helpers is None else source_helpers.get(program),
                 args.helper_disambiguate)
             for prefix in prefixes:
                 if args.dedupe_program == "last":
-                    key = (program, attrs.get("prog_type"), prefix, required, forbidden)
+                    key = (program, attrs.get("prog_type"), prefix,
+                           attrs.get("source_xlated_len"), required, forbidden)
                     if key not in selected_by_program or selected_by_program[key][0] != rel:
                         selected_by_program[key] = (rel, set())
                         selected_helpers_by_program[key] = (required, forbidden)
                     selected_by_program[key][1].add(symbol)
                 else:
-                    key = (program, rel, attrs.get("prog_type"), prefix, required, forbidden)
+                    key = (program, rel, attrs.get("prog_type"), prefix,
+                           attrs.get("source_xlated_len"), required, forbidden)
                     native_object_by_key[key] = rel
                     helper_require_by_key[key] = required
                     helper_forbid_by_key[key] = forbidden
@@ -317,16 +329,17 @@ def main() -> None:
 
     if args.dedupe_program == "last":
         for key, (rel, symbols) in selected_by_program.items():
-            program, prog_type, prefix, required, forbidden = key
-            out_key = (program, rel, prog_type, prefix, required, forbidden)
+            program, prog_type, prefix, source_xlated_len, required, forbidden = key
+            out_key = (program, rel, prog_type, prefix, source_xlated_len,
+                       required, forbidden)
             native_object_by_key[out_key] = rel
             helper_require_by_key[out_key] = selected_helpers_by_program[key][0]
             helper_forbid_by_key[out_key] = selected_helpers_by_program[key][1]
             entries_by_key[out_key].update(symbols)
 
     objects: list[dict[str, object]] = []
-    for key in sorted(entries_by_key):
-        program, rel, prog_type, prefix, _required, _forbidden = key
+    for key in sorted(entries_by_key, key=manifest_sort_key):
+        program, rel, prog_type, prefix, source_xlated_len, _required, _forbidden = key
         symbols = sorted(entries_by_key[key])
         entry: dict[str, object] = {
             "program": program,
@@ -336,6 +349,8 @@ def main() -> None:
             entry["symbol"] = symbols[0]
         if prog_type is not None:
             entry["prog_type"] = prog_type
+        if source_xlated_len is not None:
+            entry["source_xlated_len"] = source_xlated_len
         if prefix is not None:
             entry["source_map_prefix"] = prefix
         required = helper_require_by_key.get(key, ())

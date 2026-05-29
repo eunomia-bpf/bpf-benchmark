@@ -71,6 +71,76 @@ std::string libbpf_error_string(int error_code)
     return std::string(buffer);
 }
 
+std::string native_lab_kernel_log_tail()
+{
+    int fd = open("/dev/kmsg", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+    if (fd < 0) {
+        return "\nkernel log unavailable: open /dev/kmsg: "
+            + std::string(std::strerror(errno));
+    }
+    if (lseek(fd, 0, SEEK_SET) < 0) {
+        int saved = errno;
+        close(fd);
+        return "\nkernel log unavailable: seek /dev/kmsg: "
+            + std::string(std::strerror(saved));
+    }
+
+    std::string raw;
+    char buf[4096];
+    for (;;) {
+        ssize_t n = read(fd, buf, sizeof(buf));
+        if (n > 0) {
+            raw.append(buf, static_cast<size_t>(n));
+            constexpr size_t kMaxRawLog = 128 * 1024;
+            if (raw.size() > kMaxRawLog) {
+                raw.erase(0, raw.size() - kMaxRawLog);
+            }
+            continue;
+        }
+        if (n == 0) {
+            break;
+        }
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            break;
+        }
+        if (errno == EPIPE) {
+            raw.clear();
+            continue;
+        }
+        const int saved = errno;
+        close(fd);
+        return "\nkernel log unavailable: read /dev/kmsg: "
+            + std::string(std::strerror(saved));
+    }
+    close(fd);
+
+    std::string filtered;
+    size_t line_start = 0;
+    while (line_start < raw.size()) {
+        size_t line_end = raw.find('\n', line_start);
+        if (line_end == std::string::npos) {
+            line_end = raw.size();
+        }
+        std::string line = raw.substr(line_start, line_end - line_start);
+        if (line.find("bpf_x86_native_lab") != std::string::npos ||
+            line.find("bpf_arm64_native_lab") != std::string::npos ||
+            line.find("bpf_jit:") != std::string::npos ||
+            line.find("Target call") != std::string::npos) {
+            filtered += line;
+            filtered += '\n';
+            constexpr size_t kMaxFilteredLog = 8192;
+            if (filtered.size() > kMaxFilteredLog) {
+                filtered.erase(0, filtered.size() - kMaxFilteredLog);
+            }
+        }
+        line_start = line_end + 1;
+    }
+    if (filtered.empty()) {
+        return "";
+    }
+    return "\nkernel log tail:\n" + filtered;
+}
+
 bpf_prog_info load_prog_info(int program_fd)
 {
     bpf_prog_info info = {};
@@ -1147,6 +1217,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
             message += "\nverifier log tail:\n";
             message.append(verifier_log.data() + start, log_size - start);
         }
+        message += native_lab_kernel_log_tail();
         fail(message);
     }
     return fd;
