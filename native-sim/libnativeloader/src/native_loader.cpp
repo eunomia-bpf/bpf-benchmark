@@ -82,6 +82,16 @@ bpf_prog_info load_prog_info(int program_fd)
     return info;
 }
 
+std::string prog_info_name_or_stub(const bpf_prog_info &info)
+{
+    char name[sizeof(info.name) + 1] = {};
+    std::memcpy(name, info.name, sizeof(info.name));
+    if (name[0] == '\0') {
+        return "native_lab_stub";
+    }
+    return std::string(name, strnlen(name, sizeof(info.name)));
+}
+
 std::vector<uint8_t> load_xlated_program(
     int program_fd,
     uint32_t xlated_prog_len,
@@ -368,8 +378,6 @@ constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
 constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v40";
-constexpr const char *kKallsymsCachePath = "/tmp/native_kernel_kallsyms.tsv";
-constexpr const char *kKallsymsCacheVersion = "native-kallsyms-cache-v3";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
 constexpr const char *kNativeStubBtfCacheVersion = "native-stub-btf-cache-v1";
 constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";
@@ -766,7 +774,6 @@ struct NativeStubBtfIds {
 struct StubLoadAttrs {
     uint32_t expected_attach_type = 0;
     uint32_t attach_btf_id = 0;
-    uint32_t prog_btf_id = 0;
     uint32_t attach_btf_obj_id = 0;
     uint32_t attach_prog_id = 0;
 };
@@ -917,11 +924,67 @@ int open_prog_fd_by_id_required(uint32_t id, const char *field_name)
     return fd;
 }
 
+int bpf_prog_load_native_stub_raw(uint32_t prog_type_value,
+                                  const StubLoadAttrs &attrs,
+                                  int attach_prog_fd,
+                                  int attach_btf_obj_fd,
+                                  const std::string &prog_name,
+                                  const std::vector<bpf_insn> &insns,
+                                  const std::vector<int> &fd_array,
+                                  std::vector<char> &verifier_log,
+                                  uint32_t &log_true_size)
+{
+    union bpf_attr attr = {};
+    constexpr const char kDefaultName[] = "native_lab_stub";
+    constexpr const char kLicense[] = "GPL";
+    const char *name_data = prog_name.empty() ? kDefaultName : prog_name.data();
+    const size_t name_size = prog_name.empty()
+        ? strlen(kDefaultName)
+        : prog_name.size();
+
+    attr.prog_type = prog_type_value;
+    attr.expected_attach_type = attrs.expected_attach_type;
+    attr.attach_btf_id = attrs.attach_btf_id;
+    if (attach_prog_fd >= 0) {
+        attr.attach_prog_fd = static_cast<uint32_t>(attach_prog_fd);
+    } else if (attach_btf_obj_fd >= 0) {
+        attr.attach_btf_obj_fd = static_cast<uint32_t>(attach_btf_obj_fd);
+    }
+    std::memcpy(attr.prog_name,
+                name_data,
+                std::min(name_size, sizeof(attr.prog_name) - 1));
+    attr.license = ptr_to_u64(kLicense);
+    attr.insns = ptr_to_u64(insns.data());
+    attr.insn_cnt = static_cast<uint32_t>(insns.size());
+    attr.fd_array = ptr_to_u64(fd_array.data());
+    attr.fd_array_cnt = static_cast<uint32_t>(fd_array.size());
+    attr.log_level = 2;
+    attr.log_size = static_cast<uint32_t>(verifier_log.size());
+    attr.log_buf = ptr_to_u64(verifier_log.data());
+
+    const unsigned int attr_size =
+        static_cast<unsigned int>(offsetof(union bpf_attr, keyring_id) +
+                                  sizeof(attr.keyring_id));
+    for (int attempt = 0; attempt < 5; attempt++) {
+        const long rc = syscall(SYS_bpf, BPF_PROG_LOAD, &attr, attr_size);
+        if (rc >= 0) {
+            log_true_size = attr.log_true_size;
+            return static_cast<int>(rc);
+        }
+        if (errno != EAGAIN) {
+            break;
+        }
+    }
+    log_true_size = attr.log_true_size;
+    return -errno;
+}
+
 int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
                    uint32_t callee_saved_mask,
                    uint32_t prog_type_value,
                    const StubLoadAttrs &attrs,
                    bool tail_call_reachable,
+                   const std::string &prog_name,
                    const std::vector<int> &map_ref_fds)
 {
     if (chunks == 0) {
@@ -1022,7 +1085,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
 
     // fd_array[0] is the verifier pre-scan slot; fd_array[1] is what `off=1`
     // in the kinsn call resolves to. Retained map fds follow and are bound via
-    // fd_array_cnt instead of dummy runtime BPF instructions.
+    // fd_array_cnt, so map retention has no runtime BPF instruction cost.
     std::vector<int> fd_array;
     fd_array.reserve(2 + map_ref_fds.size());
     fd_array.push_back(mod_btf_fd);
@@ -1036,28 +1099,55 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     if (fd_array.size() > std::numeric_limits<uint32_t>::max()) {
         fail("native_kernel fd_array too large");
     }
-    ScopedFd prog_btf_fd(open_btf_fd_by_id_required(
-        attrs.prog_btf_id, "prog_btf_id"));
     ScopedFd attach_btf_obj_fd(open_btf_fd_by_id_required(
         attrs.attach_btf_obj_id, "attach_btf_obj_id"));
     ScopedFd attach_prog_fd(open_prog_fd_by_id_required(
         attrs.attach_prog_id, "attach_prog_id"));
 
-    LIBBPF_OPTS(bpf_prog_load_opts, opts,
-        .expected_attach_type = static_cast<bpf_attach_type>(attrs.expected_attach_type),
-        .prog_btf_fd = static_cast<uint32_t>(prog_btf_fd.get() >= 0 ? prog_btf_fd.get() : 0),
-        .attach_btf_id = attrs.attach_btf_id,
-        .attach_prog_fd = static_cast<uint32_t>(attach_prog_fd.get() >= 0 ? attach_prog_fd.get() : 0),
-        .attach_btf_obj_fd = static_cast<uint32_t>(attach_btf_obj_fd.get() >= 0 ? attach_btf_obj_fd.get() : 0),
-        .fd_array = fd_array.data(),
-        .fd_array_cnt = static_cast<uint32_t>(fd_array.size()),
-    );
-    int fd = bpf_prog_load(static_cast<bpf_prog_type>(prog_type_value),
-                           "native_lab_stub", "GPL",
-                           insns.data(), insns.size(), &opts);
+    std::vector<char> verifier_log(256 * 1024, '\0');
+    uint32_t log_true_size = 0;
+    int fd = bpf_prog_load_native_stub_raw(
+        prog_type_value, attrs, attach_prog_fd.get(), attach_btf_obj_fd.get(),
+        prog_name, insns, fd_array, verifier_log, log_true_size);
     if (fd < 0) {
-        fail(std::string("bpf_prog_load (native_lab stub): ")
-             + std::strerror(errno));
+        std::string message = std::string("BPF_PROG_LOAD native_lab stub: ")
+            + libbpf_error_string(fd);
+        message += "\nstub fd_array_cnt=" + std::to_string(fd_array.size())
+            + " fd_array=";
+        for (size_t i = 0; i < fd_array.size(); i++) {
+            if (i != 0) {
+                message += ",";
+            }
+            message += std::to_string(i) + ":" + std::to_string(fd_array[i]);
+        }
+        message += "\nstub insns=";
+        for (size_t i = 0; i < insns.size(); i++) {
+            if (i != 0) {
+                message += ";";
+            }
+            const bpf_insn &insn = insns[i];
+            message += std::to_string(i)
+                + ":code=" + std::to_string(insn.code)
+                + ",dst=" + std::to_string(insn.dst_reg)
+                + ",src=" + std::to_string(insn.src_reg)
+                + ",off=" + std::to_string(insn.off)
+                + ",imm=" + std::to_string(insn.imm);
+        }
+        size_t log_size = log_true_size != 0
+            ? std::min<size_t>(log_true_size, verifier_log.size())
+            : strnlen(verifier_log.data(), verifier_log.size());
+        while (log_size > 0 && verifier_log[log_size - 1] == '\0') {
+            log_size--;
+        }
+        if (log_size != 0) {
+            constexpr size_t kMaxVerifierLogTail = 8192;
+            const size_t start = log_size > kMaxVerifierLogTail
+                ? log_size - kMaxVerifierLogTail
+                : 0;
+            message += "\nverifier log tail:\n";
+            message.append(verifier_log.data() + start, log_size - start);
+        }
+        fail(message);
     }
     return fd;
 }
@@ -1291,114 +1381,6 @@ const char *native_arch_name()
 #endif
 }
 
-bool has_all_wanted_symbols(const std::unordered_map<std::string, uint64_t> &table,
-                            const char *const *wanted,
-                            size_t wanted_count)
-{
-    for (size_t i = 0; i < wanted_count; i++) {
-        if (table.find(wanted[i]) == table.end()) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool load_kallsyms_cache(std::unordered_map<std::string, uint64_t> &table,
-                         const char *const *wanted,
-                         size_t wanted_count,
-                         const std::string &boot_id)
-{
-    FILE *f = std::fopen(kKallsymsCachePath, "re");
-    if (!f) {
-        if (errno == ENOENT) {
-            return false;
-        }
-        fail("open " + std::string(kKallsymsCachePath) + ": " +
-             std::strerror(errno));
-    }
-
-    bool valid_version = false;
-    bool valid_arch = false;
-    bool valid_boot = false;
-    std::unordered_map<std::string, uint64_t> cached;
-    char line[512];
-    while (std::fgets(line, sizeof(line), f)) {
-        char key[256] = {};
-        char value[256] = {};
-        if (std::sscanf(line, "%255s %255s", key, value) != 2) {
-            std::fclose(f);
-            fail("malformed native_kernel kallsyms cache line");
-        }
-        if (std::strcmp(key, "version") == 0) {
-            valid_version = std::strcmp(value, kKallsymsCacheVersion) == 0;
-            continue;
-        }
-        if (std::strcmp(key, "arch") == 0) {
-            valid_arch = std::strcmp(value, native_arch_name()) == 0;
-            continue;
-        }
-        if (std::strcmp(key, "boot_id") == 0) {
-            valid_boot = boot_id == value;
-            continue;
-        }
-        for (size_t i = 0; i < wanted_count; i++) {
-            if (std::strcmp(key, wanted[i]) == 0) {
-                cached.emplace(wanted[i], std::strtoull(value, nullptr, 16));
-                break;
-            }
-        }
-    }
-    std::fclose(f);
-
-    if (!valid_version || !valid_arch || !valid_boot ||
-        !has_all_wanted_symbols(cached, wanted, wanted_count)) {
-        return false;
-    }
-
-    table = std::move(cached);
-    return true;
-}
-
-void store_kallsyms_cache(const std::unordered_map<std::string, uint64_t> &table,
-                          const char *const *wanted,
-                          size_t wanted_count,
-                          const std::string &boot_id)
-{
-    if (!has_all_wanted_symbols(table, wanted, wanted_count)) {
-        return;
-    }
-
-    std::filesystem::path tmp =
-        std::string(kKallsymsCachePath) + "." + std::to_string(getpid()) + ".tmp";
-    std::ofstream out(tmp);
-    if (!out) {
-        fail("open " + tmp.string() + ": " + std::strerror(errno));
-    }
-    out << "version " << kKallsymsCacheVersion << "\n";
-    out << "arch " << native_arch_name() << "\n";
-    out << "boot_id " << boot_id << "\n";
-    for (size_t i = 0; i < wanted_count; i++) {
-        auto it = table.find(wanted[i]);
-        if (it == table.end()) {
-            fail("native_kernel kallsyms cache missing " + std::string(wanted[i]));
-        }
-        char addr[32];
-        std::snprintf(addr, sizeof(addr), "0x%llx",
-                      static_cast<unsigned long long>(it->second));
-        out << wanted[i] << " " << addr << "\n";
-    }
-    out.close();
-    if (!out) {
-        fail("write " + tmp.string() + ": " + std::strerror(errno));
-    }
-
-    std::error_code ec;
-    std::filesystem::rename(tmp, kKallsymsCachePath, ec);
-    if (ec) {
-        fail("publish " + std::string(kKallsymsCachePath) + ": " + ec.message());
-    }
-}
-
 const char *helper_symbol_for_id(int helper_id);
 
 const std::unordered_map<std::string, uint64_t> &kallsyms_table()
@@ -1426,12 +1408,6 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
     wanted.push_back(kArrayOfMapLookupElemSymbol);
     wanted.push_back(kHtabLruPercpuMapLookupElemSymbol);
     const size_t wanted_count = wanted.size();
-
-    const std::string boot_id =
-        read_first_line_required("/proc/sys/kernel/random/boot_id");
-    if (load_kallsyms_cache(table, wanted.data(), wanted_count, boot_id)) {
-        return table;
-    }
 
     FILE *f = std::fopen("/proc/kallsyms", "re");
     if (!f) {
@@ -1461,7 +1437,6 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
         }
     }
     std::fclose(f);
-    store_kallsyms_cache(table, wanted.data(), wanted_count, boot_id);
     return table;
 }
 
@@ -1556,6 +1531,23 @@ bool map_matches_shape(const MapMeta &meta, const NativeMapShape &shape)
         return false;
     }
     if (shape.max_entries != 0 && meta.max_entries != shape.max_entries) {
+        return false;
+    }
+    return true;
+}
+
+bool map_info_matches_shape(const bpf_map_info &info, const NativeMapShape &shape)
+{
+    if (shape.type >= 0 && static_cast<int>(info.type) != shape.type) {
+        return false;
+    }
+    if (shape.key_size != 0 && info.key_size != shape.key_size) {
+        return false;
+    }
+    if (shape.value_size != 0 && info.value_size != shape.value_size) {
+        return false;
+    }
+    if (shape.max_entries != 0 && info.max_entries != shape.max_entries) {
         return false;
     }
     return true;
@@ -1865,18 +1857,14 @@ MapMeta load_map_meta_from_fd(int map_fd)
     };
 }
 
-std::string bpf_obj_name_truncation(const std::string &name);
-
-bool find_open_process_map_by_name(const std::string &name,
-                                   const std::vector<NativeMapRule> &map_rules,
-                                   MapMeta &out)
+template <typename Predicate>
+std::vector<MapMeta> collect_open_process_maps(Predicate predicate)
 {
     DIR *fd_dir = opendir("/proc/self/fd");
     if (!fd_dir) {
         fail("opendir /proc/self/fd: " + std::string(std::strerror(errno)));
     }
 
-    const std::string truncated = bpf_obj_name_truncation(name);
     std::vector<MapMeta> matches;
     struct dirent *de = nullptr;
     while ((de = readdir(fd_dir)) != nullptr) {
@@ -1892,15 +1880,14 @@ bool find_open_process_map_by_name(const std::string &name,
         if (bpf_obj_get_info_by_fd(fd, &info, &info_len) != 0) {
             continue;
         }
-        char map_name[sizeof(info.name) + 1] = {};
-        std::memcpy(map_name, info.name, sizeof(info.name));
-        if (map_name[0] == '\0' ||
-            (map_name != truncated && map_name != name)) {
+        char map_name_buf[sizeof(info.name) + 1] = {};
+        std::memcpy(map_name_buf, info.name, sizeof(info.name));
+        std::string map_name(map_name_buf);
+        if (map_name.empty() || !predicate(info, map_name)) {
             continue;
         }
-
-        MapMeta meta{
-            std::string(map_name),
+        matches.push_back(MapMeta{
+            std::move(map_name),
             fd,
             info.id,
             static_cast<int>(info.type),
@@ -1909,10 +1896,23 @@ bool find_open_process_map_by_name(const std::string &name,
             info.max_entries,
             lookup_kernel_map_ptr_by_fd(fd),
             lookup_array_value_addr_if_direct(info, fd),
-        };
-        matches.push_back(std::move(meta));
+        });
     }
     closedir(fd_dir);
+    return matches;
+}
+
+std::string bpf_obj_name_truncation(const std::string &name);
+
+bool find_open_process_map_by_name(const std::string &name,
+                                   const std::vector<NativeMapRule> &map_rules,
+                                   MapMeta &out)
+{
+    const std::string truncated = bpf_obj_name_truncation(name);
+    std::vector<MapMeta> matches =
+        collect_open_process_maps([&](const bpf_map_info &, const std::string &map_name) {
+            return map_name == truncated || map_name == name;
+        });
 
     if (matches.empty()) {
         return false;
@@ -1953,50 +1953,16 @@ bool find_open_process_array_data_map_by_name(const std::string &name,
                                               uint64_t min_value_size,
                                               MapMeta &out)
 {
-    DIR *fd_dir = opendir("/proc/self/fd");
-    if (!fd_dir) {
-        fail("opendir /proc/self/fd: " + std::string(std::strerror(errno)));
-    }
-
     const std::string truncated = bpf_obj_name_truncation(name);
-    std::vector<MapMeta> matches;
-    struct dirent *de = nullptr;
-    while ((de = readdir(fd_dir)) != nullptr) {
-        if (de->d_name[0] < '0' || de->d_name[0] > '9') {
-            continue;
-        }
-        int fd = std::atoi(de->d_name);
-        if (fd < 0 || !fd_is_bpf_map(fd)) {
-            continue;
-        }
-        bpf_map_info info = {};
-        __u32 info_len = sizeof(info);
-        if (bpf_obj_get_info_by_fd(fd, &info, &info_len) != 0) {
-            continue;
-        }
-        char map_name[sizeof(info.name) + 1] = {};
-        std::memcpy(map_name, info.name, sizeof(info.name));
-        if (map_name[0] == '\0' ||
-            (map_name != truncated && map_name != name) ||
-            info.type != BPF_MAP_TYPE_ARRAY ||
-            info.key_size != 4 ||
-            info.max_entries != 1 ||
-            info.value_size < min_value_size) {
-            continue;
-        }
-        matches.push_back(MapMeta{
-            std::string(map_name),
-            fd,
-            info.id,
-            static_cast<int>(info.type),
-            info.key_size,
-            info.value_size,
-            info.max_entries,
-            lookup_kernel_map_ptr_by_fd(fd),
-            lookup_array_value_addr_if_direct(info, fd),
+    std::vector<MapMeta> matches =
+        collect_open_process_maps([&](const bpf_map_info &info,
+                                      const std::string &map_name) {
+            return (map_name == truncated || map_name == name) &&
+                   info.type == BPF_MAP_TYPE_ARRAY &&
+                   info.key_size == 4 &&
+                   info.max_entries == 1 &&
+                   info.value_size >= min_value_size;
         });
-    }
-    closedir(fd_dir);
 
     if (matches.empty()) {
         return false;
@@ -2168,14 +2134,7 @@ struct LinkedBlob {
     std::vector<uint32_t> relocated_map_ids;
 };
 
-/* Libbpf-load the canonical `.bpf.o` companion so the kernel allocates
- * maps, then ask the native_lab kernel module to translate map fds into
- * kernel pointers. The caller MUST keep the returned bpf_object alive
- * while the native_kernel run executes -- closing it frees the maps. */
 struct CompanionLoad {
-    bpf_object *obj = nullptr;
-    uint64_t open_ns = 0;
-    uint64_t object_load_ns = 0;
     uint64_t map_ptr_extract_ns = 0;
     uint64_t lookup_spec_ns = 0;
     uint64_t source_bytecode_bytes = 0;
@@ -2345,74 +2304,89 @@ void add_map_symbol_alias_meta(CompanionLoad &load,
     load.native_map_symbols[alias] = alias;
 }
 
-const MapMeta *find_single_cilium_calls_map(const CompanionLoad &load)
+bool map_matches_native_symbol_rule(const NativeMapRule &rule,
+                                    const std::string &symbol,
+                                    const MapMeta &meta)
 {
-    const MapMeta *match = nullptr;
-    for (const MapMeta &meta : load.maps) {
-        if (meta.type != BPF_MAP_TYPE_PROG_ARRAY ||
-            !starts_with(meta.name, "cilium_calls")) {
-            continue;
-        }
-        if (match && match->kernel_addr != meta.kernel_addr) {
-            fail("native map symbol cilium_calls matches multiple loaded Cilium prog arrays");
-        }
-        match = &meta;
-    }
-    return match;
+    return rule.native_symbol == symbol &&
+           native_map_rule_matches(rule, meta.name) &&
+           map_matches_shape(meta, rule.shape);
 }
 
-bool find_open_process_cilium_calls_map(MapMeta &out)
+bool map_info_matches_native_symbol_rule(const NativeMapRule &rule,
+                                         const std::string &symbol,
+                                         const bpf_map_info &info,
+                                         const std::string &map_name)
 {
-    DIR *fd_dir = opendir("/proc/self/fd");
-    if (!fd_dir) {
-        fail("opendir /proc/self/fd: " + std::string(std::strerror(errno)));
-    }
+    return rule.native_symbol == symbol &&
+           native_map_rule_matches(rule, map_name) &&
+           map_info_matches_shape(info, rule.shape);
+}
 
-    std::vector<MapMeta> matches;
-    struct dirent *de = nullptr;
-    while ((de = readdir(fd_dir)) != nullptr) {
-        if (de->d_name[0] < '0' || de->d_name[0] > '9') {
+bool find_loaded_manifest_native_symbol_map(const CompanionLoad &load,
+                                            const std::string &symbol,
+                                            MapMeta &out)
+{
+    bool found = false;
+    for (const NativeMapRule &rule : load.map_rules) {
+        if (rule.native_symbol != symbol) {
             continue;
         }
-        int fd = std::atoi(de->d_name);
-        if (fd < 0 || !fd_is_bpf_map(fd)) {
-            continue;
+        for (const MapMeta &meta : load.maps) {
+            if (!map_matches_native_symbol_rule(rule, symbol, meta)) {
+                continue;
+            }
+            if (found && out.kernel_addr != meta.kernel_addr) {
+                fail("native map symbol " + symbol +
+                     " matches multiple loaded maps through manifest");
+            }
+            out = meta;
+            found = true;
         }
-        bpf_map_info info = {};
-        __u32 info_len = sizeof(info);
-        if (bpf_obj_get_info_by_fd(fd, &info, &info_len) != 0) {
-            continue;
-        }
-        char map_name[sizeof(info.name) + 1] = {};
-        std::memcpy(map_name, info.name, sizeof(info.name));
-        if (!starts_with(map_name, "cilium_calls") ||
-            info.type != BPF_MAP_TYPE_PROG_ARRAY ||
-            info.key_size != 4 ||
-            info.value_size != 4) {
-            continue;
-        }
-        matches.push_back(MapMeta{
-            std::string(map_name),
-            fd,
-            info.id,
-            static_cast<int>(info.type),
-            info.key_size,
-            info.value_size,
-            info.max_entries,
-            lookup_kernel_map_ptr_by_fd(fd),
-            lookup_array_value_addr_if_direct(info, fd),
-        });
     }
-    closedir(fd_dir);
+    return found;
+}
+
+bool find_open_process_manifest_native_symbol_map(const CompanionLoad &load,
+                                                  const std::string &symbol,
+                                                  MapMeta &out)
+{
+    bool object_scoped = false;
+    std::vector<MapMeta> matches =
+        collect_open_process_maps([&](const bpf_map_info &info,
+                                      const std::string &map_name) {
+            for (const NativeMapRule &rule : load.map_rules) {
+                if (!map_info_matches_native_symbol_rule(rule, symbol,
+                                                         info, map_name)) {
+                    continue;
+                }
+                object_scoped = object_scoped || rule.object_scoped;
+                return true;
+            }
+            return false;
+        });
 
     if (matches.empty()) {
         return false;
     }
-    out = *std::max_element(matches.begin(), matches.end(),
-                            [](const MapMeta &a, const MapMeta &b) {
-                                return a.fd < b.fd;
-                            });
-    return true;
+    if (object_scoped && matches.size() > 1) {
+        out = *std::max_element(matches.begin(), matches.end(),
+                                [](const MapMeta &a, const MapMeta &b) {
+                                    return a.fd < b.fd;
+                                });
+        return true;
+    }
+
+    bool found = false;
+    for (const MapMeta &meta : matches) {
+        if (found && out.kernel_addr != meta.kernel_addr) {
+            fail("native map symbol " + symbol +
+                 " matches multiple open process maps through manifest");
+        }
+        out = meta;
+        found = true;
+    }
+    return found;
 }
 
 const MapMeta *find_singleton_array_data_map(const CompanionLoad &load,
@@ -2535,16 +2509,15 @@ void add_native_map_symbol_alias(CompanionLoad &load, const std::string &name)
         return;
     }
 
-    if (name == "cilium_calls") {
-        if (const MapMeta *match = find_single_cilium_calls_map(load)) {
-            add_map_symbol_alias_meta(load, name, *match);
-            return;
-        }
-        MapMeta process_map{};
-        if (find_open_process_cilium_calls_map(process_map)) {
-            add_map_meta(load, process_map);
-            add_map_symbol_alias_meta(load, name, process_map);
-        }
+    MapMeta manifest_symbol_map{};
+    if (find_loaded_manifest_native_symbol_map(load, name, manifest_symbol_map)) {
+        add_map_symbol_alias_meta(load, name, manifest_symbol_map);
+        return;
+    }
+    if (find_open_process_manifest_native_symbol_map(load, name,
+                                                     manifest_symbol_map)) {
+        add_map_meta(load, manifest_symbol_map);
+        add_map_symbol_alias_meta(load, name, manifest_symbol_map);
         return;
     }
 
@@ -2622,30 +2595,37 @@ NativeMapShape map_shape_from_meta(const MapMeta &meta)
     };
 }
 
-NativeMapShape inner_map_shape_for_outer_map(const MapMeta &meta)
+NativeMapShape inner_map_shape_for_outer_map(
+    const MapMeta &meta,
+    const std::vector<NativeMapRule> &map_rules)
 {
     if (meta.type != BPF_MAP_TYPE_HASH_OF_MAPS &&
         meta.type != BPF_MAP_TYPE_ARRAY_OF_MAPS) {
         return NativeMapShape{};
     }
 
-    /* bpf_map_info in this kernel fork does not expose inner_map_id, so
-     * preserve verifier-equivalent lowering for the hot Tetragon policy
-     * map-in-map shapes by matching the loaded outer map shape. Map names in
-     * bpf_map_info are kernel-truncated, so key/max_entries disambiguate the
-     * two policy-filter outers. */
-    if (starts_with(meta.name, "policy_filter_") &&
-        meta.type == BPF_MAP_TYPE_HASH_OF_MAPS &&
-        meta.value_size == 4) {
-        if (meta.key_size == 4 && meta.max_entries == 128) {
-            return NativeMapShape{BPF_MAP_TYPE_HASH, 8, 1, 1};
+    NativeMapShape match{};
+    for (const NativeMapRule &rule : map_rules) {
+        if (rule.inner_shape.type < 0) {
+            continue;
         }
-        if (meta.key_size == 8 && meta.max_entries == 1024) {
-            return NativeMapShape{BPF_MAP_TYPE_HASH, 4, 1, 128};
+        bool name_match = native_map_rule_matches(rule, meta.name);
+        if (!name_match &&
+            rule.match == NativeMapRuleMatch::Exact &&
+            starts_with(rule.pattern, meta.name)) {
+            name_match = true;
         }
+        if (!name_match || !map_matches_shape(meta, rule.shape)) {
+            continue;
+        }
+        if (match.type >= 0 &&
+            !native_map_shape_equal(match, rule.inner_shape)) {
+            fail("manifest map_rules provide ambiguous inner map shape for " +
+                 meta.name);
+        }
+        match = rule.inner_shape;
     }
-
-    return NativeMapShape{};
+    return match;
 }
 
 bool configure_lookup_site_for_shape(CompanionLoad::LookupSite &site,
@@ -2867,202 +2847,16 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
 
 #include "native_loader_bytecode.hpp"
 
-CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
-{
-    CompanionLoad out{};
-    struct stat st {};
-    std::string bpf_path = bpf_o_path.string();
-    if (stat(bpf_path.c_str(), &st) != 0) {
-        fail("native_kernel companion .bpf.o is missing: " + bpf_path);
-    }
-
-    const auto open_start = std::chrono::steady_clock::now();
-    bpf_object *obj = bpf_object__open_file(bpf_path.c_str(), nullptr);
-    if (!obj || libbpf_get_error(obj)) {
-        fail(std::string("bpf_object__open_file ") + bpf_path);
-    }
-    const auto open_end = std::chrono::steady_clock::now();
-    out.open_ns = elapsed_ns(open_start, open_end);
-
-    bpf_program *prog = nullptr;
-    bpf_program *entry_prog = nullptr;
-    bpf_object__for_each_program(prog, obj) {
-        if (entry_prog != nullptr) {
-            bpf_object__close(obj);
-            fail("native_kernel companion .bpf.o has multiple BPF programs: " + bpf_path);
-        }
-        entry_prog = prog;
-    }
-    if (!entry_prog) {
-        bpf_object__close(obj);
-        fail("native_kernel companion .bpf.o has no BPF programs: " + bpf_path);
-    }
-
-    const auto object_load_start = std::chrono::steady_clock::now();
-    if (bpf_object__load(obj) != 0) {
-        bpf_object__close(obj);
-        fail(std::string("bpf_object__load ") + bpf_path + ": "
-             + std::strerror(errno));
-    }
-    const auto object_load_end = std::chrono::steady_clock::now();
-    out.object_load_ns = elapsed_ns(object_load_start, object_load_end);
-
-    const auto map_ptr_start = std::chrono::steady_clock::now();
-    bpf_map *map = nullptr;
-    bpf_object__for_each_map(map, obj) {
-        int fd = bpf_map__fd(map);
-        if (fd >= 0) {
-            MapMeta meta = load_map_meta_from_fd(fd);
-            add_map_meta(out, meta);
-            add_exact_map_meta(out, meta);
-        }
-    }
-    const auto map_ptr_end = std::chrono::steady_clock::now();
-    out.map_ptr_extract_ns = elapsed_ns(map_ptr_start, map_ptr_end);
-
-    /* Build per-call-site map specs for the entry program. The runner walks
-     * source BPF to associate helper sites with map metadata and passes
-     * explicit call targets into native-link. */
-    const auto lookup_spec_start = std::chrono::steady_clock::now();
-    {
-        int entry_fd = bpf_program__fd(entry_prog);
-        if (entry_fd < 0) {
-            bpf_object__close(obj);
-            fail("native_kernel companion entry program has no fd after load: " + bpf_path);
-        }
-
-        const bpf_prog_info prog_info = load_prog_info(entry_fd);
-        out.prog_type = prog_info.type;
-        out.source_bytecode_bytes =
-            bpf_program__insn_cnt(entry_prog) * sizeof(bpf_insn);
-
-        /* Collect map metadata by fd for quick lookup. */
-        std::unordered_map<int, MapMeta> meta_by_fd;
-        map = nullptr;
-        bpf_object__for_each_map(map, obj) {
-            int fd = bpf_map__fd(map);
-            if (fd >= 0) {
-                meta_by_fd[fd] = load_map_meta_from_fd(fd);
-            }
-        }
-
-        BpfArrayOffsets array_offsets{
-            K_BPF_ARRAY_VALUE_OFFSET,
-            K_BPF_ARRAY_PPTRS_OFFSET,
-        };
-        BpfHtabOffsets htab_offsets{
-            K_HTAB_ELEM_KEY_OFFSET,
-            K_HTAB_ELEM_LRU_REF_OFFSET,
-        };
-#if defined(__x86_64__)
-        uint64_t this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
-#else
-        uint64_t this_cpu_off_addr = 0;
-#endif
-
-        /* Walk the entry program's BPF source bytecode and build the
-         * per-call-site spec list. */
-        const struct bpf_insn *insns = bpf_program__insns(entry_prog);
-        size_t insn_cnt = bpf_program__insn_cnt(entry_prog);
-        std::vector<SourceHelperCall> source_calls =
-            collect_source_helper_calls(insns, insn_cnt, &meta_by_fd);
-        for (const SourceHelperCall &call : source_calls) {
-            if (call.helper_id == BPF_FUNC_tail_call) {
-                out.has_tail_call = true;
-                continue;
-            }
-            if (!helper_alias_for_call(call.helper_id, prog_info.type).link_name) {
-                bpf_object__close(obj);
-                fail("native_kernel: unsupported helper id "
-                     + std::to_string(call.helper_id));
-            }
-
-            auto map_it = (call.map_fd >= 0) ? meta_by_fd.find(call.map_fd) : meta_by_fd.end();
-            if (call.helper_id == BPF_FUNC_map_lookup_elem) {
-                CompanionLoad::LookupSite site{
-                    CompanionLoad::LookupSite::Kind::Call,
-                    helper_kernel_addr(BPF_FUNC_map_lookup_elem),
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                };
-                if (map_it != meta_by_fd.end()) {
-                    site.map_name = map_it->second.name;
-                configure_lookup_site_for_shape(site,
-                                                    map_shape_from_meta(map_it->second),
-                                                    array_offsets,
-                                                    htab_offsets,
-                                                    this_cpu_off_addr);
-                } else {
-                    configure_lookup_site_for_shape(site,
-                                                    call.dynamic_map_shape,
-                                                    array_offsets,
-                                                    htab_offsets,
-                                                    this_cpu_off_addr);
-                }
-                out.lookup_sites.push_back(site);
-                continue;
-            }
-
-            if (call.helper_id == BPF_FUNC_map_update_elem) {
-                CompanionLoad::UpdateSite site{
-                    CompanionLoad::UpdateSite::Kind::Call,
-                    helper_kernel_addr(BPF_FUNC_map_update_elem),
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                };
-                if (map_it != meta_by_fd.end()) {
-                    const uint32_t value_size = map_it->second.value_size;
-                    const bool simple_value =
-                        value_size == 1 || value_size == 2 ||
-                        value_size == 4 || value_size == 8;
-                    int t = map_it->second.type;
-                    if (simple_value && t == BPF_MAP_TYPE_ARRAY) {
-                        site.kind = CompanionLoad::UpdateSite::Kind::Array;
-                        site.max_entries = map_it->second.max_entries;
-                        site.elem_size = (value_size + 7u) & ~7u;
-                        site.value_size = value_size;
-                        site.value_offset = array_offsets.value;
-                    } else if (simple_value && t == BPF_MAP_TYPE_PERCPU_ARRAY) {
-#if defined(__x86_64__)
-                        if (this_cpu_off_addr == 0) {
-                            fail("this_cpu_off not in /proc/kallsyms");
-                        }
-#endif
-                        site.kind = CompanionLoad::UpdateSite::Kind::PerCpuArray;
-                        site.max_entries = map_it->second.max_entries;
-                        site.elem_size = sizeof(void *);
-                        site.value_size = value_size;
-                        site.value_offset = array_offsets.pptrs;
-                        site.percpu_base_addr = this_cpu_off_addr;
-                    }
-                }
-                out.update_sites.push_back(site);
-                continue;
-            }
-        }
-    }
-    const auto lookup_spec_end = std::chrono::steady_clock::now();
-    out.lookup_spec_ns = elapsed_ns(lookup_spec_start, lookup_spec_end);
-
-    out.obj = obj;
-    return out;
-}
-
 CompanionLoad load_from_loaded_program_fd(int program_fd,
                                           const bpf_prog_info &prog_info,
                                           const bpf_insn *source_insns,
-                                          size_t source_insn_cnt)
+                                          size_t source_insn_cnt,
+                                          std::vector<NativeMapRule> map_rules)
 {
     CompanionLoad out{};
     out.prog_type = prog_info.type;
     out.source_bytecode_bytes = source_insn_cnt * sizeof(bpf_insn);
+    out.map_rules = std::move(map_rules);
 
     const auto map_ptr_start = std::chrono::steady_clock::now();
     const std::vector<uint32_t> map_ids =
@@ -3108,7 +2902,8 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
         }
     }
     std::vector<SourceHelperCall> source_calls =
-        collect_source_helper_calls(insns, insn_cnt, &meta_by_source_fd);
+        collect_source_helper_calls(insns, insn_cnt, &meta_by_source_fd,
+                                    &out.map_rules);
 
     BpfArrayOffsets array_offsets{
         K_BPF_ARRAY_VALUE_OFFSET,
@@ -3202,9 +2997,9 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
 }
 
 #include "native_loader_link_schema.hpp"
+#include "native_loader_link_plan.hpp"
 
 std::string native_link_cache_key(const std::filesystem::path &native_elf,
-                                  const std::filesystem::path &bpf_obj,
                                   const std::string &symbol_name,
                                   const NativeLinkArgs &link_args)
 {
@@ -3216,11 +3011,7 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
     hash.add_string("x86_64");
 #endif
     hash_file_contents(hash, native_elf, "native_elf");
-    if (bpf_obj.empty()) {
-        hash.add_string("loaded_prog");
-    } else {
-        hash_file_contents(hash, bpf_obj, "companion_bpf");
-    }
+    hash.add_string("loaded_prog");
     hash_file_identity(hash, link_args.linker, "native_linker");
     hash.add_string(symbol_name);
     for (const auto &arg : link_args.helpers) {
@@ -3268,147 +3059,6 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
         hash.add_u64(arg.percpu_base_addr);
     }
     return hash.hex();
-}
-
-void write_json_string(std::ostream &out, const std::string &value)
-{
-    out << '"';
-    for (unsigned char ch : value) {
-        switch (ch) {
-        case '"':
-            out << "\\\"";
-            break;
-        case '\\':
-            out << "\\\\";
-            break;
-        case '\b':
-            out << "\\b";
-            break;
-        case '\f':
-            out << "\\f";
-            break;
-        case '\n':
-            out << "\\n";
-            break;
-        case '\r':
-            out << "\\r";
-            break;
-        case '\t':
-            out << "\\t";
-            break;
-        default:
-            if (ch < 0x20) {
-                char buf[7];
-                std::snprintf(buf, sizeof(buf), "\\u%04x", ch);
-                out << buf;
-            } else {
-                out << static_cast<char>(ch);
-            }
-            break;
-        }
-    }
-    out << '"';
-}
-
-void write_json_name_addr(std::ostream &out,
-                          const NativeLinkArgs::NameAddr &item)
-{
-    out << "{\"name\":";
-    write_json_string(out, item.name);
-    out << ",\"addr\":" << item.addr << "}";
-}
-
-void write_json_lookup_site_fields(std::ostream &out,
-                                   const NativeLinkArgs::LookupSite &site)
-{
-    out << "\"kind\":";
-    write_json_string(out, site.kind);
-    out << ",\"target_addr\":" << site.target_addr
-        << ",\"key_offset\":" << site.key_offset
-        << ",\"max_entries\":" << site.max_entries
-        << ",\"elem_size\":" << site.elem_size
-        << ",\"index_mask\":" << site.index_mask
-        << ",\"value_offset\":" << site.value_offset
-        << ",\"percpu_base_addr\":" << site.percpu_base_addr;
-    if (!site.map_name.empty()) {
-        out << ",\"map_name\":";
-        write_json_string(out, site.map_name);
-    }
-}
-
-void write_json_lookup_site(std::ostream &out,
-                            const NativeLinkArgs::LookupSite &site)
-{
-    out << "{";
-    write_json_lookup_site_fields(out, site);
-    out << "}";
-}
-
-void write_json_lookup_map(std::ostream &out,
-                           const NativeLinkArgs::LookupMap &item)
-{
-    out << "{\"name\":";
-    write_json_string(out, item.name);
-    out << ",";
-    write_json_lookup_site_fields(out, item.site);
-    out << "}";
-}
-
-void write_json_update_site(std::ostream &out,
-                            const NativeLinkArgs::UpdateSite &site)
-{
-    out << "{\"kind\":";
-    write_json_string(out, site.kind);
-    out << ",\"target_addr\":" << site.target_addr
-        << ",\"max_entries\":" << site.max_entries
-        << ",\"elem_size\":" << site.elem_size
-        << ",\"value_size\":" << site.value_size
-        << ",\"value_offset\":" << site.value_offset
-        << ",\"percpu_base_addr\":" << site.percpu_base_addr
-        << "}";
-}
-
-template <typename T, typename Writer>
-void write_json_array(std::ostream &out,
-                      const std::vector<T> &items,
-                      Writer writer)
-{
-    out << "[";
-    for (size_t i = 0; i < items.size(); i++) {
-        if (i != 0) {
-            out << ",";
-        }
-        writer(out, items[i]);
-    }
-    out << "]";
-}
-
-std::filesystem::path write_native_link_plan(
-    const NativeLinkArgs &link_args,
-    const std::filesystem::path &base)
-{
-    const std::filesystem::path path = base.string() + ".link-plan.json";
-    std::ofstream out(path, std::ios::binary | std::ios::trunc);
-    if (!out) {
-        fail("open native-link plan " + path.string());
-    }
-    out << "{\"version\":1";
-    out << ",\"helpers\":";
-    write_json_array(out, link_args.helpers, write_json_name_addr);
-    out << ",\"maps\":";
-    write_json_array(out, link_args.maps, write_json_name_addr);
-    out << ",\"lookup_sites\":";
-    write_json_array(out, link_args.lookup_sites, write_json_lookup_site);
-    out << ",\"lookup_maps\":";
-    write_json_array(out, link_args.lookup_maps, write_json_lookup_map);
-    out << ",\"update_sites\":";
-    write_json_array(out, link_args.update_sites, write_json_update_site);
-    out << "}\n";
-    out.close();
-    if (!out) {
-        fail("write native-link plan " + path.string());
-    }
-    return path;
 }
 
 bool linker_output_exists(const LinkerOutput &out)
@@ -3514,14 +3164,14 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     return out;
 }
 
-LinkedBlob load_or_link_native_blob(const native_loader::LoadOptions &options,
+LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_path,
                                     const std::filesystem::path &elf_path,
                                     const std::string &symbol_name,
                                     const CompanionLoad &companion)
 {
     const auto cache_lookup_start = std::chrono::steady_clock::now();
     NativeLinkArgs link_args =
-        build_native_link_args(options, companion.map_addrs, companion);
+        build_native_link_args(native_link_path, companion.map_addrs, companion);
     const std::filesystem::path cache_dir = kNativeLinkCacheDir;
     std::error_code ec;
     std::filesystem::create_directories(cache_dir, ec);
@@ -3530,7 +3180,7 @@ LinkedBlob load_or_link_native_blob(const native_loader::LoadOptions &options,
     }
 
     const std::string key =
-        native_link_cache_key(elf_path, options.bpf_object_path, symbol_name, link_args);
+        native_link_cache_key(elf_path, symbol_name, link_args);
     LinkerOutput cache{};
     cache.proof = cache_dir / (key + ".proof.o");
     cache.blob = cache_dir / (key + ".blob.bin");
@@ -3607,19 +3257,20 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
                                 uint32_t prog_type,
                                 const StubLoadAttrs &attrs,
                                 bool tail_call_reachable,
+                                const std::string &prog_name,
                                 const std::vector<int> &map_ref_fds)
 {
     LoadedStub out{};
+    std::vector<NativeLabReloc> relocs;
+    std::vector<NativeBlobChunk> chunks;
 
     const auto upload_start = std::chrono::steady_clock::now();
     auto upload_end = upload_start;
     {
         NativeLabUploadLock upload_lock;
         ensure_debugfs_mounted();
-        std::vector<NativeLabReloc> relocs =
-            parse_native_lab_relocs(linked.relocs, linked.blob.size());
-        std::vector<NativeBlobChunk> chunks =
-            plan_blob_chunks(linked.blob.size(), relocs);
+        relocs = parse_native_lab_relocs(linked.relocs, linked.blob.size());
+        chunks = plan_blob_chunks(linked.blob.size(), relocs);
         upload_blob(linked.blob, chunks);
         upload_relocs(relocs, chunks);
         upload_end = std::chrono::steady_clock::now();
@@ -3627,15 +3278,77 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
         const auto prog_load_start = std::chrono::steady_clock::now();
         NativeStubBtfIds stub_btf = find_native_stub_btf_ids();
         ScopedFd mod_btf_fd(open_module_btf_fd_by_id(stub_btf.module_btf_id));
-        out.prog_fd = load_stub_prog(
-            stub_btf.kfunc_btf_id,
-            mod_btf_fd.get(),
-            static_cast<uint32_t>(chunks.size()),
-            linked.callee_saved_mask,
-            prog_type,
-            attrs,
-            tail_call_reachable,
-            map_ref_fds);
+        try {
+            out.prog_fd = load_stub_prog(
+                stub_btf.kfunc_btf_id,
+                mod_btf_fd.get(),
+                static_cast<uint32_t>(chunks.size()),
+                linked.callee_saved_mask,
+                prog_type,
+                attrs,
+                tail_call_reachable,
+                prog_name,
+                map_ref_fds);
+        } catch (const std::exception &e) {
+            std::ostringstream msg;
+            msg << e.what()
+                << "\nnative_lab stub context:"
+                << " prog_type=" << prog_type
+                << " blob_bytes=" << linked.blob.size()
+                << " reloc_records=" << relocs.size()
+                << " reloc_bytes=" << linked.relocs.size()
+                << " chunks=" << chunks.size()
+                << " callee_saved_mask=" << linked.callee_saved_mask
+                << " tail_call_reachable=" << (tail_call_reachable ? 1 : 0)
+                << " retained_map_fds=" << map_ref_fds.size()
+                << " relocated_map_ids=" << linked.relocated_map_ids.size()
+                << " expected_attach_type=" << attrs.expected_attach_type
+                << " attach_btf_id=" << attrs.attach_btf_id
+                << " attach_btf_obj_id=" << attrs.attach_btf_obj_id
+                << " attach_prog_id=" << attrs.attach_prog_id
+                << " module_btf_id=" << stub_btf.module_btf_id
+                << " kfunc_btf_id=" << stub_btf.kfunc_btf_id;
+            if (!map_ref_fds.empty()) {
+                msg << "\nretained_map_info=";
+                for (size_t i = 0; i < map_ref_fds.size(); i++) {
+                    if (i != 0) {
+                        msg << ",";
+                    }
+                    bpf_map_info info = {};
+                    __u32 info_len = sizeof(info);
+                    int fd = map_ref_fds[i];
+                    if (bpf_obj_get_info_by_fd(fd, &info, &info_len) == 0) {
+                        char map_name[sizeof(info.name) + 1] = {};
+                        std::memcpy(map_name, info.name, sizeof(info.name));
+                        msg << fd << ":id=" << info.id
+                            << ":type=" << info.type
+                            << ":name=" << map_name;
+                    } else {
+                        msg << fd << ":info_errno=" << errno;
+                    }
+                }
+            }
+            if (!chunks.empty()) {
+                msg << "\nchunk_bytes=";
+                for (size_t i = 0; i < chunks.size(); i++) {
+                    if (i != 0) {
+                        msg << ",";
+                    }
+                    msg << chunks[i].offset << ":" << chunks[i].len;
+                }
+            }
+            if (!relocs.empty()) {
+                msg << "\nreloc_targets=";
+                for (size_t i = 0; i < relocs.size(); i++) {
+                    if (i != 0) {
+                        msg << ",";
+                    }
+                    msg << relocs[i].global_offset << ":0x"
+                        << std::hex << relocs[i].target << std::dec;
+                }
+            }
+            fail(msg.str());
+        }
         try {
             verify_loaded_prog_uses_maps(out.prog_fd, linked.relocated_map_ids);
         } catch (...) {
@@ -3687,69 +3400,6 @@ void close_fd_vector(std::vector<int> &fds)
 
 namespace native_loader {
 
-LoadedProgram load_from_companion_object(const LoadOptions &options)
-{
-    if (options.bpf_object_path.empty()) {
-        fail("native_loader: missing bpf_object_path");
-    }
-    if (options.native_object_path.empty()) {
-        fail("native_loader: missing native_object_path");
-    }
-    if (options.symbol_name.empty()) {
-        fail("native_loader: missing symbol_name");
-    }
-    if (options.prog_type == 0) {
-        fail("native_loader: missing prog_type");
-    }
-
-    LoadedProgram out{};
-    const auto companion_load_start = std::chrono::steady_clock::now();
-    CompanionLoad companion = load_bpf_companion(options.bpf_object_path);
-    add_native_data_symbol_addrs(options.native_object_path, companion);
-    const auto companion_load_end = std::chrono::steady_clock::now();
-
-    LinkedBlob linked = load_or_link_native_blob(
-        options,
-        options.native_object_path,
-        options.symbol_name,
-        companion);
-
-    std::vector<int> map_ref_fds =
-        reopen_relocated_map_fds(linked.relocated_map_ids);
-    LoadedStub loaded_stub{};
-    try {
-        loaded_stub = upload_and_load_stub(
-            linked,
-            options.prog_type,
-            StubLoadAttrs{},
-            companion.has_tail_call,
-            map_ref_fds);
-        close_fd_vector(map_ref_fds);
-    } catch (...) {
-        close_fd_vector(map_ref_fds);
-        throw;
-    }
-
-    out.prog_fd = loaded_stub.prog_fd;
-    out.replaced = true;
-    out.companion_object = companion.obj;
-    out.callee_saved_mask = linked.callee_saved_mask;
-    out.bpf_bytecode_bytes = companion.source_bytecode_bytes;
-    out.native_code_bytes = linked.blob.size();
-    out.timings.companion_load_ns = elapsed_ns(companion_load_start, companion_load_end);
-    out.timings.companion_open_ns = companion.open_ns;
-    out.timings.companion_object_load_ns = companion.object_load_ns;
-    out.timings.companion_map_ptr_extract_ns = companion.map_ptr_extract_ns;
-    out.timings.companion_lookup_spec_ns = companion.lookup_spec_ns;
-    out.timings.cache_lookup_ns = linked.cache_lookup_ns;
-    out.timings.native_link_exec_ns = linked.native_link_exec_ns;
-    out.timings.native_link_read_ns = linked.native_link_read_ns;
-    out.timings.map_patch_ns = linked.map_patch_ns;
-    out.timings.upload_ns = loaded_stub.upload_ns;
-    out.timings.prog_load_ns = loaded_stub.prog_load_ns;
-    return out;
-}
-
 LoadedProgram load_from_fd(const FdLoadOptions &options)
 {
     if (options.original_prog_fd < 0) {
@@ -3762,8 +3412,15 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     const auto companion_load_start = std::chrono::steady_clock::now();
     const bpf_prog_info prog_info = load_prog_info(options.original_prog_fd);
     std::vector<bpf_insn> source_insns;
+    if (!options.source_bpf_path.empty() && !options.source_insns.empty()) {
+        fail("native_loader: source_bpf_path and source_insns are mutually exclusive");
+    }
     if (!options.source_bpf_path.empty()) {
         source_insns = read_bpf_insn_file(options.source_bpf_path);
+    } else {
+        source_insns = options.source_insns;
+    }
+    if (!source_insns.empty() && !options.source_fd_array.empty()) {
         canonicalize_source_fd_array(source_insns, options.source_fd_array);
     }
     std::filesystem::path native_object_path = options.native_object_path;
@@ -3793,19 +3450,13 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             options.original_prog_fd,
             prog_info,
             source_insns.empty() ? nullptr : source_insns.data(),
-            source_insns.size());
-    companion.map_rules = std::move(map_rules);
+            source_insns.size(),
+            std::move(map_rules));
     add_native_data_symbol_addrs(native_object_path, companion);
     const auto companion_load_end = std::chrono::steady_clock::now();
 
-    LoadOptions link_options{};
-    link_options.native_object_path = native_object_path;
-    link_options.symbol_name = symbol_name;
-    link_options.prog_type = prog_info.type;
-    link_options.native_link_path = options.native_link_path;
-
     LinkedBlob linked = load_or_link_native_blob(
-        link_options,
+        options.native_link_path,
         native_object_path,
         symbol_name,
         companion);
@@ -3815,7 +3466,6 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     stub_attrs.attach_btf_id = options.attach_btf_id
         ? options.attach_btf_id
         : prog_info.attach_btf_id;
-    stub_attrs.prog_btf_id = options.prog_btf_id;
     stub_attrs.attach_btf_obj_id = options.attach_btf_obj_id
         ? options.attach_btf_obj_id
         : prog_info.attach_btf_obj_id;
@@ -3823,6 +3473,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
 
     std::vector<int> map_ref_fds =
         reopen_relocated_map_fds(linked.relocated_map_ids);
+    const std::string stub_prog_name = prog_info_name_or_stub(prog_info);
     LoadedStub loaded_stub{};
     try {
         loaded_stub = upload_and_load_stub(
@@ -3830,6 +3481,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             prog_info.type,
             stub_attrs,
             companion.has_tail_call,
+            stub_prog_name,
             map_ref_fds);
         close_fd_vector(map_ref_fds);
     } catch (...) {
@@ -3839,13 +3491,8 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
 
     out.prog_fd = loaded_stub.prog_fd;
     out.replaced = true;
-    out.companion_object = nullptr;
-    out.callee_saved_mask = linked.callee_saved_mask;
     out.bpf_bytecode_bytes = companion.source_bytecode_bytes;
     out.native_code_bytes = linked.blob.size();
-    out.timings.companion_load_ns = elapsed_ns(companion_load_start, companion_load_end);
-    out.timings.companion_open_ns = companion.open_ns;
-    out.timings.companion_object_load_ns = companion.object_load_ns;
     out.timings.companion_map_ptr_extract_ns = companion.map_ptr_extract_ns;
     out.timings.companion_lookup_spec_ns = companion.lookup_spec_ns;
     out.timings.cache_lookup_ns = linked.cache_lookup_ns;
@@ -3865,10 +3512,6 @@ void close_loaded_program(LoadedProgram *program)
     if (program->prog_fd >= 0) {
         close(program->prog_fd);
         program->prog_fd = -1;
-    }
-    if (program->companion_object) {
-        bpf_object__close(program->companion_object);
-        program->companion_object = nullptr;
     }
 }
 
@@ -3899,7 +3542,6 @@ extern "C" int native_loader_load_from_fd_with_manifest_path_and_attach(
     uint32_t source_fd_array_count,
     uint32_t expected_attach_type,
     uint32_t attach_btf_id,
-    uint32_t prog_btf_id,
     uint32_t attach_btf_obj_id,
     uint32_t attach_prog_id,
     struct native_loader_c_result *out)
@@ -3933,7 +3575,6 @@ extern "C" int native_loader_load_from_fd_with_manifest_path_and_attach(
         }
         options.expected_attach_type = expected_attach_type;
         options.attach_btf_id = attach_btf_id;
-        options.prog_btf_id = prog_btf_id;
         options.attach_btf_obj_id = attach_btf_obj_id;
         options.attach_prog_id = attach_prog_id;
         native_loader::LoadedProgram loaded = native_loader::load_from_fd(options);

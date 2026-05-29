@@ -78,12 +78,12 @@ NativeLinkArgs::UpdateSite make_link_update_site(
 }
 
 NativeLinkArgs build_native_link_args(
-    const native_loader::LoadOptions &options,
+    const std::filesystem::path &native_link_path,
     const std::unordered_map<std::string, uint64_t> &map_addrs,
     const CompanionLoad &companion)
 {
     NativeLinkArgs out{};
-    out.linker = native_link_binary(options.native_link_path);
+    out.linker = native_link_binary(native_link_path);
     BpfArrayOffsets array_offsets{
         K_BPF_ARRAY_VALUE_OFFSET,
         K_BPF_ARRAY_PPTRS_OFFSET,

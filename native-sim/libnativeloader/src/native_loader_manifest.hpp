@@ -31,7 +31,9 @@ struct NativeMapRule {
     NativeMapRuleMatch match = NativeMapRuleMatch::Exact;
     std::string pattern;
     std::string exclude;
+    std::string native_symbol;
     NativeMapShape shape;
+    NativeMapShape inner_shape;
     bool object_scoped = false;
 };
 
@@ -95,6 +97,8 @@ inline const NativeMapRule *find_native_map_rule(
         }
         if (match &&
             (!native_map_shape_equal(match->shape, rule.shape) ||
+             !native_map_shape_equal(match->inner_shape, rule.inner_shape) ||
+             match->native_symbol != rule.native_symbol ||
              match->object_scoped != rule.object_scoped)) {
             manifest_fail("native_loader: manifest map_rules are ambiguous for map " + name);
         }
@@ -556,10 +560,23 @@ inline NativeMapRule parse_native_map_rule(const std::string &entry)
     if (std::optional<std::string> exclude = json_object_string(entry, "exclude")) {
         rule.exclude = *exclude;
     }
+    if (std::optional<std::string> native_symbol =
+            json_object_string(entry, "native_symbol")) {
+        rule.native_symbol = *native_symbol;
+    }
     rule.shape.type = static_cast<int>(json_required_u32(entry, "type"));
     rule.shape.key_size = static_cast<uint32_t>(json_object_u64(entry, "key_size").value_or(0));
     rule.shape.value_size = static_cast<uint32_t>(json_object_u64(entry, "value_size").value_or(0));
     rule.shape.max_entries = static_cast<uint32_t>(json_object_u64(entry, "max_entries").value_or(0));
+    if (std::optional<uint64_t> inner_type = json_object_u64(entry, "inner_type")) {
+        rule.inner_shape.type = static_cast<int>(*inner_type);
+        rule.inner_shape.key_size =
+            static_cast<uint32_t>(json_object_u64(entry, "inner_key_size").value_or(0));
+        rule.inner_shape.value_size =
+            static_cast<uint32_t>(json_object_u64(entry, "inner_value_size").value_or(0));
+        rule.inner_shape.max_entries =
+            static_cast<uint32_t>(json_object_u64(entry, "inner_max_entries").value_or(0));
+    }
     rule.object_scoped = json_object_bool(entry, "object_scoped").value_or(false);
     return rule;
 }

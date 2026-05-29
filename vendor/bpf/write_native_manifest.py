@@ -36,6 +36,8 @@ def map_rule(
     max_entries: int = 0,
     object_scoped: bool = False,
     exclude: str | None = None,
+    inner: tuple[int, int, int, int] | None = None,
+    native_symbol: str | None = None,
 ) -> dict[str, object]:
     entry: dict[str, object] = {
         "match": match,
@@ -52,6 +54,14 @@ def map_rule(
         entry["object_scoped"] = True
     if exclude is not None:
         entry["exclude"] = exclude
+    if native_symbol is not None:
+        entry["native_symbol"] = native_symbol
+    if inner is not None:
+        inner_type, inner_key_size, inner_value_size, inner_max_entries = inner
+        entry["inner_type"] = inner_type
+        entry["inner_key_size"] = inner_key_size
+        entry["inner_value_size"] = inner_value_size
+        entry["inner_max_entries"] = inner_max_entries
     return entry
 
 
@@ -74,6 +84,8 @@ CILIUM_MAP_RULES = [
     map_rule("exact", "cilium_nodeport_neigh6", BPF_MAP_TYPE_LRU_HASH, 16, 8, object_scoped=True),
     map_rule("exact", "cilium_tail_call_buffer6", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 60, 1, True),
     map_rule("exact", "cilium_tail_call_buffer4", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 60, 1, True),
+    map_rule("prefix", "cilium_calls", BPF_MAP_TYPE_PROG_ARRAY, 4, 4,
+             object_scoped=True, native_symbol="cilium_calls"),
 ]
 
 TRACEE_TETRAGON_MAP_RULES = [
@@ -134,8 +146,10 @@ TRACEE_TETRAGON_MAP_RULES = [
     map_rule("exact", "config_map", BPF_MAP_TYPE_ARRAY, 4, 736, 1, True),
     map_rule("exact", "write_offload", BPF_MAP_TYPE_HASH, 8, 16, 1, True),
     map_rule("exact", "argfilter_maps", BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4, 8, True),
-    map_rule("exact", "policy_filter_maps", BPF_MAP_TYPE_HASH_OF_MAPS, 4, 4, 128, True),
-    map_rule("exact", "policy_filter_cgroup_maps", BPF_MAP_TYPE_HASH_OF_MAPS, 8, 4, 1024, True),
+    map_rule("exact", "policy_filter_maps", BPF_MAP_TYPE_HASH_OF_MAPS, 4, 4, 128, True,
+             inner=(BPF_MAP_TYPE_HASH, 8, 1, 1)),
+    map_rule("exact", "policy_filter_cgroup_maps", BPF_MAP_TYPE_HASH_OF_MAPS, 8, 4, 1024, True,
+             inner=(BPF_MAP_TYPE_HASH, 4, 1, 128)),
     map_rule("exact", "exit_heap_map", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 40, 1, True),
 ]
 

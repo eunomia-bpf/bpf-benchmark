@@ -132,6 +132,18 @@ static int decode_native_lab_payload(u64 payload, u32 *blob_id, u32 *abi_mask)
 	return 0;
 }
 
+static void native_lab_emit_error(const char *reason, int err, u64 payload,
+				  u32 blob_id, size_t blob_len,
+				  size_t reloc_count, size_t reloc_index,
+				  u32 reloc_offset, u32 reloc_kind,
+				  u64 reloc_target)
+{
+	pr_err_ratelimited("bpf_x86_native_lab: emit failed reason=%s err=%d payload=0x%llx blob=%u len=%zu relocs=%zu reloc_index=%zu reloc_offset=%u reloc_kind=%u reloc_target=0x%llx\n",
+			   reason, err, (unsigned long long)payload, blob_id,
+			   blob_len, reloc_count, reloc_index, reloc_offset,
+			   reloc_kind, (unsigned long long)reloc_target);
+}
+
 /*
  * Verifier-side proof. We claim the kinsn is equivalent to `r0 = 0`.
  * This is a deliberate lie: the blob can produce any value or side
@@ -175,14 +187,21 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	(void)prog;
 
 	err = decode_native_lab_payload(payload, &blob_id, NULL);
-	if (err)
+	if (err) {
+		native_lab_emit_error("decode_payload", err, payload, 0, 0, 0,
+				      0, 0, 0, 0);
 		return err;
+	}
 
 	mutex_lock(&blobs_lock);
 	if (blobs[blob_id].bytes && blobs[blob_id].len) {
 		snapshot_len = blobs[blob_id].len;
 		if (snapshot_len > NATIVE_LAB_MAX_BLOB_BYTES) {
 			mutex_unlock(&blobs_lock);
+			native_lab_emit_error("blob_too_large", -E2BIG, payload,
+					      blob_id, snapshot_len,
+					      blobs[blob_id].reloc_count, 0,
+					      0, 0, 0);
 			return -E2BIG;
 		}
 		if (emit) {
@@ -211,15 +230,35 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 					if ((size_t)r->offset + sizeof(rel32_slot) >
 					    snapshot_len) {
 						err = -ERANGE;
+						native_lab_emit_error("reloc_bounds", err,
+								      payload, blob_id,
+								      snapshot_len,
+								      blobs[blob_id].reloc_count,
+								      i, r->offset,
+								      r->kind, r->target);
 						break;
 					}
 					if (memcmp(emit_at + r->offset, rel32_slot,
 						   sizeof(rel32_slot))) {
 						err = -EINVAL;
+						native_lab_emit_error("reloc_slot_mismatch",
+								      err, payload,
+								      blob_id,
+								      snapshot_len,
+								      blobs[blob_id].reloc_count,
+								      i, r->offset,
+								      r->kind, r->target);
 						break;
 					}
 					if (!final_emit_at) {
 						err = -EINVAL;
+						native_lab_emit_error("missing_final_ip",
+								      err, payload,
+								      blob_id,
+								      snapshot_len,
+								      blobs[blob_id].reloc_count,
+								      i, r->offset,
+								      r->kind, r->target);
 						break;
 					}
 					slot_va = (u64)final_emit_at + r->offset;
@@ -228,6 +267,13 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 					disp = (s32)disp64;
 					if ((s64)disp != disp64) {
 						err = -ERANGE;
+						native_lab_emit_error("rel32_out_of_range",
+								      err, payload,
+								      blob_id,
+								      snapshot_len,
+								      blobs[blob_id].reloc_count,
+								      i, r->offset,
+								      r->kind, r->target);
 						break;
 					}
 					memcpy(emit_at + r->offset + 1, &disp, 4);
@@ -235,6 +281,12 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 				}
 				default:
 					err = -EINVAL;
+					native_lab_emit_error("unknown_reloc_kind",
+							      err, payload,
+							      blob_id, snapshot_len,
+							      blobs[blob_id].reloc_count,
+							      i, r->offset,
+							      r->kind, r->target);
 					break;
 				}
 				if (err)
@@ -248,8 +300,11 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	}
 	mutex_unlock(&blobs_lock);
 
-	if (!snapshot_len)
+	if (!snapshot_len) {
+		native_lab_emit_error("missing_blob", -ENOENT, payload, blob_id,
+				      0, 0, 0, 0, 0, 0);
 		return -ENOENT;
+	}
 
 	*off += snapshot_len;
 	return snapshot_len;

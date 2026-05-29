@@ -457,6 +457,33 @@ fn discover_reloc_reachable(
     Ok(())
 }
 
+fn x86_call_relocation_opcode_offsets(elf: &object::File, sym: &SymInfo) -> Result<HashSet<u64>> {
+    let section = elf
+        .section_by_index(sym.section_index)
+        .with_context(|| format!("section {:?}", sym.section_index))?;
+    let bytes = read_symbol_bytes(elf, sym)?;
+    let mut out = HashSet::new();
+    for (reloc_offset, reloc) in section.relocations() {
+        if reloc_offset < sym.address || reloc_offset >= sym.address + sym.size {
+            continue;
+        }
+        let RelocationFlags::Elf { r_type } = reloc.flags() else {
+            continue;
+        };
+        if r_type != 4 {
+            continue;
+        }
+        let local_patch_off = reloc_offset - sym.address;
+        let Some(opcode_local_off) = local_patch_off.checked_sub(1) else {
+            continue;
+        };
+        if bytes.get(opcode_local_off as usize) == Some(&0xE8) {
+            out.insert(opcode_local_off);
+        }
+    }
+    Ok(out)
+}
+
 pub(super) fn discover_reachable(elf: &object::File, entry: &SymInfo) -> Result<Vec<SymInfo>> {
     let mut included: Vec<SymInfo> = vec![entry.clone()];
     let mut seen: HashSet<SymbolKey> = [symbol_key(entry)].into_iter().collect();
@@ -464,6 +491,7 @@ pub(super) fn discover_reachable(elf: &object::File, entry: &SymInfo) -> Result<
 
     while let Some(sym) = queue.pop() {
         let bytes = read_symbol_bytes(elf, &sym)?;
+        let call_relocation_opcode_offsets = x86_call_relocation_opcode_offsets(elf, &sym)?;
         let mut decoder = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
         while decoder.can_decode() {
             let insn = decoder.decode();
@@ -471,6 +499,9 @@ pub(super) fn discover_reachable(elf: &object::File, entry: &SymInfo) -> Result<
                 bail!("iced bailed decoding {} at IP {:#x}", sym.name, insn.ip());
             }
             if matches!(insn.flow_control(), FlowControl::Call) {
+                if call_relocation_opcode_offsets.contains(&(insn.ip() - sym.address)) {
+                    continue;
+                }
                 let target = insn.near_branch_target();
                 if target == 0 {
                     continue;
@@ -989,7 +1020,7 @@ fn scan_x86_pc_relative_relocations(
                 RelocationFlags::Elf { r_type } => r_type,
                 _ => continue,
             };
-            if matches!(r_type, 2 | 9 | 41 | 42) {
+            if matches!(r_type, 2 | 4 | 9 | 41 | 42) {
                 out.insert(local_site_key(sym, reloc_offset - sym.address));
             }
         }
@@ -3378,7 +3409,9 @@ where
         FlowControl::UnconditionalBranch | FlowControl::ConditionalBranch | FlowControl::Call
     ) {
         let target = insn.near_branch_target();
-        if target != 0 && !in_any_or_end(target) {
+        let relocated_call = matches!(fc, FlowControl::Call)
+            && (0..insn.len() as u64).any(&mut has_pc_relative_relocation);
+        if target != 0 && !in_any_or_end(target) && !relocated_call {
             bail!(
                 "instruction at IP {:#x} branches to {:#x} outside the included symbols",
                 insn.ip(),

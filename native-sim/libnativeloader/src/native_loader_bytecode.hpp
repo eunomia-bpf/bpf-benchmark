@@ -33,7 +33,8 @@ struct SourceMapBinding {
 std::vector<SourceHelperCall> collect_source_helper_calls(
     const struct bpf_insn *insns,
     size_t cnt,
-    const std::unordered_map<int, MapMeta> *meta_by_fd = nullptr)
+    const std::unordered_map<int, MapMeta> *meta_by_fd = nullptr,
+    const std::vector<NativeMapRule> *map_rules = nullptr)
 {
     std::vector<SourceHelperCall> sites;
     SourceMapBinding reg_map[11];
@@ -91,7 +92,9 @@ std::vector<SourceHelperCall> collect_source_helper_calls(
                 meta_by_fd) {
                 auto meta_it = meta_by_fd->find(map_binding.map_fd);
                 if (meta_it != meta_by_fd->end()) {
-                    return_shape = inner_map_shape_for_outer_map(meta_it->second);
+                    return_shape = inner_map_shape_for_outer_map(
+                        meta_it->second,
+                        map_rules ? *map_rules : std::vector<NativeMapRule>{});
                 }
             }
 

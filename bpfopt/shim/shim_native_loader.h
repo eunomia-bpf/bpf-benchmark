@@ -4,7 +4,7 @@
 struct native_loader_c_result {
     int prog_fd;
     int replaced;
-    char error[4096];
+    char error[65536];
 };
 
 typedef int (*native_loader_load_from_fd_with_manifest_path_and_attach_fn)(
@@ -15,7 +15,6 @@ typedef int (*native_loader_load_from_fd_with_manifest_path_and_attach_fn)(
     uint32_t source_fd_array_count,
     uint32_t expected_attach_type,
     uint32_t attach_btf_id,
-    uint32_t prog_btf_id,
     uint32_t attach_btf_obj_id,
     uint32_t attach_prog_id,
     struct native_loader_c_result *out);
@@ -298,8 +297,7 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     if (load((int)original_fd, manifest, prog->bytecode_path,
              prog->fd_array_snapshot, prog->fd_array_snapshot_n,
              prog->expected_attach_type, prog->attach_btf_id,
-             prog->prog_btf_kid, prog->attach_btf_obj_kid,
-             prog->attach_prog_kid,
+             prog->attach_btf_obj_kid, prog->attach_prog_kid,
              &result) != 0) {
         log_line("native-loader failed prog=%s manifest=%s source=%s error=%s",
                  prog_name ? prog_name : "", manifest,
