@@ -1,0 +1,273 @@
+group	compare_to	benchmark	runtime	families	relocations	rep1_ratio	rep2_ratio	rep3_ratio	median_ratio	min_ratio	max_ratio	faster_reps	slower_reps	equal_reps	direction
+baseline	control-disabled	arm64_direct_abi_coverage	kernel			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+baseline	control-disabled	arm64_direct_abi_coverage	native			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+baseline	control-disabled	bcc_runqlat_log2_histogram_bucket	kernel			0.996504370	0.995008735	0.995271279	0.995271279	0.995008735	0.996504370	3	0	0	all_faster
+baseline	control-disabled	bcc_runqlat_log2_histogram_bucket	native			1.003160271	1.000450450	1.000000000	1.000450450	1.000000000	1.003160271	0	2	1	mixed
+baseline	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	kernel			1.012539185	1.006250000	1.009404389	1.009404389	1.006250000	1.012539185	0	3	0	all_slower
+baseline	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	native			1.000000000	1.006666667	1.000000000	1.000000000	1.000000000	1.006666667	0	1	2	mixed
+baseline	control-disabled	bitmap_popcount_scan	kernel			1.006996065	1.000000000	0.999565784	1.000000000	0.999565784	1.006996065	1	1	1	mixed
+baseline	control-disabled	bitmap_popcount_scan	native			0.997523220	1.000620347	1.000000000	1.000000000	0.997523220	1.000620347	1	1	1	mixed
+baseline	control-disabled	bpf_local_call_fanout_dispatch	kernel			1.024615385	0.970149254	1.000000000	1.000000000	0.970149254	1.024615385	1	1	1	mixed
+baseline	control-disabled	bpf_local_call_fanout_dispatch	native			1.008695652	1.000000000	1.008771930	1.008695652	1.000000000	1.008771930	0	2	1	mixed
+baseline	control-disabled	bpftrace_comm_key_fnv_hash	kernel			1.000000000	0.999396500	1.000000000	1.000000000	0.999396500	1.000000000	1	0	2	mixed
+baseline	control-disabled	bpftrace_comm_key_fnv_hash	native			1.000000000	0.998448410	1.000777605	1.000000000	0.998448410	1.000777605	1	1	1	mixed
+baseline	control-disabled	bpftrace_string_search_prefix_scan	kernel			1.000000000	1.000000000	1.021194605	1.000000000	1.000000000	1.021194605	0	1	2	mixed
+baseline	control-disabled	bpftrace_string_search_prefix_scan	native			1.005665722	1.011331445	1.048022599	1.011331445	1.005665722	1.048022599	0	3	0	all_slower
+baseline	control-disabled	ccmp_all_nonzero	kernel			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+baseline	control-disabled	ccmp_all_nonzero	native			0.833333333	1.000000000	1.000000000	1.000000000	0.833333333	1.000000000	1	0	2	mixed
+baseline	control-disabled	cgroup_skb_hash_chain	kernel			0.963821892	0.993314231	1.000962464	0.993314231	0.963821892	1.000962464	2	1	0	mixed
+baseline	control-disabled	cgroup_skb_hash_chain	native			0.976798144	0.935555556	1.000000000	0.976798144	0.935555556	1.000000000	2	0	1	mixed
+baseline	control-disabled	cilium_ct_nat_tuple_rewrite	kernel			1.023157895	1.000000000	0.997903564	1.000000000	0.997903564	1.023157895	1	1	1	mixed
+baseline	control-disabled	cilium_ct_nat_tuple_rewrite	native			1.055837563	1.005076142	1.025252525	1.025252525	1.005076142	1.055837563	0	3	0	all_slower
+baseline	control-disabled	cilium_policy_guard_tree_filter	kernel			1.000000000	0.991803279	0.995983936	0.995983936	0.991803279	1.000000000	2	0	1	mixed
+baseline	control-disabled	cilium_policy_guard_tree_filter	native			1.008130081	1.008196721	1.032258065	1.008196721	1.008130081	1.032258065	0	3	0	all_slower
+baseline	control-disabled	cilium_socket_lb_service_select	kernel			1.106244175	1.133782483	1.137198068	1.133782483	1.106244175	1.137198068	0	3	0	all_slower
+baseline	control-disabled	cilium_socket_lb_service_select	native			1.003039514	1.000000000	1.009118541	1.003039514	1.000000000	1.009118541	0	2	1	mixed
+baseline	control-disabled	csel_select64	kernel			0.965517241	1.000000000	1.000000000	1.000000000	0.965517241	1.000000000	1	0	2	mixed
+baseline	control-disabled	csel_select64	native			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+baseline	control-disabled	flow_5tuple_rss_hash	kernel			1.000000000	1.000000000	1.041666667	1.000000000	1.000000000	1.041666667	0	1	2	mixed
+baseline	control-disabled	flow_5tuple_rss_hash	native			1.000000000	1.000000000	1.055555556	1.000000000	1.000000000	1.055555556	0	1	2	mixed
+baseline	control-disabled	flow_record_field_scan	kernel			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+baseline	control-disabled	flow_record_field_scan	native			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+baseline	control-disabled	katran_lb_consistent_hash_select	kernel			1.000000000	1.000000000	1.016393443	1.000000000	1.000000000	1.016393443	0	1	2	mixed
+baseline	control-disabled	katran_lb_consistent_hash_select	native			1.074074074	1.037037037	1.000000000	1.037037037	1.000000000	1.074074074	0	2	1	mixed
+baseline	control-disabled	ldp_stack_pair	kernel			1.000000000	1.000000000	0.952380952	1.000000000	0.952380952	1.000000000	1	0	2	mixed
+baseline	control-disabled	ldp_stack_pair	native			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+baseline	control-disabled	otel_stack_frame_unwind_scan	kernel			1.044619423	0.997382199	1.041994751	1.041994751	0.997382199	1.044619423	1	2	0	mixed
+baseline	control-disabled	otel_stack_frame_unwind_scan	native			1.068965517	1.008620690	1.059829060	1.059829060	1.008620690	1.068965517	0	3	0	all_slower
+baseline	control-disabled	packed_header_bitfield_decode	kernel			1.001068376	1.000000000	0.997870075	1.000000000	0.997870075	1.001068376	1	1	1	mixed
+baseline	control-disabled	packed_header_bitfield_decode	native			0.996015936	0.998007968	1.117296223	0.998007968	0.996015936	1.117296223	2	1	0	mixed
+baseline	control-disabled	packet_checksum_fold	kernel			0.996501809	0.999727776	1.001725495	0.999727776	0.996501809	1.001725495	2	1	0	mixed
+baseline	control-disabled	packet_checksum_fold	native			0.993105287	1.078718430	1.001342436	1.001342436	0.993105287	1.078718430	1	2	0	mixed
+baseline	control-disabled	packet_record_bounds_window	kernel			1.008746356	1.002923977	1.017441860	1.008746356	1.002923977	1.017441860	0	3	0	all_slower
+baseline	control-disabled	packet_record_bounds_window	native			1.135135135	1.000000000	1.067114094	1.067114094	1.000000000	1.135135135	0	2	1	mixed
+baseline	control-disabled	packet_toeplitz_rss_hash	kernel			1.010548523	1.089958159	1.019120459	1.019120459	1.010548523	1.089958159	0	3	0	all_slower
+baseline	control-disabled	packet_toeplitz_rss_hash	native			1.000000000	0.997333333	1.007936508	1.000000000	0.997333333	1.007936508	1	1	1	mixed
+baseline	control-disabled	packet_vlan_tcpopt_parser	kernel			1.000000000	1.000000000	1.022222222	1.000000000	1.000000000	1.022222222	0	1	2	mixed
+baseline	control-disabled	packet_vlan_tcpopt_parser	native			0.947368421	1.000000000	1.052631579	1.000000000	0.947368421	1.052631579	1	1	1	mixed
+baseline	control-disabled	payload_prefix_memcmp_scan	kernel			1.010489510	1.024475524	1.027777778	1.024475524	1.010489510	1.027777778	0	3	0	all_slower
+baseline	control-disabled	payload_prefix_memcmp_scan	native			1.011834320	1.000000000	1.023809524	1.011834320	1.000000000	1.023809524	0	2	1	mixed
+baseline	control-disabled	simple	kernel			1.000000000	0.937500000	0.933333333	0.937500000	0.933333333	1.000000000	2	0	1	mixed
+baseline	control-disabled	simple	native			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+baseline	control-disabled	simple_packet	kernel			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+baseline	control-disabled	simple_packet	native			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+baseline	control-disabled	siphash_rotate64_mixer	kernel			1.000000000	0.987654321	1.006250000	1.000000000	0.987654321	1.006250000	1	1	1	mixed
+baseline	control-disabled	siphash_rotate64_mixer	native			1.000000000	0.977777778	1.113636364	1.000000000	0.977777778	1.113636364	1	1	1	mixed
+baseline	control-disabled	sorted_rule_binary_search	kernel			1.000000000	1.004651163	0.995882656	1.000000000	0.995882656	1.004651163	1	1	1	mixed
+baseline	control-disabled	sorted_rule_binary_search	native			1.012517385	1.004172462	0.998609179	1.004172462	0.998609179	1.012517385	1	2	0	mixed
+baseline	control-disabled	stp_stack_pair	kernel			0.952380952	1.000000000	1.000000000	1.000000000	0.952380952	1.000000000	1	0	2	mixed
+baseline	control-disabled	stp_stack_pair	native			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+baseline	control-disabled	tc_packet_checksum_fold	kernel			0.997915093	0.989219620	1.000211935	0.997915093	0.989219620	1.000211935	2	1	0	mixed
+baseline	control-disabled	tc_packet_checksum_fold	native			0.977704500	0.989458117	1.006859552	0.989458117	0.977704500	1.006859552	2	1	0	mixed
+baseline	control-disabled	tetragon_process_event_arg_filter	kernel			1.022770398	1.019083969	1.005714286	1.019083969	1.005714286	1.022770398	0	3	0	all_slower
+baseline	control-disabled	tetragon_process_event_arg_filter	native			0.971929825	1.000000000	1.000000000	1.000000000	0.971929825	1.000000000	1	0	2	mixed
+baseline	control-disabled	trace_event_type_switch_dispatch	kernel			0.932157395	0.994452150	0.988372093	0.988372093	0.932157395	0.994452150	3	0	0	all_faster
+baseline	control-disabled	trace_event_type_switch_dispatch	native			0.998422713	0.998425197	0.973846154	0.998422713	0.973846154	0.998425197	3	0	0	all_faster
+baseline	control-disabled	tracee_http_method_prefix_detect	kernel			1.083333333	0.794871795	1.000000000	1.000000000	0.794871795	1.083333333	1	1	1	mixed
+baseline	control-disabled	tracee_http_method_prefix_detect	native			1.078947368	1.000000000	1.026315789	1.026315789	1.000000000	1.078947368	0	2	1	mixed
+baseline	control-disabled	tracee_syscall_name_table_lookup	kernel			0.939481268	0.971751412	0.988023952	0.971751412	0.939481268	0.988023952	3	0	0	all_faster
+baseline	control-disabled	tracee_syscall_name_table_lookup	native			0.988549618	0.984790875	1.000000000	0.988549618	0.984790875	1.000000000	2	0	1	mixed
+candidate-conservative	control-disabled	arm64_direct_abi_coverage	kernel	EXTR,LDR	EXTR:1,LDR:4	0.950000000	0.950000000	0.950000000	0.950000000	0.950000000	0.950000000	3	0	0	all_faster
+candidate-conservative	control-disabled	arm64_direct_abi_coverage	native	EXTR,LDR	EXTR:1,LDR:4	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-conservative	control-disabled	bcc_runqlat_log2_histogram_bucket	kernel	LDR	LDR:2	1.021722846	1.001247816	0.993280239	1.001247816	0.993280239	1.021722846	1	2	0	mixed
+candidate-conservative	control-disabled	bcc_runqlat_log2_histogram_bucket	native	LDR	LDR:2	1.032054176	1.001351351	1.000000000	1.001351351	1.000000000	1.032054176	0	2	1	mixed
+candidate-conservative	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	kernel	EXTR,LDR	EXTR:1,LDR:2	0.984326019	0.981250000	0.984326019	0.984326019	0.981250000	0.984326019	3	0	0	all_faster
+candidate-conservative	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	native	EXTR,LDR	EXTR:1,LDR:2	0.993333333	1.086666667	1.000000000	1.000000000	0.993333333	1.086666667	1	1	1	mixed
+candidate-conservative	control-disabled	bitmap_popcount_scan	kernel	LDR	LDR:2	1.006121557	1.006555944	0.992184108	1.006121557	0.992184108	1.006555944	1	2	0	mixed
+candidate-conservative	control-disabled	bitmap_popcount_scan	native	LDR	LDR:2	0.998142415	1.000000000	1.000000000	1.000000000	0.998142415	1.000000000	1	0	2	mixed
+candidate-conservative	control-disabled	bpf_local_call_fanout_dispatch	kernel	LDR	LDR:3	0.929230769	0.904477612	1.009230769	0.929230769	0.904477612	1.009230769	2	1	0	mixed
+candidate-conservative	control-disabled	bpf_local_call_fanout_dispatch	native	LDR	LDR:3	1.000000000	1.000000000	1.008771930	1.000000000	1.000000000	1.008771930	0	1	2	mixed
+candidate-conservative	control-disabled	bpftrace_comm_key_fnv_hash	kernel	LDR	LDR:2	0.998792271	1.015087508	1.000000000	1.000000000	0.998792271	1.015087508	1	1	1	mixed
+candidate-conservative	control-disabled	bpftrace_comm_key_fnv_hash	native	LDR	LDR:2	1.000000000	1.018619085	1.000777605	1.000777605	1.000000000	1.018619085	0	2	1	mixed
+candidate-conservative	control-disabled	bpftrace_string_search_prefix_scan	kernel	EXTR,LDR	EXTR:1,LDR:1	1.029013540	1.041015625	1.025048170	1.029013540	1.025048170	1.041015625	0	3	0	all_slower
+candidate-conservative	control-disabled	bpftrace_string_search_prefix_scan	native	EXTR,LDR	EXTR:1,LDR:1	1.000000000	1.002832861	1.016949153	1.002832861	1.000000000	1.016949153	0	2	1	mixed
+candidate-conservative	control-disabled	ccmp_all_nonzero	kernel			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-conservative	control-disabled	ccmp_all_nonzero	native			0.833333333	1.000000000	1.000000000	1.000000000	0.833333333	1.000000000	1	0	2	mixed
+candidate-conservative	control-disabled	cgroup_skb_hash_chain	kernel	LDR	LDR:2	1.024118738	0.990448902	1.000000000	1.000000000	0.990448902	1.024118738	1	1	1	mixed
+candidate-conservative	control-disabled	cgroup_skb_hash_chain	native	LDR	LDR:2	1.034802784	0.935555556	1.000000000	1.000000000	0.935555556	1.034802784	1	1	1	mixed
+candidate-conservative	control-disabled	cilium_ct_nat_tuple_rewrite	kernel	EXTR,LDR	EXTR:1,LDR:2	0.953684211	0.953684211	0.951781971	0.953684211	0.951781971	0.953684211	3	0	0	all_faster
+candidate-conservative	control-disabled	cilium_ct_nat_tuple_rewrite	native	EXTR,LDR	EXTR:1,LDR:2	1.000000000	1.005076142	1.005050505	1.005050505	1.000000000	1.005076142	0	2	1	mixed
+candidate-conservative	control-disabled	cilium_policy_guard_tree_filter	kernel	LDR	LDR:1	1.000000000	1.000000000	0.975903614	1.000000000	0.975903614	1.000000000	1	0	2	mixed
+candidate-conservative	control-disabled	cilium_policy_guard_tree_filter	native	LDR	LDR:1	1.008130081	1.008196721	0.991935484	1.008130081	0.991935484	1.008196721	1	2	0	mixed
+candidate-conservative	control-disabled	cilium_socket_lb_service_select	kernel	LDR	LDR:2	0.962721342	0.994225217	1.000966184	0.994225217	0.962721342	1.000966184	2	1	0	mixed
+candidate-conservative	control-disabled	cilium_socket_lb_service_select	native	LDR	LDR:2	1.003039514	1.003039514	1.003039514	1.003039514	1.003039514	1.003039514	0	3	0	all_slower
+candidate-conservative	control-disabled	csel_select64	kernel	EXTR,LDR	EXTR:1,LDR:4	0.586206897	0.607142857	0.607142857	0.607142857	0.586206897	0.607142857	3	0	0	all_faster
+candidate-conservative	control-disabled	csel_select64	native	EXTR,LDR	EXTR:1,LDR:4	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-conservative	control-disabled	flow_5tuple_rss_hash	kernel	EXTR	EXTR:14	0.812500000	0.791666667	0.791666667	0.791666667	0.791666667	0.812500000	3	0	0	all_faster
+candidate-conservative	control-disabled	flow_5tuple_rss_hash	native	EXTR	EXTR:14	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-conservative	control-disabled	flow_record_field_scan	kernel			1.037634409	1.000000000	1.000000000	1.000000000	1.000000000	1.037634409	0	1	2	mixed
+candidate-conservative	control-disabled	flow_record_field_scan	native			1.037383178	1.000000000	1.000000000	1.000000000	1.000000000	1.037383178	0	1	2	mixed
+candidate-conservative	control-disabled	katran_lb_consistent_hash_select	kernel	EXTR,LDR	EXTR:24,LDR:7	0.983606557	0.934426230	0.918032787	0.934426230	0.918032787	0.983606557	3	0	0	all_faster
+candidate-conservative	control-disabled	katran_lb_consistent_hash_select	native	EXTR,LDR	EXTR:24,LDR:7	1.074074074	1.074074074	0.964285714	1.074074074	0.964285714	1.074074074	1	2	0	mixed
+candidate-conservative	control-disabled	ldp_stack_pair	kernel	EXTR,LDR	EXTR:1,LDR:2	1.000000000	1.000000000	0.952380952	1.000000000	0.952380952	1.000000000	1	0	2	mixed
+candidate-conservative	control-disabled	ldp_stack_pair	native	EXTR,LDR	EXTR:1,LDR:2	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-conservative	control-disabled	otel_stack_frame_unwind_scan	kernel	LDR	LDR:2	0.997375328	1.002617801	0.997375328	0.997375328	0.997375328	1.002617801	2	1	0	mixed
+candidate-conservative	control-disabled	otel_stack_frame_unwind_scan	native	LDR	LDR:2	1.000000000	1.008620690	1.000000000	1.000000000	1.000000000	1.008620690	0	1	2	mixed
+candidate-conservative	control-disabled	packed_header_bitfield_decode	kernel	LDR	LDR:2	0.996794872	0.995731057	0.995740149	0.995740149	0.995731057	0.996794872	3	0	0	all_faster
+candidate-conservative	control-disabled	packed_header_bitfield_decode	native	LDR	LDR:2	1.005976096	0.998007968	1.003976143	1.003976143	0.998007968	1.005976096	1	2	0	mixed
+candidate-conservative	control-disabled	packet_checksum_fold	kernel	LDR	LDR:3	0.995687575	1.042345967	0.998395592	0.998395592	0.995687575	1.042345967	2	1	0	mixed
+candidate-conservative	control-disabled	packet_checksum_fold	native	LDR	LDR:3	0.996152674	1.045644426	0.999961645	0.999961645	0.996152674	1.045644426	2	1	0	mixed
+candidate-conservative	control-disabled	packet_record_bounds_window	kernel	LDR	LDR:8	0.586005831	0.576023392	0.587209302	0.586005831	0.576023392	0.587209302	3	0	0	all_faster
+candidate-conservative	control-disabled	packet_record_bounds_window	native	LDR	LDR:8	1.006756757	1.000000000	0.993288591	1.000000000	0.993288591	1.006756757	1	1	1	mixed
+candidate-conservative	control-disabled	packet_toeplitz_rss_hash	kernel			1.120253165	1.096234310	0.998087954	1.096234310	0.998087954	1.120253165	1	2	0	mixed
+candidate-conservative	control-disabled	packet_toeplitz_rss_hash	native			1.029490617	0.997333333	0.994708995	0.997333333	0.994708995	1.029490617	2	1	0	mixed
+candidate-conservative	control-disabled	packet_vlan_tcpopt_parser	kernel			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-conservative	control-disabled	packet_vlan_tcpopt_parser	native			0.947368421	1.000000000	0.947368421	0.947368421	0.947368421	1.000000000	2	0	1	mixed
+candidate-conservative	control-disabled	payload_prefix_memcmp_scan	kernel	EXTR,LDR	EXTR:2,LDR:1	1.024475524	1.024475524	1.017361111	1.024475524	1.017361111	1.024475524	0	3	0	all_slower
+candidate-conservative	control-disabled	payload_prefix_memcmp_scan	native	EXTR,LDR	EXTR:2,LDR:1	1.000000000	0.994082840	1.005952381	1.000000000	0.994082840	1.005952381	1	1	1	mixed
+candidate-conservative	control-disabled	simple	kernel			1.071428571	0.937500000	0.866666667	0.937500000	0.866666667	1.071428571	2	1	0	mixed
+candidate-conservative	control-disabled	simple	native			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-conservative	control-disabled	simple_packet	kernel			1.000000000	1.000000000	0.928571429	1.000000000	0.928571429	1.000000000	1	0	2	mixed
+candidate-conservative	control-disabled	simple_packet	native			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-conservative	control-disabled	siphash_rotate64_mixer	kernel	EXTR,LDR	EXTR:116,LDR:8	0.525000000	0.518518519	0.525000000	0.525000000	0.518518519	0.525000000	3	0	0	all_faster
+candidate-conservative	control-disabled	siphash_rotate64_mixer	native	EXTR,LDR	EXTR:116,LDR:8	1.000000000	0.977777778	1.000000000	1.000000000	0.977777778	1.000000000	1	0	2	mixed
+candidate-conservative	control-disabled	sorted_rule_binary_search	kernel	LDR	LDR:2	1.005144033	1.003100775	0.998970664	1.003100775	0.998970664	1.005144033	1	2	0	mixed
+candidate-conservative	control-disabled	sorted_rule_binary_search	native	LDR	LDR:2	1.002781641	1.000000000	1.000000000	1.000000000	1.000000000	1.002781641	0	1	2	mixed
+candidate-conservative	control-disabled	stp_stack_pair	kernel			0.952380952	1.000000000	1.050000000	1.000000000	0.952380952	1.050000000	1	1	1	mixed
+candidate-conservative	control-disabled	stp_stack_pair	native			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-conservative	control-disabled	tc_packet_checksum_fold	kernel	LDR	LDR:3	1.006133857	0.987452836	0.998334797	0.998334797	0.987452836	1.006133857	2	1	0	mixed
+candidate-conservative	control-disabled	tc_packet_checksum_fold	native	LDR	LDR:3	0.979390715	0.989420196	0.999961678	0.989420196	0.979390715	0.999961678	3	0	0	all_faster
+candidate-conservative	control-disabled	tetragon_process_event_arg_filter	kernel	LDR	LDR:2	0.996204934	1.020992366	1.009523810	1.009523810	0.996204934	1.020992366	1	2	0	mixed
+candidate-conservative	control-disabled	tetragon_process_event_arg_filter	native	LDR	LDR:2	0.964912281	0.996376812	1.094545455	0.996376812	0.964912281	1.094545455	2	1	0	mixed
+candidate-conservative	control-disabled	trace_event_type_switch_dispatch	kernel	LDR	LDR:2	0.890094980	0.925104022	0.982558140	0.925104022	0.890094980	0.982558140	3	0	0	all_faster
+candidate-conservative	control-disabled	trace_event_type_switch_dispatch	native	LDR	LDR:2	1.003154574	0.995275591	0.975384615	0.995275591	0.975384615	1.003154574	2	1	0	mixed
+candidate-conservative	control-disabled	tracee_http_method_prefix_detect	kernel	LDR	LDR:2	1.000000000	0.769230769	1.311475410	1.000000000	0.769230769	1.311475410	1	1	1	mixed
+candidate-conservative	control-disabled	tracee_http_method_prefix_detect	native	LDR	LDR:2	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-conservative	control-disabled	tracee_syscall_name_table_lookup	kernel	LDR	LDR:1	0.933717579	1.008474576	0.979041916	0.979041916	0.933717579	1.008474576	2	1	0	mixed
+candidate-conservative	control-disabled	tracee_syscall_name_table_lookup	native	LDR	LDR:1	0.988549618	0.984790875	1.000000000	0.988549618	0.984790875	1.000000000	2	0	1	mixed
+candidate-expanded	control-disabled	arm64_direct_abi_coverage	kernel	EXTR,LDR	EXTR:1,LDR:4	0.950000000	0.950000000	0.950000000	0.950000000	0.950000000	0.950000000	3	0	0	all_faster
+candidate-expanded	control-disabled	arm64_direct_abi_coverage	native	EXTR,LDR	EXTR:1,LDR:4	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-expanded	control-disabled	bcc_runqlat_log2_histogram_bucket	kernel	LDR	LDR:2	0.998252185	1.006239082	0.997013440	0.998252185	0.997013440	1.006239082	2	1	0	mixed
+candidate-expanded	control-disabled	bcc_runqlat_log2_histogram_bucket	native	LDR	LDR:2	0.999548533	1.000450450	1.008126411	1.000450450	0.999548533	1.008126411	1	2	0	mixed
+candidate-expanded	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	kernel	EXTR,LDR	EXTR:1,LDR:2	0.981191223	0.981250000	0.984326019	0.981250000	0.981191223	0.984326019	3	0	0	all_faster
+candidate-expanded	control-disabled	bcc_tcpconnect_ipv4_tuple_filter	native	EXTR,LDR	EXTR:1,LDR:2	1.000000000	1.113333333	1.000000000	1.000000000	1.000000000	1.113333333	0	1	2	mixed
+candidate-expanded	control-disabled	bitmap_popcount_scan	kernel	LDR	LDR:2	1.006996065	0.998251748	1.000000000	1.000000000	0.998251748	1.006996065	1	1	1	mixed
+candidate-expanded	control-disabled	bitmap_popcount_scan	native	LDR	LDR:2	0.998142415	1.000000000	0.999379653	0.999379653	0.998142415	1.000000000	2	0	1	mixed
+candidate-expanded	control-disabled	bpf_local_call_fanout_dispatch	kernel	LDR	LDR:3	0.929230769	0.901492537	0.929230769	0.929230769	0.901492537	0.929230769	3	0	0	all_faster
+candidate-expanded	control-disabled	bpf_local_call_fanout_dispatch	native	LDR	LDR:3	1.008695652	1.000000000	1.008771930	1.008695652	1.000000000	1.008771930	0	2	1	mixed
+candidate-expanded	control-disabled	bpftrace_comm_key_fnv_hash	kernel	LDR	LDR:2	1.005434783	1.004828002	0.998792271	1.004828002	0.998792271	1.005434783	1	2	0	mixed
+candidate-expanded	control-disabled	bpftrace_comm_key_fnv_hash	native	LDR	LDR:2	1.007770008	0.998448410	1.000777605	1.000777605	0.998448410	1.007770008	1	2	0	mixed
+candidate-expanded	control-disabled	bpftrace_string_search_prefix_scan	kernel	EXTR,LDR	EXTR:1,LDR:1	1.030947776	1.041015625	1.026974952	1.030947776	1.026974952	1.041015625	0	3	0	all_slower
+candidate-expanded	control-disabled	bpftrace_string_search_prefix_scan	native	EXTR,LDR	EXTR:1,LDR:1	0.997167139	1.110481586	0.997175141	0.997175141	0.997167139	1.110481586	2	1	0	mixed
+candidate-expanded	control-disabled	ccmp_all_nonzero	kernel			1.058823529	1.000000000	1.000000000	1.000000000	1.000000000	1.058823529	0	1	2	mixed
+candidate-expanded	control-disabled	ccmp_all_nonzero	native			0.833333333	1.000000000	1.000000000	1.000000000	0.833333333	1.000000000	1	0	2	mixed
+candidate-expanded	control-disabled	cgroup_skb_hash_chain	kernel	LDR	LDR:2	0.969387755	0.999044890	0.999037536	0.999037536	0.969387755	0.999044890	3	0	0	all_faster
+candidate-expanded	control-disabled	cgroup_skb_hash_chain	native	LDR	LDR:2	1.037122970	0.942222222	1.000000000	1.000000000	0.942222222	1.037122970	1	1	1	mixed
+candidate-expanded	control-disabled	cilium_ct_nat_tuple_rewrite	kernel	EXTR,LDR	EXTR:1,LDR:2	0.955789474	1.044210526	0.949685535	0.955789474	0.949685535	1.044210526	2	1	0	mixed
+candidate-expanded	control-disabled	cilium_ct_nat_tuple_rewrite	native	EXTR,LDR	EXTR:1,LDR:2	1.005076142	1.005076142	1.000000000	1.005076142	1.000000000	1.005076142	0	2	1	mixed
+candidate-expanded	control-disabled	cilium_policy_guard_tree_filter	kernel	LDR	LDR:1	1.000000000	1.004098361	0.979919679	1.000000000	0.979919679	1.004098361	1	1	1	mixed
+candidate-expanded	control-disabled	cilium_policy_guard_tree_filter	native	LDR	LDR:1	1.008130081	1.024590164	1.032258065	1.024590164	1.008130081	1.032258065	0	3	0	all_slower
+candidate-expanded	control-disabled	cilium_socket_lb_service_select	kernel	LDR	LDR:2	0.961789376	0.993262753	0.998067633	0.993262753	0.961789376	0.998067633	3	0	0	all_faster
+candidate-expanded	control-disabled	cilium_socket_lb_service_select	native	LDR	LDR:2	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-expanded	control-disabled	csel_select64	kernel	CSEL,EXTR,LDR	CSEL:4,EXTR:1,LDR:4	0.620689655	0.607142857	0.607142857	0.607142857	0.607142857	0.620689655	3	0	0	all_faster
+candidate-expanded	control-disabled	csel_select64	native	CSEL,EXTR,LDR	CSEL:4,EXTR:1,LDR:4	1.250000000	1.000000000	1.000000000	1.000000000	1.000000000	1.250000000	0	1	2	mixed
+candidate-expanded	control-disabled	flow_5tuple_rss_hash	kernel	EXTR	EXTR:14	0.791666667	0.791666667	0.791666667	0.791666667	0.791666667	0.791666667	3	0	0	all_faster
+candidate-expanded	control-disabled	flow_5tuple_rss_hash	native	EXTR	EXTR:14	1.000000000	1.055555556	1.000000000	1.000000000	1.000000000	1.055555556	0	1	2	mixed
+candidate-expanded	control-disabled	flow_record_field_scan	kernel			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-expanded	control-disabled	flow_record_field_scan	native			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-expanded	control-disabled	katran_lb_consistent_hash_select	kernel	EXTR,LDR	EXTR:24,LDR:7	0.918032787	0.918032787	0.918032787	0.918032787	0.918032787	0.918032787	3	0	0	all_faster
+candidate-expanded	control-disabled	katran_lb_consistent_hash_select	native	EXTR,LDR	EXTR:24,LDR:7	1.000000000	1.037037037	0.964285714	1.000000000	0.964285714	1.037037037	1	1	1	mixed
+candidate-expanded	control-disabled	ldp_stack_pair	kernel	EXTR,LDR	EXTR:1,LDR:2	1.100000000	1.000000000	0.952380952	1.000000000	0.952380952	1.100000000	1	1	1	mixed
+candidate-expanded	control-disabled	ldp_stack_pair	native	EXTR,LDR	EXTR:1,LDR:2	1.200000000	1.000000000	1.000000000	1.000000000	1.000000000	1.200000000	0	1	2	mixed
+candidate-expanded	control-disabled	otel_stack_frame_unwind_scan	kernel	LDR	LDR:2	0.997375328	1.018324607	0.997375328	0.997375328	0.997375328	1.018324607	2	1	0	mixed
+candidate-expanded	control-disabled	otel_stack_frame_unwind_scan	native	LDR	LDR:2	1.000000000	1.034482759	1.000000000	1.000000000	1.000000000	1.034482759	0	1	2	mixed
+candidate-expanded	control-disabled	packed_header_bitfield_decode	kernel	LDR	LDR:2	0.996794872	1.002134472	0.993610224	0.996794872	0.993610224	1.002134472	2	1	0	mixed
+candidate-expanded	control-disabled	packed_header_bitfield_decode	native	LDR	LDR:2	1.000000000	1.000000000	0.998011928	1.000000000	0.998011928	1.000000000	1	0	2	mixed
+candidate-expanded	control-disabled	packet_checksum_fold	kernel	LDR	LDR:3	0.994360676	1.007229061	0.998244233	0.998244233	0.994360676	1.007229061	2	1	0	mixed
+candidate-expanded	control-disabled	packet_checksum_fold	native	LDR	LDR:3	0.993257657	0.999425133	0.999923289	0.999425133	0.993257657	0.999923289	3	0	0	all_faster
+candidate-expanded	control-disabled	packet_record_bounds_window	kernel	LDR	LDR:8	0.577259475	0.578947368	0.575581395	0.577259475	0.575581395	0.578947368	3	0	0	all_faster
+candidate-expanded	control-disabled	packet_record_bounds_window	native	LDR	LDR:8	0.993243243	1.121621622	0.993288591	0.993288591	0.993243243	1.121621622	2	1	0	mixed
+candidate-expanded	control-disabled	packet_toeplitz_rss_hash	kernel			1.037974684	1.119246862	1.001912046	1.037974684	1.001912046	1.119246862	0	3	0	all_slower
+candidate-expanded	control-disabled	packet_toeplitz_rss_hash	native			1.026809651	1.056000000	0.992063492	1.026809651	0.992063492	1.056000000	1	2	0	mixed
+candidate-expanded	control-disabled	packet_vlan_tcpopt_parser	kernel			1.000000000	1.022222222	1.000000000	1.000000000	1.000000000	1.022222222	0	1	2	mixed
+candidate-expanded	control-disabled	packet_vlan_tcpopt_parser	native			1.000000000	1.055555556	0.947368421	1.000000000	0.947368421	1.055555556	1	1	1	mixed
+candidate-expanded	control-disabled	payload_prefix_memcmp_scan	kernel	EXTR,LDR	EXTR:2,LDR:1	1.027972028	1.038461538	1.017361111	1.027972028	1.017361111	1.038461538	0	3	0	all_slower
+candidate-expanded	control-disabled	payload_prefix_memcmp_scan	native	EXTR,LDR	EXTR:2,LDR:1	0.994082840	1.005917160	1.005952381	1.005917160	0.994082840	1.005952381	1	2	0	mixed
+candidate-expanded	control-disabled	simple	kernel			1.142857143	0.875000000	0.866666667	0.875000000	0.866666667	1.142857143	2	1	0	mixed
+candidate-expanded	control-disabled	simple	native			1.250000000	1.000000000	1.000000000	1.000000000	1.000000000	1.250000000	0	1	2	mixed
+candidate-expanded	control-disabled	simple_packet	kernel			1.142857143	1.000000000	1.000000000	1.000000000	1.000000000	1.142857143	0	1	2	mixed
+candidate-expanded	control-disabled	simple_packet	native			1.250000000	1.000000000	1.000000000	1.000000000	1.000000000	1.250000000	0	1	2	mixed
+candidate-expanded	control-disabled	siphash_rotate64_mixer	kernel	EXTR,LDR	EXTR:116,LDR:8	0.525000000	0.518518519	0.531250000	0.525000000	0.518518519	0.531250000	3	0	0	all_faster
+candidate-expanded	control-disabled	siphash_rotate64_mixer	native	EXTR,LDR	EXTR:116,LDR:8	1.022727273	0.977777778	1.000000000	1.000000000	0.977777778	1.022727273	1	1	1	mixed
+candidate-expanded	control-disabled	sorted_rule_binary_search	kernel	LDR	LDR:2	0.997942387	0.998449612	0.998455996	0.998449612	0.997942387	0.998455996	3	0	0	all_faster
+candidate-expanded	control-disabled	sorted_rule_binary_search	native	LDR	LDR:2	1.000000000	1.000000000	1.080667594	1.000000000	1.000000000	1.080667594	0	1	2	mixed
+candidate-expanded	control-disabled	stp_stack_pair	kernel			1.047619048	1.050000000	1.000000000	1.047619048	1.000000000	1.050000000	0	2	1	mixed
+candidate-expanded	control-disabled	stp_stack_pair	native			1.200000000	1.000000000	1.000000000	1.000000000	1.000000000	1.200000000	0	1	2	mixed
+candidate-expanded	control-disabled	tc_packet_checksum_fold	kernel	LDR	LDR:3	0.997794229	0.990597113	1.008992098	0.997794229	0.990597113	1.008992098	2	1	0	mixed
+candidate-expanded	control-disabled	tc_packet_checksum_fold	native	LDR	LDR:3	0.977741972	1.015357779	1.001187967	1.001187967	0.977741972	1.015357779	1	2	0	mixed
+candidate-expanded	control-disabled	tetragon_process_event_arg_filter	kernel	LDR	LDR:2	0.990512334	0.998091603	0.994285714	0.994285714	0.990512334	0.998091603	3	0	0	all_faster
+candidate-expanded	control-disabled	tetragon_process_event_arg_filter	native	LDR	LDR:2	0.964912281	1.000000000	1.000000000	1.000000000	0.964912281	1.000000000	1	0	2	mixed
+candidate-expanded	control-disabled	trace_event_type_switch_dispatch	kernel	LDR	LDR:2	0.876526459	0.869625520	0.938953488	0.876526459	0.869625520	0.938953488	3	0	0	all_faster
+candidate-expanded	control-disabled	trace_event_type_switch_dispatch	native	LDR	LDR:2	0.998422713	0.993700787	0.973846154	0.993700787	0.973846154	0.998422713	3	0	0	all_faster
+candidate-expanded	control-disabled	tracee_http_method_prefix_detect	kernel	LDR	LDR:2	1.100000000	0.846153846	1.098360656	1.098360656	0.846153846	1.100000000	1	2	0	mixed
+candidate-expanded	control-disabled	tracee_http_method_prefix_detect	native	LDR	LDR:2	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-expanded	control-disabled	tracee_syscall_name_table_lookup	kernel	LDR	LDR:1	0.936599424	0.918079096	0.970059880	0.936599424	0.918079096	0.970059880	3	0	0	all_faster
+candidate-expanded	control-disabled	tracee_syscall_name_table_lookup	native	LDR	LDR:1	0.988549618	0.996197719	1.000000000	0.996197719	0.988549618	1.000000000	2	0	1	mixed
+candidate-expanded	candidate-conservative	arm64_direct_abi_coverage	kernel	EXTR,LDR	EXTR:1,LDR:4	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-expanded	candidate-conservative	arm64_direct_abi_coverage	native	EXTR,LDR	EXTR:1,LDR:4	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-expanded	candidate-conservative	bcc_runqlat_log2_histogram_bucket	kernel	LDR	LDR:2	0.977028348	1.004985045	1.003758457	1.003758457	0.977028348	1.004985045	1	2	0	mixed
+candidate-expanded	candidate-conservative	bcc_runqlat_log2_histogram_bucket	native	LDR	LDR:2	0.968503937	0.999100315	1.008126411	0.999100315	0.968503937	1.008126411	2	1	0	mixed
+candidate-expanded	candidate-conservative	bcc_tcpconnect_ipv4_tuple_filter	kernel	EXTR,LDR	EXTR:1,LDR:2	0.996815287	1.000000000	1.000000000	1.000000000	0.996815287	1.000000000	1	0	2	mixed
+candidate-expanded	candidate-conservative	bcc_tcpconnect_ipv4_tuple_filter	native	EXTR,LDR	EXTR:1,LDR:2	1.006711409	1.024539877	1.000000000	1.006711409	1.000000000	1.024539877	0	2	1	mixed
+candidate-expanded	candidate-conservative	bitmap_popcount_scan	kernel	LDR	LDR:2	1.000869187	0.991749891	1.007877462	1.000869187	0.991749891	1.007877462	1	2	0	mixed
+candidate-expanded	candidate-conservative	bitmap_popcount_scan	native	LDR	LDR:2	1.000000000	1.000000000	0.999379653	1.000000000	0.999379653	1.000000000	1	0	2	mixed
+candidate-expanded	candidate-conservative	bpf_local_call_fanout_dispatch	kernel	LDR	LDR:3	1.000000000	0.996699670	0.920731707	0.996699670	0.920731707	1.000000000	2	0	1	mixed
+candidate-expanded	candidate-conservative	bpf_local_call_fanout_dispatch	native	LDR	LDR:3	1.008695652	1.000000000	1.000000000	1.000000000	1.000000000	1.008695652	0	1	2	mixed
+candidate-expanded	candidate-conservative	bpftrace_comm_key_fnv_hash	kernel	LDR	LDR:2	1.006650544	0.989892985	0.998792271	0.998792271	0.989892985	1.006650544	2	1	0	mixed
+candidate-expanded	candidate-conservative	bpftrace_comm_key_fnv_hash	native	LDR	LDR:2	1.007770008	0.980198020	1.000000000	1.000000000	0.980198020	1.007770008	1	1	1	mixed
+candidate-expanded	candidate-conservative	bpftrace_string_search_prefix_scan	kernel	EXTR,LDR	EXTR:1,LDR:1	1.001879699	1.000000000	1.001879699	1.001879699	1.000000000	1.001879699	0	2	1	mixed
+candidate-expanded	candidate-conservative	bpftrace_string_search_prefix_scan	native	EXTR,LDR	EXTR:1,LDR:1	0.997167139	1.107344633	0.980555556	0.997167139	0.980555556	1.107344633	2	1	0	mixed
+candidate-expanded	candidate-conservative	ccmp_all_nonzero	kernel			1.058823529	1.000000000	1.000000000	1.000000000	1.000000000	1.058823529	0	1	2	mixed
+candidate-expanded	candidate-conservative	ccmp_all_nonzero	native			1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-expanded	candidate-conservative	cgroup_skb_hash_chain	kernel	LDR	LDR:2	0.946557971	1.008678881	0.999037536	0.999037536	0.946557971	1.008678881	2	1	0	mixed
+candidate-expanded	candidate-conservative	cgroup_skb_hash_chain	native	LDR	LDR:2	1.002242152	1.007125891	1.000000000	1.002242152	1.000000000	1.007125891	0	2	1	mixed
+candidate-expanded	candidate-conservative	cilium_ct_nat_tuple_rewrite	kernel	EXTR,LDR	EXTR:1,LDR:2	1.002207506	1.094922737	0.997797357	1.002207506	0.997797357	1.094922737	1	2	0	mixed
+candidate-expanded	candidate-conservative	cilium_ct_nat_tuple_rewrite	native	EXTR,LDR	EXTR:1,LDR:2	1.005076142	1.000000000	0.994974874	1.000000000	0.994974874	1.005076142	1	1	1	mixed
+candidate-expanded	candidate-conservative	cilium_policy_guard_tree_filter	kernel	LDR	LDR:1	1.000000000	1.004098361	1.004115226	1.004098361	1.000000000	1.004115226	0	2	1	mixed
+candidate-expanded	candidate-conservative	cilium_policy_guard_tree_filter	native	LDR	LDR:1	1.000000000	1.016260163	1.040650407	1.016260163	1.000000000	1.040650407	0	2	1	mixed
+candidate-expanded	candidate-conservative	cilium_socket_lb_service_select	kernel	LDR	LDR:2	0.999031946	0.999031946	0.997104247	0.999031946	0.997104247	0.999031946	3	0	0	all_faster
+candidate-expanded	candidate-conservative	cilium_socket_lb_service_select	native	LDR	LDR:2	0.996969697	0.996969697	0.996969697	0.996969697	0.996969697	0.996969697	3	0	0	all_faster
+candidate-expanded	candidate-conservative	csel_select64	kernel	CSEL,EXTR,LDR	CSEL:4,EXTR:1,LDR:4	1.058823529	1.000000000	1.000000000	1.000000000	1.000000000	1.058823529	0	1	2	mixed
+candidate-expanded	candidate-conservative	csel_select64	native	CSEL,EXTR,LDR	CSEL:4,EXTR:1,LDR:4	1.250000000	1.000000000	1.000000000	1.000000000	1.000000000	1.250000000	0	1	2	mixed
+candidate-expanded	candidate-conservative	flow_5tuple_rss_hash	kernel	EXTR	EXTR:14	0.974358974	1.000000000	1.000000000	1.000000000	0.974358974	1.000000000	1	0	2	mixed
+candidate-expanded	candidate-conservative	flow_5tuple_rss_hash	native	EXTR	EXTR:14	1.000000000	1.055555556	1.000000000	1.000000000	1.000000000	1.055555556	0	1	2	mixed
+candidate-expanded	candidate-conservative	flow_record_field_scan	kernel			0.963730570	1.000000000	1.000000000	1.000000000	0.963730570	1.000000000	1	0	2	mixed
+candidate-expanded	candidate-conservative	flow_record_field_scan	native			0.963963964	1.000000000	1.000000000	1.000000000	0.963963964	1.000000000	1	0	2	mixed
+candidate-expanded	candidate-conservative	katran_lb_consistent_hash_select	kernel	EXTR,LDR	EXTR:24,LDR:7	0.933333333	0.982456140	1.000000000	0.982456140	0.933333333	1.000000000	2	0	1	mixed
+candidate-expanded	candidate-conservative	katran_lb_consistent_hash_select	native	EXTR,LDR	EXTR:24,LDR:7	0.931034483	0.965517241	1.000000000	0.965517241	0.931034483	1.000000000	2	0	1	mixed
+candidate-expanded	candidate-conservative	ldp_stack_pair	kernel	EXTR,LDR	EXTR:1,LDR:2	1.100000000	1.000000000	1.000000000	1.000000000	1.000000000	1.100000000	0	1	2	mixed
+candidate-expanded	candidate-conservative	ldp_stack_pair	native	EXTR,LDR	EXTR:1,LDR:2	1.200000000	1.000000000	1.000000000	1.000000000	1.000000000	1.200000000	0	1	2	mixed
+candidate-expanded	candidate-conservative	otel_stack_frame_unwind_scan	kernel	LDR	LDR:2	1.000000000	1.015665796	1.000000000	1.000000000	1.000000000	1.015665796	0	1	2	mixed
+candidate-expanded	candidate-conservative	otel_stack_frame_unwind_scan	native	LDR	LDR:2	1.000000000	1.025641026	1.000000000	1.000000000	1.000000000	1.025641026	0	1	2	mixed
+candidate-expanded	candidate-conservative	packed_header_bitfield_decode	kernel	LDR	LDR:2	1.000000000	1.006430868	0.997860963	1.000000000	0.997860963	1.006430868	1	1	1	mixed
+candidate-expanded	candidate-conservative	packed_header_bitfield_decode	native	LDR	LDR:2	0.994059406	1.001996008	0.994059406	0.994059406	0.994059406	1.001996008	2	1	0	mixed
+candidate-expanded	candidate-conservative	packet_checksum_fold	kernel	LDR	LDR:3	0.998667353	0.966309741	0.999848398	0.998667353	0.966309741	0.999848398	3	0	0	all_faster
+candidate-expanded	candidate-conservative	packet_checksum_fold	native	LDR	LDR:3	0.997093801	0.955798270	0.999961643	0.997093801	0.955798270	0.999961643	3	0	0	all_faster
+candidate-expanded	candidate-conservative	packet_record_bounds_window	kernel	LDR	LDR:8	0.985074627	1.005076142	0.980198020	0.985074627	0.980198020	1.005076142	2	1	0	mixed
+candidate-expanded	candidate-conservative	packet_record_bounds_window	native	LDR	LDR:8	0.986577181	1.121621622	1.000000000	1.000000000	0.986577181	1.121621622	1	1	1	mixed
+candidate-expanded	candidate-conservative	packet_toeplitz_rss_hash	kernel			0.926553672	1.020992366	1.003831418	1.003831418	0.926553672	1.020992366	1	2	0	mixed
+candidate-expanded	candidate-conservative	packet_toeplitz_rss_hash	native			0.997395833	1.058823529	0.997340426	0.997395833	0.997340426	1.058823529	2	1	0	mixed
+candidate-expanded	candidate-conservative	packet_vlan_tcpopt_parser	kernel			1.000000000	1.022222222	1.000000000	1.000000000	1.000000000	1.022222222	0	1	2	mixed
+candidate-expanded	candidate-conservative	packet_vlan_tcpopt_parser	native			1.055555556	1.055555556	1.000000000	1.055555556	1.000000000	1.055555556	0	2	1	mixed
+candidate-expanded	candidate-conservative	payload_prefix_memcmp_scan	kernel	EXTR,LDR	EXTR:2,LDR:1	1.003412969	1.013651877	1.000000000	1.003412969	1.000000000	1.013651877	0	2	1	mixed
+candidate-expanded	candidate-conservative	payload_prefix_memcmp_scan	native	EXTR,LDR	EXTR:2,LDR:1	0.994082840	1.011904762	1.000000000	1.000000000	0.994082840	1.011904762	1	1	1	mixed
+candidate-expanded	candidate-conservative	simple	kernel			1.066666667	0.933333333	1.000000000	1.000000000	0.933333333	1.066666667	1	1	1	mixed
+candidate-expanded	candidate-conservative	simple	native			1.250000000	1.000000000	1.000000000	1.000000000	1.000000000	1.250000000	0	1	2	mixed
+candidate-expanded	candidate-conservative	simple_packet	kernel			1.142857143	1.000000000	1.076923077	1.076923077	1.000000000	1.142857143	0	2	1	mixed
+candidate-expanded	candidate-conservative	simple_packet	native			1.250000000	1.000000000	1.000000000	1.000000000	1.000000000	1.250000000	0	1	2	mixed
+candidate-expanded	candidate-conservative	siphash_rotate64_mixer	kernel	EXTR,LDR	EXTR:116,LDR:8	1.000000000	1.000000000	1.011904762	1.000000000	1.000000000	1.011904762	0	1	2	mixed
+candidate-expanded	candidate-conservative	siphash_rotate64_mixer	native	EXTR,LDR	EXTR:116,LDR:8	1.022727273	1.000000000	1.000000000	1.000000000	1.000000000	1.022727273	0	1	2	mixed
+candidate-expanded	candidate-conservative	sorted_rule_binary_search	kernel	LDR	LDR:2	0.992835210	0.995363215	0.999484802	0.995363215	0.992835210	0.999484802	3	0	0	all_faster
+candidate-expanded	candidate-conservative	sorted_rule_binary_search	native	LDR	LDR:2	0.997226075	1.000000000	1.080667594	1.000000000	0.997226075	1.080667594	1	1	1	mixed
+candidate-expanded	candidate-conservative	stp_stack_pair	kernel			1.100000000	1.050000000	0.952380952	1.050000000	0.952380952	1.100000000	1	2	0	mixed
+candidate-expanded	candidate-conservative	stp_stack_pair	native			1.200000000	1.000000000	1.000000000	1.000000000	1.000000000	1.200000000	0	1	2	mixed
+candidate-expanded	candidate-conservative	tc_packet_checksum_fold	kernel	LDR	LDR:3	0.991711214	1.003184230	1.010675077	1.003184230	0.991711214	1.010675077	1	2	0	mixed
+candidate-expanded	candidate-conservative	tc_packet_checksum_fold	native	LDR	LDR:3	0.998316563	1.026214932	1.001226336	1.001226336	0.998316563	1.026214932	1	2	0	mixed
+candidate-expanded	candidate-conservative	tetragon_process_event_arg_filter	kernel	LDR	LDR:2	0.994285714	0.977570093	0.984905660	0.984905660	0.977570093	0.994285714	3	0	0	all_faster
+candidate-expanded	candidate-conservative	tetragon_process_event_arg_filter	native	LDR	LDR:2	1.000000000	1.003636364	0.913621262	1.000000000	0.913621262	1.003636364	1	1	1	mixed
+candidate-expanded	candidate-conservative	trace_event_type_switch_dispatch	kernel	LDR	LDR:2	0.984756098	0.940029985	0.955621302	0.955621302	0.940029985	0.984756098	3	0	0	all_faster
+candidate-expanded	candidate-conservative	trace_event_type_switch_dispatch	native	LDR	LDR:2	0.995283019	0.998417722	0.998422713	0.998417722	0.995283019	0.998422713	3	0	0	all_faster
+candidate-expanded	candidate-conservative	tracee_http_method_prefix_detect	kernel	LDR	LDR:2	1.100000000	1.100000000	0.837500000	1.100000000	0.837500000	1.100000000	1	2	0	mixed
+candidate-expanded	candidate-conservative	tracee_http_method_prefix_detect	native	LDR	LDR:2	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	1.000000000	0	0	3	all_equal
+candidate-expanded	candidate-conservative	tracee_syscall_name_table_lookup	kernel	LDR	LDR:1	1.003086420	0.910364146	0.990825688	0.990825688	0.910364146	1.003086420	2	1	0	mixed
+candidate-expanded	candidate-conservative	tracee_syscall_name_table_lookup	native	LDR	LDR:1	1.000000000	1.011583012	1.000000000	1.000000000	1.000000000	1.011583012	0	1	2	mixed

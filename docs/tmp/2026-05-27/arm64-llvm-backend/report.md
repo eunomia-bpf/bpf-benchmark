@@ -20,14 +20,22 @@ object；在可证明安全的 BPF MachineInstr pattern 上，LLVM emit
 kinsn module lower 成 native AArch64 instruction。
 
 当前总体状态：已有 module ABI 的 25 个 `bpf_arm64_*` target 已全部补齐 LLVM implementation，
-并通过 development-grade full micro correctness 和 combined same-LLC attribution。最终 AWS
-ARM64 full micro correctness 结果是 34/34 benchmark、68 个 runtime sample、0 个 bad sample。
-combined same-LLC attribution 的 affected kernel geomean treatment/control 是 `0.9621843369`，
-约 `3.78%` faster，但由于 `PRFM` forced selector 命中 33/34 个 benchmark，这只能作为
-combined signal，不能替代 family-only 结论。`REV`、`EXTR`、`UBFM`、`LDR` selected-safe
-subset、`LDP/STP` stack-only subset、`CSEL` selected target、`CCMP/CMP/CSET` selected-safe
-subset 已达到 micro 级开发闭环。`LDRB`、direct `STR`、`PRFM`、`MOV` 作为 forced ABI coverage
-已通过 correctness，但不进入默认策略。
+并通过 development-grade full micro correctness、combined same-LLC attribution、family-only
+same-LLC attribution 和 3 轮 true all-on same-LLC attribution。最终 AWS ARM64 full micro
+correctness 结果是 34/34 benchmark、68 个 runtime sample、0 个 bad sample。
+combined same-LLC attribution 的 affected kernel geomean treatment/control 是
+`0.9621843369`，约 `3.78%` faster；family-only attribution 显示这个 combined signal
+主要不能归因给 `PRFM`，而是 `EXTR` 最明确，`LDR / wide-load` 有 development-grade
+正向信号。2026-05-28 true all-on 3 轮实验显示：treatment object 有 396 个
+`bpf_arm64_*` relocation、0 个 `bpf_x86_*`，kernel all geomean treatment/control 三轮都
+faster，中位数 `0.939098387`；native all 中位数 `1.003011563`。`REV`、`EXTR`、
+`UBFM`、`LDR` selected-safe subset、`LDP/STP` stack-only subset、`CSEL` selected target、
+`CCMP/CMP/CSET` selected-safe subset 已达到 micro 级开发闭环。`LDRB`、direct `STR`、
+`PRFM`、`MOV` 作为 forced ABI coverage 已通过 correctness，但不进入默认策略。
+2026-05-28 candidate default policy attribution 显示：保守候选 `EXTR + selected LDR`
+kernel all geomean 中位数 `0.940471563`；expanded 候选额外加入 `CSEL`，但相对保守候选的
+kernel all geomean 中位数 `1.000359815`，没有稳定额外收益。因此当前 default candidate 是
+`EXTR + selected LDR`，不要把 `CSEL`、`PRFM`、`MOV` 加进默认策略。
 
 ## Family 总清单
 
@@ -63,6 +71,54 @@ subset 已达到 micro 级开发闭环。`LDRB`、direct `STR`、`PRFM`、`MOV` 
 
 限制：这是 all-existing-ABI combined treatment，不是 family-only treatment。`PRFM` forced
 selector 命中 33/34 个 benchmark，因此该结果不能说明单个 family 的独立收益。
+
+2026-05-28 又补了 true all-on 3 轮稳定性 attribution：
+
+```text
+/home/ruoji/github/bpf-opt/code/docs/tmp/2026-05-28/arm64-llvm-backend/true-all-on-attribution/report.md
+```
+
+主结果：
+
+| item | result |
+|---|---:|
+| AWS full micro runs | 9 |
+| runtime samples | 1836 |
+| bad samples | 0 |
+| treatment ARM64 relocations | 396 |
+| treatment x86 relocations | 0 |
+| kernel all geomean treatment/control, rep1 | 0.939098387 |
+| kernel all geomean treatment/control, rep2 | 0.935947497 |
+| kernel all geomean treatment/control, rep3 | 0.945958541 |
+| kernel all geomean median | 0.939098387 |
+| native all geomean median | 1.003011563 |
+
+限制：true all-on 回答的是“所有 selector 同时打开以后，full micro 的真实组合表现是否稳定”。
+一个 benchmark 往往同时触发多个 family，因此 true all-on 仍不能替代 family-only 因果结论。
+
+2026-05-28 又补了 candidate default policy attribution：
+
+```text
+/home/ruoji/github/bpf-opt/code/docs/tmp/2026-05-28/arm64-llvm-backend/candidate-default-policy-attribution/report.md
+```
+
+主结果：
+
+| item | result |
+|---|---:|
+| AWS full micro runs | 12 |
+| runtime samples | 2448 |
+| bad samples | 0 |
+| conservative ARM64 relocations | 234 |
+| expanded ARM64 relocations | 238 |
+| conservative kernel all geomean treatment/control | 0.940471563 |
+| expanded kernel all geomean treatment/control | 0.932466234 |
+| expanded/conservative kernel all geomean | 1.000359815 |
+| expanded/conservative CSEL scope median | 1.000000000 |
+
+解释：expanded 相对 control 的收益主要继承自 `EXTR + selected LDR`；额外 `CSEL` 只有 4 个
+relocation，且相对 conservative 没有稳定额外收益。因此当前 default candidate 保持为
+`EXTR + selected LDR`。
 
 ## Family 报告
 
@@ -149,6 +205,8 @@ selector 命中 33/34 个 benchmark，因此该结果不能说明单个 family �
 /home/ruoji/github/bpf-opt/experiments/2026-05-26-arm64-prfm-expanded-attribution
 /home/ruoji/github/bpf-opt/experiments/2026-05-27-arm64-existing-abi-completion
 /home/ruoji/github/bpf-opt/experiments/2026-05-27-arm64-existing-abi-same-llc-attribution
+/home/ruoji/github/bpf-opt/experiments/2026-05-28-arm64-true-all-on-same-llc-attribution
+/home/ruoji/github/bpf-opt/experiments/2026-05-28-arm64-candidate-default-policy-attribution
 ```
 
 Final existing ABI completion summary:
@@ -169,6 +227,67 @@ bad samples 0
 affected benchmarks 33
 affected kernel geomean treatment/control 0.9621843369
 estimated AWS cost $0.009787630
+```
+
+PRFM-disabled combined same-LLC attribution summary:
+
+```text
+raw experiment /home/ruoji/github/bpf-opt/experiments/2026-05-27-arm64-prfm-disabled-combined-attribution
+public report  /home/ruoji/github/bpf-opt/code/docs/tmp/2026-05-27/arm64-llvm-backend/same-llc-attribution/prfm-disabled-combined/report.md
+benchmarks per group 34
+runtime samples per group 204
+bad samples 0
+affected benchmarks 21
+PRFM symbols 0
+affected kernel geomean treatment/control 0.953473712
+native all geomean treatment/control 0.979571493
+estimated AWS cost $0.006151901
+```
+
+解释：去掉 `PRFM` 后仍有 positive combined kernel signal，但 native runtime 同向漂移约 2%，
+因此不能把该 combined number 当成精确收益。
+
+Family-only same-LLC attribution 也已完成：
+
+```text
+raw experiment /home/ruoji/github/bpf-opt/experiments/2026-05-27-arm64-family-only-same-llc-attribution
+public report  /home/ruoji/github/bpf-opt/code/docs/tmp/2026-05-27/arm64-llvm-backend/same-llc-attribution/family-only/report.md
+groups         baseline + control-disabled + 11 family-only treatments
+runtime samples total 2652
+bad samples    0
+estimated AWS cost $0.042255
+```
+
+Family-only 主结论：
+
+| Policy group | affected benchmarks | kernel affected treatment/control | interpretation |
+|---|---:|---:|---|
+| `EXTR / rotate` | 10 | 0.920357048 | 最明确的 positive signal。 |
+| `LDR / wide-load` | 24 | 0.969490539 | development-grade 正向，但 native drift 存在。 |
+| `LDR / direct-load` | 2 | 0.975900073 | 小范围正向，覆盖面窄。 |
+| `CSEL / cmov` | 1 | 0.928571429 | 单 benchmark 信号；object 还包含 supporting `TST`。 |
+| `REV / unary` | 1 | 1.016393443 | 不是 performance win。 |
+| `UBFM / bextr` | 12 | 0.999867703 | neutral。 |
+| `STR / direct-store` | 2 | 1.000000000 | neutral。 |
+| `LDP/STP / pair-mem` | 2 | 0.998865570 | neutral。 |
+| `CCMP/CMP/CSET / ccmp` | 2 | 1.007685031 | 不是 performance win。 |
+| `MOV / mov` | 0 | N/A | full micro 无自然 hit。 |
+| `PRFM / prefetch` | 33 | 1.009656628 | 不是 performance win，default 应保持 disabled。 |
+
+True all-on same-LLC attribution summary：
+
+```text
+raw experiment /home/ruoji/github/bpf-opt/experiments/2026-05-28-arm64-true-all-on-same-llc-attribution
+public report  /home/ruoji/github/bpf-opt/code/docs/tmp/2026-05-28/arm64-llvm-backend/true-all-on-attribution/report.md
+groups         3x baseline + 3x control-disabled + 3x treatment-true-all-on
+runtime samples total 1836
+bad samples    0
+treatment ARM64 relocations 396
+treatment x86 relocations 0
+kernel all geomean reps 0.939098387 / 0.935947497 / 0.945958541
+kernel all geomean median 0.939098387
+native all geomean median 1.003011563
+estimated AWS cost $0.027751408
 ```
 
 ## 清理规则
@@ -211,6 +330,8 @@ Makefile 或 benchmark framework 行为。
 短期下一步不是继续盲目加 family，而是决定交付口径：
 
 1. 如果目标是 development branch，当前可以整理 commit / push。
-2. 如果目标是论文级性能结论，需要选定 corpus / paper-grade benchmark，并用
+2. 如果目标是工程默认策略，需要跑 candidate default policy attribution；候选应优先考虑
+   `EXTR` 和 selected `LDR`，不要默认启用 `PRFM` 或 `MOV`。
+3. 如果目标是论文级性能结论，需要选定 corpus / paper-grade benchmark，并用
    baseline、same-LLC control、family-only treatment、combined treatment 跑足样本。
-3. 如果目标是继续扩展 selector，应先明确是否新增 kernel module ABI；当前已有 ABI 已全部覆盖。
+4. 如果目标是继续扩展 selector，应先明确是否新增 kernel module ABI；当前已有 ABI 已全部覆盖。

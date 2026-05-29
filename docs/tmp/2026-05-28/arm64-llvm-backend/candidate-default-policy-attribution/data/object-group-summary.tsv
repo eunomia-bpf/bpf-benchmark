@@ -1,0 +1,4 @@
+case	objects	objects_with_arm64_kfunc	objects_with_x86_kfunc	arm64_refs	x86_refs	kfunc_refs
+control-disabled	34	0	0	0	0	0
+candidate-conservative	34	27	0	234	0	234
+candidate-expanded	34	27	0	238	0	238

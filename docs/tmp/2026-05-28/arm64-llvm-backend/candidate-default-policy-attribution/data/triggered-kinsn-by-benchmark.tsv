@@ -1,0 +1,103 @@
+group	benchmark	families	relocations	symbols	total_refs
+control-disabled	arm64_direct_abi_coverage				0
+control-disabled	bcc_runqlat_log2_histogram_bucket				0
+control-disabled	bcc_tcpconnect_ipv4_tuple_filter				0
+control-disabled	bitmap_popcount_scan				0
+control-disabled	bpf_local_call_fanout_dispatch				0
+control-disabled	bpftrace_comm_key_fnv_hash				0
+control-disabled	bpftrace_string_search_prefix_scan				0
+control-disabled	ccmp_all_nonzero				0
+control-disabled	cgroup_skb_hash_chain				0
+control-disabled	cilium_ct_nat_tuple_rewrite				0
+control-disabled	cilium_policy_guard_tree_filter				0
+control-disabled	cilium_socket_lb_service_select				0
+control-disabled	csel_select64				0
+control-disabled	flow_5tuple_rss_hash				0
+control-disabled	flow_record_field_scan				0
+control-disabled	katran_lb_consistent_hash_select				0
+control-disabled	ldp_stack_pair				0
+control-disabled	otel_stack_frame_unwind_scan				0
+control-disabled	packed_header_bitfield_decode				0
+control-disabled	packet_checksum_fold				0
+control-disabled	packet_record_bounds_window				0
+control-disabled	packet_toeplitz_rss_hash				0
+control-disabled	packet_vlan_tcpopt_parser				0
+control-disabled	payload_prefix_memcmp_scan				0
+control-disabled	simple				0
+control-disabled	simple_packet				0
+control-disabled	siphash_rotate64_mixer				0
+control-disabled	sorted_rule_binary_search				0
+control-disabled	stp_stack_pair				0
+control-disabled	tc_packet_checksum_fold				0
+control-disabled	tetragon_process_event_arg_filter				0
+control-disabled	trace_event_type_switch_dispatch				0
+control-disabled	tracee_http_method_prefix_detect				0
+control-disabled	tracee_syscall_name_table_lookup				0
+candidate-conservative	arm64_direct_abi_coverage	EXTR,LDR	EXTR:1,LDR:4	bpf_arm64_extr_x:1,bpf_arm64_ldr_w:1,bpf_arm64_ldr_x:1,bpf_arm64_ldrb:1,bpf_arm64_ldrh:1	5
+candidate-conservative	bcc_runqlat_log2_histogram_bucket	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-conservative	bcc_tcpconnect_ipv4_tuple_filter	EXTR,LDR	EXTR:1,LDR:2	bpf_arm64_extr_w:1,bpf_arm64_ldr_w:2	3
+candidate-conservative	bitmap_popcount_scan	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-conservative	bpf_local_call_fanout_dispatch	LDR	LDR:3	bpf_arm64_ldr_w:3	3
+candidate-conservative	bpftrace_comm_key_fnv_hash	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-conservative	bpftrace_string_search_prefix_scan	EXTR,LDR	EXTR:1,LDR:1	bpf_arm64_extr_x:1,bpf_arm64_ldr_w:1	2
+candidate-conservative	ccmp_all_nonzero				0
+candidate-conservative	cgroup_skb_hash_chain	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-conservative	cilium_ct_nat_tuple_rewrite	EXTR,LDR	EXTR:1,LDR:2	bpf_arm64_extr_w:1,bpf_arm64_ldr_w:2	3
+candidate-conservative	cilium_policy_guard_tree_filter	LDR	LDR:1	bpf_arm64_ldr_w:1	1
+candidate-conservative	cilium_socket_lb_service_select	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-conservative	csel_select64	EXTR,LDR	EXTR:1,LDR:4	bpf_arm64_extr_x:1,bpf_arm64_ldr_x:4	5
+candidate-conservative	flow_5tuple_rss_hash	EXTR	EXTR:14	bpf_arm64_extr_w:14	14
+candidate-conservative	flow_record_field_scan				0
+candidate-conservative	katran_lb_consistent_hash_select	EXTR,LDR	EXTR:24,LDR:7	bpf_arm64_extr_w:24,bpf_arm64_ldrh:7	31
+candidate-conservative	ldp_stack_pair	EXTR,LDR	EXTR:1,LDR:2	bpf_arm64_extr_x:1,bpf_arm64_ldr_x:2	3
+candidate-conservative	otel_stack_frame_unwind_scan	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-conservative	packed_header_bitfield_decode	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-conservative	packet_checksum_fold	LDR	LDR:3	bpf_arm64_ldr_w:2,bpf_arm64_ldrh:1	3
+candidate-conservative	packet_record_bounds_window	LDR	LDR:8	bpf_arm64_ldr_w:6,bpf_arm64_ldrh:2	8
+candidate-conservative	packet_toeplitz_rss_hash				0
+candidate-conservative	packet_vlan_tcpopt_parser				0
+candidate-conservative	payload_prefix_memcmp_scan	EXTR,LDR	EXTR:2,LDR:1	bpf_arm64_extr_x:2,bpf_arm64_ldr_w:1	3
+candidate-conservative	simple				0
+candidate-conservative	simple_packet				0
+candidate-conservative	siphash_rotate64_mixer	EXTR,LDR	EXTR:116,LDR:8	bpf_arm64_extr_x:116,bpf_arm64_ldr_x:8	124
+candidate-conservative	sorted_rule_binary_search	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-conservative	stp_stack_pair				0
+candidate-conservative	tc_packet_checksum_fold	LDR	LDR:3	bpf_arm64_ldr_w:2,bpf_arm64_ldrh:1	3
+candidate-conservative	tetragon_process_event_arg_filter	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-conservative	trace_event_type_switch_dispatch	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-conservative	tracee_http_method_prefix_detect	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-conservative	tracee_syscall_name_table_lookup	LDR	LDR:1	bpf_arm64_ldr_w:1	1
+candidate-expanded	arm64_direct_abi_coverage	EXTR,LDR	EXTR:1,LDR:4	bpf_arm64_extr_x:1,bpf_arm64_ldr_w:1,bpf_arm64_ldr_x:1,bpf_arm64_ldrb:1,bpf_arm64_ldrh:1	5
+candidate-expanded	bcc_runqlat_log2_histogram_bucket	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-expanded	bcc_tcpconnect_ipv4_tuple_filter	EXTR,LDR	EXTR:1,LDR:2	bpf_arm64_extr_w:1,bpf_arm64_ldr_w:2	3
+candidate-expanded	bitmap_popcount_scan	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-expanded	bpf_local_call_fanout_dispatch	LDR	LDR:3	bpf_arm64_ldr_w:3	3
+candidate-expanded	bpftrace_comm_key_fnv_hash	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-expanded	bpftrace_string_search_prefix_scan	EXTR,LDR	EXTR:1,LDR:1	bpf_arm64_extr_x:1,bpf_arm64_ldr_w:1	2
+candidate-expanded	ccmp_all_nonzero				0
+candidate-expanded	cgroup_skb_hash_chain	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-expanded	cilium_ct_nat_tuple_rewrite	EXTR,LDR	EXTR:1,LDR:2	bpf_arm64_extr_w:1,bpf_arm64_ldr_w:2	3
+candidate-expanded	cilium_policy_guard_tree_filter	LDR	LDR:1	bpf_arm64_ldr_w:1	1
+candidate-expanded	cilium_socket_lb_service_select	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-expanded	csel_select64	CSEL,EXTR,LDR	CSEL:4,EXTR:1,LDR:4	bpf_arm64_csel_ne:2,bpf_arm64_extr_x:1,bpf_arm64_ldr_x:4,bpf_arm64_tst:2	9
+candidate-expanded	flow_5tuple_rss_hash	EXTR	EXTR:14	bpf_arm64_extr_w:14	14
+candidate-expanded	flow_record_field_scan				0
+candidate-expanded	katran_lb_consistent_hash_select	EXTR,LDR	EXTR:24,LDR:7	bpf_arm64_extr_w:24,bpf_arm64_ldrh:7	31
+candidate-expanded	ldp_stack_pair	EXTR,LDR	EXTR:1,LDR:2	bpf_arm64_extr_x:1,bpf_arm64_ldr_x:2	3
+candidate-expanded	otel_stack_frame_unwind_scan	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-expanded	packed_header_bitfield_decode	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-expanded	packet_checksum_fold	LDR	LDR:3	bpf_arm64_ldr_w:2,bpf_arm64_ldrh:1	3
+candidate-expanded	packet_record_bounds_window	LDR	LDR:8	bpf_arm64_ldr_w:6,bpf_arm64_ldrh:2	8
+candidate-expanded	packet_toeplitz_rss_hash				0
+candidate-expanded	packet_vlan_tcpopt_parser				0
+candidate-expanded	payload_prefix_memcmp_scan	EXTR,LDR	EXTR:2,LDR:1	bpf_arm64_extr_x:2,bpf_arm64_ldr_w:1	3
+candidate-expanded	simple				0
+candidate-expanded	simple_packet				0
+candidate-expanded	siphash_rotate64_mixer	EXTR,LDR	EXTR:116,LDR:8	bpf_arm64_extr_x:116,bpf_arm64_ldr_x:8	124
+candidate-expanded	sorted_rule_binary_search	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-expanded	stp_stack_pair				0
+candidate-expanded	tc_packet_checksum_fold	LDR	LDR:3	bpf_arm64_ldr_w:2,bpf_arm64_ldrh:1	3
+candidate-expanded	tetragon_process_event_arg_filter	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-expanded	trace_event_type_switch_dispatch	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-expanded	tracee_http_method_prefix_detect	LDR	LDR:2	bpf_arm64_ldr_w:2	2
+candidate-expanded	tracee_syscall_name_table_lookup	LDR	LDR:1	bpf_arm64_ldr_w:1	1

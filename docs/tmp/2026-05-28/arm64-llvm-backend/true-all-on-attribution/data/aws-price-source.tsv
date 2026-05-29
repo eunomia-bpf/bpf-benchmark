@@ -1,0 +1,4 @@
+item	unit	price	source
+EC2 t4g.small Linux On-Demand us-east-1	USD/hour	0.0168000000	AWS Pricing API get-products AmazonEC2; also consistent with AWS EC2 On-Demand pricing page
+EBS gp3 root volume us-east-1	USD/GB-month	0.0800000000	AWS Pricing API get-products AmazonEC2 volumeApiName=gp3; also consistent with AWS EBS pricing page
+root volume size	GB	32	aws-config AWS_ARM64_ROOT_VOLUME_GB

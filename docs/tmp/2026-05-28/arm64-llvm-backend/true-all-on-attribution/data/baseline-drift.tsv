@@ -1,0 +1,3 @@
+group	runtime	scope	benchmarks	rep1_geomean	rep2_geomean	rep3_geomean	median_geomean	min_geomean	max_geomean	median_faster_pct	direction
+baseline	kernel	ALL	34	1.026397489	1.002543879	1.024787499	1.024787499	1.002543879	1.026397489	-2.478749900	all_slower
+baseline	native	ALL	34	1.035481956	0.994015869	1.010242379	1.010242379	0.994015869	1.035481956	-1.024237900	mixed
