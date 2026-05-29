@@ -1,6 +1,6 @@
 # Native Kernel Execution Evaluation
 
-Last updated: 2026-05-27
+Last updated: 2026-05-29
 
 This is the paper-facing evaluation note for the native-in-kernel execution
 path. The benchmark framework records raw counters and workload payloads only;
@@ -21,17 +21,18 @@ The current research questions are:
 - **RQ1 Correctness:** does native execution preserve microbenchmark outputs
   and load real corpus applications without startup or workload failures?
 - **RQ2 Micro execution cost:** how do userspace native, userspace eBPF,
-  kernel native, and kernel eBPF compare on the stage1/stage2 micro suites?
+  kernel native, and kernel eBPF compare on pure-bytecode micro cases, and how
+  does kernel native compare with kernel eBPF on helper/map cases?
 - **RQ3 BPF per-run cost in real apps:** once real apps are running, does
   kernel native reduce measured BPF `ns/run` relative to the kernel eBPF JIT?
 - **RQ4 End-to-end workload impact:** does lower BPF execution cost translate
   into higher application workload throughput?
 
 Headline result: **on x86 KVM, kernel-native execution improves workload
-throughput by `1.23x` unweighted geomean over eBPF JIT across six real-app
-workloads, with four wins, one neutral result, and one slight regression.** It
-also reduces aggregate BPF `ns/run` in five of the six retained counter
-populations.
+throughput by `1.35x` unweighted geomean over eBPF JIT across six real-app
+workloads, with four clear wins, one neutral result, and one slight
+regression.** It also reduces aggregate BPF `ns/run` in five of the six
+retained counter populations.
 
 The narrow claim supported by the current x86 KVM data is: native kernel
 execution is consistently positive on controlled microbenchmarks, and it fixes
@@ -45,10 +46,11 @@ All runs in this note use the repository `make` entrypoints on x86 KVM. The
 kernel/runtime image is the repository default build used by `make micro` and
 `make corpus`.
 
-Micro runs use `SAMPLES=3`, `WARMUPS=0`, and `INNER_REPEAT=100000`. The tested
-runtimes are `kernel` (kernel eBPF JIT), `native_kernel` (native object loaded
-into the kernel native path), `llvmbpf` (userspace eBPF), and `native`
-(userspace native).
+Micro runs use `SAMPLES=3`, `WARMUPS=0`, and `INNER_REPEAT=100000`. The
+pure-bytecode suite tests `kernel` (kernel eBPF JIT), `native_kernel` (native
+object loaded into the kernel native path), `llvmbpf` (userspace eBPF), and
+`native` (userspace native). The helper/map suite tests `kernel` and
+`native_kernel`.
 
 Corpus runs cover six real applications: `bcc/set`,
 `otelcol-ebpf-profiler/profiling`, `cilium/agent`, `tetragon/observer`,
@@ -60,10 +62,10 @@ Three corpus datasets are used:
 
 - **BPF stats on:** native-post runs with BPF runtime counters enabled, used
   for per-run `ns/run`.
-- **BPF stats off:** native-post six-app run with BPF runtime counters
-  disabled, used for workload throughput without BPF stats overhead.
-- **Workload-only:** six-app no-agent/no-eBPF baseline, used as the workload
-  throughput denominator.
+- **BPF stats off:** native-post runs with BPF runtime counters disabled, used
+  for workload throughput without BPF stats overhead.
+- **Workload-only:** no-eBPF workload runs, used as the workload throughput
+  denominator where that mode is semantically comparable.
 
 The Cilium corpus result is a steady-state datapath measurement. The runner
 disables runtime reload/regeneration controllers and pauses `cilium-agent`
@@ -112,65 +114,70 @@ that every retained BPF program improved.
 
 ## Main Results
 
-Latest authoritative datasets are all complete: micro stage1, micro stage2,
-six-app corpus with BPF stats enabled, six-app corpus with BPF stats disabled,
-and six-app workload-only no-agent/no-eBPF baseline.
+Latest authoritative datasets are all complete: pure-bytecode micro,
+helper/map micro, six corpus apps with BPF stats enabled, six corpus apps with
+BPF stats disabled, and six no-eBPF workload-only baselines. Corpus artifacts
+were collected one app at a time.
 
-![Corpus workload and BPF per-run cost](figures/eval-native-corpus-combined-side-by-side-ns-bars.png)
+![Corpus workload and BPF per-run cost](figures/eval-native-corpus-20260529.png)
 
 *Figure 1: Corpus end-to-end workload throughput and aggregate BPF per-run
-cost. The left subplot normalizes workload throughput to the no-agent/no-eBPF
-baseline for each app. The right subplot reports raw aggregate BPF `ns/run`
+cost. The left subplot normalizes workload throughput to the no-eBPF baseline
+for each app. The right subplot reports raw aggregate BPF `ns/run`
 for the retained counter population (`run_cnt_delta >= 100`). For workload
-throughput, higher is better. For BPF `ns/run`, lower is better.*
+throughput, higher is better. For BPF `ns/run`, lower is better. Cilium's
+workload-only number is not a strict upper bound because workload-only bypasses
+the Cilium datapath setup rather than running the same attached datapath with
+no BPF program.*
 
-![Micro stage1 runtime](figures/eval-native-micro-stage1-runtime.png)
+![Micro runtime](figures/eval-native-micro-20260529.png)
 
-![Micro stage2 runtime](figures/eval-native-micro-stage2-runtime.png)
+*Figure 2: Micro runtime normalized to kernel eBPF. Lower is faster. The
+helper/map panel only reports kernel native because the authoritative helper
+artifact intentionally compares against the real kernel helper/map ABI rather
+than userspace emulation.*
 
-*Figures 2-3: Micro runtime normalized to kernel eBPF. Lower is faster.*
-
-Micro four-runtime result:
+Micro runtime result:
 
 | Suite | userspace native | userspace eBPF | kernel native | kernel eBPF |
 | --- | ---: | ---: | ---: | ---: |
-| Stage1 normalized runtime | 0.58x | 0.65x | 0.68x | 1.00x |
-| Stage2 normalized runtime | 2.29x | 1.01x | 0.71x | 1.00x |
+| Pure bytecode normalized runtime | 0.566x | 0.665x | 0.677x | 1.000x |
+| With helpers/maps normalized runtime | n/a | n/a | 0.700x | 1.000x |
 
 Corpus workload throughput. The `native/eBPF` headline is the unweighted
-geomean across the six per-app ratios (`1.23x`):
+geomean across the six per-app ratios (`1.35x`):
 
-| App | no-agent/no-eBPF throughput | eBPF/no-eBPF | native/no-eBPF | native/eBPF |
+| App | no-eBPF throughput | eBPF/no-eBPF | native/no-eBPF | native/eBPF |
 | --- | ---: | ---: | ---: | ---: |
-| `bcc` | 1574097 | 0.45x | 0.46x | 1.01x |
-| `otel` | 110063016 | 0.40x | 0.73x | 1.84x |
-| `cilium` | 2373714 | 0.61x | 0.84x | 1.38x |
-| `tetragon` | 1559214 | 0.23x | 0.29x | 1.24x |
-| `katran` | 7507097 | 0.38x | 0.43x | 1.14x |
-| `tracee` | 3327639 | 0.14x | 0.13x | 0.95x |
+| `bcc` | 1574841 | 0.451x | 0.453x | 1.005x |
+| `otel` | 108641288 | 0.397x | 0.724x | 1.824x |
+| `cilium` | 2412363 | 0.680x | 1.603x | 2.358x |
+| `tetragon` | 1542246 | 0.233x | 0.308x | 1.323x |
+| `katran` | 8434635 | 0.348x | 0.383x | 1.102x |
+| `tracee` | 3325831 | 0.136x | 0.130x | 0.958x |
 
 Native/eBPF workload sample spread:
 
 | App | native/eBPF samples | Mean | CV |
 | --- | --- | ---: | ---: |
-| `bcc` | 1.006x, 1.008x, 1.005x | 1.007x | 0.1% |
-| `otel` | 1.791x, 1.877x, 1.865x | 1.844x | 2.5% |
-| `cilium` | 1.374x, 1.387x, 1.379x | 1.380x | 0.5% |
-| `tetragon` | 1.211x, 1.216x, 1.285x | 1.237x | 3.3% |
-| `katran` | 1.133x, 1.136x, 1.137x | 1.135x | 0.1% |
-| `tracee` | 0.961x, 0.957x, 0.942x | 0.954x | 1.0% |
+| `bcc` | 1.006x, 1.001x, 1.007x | 1.004x | 0.3% |
+| `otel` | 1.796x, 1.824x, 1.823x | 1.815x | 0.9% |
+| `cilium` | 2.325x, 2.458x, 2.356x | 2.380x | 2.9% |
+| `tetragon` | 1.352x, 1.249x, 1.323x | 1.308x | 4.1% |
+| `katran` | 1.128x, 1.099x, 1.102x | 1.110x | 1.4% |
+| `tracee` | 0.966x, 0.963x, 0.954x | 0.961x | 0.6% |
 
 Corpus BPF per-run counters, reported as run-weighted aggregate `ns/run` over
 retained records:
 
 | App | eBPF ns/run | native ns/run | native/eBPF cost | speedup | retained eBPF/native |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `bcc` | 103.8 | 102.9 | 0.99x | 1.01x | 15/16 |
-| `otel` | 3224.9 | 212.1 | 0.07x | 15.21x | 2/1 |
-| `cilium` | 443.5 | 133.5 | 0.30x | 3.32x | 2/4 |
-| `tetragon` | 701.2 | 304.1 | 0.43x | 2.31x | 21/23 |
-| `katran` | 177.3 | 144.9 | 0.82x | 1.22x | 1/1 |
-| `tracee` | 321.4 | 324.4 | 1.01x | 0.99x | 41/41 |
+| `bcc` | 103.6 | 102.5 | 0.99x | 1.01x | 16/15 |
+| `otel` | 3210.4 | 216.7 | 0.07x | 14.81x | 2/2 |
+| `cilium` | 488.7 | 262.3 | 0.54x | 1.86x | 2/2 |
+| `tetragon` | 695.2 | 311.8 | 0.45x | 2.23x | 21/24 |
+| `katran` | 178.3 | 142.4 | 0.80x | 1.25x | 1/1 |
+| `tracee` | 324.5 | 330.9 | 1.02x | 0.98x | 41/41 |
 
 ## RQ Answers
 
@@ -181,22 +188,23 @@ three measured workload samples per app, and no final-artifact `panic`,
 `phase_error`, `load program: no such file`, or incompatible map-spec failures.
 
 **RQ2 Micro execution cost.** Kernel native is faster than kernel eBPF on both
-current micro suites: `0.68x` normalized runtime on stage1 and `0.71x` on
-stage2. Userspace native is faster than kernel eBPF on stage1 but slower on
-stage2 because stage2 includes helper/map-heavy paths where userspace-native
-emulation is not a kernel ABI comparison.
+current micro suites: `0.677x` normalized runtime on pure bytecode and `0.700x`
+on helpers/maps. On pure bytecode, userspace native (`0.566x`) and userspace
+eBPF (`0.665x`) are also faster than kernel eBPF. The helper/map suite only
+reports kernel native because helper/map-heavy programs must be evaluated
+against the real kernel helper/map ABI.
 
 **RQ3 BPF per-run cost in real apps.** Native reduces run-weighted aggregate
 BPF `ns/run` on five of six retained counter populations and is
 neutral/slightly slower on Tracee. Tetragon's previous native slowdown is
-fixed: aggregate BPF per-run cost is now `304.1 ns/run` versus `701.2 ns/run`
-for eBPF (`0.43x` cost, `2.31x` speedup).
+fixed: aggregate BPF per-run cost is now `311.8 ns/run` versus `695.2 ns/run`
+for eBPF (`0.45x` cost, `2.23x` speedup).
 
 **RQ4 End-to-end workload impact.** Native improves workload throughput by
-`1.23x` unweighted geomean across the six app workloads. It improves over eBPF
-on OTEL (`1.84x`), steady-state Cilium datapath (`1.38x`), Tetragon (`1.24x`),
-and Katran (`1.14x`), is neutral on BCC (`1.01x`), and is slightly lower on
-Tracee (`0.95x`). The no-agent/no-eBPF baseline remains much faster for several
+`1.35x` unweighted geomean across the six app workloads. It improves over eBPF
+on OTEL (`1.82x`), steady-state Cilium datapath (`2.36x`), Tetragon (`1.32x`),
+and Katran (`1.10x`), is neutral on BCC (`1.005x`), and is slightly lower on
+Tracee (`0.958x`). The no-eBPF baseline remains much faster for several
 tracing/security workloads, showing that hook frequency, event construction,
 map traffic, perf/ring-buffer traffic, and application-side processing remain
 major costs outside BPF instruction execution.
@@ -217,10 +225,10 @@ were startup correctness and native-loader/app metadata mismatches: manifest
 no-match handling, native replacement fd semantics, app-visible program-info
 queries, stale fd reuse, and Tetragon map-id assumptions.
 
-OTEL's `15.21x` aggregate BPF `ns/run` speedup is dominated by the directly
+OTEL's `14.81x` aggregate BPF `ns/run` speedup is dominated by the directly
 attached `native_tracer_entry` perf-event program. In the BPF-stats artifact,
-baseline `native_tracer_e` ran 420.7M times at 3224.9 ns/run, while the native
-replacement ran 432.1M times at 212.1 ns/run. The tail-called
+baseline `native_tracer_e` ran 421.3M times at 3210.4 ns/run, while the native
+replacement ran 432.1M times at 216.7 ns/run. The tail-called
 `perf_unwind_*` programs still report zero own `run_cnt`, so their work is
 charged to this caller. Inspection of the saved BPF bytecode and native object
 shows a concrete hot-path cause: `get_pristine_per_cpu_record()` expands in
@@ -238,16 +246,16 @@ for the observed OTEL entry speedup.
 
 BCC is neutral because its hottest retained programs are already tiny and
 kernel-JIT efficient. The dominant `sys_enter`/`sys_exit` tracepoints run about
-3.5B times each and stay essentially unchanged (`79.9 -> 80.7 ns/run` and
-`85.8 -> 85.1 ns/run`); the expensive `tracepoint__sys` instance is also
-unchanged (`1212 -> 1220 ns/run`). Native shrinks translated bytecode for many
+3.5B times each and stay essentially unchanged (`80.9 -> 81.1 ns/run` and
+`85.2 -> 85.1 ns/run`); the expensive `tracepoint__sys` instance is also
+unchanged (`1207.5 -> 1226.3 ns/run`). Native shrinks translated bytecode for many
 programs, but the remaining cost is hook dispatch, helper/map work, and fixed
 entry/exit overhead that native code does not remove.
 
 Tracee is a slight regression for the same reason plus cancellation among hot
 raw-tracepoint dispatchers. The four hottest raw tracepoint entries run about
-1.6B times each: two improve (`198.9 -> 168.9 ns/run`, `421.1 -> 404.0
-ns/run`) and two regress (`356.2 -> 374.6 ns/run`, `358.1 -> 381.2 ns/run`).
+1.6B times each: two improve (`201.0 -> 176.9 ns/run`, `424.3 -> 413.8
+ns/run`) and two regress (`363.2 -> 387.5 ns/run`, `358.5 -> 382.3 ns/run`).
 Tracee's workload path also includes event construction, tail-call dispatch,
 map traffic, and userspace event processing, so a near-neutral BPF `ns/run`
 result can still appear as a small workload throughput loss.
@@ -278,11 +286,11 @@ and native-loader matching bugs, not as a missing autoreload flag.
   normal kernel accounting. Their cost is accounted at the directly attached
   caller, so retained counter coverage must be interpreted through the call
   tree.
-- Workload throughput uses the BPF-stats-off artifact to avoid stats overhead;
+- Workload throughput uses the BPF-stats-off artifacts to avoid stats overhead;
   BPF per-run uses the BPF-stats-on artifact. These answer different questions
-  and should not be mixed as a single run. The artifacts were collected
-  sequentially on the same x86 KVM setup and kernel image during the
-  2026-05-26 to 2026-05-27 evaluation window, so time drift remains a possible
+  and should not be mixed as a single run. The artifacts were collected one
+  app at a time on the same x86 KVM setup and kernel image during the
+  2026-05-29 evaluation window, so time drift remains a possible
   source of variance even though the three-sample workload CVs are small.
 - `SAMPLES=3` is sufficient for the current benchmark contract but is not a
   substitute for a full confidence-interval study over independent machine
@@ -292,33 +300,44 @@ and native-loader matching bugs, not as a missing autoreload flag.
 
 | Dataset | Status | Generated at (UTC) | Mode | Artifact |
 | --- | --- | --- | --- | --- |
-| Micro stage1, 4 runtimes | complete | 2026-05-26T21:09:52 | micro | `micro/results/x86_kvm_micro_20260526_210952_650695/metadata.json` |
-| Micro stage2, 4 runtimes | complete | 2026-05-26T21:04:34 | micro | `micro/results/x86_kvm_micro_20260526_210434_440390/metadata.json` |
-| `bcc/set`, BPF stats on | complete | 2026-05-26T21:42:45 | stats on | `corpus/results/x86_kvm_corpus_20260526_211758_813406/metadata.json` |
-| `otelcol-ebpf-profiler/profiling`, BPF stats on | complete | 2026-05-26T22:12:22 | stats on | `corpus/results/x86_kvm_corpus_20260526_214808_410996/metadata.json` |
-| `cilium/agent`, BPF stats on | complete | 2026-05-26T23:27:22 | stats on | `corpus/results/x86_kvm_corpus_20260526_230251_020975/metadata.json` |
-| `tetragon/observer`, BPF stats on | complete | 2026-05-27T00:50:35 | stats on | `corpus/results/x86_kvm_corpus_20260527_002557_893190/metadata.json` |
-| `katran`, BPF stats on | complete | 2026-05-27T01:20:29 | stats on | `corpus/results/x86_kvm_corpus_20260527_005602_704153/metadata.json` |
-| `tracee/monitor`, BPF stats on | complete | 2026-05-27T01:51:22 | stats on | `corpus/results/x86_kvm_corpus_20260527_012602_194852/metadata.json` |
-| Six-app native, BPF stats off | complete | 2026-05-27T04:25:20 | stats off | `corpus/results/x86_kvm_corpus_20260527_015711_134639/metadata.json` |
-| Six-app workload-only no-agent/no-eBPF | complete | 2026-05-27T05:44:16 | workload-only | `corpus/results/x86_kvm_corpus_20260527_043130_139245/metadata.json` |
+| Micro pure bytecode, 4 runtimes | complete | 2026-05-29T00:39:19 | micro | `micro/results/x86_kvm_micro_20260529_003919_048557/metadata.json` |
+| Micro helpers/maps, 2 runtimes | complete | 2026-05-29T00:46:58 | micro | `micro/results/x86_kvm_micro_20260529_004658_667642/metadata.json` |
+| `bcc/set`, BPF stats on | complete | 2026-05-29T01:21:51 | stats on | `corpus/results/x86_kvm_corpus_20260529_005704_033715/metadata.json` |
+| `bcc/set`, BPF stats off | complete | 2026-05-29T01:52:54 | stats off | `corpus/results/x86_kvm_corpus_20260529_012805_826766/metadata.json` |
+| `bcc/set`, no-eBPF | complete | 2026-05-29T02:10:46 | workload-only | `corpus/results/x86_kvm_corpus_20260529_015843_382681/metadata.json` |
+| `otelcol-ebpf-profiler/profiling`, BPF stats on | complete | 2026-05-29T02:40:37 | stats on | `corpus/results/x86_kvm_corpus_20260529_021623_817446/metadata.json` |
+| `otelcol-ebpf-profiler/profiling`, BPF stats off | complete | 2026-05-29T03:11:28 | stats off | `corpus/results/x86_kvm_corpus_20260529_024714_858694/metadata.json` |
+| `otelcol-ebpf-profiler/profiling`, no-eBPF | complete | 2026-05-29T03:29:21 | workload-only | `corpus/results/x86_kvm_corpus_20260529_031718_784847/metadata.json` |
+| `cilium/agent`, BPF stats on | complete | 2026-05-29T03:59:53 | stats on | `corpus/results/x86_kvm_corpus_20260529_033517_489159/metadata.json` |
+| `cilium/agent`, BPF stats off | complete | 2026-05-29T04:30:30 | stats off | `corpus/results/x86_kvm_corpus_20260529_040554_604387/metadata.json` |
+| `cilium/agent`, no-eBPF | complete | 2026-05-29T04:49:28 | workload-only | `corpus/results/x86_kvm_corpus_20260529_043720_016160/metadata.json` |
+| `tetragon/observer`, BPF stats on | complete | 2026-05-29T05:20:32 | stats on | `corpus/results/x86_kvm_corpus_20260529_045551_393389/metadata.json` |
+| `tetragon/observer`, BPF stats off | complete | 2026-05-29T05:51:12 | stats off | `corpus/results/x86_kvm_corpus_20260529_052633_700199/metadata.json` |
+| `tetragon/observer`, no-eBPF | complete | 2026-05-29T06:08:47 | workload-only | `corpus/results/x86_kvm_corpus_20260529_055644_747412/metadata.json` |
+| `katran`, BPF stats on | complete | 2026-05-29T06:39:05 | stats on | `corpus/results/x86_kvm_corpus_20260529_061439_040837/metadata.json` |
+| `katran`, BPF stats off | complete | 2026-05-29T07:09:11 | stats off | `corpus/results/x86_kvm_corpus_20260529_064444_673720/metadata.json` |
+| `katran`, no-eBPF | complete | 2026-05-29T07:27:05 | workload-only | `corpus/results/x86_kvm_corpus_20260529_071439_317979/metadata.json` |
+| `tracee/monitor`, BPF stats on | complete | 2026-05-29T07:58:33 | stats on | `corpus/results/x86_kvm_corpus_20260529_073309_993570/metadata.json` |
+| `tracee/monitor`, BPF stats off | complete | 2026-05-29T08:29:31 | stats off | `corpus/results/x86_kvm_corpus_20260529_080408_588450/metadata.json` |
+| `tracee/monitor`, no-eBPF | complete | 2026-05-29T08:48:07 | workload-only | `corpus/results/x86_kvm_corpus_20260529_083605_206833/metadata.json` |
 
 ## Appendix B: Reproduction Commands
 
-Micro stage1:
+Micro pure bytecode:
 
 ```sh
-RUNTIMES="native llvmbpf native_kernel kernel" \
-SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 TIMEOUT=2400 \
+RUNTIMES="kernel native_kernel llvmbpf native" \
+SUITE="micro/config/micro_pure_jit.yaml" \
+SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 TIMEOUT=7200 \
 make micro
 ```
 
-Micro stage2:
+Micro helpers/maps:
 
 ```sh
-SUITE=micro/config/micro_stage2.yaml \
-RUNTIMES="native llvmbpf native_kernel kernel" \
-SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 TIMEOUT=2400 \
+RUNTIMES="kernel native_kernel" \
+SUITE="micro/config/micro_stage2.yaml" \
+SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 TIMEOUT=7200 \
 make micro
 ```
 
@@ -328,35 +347,42 @@ Corpus native with BPF runtime counters enabled:
 BPFREJIT_CORPUS_APPS="<one of the six apps listed above>" \
 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 BPFREJIT_CORPUS_BPF_STATS=1 \
-SAMPLES=3 WORKLOAD_DURATION=180 BPFREJIT_CORPUS_APP_TIMEOUT=3600 \
-TIMEOUT=14400 \
+SAMPLES=3 WORKLOAD_DURATION=180 WARMUPS=1 \
+BPFREJIT_CORPUS_APP_TIMEOUT=3600 BPFREJIT_CORPUS_REJIT_TIMEOUT=1200 \
+TIMEOUT=7200 \
 make corpus
 ```
 
-The BPF-stats-on run was collected one app at a time so any loader/startup
-failure would surface with a small artifact and could be fixed before moving
-to the next app. The stats-off and workload-only runs below were collected as
-six-app suite runs.
+All corpus modes were collected one app at a time so any loader/startup or
+workload failure would surface with a small artifact and could be fixed before
+moving to the next app.
 
 Corpus native with BPF runtime counters disabled:
 
 ```sh
-BPFREJIT_CORPUS_APPS="bcc/set,otelcol-ebpf-profiler/profiling,cilium/agent,tetragon/observer,katran,tracee/monitor" \
+BPFREJIT_CORPUS_APPS="<one of the six apps listed above>" \
 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
 BPFREJIT_CORPUS_BPF_STATS=0 \
-SAMPLES=3 WORKLOAD_DURATION=180 BPFREJIT_CORPUS_APP_TIMEOUT=3600 \
-TIMEOUT=14400 \
+SAMPLES=3 WORKLOAD_DURATION=180 WARMUPS=1 \
+BPFREJIT_CORPUS_APP_TIMEOUT=3600 BPFREJIT_CORPUS_REJIT_TIMEOUT=1200 \
+TIMEOUT=7200 \
 make corpus
 ```
 
-Corpus workload-only no-agent/no-eBPF baseline:
+Corpus workload-only no-eBPF baseline:
 
 ```sh
-BPFREJIT_CORPUS_APPS="bcc/set,otelcol-ebpf-profiler/profiling,cilium/agent,tetragon/observer,katran,tracee/monitor" \
+BPFREJIT_CORPUS_APPS="<one of the six apps listed above>" \
 BPFREJIT_CORPUS_WORKLOAD_ONLY=1 BPFREJIT_CORPUS_BPF_STATS=0 \
-SAMPLES=3 WORKLOAD_DURATION=180 BPFREJIT_CORPUS_APP_TIMEOUT=3600 \
-TIMEOUT=14400 \
+SAMPLES=3 WORKLOAD_DURATION=180 WARMUPS=1 \
+BPFREJIT_CORPUS_APP_TIMEOUT=3600 TIMEOUT=7200 \
 make corpus
+```
+
+Post-hoc table/figure generator:
+
+```sh
+python3 docs/tmp/native_eval_20260529.py
 ```
 
 ## Appendix C: Implementation Fixes In This Evaluation
@@ -378,6 +404,12 @@ make corpus
 
 ## Appendix D: Progress Log
 
+- 2026-05-29: Re-ran the authoritative x86 KVM native evaluation one app at a
+  time for all six corpus apps, collecting BPF-stats-on, BPF-stats-off, and
+  no-eBPF workload-only artifacts with `SAMPLES=3` and
+  `WORKLOAD_DURATION=180`. Updated the paper-facing headline to `1.35x`
+  workload geomean over kernel eBPF, refreshed the corpus and micro figures,
+  and added `docs/tmp/native_eval_20260529.py` as the post-hoc analysis script.
 - 2026-05-27: Added OSDI-reviewer-facing clarifications: a precise workload
   headline (`1.23x` unweighted geomean across six apps), workload intent and
   limitation table, native/eBPF three-sample spread, run-weighted aggregate
