@@ -78,9 +78,14 @@ class LocalEtcdSession:
             "--initial-cluster-state", "new",
         ]
         self.command_used = list(command)
+        env = os.environ.copy()
+        machine = os.uname().machine.lower()
+        if machine in {"aarch64", "arm64"}:
+            env.setdefault("ETCD_UNSUPPORTED_ARCH", "arm64")
         self.process = subprocess.Popen(
             command,
             cwd=ROOT_DIR,
+            env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,

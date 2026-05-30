@@ -62,6 +62,10 @@ use std::path::PathBuf;
 mod x86;
 
 const ARM64_THREAD_INFO_CPU_OFFSET_HELPER_KEY: &str = "__native_arm64_thread_info_cpu_offset";
+const ARM64_BPF_MAP_MAX_ENTRIES_OFFSET_KEY: &str = "__native_arm64_bpf_map_max_entries_offset";
+const ARM64_BPF_ARRAY_PTRS_OFFSET_KEY: &str = "__native_arm64_bpf_array_ptrs_offset";
+const ARM64_BPF_PROG_BPF_FUNC_OFFSET_KEY: &str = "__native_arm64_bpf_prog_bpf_func_offset";
+const ARM64_TAIL_CALL_OFFSET_KEY: &str = "__native_arm64_tail_call_offset";
 const ARM64_RETURN_TRAMPOLINE_SYMBOL: &str = "__native_link_arm64_ret_trampoline";
 const A64_NOP: u32 = 0xd503_201f;
 
@@ -508,6 +512,7 @@ fn main() -> Result<()> {
                 &helper_addrs,
                 &map_addrs,
                 &lookup_sites,
+                &lookup_maps,
                 &update_sites,
                 proof_mode,
                 args.show,
@@ -795,6 +800,13 @@ fn read_proof_abi(elf: &object::File) -> Result<Option<u8>> {
     Ok(mask)
 }
 
+fn arm64_effective_callee_saved_mask(
+    proof_callee_saved_mask: Option<u8>,
+    entry_callee_saved_mask: u8,
+) -> u8 {
+    proof_callee_saved_mask.unwrap_or(entry_callee_saved_mask)
+}
+
 fn find_symbol_by_name(elf: &object::File, name: &str) -> Result<SymInfo> {
     for sym in elf.symbols().chain(elf.dynamic_symbols()) {
         if sym.name().ok() == Some(name) && sym.size() > 0 {
@@ -811,16 +823,19 @@ fn find_symbol_by_name(elf: &object::File, name: &str) -> Result<SymInfo> {
     bail!("symbol {name} not found in input ELF")
 }
 
-fn find_symbol_at_address(elf: &object::File, address: u64) -> Option<SymInfo> {
+fn find_symbol_at_section_address(
+    elf: &object::File,
+    section_index: object::SectionIndex,
+    address: u64,
+) -> Option<SymInfo> {
     for sym in elf.symbols().chain(elf.dynamic_symbols()) {
         let addr = sym.address();
         let size = sym.size();
-        if size == 0 {
+        if size == 0 || sym.section_index()? != section_index {
             continue;
         }
         if address >= addr && address < addr + size {
             let name = sym.name().ok()?.to_string();
-            let section_index = sym.section_index()?;
             return Some(SymInfo {
                 name,
                 address: addr,
@@ -928,6 +943,13 @@ fn a64_cbnz64(rt: u32) -> Result<u32> {
     Ok(0xb500_0000 | rt)
 }
 
+fn a64_br(reg: u32) -> Result<u32> {
+    if reg >= 32 {
+        bail!("arm64 BR register out of range: x{reg}");
+    }
+    Ok(0xd61f_0000 | (reg << 5))
+}
+
 fn a64_adr(rd: u32, word_index: usize, target_byte_offset: usize) -> Result<u32> {
     if rd >= 32 {
         bail!("arm64 ADR target register out of range: x{rd}");
@@ -1024,6 +1046,46 @@ fn a64_blr(reg: u32) -> Result<u32> {
         bail!("arm64 BLR register out of range: x{reg}");
     }
     Ok(0xd63f_0000 | (reg << 5))
+}
+
+fn a64_blr_reg(insn: u32) -> Option<usize> {
+    if (insn & 0xffff_fc1f) != 0xd63f_0000 {
+        return None;
+    }
+    Some(((insn >> 5) & 0x1f) as usize)
+}
+
+fn a64_movz_imm_to_reg(insn: u32) -> Option<(usize, u64)> {
+    if (insn & 0x7f80_0000) != 0x5280_0000 {
+        return None;
+    }
+    let sf = (insn >> 31) & 1;
+    let hw = (insn >> 21) & 0x3;
+    if sf == 0 && hw >= 2 {
+        return None;
+    }
+    let shift = hw * 16;
+    let imm = u64::from((insn >> 5) & 0xffff) << shift;
+    Some(((insn & 0x1f) as usize, imm))
+}
+
+fn a64_known_helper_id_load(insn: u32) -> Option<(usize, u64)> {
+    let (reg, helper_id) = a64_movz_imm_to_reg(insn)?;
+    x86::bpf_helper_name_from_id(helper_id)?;
+    Some((reg, helper_id))
+}
+
+fn a64_written_gpr(insn: u32) -> Option<usize> {
+    if matches!(insn & 0x7f80_0000, 0x1280_0000 | 0x5280_0000 | 0x7280_0000) {
+        return Some((insn & 0x1f) as usize);
+    }
+    if (insn & 0x1f00_0000) == 0x1100_0000 {
+        return Some((insn & 0x1f) as usize);
+    }
+    if let Some((dst, _)) = a64_mov_reg64(insn) {
+        return Some(dst);
+    }
+    None
 }
 
 fn a64_add_imm64(rd: u32, rn: u32, imm: u32) -> Result<u32> {
@@ -1158,6 +1220,41 @@ fn a64_cmp_reg64(rn: u32, rm: u32) -> Result<u32> {
     Ok(0xeb00_001f | (rm << 16) | (rn << 5))
 }
 
+fn a64_cmp_reg32(rn: u32, rm: u32) -> Result<u32> {
+    if rn >= 32 || rm >= 32 {
+        bail!("arm64 CMP w register out of range: w{rn}, w{rm}");
+    }
+    Ok(0x6b00_001f | (rm << 16) | (rn << 5))
+}
+
+fn a64_mov_reg32(rd: u32, rn: u32) -> Result<u32> {
+    if rd >= 32 || rn >= 32 {
+        bail!("arm64 MOV w register out of range: w{rd}, w{rn}");
+    }
+    Ok(0x2a00_03e0 | (rn << 16) | rd)
+}
+
+fn a64_mov_reg64_word(rd: u32, rn: u32) -> Result<u32> {
+    if rd >= 32 || rn >= 32 {
+        bail!("arm64 MOV x register out of range: x{rd}, x{rn}");
+    }
+    Ok(0xaa00_03e0 | (rn << 16) | rd)
+}
+
+fn a64_ldp_post64(rt: u32, rt2: u32, byte_off: i32) -> Result<u32> {
+    if rt >= 32 || rt2 >= 32 {
+        bail!("arm64 LDP post register out of range: x{rt}, x{rt2}");
+    }
+    if byte_off % 8 != 0 {
+        bail!("arm64 LDP post offset is not 8-byte aligned: {byte_off}");
+    }
+    let imm7 = byte_off / 8;
+    if !(-64..=63).contains(&imm7) {
+        bail!("arm64 LDP post offset out of range: {byte_off}");
+    }
+    Ok(0xa8c0_0000 | (((imm7 as u32) & 0x7f) << 15) | (rt2 << 10) | (31 << 5) | rt)
+}
+
 fn a64_madd64(rd: u32, rn: u32, rm: u32, ra: u32) -> Result<u32> {
     if rd >= 32 || rn >= 32 || rm >= 32 || ra >= 32 {
         bail!("arm64 MADD register out of range: x{rd}, x{rn}, x{rm}, x{ra}");
@@ -1246,6 +1343,17 @@ fn arm64_helper_call_sequence(helper_addr: u64) -> Result<Vec<u32>> {
     let mut words = arm64_mov_imm64_sequence(A64_X10, helper_addr)?;
     words.push(a64_blr(A64_X10)?);
     Ok(words)
+}
+
+fn arm64_required_u32_helper_arg(
+    helper_addrs: &HashMap<String, u64>,
+    key: &str,
+    label: &str,
+) -> Result<u32> {
+    let value = *helper_addrs
+        .get(key)
+        .ok_or_else(|| anyhow!("arm64 tail_call lowering missing link-plan helper {key}"))?;
+    u32::try_from(value).map_err(|_| anyhow!("{label} does not fit u32: {value:#x}"))
 }
 
 fn build_arm64_get_smp_processor_id_inline(
@@ -1362,6 +1470,120 @@ fn build_arm64_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<u32>
     }
     let done = words.len();
     words[null_branch] = a64_patch_cbz_cbnz(words[null_branch], null_branch, done)?;
+    Ok(words)
+}
+
+fn append_arm64_stub_callee_pop(words: &mut Vec<u32>, callee_saved_mask: u8) -> Result<()> {
+    if callee_saved_mask > 0xf {
+        bail!("arm64 tail_call callee-saved mask exceeds 4 bits");
+    }
+    let regs: Vec<u32> = [19u32, 20, 21, 22]
+        .iter()
+        .enumerate()
+        .filter_map(|(idx, reg)| {
+            if callee_saved_mask & (1 << idx) != 0 {
+                Some(*reg)
+            } else {
+                None
+            }
+        })
+        .collect();
+    if regs.is_empty() {
+        return Ok(());
+    }
+    let mut idx = regs.len();
+    if idx % 2 != 0 {
+        idx -= 1;
+        words.push(a64_ldp_post64(regs[idx], 31, 16)?);
+    }
+    while idx > 0 {
+        idx -= 2;
+        words.push(a64_ldp_post64(regs[idx], regs[idx + 1], 16)?);
+    }
+    Ok(())
+}
+
+fn build_arm64_tail_call_inline(
+    helper_addrs: &HashMap<String, u64>,
+    callee_saved_mask: u8,
+    native_cleanup_words: &[u32],
+    tail_call_cnt_ptr_stack_offset: Option<u32>,
+) -> Result<Vec<u32>> {
+    const MAX_TAIL_CALL_CNT: u32 = 33;
+    const X1: u32 = 1;
+    const X2: u32 = 2;
+    const X8: u32 = 8;
+    const X9: u32 = 9;
+    const X10: u32 = 10;
+    const X11: u32 = 11;
+    const X12: u32 = 12;
+    const X26: u32 = 26;
+
+    let map_max_entries = arm64_required_u32_helper_arg(
+        helper_addrs,
+        ARM64_BPF_MAP_MAX_ENTRIES_OFFSET_KEY,
+        "struct bpf_map.max_entries offset",
+    )?;
+    let array_ptrs = arm64_required_u32_helper_arg(
+        helper_addrs,
+        ARM64_BPF_ARRAY_PTRS_OFFSET_KEY,
+        "struct bpf_array.ptrs offset",
+    )?;
+    let prog_bpf_func = arm64_required_u32_helper_arg(
+        helper_addrs,
+        ARM64_BPF_PROG_BPF_FUNC_OFFSET_KEY,
+        "struct bpf_prog.bpf_func offset",
+    )?;
+    let tail_call_offset = arm64_required_u32_helper_arg(
+        helper_addrs,
+        ARM64_TAIL_CALL_OFFSET_KEY,
+        "arm64 BPF tail-call entry offset",
+    )?;
+    if native_cleanup_words.is_empty() {
+        bail!("arm64 bpf_tail_call lowering missing entry cleanup sequence");
+    }
+
+    let mut words = Vec::new();
+    words.push(a64_ldr_u32(X8, X1, map_max_entries)?);
+    words.push(a64_mov_reg32(X2, X2)?);
+    words.push(a64_cmp_reg32(X2, X8)?);
+    let bounds_branch = words.len();
+    words.push(0);
+
+    if let Some(offset) = tail_call_cnt_ptr_stack_offset {
+        words.push(a64_ldr_u64(X9, 31, offset)?);
+    } else {
+        words.push(a64_mov_reg64_word(X9, X26)?);
+    }
+    words.push(a64_ldr_u64(X12, X9, 0)?);
+    words.push(a64_cmp_imm64(X12, MAX_TAIL_CALL_CNT)?);
+    let limit_branch = words.len();
+    words.push(0);
+
+    words.push(a64_add_imm64(X8, X1, array_ptrs)?);
+    words.push(a64_add_shift64(X8, X8, X2, 3)?);
+    words.push(a64_ldr_u64(X11, X8, 0)?);
+    let null_branch = words.len();
+    words.push(a64_cbz64(X11)?);
+
+    words.push(a64_add_imm64(X12, X12, 1)?);
+    words.push(a64_str_u64(X12, X9, 0)?);
+    words.extend_from_slice(native_cleanup_words);
+    append_arm64_stub_callee_pop(&mut words, callee_saved_mask)?;
+    words.push(a64_ldr_u64(X10, X11, prog_bpf_func)?);
+    words.push(a64_add_imm64(X10, X10, tail_call_offset)?);
+    words.push(a64_br(X10)?);
+
+    let out = words.len();
+    words[bounds_branch] = a64_patch_b_cond(0x5400_0002, bounds_branch, out)?;
+    words[limit_branch] = a64_patch_b_cond(0x5400_0002, limit_branch, out)?;
+    words[null_branch] = a64_patch_cbz_cbnz(words[null_branch], null_branch, out)?;
+    if words.len() > 64 {
+        bail!(
+            "arm64 bpf_tail_call lowering produced {} instructions, exceeding native_lab per-chunk limit",
+            words.len()
+        );
+    }
     Ok(words)
 }
 
@@ -1551,15 +1773,39 @@ fn arm64_append_section_data(
     let section = elf
         .section_by_index(section_index)
         .with_context(|| format!("arm64 local data section {section_index:?}"))?;
-    let data = section
-        .data()
+    let data = arm64_section_materialized_data(&section)
         .with_context(|| format!("read arm64 local data section {section_index:?}"))?;
     if data.is_empty() {
         bail!("arm64 local data section {section_index:?} is empty");
     }
-    blob.extend_from_slice(data);
+    blob.extend_from_slice(&data);
     local_data.insert(section_index, offset);
     Ok(offset)
+}
+
+fn arm64_section_materialized_data(section: &object::Section) -> Result<Vec<u8>> {
+    let data = section.data().context("read section data")?;
+    let size = usize::try_from(section.size()).context("section size does not fit usize")?;
+    if data.len() > size {
+        bail!(
+            "section data length {} exceeds memory size {}",
+            data.len(),
+            size
+        );
+    }
+    if data.len() == size {
+        return Ok(data.to_vec());
+    }
+    if !section.kind().is_bss() {
+        bail!(
+            "initialized section data length {} is shorter than memory size {}",
+            data.len(),
+            size
+        );
+    }
+    let mut materialized = data.to_vec();
+    materialized.resize(size, 0);
+    Ok(materialized)
 }
 
 const R_AARCH64_ADR_PREL_PG_HI21: u32 = 275;
@@ -1568,18 +1814,22 @@ const R_AARCH64_CALL26: u32 = 283;
 const R_AARCH64_ADR_GOT_PAGE: u32 = 311;
 const R_AARCH64_LD64_GOT_LO12_NC: u32 = 312;
 
+type Arm64AddressKey = (object::SectionIndex, u64);
+type Arm64RelocKey = (Arm64AddressKey, u64);
+
 #[derive(Clone, Debug)]
 struct Arm64RelocInfo {
     r_type: u32,
     target_name: String,
     target_section_index: Option<object::SectionIndex>,
+    target_address: Option<u64>,
     addend: i64,
 }
 
 fn arm64_text_relocations(
     elf: &object::File,
     included: &[SymInfo],
-) -> Result<HashMap<(u64, u64), Arm64RelocInfo>> {
+) -> Result<HashMap<Arm64RelocKey, Arm64RelocInfo>> {
     let mut out = HashMap::new();
     let mut sections: HashMap<object::SectionIndex, Vec<&SymInfo>> = HashMap::new();
     for sym in included {
@@ -1602,33 +1852,48 @@ fn arm64_text_relocations(
                 RelocationFlags::Elf { r_type } => r_type,
                 _ => continue,
             };
-            let (target_name, target_section_index) = match reloc.target() {
+            let addend = reloc.addend();
+            let (target_name, target_section_index, target_address) = match reloc.target() {
                 RelocationTarget::Symbol(idx) => {
                     let target_sym = elf.symbol_by_index(idx)?;
                     let target_section_index = target_sym.section_index();
+                    let target_address = if target_section_index.is_some() && addend >= 0 {
+                        Some(
+                            target_sym
+                                .address()
+                                .checked_add(addend as u64)
+                                .ok_or_else(|| {
+                                    anyhow!(
+                                        "arm64 relocation target address overflow for addend {addend}"
+                                    )
+                                })?,
+                        )
+                    } else {
+                        None
+                    };
                     let raw_name = target_sym
                         .name()
                         .map_err(|e| anyhow!("reloc target symbol name: {e}"))?;
                     let target_name = if raw_name.is_empty() {
                         format!(
                             "__arm64_section_{:?}_addend_{}",
-                            target_section_index,
-                            reloc.addend()
+                            target_section_index, addend
                         )
                     } else {
                         raw_name.to_string()
                     };
-                    (target_name, target_section_index)
+                    (target_name, target_section_index, target_address)
                 }
                 _ => continue,
             };
             out.insert(
-                (sym.address, reloc_addr - sym.address),
+                ((sym.section_index, sym.address), reloc_addr - sym.address),
                 Arm64RelocInfo {
                     r_type,
                     target_name,
                     target_section_index,
-                    addend: reloc.addend(),
+                    target_address,
+                    addend,
                 },
             );
         }
@@ -1653,8 +1918,7 @@ fn arm64_reloc_data(elf: &object::File, reloc: &Arm64RelocInfo, max_len: usize) 
     let section = elf
         .section_by_index(section_index)
         .with_context(|| format!("arm64 proof data section {section_index:?}"))?;
-    let data = section
-        .data()
+    let data = arm64_section_materialized_data(&section)
         .with_context(|| format!("read arm64 proof data section {section_index:?}"))?;
     let start = reloc.addend as usize;
     if start >= data.len() {
@@ -1669,9 +1933,25 @@ fn arm64_reloc_data(elf: &object::File, reloc: &Arm64RelocInfo, max_len: usize) 
     Ok(data[start..end].to_vec())
 }
 
+fn arm64_local_call_target(reloc: &Arm64RelocInfo) -> Option<Arm64AddressKey> {
+    if reloc.r_type != R_AARCH64_CALL26 {
+        return None;
+    }
+    Some((reloc.target_section_index?, reloc.target_address?))
+}
+
+fn arm64_proof_reloc_addend(reloc: &Arm64RelocInfo) -> i64 {
+    if reloc.target_name.starts_with("__arm64_section_") {
+        0
+    } else {
+        reloc.addend
+    }
+}
+
 fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<SymInfo>> {
     let mut included: Vec<SymInfo> = vec![entry.clone()];
-    let mut seen: std::collections::HashSet<u64> = [entry.address].into_iter().collect();
+    let mut seen: std::collections::HashSet<Arm64AddressKey> =
+        [(entry.section_index, entry.address)].into_iter().collect();
     let mut queue: Vec<SymInfo> = vec![entry.clone()];
 
     while let Some(sym) = queue.pop() {
@@ -1682,33 +1962,41 @@ fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<S
         let relocs = arm64_text_relocations(elf, std::slice::from_ref(&sym))?;
         for (word_index, word) in bytes.chunks_exact(4).enumerate() {
             let insn = u32::from_le_bytes(word.try_into().unwrap());
-            if relocs
-                .get(&(sym.address, (word_index * 4) as u64))
-                .is_some_and(|reloc| reloc.r_type == R_AARCH64_CALL26)
-            {
+            let reloc = relocs.get(&((sym.section_index, sym.address), (word_index * 4) as u64));
+            let (target_section_index, target_address) =
+                if let Some(reloc) = reloc.filter(|reloc| reloc.r_type == R_AARCH64_CALL26) {
+                    let Some((section_index, address)) = arm64_local_call_target(reloc) else {
+                        continue;
+                    };
+                    (section_index, address)
+                } else {
+                    let Some(target) = a64_bl_target(sym.address, word_index, insn) else {
+                        continue;
+                    };
+                    (sym.section_index, target)
+                };
+            let target_key = (target_section_index, target_address);
+            if seen.contains(&target_key) {
                 continue;
             }
-            let Some(target) = a64_bl_target(sym.address, word_index, insn) else {
-                continue;
-            };
-            if seen.contains(&target) {
-                continue;
-            }
-            let called = find_symbol_at_address(elf, target).ok_or_else(|| {
-                anyhow!(
-                    "{} calls {target:#x} but no symbol covers that address",
-                    sym.name
-                )
-            })?;
-            if called.address != target {
+            let called =
+                find_symbol_at_section_address(elf, target_section_index, target_address)
+                    .ok_or_else(|| {
+                        anyhow!(
+                            "{} calls {target_address:#x} in section {:?} but no symbol covers that address",
+                            sym.name,
+                            target_section_index
+                        )
+                    })?;
+            if called.address != target_address {
                 bail!(
-                    "{} calls {target:#x}, which lands inside {} at {:#x}",
+                    "{} calls {target_address:#x}, which lands inside {} at {:#x}",
                     sym.name,
                     called.name,
                     called.address
                 );
             }
-            if seen.insert(called.address) {
+            if seen.insert((called.section_index, called.address)) {
                 included.push(called.clone());
                 queue.push(called);
             }
@@ -1721,22 +2009,22 @@ fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<S
 enum Arm64PatchKind {
     ReturnToTrampoline,
     Bl {
-        target_symbol_address: u64,
+        target_symbol: Arm64AddressKey,
     },
     B {
-        source_symbol_address: u64,
+        source_symbol: Arm64AddressKey,
         target_is_symbol_end: bool,
         target_address: u64,
     },
     BCond {
         insn: u32,
-        source_symbol_address: u64,
+        source_symbol: Arm64AddressKey,
         target_is_symbol_end: bool,
         target_address: u64,
     },
     CbzCbnz {
         insn: u32,
-        source_symbol_address: u64,
+        source_symbol: Arm64AddressKey,
         target_is_symbol_end: bool,
         target_address: u64,
     },
@@ -1760,53 +2048,76 @@ struct Arm64Patch {
 struct Arm64EntryAbiStrip {
     nop_word_indices: HashSet<usize>,
     callee_saved_mask: u8,
+    tail_call_cleanup_words: Vec<u32>,
+    tail_call_cnt_ptr_stack_offset: Option<u32>,
 }
 
 fn plan_arm64_entry_abi_strip(bytes: &[u8]) -> Result<Arm64EntryAbiStrip> {
     let mut out = Arm64EntryAbiStrip::default();
-    let mut save_counts = [0i32; 4];
+    let mut save_offsets: [Option<i32>; 4] = [None; 4];
     let mut restore_counts = [0i32; 4];
+    out.tail_call_cnt_ptr_stack_offset = arm64_saved_reg_stack_offset(bytes, 26);
 
     for (word_index, word) in bytes.chunks_exact(4).enumerate() {
         let insn = u32::from_le_bytes(word.try_into().unwrap());
-        let Some((is_load, rt, rt2)) = arm64_stp_ldp_pair_regs(insn) else {
-            continue;
-        };
-        if !arm64_entry_pair_is_strippable(rt, rt2) {
+        if word_index == 0 && arm64_is_sp_sub_imm(insn) {
             continue;
         }
-
-        out.nop_word_indices.insert(word_index);
+        let Some((is_load, offset, rt, rt2)) = arm64_stp_ldp_pair(insn) else {
+            break;
+        };
+        if is_load {
+            break;
+        }
+        if arm64_entry_pair_is_strippable(rt, rt2) {
+            out.nop_word_indices.insert(word_index);
+        }
         for reg in [rt, rt2] {
             let Some(bit_index) = arm64_callee_saved_bit_index(reg) else {
                 continue;
             };
-            if is_load {
-                restore_counts[bit_index] += 1;
-            } else {
-                save_counts[bit_index] += 1;
+            if save_offsets[bit_index].replace(offset).is_some() {
+                bail!(
+                    "arm64 entry ABI strip found multiple prologue save sites for x{}",
+                    19 + bit_index
+                );
             }
         }
     }
 
-    for (idx, (saves, restores)) in save_counts.iter().zip(restore_counts.iter()).enumerate() {
-        if *saves == 0 && *restores == 0 {
+    for (word_index, word) in bytes.chunks_exact(4).enumerate() {
+        let insn = u32::from_le_bytes(word.try_into().unwrap());
+        let Some((is_load, offset, rt, rt2)) = arm64_stp_ldp_pair(insn) else {
+            continue;
+        };
+        if !is_load || !arm64_entry_pair_is_strippable(rt, rt2) {
             continue;
         }
-        if *saves == 0 || *restores == 0 {
-            bail!(
-                "arm64 entry ABI strip found unbalanced save/restore for x{}: saves={}, restores={}",
-                19 + idx,
-                saves,
-                restores
-            );
+
+        let mut matches_saved_slot = false;
+        for reg in [rt, rt2] {
+            let Some(bit_index) = arm64_callee_saved_bit_index(reg) else {
+                continue;
+            };
+            if save_offsets[bit_index] == Some(offset) {
+                restore_counts[bit_index] += 1;
+                matches_saved_slot = true;
+            }
         }
-        if *saves > 1 {
+        if matches_saved_slot {
+            out.nop_word_indices.insert(word_index);
+        }
+    }
+
+    for (idx, save_offset) in save_offsets.iter().enumerate() {
+        let Some(_offset) = save_offset else {
+            continue;
+        };
+        if restore_counts[idx] == 0 {
             bail!(
-                "arm64 entry ABI strip found multiple save sites for x{}: saves={}, restores={}",
+                "arm64 entry ABI strip found unbalanced save/restore for x{}: saves=1, restores={}",
                 19 + idx,
-                saves,
-                restores
+                restore_counts[idx]
             );
         }
         out.callee_saved_mask |= 1u8 << idx;
@@ -1815,19 +2126,187 @@ fn plan_arm64_entry_abi_strip(bytes: &[u8]) -> Result<Arm64EntryAbiStrip> {
     Ok(out)
 }
 
-fn arm64_stp_ldp_pair_regs(insn: u32) -> Option<(bool, u32, u32)> {
-    if (insn & 0x7c00_0000) != 0x2800_0000 {
-        return None;
+fn plan_arm64_tail_call_cleanup(
+    elf: &object::File,
+    sym: &SymInfo,
+    bytes: &[u8],
+    nop_word_indices: &HashSet<usize>,
+) -> Result<Vec<u32>> {
+    let mut terminators = Vec::new();
+    for (word_index, word) in bytes.chunks_exact(4).enumerate() {
+        let insn = u32::from_le_bytes(word.try_into().unwrap());
+        if a64_is_ret(insn) {
+            terminators.push(word_index);
+            continue;
+        }
+        let Some(target) = a64_branch_target(sym.address, word_index, insn) else {
+            continue;
+        };
+        if arm64_is_return_trampoline_target(elf, target)? {
+            terminators.push(word_index);
+        }
     }
-    if (insn & 0xc000_0000) != 0x8000_0000 {
-        return None;
+    plan_arm64_tail_call_cleanup_from_terminators(bytes, &terminators, nop_word_indices)
+}
+
+fn arm64_symbol_has_tail_call(
+    bytes: &[u8],
+    sym: &SymInfo,
+    relocs: &HashMap<Arm64RelocKey, Arm64RelocInfo>,
+) -> bool {
+    let sym_key = (sym.section_index, sym.address);
+    let mut helper_imm_registers: [Option<u64>; 32] = std::array::from_fn(|_| None);
+    for (word_index, word) in bytes.chunks_exact(4).enumerate() {
+        let off = (word_index * 4) as u64;
+        if relocs.get(&(sym_key, off)).is_some_and(|reloc| {
+            reloc.r_type == R_AARCH64_CALL26 && reloc.target_name == "bpf_tail_call"
+        }) {
+            return true;
+        }
+
+        let insn = u32::from_le_bytes(word.try_into().unwrap());
+        let helper_imm_load_reg = if let Some((reg, helper_id)) = a64_known_helper_id_load(insn) {
+            helper_imm_registers[reg] = Some(helper_id);
+            Some(reg)
+        } else {
+            None
+        };
+        if let Some(reg) = a64_blr_reg(insn) {
+            if helper_imm_registers[reg] == Some(12) {
+                return true;
+            }
+            for slot in helper_imm_registers.iter_mut().take(19) {
+                *slot = None;
+            }
+        }
+        if let Some(reg) = a64_written_gpr(insn) {
+            if helper_imm_load_reg != Some(reg) {
+                helper_imm_registers[reg] = None;
+            }
+        }
     }
+    false
+}
+
+fn plan_arm64_tail_call_cleanup_from_terminators(
+    bytes: &[u8],
+    terminators: &[usize],
+    nop_word_indices: &HashSet<usize>,
+) -> Result<Vec<u32>> {
+    let mut selected: Option<Vec<u32>> = None;
+    for &terminator in terminators {
+        let mut start = terminator;
+        while start > 0 {
+            let prev = start - 1;
+            let word = u32::from_le_bytes(bytes[prev * 4..prev * 4 + 4].try_into().unwrap());
+            if !arm64_tail_cleanup_word(word, nop_word_indices.contains(&prev)) {
+                break;
+            }
+            start = prev;
+        }
+        if start == terminator {
+            continue;
+        }
+        let mut candidate = Vec::new();
+        for idx in start..terminator {
+            let word = u32::from_le_bytes(bytes[idx * 4..idx * 4 + 4].try_into().unwrap());
+            if nop_word_indices.contains(&idx) {
+                continue;
+            } else {
+                candidate.push(word);
+            }
+        }
+        if let Some(previous) = &selected {
+            if previous != &candidate {
+                bail!("arm64 entry with bpf_tail_call has multiple incompatible return epilogues");
+            }
+        } else {
+            selected = Some(candidate);
+        }
+    }
+    Ok(selected.unwrap_or_default())
+}
+
+fn arm64_tail_cleanup_word(insn: u32, is_stripped: bool) -> bool {
+    if is_stripped {
+        return true;
+    }
+    if let Some((is_load, _, _, _)) = arm64_stp_ldp_pair(insn) {
+        return is_load;
+    }
+    arm64_ldr_str_unsigned64_sp(insn).is_some_and(|(is_load, _, _)| is_load)
+        || arm64_is_add_sp_imm(insn)
+}
+
+fn arm64_is_sp_sub_imm(insn: u32) -> bool {
+    (insn & 0xffc0_03ff) == 0xd100_03ff
+}
+
+fn arm64_is_add_sp_imm(insn: u32) -> bool {
+    (insn & 0xffc0_03ff) == 0x9100_03ff
+}
+
+fn arm64_stp_ldp_pair(insn: u32) -> Option<(bool, i32, u32, u32)> {
+    let (is_load, has_writeback) = match insn & 0xffc0_0000 {
+        0xa900_0000 => (false, false),
+        0xa980_0000 | 0xa880_0000 => (false, true),
+        0xa940_0000 => (true, false),
+        0xa9c0_0000 | 0xa8c0_0000 => (true, true),
+        _ => return None,
+    };
     let rn = (insn >> 5) & 0x1f;
     if rn != 31 {
         return None;
     }
-    let is_load = ((insn >> 22) & 1) != 0;
-    Some((is_load, insn & 0x1f, (insn >> 10) & 0x1f))
+    let mut imm7 = ((insn >> 15) & 0x7f) as i32;
+    if (imm7 & 0x40) != 0 {
+        imm7 -= 0x80;
+    }
+    let offset = if has_writeback { 0 } else { imm7 * 8 };
+    Some((is_load, offset, insn & 0x1f, (insn >> 10) & 0x1f))
+}
+
+fn arm64_ldr_str_unsigned64_sp(insn: u32) -> Option<(bool, u32, u32)> {
+    let is_load = match insn & 0xffc0_0000 {
+        0xf940_0000 => true,
+        0xf900_0000 => false,
+        _ => return None,
+    };
+    let rn = (insn >> 5) & 0x1f;
+    if rn != 31 {
+        return None;
+    }
+    let byte_off = ((insn >> 10) & 0xfff) * 8;
+    Some((is_load, byte_off, insn & 0x1f))
+}
+
+fn arm64_saved_reg_stack_offset(bytes: &[u8], wanted_reg: u32) -> Option<u32> {
+    for (word_index, word) in bytes.chunks_exact(4).enumerate() {
+        let insn = u32::from_le_bytes(word.try_into().ok()?);
+        if word_index == 0 && arm64_is_sp_sub_imm(insn) {
+            continue;
+        }
+        if let Some((is_load, offset, rt, rt2)) = arm64_stp_ldp_pair(insn) {
+            if is_load {
+                return None;
+            }
+            if offset >= 0 && (rt == wanted_reg || rt2 == wanted_reg) {
+                return Some(offset as u32);
+            }
+            continue;
+        }
+        if let Some((is_load, offset, rt)) = arm64_ldr_str_unsigned64_sp(insn) {
+            if is_load {
+                return None;
+            }
+            if rt == wanted_reg {
+                return Some(offset);
+            }
+            continue;
+        }
+        break;
+    }
+    None
 }
 
 fn arm64_entry_pair_is_strippable(rt: u32, rt2: u32) -> bool {
@@ -1850,20 +2329,20 @@ fn arm64_callee_saved_bit_index(reg: u32) -> Option<usize> {
 }
 
 fn arm64_branch_target_word(
-    addr_word_offset: &HashMap<u64, usize>,
-    sym_end_word_offset: &HashMap<u64, usize>,
-    source_symbol_address: u64,
+    addr_word_offset: &HashMap<Arm64AddressKey, usize>,
+    sym_end_word_offset: &HashMap<Arm64AddressKey, usize>,
+    source_symbol: Arm64AddressKey,
     target_is_symbol_end: bool,
     target_address: u64,
 ) -> Result<usize> {
     if target_is_symbol_end {
         return sym_end_word_offset
-            .get(&source_symbol_address)
+            .get(&source_symbol)
             .copied()
             .ok_or_else(|| anyhow!("arm64 branch target symbol end not in index map"));
     }
     addr_word_offset
-        .get(&target_address)
+        .get(&(source_symbol.0, target_address))
         .copied()
         .ok_or_else(|| anyhow!("arm64 branch target addr not in index map"))
 }
@@ -1883,6 +2362,108 @@ fn arm64_call_clobber_map_regs(reg_map_names: &mut [Option<String>; 32]) {
     }
 }
 
+fn arm64_truncate_bpf_obj_name(name: &str) -> String {
+    name.bytes().take(15).map(char::from).collect()
+}
+
+fn arm64_lookup_site_matches_native_map(spec: &LookupSiteSpec, native_map_name: &str) -> bool {
+    let Some(source_map_name) = spec.map_name.as_deref() else {
+        return false;
+    };
+    source_map_name == native_map_name
+        || arm64_truncate_bpf_obj_name(source_map_name)
+            == arm64_truncate_bpf_obj_name(native_map_name)
+}
+
+fn arm64_lookup_map_spec(
+    lookup_maps: &HashMap<String, LookupSiteSpec>,
+    native_map_name: &str,
+) -> Result<Option<LookupSiteSpec>> {
+    if let Some(spec) = lookup_maps.get(native_map_name) {
+        return Ok(Some(spec.clone()));
+    }
+
+    let native_truncated = arm64_truncate_bpf_obj_name(native_map_name);
+    let mut match_spec: Option<LookupSiteSpec> = None;
+    let mut match_name: Option<&str> = None;
+    for (name, spec) in lookup_maps {
+        if arm64_truncate_bpf_obj_name(name) != native_truncated {
+            continue;
+        }
+        if let Some(existing) = match_name {
+            bail!(
+                "arm64 native map name {native_map_name:?} matches multiple link-plan lookup_maps entries: {existing:?} and {name:?}"
+            );
+        }
+        match_name = Some(name.as_str());
+        match_spec = Some(spec.clone());
+    }
+    Ok(match_spec)
+}
+
+fn arm64_generic_lookup_site(target_addr: u64, map_name: Option<&str>) -> Option<LookupSiteSpec> {
+    if target_addr == 0 {
+        return None;
+    }
+    Some(LookupSiteSpec {
+        kind: LookupKind::Call,
+        target_addr,
+        key_offset: 0,
+        max_entries: 0,
+        elem_size: 0,
+        index_mask: 0,
+        value_offset: 0,
+        percpu_base_addr: 0,
+        map_name: map_name.map(ToOwned::to_owned),
+    })
+}
+
+fn arm64_select_lookup_site(
+    lookup_sites: &[LookupSiteSpec],
+    lookup_maps: &HashMap<String, LookupSiteSpec>,
+    used: &mut [bool],
+    native_call_index: usize,
+    native_map_name: Option<&str>,
+    sym_name: &str,
+    generic_target_addr: u64,
+) -> Result<(String, Option<usize>, LookupSiteSpec)> {
+    if let Some(map_name) = native_map_name {
+        if let Some((idx, spec)) = lookup_sites
+            .iter()
+            .enumerate()
+            .find(|(idx, spec)| !used[*idx] && arm64_lookup_site_matches_native_map(spec, map_name))
+        {
+            used[idx] = true;
+            return Ok((idx.to_string(), Some(idx), spec.clone()));
+        }
+
+        if let Some(spec) = arm64_lookup_map_spec(lookup_maps, map_name)? {
+            return Ok((format!("map:{map_name}"), None, spec));
+        }
+
+        if let Some(spec) = arm64_generic_lookup_site(generic_target_addr, Some(map_name)) {
+            return Ok((format!("generic:{map_name}"), None, spec));
+        }
+
+        bail!(
+            "arm64 bpf_map_lookup_elem native call {native_call_index} in {sym_name} uses map {map_name:?} but no matching link-plan lookup_sites or lookup_maps metadata exists"
+        );
+    }
+
+    if let Some((idx, spec)) = lookup_sites.iter().enumerate().find(|(idx, _)| !used[*idx]) {
+        used[idx] = true;
+        return Ok((idx.to_string(), Some(idx), spec.clone()));
+    }
+
+    if let Some(spec) = arm64_generic_lookup_site(generic_target_addr, None) {
+        return Ok(("generic".to_string(), None, spec));
+    }
+
+    bail!(
+        "arm64 bpf_map_lookup_elem native call {native_call_index} in {sym_name} is missing link-plan lookup_sites metadata"
+    );
+}
+
 fn arm64_select_map_call_site(
     sites_len: usize,
     ordinal: usize,
@@ -1898,6 +2479,125 @@ fn arm64_select_map_call_site(
     map_name.and_then(|name| seen_by_map.get(name).copied())
 }
 
+#[allow(clippy::too_many_arguments)]
+fn build_arm64_helper_call(
+    helper_name: &str,
+    sym_name: &str,
+    off: usize,
+    is_entry: bool,
+    helper_addrs: &HashMap<String, u64>,
+    lookup_sites: &[LookupSiteSpec],
+    lookup_maps: &HashMap<String, LookupSiteSpec>,
+    update_sites: &[UpdateSiteSpec],
+    callee_saved_mask: u8,
+    tail_call_cleanup_words: &[u32],
+    tail_call_cnt_ptr_stack_offset: Option<u32>,
+    lookup_call_counter: &mut usize,
+    update_call_counter: &mut usize,
+    reg_map_names: &mut [Option<String>; 32],
+    lookup_site_used: &mut [bool],
+    update_site_by_map: &mut HashMap<String, usize>,
+) -> Result<Vec<u32>> {
+    if helper_name == "bpf_tail_call" {
+        if !is_entry {
+            bail!("arm64 bpf_tail_call in non-entry symbol {sym_name} at byte offset {off:#x} is unsupported");
+        }
+        arm64_call_clobber_map_regs(reg_map_names);
+        return build_arm64_tail_call_inline(
+            helper_addrs,
+            callee_saved_mask,
+            tail_call_cleanup_words,
+            tail_call_cnt_ptr_stack_offset,
+        );
+    }
+
+    if helper_name == "bpf_get_smp_processor_id" {
+        if let Some(inline) = build_arm64_get_smp_processor_id_inline(helper_addrs)? {
+            return Ok(inline);
+        }
+    }
+
+    let mut helper_addr = helper_addrs.get(helper_name).copied();
+    let mut helper_addr_from_site = false;
+    let mut lookup_postprocess = None;
+    if helper_name == "bpf_map_lookup_elem" && is_entry {
+        let ordinal = *lookup_call_counter;
+        let native_map_name = reg_map_names[0].as_deref();
+        let (site_label, _site_index, spec) = arm64_select_lookup_site(
+            lookup_sites,
+            lookup_maps,
+            lookup_site_used,
+            ordinal,
+            native_map_name,
+            sym_name,
+            helper_addr.unwrap_or(0),
+        )?;
+        *lookup_call_counter += 1;
+        match spec.kind {
+            LookupKind::Array | LookupKind::PerCpuArray => {
+                let words = build_arm64_array_lookup(&spec)?;
+                arm64_call_clobber_map_regs(reg_map_names);
+                return Ok(words);
+            }
+            LookupKind::Call
+            | LookupKind::Hash
+            | LookupKind::LruHash
+            | LookupKind::PerCpuHash
+            | LookupKind::HashOfMaps => {
+                helper_addr = Some(resolve_lookup_site_target(
+                    &spec,
+                    &format!("arm64 lookup-site {site_label} ({:?})", spec.kind),
+                )?);
+                helper_addr_from_site = true;
+                lookup_postprocess = Some(spec);
+            }
+        }
+    }
+    if helper_name == "bpf_map_update_elem" && is_entry {
+        let ordinal = *update_call_counter;
+        let map_name = reg_map_names[0].as_ref();
+        let site_index =
+            arm64_select_map_call_site(update_sites.len(), ordinal, map_name, update_site_by_map);
+        *update_call_counter += 1;
+        if let Some(site_index) = site_index {
+            let spec = &update_sites[site_index];
+            match spec.kind {
+                UpdateKind::Array | UpdateKind::PerCpuArray => {
+                    let words = build_arm64_array_update(spec)?;
+                    arm64_call_clobber_map_regs(reg_map_names);
+                    return Ok(words);
+                }
+                UpdateKind::Call => {
+                    helper_addr = Some(require_call_target(
+                        spec.target_addr,
+                        &format!("arm64 update-site {ordinal}"),
+                    )?);
+                    helper_addr_from_site = true;
+                }
+            }
+        }
+    }
+    let helper_addr = if helper_addr_from_site {
+        helper_addr.ok_or_else(|| {
+            anyhow!(
+                "arm64 helper call in {sym_name} at byte offset {off:#x} has empty site target for {helper_name}"
+            )
+        })?
+    } else {
+        resolve_helper_target(
+            helper_name,
+            helper_addrs,
+            &format!("arm64 helper call {helper_name}"),
+        )?
+    };
+    let mut words = arm64_helper_call_sequence(helper_addr)?;
+    if let Some(spec) = lookup_postprocess {
+        words.extend(build_arm64_lookup_call_postprocess(&spec)?);
+    }
+    arm64_call_clobber_map_regs(reg_map_names);
+    Ok(words)
+}
+
 fn rewrite_arm64(
     elf: &object::File,
     entry: &SymInfo,
@@ -1905,27 +2605,34 @@ fn rewrite_arm64(
     helper_addrs: &HashMap<String, u64>,
     map_addrs: &HashMap<String, u64>,
     lookup_sites: &[LookupSiteSpec],
+    lookup_maps: &HashMap<String, LookupSiteSpec>,
     update_sites: &[UpdateSiteSpec],
     proof_mode: bool,
     show: bool,
 ) -> Result<RewriteResult> {
     let mut blob = Vec::new();
-    let mut sym_start_word_offset: HashMap<u64, usize> = HashMap::new();
-    let mut sym_end_word_offset: HashMap<u64, usize> = HashMap::new();
-    let mut addr_word_offset: HashMap<u64, usize> = HashMap::new();
+    let mut sym_start_word_offset: HashMap<Arm64AddressKey, usize> = HashMap::new();
+    let mut sym_end_word_offset: HashMap<Arm64AddressKey, usize> = HashMap::new();
+    let mut addr_word_offset: HashMap<Arm64AddressKey, usize> = HashMap::new();
     let mut patches: Vec<Arm64Patch> = Vec::new();
     let relocs = arm64_text_relocations(elf, included)?;
     let mut lookup_call_counter: usize = 0;
     let mut update_call_counter: usize = 0;
     let mut proof_relocs: Vec<ProofReloc> = Vec::new();
-    let mut callee_saved_mask: u8 = 0;
+    let proof_callee_saved_mask = if proof_mode {
+        None
+    } else {
+        read_proof_abi(elf)?
+    };
+    let mut callee_saved_mask = arm64_effective_callee_saved_mask(proof_callee_saved_mask, 0);
     const A64_MOV_X7_X0: u32 = 0xaa00_03e7;
     let mut reg_map_names: [Option<String>; 32] = std::array::from_fn(|_| None);
-    let mut lookup_site_by_map: HashMap<String, usize> = HashMap::new();
+    let mut lookup_site_used = vec![false; lookup_sites.len()];
     let mut update_site_by_map: HashMap<String, usize> = HashMap::new();
 
     for sym in included {
-        let is_entry = sym.address == entry.address;
+        let is_entry = sym.section_index == entry.section_index && sym.address == entry.address;
+        let sym_key = (sym.section_index, sym.address);
         let bytes = read_symbol_bytes(elf, sym)?;
         if bytes.is_empty() || bytes.len() % 4 != 0 {
             bail!(
@@ -1933,28 +2640,53 @@ fn rewrite_arm64(
                 sym.name
             );
         }
-        let entry_abi_strip = if is_entry {
+        let mut helper_imm_registers: [Option<u64>; 32] = std::array::from_fn(|_| None);
+        let mut entry_abi_strip = if is_entry {
             plan_arm64_entry_abi_strip(&bytes)?
         } else {
             Arm64EntryAbiStrip::default()
         };
+        let entry_has_tail_call =
+            is_entry && !proof_mode && arm64_symbol_has_tail_call(&bytes, sym, &relocs);
+        if entry_has_tail_call {
+            entry_abi_strip.tail_call_cleanup_words =
+                plan_arm64_tail_call_cleanup(elf, sym, &bytes, &entry_abi_strip.nop_word_indices)?;
+        }
         if is_entry {
-            callee_saved_mask = entry_abi_strip.callee_saved_mask;
+            callee_saved_mask = arm64_effective_callee_saved_mask(
+                proof_callee_saved_mask,
+                entry_abi_strip.callee_saved_mask,
+            );
         }
 
         let end = sym.address + sym.size;
-        sym_start_word_offset.insert(sym.address, blob.len() / 4);
+        sym_start_word_offset.insert(sym_key, blob.len() / 4);
         for (local_word_index, word) in bytes.chunks_exact(4).enumerate() {
             let off = local_word_index * 4;
             let mut insn = u32::from_le_bytes(word.try_into().unwrap());
             let emit_word_index = blob.len() / 4;
-            addr_word_offset.insert(sym.address + off as u64, emit_word_index);
+            addr_word_offset.insert(
+                (sym.section_index, sym.address + off as u64),
+                emit_word_index,
+            );
             if is_entry && entry_abi_strip.nop_word_indices.contains(&local_word_index) {
                 insn = A64_NOP;
                 blob.extend_from_slice(&insn.to_le_bytes());
                 continue;
             }
-            let reloc = relocs.get(&(sym.address, off as u64));
+            let reloc = relocs.get(&((sym.section_index, sym.address), off as u64));
+            let mut helper_imm_load_reg = None;
+            if let Some((reg, helper_id)) = a64_known_helper_id_load(insn) {
+                helper_imm_registers[reg] = Some(helper_id);
+                helper_imm_load_reg = Some(reg);
+                let next_is_call = bytes.get(off + 4..off + 8).and_then(|next| {
+                    let next = u32::from_le_bytes(next.try_into().ok()?);
+                    a64_blr_reg(next)
+                }) == Some(reg);
+                if !proof_mode && next_is_call {
+                    insn = A64_NOP;
+                }
+            }
             if !proof_mode {
                 if let Some((dst, src)) = a64_mov_reg64(insn) {
                     reg_map_names[dst] = reg_map_names[src].clone();
@@ -1969,7 +2701,7 @@ fn rewrite_arm64(
                                 offset: (emit_word_index * 4) as u64,
                                 r_type: reloc.r_type,
                                 symbol: reloc.target_name.clone(),
-                                addend: reloc.addend,
+                                addend: arm64_proof_reloc_addend(reloc),
                                 data: Some(arm64_reloc_data(elf, reloc, 16)?),
                             });
                             blob.extend_from_slice(&insn.to_le_bytes());
@@ -1999,7 +2731,7 @@ fn rewrite_arm64(
                                 offset: (emit_word_index * 4) as u64,
                                 r_type: reloc.r_type,
                                 symbol: reloc.target_name.clone(),
-                                addend: reloc.addend,
+                                addend: arm64_proof_reloc_addend(reloc),
                                 data: None,
                             });
                             blob.extend_from_slice(&insn.to_le_bytes());
@@ -2013,6 +2745,27 @@ fn rewrite_arm64(
                         continue;
                     }
                     R_AARCH64_CALL26 => {
+                        if let Some(target) = arm64_local_call_target(reloc) {
+                            if !included
+                                .iter()
+                                .any(|s| (s.section_index, s.address) == target)
+                            {
+                                bail!(
+                                    "arm64 local CALL26 in {} at byte offset {off:#x} targets section {:?} address {:#x}, outside included symbols",
+                                    sym.name,
+                                    target.0,
+                                    target.1
+                                );
+                            }
+                            patches.push(Arm64Patch {
+                                word_index: emit_word_index,
+                                kind: Arm64PatchKind::Bl {
+                                    target_symbol: target,
+                                },
+                            });
+                            blob.extend_from_slice(&insn.to_le_bytes());
+                            continue;
+                        }
                         if proof_mode {
                             proof_relocs.push(ProofReloc {
                                 offset: (emit_word_index * 4) as u64,
@@ -2024,112 +2777,26 @@ fn rewrite_arm64(
                             blob.extend_from_slice(&insn.to_le_bytes());
                             continue;
                         }
-                        if reloc.target_name == "bpf_get_smp_processor_id" {
-                            if let Some(inline) =
-                                build_arm64_get_smp_processor_id_inline(helper_addrs)?
-                            {
-                                for word in inline {
-                                    append_u32(&mut blob, word);
-                                }
-                                continue;
-                            }
-                        }
-                        let mut helper_addr = helper_addrs.get(&reloc.target_name).copied();
-                        let mut helper_addr_from_site = false;
-                        let mut lookup_postprocess = None;
-                        if reloc.target_name == "bpf_map_lookup_elem" && is_entry {
-                            let ordinal = lookup_call_counter;
-                            let map_name = reg_map_names[0].as_ref();
-                            let site_index = arm64_select_map_call_site(
-                                lookup_sites.len(),
-                                ordinal,
-                                map_name,
-                                &mut lookup_site_by_map,
-                            )
-                            .ok_or_else(|| {
-                                anyhow!(
-                                    "arm64 bpf_map_lookup_elem call site {ordinal} in {} is missing link-plan lookup_sites metadata",
-                                    sym.name
-                                )
-                            })?;
-                            let spec = &lookup_sites[site_index];
-                            lookup_call_counter += 1;
-                            match spec.kind {
-                                LookupKind::Array | LookupKind::PerCpuArray => {
-                                    for word in build_arm64_array_lookup(spec)? {
-                                        append_u32(&mut blob, word);
-                                    }
-                                    arm64_call_clobber_map_regs(&mut reg_map_names);
-                                    continue;
-                                }
-                                LookupKind::Call
-                                | LookupKind::Hash
-                                | LookupKind::LruHash
-                                | LookupKind::PerCpuHash
-                                | LookupKind::HashOfMaps => {
-                                    helper_addr = Some(resolve_lookup_site_target(
-                                        spec,
-                                        &format!("arm64 lookup-site {ordinal} ({:?})", spec.kind),
-                                    )?);
-                                    helper_addr_from_site = true;
-                                    lookup_postprocess = Some(spec.clone());
-                                }
-                            }
-                        }
-                        if reloc.target_name == "bpf_map_update_elem" && is_entry {
-                            let ordinal = update_call_counter;
-                            let map_name = reg_map_names[0].as_ref();
-                            let site_index = arm64_select_map_call_site(
-                                update_sites.len(),
-                                ordinal,
-                                map_name,
-                                &mut update_site_by_map,
-                            );
-                            update_call_counter += 1;
-                            if let Some(site_index) = site_index {
-                                let spec = &update_sites[site_index];
-                                match spec.kind {
-                                    UpdateKind::Array | UpdateKind::PerCpuArray => {
-                                        for word in build_arm64_array_update(spec)? {
-                                            append_u32(&mut blob, word);
-                                        }
-                                        arm64_call_clobber_map_regs(&mut reg_map_names);
-                                        continue;
-                                    }
-                                    UpdateKind::Call => {
-                                        helper_addr = Some(require_call_target(
-                                            spec.target_addr,
-                                            &format!("arm64 update-site {ordinal}"),
-                                        )?);
-                                        helper_addr_from_site = true;
-                                    }
-                                }
-                            }
-                        }
-                        let helper_addr = if helper_addr_from_site {
-                            helper_addr.ok_or_else(|| {
-                                anyhow!(
-                                    "arm64 CALL26 in {} at byte offset {off:#x} has empty site target for {}",
-                                    sym.name,
-                                    reloc.target_name
-                                )
-                            })?
-                        } else {
-                            resolve_helper_target(
-                                &reloc.target_name,
-                                helper_addrs,
-                                &format!("arm64 helper call {}", reloc.target_name),
-                            )?
-                        };
-                        for word in arm64_helper_call_sequence(helper_addr)? {
+                        for word in build_arm64_helper_call(
+                            &reloc.target_name,
+                            &sym.name,
+                            off,
+                            is_entry,
+                            helper_addrs,
+                            lookup_sites,
+                            lookup_maps,
+                            update_sites,
+                            callee_saved_mask,
+                            &entry_abi_strip.tail_call_cleanup_words,
+                            entry_abi_strip.tail_call_cnt_ptr_stack_offset,
+                            &mut lookup_call_counter,
+                            &mut update_call_counter,
+                            &mut reg_map_names,
+                            &mut lookup_site_used,
+                            &mut update_site_by_map,
+                        )? {
                             append_u32(&mut blob, word);
                         }
-                        if let Some(spec) = lookup_postprocess {
-                            for word in build_arm64_lookup_call_postprocess(&spec)? {
-                                append_u32(&mut blob, word);
-                            }
-                        }
-                        arm64_call_clobber_map_regs(&mut reg_map_names);
                         continue;
                     }
                     R_AARCH64_ADR_GOT_PAGE => {
@@ -2185,11 +2852,60 @@ fn rewrite_arm64(
                         });
                         let rt = (insn & 0x1f) as usize;
                         reg_map_names[rt] = Some(reloc.target_name.clone());
+                        helper_imm_registers[rt] = None;
                         blob.extend_from_slice(&insn.to_le_bytes());
                         continue;
                     }
                     _ => {}
                 }
+            }
+
+            if let Some(reg) = a64_blr_reg(insn) {
+                let Some(helper_id) = helper_imm_registers[reg] else {
+                    if !proof_mode {
+                        bail!(
+                            "arm64 unresolved register-indirect call in {} at byte offset {off:#x} through x{reg}; helper calls must be rewritten before kernel load",
+                            sym.name
+                        );
+                    }
+                    blob.extend_from_slice(&insn.to_le_bytes());
+                    continue;
+                };
+                let helper_name = x86::bpf_helper_name_from_id(helper_id).ok_or_else(|| {
+                    anyhow!(
+                        "arm64 immediate BPF helper id {} in {} at byte offset {off:#x} is unsupported",
+                        helper_id,
+                        sym.name
+                    )
+                })?;
+                for slot in helper_imm_registers.iter_mut().take(19) {
+                    *slot = None;
+                }
+                if proof_mode {
+                    blob.extend_from_slice(&insn.to_le_bytes());
+                    continue;
+                }
+                for word in build_arm64_helper_call(
+                    helper_name,
+                    &sym.name,
+                    off,
+                    is_entry,
+                    helper_addrs,
+                    lookup_sites,
+                    lookup_maps,
+                    update_sites,
+                    callee_saved_mask,
+                    &entry_abi_strip.tail_call_cleanup_words,
+                    entry_abi_strip.tail_call_cnt_ptr_stack_offset,
+                    &mut lookup_call_counter,
+                    &mut update_call_counter,
+                    &mut reg_map_names,
+                    &mut lookup_site_used,
+                    &mut update_site_by_map,
+                )? {
+                    append_u32(&mut blob, word);
+                }
+                continue;
             }
 
             if a64_is_adr_or_adrp(insn) {
@@ -2206,7 +2922,11 @@ fn rewrite_arm64(
             }
 
             if let Some(target) = a64_bl_target(sym.address, local_word_index, insn) {
-                if !included.iter().any(|s| s.address == target) {
+                let target_symbol = (sym.section_index, target);
+                if !included
+                    .iter()
+                    .any(|s| (s.section_index, s.address) == target_symbol)
+                {
                     bail!(
                         "arm64 BL in {} at byte offset {off:#x} targets {target:#x}, outside included symbols",
                         sym.name
@@ -2214,9 +2934,7 @@ fn rewrite_arm64(
                 }
                 patches.push(Arm64Patch {
                     word_index: emit_word_index,
-                    kind: Arm64PatchKind::Bl {
-                        target_symbol_address: target,
-                    },
+                    kind: Arm64PatchKind::Bl { target_symbol },
                 });
                 blob.extend_from_slice(&insn.to_le_bytes());
                 continue;
@@ -2246,21 +2964,21 @@ fn rewrite_arm64(
                 let target_is_symbol_end = target == end;
                 let kind = if a64_is_uncond_b(insn) {
                     Arm64PatchKind::B {
-                        source_symbol_address: sym.address,
+                        source_symbol: sym_key,
                         target_is_symbol_end,
                         target_address: target,
                     }
                 } else if a64_is_b_cond(insn) {
                     Arm64PatchKind::BCond {
                         insn,
-                        source_symbol_address: sym.address,
+                        source_symbol: sym_key,
                         target_is_symbol_end,
                         target_address: target,
                     }
                 } else if a64_is_cbz_cbnz(insn) {
                     Arm64PatchKind::CbzCbnz {
                         insn,
-                        source_symbol_address: sym.address,
+                        source_symbol: sym_key,
                         target_is_symbol_end,
                         target_address: target,
                     }
@@ -2285,8 +3003,13 @@ fn rewrite_arm64(
             } else {
                 blob.extend_from_slice(&insn.to_le_bytes());
             }
+            if let Some(reg) = a64_written_gpr(insn) {
+                if helper_imm_load_reg != Some(reg) {
+                    helper_imm_registers[reg] = None;
+                }
+            }
         }
-        sym_end_word_offset.insert(sym.address, blob.len() / 4);
+        sym_end_word_offset.insert(sym_key, blob.len() / 4);
     }
 
     let mut map_literals: HashMap<String, usize> = HashMap::new();
@@ -2337,10 +3060,8 @@ fn rewrite_arm64(
                 let section = elf
                     .section_by_index(*section_index)
                     .with_context(|| format!("arm64 local data section {section_index:?}"))?;
-                let section_len = section
-                    .data()
-                    .with_context(|| format!("read arm64 local data section {section_index:?}"))?
-                    .len();
+                let section_len = usize::try_from(section.size())
+                    .context("arm64 local data section size does not fit usize")?;
                 if *addend as usize > section_len {
                     bail!(
                         "arm64 local data relocation {target_name} addend {} exceeds section size {}",
@@ -2375,23 +3096,21 @@ fn rewrite_arm64(
             Arm64PatchKind::ReturnToTrampoline => {
                 a64_patch_b(patch.word_index, ret_trampoline_word)?
             }
-            Arm64PatchKind::Bl {
-                target_symbol_address,
-            } => {
+            Arm64PatchKind::Bl { target_symbol } => {
                 let target_word = *sym_start_word_offset
-                    .get(&target_symbol_address)
+                    .get(&target_symbol)
                     .ok_or_else(|| anyhow!("arm64 BL target sym addr not in index map"))?;
                 a64_patch_bl(patch.word_index, target_word)?
             }
             Arm64PatchKind::B {
-                source_symbol_address,
+                source_symbol,
                 target_is_symbol_end,
                 target_address,
             } => {
                 let target_word = arm64_branch_target_word(
                     &addr_word_offset,
                     &sym_end_word_offset,
-                    source_symbol_address,
+                    source_symbol,
                     target_is_symbol_end,
                     target_address,
                 )?;
@@ -2399,14 +3118,14 @@ fn rewrite_arm64(
             }
             Arm64PatchKind::BCond {
                 insn,
-                source_symbol_address,
+                source_symbol,
                 target_is_symbol_end,
                 target_address,
             } => {
                 let target_word = arm64_branch_target_word(
                     &addr_word_offset,
                     &sym_end_word_offset,
-                    source_symbol_address,
+                    source_symbol,
                     target_is_symbol_end,
                     target_address,
                 )?;
@@ -2414,14 +3133,14 @@ fn rewrite_arm64(
             }
             Arm64PatchKind::CbzCbnz {
                 insn,
-                source_symbol_address,
+                source_symbol,
                 target_is_symbol_end,
                 target_address,
             } => {
                 let target_word = arm64_branch_target_word(
                     &addr_word_offset,
                     &sym_end_word_offset,
-                    source_symbol_address,
+                    source_symbol,
                     target_is_symbol_end,
                     target_address,
                 )?;
@@ -2459,18 +3178,19 @@ fn rewrite_arm64(
 
 fn arm64_proof_symbols(
     included: &[SymInfo],
-    start_words: &HashMap<u64, usize>,
-    end_words: &HashMap<u64, usize>,
+    start_words: &HashMap<Arm64AddressKey, usize>,
+    end_words: &HashMap<Arm64AddressKey, usize>,
     blob_len: usize,
 ) -> Result<Vec<ProofSymbol>> {
     let mut out = Vec::new();
     for sym in included {
+        let sym_key = (sym.section_index, sym.address);
         let start = *start_words
-            .get(&sym.address)
+            .get(&sym_key)
             .ok_or_else(|| anyhow!("arm64 proof symbol {} has no start", sym.name))?
             * 4;
         let end = *end_words
-            .get(&sym.address)
+            .get(&sym_key)
             .ok_or_else(|| anyhow!("arm64 proof symbol {} has no end", sym.name))?
             * 4;
         if end < start || end > blob_len {
@@ -2541,5 +3261,274 @@ mod tests {
         assert!(strip.nop_word_indices.contains(&2));
         assert!(strip.nop_word_indices.contains(&3));
         assert_eq!(strip.nop_word_indices.len(), 3);
+    }
+
+    #[test]
+    fn arm64_entry_abi_strip_ignores_body_spills() {
+        let mut bytes = Vec::new();
+        for word in [
+            0xd104c3ff, // sub sp, sp, #0x130
+            0xa91157f6, // stp x22, x21, [sp, #0x110]
+            0xd503201f, // nop
+            0xa9035bf5, // stp x21, x22, [sp, #0x30]
+            0xa95157f6, // ldp x22, x21, [sp, #0x110]
+        ] {
+            bytes.extend_from_slice(&u32::to_le_bytes(word));
+        }
+
+        let strip = plan_arm64_entry_abi_strip(&bytes).unwrap();
+        assert_eq!(strip.callee_saved_mask, 0xc);
+        assert!(strip.nop_word_indices.contains(&1));
+        assert!(!strip.nop_word_indices.contains(&3));
+        assert!(strip.nop_word_indices.contains(&4));
+        assert_eq!(strip.nop_word_indices.len(), 2);
+    }
+
+    #[test]
+    fn arm64_stp_ldp_pair_rejects_non_pair_instructions() {
+        assert!(arm64_stp_ldp_pair(0xaa00_03f3).is_none()); // mov x19, x0
+        assert!(arm64_stp_ldp_pair(0xf900_1bfe).is_none()); // str x30, [sp, #0x30]
+    }
+
+    #[test]
+    fn arm64_entry_abi_strip_matches_writeback_push_pop() {
+        let mut bytes = Vec::new();
+        for word in [
+            0xa9bf4ffe, // stp x30, x19, [sp, #-0x10]!
+            0xd503201f, // nop
+            0xa8c14ffe, // ldp x30, x19, [sp], #0x10
+        ] {
+            bytes.extend_from_slice(&u32::to_le_bytes(word));
+        }
+
+        let strip = plan_arm64_entry_abi_strip(&bytes).unwrap();
+        assert_eq!(strip.callee_saved_mask, 0x1);
+        assert!(strip.nop_word_indices.contains(&0));
+        assert!(strip.nop_word_indices.contains(&2));
+        assert_eq!(strip.nop_word_indices.len(), 2);
+    }
+
+    #[test]
+    fn arm64_immediate_helper_call_patterns_decode() {
+        assert_eq!(a64_known_helper_id_load(0x5280_0028), Some((8, 1)));
+        assert_eq!(a64_known_helper_id_load(0x5280_0e29), Some((9, 113)));
+        assert_eq!(a64_known_helper_id_load(0x5280_1008), None);
+        assert_eq!(a64_blr_reg(0xd63f_0100), Some(8));
+        assert_eq!(a64_blr_reg(0xd63f_0120), Some(9));
+        assert_eq!(a64_blr_reg(A64_NOP), None);
+    }
+
+    #[test]
+    fn arm64_tail_call_cleanup_uses_rewritten_epilogue() {
+        let add_sp = a64_add_imm64(31, 31, 0x20).unwrap();
+        let mut bytes = Vec::new();
+        for word in [
+            0xa9024ffe, // stp x30, x19, [sp, #32]
+            0xd503201f, // body nop
+            0xa9424ffe, // ldp x30, x19, [sp, #32]
+            add_sp,     // add sp, sp, #0x20
+            0xd65f03c0, // ret
+        ] {
+            bytes.extend_from_slice(&u32::to_le_bytes(word));
+        }
+
+        let strip = plan_arm64_entry_abi_strip(&bytes).unwrap();
+        let cleanup =
+            plan_arm64_tail_call_cleanup_from_terminators(&bytes, &[4], &strip.nop_word_indices)
+                .unwrap();
+
+        assert_eq!(cleanup, vec![add_sp]);
+    }
+
+    #[test]
+    fn arm64_tail_call_cleanup_ignores_stripped_restore_padding() {
+        let add_sp = a64_add_imm64(31, 31, 0x80).unwrap();
+        let ldr_lr = 0xf9402bfe; // ldr x30, [sp, #80]
+        let mut bytes = Vec::new();
+        for word in [
+            0xa9074ff4, // stp x20, x19, [sp, #112]
+            0xa90657f6, // stp x22, x21, [sp, #96]
+            0xa94657f6, // ldp x22, x21, [sp, #96]
+            ldr_lr, add_sp, 0xd65f03c0, // ret
+            0xa9474ff4, // ldp x20, x19, [sp, #112]
+            0xaa0803e0, // mov x0, x8
+            ldr_lr, 0xa94657f6, // ldp x22, x21, [sp, #96]
+            add_sp, 0xd65f03c0, // ret
+        ] {
+            bytes.extend_from_slice(&u32::to_le_bytes(word));
+        }
+
+        let strip = plan_arm64_entry_abi_strip(&bytes).unwrap();
+        let cleanup = plan_arm64_tail_call_cleanup_from_terminators(
+            &bytes,
+            &[5, 11],
+            &strip.nop_word_indices,
+        )
+        .unwrap();
+
+        assert_eq!(cleanup, vec![ldr_lr, add_sp]);
+    }
+
+    #[test]
+    fn arm64_tail_call_detection_requires_tail_helper() {
+        let mut bytes = Vec::new();
+        for word in [
+            0x52800028, // mov w8, #1
+            0xd63f0100, // blr x8
+            0x52800189, // mov w9, #12
+            0xd63f0120, // blr x9
+        ] {
+            bytes.extend_from_slice(&u32::to_le_bytes(word));
+        }
+        let sym = SymInfo {
+            name: "entry".to_string(),
+            address: 0,
+            size: bytes.len() as u64,
+            section_index: object::SectionIndex(1),
+        };
+
+        assert!(arm64_symbol_has_tail_call(&bytes, &sym, &HashMap::new()));
+
+        let non_tail = &bytes[..8];
+        let sym = SymInfo {
+            size: non_tail.len() as u64,
+            ..sym
+        };
+        assert!(!arm64_symbol_has_tail_call(non_tail, &sym, &HashMap::new()));
+    }
+
+    #[test]
+    fn arm64_tail_call_inline_patches_all_failure_branches() {
+        let helper_addrs = HashMap::from([
+            (ARM64_BPF_MAP_MAX_ENTRIES_OFFSET_KEY.to_string(), 68),
+            (ARM64_BPF_ARRAY_PTRS_OFFSET_KEY.to_string(), 272),
+            (ARM64_BPF_PROG_BPF_FUNC_OFFSET_KEY.to_string(), 72),
+            (ARM64_TAIL_CALL_OFFSET_KEY.to_string(), 28),
+        ]);
+        let words = build_arm64_tail_call_inline(
+            &helper_addrs,
+            0x3,
+            &[a64_add_imm64(31, 31, 0x20).unwrap()],
+            Some(0xb0),
+        )
+        .unwrap();
+        let out_target = Some((words.len() * 4) as u64);
+
+        assert_eq!(a64_branch_target(0, 3, words[3]), out_target);
+        assert_eq!(a64_branch_target(0, 7, words[7]), out_target);
+        assert_eq!(a64_branch_target(0, 11, words[11]), out_target);
+        assert_eq!(*words.last().unwrap(), a64_br(10).unwrap());
+        assert!(words.len() <= 64);
+    }
+
+    #[test]
+    fn arm64_proof_callee_saved_mask_wins_for_kernel_rewrite() {
+        assert_eq!(arm64_effective_callee_saved_mask(Some(0xf), 0), 0xf);
+        assert_eq!(arm64_effective_callee_saved_mask(None, 0xc), 0xc);
+    }
+
+    #[test]
+    fn arm64_tail_call_inline_pops_proof_sidecar_callee_saved_regs() {
+        let helper_addrs = HashMap::from([
+            (ARM64_BPF_MAP_MAX_ENTRIES_OFFSET_KEY.to_string(), 68),
+            (ARM64_BPF_ARRAY_PTRS_OFFSET_KEY.to_string(), 272),
+            (ARM64_BPF_PROG_BPF_FUNC_OFFSET_KEY.to_string(), 72),
+            (ARM64_TAIL_CALL_OFFSET_KEY.to_string(), 28),
+        ]);
+        let words = build_arm64_tail_call_inline(
+            &helper_addrs,
+            0xf,
+            &[a64_add_imm64(31, 31, 0x80).unwrap()],
+            None,
+        )
+        .unwrap();
+        let load_bpf_func = a64_ldr_u64(10, 11, 72).unwrap();
+        let load_idx = words
+            .iter()
+            .position(|word| *word == load_bpf_func)
+            .unwrap();
+
+        assert!(words[..load_idx].contains(&a64_ldp_post64(21, 22, 16).unwrap()));
+        assert!(words[..load_idx].contains(&a64_ldp_post64(19, 20, 16).unwrap()));
+    }
+
+    #[test]
+    fn arm64_tail_call_counter_pointer_uses_saved_x26_slot() {
+        let mut bytes = Vec::new();
+        for word in [
+            0xd103c3ff, // sub sp, sp, #0xf0
+            0xf9004bfe, // str x30, [sp, #0x90]
+            0xa90b67fa, // stp x26, x25, [sp, #0xb0]
+            0xd503201f, // body nop
+        ] {
+            bytes.extend_from_slice(&u32::to_le_bytes(word));
+        }
+
+        assert_eq!(arm64_saved_reg_stack_offset(&bytes, 26), Some(0xb0));
+    }
+
+    fn arm64_test_lookup_spec(kind: LookupKind, map_name: &str) -> LookupSiteSpec {
+        LookupSiteSpec {
+            kind,
+            target_addr: 0x1234,
+            key_offset: 8,
+            max_entries: 4,
+            elem_size: 16,
+            index_mask: 3,
+            value_offset: 32,
+            percpu_base_addr: 0,
+            map_name: Some(map_name.to_string()),
+        }
+    }
+
+    #[test]
+    fn arm64_lookup_selection_prefers_native_map_over_ordinal_order() {
+        let lookup_sites = vec![
+            arm64_test_lookup_spec(LookupKind::Hash, "hash_map"),
+            arm64_test_lookup_spec(LookupKind::Array, "scratch_map"),
+        ];
+        let lookup_maps = HashMap::new();
+        let mut used = vec![false; lookup_sites.len()];
+
+        let (_label, site_index, spec) = arm64_select_lookup_site(
+            &lookup_sites,
+            &lookup_maps,
+            &mut used,
+            0,
+            Some("scratch_map"),
+            "entry",
+            0xfeed,
+        )
+        .unwrap();
+
+        assert_eq!(site_index, Some(1));
+        assert!(matches!(spec.kind, LookupKind::Array));
+        assert_eq!(used, vec![false, true]);
+    }
+
+    #[test]
+    fn arm64_lookup_selection_uses_lookup_maps_for_extra_native_map_calls() {
+        let lookup_sites = Vec::new();
+        let lookup_maps = HashMap::from([(
+            "cilium_xdp_scratch".to_string(),
+            arm64_test_lookup_spec(LookupKind::PerCpuArray, "cilium_xdp_scratch"),
+        )]);
+        let mut used = Vec::new();
+
+        let (label, site_index, spec) = arm64_select_lookup_site(
+            &lookup_sites,
+            &lookup_maps,
+            &mut used,
+            7,
+            Some("cilium_xdp_scratch"),
+            "cil_xdp_entry",
+            0xfeed,
+        )
+        .unwrap();
+
+        assert_eq!(label, "map:cilium_xdp_scratch");
+        assert_eq!(site_index, None);
+        assert!(matches!(spec.kind, LookupKind::PerCpuArray));
+        assert_eq!(spec.max_entries, 4);
     }
 }

@@ -352,11 +352,13 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
         shim_native_loader_fatal();
     }
     if (!result.replaced) {
-        log_line("native-loader no manifest match for prog=%s manifest=%s "
-                 "source=%s",
+        if (result.prog_fd >= 0)
+            real_close(result.prog_fd);
+        log_line("native-loader no manifest match pass-through for prog=%s "
+                 "manifest=%s source=%s",
                  prog_name ? prog_name : "", manifest, prog->bytecode_path);
         dlclose(handle);
-        shim_native_loader_fatal();
+        return original_fd;
     }
     if (result.prog_fd < 0) {
         log_line("native-loader returned invalid fd for prog=%s",

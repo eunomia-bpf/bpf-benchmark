@@ -446,8 +446,15 @@ constexpr const char *kX86BpfProgBpfFuncOffsetKey =
 constexpr const char *kX86TailCallOffsetKey = "__native_x86_tail_call_offset";
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
+constexpr const char *kArm64BpfMapMaxEntriesOffsetKey =
+    "__native_arm64_bpf_map_max_entries_offset";
+constexpr const char *kArm64BpfArrayPtrsOffsetKey =
+    "__native_arm64_bpf_array_ptrs_offset";
+constexpr const char *kArm64BpfProgBpfFuncOffsetKey =
+    "__native_arm64_bpf_prog_bpf_func_offset";
+constexpr const char *kArm64TailCallOffsetKey = "__native_arm64_tail_call_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v40";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v41";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
 constexpr const char *kNativeStubBtfCacheVersion = "native-stub-btf-cache-v1";
 constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";
@@ -470,6 +477,9 @@ constexpr int kLibbpfCoreBadRelocPoison = 195896080; // 0xbad2310
 #endif
 #ifndef K_BPF_PROG_BPF_FUNC_OFFSET
 #define K_BPF_PROG_BPF_FUNC_OFFSET 72u
+#endif
+#ifndef K_ARM64_BPF_TAIL_CALL_OFFSET
+#define K_ARM64_BPF_TAIL_CALL_OFFSET 28u
 #endif
 
 std::string read_first_line_required(const char *path);
@@ -2480,16 +2490,29 @@ const MapMeta *find_singleton_array_data_map(const CompanionLoad &load,
         return nullptr;
     }
     const MapMeta *match = matches[0];
+    bool same_object = true;
     for (const MapMeta *candidate : matches) {
         if (candidate->kernel_addr != match->kernel_addr) {
-            fail("multiple ARRAY maps match native data section " + section_name +
-                 ": " + match->name + " and " + candidate->name);
+            same_object = false;
+            continue;
         }
         if (candidate->value_addr != match->value_addr) {
             fail("multiple ARRAY maps match native data section " + section_name +
                  " with different value addresses: " + match->name +
                  " and " + candidate->name);
         }
+    }
+    if (!same_object) {
+        /* libbpf can keep earlier per-object data maps with the same section
+         * name open while loading the next object. Bind data symbols to the
+         * newest matching map, which is the object currently being loaded. */
+        match = *std::max_element(matches.begin(), matches.end(),
+                                  [](const MapMeta *a, const MapMeta *b) {
+                                      if (a->kernel_id != b->kernel_id) {
+                                          return a->kernel_id < b->kernel_id;
+                                      }
+                                      return a->fd < b->fd;
+                                  });
     }
     return match;
 }
@@ -2888,9 +2911,7 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
             }
             const uint64_t off = sym.st_value - target_shdr.sh_addr;
             const uint64_t symbol_end = off + sym.st_size;
-            const uint64_t section_end =
-                std::max<uint64_t>(target_shdr.sh_size, symbol_end);
-            const MapMeta *map = find_array_data_map(load, section, section_end);
+            const MapMeta *map = find_array_data_map(load, section, symbol_end);
             if (!map) {
                 continue;
             }

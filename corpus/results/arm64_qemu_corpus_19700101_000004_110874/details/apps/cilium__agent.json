@@ -1,0 +1,10 @@
+{
+  "app": "cilium/agent",
+  "baseline": null,
+  "error": "command failed (2): ip link add dev bpfbench0 type veth peer name bpfbench1\nError: Unknown device type.",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "cilium",
+  "selected_workload": "cilium_endpoint_pktgen",
+  "status": "error"
+}

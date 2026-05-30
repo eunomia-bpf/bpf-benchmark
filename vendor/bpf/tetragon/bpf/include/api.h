@@ -415,6 +415,9 @@ enum {
 };
 
 #ifdef MICRO_NATIVE
+#define bpf_strnstr native_bpf_strnstr
+#define bpf_strncasestr native_bpf_strncasestr
+
 static __attribute__((unused)) int native_ascii_tolower(int c)
 {
 	if (c >= 'A' && c <= 'Z')

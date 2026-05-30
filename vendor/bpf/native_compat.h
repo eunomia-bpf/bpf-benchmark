@@ -70,18 +70,6 @@
 #define _(P) (__builtin_preserve_access_index(P))
 #endif
 
-#define __PT_PARM1_REG di
-#define __PT_PARM2_REG si
-#define __PT_PARM3_REG dx
-#define __PT_PARM4_REG cx
-#define __PT_PARM5_REG r8
-#define __PT_PARM6_REG r9
-#define __PT_RET_REG sp
-#define __PT_FP_REG bp
-#define __PT_RC_REG ax
-#define __PT_SP_REG sp
-#define __PT_IP_REG ip
-
 #if defined(__TARGET_ARCH_x86) && !defined(bpf_target_x86)
 #define bpf_target_x86
 #endif
@@ -90,17 +78,44 @@
 #endif
 
 #define __PT_REGS_CAST(x) ((struct pt_regs *)(x))
-#define PT_REGS_PARM1(x) (__PT_REGS_CAST(x)->__PT_PARM1_REG)
-#define PT_REGS_PARM2(x) (__PT_REGS_CAST(x)->__PT_PARM2_REG)
-#define PT_REGS_PARM3(x) (__PT_REGS_CAST(x)->__PT_PARM3_REG)
-#define PT_REGS_PARM4(x) (__PT_REGS_CAST(x)->__PT_PARM4_REG)
-#define PT_REGS_PARM5(x) (__PT_REGS_CAST(x)->__PT_PARM5_REG)
-#define PT_REGS_PARM6(x) (__PT_REGS_CAST(x)->__PT_PARM6_REG)
-#define PT_REGS_RET(x) (__PT_REGS_CAST(x)->__PT_RET_REG)
-#define PT_REGS_FP(x) (__PT_REGS_CAST(x)->__PT_FP_REG)
-#define PT_REGS_RC(x) (__PT_REGS_CAST(x)->__PT_RC_REG)
-#define PT_REGS_SP(x) (__PT_REGS_CAST(x)->__PT_SP_REG)
-#define PT_REGS_IP(x) (__PT_REGS_CAST(x)->__PT_IP_REG)
+
+#if defined(__TARGET_ARCH_arm64)
+#define __PT_PARM1(x) (__PT_REGS_CAST(x)->regs[0])
+#define __PT_PARM2(x) (__PT_REGS_CAST(x)->regs[1])
+#define __PT_PARM3(x) (__PT_REGS_CAST(x)->regs[2])
+#define __PT_PARM4(x) (__PT_REGS_CAST(x)->regs[3])
+#define __PT_PARM5(x) (__PT_REGS_CAST(x)->regs[4])
+#define __PT_PARM6(x) (__PT_REGS_CAST(x)->regs[5])
+#define __PT_RET(x) (__PT_REGS_CAST(x)->regs[30])
+#define __PT_FP(x) (__PT_REGS_CAST(x)->regs[29])
+#define __PT_RC(x) (__PT_REGS_CAST(x)->regs[0])
+#define __PT_SP(x) (__PT_REGS_CAST(x)->sp)
+#define __PT_IP(x) (__PT_REGS_CAST(x)->pc)
+#else
+#define __PT_PARM1(x) (__PT_REGS_CAST(x)->di)
+#define __PT_PARM2(x) (__PT_REGS_CAST(x)->si)
+#define __PT_PARM3(x) (__PT_REGS_CAST(x)->dx)
+#define __PT_PARM4(x) (__PT_REGS_CAST(x)->cx)
+#define __PT_PARM5(x) (__PT_REGS_CAST(x)->r8)
+#define __PT_PARM6(x) (__PT_REGS_CAST(x)->r9)
+#define __PT_RET(x) (__PT_REGS_CAST(x)->sp)
+#define __PT_FP(x) (__PT_REGS_CAST(x)->bp)
+#define __PT_RC(x) (__PT_REGS_CAST(x)->ax)
+#define __PT_SP(x) (__PT_REGS_CAST(x)->sp)
+#define __PT_IP(x) (__PT_REGS_CAST(x)->ip)
+#endif
+
+#define PT_REGS_PARM1(x) __PT_PARM1(x)
+#define PT_REGS_PARM2(x) __PT_PARM2(x)
+#define PT_REGS_PARM3(x) __PT_PARM3(x)
+#define PT_REGS_PARM4(x) __PT_PARM4(x)
+#define PT_REGS_PARM5(x) __PT_PARM5(x)
+#define PT_REGS_PARM6(x) __PT_PARM6(x)
+#define PT_REGS_RET(x) __PT_RET(x)
+#define PT_REGS_FP(x) __PT_FP(x)
+#define PT_REGS_RC(x) __PT_RC(x)
+#define PT_REGS_SP(x) __PT_SP(x)
+#define PT_REGS_IP(x) __PT_IP(x)
 #define PT_REGS_RET_CORE(x) PT_REGS_RET(x)
 #define PT_REGS_FP_CORE(x) PT_REGS_FP(x)
 #define PT_REGS_RC_CORE(x) PT_REGS_RC(x)

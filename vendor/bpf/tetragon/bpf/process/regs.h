@@ -9,7 +9,6 @@
 FUNC_LOCAL __u64
 read_reg(struct pt_regs *ctx, __u32 src, __u8 shift)
 {
-	/* Using inlined asm for same reason we use WRITE_REG above. */
 #ifdef MICRO_NATIVE
 #define READ_REG(reg) ({                                             \
 	__u64 val = *(__u64 *)((char *)ctx + offsetof(struct pt_regs, reg)); \
@@ -74,14 +73,6 @@ read_reg(struct pt_regs *ctx, __u32 src, __u8 shift)
 FUNC_LOCAL int
 write_reg(struct pt_regs *ctx, __u32 dst, __u8 size, __u64 val)
 {
-	/*
-	 * Using inlined asm to make sure we access context via 'ctx-reg + offset'.
-	 * When using switch on all registers offset values, clang-18 uses * modified
-	 * ctx-reg which fails verifier.
-	 *
-	 * Using clang-20 seems to work, but we need to upgrade first ;-)
-	 */
-
 #ifdef MICRO_NATIVE
 #define WRITE_REG(reg) ({                                                  \
 	void *__p = (char *)ctx + offsetof(struct pt_regs, reg);            \
@@ -163,116 +154,138 @@ write_reg(struct pt_regs *ctx, __u32 dst, __u8 size, __u64 val)
 FUNC_LOCAL __u64
 read_reg(struct pt_regs *ctx, __u32 src, __u8 shift)
 {
-	/* Using inlined asm for same reason we use WRITE_REG above. */
-
-#define READ_REG(reg) ({                                        \
-	__u64 val;                                              \
-	asm volatile("%[val] = *(u64 *)(%[ctx] + %[off])\n"     \
-		     : [ctx] "+r"(ctx), [val] "+r"(val)         \
-		     : [off] "i"(offsetof(struct pt_regs, reg)) \
-		     :);                                        \
-	val <<= shift;                                          \
-	val >>= shift;                                          \
-	val;                                                    \
+#ifdef MICRO_NATIVE
+#define READ_SCALAR_REG(reg) ({                                        \
+	__u64 val = *(__u64 *)((char *)ctx + offsetof(struct pt_regs, reg)); \
+	val <<= shift;                                                  \
+	val >>= shift;                                                  \
+	val;                                                            \
 })
+#define READ_ARRAY_REG(offset) ({ \
+	__u64 val = ctx->regs[(offset)]; \
+	val <<= shift; \
+	val >>= shift; \
+	val; \
+})
+#else
+#define READ_SCALAR_REG(reg) ({                                  \
+	__u64 val;                                                \
+	asm volatile("%[val] = *(u64 *)(%[ctx] + %[off])\n"       \
+		     : [ctx] "+r"(ctx), [val] "+r"(val)           \
+		     : [off] "i"(offsetof(struct pt_regs, reg))   \
+		     :);                                          \
+	val <<= shift;                                            \
+	val >>= shift;                                            \
+	val;                                                      \
+})
+#define READ_ARRAY_REG(offset) ({                                           \
+	__u64 val;                                                          \
+	asm volatile("%[val] = *(u64 *)(%[ctx] + %[off])\n"                 \
+		     : [ctx] "+r"(ctx), [val] "+r"(val)                     \
+		     : [off] "i"(offsetof(struct pt_regs, regs) + 8 * (offset)) \
+		     :);                                                    \
+	val <<= shift;                                                      \
+	val >>= shift;                                                      \
+	val;                                                                \
+})
+#endif
 
 	switch (src) {
 	case offsetof(struct pt_regs, sp):
-		return READ_REG(sp);
+		return READ_SCALAR_REG(sp);
 	case offsetof(struct pt_regs, pc):
-		return READ_REG(pc);
-#undef READ_REG
-#define READ_REG(offset) ({                                                     \
-	__u64 val;                                                              \
-	asm volatile("%[val] = *(u64 *)(%[ctx] + %[off])\n"                     \
-		     : [ctx] "+r"(ctx), [val] "+r"(val)                         \
-		     : [off] "i"(offsetof(struct pt_regs, regs) + 8 * (offset)) \
-		     :);                                                        \
-	val <<= shift;                                                          \
-	val >>= shift;                                                          \
-	val;                                                                    \
-})
+		return READ_SCALAR_REG(pc);
 	case offsetof(struct pt_regs, regs) + 8 * 0:
-		return READ_REG(0);
+		return READ_ARRAY_REG(0);
 	case offsetof(struct pt_regs, regs) + 8 * 1:
-		return READ_REG(1);
+		return READ_ARRAY_REG(1);
 	case offsetof(struct pt_regs, regs) + 8 * 2:
-		return READ_REG(2);
+		return READ_ARRAY_REG(2);
 	case offsetof(struct pt_regs, regs) + 8 * 3:
-		return READ_REG(3);
+		return READ_ARRAY_REG(3);
 	case offsetof(struct pt_regs, regs) + 8 * 4:
-		return READ_REG(4);
+		return READ_ARRAY_REG(4);
 	case offsetof(struct pt_regs, regs) + 8 * 5:
-		return READ_REG(5);
+		return READ_ARRAY_REG(5);
 	case offsetof(struct pt_regs, regs) + 8 * 6:
-		return READ_REG(6);
+		return READ_ARRAY_REG(6);
 	case offsetof(struct pt_regs, regs) + 8 * 7:
-		return READ_REG(7);
+		return READ_ARRAY_REG(7);
 	case offsetof(struct pt_regs, regs) + 8 * 8:
-		return READ_REG(8);
+		return READ_ARRAY_REG(8);
 	case offsetof(struct pt_regs, regs) + 8 * 9:
-		return READ_REG(9);
+		return READ_ARRAY_REG(9);
 	case offsetof(struct pt_regs, regs) + 8 * 10:
-		return READ_REG(10);
+		return READ_ARRAY_REG(10);
 	case offsetof(struct pt_regs, regs) + 8 * 11:
-		return READ_REG(11);
+		return READ_ARRAY_REG(11);
 	case offsetof(struct pt_regs, regs) + 8 * 12:
-		return READ_REG(12);
+		return READ_ARRAY_REG(12);
 	case offsetof(struct pt_regs, regs) + 8 * 13:
-		return READ_REG(13);
+		return READ_ARRAY_REG(13);
 	case offsetof(struct pt_regs, regs) + 8 * 14:
-		return READ_REG(14);
+		return READ_ARRAY_REG(14);
 	case offsetof(struct pt_regs, regs) + 8 * 15:
-		return READ_REG(15);
+		return READ_ARRAY_REG(15);
 	case offsetof(struct pt_regs, regs) + 8 * 16:
-		return READ_REG(16);
+		return READ_ARRAY_REG(16);
 	case offsetof(struct pt_regs, regs) + 8 * 17:
-		return READ_REG(17);
+		return READ_ARRAY_REG(17);
 	case offsetof(struct pt_regs, regs) + 8 * 18:
-		return READ_REG(18);
+		return READ_ARRAY_REG(18);
 	case offsetof(struct pt_regs, regs) + 8 * 19:
-		return READ_REG(19);
+		return READ_ARRAY_REG(19);
 	case offsetof(struct pt_regs, regs) + 8 * 20:
-		return READ_REG(20);
+		return READ_ARRAY_REG(20);
 	case offsetof(struct pt_regs, regs) + 8 * 21:
-		return READ_REG(21);
+		return READ_ARRAY_REG(21);
 	case offsetof(struct pt_regs, regs) + 8 * 22:
-		return READ_REG(22);
+		return READ_ARRAY_REG(22);
 	case offsetof(struct pt_regs, regs) + 8 * 23:
-		return READ_REG(23);
+		return READ_ARRAY_REG(23);
 	case offsetof(struct pt_regs, regs) + 8 * 24:
-		return READ_REG(24);
+		return READ_ARRAY_REG(24);
 	case offsetof(struct pt_regs, regs) + 8 * 25:
-		return READ_REG(25);
+		return READ_ARRAY_REG(25);
 	case offsetof(struct pt_regs, regs) + 8 * 26:
-		return READ_REG(26);
+		return READ_ARRAY_REG(26);
 	case offsetof(struct pt_regs, regs) + 8 * 27:
-		return READ_REG(27);
+		return READ_ARRAY_REG(27);
 	case offsetof(struct pt_regs, regs) + 8 * 28:
-		return READ_REG(28);
+		return READ_ARRAY_REG(28);
 	case offsetof(struct pt_regs, regs) + 8 * 29:
-		return READ_REG(29);
+		return READ_ARRAY_REG(29);
 	case offsetof(struct pt_regs, regs) + 8 * 30:
-		return READ_REG(30);
+		return READ_ARRAY_REG(30);
 	}
 
-#undef READ_REG
-
+#undef READ_SCALAR_REG
+#undef READ_ARRAY_REG
 	return 0;
 }
 
 FUNC_LOCAL int
 write_reg(struct pt_regs *ctx, __u32 dst, __u8 size, __u64 val)
 {
-	/*
-	 * Using inlined asm to make sure we access context via 'ctx-reg + offset'.
-	 * When using switch on all registers offset values, clang-18 uses * modified
-	 * ctx-reg which fails verifier.
-	 *
-	 * Using clang-20 seems to work, but we need to upgrade first ;-)
-	 */
-
-#define WRITE_REG(reg) ({                                                  \
+#ifdef MICRO_NATIVE
+#define WRITE_SCALAR_REG(reg) ({                                           \
+	void *__p = (char *)ctx + offsetof(struct pt_regs, reg);            \
+	if (size == 8)                                                      \
+		*(__u64 *)__p = val;                                        \
+	else if (size == 4)                                                 \
+		*(__u32 *)__p = (__u32)val;                                 \
+	0;                                                                 \
+})
+#define WRITE_ARRAY_REG(offset) ({ \
+	void *__p = &ctx->regs[(offset)]; \
+	if (size == 8) \
+		*(__u64 *)__p = val; \
+	else if (size == 4) \
+		*(__u32 *)__p = (__u32)val; \
+	0; \
+})
+#else
+#define WRITE_SCALAR_REG(reg) ({                                           \
 	asm volatile("if %[size] != 8 goto +2\n"                           \
 		     "*(u64 *)(%[ctx] + %[off]) = %[val]\n"                \
 		     "goto +2\n"                                           \
@@ -283,121 +296,90 @@ write_reg(struct pt_regs *ctx, __u32 dst, __u8 size, __u64 val)
 		     :);                                                   \
 	0;                                                                 \
 })
+#define WRITE_ARRAY_REG(offset) ({                                          \
+	asm volatile("if %[size] != 8 goto +2\n"                           \
+		     "*(u64 *)(%[ctx] + %[off]) = %[val]\n"                \
+		     "goto +2\n"                                           \
+		     "if %[size] != 4 goto +1\n"                           \
+		     "*(u32 *)(%[ctx] + %[off]) = %[val]\n"                \
+		     : [ctx] "+r"(ctx), [val] "+r"(val), [size] "+r"(size) \
+		     : [off] "i"(offsetof(struct pt_regs, regs) + 8 * (offset)) \
+		     :);                                                   \
+	0;                                                                 \
+})
+#endif
 
 	switch (dst) {
 	case offsetof(struct pt_regs, sp):
-		return WRITE_REG(sp);
+		return WRITE_SCALAR_REG(sp);
 	case offsetof(struct pt_regs, pc):
-		return WRITE_REG(pc);
-#undef WRITE_REG
-#define WRITE_REG(offset) ({                                                    \
-	asm volatile("if %[size] != 8 goto +2\n"                                \
-		     "*(u64 *)(%[ctx] + %[off]) = %[val]\n"                     \
-		     "goto +2\n"                                                \
-		     "if %[size] != 4 goto +1\n"                                \
-		     "*(u32 *)(%[ctx] + %[off]) = %[val]\n"                     \
-		     : [ctx] "+r"(ctx), [val] "+r"(val), [size] "+r"(size)      \
-		     : [off] "i"(offsetof(struct pt_regs, regs) + 8 * (offset)) \
-		     :);                                                        \
-	0;                                                                      \
-})
+		return WRITE_SCALAR_REG(pc);
 	case offsetof(struct pt_regs, regs) + 8 * 0:
-		WRITE_REG(0);
-		break;
+		return WRITE_ARRAY_REG(0);
 	case offsetof(struct pt_regs, regs) + 8 * 1:
-		WRITE_REG(1);
-		break;
+		return WRITE_ARRAY_REG(1);
 	case offsetof(struct pt_regs, regs) + 8 * 2:
-		WRITE_REG(2);
-		break;
+		return WRITE_ARRAY_REG(2);
 	case offsetof(struct pt_regs, regs) + 8 * 3:
-		WRITE_REG(3);
-		break;
+		return WRITE_ARRAY_REG(3);
 	case offsetof(struct pt_regs, regs) + 8 * 4:
-		WRITE_REG(4);
-		break;
+		return WRITE_ARRAY_REG(4);
 	case offsetof(struct pt_regs, regs) + 8 * 5:
-		WRITE_REG(5);
-		break;
+		return WRITE_ARRAY_REG(5);
 	case offsetof(struct pt_regs, regs) + 8 * 6:
-		WRITE_REG(6);
-		break;
+		return WRITE_ARRAY_REG(6);
 	case offsetof(struct pt_regs, regs) + 8 * 7:
-		WRITE_REG(7);
-		break;
+		return WRITE_ARRAY_REG(7);
 	case offsetof(struct pt_regs, regs) + 8 * 8:
-		WRITE_REG(8);
-		break;
+		return WRITE_ARRAY_REG(8);
 	case offsetof(struct pt_regs, regs) + 8 * 9:
-		WRITE_REG(9);
-		break;
+		return WRITE_ARRAY_REG(9);
 	case offsetof(struct pt_regs, regs) + 8 * 10:
-		WRITE_REG(10);
-		break;
+		return WRITE_ARRAY_REG(10);
 	case offsetof(struct pt_regs, regs) + 8 * 11:
-		WRITE_REG(11);
-		break;
+		return WRITE_ARRAY_REG(11);
 	case offsetof(struct pt_regs, regs) + 8 * 12:
-		WRITE_REG(12);
-		break;
+		return WRITE_ARRAY_REG(12);
 	case offsetof(struct pt_regs, regs) + 8 * 13:
-		WRITE_REG(13);
-		break;
+		return WRITE_ARRAY_REG(13);
 	case offsetof(struct pt_regs, regs) + 8 * 14:
-		WRITE_REG(14);
-		break;
+		return WRITE_ARRAY_REG(14);
 	case offsetof(struct pt_regs, regs) + 8 * 15:
-		WRITE_REG(15);
-		break;
+		return WRITE_ARRAY_REG(15);
 	case offsetof(struct pt_regs, regs) + 8 * 16:
-		WRITE_REG(16);
-		break;
+		return WRITE_ARRAY_REG(16);
 	case offsetof(struct pt_regs, regs) + 8 * 17:
-		WRITE_REG(17);
-		break;
+		return WRITE_ARRAY_REG(17);
 	case offsetof(struct pt_regs, regs) + 8 * 18:
-		WRITE_REG(18);
-		break;
+		return WRITE_ARRAY_REG(18);
 	case offsetof(struct pt_regs, regs) + 8 * 19:
-		WRITE_REG(19);
-		break;
+		return WRITE_ARRAY_REG(19);
 	case offsetof(struct pt_regs, regs) + 8 * 20:
-		WRITE_REG(20);
-		break;
+		return WRITE_ARRAY_REG(20);
 	case offsetof(struct pt_regs, regs) + 8 * 21:
-		WRITE_REG(21);
-		break;
+		return WRITE_ARRAY_REG(21);
 	case offsetof(struct pt_regs, regs) + 8 * 22:
-		WRITE_REG(22);
-		break;
+		return WRITE_ARRAY_REG(22);
 	case offsetof(struct pt_regs, regs) + 8 * 23:
-		WRITE_REG(23);
-		break;
+		return WRITE_ARRAY_REG(23);
 	case offsetof(struct pt_regs, regs) + 8 * 24:
-		WRITE_REG(24);
-		break;
+		return WRITE_ARRAY_REG(24);
 	case offsetof(struct pt_regs, regs) + 8 * 25:
-		WRITE_REG(25);
-		break;
+		return WRITE_ARRAY_REG(25);
 	case offsetof(struct pt_regs, regs) + 8 * 26:
-		WRITE_REG(26);
-		break;
+		return WRITE_ARRAY_REG(26);
 	case offsetof(struct pt_regs, regs) + 8 * 27:
-		WRITE_REG(27);
-		break;
+		return WRITE_ARRAY_REG(27);
 	case offsetof(struct pt_regs, regs) + 8 * 28:
-		WRITE_REG(28);
-		break;
+		return WRITE_ARRAY_REG(28);
 	case offsetof(struct pt_regs, regs) + 8 * 29:
-		WRITE_REG(29);
-		break;
+		return WRITE_ARRAY_REG(29);
 	case offsetof(struct pt_regs, regs) + 8 * 30:
-		WRITE_REG(30);
-		break;
+		return WRITE_ARRAY_REG(30);
 	}
 
-#undef WRITE_REG
-
+#undef WRITE_SCALAR_REG
+#undef WRITE_ARRAY_REG
 	return 0;
 }
 

@@ -285,7 +285,11 @@ __read_arg_1(void *ctx, int type, long orig_off, unsigned long arg, int argm, ch
 		struct filename *file;
 
 		probe_read(&file, sizeof(file), &arg);
+#if defined(MICRO_NATIVE) && defined(__TARGET_ARCH_arm64)
+		probe_read(&arg, sizeof(arg), &((struct __filename_head *)file)->name);
+#else
 		probe_read(&arg, sizeof(arg), &file->name);
+#endif
 	}
 		fallthrough;
 	case string_type:

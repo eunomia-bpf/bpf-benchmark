@@ -11,7 +11,7 @@ STAGE2_PROGRAM_BUILD_X86 := $(STAGE2_PROGRAM_DIR)/build-x86
 STAGE2_PROGRAM_BUILD_ARM64 := $(STAGE2_PROGRAM_DIR)/build-arm64
 VENDOR_BUILD_DIR := $(ROOT_DIR)/vendor/build
 NATIVE_BPF_ARTIFACTS_X86 := $(VENDOR_BUILD_DIR)/native-bpf/x86/stage
-NATIVE_BPF_ARTIFACTS_ARM64 := $(RUNNER_DIR)/build-native-bpf-arm64
+NATIVE_BPF_ARTIFACTS_ARM64 := $(VENDOR_BUILD_DIR)/native-bpf/arm64/stage
 
 DEFAULT_RUNNER_LLVM_DIR := $(ROOT_DIR)/llvm-backend/build-bpf-kinsn/lib/cmake/llvm
 RUNNER_LLVM_DIR := $(if $(strip $(LLVM_DIR)),$(LLVM_DIR),$(if $(strip $(RUN_LLVM_DIR)),$(RUN_LLVM_DIR),$(DEFAULT_RUNNER_LLVM_DIR)))
@@ -210,8 +210,12 @@ host-stage2-programs-arm64: host-micro-programs-arm64
 host-native-bpf-x86: host-rust-x86
 	$(MAKE) -C "$(ROOT_DIR)/vendor/bpf" native-artifacts
 
-host-native-bpf-arm64:
-	install -d "$(NATIVE_BPF_ARTIFACTS_ARM64)"
+host-native-bpf-arm64: host-rust-arm64 host-source-apps-arm64 $(HOST_KERNEL_VMLINUX_ARM64)
+	$(MAKE) -C "$(ROOT_DIR)/vendor/bpf" ARCH=arm64 GOARCH=arm64 \
+		VMLINUX_BTF="$(HOST_KERNEL_VMLINUX_ARM64)" \
+		NATIVE_LINK="$(NATIVE_LINK_DIR)/target/$(ARM64_RUST_TARGET)/release/native-link" \
+		NATIVE_SYS_INCLUDE_FLAGS="$(ARM64_SYS_INCLUDE_FLAGS)" \
+		native-artifacts
 
 host-x86-sim-proofs: host-micro-programs-x86
 	$(MAKE) -C "$(ROOT_DIR)/native-sim/x86" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_X86)/x86_sim_proofs" MICRO_CONFIG="$(MICRO_PROOF_CONFIG)" micro-proofs-build

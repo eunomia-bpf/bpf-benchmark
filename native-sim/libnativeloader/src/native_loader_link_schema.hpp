@@ -113,6 +113,14 @@ NativeLinkArgs build_native_link_args(
     {
         uint32_t cpu_offset = K_THREAD_INFO_CPU_OFFSET;
         add_name_addr(out.helpers, kArm64ThreadInfoCpuOffsetHelperKey, cpu_offset);
+        add_name_addr(out.helpers, kArm64BpfMapMaxEntriesOffsetKey,
+                      K_BPF_MAP_MAX_ENTRIES_OFFSET);
+        add_name_addr(out.helpers, kArm64BpfArrayPtrsOffsetKey,
+                      K_BPF_ARRAY_PTRS_OFFSET);
+        add_name_addr(out.helpers, kArm64BpfProgBpfFuncOffsetKey,
+                      K_BPF_PROG_BPF_FUNC_OFFSET);
+        add_name_addr(out.helpers, kArm64TailCallOffsetKey,
+                      K_ARM64_BPF_TAIL_CALL_OFFSET);
     }
 #endif
 
