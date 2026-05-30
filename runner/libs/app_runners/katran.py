@@ -619,6 +619,29 @@ KATRAN_PKTGEN_THREAD_IDS = (0, 1, 2, 3)
 KATRAN_WORKLOADS = {"xdp_traffic", "xdp_pktgen"}
 
 
+def _available_katran_pktgen_thread_ids(namespace: str) -> tuple[int, ...]:
+    completed = ns_exec_command(
+        namespace,
+        [
+            "sh",
+            "-c",
+            'for path in /proc/net/pktgen/kpktgend_*; do [ -e "$path" ] && basename "$path"; done',
+        ],
+    )
+    available: set[int] = set()
+    for line in (completed.stdout or "").splitlines():
+        name = line.strip()
+        if not name.startswith("kpktgend_"):
+            continue
+        suffix = name.removeprefix("kpktgend_")
+        if suffix.isdigit():
+            available.add(int(suffix))
+    selected = tuple(thread_id for thread_id in KATRAN_PKTGEN_THREAD_IDS if thread_id in available)
+    if not selected:
+        raise RuntimeError(f"Katran pktgen found no usable pktgen threads in namespace {namespace}")
+    return selected
+
+
 def _resolve_katran_bpf_artifact(*relative_candidates: str) -> Path:
     katran_root = repo_artifact_root() / "katran"
     for candidate in relative_candidates:
@@ -744,8 +767,9 @@ class KatranRunner(AppRunner):
         duration_s = max(1, int(float(seconds)))
         ensure_kernel_module_loaded("pktgen")
         self._pktgen_write(PKTGEN_CTRL, "reset")
-        aliases = tuple(f"{ROUTER_LB_IFACE}@{thread_id}" for thread_id in KATRAN_PKTGEN_THREAD_IDS)
-        for thread_id, alias in zip(KATRAN_PKTGEN_THREAD_IDS, aliases, strict=True):
+        pktgen_thread_ids = _available_katran_pktgen_thread_ids(ROUTER_NS)
+        aliases = tuple(f"{ROUTER_LB_IFACE}@{thread_id}" for thread_id in pktgen_thread_ids)
+        for thread_id, alias in zip(pktgen_thread_ids, aliases, strict=True):
             thread_path = f"/proc/net/pktgen/kpktgend_{thread_id}"
             self._pktgen_write(thread_path, "rem_device_all")
             self._pktgen_write(thread_path, f"add_device {alias}")
@@ -805,7 +829,7 @@ class KatranRunner(AppRunner):
                         "src_ip": CLIENT_IP, "dst_ip": VIP_IP, "dst_port": VIP_PORT,
                         "proto": UDP_PROTO},
             )
-            for thread_id, alias in zip(KATRAN_PKTGEN_THREAD_IDS, aliases, strict=True)
+            for thread_id, alias in zip(pktgen_thread_ids, aliases, strict=True)
         )
         return WorkloadResult(
             workload_name="katran_kernel_pktgen_l2_udp",
@@ -818,7 +842,7 @@ class KatranRunner(AppRunner):
                     "shared_skb": False, "xmit_mode": "start_xmit",
                     "pkt_size": DEFAULT_PKTGEN_PKT_SIZE,
                     "clone_skb": DEFAULT_PKTGEN_CLONE_SKB,
-                    "threads": list(KATRAN_PKTGEN_THREAD_IDS),
+                    "threads": list(pktgen_thread_ids),
                     "src_ip": CLIENT_IP, "dst_ip": VIP_IP, "dst_port": VIP_PORT, "proto": UDP_PROTO},
             components=components,
         )

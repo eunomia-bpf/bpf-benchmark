@@ -282,6 +282,15 @@ constexpr const char *kVmlinuxBtfPath = "/sys/kernel/btf/vmlinux";
 constexpr const char *kDebugfsDir = "/sys/kernel/debug";
 constexpr uint32_t kMaxBlobs = 512;
 
+bool native_lab_needs_tail_call_probe()
+{
+#if defined(__aarch64__)
+    return false;
+#else
+    return true;
+#endif
+}
+
 class NativeLabUploadLock {
 public:
     NativeLabUploadLock()
@@ -496,7 +505,8 @@ void ensure_debugfs_mounted()
 
 uint64_t lookup_native_lab_ptr_by_fd(int map_fd,
                                      const char *path,
-                                     const char *label)
+                                     const char *label,
+                                     bool allow_unavailable = false)
 {
     ensure_debugfs_mounted();
     int fd = open(path, O_RDWR | O_CLOEXEC);
@@ -515,6 +525,10 @@ uint64_t lookup_native_lab_ptr_by_fd(int map_fd,
     int saved = errno;
     if (written != request_len) {
         close(fd);
+        if (allow_unavailable && written < 0 &&
+            (saved == EOPNOTSUPP || saved == EINVAL)) {
+            return 0;
+        }
         fail(std::string("write ") + path + ": " + std::strerror(saved));
     }
 
@@ -552,6 +566,12 @@ uint64_t lookup_kernel_map_value_ptr_by_fd(int map_fd)
 {
     return lookup_native_lab_ptr_by_fd(
         map_fd, kNativeLabTarget.map_value_ptr_path, "map_value_ptr");
+}
+
+uint64_t lookup_kernel_map_value_ptr_by_fd_if_available(int map_fd)
+{
+    return lookup_native_lab_ptr_by_fd(
+        map_fd, kNativeLabTarget.map_value_ptr_path, "map_value_ptr", true);
 }
 
 constexpr size_t kRelocRecordBytes = 16;
@@ -598,6 +618,115 @@ void append_u64_le(std::vector<uint8_t> &out, uint64_t v)
     for (unsigned i = 0; i < 8; i++) {
         out.push_back(static_cast<uint8_t>((v >> (i * 8)) & 0xff));
     }
+}
+
+std::string hex_u64(uint64_t value)
+{
+    char buf[17];
+    std::snprintf(buf, sizeof(buf), "%016llx",
+                  static_cast<unsigned long long>(value));
+    return std::string(buf);
+}
+
+std::string offset_or_none(size_t offset)
+{
+    if (offset == std::numeric_limits<size_t>::max()) {
+        return "none";
+    }
+    return std::to_string(offset);
+}
+
+std::string native_blob_diagnostics(const std::vector<uint8_t> &blob,
+                                    const std::vector<NativeBlobChunk> &chunks)
+{
+    constexpr uint32_t kArm64BreakFault = 0xd4200000;
+    uint64_t hash = 1469598103934665603ULL;
+    for (uint8_t byte : blob) {
+        hash ^= byte;
+        hash *= 1099511628211ULL;
+    }
+
+    size_t break_fault_words = 0;
+    size_t first_break_fault_offset = std::numeric_limits<size_t>::max();
+    size_t zero_words = 0;
+    size_t first_zero_offset = std::numeric_limits<size_t>::max();
+    const size_t word_bytes = blob.size() - (blob.size() % sizeof(uint32_t));
+    for (size_t offset = 0; offset < word_bytes; offset += sizeof(uint32_t)) {
+        const uint32_t word = read_u32_le(blob.data() + offset);
+        if (word == kArm64BreakFault) {
+            if (first_break_fault_offset == std::numeric_limits<size_t>::max()) {
+                first_break_fault_offset = offset;
+            }
+            break_fault_words++;
+        }
+        if (word == 0) {
+            if (first_zero_offset == std::numeric_limits<size_t>::max()) {
+                first_zero_offset = offset;
+            }
+            zero_words++;
+        }
+    }
+
+    size_t chunk_range_bad = 0;
+    size_t first_bad_chunk = std::numeric_limits<size_t>::max();
+    size_t chunk_alignment_bad = 0;
+    size_t first_unaligned_chunk = std::numeric_limits<size_t>::max();
+    size_t chunk_length_bad = 0;
+    size_t first_bad_length_chunk = std::numeric_limits<size_t>::max();
+    size_t chunk_contiguous_bad = 0;
+    size_t first_noncontiguous_chunk = std::numeric_limits<size_t>::max();
+    size_t expected_offset = 0;
+    for (size_t i = 0; i < chunks.size(); i++) {
+        const NativeBlobChunk &chunk = chunks[i];
+        if (chunk.offset > blob.size() || chunk.len > blob.size() - chunk.offset) {
+            if (first_bad_chunk == std::numeric_limits<size_t>::max()) {
+                first_bad_chunk = i;
+            }
+            chunk_range_bad++;
+        }
+        if ((chunk.offset % sizeof(uint32_t)) != 0 ||
+            (chunk.len % sizeof(uint32_t)) != 0) {
+            if (first_unaligned_chunk == std::numeric_limits<size_t>::max()) {
+                first_unaligned_chunk = i;
+            }
+            chunk_alignment_bad++;
+        }
+        if (chunk.len == 0 || chunk.len > kNativeLabTarget.chunk_bytes) {
+            if (first_bad_length_chunk == std::numeric_limits<size_t>::max()) {
+                first_bad_length_chunk = i;
+            }
+            chunk_length_bad++;
+        }
+        if (chunk.offset != expected_offset) {
+            if (first_noncontiguous_chunk == std::numeric_limits<size_t>::max()) {
+                first_noncontiguous_chunk = i;
+            }
+            chunk_contiguous_bad++;
+        }
+        expected_offset = chunk.offset + chunk.len;
+    }
+    const bool final_size_matches = expected_offset == blob.size();
+
+    std::ostringstream out;
+    out << "native_blob_diag:"
+        << " fnv64=" << hex_u64(hash)
+        << " word_count=" << (blob.size() / sizeof(uint32_t))
+        << " tail_bytes=" << (blob.size() % sizeof(uint32_t))
+        << " break_fault_words=" << break_fault_words
+        << " first_break_fault_offset=" << offset_or_none(first_break_fault_offset)
+        << " zero_words=" << zero_words
+        << " first_zero_offset=" << offset_or_none(first_zero_offset)
+        << " chunk_range_bad=" << chunk_range_bad
+        << " first_bad_chunk=" << offset_or_none(first_bad_chunk)
+        << " chunk_alignment_bad=" << chunk_alignment_bad
+        << " first_unaligned_chunk=" << offset_or_none(first_unaligned_chunk)
+        << " chunk_length_bad=" << chunk_length_bad
+        << " first_bad_length_chunk=" << offset_or_none(first_bad_length_chunk)
+        << " chunk_contiguous_bad=" << chunk_contiguous_bad
+        << " first_noncontiguous_chunk=" << offset_or_none(first_noncontiguous_chunk)
+        << " final_chunk_end=" << expected_offset
+        << " final_size_matches=" << (final_size_matches ? 1 : 0);
+    return out.str();
 }
 
 std::vector<NativeLabReloc> parse_native_lab_relocs(const std::vector<uint8_t> &relocs,
@@ -1617,23 +1746,6 @@ bool map_matches_shape(const MapMeta &meta, const NativeMapShape &shape)
     return true;
 }
 
-bool map_info_matches_shape(const bpf_map_info &info, const NativeMapShape &shape)
-{
-    if (shape.type >= 0 && static_cast<int>(info.type) != shape.type) {
-        return false;
-    }
-    if (shape.key_size != 0 && info.key_size != shape.key_size) {
-        return false;
-    }
-    if (shape.value_size != 0 && info.value_size != shape.value_size) {
-        return false;
-    }
-    if (shape.max_entries != 0 && info.max_entries != shape.max_entries) {
-        return false;
-    }
-    return true;
-}
-
 bool fd_is_bpf_map(int fd)
 {
     char fdpath[64];
@@ -1914,7 +2026,7 @@ uint64_t lookup_array_value_addr_if_direct(const bpf_map_info &info, int map_fd)
     if (info.type != BPF_MAP_TYPE_ARRAY || info.max_entries != 1) {
         return 0;
     }
-    return lookup_kernel_map_value_ptr_by_fd(map_fd);
+    return lookup_kernel_map_value_ptr_by_fd_if_available(map_fd);
 }
 
 MapMeta load_map_meta_from_fd(int map_fd)
@@ -1985,15 +2097,73 @@ std::vector<MapMeta> collect_open_process_maps(Predicate predicate)
 
 std::string bpf_obj_name_truncation(const std::string &name);
 
+struct OpenProcessMapsCache {
+    bool loaded = false;
+    std::vector<MapMeta> maps;
+};
+
+thread_local OpenProcessMapsCache *active_open_process_maps_cache = nullptr;
+
+class OpenProcessMapsCacheScope {
+public:
+    explicit OpenProcessMapsCacheScope(OpenProcessMapsCache &cache)
+        : previous_(active_open_process_maps_cache)
+    {
+        active_open_process_maps_cache = &cache;
+    }
+
+    OpenProcessMapsCacheScope(const OpenProcessMapsCacheScope &) = delete;
+    OpenProcessMapsCacheScope &operator=(const OpenProcessMapsCacheScope &) = delete;
+
+    ~OpenProcessMapsCacheScope()
+    {
+        active_open_process_maps_cache = previous_;
+    }
+
+private:
+    OpenProcessMapsCache *previous_;
+};
+
+template <typename Predicate>
+std::vector<MapMeta> collect_open_process_maps_cached(Predicate predicate)
+{
+    OpenProcessMapsCache *cache = active_open_process_maps_cache;
+    if (!cache) {
+        return collect_open_process_maps(predicate);
+    }
+    if (!cache->loaded) {
+        cache->maps = collect_open_process_maps(
+            [](const bpf_map_info &, const std::string &) {
+                return true;
+            });
+        cache->loaded = true;
+    }
+
+    std::vector<MapMeta> matches;
+    for (const MapMeta &meta : cache->maps) {
+        bpf_map_info info = {};
+        info.id = meta.kernel_id;
+        info.type = static_cast<__u32>(meta.type);
+        info.key_size = meta.key_size;
+        info.value_size = meta.value_size;
+        info.max_entries = meta.max_entries;
+        if (predicate(info, meta.name)) {
+            matches.push_back(meta);
+        }
+    }
+    return matches;
+}
+
 bool find_open_process_map_by_name(const std::string &name,
                                    const std::vector<NativeMapRule> &map_rules,
                                    MapMeta &out)
 {
     const std::string truncated = bpf_obj_name_truncation(name);
     std::vector<MapMeta> matches =
-        collect_open_process_maps([&](const bpf_map_info &, const std::string &map_name) {
-            return map_name == truncated || map_name == name;
-        });
+        collect_open_process_maps_cached(
+            [&](const bpf_map_info &, const std::string &map_name) {
+                return map_name == truncated || map_name == name;
+            });
 
     if (matches.empty()) {
         return false;
@@ -2036,14 +2206,14 @@ bool find_open_process_array_data_map_by_name(const std::string &name,
 {
     const std::string truncated = bpf_obj_name_truncation(name);
     std::vector<MapMeta> matches =
-        collect_open_process_maps([&](const bpf_map_info &info,
-                                      const std::string &map_name) {
-            return (map_name == truncated || map_name == name) &&
-                   info.type == BPF_MAP_TYPE_ARRAY &&
-                   info.key_size == 4 &&
-                   info.max_entries == 1 &&
-                   info.value_size >= min_value_size;
-        });
+        collect_open_process_maps_cached(
+            [&](const bpf_map_info &info, const std::string &map_name) {
+                return (map_name == truncated || map_name == name) &&
+                       info.type == BPF_MAP_TYPE_ARRAY &&
+                       info.key_size == 4 &&
+                       info.max_entries == 1 &&
+                       info.value_size >= min_value_size;
+            });
 
     if (matches.empty()) {
         return false;
@@ -2165,6 +2335,7 @@ struct LinkerOutput {
     std::filesystem::path relocs;
     std::filesystem::path map_patches;
     std::filesystem::path abi;
+    bool prebuilt_proof = false;
 };
 
 struct NativeLinkArgs {
@@ -2211,6 +2382,8 @@ struct LinkedBlob {
     uint64_t native_link_exec_ns = 0;
     uint64_t native_link_read_ns = 0;
     uint64_t map_patch_ns = 0;
+    bool cache_hit = false;
+    bool prebuilt_proof = false;
     uint32_t callee_saved_mask = 0;
     std::vector<uint32_t> relocated_map_ids;
 };
@@ -2228,6 +2401,7 @@ struct CompanionLoad {
     uint32_t prog_type = 0;
     std::vector<MapMeta> maps;
     std::vector<NativeMapRule> map_rules;
+    std::vector<MapMeta> source_tail_call_maps;
     /* Per-call-site spec for every `bpf_map_lookup_elem` invocation in
      * the entry program, listed in BPF-source order. Each entry is a
      * (target_kernel_address, key_offset) pair. native-link routes the
@@ -2275,6 +2449,19 @@ struct CompanionLoad {
     };
     std::vector<UpdateSite> update_sites;
 };
+
+void add_source_tail_call_map(CompanionLoad &load, const MapMeta &meta)
+{
+    if (meta.type != BPF_MAP_TYPE_PROG_ARRAY) {
+        return;
+    }
+    for (const MapMeta &existing : load.source_tail_call_maps) {
+        if (existing.kernel_id == meta.kernel_id) {
+            return;
+        }
+    }
+    load.source_tail_call_maps.push_back(meta);
+}
 
 void add_exact_map_meta(CompanionLoad &load, const MapMeta &meta)
 {
@@ -2385,6 +2572,32 @@ void add_map_symbol_alias_meta(CompanionLoad &load,
     load.native_map_symbols[alias] = alias;
 }
 
+const MapMeta *source_tail_call_map_for_native_symbol(const CompanionLoad &load,
+                                                      const MapMeta &candidate)
+{
+    if (candidate.type != BPF_MAP_TYPE_PROG_ARRAY ||
+        load.source_tail_call_maps.size() != 1) {
+        return nullptr;
+    }
+    const MapMeta &source = load.source_tail_call_maps.front();
+    if (source.type != BPF_MAP_TYPE_PROG_ARRAY) {
+        return nullptr;
+    }
+    return &source;
+}
+
+void add_native_map_symbol_alias_meta(CompanionLoad &load,
+                                      const std::string &alias,
+                                      const MapMeta &candidate)
+{
+    if (const MapMeta *source_tail_call =
+            source_tail_call_map_for_native_symbol(load, candidate)) {
+        add_map_symbol_alias_meta(load, alias, *source_tail_call);
+        return;
+    }
+    add_map_symbol_alias_meta(load, alias, candidate);
+}
+
 bool map_matches_native_symbol_rule(const NativeMapRule &rule,
                                     const std::string &symbol,
                                     const MapMeta &meta)
@@ -2399,9 +2612,18 @@ bool map_info_matches_native_symbol_rule(const NativeMapRule &rule,
                                          const bpf_map_info &info,
                                          const std::string &map_name)
 {
-    return rule.native_symbol == symbol &&
-           native_map_rule_matches(rule, map_name) &&
-           map_info_matches_shape(info, rule.shape);
+    MapMeta meta{
+        map_name,
+        -1,
+        info.id,
+        static_cast<int>(info.type),
+        info.key_size,
+        info.value_size,
+        info.max_entries,
+        0,
+        0,
+    };
+    return map_matches_native_symbol_rule(rule, symbol, meta);
 }
 
 bool find_loaded_manifest_native_symbol_map(const CompanionLoad &load,
@@ -2434,18 +2656,18 @@ bool find_open_process_manifest_native_symbol_map(const CompanionLoad &load,
 {
     bool object_scoped = false;
     std::vector<MapMeta> matches =
-        collect_open_process_maps([&](const bpf_map_info &info,
-                                      const std::string &map_name) {
-            for (const NativeMapRule &rule : load.map_rules) {
-                if (!map_info_matches_native_symbol_rule(rule, symbol,
-                                                         info, map_name)) {
-                    continue;
+        collect_open_process_maps_cached(
+            [&](const bpf_map_info &info, const std::string &map_name) {
+                for (const NativeMapRule &rule : load.map_rules) {
+                    if (!map_info_matches_native_symbol_rule(rule, symbol,
+                                                             info, map_name)) {
+                        continue;
+                    }
+                    object_scoped = object_scoped || rule.object_scoped;
+                    return true;
                 }
-                object_scoped = object_scoped || rule.object_scoped;
-                return true;
-            }
-            return false;
-        });
+                return false;
+            });
 
     if (matches.empty()) {
         return false;
@@ -2599,19 +2821,21 @@ void add_native_map_symbol_alias(CompanionLoad &load, const std::string &name)
     }
 
     if (const MapMeta *exact = find_exact_map_meta(load, name)) {
-        add_map_symbol_alias_meta(load, name, *exact);
+        add_native_map_symbol_alias_meta(load, name, *exact);
         return;
     }
 
     MapMeta manifest_symbol_map{};
     if (find_loaded_manifest_native_symbol_map(load, name, manifest_symbol_map)) {
-        add_map_symbol_alias_meta(load, name, manifest_symbol_map);
+        add_native_map_symbol_alias_meta(load, name, manifest_symbol_map);
         return;
     }
     if (find_open_process_manifest_native_symbol_map(load, name,
                                                      manifest_symbol_map)) {
-        add_map_meta(load, manifest_symbol_map);
-        add_map_symbol_alias_meta(load, name, manifest_symbol_map);
+        if (!source_tail_call_map_for_native_symbol(load, manifest_symbol_map)) {
+            add_map_meta(load, manifest_symbol_map);
+        }
+        add_native_map_symbol_alias_meta(load, name, manifest_symbol_map);
         return;
     }
 
@@ -2647,14 +2871,16 @@ void add_native_map_symbol_alias(CompanionLoad &load, const std::string &name)
                      " matches multiple loaded maps named " + truncated);
             }
         }
-        add_map_symbol_alias_meta(load, name, *match);
+        add_native_map_symbol_alias_meta(load, name, *match);
         return;
     }
 
     MapMeta process_map{};
     if (find_open_process_map_by_name(name, load.map_rules, process_map)) {
-        add_map_meta(load, process_map);
-        add_map_symbol_alias_meta(load, name, process_map);
+        if (!source_tail_call_map_for_native_symbol(load, process_map)) {
+            add_map_meta(load, process_map);
+        }
+        add_native_map_symbol_alias_meta(load, name, process_map);
     }
 }
 
@@ -3012,11 +3238,14 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
 #endif
 
     for (const SourceHelperCall &call : source_calls) {
+        auto map_it = (call.map_fd >= 0) ? meta_by_source_fd.find(call.map_fd) : meta_by_source_fd.end();
         if (call.helper_id == BPF_FUNC_tail_call) {
             out.has_tail_call = true;
+            if (map_it != meta_by_source_fd.end()) {
+                add_source_tail_call_map(out, map_it->second);
+            }
             continue;
         }
-        auto map_it = (call.map_fd >= 0) ? meta_by_source_fd.find(call.map_fd) : meta_by_source_fd.end();
         if (call.helper_id == BPF_FUNC_map_lookup_elem) {
             CompanionLoad::LookupSite site{
                 CompanionLoad::LookupSite::Kind::Call,
@@ -3160,7 +3389,52 @@ bool linker_output_exists(const LinkerOutput &out)
            && std::filesystem::exists(out.blob, ec)
            && std::filesystem::exists(out.relocs, ec)
            && std::filesystem::exists(out.map_patches, ec)
-           && std::filesystem::exists(out.abi, ec);
+	           && std::filesystem::exists(out.abi, ec);
+}
+
+bool env_bool_enabled(const char *name)
+{
+    const char *raw = std::getenv(name);
+    if (!raw || !raw[0]) {
+        return false;
+    }
+    return std::strcmp(raw, "1") == 0
+        || std::strcmp(raw, "true") == 0
+        || std::strcmp(raw, "yes") == 0
+        || std::strcmp(raw, "on") == 0;
+}
+
+std::string native_object_proof_stem(const std::filesystem::path &elf_path)
+{
+    std::string name = elf_path.filename().string();
+    static constexpr const char *kSuffix = ".native.o";
+    static constexpr size_t kSuffixLen = std::char_traits<char>::length(kSuffix);
+    if (name.size() > kSuffixLen &&
+        name.compare(name.size() - kSuffixLen, kSuffixLen, kSuffix) == 0) {
+        name.resize(name.size() - kSuffixLen);
+        return name;
+    }
+    return elf_path.stem().string();
+}
+
+std::optional<std::filesystem::path> find_prebuilt_proof(
+    const std::filesystem::path &elf_path,
+    const std::string &symbol_name)
+{
+    std::error_code ec;
+    const std::filesystem::path dir = elf_path.parent_path();
+    const std::string object_stem = native_object_proof_stem(elf_path);
+    std::vector<std::filesystem::path> candidates{
+        dir / (object_stem + "." + symbol_name + ".proof.o"),
+        dir / (symbol_name + ".proof.o"),
+    };
+    for (const auto &candidate : candidates) {
+        if (std::filesystem::is_regular_file(candidate, ec)) {
+            return candidate;
+        }
+        ec.clear();
+    }
+    return std::nullopt;
 }
 
 void publish_cache_file(const std::filesystem::path &tmp,
@@ -3192,31 +3466,52 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     out.map_patches = base.string() + ".map-patches.tsv";
     out.abi = base.string() + ".abi.tsv";
 
-    std::vector<std::string> proof_argv;
-    proof_argv.push_back(link_args.linker.string());
-    proof_argv.push_back("--input");
-    proof_argv.push_back(elf_path.string());
-    proof_argv.push_back("--symbol");
-    proof_argv.push_back(symbol_name);
-    proof_argv.push_back("--output");
-    proof_argv.push_back(out.proof.string());
-    proof_argv.push_back("--mode");
-    proof_argv.push_back("proof");
-
-    const std::filesystem::path proof_stderr = base.string() + ".proof.stderr.txt";
-    int proof_rc = run_subprocess(proof_argv, proof_stderr);
-    if (proof_rc != 0) {
-        std::ostringstream msg;
-        const std::string stderr_text = read_text_file_limited(proof_stderr, 2048);
-        msg << "native-link proof failed (rc=" << proof_rc << ")";
-        if (!stderr_text.empty()) {
-            msg << "\nstderr:\n" << stderr_text;
+    std::optional<std::filesystem::path> prebuilt_proof =
+        find_prebuilt_proof(elf_path, symbol_name);
+    if (prebuilt_proof) {
+        out.prebuilt_proof = true;
+        std::error_code copy_ec;
+        std::filesystem::copy_file(
+            *prebuilt_proof,
+            out.proof,
+            std::filesystem::copy_options::overwrite_existing,
+            copy_ec);
+        if (copy_ec) {
+            fail("copy prebuilt native-link proof " + prebuilt_proof->string() +
+                 " to " + out.proof.string() + ": " + copy_ec.message());
         }
-        msg << "\ncommand: " << format_command_limited(proof_argv, 4096);
-        fail(msg.str());
+    } else {
+        if (env_bool_enabled("BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF")) {
+            fail("missing prebuilt native-link proof for " + elf_path.string() +
+                 " symbol " + symbol_name);
+        }
+
+        std::vector<std::string> proof_argv;
+        proof_argv.push_back(link_args.linker.string());
+        proof_argv.push_back("--input");
+        proof_argv.push_back(elf_path.string());
+        proof_argv.push_back("--symbol");
+        proof_argv.push_back(symbol_name);
+        proof_argv.push_back("--output");
+        proof_argv.push_back(out.proof.string());
+        proof_argv.push_back("--mode");
+        proof_argv.push_back("proof");
+
+        const std::filesystem::path proof_stderr = base.string() + ".proof.stderr.txt";
+        int proof_rc = run_subprocess(proof_argv, proof_stderr);
+        if (proof_rc != 0) {
+            std::ostringstream msg;
+            const std::string stderr_text = read_text_file_limited(proof_stderr, 2048);
+            msg << "native-link proof failed (rc=" << proof_rc << ")";
+            if (!stderr_text.empty()) {
+                msg << "\nstderr:\n" << stderr_text;
+            }
+            msg << "\ncommand: " << format_command_limited(proof_argv, 4096);
+            fail(msg.str());
+        }
+        std::error_code proof_ec;
+        std::filesystem::remove(proof_stderr, proof_ec);
     }
-    std::error_code proof_ec;
-    std::filesystem::remove(proof_stderr, proof_ec);
 
     std::vector<std::string> argv;
     argv.push_back(link_args.linker.string());
@@ -3305,6 +3600,7 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
         linked.relocated_map_ids =
             collect_relocated_map_ids(map_patches, companion.map_addr_ids);
         linked.callee_saved_mask = read_link_abi_file(source.abi);
+        linked.prebuilt_proof = source.prebuilt_proof;
         const auto read_end = std::chrono::steady_clock::now();
         publish_cache_file(tmp.proof, cache.proof);
         publish_cache_file(tmp.blob, cache.blob);
@@ -3330,6 +3626,7 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
     linked.relocated_map_ids =
         collect_relocated_map_ids(map_patches, companion.map_addr_ids);
     linked.callee_saved_mask = read_link_abi_file(source.abi);
+    linked.cache_hit = true;
     const auto read_end = std::chrono::steady_clock::now();
     const auto patch_start = std::chrono::steady_clock::now();
     patch_map_literals(linked.blob, map_patches, companion.map_addrs);
@@ -3420,6 +3717,7 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
                     }
                 }
             }
+            msg << "\n" << native_blob_diagnostics(linked.blob, chunks);
             if (!chunks.empty()) {
                 msg << "\nchunk_bytes=";
                 for (size_t i = 0; i < chunks.size(); i++) {
@@ -3494,6 +3792,7 @@ namespace native_loader {
 
 LoadedProgram load_from_fd(const FdLoadOptions &options)
 {
+    const auto total_start = std::chrono::steady_clock::now();
     if (options.original_prog_fd < 0) {
         fail("native_loader: missing original_prog_fd");
     }
@@ -3501,7 +3800,6 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         fail("native_loader: missing native_object_path or manifest_path");
     }
     LoadedProgram out{};
-    const auto companion_load_start = std::chrono::steady_clock::now();
     const bpf_prog_info prog_info = load_prog_info(options.original_prog_fd);
     std::vector<bpf_insn> source_insns;
     if (!options.source_bpf_path.empty() && !options.source_insns.empty()) {
@@ -3517,22 +3815,34 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     }
     std::filesystem::path native_object_path = options.native_object_path;
     std::string symbol_name = options.symbol_name;
+    std::vector<std::filesystem::path> native_data_object_paths;
     std::vector<NativeMapRule> map_rules;
+    uint64_t manifest_resolve_ns = 0;
     if (native_object_path.empty()) {
         if (source_insns.empty()) {
             fail("native_loader: manifest resolution requires source BPF bytecode");
         }
+        const auto manifest_start = std::chrono::steady_clock::now();
         std::optional<ManifestResolution> resolution =
             resolve_native_manifest(options.manifest_path,
                                     prog_info,
                                     source_insns,
                                     load_map_info);
+        const auto manifest_end = std::chrono::steady_clock::now();
+        manifest_resolve_ns = elapsed_ns(manifest_start, manifest_end);
         if (!resolution) {
+            out.timings.manifest_resolve_ns = manifest_resolve_ns;
+            out.timings.total_ns =
+                elapsed_ns(total_start, std::chrono::steady_clock::now());
             return out;
         }
         native_object_path = resolution->native_object_path;
         symbol_name = resolution->symbol_name;
+        native_data_object_paths = std::move(resolution->native_data_object_paths);
         map_rules = std::move(resolution->map_rules);
+    }
+    if (native_data_object_paths.empty()) {
+        native_data_object_paths.push_back(native_object_path);
     }
     if (symbol_name.empty()) {
         symbol_name = load_prog_btf_symbol_name(options.original_prog_fd, prog_info);
@@ -3544,8 +3854,15 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             source_insns.empty() ? nullptr : source_insns.data(),
             source_insns.size(),
             std::move(map_rules));
-    add_native_data_symbol_addrs(native_object_path, companion);
-    const auto companion_load_end = std::chrono::steady_clock::now();
+    const auto native_data_symbols_start = std::chrono::steady_clock::now();
+    {
+        OpenProcessMapsCache open_maps_cache;
+        OpenProcessMapsCacheScope open_maps_scope(open_maps_cache);
+        for (const std::filesystem::path &path : native_data_object_paths) {
+            add_native_data_symbol_addrs(path, companion);
+        }
+    }
+    const auto native_data_symbols_end = std::chrono::steady_clock::now();
 
     LinkedBlob linked = load_or_link_native_blob(
         options.native_link_path,
@@ -3568,13 +3885,13 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     const std::string stub_prog_name = prog_info_name_or_stub(prog_info);
     LoadedStub loaded_stub{};
     try {
-        loaded_stub = upload_and_load_stub(
-            linked,
-            prog_info.type,
-            stub_attrs,
-            companion.has_tail_call,
-            stub_prog_name,
-            map_ref_fds);
+            loaded_stub = upload_and_load_stub(
+                linked,
+                prog_info.type,
+                stub_attrs,
+                companion.has_tail_call && native_lab_needs_tail_call_probe(),
+                stub_prog_name,
+                map_ref_fds);
         close_fd_vector(map_ref_fds);
     } catch (...) {
         close_fd_vector(map_ref_fds);
@@ -3583,8 +3900,15 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
 
     out.prog_fd = loaded_stub.prog_fd;
     out.replaced = true;
+    out.cache_hit = linked.cache_hit;
+    out.prebuilt_proof = linked.prebuilt_proof;
     out.bpf_bytecode_bytes = companion.source_bytecode_bytes;
     out.native_code_bytes = linked.blob.size();
+    out.timings.total_ns =
+        elapsed_ns(total_start, std::chrono::steady_clock::now());
+    out.timings.manifest_resolve_ns = manifest_resolve_ns;
+    out.timings.native_data_symbols_ns =
+        elapsed_ns(native_data_symbols_start, native_data_symbols_end);
     out.timings.companion_map_ptr_extract_ns = companion.map_ptr_extract_ns;
     out.timings.companion_lookup_spec_ns = companion.lookup_spec_ns;
     out.timings.cache_lookup_ns = linked.cache_lookup_ns;
@@ -3621,6 +3945,22 @@ void transfer_loaded_program_to_c_result(native_loader::LoadedProgram &loaded,
 
     out->prog_fd = loaded.prog_fd;
     out->replaced = loaded.replaced ? 1 : 0;
+    out->cache_hit = loaded.cache_hit ? 1 : 0;
+    out->prebuilt_proof = loaded.prebuilt_proof ? 1 : 0;
+    out->bpf_bytecode_bytes = loaded.bpf_bytecode_bytes;
+    out->native_code_bytes = loaded.native_code_bytes;
+    out->total_ns = loaded.timings.total_ns;
+    out->manifest_resolve_ns = loaded.timings.manifest_resolve_ns;
+    out->native_data_symbols_ns = loaded.timings.native_data_symbols_ns;
+    out->companion_map_ptr_extract_ns =
+        loaded.timings.companion_map_ptr_extract_ns;
+    out->companion_lookup_spec_ns = loaded.timings.companion_lookup_spec_ns;
+    out->cache_lookup_ns = loaded.timings.cache_lookup_ns;
+    out->native_link_exec_ns = loaded.timings.native_link_exec_ns;
+    out->native_link_read_ns = loaded.timings.native_link_read_ns;
+    out->map_patch_ns = loaded.timings.map_patch_ns;
+    out->upload_ns = loaded.timings.upload_ns;
+    out->prog_load_ns = loaded.timings.prog_load_ns;
     loaded.prog_fd = -1;
 }
 

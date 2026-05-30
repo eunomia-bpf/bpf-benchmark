@@ -237,6 +237,14 @@ def _build_runner_artifacts(
     result_details = runner.artifacts.get("result_details")
     if isinstance(result_details, Mapping):
         artifacts["result_details"] = dict(result_details)
+    process_output = getattr(runner, "process_output", None)
+    if isinstance(process_output, Mapping) and process_output:
+        details = dict(artifacts.get("result_details") or {})
+        details["process_output"] = dict(process_output)
+        command_used = getattr(runner, "command_used", None)
+        if isinstance(command_used, Sequence) and not isinstance(command_used, (str, bytes, bytearray)):
+            details["command_used"] = [str(part) for part in command_used]
+        artifacts["result_details"] = details
     return artifacts
 
 
@@ -611,6 +619,14 @@ def run_suite(
                         wait_for_suite_quiescence()
                         raise _AppLifecycleComplete
 
+                    phase = "baseline_start"
+                    _print_progress(
+                        "phase_start",
+                        app=app.name,
+                        runner=app.runner,
+                        phase=phase,
+                        workload=app.workload_for("corpus"),
+                    )
                     runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
                     with _temporary_env({
                         "BPFREJIT_SHIM_LOADTIME_PLAN": "",
@@ -621,6 +637,13 @@ def run_suite(
                         )),
                     }):
                         runner.start()
+                    _print_progress(
+                        "phase_done",
+                        app=app.name,
+                        runner=app.runner,
+                        phase=phase,
+                        status="ok",
+                    )
                     lifecycle = LifecycleRunResult(
                         baseline=None,
                         rejit_result=None,
@@ -735,11 +758,25 @@ def run_suite(
                         )
 
                     phase = "post_rejit_start"
+                    _print_progress(
+                        "phase_start",
+                        app=app.name,
+                        runner=app.runner,
+                        phase=phase,
+                        workload=app.workload_for("corpus"),
+                    )
                     runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
                     with _timeout_scope(float(getattr(args, "rejit_timeout_s", 0.0) or 0.0),
                                         f"{app.name} loadtime rejit"):
                         with _temporary_env(loadtime_env):
                             runner.start()
+                    _print_progress(
+                        "phase_done",
+                        app=app.name,
+                        runner=app.runner,
+                        phase=phase,
+                        status="ok",
+                    )
                     app_pids = _runner_pids(app, runner)
 
                     phase = "post_rejit"
@@ -781,7 +818,7 @@ def run_suite(
                     startup_error = error_message
                 else:
                     lifecycle.error = error_message
-                    if phase in {"map_snapshot", "loadtime_plan", "post_rejit_start", "baseline_stop", "post_rejit_stop"}:
+                    if phase in {"baseline_start", "map_snapshot", "loadtime_plan", "post_rejit_start", "baseline_stop", "post_rejit_stop"}:
                         _print_progress(
                             "phase_error",
                             app=app.name,
@@ -806,6 +843,8 @@ def run_suite(
                         runner.stop()
                     except Exception as stop_exc:
                         stop_error = str(stop_exc)
+                    if lifecycle is not None:
+                        lifecycle.artifacts.update(_build_runner_artifacts(app, runner))
                     try:
                         wait_for_suite_quiescence()
                     except Exception as quiesce_exc:

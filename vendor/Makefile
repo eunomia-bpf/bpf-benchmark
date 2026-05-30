@@ -76,11 +76,25 @@ otel-x86 otel-arm64: otel-%: $(BUILD)/otelcol-ebpf-profiler-%.yaml
 	install -D -m 0755 "$(BUILD)/otelcol-ebpf-profiler-build-$*/otelcol-ebpf-profiler" "$(BUILD)/$*/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
 
 tracee-x86:
+	CGO_ENABLED=1 $(GO_ENV) $(MAKE) -C "$(TRACEE)" OUTPUT_DIR="$(BUILD)/.tracee-build/x86/dist" GOENV_MK="$(BUILD)/.tracee-build/x86/dist/goenv.mk" GO_ARCH=amd64 LINUX_ARCH=x86 ARCH=x86_64 CMD_GO="$(TRACEE_GO)" CMD_CLANG="$(CLANG)" CMD_BPF_CLANG="$(CLANG)" CMD_LIBBPF_CC="$(CLANG)" CMD_CGO_CC="$(CLANG)" CMD_GCC=gcc bpf embedded-dirs btfhub signatures
+	rm -rf "$(TRACEE)/dist/lsm_support" "$(TRACEE)/dist/btfhub"
+	install -d "$(TRACEE)/dist/lsm_support" "$(TRACEE)/dist/btfhub"
+	cp "$(BUILD)/.tracee-build/x86/dist/tracee.bpf.o" "$(TRACEE)/dist/tracee.bpf.o"
+	cp -a "$(BUILD)/.tracee-build/x86/dist/lsm_support/." "$(TRACEE)/dist/lsm_support/"
+	cp -a "$(BUILD)/.tracee-build/x86/dist/btfhub/." "$(TRACEE)/dist/btfhub/"
+	rm -f "$(BUILD)/.tracee-build/x86/dist/tracee"
 	CGO_ENABLED=1 $(GO_ENV) $(MAKE) -C "$(TRACEE)" OUTPUT_DIR="$(BUILD)/.tracee-build/x86/dist" GOENV_MK="$(BUILD)/.tracee-build/x86/dist/goenv.mk" GO_ARCH=amd64 LINUX_ARCH=x86 ARCH=x86_64 CMD_GO="$(TRACEE_GO)" CMD_CLANG="$(CLANG)" CMD_BPF_CLANG="$(CLANG)" CMD_LIBBPF_CC="$(CLANG)" CMD_CGO_CC="$(CLANG)" CMD_GCC=gcc tracee
 	file "$(BUILD)/.tracee-build/x86/dist/tracee" | grep -q 'x86-64'
 	install -D -m 0755 "$(BUILD)/.tracee-build/x86/dist/tracee" "$(BUILD)/x86/tracee/bin/tracee"
 
 tracee-arm64:
+	CGO_ENABLED=1 $(GO_ENV) $(MAKE) -C "$(TRACEE)" OUTPUT_DIR="$(BUILD)/.tracee-build/arm64/dist" GOENV_MK="$(BUILD)/.tracee-build/arm64/dist/goenv.mk" GO_ARCH=arm64 LINUX_ARCH=arm64 ARCH=arm64 CMD_GO="$(TRACEE_GO)" CMD_CLANG="$(CLANG)" CMD_BPF_CLANG="$(CLANG)" CMD_LIBBPF_CC=aarch64-linux-gnu-gcc CMD_CGO_CC=aarch64-linux-gnu-gcc CMD_GCC=aarch64-linux-gnu-gcc bpf embedded-dirs btfhub signatures
+	rm -rf "$(TRACEE)/dist/lsm_support" "$(TRACEE)/dist/btfhub"
+	install -d "$(TRACEE)/dist/lsm_support" "$(TRACEE)/dist/btfhub"
+	cp "$(BUILD)/.tracee-build/arm64/dist/tracee.bpf.o" "$(TRACEE)/dist/tracee.bpf.o"
+	cp -a "$(BUILD)/.tracee-build/arm64/dist/lsm_support/." "$(TRACEE)/dist/lsm_support/"
+	cp -a "$(BUILD)/.tracee-build/arm64/dist/btfhub/." "$(TRACEE)/dist/btfhub/"
+	rm -f "$(BUILD)/.tracee-build/arm64/dist/tracee"
 	CGO_ENABLED=1 $(GO_ENV) $(MAKE) -C "$(TRACEE)" OUTPUT_DIR="$(BUILD)/.tracee-build/arm64/dist" GOENV_MK="$(BUILD)/.tracee-build/arm64/dist/goenv.mk" GO_ARCH=arm64 LINUX_ARCH=arm64 ARCH=arm64 CMD_GO="$(TRACEE_GO)" CMD_CLANG="$(CLANG)" CMD_BPF_CLANG="$(CLANG)" CMD_LIBBPF_CC=aarch64-linux-gnu-gcc CMD_CGO_CC=aarch64-linux-gnu-gcc CMD_GCC=aarch64-linux-gnu-gcc tracee
 	file "$(BUILD)/.tracee-build/arm64/dist/tracee" | grep -q 'ARM aarch64'
 	install -D -m 0755 "$(BUILD)/.tracee-build/arm64/dist/tracee" "$(BUILD)/arm64/tracee/bin/tracee"

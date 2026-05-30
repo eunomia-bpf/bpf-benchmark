@@ -13,6 +13,8 @@ mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
 if [ -d /artifacts/lib/modules ] && [ ! -e /lib/modules ]; then
     ln -sfn /artifacts/lib/modules /lib/modules
 fi
+mount -t tmpfs -o mode=0755,nosuid,nodev tmpfs /run 2>/dev/null || chmod 0755 /run 2>/dev/null || true
+[ -d /run/netns ] || mkdir -p /run/netns
 mount -t tmpfs -o mode=1777,nosuid,nodev tmpfs /tmp 2>/dev/null || chmod 1777 /tmp 2>/dev/null || true
 mount -t tmpfs -o mode=1777,nosuid,nodev tmpfs /var/tmp 2>/dev/null || chmod 1777 /var/tmp 2>/dev/null || true
 mount -t tmpfs -o mode=1777,nosuid,nodev tmpfs /dev/shm 2>/dev/null || chmod 1777 /dev/shm 2>/dev/null || true
@@ -27,6 +29,7 @@ export BPFREJIT_INSIDE_RUNTIME_CONTAINER=1
 export BPFREJIT_IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 export BPFREJIT_REPO_ARTIFACT_ROOT=/artifacts/user/repo-artifacts/arm64
 export BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so
+export BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF=1
 export BPFREJIT_KERNEL_MODULES_ROOT=/artifacts
 export PYTHONPATH=/home/yunwei37/workspace/bpf-benchmark
 export PATH=/home/yunwei37/workspace/bpf-benchmark/runner/build-arm64-llvmbpf:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

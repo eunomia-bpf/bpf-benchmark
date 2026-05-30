@@ -1,0 +1,10 @@
+{
+  "app": "cilium/agent",
+  "baseline": null,
+  "error": "command failed (255): ip link set dev bpfbench1 netns bpfbenchns\nError: argument \"bpfbenchns\" is wrong: Invalid \"netns\" value",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "cilium",
+  "selected_workload": "cilium_endpoint_pktgen",
+  "status": "error"
+}

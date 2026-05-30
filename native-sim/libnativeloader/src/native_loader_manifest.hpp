@@ -2,6 +2,7 @@
 
 #include <linux/bpf.h>
 
+#include <algorithm>
 #include <cctype>
 #include <cstdint>
 #include <cstring>
@@ -40,6 +41,7 @@ struct NativeMapRule {
 struct ManifestResolution {
     std::filesystem::path native_object_path;
     std::string symbol_name;
+    std::vector<std::filesystem::path> native_data_object_paths;
     std::vector<NativeMapRule> map_rules;
 };
 
@@ -591,6 +593,22 @@ inline std::vector<NativeMapRule> parse_manifest_map_rules(
     return rules;
 }
 
+inline std::vector<std::filesystem::path> parse_manifest_data_objects(
+    const std::filesystem::path &manifest_path,
+    const std::string &manifest)
+{
+    std::vector<std::filesystem::path> paths;
+    for (const std::string &entry : json_array_objects(manifest, "data_objects")) {
+        std::filesystem::path path =
+            manifest_relative_path(manifest_path,
+                                   json_required_string(entry, "native_object"));
+        if (std::find(paths.begin(), paths.end(), path) == paths.end()) {
+            paths.push_back(std::move(path));
+        }
+    }
+    return paths;
+}
+
 template <typename LoadMapInfo>
 std::optional<ManifestResolution> resolve_native_manifest(
     const std::filesystem::path &manifest_path,
@@ -663,6 +681,18 @@ std::optional<ManifestResolution> resolve_native_manifest(
     if (!std::filesystem::exists(selected->native_object_path, ec) || ec) {
         manifest_fail("native_loader: manifest native object is unreadable: " +
                       selected->native_object_path.string());
+    }
+    selected->native_data_object_paths =
+        parse_manifest_data_objects(manifest_path, manifest);
+    if (selected->native_data_object_paths.empty()) {
+        selected->native_data_object_paths.push_back(selected->native_object_path);
+    }
+    for (const std::filesystem::path &path : selected->native_data_object_paths) {
+        ec.clear();
+        if (!std::filesystem::exists(path, ec) || ec) {
+            manifest_fail("native_loader: manifest native data object is unreadable: " +
+                          path.string());
+        }
     }
     selected->map_rules = parse_manifest_map_rules(manifest);
     return *selected;

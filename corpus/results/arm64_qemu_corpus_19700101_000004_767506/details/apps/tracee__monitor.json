@@ -1,0 +1,10 @@
+{
+  "app": "tracee/monitor",
+  "baseline": null,
+  "error": "shim socket /var/run/bpfrejit/shim-566.sock request failed: [Errno 111] Connection refused",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "tracee",
+  "selected_workload": "stress_ng_tracee_syscall_hot",
+  "status": "error"
+}

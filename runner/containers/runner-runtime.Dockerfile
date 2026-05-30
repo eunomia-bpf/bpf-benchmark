@@ -131,11 +131,15 @@ RUN set -eux; \
     ln -sfn /usr/local/bin/otelcol-ebpf-profiler "${repo_artifact_root}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
 
 COPY --link --from=runner-runtime-host-kernel-image /${KERNEL_IMAGE_NAME} /artifacts/kernel/${KERNEL_IMAGE_NAME}
+COPY --link --from=runner-runtime-host-kernel-config /config /artifacts/kernel/config
 COPY --link --from=runner-runtime-host-kernel-offsets /kernel_offsets.h /artifacts/kernel/kernel_offsets.h
 COPY --link --from=runner-runtime-host-kernel-modules / /artifacts/lib/modules
 RUN mkdir -p /artifacts && printf '%s\n' "${KERNEL_MANIFEST_JSON}" > /artifacts/manifest.json
 RUN set -eux; \
     kernel_release="$(python3 -c 'import json; print(json.load(open("/artifacts/manifest.json"))["kernel_release"])')"; \
+    mkdir -p /artifacts/boot /boot; \
+    cp /artifacts/kernel/config "/artifacts/boot/config-${kernel_release}"; \
+    cp /artifacts/kernel/config "/boot/config-${kernel_release}"; \
     depmod -b /artifacts "$kernel_release"
 
 COPY --link --from=runner-runtime-host-runner-build /micro_exec ${IMAGE_WORKSPACE}/runner/${RUNNER_BUILD_DIR_NAME}/micro_exec
@@ -157,6 +161,8 @@ COPY --link --from=runner-runtime-artifacts /artifacts/user/repo-artifacts /arti
 COPY --link --from=runner-runtime-artifacts /usr/local/bin/ /usr/local/bin/
 COPY --link --from=runner-runtime-artifacts /var/lib/cilium /var/lib/cilium
 COPY --link --from=runner-runtime-artifacts /artifacts/kernel /artifacts/kernel
+COPY --link --from=runner-runtime-artifacts /artifacts/boot /artifacts/boot
+COPY --link --from=runner-runtime-artifacts /boot /boot
 COPY --link --from=runner-runtime-artifacts /artifacts/lib/modules /artifacts/lib/modules
 COPY --link --from=runner-runtime-artifacts /artifacts/manifest.json /artifacts/manifest.json
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WORKSPACE}/runner
@@ -197,6 +203,7 @@ RUN mkdir -p micro/results corpus/results tests/results /var/tmp/bpfrejit-runtim
 ENV BPFREJIT_IMAGE_WORKSPACE=${IMAGE_WORKSPACE} \
     BPFREJIT_REPO_ARTIFACT_ROOT=/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH} \
     BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so \
+    BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF=1 \
     PYTHONPATH=${IMAGE_WORKSPACE} \
     RUN_TARGET_ARCH=${RUN_TARGET_ARCH} \
     PATH=${IMAGE_WORKSPACE}/runner/build-llvmbpf:${IMAGE_WORKSPACE}/runner/build-arm64-llvmbpf:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

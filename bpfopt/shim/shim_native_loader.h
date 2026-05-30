@@ -4,6 +4,21 @@
 struct native_loader_c_result {
     int prog_fd;
     int replaced;
+    int cache_hit;
+    int prebuilt_proof;
+    uint64_t bpf_bytecode_bytes;
+    uint64_t native_code_bytes;
+    uint64_t total_ns;
+    uint64_t manifest_resolve_ns;
+    uint64_t native_data_symbols_ns;
+    uint64_t companion_map_ptr_extract_ns;
+    uint64_t companion_lookup_spec_ns;
+    uint64_t cache_lookup_ns;
+    uint64_t native_link_exec_ns;
+    uint64_t native_link_read_ns;
+    uint64_t map_patch_ns;
+    uint64_t upload_ns;
+    uint64_t prog_load_ns;
     char error[65536];
 };
 
@@ -19,6 +34,12 @@ typedef int (*native_loader_load_from_fd_with_manifest_path_and_attach_fn)(
     uint32_t attach_prog_id,
     struct native_loader_c_result *out);
 
+static void *shim_native_loader_handle;
+static char *shim_native_loader_handle_path;
+static native_loader_load_from_fd_with_manifest_path_and_attach_fn
+    shim_native_loader_load_fn;
+static pthread_mutex_t shim_native_loader_handle_lock = PTHREAD_MUTEX_INITIALIZER;
+
 static int shim_native_loader_enabled(void) {
     const char *e = getenv("BPFREJIT_SHIM_NATIVE_LOADER");
     return e && strcmp(e, "1") == 0;
@@ -27,6 +48,58 @@ static int shim_native_loader_enabled(void) {
 static void shim_native_loader_fatal(void) {
     fflush(NULL);
     _exit(97);
+}
+
+static native_loader_load_from_fd_with_manifest_path_and_attach_fn
+shim_native_loader_resolve_load_fn(const char *so_path) {
+    pthread_mutex_lock(&shim_native_loader_handle_lock);
+    if (shim_native_loader_load_fn) {
+        if (strcmp(shim_native_loader_handle_path, so_path) != 0) {
+            log_line("native-loader refusing to switch shared object from %s to %s",
+                     shim_native_loader_handle_path, so_path);
+            pthread_mutex_unlock(&shim_native_loader_handle_lock);
+            shim_native_loader_fatal();
+        }
+        native_loader_load_from_fd_with_manifest_path_and_attach_fn load =
+            shim_native_loader_load_fn;
+        pthread_mutex_unlock(&shim_native_loader_handle_lock);
+        return load;
+    }
+
+    void *handle = dlopen(so_path, RTLD_NOW | RTLD_LOCAL);
+    if (!handle) {
+        log_line("native-loader dlopen %s failed: %s", so_path, dlerror());
+        pthread_mutex_unlock(&shim_native_loader_handle_lock);
+        shim_native_loader_fatal();
+    }
+
+    dlerror();
+    native_loader_load_from_fd_with_manifest_path_and_attach_fn load =
+        (native_loader_load_from_fd_with_manifest_path_and_attach_fn)dlsym(
+            handle, "native_loader_load_from_fd_with_manifest_path_and_attach");
+    const char *sym_err = dlerror();
+    if (sym_err || !load) {
+        log_line("native-loader dlsym failed: %s", sym_err ? sym_err : "null");
+        dlclose(handle);
+        pthread_mutex_unlock(&shim_native_loader_handle_lock);
+        shim_native_loader_fatal();
+    }
+
+    char *path_copy = strdup(so_path);
+    if (!path_copy) {
+        log_line("native-loader failed to cache shared object path=%s errno=%d",
+                 so_path, errno ? errno : ENOMEM);
+        dlclose(handle);
+        pthread_mutex_unlock(&shim_native_loader_handle_lock);
+        shim_native_loader_fatal();
+    }
+
+    shim_native_loader_handle = handle;
+    shim_native_loader_handle_path = path_copy;
+    shim_native_loader_load_fn = load;
+    log_line("native-loader loaded shared object path=%s", so_path);
+    pthread_mutex_unlock(&shim_native_loader_handle_lock);
+    return load;
 }
 
 static int shim_native_loader_is_libbpf_probe(const struct prog_entry *prog) {
@@ -320,22 +393,8 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     const char *so_path = getenv("BPFREJIT_NATIVE_LOADER_SO");
     if (!so_path || !so_path[0])
         so_path = "libnative_loader.so";
-    void *handle = dlopen(so_path, RTLD_NOW | RTLD_LOCAL);
-    if (!handle) {
-        log_line("native-loader dlopen %s failed: %s", so_path, dlerror());
-        shim_native_loader_fatal();
-    }
-
-    dlerror();
     native_loader_load_from_fd_with_manifest_path_and_attach_fn load =
-        (native_loader_load_from_fd_with_manifest_path_and_attach_fn)dlsym(
-            handle, "native_loader_load_from_fd_with_manifest_path_and_attach");
-    const char *sym_err = dlerror();
-    if (sym_err || !load) {
-        log_line("native-loader dlsym failed: %s", sym_err ? sym_err : "null");
-        dlclose(handle);
-        shim_native_loader_fatal();
-    }
+        shim_native_loader_resolve_load_fn(so_path);
 
     struct native_loader_c_result result;
     memset(&result, 0, sizeof(result));
@@ -348,7 +407,6 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
         log_line("native-loader failed prog=%s manifest=%s source=%s error=%s",
                  prog_name ? prog_name : "", manifest,
                  prog->bytecode_path, result.error);
-        dlclose(handle);
         shim_native_loader_fatal();
     }
     if (!result.replaced) {
@@ -357,13 +415,11 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
         log_line("native-loader no manifest match pass-through for prog=%s "
                  "manifest=%s source=%s",
                  prog_name ? prog_name : "", manifest, prog->bytecode_path);
-        dlclose(handle);
         return original_fd;
     }
     if (result.prog_fd < 0) {
         log_line("native-loader returned invalid fd for prog=%s",
                  prog_name ? prog_name : "");
-        dlclose(handle);
         shim_native_loader_fatal();
     }
 
@@ -371,13 +427,34 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     shim_native_loader_log_jit_info("native", result.prog_fd);
     shim_native_loader_log_jit_dump("original", (int)original_fd);
     shim_native_loader_log_jit_dump("native", result.prog_fd);
+    log_line("native-loader timings prog=%s cache_hit=%d prebuilt_proof=%d "
+             "bpf_bytes=%llu native_bytes=%llu "
+             "total_ns=%llu manifest_resolve_ns=%llu native_data_symbols_ns=%llu "
+             "companion_map_ptr_ns=%llu companion_lookup_spec_ns=%llu "
+             "cache_lookup_ns=%llu native_link_exec_ns=%llu "
+             "native_link_read_ns=%llu map_patch_ns=%llu "
+             "upload_ns=%llu prog_load_ns=%llu",
+             prog_name ? prog_name : "", result.cache_hit,
+             result.prebuilt_proof,
+             (unsigned long long)result.bpf_bytecode_bytes,
+             (unsigned long long)result.native_code_bytes,
+             (unsigned long long)result.total_ns,
+             (unsigned long long)result.manifest_resolve_ns,
+             (unsigned long long)result.native_data_symbols_ns,
+             (unsigned long long)result.companion_map_ptr_extract_ns,
+             (unsigned long long)result.companion_lookup_spec_ns,
+             (unsigned long long)result.cache_lookup_ns,
+             (unsigned long long)result.native_link_exec_ns,
+             (unsigned long long)result.native_link_read_ns,
+             (unsigned long long)result.map_patch_ns,
+             (unsigned long long)result.upload_ns,
+             (unsigned long long)result.prog_load_ns);
 
     int shadow_original_fd = fcntl((int)original_fd, F_DUPFD_CLOEXEC, 3);
     if (shadow_original_fd < 0) {
         log_line("native-loader failed to dup original fd=%ld errno=%d",
                  original_fd, errno);
         real_close(result.prog_fd);
-        dlclose(handle);
         shim_native_loader_fatal();
     }
     if (prog->native_loader_original_fd >= 0)
@@ -390,14 +467,12 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
         real_close(result.prog_fd);
         real_close(shadow_original_fd);
         prog->native_loader_original_fd = -1;
-        dlclose(handle);
         shim_native_loader_fatal();
     }
     log_line("native-loader replaced prog=%s original_fd=%ld native_fd=%d "
              "manifest=%s source=%s",
              prog_name ? prog_name : "", original_fd, result.prog_fd,
              manifest, prog->bytecode_path);
-    dlclose(handle);
     return result.prog_fd;
 }
 

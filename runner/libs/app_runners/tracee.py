@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import shlex
+import signal
 import subprocess
 import threading
 import time
@@ -14,7 +15,6 @@ from urllib.request import urlopen
 from .. import ROOT_DIR, run_command, tail_text
 from ..agent import (
     start_agent,
-    stop_agent,
     wait_healthy,
 )
 from ..rejit import app_shim_has_programs, skip_rejit_disables_shim, wait_for_app_shim_programs
@@ -31,6 +31,13 @@ from .setup_support import pick_host_executable, repo_artifact_root
 TRACEE_HEALTH_HOST = "127.0.0.1"
 TRACEE_HEALTH_PORT = 3366
 TRACEE_OUTPUT_MODE = "none"
+
+
+def _tracee_extra_args_from_env() -> tuple[str, ...]:
+    raw = os.environ.get("BPFREJIT_TRACEE_EXTRA_ARGS", "").strip()
+    if not raw:
+        return ()
+    return tuple(shlex.split(raw))
 
 
 def _tracee_runtime_dir() -> Path:
@@ -107,13 +114,12 @@ class TraceeAgentSession(AgentSession):
             self._start_io_threads()
 
             def _health_check() -> bool:
-                return (
-                    _tracee_healthz_ready(TRACEE_HEALTH_HOST, TRACEE_HEALTH_PORT)
-                    or _tracee_collector_has_activity(self.collector)
-                ) and (skip_rejit_disables_shim() or app_shim_has_programs(int(proc.pid)))
+                return _tracee_healthz_ready(TRACEE_HEALTH_HOST, TRACEE_HEALTH_PORT) and (
+                    skip_rejit_disables_shim() or app_shim_has_programs(int(proc.pid))
+                )
 
             try:
-                healthy = wait_healthy(proc, None, _health_check)
+                healthy = wait_healthy(proc, DEFAULT_STARTUP_TIMEOUT_S, _health_check)
             except Exception:
                 self.close()
                 raise
@@ -130,9 +136,10 @@ class TraceeAgentSession(AgentSession):
                     raise
                 self.programs = []
                 return self
-            snapshot = self.collector.snapshot()
-            failures.append(_format_launch_failure(command, proc, snapshot))
+            failed_proc = proc
             self.close()
+            snapshot = self.collector.snapshot()
+            failures.append(_format_launch_failure(command, failed_proc, snapshot))
         if not failures:
             failures.append("Tracee never became healthy")
         raise RuntimeError(f"failed to launch Tracee: {' | '.join(failures)}")
@@ -146,7 +153,7 @@ class TraceeAgentSession(AgentSession):
 
     def close(self) -> None:
         if self.process is not None:
-            stop_agent(self.process, timeout=DEFAULT_STOP_TIMEOUT_S); self.process = None
+            stop_tracee_agent(self.process); self.process = None
         self._join_io_threads()
 
 
@@ -200,11 +207,6 @@ def _tracee_healthz_ready(host: str, port: int) -> bool:
         return False
 
 
-def _tracee_collector_has_activity(collector: TraceeOutputCollector) -> bool:
-    snapshot = collector.snapshot()
-    return bool(snapshot.get("stdout_tail") or snapshot.get("stderr_tail"))
-
-
 def build_tracee_commands(binary: str, extra_args: Sequence[str] = ()) -> list[list[str]]:
     # --capabilities bypass=true keeps CAP_BPF + CAP_PERFMON effective for the
     # whole tracee process lifetime. Default tracee parks them in a separate
@@ -243,7 +245,35 @@ def run_tracee_workload(spec: Mapping[str, object], duration_s: int) -> Workload
     raise RuntimeError(f"unsupported workload kind: {kind}")
 
 DEFAULT_STARTUP_SETTLE_S = 5.0
-DEFAULT_STOP_TIMEOUT_S = 300.0
+DEFAULT_STARTUP_TIMEOUT_S = 300.0
+DEFAULT_GRACEFUL_STOP_TIMEOUT_S = 10.0
+DEFAULT_KILL_STOP_TIMEOUT_S = 30.0
+
+
+def stop_tracee_agent(proc: subprocess.Popen[str]) -> int:
+    if proc.poll() is not None:
+        return int(proc.returncode or 0)
+
+    proc.send_signal(signal.SIGINT)
+    try:
+        return proc.wait(timeout=DEFAULT_GRACEFUL_STOP_TIMEOUT_S)
+    except subprocess.TimeoutExpired:
+        pass
+
+    proc.terminate()
+    try:
+        return proc.wait(timeout=DEFAULT_GRACEFUL_STOP_TIMEOUT_S)
+    except subprocess.TimeoutExpired:
+        pass
+
+    proc.kill()
+    try:
+        return proc.wait(timeout=DEFAULT_KILL_STOP_TIMEOUT_S)
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(
+            "Tracee did not exit after SIGINT/SIGTERM/SIGKILL "
+            f"within {DEFAULT_KILL_STOP_TIMEOUT_S:.1f}s"
+        ) from exc
 
 
 class TraceeRunner(AppRunner):
@@ -289,7 +319,10 @@ class TraceeRunner(AppRunner):
             raise RuntimeError("TraceeRunner is already running")
 
         tracee_binary = self._resolve_binary()
-        commands = build_tracee_commands(tracee_binary, self.extra_args)
+        commands = build_tracee_commands(
+            tracee_binary,
+            (*self.extra_args, *_tracee_extra_args_from_env()),
+        )
         session = TraceeAgentSession(commands)
         session.__enter__()
         self.session = session

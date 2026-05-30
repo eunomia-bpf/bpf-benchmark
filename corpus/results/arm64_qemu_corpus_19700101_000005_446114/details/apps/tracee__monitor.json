@@ -1,0 +1,10 @@
+{
+  "app": "tracee/monitor",
+  "baseline": null,
+  "error": "failed to launch Tracee: /artifacts/tracee/bin/tracee --events '*' --output none --server healthz --server http-address=:3366 --signatures-dir /var/tmp/bpfrejit-runtime/0cb75ae1/tracee/signatures --capabilities bypass=true --logging level=debug --logging filters.include.libbpf: command exited with code 1",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "tracee",
+  "selected_workload": "stress_ng_tracee_syscall_hot",
+  "status": "error"
+}

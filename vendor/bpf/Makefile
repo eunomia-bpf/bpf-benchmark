@@ -277,7 +277,9 @@ $(NATIVE_OUT)/katran/%.proof.ok: $(NATIVE_OUT)/katran/%.native.o $(NATIVE_LINK)
 native-katran: $(KATRAN_NATIVE_OBJS) $(KATRAN_NATIVE_PROOF_MARKERS)
 	install -d "$(NATIVE_OUT)/katran"
 	install -d "$(KATRAN_NATIVE_STAGE_OUT)"
+	rm -f "$(KATRAN_NATIVE_STAGE_OUT)"/*.proof.o
 	install -m 0644 $(KATRAN_NATIVE_OBJS) "$(KATRAN_NATIVE_STAGE_OUT)"
+	install -m 0644 "$(NATIVE_OUT)/katran"/*.proof.o "$(KATRAN_NATIVE_STAGE_OUT)"
 	python3 "$(CURDIR)/write_native_manifest.py" --app katran --llvm-nm "$(LLVM_NM)" --skip-prefix jhash \
 		--output "$(NATIVE_OUT)/katran/manifest.json" \
 		--object "$(NATIVE_OUT)/katran/balancer.native.o" \
@@ -305,7 +307,9 @@ $(NATIVE_OUT)/bcc/%.proof.ok: $(NATIVE_OUT)/bcc/%.native.o $(NATIVE_LINK)
 native-bcc: $(BCC_VMLINUX_H) $(BCC_NATIVE_OBJS) $(BCC_NATIVE_PROOF_MARKERS)
 	install -d "$(NATIVE_OUT)/bcc"
 	install -d "$(BCC_NATIVE_STAGE_OUT)"
+	rm -f "$(BCC_NATIVE_STAGE_OUT)"/*.proof.o
 	install -m 0644 $(BCC_NATIVE_OBJS) "$(BCC_NATIVE_STAGE_OUT)"
+	install -m 0644 "$(NATIVE_OUT)/bcc"/*.proof.o "$(BCC_NATIVE_STAGE_OUT)"
 	python3 "$(CURDIR)/write_native_manifest.py" --app bcc --llvm-nm "$(LLVM_NM)" \
 		--output "$(NATIVE_OUT)/bcc/manifest.json" \
 		$(foreach obj,$(BCC_NATIVE_OBJS),--object "$(obj)")
@@ -328,8 +332,9 @@ $(NATIVE_OUT)/cilium/%.proof.ok: $(NATIVE_OUT)/cilium/%.native.o $(NATIVE_LINK)
 
 native-cilium: $(CILIUM_NATIVE_OBJS) $(CILIUM_NATIVE_PROOF_MARKERS)
 	install -d "$(CILIUM_NATIVE_STAGE_OUT)"
-	rm -f "$(CILIUM_NATIVE_STAGE_OUT)"/*.native.o
+	rm -f "$(CILIUM_NATIVE_STAGE_OUT)"/*.native.o "$(CILIUM_NATIVE_STAGE_OUT)"/*.proof.o
 	install -m 0644 $(CILIUM_NATIVE_OBJS) "$(CILIUM_NATIVE_STAGE_OUT)"
+	install -m 0644 "$(NATIVE_OUT)/cilium"/*.proof.o "$(CILIUM_NATIVE_STAGE_OUT)"
 	python3 "$(CURDIR)/write_native_manifest.py" --app cilium --llvm-nm "$(LLVM_NM)" \
 		--output "$(NATIVE_OUT)/cilium/manifest.json" \
 		--object "$(NATIVE_OUT)/cilium/bpf_lxc.native.o,source_map_prefix=cilium_calls_0" \
@@ -368,12 +373,27 @@ $(OTEL_NATIVE_PROOF_MARKER): $(OTEL_NATIVE_OBJECT) $(NATIVE_LINK)
 
 native-otel: $(OTEL_NATIVE_OBJECT) $(OTEL_NATIVE_PROOF_MARKER)
 	install -d "$(OTEL_NATIVE_STAGE_OUT)"
+	rm -f "$(OTEL_NATIVE_STAGE_OUT)"/*.proof.o
 	install -m 0644 "$(OTEL_NATIVE_OBJECT)" "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o"
+	for obj in $(OTEL_NATIVE_UNIT_OBJS); do \
+		install -m 0644 "$${obj}" "$(OTEL_NATIVE_STAGE_OUT)/$$(basename "$${obj}")"; \
+	done
+	install -m 0644 "$(NATIVE_OUT)/otel"/*.proof.o "$(OTEL_NATIVE_STAGE_OUT)"
+	native_data_args=(); \
+	stage_data_args=(); \
+	for obj in $(OTEL_NATIVE_UNIT_OBJS); do native_data_args+=(--data-object "$${obj}"); done; \
+	for obj in "$(OTEL_NATIVE_STAGE_OUT)"/*.native.o; do \
+		if [[ "$$(basename "$${obj}")" != "otelcol-ebpf-profiler.native.o" ]]; then \
+			stage_data_args+=(--data-object "$${obj}"); \
+		fi; \
+	done; \
 	python3 "$(CURDIR)/write_native_manifest.py" --app otelcol-ebpf-profiler --llvm-nm "$(LLVM_NM)" \
 		--output "$(NATIVE_OUT)/otel/manifest.json" \
-		--object "$(OTEL_NATIVE_OBJECT)"
+		"$${native_data_args[@]}" \
+		--object "$(OTEL_NATIVE_OBJECT)"; \
 	python3 "$(CURDIR)/write_native_manifest.py" --app otelcol-ebpf-profiler --llvm-nm "$(LLVM_NM)" \
 		--output "$(OTEL_NATIVE_STAGE_OUT)/manifest.json" \
+		"$${stage_data_args[@]}" \
 		--object "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o"
 
 $(TRACEE_NATIVE_PROOF_MARKER): $(TRACEE_NATIVE_OBJECT) $(NATIVE_LINK)
@@ -404,10 +424,12 @@ $(NATIVE_OUT)/tracee/lsm_support/%.proof.ok: $(NATIVE_OUT)/tracee/lsm_support/%.
 
 native-tracee: $(TRACEE_NATIVE_OBJS) $(TRACEE_NATIVE_PROOF_MARKERS)
 	install -d "$(TRACEE_NATIVE_STAGE_OUT)"
-	rm -f "$(TRACEE_NATIVE_STAGE_OUT)"/*.native.o
+	rm -f "$(TRACEE_NATIVE_STAGE_OUT)"/*.native.o "$(TRACEE_NATIVE_STAGE_OUT)"/*.proof.o
 	for obj in $(TRACEE_NATIVE_OBJS); do \
 		install -m 0644 "$${obj}" "$(TRACEE_NATIVE_STAGE_OUT)/$$(basename "$${obj}")"; \
 	done
+	install -m 0644 "$(NATIVE_OUT)/tracee"/*.proof.o "$(TRACEE_NATIVE_STAGE_OUT)"
+	install -m 0644 "$(NATIVE_OUT)/tracee/lsm_support"/*.proof.o "$(TRACEE_NATIVE_STAGE_OUT)"
 	python3 "$(CURDIR)/write_native_manifest.py" --app tracee --llvm-nm "$(LLVM_NM)" \
 		--output "$(NATIVE_OUT)/tracee/manifest.json" \
 		--object "$(TRACEE_NATIVE_OBJECT)" \
@@ -421,7 +443,7 @@ native-tetragon: $(TETRAGON_VMLINUX_H) native_compat.h $(NATIVE_LINK)
 	install -d "$(NATIVE_OUT)/tetragon"
 	install -d "$(TETRAGON_NATIVE_STAGE_OUT)"
 	rm -f "$(NATIVE_OUT)/tetragon"/*.native.o "$(NATIVE_OUT)/tetragon"/*.proof.o "$(NATIVE_OUT)/tetragon"/*.proof.ok
-	rm -f "$(TETRAGON_NATIVE_STAGE_OUT)"/*.native.o
+	rm -f "$(TETRAGON_NATIVE_STAGE_OUT)"/*.native.o "$(TETRAGON_NATIVE_STAGE_OUT)"/*.proof.o
 	native_out="$(NATIVE_OUT)/tetragon"; \
 	stage_out="$(TETRAGON_NATIVE_STAGE_OUT)"; \
 	common_flags=($(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS -DMICRO_NATIVE_TETRAGON \
@@ -522,12 +544,13 @@ native-tetragon: $(TETRAGON_VMLINUX_H) native_compat.h $(NATIVE_LINK)
 			exit 1; \
 		fi; \
 		for sym in $${symbols}; do \
-			"$(NATIVE_LINK)" --input "$${obj}" --symbol "$${sym}" \
-				--output "$${native_out}/$${base}.$${sym}.proof.o" --mode proof; \
+				"$(NATIVE_LINK)" --input "$${obj}" --symbol "$${sym}" \
+					--output "$${native_out}/$${base}.$${sym}.proof.o" --mode proof; \
+				done; \
+				printf 'ok\n' > "$${native_out}/$${base}.proof.ok"; \
+				install -m 0644 "$${obj}" "$${stage_out}/$${base}.native.o"; \
+				install -m 0644 "$${native_out}/$${base}."*.proof.o "$${stage_out}"; \
 			done; \
-			printf 'ok\n' > "$${native_out}/$${base}.proof.ok"; \
-			install -m 0644 "$${obj}" "$${stage_out}/$${base}.native.o"; \
-		done; \
 		native_args=(); \
 		stage_args=(); \
 		for obj in "$${native_out}"/*.native.o; do native_args+=(--object "$${obj}"); done; \

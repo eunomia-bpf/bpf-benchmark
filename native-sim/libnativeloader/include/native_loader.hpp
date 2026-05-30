@@ -10,6 +10,9 @@
 namespace native_loader {
 
 struct LoadTimings {
+    uint64_t total_ns = 0;
+    uint64_t manifest_resolve_ns = 0;
+    uint64_t native_data_symbols_ns = 0;
     uint64_t companion_map_ptr_extract_ns = 0;
     uint64_t companion_lookup_spec_ns = 0;
     uint64_t cache_lookup_ns = 0;
@@ -23,6 +26,8 @@ struct LoadTimings {
 struct LoadedProgram {
     int prog_fd = -1;
     bool replaced = false;
+    bool cache_hit = false;
+    bool prebuilt_proof = false;
     uint64_t bpf_bytecode_bytes = 0;
     uint64_t native_code_bytes = 0;
     LoadTimings timings;
@@ -53,6 +58,21 @@ extern "C" {
 struct native_loader_c_result {
     int prog_fd;
     int replaced;
+    int cache_hit;
+    int prebuilt_proof;
+    uint64_t bpf_bytecode_bytes;
+    uint64_t native_code_bytes;
+    uint64_t total_ns;
+    uint64_t manifest_resolve_ns;
+    uint64_t native_data_symbols_ns;
+    uint64_t companion_map_ptr_extract_ns;
+    uint64_t companion_lookup_spec_ns;
+    uint64_t cache_lookup_ns;
+    uint64_t native_link_exec_ns;
+    uint64_t native_link_read_ns;
+    uint64_t map_patch_ns;
+    uint64_t upload_ns;
+    uint64_t prog_load_ns;
     char error[65536];
 };
 

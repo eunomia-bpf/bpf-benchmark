@@ -2077,6 +2077,383 @@ Command:
 make arm64-runner-runtime-image-tar
 ```
 
+### Phase 101 - Katran final-image ARM64 QEMU revalidation
+
+Status: passed.
+
+Changed files:
+
+- None in this phase. This phase only reran Katran against the final
+  Phase 97/98 image after the ARM64 literal-pool fix.
+
+Test command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 \
+  BPFREJIT_SHIM_NATIVE_LOADER=post \
+  SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="katran" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Validation result:
+
+- QEMU wrapper exit code: 0.
+- Artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000004_808748`.
+- Suite status: `ok`.
+- App status: `ok`.
+- Baseline workload:
+  - workload: `katran_kernel_pktgen_l2_udp`
+  - return code: 0
+  - duration: `12.907333055999999s`
+  - pktgen threads selected from the real QEMU namespace: `[0, 1]`
+- Post/native workload:
+  - workload: `katran_kernel_pktgen_l2_udp`
+  - return code: 0
+  - duration: `12.479011552000003s`
+  - pktgen threads selected from the real QEMU namespace: `[0, 1]`
+- Post/native shim log:
+  - native replacements: 1
+  - native-loader skip records: 5
+  - native-loader failure/error records: 0
+  - `literal load displacement` matches: 0
+  - `Invalid argument` matches: 0
+  - `Kernel panic` / `Oops` matches: 0
+  - unresolved helper/register matches: 0
+- Native-loader timing records:
+  - count: 1
+  - total sum: `1.543s`
+  - average: `1.543s`
+  - max: `1.543s`
+  - native-link exec sum: `0.159s`
+  - native data-symbol sum: `0.022s`
+  - `BPF_PROG_LOAD` sum: `0.311s`
+
+Technical decision:
+
+- Katran is revalidated against the final image. No additional code change is
+  needed for this app.
+- The Phase 92 pktgen fix remains correct for ARM64 QEMU because the workload
+  now discovers available pktgen kernel threads instead of assuming four
+  threads.
+- The next final-image revalidation remains app-scoped and must not batch apps:
+  run `cilium/agent` alone, then `otelcol-ebpf-profiler/profiling` alone, and
+  only then run `micro` last.
+
+### Phase 102 - Cilium final-image ARM64 QEMU revalidation
+
+Status: passed.
+
+Changed files:
+
+- None in this phase. This phase only reran Cilium against the final
+  Phase 97/98 image after the optional map-value pointer fix from Phase 94.
+
+Test command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 \
+  BPFREJIT_SHIM_NATIVE_LOADER=post \
+  SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="cilium/agent" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Validation result:
+
+- QEMU wrapper exit code: 0.
+- Artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000004_668882`.
+- Suite status: `ok`.
+- App status: `ok`.
+- Baseline workload:
+  - workload: `cilium_endpoint_pktgen`
+  - path: `bidirectional-endpoint-to-endpoint`
+  - forward component return code: 0
+  - forward duration: `12.355631375999991s`
+  - forward raw pktgen result: `551022` packets, `45225pps`,
+    `errors: 0`
+  - reverse component return code: 0
+  - reverse duration: `12.348464495999991s`
+  - reverse raw pktgen result: `551333` packets, `45532pps`,
+    `errors: 0`
+- Post/native workload:
+  - workload: `cilium_endpoint_pktgen`
+  - path: `bidirectional-endpoint-to-endpoint`
+  - forward component return code: 0
+  - forward duration: `12.305617392000045s`
+  - forward raw pktgen result: `1745714` packets, `145187pps`,
+    `errors: 0`
+  - reverse component return code: 0
+  - reverse duration: `12.308367855999961s`
+  - reverse raw pktgen result: `1686418` packets, `139825pps`,
+    `errors: 0`
+- Post/native shim log:
+  - native replacements: 113
+  - native-loader skip records: 33
+  - native-loader failure/error records: 0
+  - `literal load displacement` matches: 0
+  - `Invalid argument` matches: 0
+  - `Kernel panic` / `Oops` matches: 0
+  - unresolved helper/register matches: 0
+- Native-loader timing records:
+  - count: 113
+  - total sum: `57.866s`
+  - average: `0.512s`
+  - max: `16.121s`
+  - native-link exec sum: `29.030s`
+  - native data-symbol sum: `11.407s`
+  - `BPF_PROG_LOAD` sum: `6.443s`
+
+Technical decision:
+
+- Cilium is revalidated against the final image. The Phase 94 native-loader
+  change is accepted: unavailable optional direct map value pointers no longer
+  abort unrelated open-process map scanning, while real data-symbol resolution
+  still fails if it needs a missing value address.
+- This remains a native-loader-only fix and does not filter ReJIT, bypass the
+  Cilium app loader, alter shim semantics for successful x86 paths, or modify
+  the kernel.
+- The next final-image revalidation is `otelcol-ebpf-profiler/profiling` alone.
+  `micro` remains last.
+
+### Phase 103 - OTel eBPF profiler final-image ARM64 QEMU revalidation
+
+Status: passed.
+
+Changed files:
+
+- None in this phase. This phase only reran OTel eBPF profiler against the
+  final Phase 97/98 image.
+
+Test command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 \
+  BPFREJIT_SHIM_NATIVE_LOADER=post \
+  SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="otelcol-ebpf-profiler/profiling" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Validation result:
+
+- QEMU wrapper exit code: 0.
+- Artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000004_620570`.
+- Suite status: `ok`.
+- App status: `ok`.
+- Baseline workload:
+  - workload: `otel_mixed_workload`
+  - all 11 components returned 0
+  - raw component data:
+    - `otel_python3_int_loop_0`: duration `11.438876271999995s`,
+      `ops=612290`, `elapsed_s=10.011962`
+    - `otel_python3_int_loop_1`: duration `11.458721903999994s`,
+      `ops=618059`, `elapsed_s=10.044266`
+    - `otel_ruby_int_loop_0`: duration `20.962389967999997s`,
+      `ops=2933676`, `elapsed_s=10.009733`
+    - `otel_ruby_int_loop_1`: duration `21.116341007999992s`,
+      `ops=3146357`, `elapsed_s=10.000055`
+    - `otel_nodejs_int_loop_0`: duration `21.11784279999999s`,
+      `ops=1786138`, `elapsed_s=10.014980`
+    - `otel_nodejs_int_loop_1`: duration `21.11931023999999s`,
+      `ops=2112447`, `elapsed_s=10.024591`
+    - `otel_perl_int_loop_0`: duration `21.120518207999993s`,
+      `ops=1021635`, `elapsed_s=10.000042`
+    - `otel_perl_int_loop_1`: duration `21.121717632s`,
+      `ops=995894`, `elapsed_s=10.029781`
+    - `otel_php_int_loop_0`: duration `21.122894415999994s`,
+      `ops=5252480`, `elapsed_s=10.000039`
+    - `otel_php_int_loop_1`: duration `21.124177391999993s`,
+      `ops=5338141`, `elapsed_s=10.005332`
+    - `otel_stress_ng_cpu`: duration `21.125397679999992s`,
+      stress-ng passed 1 CPU stressor
+- Post/native workload:
+  - workload: `otel_mixed_workload`
+  - all 11 components returned 0
+  - raw component data:
+    - `otel_python3_int_loop_0`: duration `10.605317056000004s`,
+      `ops=799553`, `elapsed_s=10.028367`
+    - `otel_python3_int_loop_1`: duration `10.85592580800001s`,
+      `ops=804691`, `elapsed_s=10.000693`
+    - `otel_ruby_int_loop_0`: duration `23.245480495999985s`,
+      `ops=4043249`, `elapsed_s=10.003249`
+    - `otel_ruby_int_loop_1`: duration `23.278813424000006s`,
+      `ops=3935372`, `elapsed_s=10.000055`
+    - `otel_nodejs_int_loop_0`: duration `23.280195215999996s`,
+      `ops=2075292`, `elapsed_s=10.016996`
+    - `otel_nodejs_int_loop_1`: duration `23.281545952000002s`,
+      `ops=1878368`, `elapsed_s=10.000792`
+    - `otel_perl_int_loop_0`: duration `23.282965103999985s`,
+      `ops=1079496`, `elapsed_s=10.002509`
+    - `otel_perl_int_loop_1`: duration `23.284149104000008s`,
+      `ops=986039`, `elapsed_s=10.000175`
+    - `otel_php_int_loop_0`: duration `23.28562596799999s`,
+      `ops=6060372`, `elapsed_s=10.014673`
+    - `otel_php_int_loop_1`: duration `23.286857791999992s`,
+      `ops=6205206`, `elapsed_s=10.001782`
+    - `otel_stress_ng_cpu`: duration `23.288075936s`,
+      stress-ng passed 1 CPU stressor
+- Post/native shim log:
+  - native replacements: 13
+  - native-loader skip records: 2
+  - native-loader failure/error records: 0
+  - `literal load displacement` matches: 0
+  - `Invalid argument` matches: 0
+  - `Kernel panic` / `Oops` matches: 0
+  - unresolved helper/register matches: 0
+- Native-loader timing records:
+  - count: 13
+  - total sum: `8.434s`
+  - average: `0.649s`
+  - max: `1.597s`
+  - native-link exec sum: `2.240s`
+  - native data-symbol sum: `1.167s`
+  - `BPF_PROG_LOAD` sum: `2.055s`
+
+Technical decision:
+
+- OTel is revalidated against the final image. No additional code change is
+  needed for this app.
+- The ARM64 helper-id reachability and ABI/callee-saved fixes remain compatible
+  with OTel's tail-call profiler path.
+- All six supported corpus apps have now passed final-image or post-fix ARM64
+  QEMU functional validation individually. The required next and final
+  validation is `micro`, run through `make micro`.
+
+### Phase 104 - ARM64 QEMU micro final validation
+
+Status: passed.
+
+Changed files:
+
+- None in this phase. This phase only ran the required final `micro`
+  validation after all six corpus apps had passed individually.
+
+Test command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 \
+  SAMPLES=1 WARMUPS=0 INNER_REPEAT=10 TIMEOUT=1200 make micro
+```
+
+Validation result:
+
+- QEMU wrapper exit code: 0.
+- Artifact:
+  `micro/results/arm64_qemu_micro_19700101_000007_733722`.
+- Suite status: `completed`.
+- Suite name: `micro_staged_codegen`.
+- Run type: `arm64_qemu_micro`.
+- Defaults:
+  - `samples`: 1
+  - `warmups`: 0
+  - `inner_repeat`: 10
+  - `perf_counters`: false
+- Progress:
+  - completed benchmarks: 29
+  - total benchmarks: 29
+- Runtime coverage:
+  - `native`: 29 runs
+  - `llvmbpf`: 29 runs
+  - `kernel`: 29 runs
+- Structured correctness check:
+  - result/retval mismatches against expected values: 0
+- Host/runtime metadata:
+  - kernel: `7.0.0-rc2+`
+  - platform: `Linux-7.0.0-rc2+-aarch64-with-glibc2.39`
+  - python: `3.12.3`
+  - `perf_event_paranoid`: `2`
+  - CPU governor: `unknown`
+  - turbo state: `unknown`
+- QEMU console:
+  - no `Kernel panic` observed
+  - no `Oops` observed
+
+Raw per-benchmark sample data:
+
+Columns:
+
+`bench expected_result expected_retval native_result native_compile_ns native_exec_ns llvmbpf_compile_ns llvmbpf_exec_ns kernel_compile_ns kernel_exec_ns`
+
+```text
+simple 12345678 2 12345678 4941056 6206 1462661856 12205 49362704 596
+simple_packet 12345678 2 12345678 4374960 5784 1547425568 12642 43361344 433
+bitmap_popcount_scan 12830754992348206170 2 12830754992348206170 7889936 14166 2577841744 18520 108145824 2742
+sorted_rule_binary_search 126 2 126 7791312 16196 2308213824 20448 284824000 5046
+bcc_runqlat_log2_histogram_bucket 17790125373615940312 2 17790125373615940312 5412672 21772 2325163600 29466 1170506640 11934
+trace_event_type_switch_dispatch 16 2 16 6015664 64515 2551160000 34872 466887184 3636
+packet_checksum_fold 0 2 0 5094720 37945 3043780704 55230 659574000 49638
+payload_prefix_memcmp_scan 9377358970524074984 2 9377358970524074984 5310080 15648 2234783072 20954 58097744 1075
+packet_vlan_tcpopt_parser 7124500222221 2 7124500222221 6441152 22552 2166690000 30546 79609328 622
+bpf_local_call_fanout_dispatch 1171593469689687806 2 1171593469689687806 4423664 21353 2568516736 27530 77394432 1318
+flow_5tuple_rss_hash 11016707074064960918 2 11016707074064960918 5915968 17894 2005432976 23819 63750256 590
+katran_lb_consistent_hash_select 5895923248507644458 2 5895923248507644458 5112672 21620 2382408928 29800 56252464 779
+cilium_policy_guard_tree_filter 5333736376993440184 2 5333736376993440184 4544752 19996 2262535712 24867 78091392 1302
+siphash_rotate64_mixer 2666935177028490406 2 2666935177028490406 5035712 13803 2064107648 21762 53484784 865
+packet_record_bounds_window 1610777047308888911 2 1610777047308888911 5176128 12137 2798845824 17888 66452896 1395
+flow_record_field_scan 9354240374969449171 2 9354240374969449171 6638688 13353 1943384160 18994 60391760 803
+packed_header_bitfield_decode 12211926182125163441 2 12211926182125163441 6962880 25651 2492596080 31358 99604624 1936
+bpftrace_string_search_prefix_scan 15111065535037762995 2 15111065535037762995 7675328 23414 2384020800 27355 131047232 2118
+tracee_syscall_name_table_lookup 4063733557757466536 2 4063733557757466536 4920704 35779 2522966208 38501 173829968 1590
+tracee_http_method_prefix_detect 11562433829591280482 2 11562433829591280482 5037584 26344 2347338064 32962 55188192 672
+cilium_socket_lb_service_select 2868565165525030065 2 2868565165525030065 7322624 19382 2360461408 23389 140218240 3192
+bcc_tcpconnect_ipv4_tuple_filter 18109187572642697766 2 18109187572642697766 5161408 21046 2371767792 26482 81261024 1558
+tetragon_process_event_arg_filter 12641586655603153431 2 12641586655603153431 4728704 29652 2671595616 35526 225734336 2057
+otel_stack_frame_unwind_scan 12043289854646947360 2 12043289854646947360 7094176 16401 2357755936 24616 118817648 1592
+cilium_ct_nat_tuple_rewrite 14199193300769829204 2 14199193300769829204 3986528 14756 2110780240 24899 66485072 1907
+packet_toeplitz_rss_hash 13526464303109995596 2 13526464303109995596 5331056 34488 2401219776 33246 80403120 2323
+bpftrace_comm_key_fnv_hash 8524536671075880526 2 8524536671075880526 5332384 18430 2155724928 31762 75802240 2001
+tc_packet_checksum_fold 0 0 0 5271232 44916 1954521024 54766 623996032 50889
+cgroup_skb_hash_chain 12027228624407116210 1 12027228624407116210 5392352 19827 2775927344 21326 57005424 1664
+```
+
+Technical decision:
+
+- `micro` was intentionally run after all corpus apps, as requested, to verify
+  that the ARM64 native-link/native-loader changes did not break the standalone
+  micro execution path.
+- The test used the Makefile entrypoint only. QEMU ran the runtime test path;
+  no source/image build step was added inside QEMU.
+- The benchmark's internal `compile_ns` fields are part of micro's measured
+  runtime behavior and are recorded as raw test data, not framework-side
+  aggregation.
+
+### Final ARM64 native-kernel status after Phase 104
+
+Status: all requested final validations completed.
+
+Corpus app validation artifacts:
+
+- Tracee:
+  `corpus/results/arm64_qemu_corpus_19700101_000004_787802`
+- BCC:
+  `corpus/results/arm64_qemu_corpus_19700101_000004_804880`
+- Katran:
+  `corpus/results/arm64_qemu_corpus_19700101_000004_808748`
+- Cilium:
+  `corpus/results/arm64_qemu_corpus_19700101_000004_668882`
+- Tetragon:
+  `corpus/results/arm64_qemu_corpus_19700101_000005_562503`
+- OTel eBPF profiler:
+  `corpus/results/arm64_qemu_corpus_19700101_000004_620570`
+
+Micro validation artifact:
+
+- `micro/results/arm64_qemu_micro_19700101_000007_733722`
+
+Kernel state:
+
+- `git -C vendor/linux-framework status --short`: empty output.
+- `git -C vendor/linux-framework log -1 --oneline`:
+  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
+- No kernel source file was changed by this ARM64 completion work.
+
 Result:
 
 ```text
@@ -4097,7 +4474,8 @@ Completion todo:
 
 ## Phase 42 - Cilium ARM64 proof ABI tail-call sidecar pop
 
-Status: in progress.
+Status: local cross-build validation passed; ARM64 runtime image rebuild and
+Tracee QEMU retry pending.
 
 Changed files so far:
 
@@ -4301,3 +4679,5104 @@ Technical decision:
 Next step:
 
 - Retry `cilium/agent` alone under QEMU with the new arm64 runtime image.
+
+## Phase 44 - QEMU ARM64 volatile /run for Cilium netns setup
+
+Status: completed.
+
+Changed files:
+
+- `runner/scripts/qemu-arm64-init`
+- `docs/tmp/arm64_native_kernel_all_apps_plan_20260529.md`
+
+QEMU command and failure data that triggered this phase:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="cilium/agent" SAMPLES=1 WORKLOAD_DURATION=10 \
+  BPFREJIT_CORPUS_APP_TIMEOUT=600 TIMEOUT=1200 make corpus
+```
+
+```text
+exit=2
+artifact=/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000004_488342
+metadata.status=error
+app.status=error
+baseline_workloads=0
+post_rejit_workloads=0
+```
+
+Failure:
+
+```text
+command failed (255): ip link set dev bpfbench1 netns bpfbenchns
+Error: argument "bpfbenchns" is wrong: Invalid "netns" value
+```
+
+Technical diagnosis:
+
+- This failure happens before Cilium loads BPF programs, so it is not an ARM64
+  native-link, loader, shim, or ReJIT correctness failure.
+- The reused QEMU rootfs kept a stale named netns bind handle at
+  `.cache/qemu-arm64-root/run/netns/bpfbenchns`.
+- `/var/run` points at `/run`, and `/run` was only created as a regular rootfs
+  directory. After an interrupted or failed run, a stale named namespace file
+  can persist into the next QEMU boot and make `ip link set ... netns
+  bpfbenchns` fail against an invalid namespace value.
+
+Implementation:
+
+- Mount `/run` as tmpfs in `runner/scripts/qemu-arm64-init`.
+- Recreate `/run/netns` after the tmpfs mount.
+- Kept the change local to the ARM64 QEMU init path; loader, shim,
+  native-link, app runner code, and Makefile behavior were not changed.
+
+Validation:
+
+```bash
+sh -n runner/scripts/qemu-arm64-init
+```
+
+```text
+exit=0
+```
+
+Technical decision:
+
+- A volatile `/run` matches normal Linux boot semantics and prevents stale QEMU
+  rootfs runtime state from affecting later app tests.
+- No manual cleanup is required before the next run because the tmpfs mount
+  hides any old rootfs `/run` contents during QEMU execution.
+
+Next step:
+
+- Retry `cilium/agent` alone under QEMU. Functional correctness remains the
+  gate before moving to the next app.
+
+## Phase 45 - Cilium post-native ARM64 execute-fault triage
+
+Status: in progress.
+
+Changed files:
+
+- `docs/tmp/arm64_native_kernel_all_apps_plan_20260529.md`
+
+QEMU command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="cilium/agent" SAMPLES=1 WORKLOAD_DURATION=10 \
+  BPFREJIT_CORPUS_APP_TIMEOUT=600 TIMEOUT=1200 make corpus
+```
+
+Observed QEMU data:
+
+```text
+exit=2
+artifact=.cache/qemu-arm64-root/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000004_509747
+metadata.status=running
+workload_seconds=10.0
+baseline_shim_log_bytes=136365
+post_rejit_shim_log_bytes=185202
+```
+
+Functional progress:
+
+- The Phase 44 volatile `/run` change worked: Cilium now creates endpoint
+  netns/veth state and reaches workload execution instead of failing at
+  `ip link set dev bpfbench1 netns bpfbenchns`.
+- Baseline measurement completed before the crash.
+- The crash happens only after post-native replacement, during
+  `cilium_endpoint_pktgen`.
+
+Crash signature captured from the QEMU console:
+
+```text
+Unable to handle kernel execute from non-executable memory at virtual address 0000800000000200
+ESR=0x86000004 IABT current EL, level 0 translation fault
+pc : 0x800000000200
+lr : bpf_prog_57231a1fe2fcf814_tail_handle_ipv+0x7b0/0x3210
+PID=2814 Comm=kpktgend_1
+x10: 0000800000000200
+x11: 0000000000000001
+x0 : 00000000ffffff7b
+Kernel panic - not syncing: Oops: Fatal exception in interrupt
+```
+
+Relevant native-loader data:
+
+```text
+native-loader jit-info native fd=320 id=334 type=3 name=tail_handle_ipv tag=57231a1fe2fcf814 jited_len=12816 xlated_len=816 ksym0=0xffff8000835eeb10
+BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_04 map_fd=222 key=26 prog_fd=320 prog_id=334 flags=0 ret=0 errno=0
+native-loader jit-info prog_array-target fd=320 id=334 type=3 name=tail_handle_ipv tag=57231a1fe2fcf814 jited_len=12816 xlated_len=816 ksym0=0xffff8000835eeb10
+```
+
+Technical diagnosis:
+
+- The failing program is a native replacement for Cilium `tail_handle_ipv`
+  with tag `57231a1fe2fcf814`; the tail-call map update confirms the native fd
+  is inserted into `cilium_calls_04`.
+- The faulting target `0x0000800000000200` is not a kernel text address and is
+  not a valid BPF JIT address. It is therefore a corrupted indirect branch
+  target, not a verifier rejection or app setup failure.
+- The LR offset `+0x7b0` lines up with the proof input's helper-call region in
+  `bpf_lxc.tail_handle_ipv4.proof.o`, where original proof assembly has:
+
+```text
+7a8: mov w8, #0x2
+7ac: ldr x0, [x0]
+7b0: blr x8
+7b4: b 0x204
+```
+
+Local native-link reproduction:
+
+```bash
+cargo run --manifest-path native-sim/x86/native_lab/native_link/Cargo.toml -- \
+  --input vendor/build/native-bpf/arm64/6.15.11-061511-generic/native/cilium/bpf_lxc.tail_handle_ipv4.proof.o \
+  --symbol tail_handle_ipv4 \
+  --link-plan /tmp/arm64_systemmap_tail_handle_ipv4_link_plan.json \
+  --output /tmp/tail_handle_ipv4_systemmap.blob \
+  --output-map-patches /tmp/tail_handle_ipv4_systemmap.map-patches \
+  --output-abi /tmp/tail_handle_ipv4_systemmap.abi
+```
+
+```text
+exit=0
+output_size=5852 bytes
+map_patch_sites=25
+bpf_map_update_elem=0xffff8000802f0df0
+bpf_ktime_get_ns=0xffff8000802f1078
+```
+
+Relevant linked helper-call disassembly:
+
+```text
+8e8: mov w8, #0x2
+8ec: nop
+8f0: mov x10, #0xffffffffffff0df0
+8f4: movk x10, #0x802f, lsl #16
+8f8: movk x10, #0x8000, lsl #32
+8fc: blr x10
+```
+
+Technical decision:
+
+- Do not modify kernel, loader, or shim for this phase.
+- Use the existing `BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT` diagnostic path to
+  capture the actual native JIT bytes from QEMU before making any code change.
+- If the dumped runtime bytes already encode `0x0000800000000200`, the bug is
+  in native-link or its runtime link plan input. If the dumped bytes encode the
+  correct helper address, the next focus is the native BPF JIT/module emission
+  path or register state corruption at runtime.
+
+Next test:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT=16384 \
+  BPFREJIT_CORPUS_APPS="cilium/agent" SAMPLES=1 WORKLOAD_DURATION=1 \
+  BPFREJIT_CORPUS_APP_TIMEOUT=600 TIMEOUT=1200 make corpus
+```
+
+Expected data to record:
+
+- Exact artifact directory.
+- Whether baseline still completes.
+- Matching `native-loader jit-dump native ... tag=57231a1fe2fcf814` bytes.
+- Disassembly around the fault offset and the helper-call immediate materialization.
+
+## Phase 46 - Cilium prog-array post-update JIT dump instrumentation
+
+Reason:
+
+- Phase 45 showed that the Cilium post-native crash happens only after the
+  native `tail_handle_ipv` program is inserted into `cilium_calls_04`.
+- The existing shim already logged `jit-info prog_array-target` after a
+  successful prog-array update, but it did not dump the target JIT bytes at
+  that point.
+- ARM64 BPF JIT text may be patched after load for direct-call/fentry style
+  attachment, and ARM64 appends hidden PLT target words after `jited_len`; a
+  post-update dump is needed to distinguish native-link byte generation from
+  runtime JIT text patching.
+
+Code change:
+
+```diff
+diff --git a/bpfopt/shim/libbpfrejit_shim.c b/bpfopt/shim/libbpfrejit_shim.c
+@@ -314,8 +314,10 @@ static void log_prog_array_update(const union bpf_attr *attr, long ret,
+              map_name, attr->map_fd, key, prog_fd, prog_id,
+              (unsigned long long)attr->flags, ret,
+              ret < 0 ? saved_errno : 0);
+-    if (ret >= 0)
++    if (ret >= 0) {
+         shim_native_loader_log_jit_info("prog_array-target", (int)prog_fd);
++        shim_native_loader_log_jit_dump("prog_array-target", (int)prog_fd);
++    }
+ }
+```
+
+Technical decision:
+
+- This is a temporary diagnostic shim-only change.
+- It does not replace the app loader and does not change native replacement
+  selection.
+- It keeps loader/native-loader behavior unchanged except for additional log
+  output when `BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT` is set. Without that env
+  var, `shim_native_loader_log_jit_dump()` returns immediately.
+- No kernel source was modified. The kernel tree is clean after this build.
+- If this dump proves the target text is unchanged after prog-array insertion,
+  the next fix should be in native-link or the native object ABI, not in shim.
+
+Local cross-build commands:
+
+```bash
+make host-runner-arm64
+make arm64-runner-runtime-image-tar
+```
+
+Build/test data:
+
+```text
+make host-runner-arm64: exit=0
+make arm64-runner-runtime-image-tar: exit=0
+arm64 runtime image id: sha256:33d3fa24039474b8170e63a928041fa7109e573a25d41f6224ddd3eb7eb15c24
+arm64 runtime tar: .cache/container-images/arm64-runner-runtime.image.tar
+arm64 runtime tar sha256: 42f2d300e7870ea232ada34432b354487fbaa30ddd39b8cbbb09f8bb051b13b1
+arm64 runtime tar size: 1968670720
+arm64 runtime tar mtime: 2026-05-29 19:06:59.658890350 -0700
+shim Build ID: a4a9530ce8acfd0e8737b64488921321ea20dfd7
+native_loader Build ID: 9dac070616bb76a8ee20ac511615e8a3cf6de2b6
+micro_exec Build ID: b31c3c999d2ef78a59f5ad9b251b2a6e2e4a149b
+native-link Build ID: ca1f609fa71ea1a47d9d10ad29cf7aa1155b5ca8
+bpfopt Build ID: 147a2eee8acbc77defda63d25021d8c456e1f5ce
+kernel submodule status: clean
+kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
+micro proof build-only during image target: 29 benchmarks, all ok
+```
+
+Build observation:
+
+- `make host-runner-arm64` rebuilt kernel objects as part of dependency
+  handling, including `kernel/bpf/core.o`, but `git -C vendor/linux-framework
+  status --short` remained empty. This was a rebuild, not a kernel source edit.
+- All app/native artifacts were built locally before QEMU. No QEMU-internal
+  build is allowed or used for the next test.
+
+Next Cilium diagnostic run:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT=16384 \
+  BPFREJIT_CORPUS_APPS="cilium/agent" SAMPLES=1 WORKLOAD_DURATION=1 \
+  BPFREJIT_CORPUS_APP_TIMEOUT=600 TIMEOUT=1200 make corpus
+```
+
+Required data from the next run:
+
+- Artifact path and `metadata.json` status.
+- Whether baseline completes before post-native crash.
+- Load-time and post-prog-array-update JIT dumps for tag
+  `57231a1fe2fcf814`.
+- Byte comparison at offset 0, the helper-call region around `+0x7b0`, the
+  tail-call sites, and the ARM64 PLT stub at the end of `jited_len`.
+- Decision record: if post-update bytes differ, isolate the runtime patch; if
+  bytes are unchanged, move to native-link/ABI control-flow analysis.
+
+## Phase 47 - ARM64 native-link TBZ/TBNZ relocation fix
+
+Status: completed.
+
+Changed files:
+
+- `native-sim/x86/native_lab/native_link/src/main.rs`
+- `docs/tmp/arm64_native_kernel_all_apps_plan_20260529.md`
+
+Diagnostic QEMU command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT=16384 \
+  BPFREJIT_CORPUS_APPS="cilium/agent" SAMPLES=1 WORKLOAD_DURATION=1 \
+  BPFREJIT_CORPUS_APP_TIMEOUT=600 TIMEOUT=1200 make corpus
+```
+
+Diagnostic artifact:
+
+```text
+artifact=.cache/qemu-arm64-root/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000005_539581
+metadata.status=running
+metadata.samples=1
+metadata.workload_seconds=1.0
+result.json=absent because the QEMU guest panicked during post-native workload
+baseline_shim_log_bytes=954249
+post_rejit_shim_log_bytes=2416000
+```
+
+Relevant shim/native-loader lines:
+
+```text
+1568: native-loader jit-info native fd=318 id=332 type=3 name=tail_handle_ipv tag=57231a1fe2fcf814 jited_len=12816 xlated_len=816 ksym0=0xffff8000835ec0a0
+1570: native-loader jit-dump native fd=318 len=12816 dumped=12816
+1670: BPF_MAP_UPDATE_ELEM prog_array name=cilium_calls_00 map_fd=230 key=26 prog_fd=318 prog_id=332 flags=0 ret=0 errno=0
+1671: native-loader jit-info prog_array-target fd=318 id=332 type=3 name=tail_handle_ipv tag=57231a1fe2fcf814 jited_len=12816 xlated_len=816 ksym0=0xffff8000835ec0a0
+1672: native-loader jit-dump prog_array-target fd=318 len=12816 dumped=12816
+```
+
+Dump comparison:
+
+```text
+/tmp/cilium_tail_handle_ipv_fd318_native.bin sha256=aa8ee87bdd9fb3dabcdfcb941b02841338fda5631749b79e15b8da5b657c1a5a
+/tmp/cilium_tail_handle_ipv_fd318_prog_array-target.bin sha256=aa8ee87bdd9fb3dabcdfcb941b02841338fda5631749b79e15b8da5b657c1a5a
+cmp_exit=0
+```
+
+Crash signature:
+
+```text
+Unable to handle kernel execute from non-executable memory at virtual address 0000800000000200
+pc : 0x800000000200
+lr : bpf_prog_57231a1fe2fcf814_tail_handle_ipv+0x7b0/0x3210
+x10: 0000800000000200
+x0 : 00000000ffffff7b
+PID=2814 Comm=kpktgend_1
+```
+
+Root cause:
+
+```text
+22b0: mov  x10, #0xffffffffffff9038
+22b4: movk x10, #0x8029, lsl #16
+22b8: movk x10, #0x8000, lsl #32
+22bc: blr  x10
+22c0: mov  w0, wzr
+22c4: tbnz w0, #31, 0x7a8
+22c8: cmp  w0, #0x2
+22cc: b.ne 0x358
+```
+
+- The post-prog-array dump is byte-identical to the load-time dump, so the
+  failure is not caused by runtime text patching after the prog-array update.
+- The stale `tbnz w0, #31, 0x7a8` target lands inside an expanded helper-call
+  address materialization sequence. If `w0` is negative, control skips the
+  first address-materialization instructions and executes `blr x10` with a
+  corrupted `x10`. This matches `x0=0xffffff7b`, `x10=0x0000800000000200`,
+  and `pc=0x800000000200`.
+- ARM64 native-link already relocated unconditional `B`, conditional `B.cond`,
+  and `CBZ/CBNZ`, but it did not decode or patch `TBZ/TBNZ`. Cilium's
+  `tail_handle_ipv` exercises this missing branch class after helper-call
+  expansion changes instruction layout.
+
+Implementation:
+
+- Added `a64_is_tbz_tbnz()` for ARM64 test-bit branch detection.
+- Extended `a64_branch_target()` to decode `TBZ/TBNZ` imm14 signed branch
+  targets.
+- Added `a64_patch_tbz_tbnz()` to rewrite the imm14 displacement after layout
+  expansion.
+- Added `Arm64PatchKind::TbzTbnz` and wired it into branch classification and
+  final patch application in `rewrite_arm64()`.
+- Added regression unit test
+  `arm64_tbz_tbnz_branches_decode_and_patch`, including the exact Cilium
+  stale-shape instruction `0x37ff2720`.
+
+Technical decision:
+
+- Keep the correctness fix entirely in native-link. This is the ARM-specific
+  layer that owns native branch relocation after variable-length rewriting.
+- Do not change kernel source. `git -C vendor/linux-framework status --short`
+  remained empty, and kernel HEAD stayed
+  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
+- Do not change loader or native-loader semantics. The Phase 46 shim dump is
+  still temporary diagnostics only and is disabled unless
+  `BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT` is set.
+- Performance impact is neutral at runtime: the emitted instruction shape is
+  unchanged except for corrected branch immediates; this only adds link-time
+  relocation coverage.
+
+Unit validation:
+
+```bash
+cargo test --manifest-path native-sim/x86/native_lab/native_link/Cargo.toml \
+  arm64_tbz_tbnz_branches_decode_and_patch
+cargo test --manifest-path native-sim/x86/native_lab/native_link/Cargo.toml
+```
+
+```text
+targeted test: exit=0
+full test: exit=0, 17 passed, 0 failed
+```
+
+Local cross-build validation:
+
+```bash
+make host-native-bpf-arm64
+```
+
+```text
+exit=0
+native-link arm64 Build ID: 796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc
+kernel submodule status: clean
+kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
+```
+
+Local Cilium link verification:
+
+```bash
+cargo run --manifest-path native-sim/x86/native_lab/native_link/Cargo.toml -- \
+  --input vendor/build/native-bpf/arm64/6.15.11-061511-generic/native/cilium/bpf_lxc.tail_handle_ipv4.proof.o \
+  --symbol tail_handle_ipv4 \
+  --link-plan /tmp/arm64_systemmap_tail_handle_ipv4_link_plan.json \
+  --output /tmp/tail_handle_ipv4_tbzfix.blob \
+  --output-map-patches /tmp/tail_handle_ipv4_tbzfix.map-patches \
+  --output-abi /tmp/tail_handle_ipv4_tbzfix.abi
+```
+
+```text
+exit=0
+output_size=5852 bytes
+map_patch_sites=25
+blob_sha256=2e238fad7ac8f248201a5dde276237ad87d8776965736267ea22e9b301928a75
+```
+
+Disassembly check:
+
+```bash
+aarch64-linux-gnu-objdump -D -b binary -m aarch64 /tmp/tail_handle_ipv4_tbzfix.blob |
+  rg -n 'tbnz|tbz|0x7a8|22c4'
+```
+
+```text
+exit=0
+No TBZ/TBNZ target to 0x7a8 remains in the locally linked blob.
+Example corrected test-bit branches:
+100:  tbnz w0, #31, 0x3d8
+4cc:  tbnz w0, #31, 0x514
+1148: tbnz w0, #31, 0x15c4
+12b8: tbnz w0, #31, 0x1444
+```
+
+Next step:
+
+- Rebuild the arm64 runtime image from the local cross-built artifacts.
+- Re-run `cilium/agent` alone in QEMU with `WORKLOAD_DURATION=1` first. If the
+  panic is gone, run the normal `WORKLOAD_DURATION=10` app correctness test
+  before moving to the next app.
+
+## Phase 48 - Cilium ARM64 QEMU validation after TBZ/TBNZ fix
+
+Status: completed.
+
+Changed files:
+
+- `docs/tmp/arm64_native_kernel_all_apps_plan_20260529.md`
+
+Local image rebuild:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+```text
+exit=0
+arm64 runtime image id: sha256:d51d01042a49cad130070e102e557bc02f84540948d0a2ad7fd339c8e39afaa1
+arm64 runtime tar: .cache/container-images/arm64-runner-runtime.image.tar
+arm64 runtime tar sha256: ea21e6a1d71b951ae40cc9445dba5c458872206e60d4b9c4dd3765c0304b54cc
+arm64 runtime tar size: 1968671232
+arm64 runtime tar mtime: 2026-05-29 19:32:53.949508440 -0700
+native-link Build ID: 796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc
+shim Build ID: a4a9530ce8acfd0e8737b64488921321ea20dfd7
+native_loader Build ID: 9dac070616bb76a8ee20ac511615e8a3cf6de2b6
+micro_exec Build ID: b31c3c999d2ef78a59f5ad9b251b2a6e2e4a149b
+kernel submodule status: clean
+kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
+```
+
+Build observation:
+
+- All app/native artifacts were produced locally before QEMU.
+- No build ran inside QEMU.
+- The kernel Make dependency rebuilt/checks kernel outputs, but the kernel
+  submodule stayed clean. No kernel source changed.
+
+Cilium smoke command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="cilium/agent" SAMPLES=1 WORKLOAD_DURATION=1 \
+  BPFREJIT_CORPUS_APP_TIMEOUT=600 TIMEOUT=1200 make corpus
+```
+
+Cilium smoke result:
+
+```text
+exit=0
+artifact=corpus/results/arm64_qemu_corpus_19700101_000005_688075
+metadata.status=completed
+metadata.samples=1
+metadata.workload_seconds=1.0
+app.status=ok
+app.error=""
+baseline_workloads=1
+post_rejit_workloads=1
+baseline_components=2
+post_rejit_components=2
+post_rejit_log_bytes=207731
+native_replaced=103
+native_errors=0
+jit_dump_lines=0
+prog_array_updates=64
+```
+
+Cilium 10 second command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="cilium/agent" SAMPLES=1 WORKLOAD_DURATION=10 \
+  BPFREJIT_CORPUS_APP_TIMEOUT=600 TIMEOUT=1200 make corpus
+```
+
+Cilium 10 second result:
+
+```text
+exit=0
+artifact=corpus/results/arm64_qemu_corpus_19700101_000004_761540
+metadata.status=completed
+metadata.samples=1
+metadata.workload_seconds=10.0
+app.status=ok
+app.error=""
+baseline_workloads=1
+post_rejit_workloads=1
+baseline_components=2
+post_rejit_components=2
+post_rejit_log_bytes=206847
+native_replaced=102
+native_errors=0
+jit_dump_lines=0
+prog_array_updates=63
+```
+
+Technical decision:
+
+- The previous Cilium execute fault at `pc=0x800000000200` is fixed by the
+  native-link TBZ/TBNZ relocation change. The same single-app QEMU path now
+  completes both baseline and post-native workloads.
+- `SKIP_REJIT=norejit` remains intentional here: the test isolates native
+  loader/native-link correctness from ReJIT pass behavior.
+- The Phase 46 shim dump instrumentation was not enabled in these validation
+  runs (`jit_dump_lines=0`). It is no longer needed after the root cause was
+  isolated, so it will be removed before continuing with the remaining apps.
+
+Next step:
+
+- Remove the temporary shim diagnostic source change.
+- Rebuild the arm64 runtime image with an unchanged shim.
+- Re-run a short Cilium smoke on that final image before moving to the next
+  app.
+
+## Phase 49 - Remove temporary shim diagnostics and revalidate Cilium
+
+Status: completed.
+
+Changed files:
+
+- `bpfopt/shim/libbpfrejit_shim.c`
+- `docs/tmp/arm64_native_kernel_all_apps_plan_20260529.md`
+
+Code change:
+
+- Removed the temporary Phase 46 call to
+  `shim_native_loader_log_jit_dump("prog_array-target", ...)`.
+- Restored `log_prog_array_update()` to the existing behavior: after a
+  successful prog-array update, it logs `jit-info` only.
+- After the edit, `git diff -- bpfopt/shim/libbpfrejit_shim.c` is empty. The
+  final source tree has no shim source change.
+
+Technical decision:
+
+- The Cilium root cause was proven to be missing ARM64 `TBZ/TBNZ` relocation in
+  native-link, not shim behavior.
+- Keeping a diagnostic-only shim diff would violate the "keep loader/shim
+  unchanged where possible" constraint, so it was removed before testing the
+  remaining apps.
+- Remaining ARM-specific functional code change is in native-link. The QEMU
+  init `/run` tmpfs change is test-environment hygiene for ARM64 QEMU named
+  netns setup.
+
+Final local image rebuild:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+```text
+exit=0
+arm64 runtime image id: sha256:6827e391d25059688ea0e269b123f728b2d48d43cfbc09ee7411a1416565da01
+arm64 runtime tar: .cache/container-images/arm64-runner-runtime.image.tar
+arm64 runtime tar sha256: d7f7a795aa1321fb6dabcc3f3a6acb90efc86f91cd1e059fc9046d3442fc332c
+arm64 runtime tar size: 1968671744
+arm64 runtime tar mtime: 2026-05-29 19:56:57.036175669 -0700
+shim Build ID: 9cac42717105190a7154e2593624f3949d643882
+native-link Build ID: 796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc
+native_loader Build ID: 9dac070616bb76a8ee20ac511615e8a3cf6de2b6
+micro_exec Build ID: b31c3c999d2ef78a59f5ad9b251b2a6e2e4a149b
+kernel submodule status: clean
+kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
+micro proof build-only during image target: 29 benchmarks, all ok
+```
+
+Final-image Cilium smoke command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="cilium/agent" SAMPLES=1 WORKLOAD_DURATION=1 \
+  BPFREJIT_CORPUS_APP_TIMEOUT=600 TIMEOUT=1200 make corpus
+```
+
+Final-image Cilium smoke result:
+
+```text
+exit=0
+artifact=corpus/results/arm64_qemu_corpus_19700101_000005_372917
+metadata.status=completed
+metadata.samples=1
+metadata.workload_seconds=1.0
+app.status=ok
+app.error=""
+baseline_workloads=1
+post_rejit_workloads=1
+baseline_components=2
+post_rejit_components=2
+post_rejit_log_bytes=207445
+native_replaced=103
+native_errors=0
+jit_dump_lines=0
+prog_array_updates=63
+```
+
+Conclusion:
+
+- Cilium passes on the final image with no shim source diff.
+- The next app should be tested alone, with the same final image and no
+  QEMU-internal build.
+
+## Phase 50 - BCC ARM64 QEMU app validation
+
+Status: completed.
+
+Changed files:
+
+- `docs/tmp/arm64_native_kernel_all_apps_plan_20260529.md`
+
+Command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="bcc/set" SAMPLES=1 WORKLOAD_DURATION=10 \
+  TIMEOUT=1200 make corpus
+```
+
+Result:
+
+```text
+exit=0
+artifact=corpus/results/arm64_qemu_corpus_19700101_000004_632054
+metadata.status=completed
+metadata.samples=1
+metadata.workload_seconds=10.0
+app.status=ok
+app.error=""
+baseline_workloads=1
+post_rejit_workloads=1
+baseline_workload_names=["stress_ng_bcc_hook_hot"]
+post_rejit_workload_names=["stress_ng_bcc_hook_hot"]
+post_rejit_log_bytes=70321
+native_replaced=23
+native_errors=0
+jit_dump_lines=0
+prog_array_updates=0
+kernel submodule status: clean
+kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
+```
+
+Technical decision:
+
+- BCC passed on the final image with no shim source diff.
+- No code changes were made in this phase.
+- Continue one app at a time; next app is `otelcol-ebpf-profiler/profiling`.
+
+## Phase 51 - OTEL rodata symbol triage and minimal metadata fix
+
+Status: in progress.
+
+Changed files:
+
+- `native-sim/libnativeloader/src/native_loader_manifest.hpp`
+- `native-sim/libnativeloader/src/native_loader.cpp`
+- `vendor/bpf/write_native_manifest.py`
+- `vendor/bpf/Makefile`
+- `docs/tmp/arm64_native_kernel_all_apps_plan_20260529.md`
+
+Failing command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="otelcol-ebpf-profiler/profiling" SAMPLES=1 WORKLOAD_DURATION=10 \
+  TIMEOUT=1200 make corpus
+```
+
+Failure data:
+
+```text
+exit=0
+artifact=corpus/results/arm64_qemu_corpus_19700101_000004_517037
+metadata.status=error
+app.status=error
+app.error="native app exited before BPF programs were tracked by shim"
+post_rejit_log_bytes=37231
+native_replaced_before_failure=11
+native-loader failed prog=native_tracer_e
+native-link stderr: Error: arm64 ADR_GOT in native_tracer_entry at byte offset 0x2c0 targets unknown map stack_ptregs_offset
+```
+
+Root-cause evidence:
+
+```text
+runtime map create: BPF_MAP_CREATE type=2 key_size=4 value_size=36 max_entries=1 name=.rodata.var
+standalone native_stack_trace.native.o:
+  task_stack_offset=0x18, stack_ptregs_offset=0x1c, .rodata.var size=0x20
+combined otelcol-ebpf-profiler.native.o:
+  task_stack_offset=0x20, stack_ptregs_offset=0x24, off_cpu_threshold=0x28, .rodata.var size=0x2c
+```
+
+Technical decision:
+
+- The failure is not a shim/kernel issue. The loader-generated link plan lacked
+  `stack_ptregs_offset` because the current OTEL combined native object has a
+  `.rodata.var` layout larger than the live BPF data map.
+- The runtime BPF map layout matches the standalone unit object
+  `native_stack_trace.native.o`, not the partial-linked aggregate object.
+- Keep the code object path unchanged for OTEL, but add manifest-declared
+  native data objects so native-loader can resolve BPF data/rodata symbol
+  addresses from the original unit-object layout.
+- This is deliberately metadata-only at the loader boundary: no shim behavior,
+  no app filtering, no kernel source, and no QEMU-internal build.
+
+Code change:
+
+- `native_loader_manifest.hpp`: added optional top-level `data_objects`
+  manifest parsing and validation. If absent, behavior falls back to the
+  selected `native_object`, preserving existing manifests.
+- `native_loader.cpp`: scans all resolved data objects with
+  `add_native_data_symbol_addrs()` before invoking native-link.
+- `write_native_manifest.py`: added `--data-object` and emits
+  `"data_objects": [{"native_object": "..."}]`.
+- `vendor/bpf/Makefile`: `native-otel` now stages OTEL unit native objects and
+  passes them as `--data-object` while keeping
+  `otelcol-ebpf-profiler.native.o` as the selected code object.
+
+Local metadata smoke:
+
+```bash
+python3 vendor/bpf/write_native_manifest.py --app otelcol-ebpf-profiler \
+  --llvm-nm llvm-nm-18 --output /tmp/otel_manifest_test.json \
+  --data-object vendor/build/native-bpf/arm64/6.15.11-061511-generic/native/otel/native_stack_trace.native.o \
+  --object vendor/build/native-bpf/arm64/6.15.11-061511-generic/native/otel/otelcol-ebpf-profiler.native.o
+```
+
+```text
+exit=0
+data_objects=[{"native_object":"vendor/build/native-bpf/arm64/6.15.11-061511-generic/native/otel/native_stack_trace.native.o"}]
+objects=26
+kernel submodule status: clean
+kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
+```
+
+Next tests:
+
+- Rebuild locally with `make host-native-bpf-arm64`.
+- Rebuild the ARM64 runner runtime image locally.
+- Re-run OTEL alone in QEMU.
+
+## Phase 52 - Local ARM64 cross-build after OTEL data-object metadata
+
+Status: completed.
+
+Constraint check:
+
+- Build was performed on the host with `make host-native-bpf-arm64`.
+- No build was performed inside QEMU.
+- Kernel source was not edited.
+- Shim source was not edited.
+- The loader change remained metadata-driven and backward-compatible: manifests
+  without `data_objects` still resolve data symbols from the selected
+  `native_object`.
+
+Command:
+
+```bash
+make host-native-bpf-arm64
+```
+
+Result:
+
+```text
+exit=0
+native-link arm64 Build ID: 796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc
+kernel submodule status: clean
+kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
+```
+
+OTEL staged manifest verification:
+
+```bash
+jq '{data_objects_len: (.data_objects | length), first_data_objects: .data_objects[0:3], objects_len: (.objects | length)}' \
+  vendor/build/native-bpf/arm64/stage/otelcol-ebpf-profiler/manifest.json
+```
+
+```json
+{
+  "data_objects_len": 15,
+  "first_data_objects": [
+    {
+      "native_object": "custom_trace.native.o"
+    },
+    {
+      "native_object": "dotnet_tracer.native.o"
+    },
+    {
+      "native_object": "go_labels.native.o"
+    }
+  ],
+  "objects_len": 26
+}
+```
+
+Staged object verification:
+
+```text
+stage native object count=16
+source native object count=16
+stage manifest size=4653
+stage manifest mtime=2026-05-29 20:21:52 -0700
+```
+
+Technical decision:
+
+- Keep `otelcol-ebpf-profiler.native.o` as the selected code object.
+- Use the 15 non-combined OTEL unit objects as data-symbol sources.
+- Do not add any app-specific logic to shim/native-link.
+- Do not patch the kernel to compensate for map/data-layout mismatch.
+
+Next tests:
+
+- Rebuild the ARM64 runner runtime image locally.
+- Re-run OTEL alone in QEMU and verify that the prior `stack_ptregs_offset`
+  ADR_GOT failure is gone.
+
+## Phase 53 - Local ARM64 runner runtime image rebuild
+
+Status: completed.
+
+Constraint check:
+
+- Runtime image was rebuilt locally with `make arm64-runner-runtime-image-tar`.
+- QEMU was not used for any build step.
+- The image includes the rebuilt arm64 `native_loader`, the unchanged arm64 shim,
+  the arm64 `native-link`, staged native-BPF artifacts, and micro programs.
+- Kernel submodule stayed clean.
+
+Command:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+Result:
+
+```text
+exit=0
+docker image id: sha256:a3e7e6254434434036770e2e92237d2a1274bd8718dd08345fe07b46153fed67
+image tar: .cache/container-images/arm64-runner-runtime.image.tar
+image tar sha256: ff0507dc02a3c7be16a1904d2f50d5412b05daef5df82e7147604b14b0d0d573
+image tar size: 1970936832
+image tar mtime: 2026-05-29 20:30:22 -0700
+kernel submodule status: clean
+```
+
+Build IDs:
+
+```text
+shim libbpfrejit_shim.so: 9cac42717105190a7154e2593624f3949d643882
+native_loader libnative_loader.so: 2cee79d07865aa610b1600416687b3e0229e8ab2
+native-link: 796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc
+micro_exec: dcb6f16894dc939b2c7fc0d2ccc8d1a704d942a6
+```
+
+Build-only micro proof data observed during image build:
+
+```text
+arm64 micro proof build-only count: 29
+arm64 micro proof build-only result: 29 ok, 0 failed
+slowest observed compile: katran_lb_consistent_hash_select compile=26.628s
+```
+
+Technical decision:
+
+- Continue to use this image for all subsequent QEMU tests.
+- Because `native_loader` changed globally, already-passing apps must be rerun
+  after remaining apps pass; otherwise their earlier pass only proves the
+  previous image.
+
+Next test:
+
+- Run only OTEL in QEMU and check that the previous ADR_GOT
+  `stack_ptregs_offset` failure no longer occurs.
+
+## Phase 54 - OTEL custom__generic stub failure and ARM64 loader tail-call probe decision
+
+Status: completed.
+
+Constraint check:
+
+- Test was run in QEMU only after local cross-build/image rebuild.
+- No build was performed inside QEMU.
+- Kernel source was not edited.
+- Shim source was not edited.
+- The change was kept in `native_loader` because the behavior difference is
+  architecture-specific loader/stub construction, not native-link relocation.
+- x86 behavior is preserved: x86 still emits the verifier-only synthetic
+  tail-call probe that its JIT uses to set up the tail-call prologue.
+
+QEMU command that exposed the next OTEL failure:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="otelcol-ebpf-profiler/profiling" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Artifact:
+
+```text
+corpus/results/arm64_qemu_corpus_19700101_000005_500852
+metadata.status: error
+app.status: error
+app.error: native app exited before BPF programs were tracked by shim
+baseline_workloads: 1
+post_workloads: 0
+programs: 0
+```
+
+Observed post-phase loader data:
+
+```text
+native-loader replaced before failure: 12
+prior ADR_GOT stack_ptregs_offset failure: absent
+failing program: custom__generic
+failure: BPF_PROG_LOAD native_lab stub: Invalid argument
+stub context: prog_type=2 blob_bytes=5668 reloc_records=0 reloc_bytes=0 chunks=23
+stub context: callee_saved_mask=15 tail_call_reachable=1 retained_map_fds=12 relocated_map_ids=12
+```
+
+Technical analysis:
+
+- The OTEL manifest `data_objects` change worked: `native_tracer_entry`
+  loaded successfully and the previous unknown-map-symbol failure for
+  `stack_ptregs_offset` did not recur.
+- The new failure was in `custom__generic` while loading the verifier-only
+  native-lab stub. The stub had `tail_call_reachable=1`, so the loader appended
+  synthetic BPF map-load + `BPF_FUNC_tail_call` bytecode to make the verifier/JIT
+  see a tail-call path.
+- On x86, this is required because the x86 JIT consults
+  `aux->tail_call_reachable` to decide whether to emit the tail-call prologue.
+- On arm64, `arch/arm64/net/bpf_jit_comp.c` does not use
+  `tail_call_reachable`; the arm64 JIT prologue prepares the tail-call counter
+  unconditionally. Therefore the synthetic verifier-only tail-call probe is not
+  needed for arm64 and can make the stub fail verification.
+
+Code change:
+
+- `native-sim/libnativeloader/src/native_loader.cpp`
+  - Added `native_lab_needs_tail_call_probe()`.
+  - It returns `false` under `__aarch64__` and `true` elsewhere.
+  - `load_from_fd()` now passes
+    `companion.has_tail_call && native_lab_needs_tail_call_probe()` to
+    `upload_and_load_stub()`.
+
+Technical decision:
+
+- Keep the shim unchanged.
+- Keep the kernel unchanged.
+- Keep x86 synthetic tail-call-probe behavior unchanged.
+- Disable only the ARM64 verifier-only tail-call probe at loader stub-build
+  time because ARM64 JIT does not need it for prologue selection.
+- Rebuild locally, then re-run only OTEL in QEMU.
+
+Local cross-build/image command after the loader change:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+Result:
+
+```text
+exit=0
+docker image id: sha256:534bdeaa07d0489e8484bb55d61f5391e4874bfda9d45a288a6b71a01ad0a093
+image tar: .cache/container-images/arm64-runner-runtime.image.tar
+image tar sha256: b5a28c6971d9cdb333266b2c07582f59a092b3ab2fd4cd287e1a9ef4efa06b37
+image tar size: 1970936832
+image tar mtime: 2026-05-29 20:41:59 -0700
+kernel submodule status: clean
+```
+
+Build IDs:
+
+```text
+shim libbpfrejit_shim.so: 9cac42717105190a7154e2593624f3949d643882
+native_loader libnative_loader.so: 272af510952fac96a310703c10c53ccb19dc4d55
+native-link: 796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc
+micro_exec: f58d8e68c81621fb49864f8a6797c5bf2dd7e168
+```
+
+Build-only micro proof data observed during this image build:
+
+```text
+arm64 micro proof build-only count: 29
+arm64 micro proof build-only result: 29 ok, 0 failed
+slowest observed compile: katran_lb_consistent_hash_select compile=26.657s
+```
+
+Next test:
+
+- Re-run only OTEL in QEMU with this image.
+- If OTEL passes, proceed one app at a time to tracee, tetragon, katran, then
+  rerun cilium and bcc on the final image.
+
+## Phase 55 - OTEL custom__generic failure after ARM64 tail-call probe removal
+
+Status: completed.
+
+Constraint check:
+
+- Test was run in QEMU only after the local ARM64 image rebuild from Phase 54.
+- No build was performed inside QEMU.
+- Kernel source remained clean and was not edited.
+- Shim source was not edited.
+- Test scope remained a single app: `otelcol-ebpf-profiler/profiling`.
+
+QEMU command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="otelcol-ebpf-profiler/profiling" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Artifact:
+
+```text
+corpus/results/arm64_qemu_corpus_19700101_000005_458293
+metadata.status: error
+metadata.generated_at: 1970-01-01T00:01:50.807902+00:00
+metadata.samples: 1
+metadata.workload_seconds: 10.0
+app.status: error
+baseline_workloads: 1
+post_workloads: 0
+programs: 0
+```
+
+Observed post-phase loader data:
+
+```text
+native-loader replaced before failure: 12
+failing program: custom__generic
+failure: BPF_PROG_LOAD native_lab stub: Invalid argument
+stub fd_array_cnt: 14
+stub context: prog_type=2 blob_bytes=5668 reloc_records=0 reloc_bytes=0 chunks=23
+stub context: callee_saved_mask=15 tail_call_reachable=0 retained_map_fds=12 relocated_map_ids=12
+chunk_bytes: 22 chunks of 256 bytes plus final chunk 5632:36
+verifier tail: processed 116 insns
+```
+
+Technical analysis:
+
+- The Phase 52 `data_objects` fix is still effective: the earlier
+  `ADR_GOT ... targets unknown map stack_ptregs_offset` failure did not recur.
+- The Phase 54 ARM64 tail-call probe change is active:
+  `tail_call_reachable=0`, and the stub bytecode contains only the kfunc calls
+  plus exit. The earlier synthetic tail-call map-load/call sequence is absent.
+- The verifier log tail reaches `processed 116 insns`, so this failure is most
+  likely after verifier acceptance, during native-lab upload/JIT finalization.
+- The runtime blob is 5668 bytes with zero native-lab relocation records and 23
+  chunks. Chunk sizing is valid for the arm64 native-lab module limit
+  (`<=256` bytes per chunk and 4-byte aligned final chunk).
+- A host-side diagnostic `native-link` run against
+  `custom__generic.proof.o` with a fake helper/map plan succeeded and produced
+  an arm64 blob with no `0xd4200000` `AARCH64_BREAK_FAULT` word in that fake
+  output. The fake blob size differed from runtime, so the real failure must be
+  diagnosed from the actual linked runtime blob.
+
+Technical decision:
+
+- Do not edit kernel code for this failure.
+- Do not change shim behavior.
+- Add a minimal `native_loader` failure-path diagnostic that inspects the real
+  linked blob already held in memory when `BPF_PROG_LOAD` fails.
+- Keep the diagnostic off the success path except for exception formatting:
+  no framework-side aggregation, no app filtering, and no performance
+  computation.
+- Rebuild locally, then re-run only OTEL in QEMU. The next artifact must record
+  whether the real runtime blob contains `0xd4200000`, whether all chunk ranges
+  are aligned, and a small checksum/fingerprint sufficient to compare retries
+  without dumping large binary payloads into logs.
+
+## Phase 56 - Loader failure-path blob diagnostic and local ARM64 image rebuild
+
+Status: completed.
+
+Constraint check:
+
+- Code change was limited to `native-sim/libnativeloader/src/native_loader.cpp`.
+- Kernel source was not edited.
+- Shim source was not edited.
+- Diagnostic runs only after `BPF_PROG_LOAD native_lab stub` throws; normal
+  successful loads do not scan or log blob diagnostics.
+- The diagnostic records raw failure facts only. It does not aggregate,
+  compare, summarize, or filter benchmark programs.
+
+Code change:
+
+- Added `native_blob_diagnostics()`.
+- On native-lab stub load failure it appends one line with:
+  - FNV64 fingerprint of the exact runtime linked blob.
+  - 4-byte word count and tail byte count.
+  - Count and first offset for `0xd4200000` `AARCH64_BREAK_FAULT` words.
+  - Count and first offset for zero words.
+  - Chunk range, alignment, length, contiguity, and final-size checks.
+
+Technical decision:
+
+- Keep this in loader failure handling, not kernel code, because the immediate
+  need is to distinguish bad runtime blob emission from kernel-side native-lab
+  JIT/load behavior using the real QEMU failure artifact.
+- Do not persist large blob files in the framework artifact path; the single
+  diagnostic line is enough for the next decision and avoids changing runner
+  artifact semantics.
+
+Local cross-build/image command:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+Result:
+
+```text
+exit=0
+docker image id: sha256:108069a2919956271c18a232b70b2bb4bc3f73def061e97a19e9e179f29ddc85
+image tar: .cache/container-images/arm64-runner-runtime.image.tar
+image tar sha256: f4bac2d1f59c43eef74fcb4c7515833c30b29eab0d8bcfa524b4b42c7c291b07
+image tar size: 1970936832
+image tar mtime: 2026-05-29 21:03:45 -0700
+kernel submodule status: clean
+kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
+```
+
+Build IDs:
+
+```text
+shim libbpfrejit_shim.so: 9cac42717105190a7154e2593624f3949d643882
+native_loader libnative_loader.so: bd5d4ca1526448bd213e180f12303f3cf68f474f
+native-link: 796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc
+micro_exec: 597fe2f8e92ce9bdb163ef448cc78b4b2d97f8bb
+```
+
+Build-only micro proof data observed during this image build:
+
+```text
+arm64 micro proof build-only count: 29
+arm64 micro proof build-only result: 29 ok, 0 failed
+slowest observed compile: katran_lb_consistent_hash_select compile=26.580s
+```
+
+Next test:
+
+- Run only OTEL in QEMU using this image.
+- If OTEL still fails at `custom__generic`, inspect the new
+  `native_blob_diag` line before making the next code change.
+
+## Phase 57 - OTEL fourth QEMU run with real runtime blob diagnostics
+
+Status: completed.
+
+Constraint check:
+
+- Test used the locally cross-built ARM64 runtime image from Phase 56.
+- No build was performed inside QEMU.
+- Only OTEL profiling was tested; no multi-app corpus run was used.
+- Kernel source remained unmodified for this phase.
+- Shim source remained unmodified for this phase.
+- Result data below is copied from raw artifact status/logs. No framework-side
+  aggregation or performance interpretation was added.
+
+QEMU command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="otelcol-ebpf-profiler/profiling" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Result artifact:
+
+```text
+corpus/results/arm64_qemu_corpus_19700101_000005_695831
+metadata.status: error
+generated_at: 1970-01-01T00:01:46.053926+00:00
+samples: 1
+workload_seconds: 10.0
+app.status: error
+baseline_workloads: 1
+post_workloads: 0
+programs: 0
+```
+
+Observed post-phase loader data:
+
+```text
+native-loader replacements before failure: 12
+failing program: custom__generic
+program type: 2 (kprobe)
+program hash: 57ce2dc2cf086f54
+failure: BPF_PROG_LOAD native_lab stub: Invalid argument
+stub fd_array_cnt: 14
+fd_array: 0:90,1:90,2:69,3:72,4:73,5:75,6:78,7:79,8:80,9:81,10:84,11:85,12:86,13:87
+stub context: prog_type=2 blob_bytes=5668 reloc_records=0 reloc_bytes=0 chunks=23
+stub context: callee_saved_mask=15 tail_call_reachable=0 retained_map_fds=12 relocated_map_ids=12
+stub context: expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0
+stub context: module_btf_id=10 kfunc_btf_id=125012
+verifier tail: processed 116 insns
+```
+
+Real runtime blob diagnostic:
+
+```text
+fnv64=11745565142136ab
+word_count=1417
+tail_bytes=0
+break_fault_words=0
+first_break_fault_offset=none
+zero_words=0
+first_zero_offset=none
+chunk_range_bad=0
+first_bad_chunk=none
+chunk_alignment_bad=0
+first_unaligned_chunk=none
+chunk_length_bad=0
+first_bad_length_chunk=none
+chunk_contiguous_bad=0
+first_noncontiguous_chunk=none
+final_chunk_end=5668
+final_size_matches=1
+chunk_bytes: 0:256,256:256,...,5376:256,5632:36
+```
+
+Technical analysis:
+
+- The real runtime linked native blob has valid basic shape:
+  - No `0xd4200000` `AARCH64_BREAK_FAULT` words.
+  - No all-zero 4-byte words.
+  - Every chunk is 4-byte aligned.
+  - Every chunk is within the blob range.
+  - Every chunk length is within the ARM64 native-lab module limit of
+    `<=256` bytes.
+  - Chunks are contiguous and cover the complete 5668-byte blob.
+- The Phase 54 tail-call verifier probe fix is active:
+  `tail_call_reachable=0`, and the stub has only native-lab sidecar/kfunc
+  pairs plus final exit.
+- The Phase 52 OTEL `data_objects` fix is still active; the earlier
+  `ADR_GOT ... targets unknown map stack_ptregs_offset` failure did not recur.
+- The verifier proof path completed far enough to print
+  `processed 116 insns`, matching 23 chunks times the 5-insn native-lab proof
+  sequence plus final exit.
+- Because the blob is structurally valid and the verifier proof sequence is
+  accepted, the remaining likely failure point is after verifier acceptance:
+  ARM64 JIT/native-lab image emission, BPF JIT finalization, or kernel-side
+  program finalization returning `EINVAL`.
+
+Technical decision:
+
+- Do not edit kernel source based only on this artifact.
+- Do not skip or filter `custom__generic`.
+- Do not change shim behavior.
+- Continue by inspecting the ARM64 JIT and verifier kinsn paths read-only, then
+  prefer a minimal native-link/loader-side fix if the failure is triggered by
+  something the loader can encode differently while preserving x86 behavior.
+
+## Phase 58 - OTEL custom trace tail-call map alias fix
+
+Status: in progress.
+
+Constraint check:
+
+- Kernel source was not edited.
+- Shim source was not edited.
+- No app loader replacement was introduced.
+- The change is limited to native-loader map alias resolution.
+- The fix does not skip, filter, or exclude any BPF program.
+- The fix preserves the app's real upstream loader behavior by following the
+  source bytecode map fd after the app loader has applied its map rewrite.
+
+Root-cause data:
+
+```text
+failing program: custom__generic
+stub prog_type: 2 (kprobe)
+retained map with mismatch: perf_progs
+perf_progs map type: 3 (BPF_MAP_TYPE_PROG_ARRAY)
+prior perf_progs owner path: PERF_EVENT unwind programs inserted before custom__generic
+kernel failure point: bpf_prog_select_runtime() -> bpf_check_tail_call()
+surface error: BPF_PROG_LOAD native_lab stub: EINVAL
+```
+
+Source/app behavior:
+
+- OTEL compiles `custom__generic` from `custom_trace.ebpf.c`.
+- That source includes `tracemgmt.h`, where `collect_trace()` eventually uses
+  `bpf_tail_call(ctx, &perf_progs, next)`.
+- During real app startup, OTEL's Go loader calls `loadProbeUnwinders()`.
+- `loadProbeUnwinders()` scans the source instructions for references to the
+  perf tail-call map fd and rewrites those instruction map associations to the
+  probe tail-call map (`kprobe_progs` for `custom__generic`).
+- Therefore the loaded BPF bytecode succeeds because the true source map fd at
+  the tail-call site is `kprobe_progs`, not `perf_progs`.
+
+Native-loader bug:
+
+- Phase 52 made the loader scan OTEL unit native objects as `data_objects` so
+  ARM64 native-link could resolve unit-local data symbols.
+- That data-object scan also sees `.maps` symbols such as `perf_progs`.
+- For `custom__generic`, native object symbol names still contain
+  `perf_progs`, but the real app loader has already rewritten the source BPF
+  tail-call map fd to `kprobe_progs`.
+- The native-loader resolved the native `perf_progs` symbol by exact/open
+  process map name, so the native stub retained and patched the real
+  `perf_progs` map.
+- Kernel then treated that retained prog-array map as a `used_map` of the
+  KPROBE native stub. Since `perf_progs` already owns PERF_EVENT programs, the
+  tail-call map compatibility check rejected the KPROBE stub with `EINVAL`.
+
+Code change:
+
+- Added `CompanionLoad::source_tail_call_maps`.
+- While walking the app-provided source bytecode, record the actual
+  `BPF_FUNC_tail_call` map fd after app-loader map rewrites.
+- When resolving a native `.maps` symbol whose candidate map is
+  `BPF_MAP_TYPE_PROG_ARRAY`, and the source bytecode has exactly one tail-call
+  prog-array map, alias the native symbol to that source tail-call map.
+- This means:
+  - `native_tracer_entry` still resolves `perf_progs` to `perf_progs`.
+  - `custom__generic` resolves native symbol `perf_progs` to `kprobe_progs`,
+    matching the app loader's source bytecode rewrite.
+- Retained map fds now follow the effective source bytecode map rather than
+  stale native object symbol names.
+
+Changed file:
+
+```text
+native-sim/libnativeloader/src/native_loader.cpp
+```
+
+Technical decision:
+
+- Fix this in native-loader rather than kernel. The kernel is correct to reject
+  a KPROBE stub that claims to use a PERF_EVENT-owned prog-array map.
+- Do not revive the previous kernel dirty patch that skipped compatibility for
+  non-bytecode fd-array map refs.
+- Do not filter `custom__generic`; the correct behavior is to load it with the
+  same effective tail-call map that the app loader gave the original BPF
+  program.
+- This is a loader correctness fix, but it is still narrowly scoped: only
+  native `.maps` symbols whose resolved candidate is `BPF_MAP_TYPE_PROG_ARRAY`
+  can be redirected, and only when the source bytecode has exactly one
+  tail-call prog-array map.
+
+Required next validation:
+
+1. Local cross-build:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+2. QEMU functional test, OTEL only:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="otelcol-ebpf-profiler/profiling" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Expected raw check in next artifact:
+
+- `custom__generic` should either load successfully, or if it fails the
+  retained map list should no longer show `perf_progs` for the native stub.
+
+Validation result:
+
+- Command:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+- Exit code: 0.
+- Test/build mode: local ARM64 cross-build only. No build was performed inside
+  QEMU.
+- Docker image: `bpf-benchmark/runner-runtime:arm64`.
+- Docker image id:
+  `sha256:c7b5b7a46c748d5a1c5de0aaac12541aecf6de70639c09a70f0b9d2ac367b15e`.
+- Image tar:
+  `.cache/container-images/arm64-runner-runtime.image.tar`.
+- Image tar sha256:
+  `eced9c9ab06dccc47a7435f78fe4041744fb008ea0e905f1c47a1b0d53b81187`.
+- Image tar size: `1970936832` bytes.
+- Image tar mtime: `2026-05-29 21:21:50.888831339 -0700`.
+- Build IDs:
+  - `native_loader`: `5237bb0e83bc335b41f17b91da48b38ce86fd6c3`
+  - `shim`: `9cac42717105190a7154e2593624f3949d643882`
+  - `native-link`: `796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc`
+  - `micro_exec`: `bacab4ca202d7b64a2c0808314fd127534708652`
+- Build-only micro proof-object generation completed during image build:
+  29 ok, 0 failed; slowest observed compile item was
+  `katran_lb_consistent_hash_select` at about 26.7s.
+- Kernel submodule:
+  - `git -C vendor/linux-framework status --short`: empty output.
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Next step:
+
+- Run QEMU functional validation for OTEL only, using the locally built image
+  tar and not building anything inside QEMU.
+
+### Phase 59 - OTEL QEMU single-app validation after source tail-call map fix
+
+Command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="otelcol-ebpf-profiler/profiling" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Execution constraints:
+
+- Suite entrypoint was `make corpus`.
+- QEMU used the local image tar produced in Phase 58.
+- No build was performed inside QEMU.
+- App was tested alone; no multi-app corpus run was used.
+
+Result:
+
+- Exit code: 0.
+- Artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000005_642513`.
+- Metadata:
+  - `status`: `completed`
+  - `run_type`: `arm64_qemu_corpus`
+  - `samples`: `1`
+  - `workload_seconds`: `10.0`
+  - `started_at`: `1970-01-01T00:00:05.642513+00:00`
+  - `completed_at`: `1970-01-01T00:02:20.974477+00:00`
+- App payload:
+  - file:
+    `corpus/results/arm64_qemu_corpus_19700101_000005_642513/details/apps/otelcol-ebpf-profiler__profiling.json`
+  - `status`: `ok`
+  - `error`: empty string
+  - baseline workload entries: `1`
+  - post workload entries: `1`
+  - `rejit_result`: `{ "mode": "loadtime", "status": "skipped" }`
+    because this functional run used `SKIP_REJIT=norejit`.
+- Baseline BPF snapshot:
+  - program entries: `12`
+  - `custom__generic` was present:
+
+```json
+{
+  "bytes_jited": 3928,
+  "bytes_xlated": 5848,
+  "id": 17,
+  "name": "custom__generic",
+  "run_cnt_delta": 0,
+  "run_time_ns_delta": 0,
+  "type": "kprobe"
+}
+```
+
+- Post BPF snapshot:
+  - program entries: `8`
+  - names present:
+    `perf_unwind_sto`, `perf_unwind_nat`, `perf_unwind_hot`,
+    `perf_unwind_per`, `perf_unwind_php`, `perf_unwind_pyt`,
+    `perf_unwind_rub`, `perf_unwind_v8`.
+- Kinsn/native modules:
+  - expected modules: 11
+  - loaded modules: 11
+  - failed modules: empty list
+  - `bpf_arm64_native_lab` loaded.
+- Failure-pattern check:
+  - `rg` over the artifact for
+    `BPF_PROG_LOAD native_lab stub`, `Invalid argument`, `perf_progs`,
+    and `native_blob_diag` produced no failure matches.
+  - `custom__generic` appears in the artifact only as the successful baseline
+    BPF snapshot entry above.
+
+Technical decision recorded:
+
+- The Phase 58 loader fix is sufficient for the previously failing OTEL
+  `custom__generic` path. The test reached both baseline and post workload
+  completion, and the app reported `status: ok`.
+- No kernel change is needed for this failure. The kernel submodule remains
+  clean and continues to reject incompatible prog-array usage correctly.
+
+Next step:
+
+- Continue one-app-at-a-time QEMU validation with the same image. The next app
+  is `tracee/monitor`.
+
+### Phase 60 - Tracee QEMU single-app validation, first attempt
+
+Command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 79 - Correct Tracee post/native startup hang diagnosis and bound startup wait
+
+Observed test data from the latest Tracee ARM64 QEMU run after Phase 78:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 90 - Tracee ARM64 QEMU functional pass after ABI fix
+
+Status: completed.
+
+Changed files:
+
+- None in this phase. This phase only ran the required QEMU functional test
+  against the Phase 89 locally cross-built runtime image.
+
+QEMU command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Artifact:
+
+- `corpus/results/arm64_qemu_corpus_19700101_000005_549033`
+
+Validation result:
+
+- Exit code: 0.
+- Suite result:
+  - `details/result.json` status: `ok`
+- App result:
+  - `details/apps/tracee__monitor.json` status: `ok`
+  - `error`: empty string
+  - `selected_workload`: `stress_ng_tracee_syscall_hot`
+  - `rejit_result`: `{ "mode": "loadtime", "status": "skipped" }`
+- Workload correctness:
+  - baseline workload count: 1
+  - post/native workload count: 1
+  - baseline workload returncode: 0
+  - post/native workload returncode: 0
+  - baseline `stress-ng` passed stressors: 7
+  - post/native `stress-ng` passed stressors: 7
+- Runner phase markers:
+  - `baseline_start`: `status=ok`
+  - `measurement_done` for `baseline`: `status=ok`
+  - `post_rejit_start`: `status=ok`
+  - `measurement_done` for `post_rejit`: `status=ok`
+  - `app_done`: `status=ok`
+- Post/native shim log:
+  - first timestamp: `121.824749`
+  - last timestamp: `341.060754`
+  - elapsed log window: `219.236s`
+  - native-loader timing records: 169
+  - native-loader replaced records: 169
+  - native-loader failed records: 0
+- Timing totals from post/native shim log:
+  - `total`: sum `114.549s`, avg `0.678s`, max `1.418s`
+  - `manifest`: sum `2.660s`, avg `0.016s`, max `0.022s`
+  - `native_data`: sum `16.477s`, avg `0.097s`, max `0.131s`
+  - `map_ptr`: sum `1.468s`, avg `0.009s`, max `0.016s`
+  - `lookup_spec`: sum `2.147s`, avg `0.013s`, max `0.946s`
+  - `cache_lookup`: sum `41.863s`, avg `0.248s`, max `0.317s`
+  - `link_exec`: sum `30.268s`, avg `0.179s`, max `0.241s`
+  - `link_read`: sum `0.315s`, avg `0.002s`, max `0.004s`
+  - `map_patch`: sum `0.003s`, avg `0.000s`, max `0.000s`
+  - `upload`: sum `1.516s`, avg `0.009s`, max `0.058s`
+  - `prog_load`: sum `16.869s`, avg `0.100s`, max `0.518s`
+- Failure signatures checked in the post/native log:
+  - `native-loader failed`: none
+  - `unresolved register-indirect`: none
+  - `panic`: none
+  - `Oops`: none
+- Kernel source status after the run:
+  - `git -C vendor/linux-framework status --short`: empty output
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Technical decision:
+
+- Phase 88 fixed the Tracee ARM64 correctness blocker. The previous kernel
+  panic path in `bpf_trace_run2` did not reproduce after `trace_sys_enter`
+  advertised the observed x19..x22 callee-saved mask.
+- The previous branch-sensitive helper-id failure also stayed fixed:
+  `cgroup_bpf_run_` and related cgroup programs were replaced successfully,
+  and no register-indirect BLR failure appeared.
+- Tracee can move from blocker/debug status to app-passed status for the
+  current ARM64 native-loader bring-up matrix.
+
+Next app:
+
+- `bcc/set`
+
+### Phase 91 - BCC set ARM64 QEMU functional pass
+
+Status: completed.
+
+Changed files:
+
+- None in this phase. This phase only ran the required QEMU functional test
+  against the Phase 89 locally cross-built runtime image.
+
+QEMU command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="bcc/set" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Artifact:
+
+- `corpus/results/arm64_qemu_corpus_19700101_000004_674568`
+
+Validation result:
+
+- Exit code: 0.
+- Suite result:
+  - `details/result.json` status: `ok`
+- App result:
+  - `details/apps/bcc__set.json` status: `ok`
+  - `error`: empty string
+  - `selected_workload`: `stress_ng_bcc_hook_hot`
+  - `rejit_result`: `{ "mode": "loadtime", "status": "skipped" }`
+- Workload correctness:
+  - baseline workload count: 1
+  - post/native workload count: 1
+  - baseline workload returncode: 0
+  - post/native workload returncode: 0
+- Runner phase markers:
+  - `baseline_start`: `status=ok`
+  - `measurement_done` for `baseline`: `status=ok`
+  - `post_rejit_start`: `status=ok`
+  - `measurement_done` for `post_rejit`: `status=ok`
+  - `app_done`: `status=ok`
+- Post/native shim log:
+  - first timestamp: `63.816875`
+  - last timestamp: `117.947717`
+  - elapsed log window: `54.131s`
+  - native-loader timing records: 23
+  - native-loader replaced records: 23
+  - native-loader failed records: 0
+- Timing totals from post/native shim log:
+  - `total`: sum `43.245s`, avg `1.880s`, max `4.829s`
+  - `manifest`: sum `0.797s`, avg `0.035s`, max `0.062s`
+  - `native_data`: sum `0.743s`, avg `0.032s`, max `0.083s`
+  - `map_ptr`: sum `0.167s`, avg `0.007s`, max `0.031s`
+  - `lookup_spec`: sum `27.540s`, avg `1.197s`, max `4.096s`
+  - `cache_lookup`: sum `5.408s`, avg `0.235s`, max `3.875s`
+  - `link_exec`: sum `5.140s`, avg `0.223s`, max `0.419s`
+  - `link_read`: sum `0.163s`, avg `0.007s`, max `0.026s`
+  - `map_patch`: sum `0.000s`, avg `0.000s`, max `0.000s`
+  - `upload`: sum `2.245s`, avg `0.098s`, max `0.360s`
+  - `prog_load`: sum `0.733s`, avg `0.032s`, max `0.289s`
+- Failure signatures checked in the post/native log:
+  - `native-loader failed`: none
+  - `unresolved register-indirect`: none
+  - `panic`: none
+  - `Oops`: none
+- Kernel source status after the run:
+  - `git -C vendor/linux-framework status --short`: empty output
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Technical decision:
+
+- BCC's real upstream binaries load and run successfully on ARM64 with the
+  native-loader post path enabled.
+- The native-loader path stayed app-loader-only: no framework direct
+  `.bpf.o` load and no custom replacement loader were introduced.
+- BCC can move to app-passed status for the current ARM64 native-loader
+  bring-up matrix.
+
+Next app:
+
+- `katran`
+
+### Phase 92 - Katran ARM64 QEMU baseline pktgen thread-count fix
+
+Status: completed.
+
+Initial QEMU command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="katran" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Initial artifact:
+
+- `corpus/results/arm64_qemu_corpus_19700101_000004_988918`
+
+Initial validation result:
+
+- Make/QEMU wrapper exit code: 0.
+- Suite result:
+  - `details/result.json` status: `error`
+- App result:
+  - `details/apps/katran.json` status: `error`
+  - `selected_workload`: `xdp_pktgen`
+  - baseline workload count: 0
+  - post/native workload count: 0
+- Error:
+
+```text
+command failed (2): /usr/sbin/ip netns exec katran-router sh -c 'printf '"'"'%s\n'"'"' rem_device_all > /proc/net/pktgen/kpktgend_2'
+sh: 1: cannot create /proc/net/pktgen/kpktgend_2: Directory nonexistent
+```
+
+Root cause:
+
+- The Katran pktgen workload hard-coded `KATRAN_PKTGEN_THREAD_IDS = (0, 1, 2, 3)`.
+- ARM64 QEMU currently boots with 2 vCPUs, so the `pktgen` module exposes
+  `kpktgend_0` and `kpktgend_1`, but not `kpktgend_2` or `kpktgend_3`.
+- The failure happened in the baseline workload before the native-loader post
+  path, so it was not an ARM64 native-link failure.
+
+Changed files:
+
+- `runner/libs/app_runners/katran.py`
+
+Code change:
+
+- Added `_available_katran_pktgen_thread_ids(namespace)`.
+- After loading `pktgen`, the Katran runner now reads the actual
+  `/proc/net/pktgen/kpktgend_*` files in the Katran router namespace.
+- It selects the existing subset of the original default `(0, 1, 2, 3)`.
+- It still fails fast if no usable pktgen thread exists.
+- It records the actual selected thread ids in the workload `config["threads"]`.
+
+Technical decision:
+
+- This is a minimal runner bug fix, not an app-loader replacement and not a
+  ReJIT filter.
+- x86 behavior remains unchanged on hosts that expose `kpktgend_0..3`.
+- ARM64 QEMU uses all available pktgen threads instead of assuming four CPUs.
+- No loader, shim, native-loader, native-link, or kernel source change was made
+  for this Katran baseline issue.
+
+Local validation:
+
+- `python3 -m py_compile runner/libs/app_runners/katran.py`
+  - Exit code: 0.
+
+Rebuild command:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+Rebuild validation:
+
+- Exit code: 0.
+- Build/test mode: local cross-build and image packaging only. No build was
+  performed inside QEMU.
+- ARM64 micro proof build during rebuild:
+  - 29 / 29 programs reported `ok`.
+- Runtime image:
+  - Docker image id:
+    `sha256:d0cfd800d93367fb669c069108ef3273d94325e703c425f950fb702833fcaa2a`
+  - Tar path:
+    `.cache/container-images/arm64-runner-runtime.image.tar`
+  - Tar sha256:
+    `b2ebfabdff3ff5f2975217b16b45a4e6f8caad9d50b1e94e358191d99f58b162`
+  - Tar size:
+    `1982983168` bytes
+  - Tar mtime:
+    `2026-05-30 01:49:49.629884294 -0700`
+- Runtime-image code spot check:
+  - `_available_katran_pktgen_thread_ids` exists in
+    `/home/yunwei37/workspace/bpf-benchmark/runner/libs/app_runners/katran.py`
+  - `_run_pktgen_workload` calls it before configuring pktgen aliases.
+- Kernel source status after rebuild:
+  - `git -C vendor/linux-framework status --short`: empty output
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="katran" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 93 - Katran ARM64 QEMU functional pass after pktgen fix
+
+Status: completed.
+
+Changed files:
+
+- None in this phase. This phase only reran Katran against the Phase 92
+  locally rebuilt runtime image.
+
+QEMU command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="katran" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Artifact:
+
+- `corpus/results/arm64_qemu_corpus_19700101_000005_360511`
+
+Validation result:
+
+- Exit code: 0.
+- Suite result:
+  - `details/result.json` status: `ok`
+- App result:
+  - `details/apps/katran.json` status: `ok`
+  - `error`: empty string
+  - `selected_workload`: `xdp_pktgen`
+  - `rejit_result`: `{ "mode": "loadtime", "status": "skipped" }`
+- Workload correctness:
+  - baseline workload count: 1
+  - post/native workload count: 1
+  - baseline workload returncode: 0
+  - post/native workload returncode: 0
+  - baseline pktgen threads: `[0, 1]`
+  - post/native pktgen threads: `[0, 1]`
+  - baseline pktgen component count: 2
+  - post/native pktgen component count: 2
+- Runner phase markers:
+  - `baseline_start`: `status=ok`
+  - `measurement_done` for `baseline`: `status=ok`
+  - `post_rejit_start`: `status=ok`
+  - `measurement_done` for `post_rejit`: `status=ok`
+  - `app_done`: `status=ok`
+- Post/native shim log:
+  - first timestamp: `77.647677`
+  - last timestamp: `122.680352`
+  - elapsed log window: `45.033s`
+  - native-loader timing records: 1
+  - native-loader replaced records: 1
+  - native-loader failed records: 0
+  - replaced program: `balancer_ingres`
+- Timing totals from post/native shim log:
+  - `total`: sum `1.557s`, avg `1.557s`, max `1.557s`
+  - `manifest`: sum `0.012s`, avg `0.012s`, max `0.012s`
+  - `native_data`: sum `0.021s`, avg `0.021s`, max `0.021s`
+  - `map_ptr`: sum `0.015s`, avg `0.015s`, max `0.015s`
+  - `lookup_spec`: sum `0.968s`, avg `0.968s`, max `0.968s`
+  - `cache_lookup`: sum `0.020s`, avg `0.020s`, max `0.020s`
+  - `link_exec`: sum `0.157s`, avg `0.157s`, max `0.157s`
+  - `link_read`: sum `0.005s`, avg `0.005s`, max `0.005s`
+  - `map_patch`: sum `0.000s`, avg `0.000s`, max `0.000s`
+  - `upload`: sum `0.011s`, avg `0.011s`, max `0.011s`
+  - `prog_load`: sum `0.332s`, avg `0.332s`, max `0.332s`
+- Failure signatures checked in the post/native log:
+  - `native-loader failed`: none
+  - `unresolved register-indirect`: none
+  - `panic`: none
+  - `Oops`: none
+- Kernel source status after the run:
+  - `git -C vendor/linux-framework status --short`: empty output
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Technical decision:
+
+- The Katran baseline blocker was fixed without touching loader, shim,
+  native-loader, native-link, or kernel code.
+- ARM64 QEMU now exercises the same real Katran app loader with the actual
+  available pktgen worker threads.
+- Katran can move to app-passed status for the current ARM64 native-loader
+  bring-up matrix.
+
+Next app:
+
+- `cilium/agent`
+
+### Phase 85 - Tracee still times out after prebuilt proofs; add native-loader timing diagnostics
+
+Tracee QEMU retry command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Validation result:
+
+- QEMU wrapper exit code: 0.
+- App result artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000005_703877`.
+- App status: `error`.
+- Baseline startup and baseline workload completed.
+- Post/native startup failed under the bounded Tracee startup timeout:
+  - phase: `post_rejit_start`
+  - Tracee command exit code: `-9`
+- Post/native shim log:
+  - first timestamp: `120.955695`
+  - last observed replacement timestamp: `437.873019`
+  - native replacements completed before timeout: `70`
+  - native-loader skip records: `12`
+  - native-loader failure/error records: `0`
+  - no `native-link --mode proof` failure or missing-prebuilt-proof records
+    were observed.
+- Interpretation: prebuilt proofs are packaged and required, but Tracee
+  startup is still dominated by per-program runtime work after proof selection.
+  The current shim log only exposes whole replacement wall time, not the
+  existing per-stage timings already measured inside `libnative_loader`.
+
+Technical decision:
+
+- Add a diagnostic-only C ABI extension from `libnative_loader` to the shim:
+  - replacement cache hit flag
+  - prebuilt proof flag
+  - BPF/native byte sizes
+  - existing timing fields:
+    - companion map metadata extraction
+    - companion lookup-site analysis
+    - cache lookup
+    - native-link execution
+    - native-link output read
+    - map literal patching
+    - native-lab upload
+    - native stub `BPF_PROG_LOAD`
+- This does not change load or replacement semantics. It is limited to the
+  loader/shim diagnostic boundary and is needed to decide the next minimal
+  performance fix.
+- Kernel source remains unchanged.
+
+Changed files in this phase:
+
+- `native-sim/libnativeloader/include/native_loader.hpp`
+- `native-sim/libnativeloader/src/native_loader.cpp`
+- `bpfopt/shim/shim_native_loader.h`
+- `docs/tmp/arm64_native_kernel_all_apps_plan_20260529.md`
+
+Next validation command:
+
+```bash
+make host-runner-arm64 host-shim-arm64 host-shim-x86
+```
+
+Local validation result:
+
+- Exit code: 0.
+- Build/test mode: local cross-build only. No build was performed inside QEMU.
+- Rebuilt targets:
+  - ARM64 `native_loader_shared`
+  - ARM64 `micro_exec`
+  - ARM64 `libbpfrejit_shim.so`
+  - x86 `libbpfrejit_shim.so`
+- Warnings:
+  - existing `shim_reload.h:603` `-Wformat-truncation` warning on both shim
+    builds
+- Build IDs and hashes:
+  - ARM64 `native_loader`:
+    - Build ID: `4bb4c01abf5ccd0a78abf98abdcb3324ccde1d37`
+    - sha1: `8e7d33e69b6bbeed5bb9949c222d9a6c1ef9aaef`
+  - ARM64 `micro_exec`:
+    - Build ID: `b31ab9eadbe1a819ca91032c0ab873e3d2a92405`
+    - sha1: `8e8eea1e54594a590a44e13a32cf990891180af6`
+  - ARM64 `libbpfrejit_shim.so`:
+    - Build ID: `9acf4ef91a93a2c31c6f49d3cc0ee7fd5068a8fb`
+    - sha1: `84221d73b396a03efa949151279fc48dd4145673`
+  - x86 `libbpfrejit_shim.so`:
+    - Build ID: `7651954bdf6e99c3447b5fc3be6faaf9e5886eb0`
+    - sha1: `4fdf2f738f713a69382219b3b36afdf96fdb4af5`
+- Kernel submodule remains clean:
+  - `git -C vendor/linux-framework status --short`: empty output
+
+Next command:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+### Phase 94 - Cilium ARM64 optional map-value pointer handling
+
+Command that exposed the failure:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="cilium/agent" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Observed failure data:
+
+- Artifact: `corpus/results/arm64_qemu_corpus_19700101_000004_864653`.
+- QEMU wrapper exit code: 0.
+- App status: `error`.
+- Baseline startup and baseline workload completed.
+- Post/native startup failed before any post workload was recorded.
+- Runner error text:
+  `cilium-agent exited before endpoint 1749 became ready (rc=97)`.
+- Cilium logs still showed the endpoint later reached successful creation, so
+  the actionable native failure was taken from the post shim log instead of the
+  wrapper summary.
+- Native shim failure:
+  `native-loader failed prog=tail_handle_ipv ... error=write /sys/kernel/debug/bpf_arm64_native_lab/map_value_ptr: Invalid argument`.
+- The failure happened after many Cilium programs had already been replaced,
+  which narrowed the issue to native-loader direct map-value pointer lookup
+  during open-process map scanning, not to Cilium baseline loading or app
+  lifecycle setup.
+
+Changed files:
+
+- `native-sim/libnativeloader/src/native_loader.cpp`
+- `docs/tmp/arm64_native_kernel_all_apps_plan_20260529.md`
+
+Code change:
+
+- Extended `lookup_native_lab_ptr_by_fd()` with an `allow_unavailable` flag.
+- Added `lookup_kernel_map_value_ptr_by_fd_if_available()`.
+- Changed `lookup_array_value_addr_if_direct()` to use the optional
+  `map_value_ptr` lookup path for open-process maps.
+- Kept `map_ptr` lookup fail-fast.
+- Kept actual native data-symbol binding fail-fast: if a native object really
+  needs a `.data` / `.rodata` / `.bss` / kconfig map value pointer and the
+  optional lookup returned unavailable, existing `value_addr == 0` validation
+  still fails with a precise error.
+
+Technical decision:
+
+- This is a minimal native-loader-only Cilium fix. It does not touch loader,
+  shim, runner selection policy, app code, or kernel code.
+- The debugfs `map_value_ptr` query is optional for unrelated open-process
+  maps encountered while building the process map cache. Some Cilium maps can
+  reject direct value-pointer export with `EINVAL`; that should not abort
+  scanning unless the current native program actually needs that map's value
+  address.
+- This is not ReJIT filtering and does not skip any BPF program. A real native
+  data-symbol dependency still surfaces naturally as a load-time error.
+- Performance intent: avoid extra process-wide fallbacks or repeated scans.
+  The existing open-process map cache remains in place; the change only avoids
+  treating unsupported direct value-pointer export as fatal for irrelevant
+  maps.
+
+Local validation:
+
+- Command:
+
+  ```bash
+  make host-runner-arm64
+  ```
+
+- Result: exit code 0.
+- Build/test mode: local arm64 cross-build only. Nothing was built inside QEMU.
+- Rebuilt:
+  - `runner/build-arm64-llvmbpf/micro_exec`
+  - `runner/build-arm64-llvmbpf/native_loader/libnative_loader.so`
+- New local `libnative_loader.so` Build ID:
+  `2b9fb1d83ee9a538013aa9ddd06b9b9aa4c19887`.
+
+Runtime image validation:
+
+- Command:
+
+  ```bash
+  make arm64-runner-runtime-image-tar
+  ```
+
+- Result: exit code 0.
+- Build/test mode: local arm64 cross-build plus image packaging only. Nothing
+  was built inside QEMU.
+- Docker image id:
+  `sha256:b0522d15064e9f91dbffcea29a685d7e3c06b4dad3f158f33973fcff98f30763`.
+- Image tar:
+  `.cache/container-images/arm64-runner-runtime.image.tar`.
+- Image tar sha256:
+  `cd09d10e0e0dc8991e8178cb598c70984458b188f406caa977415b507448f0e0`.
+- Image tar size and mtime:
+  `1982983168 2026-05-30 02:07:34.484642796 -0700`.
+- Build-only arm64 micro proof generation inside the local image build:
+  29 ok, 0 failed.
+- ARM64 native-bpf staged proof counts:
+  - `bcc`: 34
+  - `cilium`: 84
+  - `katran`: 6
+  - `otelcol-ebpf-profiler`: 30
+  - `tetragon`: 913
+  - `tracee`: 174
+- Kernel submodule:
+  - `git -C vendor/linux-framework status --short`: empty output.
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="cilium/agent" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 95 - Cilium ARM64 QEMU functional pass after optional map-value fix
+
+Command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="cilium/agent" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Validation result:
+
+- QEMU wrapper exit code: 0.
+- App result artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000005_491724`.
+- Suite status: `ok`.
+- App status: `ok`.
+- Baseline startup: `ok`.
+- Baseline workload: `ok`.
+- Post/native startup: `ok`.
+- Post/native workload: `ok`.
+- Baseline workload components:
+  - `cilium_endpoint_pktgen_forward`: return code 0, duration
+    `12.228395599999999s`.
+  - `cilium_endpoint_pktgen_reverse`: return code 0, duration
+    `12.23978308800001s`.
+- Post/native workload components:
+  - `cilium_endpoint_pktgen_forward`: return code 0, duration
+    `12.14216448000002s`.
+  - `cilium_endpoint_pktgen_reverse`: return code 0, duration
+    `12.203378399999963s`.
+- Post/native shim log:
+  - `native-loader replaced`: 113
+  - `native-loader skip`: 33
+  - `native-loader loaded shared object`: 1
+  - `native-loader failed` / `native-loader error`: 0
+  - `map_value_ptr`, `Invalid argument`, `Kernel panic`, `Oops`,
+    `unresolved`: no matches in the app/shim artifact.
+- Post/native native-loader timing data:
+  - timing records: 113
+  - total sum: `71.559s`
+  - total average: `0.633s`
+  - total max: `31.290s`
+  - `native_link_exec_ns` sum: `28.037s`
+  - `native_data_symbols_ns` sum: `26.942s`
+  - `prog_load_ns` sum: `6.113s`
+  - slowest records:
+    - `tail_handle_ipv`: `31.290478s`
+    - `cil_xdp_entry`: `2.006600s`
+    - `tail_handle_ipv`: `0.653074s`
+    - `tail_nodeport_n`: `0.643918s`
+
+Technical decision:
+
+- Phase 94 is accepted as the Cilium functional fix. It kept the change scoped
+  to native-loader map-value pointer discovery and did not require shim,
+  loader, runner selection, app, or kernel changes.
+- The 31.29s first `tail_handle_ipv` replacement is a performance hotspot but
+  not a correctness blocker for this phase. Keep it recorded as raw timing
+  data; do not add framework-side aggregation or filtering.
+- Continue one app at a time. Next app is `otelcol-ebpf-profiler`.
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="otelcol-ebpf-profiler/profiling" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 96 - OTel eBPF profiler ARM64 QEMU functional pass
+
+Command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="otelcol-ebpf-profiler/profiling" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Validation result:
+
+- QEMU wrapper exit code: 0.
+- App result artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000004_656648`.
+- Suite status: `ok`.
+- App status: `ok`.
+- Baseline startup/workload: `ok`.
+- Post/native startup/workload: `ok`.
+- Baseline workload components: 11, all return code 0.
+- Post/native workload components: 11, all return code 0.
+- Baseline component durations:
+  - `otel_python3_int_loop_0`: `11.154599920000003s`
+  - `otel_python3_int_loop_1`: `11.646279120000003s`
+  - `otel_ruby_int_loop_0`: `22.002050304000008s`
+  - `otel_ruby_int_loop_1`: `22.338310608s`
+  - `otel_nodejs_int_loop_0`: `31.548779808000006s`
+  - `otel_nodejs_int_loop_1`: `31.555615263999997s`
+  - `otel_perl_int_loop_0`: `31.557008800000006s`
+  - `otel_perl_int_loop_1`: `31.558462352000006s`
+  - `otel_php_int_loop_0`: `31.559795472000005s`
+  - `otel_php_int_loop_1`: `31.561106015999997s`
+  - `otel_stress_ng_cpu`: `31.562675487999996s`
+- Post/native component durations:
+  - `otel_python3_int_loop_0`: `11.442509951999995s`
+  - `otel_python3_int_loop_1`: `11.444299408000006s`
+  - `otel_ruby_int_loop_0`: `25.31654223999999s`
+  - `otel_ruby_int_loop_1`: `25.318225711999986s`
+  - `otel_nodejs_int_loop_0`: `25.319647247999995s`
+  - `otel_nodejs_int_loop_1`: `25.32100195199999s`
+  - `otel_perl_int_loop_0`: `25.322252735999996s`
+  - `otel_perl_int_loop_1`: `25.323484576s`
+  - `otel_php_int_loop_0`: `25.324721600000004s`
+  - `otel_php_int_loop_1`: `25.326069743999994s`
+  - `otel_stress_ng_cpu`: `25.327323439999986s`
+- Post/native shim log:
+  - `native-loader replaced`: 13
+  - `native-loader skip`: 2
+  - `native-loader loaded shared object`: 1
+  - `native-loader failed` / `native-loader error`: 0
+  - `map_value_ptr`, `Invalid argument`, `Kernel panic`, `Oops`,
+    `unresolved`: no matches in the artifact.
+- Post/native native-loader timing data:
+  - timing records: 13
+  - total sum: `8.073s`
+  - total average: `0.621s`
+  - total max: `1.582s`
+  - `native_link_exec_ns` sum: `2.083s`
+  - `native_data_symbols_ns` sum: `1.117s`
+  - `prog_load_ns` sum: `2.088s`
+  - slowest records:
+    - `read_task_struc`: `1.581535s`
+    - `perf_unwind_nat`: `0.677641s`
+    - `perf_unwind_per`: `0.677251s`
+    - `perf_unwind_v8`: `0.650987s`
+
+Technical decision:
+
+- OTel is functionally passing on ARM64 native-loader/post-native with the
+  Phase 94 image. No additional code change is needed for this app.
+- Continue the one-app-at-a-time functional sequence. Next app is
+  `tetragon/observer`.
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tetragon/observer" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 98 - Tetragon ARM64 QEMU functional pass after literal-pool fix
+
+Command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tetragon/observer" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Validation result:
+
+- QEMU wrapper exit code: 0.
+- App result artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000005_562503`.
+- Suite status: `ok`.
+- App status: `ok`.
+- Baseline startup/workload: `ok`.
+- Post/native startup/workload: `ok`.
+- Baseline workload:
+  - `stress_ng_tetragon_policy_hot`: return code 0, duration
+    `10.793806752000009s`.
+- Post/native workload:
+  - `stress_ng_tetragon_policy_hot`: return code 0, duration
+    `10.724514224000018s`.
+- Post/native shim log:
+  - `native-loader replaced`: 182
+  - `native-loader skip`: 19
+  - `native-loader loaded shared object`: 1
+  - `native-loader failed` / `native-loader error`: 0
+  - `literal load displacement`, `Invalid argument`, `Kernel panic`, `Oops`,
+    `unresolved`: no matches in the artifact.
+- Post/native native-loader timing data:
+  - timing records: 182
+  - total sum: `108.087s`
+  - total average: `0.594s`
+  - total max: `2.512s`
+  - `native_link_exec_ns` sum: `3.926s`
+  - `native_data_symbols_ns` sum: `76.514s`
+  - `prog_load_ns` sum: `11.911s`
+  - slowest records:
+    - `generic_kprobe_`: `2.511715s`
+    - `generic_kprobe_`: `2.000812s`
+    - `generic_kprobe_`: `1.935253s`
+    - `generic_kprobe_`: `1.716006s`
+    - `generic_kprobe_`: `1.537444s`
+    - `event_exit_disa`: `1.486956s`
+
+Technical decision:
+
+- Phase 97 is accepted as the Tetragon functional fix. The previous
+  `execve_send` kernel-mode native-link alignment failure is gone.
+- Because this changed global ARM64 native-link behavior, every app that
+  passed before Phase 97 must be revalidated one by one against the final
+  image before running micro last.
+- Revalidation order: Tracee, BCC, Katran, Cilium, OTel. Tetragon is already
+  validated against the final image in this phase.
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 99 - Tracee final-image ARM64 QEMU revalidation
+
+Command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Validation result:
+
+- QEMU wrapper exit code: 0.
+- App result artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000004_787802`.
+- Suite status: `ok`.
+- App status: `ok`.
+- Baseline workload:
+  - `stress_ng_tracee_syscall_hot`: return code 0, duration
+    `11.080811359999998s`.
+- Post/native workload:
+  - `stress_ng_tracee_syscall_hot`: return code 0, duration
+    `11.109807504000003s`.
+- Post/native shim log:
+  - `native-loader replaced`: 169
+  - `native-loader skip`: 13
+  - `native-loader failed` / `native-loader error`: 0
+  - `literal load displacement`, `Invalid argument`, `Kernel panic`, `Oops`,
+    `unresolved`: no matches in the artifact.
+- Post/native native-loader timing data:
+  - timing records: 169
+  - total sum: `112.849s`
+  - total average: `0.668s`
+  - total max: `1.414s`
+  - `native_link_exec_ns` sum: `29.731s`
+  - `native_data_symbols_ns` sum: `16.947s`
+  - `prog_load_ns` sum: `16.612s`
+
+Technical decision:
+
+- Tracee is revalidated against the final Phase 97/98 image. No additional
+  code changes are needed.
+- Continue final-image revalidation one app at a time. Next app is `bcc/set`.
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="bcc/set" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 100 - BCC final-image ARM64 QEMU revalidation
+
+Command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="bcc/set" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Validation result:
+
+- QEMU wrapper exit code: 0.
+- App result artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000004_804880`.
+- Suite status: `ok`.
+- App status: `ok`.
+- Baseline workload:
+  - `stress_ng_bcc_hook_hot`: return code 0, duration
+    `14.675355408000001s`.
+- Post/native workload:
+  - `stress_ng_bcc_hook_hot`: return code 0, duration
+    `13.659696495999995s`.
+- Post/native shim log:
+  - `native-loader replaced`: 23
+  - `native-loader skip`: 51
+  - `native-loader failed` / `native-loader error`: 0
+  - `literal load displacement`, `Invalid argument`, `Kernel panic`, `Oops`,
+    `unresolved`: no matches in the artifact.
+- Post/native native-loader timing data:
+  - timing records: 23
+  - total sum: `43.367s`
+  - total average: `1.886s`
+  - total max: `4.935s`
+  - `native_link_exec_ns` sum: `5.680s`
+  - `native_data_symbols_ns` sum: `0.762s`
+  - `prog_load_ns` sum: `0.923s`
+
+Technical decision:
+
+- BCC is revalidated against the final Phase 97/98 image. No additional code
+  changes are needed.
+- Continue final-image revalidation one app at a time. Next app is `katran`.
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="katran" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 97 - Tetragon ARM64 literal-pool alignment fix
+
+Command that exposed the failure:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tetragon/observer" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Observed failure data:
+
+- Artifact: `corpus/results/arm64_qemu_corpus_19700101_000004_621256`.
+- QEMU wrapper exit code: 0.
+- Baseline startup/workload: `ok`.
+- Post/native startup: `error`.
+- Runner summary:
+  `Tetragon exited before BPF programs were tracked by shim`.
+- Post/native shim log:
+  - `native-loader replaced`: 5
+  - `native-loader skip`: 17
+  - `native-loader failed` / `native-loader error`: 1
+- Exact native-link failure:
+  - program: `execve_send`
+  - source hash: `36a98ef5fd8d4309`
+  - command failed in `native-link --mode kernel`
+  - stderr:
+    `Error: arm64 literal load displacement is not 4-byte aligned: 3687`
+- The failure happened after `event_exit_acct`, `event_exit_disa`,
+  `event_wake_up_n`, `event_execve`, and `execve_rate` had already been
+  replaced successfully, so the problem was per-program ARM64 native-link
+  kernel-mode patching, not Tetragon baseline startup.
+
+Changed files:
+
+- `native-sim/x86/native_lab/native_link/src/main.rs`
+- `docs/tmp/arm64_native_kernel_all_apps_plan_20260529.md`
+
+Code change:
+
+- Fixed `align_arm64_blob_to_8()` so it actually pads to the next 8-byte
+  boundary for any current blob length.
+- Preserved the old 4-byte NOP padding behavior when the blob is already
+  instruction-aligned at `len % 8 == 4`.
+- Added regression test
+  `arm64_literal_pool_alignment_handles_unaligned_data`, which reproduces the
+  Tetragon failure shape: arbitrary local data leaves the blob at length 3683,
+  literal-pool append must place the u64 literal at offset 3688, and
+  `a64_ldr_lit64()` must accept the aligned displacement.
+
+Technical decision:
+
+- This is an ARM64 native-linker-only fix. It does not touch loader, shim,
+  runner app policy, app code, or kernel code.
+- Root cause: `align_arm64_blob_to_8()` assumed the blob length was always
+  4-byte instruction-aligned. Tetragon `execve_send` can append local data of
+  non-4-byte size before a map literal pool. Appending one 4-byte NOP from an
+  arbitrary byte offset produced a literal offset that was still not
+  4-byte-aligned, causing `LDR literal` encoding to fail.
+- Performance impact should be negligible: the fix only adds up to seven bytes
+  of zero padding in rare data-pool alignment cases.
+
+Local validation:
+
+- Command:
+
+  ```bash
+  cargo test --manifest-path native-sim/x86/native_lab/native_link/Cargo.toml
+  ```
+
+- Result: 21 passed, 0 failed.
+- New regression test:
+  `tests::arm64_literal_pool_alignment_handles_unaligned_data ... ok`.
+
+Runtime image validation:
+
+- Command:
+
+  ```bash
+  make arm64-runner-runtime-image-tar
+  ```
+
+- Result: exit code 0.
+- Build/test mode: local arm64 cross-build plus image packaging only. Nothing
+  was built inside QEMU.
+- The build log confirmed arm64 `native-link` was recompiled.
+- Docker image id:
+  `sha256:fb0b0d754e6a9744431d9f600bb5d00f9fbd1ca0a76ed22e4335086024aff42e`.
+- Image tar:
+  `.cache/container-images/arm64-runner-runtime.image.tar`.
+- Image tar sha256:
+  `f5e1c9c96e3c7a898b22e9d8f75600b0662ade6b1b25720d06393ecefdeaab69`.
+- Image tar size and mtime:
+  `1982983168 2026-05-30 02:32:21.526451100 -0700`.
+- arm64 `native-link`:
+  - Build ID: `cdde5b030858e12e7c773aad8db847bd1d445ed5`
+  - sha1: `9488b89ae4f295e16606dbdd9de3c0ebe25b8a12`
+- arm64 `libnative_loader.so` sha1:
+  `964757a296dccfe04f0c821785ff48ac251423f4`.
+- arm64 `micro_exec` sha1:
+  `92c9d470f53a7d074fca9965bf566985529c1666`.
+- Build-only arm64 micro proof generation inside the local image build:
+  29 ok, 0 failed.
+- ARM64 native-bpf staged proof counts:
+  - `bcc`: 34
+  - `cilium`: 84
+  - `katran`: 6
+  - `otelcol-ebpf-profiler`: 30
+  - `tetragon`: 913
+  - `tracee`: 174
+- Kernel submodule:
+  - `git -C vendor/linux-framework status --short`: empty output.
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tetragon/observer" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 89 - Rebuild ARM64 runtime image after callee-saved mask fix
+
+Status: completed.
+
+Changed files:
+
+- None in this phase. This phase only rebuilt and validated artifacts that
+  include the Phase 88 native-link ARM64 ABI fix.
+
+Local build command:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+Validation result:
+
+- Exit code: 0.
+- Build/test mode: local cross-build and image packaging only. No build was
+  performed inside QEMU.
+- The local build rebuilt:
+  - `native_loader_shared`
+  - `micro_exec`
+  - ARM64 micro proof objects
+  - ARM64 native BPF proof objects for all supported apps
+  - `bpf-benchmark/runner-runtime:arm64`
+- ARM64 micro proof build result:
+  - 29 / 29 programs reported `ok`.
+- Runtime image:
+  - Docker image id:
+    `sha256:8a86072d840f7fb6475ddc26508076d0380428aad53536f6f207ce3eebd4192e`
+  - Tar path:
+    `.cache/container-images/arm64-runner-runtime.image.tar`
+  - Tar sha256:
+    `bd2c4e1037e135a3e7a0e45bb92f05d3cf8851c89a0d4a1c5df2c0bd5e0e6ab6`
+  - Tar size:
+    `1982982144` bytes
+  - Tar mtime:
+    `2026-05-30 01:32:01.822402181 -0700`
+- Runtime-image native proof counts:
+  - `bcc`: 34
+  - `cilium`: 84
+  - `katran`: 6
+  - `otelcol-ebpf-profiler`: 30
+  - `tetragon`: 913
+  - `tracee`: 174
+- Runtime-image native loader proof policy:
+  - `BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF=1`
+- Runtime-image `native-link`:
+  - Build ID: `b410a114ba7b430b29633fa5d746e51bdf8eb66c`
+- Runtime-image Tracee ABI spot check:
+  - `/artifacts/user/native-bpf/arm64/tracee/trace_sys_enter.proof.o`
+  - `.native_link_abi` reports `callee_saved_mask	15`
+- Kernel source status:
+  - `git -C vendor/linux-framework status --short`: empty output
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Technical decision:
+
+- The image is valid for the next Tracee QEMU retry because it contains the
+  prebuilt proof objects and enforces the no-build-in-QEMU policy at runtime.
+- The Phase 88 ABI fix is visible in the image: Tracee `trace_sys_enter`
+  now asks the kernel BPF JIT to preserve all BPF callee-saved ARM64
+  registers x19..x22.
+- No kernel source change was made, and the kernel submodule remains clean.
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Runtime image rebuild validation after Phase 87:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+Result:
+
+- Exit code: 0.
+- Build mode: local host/cross-build only. No build was performed inside QEMU.
+- Docker image:
+  `bpf-benchmark/runner-runtime:arm64`
+- Docker image ID:
+  `sha256:0f19e1bcdf852e1658c14b958c9b66ce6d820cc27bd40fbc2e5ca3580632120e`
+- Image tar:
+  `.cache/container-images/arm64-runner-runtime.image.tar`
+- Image tar sha256:
+  `3c50aac1ef1e1ac3d2172115afa5ea2f9cf2c57e1c8c6d1edccb3ed1f181260d`
+- Image tar size:
+  `1982982144`
+- Image tar mtime:
+  `2026-05-30 01:10:37.285080496 -0700`
+
+Runtime image proof/env check:
+
+```bash
+docker run --rm --platform linux/arm64 bpf-benchmark/runner-runtime:arm64 sh -lc '...'
+```
+
+Result:
+
+- `BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF=1`
+- `tracee_proofs=174`
+- `tracee-proof-ok`
+- Runtime proof counts:
+  - `bcc`: 34
+  - `cilium`: 84
+  - `katran`: 6
+  - `otelcol-ebpf-profiler`: 30
+  - `tetragon`: 913
+  - `tracee`: 174
+- Runtime binary Build IDs:
+  - `/usr/local/bin/native-link`:
+    `c85dec1b0a55c15152ce68c4c50c5ac9fa3c9079`
+  - `/usr/local/lib/bpfrejit/libnative_loader.so`:
+    `6f9f790f7b47debb47b7fe6e6bcaefaf46a426ae`
+  - `/usr/local/lib/bpfrejit/libbpfrejit_shim.so`:
+    `832fbe570b4c5b9c24b69ce57807146b79b56ef9`
+
+Kernel submodule check:
+
+- `git -C vendor/linux-framework status --short`: empty output
+- `git -C vendor/linux-framework log -1 --oneline`:
+  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 88 - Tracee post/native panic showed missing ARM64 callee-saved mask
+
+Status: in progress.
+
+Test command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Test result:
+
+- Exit code: 2.
+- Baseline phase: completed.
+- Post/native phase: kernel panic during real Tracee execution.
+- The QEMU run did not complete, so the artifact first remained under:
+  `.cache/qemu-arm64-root/home/yunwei37/workspace/bpf-benchmark/corpus/results/arm64_qemu_corpus_19700101_000005_286265`
+- Preserved copy:
+  `corpus/results/arm64_qemu_corpus_19700101_000005_286265_panic_x20_mask_gap`
+- `progress.json` status:
+  `running`
+- `metadata.json` status:
+  `running`
+- Post/native shim-log data:
+  - elapsed first-to-last timestamp: `158.538s`
+  - `native-loader timings`: 169
+  - `native-loader replaced`: 169
+  - `native-loader failed`: 0
+  - timing totals:
+    - `total_ns`: sum `111.619s`, avg `0.660s`, max `1.444s`
+    - `native_data_symbols_ns`: sum `16.340s`, avg `0.097s`
+    - `cache_lookup_ns`: sum `38.915s`, avg `0.230s`
+    - `native_link_exec_ns`: sum `31.086s`, avg `0.184s`
+    - `prog_load_ns`: sum `16.169s`, avg `0.096s`
+
+Kernel panic data:
+
+- Process:
+  `tracee`
+- Panic site:
+  `bpf_trace_run2+0x1f8/0x260`
+- Fault:
+  `Unable to handle kernel read from unreadable memory at virtual address 000000000000009d`
+- Relevant registers:
+  - `x20 = 0x65`
+  - `pc = bpf_trace_run2+0x1f8`
+- Disassembly of local kernel:
+  - `bpf_trace_run2+0x1f8` is `ldr x1, [x20, #56]`
+  - `x20` should still hold `struct bpf_prog *prog`
+- Last attach sequence before panic included:
+  - `BPF_RAW_TRACEPOINT_OPEN name=sys_enter prog_fd=147`
+  - `prog_fd=147` maps to native replacement of Tracee
+    `trace_sys_enter`
+  - `BPF_RAW_TRACEPOINT_OPEN name=sys_enter prog_fd=71`
+  - `prog_fd=71` maps to native replacement of Tracee
+    `tracepoint__raw`
+
+Root cause:
+
+- `trace_sys_enter.proof.o` wrote ARM64 registers `x20`, `x21`, and `x22`,
+  but its `.native_link_abi` did not request the kernel BPF JIT to save the
+  corresponding BPF callee-saved registers.
+- The ARM64 kernel BPF JIT maps BPF callee-saved registers as:
+  - `BPF_REG_6 -> x19`
+  - `BPF_REG_7 -> x20`
+  - `BPF_REG_8 -> x21`
+  - `BPF_REG_9 -> x22`
+- The native blob returned with `x20` clobbered to the syscall id (`0x65`),
+  so `bpf_trace_run2` dereferenced `x20 + 56 == 0x9d` and panicked.
+- This is a native-link proof ABI bug. It is not a loader policy issue, not a
+  shim replacement policy issue, and not a kernel source issue.
+
+Changed files:
+
+- `native-sim/x86/native_lab/native_link/src/main.rs`
+- `docs/tmp/arm64_native_kernel_all_apps_plan_20260529.md`
+
+Implementation:
+
+- Added ARM64 proof-side callee-saved observation:
+  - `arm64_observed_bpf_callee_saved_mask`
+  - `arm64_accumulate_bpf_callee_saved_regs`
+  - `arm64_mark_bpf_callee_saved_reg`
+- In ARM64 proof mode, native-link now ORs the observed `x19..x22` use into
+  the `.native_link_abi` `callee_saved_mask` for all reachable symbols in the
+  blob.
+- The scan ignores entry save/restore words already stripped by native-link,
+  so compiler ABI saves do not get double-counted as observed body usage.
+- The scan is conservative by design: over-saving a BPF callee-saved register
+  costs a few prologue/epilogue instructions, but under-saving corrupts the
+  kernel caller and can panic the system.
+
+Unit validation:
+
+```bash
+cargo test --manifest-path native-sim/x86/native_lab/native_link/Cargo.toml
+```
+
+Result:
+
+- Exit code: 0.
+- Test result: 20 passed, 0 failed.
+- New regression tests:
+  - `arm64_observed_callee_saved_mask_detects_unsaved_bpf_regs`
+  - `arm64_observed_callee_saved_mask_ignores_stripped_save_restore_only`
+
+Local ARM64 native-link build:
+
+```bash
+make host-rust-arm64
+```
+
+Result:
+
+- Exit code: 0.
+- Build mode: local cross-build only.
+
+Local ARM64 native-bpf proof rebuild:
+
+```bash
+make host-native-bpf-arm64
+```
+
+Result:
+
+- Exit code: 0.
+- Build mode: local cross-build only. No build was performed inside QEMU.
+- Proof counts:
+  - `katran`: 6
+  - `bcc`: 34
+  - `cilium`: 84
+  - `otelcol-ebpf-profiler`: 30
+  - `tracee`: 174
+  - `tetragon`: 913
+- Critical Tracee `.native_link_abi` checks:
+  - `trace_sys_enter.proof.o`: `callee_saved_mask=15`
+  - `tracepoint__raw_syscalls__sys_enter.proof.o`: `callee_saved_mask=3`
+  - `cgroup_bpf_run_filter_skb.proof.o`: `callee_saved_mask=15`
+- ARM64 native-link binary:
+  - Build ID: `b410a114ba7b430b29633fa5d746e51bdf8eb66c`
+  - sha1: `bf0f90d8758b089f4e435c3a954df8eb382477fb`
+- Kernel submodule remains clean:
+  - `git -C vendor/linux-framework status --short`: empty output
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Next command:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+### Phase 85 - Tracee prebuilt-proof QEMU retry exposed native data-symbol cost
+
+Status: completed.
+
+Test command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Test result:
+
+- Artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000005_868648`
+- Baseline phase: completed.
+- Post/native phase: Tracee startup exceeded the bounded startup timeout and
+  exited with code `-9`.
+- QEMU performed no build step. The runtime loader consumed prebuilt proof
+  objects:
+  - `native-loader timings` rows: 71
+  - `native-loader replaced` rows: 71
+  - `cache_hit=0`
+  - `prebuilt_proof=71`
+- Post/native loader-log elapsed time before timeout:
+  - first native-loader timestamp to last native-loader timestamp:
+    `319.818s`
+- Timing totals from the 71 rows:
+  - `native_link_exec_ns`: sum `12.779s`, avg `0.180s`
+  - `cache_lookup_ns`: sum `16.423s`, avg `0.231s`
+  - `upload_ns`: sum `0.675s`
+  - `prog_load_ns`: sum `7.408s`
+
+Technical decision:
+
+- Prebuilt proof packaging worked: the loader did not run proof generation in
+  QEMU.
+- The remaining Tracee timeout was dominated by repeated runtime-side map
+  discovery while resolving native data symbols for each real app load.
+- The next fix should keep loader/shim ABI stable apart from diagnostic timing
+  fields and should localize the behavior change in `libnative_loader`.
+
+### Phase 86 - Cache open-process BPF map snapshots during native data-symbol resolution
+
+Status: completed.
+
+Changed files:
+
+- `native-sim/libnativeloader/src/native_loader.cpp`
+- `native-sim/libnativeloader/include/native_loader.hpp`
+- `bpfopt/shim/shim_native_loader.h`
+- `docs/tmp/arm64_native_kernel_all_apps_plan_20260529.md`
+
+Implementation:
+
+- Added a per-load `OpenProcessMapsCacheScope` in `libnative_loader`.
+- During native data-symbol resolution, the loader now snapshots open-process
+  BPF maps once and reuses that snapshot for:
+  - `find_open_process_map_by_name`
+  - `find_open_process_array_data_map_by_name`
+  - `find_open_process_manifest_native_symbol_map`
+- Added diagnostic timing fields:
+  - `total_ns`
+  - `manifest_resolve_ns`
+  - `native_data_symbols_ns`
+- The shim only forwards/logs the extra timing fields. It does not change app
+  loading policy or native replacement policy.
+
+Local validation:
+
+```bash
+make host-runner-arm64 host-shim-arm64 host-shim-x86
+```
+
+Validation result:
+
+- Exit code: 0.
+- Build mode: local cross-build only.
+- Known existing warning remained:
+  `shim_reload.h:603 -Wformat-truncation`.
+- Build IDs and hashes from this validation:
+  - ARM64 `native_loader`:
+    - Build ID: `6f9f790f7b47debb47b7fe6e6bcaefaf46a426ae`
+    - sha1: `b5662752fb1203d24d9f8d40b80545e7e8b2998c`
+  - ARM64 `micro_exec`:
+    - Build ID: `108ef9c783e9b3baf31bae505a0f8352194522b8`
+    - sha1: `ee1bf80eb3d531d778f919aa98231d1177afc17a`
+  - ARM64 `libbpfrejit_shim.so`:
+    - Build ID: `832fbe570b4c5b9c24b69ce57807146b79b56ef9`
+    - sha1: `8292328a459766bf5bec83fde1e805f58f6eb4fc`
+  - x86 `libbpfrejit_shim.so`:
+    - Build ID: `c238ebc783b56312bbe44eb02eb39882f933c0c4`
+    - sha1: `fd03fb35b7667a78651d516326065f5c03ee9b42`
+
+Runtime image validation:
+
+- Image ID:
+  `sha256:bce5b9eaaf55b3c1de342ac509926bd4d81ebe488ead059f78fd99443b8e8d81`
+- Image tar:
+  `.cache/container-images/arm64-runner-runtime.image.tar`
+- Image tar sha256:
+  `ffa7f11d62c6df54729f63e2a3127329f69642bd0b2c4154cf90993261e13581`
+- Image tar size:
+  `1982982144`
+- Image tar mtime:
+  `2026-05-30 00:51:05.418274644 -0700`
+- Runtime proof check:
+  - `BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF=1`
+  - `tracee`: 174 proof objects
+  - all staged app proof counts matched the host stage:
+    `katran=6`, `bcc=34`, `cilium=84`, `otelcol-ebpf-profiler=30`,
+    `tracee=174`, `tetragon=913`
+
+Tracee-only QEMU validation:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Validation result:
+
+- Artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000005_573700`
+- Baseline phase: completed.
+- Post/native phase: failed fast with exit code `97`.
+- Post/native loader-log elapsed time:
+  `133.386s`
+- Native-loader rows:
+  - `native-loader timings`: 157
+  - `native-loader replaced`: 157
+  - `native-loader failed`: 1
+- Failure:
+  `native-link kernel failed (rc=1)`.
+- Native-link diagnostic:
+  `arm64 unresolved register-indirect call in cgroup_bpf_run_filter_skb at byte offset 0x298 through x24; helper calls must be rewritten before kernel load`.
+
+Technical decision:
+
+- The open-map snapshot reduced repeated runtime discovery enough to expose the
+  next real native-link correctness gap instead of timing out first.
+- The new failure is ARM64 native-link control-flow analysis, not loader,
+  shim, kernel, or app startup behavior.
+- Do not add a loader/shim workaround. Fix the ARM64 helper-call rewrite in
+  native-link so the generated kernel object is correct before the kernel
+  verifier sees it.
+
+### Phase 87 - ARM64 branch-sensitive helper-id recovery for register-indirect BLR
+
+Status: in progress.
+
+Changed files:
+
+- `native-sim/x86/native_lab/native_link/src/main.rs`
+- `docs/tmp/arm64_native_kernel_all_apps_plan_20260529.md`
+
+Observed failing code shape:
+
+- Tracee program:
+  `cgroup_bpf_run_filter_skb`
+- ARM64 sequence:
+  - `mov w24, #1`
+  - conditional control flow may branch around a later GOT/map load into `x24`
+  - final call is `blr x24`
+- The existing linear helper-id tracker cleared `x24` after seeing the later
+  map load, even though the failing branch path reaches `blr x24` with helper
+  id `1` still live.
+
+Implementation:
+
+- Added ARM64 instruction helpers for the native-linker:
+  - `arm64_reloc_written_gpr`
+  - `arm64_word_at`
+  - `arm64_insn_writes_reg`
+  - `arm64_branch_word_target`
+  - `arm64_successors_for_helper_reachability`
+  - `arm64_reachable_helper_id_for_blr`
+- When the normal linear state has no helper id for `blr <reg>`, native-link
+  now runs a bounded backwards/forwards local reachability check over ARM64
+  instruction words and relocations for the same symbol.
+- The reachability check only accepts a helper id when all reachable paths that
+  define the call register before the `blr` agree on the same immediate helper
+  id.
+- Caller-clobbered registers `x0..x18` are invalidated after direct calls and
+  `blr`, matching the existing helper-call ABI model. Callee-saved registers
+  such as `x24` can preserve the helper id across helper calls.
+
+Unit/regression validation:
+
+```bash
+cargo test --manifest-path native-sim/x86/native_lab/native_link/Cargo.toml \
+  arm64_reachable_helper_id_survives_branch_around_map_load
+```
+
+Result:
+
+- Exit code: 0.
+- Test result: passed.
+- Bug detected by the test: a branch path can skip a non-helper write to the
+  register used by `blr`, so a purely linear scan loses the helper id.
+
+Native-link validation:
+
+```bash
+cargo test --manifest-path native-sim/x86/native_lab/native_link/Cargo.toml
+```
+
+Result:
+
+- Exit code: 0.
+- Test result: 18 passed, 0 failed.
+
+Local ARM64 native-link build validation:
+
+```bash
+make host-rust-arm64
+```
+
+Result:
+
+- Exit code: 0.
+- Build mode: local cross-build only.
+
+Local ARM64 native-bpf proof validation:
+
+```bash
+make host-native-bpf-arm64
+```
+
+Result:
+
+- Exit code: 0.
+- Build mode: local cross-build only. No build was performed inside QEMU.
+- Proof counts in `vendor/build/native-bpf/arm64/stage`:
+  - `katran`: 6
+  - `bcc`: 34
+  - `cilium`: 84
+  - `otelcol-ebpf-profiler`: 30
+  - `tracee`: 174
+  - `tetragon`: 913
+- Native-link host binary after the fix:
+  - path:
+    `native-sim/x86/native_lab/native_link/target/release/native-link`
+  - Build ID: `b088d6ce476a39cbd8aa7d3be0b33a7f0d22f91f`
+  - sha1: `bfdc8b8b9731c6d31d18b140c0c017ef4e2fb45f`
+- Native-link ARM64 binary after the fix:
+  - path:
+    `native-sim/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link`
+  - Build ID: `c85dec1b0a55c15152ce68c4c50c5ac9fa3c9079`
+  - sha1: `3ec696508ee50d57fe06ff3c4cb593b4e73290dc`
+- Kernel submodule remains clean:
+  - `git -C vendor/linux-framework status --short`: empty output
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Technical decision:
+
+- The fix is intentionally in native-link. It does not change the app loader,
+  shim replacement policy, or kernel source.
+- The next validation step is to rebuild the ARM64 runtime image and retry
+  Tracee alone in QEMU. If Tracee passes, continue one app at a time and run
+  micro last.
+
+Next command:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+Image rebuild result:
+
+- Exit code: 0.
+- Build/test mode: local build and image packaging only. No build was
+  performed inside QEMU.
+- Docker image id:
+  `sha256:0a3505ab2550167fa60e80d2140c08ae1393ce554a9827c1900376bac67eafc2`.
+- Image tar sha256:
+  `e64a3fa10c6f1302065585fca0b74b736f8088a739188ba08294f92ed107e79c`.
+- Image tar size: `1983047680` bytes.
+- Image tar mtime: `2026-05-30 00:28:18.759246236 -0700`.
+- Runtime image proof check:
+  - `BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF`: `1`
+  - Tracee staged proof count: `174`
+  - `/artifacts/user/native-bpf/arm64/tracee/sys_enter_init.proof.o`
+    exists.
+- Kernel submodule remains clean:
+  - `git -C vendor/linux-framework status --short`: empty output
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 82 - Keep native loader shared object resident in the shim
+
+Status: completed.
+
+Changed files:
+
+- `bpfopt/shim/shim_native_loader.h`
+- `docs/tmp/arm64_native_kernel_all_apps_plan_20260529.md`
+
+Implementation:
+
+- Added a process-local cached native-loader handle in the shim:
+  - `shim_native_loader_handle`
+  - `shim_native_loader_handle_path`
+  - `shim_native_loader_load_fn`
+  - `shim_native_loader_handle_lock`
+- Added `shim_native_loader_resolve_load_fn()`:
+  - first call performs `dlopen()` and `dlsym()`
+  - later calls reuse the cached function pointer
+  - if the shared-object path changes inside the same process, the shim fails
+    fast instead of silently mixing loader implementations
+- Removed per-program `dlclose()` calls from the native replacement path.
+
+Technical decision:
+
+- The behavior-level replacement policy is unchanged: each candidate program is
+  still passed to the same native loader C ABI, and the returned fd still
+  replaces the original fd only when the native loader reports `replaced=1`.
+- This is not a ReJIT filter and does not add any app or program exclusion.
+- The change is intentionally in the generic shim because the old behavior
+  discarded process-local native loader caches on every program load. That is
+  a success-path inefficiency on x86 as well; ARM64 QEMU only made it visible.
+- The ARM-specific lowering and linking behavior remains in the native
+  linker/native loader stack.
+
+Local validation:
+
+```bash
+make host-shim-arm64 host-shim-x86
+```
+
+Result:
+
+- Exit code: 0.
+- ARM64 shim artifact:
+  `bpfopt/shim/build-arm64/libbpfrejit_shim.so`
+- ARM64 shim sha1:
+  `aa0c16143048a0afe55223be942542782f70f58c`
+- ARM64 shim Build ID:
+  `68c79ecd3a5c54a0365125558d0ba64842efe816`
+- x86 shim artifact:
+  `bpfopt/shim/build-x86/libbpfrejit_shim.so`
+- x86 shim sha1:
+  `1a13ec29c54798589673bfd1eb344056eecefcdd`
+- x86 shim Build ID:
+  `a8dc5711cd0c901ded5bae4edc7405b37055f27d`
+- Compiler warning status:
+  - both builds still emit the pre-existing
+    `shim_reload.h:603 -Wformat-truncation` warning
+  - no new compile errors
+
+Kernel state:
+
+- `git -C vendor/linux-framework status --short`: empty output
+- `git -C vendor/linux-framework log -1 --oneline`:
+  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Next validation command:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+- Suite entrypoint was `make corpus`.
+- QEMU used the locally cross-built ARM64 runtime image from Phase 78.
+- No build was performed inside QEMU.
+- Tracee was tested alone.
+- The run reached:
+  - `app_start`
+  - `measurement_start` for `baseline`
+  - `measurement_done` for `baseline` with `status=ok`
+  - `rejit_skipped`
+- No `result.json` was copied out before the run was terminated manually with
+  SIGINT from the host.
+- Host observation before termination:
+  - `make corpus` was still running after roughly 7 minutes.
+  - `qemu-system-aarch64` was still running at about one full CPU.
+- Kernel submodule check stayed clean:
+  - `git -C vendor/linux-framework status --short`: empty output
+  - latest kernel commit:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Diagnosis correction:
+
+- The earlier "cleanup hang" interpretation was incomplete.
+- `corpus/driver.py` prints `rejit_skipped` only after `baseline_stop` and
+  `wait_for_suite_quiescence()` return successfully.
+- Therefore the latest hang is after baseline cleanup, in the second app start
+  path: `post_rejit_start`.
+- With `BPFREJIT_SHIM_NATIVE_LOADER=post` and `SKIP_REJIT=norejit`, that second
+  start is the first Tracee run using the load-time native-loader path.
+- Tracee's current startup readiness path used `wait_healthy(proc, None, ...)`,
+  so a post/native Tracee process that stays alive but never becomes healthy
+  can block forever without producing a framework error.
+
+Technical decision:
+
+- Keep loader, shim, native-link, kernel, Tracee command line, and BPF bytecode
+  behavior unchanged in this phase.
+- Add a Tracee-specific startup health timeout so the existing failure surfaces
+  as a normal app error with captured process output instead of hanging the
+  whole QEMU suite.
+- Add raw lifecycle progress markers around baseline and post app startup so
+  future QEMU output identifies the exact blocking phase.
+- These lifecycle events are raw progress data only; they do not compute
+  aggregation, ratios, geomeans, wins/losses, or any framework-side summary.
+
+Changed files:
+
+```text
+runner/libs/app_runners/tracee.py
+corpus/driver.py
+```
+
+Code changes:
+
+- `runner/libs/app_runners/tracee.py`
+  - Adds `DEFAULT_STARTUP_TIMEOUT_S = 300.0`.
+  - Changes Tracee startup health wait from unbounded to:
+    `wait_healthy(proc, DEFAULT_STARTUP_TIMEOUT_S, _health_check)`.
+  - Keeps the bounded SIGINT/SIGTERM/SIGKILL shutdown from Phase 77.
+- `corpus/driver.py`
+  - Emits `phase_start` / `phase_done` around `baseline_start`.
+  - Emits `phase_start` / `phase_done` around `post_rejit_start`.
+  - Includes `baseline_start` in the existing `phase_error` reporting set.
+
+Why this is minimal:
+
+- No kernel source was modified.
+- No git state was modified.
+- No native-link, native-loader, shim behavior, app loader behavior, or ReJIT
+  policy changed.
+- The only behavioral change is fail-fast bounded startup for Tracee instead
+  of indefinite wait.
+
+Local validation:
+
+```bash
+python3 -m py_compile runner/libs/app_runners/tracee.py corpus/driver.py runner/libs/suite_commands.py
+```
+
+- Exit code: 0.
+
+Required next validation:
+
+- Rebuild the ARM64 runtime image locally with `make arm64-runner-runtime-image-tar`.
+- Re-run `tracee/monitor` alone in QEMU.
+- If Tracee now fails instead of hanging, inspect the captured per-app artifact
+  and make the next smallest fix based on the recorded process output.
+
+### Phase 74 - Tracee ARM64 cross-build embed fix and local verification
+
+Decision:
+
+- The Tracee blocker was not caused by native-link, shim, loader, or kernel
+  source changes.
+- The failing ARM64 QEMU run loaded a Tracee binary whose embedded
+  `tracee.bpf.o` still matched the x86 CO-RE layout. The verifier showed
+  `call unknown#195896080` (`0xbad2310`) in
+  `raw_tracepoint/sys_enter`, which is libbpf's poisoned CO-RE relocation
+  sentinel.
+- Local ARM64 BTF validation against the out-of-tree ARM64 object succeeded,
+  so the mismatch had to be in Tracee's embedded input, not in the running
+  kernel BTF.
+- Minimal fix: keep the real upstream Tracee binary, but make
+  `vendor/Makefile` build the upstream generated embed inputs from the
+  arch-specific `OUTPUT_DIR`, copy those generated inputs into Tracee's embed
+  source directory, and remove the stale out-of-tree binary before invoking
+  the upstream `tracee` target so Go relinks and embeds the refreshed objects.
+
+Changed file:
+
+```text
+vendor/Makefile
+```
+
+Code change:
+
+- `tracee-x86` and `tracee-arm64` now run the upstream Tracee
+  `bpf embedded-dirs btfhub signatures` targets before building the real
+  Tracee binary.
+- The arch-specific generated files are synchronized into
+  `vendor/repos/tracee/dist`:
+  - `tracee.bpf.o`
+  - `lsm_support/.`
+  - `btfhub/.`
+- The existing out-of-tree `dist/tracee` binary is deleted before the upstream
+  `tracee` target, forcing Go to relink and embed the refreshed BPF payload.
+
+Why this is minimal:
+
+- No custom Tracee loader was added.
+- No framework-side `.bpf.o` loading was introduced.
+- No kernel source, shim, native-loader, native-link, or runner protocol
+  behavior changed for this fix.
+- The fix aligns ARM64 with the x86 success path by making Tracee's own build
+  embed the architecture-specific generated BPF assets.
+
+Local cross-build validation:
+
+```bash
+make host-source-apps-arm64
+```
+
+- Exit code: 0.
+- Test/build mode: local ARM64 cross-build only. No build was performed inside
+  QEMU.
+- First implementation note: copying the generated embed inputs alone was not
+  enough because upstream Make considered `dist/tracee` up to date. The final
+  implementation removes the out-of-tree binary before the upstream `tracee`
+  build step.
+
+Tracee binary/object verification:
+
+```text
+57566dbd8b8449d16a70adca6565db78cb539b4814e06651c3ae72aec3c5ab07  vendor/build/.tracee-build/arm64/dist/tracee
+57566dbd8b8449d16a70adca6565db78cb539b4814e06651c3ae72aec3c5ab07  vendor/build/arm64/tracee/bin/tracee
+4eed3d429add0b77abe403f7bb45a48bb672d010d4aae70b940f293b6e429c80  vendor/build/.tracee-build/arm64/dist/tracee.bpf.o
+4eed3d429add0b77abe403f7bb45a48bb672d010d4aae70b940f293b6e429c80  vendor/repos/tracee/dist/tracee.bpf.o
+```
+
+- ARM64 Tracee binary build ID:
+  `28dc19976572b069a5b0d938289972908021b070`.
+- Extracted embedded ELF offsets changed from the old binary, confirming a new
+  embedded payload:
+  - old: `[0, 34729376, 34780000, 34850656]`
+  - new: `[0, 34729376, 34780064, 34849888]`
+- The new embedded object disassembles the `raw_tracepoint/sys_enter`
+  relocation through `struct task_struct::thread_info.flags`, not the stale
+  x86-compatible `thread_info.status` path.
+- `bpftool -d gen min_core_btf vendor/build/arm64/linux/vmlinux
+  /tmp/tracee_emb_arm64_new.btf /tmp/tracee_emb_arm64_new.elf` succeeded.
+- Relevant CO-RE check result:
+  - `struct task_struct::thread_info.flags`: matched
+  - `struct bpf_raw_tracepoint_args.args[1]`: matched
+
+Required next validation:
+
+- Rebuild the ARM64 runtime image so QEMU uses the fixed Tracee binary.
+- Re-run `tracee/monitor` alone in QEMU before moving to the next app.
+
+### Phase 75 - Rebuild ARM64 runtime image after Tracee embed fix
+
+Command:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+Validation result:
+
+- Exit code: 0.
+- Build/test mode: local ARM64 cross-build and image packaging only. No build
+  was performed inside QEMU.
+- Tracee build step in the image build reran the upstream generated embed
+  inputs, copied the ARM64 `tracee.bpf.o`/`lsm_support`/`btfhub` inputs into
+  Tracee's embed source directory, removed the stale out-of-tree binary, and
+  relinked the real upstream Tracee binary.
+- Docker image id:
+  `sha256:d7a046bc91560aeab683f2f83d45258dc3cc45541d8ab03e2d855fee7b7ad33f`.
+- Image tar:
+  `.cache/container-images/arm64-runner-runtime.image.tar`.
+- Image tar sha256:
+  `8e7214f6357bf3a095a51a28d31306828f9beaf6433e16c62e26e3c835d45f5c`.
+- Image tar size: `1971375616` bytes.
+- Image tar mtime: `2026-05-29 22:42:50.907672237 -0700`.
+- Docker build log confirmed:
+  - `/artifacts/kernel/config` copied from the local ARM64 kernel build.
+  - `/boot/config-7.0.0-rc2+` generated in the runtime image.
+  - `/artifacts/tracee/bin/tracee` copied from the rebuilt ARM64 Tracee
+    artifact.
+- Build IDs:
+  - `native_loader`: `5237bb0e83bc335b41f17b91da48b38ce86fd6c3`
+  - `micro_exec`: `bacab4ca202d7b64a2c0808314fd127534708652`
+  - `native-link`: `796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc`
+  - `libbpfrejit_shim.so`: `b510a8af5bfdc82b6497002e0169601ca2926fdd`
+  - `tracee`: `28dc19976572b069a5b0d938289972908021b070`
+- Build-only micro proof-object generation during this image build:
+  29 ok, 0 failed.
+- Kernel submodule remains clean:
+  - `git -C vendor/linux-framework status --short`: empty output.
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 81 - Tracee ARM64 QEMU post/native startup timeout diagnosis
+
+Command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Validation result:
+
+- QEMU wrapper exit code: 0.
+- App result artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000005_582123`.
+- App status: `error`.
+- Baseline startup completed:
+  - `phase_start baseline_start`
+  - `phase_done baseline_start`
+  - `measurement_start baseline`
+  - `measurement_done baseline status ok`
+- Baseline workload completed functionally:
+  - workload command return code: 0
+  - observed duration: about `10.95s`
+- ReJIT mode remained load-time only:
+  - `rejit_result`: `{"mode":"loadtime","status":"skipped"}`
+- Post/native startup began and then failed under the bounded Tracee startup
+  timeout:
+  - `phase_start post_rejit_start`
+  - `phase_error post_rejit_start`
+  - Tracee command exit code: `-9`
+- Baseline shim log:
+  - BPF load records: `184`
+  - native replacements: `0`
+  - skipped native loader records: `0`
+  - no native-loader failure/error records
+- Post/native shim log:
+  - BPF load records: `80`
+  - native replacements completed before timeout: `65`
+  - skipped native loader records: `12`
+  - native-loader failure/error records: `0`
+  - last observed timestamp: `443.209770`
+  - last observed operation:
+    `BPF_PROG_LOAD type=2 (kprobe) name=trace_proc_crea insn_cnt=1726`
+- Representative post/native replacement timings measured from adjacent
+  `BPF_PROG_LOAD` to `native-loader replaced` log records:
+  - large Tracee native symbols commonly took about `4s-8s`
+  - `lkm_seeker_kset`, `14602` insns: about `7.7s`
+  - `uprobe_syscall_`, `12994` insns: about `7.1s`
+  - `lkm_seeker_proc`, `13343` insns: about `7.0s`
+  - even `heartbeat_captu`, `27` insns, took about `5.1s`
+
+Technical decision:
+
+- This is no longer a cleanup/quiesce issue. Baseline stop and quiesce had
+  completed before `rejit_skipped`, and the failure happens after
+  `phase_start post_rejit_start`.
+- This is also not a verifier/native load correctness failure in the observed
+  data: the post/native log has `65` successful native replacements and no
+  native-loader failure/error before timeout.
+- The blocker is post/native startup latency. Tracee loads many BPF programs,
+  and each load currently resolves `libnative_loader.so` through `dlopen`,
+  calls into it once, and then `dlclose`s it. That discards native loader
+  process-local static caches such as the `/proc/kallsyms` symbol table and
+  any C++ runtime initialized state. x86 KVM can mask this cost; ARM64 QEMU
+  exposes it as multi-second replacement latency even for tiny programs.
+- Next minimal implementation step: keep the native loader shared object
+  resident in the shim process after the first successful `dlopen`/`dlsym`.
+  This does not filter any BPF program, does not change the native-link
+  contract, does not alter loader/shim attach semantics, and keeps the
+  architecture-specific behavior inside the native linker/native loader path.
+- This change is allowed under the existing constraint because it fixes an
+  x86-success-path inconsistency: a successful load path should not rely on
+  destroying the same native loader caches for every program. The behavioral
+  result remains the same file descriptor replacement policy; only repeated
+  library initialization is removed.
+- The 300s Tracee startup timeout remains a diagnostic safety bound, not the
+  final performance solution.
+
+Required validation after the change:
+
+1. Local compile check for the shim and native loader.
+2. Local ARM64 cross-build of the runner runtime image via
+   `make arm64-runner-runtime-image-tar`.
+3. QEMU Tracee-only functional run with the same command as above.
+4. Record per-step build IDs, artifact path, app status, baseline/post status,
+   replacement counts, and observed replacement timing data before moving to
+   the next app.
+
+### Phase 76 - Tracee QEMU retry after embed fix reached measurement, then hung in cleanup
+
+Command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Observed output:
+
+```text
+{"app": "tracee/monitor", "event": "app_start", "runner": "tracee", "workload": "stress_ng_tracee_syscall_hot"}
+{"app": "tracee/monitor", "event": "measurement_start", "phase": "baseline", "runner": "tracee", "samples": 1, "workload": "stress_ng_tracee_syscall_hot"}
+{"app": "tracee/monitor", "event": "measurement_done", "phase": "baseline", "runner": "tracee", "status": "ok"}
+{"app": "tracee/monitor", "event": "rejit_skipped", "runner": "tracee"}
+```
+
+Result:
+
+- The old Tracee startup blocker is fixed:
+  - Tracee became healthy.
+  - BPF program loading reached the runner health path.
+  - The workload ran.
+  - Baseline measurement completed successfully.
+- No `call unknown#195896080` / `0xbad2310` CO-RE poison failure appeared in
+  this run.
+- The run then stopped producing output during `baseline_stop` cleanup.
+- Host-side observation before interruption:
+  - `make corpus` had been running for more than 15 minutes.
+  - QEMU was still consuming about one host CPU.
+  - No `result.json` had been copied out.
+- I interrupted the hung QEMU run with `SIGINT` from the host. This was not a
+  benchmark result; it is cleanup failure triage data.
+
+Technical decision:
+
+- Do not change kernel source, shim, native-loader, native-link, Tracee source,
+  or benchmark policy for this cleanup issue.
+- The existing Tracee runner used `DEFAULT_STOP_TIMEOUT_S = 300.0` with the
+  generic `stop_agent()` sequence. That can wait up to roughly 900 seconds
+  across `SIGINT`, `SIGTERM`, and `SIGKILL` in the worst case before surfacing
+  a failure.
+- Tracee output mode is `none`, and the benchmark does not need Tracee to
+  gracefully flush app-level output on shutdown. The important resource cleanup
+  is process exit, which closes BPF fds/links.
+- Minimal targeted fix: make the Tracee runner use a Tracee-specific bounded
+  shutdown helper:
+  - send `SIGINT` briefly for normal graceful exit;
+  - escalate to `SIGTERM` briefly;
+  - escalate to `SIGKILL`;
+  - fail fast if the process still cannot exit.
+- This keeps the x86/ARM app startup and load behavior unchanged, but prevents
+  ARM64 QEMU cleanup from hiding the actual test result for many minutes.
+
+Required next validation:
+
+- Compile-check the modified Python.
+- Rebuild the ARM64 runtime image locally so QEMU gets the updated runner.
+- Re-run `tracee/monitor` alone.
+
+### Phase 77 - Tracee-specific bounded shutdown fix
+
+Changed file:
+
+```text
+runner/libs/app_runners/tracee.py
+```
+
+Code change:
+
+- Removed Tracee's use of the generic `stop_agent(..., timeout=300.0)` path.
+- Added `stop_tracee_agent()`:
+  - returns immediately if Tracee has already exited;
+  - sends `SIGINT` and waits `10s`;
+  - sends `SIGTERM` and waits `10s`;
+  - sends `SIGKILL` and waits `30s`;
+  - raises a clear error if Tracee still cannot exit.
+- Kept Tracee startup, health check, command-line behavior, shim env, native
+  manifest handling, and workload behavior unchanged.
+
+Why this is minimal:
+
+- It is scoped to Tracee cleanup only.
+- It does not change loader, shim, native-link, kernel, or BPF bytecode.
+- It does not add any app filtering or benchmark summary logic.
+- It preserves the real upstream Tracee binary and real app startup path.
+- It makes cleanup fail-fast enough that QEMU hangs do not hide the actual app
+  load/measurement result.
+
+Validation:
+
+```bash
+python3 -m py_compile runner/libs/app_runners/tracee.py corpus/driver.py runner/libs/suite_commands.py
+```
+
+- Exit code: 0.
+
+Kernel submodule:
+
+- `git -C vendor/linux-framework status --short`: empty output.
+- `git -C vendor/linux-framework log -1 --oneline`:
+  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Required next validation:
+
+- Rebuild `make arm64-runner-runtime-image-tar`.
+- Re-run Tracee alone in QEMU.
+
+### Phase 78 - Rebuild ARM64 runtime image after Tracee shutdown fix
+
+Command:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+Validation result:
+
+- Exit code: 0.
+- Build/test mode: local ARM64 cross-build and image packaging only. No build
+  was performed inside QEMU.
+- Docker image id:
+  `sha256:33172a4060879c2bd4c9a593ba648ed4721e4edba7b85da1b0fbeaadbbf8a118`.
+- Image tar:
+  `.cache/container-images/arm64-runner-runtime.image.tar`.
+- Image tar sha256:
+  `fef423284eb1de9f891f2ad9bdae14fc5308eedb244e67c61f8ca0cbbd97daf8`.
+- Image tar size: `1971376128` bytes.
+- Image tar mtime: `2026-05-29 23:06:24.601680740 -0700`.
+- Docker build log confirmed `runner/libs` was recopied into the runtime
+  image after the Tracee Python change.
+- Build IDs:
+  - `native_loader`: `5237bb0e83bc335b41f17b91da48b38ce86fd6c3`
+  - `micro_exec`: `bacab4ca202d7b64a2c0808314fd127534708652`
+  - `native-link`: `796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc`
+  - `libbpfrejit_shim.so`: `b510a8af5bfdc82b6497002e0169601ca2926fdd`
+  - `tracee`: `28dc19976572b069a5b0d938289972908021b070`
+- Build-only micro proof-object generation during this image build:
+  29 ok, 0 failed.
+- Kernel submodule remains clean:
+  - `git -C vendor/linux-framework status --short`: empty output.
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Execution constraints:
+
+- Suite entrypoint was `make corpus`.
+- QEMU used the local image tar from Phase 58.
+- No build was performed inside QEMU.
+- App was tested alone.
+
+Result:
+
+- Make/QEMU wrapper exit code: 0.
+- Artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000004_820831`.
+- Metadata:
+  - `status`: `error`
+  - `error_message`: `corpus suite reported errors`
+  - `run_type`: `arm64_qemu_corpus`
+  - `samples`: `1`
+  - `workload_seconds`: `10.0`
+  - `started_at`: `1970-01-01T00:00:04.820831+00:00`
+  - `generated_at`: `1970-01-01T00:00:42.481673+00:00`
+- App payload:
+  - file:
+    `corpus/results/arm64_qemu_corpus_19700101_000004_820831/details/apps/tracee__monitor.json`
+  - `status`: `error`
+  - `selected_workload`: `stress_ng_tracee_syscall_hot`
+  - `baseline`: `null`
+  - `post_rejit`: `null`
+  - `rejit_result`: `{}`
+  - `error`:
+    `shim socket /var/run/bpfrejit/shim-565.sock request failed: [Errno 111] Connection refused`
+- Module state:
+  - expected kinsn/native modules loaded successfully.
+  - `bpf_arm64_native_lab` was loaded.
+  - failed module list was empty.
+
+Important interpretation:
+
+- The failure happened during baseline measurement, before the post/native-loader
+  phase.
+- With `BPFREJIT_SHIM_NATIVE_LOADER=post`, the shim only enables native-loader
+  replacement when the environment value is exactly `1`; baseline therefore did
+  not run native-loader replacement.
+- This failure is not evidence of a Phase 58 native-loader regression yet. It
+  first needs to be isolated as either:
+  - a Tracee ARM64/QEMU baseline lifecycle issue, or
+  - an inherited shim/socket lifecycle issue that x86 already avoids.
+
+Next diagnostic step:
+
+- Re-run `tracee/monitor` with `SKIP_REJIT=norejit` and without the
+  `BPFREJIT_SHIM_NATIVE_LOADER=post` outer environment. This keeps the same
+  make/QEMU path but removes the post-native flag from the environment so the
+  baseline failure can be compared directly.
+
+### Phase 61 - Tracee baseline control without native-loader post flag
+
+Command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Execution constraints:
+
+- Suite entrypoint was `make corpus`.
+- QEMU used the local image tar from Phase 58.
+- No build was performed inside QEMU.
+- App was tested alone.
+- `BPFREJIT_SHIM_NATIVE_LOADER` was not set in the generated `qemu-run.sh`
+  environment.
+
+Result:
+
+- Make/QEMU wrapper exit code: 0.
+- Artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000004_767506`.
+- App result from QEMU console:
+  - `status`: `error`
+  - phase: `baseline`
+  - `error`:
+    `shim socket /var/run/bpfrejit/shim-566.sock request failed: [Errno 111] Connection refused`
+- The failure is the same shape as Phase 60.
+
+Technical decision:
+
+- This confirms the current Tracee blocker is not caused by the ARM64
+  native-loader replacement path. The failure occurs in baseline with no
+  native-loader flag in the app environment.
+- The runner currently records only the shim socket failure in the app payload.
+  It does not persist Tracee's captured stderr/stdout tail for this mid-phase
+  failure, so the next change is a minimal diagnostics change in runner error
+  handling, not a native-link or kernel change.
+- The diagnostic data is needed before deciding whether the real fix belongs
+  in Tracee app startup, workload selection, runner lifecycle, or the shim
+  socket/process liveness path.
+
+Planned minimal code change:
+
+- Preserve raw runner process output in `runner_details` when an app fails
+  mid-phase and the runner is stopped by the `finally` cleanup path.
+- This does not compute summaries or performance metrics.
+- This is not a workaround for Tracee and does not filter, skip, or exclude
+  any BPF program.
+
+### Phase 62 - Add raw runner failure diagnostics for Tracee blocker
+
+Changed file:
+
+```text
+corpus/driver.py
+```
+
+Code change:
+
+- `_build_runner_artifacts()` now copies non-empty `runner.process_output` into
+  `runner_details.process_output`.
+- If `runner.command_used` is available, it is copied into
+  `runner_details.command_used`.
+- In the `finally` cleanup path, after `runner.stop()` runs for a failed app,
+  `lifecycle.artifacts` is refreshed from `_build_runner_artifacts()`.
+
+Why this is minimal:
+
+- The change only records raw process stderr/stdout/returncode already captured
+  by the runner.
+- It does not alter app startup, workload execution, BPF loading, shim behavior,
+  native-loader behavior, or ReJIT behavior.
+- It does not add framework-side aggregation, ratios, averages, summaries, or
+  derived performance metrics.
+- It is only expected to affect payloads where a runner has non-empty
+  `process_output`, which is the Tracee failure case currently under
+  investigation.
+
+Local validation:
+
+```bash
+python3 -m py_compile corpus/driver.py
+```
+
+- Exit code: 0.
+
+Required next validation:
+
+- Rebuild the ARM64 runtime image locally so QEMU uses this Python change.
+- Re-run `tracee/monitor` alone and inspect `runner_details.process_output`.
+
+Build validation:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+- Exit code: 0.
+- Test/build mode: local ARM64 cross-build only. No build was performed inside
+  QEMU.
+- Docker image id:
+  `sha256:70beffd8356ae3a378a679feede0b988c810256992b1123e5bba2bfd00f5af4d`.
+- Image tar:
+  `.cache/container-images/arm64-runner-runtime.image.tar`.
+- Image tar sha256:
+  `4ef7aa5bae32add9492a4c732b82fabc78c71117c12d683e280d7084537af69b`.
+- Image tar size: `1970937344` bytes.
+- Image tar mtime: `2026-05-29 21:37:22.878999386 -0700`.
+- Build IDs:
+  - `native_loader`: `5237bb0e83bc335b41f17b91da48b38ce86fd6c3`
+  - `micro_exec`: `bacab4ca202d7b64a2c0808314fd127534708652`
+- Build-only micro proof-object generation completed during image build:
+  29 ok, 0 failed; slowest observed compile item was
+  `katran_lb_consistent_hash_select` at about 26.8s.
+- Kernel submodule:
+  - `git -C vendor/linux-framework status --short`: empty output.
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 71 - Narrow Tracee ARM64 failure to runtime CO-RE target state
+
+Diagnostic context:
+
+- Tracee still fails before native-loader replacement is evaluated.
+- The first real failed program load in the shim log is:
+  - `BPF_PROG_LOAD type=17 (raw_tracepoint)`
+  - `name=tracepoint__raw`
+  - section: `raw_tracepoint/sys_enter`
+  - `insn_cnt=29`
+  - hash: `3f5643b0ebab4dc0`
+  - verifier tail:
+    `2: (85) call unknown#195896080` followed by
+    `invalid func unknown#195896080`
+- `195896080 == 0xbad2310`, which libbpf uses to poison an instruction when
+  a CO-RE relocation cannot be resolved.
+- The failing source location is Tracee's `is_arm64_compat()` path:
+  `BPF_CORE_READ(task, thread_info.flags) & _TIF_32BIT`.
+
+Local BTF verification command:
+
+```bash
+rm -f /tmp/tracee.arm64.min.btf
+bpftool -d gen min_core_btf \
+  vendor/build/arm64/linux/vmlinux \
+  /tmp/tracee.arm64.min.btf \
+  vendor/build/.tracee-build/arm64/dist/tracee.bpf.o \
+  >/tmp/tracee_min_core_btf.log 2>&1
+```
+
+Result:
+
+- Exit code: 0.
+- Output BTF:
+  `/tmp/tracee.arm64.min.btf`, size `19488` bytes.
+- Debug log:
+  `/tmp/tracee_min_core_btf.log`, size about `8.8 MiB`.
+- The local ARM64 build BTF resolves the exact failing section:
+  - `raw_tracepoint/sys_enter` relo #0:
+    `struct task_struct.thread_info.flags` matched target
+    `struct task_struct.thread_info.flags` at offset `0`.
+  - `raw_tracepoint/sys_enter` relo #1:
+    `struct bpf_raw_tracepoint_args.args[1]` matched target
+    `struct bpf_raw_tracepoint_args.args[1]` at offset `8`.
+- The local built kernel BTF contains:
+  - `struct task_struct` with `thread_info` at bit offset `0`.
+  - `struct thread_info` with `flags` at bit offset `0`.
+  - `struct bpf_raw_tracepoint_args` with `args` at bit offset `0`.
+
+Technical decision:
+
+- This is not an ARM64 native-link, native-loader, or shim replacement bug.
+- The local cross-built ARM64 kernel BTF can resolve the relocation, so the
+  remaining question is what BTF path/data Tracee/libbpf sees inside the
+  QEMU Docker runtime when the real upstream Tracee binary starts.
+- Do not change kernel source.
+- Do not change native-link for this failure.
+- Do not filter/skip the Tracee BPF program.
+- Next run must keep Tracee as a single app and enable default-off diagnostics
+  only:
+  - `BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1`
+  - Tracee debug/libbpf logging through `BPFREJIT_TRACEE_EXTRA_ARGS`
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_TRACEE_EXTRA_ARGS="--logging level=debug --logging filters.include.libbpf" \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 72 - Identify stale x86 BPF embedded in the ARM64 Tracee binary
+
+Diagnostic commands:
+
+```bash
+python3 - <<'PY'
+from pathlib import Path
+p = Path('vendor/build/.tracee-build/arm64/dist/tracee')
+data = p.read_bytes()
+needle = b'\x7fELF'
+pos = []
+i = 0
+while True:
+    j = data.find(needle, i)
+    if j < 0:
+        break
+    pos.append(j)
+    i = j + 1
+print(pos)
+PY
+
+dd if=vendor/build/.tracee-build/arm64/dist/tracee \
+  of=/tmp/tracee_emb_34850656.elf bs=1 skip=34850656 count=20000000
+llvm-objdump -dr --section=raw_tracepoint/sys_enter /tmp/tracee_emb_34850656.elf
+bpftool -d gen min_core_btf \
+  vendor/build/arm64/linux/vmlinux \
+  /tmp/tracee_emb_min.btf \
+  /tmp/tracee_emb_34850656.elf \
+  >/tmp/tracee_emb_min_core_btf.log 2>&1
+```
+
+Result:
+
+- The ARM64 Tracee binary contains embedded ELF objects at offsets:
+  `0`, `34729376`, `34780000`, `34850656`.
+- The object at `34850656` is the embedded main `tracee.bpf.o`.
+- That embedded object is not the same as
+  `vendor/build/.tracee-build/arm64/dist/tracee.bpf.o`:
+  - embedded object sha256:
+    `b0dd6440e7eeb56dc18938f005b88d204675c8ff4d485e04c2b00508599479c6`
+  - output-dir object sha256:
+    `4eed3d429add0b77abe403f7bb45a48bb672d010d4aae70b940f293b6e429c80`
+- The embedded object uses the x86 compat path:
+  `struct task_struct::thread_info.status`.
+- The ARM64 output-dir object uses the ARM64 compat path:
+  `struct task_struct::thread_info.flags`.
+- Running `bpftool -d gen min_core_btf` on the embedded object reproduces the
+  real failure without QEMU:
+  - `raw_tracepoint/sys_enter` relo #0:
+    `struct task_struct.thread_info.status`
+  - target candidate only matches `struct task_struct.thread_info`, then no
+    nested `status` field exists on ARM64 `struct thread_info`.
+  - libbpf reports `no matching targets found`, which leads to the
+    `0xbad2310` poisoned helper call seen in the kernel verifier log.
+
+Technical decision:
+
+- Root cause is the Tracee build contract, not runtime BTF.
+- Tracee's Go embed source is `vendor/repos/tracee/dist/tracee.bpf.o`.
+- The out-of-tree build writes the correct ARM64 object to
+  `vendor/build/.tracee-build/arm64/dist/tracee.bpf.o`, but the Go binary
+  still embeds the stale source-tree `vendor/repos/tracee/dist/tracee.bpf.o`.
+- The fix should be in the local app build wrapper, not in kernel, shim,
+  native-loader, or native-link:
+  - build Tracee BPF into the out-of-tree output dir first;
+  - copy the generated `tracee.bpf.o`, `lsm_support`, and `btfhub` into
+    Tracee's source-tree `dist/` immediately before the Go embed build;
+  - build the real upstream Tracee binary normally.
+
+### Phase 73 - Fix Tracee cross-build embed input and health readiness
+
+Changed files:
+
+```text
+vendor/Makefile
+runner/libs/app_runners/tracee.py
+```
+
+Code change:
+
+- `vendor/Makefile`
+  - `tracee-x86` and `tracee-arm64` now run the upstream Tracee `bpf`,
+    `embedded-dirs`, `btfhub`, and `signatures` targets first.
+  - Before the upstream Go `tracee` build, the wrapper syncs the generated
+    out-of-tree embed inputs into `vendor/repos/tracee/dist/`:
+    - `tracee.bpf.o`
+    - `lsm_support/*`
+    - `btfhub/*`
+  - The wrapper then invokes the upstream `tracee` target, so the real Tracee
+    binary embeds the BPF object for the requested architecture.
+- `runner/libs/app_runners/tracee.py`
+  - Tracee readiness now requires the configured healthz endpoint to return
+    ready.
+  - Plain stdout/stderr activity is no longer considered readiness. This
+    prevents early feature-probe logs from being mistaken for a successful
+    Tracee startup.
+  - The previously used `_tracee_collector_has_activity()` helper was removed
+    to avoid dead code.
+
+Why this is minimal:
+
+- No kernel source was modified.
+- No Tracee source code or BPF source logic was changed.
+- No loader, shim, native-loader, native-link, ReJIT, or benchmark
+  aggregation logic was changed for this root cause.
+- The build still produces and runs the real upstream Tracee binary; it only
+  makes the upstream Go embed input match the selected target architecture.
+
+Local validation:
+
+```bash
+python3 -m py_compile \
+  runner/libs/app_runners/tracee.py \
+  corpus/driver.py \
+  runner/libs/suite_commands.py
+```
+
+- Exit code: 0.
+
+Required next validation:
+
+- Run the local ARM64 cross-build:
+
+```bash
+make host-source-apps-arm64
+```
+
+- Verify the rebuilt ARM64 Tracee binary embeds `thread_info.flags`, not
+  `thread_info.status`.
+- Rebuild the ARM64 runtime image.
+- Re-run `tracee/monitor` alone in QEMU with no `TRACEE_BTF_FILE` override.
+
+### Phase 68 - Tracee debug args did not expose the verifier rejection
+
+Command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_TRACEE_EXTRA_ARGS="--logging level=debug --logging filters.include.libbpf" \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Validation result:
+
+- Exit code from the Make/QEMU wrapper: 0.
+- Artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000005_435848`.
+- App status: `error`.
+- Runner-visible error:
+  `failed to launch Tracee: /artifacts/tracee/bin/tracee ... command exited with code 1`.
+- No Tracee/libbpf verifier detail was captured in `stdout` or `stderr`, even
+  after the runner-side IO thread join fix.
+- Shim log still identified the first failing real app program:
+  - command: `BPF_PROG_LOAD`
+  - type: `17` (`raw_tracepoint`)
+  - name: `tracepoint__raw`
+  - section implied by Tracee source: `raw_tracepoint/sys_enter`
+  - `insn_cnt=29`
+  - hash: `3f5643b0ebab4dc0`
+  - `prog_btf_fd=124`
+  - result: `fd=-1 errno=22`
+
+Technical decision:
+
+- The failure happens before native replacement, in Tracee's baseline app load.
+- Tracee's own debug flags do not produce enough verifier detail for this path.
+- The next diagnostic must remain on the real app startup path. Do not load
+  `.bpf.o` directly and do not build anything inside QEMU.
+- Add a default-off shim diagnostic that runs only after a real
+  `BPF_PROG_LOAD` has already failed and only when explicitly enabled by an
+  environment variable. This keeps the normal loader/shim behavior and
+  performance path unchanged.
+
+### Phase 69 - Add default-off shim verifier-log capture for failed app loads
+
+Changed files:
+
+```text
+Makefile
+bpfopt/shim/libbpfrejit_shim.c
+runner/libs/suite_commands.py
+```
+
+Code change:
+
+- `bpfopt/shim/libbpfrejit_shim.c`
+  - Added `BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD`.
+  - Default behavior is unchanged: when the variable is unset or `0`, failed
+    app `BPF_PROG_LOAD` calls are only logged as before.
+  - When enabled and a real app `BPF_PROG_LOAD` returns an error, the shim
+    copies the same attr into a temporary buffer, attaches a 4 MiB verifier log
+    buffer, retries the load for diagnostics, closes the diagnostic fd if the
+    retry unexpectedly succeeds, writes the verifier log to
+    `$BPFREJIT_SHIM_DIR/bpfrejit_load_failure_<pid>_<hash>.log`, logs a short
+    tail into the shim log, and restores the original errno.
+- `Makefile`
+  - Added `BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD` to `SUITE_ENV_NAMES` so QEMU
+    test invocations can pass the diagnostic switch through the generated
+    `/qemu-run.sh`.
+- `runner/libs/suite_commands.py`
+  - Added `BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD` and the existing
+    `BPFREJIT_TRACEE_EXTRA_ARGS` to the container command env allow-list for
+    consistency with the Makefile path.
+
+Why this is minimal:
+
+- No kernel source was modified.
+- No native-link code was touched.
+- No native-loader replacement behavior was touched.
+- The diagnostic is off by default and is only used for failing app loads.
+- The Tracee app still starts through the real upstream Tracee binary.
+
+Local validation:
+
+```bash
+python3 -m py_compile runner/libs/suite_commands.py runner/libs/app_runners/tracee.py corpus/driver.py
+make -C bpfopt/shim
+make host-shim-arm64
+```
+
+Results:
+
+- Python compile: exit code 0.
+- Host shim build: exit code 0.
+- ARM64 cross shim build: exit code 0.
+- Both shim builds only reported the pre-existing `shim_reload.h` snprintf
+  truncation warning at `shim_reload.h:603`; no new compile errors.
+- Kernel submodule remains clean, with HEAD:
+  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
+
+Next command:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+Image rebuild command:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+Image rebuild validation result:
+
+- Exit code: 0.
+- Build/test mode: local build and Docker image packaging only. No build was
+  performed inside QEMU.
+- Docker image id:
+  `sha256:1e0483846667124a6ec80f6cae5694886d54152d7f297807fd327aeb0e020143`.
+- Image tar:
+  `.cache/container-images/arm64-runner-runtime.image.tar`.
+- Image tar sha256:
+  `c31ccfcb7c4008736ba033849cd3beb4f247d3eda71291975234ed360e864cab`.
+- Image tar size: `1982916096` bytes.
+- Image tar mtime: `2026-05-30 00:10:37.110866547 -0700`.
+- Docker build log confirms native-bpf proof artifacts were copied:
+  - native-bpf build context transfer: about `138.51MB`
+  - `COPY --link --from=runner-runtime-host-native-bpf / /artifacts/user/native-bpf/arm64/`: `DONE`
+- Runtime image environment includes:
+  - `BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF=1`
+- Runtime image proof count check:
+  - command mode: container inspection only, no build
+  - `BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF`: `1`
+  - `katran`: 6
+  - `bcc`: 34
+  - `cilium`: 84
+  - `otelcol-ebpf-profiler`: 30
+  - `tracee`: 174
+  - `tetragon`: 913
+  - representative file checks passed:
+    - `/artifacts/user/native-bpf/arm64/tracee/sys_enter_init.proof.o`
+    - `/artifacts/user/native-bpf/arm64/tetragon/bpf_generic_kprobe.generic_kprobe_event.proof.o`
+- Build IDs and hashes packaged from the host build:
+  - `native_loader`:
+    - Build ID: `421f5fcf7ed002f1428df95b45fc0b032436f273`
+    - sha1: `4ec1a24e6008d3445fc5c993d90d420ae17b7833`
+  - `micro_exec`:
+    - Build ID: `181ffbdc80327b47650c53c1fe7d9cfa3435c733`
+    - sha1: `fb7a55f7595f9b4dd63400a8ae5e2071197edda6`
+  - `libbpfrejit_shim.so`:
+    - Build ID: `68c79ecd3a5c54a0365125558d0ba64842efe816`
+    - sha1: `aa0c16143048a0afe55223be942542782f70f58c`
+  - `native-link`:
+    - Build ID: `796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc`
+    - sha1: `6ca7e652befe574d81d7550519774b05fcaf2574`
+- Kernel submodule remains clean:
+  - `git -C vendor/linux-framework status --short`: empty output
+
+Technical decision:
+
+- The image now enforces prebuilt proof usage at runtime. If an app load path
+  still needs a missing proof object, the run should fail fast and the missing
+  path must be fixed in the host packaging step rather than by building inside
+  QEMU.
+- Proceed with Tracee-only QEMU functional retry before testing any other app.
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Then rerun Tracee alone with:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 70 - Rebuild ARM64 runtime image with failed-load verifier diagnostics
+
+Command:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+Validation result:
+
+- Exit code: 0.
+- Test/build mode: local ARM64 cross-build only. No build was performed inside
+  QEMU.
+- Docker image id:
+  `sha256:41f6c762b5d65e6536eb18d0056f16914476df78a901e6106dbe87ef83014b4f`.
+- Image tar:
+  `.cache/container-images/arm64-runner-runtime.image.tar`.
+- Image tar sha256:
+  `70a74a2fb25d40770277fa958f49469743e0b0e2eb27b45c8ef5e8049de6f911`.
+- Image tar size: `1971441664` bytes.
+- Image tar mtime: `2026-05-29 22:15:04.922059301 -0700`.
+- ARM64 artifact Build IDs:
+  - `libbpfrejit_shim.so`:
+    `b510a8af5bfdc82b6497002e0169601ca2926fdd`
+  - `native_loader`: `5237bb0e83bc335b41f17b91da48b38ce86fd6c3`
+  - `micro_exec`: `bacab4ca202d7b64a2c0808314fd127534708652`
+  - `native-link`: `796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc`
+- Build-only micro proof-object generation completed during image build:
+  29 ok, 0 failed; slowest observed compile item was
+  `katran_lb_consistent_hash_select` at about 26.6s.
+- Native artifact generation rebuilt/staged the ARM64 app native objects and
+  proof objects, including Tetragon; only existing compile warnings were
+  observed.
+- Kernel submodule:
+  - `git -C vendor/linux-framework status --short`: empty output.
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 65 - Tracee after kernel-config runtime image fix
+
+Command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Execution constraints:
+
+- Suite entrypoint was `make corpus`.
+- QEMU used the locally cross-built ARM64 runtime image from Phase 64.
+- No build was performed inside QEMU.
+- Tracee was tested alone.
+- ReJIT remained skipped with `SKIP_REJIT=norejit`.
+
+Result:
+
+- Make/QEMU wrapper exit code: 0.
+- Artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000005_768109`.
+- App result:
+  - `status`: `error`
+  - phase: `baseline`
+  - `error`:
+    `shim socket /var/run/bpfrejit/shim-567.sock request failed: [Errno 111] Connection refused`
+- Progress compared with Phase 63:
+  - Tracee reached `measurement_start` for the baseline workload.
+  - The previous KConfig missing warnings disappeared.
+  - The remaining app exit is still `failed to load BPF object: invalid argument`.
+- Raw shim log identified the first failing real program:
+  - `BPF_PROG_LOAD type=17 (raw_tracepoint)`
+  - `name=tracepoint__raw`
+  - `insn_cnt=29`
+  - section in Tracee object: `raw_tracepoint/sys_enter`
+  - `hash=3f5643b0ebab4dc0`
+  - `prog_btf_fd=124`
+  - result: `fd=-1 errno=22`
+- A preceding tiny libbpf probe load succeeded:
+  - `BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6`
+  - result: `fd=23 errno=0 kernel_prog_id=17`
+
+Technical decision:
+
+- The KConfig image fix was necessary but not sufficient.
+- The current blocker is now a real app baseline verifier/load failure for
+  Tracee's first `raw_tracepoint/sys_enter` program on ARM64 QEMU.
+- This remains outside native-loader/native-link/ReJIT. The native-loader flag
+  is `post`, and the failing load is in baseline before replacement.
+- The next step is a diagnostic-only runner knob to pass Tracee logging flags
+  into the real Tracee binary. The default path must stay unchanged and
+  performance-neutral; debug logging is only enabled for the next isolated
+  Tracee diagnostic run.
+
+Planned minimal code change:
+
+- Add `BPFREJIT_TRACEE_EXTRA_ARGS` to the make/QEMU suite env pass-through.
+- Parse it with `shlex.split()` in the Tracee app runner and append it to
+  Tracee's existing command only when the env var is non-empty.
+- Rebuild the ARM64 image locally.
+- Re-run only `tracee/monitor` with:
+  `BPFREJIT_TRACEE_EXTRA_ARGS="--logging level=debug --logging filters.include.libbpf"`.
+
+### Phase 66 - Add default-off Tracee diagnostic extra-args knob
+
+Changed files:
+
+```text
+Makefile
+runner/libs/app_runners/tracee.py
+```
+
+Code change:
+
+- `Makefile`
+  - Adds `BPFREJIT_TRACEE_EXTRA_ARGS` to `SUITE_ENV_NAMES`, so the value is
+    exported into QEMU's generated `qemu-run.sh` only when set by the caller.
+- `runner/libs/app_runners/tracee.py`
+  - Adds `_tracee_extra_args_from_env()`.
+  - Parses the env value with `shlex.split()`.
+  - Appends parsed arguments to the real Tracee command in `TraceeRunner.start()`.
+
+Why this is minimal:
+
+- Default behavior is unchanged when `BPFREJIT_TRACEE_EXTRA_ARGS` is unset.
+- The knob only affects Tracee and only appends CLI args to the real upstream
+  Tracee binary.
+- No BPF program filtering, event exclusion, native-loader behavior,
+  native-link behavior, shim behavior, or ReJIT behavior was changed.
+- This is diagnostic-only and should not affect performance runs unless
+  explicitly enabled.
+
+Local validation:
+
+```bash
+python3 -m py_compile runner/libs/app_runners/tracee.py
+```
+
+- Exit code: 0.
+
+Required next validation:
+
+- Rebuild the ARM64 runtime image locally so QEMU contains the Python change.
+- Re-run only `tracee/monitor` with libbpf debug args enabled.
+
+Build validation:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+- Exit code: 0.
+- Test/build mode: local ARM64 cross-build only. No build was performed inside
+  QEMU.
+- Docker image id:
+  `sha256:f76d36f3aef71334c96c5559b7a4bad10b5e8afeb9e8db1e9996c96b3de1e199`.
+- Image tar sha256:
+  `fc8dd8da56a0ce7bde920eca8e16cafedea57e344dca14f1e00218ed7ee8ff19`.
+- Image tar size: `1971437056` bytes.
+- Image tar mtime: `2026-05-29 21:56:45.392183547 -0700`.
+- Build IDs:
+  - `native_loader`: `5237bb0e83bc335b41f17b91da48b38ce86fd6c3`
+  - `micro_exec`: `bacab4ca202d7b64a2c0808314fd127534708652`
+  - `native-link`: `796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc`
+- Build-only micro proof-object generation completed during image build:
+  29 ok, 0 failed; slowest observed compile item was
+  `katran_lb_consistent_hash_select` at about 26.6s.
+- Kernel submodule:
+  - `git -C vendor/linux-framework status --short`: empty output.
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_TRACEE_EXTRA_ARGS="--logging level=debug --logging filters.include.libbpf" \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 67 - Preserve Tracee launch-failure output after IO thread join
+
+Diagnostic run result before this change:
+
+- Command was the Phase 66 Tracee debug command.
+- Make/QEMU wrapper exit code: 0.
+- Artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000005_446114`.
+- Tracee command included:
+  `--logging level=debug --logging filters.include.libbpf`.
+- App failed during startup before `measurement_start`:
+  `failed to launch Tracee: ... command exited with code 1`.
+- The artifact did not include Tracee stderr details, because the launch
+  failure path sampled stdout/stderr before joining the collector threads.
+
+Changed file:
+
+```text
+runner/libs/app_runners/tracee.py
+```
+
+Code change:
+
+- In `TraceeAgentSession.__enter__()`, for an unhealthy/failed launch:
+  - preserve the failed `proc`
+  - call `self.close()` first, which stops the process if needed and joins IO
+    threads
+  - take the collector snapshot after the join
+  - format the launch failure using the preserved process and the completed
+    snapshot
+
+Why this is minimal:
+
+- It affects only Tracee launch-failure diagnostics.
+- Successful Tracee startup behavior is unchanged.
+- App startup, workload execution, BPF loading, native-loader behavior, shim
+  behavior, native-link behavior, and ReJIT behavior are unchanged.
+- No framework-side aggregation or summary was added.
+
+Local validation:
+
+```bash
+python3 -m py_compile runner/libs/app_runners/tracee.py
+```
+
+- Exit code: 0.
+
+Required next validation:
+
+- Rebuild the ARM64 runtime image locally.
+- Re-run only `tracee/monitor` with libbpf debug args enabled.
+
+Build validation:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+- Exit code: 0.
+- Test/build mode: local ARM64 cross-build only. No build was performed inside
+  QEMU.
+- Docker image id:
+  `sha256:bd9872f10e60154c7db5db328889b7b63b744e58e305c9c3acf51be5c21420b1`.
+- Image tar sha256:
+  `fd0853d25935e6eeea32027f317cdf00ba79125a82dca2e9787d6d3c920a7cac`.
+- Image tar size: `1971437568` bytes.
+- Image tar mtime: `2026-05-29 22:03:50.200460888 -0700`.
+- Build IDs:
+  - `native_loader`: `5237bb0e83bc335b41f17b91da48b38ce86fd6c3`
+  - `micro_exec`: `bacab4ca202d7b64a2c0808314fd127534708652`
+  - `native-link`: `796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc`
+- Build-only micro proof-object generation completed during image build:
+  29 ok, 0 failed; slowest observed compile item was
+  `katran_lb_consistent_hash_select` at about 27.5s.
+- Kernel submodule:
+  - `git -C vendor/linux-framework status --short`: empty output.
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_TRACEE_EXTRA_ARGS="--logging level=debug --logging filters.include.libbpf" \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 63 - Re-run Tracee with raw process diagnostics enabled
+
+Command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Execution constraints:
+
+- Suite entrypoint was `make corpus`.
+- QEMU used the locally cross-built ARM64 runtime image from Phase 62.
+- No build was performed inside QEMU.
+- Tracee was tested alone.
+- ReJIT was intentionally skipped with `SKIP_REJIT=norejit`; this isolates real
+  application startup/BPF load correctness before measuring ReJIT/native-loader
+  behavior.
+
+Result:
+
+- Make/QEMU wrapper exit code: 0.
+- Artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000005_749283`.
+- App result:
+  - `status`: `error`
+  - phase: `baseline`
+  - `error`:
+    `shim socket /var/run/bpfrejit/shim-567.sock request failed: [Errno 111] Connection refused`
+- `runner_details.command_used` captured the real upstream Tracee command:
+  `/artifacts/tracee/bin/tracee --events * --output none --server healthz --server http-address=:3366 --signatures-dir /var/tmp/bpfrejit-runtime/ccbf12fb/tracee/signatures --capabilities bypass=true`
+- `runner_details.process_output.returncode`: `1`.
+- Tracee stderr tail ended with:
+  `Tracee runner failed: error initializing Tracee: ebpf.(*Tracee).Init: ebpf.(*Tracee).initBPF: failed to load BPF object: invalid argument`.
+- Tracee stderr also reported:
+  - `KConfig: could not check enabled kconfig features`
+  - `could not read /boot/config-7.0.0-rc2+: stat /boot/config-7.0.0-rc2+: no such file or directory`
+  - `KConfig: assuming kconfig values, might have unexpected behavior`
+
+Technical decision:
+
+- The failure is still in baseline and occurs before any native-loader
+  replacement path can be evaluated.
+- The raw process output now shows the real app binary exits during
+  `initBPF` with libbpf/kernel `EINVAL`; the shim socket error is only the
+  runner-visible consequence of Tracee exiting early.
+- ARM64 QEMU runtime image lacks `/boot/config-$(uname -r)`, while Tracee uses
+  the running kernel config to choose/load BPF features. Because
+  `CONFIG_IKCONFIG` is disabled in the local kernel builds, `/proc/config.gz`
+  cannot be used as a fallback.
+- The next fix should make the QEMU runtime image expose the exact locally
+  built kernel `.config` at `/boot/config-7.0.0-rc2+`. This is an environment
+  parity fix against the x86 success path and avoids changing kernel source,
+  native-link, shim, loader, or Tracee code.
+
+Planned minimal code change:
+
+- Add a narrow kernel-config build context to the runner runtime image build.
+- Copy the host-built kernel `.config` into `/artifacts/kernel/config`.
+- During image assembly, copy it to `/artifacts/boot/config-${kernel_release}`.
+- The QEMU/container execution path already bind-mounts `/artifacts` content,
+  so Tracee should see `/boot/config-$(uname -r)` without changing app
+  commands.
+
+Required validation:
+
+- Locally rebuild the ARM64 runtime image.
+- Verify the rebuilt image contains `/artifacts/boot/config-7.0.0-rc2+`.
+- Re-run `tracee/monitor` alone in QEMU before proceeding to the remaining
+  apps.
+
+### Phase 64 - Expose the locally built kernel config in the runtime image
+
+Changed files:
+
+```text
+runner/mk/build.mk
+runner/containers/runner-runtime.Dockerfile
+```
+
+Code change:
+
+- `runner/mk/build.mk`
+  - Adds tiny per-arch kernel-config build contexts under the corresponding
+    kernel build directory:
+    - `$(HOST_KERNEL_BUILD_DIR_X86)/bpf-benchmark-kernel-config-context`
+    - `$(HOST_KERNEL_BUILD_DIR_ARM64)/bpf-benchmark-kernel-config-context`
+  - Each runtime-image recipe copies the local kernel build `.config` to that
+    narrow context as `config` before `docker build`.
+  - Each runtime-image recipe passes the new named build context
+    `runner-runtime-host-kernel-config=...`.
+- `runner/containers/runner-runtime.Dockerfile`
+  - Copies `/config` from the narrow kernel-config context into
+    `/artifacts/kernel/config`.
+  - Reads `kernel_release` from the existing manifest and writes the config to:
+    - `/artifacts/boot/config-${kernel_release}`
+    - `/boot/config-${kernel_release}`
+  - Copies `/artifacts/boot` and `/boot` from the artifacts stage into the
+    final runtime stage.
+
+Why this is minimal:
+
+- No kernel source was modified.
+- The runtime image gains only the exact `.config` for the kernel image that is
+  already being booted/tested.
+- The Docker build still avoids sending the full kbuild output as context; the
+  new context contains only one copied file.
+- No Tracee command line, Tracee source, shim, native-loader, native-link, BPF
+  bytecode, or ReJIT logic was changed.
+
+Expected effect:
+
+- In ARM64 QEMU, `/boot/config-$(uname -r)` should exist before Tracee starts.
+- Tracee can use the real kernel config instead of assuming feature values.
+- This should make the baseline failure mode comparable to the x86 success
+  path and allow native-loader validation to proceed.
+
+Required validation:
+
+- Rebuild with `make arm64-runner-runtime-image-tar`.
+- Verify the image/root contains `/boot/config-7.0.0-rc2+` and
+  `/artifacts/kernel/config`.
+- Re-run `tracee/monitor` alone.
+
+Validation result:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+- Exit code: 0.
+- Test/build mode: local ARM64 cross-build only. No build was performed inside
+  QEMU.
+- Docker image id:
+  `sha256:cc6bf47c4350fc669bc5528c582f1850cf687133d100f172a53445d77fe437e6`.
+- Image tar:
+  `.cache/container-images/arm64-runner-runtime.image.tar`.
+- Image tar sha256:
+  `9543cafd74fd1a07d6a1c3f232a010f82621bbce02e7e8d26786e7e44b81e8ba`.
+- Image tar size: `1971437056` bytes.
+- Image tar mtime: `2026-05-29 21:48:21.651325885 -0700`.
+- Image file presence check in the ARM64 image:
+  - `/boot/config-7.0.0-rc2+`: `162999` bytes
+  - `/artifacts/boot/config-7.0.0-rc2+`: `162999` bytes
+  - `/artifacts/kernel/config`: `162999` bytes
+- Build IDs:
+  - `native_loader`: `5237bb0e83bc335b41f17b91da48b38ce86fd6c3`
+  - `micro_exec`: `bacab4ca202d7b64a2c0808314fd127534708652`
+  - `native-link`: `796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc`
+- Build-only micro proof-object generation completed during image build:
+  29 ok, 0 failed; slowest observed compile item was
+  `katran_lb_consistent_hash_select` at about 26.8s.
+- Kernel submodule:
+  - `git -C vendor/linux-framework status --short`: empty output.
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 80 - Rebuild ARM64 runtime image after Tracee startup timeout and phase markers
+
+Command:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+Validation result:
+
+- Exit code: 0.
+- Build/test mode: local ARM64 cross-build and image packaging only. No build
+  was performed inside QEMU.
+- Docker image id:
+  `sha256:788f06aca7976dbd7d72a10124b6a7301d97204f603d047c6e2da30ff0233fa5`.
+- Image tar:
+  `.cache/container-images/arm64-runner-runtime.image.tar`.
+- Image tar sha256:
+  `512981a43c99b4bcf01cbd07accd08050eba65af673b2beab5f245e3741193ef`.
+- Image tar size: `1971377664` bytes.
+- Image tar mtime: `2026-05-29 23:27:34.294134607 -0700`.
+- Docker build log confirmed the updated Python was copied into the image:
+  - `COPY runner/libs ./runner/libs`: `DONE`
+  - `COPY corpus/*.py ./corpus/`: `DONE`
+- Build IDs:
+  - `native_loader`: `5237bb0e83bc335b41f17b91da48b38ce86fd6c3`
+  - `micro_exec`: `bacab4ca202d7b64a2c0808314fd127534708652`
+  - `native-link`: `796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc`
+  - `libbpfrejit_shim.so`: `b510a8af5bfdc82b6497002e0169601ca2926fdd`
+  - `tracee`: `28dc19976572b069a5b0d938289972908021b070`
+- Build-only micro proof-object generation during this image build:
+  29 ok, 0 failed; slowest observed compile item was
+  `katran_lb_consistent_hash_select` at `26.518s`.
+- Kernel submodule remains clean:
+  - `git -C vendor/linux-framework status --short`: empty output
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Technical decision:
+
+- Proceed to Tracee-only QEMU validation before any other app.
+- Keep `SKIP_REJIT=norejit` and `BPFREJIT_SHIM_NATIVE_LOADER=post` to test
+  baseline first, then the post/native load-time path, without ReJIT.
+- Keep `BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1` enabled for this diagnostic run
+  so a native/post verifier failure is recorded without changing default
+  behavior.
+
+Next command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+### Phase 83 - Tracee after resident native-loader handle
+
+Command:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 \
+  BPFREJIT_CORPUS_APPS="tracee/monitor" \
+  SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+```
+
+Validation result:
+
+- QEMU wrapper exit code: 0.
+- App result artifact:
+  `corpus/results/arm64_qemu_corpus_19700101_000006_267907`.
+- App status: `error`.
+- Baseline startup and baseline workload completed:
+  - baseline workload return code: 0
+  - baseline workload duration: about `11.15s`
+- Post/native startup failed under the bounded Tracee startup timeout:
+  - phase: `post_rejit_start`
+  - Tracee command exit code: `-9`
+- Baseline shim log:
+  - first timestamp: `14.669302`
+  - last timestamp: `114.600949`
+  - BPF load records: `184`
+  - native replacements: `0`
+- Post/native shim log:
+  - first timestamp: `124.362450`
+  - last timestamp: `442.683678`
+  - BPF load records: `81`
+  - native replacements completed before timeout: `66`
+  - native-loader skip records: `12`
+  - native-loader failure/error records: `0`
+  - `native-loader loaded shared object` records: `1`
+- Replacement timing from adjacent `BPF_PROG_LOAD` to
+  `native-loader replaced` records:
+  - count: `66`
+  - min: about `0.35s`
+  - median: about `4.63s`
+  - max: about `7.64s`
+  - slowest observed replacements:
+    - `lkm_seeker_kset`, `14602` insns: about `7.64s`
+    - `uprobe_syscall_`, `12994` insns: about `7.16s`
+    - `lkm_seeker_proc`, `13343` insns: about `6.92s`
+    - `lkm_seeker_modt`, `13815` insns: about `6.33s`
+    - `sched_process_e`, `268` insns: about `5.47s`
+
+Technical decision:
+
+- The Phase 82 shim handle cache worked mechanically: post/native logs show
+  exactly one shared-object load in the Tracee process.
+- It did not materially change Tracee post/native startup time. Therefore the
+  dominant cost is not repeated `dlopen`/`dlclose`; it is per-program runtime
+  native linking inside QEMU.
+- The next implementation step is to stop repeating `native-link --mode proof`
+  in QEMU. The local cross-build already generates proof objects for every
+  native symbol. Those `.proof.o` files must be copied into the runtime
+  native-bpf stage, and `libnative_loader` must consume them before invoking
+  `native-link --mode kernel`.
+- Runtime must fail fast when prebuilt proofs are required but missing. This
+  keeps the "no build in QEMU" constraint visible instead of silently falling
+  back to proof generation inside the guest.
+- No kernel source change is needed. The kernel submodule remains clean at
+  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
+
+### Phase 84 - Use prebuilt native-link proof objects from runtime image
+
+Status: in progress.
+
+Changed files:
+
+- `native-sim/libnativeloader/src/native_loader.cpp`
+- `vendor/bpf/Makefile`
+- `runner/containers/runner-runtime.Dockerfile`
+- `runner/scripts/qemu-arm64-init`
+- `runner/libs/suite_commands.py`
+- `docs/tmp/arm64_native_kernel_all_apps_plan_20260529.md`
+
+Implementation plan:
+
+- Package `.proof.o` files generated during local cross-build into
+  `/artifacts/user/native-bpf/<arch>/<app>/`.
+- In `libnative_loader`, derive candidate prebuilt proof names from the native
+  object and symbol:
+  - `<native-object-stem>.<symbol>.proof.o`
+  - `<symbol>.proof.o`
+- If a prebuilt proof exists, copy it into the per-cache temporary proof path
+  and skip `native-link --mode proof`.
+- If `BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF=1` and no prebuilt proof
+  exists, fail fast.
+- Set `BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF=1` in the runtime image
+  and in ARM64 QEMU init so missing packaging is a visible correctness failure.
+- Keep `native-link --mode kernel` unchanged for now because it still needs
+  runtime map metadata, helper targets, and link-plan details from the real
+  app load path.
+
+Validation required before retrying Tracee:
+
+1. Local compile of `native_loader_shared`.
+2. Local native-bpf ARM64 stage rebuild and proof presence check.
+3. Local ARM64 runtime image rebuild.
+4. Tracee-only QEMU functional retry.
+
+Local validation command:
+
+```bash
+make host-runner-arm64 host-native-bpf-arm64
+```
+
+Validation result:
+
+- Exit code: 0.
+- Build/test mode: local cross-build only. No build was performed inside QEMU.
+- `host-runner-arm64` rebuilt:
+  - `native_loader_shared`
+  - `micro_exec`
+- `host-native-bpf-arm64` rebuilt and staged native BPF artifacts for all
+  supported apps.
+- ARM64 native-bpf stage proof counts:
+  - `katran`: 6
+  - `bcc`: 34
+  - `cilium`: 84
+  - `otelcol-ebpf-profiler`: 30
+  - `tracee`: 174
+  - `tetragon`: 913
+- Representative staged proof objects verified with `test -f`:
+  - `vendor/build/native-bpf/arm64/stage/tracee/sys_enter_init.proof.o`
+  - `vendor/build/native-bpf/arm64/stage/tracee/kprobe_check.security_bpf_kprobe.proof.o`
+  - `vendor/build/native-bpf/arm64/stage/cilium/bpf_host.cil_to_host.proof.o`
+  - `vendor/build/native-bpf/arm64/stage/bcc/capable.kprobe__cap_capable_entry.proof.o`
+  - `vendor/build/native-bpf/arm64/stage/otelcol-ebpf-profiler/native_tracer_entry.proof.o`
+  - `vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_kprobe.generic_kprobe_event.proof.o`
+  - `vendor/build/native-bpf/arm64/stage/katran/balancer.balancer_ingress.proof.o`
+- Build IDs and hashes after this local build:
+  - `native_loader`:
+    - Build ID: `421f5fcf7ed002f1428df95b45fc0b032436f273`
+    - sha1: `4ec1a24e6008d3445fc5c993d90d420ae17b7833`
+  - `micro_exec`:
+    - Build ID: `181ffbdc80327b47650c53c1fe7d9cfa3435c733`
+    - sha1: `fb7a55f7595f9b4dd63400a8ae5e2071197edda6`
+  - `libbpfrejit_shim.so`:
+    - Build ID: `68c79ecd3a5c54a0365125558d0ba64842efe816`
+    - sha1: `aa0c16143048a0afe55223be942542782f70f58c`
+  - `native-link`:
+    - Build ID: `796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc`
+    - sha1: `6ca7e652befe574d81d7550519774b05fcaf2574`
+- Kernel submodule remains clean:
+  - `git -C vendor/linux-framework status --short`: empty output
+  - `git -C vendor/linux-framework log -1 --oneline`:
+    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+
+Technical decision:
+
+- The local cross-build now satisfies the "build first on host, QEMU only
+  tests" constraint for native proof objects.
+- The next required test is image packaging. It must verify that the staged
+  `.proof.o` files are included in the ARM64 runtime image together with
+  `BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF=1`.
+
+Next command:
+
+```bash
+make arm64-runner-runtime-image-tar
+```
+
+### EOF final status index - ARM64 native-kernel all-app completion
+
+Status: completed.
+
+Note:
+
+- This tail section is the current authoritative end-of-file status. The
+  preceding Phase 84 text is preserved as historical planning data.
+- Detailed Phase 101-104 records, including raw test data, were appended in
+  this document under these headings:
+  - `Phase 101 - Katran final-image ARM64 QEMU revalidation`
+  - `Phase 102 - Cilium final-image ARM64 QEMU revalidation`
+  - `Phase 103 - OTel eBPF profiler final-image ARM64 QEMU revalidation`
+  - `Phase 104 - ARM64 QEMU micro final validation`
+
+Final validation matrix:
+
+- Tracee: passed,
+  `corpus/results/arm64_qemu_corpus_19700101_000004_787802`
+- BCC: passed,
+  `corpus/results/arm64_qemu_corpus_19700101_000004_804880`
+- Katran: passed,
+  `corpus/results/arm64_qemu_corpus_19700101_000004_808748`
+- Cilium: passed,
+  `corpus/results/arm64_qemu_corpus_19700101_000004_668882`
+- Tetragon: passed,
+  `corpus/results/arm64_qemu_corpus_19700101_000005_562503`
+- OTel eBPF profiler: passed,
+  `corpus/results/arm64_qemu_corpus_19700101_000004_620570`
+- Micro: passed,
+  `micro/results/arm64_qemu_micro_19700101_000007_733722`
+
+Final commands completed:
+
+```bash
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 BPFREJIT_CORPUS_APPS="katran" SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 BPFREJIT_CORPUS_APPS="cilium/agent" SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+PLATFORM=qemu ARCH=arm64 BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD=1 BPFREJIT_CORPUS_APPS="otelcol-ebpf-profiler/profiling" SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=1200 make corpus
+PLATFORM=qemu ARCH=arm64 SAMPLES=1 WARMUPS=0 INNER_REPEAT=10 TIMEOUT=1200 make micro
+```
+
+Final correctness/performance data pointers:
+
+- Katran Phase 101 records:
+  - replacements: 1
+  - skips: 5
+  - failures/errors: 0
+  - native-loader timing count: 1
+  - native-loader total sum: `1.543s`
+- Cilium Phase 102 records:
+  - replacements: 113
+  - skips: 33
+  - failures/errors: 0
+  - native-loader timing count: 113
+  - native-loader total sum: `57.866s`
+- OTel Phase 103 records:
+  - replacements: 13
+  - skips: 2
+  - failures/errors: 0
+  - native-loader timing count: 13
+  - native-loader total sum: `8.434s`
+- Micro Phase 104 records:
+  - benchmarks completed: 29 / 29
+  - runtime runs: `native=29`, `llvmbpf=29`, `kernel=29`
+  - structured result/retval mismatches: 0
+  - raw per-benchmark compile/exec data is recorded in the Phase 104 table
+
+Final kernel state:
+
+- `git -C vendor/linux-framework status --short`: empty output.
+- `git -C vendor/linux-framework log -1 --oneline`:
+  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
+- No kernel source file was changed by this ARM64 native-kernel completion work.

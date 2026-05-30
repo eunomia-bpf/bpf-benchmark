@@ -318,6 +318,87 @@ static void log_prog_array_update(const union bpf_attr *attr, long ret,
         shim_native_loader_log_jit_info("prog_array-target", (int)prog_fd);
 }
 
+static int shim_env_enabled(const char *name) {
+    const char *raw = getenv(name);
+    return raw && raw[0] != '\0' && strcmp(raw, "0") != 0;
+}
+
+static void log_failed_prog_load_verifier(const union bpf_attr *attr,
+                                          unsigned int attr_size,
+                                          const struct prog_entry *prog,
+                                          int original_errno) {
+    if (!attr || !shim_env_enabled("BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD"))
+        return;
+
+    size_t diag_attr_size = attr_size;
+    if (diag_attr_size < sizeof(union bpf_attr))
+        diag_attr_size = sizeof(union bpf_attr);
+    if (diag_attr_size > 4096) {
+        log_line("BPF_PROG_LOAD failure_diag skipped attr_size=%u",
+                 attr_size);
+        return;
+    }
+
+    const size_t log_size = 4 * 1024 * 1024;
+    char *log_buf = (char *)calloc(1, log_size);
+    char *diag_attr = (char *)calloc(1, diag_attr_size);
+    if (!log_buf || !diag_attr) {
+        log_line("BPF_PROG_LOAD failure_diag allocation failed");
+        free(log_buf);
+        free(diag_attr);
+        return;
+    }
+
+    memcpy(diag_attr, attr,
+           attr_size < diag_attr_size ? attr_size : diag_attr_size);
+    union bpf_attr *diag = (union bpf_attr *)(void *)diag_attr;
+    diag->log_level = 1;
+    diag->log_buf = (uintptr_t)log_buf;
+    diag->log_size = (uint32_t)log_size;
+    diag->log_true_size = 0;
+
+    long diag_fd = real_syscall(SYS_bpf, BPF_PROG_LOAD, diag_attr,
+                                (unsigned int)diag_attr_size);
+    int diag_errno = diag_fd < 0 ? errno : 0;
+    if (diag_fd >= 0)
+        real_close((int)diag_fd);
+
+    size_t log_len = strnlen(log_buf, log_size);
+    char path[320];
+    const char *dir = getenv("BPFREJIT_SHIM_DIR");
+    if (!dir) dir = "/tmp";
+    uint64_t hash = prog ? prog->hash : 0;
+    snprintf(path, sizeof(path), "%s/bpfrejit_load_failure_%d_%016lx.log",
+             dir, getpid(), hash);
+    int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd >= 0) {
+        (void)!write(fd, log_buf, log_len);
+        real_close(fd);
+    } else {
+        path[0] = '\0';
+    }
+
+    const char *name = prog ? prog->name : "";
+    const char *tail = log_buf;
+    size_t tail_n = log_len;
+    if (tail_n > 1800) {
+        tail = log_buf + (tail_n - 1800);
+        tail_n = 1800;
+    }
+    log_line("BPF_PROG_LOAD failure_diag name=%s type=%u (%s) "
+             "insn_cnt=%u hash=%016lx original_errno=%d diag_ret=%ld "
+             "diag_errno=%d log_bytes=%zu log_true_size=%u log_path=%s "
+             "tail:\n%.*s",
+             name, attr->prog_type, prog_type_short_name(attr->prog_type),
+             attr->insn_cnt, hash, original_errno, diag_fd, diag_errno,
+             log_len, diag->log_true_size, path[0] ? path : "<open-failed>",
+             (int)tail_n, tail);
+
+    free(log_buf);
+    free(diag_attr);
+    errno = original_errno;
+}
+
 __attribute__((constructor)) static void shim_init(void) {
     real_syscall = dlsym(RTLD_NEXT, "syscall");
     real_ioctl = dlsym(RTLD_NEXT, "ioctl");
@@ -572,6 +653,15 @@ long syscall(long number, ...) {
                             loadtime_active ? (long)loadtime.attr_size : a2,
                             a3, a4, a5);
     int saved_errno = errno;
+    if (cmd == BPF_PROG_LOAD && ret < 0) {
+        const union bpf_attr *failed_attr =
+            loadtime_active ? (const union bpf_attr *)(void *)loadtime.attr_buf
+                            : attr;
+        unsigned int failed_attr_size =
+            loadtime_active ? loadtime.attr_size : size;
+        log_failed_prog_load_verifier(failed_attr, failed_attr_size,
+                                      pending_prog, saved_errno);
+    }
 
     uint32_t resolved_id = 0;
     if (pending_prog) {

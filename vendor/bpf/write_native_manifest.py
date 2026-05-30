@@ -279,6 +279,7 @@ def main() -> None:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--llvm-nm", required=True)
     parser.add_argument("--object", action="append", required=True)
+    parser.add_argument("--data-object", action="append", default=[])
     parser.add_argument("--skip-prefix", action="append", default=["LBB", "__check_"])
     parser.add_argument("--dedupe-program", choices=("none", "last"), default="none")
     parser.add_argument("--source-object-root", type=Path)
@@ -371,6 +372,16 @@ def main() -> None:
         "status": "native-objects-proof-linked",
         "objects": objects,
     }
+    if args.data_object:
+        data_objects = []
+        seen_data_objects: set[str] = set()
+        for raw in args.data_object:
+            rel = rel_object(output, Path(raw))
+            if rel in seen_data_objects:
+                continue
+            seen_data_objects.add(rel)
+            data_objects.append({"native_object": rel})
+        manifest["data_objects"] = data_objects
     map_rules = map_rules_for_app(args.app)
     if map_rules:
         manifest["map_rules"] = map_rules
