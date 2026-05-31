@@ -41,16 +41,22 @@ const DEFAULT_KINSN_NAMES: &[&str] = &[
     "bpf_arm64_cmp_x", "bpf_arm64_cmp_w", "bpf_arm64_ccmp_x", "bpf_arm64_ccmp_w",
     "bpf_arm64_cset_x_cond",
     // cond_select
-    "bpf_x86_movq", "bpf_x86_testq", "bpf_x86_cmovneq", "bpf_x86_cmoveq",
+    "bpf_x86_movq", "bpf_x86_testq", "bpf_x86_cmpl", "bpf_x86_cmpq",
+    "bpf_x86_cmovel", "bpf_x86_cmoveq", "bpf_x86_cmovnel", "bpf_x86_cmovneq",
+    "bpf_x86_cmovbl", "bpf_x86_cmovbq",
     "bpf_arm64_mov_x",
     // rotate
     "bpf_x86_rolq", "bpf_x86_rorxl", "bpf_arm64_extr_x", "bpf_arm64_extr_w",
     // lea
     "bpf_x86_leaq", "bpf_x86_leal",
     // endian_fusion
+    "bpf_x86_movbe16", "bpf_x86_movbe32", "bpf_x86_movbe64",
     "bpf_x86_movzwl", "bpf_x86_movl", "bpf_x86_rolw", "bpf_x86_bswapl",
+    "bpf_x86_bswapq",
     // bulk_memory
-    "bpf_x86_movzbl", "bpf_x86_movb", "bpf_arm64_ldrb", "bpf_arm64_strb",
+    "bpf_x86_movzbl", "bpf_x86_movb", "bpf_x86_bextrq", "bpf_x86_blsiq",
+    "bpf_x86_blsrq", "bpf_x86_popcntq", "bpf_x86_shldl", "bpf_x86_shldq",
+    "bpf_x86_shrdl", "bpf_x86_shrdq", "bpf_arm64_ldrb", "bpf_arm64_strb",
     // prefetch
     "bpf_x86_prefetcht0", "bpf_arm64_prfm_pldl1keep",
     // extract

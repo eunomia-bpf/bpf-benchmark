@@ -87,8 +87,13 @@ static __always_inline bool kinsn_x86_needs_rex8(u8 reg)
 
 static __always_inline bool kinsn_x86_reg_is_shadowed(u8 reg)
 {
-	return reg <= BPF_REG_10 ||
-	       (reg >= KINSN_X86_REG_R9 && reg <= KINSN_X86_REG_RSP);
+	/*
+	 * BPF register operands must read the live verifier register state.
+	 * The shadow stack is only valid for arch-only x86 operands; ordinary
+	 * BPF instructions between kinsn sites do not keep these slots in sync.
+	 */
+	(void)reg;
+	return false;
 }
 
 static __always_inline bool kinsn_x86_reg_is_bpf_writable(u8 reg)

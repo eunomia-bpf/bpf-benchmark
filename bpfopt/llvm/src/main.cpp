@@ -34,6 +34,7 @@
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Object/ObjectFile.h"
 #include "llvm/Passes/PassBuilder.h"
+#include "llvm/Support/CommandLine.h"
 #include "llvm/Support/CodeGen.h"
 #include "llvm/Support/FormatVariadic.h"
 #include "llvm/Support/JSON.h"
@@ -53,12 +54,23 @@ constexpr uint8_t BPF_LD_IMM64 = 0x18;
 constexpr uint8_t BPF_CALL = 0x85;
 constexpr uint8_t BPF_CALLX = BPF_CALL | 0x08;
 constexpr uint8_t BPF_EXIT = 0x95;
+constexpr uint8_t BPF_CLASS_MASK = 0x07;
+constexpr uint8_t BPF_LDX = 0x01;
+constexpr uint8_t BPF_ST = 0x02;
+constexpr uint8_t BPF_STX = 0x03;
+constexpr uint8_t BPF_SIZE_MASK = 0x18;
+constexpr uint8_t BPF_W = 0x00;
+constexpr uint8_t BPF_H = 0x08;
+constexpr uint8_t BPF_B = 0x10;
+constexpr uint8_t BPF_DW = 0x18;
 constexpr uint8_t BPF_PSEUDO_MAP_FD = 1;
 constexpr uint8_t BPF_PSEUDO_MAP_VALUE = 2;
 constexpr uint8_t BPF_PSEUDO_MAP_IDX = 5;
 constexpr uint8_t BPF_PSEUDO_MAP_IDX_VALUE = 6;
 constexpr uint8_t BPF_PSEUDO_CALL = 1;
 constexpr uint8_t BPF_PSEUDO_FUNC = 4;
+constexpr uint8_t BPF_PSEUDO_KINSN_CALL = 4;
+constexpr uint8_t BPF_REG_10 = 10;
 constexpr size_t INSN_SIZE = 8;
 
 // BPF helper function ids (uapi/linux/bpf.h __BPF_FUNC_MAPPER order). This pure
@@ -67,6 +79,7 @@ constexpr size_t INSN_SIZE = 8;
 constexpr int32_t BPF_FUNC_map_lookup_elem = 1;
 constexpr int32_t BPF_FUNC_map_update_elem = 2;
 constexpr int32_t BPF_FUNC_map_delete_elem = 3;
+constexpr int32_t BPF_FUNC_probe_read_user = 112;
 constexpr int32_t BPF_FUNC_map_push_elem = 87;
 constexpr int32_t BPF_FUNC_map_pop_elem = 88;
 
@@ -87,6 +100,13 @@ struct Cli {
 	std::string line_info_rec_size;
 	std::vector<std::string> pass_args;
 };
+
+struct KinsnTarget {
+	int32_t btf_func_id = 0;
+	int16_t call_offset = 0;
+};
+
+using KinsnTargetMap = std::map<std::string, KinsnTarget>;
 
 std::string llvm_error_string(llvm::Error err)
 {
@@ -250,6 +270,206 @@ read_fd_to_id_map(const std::filesystem::path &path)
 	return out;
 }
 
+KinsnTargetMap read_kinsn_targets(const std::filesystem::path &path)
+{
+	auto value = expected_or_throw(llvm::json::parse(read_text(path)));
+	auto *root = value.getAsObject();
+	if (!root) {
+		throw std::runtime_error("--target JSON root is not an object");
+	}
+	auto *kinsns = root->getObject("kinsns");
+	if (!kinsns) {
+		throw std::runtime_error("--target JSON has no kinsns object");
+	}
+	KinsnTargetMap out;
+	for (const auto &entry : *kinsns) {
+		auto *obj = entry.getSecond().getAsObject();
+		if (!obj) {
+			throw std::runtime_error("target kinsn is not an object: " +
+						 entry.getFirst().str());
+		}
+		auto func_id = obj->getInteger("btf_func_id");
+		if (!func_id || *func_id <= 0 ||
+		    *func_id > std::numeric_limits<int32_t>::max()) {
+			throw std::runtime_error(
+				"target kinsn has invalid btf_func_id: " +
+				entry.getFirst().str());
+		}
+		auto call_offset = obj->getInteger("call_offset");
+		if (!call_offset || *call_offset < 0 ||
+		    *call_offset > std::numeric_limits<int16_t>::max()) {
+			throw std::runtime_error(
+				"target kinsn has invalid call_offset: " +
+				entry.getFirst().str());
+		}
+		out.emplace(entry.getFirst().str(),
+			    KinsnTarget{
+				    static_cast<int32_t>(*func_id),
+				    static_cast<int16_t>(*call_offset),
+			    });
+	}
+	return out;
+}
+
+std::optional<std::vector<std::string>>
+kinsn_mode_specs_for_pass(std::string_view pass)
+{
+	if (pass == "rotate") {
+		return std::vector<std::string>{ "rotate=force" };
+	}
+	if (pass == "cond_select") {
+		return std::vector<std::string>{ "cmov=force" };
+	}
+	if (pass == "extract") {
+		return std::vector<std::string>{ "bextr=force" };
+	}
+	if (pass == "endian_fusion") {
+		return std::vector<std::string>{
+			"unary=force",
+			"movbe-be=force",
+			"movbe-load=force",
+		};
+	}
+	if (pass == "bulk_memory") {
+		return std::vector<std::string>{
+			"wide-load=force",
+			"indexed-load=force",
+			"scaled-index-mem=force",
+		};
+	}
+	if (pass == "lea") {
+		return std::vector<std::string>{ "preemit-lea=force" };
+	}
+	if (pass == "prefetch" || pass == "ccmp") {
+		return std::vector<std::string>{};
+	}
+	return std::nullopt;
+}
+
+void configure_llvm_kinsn_select(const std::vector<std::string> &mode_specs)
+{
+	std::vector<std::string> args{ "bpfopt", "-bpf-enable-kinsn-select",
+				       "-bpf-kinsn-mode=all=disable" };
+	for (const auto &spec : mode_specs) {
+		args.push_back("-bpf-kinsn-mode=" + spec);
+	}
+	std::vector<const char *> argv;
+	argv.reserve(args.size());
+	for (const auto &arg : args) {
+		argv.push_back(arg.c_str());
+	}
+	llvm::cl::ParseCommandLineOptions(static_cast<int>(argv.size()),
+					  argv.data(), "bpfopt LLVM kinsn\n");
+}
+
+int64_t count_kinsn_calls(const std::vector<uint8_t> &bytes)
+{
+	if (bytes.size() % INSN_SIZE != 0) {
+		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
+	}
+	int64_t count = 0;
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	for (size_t pc = 0; pc < insn_count; pc++) {
+		const uint8_t opcode = bytes[pc * INSN_SIZE];
+		if ((opcode == BPF_CALL || opcode == BPF_CALLX) &&
+		    src_reg(bytes, pc) == BPF_PSEUDO_KINSN_CALL) {
+			count++;
+		}
+	}
+	return count;
+}
+
+bool targets_include_x86_kinsns(const KinsnTargetMap &targets)
+{
+	return std::any_of(targets.begin(), targets.end(), [](const auto &entry) {
+		return entry.first.starts_with("bpf_x86_");
+	});
+}
+
+int32_t bpf_mem_size(uint8_t opcode)
+{
+	switch (opcode & BPF_SIZE_MASK) {
+	case BPF_B:
+		return 1;
+	case BPF_H:
+		return 2;
+	case BPF_W:
+		return 4;
+	case BPF_DW:
+		return 8;
+	default:
+		return 8;
+	}
+}
+
+bool x86_kinsn_proof_stack_collides(const std::vector<uint8_t> &bytes)
+{
+	if (bytes.size() % INSN_SIZE != 0) {
+		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
+	}
+	constexpr int32_t reserved_low = -512;
+	constexpr int32_t reserved_high = -329;
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	for (size_t pc = 0; pc < insn_count; pc++) {
+		const uint8_t opcode = bytes[pc * INSN_SIZE];
+		const uint8_t klass = opcode & BPF_CLASS_MASK;
+		if (klass != BPF_LDX && klass != BPF_ST &&
+		    klass != BPF_STX) {
+			continue;
+		}
+		const bool fp_base = klass == BPF_LDX ? src_reg(bytes, pc) == BPF_REG_10 :
+							 dst_reg(bytes, pc) == BPF_REG_10;
+		if (!fp_base) {
+			continue;
+		}
+		const int32_t start = read_off(bytes, pc);
+		const int32_t end = start + bpf_mem_size(opcode) - 1;
+		if (start <= reserved_high && end >= reserved_low) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool has_helper_call(const std::vector<uint8_t> &bytes, int32_t helper_id)
+{
+	if (bytes.size() % INSN_SIZE != 0) {
+		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
+	}
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	for (size_t pc = 0; pc < insn_count; pc++) {
+		const uint8_t opcode = bytes[pc * INSN_SIZE];
+		if ((opcode == BPF_CALL || opcode == BPF_CALLX) &&
+		    src_reg(bytes, pc) == 0 && read_imm(bytes, pc) == helper_id) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool x86_cond_select_large_if_conversion(const std::vector<uint8_t> &input,
+					 const std::vector<uint8_t> &output,
+					 int64_t kinsn_calls)
+{
+	const int64_t input_insns = static_cast<int64_t>(input.size() / INSN_SIZE);
+	const int64_t output_insns = static_cast<int64_t>(output.size() / INSN_SIZE);
+	const int64_t removed_insns = input_insns - output_insns;
+	if (removed_insns <= 0 || kinsn_calls <= 0) {
+		return false;
+	}
+
+	/*
+	 * A cmov kinsn should replace a small verifier-visible diamond. If LLVM
+	 * removes hundreds of BPF instructions for only a handful of kinsn calls,
+	 * it has converted control flow that carries verifier state, which can
+	 * expose previously guarded pointer/scalar paths.
+	 */
+	constexpr int64_t kAbsoluteShrinkLimit = 512;
+	constexpr int64_t kShrinkPerKinsnLimit = 64;
+	return removed_insns > kAbsoluteShrinkLimit &&
+	       removed_insns > kinsn_calls * kShrinkPerKinsnLimit;
+}
+
 void canonicalize_map_refs(Cli &cli)
 {
 	if (cli.pass) {
@@ -369,7 +589,9 @@ void canonicalize_map_refs(Cli &cli)
 
 void write_report(const Cli &cli, const std::vector<uint8_t> &input,
 		  const std::vector<uint8_t> &output,
-		  const std::vector<InlineRecord> &inlined = {})
+		  const std::vector<InlineRecord> &inlined = {},
+		  std::optional<int64_t> sites_applied_override = std::nullopt,
+		  const std::vector<std::string> &diagnostics = {})
 {
 	if (!cli.report) {
 		return;
@@ -377,6 +599,7 @@ void write_report(const Cli &cli, const std::vector<uint8_t> &input,
 	const bool changed = input != output;
 	const bool is_map_inline = cli.pass && *cli.pass == "map_inline";
 	llvm::json::Array inlined_entries;
+	llvm::json::Array diagnostic_entries;
 	for (const auto &record : inlined) {
 		inlined_entries.emplace_back(llvm::json::Object{
 			{ "map_id", static_cast<int64_t>(record.map_id) },
@@ -384,18 +607,23 @@ void write_report(const Cli &cli, const std::vector<uint8_t> &input,
 			{ "value_hex", bytes_hex(record.value) },
 		});
 	}
+	for (const auto &diagnostic : diagnostics) {
+		diagnostic_entries.emplace_back(diagnostic);
+	}
 	llvm::json::Object report{
 		{ "pass", *cli.pass },
 		{ "sites_applied",
-		  is_map_inline ? static_cast<int64_t>(inlined.size()) :
-				  (changed ? 1 : 0) },
+		  sites_applied_override.value_or(
+			  is_map_inline ? static_cast<int64_t>(inlined.size()) :
+					  (changed ? 1 : 0)) },
 		{ "sites_matched",
-		  is_map_inline ? static_cast<int64_t>(inlined.size()) :
-				  (changed ? 1 : 0) },
+		  sites_applied_override.value_or(
+			  is_map_inline ? static_cast<int64_t>(inlined.size()) :
+					  (changed ? 1 : 0)) },
 		{ "sites_skipped", 0 },
 		{ "skip_reasons", llvm::json::Object{} },
 		{ "skipped_sites", llvm::json::Array{} },
-		{ "diagnostics", llvm::json::Array{} },
+		{ "diagnostics", std::move(diagnostic_entries) },
 		{ "insn_count_before", input.size() / INSN_SIZE },
 		{ "insn_count_after", output.size() / INSN_SIZE },
 		{ "insn_delta",
@@ -427,16 +655,75 @@ void run_pass(Cli &cli)
 		throw std::runtime_error(
 			"--fd-to-id requires --canonicalize-map-refs");
 	}
+	const auto kinsn_mode_specs = kinsn_mode_specs_for_pass(*cli.pass);
+	KinsnTargetMap kinsn_targets;
+	if (kinsn_mode_specs) {
+		if (!cli.target) {
+			throw std::runtime_error("--pass " + *cli.pass +
+						 " requires --target");
+		}
+		kinsn_targets = read_kinsn_targets(*cli.target);
+		configure_llvm_kinsn_select(*kinsn_mode_specs);
+	}
 	const auto input = read_all(cli.input);
 	std::vector<InlineRecord> inlined;
 	std::vector<uint8_t> output;
+	std::optional<int64_t> sites_applied;
+	std::vector<std::string> diagnostics;
+	if (kinsn_mode_specs && count_kinsn_calls(input) > 0) {
+		output = input;
+		sites_applied = 0;
+		write_all(cli.output, output);
+		write_report(cli, input, output, inlined, sites_applied,
+			     diagnostics);
+		return;
+	}
+	if (kinsn_mode_specs && *cli.pass == "lea" &&
+	    targets_include_x86_kinsns(kinsn_targets)) {
+		output = input;
+		sites_applied = 0;
+		diagnostics.push_back(
+			"x86_lea_disabled=verifier_pointer_semantics");
+		write_all(cli.output, output);
+		write_report(cli, input, output, inlined, sites_applied,
+			     diagnostics);
+		return;
+	}
 	if (*cli.pass == "map_inline") {
 		output = run_map_inline_roundtrip(input, cli, inlined);
 	} else {
-		output = run_llvm_roundtrip(input);
+		output = run_llvm_roundtrip(
+			input, kinsn_mode_specs ? &kinsn_targets : nullptr);
+		if (kinsn_mode_specs) {
+			sites_applied = count_kinsn_calls(output);
+			if (*sites_applied > 0 &&
+			    targets_include_x86_kinsns(kinsn_targets)) {
+				if (*cli.pass == "cond_select" &&
+				    has_helper_call(input, BPF_FUNC_probe_read_user)) {
+					output = input;
+					sites_applied = 0;
+					diagnostics.push_back(
+						"x86_cond_select_probe_read_user_gate=verifier_bounds");
+				} else if (*cli.pass == "cond_select" &&
+					   x86_cond_select_large_if_conversion(
+						   input, output, *sites_applied)) {
+					output = input;
+					sites_applied = 0;
+					diagnostics.push_back(
+						"x86_cond_select_large_if_conversion=verifier_state_guard");
+				} else if (x86_kinsn_proof_stack_collides(output)) {
+					output = input;
+					sites_applied = 0;
+					diagnostics.push_back(
+						"x86_kinsn_proof_stack_collision=reserved_fp_-512_to_-329");
+				}
+			} else if (*sites_applied == 0) {
+				output = input;
+			}
+		}
 	}
 	write_all(cli.output, output);
-	write_report(cli, input, output, inlined);
+	write_report(cli, input, output, inlined, sites_applied, diagnostics);
 }
 
 std::string next_value(int &i, int argc, char **argv, std::string_view opt)

@@ -277,11 +277,73 @@ bool patch_func_symbol(std::vector<uint8_t> &text, size_t pc,
 	return true;
 }
 
+bool patch_kinsn_symbol(std::vector<uint8_t> &text, size_t pc,
+			std::string_view name,
+			const KinsnTargetMap *kinsn_targets)
+{
+	if (!name.starts_with("bpf_")) {
+		return false;
+	}
+	if (!kinsn_targets) {
+		throw std::runtime_error("kinsn relocation requires --target: " +
+					 std::string(name));
+	}
+	const auto target = kinsn_targets->find(std::string(name));
+	if (target == kinsn_targets->end()) {
+		throw std::runtime_error("target.json has no kinsn entry for " +
+					 std::string(name));
+	}
+	if (text[pc * INSN_SIZE] != BPF_CALL) {
+		throw std::runtime_error("kinsn relocation does not target a call");
+	}
+	set_src_reg(text, pc, BPF_PSEUDO_KINSN_CALL);
+	write_off(text, pc, target->second.call_offset);
+	write_imm(text, pc, target->second.btf_func_id);
+	return true;
+}
+
+std::map<int32_t, uint8_t>
+external_call_src_regs(const std::vector<uint8_t> &input)
+{
+	std::map<int32_t, uint8_t> src_by_imm;
+	const size_t insn_count = input.size() / INSN_SIZE;
+	for (size_t pc = 0; pc < insn_count; pc++) {
+		const uint8_t opcode = input[pc * INSN_SIZE];
+		if (opcode != BPF_CALL && opcode != BPF_CALLX) {
+			continue;
+		}
+		const uint8_t src = src_reg(input, pc);
+		if (src == BPF_PSEUDO_CALL) {
+			continue;
+		}
+		const int32_t imm = read_imm(input, pc);
+		const auto [it, inserted] = src_by_imm.emplace(imm, src);
+		if (!inserted && it->second != src) {
+			throw std::runtime_error(
+				"cannot preserve mixed external call src_reg for imm " +
+				std::to_string(imm));
+		}
+	}
+	return src_by_imm;
+}
+
+uint8_t external_call_src_reg(const std::map<int32_t, uint8_t> &src_by_imm,
+			      int32_t imm)
+{
+	const auto it = src_by_imm.find(imm);
+	if (it == src_by_imm.end()) {
+		return 0;
+	}
+	return it->second;
+}
+
 void apply_one_relocation(llvm::object::ObjectFile &object,
 			  const llvm::object::RelocationRef &reloc,
 			  std::vector<uint8_t> &text,
 			  std::optional<size_t> subprog_start,
-			  size_t generated_insns)
+			  size_t generated_insns,
+			  const std::map<int32_t, uint8_t> &call_src_by_imm,
+			  const KinsnTargetMap *kinsn_targets)
 {
 	const auto symbol = reloc.getSymbol();
 	if (symbol == object.symbol_end()) {
@@ -295,13 +357,17 @@ void apply_one_relocation(llvm::object::ObjectFile &object,
 			throw std::runtime_error(
 				"helper relocation does not target a call");
 		}
-		set_src_reg(text, pc, 0);
+		set_src_reg(text, pc,
+			    external_call_src_reg(call_src_by_imm,
+						  static_cast<int32_t>(*helper)));
 		write_imm(text, pc, static_cast<int32_t>(*helper));
 		} else if (!patch_map_symbol(text, pc, name) &&
 			   !patch_call_symbol(text, pc, name, subprog_start,
 					      generated_insns) &&
 			   !patch_func_symbol(text, pc, name, subprog_start,
-					      generated_insns)) {
+					      generated_insns) &&
+			   !patch_kinsn_symbol(text, pc, name,
+					       kinsn_targets)) {
 		throw std::runtime_error("unsupported relocation symbol " +
 					 name + " at offset " +
 					 std::to_string(reloc.getOffset()) +
@@ -312,7 +378,9 @@ void apply_one_relocation(llvm::object::ObjectFile &object,
 void apply_text_relocations(llvm::object::ObjectFile &object,
 			    std::vector<uint8_t> &text,
 			    std::optional<size_t> subprog_start,
-			    size_t generated_insns)
+			    size_t generated_insns,
+			    const std::map<int32_t, uint8_t> &call_src_by_imm,
+			    const KinsnTargetMap *kinsn_targets)
 {
 	for (const auto &section : object.sections()) {
 		auto relocated = section.getRelocatedSection();
@@ -326,7 +394,9 @@ void apply_text_relocations(llvm::object::ObjectFile &object,
 		}
 		for (const auto &reloc : section.relocations()) {
 			apply_one_relocation(object, reloc, text,
-					     subprog_start, generated_insns);
+					     subprog_start, generated_insns,
+					     call_src_by_imm,
+					     kinsn_targets);
 		}
 	}
 	for (size_t pc = 0; pc < text.size() / INSN_SIZE; pc++) {

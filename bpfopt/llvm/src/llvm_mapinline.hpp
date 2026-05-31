@@ -4,7 +4,8 @@
 
 std::vector<uint8_t>
 extract_relocated_text(const std::vector<uint8_t> &object_bytes,
-		       const std::vector<uint8_t> &input)
+		       const std::vector<uint8_t> &input,
+		       const KinsnTargetMap *kinsn_targets)
 {
 	auto buffer = llvm::MemoryBuffer::getMemBuffer(
 		llvm::StringRef(
@@ -32,7 +33,9 @@ extract_relocated_text(const std::vector<uint8_t> &object_bytes,
 	}
 	const auto subprog_start = subprog_start_pc(input);
 	const size_t generated_insns = text.size() / INSN_SIZE;
-	apply_text_relocations(*object, text, subprog_start, generated_insns);
+	const auto call_src_by_imm = external_call_src_regs(input);
+	apply_text_relocations(*object, text, subprog_start, generated_insns,
+			       call_src_by_imm, kinsn_targets);
 	if (subprog_start) {
 		text.insert(text.end(), input.begin() + *subprog_start * INSN_SIZE,
 			    input.end());
@@ -178,11 +181,13 @@ llvm::orc::ThreadSafeModule generate_llvm_module(const std::vector<uint8_t> &inp
 		context.generateModule(helper_symbols(input), {}, false));
 }
 
-std::vector<uint8_t> run_llvm_roundtrip(const std::vector<uint8_t> &input)
+std::vector<uint8_t> run_llvm_roundtrip(const std::vector<uint8_t> &input,
+					const KinsnTargetMap *kinsn_targets)
 {
 	auto module = generate_llvm_module(input);
 	return module.withModuleDo([&](llvm::Module &module) {
-		return extract_relocated_text(emit_bpf_object(module), input);
+		return extract_relocated_text(emit_bpf_object(module), input,
+					      kinsn_targets);
 	});
 }
 
@@ -985,7 +990,8 @@ std::vector<uint8_t> run_map_inline_roundtrip(const std::vector<uint8_t> &input,
 			module.print(llvm::errs(), nullptr);
 		}
 		records = fold_map_lookups_ir(module, args);
-		return extract_relocated_text(emit_bpf_object(module), input);
+		return extract_relocated_text(emit_bpf_object(module), input,
+					      nullptr);
 	});
 }
 
