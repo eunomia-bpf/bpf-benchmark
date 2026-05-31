@@ -33,13 +33,6 @@ TRACEE_HEALTH_PORT = 3366
 TRACEE_OUTPUT_MODE = "none"
 
 
-def _tracee_extra_args_from_env() -> tuple[str, ...]:
-    raw = os.environ.get("BPFREJIT_TRACEE_EXTRA_ARGS", "").strip()
-    if not raw:
-        return ()
-    return tuple(shlex.split(raw))
-
-
 def _tracee_runtime_dir() -> Path:
     if explicit := os.environ.get("BPFREJIT_TRACEE_RUNTIME_DIR", "").strip():
         candidate = Path(explicit).expanduser()
@@ -319,10 +312,7 @@ class TraceeRunner(AppRunner):
             raise RuntimeError("TraceeRunner is already running")
 
         tracee_binary = self._resolve_binary()
-        commands = build_tracee_commands(
-            tracee_binary,
-            (*self.extra_args, *_tracee_extra_args_from_env()),
-        )
+        commands = build_tracee_commands(tracee_binary, self.extra_args)
         session = TraceeAgentSession(commands)
         session.__enter__()
         self.session = session

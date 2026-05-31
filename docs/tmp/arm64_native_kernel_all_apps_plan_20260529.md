@@ -9780,3 +9780,52 @@ Final kernel state:
 - `git -C vendor/linux-framework log -1 --oneline`:
   `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
 - No kernel source file was changed by this ARM64 native-kernel completion work.
+
+### Phase 105 - Remove temporary diagnostic environment knobs
+
+Status: completed.
+
+Changed files:
+
+- `Makefile`
+- `runner/libs/suite_commands.py`
+- `runner/libs/app_runners/tracee.py`
+- `bpfopt/shim/libbpfrejit_shim.c`
+
+Change:
+
+- Removed `BPFREJIT_TRACEE_EXTRA_ARGS`.
+  - Reason: it was only a Tracee command-line convenience knob used during
+    debugging. It is not needed for the final ARM64 path.
+  - Tracee now uses only the configured runner `extra_args`.
+- Removed `BPFREJIT_SHIM_LOG_FAILED_PROG_LOAD`.
+  - Reason: it was an opt-in temporary diagnostic path that retried failed
+    `BPF_PROG_LOAD` with verifier logging. The final successful path does not
+    need a second-load failure logger.
+  - This removes the env export/propagation and deletes the shim-side
+    `failure_diag` implementation.
+- Kept `BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF`.
+  - Reason: this is not a diagnostic convenience knob. It enforces the task
+    constraint that QEMU must consume locally cross-built proof objects and
+    fail fast when they are missing.
+
+Code-size delta for this cleanup:
+
+- `Makefile`: `-2`
+- `runner/libs/suite_commands.py`: `-1`
+- `runner/libs/app_runners/tracee.py`: `+1/-11`
+- `bpfopt/shim/libbpfrejit_shim.c`: `-90`
+
+Validation:
+
+```bash
+python3 -m py_compile runner/libs/app_runners/tracee.py runner/libs/suite_commands.py
+make host-shim-arm64
+```
+
+Validation result:
+
+- Python compile: exit 0.
+- ARM64 shim build: exit 0.
+- Only warning observed: existing `shim_reload.h` `snprintf` truncation
+  warning during cross compile.
