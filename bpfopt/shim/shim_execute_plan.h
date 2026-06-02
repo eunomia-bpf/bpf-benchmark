@@ -76,6 +76,22 @@ static void command_key_for_prog(const char *prog_name, char *out,
     out[o] = 0;
 }
 
+static void command_key_for_prog_insn_count(const char *prog_name,
+                                            uint32_t insn_cnt, char *out,
+                                            size_t out_sz) {
+    command_key_for_prog(prog_name, out, out_sz);
+    size_t len = strlen(out);
+    if (len >= out_sz)
+        return;
+    snprintf(out + len, out_sz - len, "_insns_%u", insn_cnt);
+}
+
+static void command_key_for_hash(uint64_t prog_hash, char *out,
+                                 size_t out_sz) {
+    snprintf(out, out_sz, "command_hash_%016llx",
+             (unsigned long long)prog_hash);
+}
+
 static char **env_without_ld_preload(void) {
     size_t n_env = 0;
     while (environ[n_env]) n_env++;
@@ -673,15 +689,33 @@ static void emit_execute_plan(int cli, const char *json) {
         struct prog_entry *pd = prog_find_by_kernel_id(want_id);
         char prog_type_name[32] = "socket_filter";
         char prog_name[17] = {0};
+        uint64_t prog_hash = 0;
+        char bytecode_path[256] = {0};
         uint32_t orig_insn_count = 0, prog_type_num = 0;
         if (pd) {
             snprintf(prog_type_name, sizeof(prog_type_name), "%s",
                      prog_type_short_name(pd->prog_type));
             memcpy(prog_name, pd->name, sizeof(prog_name));
+            prog_hash = pd->hash;
+            snprintf(bytecode_path, sizeof(bytecode_path), "%s",
+                     pd->bytecode_path);
             prog_type_num = pd->prog_type;
             orig_insn_count = pd->insn_cnt;
         }
         pthread_mutex_unlock(&state_mutex);
+        if (bytecode_path[0]) {
+            struct bpf_insn *policy_insns = NULL;
+            uint32_t policy_insn_count = 0;
+            if (read_bytecode_file(bytecode_path, &policy_insns,
+                                   &policy_insn_count) == 0) {
+                prog_hash = normalized_prog_hash(policy_insns,
+                                                 policy_insn_count);
+                free(policy_insns);
+            } else {
+                log_line("execute_plan policy hash read failed path=%s",
+                         bytecode_path);
+            }
+        }
 
         if (buf_appendf(&resp, &cap, &len, "%s\"%u\":{",
                         first_prog ? "" : ",", want_id) != 0) {
@@ -763,6 +797,15 @@ static void emit_execute_plan(int cli, const char *json) {
             char command_key[96];
             char override_cmd[4096] = {0};
             command_key_for_prog(prog_name, command_key, sizeof(command_key));
+            if (json_get_str(so, command_key, override_cmd,
+                             sizeof(override_cmd)))
+                snprintf(cmdbuf, sizeof(cmdbuf), "%s", override_cmd);
+            command_key_for_prog_insn_count(prog_name, orig_insn_count,
+                                            command_key, sizeof(command_key));
+            if (json_get_str(so, command_key, override_cmd,
+                             sizeof(override_cmd)))
+                snprintf(cmdbuf, sizeof(cmdbuf), "%s", override_cmd);
+            command_key_for_hash(prog_hash, command_key, sizeof(command_key));
             if (json_get_str(so, command_key, override_cmd,
                              sizeof(override_cmd)))
                 snprintf(cmdbuf, sizeof(cmdbuf), "%s", override_cmd);

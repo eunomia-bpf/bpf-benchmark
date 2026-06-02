@@ -1,0 +1,187 @@
+# lea override for tracee.
+log_level: 1
+programs:
+  default:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}
+  tracepoint__sch:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  sched_process_e:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  uprobe_mem_dump:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  trace_tracepoin:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  tracepoint__cgr:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+hashes:
+  a4278941c75297ec:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  a6e72d79c360725b:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  d3000b025c5d3d02:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  110f999331070a81:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  07f9248ee36a0ca8:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  0a8f114bcc548a7f:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  b0f73883ed4230ca:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  5d66dc950dd131db:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  e22497bebafc0f12:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  6a51cbbba12e2c06:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  8eb773d7a345494d:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  a290e5fb28e99606:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  a32c59500a34e046:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  f6e1528739e57cd7:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  c63074b1b2dc62f8:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  dff4f04eda0895d3:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  f6b0c2d50ce9fb8a:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  f0cbe7cb605e3844:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  783adb869995c897:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  e1658c671f3b5dc2:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  5353454fe071da74:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  1d3b9badd5d50ac5:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  dbdb13f75f997d4e:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  1f4eac73650f4ab5:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  130a20bc6311748f:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  18928c71589163a5:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  a0844e4ccb7d13d2:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  c63b4f00140e9fe1:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  255c23f786f8f039:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  05a43b3f7252b578:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  052dc4f2989be932:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  191ac3431dcadb3d:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  2411a6ee68e22a4e:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  c016e6fab76d9787:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  c33ada3e81a530fd:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  5644778a77ae5ce9:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  638c4d896bef587e:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  dccd771e5d1735c2:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  a5ce1ca980b97f1e:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  f543c08f87494804:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  8ede0cfece895d5c:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  3306a94e305287c1:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  05d723080fac95c6:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  067088cf39b3eddc:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  9d3f5d8a2b44aba8:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  6523e7aa387156d1:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  f71964c1fb2d3378:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  70a11365856b23e9:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  cd865b7d5a529840:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  94e487ae6e2754b7:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  f8ff3e2df574b051:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  5b5e6b7ee500d6b3:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  4874d6c3766a12a8:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  9a22964235a9484f:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable
+  55a9589c9ab4c678:
+    command: |
+      bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode all=disable

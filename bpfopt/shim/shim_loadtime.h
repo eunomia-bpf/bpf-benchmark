@@ -290,6 +290,23 @@ static void loadtime_command_key_for_prog(const char *prog_name, char *out,
     out[o] = 0;
 }
 
+static void loadtime_command_key_for_prog_insn_count(const char *prog_name,
+                                                     uint32_t insn_cnt,
+                                                     char *out,
+                                                     size_t out_sz) {
+    loadtime_command_key_for_prog(prog_name, out, out_sz);
+    size_t len = strlen(out);
+    if (len >= out_sz)
+        return;
+    snprintf(out + len, out_sz - len, "_insns_%u", insn_cnt);
+}
+
+static void loadtime_command_key_for_hash(uint64_t prog_hash, char *out,
+                                          size_t out_sz) {
+    snprintf(out, out_sz, "command_hash_%016llx",
+             (unsigned long long)prog_hash);
+}
+
 static int loadtime_run_shell(const char *command, const char *log_path,
                               uint64_t *elapsed_ms) {
     if (elapsed_ms) *elapsed_ms = 0;
@@ -734,6 +751,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     }
 
     size_t input_bytes = (size_t)attr->insn_cnt * sizeof(struct bpf_insn);
+    uint64_t input_hash = normalized_prog_hash(input_insns, attr->insn_cnt);
     if (loadtime_write_file(cur, input_insns, input_bytes) != 0) {
         snprintf(err, err_sz, "failed to write loadtime input %s errno=%d",
                  cur, errno);
@@ -825,6 +843,8 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
              prog_type_short_name(attr->prog_type));
     char prog_name[17] = {0};
     memcpy(prog_name, attr->prog_name, 16);
+    log_line("loadtime policy prog=%s policy_hash=%016llx insn_cnt=%u",
+             prog_name, (unsigned long long)input_hash, attr->insn_cnt);
     char prog_id_str[] = "0";
 
     char verifier_log[360];
@@ -870,6 +890,15 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         json_get_str(so, "command", cmdbuf, sizeof(cmdbuf));
         char command_key[96], override_cmd[4096] = {0};
         loadtime_command_key_for_prog(prog_name, command_key, sizeof(command_key));
+        if (json_get_str(so, command_key, override_cmd, sizeof(override_cmd)))
+            snprintf(cmdbuf, sizeof(cmdbuf), "%s", override_cmd);
+        loadtime_command_key_for_prog_insn_count(prog_name, attr->insn_cnt,
+                                                 command_key,
+                                                 sizeof(command_key));
+        if (json_get_str(so, command_key, override_cmd, sizeof(override_cmd)))
+            snprintf(cmdbuf, sizeof(cmdbuf), "%s", override_cmd);
+        loadtime_command_key_for_hash(input_hash, command_key,
+                                      sizeof(command_key));
         if (json_get_str(so, command_key, override_cmd, sizeof(override_cmd)))
             snprintf(cmdbuf, sizeof(cmdbuf), "%s", override_cmd);
         free(so);

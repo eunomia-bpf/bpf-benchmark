@@ -3,8 +3,63 @@
 # Daemon substitutes ${...} vars; runner sends this command verbatim.
 log_level: 1
 kinsns:
-  - name: bpf_x86_shrq
-  - name: bpf_x86_andl
+  - name: bpf_arm64_ccmp_w
+  - name: bpf_arm64_ccmp_x
+  - name: bpf_arm64_cmp_w
+  - name: bpf_arm64_cmp_x
+  - name: bpf_arm64_csel_ne
+  - name: bpf_arm64_cset_x_cond
+  - name: bpf_arm64_extr_w
+  - name: bpf_arm64_extr_x
+  - name: bpf_arm64_ldr_w
+  - name: bpf_arm64_ldr_x
+  - name: bpf_arm64_ldrb
+  - name: bpf_arm64_ldrh
+  - name: bpf_arm64_mov_x
+  - name: bpf_arm64_prfm_pldl1keep
+  - name: bpf_arm64_rev16_w
+  - name: bpf_arm64_rev_w
+  - name: bpf_arm64_rev_x
+  - name: bpf_arm64_strb
+  - name: bpf_arm64_tst
   - name: bpf_arm64_ubfm_x
+  - name: bpf_x86_bextrq
+  - name: bpf_x86_blsiq
+  - name: bpf_x86_blsrq
+  - name: bpf_x86_andl
+  - name: bpf_x86_bswapl
+  - name: bpf_x86_bswapq
+  - name: bpf_x86_cmovbl
+  - name: bpf_x86_cmovbq
+  - name: bpf_x86_cmovel
+  - name: bpf_x86_cmoveq
+  - name: bpf_x86_cmovnel
+  - name: bpf_x86_cmovneq
+  - name: bpf_x86_cmp_cmovb
+  - name: bpf_x86_cmp_cmove
+  - name: bpf_x86_cmp_cmovne
+  - name: bpf_x86_cmpl
+  - name: bpf_x86_cmpq
+  - name: bpf_x86_leal
+  - name: bpf_x86_leaq
+  - name: bpf_x86_movb
+  - name: bpf_x86_movbe16
+  - name: bpf_x86_movbe32
+  - name: bpf_x86_movbe64
+  - name: bpf_x86_movl
+  - name: bpf_x86_movq
+  - name: bpf_x86_rolq
+  - name: bpf_x86_rolw
+  - name: bpf_x86_rorxl
+  - name: bpf_x86_movzbl
+  - name: bpf_x86_movzwl
+  - name: bpf_x86_popcntq
+  - name: bpf_x86_prefetcht0
+  - name: bpf_x86_shldl
+  - name: bpf_x86_shldq
+  - name: bpf_x86_shrdl
+  - name: bpf_x86_shrdq
+  - name: bpf_x86_shrq
+  - name: bpf_x86_testq
 command: |
-  bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode bextr=force
+  bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}

@@ -2,13 +2,17 @@
 
 Each pass declares its shim step in `runner/config/passes/<pass>/default.yaml`;
 optional per-app overrides live at `runner/config/passes/<pass>/<app>.yaml`
-with a `programs` map keyed by prog_name (and `default` fallback). YAML is the
+with a `programs` map keyed by prog_name (and `default` fallback), an optional
+`program_insn_counts` map keyed by prog_name and original insn_cnt, plus an
+optional `hashes` map keyed by 16-hex normalized bytecode hash. YAML is the
 single source of truth; runner never queries bpfopt for pass metadata.
 
 Lookup (no merge; first match is selected):
-  1. <pass>/<app>.yaml -> programs[<prog_name>]
-  2. <pass>/<app>.yaml -> programs.default
-  3. <pass>/default.yaml -> top-level command
+  1. <pass>/<app>.yaml -> hashes[<bytecode_hash>]
+  2. <pass>/<app>.yaml -> program_insn_counts[<prog_name>][<insn_cnt>]
+  3. <pass>/<app>.yaml -> programs[<prog_name>]
+  4. <pass>/<app>.yaml -> programs.default
+  5. <pass>/default.yaml -> top-level command
 
 Per-pass yaml's `log_level` is retained in the socket payload for diagnostics.
 No pass consumes verifier-state side input.
@@ -39,6 +43,25 @@ def _command_key_for_prog(prog_name: str) -> str:
     return f"command_{sanitized}"
 
 
+def _command_key_for_prog_insn_count(prog_name: str, insn_count: object) -> str:
+    try:
+        count = int(insn_count)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"invalid insn count key: {insn_count!r}") from exc
+    if count <= 0:
+        raise ValueError(f"invalid insn count key: {insn_count!r}")
+    return f"{_command_key_for_prog(prog_name)}_insns_{count}"
+
+
+def _command_key_for_hash(prog_hash: object) -> str:
+    value = str(prog_hash).strip().lower()
+    if value.startswith("0x"):
+        value = value[2:]
+    if len(value) != 16 or any(c not in "0123456789abcdef" for c in value):
+        raise ValueError(f"invalid bytecode hash key: {prog_hash!r}")
+    return f"command_hash_{value}"
+
+
 def find_step_payload(pass_name: str, app_name: str | None) -> dict[str, Any]:
     pass_dir = CONFIG_ROOT / pass_name
     default = _load(pass_dir / "default.yaml")
@@ -65,6 +88,18 @@ def find_step_payload(pass_name: str, app_name: str | None) -> dict[str, Any]:
         names = {str(prog_name), str(prog_name)[:15]}
         for name in names:
             payload[_command_key_for_prog(name)] = collapsed
+    for prog_name, by_count in override.get("program_insn_counts", {}).items():
+        if not isinstance(by_count, Mapping):
+            raise ValueError(f"invalid program_insn_counts entry for {prog_name!r}")
+        names = {str(prog_name), str(prog_name)[:15]}
+        for insn_count, entry in by_count.items():
+            collapsed = _collapse(entry["command"])
+            for name in names:
+                payload[_command_key_for_prog_insn_count(name, insn_count)] = (
+                    collapsed
+                )
+    for prog_hash, entry in override.get("hashes", {}).items():
+        payload[_command_key_for_hash(prog_hash)] = _collapse(entry["command"])
     return payload
 
 

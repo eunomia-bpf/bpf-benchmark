@@ -37,31 +37,25 @@ struct Cli {
 /// pass configs. Keep in sync with `runner/config/passes/*/default.yaml`. The
 /// shim invokes kinsnprober with no `--name` flags and gets this set.
 const DEFAULT_KINSN_NAMES: &[&str] = &[
-    // ccmp (arm64)
-    "bpf_arm64_cmp_x", "bpf_arm64_cmp_w", "bpf_arm64_ccmp_x", "bpf_arm64_ccmp_w",
-    "bpf_arm64_cset_x_cond",
-    // cond_select
-    "bpf_x86_movq", "bpf_x86_testq", "bpf_x86_cmpl", "bpf_x86_cmpq",
-    "bpf_x86_cmovel", "bpf_x86_cmoveq", "bpf_x86_cmovnel", "bpf_x86_cmovneq",
-    "bpf_x86_cmovbl", "bpf_x86_cmovbq",
-    "bpf_x86_cmp_cmove", "bpf_x86_cmp_cmovne", "bpf_x86_cmp_cmovb",
-    "bpf_arm64_mov_x",
-    // rotate
-    "bpf_x86_rolq", "bpf_x86_rorxl", "bpf_arm64_extr_x", "bpf_arm64_extr_w",
-    // lea
-    "bpf_x86_leaq", "bpf_x86_leal",
-    // endian_fusion
+    "bpf_arm64_ccmp_w", "bpf_arm64_ccmp_x", "bpf_arm64_cmp_w",
+    "bpf_arm64_cmp_x", "bpf_arm64_csel_ne", "bpf_arm64_cset_x_cond",
+    "bpf_arm64_extr_w", "bpf_arm64_extr_x", "bpf_arm64_ldr_w",
+    "bpf_arm64_ldr_x", "bpf_arm64_ldrb", "bpf_arm64_ldrh",
+    "bpf_arm64_mov_x", "bpf_arm64_prfm_pldl1keep", "bpf_arm64_rev16_w",
+    "bpf_arm64_rev_w", "bpf_arm64_rev_x", "bpf_arm64_strb",
+    "bpf_arm64_tst", "bpf_arm64_ubfm_x",
+    "bpf_x86_bextrq", "bpf_x86_blsiq", "bpf_x86_blsrq", "bpf_x86_andl",
+    "bpf_x86_bswapl", "bpf_x86_bswapq", "bpf_x86_cmovbl",
+    "bpf_x86_cmovbq", "bpf_x86_cmovel", "bpf_x86_cmoveq",
+    "bpf_x86_cmovnel", "bpf_x86_cmovneq", "bpf_x86_cmp_cmovb",
+    "bpf_x86_cmp_cmove", "bpf_x86_cmp_cmovne", "bpf_x86_cmpl",
+    "bpf_x86_cmpq", "bpf_x86_leal", "bpf_x86_leaq", "bpf_x86_movb",
     "bpf_x86_movbe16", "bpf_x86_movbe32", "bpf_x86_movbe64",
-    "bpf_x86_movzwl", "bpf_x86_movl", "bpf_x86_rolw", "bpf_x86_bswapl",
-    "bpf_x86_bswapq",
-    // bulk_memory
-    "bpf_x86_movzbl", "bpf_x86_movb", "bpf_x86_bextrq", "bpf_x86_blsiq",
-    "bpf_x86_blsrq", "bpf_x86_popcntq", "bpf_x86_shldl", "bpf_x86_shldq",
-    "bpf_x86_shrdl", "bpf_x86_shrdq", "bpf_arm64_ldrb", "bpf_arm64_strb",
-    // prefetch
-    "bpf_x86_prefetcht0", "bpf_arm64_prfm_pldl1keep",
-    // extract
-    "bpf_x86_shrq", "bpf_x86_andl", "bpf_arm64_ubfm_x",
+    "bpf_x86_movl", "bpf_x86_movq", "bpf_x86_rolq", "bpf_x86_rolw",
+    "bpf_x86_rorxl", "bpf_x86_movzbl", "bpf_x86_movzwl",
+    "bpf_x86_popcntq", "bpf_x86_prefetcht0", "bpf_x86_shldl",
+    "bpf_x86_shldq", "bpf_x86_shrdl", "bpf_x86_shrdq", "bpf_x86_shrq",
+    "bpf_x86_testq",
 ];
 
 #[derive(Serialize)]

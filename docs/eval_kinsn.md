@@ -1,17 +1,147 @@
 # Kinsn Corpus Evaluation
 
-Last updated: 2026-06-01
+Last updated: 2026-06-02
 
 This is the paper-facing evaluation note for kinsn-based ReJIT on the x86 KVM
 corpus. The benchmark framework records raw counters and workload payloads
 only; all ratios, tables, figures, and interpretation below are post-hoc
 analysis.
 
-## Paper Framing
+## Current LEA Result
+
+The current authoritative x86 KVM kinsn corpus result is the LEA run collected
+after enabling x86 LEA in the bpfopt policy path and removing the wrapper-side
+LLVM selector gate. It uses the same fixed corpus workloads as the smoke runs;
+only the pass list is narrowed to `lea`.
+
+Command:
+
+```sh
+BPFREJIT_BENCH_PASSES=lea SAMPLES=1 WORKLOAD_DURATION=30 TIMEOUT=7200 make corpus
+```
+
+Artifact:
+`corpus/results/x86_kvm_corpus_20260602_141656_778399`
+
+Post-hoc script:
+`docs/tmp/kinsn_eval_20260602.py`
+
+Headline result: **the x86 KVM LEA corpus completed all six apps with
+`status=ok`, applied `22,476` LEA sites across `516` loadtime rows, and
+showed positive workload and BPF-counter results in this SAMPLES=1 run.** The
+workload post/baseline geomean is `1.187x`, the all-qualified BPF
+per-program cost geomean is `0.860x`, and the direct self-applied cost
+geomean is `0.873x`.
+
+![x86 KVM LEA kinsn corpus evaluation](figures/eval-kinsn-lea-corpus-20260602.png)
+
+*Figure 1: x86 KVM LEA corpus result. Workload throughput uses
+post/baseline ratios, higher is better. BPF cost uses per-program geomean
+post/baseline `ns/run`, lower is better. Direct-applied points are a
+conservative self-applied subset, not the full tail-call affected population.*
+
+Correctness and apply coverage:
+
+| App | status | reports | applied programs | LEA sites | errors |
+| --- | --- | ---: | ---: | ---: | ---: |
+| `bcc` | `ok` | 77 | 25 | 68 | 0 |
+| `otel` | `ok` | 17 | 14 | 1118 | 0 |
+| `cilium` | `ok` | 169 | 131 | 2731 | 0 |
+| `tetragon` | `ok` | 309 | 246 | 14311 | 0 |
+| `katran` | `ok` | 6 | 1 | 39 | 0 |
+| `tracee` | `ok` | 182 | 99 | 4209 | 0 |
+
+Workload throughput:
+
+| App | baseline throughput | post-ReJIT throughput | post/baseline |
+| --- | ---: | ---: | ---: |
+| `bcc` | 548511.86 | 639990.43 | 1.167x |
+| `otel` | 110111743.37 | 106790809.15 | 0.970x |
+| `cilium` | 1397943.00 | 1620095.00 | 1.159x |
+| `tetragon` | 350879.10 | 489226.32 | 1.394x |
+| `katran` | 2458849.00 | 2452553.00 | 0.997x |
+| `tracee` | 397762.79 | 609160.97 | 1.531x |
+
+BPF per-program counters:
+
+| App | retained rows | all-qualified geomean | wins/losses/ties | direct applied rows | direct applied geomean |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `bcc` | 10 | 0.497x | 9/1/0 | 7 | 0.432x |
+| `otel` | 1 | 1.152x | 0/1/0 | 1 | 1.152x |
+| `cilium` | 2 | 0.692x | 2/0/0 | 2 | 0.692x |
+| `tetragon` | 2 | 0.670x | 2/0/0 | 2 | 0.670x |
+| `katran` | 1 | 0.973x | 1/0/0 | 1 | 0.973x |
+| `tracee` | 38 | 1.007x | 19/19/0 | 28 | 1.064x |
+
+The global all-qualified BPF per-program geomean is `0.860x` over `54`
+retained rows. The direct self-applied geomean is `0.873x` over `41` retained
+rows. The full generated direct-row table is preserved in
+`docs/tmp/kinsn_eval_20260602_summary.md`.
+
+Interpretation caveats:
+
+- This is `SAMPLES=1`, which is acceptable for paper-grade BPF counters after
+  the `min_runs >= 100` filter, but workload ratios should still be treated as
+  a one-pass measurement rather than a variance study.
+- Direct self-applied rows are a lower bound. Tail-called programs can report
+  zero own `run_cnt_delta`; their savings are charged to the directly attached
+  caller.
+- Tracee has one raw BPF counter caveat: one `vfs_write_magic` row reports
+  `36.27 ns/run -> 1.1855e12 ns/run`. The headline geomean above does not
+  drop it; the value is recorded in the generated summary rather than silently
+  filtered.
+- Katran reports large raw pktgen `errors:` counts in the workload payloads,
+  but the app completed with `status=ok`; these are workload-side raw fields,
+  not loadtime or ReJIT errors.
+
+## Current RQ Answers
+
+**RQ1 Correctness.** The LEA run completed all six x86 KVM corpus apps with
+`status=ok`, empty app error strings, one measured baseline workload and one
+measured post-ReJIT workload per app. Loadtime reports show zero bpfopt/report
+errors for every app.
+
+**RQ2 Apply coverage.** LEA now applies broadly on x86: `22,476` sites across
+six apps. The largest site populations are Tetragon (`14,311`), Tracee
+(`4,209`), Cilium (`2,731`), and OTEL (`1,118`). This is no longer a policy
+no-op; the enabled LEA path reaches real corpus programs.
+
+**RQ3 Performance.** In this run, workload throughput is positive on four apps
+and neutral/slightly negative on two, with `1.187x` unweighted geomean.
+BPF-counter cost is positive in five of six app populations by per-program
+geomean; OTEL is the clear counter regression (`1.152x`) and Tracee is near
+neutral all-qualified (`1.007x`) despite many direct self-applied wins.
+
+## Methodology
+
+Workload throughput is computed from raw per-app workload payloads using the
+same parser style as `docs/eval_native.md`: `stress-ng` real-time bogo ops/s,
+OTEL worker `ops / elapsed_s`, and kernel `pktgen` pps. Units are app-local,
+so only post/baseline ratios within the same app are meaningful.
+
+BPF per-program cost uses the kinsn paper-grade method:
+
+```text
+baseline_avg_ns_per_run = baseline_run_time_ns_delta / baseline_run_cnt_delta
+post_avg_ns_per_run = post_run_time_ns_delta / post_run_cnt_delta
+ratio = post_avg_ns_per_run / baseline_avg_ns_per_run
+```
+
+Rows with `min(baseline_runs, post_runs) < 100` are dropped. Programs are
+paired by `(name, type, occurrence index)` after grouping each phase by BPF
+program name and type. The reported BPF metric is the per-program geomean of
+retained ratios; lower than `1.0x` is faster after kinsn.
+
+The "direct applied" BPF subset is a conservative automated subset: retained
+counter rows whose truncated `bpftool` name matches a program with
+`sites_applied > 0`. It does not fully implement the affected-population rule
+for tail-call descendants.
+
+## Previous kinsn-6 Result, 2026-05-31
 
 Kinsn replaces selected BPF instruction patterns with calls to in-kernel
-kfunc-like instruction modules. The current x86 KVM corpus run evaluates three
-questions:
+kfunc-like instruction modules. The previous x86 KVM `kinsn-6` corpus run
+evaluated three questions:
 
 - **RQ1 Correctness:** can the kinsn-enabled runtime load and run all six real
   corpus apps through their normal app startup paths?
@@ -32,9 +162,10 @@ a direct-applied-row speedup after fusing compare+cmov into one kinsn call:
 report errors. The run does **not** yet support claiming a broad corpus-wide
 BPF speedup because the all-qualified population is still `1.010x`.
 
-## Experimental Setup
+### Experimental Setup
 
-The authoritative run used the repository `make` entrypoint on x86 KVM:
+The previous authoritative `kinsn-6` run used the repository `make` entrypoint
+on x86 KVM:
 
 ```sh
 BPFREJIT_BENCH_PASSES=kinsn-6 SAMPLES=3 WORKLOAD_DURATION=180 TIMEOUT=7200 make corpus
@@ -56,7 +187,7 @@ the upstream apps, the shim probes kinsn targets into `/tmp/target.json`, and
 `BPF_PSEUDO_KINSN_CALL` relocations when a pass applies. No app is loaded by
 the framework via direct `.bpf.o` loading.
 
-## Methodology
+### Methodology
 
 Workload throughput is computed from raw per-app workload payloads using the
 same parser style as `docs/eval_native.md`: `stress-ng` real-time bogo ops/s,
@@ -82,11 +213,11 @@ counter rows whose truncated `bpftool` name matches a program with
 for tail-call descendants. Tail-called programs can report zero own
 `run_cnt_delta`; their cost is charged to the directly attached caller.
 
-## Main Results
+### Main Results
 
 ![x86 KVM kinsn-6 corpus evaluation](figures/eval-kinsn-corpus-20260531.png)
 
-*Figure 1: x86 KVM `kinsn-6` corpus result. Workload throughput uses
+*Figure 2: x86 KVM `kinsn-6` corpus result. Workload throughput uses
 post/baseline ratios, higher is better. BPF cost uses per-program geomean
 post/baseline `ns/run`, lower is better. Apply coverage shows real
 `cond_select` kinsn sites; the other five enabled kinsn-class passes had zero
@@ -139,7 +270,7 @@ The global all-qualified BPF per-program geomean is `1.010x` over `63`
 retained rows. The direct self-applied geomean is `0.944x` over `3` retained
 rows.
 
-## RQ Answers
+### RQ Answers
 
 **RQ1 Correctness.** The x86 KVM `kinsn-6` corpus completed all six apps with
 `status=ok`, empty app error strings, three measured baseline samples, and
@@ -161,7 +292,7 @@ slightly positive overall (`1.006x` geomean), led by Cilium (`1.027x`) and
 Katran (`1.018x`). The all-qualified BPF population remains slightly negative
 (`1.010x`), mostly because Tracee's retained non-direct context is `1.021x`.
 
-## Discussion
+### Discussion
 
 The x86 connection is now mechanically real: `target.json` is consumed by
 `bpfopt`, external `bpf_x86_*` symbols are lowered to
@@ -182,16 +313,16 @@ context more precisely before making a paper-level speedup claim.
 Tetragon and Tracee apply sites exist but do not show up in the conservative
 direct-self-applied retained set. This is expected for tail-call and low-run
 programs: target programs may report zero own `run_cnt_delta`, and their cost
-can be charged to the caller. The current document therefore reports both the
+can be charged to the caller. That previous section therefore reports both the
 all-qualified corpus context and the direct-self-applied subset, without
 claiming that either is the complete affected population.
 
-The x86 `lea` selector is not part of this `kinsn-6` policy and remains
-disabled on x86 because the current proof/selector path produced verifier
-pointer-semantics failures during smoke testing. Arm64 has additional kinsn
-coverage, including `ccmp`; this note only evaluates x86 KVM.
+At the time of that `kinsn-6` run, x86 `lea` was not part of the policy and
+was disabled after verifier pointer-semantics failures during smoke testing.
+That limitation is superseded by the 2026-06-02 LEA result above. Arm64 has
+additional kinsn coverage, including `ccmp`; this note only evaluates x86 KVM.
 
-### Superseded Pre-Fusion Run
+#### Superseded Pre-Fusion Run
 
 The earlier x86 KVM artifact
 `corpus/results/x86_kvm_corpus_20260531_093716_580979` used the same
@@ -205,22 +336,41 @@ that performance result while preserving it as a regression baseline.
 
 ## Appendix
 
-Post-hoc analysis script:
+Current LEA post-hoc analysis script:
+`docs/tmp/kinsn_eval_20260602.py`
+
+Current LEA generated summary:
+`docs/tmp/kinsn_eval_20260602_summary.md`
+
+Current LEA generated figure:
+`docs/figures/eval-kinsn-lea-corpus-20260602.png`
+
+Current LEA authoritative artifact:
+`corpus/results/x86_kvm_corpus_20260602_141656_778399`
+
+Current LEA reproduction command:
+
+```sh
+BPFREJIT_BENCH_PASSES=lea SAMPLES=1 WORKLOAD_DURATION=30 TIMEOUT=7200 make corpus
+python3 docs/tmp/kinsn_eval_20260602.py
+```
+
+Previous `kinsn-6` post-hoc analysis script:
 `docs/tmp/kinsn_eval_20260531.py`
 
-Generated summary:
+Previous `kinsn-6` generated summary:
 `docs/tmp/kinsn_eval_20260531_summary.md`
 
-Generated figure:
+Previous `kinsn-6` generated figure:
 `docs/figures/eval-kinsn-corpus-20260531.png`
 
-Authoritative artifact:
+Previous `kinsn-6` authoritative artifact:
 `corpus/results/x86_kvm_corpus_20260531_233035_656739`
 
 Superseded pre-fusion artifact:
 `corpus/results/x86_kvm_corpus_20260531_093716_580979`
 
-Reproduction command:
+Previous `kinsn-6` reproduction command:
 
 ```sh
 BPFREJIT_BENCH_PASSES=kinsn-6 SAMPLES=3 WORKLOAD_DURATION=180 TIMEOUT=7200 make corpus
