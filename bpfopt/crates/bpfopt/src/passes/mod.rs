@@ -174,7 +174,7 @@ fn reject_pass_args(pass_name: &str, args: &[String]) -> Result<()> {
     pass_entry!("endian_fusion", endian::EndianFusionPass, endian::KINSN_TARGETS, false),
     pass_entry!("lea", lea::LeaPass, lea::KINSN_TARGETS, false),
     pass_entry!("branch_flip", branch_flip::BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 }, &[], false),
-    pass_entry!("prefetch", prefetch::PrefetchPass, prefetch::KINSN_TARGETS, false),
+    PassRegistryEntry { name: "prefetch", make: prefetch::PrefetchPass::from_cli_args, kinsn_targets: prefetch::KINSN_TARGETS, needs_verifier_states: false },
 ];
 
 #[cfg(test)]

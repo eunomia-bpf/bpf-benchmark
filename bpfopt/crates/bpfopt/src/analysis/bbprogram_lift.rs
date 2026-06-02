@@ -194,12 +194,7 @@ pub fn canonicalize_map_refs_to_idx(
     original_loader_fd_array: Option<&[i32]>,
     map_ids: &[u32],
 ) -> Result<()> {
-    canonicalize_map_refs_to_idx_with_mapping(
-        insns,
-        original_loader_fd_array,
-        map_ids,
-        None,
-    )
+    canonicalize_map_refs_to_idx_with_mapping(insns, original_loader_fd_array, map_ids, None)
 }
 
 /// `fd_to_id`, if provided, lets the caller (e.g. an LD_PRELOAD shim that
@@ -225,7 +220,12 @@ pub fn canonicalize_map_refs_to_idx_with_mapping(
     // With a fd→id mapping the index is bounded by map_ids.len() because
     // multiple fds collapse to one idx; without mapping it's bounded the
     // same way (first-seen sequential <= map_ids.len()).
-    let used_slots = fd_to_map_index.values().copied().max().map(|m| m + 1).unwrap_or(0);
+    let used_slots = fd_to_map_index
+        .values()
+        .copied()
+        .max()
+        .map(|m| m + 1)
+        .unwrap_or(0);
     if used_slots > map_ids.len() {
         anyhow::bail!(
             "canonicalize_map_refs_to_idx: bytecode references {} unique loader map fds but prog_info has {} map ids",
