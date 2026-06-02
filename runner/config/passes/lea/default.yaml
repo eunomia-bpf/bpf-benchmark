@@ -6,4 +6,4 @@ kinsns:
   - name: bpf_x86_leaq
   - name: bpf_x86_leal
 command: |
-  bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}
+  bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode preemit-lea=force

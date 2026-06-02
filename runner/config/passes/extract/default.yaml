@@ -7,4 +7,4 @@ kinsns:
   - name: bpf_x86_andl
   - name: bpf_arm64_ubfm_x
 command: |
-  bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}
+  bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kinsn-mode bextr=force

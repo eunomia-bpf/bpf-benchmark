@@ -311,47 +311,167 @@ KinsnTargetMap read_kinsn_targets(const std::filesystem::path &path)
 	return out;
 }
 
-std::optional<std::vector<std::string>>
-kinsn_mode_specs_for_pass(std::string_view pass)
+bool is_kinsn_pass(std::string_view pass)
 {
-	if (pass == "rotate") {
-		return std::vector<std::string>{ "rotate=force" };
-	}
-	if (pass == "cond_select") {
-		return std::vector<std::string>{ "cmov=force" };
-	}
-	if (pass == "extract") {
-		return std::vector<std::string>{ "bextr=force" };
-	}
-	if (pass == "endian_fusion") {
-		return std::vector<std::string>{
-			"unary=force",
-			"movbe-be=force",
-			"movbe-load=force",
-		};
-	}
-	if (pass == "bulk_memory") {
-		return std::vector<std::string>{
-			"wide-load=force",
-			"indexed-load=force",
-			"scaled-index-mem=force",
-		};
-	}
-	if (pass == "lea") {
-		return std::vector<std::string>{ "preemit-lea=force" };
-	}
-	if (pass == "prefetch" || pass == "ccmp") {
-		return std::vector<std::string>{};
-	}
-	return std::nullopt;
+	static constexpr std::string_view passes[] = {
+		"rotate", "cond_select", "extract", "endian_fusion",
+		"bulk_memory", "lea", "prefetch", "ccmp",
+	};
+	return std::find(std::begin(passes), std::end(passes), pass) !=
+	       std::end(passes);
 }
 
-void configure_llvm_kinsn_select(const std::vector<std::string> &mode_specs)
+std::string trim_copy(std::string_view value)
+{
+	while (!value.empty() &&
+	       std::isspace(static_cast<unsigned char>(value.front()))) {
+		value.remove_prefix(1);
+	}
+	while (!value.empty() &&
+	       std::isspace(static_cast<unsigned char>(value.back()))) {
+		value.remove_suffix(1);
+	}
+	return std::string(value);
+}
+
+std::string pass_arg_value(const std::vector<std::string> &args, size_t &i,
+			   std::string_view option)
+{
+	const std::string prefix = std::string(option) + "=";
+	const auto &arg = args[i];
+	if (arg.starts_with(prefix)) {
+		return arg.substr(prefix.size());
+	}
+	if (arg != option) {
+		throw std::runtime_error("internal pass arg parser mismatch");
+	}
+	if (++i >= args.size()) {
+		throw std::runtime_error(std::string(option) + " requires VALUE");
+	}
+	return args[i];
+}
+
+bool kinsn_pass_accepts_family(std::string_view pass, std::string_view family)
+{
+	if (pass == "rotate") {
+		return family == "rotate";
+	}
+	if (pass == "cond_select") {
+		return family == "cmov";
+	}
+	if (pass == "extract") {
+		return family == "bextr";
+	}
+	if (pass == "endian_fusion") {
+		return family == "unary" || family == "movbe-be" ||
+		       family == "movbe-load";
+	}
+	if (pass == "bulk_memory") {
+		return family == "wide-load" || family == "indexed-load" ||
+		       family == "scaled-index-mem";
+	}
+	if (pass == "lea") {
+		return family == "preemit-lea";
+	}
+	if (pass == "prefetch" || pass == "ccmp") {
+		return false;
+	}
+	throw std::runtime_error("internal kinsn pass family mismatch");
+}
+
+void validate_kinsn_mode_arg(std::string_view pass, std::string_view value)
+{
+	size_t start = 0;
+	while (start <= value.size()) {
+		const size_t comma = value.find(',', start);
+		const auto end = comma == std::string_view::npos ? value.size() :
+								 comma;
+		const std::string spec = trim_copy(value.substr(start, end - start));
+		if (spec.empty()) {
+			throw std::runtime_error("empty --kinsn-mode entry");
+		}
+		const size_t eq = spec.find('=');
+		if (eq == std::string::npos || eq == 0 || eq + 1 >= spec.size() ||
+		    spec.find('=', eq + 1) != std::string::npos) {
+			throw std::runtime_error("invalid --kinsn-mode entry: " +
+						 spec);
+		}
+		const std::string family = trim_copy(
+			std::string_view(spec).substr(0, eq));
+		const std::string mode = trim_copy(
+			std::string_view(spec).substr(eq + 1));
+		if (mode != "disable" && mode != "cost" && mode != "force") {
+			throw std::runtime_error("invalid --kinsn-mode value: " +
+						 mode);
+		}
+		if (family == "all") {
+			if (mode != "disable") {
+				throw std::runtime_error(
+					"--kinsn-mode all is only accepted as all=disable");
+			}
+		} else if (!kinsn_pass_accepts_family(pass, family)) {
+			throw std::runtime_error("kinsn pass " + std::string(pass) +
+						 " does not accept family " +
+						 family);
+		}
+		if (comma == std::string_view::npos) {
+			break;
+		}
+		start = comma + 1;
+	}
+}
+
+std::vector<std::string> parse_kinsn_llvm_args(std::string_view pass,
+					       const std::vector<std::string> &args)
+{
+	std::vector<std::string> llvm_args;
+	for (size_t i = 0; i < args.size(); i++) {
+		const auto &arg = args[i];
+		if (arg == "--kinsn-mode" || arg.starts_with("--kinsn-mode=")) {
+			const std::string value =
+				pass_arg_value(args, i, "--kinsn-mode");
+			validate_kinsn_mode_arg(pass, value);
+			llvm_args.push_back("-bpf-kinsn-mode=" + value);
+		} else if (arg == "--llvm-arg" ||
+			   arg.starts_with("--llvm-arg=")) {
+			std::string value = pass_arg_value(args, i, "--llvm-arg");
+			if (value.starts_with("-bpf-kinsn-mode=")) {
+				validate_kinsn_mode_arg(
+					pass,
+					std::string_view(value).substr(
+						std::string_view(
+							"-bpf-kinsn-mode=")
+							.size()));
+			} else if (value.starts_with(
+					   "-bpf-kinsn-rotate-amortization-threshold=")) {
+				if (pass != "rotate") {
+					throw std::runtime_error(
+						"rotate amortization threshold is only valid for rotate");
+				}
+			} else {
+				throw std::runtime_error(
+					"kinsn --llvm-arg only accepts BPF kinsn selector options");
+			}
+			llvm_args.push_back(std::move(value));
+		} else {
+			throw std::runtime_error("kinsn pass " + std::string(pass) +
+						 " unknown pass-local arg: " + arg);
+		}
+	}
+	if (llvm_args.empty()) {
+		throw std::runtime_error(
+			"kinsn pass " + std::string(pass) +
+			" requires pass-local --kinsn-mode policy in runner/config/passes");
+	}
+	return llvm_args;
+}
+
+void configure_llvm_kinsn_select(const std::vector<std::string> &llvm_args)
 {
 	std::vector<std::string> args{ "bpfopt", "-bpf-enable-kinsn-select",
 				       "-bpf-kinsn-mode=all=disable" };
-	for (const auto &spec : mode_specs) {
-		args.push_back("-bpf-kinsn-mode=" + spec);
+	for (const auto &arg : llvm_args) {
+		args.push_back(arg);
 	}
 	std::vector<const char *> argv;
 	argv.reserve(args.size());
@@ -655,22 +775,26 @@ void run_pass(Cli &cli)
 		throw std::runtime_error(
 			"--fd-to-id requires --canonicalize-map-refs");
 	}
-	const auto kinsn_mode_specs = kinsn_mode_specs_for_pass(*cli.pass);
+	const bool kinsn_pass = is_kinsn_pass(*cli.pass);
 	KinsnTargetMap kinsn_targets;
-	if (kinsn_mode_specs) {
+	if (kinsn_pass) {
 		if (!cli.target) {
 			throw std::runtime_error("--pass " + *cli.pass +
 						 " requires --target");
 		}
 		kinsn_targets = read_kinsn_targets(*cli.target);
-		configure_llvm_kinsn_select(*kinsn_mode_specs);
+		configure_llvm_kinsn_select(
+			parse_kinsn_llvm_args(*cli.pass, cli.pass_args));
+	} else if (*cli.pass != "map_inline" && !cli.pass_args.empty()) {
+		throw std::runtime_error("--pass " + *cli.pass +
+					 " does not accept pass-local args");
 	}
 	const auto input = read_all(cli.input);
 	std::vector<InlineRecord> inlined;
 	std::vector<uint8_t> output;
 	std::optional<int64_t> sites_applied;
 	std::vector<std::string> diagnostics;
-	if (kinsn_mode_specs && count_kinsn_calls(input) > 0) {
+	if (kinsn_pass && count_kinsn_calls(input) > 0) {
 		output = input;
 		sites_applied = 0;
 		write_all(cli.output, output);
@@ -678,7 +802,7 @@ void run_pass(Cli &cli)
 			     diagnostics);
 		return;
 	}
-	if (kinsn_mode_specs && *cli.pass == "lea" &&
+	if (kinsn_pass && *cli.pass == "lea" &&
 	    targets_include_x86_kinsns(kinsn_targets)) {
 		output = input;
 		sites_applied = 0;
@@ -693,8 +817,8 @@ void run_pass(Cli &cli)
 		output = run_map_inline_roundtrip(input, cli, inlined);
 	} else {
 		output = run_llvm_roundtrip(
-			input, kinsn_mode_specs ? &kinsn_targets : nullptr);
-		if (kinsn_mode_specs) {
+			input, kinsn_pass ? &kinsn_targets : nullptr);
+		if (kinsn_pass) {
 			sites_applied = count_kinsn_calls(output);
 			if (*sites_applied > 0 &&
 			    targets_include_x86_kinsns(kinsn_targets)) {

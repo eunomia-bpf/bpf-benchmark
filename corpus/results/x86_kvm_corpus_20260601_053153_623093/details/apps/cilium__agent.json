@@ -1,0 +1,681 @@
+{
+  "app": "cilium/agent",
+  "baseline": {
+    "bpf": {
+      "465": {
+        "bytes_jited": 509,
+        "bytes_xlated": 880,
+        "id": 465,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 771,
+        "type": "xdp"
+      },
+      "467": {
+        "bytes_jited": 8254,
+        "bytes_xlated": 14392,
+        "id": 467,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "468": {
+        "bytes_jited": 8881,
+        "bytes_xlated": 15112,
+        "id": 468,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "470": {
+        "bytes_jited": 6566,
+        "bytes_xlated": 11024,
+        "id": 470,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "471": {
+        "bytes_jited": 1262,
+        "bytes_xlated": 2112,
+        "id": 471,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "472": {
+        "bytes_jited": 859,
+        "bytes_xlated": 1512,
+        "id": 472,
+        "name": "cil_to_host",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 1320,
+        "type": "sched_cls"
+      },
+      "473": {
+        "bytes_jited": 3945,
+        "bytes_xlated": 7040,
+        "id": 473,
+        "name": "cil_from_host",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 2168,
+        "type": "sched_cls"
+      },
+      "474": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 474,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "475": {
+        "bytes_jited": 12954,
+        "bytes_xlated": 21584,
+        "id": 475,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "476": {
+        "bytes_jited": 405,
+        "bytes_xlated": 752,
+        "id": 476,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "477": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 477,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "478": {
+        "bytes_jited": 8242,
+        "bytes_xlated": 14312,
+        "id": 478,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "479": {
+        "bytes_jited": 8881,
+        "bytes_xlated": 15112,
+        "id": 479,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "480": {
+        "bytes_jited": 3945,
+        "bytes_xlated": 7040,
+        "id": 480,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "481": {
+        "bytes_jited": 5222,
+        "bytes_xlated": 8912,
+        "id": 481,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "482": {
+        "bytes_jited": 6566,
+        "bytes_xlated": 11024,
+        "id": 482,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "483": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 483,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "484": {
+        "bytes_jited": 1262,
+        "bytes_xlated": 2112,
+        "id": 484,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "485": {
+        "bytes_jited": 859,
+        "bytes_xlated": 1512,
+        "id": 485,
+        "name": "cil_to_host",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 930,
+        "type": "sched_cls"
+      },
+      "486": {
+        "bytes_jited": 12981,
+        "bytes_xlated": 21632,
+        "id": 486,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "487": {
+        "bytes_jited": 3386,
+        "bytes_xlated": 5936,
+        "id": 487,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "488": {
+        "bytes_jited": 405,
+        "bytes_xlated": 752,
+        "id": 488,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "489": {
+        "bytes_jited": 6566,
+        "bytes_xlated": 11024,
+        "id": 489,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "490": {
+        "bytes_jited": 1262,
+        "bytes_xlated": 2112,
+        "id": 490,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "491": {
+        "bytes_jited": 3945,
+        "bytes_xlated": 7040,
+        "id": 491,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "492": {
+        "bytes_jited": 8881,
+        "bytes_xlated": 15112,
+        "id": 492,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "493": {
+        "bytes_jited": 859,
+        "bytes_xlated": 1512,
+        "id": 493,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "494": {
+        "bytes_jited": 12981,
+        "bytes_xlated": 21632,
+        "id": 494,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "495": {
+        "bytes_jited": 8242,
+        "bytes_xlated": 14312,
+        "id": 495,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "496": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 496,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "497": {
+        "bytes_jited": 5222,
+        "bytes_xlated": 8912,
+        "id": 497,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 1698,
+        "type": "sched_cls"
+      },
+      "498": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 498,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "499": {
+        "bytes_jited": 3386,
+        "bytes_xlated": 5936,
+        "id": 499,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 1291,
+        "type": "sched_cls"
+      },
+      "500": {
+        "bytes_jited": 405,
+        "bytes_xlated": 752,
+        "id": 500,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "501": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 501,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "502": {
+        "bytes_jited": 6216,
+        "bytes_xlated": 10984,
+        "id": 502,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "503": {
+        "bytes_jited": 5802,
+        "bytes_xlated": 10368,
+        "id": 503,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "504": {
+        "bytes_jited": 3622,
+        "bytes_xlated": 6368,
+        "id": 504,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "505": {
+        "bytes_jited": 382,
+        "bytes_xlated": 696,
+        "id": 505,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "506": {
+        "bytes_jited": 1089,
+        "bytes_xlated": 1720,
+        "id": 506,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 23941127,
+        "run_time_ns_delta": 10629347990,
+        "type": "sched_cls"
+      },
+      "507": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 507,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "509": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 509,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "510": {
+        "bytes_jited": 5760,
+        "bytes_xlated": 10104,
+        "id": 510,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "511": {
+        "bytes_jited": 6398,
+        "bytes_xlated": 11104,
+        "id": 511,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "512": {
+        "bytes_jited": 5580,
+        "bytes_xlated": 9904,
+        "id": 512,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "513": {
+        "bytes_jited": 5375,
+        "bytes_xlated": 9592,
+        "id": 513,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "514": {
+        "bytes_jited": 5210,
+        "bytes_xlated": 9224,
+        "id": 514,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "515": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 515,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "517": {
+        "bytes_jited": 5580,
+        "bytes_xlated": 9904,
+        "id": 517,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "518": {
+        "bytes_jited": 1089,
+        "bytes_xlated": 1720,
+        "id": 518,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 23026679,
+        "run_time_ns_delta": 11249384095,
+        "type": "sched_cls"
+      },
+      "519": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 519,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "520": {
+        "bytes_jited": 5802,
+        "bytes_xlated": 10368,
+        "id": 520,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "521": {
+        "bytes_jited": 6398,
+        "bytes_xlated": 11104,
+        "id": 521,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "522": {
+        "bytes_jited": 5760,
+        "bytes_xlated": 10104,
+        "id": 522,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "523": {
+        "bytes_jited": 6216,
+        "bytes_xlated": 10984,
+        "id": 523,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "524": {
+        "bytes_jited": 382,
+        "bytes_xlated": 696,
+        "id": 524,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "525": {
+        "bytes_jited": 5375,
+        "bytes_xlated": 9592,
+        "id": 525,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "526": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 526,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "527": {
+        "bytes_jited": 5210,
+        "bytes_xlated": 9224,
+        "id": 527,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "528": {
+        "bytes_jited": 3622,
+        "bytes_xlated": 6368,
+        "id": 528,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "components": [
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepa",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.117",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepa",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.34",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 30.047742884,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.117  dst_max: 10.244.0.117\n     src_min: 10.244.0.34  src_max: 10.244.0.34\n     src_mac: 52:27:76:e2:6d:61 dst_mac: 42:c4:f0:51:c9:e9\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 23941094  errors: 0\n     started: 289250247us  stopped: 319204837us idle: 0us\n     seq_num: 23941095  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.34  cur_daddr: 10.244.0.117\n     cur_udp_dst: 21185  cur_udp_src: 21185\n     cur_queue_map: 0\n     flows: 11986876\nResult: OK: 29954590(c29954590+d0) usec, 23941094 (64byte,-1frags)\n  799246pps 409Mb/sec (409213952bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_forward"
+          },
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepb",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.34",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepb",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.117",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 30.002941084999975,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.34  dst_max: 10.244.0.34\n     src_min: 10.244.0.117  src_max: 10.244.0.117\n     src_mac: 4e:be:9d:fb:54:97 dst_mac: 0a:d0:51:e7:6b:2c\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 23026647  errors: 0\n     started: 289240183us  stopped: 319209286us idle: 0us\n     seq_num: 23026648  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.117  cur_daddr: 10.244.0.34\n     cur_udp_dst: 24214  cur_udp_src: 24214\n     cur_queue_map: 0\n     flows: 11529702\nResult: OK: 29969102(c29969102+d0) usec, 23026647 (64byte,-1frags)\n  768346pps 393Mb/sec (393393152bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_reverse"
+          }
+        ],
+        "config": {
+          "path": "bidirectional-endpoint-to-endpoint"
+        },
+        "workload_name": "cilium_endpoint_pktgen"
+      }
+    ]
+  },
+  "error": "Cilium API PUT /v1/endpoint/0 returned HTTP 500: \"timeout while waiting for initial endpoint generation to complete: context deadline exceeded\"; cilium-agent output tail:\nl=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:40:17.997264521Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:40:17.997432679Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure policyCalculation=12.552\u00b5s proxyPolicyCalculation=43.065\u00b5s total=247.269406ms buildPermitAcquisition=3.157\u00b5s waitingForCTClean=421ns proxyWaitForAck=0s bpfCompilation=0s bpfWaitForELF=686.541\u00b5s waitingForPolicyRepository=268ns endpointPolicyCalculation=3.102\u00b5s mapSync=849ns waitingForLock=1.76\u00b5s proxyConfiguration=4.453\u00b5s selectorPolicyCalculation=0s prepareBuild=133.176\u00b5s bpfLoadProg=242.542279ms bpfWaitForELF=686.541\u00b5s bpfLoadProg=242.542279ms bpfCompilation=0s error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\"\ntime=2026-06-01T05:40:17.99746945Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\"\ntime=2026-06-01T05:40:42.404925032Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\"\ntime=2026-06-01T05:40:42.405039765Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:40:42.405051254Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:40:42.405163227Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure selectorPolicyCalculation=0s endpointPolicyCalculation=12.98\u00b5s proxyWaitForAck=0s total=93.364437ms buildPermitAcquisition=2.655\u00b5s waitingForCTClean=419ns proxyConfiguration=3.099\u00b5s mapSync=15.778\u00b5s prepareBuild=93.401\u00b5s bpfCompilation=0s policyCalculation=19.888\u00b5s bpfWaitForELF=533.778\u00b5s bpfLoadProg=90.339912ms proxyPolicyCalculation=2.286\u00b5s waitingForLock=2.196\u00b5s waitingForPolicyRepository=104ns bpfWaitForELF=533.778\u00b5s bpfLoadProg=90.339912ms bpfCompilation=0s error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\"\ntime=2026-06-01T05:40:42.405198781Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\"\ntime=2026-06-01T05:40:48.1418745Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\"\ntime=2026-06-01T05:40:48.141967256Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:40:48.141976943Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:40:48.142115667Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure prepareBuild=109.82\u00b5s total=143.580739ms bpfLoadProg=140.690661ms waitingForPolicyRepository=217ns selectorPolicyCalculation=0s proxyWaitForAck=0s bpfWaitForELF=520.308\u00b5s waitingForLock=2.471\u00b5s policyCalculation=10.802\u00b5s endpointPolicyCalculation=2.313\u00b5s proxyPolicyCalculation=33.636\u00b5s mapSync=604ns waitingForCTClean=261ns proxyConfiguration=3.542\u00b5s buildPermitAcquisition=2.957\u00b5s bpfCompilation=0s bpfWaitForELF=520.308\u00b5s bpfLoadProg=140.690661ms bpfCompilation=0s error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\"\ntime=2026-06-01T05:40:48.142148449Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\"\ntime=2026-06-01T05:41:03.866953414Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-06-01T05:41:16.647789124Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\"\ntime=2026-06-01T05:41:16.647907876Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:41:16.647918061Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:41:16.64803606Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure waitingForCTClean=1.291773ms bpfCompilation=0s policyCalculation=25.79\u00b5s selectorPolicyCalculation=0s prepareBuild=129.375\u00b5s bpfWaitForELF=664.808\u00b5s waitingForPolicyRepository=226ns endpointPolicyCalculation=16.007\u00b5s proxyWaitForAck=0s mapSync=18.464\u00b5s buildPermitAcquisition=3.169\u00b5s bpfLoadProg=239.155926ms waitingForLock=2.049\u00b5s proxyConfiguration=3.898\u00b5s proxyPolicyCalculation=2.741\u00b5s total=242.547431ms bpfCompilation=0s bpfWaitForELF=664.808\u00b5s bpfLoadProg=239.155926ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\"\ntime=2026-06-01T05:41:16.648064935Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\"\ntime=2026-06-01T05:41:20.340454005Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:41:20.340545706Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:41:20.340554705Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:41:20.340687942Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure waitingForPolicyRepository=100ns waitingForCTClean=245ns policyCalculation=10.243\u00b5s endpointPolicyCalculation=2.753\u00b5s total=198.030879ms buildPermitAcquisition=2.55\u00b5s bpfCompilation=0s selectorPolicyCalculation=0s prepareBuild=102.269\u00b5s bpfWaitForELF=539.559\u00b5s proxyConfiguration=3.359\u00b5s waitingForLock=2.098\u00b5s proxyPolicyCalculation=36.4\u00b5s proxyWaitForAck=0s mapSync=568ns bpfLoadProg=193.681364ms bpfWaitForELF=539.559\u00b5s bpfLoadProg=193.681364ms bpfCompilation=0s error=\"loading eBPF collection into the kernel: program tail_handle_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:41:20.340723296Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:41:52.882384919Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_handle_ipv4_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:41:52.882525105Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:41:52.88253555Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_handle_ipv4_from_netdev: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:41:52.882690498Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure policyCalculation=26.168\u00b5s proxyWaitForAck=0s bpfWaitForELF=491.924\u00b5s prepareBuild=96.86\u00b5s buildPermitAcquisition=2.492\u00b5s waitingForLock=2.078\u00b5s proxyConfiguration=3.279\u00b5s endpointPolicyCalculation=18.208\u00b5s proxyPolicyCalculation=2.507\u00b5s mapSync=15.182\u00b5s total=233.731059ms bpfLoadProg=229.867849ms bpfCompilation=0s waitingForPolicyRepository=232ns waitingForCTClean=1.327337ms selectorPolicyCalculation=0s bpfCompilation=0s bpfWaitForELF=491.924\u00b5s bpfLoadProg=229.867849ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_handle_ipv4_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:41:52.882736171Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_handle_ipv4_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:41:54.428269937Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program cil_to_container: load program: invalid argument\"\ntime=2026-06-01T05:41:54.428383923Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:41:54.428394832Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program cil_to_container: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:41:54.428571077Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure waitingForLock=2.044\u00b5s policyCalculation=12.204\u00b5s selectorPolicyCalculation=0s proxyWaitForAck=0s prepareBuild=134.668\u00b5s buildPermitAcquisition=2.974\u00b5s proxyPolicyCalculation=42.368\u00b5s bpfCompilation=0s bpfLoadProg=83.02129ms endpointPolicyCalculation=3.233\u00b5s mapSync=872ns bpfWaitForELF=676.569\u00b5s waitingForPolicyRepository=246ns waitingForCTClean=1.418678ms proxyConfiguration=4.127\u00b5s total=86.799527ms bpfCompilation=0s bpfWaitForELF=676.569\u00b5s bpfLoadProg=83.02129ms error=\"loading eBPF collection into the kernel: program cil_to_container: load program: invalid argument\"\ntime=2026-06-01T05:41:54.428610743Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program cil_to_container: load program: invalid argument\"\ntime=2026-06-01T05:42:13.349076785Z level=info msg=\"Released last local use of key, invoking global release\" module=agent.controlplane.identity.identity subsys=kvstorebackend key=\"[container:app=bpfbench-cilium container:instance=a]\"\ntime=2026-06-01T05:42:13.351243851Z level=info msg=\"Removed endpoint\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint\ntime=2026-06-01T05:42:13.351266811Z level=warn msg=\"Creation of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint-api error=\"timeout while waiting for initial endpoint generation to complete: context deadline exceeded\"",
+  "post_rejit": null,
+  "rejit_result": {
+    "enabled_passes": [
+      "cond_select"
+    ],
+    "mode": "loadtime",
+    "plan_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260601_053153_623093/details/loadtime-plans/cilium__agent.json",
+    "report_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260601_053153_623093/details/loadtime-reports/cilium__agent.jsonl",
+    "status": "ok"
+  },
+  "runner": "cilium",
+  "runner_details": {
+    "command_used": [
+      "/usr/local/bin/cilium-agent",
+      "--enable-k8s=false",
+      "--agent-health-require-k8s-connectivity=false",
+      "--enable-ipv4=true",
+      "--enable-ipv6=false",
+      "--enable-l7-proxy=false",
+      "--enable-health-checking=false",
+      "--enable-endpoint-health-checking=false",
+      "--enable-drift-checker=false",
+      "--enable-dynamic-config=false",
+      "--enable-dynamic-lifecycle-manager=false",
+      "--endpoint-bpf-prog-watchdog-interval=0",
+      "--endpoint-regen-interval=0",
+      "--enable-monitor=false",
+      "--enable-hubble=false",
+      "--enable-l2-neigh-discovery=false",
+      "--enable-policy=always",
+      "--policy-audit-mode=true",
+      "--enable-bpf-masquerade=true",
+      "--enable-bpf-clock-probe=true",
+      "--enable-ipv4-fragment-tracking=true",
+      "--enable-pmtu-discovery=true",
+      "--enable-extended-ip-protocols=true",
+      "--bpf-conntrack-accounting=true",
+      "--enable-xdp-prefilter=true",
+      "--bpf-lb-acceleration=native",
+      "--ipam=cluster-pool",
+      "--ipv4-range=10.244.0.0/24",
+      "--ipv4-native-routing-cidr=10.244.0.0/24",
+      "--kvstore=etcd",
+      "--kvstore-opt=etcd.address=127.0.0.1:60895",
+      "--cluster-name=default",
+      "--cluster-id=0",
+      "--routing-mode=native",
+      "--bpf-root=/var/tmp/ciliumrunner_8ec323pt/bpffs",
+      "--state-dir=/var/tmp/ciliumrunner_8ec323pt/state",
+      "--socket-path=/var/tmp/ciliumrunner_8ec323pt/state/cilium.sock",
+      "--devices=bpfbench0",
+      "--direct-routing-device=bpfbench0"
+    ],
+    "process_output": {
+      "returncode": 0,
+      "stderr_tail": "Verifier error: program tail_handle_ipv4_from_netdev: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_from_host: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_handle_ipv4_from_netdev: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_nodeport_nat_ingress_ipv4: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_from_host: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_from_host: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_to_netdev: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_drop_notify: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_nodeport_nat_ingress_ipv4: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_ipv4_to_endpoint: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_ipv4_ct_ingress: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_from_netdev: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_ipv4_to_endpoint: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_to_host: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_ipv4_to_endpoint: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_to_netdev: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_ipv4_to_endpoint: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_to_host: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_ipv4_ct_egress: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_lxc_policy: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_handle_ipv4_from_netdev: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_from_netdev: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_lxc_policy: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_to_host: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_ipv4_ct_egress: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_to_netdev: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_ipv4_to_endpoint: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_handle_ipv4_from_netdev: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_lxc_policy: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_nodeport_nat_ingress_ipv4: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_ipv4_ct_ingress: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_to_host: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_ipv4_ct_ingress: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_to_netdev: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_handle_ipv4: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program tail_handle_ipv4_from_netdev: load program: invalid argument\nVerifier log: load program: invalid argument:\nVerifier error: program cil_to_container: load program: invalid argument\nVerifier log: load program: invalid argument:",
+      "stdout_tail": "time=2026-06-01T05:36:08.108038991Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_nodeport_nat_ingress_ipv4: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:36:08.108193916Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=DeviceConfigurationChanged proxyPolicyCalculation=2.415\u00b5s mapSync=12.993\u00b5s buildPermitAcquisition=1.209\u00b5s waitingForLock=1.079\u00b5s waitingForPolicyRepository=100ns policyCalculation=16.664\u00b5s total=220.358887ms selectorPolicyCalculation=0s endpointPolicyCalculation=9.974\u00b5s proxyWaitForAck=0s prepareBuild=47.953\u00b5s bpfWaitForELF=708.208\u00b5s bpfLoadProg=217.224612ms bpfCompilation=0s waitingForCTClean=1.415458ms proxyConfiguration=3.015\u00b5s bpfCompilation=0s bpfWaitForELF=708.208\u00b5s bpfLoadProg=217.224612ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_nodeport_nat_ingress_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:36:08.108232633Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_nodeport_nat_ingress_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:36:09.190556674Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_from_host: load program: invalid argument\"\ntime=2026-06-01T05:36:09.190687917Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:36:09.190699465Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_from_host: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:36:09.190811899Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure proxyConfiguration=3.37\u00b5s selectorPolicyCalculation=0s bpfCompilation=0s waitingForPolicyRepository=103ns waitingForCTClean=1.506859ms proxyPolicyCalculation=2.646\u00b5s mapSync=15.357\u00b5s total=201.096955ms bpfLoadProg=197.105888ms waitingForLock=2.301\u00b5s endpointPolicyCalculation=15.654\u00b5s buildPermitAcquisition=1.785\u00b5s policyCalculation=22.805\u00b5s proxyWaitForAck=0s prepareBuild=101.587\u00b5s bpfWaitForELF=514.57\u00b5s bpfCompilation=0s bpfWaitForELF=514.57\u00b5s bpfLoadProg=197.105888ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_from_host: load program: invalid argument\"\ntime=2026-06-01T05:36:09.190846812Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_from_host: load program: invalid argument\"\ntime=2026-06-01T05:36:13.352593797Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_from_host: load program: invalid argument\"\ntime=2026-06-01T05:36:13.352746887Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:36:13.352758387Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_from_host: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:36:13.35291997Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure waitingForLock=2.103\u00b5s waitingForCTClean=629ns selectorPolicyCalculation=0s prepareBuild=91.785\u00b5s bpfCompilation=0s bpfWaitForELF=658.998\u00b5s buildPermitAcquisition=2.308\u00b5s waitingForPolicyRepository=238ns proxyConfiguration=3.516\u00b5s endpointPolicyCalculation=13.707\u00b5s proxyPolicyCalculation=2.293\u00b5s proxyWaitForAck=0s bpfLoadProg=157.176529ms policyCalculation=21.347\u00b5s mapSync=16.272\u00b5s total=161.56084ms bpfCompilation=0s bpfWaitForELF=658.998\u00b5s bpfLoadProg=157.176529ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_from_host: load program: invalid argument\"\ntime=2026-06-01T05:36:13.352959102Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_from_host: load program: invalid argument\"\ntime=2026-06-01T05:36:19.724704006Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\"\ntime=2026-06-01T05:36:19.724849919Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:36:19.724860608Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:36:19.725010711Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure waitingForPolicyRepository=253ns waitingForCTClean=1.368071ms policyCalculation=26.969\u00b5s proxyWaitForAck=0s buildPermitAcquisition=3.055\u00b5s bpfLoadProg=367.672787ms mapSync=29.257\u00b5s bpfCompilation=0s bpfWaitForELF=672.946\u00b5s waitingForLock=1.88\u00b5s proxyConfiguration=4.195\u00b5s selectorPolicyCalculation=0s endpointPolicyCalculation=17.523\u00b5s proxyPolicyCalculation=2.838\u00b5s prepareBuild=138.976\u00b5s total=371.61707ms bpfCompilation=0s bpfWaitForELF=672.946\u00b5s bpfLoadProg=367.672787ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\"\ntime=2026-06-01T05:36:19.725044587Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\"\ntime=2026-06-01T05:36:28.009154114Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-06-01T05:36:28.009276237Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:36:28.009286272Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:36:28.00940722Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure waitingForCTClean=1.343531ms proxyPolicyCalculation=2.698\u00b5s prepareBuild=95.46\u00b5s buildPermitAcquisition=4.61\u00b5s bpfCompilation=0s bpfWaitForELF=496.653\u00b5s waitingForPolicyRepository=226ns policyCalculation=21.838\u00b5s proxyConfiguration=3.314\u00b5s selectorPolicyCalculation=0s proxyWaitForAck=0s total=283.479576ms waitingForLock=2.041\u00b5s mapSync=14.727\u00b5s bpfLoadProg=279.574762ms endpointPolicyCalculation=13.808\u00b5s bpfCompilation=0s bpfWaitForELF=496.653\u00b5s bpfLoadProg=279.574762ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-06-01T05:36:28.009439288Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-06-01T05:36:38.251385093Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_nodeport_nat_ingress_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:36:38.251522921Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:36:38.2515349Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_nodeport_nat_ingress_ipv4: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:36:38.25168224Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure buildPermitAcquisition=2.856\u00b5s endpointPolicyCalculation=16.118\u00b5s bpfCompilation=0s bpfLoadProg=238.096414ms proxyConfiguration=4.115\u00b5s proxyWaitForAck=0s mapSync=17.518\u00b5s total=242.08825ms waitingForLock=1.908\u00b5s waitingForPolicyRepository=354ns policyCalculation=32.622\u00b5s selectorPolicyCalculation=0s bpfWaitForELF=658.886\u00b5s waitingForCTClean=356ns proxyPolicyCalculation=2.532\u00b5s prepareBuild=111.304\u00b5s bpfWaitForELF=658.886\u00b5s bpfLoadProg=238.096414ms bpfCompilation=0s error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_nodeport_nat_ingress_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:36:38.251732074Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_nodeport_nat_ingress_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:36:43.345436113Z level=info msg=\"Create endpoint request\" module=agent.controlplane.endpoint-api addressing=\"&{IPv4:10.244.0.211 IPv4ExpirationUUID: IPv4PoolName:default IPv6: IPv6ExpirationUUID: IPv6PoolName:}\" containerID=bpfbench-cepa containerInterface=eth0 datapathConfiguration=\"&{DisableSipVerification:false ExternalIpam:false InstallEndpointRoute:false RequireArpPassthrough:false RequireEgressProg:false RequireRouting:<nil>}\" interface=lxcbench0 k8sPodName=/ k8sUID=\"\" labels=\"[container:app=bpfbench-cilium container:instance=a]\" sync-build=true\ntime=2026-06-01T05:36:43.345559111Z level=info msg=\"New endpoint\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c subsys=endpoint\ntime=2026-06-01T05:36:43.345613652Z level=info msg=\"Resolving identity labels (blocking)\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c subsys=endpoint identityLabels=\"container:app=bpfbench-cilium,container:instance=a\"\ntime=2026-06-01T05:36:43.347740923Z level=info msg=\"Identity of endpoint changed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c subsys=endpoint new-identity=15138 old-identity=\"no identity\" identityLabels=\"map[app:{Key:app Value:bpfbench-cilium Source:container cidr:<nil>} instance:{Key:instance Value:a Source:container cidr:<nil>}]\"\ntime=2026-06-01T05:36:43.347778118Z level=info msg=\"Waiting for endpoint to be generated\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint\ntime=2026-06-01T05:36:43.419908273Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c7a:68ff:febe:4c6 (primary)\" device=*\ntime=2026-06-01T05:36:44.686734338Z level=info msg=\"Compiled new BPF template\" module=agent.datapath.loader file-path=/var/tmp/ciliumrunner_8ec323pt/state/state/templates/57324570eb8b556df2fcb6c32777508409a781fbf6c2ccda394012b2aee02d39/bpf_lxc.o BPFCompilationTime=1.33622833s\ntime=2026-06-01T05:36:44.863909287Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:36:44.864025434Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:36:44.864037406Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:36:44.864098871Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=LabelsUpdate waitingForPolicyRepository=261ns prepareBuild=84.038\u00b5s bpfCompilation=1.33622833s proxyConfiguration=2.664\u00b5s selectorPolicyCalculation=31.037\u00b5s proxyWaitForAck=0s total=1.51622419s bpfWaitForELF=1.344511355s waitingForCTClean=1.345953ms policyCalculation=39.268\u00b5s mapSync=1.895\u00b5s buildPermitAcquisition=1.396\u00b5s bpfLoadProg=168.975946ms endpointPolicyCalculation=1.992\u00b5s proxyPolicyCalculation=352.07\u00b5s waitingForLock=1.742\u00b5s bpfCompilation=1.33622833s bpfWaitForELF=1.344511355s bpfLoadProg=168.975946ms error=\"loading eBPF collection into the kernel: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:36:44.864140914Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:36:45.020147234Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c7a:68ff:febe:4c6 (primary)\" device=*\ntime=2026-06-01T05:36:45.108113698Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\"\ntime=2026-06-01T05:36:45.108236398Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:36:45.108247136Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:36:45.108413447Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure buildPermitAcquisition=1.224\u00b5s bpfLoadProg=240.534118ms bpfCompilation=0s waitingForCTClean=334ns policyCalculation=8.871\u00b5s selectorPolicyCalculation=0s proxyConfiguration=2.678\u00b5s endpointPolicyCalculation=2.633\u00b5s waitingForLock=1.102\u00b5s waitingForPolicyRepository=228ns proxyWaitForAck=0s prepareBuild=39.852\u00b5s total=244.169164ms bpfWaitForELF=919.43\u00b5s proxyPolicyCalculation=31.928\u00b5s mapSync=810ns bpfLoadProg=240.534118ms bpfCompilation=0s bpfWaitForELF=919.43\u00b5s error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\"\ntime=2026-06-01T05:36:45.108451218Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\"\ntime=2026-06-01T05:36:47.286603889Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\"\ntime=2026-06-01T05:36:47.286697049Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:36:47.286706231Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:36:47.286846181Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure selectorPolicyCalculation=0s proxyPolicyCalculation=34.074\u00b5s mapSync=566ns bpfWaitForELF=561.862\u00b5s bpfLoadProg=172.507179ms waitingForPolicyRepository=107ns waitingForCTClean=268ns policyCalculation=10.306\u00b5s endpointPolicyCalculation=2.596\u00b5s total=178.080119ms buildPermitAcquisition=2.38\u00b5s waitingForLock=2.209\u00b5s proxyConfiguration=3.743\u00b5s proxyWaitForAck=0s prepareBuild=102.588\u00b5s bpfCompilation=0s bpfLoadProg=172.507179ms bpfCompilation=0s bpfWaitForELF=561.862\u00b5s error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\"\ntime=2026-06-01T05:36:47.286876627Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\"\ntime=2026-06-01T05:36:50.402570142Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:36:50.402718796Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:36:50.40273053Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_from_netdev: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:36:50.40288924Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure buildPermitAcquisition=2.241\u00b5s bpfLoadProg=146.673675ms waitingForLock=2.115\u00b5s waitingForPolicyRepository=234ns waitingForCTClean=1.339673ms endpointPolicyCalculation=16.506\u00b5s proxyPolicyCalculation=1.99\u00b5s bpfCompilation=0s proxyConfiguration=4.61\u00b5s proxyWaitForAck=0s prepareBuild=115.314\u00b5s bpfWaitForELF=505.394\u00b5s policyCalculation=33.024\u00b5s selectorPolicyCalculation=0s mapSync=23.462\u00b5s total=150.463411ms bpfCompilation=0s bpfWaitForELF=505.394\u00b5s bpfLoadProg=146.673675ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:36:50.402934152Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:36:51.431987817Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:36:51.432073433Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:36:51.432082151Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:36:51.43220447Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure selectorPolicyCalculation=0s prepareBuild=102.247\u00b5s waitingForLock=2.153\u00b5s waitingForPolicyRepository=102ns endpointPolicyCalculation=3.812\u00b5s proxyPolicyCalculation=36.123\u00b5s proxyWaitForAck=0s buildPermitAcquisition=3.8\u00b5s bpfCompilation=0s bpfLoadProg=140.666834ms waitingForCTClean=1.413628ms total=144.668501ms bpfWaitForELF=474.284\u00b5s policyCalculation=11.437\u00b5s proxyConfiguration=3.664\u00b5s mapSync=594ns bpfCompilation=0s bpfWaitForELF=474.284\u00b5s bpfLoadProg=140.666834ms error=\"loading eBPF collection into the kernel: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:36:51.43225096Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:36:57.61493758Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\"\ntime=2026-06-01T05:36:57.615062734Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:36:57.615074412Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:36:57.615239525Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure proxyWaitForAck=0s mapSync=846ns prepareBuild=127.325\u00b5s bpfLoadProg=178.124246ms bpfCompilation=0s waitingForLock=1.667\u00b5s waitingForPolicyRepository=248ns policyCalculation=11.207\u00b5s proxyPolicyCalculation=41.698\u00b5s total=182.386952ms waitingForCTClean=1.333027ms selectorPolicyCalculation=0s buildPermitAcquisition=2.425\u00b5s bpfWaitForELF=673.742\u00b5s proxyConfiguration=3.294\u00b5s endpointPolicyCalculation=3.292\u00b5s bpfCompilation=0s bpfWaitForELF=673.742\u00b5s bpfLoadProg=178.124246ms error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\"\ntime=2026-06-01T05:36:57.615284781Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\"\ntime=2026-06-01T05:37:04.516627306Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\"\ntime=2026-06-01T05:37:04.516762404Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:37:04.516774476Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:37:04.516925179Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure buildPermitAcquisition=3.326\u00b5s bpfLoadProg=110.071696ms policyCalculation=27.011\u00b5s proxyPolicyCalculation=2.627\u00b5s proxyWaitForAck=0s waitingForLock=1.963\u00b5s proxyConfiguration=4.461\u00b5s prepareBuild=141.429\u00b5s total=113.394453ms waitingForPolicyRepository=244ns selectorPolicyCalculation=0s bpfWaitForELF=710.576\u00b5s bpfCompilation=0s waitingForCTClean=399ns endpointPolicyCalculation=17.376\u00b5s mapSync=18.555\u00b5s bpfCompilation=0s bpfWaitForELF=710.576\u00b5s bpfLoadProg=110.071696ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\"\ntime=2026-06-01T05:37:04.516964497Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\"\ntime=2026-06-01T05:37:05.793168715Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\"\ntime=2026-06-01T05:37:05.793258536Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:37:05.793267422Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:37:05.793390973Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure waitingForCTClean=234ns policyCalculation=12.292\u00b5s selectorPolicyCalculation=0s proxyWaitForAck=0s mapSync=628ns total=177.799959ms bpfWaitForELF=480.386\u00b5s proxyPolicyCalculation=34.229\u00b5s bpfCompilation=0s bpfLoadProg=174.265674ms waitingForLock=2.277\u00b5s proxyConfiguration=3.243\u00b5s endpointPolicyCalculation=5.299\u00b5s prepareBuild=99.546\u00b5s buildPermitAcquisition=2.034\u00b5s waitingForPolicyRepository=105ns bpfCompilation=0s bpfWaitForELF=480.386\u00b5s bpfLoadProg=174.265674ms error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\"\ntime=2026-06-01T05:37:05.793423449Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\"\ntime=2026-06-01T05:37:15.905522823Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:37:15.905644469Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:37:15.905655185Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:37:15.905817128Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure bpfCompilation=0s waitingForLock=2.06\u00b5s waitingForCTClean=1.279111ms policyCalculation=12.185\u00b5s mapSync=792ns total=111.652114ms bpfWaitForELF=684.19\u00b5s bpfLoadProg=108.290901ms proxyConfiguration=4.324\u00b5s endpointPolicyCalculation=3.171\u00b5s proxyPolicyCalculation=40.938\u00b5s proxyWaitForAck=0s buildPermitAcquisition=3.121\u00b5s waitingForPolicyRepository=115ns selectorPolicyCalculation=0s prepareBuild=122.505\u00b5s bpfWaitForELF=684.19\u00b5s bpfLoadProg=108.290901ms bpfCompilation=0s error=\"loading eBPF collection into the kernel: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:37:15.905865552Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:37:20.665364253Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\"\ntime=2026-06-01T05:37:20.665472221Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:37:20.665481826Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:37:20.665604288Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure selectorPolicyCalculation=0s proxyPolicyCalculation=2.601\u00b5s total=148.05297ms waitingForCTClean=1.297852ms proxyWaitForAck=0s mapSync=17.449\u00b5s prepareBuild=125.693\u00b5s buildPermitAcquisition=2.964\u00b5s proxyConfiguration=3.603\u00b5s endpointPolicyCalculation=15.057\u00b5s bpfCompilation=0s bpfWaitForELF=665.071\u00b5s bpfLoadProg=144.318493ms waitingForLock=1.918\u00b5s waitingForPolicyRepository=250ns policyCalculation=23.518\u00b5s bpfCompilation=0s bpfWaitForELF=665.071\u00b5s bpfLoadProg=144.318493ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\"\ntime=2026-06-01T05:37:20.665634163Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\"\ntime=2026-06-01T05:37:28.150366044Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\"\ntime=2026-06-01T05:37:28.15048645Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:37:28.150497904Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:37:28.150672718Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure policyCalculation=12.157\u00b5s proxyPolicyCalculation=40.509\u00b5s mapSync=806ns prepareBuild=124.426\u00b5s bpfCompilation=0s waitingForLock=1.966\u00b5s waitingForCTClean=1.313505ms proxyConfiguration=4.236\u00b5s selectorPolicyCalculation=0s proxyWaitForAck=0s buildPermitAcquisition=3.27\u00b5s bpfWaitForELF=702.501\u00b5s endpointPolicyCalculation=3.047\u00b5s total=243.983838ms bpfLoadProg=239.903161ms waitingForPolicyRepository=277ns bpfCompilation=0s bpfWaitForELF=702.501\u00b5s bpfLoadProg=239.903161ms error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\"\ntime=2026-06-01T05:37:28.150710653Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\"\ntime=2026-06-01T05:37:38.962970063Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\"\ntime=2026-06-01T05:37:38.963113116Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:37:38.963127081Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:37:38.963278315Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure waitingForLock=1.793\u00b5s proxyConfiguration=3.974\u00b5s selectorPolicyCalculation=0s proxyWaitForAck=0s buildPermitAcquisition=2.407\u00b5s waitingForPolicyRepository=128ns waitingForCTClean=1.282638ms proxyPolicyCalculation=2.937\u00b5s mapSync=18.667\u00b5s prepareBuild=124.917\u00b5s total=296.454576ms bpfLoadProg=291.971535ms bpfCompilation=0s policyCalculation=25.349\u00b5s endpointPolicyCalculation=16.384\u00b5s bpfWaitForELF=923.687\u00b5s bpfCompilation=0s bpfWaitForELF=923.687\u00b5s bpfLoadProg=291.971535ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\"\ntime=2026-06-01T05:37:38.963332929Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\"\ntime=2026-06-01T05:37:42.54384876Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_egress: load program: invalid argument\"\ntime=2026-06-01T05:37:42.543941604Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:37:42.543952563Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_egress: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:37:42.544076475Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure proxyWaitForAck=0s mapSync=637ns bpfWaitForELF=558.807\u00b5s waitingForPolicyRepository=106ns waitingForLock=2.224\u00b5s policyCalculation=11.661\u00b5s proxyPolicyCalculation=34.829\u00b5s total=392.585007ms buildPermitAcquisition=2.448\u00b5s waitingForCTClean=387ns proxyConfiguration=3.841\u00b5s prepareBuild=102.131\u00b5s bpfCompilation=0s bpfLoadProg=388.402986ms selectorPolicyCalculation=0s endpointPolicyCalculation=3.478\u00b5s bpfWaitForELF=558.807\u00b5s bpfLoadProg=388.402986ms bpfCompilation=0s error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_egress: load program: invalid argument\"\ntime=2026-06-01T05:37:42.544112743Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_egress: load program: invalid argument\"\ntime=2026-06-01T05:37:58.798217869Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program cil_lxc_policy: load program: invalid argument\"\ntime=2026-06-01T05:37:58.798348696Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:37:58.798359516Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program cil_lxc_policy: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:37:58.798517694Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure waitingForCTClean=484ns selectorPolicyCalculation=0s endpointPolicyCalculation=2.468\u00b5s proxyPolicyCalculation=34.526\u00b5s bpfCompilation=0s waitingForLock=2.398\u00b5s waitingForPolicyRepository=236ns proxyConfiguration=3.462\u00b5s mapSync=760ns buildPermitAcquisition=2.762\u00b5s proxyWaitForAck=0s prepareBuild=99.185\u00b5s total=253.533827ms policyCalculation=10.202\u00b5s bpfWaitForELF=671.721\u00b5s bpfLoadProg=249.316625ms bpfLoadProg=249.316625ms bpfCompilation=0s bpfWaitForELF=671.721\u00b5s error=\"loading eBPF collection into the kernel: program cil_lxc_policy: load program: invalid argument\"\ntime=2026-06-01T05:37:58.798560235Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program cil_lxc_policy: load program: invalid argument\"\ntime=2026-06-01T05:37:59.189933271Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_handle_ipv4_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:37:59.190082546Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:37:59.190094747Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_handle_ipv4_from_netdev: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:37:59.19024249Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure policyCalculation=23.665\u00b5s total=226.619218ms bpfCompilation=0s proxyConfiguration=3.596\u00b5s proxyWaitForAck=0s buildPermitAcquisition=2.514\u00b5s waitingForPolicyRepository=238ns waitingForCTClean=265ns selectorPolicyCalculation=0s mapSync=17.748\u00b5s bpfWaitForELF=539.507\u00b5s endpointPolicyCalculation=15.457\u00b5s proxyPolicyCalculation=2.697\u00b5s prepareBuild=102.9\u00b5s bpfLoadProg=222.637926ms waitingForLock=1.974\u00b5s bpfLoadProg=222.637926ms bpfCompilation=0s bpfWaitForELF=539.507\u00b5s error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_handle_ipv4_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:37:59.190278812Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_handle_ipv4_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:38:16.917725716Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:38:16.917855243Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:38:16.917866235Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:38:16.918029979Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure proxyWaitForAck=0s prepareBuild=127.839\u00b5s total=118.595851ms buildPermitAcquisition=3.208\u00b5s waitingForPolicyRepository=242ns policyCalculation=11.966\u00b5s bpfWaitForELF=707.699\u00b5s mapSync=1.037\u00b5s bpfCompilation=0s bpfLoadProg=114.674338ms waitingForLock=1.929\u00b5s waitingForCTClean=1.351403ms proxyConfiguration=3.993\u00b5s selectorPolicyCalculation=0s endpointPolicyCalculation=3.018\u00b5s proxyPolicyCalculation=42.528\u00b5s bpfCompilation=0s bpfWaitForELF=707.699\u00b5s bpfLoadProg=114.674338ms error=\"loading eBPF collection into the kernel: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:38:16.918065664Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_nodeport_rev_dnat_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:38:21.352350475Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:38:21.352465211Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:38:21.352478778Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_from_netdev: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:38:21.352596788Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure waitingForPolicyRepository=107ns proxyWaitForAck=0s mapSync=15.975\u00b5s waitingForLock=2.204\u00b5s proxyConfiguration=3.263\u00b5s endpointPolicyCalculation=15.468\u00b5s buildPermitAcquisition=1.818\u00b5s bpfLoadProg=158.398802ms waitingForCTClean=1.384918ms policyCalculation=22.943\u00b5s selectorPolicyCalculation=0s proxyPolicyCalculation=2.489\u00b5s total=161.847971ms bpfWaitForELF=465.389\u00b5s prepareBuild=102.707\u00b5s bpfCompilation=0s bpfCompilation=0s bpfWaitForELF=465.389\u00b5s bpfLoadProg=158.398802ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:38:21.352630849Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:38:37.057857453Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program cil_lxc_policy: load program: invalid argument\"\ntime=2026-06-01T05:38:37.057951326Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:38:37.057961563Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program cil_lxc_policy: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:38:37.058117125Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure selectorPolicyCalculation=0s proxyPolicyCalculation=35.45\u00b5s proxyWaitForAck=0s prepareBuild=101.072\u00b5s buildPermitAcquisition=2.362\u00b5s bpfCompilation=0s bpfWaitForELF=511.989\u00b5s endpointPolicyCalculation=7.092\u00b5s mapSync=681ns waitingForLock=2.057\u00b5s proxyConfiguration=4.021\u00b5s bpfLoadProg=135.982214ms waitingForPolicyRepository=235ns waitingForCTClean=1.343819ms policyCalculation=15.062\u00b5s total=139.321419ms bpfCompilation=0s bpfWaitForELF=511.989\u00b5s bpfLoadProg=135.982214ms error=\"loading eBPF collection into the kernel: program cil_lxc_policy: load program: invalid argument\"\ntime=2026-06-01T05:38:37.058150702Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program cil_lxc_policy: load program: invalid argument\"\ntime=2026-06-01T05:38:45.542906575Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\"\ntime=2026-06-01T05:38:45.543055828Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:38:45.543065942Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:38:45.54321371Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure selectorPolicyCalculation=0s proxyWaitForAck=0s mapSync=18.218\u00b5s prepareBuild=125.064\u00b5s endpointPolicyCalculation=17.299\u00b5s proxyPolicyCalculation=2.714\u00b5s bpfWaitForELF=631.723\u00b5s waitingForLock=1.85\u00b5s waitingForPolicyRepository=231ns waitingForCTClean=464ns proxyConfiguration=3.942\u00b5s bpfLoadProg=185.349113ms policyCalculation=26.027\u00b5s total=189.623337ms buildPermitAcquisition=2.36\u00b5s bpfCompilation=0s bpfCompilation=0s bpfWaitForELF=631.723\u00b5s bpfLoadProg=185.349113ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\"\ntime=2026-06-01T05:38:45.54324975Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\"\ntime=2026-06-01T05:38:59.218156351Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_egress: load program: invalid argument\"\ntime=2026-06-01T05:38:59.21829182Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:38:59.218303973Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_egress: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:38:59.218470199Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure waitingForPolicyRepository=230ns proxyWaitForAck=0s total=159.246211ms buildPermitAcquisition=2.193\u00b5s bpfCompilation=0s bpfWaitForELF=675.91\u00b5s endpointPolicyCalculation=3.519\u00b5s mapSync=846ns prepareBuild=128.446\u00b5s bpfLoadProg=155.338906ms waitingForLock=1.986\u00b5s waitingForCTClean=347ns policyCalculation=12.568\u00b5s proxyConfiguration=4.089\u00b5s selectorPolicyCalculation=0s proxyPolicyCalculation=39.234\u00b5s bpfWaitForELF=675.91\u00b5s bpfLoadProg=155.338906ms bpfCompilation=0s error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_egress: load program: invalid argument\"\ntime=2026-06-01T05:38:59.218515953Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_egress: load program: invalid argument\"\ntime=2026-06-01T05:39:11.694532069Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\"\ntime=2026-06-01T05:39:11.694690772Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:39:11.694703833Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:39:11.694868414Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure endpointPolicyCalculation=15.371\u00b5s proxyWaitForAck=0s proxyConfiguration=3.918\u00b5s mapSync=17.042\u00b5s bpfWaitForELF=766.302\u00b5s bpfLoadProg=146.504894ms bpfCompilation=0s waitingForLock=1.796\u00b5s waitingForPolicyRepository=339ns waitingForCTClean=1.419872ms selectorPolicyCalculation=0s proxyPolicyCalculation=2.866\u00b5s buildPermitAcquisition=2.368\u00b5s policyCalculation=24.299\u00b5s prepareBuild=118.321\u00b5s total=150.502427ms bpfCompilation=0s bpfWaitForELF=766.302\u00b5s bpfLoadProg=146.504894ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\"\ntime=2026-06-01T05:39:11.694911371Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\"\ntime=2026-06-01T05:39:23.477199939Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\"\ntime=2026-06-01T05:39:23.477297048Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:39:23.477305062Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:39:23.477427428Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure waitingForLock=1.836\u00b5s proxyConfiguration=4.399\u00b5s endpointPolicyCalculation=2.831\u00b5s prepareBuild=117.603\u00b5s waitingForCTClean=275ns proxyWaitForAck=0s bpfCompilation=0s waitingForPolicyRepository=238ns mapSync=737ns total=257.834946ms buildPermitAcquisition=2.832\u00b5s policyCalculation=12.269\u00b5s selectorPolicyCalculation=0s proxyPolicyCalculation=40.421\u00b5s bpfWaitForELF=1.997956ms bpfLoadProg=252.871311ms bpfCompilation=0s bpfWaitForELF=1.997956ms bpfLoadProg=252.871311ms error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\"\ntime=2026-06-01T05:39:23.477461889Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_to_endpoint: load program: invalid argument\"\ntime=2026-06-01T05:39:40.098746741Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_handle_ipv4_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:39:40.09888951Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:39:40.098900313Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_handle_ipv4_from_netdev: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:39:40.099055379Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure proxyWaitForAck=0s total=403.252318ms bpfWaitForELF=675.549\u00b5s waitingForPolicyRepository=282ns selectorPolicyCalculation=0s buildPermitAcquisition=3.086\u00b5s bpfLoadProg=399.239219ms proxyConfiguration=4.092\u00b5s mapSync=17.906\u00b5s bpfCompilation=0s waitingForLock=1.903\u00b5s waitingForCTClean=1.268903ms policyCalculation=44.109\u00b5s endpointPolicyCalculation=22.354\u00b5s proxyPolicyCalculation=2.747\u00b5s prepareBuild=126.613\u00b5s bpfCompilation=0s bpfWaitForELF=675.549\u00b5s bpfLoadProg=399.239219ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_handle_ipv4_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:39:40.09909531Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_handle_ipv4_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:39:49.74880739Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program cil_lxc_policy: load program: invalid argument\"\ntime=2026-06-01T05:39:49.748936424Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:39:49.748947071Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program cil_lxc_policy: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:39:49.74911806Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure buildPermitAcquisition=3.154\u00b5s waitingForLock=1.911\u00b5s selectorPolicyCalculation=0s proxyPolicyCalculation=40.711\u00b5s proxyWaitForAck=0s mapSync=818ns bpfWaitForELF=708.952\u00b5s total=271.514378ms bpfCompilation=0s prepareBuild=135.568\u00b5s waitingForPolicyRepository=224ns policyCalculation=13.958\u00b5s endpointPolicyCalculation=5.781\u00b5s waitingForCTClean=423ns proxyConfiguration=3.603\u00b5s bpfLoadProg=267.348621ms bpfCompilation=0s bpfWaitForELF=708.952\u00b5s bpfLoadProg=267.348621ms error=\"loading eBPF collection into the kernel: program cil_lxc_policy: load program: invalid argument\"\ntime=2026-06-01T05:39:49.749157123Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program cil_lxc_policy: load program: invalid argument\"\ntime=2026-06-01T05:40:10.310616252Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_nodeport_nat_ingress_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:40:10.310731477Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:40:10.310740267Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_nodeport_nat_ingress_ipv4: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:40:10.31085365Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure waitingForLock=1.836\u00b5s waitingForCTClean=1.384121ms proxyConfiguration=3.644\u00b5s proxyPolicyCalculation=2.65\u00b5s mapSync=14.374\u00b5s prepareBuild=95.189\u00b5s waitingForPolicyRepository=236ns policyCalculation=22.033\u00b5s bpfCompilation=0s bpfLoadProg=206.668443ms selectorPolicyCalculation=0s endpointPolicyCalculation=14.292\u00b5s proxyWaitForAck=0s bpfWaitForELF=497.587\u00b5s total=210.567681ms buildPermitAcquisition=2.289\u00b5s bpfCompilation=0s bpfWaitForELF=497.587\u00b5s bpfLoadProg=206.668443ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_nodeport_nat_ingress_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:40:10.310885422Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_nodeport_nat_ingress_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:40:17.99712763Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\"\ntime=2026-06-01T05:40:17.997253023Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:40:17.997264521Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:40:17.997432679Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure policyCalculation=12.552\u00b5s proxyPolicyCalculation=43.065\u00b5s total=247.269406ms buildPermitAcquisition=3.157\u00b5s waitingForCTClean=421ns proxyWaitForAck=0s bpfCompilation=0s bpfWaitForELF=686.541\u00b5s waitingForPolicyRepository=268ns endpointPolicyCalculation=3.102\u00b5s mapSync=849ns waitingForLock=1.76\u00b5s proxyConfiguration=4.453\u00b5s selectorPolicyCalculation=0s prepareBuild=133.176\u00b5s bpfLoadProg=242.542279ms bpfWaitForELF=686.541\u00b5s bpfLoadProg=242.542279ms bpfCompilation=0s error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\"\ntime=2026-06-01T05:40:17.99746945Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\"\ntime=2026-06-01T05:40:42.404925032Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\"\ntime=2026-06-01T05:40:42.405039765Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:40:42.405051254Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:40:42.405163227Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure selectorPolicyCalculation=0s endpointPolicyCalculation=12.98\u00b5s proxyWaitForAck=0s total=93.364437ms buildPermitAcquisition=2.655\u00b5s waitingForCTClean=419ns proxyConfiguration=3.099\u00b5s mapSync=15.778\u00b5s prepareBuild=93.401\u00b5s bpfCompilation=0s policyCalculation=19.888\u00b5s bpfWaitForELF=533.778\u00b5s bpfLoadProg=90.339912ms proxyPolicyCalculation=2.286\u00b5s waitingForLock=2.196\u00b5s waitingForPolicyRepository=104ns bpfWaitForELF=533.778\u00b5s bpfLoadProg=90.339912ms bpfCompilation=0s error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\"\ntime=2026-06-01T05:40:42.405198781Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_host: load program: invalid argument\"\ntime=2026-06-01T05:40:48.1418745Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\"\ntime=2026-06-01T05:40:48.141967256Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:40:48.141976943Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:40:48.142115667Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure prepareBuild=109.82\u00b5s total=143.580739ms bpfLoadProg=140.690661ms waitingForPolicyRepository=217ns selectorPolicyCalculation=0s proxyWaitForAck=0s bpfWaitForELF=520.308\u00b5s waitingForLock=2.471\u00b5s policyCalculation=10.802\u00b5s endpointPolicyCalculation=2.313\u00b5s proxyPolicyCalculation=33.636\u00b5s mapSync=604ns waitingForCTClean=261ns proxyConfiguration=3.542\u00b5s buildPermitAcquisition=2.957\u00b5s bpfCompilation=0s bpfWaitForELF=520.308\u00b5s bpfLoadProg=140.690661ms bpfCompilation=0s error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\"\ntime=2026-06-01T05:40:48.142148449Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_ipv4_ct_ingress: load program: invalid argument\"\ntime=2026-06-01T05:41:03.866953414Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-06-01T05:41:16.647789124Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\"\ntime=2026-06-01T05:41:16.647907876Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:41:16.647918061Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:41:16.64803606Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure waitingForCTClean=1.291773ms bpfCompilation=0s policyCalculation=25.79\u00b5s selectorPolicyCalculation=0s prepareBuild=129.375\u00b5s bpfWaitForELF=664.808\u00b5s waitingForPolicyRepository=226ns endpointPolicyCalculation=16.007\u00b5s proxyWaitForAck=0s mapSync=18.464\u00b5s buildPermitAcquisition=3.169\u00b5s bpfLoadProg=239.155926ms waitingForLock=2.049\u00b5s proxyConfiguration=3.898\u00b5s proxyPolicyCalculation=2.741\u00b5s total=242.547431ms bpfCompilation=0s bpfWaitForELF=664.808\u00b5s bpfLoadProg=239.155926ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\"\ntime=2026-06-01T05:41:16.648064935Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program cil_to_netdev: load program: invalid argument\"\ntime=2026-06-01T05:41:20.340454005Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:41:20.340545706Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:41:20.340554705Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:41:20.340687942Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure waitingForPolicyRepository=100ns waitingForCTClean=245ns policyCalculation=10.243\u00b5s endpointPolicyCalculation=2.753\u00b5s total=198.030879ms buildPermitAcquisition=2.55\u00b5s bpfCompilation=0s selectorPolicyCalculation=0s prepareBuild=102.269\u00b5s bpfWaitForELF=539.559\u00b5s proxyConfiguration=3.359\u00b5s waitingForLock=2.098\u00b5s proxyPolicyCalculation=36.4\u00b5s proxyWaitForAck=0s mapSync=568ns bpfLoadProg=193.681364ms bpfWaitForELF=539.559\u00b5s bpfLoadProg=193.681364ms bpfCompilation=0s error=\"loading eBPF collection into the kernel: program tail_handle_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:41:20.340723296Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_handle_ipv4: load program: invalid argument\"\ntime=2026-06-01T05:41:52.882384919Z level=error msg=\"Error while reloading endpoint BPF program\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_handle_ipv4_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:41:52.882525105Z level=info msg=\"Wrote verifier log to endpoint directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint file-path=2225_next/verifier.log\ntime=2026-06-01T05:41:52.88253555Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_handle_ipv4_from_netdev: load program: invalid argument\" file-path=2225_next_fail\ntime=2026-06-01T05:41:52.882690498Z level=warn msg=\"Regeneration of endpoint failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure policyCalculation=26.168\u00b5s proxyWaitForAck=0s bpfWaitForELF=491.924\u00b5s prepareBuild=96.86\u00b5s buildPermitAcquisition=2.492\u00b5s waitingForLock=2.078\u00b5s proxyConfiguration=3.279\u00b5s endpointPolicyCalculation=18.208\u00b5s proxyPolicyCalculation=2.507\u00b5s mapSync=15.182\u00b5s total=233.731059ms bpfLoadProg=229.867849ms bpfCompilation=0s waitingForPolicyRepository=232ns waitingForCTClean=1.327337ms selectorPolicyCalculation=0s bpfCompilation=0s bpfWaitForELF=491.924\u00b5s bpfLoadProg=229.867849ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_handle_ipv4_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:41:52.882736171Z level=error msg=\"Endpoint regeneration failed\" identity=1 k8sPodName=/ ipv6=\"\" containerID=\"\" ciliumEndpointName=/ endpointID=2225 containerInterface=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_handle_ipv4_from_netdev: load program: invalid argument\"\ntime=2026-06-01T05:41:54.428269937Z level=error msg=\"Error while reloading endpoint BPF program\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program cil_to_container: load program: invalid argument\"\ntime=2026-06-01T05:41:54.428383923Z level=info msg=\"Wrote verifier log to endpoint directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint file-path=2809_next/verifier.log\ntime=2026-06-01T05:41:54.428394832Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program cil_to_container: load program: invalid argument\" file-path=2809_next_fail\ntime=2026-06-01T05:41:54.428571077Z level=warn msg=\"Regeneration of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint reason=RegenerationFailure waitingForLock=2.044\u00b5s policyCalculation=12.204\u00b5s selectorPolicyCalculation=0s proxyWaitForAck=0s prepareBuild=134.668\u00b5s buildPermitAcquisition=2.974\u00b5s proxyPolicyCalculation=42.368\u00b5s bpfCompilation=0s bpfLoadProg=83.02129ms endpointPolicyCalculation=3.233\u00b5s mapSync=872ns bpfWaitForELF=676.569\u00b5s waitingForPolicyRepository=246ns waitingForCTClean=1.418678ms proxyConfiguration=4.127\u00b5s total=86.799527ms bpfCompilation=0s bpfWaitForELF=676.569\u00b5s bpfLoadProg=83.02129ms error=\"loading eBPF collection into the kernel: program cil_to_container: load program: invalid argument\"\ntime=2026-06-01T05:41:54.428610743Z level=error msg=\"Endpoint regeneration failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint error=\"loading eBPF collection into the kernel: program cil_to_container: load program: invalid argument\"\ntime=2026-06-01T05:42:13.349076785Z level=info msg=\"Released last local use of key, invoking global release\" module=agent.controlplane.identity.identity subsys=kvstorebackend key=\"[container:app=bpfbench-cilium container:instance=a]\"\ntime=2026-06-01T05:42:13.351243851Z level=info msg=\"Removed endpoint\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint\ntime=2026-06-01T05:42:13.351266811Z level=warn msg=\"Creation of endpoint failed\" k8sPodName=/ ipv4=10.244.0.211 endpointID=2809 containerInterface=\"\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c identity=15138 subsys=endpoint-api error=\"timeout while waiting for initial endpoint generation to complete: context deadline exceeded\""
+    }
+  },
+  "selected_workload": "cilium_endpoint_pktgen",
+  "status": "error"
+}
