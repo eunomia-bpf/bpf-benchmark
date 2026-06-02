@@ -1,0 +1,43 @@
+{
+  "experiment": "2026-06-01-prefetch-indirect-timeliness-micro-attribution",
+  "date": "2026-06-01",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "purpose": "Test additional verifier-safe prefetch micro patterns motivated by the prefetch literature review: two-stage indirect access, cacheline dedup, guarded packet offset, and broader packet ring scan.",
+  "platform": "aws",
+  "arch": "arm64",
+  "instance_type": "t4g.small",
+  "region": "us-east-1",
+  "runtime": "kernel",
+  "samples": 3,
+  "warmups": 0,
+  "inner_repeat": 100000,
+  "perf_counters": true,
+  "perf_scope": "full_repeat_raw",
+  "benchmarks": [
+    "prefetch_indirect_two_stage",
+    "prefetch_cacheline_dedup_scan",
+    "prefetch_packet_offset_guarded",
+    "prefetch_full_packet_ring_scan"
+  ],
+  "custom_llc": "/home/ruoji/github/bpf-opt/code/llvm-backend/build-bpf-kinsn/bin/llc",
+  "control_flags": "-disable-gotox -bpf-kinsn-target=arm64 -bpf-kinsn-mode=all=disable",
+  "treatment_flags": "-disable-gotox -bpf-kinsn-target=arm64 -bpf-kinsn-mode=all=disable -bpf-kinsn-mode=prefetch=force",
+  "successful_pairs": {
+    "r1": {
+      "control_token": "prefetch-indirect-control-fix1",
+      "treatment_token": "prefetch-indirect-treatment-r1"
+    },
+    "r2": {
+      "control_token": "prefetch-indirect-control-r2",
+      "treatment_token": "prefetch-indirect-treatment-r2"
+    },
+    "r3": {
+      "control_token": "prefetch-indirect-control-r3",
+      "treatment_token": "prefetch-indirect-treatment-r3"
+    }
+  },
+  "failed_attempts": {
+    "control-r1": "prefetch_indirect_two_stage failed verifier because the first implementation re-created data + mid_offset after the range check; fix1 changed it to dereference the checked pointer directly."
+  }
+}

@@ -1,0 +1,9 @@
+arch	role	n	mean_exec_ns	min_exec_ns	max_exec_ns
+x86	control	5	24438.400	14809	37372
+x86	treatment	5	9252.000	9213	9287
+arm64	control	5	17248.200	17024	17564
+arm64	treatment	5	16602.000	16184	17523
+
+arch	paired_n	paired_geomean_treatment_over_control	paired_mean_treatment_over_control
+x86	5	0.401950	0.426756
+arm64	5	0.962181	0.962448

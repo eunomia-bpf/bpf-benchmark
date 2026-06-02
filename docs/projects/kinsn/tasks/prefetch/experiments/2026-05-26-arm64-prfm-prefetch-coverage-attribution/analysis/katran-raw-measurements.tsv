@@ -1,0 +1,3 @@
+phase	program	bpf_id	run_cnt_delta	run_time_ns_delta	bytes_xlated	bytes_jited	workload_pps	workload_bps	workload_errors
+baseline	balancer_ingres	85	2155081	446332751	23808	14456	1093533	559888896	0
+post_rejit	balancer_ingres	86	2152117	451012780	24512	14632	1075776	550797312	0

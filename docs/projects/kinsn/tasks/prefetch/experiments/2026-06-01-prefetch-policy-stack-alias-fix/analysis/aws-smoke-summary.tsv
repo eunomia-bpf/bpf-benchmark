@@ -1,0 +1,5 @@
+stage	result_dir	bench	status	completed_at	runtime	exec_ns	wall_exec_ns	retval	jited_prog_len	xlated_prog_len	sites_matched	sites_applied	insn_before	insn_after	insn_delta
+intermediate-permissive	aws_x86_micro_20260601_114201_001026	prefetch_packet_first_deref	completed	2026-06-01T11:42:02.062114+00:00	kernel	7837	69685	2	598	1112	2	2	135	139	4
+intermediate-permissive	aws_x86_micro_20260601_114839_347362	prefetch_map_page_stride	completed	2026-06-01T11:48:40.292496+00:00	kernel	8046	40032	2	498	936	1	1	109	111	2
+final-conservative	aws_x86_micro_20260601_220320_641310	prefetch_packet_first_deref	completed	2026-06-01T22:03:21.487513+00:00	kernel	2410	39978	2	595	1096	1	1	135	137	2
+final-conservative	aws_x86_micro_20260601_221126_145484	prefetch_map_page_stride	completed	2026-06-01T22:11:27.073047+00:00	kernel	7997	39991	2	498	936	1	1	109	111	2

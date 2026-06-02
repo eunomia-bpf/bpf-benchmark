@@ -1,0 +1,62 @@
+[
+    {
+        "InstanceId": "i-0242b2a47332d9b69",
+        "State": "terminated",
+        "LaunchTime": "2026-06-01T23:22:58+00:00",
+        "InstanceType": "t3.small",
+        "PublicIp": null,
+        "StateTransitionReason": "User initiated (2026-06-01 23:29:30 GMT)",
+        "Name": "bpf-benchmark-x86-42",
+        "Role": "aws-x86"
+    },
+    {
+        "InstanceId": "i-01edc6c440e90fe84",
+        "State": "terminated",
+        "LaunchTime": "2026-06-01T23:30:42+00:00",
+        "InstanceType": "t3.small",
+        "PublicIp": null,
+        "StateTransitionReason": "User initiated (2026-06-01 23:36:25 GMT)",
+        "Name": "bpf-benchmark-x86-y5",
+        "Role": "aws-x86"
+    },
+    {
+        "InstanceId": "i-010f63d09b5148e47",
+        "State": "terminated",
+        "LaunchTime": "2026-06-01T23:43:49+00:00",
+        "InstanceType": "t3.small",
+        "PublicIp": null,
+        "StateTransitionReason": "User initiated (2026-06-01 23:50:55 GMT)",
+        "Name": "bpf-benchmark-x86-15j5",
+        "Role": "aws-x86"
+    },
+    {
+        "InstanceId": "i-0796b7e96f711daf9",
+        "State": "terminated",
+        "LaunchTime": "2026-06-01T23:16:50+00:00",
+        "InstanceType": "t3.small",
+        "PublicIp": null,
+        "StateTransitionReason": "User initiated (2026-06-01 23:21:45 GMT)",
+        "Name": "bpf-benchmark-x86-v",
+        "Role": "aws-x86"
+    },
+    {
+        "InstanceId": "i-0a47035f7459d8967",
+        "State": "terminated",
+        "LaunchTime": "2026-06-01T23:37:38+00:00",
+        "InstanceType": "t3.small",
+        "PublicIp": null,
+        "StateTransitionReason": "User initiated (2026-06-01 23:42:36 GMT)",
+        "Name": "bpf-benchmark-x86-hok4m",
+        "Role": "aws-x86"
+    },
+    {
+        "InstanceId": "i-0327e6690949d44a2",
+        "State": "terminated",
+        "LaunchTime": "2026-06-01T23:09:22+00:00",
+        "InstanceType": "t3.small",
+        "PublicIp": null,
+        "StateTransitionReason": "User initiated (2026-06-01 23:15:37 GMT)",
+        "Name": "bpf-benchmark-x86-x7s9v",
+        "Role": "aws-x86"
+    }
+]

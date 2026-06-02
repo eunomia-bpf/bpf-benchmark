@@ -1,0 +1,66 @@
+{
+  "experiment": "2026-06-02-prefetch-upper-bound-map-attribution",
+  "date": "2026-06-02",
+  "project": "kinsn",
+  "task": "prefetch",
+  "question": "If the existing profile-gated map-value prefetch policy is tested on a deliberately prefetch-friendly upper-bound microbenchmark, does it show a stable performance win on x86 or ARM64?",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "benchmark": "prefetch_upper_page_stride",
+  "program": "/home/ruoji/github/bpf-opt/code/micro/programs/prefetch_upper_bound.bpf.c",
+  "manifest": "/home/ruoji/github/bpf-opt/code/micro/config/micro_pure_jit.yaml",
+  "profile": "/home/ruoji/github/bpf-opt/code/micro/config/prefetch-upper-page-stride-profile-pc62.json",
+  "control": {
+    "runtime": "kernel",
+    "passes": []
+  },
+  "treatment": {
+    "runtime": "kernel",
+    "passes": ["prefetch"],
+    "pass_args": ["--profile", "/home/ruoji/github/bpf-opt/code/micro/config/prefetch-upper-page-stride-profile-pc62.json"]
+  },
+  "aws": {
+    "region": "us-east-1",
+    "x86_instance_type": "t3.small",
+    "arm64_instance_type": "t4g.small",
+    "all_instances_terminated": true
+  },
+  "runs": [
+    {
+      "label": "x86_control_smoke",
+      "command": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro RUN_TOKEN=upper-x86-control-smoke BENCH=prefetch_upper_page_stride RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=100"
+    },
+    {
+      "label": "x86_treatment_smoke",
+      "command": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro RUN_TOKEN=upper-x86-treatment-smoke BENCH=prefetch_upper_page_stride RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=100 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-upper-page-stride-profile-pc62.json'"
+    },
+    {
+      "label": "x86_control_multi",
+      "command": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro RUN_TOKEN=upper-x86-control BENCH=prefetch_upper_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=1000"
+    },
+    {
+      "label": "x86_treatment_multi",
+      "command": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro RUN_TOKEN=upper-x86-treatment BENCH=prefetch_upper_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=1000 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-upper-page-stride-profile-pc62.json'"
+    },
+    {
+      "label": "arm64_control_multi",
+      "command": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro RUN_TOKEN=upper-arm64-control BENCH=prefetch_upper_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=1000"
+    },
+    {
+      "label": "arm64_treatment_multi",
+      "command": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro RUN_TOKEN=upper-arm64-treatment BENCH=prefetch_upper_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=1000 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-upper-page-stride-profile-pc62.json'"
+    }
+  ],
+  "local_validation": [
+    "make -C code/micro/programs OUTPUT_DIR=/tmp/bpf-opt-prefetch-upper-build /tmp/bpf-opt-prefetch-upper-build/prefetch_upper_bound.bpf.o",
+    "cargo test --manifest-path code/bpfopt/Cargo.toml --release -p bpfopt prefetch",
+    "cargo build --manifest-path code/bpfopt/Cargo.toml --release -p bpfopt -p kinsnprober"
+  ],
+  "analysis_files": [
+    "analysis/run-summary.tsv",
+    "analysis/sample-results.tsv",
+    "analysis/bpfopt-sites.tsv",
+    "analysis/paired-comparison.tsv",
+    "analysis/aws-instances.tsv"
+  ]
+}

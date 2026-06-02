@@ -1,0 +1,17 @@
+{
+  "date": "2026-06-01",
+  "experiment": "prefetch-map-raw-loader-fix",
+  "question": "Can the raw-kinsn kernel runner load map-backed BPF objects that also contain bpf_arm64_prfm_pldl1keep kfunc relocations?",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "platform": "aws",
+  "arch": "arm64",
+  "instance_type": "t4g.small",
+  "benchmarks": [
+    "prefetch_map_page_stride",
+    "prefetch_map_indirect_page",
+    "prefetch_map_line_dedup"
+  ],
+  "control_flags": "-disable-gotox -bpf-kinsn-target=arm64 -bpf-kinsn-mode=all=disable",
+  "treatment_flags": "-disable-gotox -bpf-kinsn-target=arm64 -bpf-kinsn-mode=all=disable -bpf-kinsn-mode=prefetch=force"
+}

@@ -1,0 +1,58 @@
+{
+  "experiment": "2026-06-01-prefetch-selector-v3-policy-smoke",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "purpose": "Validate Kinsn prefetch selector v3 admission behavior on x86 and ARM64 AWS kernel runtime.",
+  "local_validation": [
+    {
+      "cwd": "/home/ruoji/github/bpf-opt/code/bpfopt",
+      "command": "cargo test -p bpfopt prefetch -- --nocapture",
+      "status": "passed"
+    },
+    {
+      "cwd": "/home/ruoji/github/bpf-opt/code/bpfopt",
+      "command": "cargo check -p bpfopt",
+      "status": "passed"
+    }
+  ],
+  "aws_runs": [
+    {
+      "attempt": "v2-x86-smoke",
+      "arch": "x86_64",
+      "wrapper": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro",
+      "instance_type": "t3.small",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_x86_micro_20260602_002724_881164",
+      "status": "runtime_correct_selector_failed"
+    },
+    {
+      "attempt": "v3-x86-smoke",
+      "arch": "x86_64",
+      "wrapper": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro",
+      "instance_type": "t3.small",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_x86_micro_20260602_003936_999378",
+      "status": "completed"
+    },
+    {
+      "attempt": "v3-arm64-smoke",
+      "arch": "arm64",
+      "wrapper": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro",
+      "instance_type": "t4g.small",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260602_004655_302145",
+      "status": "completed"
+    }
+  ],
+  "benchmarks": [
+    "prefetch_single_first_deref",
+    "prefetch_packet_first_deref",
+    "prefetch_map_page_stride"
+  ],
+  "selector_v3_expected_behavior": {
+    "packet_first_deref_cases": "apply exactly one final-deref prefetch site",
+    "map_value_case": "skip without profile or PMU evidence"
+  },
+  "notes": [
+    "This is a correctness/policy smoke, not a performance attribution run.",
+    "Full AWS result directories are copied under attempts/*/data.",
+    "EC2 launch and terminate timestamps are not preserved in runner metadata."
+  ]
+}

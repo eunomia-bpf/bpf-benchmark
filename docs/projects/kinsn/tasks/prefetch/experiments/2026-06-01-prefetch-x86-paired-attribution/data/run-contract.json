@@ -1,0 +1,53 @@
+{
+  "date": "2026-06-01",
+  "name": "prefetch-x86-paired-attribution",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "platform": "aws",
+  "arch": "x86",
+  "instance_type": "t3.small",
+  "region": "us-east-1",
+  "profile": "default",
+  "samples": 5,
+  "warmups": 1,
+  "inner_repeat": 10000,
+  "runtime": "kernel",
+  "runs": [
+    {
+      "bench": "prefetch_packet_first_deref",
+      "condition": "control",
+      "passes": "noop",
+      "result_dir": "aws_x86_micro_20260601_222520_226332",
+      "log": "micro_z3p_20260601_222519.remote.log",
+      "instance_id": "i-00d62f08414877ff4",
+      "command": "BPFREJIT_BENCH_PASSES=noop /home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH=prefetch_packet_first_deref RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=10000"
+    },
+    {
+      "bench": "prefetch_packet_first_deref",
+      "condition": "treatment",
+      "passes": "prefetch",
+      "result_dir": "aws_x86_micro_20260601_223237_631554",
+      "log": "micro_rioire_20260601_223235.remote.log",
+      "instance_id": "i-01b1d5f77d84533b9",
+      "command": "BPFREJIT_BENCH_PASSES=prefetch /home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH=prefetch_packet_first_deref RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=10000"
+    },
+    {
+      "bench": "prefetch_map_page_stride",
+      "condition": "control",
+      "passes": "noop",
+      "result_dir": "aws_x86_micro_20260601_224018_661551",
+      "log": "micro_p4_20260601_224016.remote.log",
+      "instance_id": "i-0edb42554e24149e0",
+      "command": "BPFREJIT_BENCH_PASSES=noop /home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH=prefetch_map_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=10000"
+    },
+    {
+      "bench": "prefetch_map_page_stride",
+      "condition": "treatment",
+      "passes": "prefetch",
+      "result_dir": "aws_x86_micro_20260601_224712_350691",
+      "log": "micro_wg9090_20260601_224710.remote.log",
+      "instance_id": "i-005f003924fb6631a",
+      "command": "BPFREJIT_BENCH_PASSES=prefetch /home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH=prefetch_map_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=10000"
+    }
+  ],
+  "root_volume_gb": 32
+}

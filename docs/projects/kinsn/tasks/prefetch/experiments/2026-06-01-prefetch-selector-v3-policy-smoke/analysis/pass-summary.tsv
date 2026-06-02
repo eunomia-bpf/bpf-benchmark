@@ -1,0 +1,10 @@
+attempt	arch	case	sites_applied	sites_skipped	skipped_reasons
+v2-x86-smoke	x86	prefetch_map_page_stride	0	1	map value prefetch requires profile or PMU evidence
+v2-x86-smoke	x86	prefetch_packet_first_deref	0	9	packet prefetch requires a data-dependent dereference; packet prefetch requires a data-dependent dereference; packet prefetch requires a data-dependent dereference; packet prefetch requires a data-dependent dereference; packet prefetch requires a data-dependent dereference; packet prefetch requires a data-dependent dereference; packet prefetch requires a data-dependent dereference; packet prefetch requires a data-dependent dereference; packet prefetch requires a data-dependent dereference
+v2-x86-smoke	x86	prefetch_single_first_deref	0	9	packet prefetch requires a data-dependent dereference; packet prefetch requires a data-dependent dereference; packet prefetch requires a data-dependent dereference; packet prefetch requires a data-dependent dereference; packet prefetch requires a data-dependent dereference; packet prefetch requires a data-dependent dereference; packet prefetch requires a data-dependent dereference; packet prefetch requires a data-dependent dereference; packet prefetch requires a data-dependent dereference
+v3-x86-smoke	x86	prefetch_map_page_stride	0	1	map value prefetch requires profile or PMU evidence
+v3-x86-smoke	x86	prefetch_packet_first_deref	1	1	packet prefetch requires a data-dependent dereference
+v3-x86-smoke	x86	prefetch_single_first_deref	1	1	packet prefetch requires a data-dependent dereference
+v3-arm64-smoke	arm64	prefetch_map_page_stride	0	1	map value prefetch requires profile or PMU evidence
+v3-arm64-smoke	arm64	prefetch_packet_first_deref	1	1	packet prefetch requires a data-dependent dereference
+v3-arm64-smoke	arm64	prefetch_single_first_deref	1	1	packet prefetch requires a data-dependent dereference

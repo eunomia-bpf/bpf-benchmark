@@ -1,0 +1,45 @@
+{
+  "date": "2026-06-01",
+  "experiment": "x86-prefetch-current-policy-micro-attribution",
+  "project": "kinsn",
+  "task": "prefetch",
+  "question": "Evaluate current KINSN prefetch policy on x86 micro benchmarks using the AWS x86 runner.",
+  "platform": "aws",
+  "arch": "x86",
+  "instance_type": "t3.small",
+  "wrapper": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro",
+  "benchmark_entry": "Makefile micro target",
+  "runtime": "kernel",
+  "control": {
+    "name": "noop",
+    "passes": "noop",
+    "meaning": "same runner pipeline without prefetch kinsn insertion"
+  },
+  "treatment": {
+    "name": "prefetch",
+    "passes": "prefetch",
+    "meaning": "current bpfopt prefetch pass inserting bpf_x86_prefetcht0 when selected"
+  },
+  "benchmarks": [
+    "prefetch_distance_0",
+    "prefetch_distance_2",
+    "prefetch_distance_4",
+    "prefetch_distance_8",
+    "prefetch_distance_16",
+    "prefetch_distance_32",
+    "prefetch_indirect_lookup",
+    "prefetch_indirect_two_stage",
+    "prefetch_cacheline_dedup_scan",
+    "prefetch_packet_offset_guarded",
+    "prefetch_full_packet_ring_scan",
+    "prefetch_map_page_stride",
+    "prefetch_map_indirect_page",
+    "prefetch_map_line_dedup",
+    "prefetch_hot_l1_load",
+    "prefetch_sequential_scan",
+    "prefetch_large_stride_scan",
+    "prefetch_permuted_index_scan",
+    "prefetch_packet_first_deref"
+  ],
+  "raw_data_policy": "framework stores raw measurements only; analysis ratios are generated outside the benchmark framework"
+}

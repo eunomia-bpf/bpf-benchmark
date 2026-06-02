@@ -1,0 +1,29 @@
+{
+  "benchmarks": [
+    "prefetch_hot_l1_load",
+    "prefetch_sequential_scan",
+    "prefetch_large_stride_scan",
+    "prefetch_permuted_index_scan",
+    "prefetch_packet_first_deref"
+  ],
+  "control_flags": "-disable-gotox -bpf-kinsn-target=arm64 -bpf-kinsn-mode=all=disable",
+  "experiment": "2026-05-31-prefetch-candidate-filtering-micro-attribution",
+  "failed_attempts": [
+    "control-r1-failed-pointer-chase",
+    "control-fix1-failed-dependent-chain",
+    "control-fix2-failed-dependent-chain",
+    "control-fix3-failed-hashed-index"
+  ],
+  "inner_repeat": 100000,
+  "perf_counters": true,
+  "perf_scope": "full_repeat_raw",
+  "runtime": "kernel",
+  "samples": 3,
+  "successful_pairs": [
+    "r1",
+    "r2",
+    "r3"
+  ],
+  "treatment_flags": "-disable-gotox -bpf-kinsn-target=arm64 -bpf-kinsn-mode=all=disable -bpf-kinsn-mode=prefetch=force",
+  "warmups": 0
+}

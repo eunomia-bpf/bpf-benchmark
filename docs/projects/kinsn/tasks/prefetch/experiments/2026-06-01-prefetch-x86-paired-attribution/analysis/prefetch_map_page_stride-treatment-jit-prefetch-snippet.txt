@@ -1,0 +1,14 @@
+  f1:	48 83 f9 10          	cmp    $0x10,%rcx
+  f5:	74 02                	je     0xf9
+  f7:	eb ba                	jmp    0xb3
+  f9:	4c 8b 7d e8          	mov    -0x18(%rbp),%r15
+  fd:	4d 01 f7             	add    %r14,%r15
+ 100:	41 0f 18 0f          	prefetcht0 (%r15)
+ 104:	49 0f b6 4f 00       	movzbq 0x0(%r15),%rcx
+ 109:	4d 0f b6 77 01       	movzbq 0x1(%r15),%r14
+ 10e:	49 c1 e6 08          	shl    $0x8,%r14
+ 112:	49 09 ce             	or     %rcx,%r14
+ 115:	49 0f b6 4f 02       	movzbq 0x2(%r15),%rcx
+ 11a:	48 c1 e1 10          	shl    $0x10,%rcx
+ 11e:	4c 09 f1             	or     %r14,%rcx
+

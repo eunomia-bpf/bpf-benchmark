@@ -1,0 +1,15 @@
+{
+  "benchmarks": 19,
+  "best": "prefetch_map_line_dedup",
+  "best_ratio": 0.7289545277885736,
+  "geomean_speedup_pct": 0.5428308055740572,
+  "geomean_treatment_over_control_exec_ns": 0.9945716919442594,
+  "losses_gt_1_02": 8,
+  "max_control_cv": 0.23006167601298325,
+  "max_treatment_cv": 0.6481747694940379,
+  "rows_with_code_size_delta": 0,
+  "ties_0_98_to_1_02": 5,
+  "wins_lt_0_98": 6,
+  "worst": "prefetch_indirect_two_stage",
+  "worst_ratio": 1.3268506900878294
+}

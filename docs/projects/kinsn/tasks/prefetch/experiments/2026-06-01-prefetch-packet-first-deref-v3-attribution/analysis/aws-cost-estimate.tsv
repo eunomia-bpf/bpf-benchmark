@@ -1,0 +1,14 @@
+token	arch	instance_type	wall_seconds	instance_id	compute_usd	ebs_usd	total_usd
+pfd-v3-arm64-r1-control	arm64	t4g.small	421.0	i-054ef73c190616bda	0.001965	0.000416	0.002380
+pfd-v3-arm64-r1-treatment	arm64	t4g.small	416.0	i-068e867f1ed364e80	0.001941	0.000411	0.002352
+pfd-v3-arm64-r2-control	arm64	t4g.small	541.0	i-0ac02ebd6279f3058	0.002525	0.000534	0.003059
+pfd-v3-arm64-r2-treatment	arm64	t4g.small	553.0	i-0fce42c882e1439d3	0.002581	0.000546	0.003127
+pfd-v3-arm64-r3-control	arm64	t4g.small	488.0	i-0ae985ff7c6bafdf7	0.002277	0.000482	0.002759
+pfd-v3-arm64-r3-treatment	arm64	t4g.small	488.0	i-0c9e49cadc4e6c36e	0.002277	0.000482	0.002759
+pfd-v3-x86-r1-control	x86	t3.small	422.0	i-07e05c78f5265ec6b	0.002438	0.000417	0.002855
+pfd-v3-x86-r1-treatment	x86	t3.small	406.0	i-02a3337b10bd4dc26	0.002346	0.000401	0.002747
+pfd-v3-x86-r2-control	x86	t3.small	385.0	i-05d4b84bcda1d3b0b	0.002224	0.000380	0.002605
+pfd-v3-x86-r2-treatment	x86	t3.small	421.0	i-04bdc19bd79e8620e	0.002432	0.000416	0.002848
+pfd-v3-x86-r3-control	x86	t3.small	408.0	i-00f6f62ead0e189a4	0.002357	0.000403	0.002760
+pfd-v3-x86-r3-treatment	x86	t3.small	413.0	i-00f099a3904007769	0.002386	0.000408	0.002794
+TOTAL	all				0.027750	0.005296	0.033046

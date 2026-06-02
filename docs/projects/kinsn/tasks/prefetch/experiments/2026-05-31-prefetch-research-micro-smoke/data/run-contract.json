@@ -1,0 +1,21 @@
+{
+  "date": "2026-05-31",
+  "experiment": "prefetch-research-micro-smoke",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "purpose": "Add and smoke-build prefetch research microbenchmarks for distance sweep and candidate filtering.",
+  "platform": "local",
+  "aws_used": false,
+  "benchmark_runtime_executed": false,
+  "make_entry_used": true,
+  "new_benchmarks": [
+    "prefetch_distance_0",
+    "prefetch_distance_2",
+    "prefetch_distance_4",
+    "prefetch_distance_8",
+    "prefetch_distance_16",
+    "prefetch_distance_32",
+    "prefetch_indirect_lookup"
+  ],
+  "build_output_dir": "/tmp/bpf-opt-prefetch-research-build-smoke"
+}

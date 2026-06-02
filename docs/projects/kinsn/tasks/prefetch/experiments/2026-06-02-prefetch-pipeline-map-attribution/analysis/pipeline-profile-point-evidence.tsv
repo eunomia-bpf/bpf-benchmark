@@ -1,0 +1,12 @@
+item	value
+benchmark	prefetch_pipeline_page_stride
+program	prefetch_pipeline_page_stride_xdp
+profile_file	/home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-page-stride-profile-pc45-r1.json
+profile_pc	45
+profile_reg	r1
+symbol_start_object_pc	250
+profile_object_pc	295
+next_pointer_materialized_object_pc	292-294
+current_demand_load_start_object_pc	318
+lead_time_bpf_slots_before_current_load	23
+semantic_intent	prefetch next-iteration map-value pointer before current-iteration demand load

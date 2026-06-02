@@ -1,0 +1,13 @@
+run	benchmark	control_prfm	treatment_prfm	control_jit_bytes	treatment_jit_bytes
+r1	prefetch_cacheline_dedup_scan	0	2	1032	1040
+r1	prefetch_full_packet_ring_scan	0	2	688	696
+r1	prefetch_indirect_two_stage	0	3	760	768
+r1	prefetch_packet_offset_guarded	0	2	720	728
+r2	prefetch_cacheline_dedup_scan	0	2	1032	1040
+r2	prefetch_full_packet_ring_scan	0	2	688	696
+r2	prefetch_indirect_two_stage	0	3	760	768
+r2	prefetch_packet_offset_guarded	0	2	720	728
+r3	prefetch_cacheline_dedup_scan	0	2	1032	1040
+r3	prefetch_full_packet_ring_scan	0	2	688	696
+r3	prefetch_indirect_two_stage	0	3	760	768
+r3	prefetch_packet_offset_guarded	0	2	720	728

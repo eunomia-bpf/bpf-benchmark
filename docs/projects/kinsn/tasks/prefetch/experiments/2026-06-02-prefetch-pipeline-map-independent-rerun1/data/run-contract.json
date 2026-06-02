@@ -1,0 +1,72 @@
+{
+  "date": "2026-06-02",
+  "experiment": "prefetch-pipeline-map-independent-rerun1",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "question": "Does the prefetch_pipeline_page_stride next-iteration prefetch positive signal reproduce on independent x86/ARM64 AWS kernel micro runs?",
+  "benchmark": "prefetch_pipeline_page_stride",
+  "profile": "/home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-page-stride-profile-pc45-r1.json",
+  "runs": [
+    {
+      "arch": "arm64",
+      "role": "control",
+      "wrapper_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro RUN_TOKEN=pipeline-arm64-control-stability-rerun2 BENCH=prefetch_pipeline_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=1000",
+      "status": "passed",
+      "instance_id": "i-0289f86439cf02668",
+      "result_copy": "data/arm64-control-stability-rerun2-result",
+      "stdout": "data/aws-arm64-control-stability-rerun2.log",
+      "stderr": "data/aws-arm64-control-stability-rerun2.stderr.log"
+    },
+    {
+      "arch": "arm64",
+      "role": "treatment",
+      "wrapper_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro RUN_TOKEN=pipeline-arm64-treatment-stability-rerun2 BENCH=prefetch_pipeline_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=1000 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-page-stride-profile-pc45-r1.json'",
+      "status": "passed",
+      "instance_id": "i-066f0c02292c250ac",
+      "result_copy": "data/arm64-treatment-stability-rerun2-result",
+      "stdout": "data/aws-arm64-treatment-stability-rerun2.log",
+      "stderr": "data/aws-arm64-treatment-stability-rerun2.stderr.log"
+    },
+    {
+      "arch": "x86",
+      "role": "control",
+      "wrapper_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro RUN_TOKEN=pipeline-x86-control-stability-rerun2 BENCH=prefetch_pipeline_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=1000",
+      "status": "passed",
+      "instance_id": "i-006a3d03d671be584",
+      "result_copy": "data/x86-control-stability-rerun2-result",
+      "stdout": "data/aws-x86-control-stability-rerun2.log",
+      "stderr": "data/aws-x86-control-stability-rerun2.stderr.log"
+    },
+    {
+      "arch": "x86",
+      "role": "treatment",
+      "wrapper_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro RUN_TOKEN=pipeline-x86-treatment-stability-rerun2 BENCH=prefetch_pipeline_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=1000 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-page-stride-profile-pc45-r1.json'",
+      "status": "passed",
+      "instance_id": "i-027643778de562722",
+      "result_copy": "data/x86-treatment-stability-rerun2-result",
+      "stdout": "data/aws-x86-treatment-stability-rerun2.log",
+      "stderr": "data/aws-x86-treatment-stability-rerun2.stderr.log"
+    }
+  ],
+  "analysis": {
+    "arm64_paired_geomean_treatment_over_control": 0.962181,
+    "arm64_paired_mean_treatment_over_control": 0.962448,
+    "x86_paired_geomean_treatment_over_control": 0.401950,
+    "x86_paired_mean_treatment_over_control": 0.426756,
+    "note": "x86 control exec_ns is highly unstable in this rerun, so x86 performance ratio is not a reliable positive conclusion. ARM64 reproduced a positive signal but not the previous 14% magnitude."
+  },
+  "aws_cost": {
+    "price_source": "AWS Pricing API queried on 2026-06-02 for us-east-1 Linux On-Demand and gp3 storage",
+    "t3_small_usd_per_hour": 0.0208,
+    "t4g_small_usd_per_hour": 0.0168,
+    "gp3_usd_per_gb_month": 0.08,
+    "root_volume_gib": 32,
+    "x86_wall_seconds": 715,
+    "arm64_wall_seconds": 646,
+    "compute_cost_usd": 0.007146,
+    "ebs_cost_usd": 0.001345,
+    "total_estimated_cost_usd": 0.008491,
+    "detail": "analysis/aws-instance-summary.tsv",
+    "note": "Estimate excludes data transfer, tax, free tier, credits, Savings Plans, Reserved Instances, and account-level discounts."
+  }
+}

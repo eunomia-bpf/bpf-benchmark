@@ -1,0 +1,5 @@
+arch	case	instance_id	instance_type	launch_time_utc	state	result_dir	started_at_utc	completed_at_utc	approx_wall_minutes
+x86	control	i-0cbf011d0b30f1a4f	t3.small	2026-06-02T05:44:38+00:00	terminated	code/micro/results/aws_x86_micro_20260602_055006_955057	2026-06-02T05:50:06.955057+00:00	2026-06-02T05:50:12.514532+00:00	5.58
+x86	treatment	i-0534d9ff54adb5ad9	t3.small	2026-06-02T05:51:46+00:00	terminated	code/micro/results/aws_x86_micro_20260602_055621_359189	2026-06-02T05:56:21.359189+00:00	2026-06-02T05:56:26.955786+00:00	4.68
+arm64	control	i-08a2542fdd6fe0ac2	t4g.small	2026-06-02T05:57:57+00:00	terminated	code/micro/results/aws_arm64_micro_20260602_060355_842916	2026-06-02T06:03:55.842916+00:00	2026-06-02T06:04:02.697695+00:00	6.09
+arm64	treatment	i-019d03615362c1488	t4g.small	2026-06-02T06:05:30+00:00	terminated	code/micro/results/aws_arm64_micro_20260602_061059_543563	2026-06-02T06:10:59.543563+00:00	2026-06-02T06:11:06.162677+00:00	5.60

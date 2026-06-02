@@ -1,0 +1,45 @@
+{
+  "experiment": "2026-06-01-prefetch-map-large-working-set-attribution",
+  "date": "2026-06-01",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "purpose": "Test whether map-backed 256 KiB working-set micro benchmarks can support ARM64 PRFM same-LLC attribution.",
+  "platform": "aws",
+  "arch": "arm64",
+  "instance_type": "t4g.small",
+  "region": "us-east-1",
+  "runtime": "kernel",
+  "samples": 3,
+  "warmups": 0,
+  "inner_repeat": 100000,
+  "smoke_inner_repeat": 1000,
+  "perf_counters": true,
+  "perf_scope": "full_repeat_raw",
+  "benchmarks": [
+    "prefetch_map_page_stride",
+    "prefetch_map_indirect_page",
+    "prefetch_map_line_dedup"
+  ],
+  "custom_llc": "/home/ruoji/github/bpf-opt/code/llvm-backend/build-bpf-kinsn/bin/llc",
+  "control_flags": "-disable-gotox -bpf-kinsn-target=arm64 -bpf-kinsn-mode=all=disable",
+  "treatment_flags": "-disable-gotox -bpf-kinsn-target=arm64 -bpf-kinsn-mode=all=disable -bpf-kinsn-mode=prefetch=force",
+  "runs": {
+    "control_smoke": {
+      "token": "prefetch-map-control-smoke",
+      "status": "completed",
+      "result_copy": "data/control-smoke-result"
+    },
+    "control_r1": {
+      "token": "prefetch-map-control-r1",
+      "status": "completed",
+      "result_copy": "data/control-r1-result"
+    },
+    "treatment_r1": {
+      "token": "prefetch-map-treatment-r1",
+      "status": "failed",
+      "result_copy": "data/treatment-r1-failed-result",
+      "failure": "raw-kinsn loader did not relocate input_map/result_map; verifier saw r1=0 for bpf_map_lookup_elem"
+    }
+  },
+  "conclusion": "blocked_by_raw_kinsn_map_loader"
+}

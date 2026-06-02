@@ -1,0 +1,89 @@
+{
+  "date_local": "2026-05-31",
+  "experiment": "prefetch-research-micro-attribution",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "question": "Do ARM64 PRFM kinsn prefetch distance-sweep micro benchmarks show stable kernel-runtime speedup over same-LLC no-prefetch control?",
+  "benchmarks": [
+    "prefetch_distance_0",
+    "prefetch_distance_2",
+    "prefetch_distance_4",
+    "prefetch_distance_8",
+    "prefetch_distance_16",
+    "prefetch_distance_32",
+    "prefetch_indirect_lookup"
+  ],
+  "common_runtime": {
+    "platform": "aws",
+    "arch": "arm64",
+    "instance_type": "t4g.small",
+    "region": "us-east-1",
+    "runtime": "kernel",
+    "samples": 3,
+    "warmups": 0,
+    "inner_repeat": 100000,
+    "perf_counters": true,
+    "perf_scope": "full_repeat_raw",
+    "bpf_compiler": "kinsn-llvm",
+    "llc": "/home/ruoji/github/bpf-opt/code/llvm-backend/build-bpf-kinsn/bin/llc"
+  },
+  "control_flags": "-disable-gotox -bpf-kinsn-target=arm64 -bpf-kinsn-mode=all=disable",
+  "treatment_flags": "-disable-gotox -bpf-kinsn-target=arm64 -bpf-kinsn-mode=all=disable -bpf-kinsn-mode=prefetch=force",
+  "runs": [
+    {
+      "name": "initial-failed-control-r1",
+      "token": "prefetchctrl1",
+      "exit": 2,
+      "result_copy": "data/control-r1-initial-result",
+      "instance_id": "i-0bf2f6cfb083cea60"
+    },
+    {
+      "name": "control-r1-fix",
+      "token": "prefetchctrlfix1",
+      "exit": 0,
+      "result_copy": "data/control-fix1-result",
+      "instance_id": "i-00ca31e5735204f59"
+    },
+    {
+      "name": "treatment-r1",
+      "token": "prefetchtreat1",
+      "exit": 0,
+      "result_copy": "data/treatment-r1-result",
+      "instance_id": "i-06b58b117e714c4c1"
+    },
+    {
+      "name": "control-r2",
+      "token": "prefetchctrlr2",
+      "exit": 0,
+      "result_copy": "data/control-r2-result",
+      "instance_id": "i-03117a7cae42b126f"
+    },
+    {
+      "name": "treatment-r2",
+      "token": "prefetchtreatr2",
+      "exit": 0,
+      "result_copy": "data/treatment-r2-result",
+      "instance_id": "i-0e099c846a8856016"
+    },
+    {
+      "name": "control-r3",
+      "token": "prefetchctrlr3",
+      "exit": 0,
+      "result_copy": "data/control-r3-result",
+      "instance_id": "i-0a2fd3429511f57c8"
+    },
+    {
+      "name": "treatment-r3",
+      "token": "prefetchtreatr3",
+      "exit": 0,
+      "result_copy": "data/treatment-r3-result",
+      "instance_id": "i-0a45ad6f3a515f1c9"
+    }
+  ],
+  "analysis": [
+    "analysis/control-vs-treatment-all-runs.tsv",
+    "analysis/case-stability.tsv",
+    "analysis/summary-all-runs.tsv",
+    "analysis/aws-cost-estimate.tsv"
+  ]
+}

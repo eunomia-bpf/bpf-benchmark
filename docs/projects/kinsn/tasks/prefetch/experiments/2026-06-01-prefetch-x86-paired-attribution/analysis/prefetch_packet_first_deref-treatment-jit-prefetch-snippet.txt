@@ -1,0 +1,14 @@
+  82:	6b ff 03             	imul   $0x3,%edi,%edi
+  85:	48 83 e7 3f          	and    $0x3f,%rdi
+  89:	48 8b 55 f0          	mov    -0x10(%rbp),%rdx
+  8d:	48 89 d6             	mov    %rdx,%rsi
+  90:	48 01 fe             	add    %rdi,%rsi
+  93:	0f 18 0e             	prefetcht0 (%rsi)
+  96:	48 0f b6 46 40       	movzbq 0x40(%rsi),%rax
+  9b:	83 e0 3f             	and    $0x3f,%eax
+  9e:	89 c7                	mov    %eax,%edi
+  a0:	c1 e7 03             	shl    $0x3,%edi
+  a3:	48 01 fa             	add    %rdi,%rdx
+  a6:	48 89 d7             	mov    %rdx,%rdi
+  a9:	48 81 c7 08 03 00 00 	add    $0x308,%rdi
+

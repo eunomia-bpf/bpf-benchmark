@@ -1,0 +1,37 @@
+arch	round	bench	metric	control_median	treatment_median	treatment_over_control	speedup_control_over_treatment	control_mean	treatment_mean	control_stdev	treatment_stdev	control_n	treatment_n
+arm64	1	prefetch_packet_first_deref	exec_ns	4046	4041	0.998764	1.00124	4050.6	4041.6	15.1592	3.36155	5	5
+arm64	1	prefetch_packet_first_deref	wall_exec_ns							0	0	0	0
+arm64	1	prefetch_packet_first_deref	exec_cycles							0	0	0	0
+arm64	1	prefetch_single_first_deref	exec_ns	64	63	0.984375	1.01587	65	61.6	1.73205	3.36155	5	5
+arm64	1	prefetch_single_first_deref	wall_exec_ns							0	0	0	0
+arm64	1	prefetch_single_first_deref	exec_cycles							0	0	0	0
+arm64	2	prefetch_packet_first_deref	exec_ns	4043	4050	1.00173	0.998272	4042.8	4050.8	4.02492	7.98123	5	5
+arm64	2	prefetch_packet_first_deref	wall_exec_ns							0	0	0	0
+arm64	2	prefetch_packet_first_deref	exec_cycles							0	0	0	0
+arm64	2	prefetch_single_first_deref	exec_ns	64	66	1.03125	0.969697	64	66.8	0	2.94958	5	5
+arm64	2	prefetch_single_first_deref	wall_exec_ns							0	0	0	0
+arm64	2	prefetch_single_first_deref	exec_cycles							0	0	0	0
+arm64	3	prefetch_packet_first_deref	exec_ns	4069	4048	0.994839	1.00519	4080	4082.4	50.3587	81.6627	5	5
+arm64	3	prefetch_packet_first_deref	wall_exec_ns							0	0	0	0
+arm64	3	prefetch_packet_first_deref	exec_cycles							0	0	0	0
+arm64	3	prefetch_single_first_deref	exec_ns	64	64	1	1	64	64	0	0	5	5
+arm64	3	prefetch_single_first_deref	wall_exec_ns							0	0	0	0
+arm64	3	prefetch_single_first_deref	exec_cycles							0	0	0	0
+x86	1	prefetch_packet_first_deref	exec_ns	2254	2358	1.04614	0.955895	2463.6	2336.4	529.552	390.963	5	5
+x86	1	prefetch_packet_first_deref	wall_exec_ns	7988	6999	0.876189	1.14131	7984.8	7988	1582.41	1411.57	5	5
+x86	1	prefetch_packet_first_deref	exec_cycles	19969	17499	0.876308	1.14115	19961.4	19970.2	3956.17	3529.38	5	5
+x86	1	prefetch_single_first_deref	exec_ns	41	40	0.97561	1.025	41.6	40.2	1.51658	1.09545	5	5
+x86	1	prefetch_single_first_deref	wall_exec_ns	5986	6984	1.16672	0.857102	6985	7185.2	1414.22	1303.42	5	5
+x86	1	prefetch_single_first_deref	exec_cycles	14964	17461	1.16687	0.856996	17462.2	17963.6	3535.54	3259.3	5	5
+x86	2	prefetch_packet_first_deref	exec_ns	2396	2043	0.852671	1.17279	2330.6	2206	204.518	425.326	5	5
+x86	2	prefetch_packet_first_deref	wall_exec_ns	6987	7986	1.14298	0.874906	7581.2	7784	890.353	1304.8	5	5
+x86	2	prefetch_packet_first_deref	exec_cycles	17467	19966	1.14307	0.874837	18953.2	19460.4	2225.57	3261.22	5	5
+x86	2	prefetch_single_first_deref	exec_ns	40	39	0.975	1.02564	40	39.6	0.707107	0.894427	5	5
+x86	2	prefetch_single_first_deref	wall_exec_ns	6983	5986	0.857225	1.16656	6984.8	6185.8	1002.25	446.221	5	5
+x86	2	prefetch_single_first_deref	exec_cycles	17457	14966	0.857307	1.16644	17461.2	15464.6	2505.25	1114.93	5	5
+x86	3	prefetch_packet_first_deref	exec_ns	2224	1977	0.888939	1.12494	2483.2	2006.2	451.621	52.4328	5	5
+x86	3	prefetch_packet_first_deref	wall_exec_ns	6457	5986	0.927056	1.07868	6772.2	7585	519.372	3050.57	5	5
+x86	3	prefetch_packet_first_deref	exec_cycles	16142	14965	0.927085	1.07865	16930.2	18962.8	1298.89	7626.07	5	5
+x86	3	prefetch_single_first_deref	exec_ns	44	52	1.18182	0.846154	44	49.6	1	6.42651	5	5
+x86	3	prefetch_single_first_deref	wall_exec_ns	6377	5983	0.938215	1.06585	6618.2	6583.6	1566.02	1343.54	5	5
+x86	3	prefetch_single_first_deref	exec_cycles	15942	14958	0.938276	1.06578	16545.4	16459.2	3914.46	3358.46	5	5

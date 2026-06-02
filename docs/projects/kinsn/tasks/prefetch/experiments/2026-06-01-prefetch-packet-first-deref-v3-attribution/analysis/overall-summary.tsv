@@ -1,0 +1,9 @@
+arch	bench	metric	rounds	geomean_treatment_over_control	geomean_speedup	median_treatment_over_control	min_ratio	max_ratio	wins	losses	stable_direction
+arm64	prefetch_packet_first_deref	exec_ns	3	0.998441	1.00156	0.998764	0.994839	1.00173	2	1	mixed
+arm64	prefetch_single_first_deref	exec_ns	3	1.00502	0.995005	1	0.984375	1.03125	1	1	mixed
+x86	prefetch_packet_first_deref	exec_ns	3	0.925581	1.0804	0.888939	0.852671	1.04614	2	1	mixed
+x86	prefetch_packet_first_deref	wall_exec_ns	3	0.975545	1.02507	0.927056	0.876189	1.14298	2	1	mixed
+x86	prefetch_packet_first_deref	exec_cycles	3	0.975625	1.02498	0.927085	0.876308	1.14307	2	1	mixed
+x86	prefetch_single_first_deref	exec_ns	3	1.03979	0.961737	0.97561	0.975	1.18182	2	1	mixed
+x86	prefetch_single_first_deref	wall_exec_ns	3	0.979013	1.02144	0.938215	0.857225	1.16672	2	1	mixed
+x86	prefetch_single_first_deref	exec_cycles	3	0.979105	1.02134	0.938276	0.857307	1.16687	2	1	mixed

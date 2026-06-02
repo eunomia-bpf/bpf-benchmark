@@ -1,0 +1,5 @@
+arch	case	n	exec_mean_ns	exec_median_ns	exec_min_ns	exec_max_ns	exec_stdev_ns	wall_mean_ns	wall_median_ns	exec_cycles_mean	bpf_bytes	native_bytes
+x86	control	5	9376.400	9955.000	7853	10728	1406.128	14201.2	13999	35503.4	920	494
+x86	treatment	5	8417.000	7918.000	7836	10477	1152.281	14195.8	12999	35489.8	936	498
+arm64	control	5	14512.800	14168.000	14034	15550	630.128				920	632
+arm64	treatment	5	14021.600	14024.000	14002	14037	13.612				936	640

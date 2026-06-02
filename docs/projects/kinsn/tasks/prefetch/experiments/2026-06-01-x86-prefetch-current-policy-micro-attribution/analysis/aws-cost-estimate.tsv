@@ -1,0 +1,5 @@
+run	instance_id	instance_type	final_state	launch_time_utc	termination_request_approx_utc	aws_wall_seconds_approx	aws_wall_hours_approx	compute_cost_usd	ebs_cost_usd	total_cost_usd
+control-noop	i-013f1b9fc5e253fc5	t3.small	terminated	2026-06-01T08:58:04+00:00	2026-06-01T09:05:46.687075+00:00	462.7	0.128524	0.002673	0.000451	0.003124
+smoke	i-09f4abf4ebf04be36	t3.small	terminated	2026-06-01T08:50:07+00:00	2026-06-01T08:55:32.523398+00:00	325.5	0.090423	0.001881	0.000317	0.002198
+treatment-prefetch	i-0527e8fc68bbcb708	t3.small	terminated	2026-06-01T09:07:21+00:00	2026-06-01T09:14:49.218833+00:00	448.2	0.124505	0.002590	0.000437	0.003026
+TOTAL										0.008348

@@ -1,0 +1,43 @@
+=== control symbols ===
+/tmp/bpf-opt-prefetch-map-control-kinsn/prefetch_map_research.bpf.o:	file format elf64-bpf
+0000000000000000 l    df *ABS*	0000000000000000 prefetch_map_research.bpf.c
+0000000000000000 g     F xdp	0000000000000368 prefetch_map_page_stride_xdp
+0000000000000000 g     O .maps	0000000000000020 input_map
+0000000000000020 g     O .maps	0000000000000020 result_map
+0000000000000368 g     F xdp	00000000000003f8 prefetch_map_indirect_page_xdp
+0000000000000760 g     F xdp	0000000000000600 prefetch_map_line_dedup_xdp
+=== control relocs ===
+0000000000000020 R_BPF_64_64              input_map
+0000000000000330 R_BPF_64_64              result_map
+0000000000000388 R_BPF_64_64              input_map
+0000000000000728 R_BPF_64_64              result_map
+0000000000000780 R_BPF_64_64              input_map
+0000000000000d28 R_BPF_64_64              result_map
+0000000000000098 R_BPF_64_ABS64           input_map
+00000000000000a0 R_BPF_64_ABS64           result_map
+00000000000002bc R_BPF_64_NODYLD32        input_map
+00000000000002c8 R_BPF_64_NODYLD32        result_map
+=== treatment symbols ===
+/tmp/bpf-opt-prefetch-map-treatment-kinsn/prefetch_map_research.bpf.o:	file format elf64-bpf
+0000000000000000 l    df *ABS*	0000000000000000 prefetch_map_research.bpf.c
+0000000000000000 g     F xdp	0000000000000378 prefetch_map_page_stride_xdp
+0000000000000000 g     O .maps	0000000000000020 input_map
+0000000000000000         *UND*	0000000000000000 bpf_arm64_prfm_pldl1keep
+0000000000000020 g     O .maps	0000000000000020 result_map
+0000000000000378 g     F xdp	0000000000000418 prefetch_map_indirect_page_xdp
+0000000000000790 g     F xdp	0000000000000610 prefetch_map_line_dedup_xdp
+=== treatment relocs ===
+0000000000000020 R_BPF_64_64              input_map
+00000000000001a8 R_BPF_64_32              bpf_arm64_prfm_pldl1keep
+0000000000000340 R_BPF_64_64              result_map
+0000000000000398 R_BPF_64_64              input_map
+0000000000000440 R_BPF_64_32              bpf_arm64_prfm_pldl1keep
+0000000000000598 R_BPF_64_32              bpf_arm64_prfm_pldl1keep
+0000000000000758 R_BPF_64_64              result_map
+00000000000007b0 R_BPF_64_64              input_map
+0000000000000900 R_BPF_64_32              bpf_arm64_prfm_pldl1keep
+0000000000000d68 R_BPF_64_64              result_map
+0000000000000098 R_BPF_64_ABS64           input_map
+00000000000000a0 R_BPF_64_ABS64           result_map
+00000000000002bc R_BPF_64_NODYLD32        input_map
+00000000000002c8 R_BPF_64_NODYLD32        result_map

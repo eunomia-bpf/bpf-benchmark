@@ -1,0 +1,6 @@
+bench	condition	instance_id	launch_time_utc	completed_at_utc	aws_wall_seconds	instance_type	ec2_usd_per_hour	compute_cost_usd	root_gb	gp3_usd_per_gb_month	ebs_cost_usd	total_cost_usd	state
+prefetch_packet_first_deref	control	i-00d62f08414877ff4	2026-06-01T22:20:32+00:00	2026-06-01T22:25:23.446134+00:00	291.4	t3.small	0.0208000000	0.001684	32	0.0800000000	0.000284	0.001968	terminated
+prefetch_packet_first_deref	treatment	i-01b1d5f77d84533b9	2026-06-01T22:26:51+00:00	2026-06-01T22:32:40.923541+00:00	349.9	t3.small	0.0208000000	0.002022	32	0.0800000000	0.000341	0.002363	terminated
+prefetch_map_page_stride	control	i-0edb42554e24149e0	2026-06-01T22:34:08+00:00	2026-06-01T22:40:24.159629+00:00	376.2	t3.small	0.0208000000	0.002173	32	0.0800000000	0.000366	0.002540	terminated
+prefetch_map_page_stride	treatment	i-005f003924fb6631a	2026-06-01T22:41:54+00:00	2026-06-01T22:47:17.954852+00:00	324.0	t3.small	0.0208000000	0.001872	32	0.0800000000	0.000316	0.002187	terminated
+TOTAL							0.0208000000	0.007751	32	0.0800000000	0.001307	0.009058	

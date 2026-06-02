@@ -1,0 +1,30 @@
+{
+  "experiment": "2026-06-01-prefetch-profile-gate-impl",
+  "date": "2026-06-01",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "code_head": "d9f007575bda699f0ddb154abd37cf80bcd1b120",
+  "platform": "local",
+  "arch": "x86_64",
+  "aws": {
+    "used": false,
+    "instance_type": null,
+    "instance_id": null,
+    "wall_time": null,
+    "cost_estimate_usd": 0
+  },
+  "commands": [
+    {
+      "workdir": "/home/ruoji/github/bpf-opt/code/bpfopt",
+      "cmd": "cargo test -p bpfopt prefetch",
+      "stdout": "/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-profile-gate-impl/data/cargo-test-prefetch.log",
+      "stderr": "/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-profile-gate-impl/data/cargo-test-prefetch.stderr.log"
+    },
+    {
+      "workdir": "/home/ruoji/github/bpf-opt/code/bpfopt",
+      "cmd": "cargo fmt -p bpfopt --check",
+      "stdout": null,
+      "stderr": null
+    }
+  ]
+}

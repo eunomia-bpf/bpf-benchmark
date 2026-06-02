@@ -1,0 +1,4 @@
+label	sites_matched	sites_applied	sites_skipped	insn_before	insn_after	insn_delta	skipped_pcs
+x86_treatment_smoke	8	1	7	250	252	2	63,77,85,98,102,110,124
+x86_treatment_multi	8	1	7	250	252	2	63,77,85,98,102,110,124
+arm64_treatment_multi	8	1	7	250	252	2	63,77,85,98,102,110,124

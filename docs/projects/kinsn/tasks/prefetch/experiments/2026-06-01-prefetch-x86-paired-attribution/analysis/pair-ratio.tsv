@@ -1,0 +1,11 @@
+bench	metric	control_median	treatment_median	treatment_over_control	percent_change_treatment_vs_control
+prefetch_map_page_stride	exec_ns	7949	7798	0.981004	-1.900
+prefetch_map_page_stride	wall_exec_ns	12999	11000	0.846219	-15.378
+prefetch_map_page_stride	exec_cycles	32497	27500	0.846232	-15.377
+prefetch_map_page_stride	jited_prog_len	494	498	1.008097	0.810
+prefetch_map_page_stride	xlated_prog_len	920	936	1.017391	1.739
+prefetch_packet_first_deref	exec_ns	2125	2049	0.964235	-3.576
+prefetch_packet_first_deref	wall_exec_ns	5538	6999	1.263814	26.381
+prefetch_packet_first_deref	exec_cycles	13846	17498	1.263758	26.376
+prefetch_packet_first_deref	jited_prog_len	592	595	1.005068	0.507
+prefetch_packet_first_deref	xlated_prog_len	1080	1096	1.014815	1.481

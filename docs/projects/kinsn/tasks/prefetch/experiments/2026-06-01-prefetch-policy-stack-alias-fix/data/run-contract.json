@@ -1,0 +1,111 @@
+{
+  "experiment": "2026-06-01-prefetch-policy-stack-alias-fix",
+  "date": "2026-06-01",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "goal": "Fix Kinsn prefetch policy misses for representative packet and map micro bytecode, then validate the final conservative policy with x86 AWS kernel micro runtime smoke.",
+  "code_changes": [
+    "code/bpfopt/crates/bpfopt/src/passes/prefetch.rs",
+    "code/bpfopt/crates/bpfopt/src/passes/prefetch_tests.rs",
+    "docs/projects/kinsn/tasks/prefetch/plan.md"
+  ],
+  "local_validation": [
+    {
+      "name": "prefetch unit tests",
+      "command": "cargo test --manifest-path code/bpfopt/crates/bpfopt/Cargo.toml prefetch -- --nocapture",
+      "stdout": "data/cargo-test-prefetch.log",
+      "stderr": "data/cargo-test-prefetch.stderr.log",
+      "result": "passed"
+    },
+    {
+      "name": "release bpfopt build",
+      "command": "cargo build --manifest-path code/bpfopt/crates/bpfopt/Cargo.toml --release --bin bpfopt",
+      "stdout": "data/cargo-build-bpfopt-release.log",
+      "stderr": "data/cargo-build-bpfopt-release.stderr.log",
+      "result": "passed"
+    }
+  ],
+  "aws_validation": [
+    {
+      "name": "packet first deref x86 kernel smoke",
+      "command": "BPFREJIT_BENCH_PASSES=prefetch /home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH=prefetch_packet_first_deref RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=1000",
+      "result_dir": "data/aws-results/aws_x86_micro_20260601_114201_001026",
+      "remote_log": "data/aws-logs/micro_m3kt_20260601_114158.remote.log",
+      "instance_id": "i-0f7fc0f3f4c735119",
+      "instance_type": "t3.small",
+      "result": "completed_intermediate_permissive_policy"
+    },
+    {
+      "name": "map page stride x86 kernel smoke",
+      "command": "BPFREJIT_BENCH_PASSES=prefetch /home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH=prefetch_map_page_stride RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=1000",
+      "result_dir": "data/aws-results/aws_x86_micro_20260601_114839_347362",
+      "remote_log": "data/aws-logs/micro_d6_20260601_114837.remote.log",
+      "instance_id": "i-0c742b49f93531e72",
+      "instance_type": "t3.small",
+      "result": "completed_intermediate_permissive_policy"
+    },
+    {
+      "name": "packet first deref x86 kernel final conservative rerun",
+      "command": "BPFREJIT_BENCH_PASSES=prefetch /home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH=prefetch_packet_first_deref RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=1000",
+      "state": "data/aws-failed-rerun/packet-rerun-instance.json",
+      "instance_id": "i-0371a7ae35a6b706b",
+      "instance_type": "t3.small",
+      "result": "failed_before_benchmark_by_expired_aws_token_requestexpired",
+      "cleanup": "confirmed terminated after renewed AWS login"
+    },
+    {
+      "name": "packet first deref x86 kernel final conservative smoke",
+      "command": "BPFREJIT_BENCH_PASSES=prefetch /home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH=prefetch_packet_first_deref RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=1000",
+      "result_dir": "data/aws-results/aws_x86_micro_20260601_220320_641310",
+      "remote_log": "data/aws-logs/micro_t6q8uy_20260601_220318.remote.log",
+      "instance_id": "i-0fe34d545ff82c5d3",
+      "instance_type": "t3.small",
+      "sites_matched": 1,
+      "sites_applied": 1,
+      "insn_before": 135,
+      "insn_after": 137,
+      "result": "completed_final_conservative_policy"
+    },
+    {
+      "name": "map page stride x86 kernel final conservative smoke",
+      "command": "BPFREJIT_BENCH_PASSES=prefetch /home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH=prefetch_map_page_stride RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=1000",
+      "result_dir": "data/aws-results/aws_x86_micro_20260601_221126_145484",
+      "remote_log": "data/aws-logs/micro_8_20260601_221124.remote.log",
+      "instance_id": "i-083bba4b087515321",
+      "instance_type": "t3.small",
+      "sites_matched": 1,
+      "sites_applied": 1,
+      "insn_before": 109,
+      "insn_after": 111,
+      "result": "completed_final_conservative_policy"
+    }
+  ],
+  "aws_cost_estimate": {
+    "pricing_assumptions": {
+      "t3.small_us_east_1_linux_usd_per_hour": 0.0208,
+      "gp3_usd_per_gb_month": 0.08,
+      "root_volume_gb": 32
+    },
+    "final_completed_smoke_instance_runtime_hours_approx": 0.202,
+    "final_completed_smoke_ec2_compute_usd_approx": 0.0042,
+    "failed_rerun_ebs_retained_cost_usd_approx": 0.036,
+    "whole_round_total_usd_rough_order": "0.045 to 0.05",
+    "excludes": [
+      "data transfer",
+      "tax",
+      "free tier",
+      "credits",
+      "Savings Plans",
+      "Reserved Instances",
+      "account-level discounts"
+    ]
+  },
+  "data": [
+    "analysis/local-bpfopt-summary.tsv",
+    "analysis/aws-smoke-summary.tsv",
+    "data/local-bpfopt/packet.current.report.json",
+    "data/local-bpfopt/map.current.report.json",
+    "data/code-diff.patch",
+    "data/aws-instance-state.json"
+  ]
+}

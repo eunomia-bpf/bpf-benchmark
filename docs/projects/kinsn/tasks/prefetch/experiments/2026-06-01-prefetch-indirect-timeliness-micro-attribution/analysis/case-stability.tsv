@@ -1,0 +1,5 @@
+benchmark	ratios_by_run	median_ratio	classification
+prefetch_cacheline_dedup_scan	0.999138921,0.988136975,1.00897799	0.999138921	mixed
+prefetch_full_packet_ring_scan	0.999069552,0.99944097,1.01386921	0.99944097	mixed
+prefetch_indirect_two_stage	1.00228462,1.00205621,1.00411727	1.00228462	stable_loss
+prefetch_packet_offset_guarded	1.03075324,0.995760847,1.00106709	1.00106709	mixed

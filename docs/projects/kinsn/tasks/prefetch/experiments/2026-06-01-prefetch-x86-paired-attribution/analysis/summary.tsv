@@ -1,0 +1,5 @@
+bench	condition	passes	result_dir	samples	median_exec_ns	mean_exec_ns	min_exec_ns	max_exec_ns	median_wall_exec_ns	mean_wall_exec_ns	min_wall_exec_ns	max_wall_exec_ns	median_exec_cycles	mean_exec_cycles	min_exec_cycles	max_exec_cycles	median_jited_prog_len	median_xlated_prog_len	retval_set	result_set
+prefetch_packet_first_deref	control	noop	aws_x86_micro_20260601_222520_226332	5	2125	2130.6	2106	2157	5538	5517.8	5437	5539	13846	13795.2	13593	13847	592	1080	2	4428431760099841926
+prefetch_packet_first_deref	treatment	prefetch	aws_x86_micro_20260601_223237_631554	5	2049	2425	1975	3060	6999	6999.2	5000	8998	17498	17498.2	12501	22496	595	1096	2	4428431760099841926
+prefetch_map_page_stride	control	noop	aws_x86_micro_20260601_224018_661551	5	7949	8417.4	7838	10466	12999	13198.8	12997	14000	32497	32996.6	32491	35000	494	920	2	5171437513957054730
+prefetch_map_page_stride	treatment	prefetch	aws_x86_micro_20260601_224712_350691	5	7798	8340.2	7782	10351	11000	11999	10998	13997	27500	29997.4	27494	34993	498	936	2	5171437513957054730

@@ -1,0 +1,56 @@
+{
+  "date": "2026-06-02",
+  "experiment": "prefetch-profile-fed-map-value-pmu-attribution",
+  "question": "Can the current AWS micro path collect hardware PMU counters for profile-fed map-value prefetch attribution?",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "commands": [
+    {
+      "name": "x86 PMU smoke",
+      "cwd": "/home/ruoji/github/bpf-opt",
+      "command": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro RUN_TOKEN=pmu-x86-smoke BENCH=prefetch_map_page_stride RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=10000 PERF_COUNTERS=1 PERF_SCOPE=full_repeat_raw BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-map-page-stride-profile-pc52.json'"
+    },
+    {
+      "name": "ARM64 PMU smoke",
+      "cwd": "/home/ruoji/github/bpf-opt",
+      "command": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro RUN_TOKEN=pmu-arm64-smoke BENCH=prefetch_map_page_stride RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=10000 PERF_COUNTERS=1 PERF_SCOPE=full_repeat_raw BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-map-page-stride-profile-pc52.json'"
+    }
+  ],
+  "inputs": {
+    "bench": "prefetch_map_page_stride",
+    "runtime": "kernel",
+    "samples": 1,
+    "warmups": 0,
+    "inner_repeat": 10000,
+    "perf_counters": true,
+    "perf_scope": "full_repeat_raw",
+    "prefetch_profile": "/home/ruoji/github/bpf-opt/code/micro/config/prefetch-map-page-stride-profile-pc52.json"
+  },
+  "outputs": {
+    "x86_result": "/home/ruoji/github/bpf-opt/code/micro/results/aws_x86_micro_20260602_064029_890900",
+    "arm64_result": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260602_064813_166189",
+    "x86_log": "/home/ruoji/github/bpf-opt/code/.cache/aws-x86/results/logs/micro_pmu-x86-smoke_20260602_064028.remote.log",
+    "arm64_log": "/home/ruoji/github/bpf-opt/code/.cache/aws-arm64/results/logs/micro_pmu-arm64-smoke_20260602_064811.remote.log"
+  },
+  "aws": [
+    {
+      "arch": "x86",
+      "instance_id": "i-08184e086166517da",
+      "instance_type": "t3.small",
+      "region": "us-east-1",
+      "launch_time": "2026-06-02T06:34:59+00:00",
+      "terminate_time": "2026-06-02 06:40:35 GMT",
+      "state": "terminated"
+    },
+    {
+      "arch": "arm64",
+      "instance_id": "i-0891ad85a1f8315dd",
+      "instance_type": "t4g.small",
+      "region": "us-east-1",
+      "launch_time": "2026-06-02T06:42:25+00:00",
+      "terminate_time": "2026-06-02 06:48:18 GMT",
+      "state": "terminated"
+    }
+  ],
+  "decision": "Do not expand to paired PMU runs because cache_misses/cache_references/instructions hardware counters are unavailable on the default AWS instances under the current custom kernel/runtime path."
+}

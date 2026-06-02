@@ -1,0 +1,8 @@
+bench	median_treatment_over_control_exec	min_ratio	max_ratio	wins	losses	classification
+prefetch_distance_0	1.01895735	0.917061611	1.18087855	1	2	mixed
+prefetch_distance_16	1.00180018	0.997011357	1.0024024	1	2	mixed
+prefetch_distance_2	0.992762364	0.879907621	1.07894737	2	1	mixed
+prefetch_distance_32	1.00325945	0.998207593	1.00506122	1	2	mixed
+prefetch_distance_4	1.00250836	1.00083612	1.0083612	0	3	stable_loss
+prefetch_distance_8	1	0.99895288	1.05141658	1	1	mixed
+prefetch_indirect_lookup	0.997763864	0.997762864	1	2	0	mixed

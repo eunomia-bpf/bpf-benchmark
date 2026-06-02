@@ -1,0 +1,21 @@
+arch	role	bench	runtime	sample	result	exec_ns	wall_exec_ns	exec_cycles	bpf_bytecode_bytes	native_code_bytes
+arm64	control	prefetch_pipeline_page_stride	kernel	0	2999102902642040864	17564			2096	1280
+arm64	control	prefetch_pipeline_page_stride	kernel	1	2999102902642040864	17024			2096	1280
+arm64	control	prefetch_pipeline_page_stride	kernel	2	2999102902642040864	17232			2096	1280
+arm64	control	prefetch_pipeline_page_stride	kernel	3	2999102902642040864	17128			2096	1280
+arm64	control	prefetch_pipeline_page_stride	kernel	4	2999102902642040864	17293			2096	1280
+arm64	treatment	prefetch_pipeline_page_stride	kernel	0	2999102902642040864	17523			2112	1280
+arm64	treatment	prefetch_pipeline_page_stride	kernel	1	2999102902642040864	16676			2112	1280
+arm64	treatment	prefetch_pipeline_page_stride	kernel	2	2999102902642040864	16314			2112	1280
+arm64	treatment	prefetch_pipeline_page_stride	kernel	3	2999102902642040864	16313			2112	1280
+arm64	treatment	prefetch_pipeline_page_stride	kernel	4	2999102902642040864	16184			2112	1280
+x86	control	prefetch_pipeline_page_stride	kernel	0	2999102902642040864	14809	69914	174786	2096	1034
+x86	control	prefetch_pipeline_page_stride	kernel	1	2999102902642040864	27884	102948	257369	2096	1034
+x86	control	prefetch_pipeline_page_stride	kernel	2	2999102902642040864	26063	59986	149964	2096	1034
+x86	control	prefetch_pipeline_page_stride	kernel	3	2999102902642040864	37372	69999	174997	2096	1034
+x86	control	prefetch_pipeline_page_stride	kernel	4	2999102902642040864	16064	69992	174980	2096	1034
+x86	treatment	prefetch_pipeline_page_stride	kernel	0	2999102902642040864	9219	39977	99942	2112	1037
+x86	treatment	prefetch_pipeline_page_stride	kernel	1	2999102902642040864	9282	40004	100010	2112	1037
+x86	treatment	prefetch_pipeline_page_stride	kernel	2	2999102902642040864	9213	39977	99942	2112	1037
+x86	treatment	prefetch_pipeline_page_stride	kernel	3	2999102902642040864	9287	59969	149923	2112	1037
+x86	treatment	prefetch_pipeline_page_stride	kernel	4	2999102902642040864	9259	59997	149994	2112	1037

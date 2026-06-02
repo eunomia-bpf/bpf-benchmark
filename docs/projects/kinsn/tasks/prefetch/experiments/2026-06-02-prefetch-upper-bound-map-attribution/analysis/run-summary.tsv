@@ -1,0 +1,7 @@
+label	arch	variant	kind	status	samples	warmups	inner_repeat	mean_exec_ns	median_exec_ns	stdev_exec_ns	min_exec_ns	max_exec_ns	bpf_bytes	native_bytes	result	passes	result_dir
+x86_control_smoke	x86	control	smoke	completed	1	0	100	10029	10029	0	10029	10029	2048	1004	10526166669351037997		data/aws-results/aws_x86_micro_20260602_084029_398969
+x86_treatment_smoke	x86	treatment	smoke	completed	1	0	100	9200	9200	0	9200	9200	2064	1007	10526166669351037997	prefetch	data/aws-results/aws_x86_micro_20260602_085326_619208
+x86_control_multi	x86	control	multi	completed	5	1	1000	8809.2	8775	93.10585373648641	8706	8946	2048	1004	10526166669351037997		data/aws-results/aws_x86_micro_20260602_090051_077465
+x86_treatment_multi	x86	treatment	multi	completed	5	1	1000	8792.4	8700	152.75241405621057	8691	9045	2064	1007	10526166669351037997	prefetch	data/aws-results/aws_x86_micro_20260602_090833_041103
+arm64_control_multi	arm64	control	multi	completed	5	1	1000	16603.2	16518	172.2663635188251	16410	16796	2048	1256	10526166669351037997		data/aws-results/aws_arm64_micro_20260602_091609_963089
+arm64_treatment_multi	arm64	treatment	multi	completed	5	1	1000	16725.4	16694	99.02928859685906	16621	16836	2064	1264	10526166669351037997	prefetch	data/aws-results/aws_arm64_micro_20260602_092216_529142

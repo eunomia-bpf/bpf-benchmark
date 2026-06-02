@@ -1,0 +1,21 @@
+arch	role	bench	runtime	sample	result	exec_ns	wall_exec_ns	exec_cycles	bpf_bytecode_bytes	native_code_bytes
+x86	control	prefetch_pipeline_page_stride	kernel	0	2999102902642040864	9301	59985	149962	2096	1034
+x86	control	prefetch_pipeline_page_stride	kernel	1	2999102902642040864	9331	59986	149965	2096	1034
+x86	control	prefetch_pipeline_page_stride	kernel	2	2999102902642040864	9457	60022	150054	2096	1034
+x86	control	prefetch_pipeline_page_stride	kernel	3	2999102902642040864	9385	59982	149956	2096	1034
+x86	control	prefetch_pipeline_page_stride	kernel	4	2999102902642040864	9340	59974	149934	2096	1034
+x86	treatment	prefetch_pipeline_page_stride	kernel	0	2999102902642040864	9250	39995	99986	2112	1037
+x86	treatment	prefetch_pipeline_page_stride	kernel	1	2999102902642040864	9257	39968	99920	2112	1037
+x86	treatment	prefetch_pipeline_page_stride	kernel	2	2999102902642040864	9160	59970	149924	2112	1037
+x86	treatment	prefetch_pipeline_page_stride	kernel	3	2999102902642040864	9229	60002	150006	2112	1037
+x86	treatment	prefetch_pipeline_page_stride	kernel	4	2999102902642040864	9238	59988	149971	2112	1037
+arm64	control	prefetch_pipeline_page_stride	kernel	0	2999102902642040864	18419			2096	1280
+arm64	control	prefetch_pipeline_page_stride	kernel	1	2999102902642040864	18371			2096	1280
+arm64	control	prefetch_pipeline_page_stride	kernel	2	2999102902642040864	18488			2096	1280
+arm64	control	prefetch_pipeline_page_stride	kernel	3	2999102902642040864	16960			2096	1280
+arm64	control	prefetch_pipeline_page_stride	kernel	4	2999102902642040864	16957			2096	1280
+arm64	treatment	prefetch_pipeline_page_stride	kernel	0	2999102902642040864	15025			2112	1280
+arm64	treatment	prefetch_pipeline_page_stride	kernel	1	2999102902642040864	14975			2112	1280
+arm64	treatment	prefetch_pipeline_page_stride	kernel	2	2999102902642040864	14942			2112	1280
+arm64	treatment	prefetch_pipeline_page_stride	kernel	3	2999102902642040864	15277			2112	1280
+arm64	treatment	prefetch_pipeline_page_stride	kernel	4	2999102902642040864	16362			2112	1280

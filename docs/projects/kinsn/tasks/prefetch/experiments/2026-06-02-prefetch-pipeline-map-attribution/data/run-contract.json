@@ -1,0 +1,125 @@
+{
+  "date": "2026-06-02",
+  "experiment": "prefetch-pipeline-map-attribution",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "question": "Can a profile-specified next-iteration map-value prefetch point be built, loaded by x86/ARM64 AWS kernel micro, emitted as native prefetch, and show positive same-LLC paired attribution?",
+  "benchmark": "prefetch_pipeline_page_stride",
+  "profile": "/home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-page-stride-profile-pc45-r1.json",
+  "local_verification": [
+    {
+      "command": "cargo test --manifest-path code/bpfopt/Cargo.toml --release -p bpfopt prefetch",
+      "status": "passed",
+      "stdout": "data/cargo-test-prefetch.log",
+      "stderr": "data/cargo-test-prefetch.stderr.log"
+    },
+    {
+      "command": "cargo build --manifest-path code/bpfopt/Cargo.toml --release -p bpfopt -p kinsnprober",
+      "status": "passed",
+      "stdout": "data/cargo-build-bpfopt-kinsnprober.log",
+      "stderr": "data/cargo-build-bpfopt-kinsnprober.stderr.log"
+    },
+    {
+      "command": "make -C code/micro/programs OUTPUT_DIR=/tmp/bpf-opt-prefetch-pipeline-build /tmp/bpf-opt-prefetch-pipeline-build/prefetch_upper_bound.bpf.o",
+      "status": "passed",
+      "stdout": "data/make-prefetch-upper-bound-object.log",
+      "stderr": "data/make-prefetch-upper-bound-object.stderr.log"
+    }
+  ],
+  "aws_attempts": [
+    {
+      "arch": "x86",
+      "wrapper_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro RUN_TOKEN=pipeline-x86-control-smoke BENCH=prefetch_pipeline_page_stride RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=100",
+      "status": "failed_before_instance_launch",
+      "reason": "AWS session expired during AMI parameter resolution",
+      "stdout": "data/aws-x86-control-smoke-login-expired.log",
+      "stderr": "data/aws-x86-control-smoke-login-expired.stderr.log"
+    },
+    {
+      "arch": "x86",
+      "wrapper_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro RUN_TOKEN=pipeline-x86-control-smoke-rerun1 BENCH=prefetch_pipeline_page_stride RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=100",
+      "status": "passed",
+      "instance_id": "i-0b59fb48b6e65a99a",
+      "result_copy": "data/x86-control-smoke-rerun1-result",
+      "stdout": "data/aws-x86-control-smoke-rerun1.log",
+      "stderr": "data/aws-x86-control-smoke-rerun1.stderr.log"
+    },
+    {
+      "arch": "x86",
+      "wrapper_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro RUN_TOKEN=pipeline-x86-treatment-smoke-rerun1 BENCH=prefetch_pipeline_page_stride RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=100 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-page-stride-profile-pc45-r1.json'",
+      "status": "passed",
+      "instance_id": "i-0a2436041dd1c24fc",
+      "result_copy": "data/x86-treatment-smoke-rerun1-result",
+      "stdout": "data/aws-x86-treatment-smoke-rerun1.log",
+      "stderr": "data/aws-x86-treatment-smoke-rerun1.stderr.log"
+    },
+    {
+      "arch": "arm64",
+      "wrapper_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro RUN_TOKEN=pipeline-arm64-control-smoke-rerun1 BENCH=prefetch_pipeline_page_stride RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=100",
+      "status": "passed",
+      "instance_id": "i-0be9e1c4e9e5a9c13",
+      "result_copy": "data/arm64-control-smoke-rerun1-result",
+      "stdout": "data/aws-arm64-control-smoke-rerun1.log",
+      "stderr": "data/aws-arm64-control-smoke-rerun1.stderr.log"
+    },
+    {
+      "arch": "arm64",
+      "wrapper_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro RUN_TOKEN=pipeline-arm64-treatment-smoke-rerun1 BENCH=prefetch_pipeline_page_stride RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=100 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-page-stride-profile-pc45-r1.json'",
+      "status": "passed",
+      "instance_id": "i-0836bb3607c88c4d5",
+      "result_copy": "data/arm64-treatment-smoke-rerun1-result",
+      "stdout": "data/aws-arm64-treatment-smoke-rerun1.log",
+      "stderr": "data/aws-arm64-treatment-smoke-rerun1.stderr.log"
+    },
+    {
+      "arch": "x86",
+      "wrapper_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro RUN_TOKEN=pipeline-x86-control-stability-r1 BENCH=prefetch_pipeline_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=1000",
+      "status": "passed",
+      "instance_id": "i-0ae292f9d48da4b87",
+      "result_copy": "data/x86-control-stability-r1-result",
+      "stdout": "data/aws-x86-control-stability-r1.log",
+      "stderr": "data/aws-x86-control-stability-r1.stderr.log"
+    },
+    {
+      "arch": "x86",
+      "wrapper_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro RUN_TOKEN=pipeline-x86-treatment-stability-r1 BENCH=prefetch_pipeline_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=1000 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-page-stride-profile-pc45-r1.json'",
+      "status": "passed",
+      "instance_id": "i-0c9ccafcc7759601d",
+      "result_copy": "data/x86-treatment-stability-r1-result",
+      "stdout": "data/aws-x86-treatment-stability-r1.log",
+      "stderr": "data/aws-x86-treatment-stability-r1.stderr.log"
+    },
+    {
+      "arch": "arm64",
+      "wrapper_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro RUN_TOKEN=pipeline-arm64-control-stability-r1 BENCH=prefetch_pipeline_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=1000",
+      "status": "passed",
+      "instance_id": "i-0ec49b38f74ef5b68",
+      "result_copy": "data/arm64-control-stability-r1-result",
+      "stdout": "data/aws-arm64-control-stability-r1.log",
+      "stderr": "data/aws-arm64-control-stability-r1.stderr.log"
+    },
+    {
+      "arch": "arm64",
+      "wrapper_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro RUN_TOKEN=pipeline-arm64-treatment-stability-r1 BENCH=prefetch_pipeline_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=1000 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-page-stride-profile-pc45-r1.json'",
+      "status": "passed",
+      "instance_id": "i-08fc9cd0578267046",
+      "result_copy": "data/arm64-treatment-stability-r1-result",
+      "stdout": "data/aws-arm64-treatment-stability-r1.log",
+      "stderr": "data/aws-arm64-treatment-stability-r1.stderr.log"
+    }
+  ],
+  "aws_cost": {
+    "price_source": "AWS Pricing API queried on 2026-06-02 for us-east-1 Linux On-Demand and gp3 storage",
+    "t3_small_usd_per_hour": 0.0208,
+    "t4g_small_usd_per_hour": 0.0168,
+    "gp3_usd_per_gb_month": 0.08,
+    "root_volume_gib": 32,
+    "x86_wall_seconds": 1439,
+    "arm64_wall_seconds": 1356,
+    "compute_cost_usd": 0.014642,
+    "ebs_cost_usd": 0.002760,
+    "total_estimated_cost_usd": 0.017402,
+    "detail": "analysis/aws-instance-summary.tsv",
+    "note": "Estimate excludes data transfer, tax, free tier, credits, Savings Plans, Reserved Instances, and account-level discounts."
+  }
+}

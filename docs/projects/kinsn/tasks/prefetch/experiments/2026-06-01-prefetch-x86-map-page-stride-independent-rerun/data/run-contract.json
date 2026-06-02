@@ -1,0 +1,97 @@
+{
+  "experiment": "2026-06-01-prefetch-x86-map-page-stride-independent-rerun",
+  "date_local": "2026-06-01",
+  "question": "Whether x86 prefetch_map_page_stride keeps the weak positive signal across independent AWS control/treatment pairs.",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "platform": "aws",
+  "arch": "x86",
+  "instance_type": "t3.small",
+  "region": "us-east-1",
+  "bench": "prefetch_map_page_stride",
+  "runtime": "kernel",
+  "samples": 5,
+  "warmups": 1,
+  "inner_repeat": 10000,
+  "commands": [
+    "BPFREJIT_BENCH_PASSES=noop /home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH=prefetch_map_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=10000",
+    "BPFREJIT_BENCH_PASSES=prefetch /home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH=prefetch_map_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=10000"
+  ],
+  "runs": [
+    {
+      "rep": 1,
+      "condition": "control",
+      "pass": "noop",
+      "result_dir": "aws_x86_micro_20260601_231529_057545",
+      "token": "x7s9v",
+      "instance": "i-0327e6690949d44a2",
+      "remote_log": "micro_x7s9v_20260601_231527.remote.log"
+    },
+    {
+      "rep": 1,
+      "condition": "treatment",
+      "pass": "prefetch",
+      "result_dir": "aws_x86_micro_20260601_232136_911736",
+      "token": "v",
+      "instance": "i-0796b7e96f711daf9",
+      "remote_log": "micro_v_20260601_232135.remote.log"
+    },
+    {
+      "rep": 2,
+      "condition": "control",
+      "pass": "noop",
+      "result_dir": "aws_x86_micro_20260601_232921_956048",
+      "token": "42",
+      "instance": "i-0242b2a47332d9b69",
+      "remote_log": "micro_42_20260601_232920.remote.log"
+    },
+    {
+      "rep": 2,
+      "condition": "treatment",
+      "pass": "prefetch",
+      "result_dir": "aws_x86_micro_20260601_233617_042359",
+      "token": "y5",
+      "instance": "i-01edc6c440e90fe84",
+      "remote_log": "micro_y5_20260601_233615.remote.log"
+    },
+    {
+      "rep": 3,
+      "condition": "control",
+      "pass": "noop",
+      "result_dir": "aws_x86_micro_20260601_234227_898339",
+      "token": "hok4m",
+      "instance": "i-0a47035f7459d8967",
+      "remote_log": "micro_hok4m_20260601_234225.remote.log"
+    },
+    {
+      "rep": 3,
+      "condition": "treatment",
+      "pass": "prefetch",
+      "result_dir": "aws_x86_micro_20260601_235047_421249",
+      "token": "15j5",
+      "instance": "i-010f63d09b5148e47",
+      "remote_log": "micro_15j5_20260601_235045.remote.log"
+    }
+  ],
+  "analysis_files": [
+    "analysis/raw-samples.tsv",
+    "analysis/summary.tsv",
+    "analysis/pair-ratio.tsv",
+    "analysis/codegen-evidence.tsv",
+    "analysis/aws-cost-summary.tsv"
+  ],
+  "aws_price_assumptions": {
+    "t3.small_linux_on_demand_us_east_1_usd_per_hour": 0.0208,
+    "gp3_us_east_1_usd_per_gb_month": 0.08,
+    "root_volume_gb": 32,
+    "excludes": [
+      "data transfer",
+      "taxes",
+      "free tier",
+      "credits",
+      "Savings Plans",
+      "Reserved Instances",
+      "account-level discounts"
+    ]
+  }
+}

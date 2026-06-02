@@ -1,0 +1,56 @@
+{
+  "date": "2026-05-26",
+  "experiment": "arm64-prfm-prefetch-coverage-attribution",
+  "question": "Can the existing bpfopt prefetch pass exercise the ARM64 PRFM kfunc path on a real corpus app, and does a single-sample run show an immediate performance win?",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "platform": "aws",
+  "arch": "arm64",
+  "suite": "corpus",
+  "apps": [
+    "katran"
+  ],
+  "wrapper_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 corpus BPFREJIT_CORPUS_APPS=katran BPFREJIT_BENCH_PASSES=prefetch SAMPLES=1 WARMUPS=0 WORKLOAD_DURATION=2",
+  "result_dir": "/home/ruoji/github/bpf-opt/code/corpus/results/aws_arm64_corpus_20260526_233600_605194",
+  "experiment_data_dir": "/home/ruoji/github/bpf-opt/experiments/2026-05-26-arm64-prfm-prefetch-coverage-attribution/data",
+  "remote_log": "/home/ruoji/github/bpf-opt/code/.cache/aws-arm64/results/logs/corpus_wcxwchw7_20260526_233559.remote.log",
+  "instance": {
+    "id": "i-0f47a6524937689ff",
+    "type": "t4g.small",
+    "region": "us-east-1",
+    "state_after_run": "terminated",
+    "launch_time_utc": "2026-05-26T23:29:57Z",
+    "terminate_observed_utc": "2026-05-26T23:36:39.061587Z",
+    "wall_seconds": 402.061587,
+    "root_volume_gb": 32
+  },
+  "kernel": {
+    "release": "7.0.0-rc2+",
+    "setup_verify_log": "/home/ruoji/github/bpf-opt/code/.cache/aws-arm64/results/setup_7.0.0-rc2+_20260526_233516/setup_verify.log"
+  },
+  "pricing": {
+    "source": "AWS Pricing API, queried on 2026-05-26",
+    "compute_usd_per_hour": 0.0168,
+    "ebs_gp3_usd_per_gb_month": 0.08,
+    "compute_cost_usd": 0.001876287406,
+    "ebs_cost_usd": 0.000397097864,
+    "total_estimated_cost_usd": 0.00227338527,
+    "excluded": [
+      "data transfer",
+      "tax",
+      "free tier",
+      "credits",
+      "Savings Plans",
+      "Reserved Instances",
+      "account-level discounts"
+    ]
+  },
+  "outcome": {
+    "status": "completed",
+    "prefetch_sites_matched": 44,
+    "prefetch_sites_applied": 44,
+    "prefetch_sites_skipped": 0,
+    "bpfopt_insn_delta": 88,
+    "kernel_runtime_interpretation": "one-sample post_rejit raw runtime was slower than baseline, so this is coverage evidence, not a performance win"
+  }
+}

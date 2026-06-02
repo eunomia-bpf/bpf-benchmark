@@ -1,0 +1,5 @@
+arch	metric	control	treatment	treatment_over_control	speedup_percent	native_delta_bytes	bpf_delta_bytes
+x86	exec_mean_ns	9376.400	8417.000	0.897679	11.398	4	16
+x86	exec_median_ns	9955.000	7918.000	0.795379	25.726	4	16
+arm64	exec_mean_ns	14512.800	14021.600	0.966154	3.503	8	16
+arm64	exec_median_ns	14168.000	14024.000	0.989836	1.027	8	16

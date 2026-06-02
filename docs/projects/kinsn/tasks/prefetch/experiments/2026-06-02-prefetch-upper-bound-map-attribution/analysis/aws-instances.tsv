@@ -1,0 +1,9 @@
+instance_id	state	type	launch_time	terminate_time	wall_seconds	public_ip	name	note
+i-050a52770a502a91b	terminated	t3.small	2026-06-02T08:30:34+00:00	2026-06-02T08:34:05+00:00	211		bpf-benchmark-x86-xmstnr	aborted x86 control smoke; manual interrupt during remote setup; terminated
+i-0c40188f8cd187be0	terminated	t3.small	2026-06-02T08:35:30+00:00	2026-06-02T08:40:34+00:00	304		bpf-benchmark-x86-jur	x86 control smoke success
+i-01098217013a60c02	terminated	t3.small	2026-06-02T08:42:08+00:00	2026-06-02T08:46:25+00:00	257		bpf-benchmark-x86-hz2n	aborted x86 treatment smoke; manual interrupt during docker install; terminated
+i-0be319e2ce133d69e	terminated	t3.small	2026-06-02T08:47:44+00:00	2026-06-02T08:53:31+00:00	347		bpf-benchmark-x86-rps	x86 treatment smoke success
+i-0ad26542ff3b248a0	terminated	t3.small	2026-06-02T08:55:10+00:00	2026-06-02T09:00:56+00:00	346		bpf-benchmark-x86-01n	x86 control multi success
+i-0ab87252c89faef66	terminated	t3.small	2026-06-02T09:02:37+00:00	2026-06-02T09:08:39+00:00	362		bpf-benchmark-x86-zv50	x86 treatment multi success
+i-01b06ea0bb53c50b9	terminated	t4g.small	2026-06-02T09:10:45+00:00	2026-06-02T09:16:15+00:00	330		bpf-benchmark-arm64-3n1yx	arm64 control multi success
+i-04cd5408dca72b368	terminated	t4g.small	2026-06-02T09:17:51+00:00	2026-06-02T09:22:22+00:00	271		bpf-benchmark-arm64-1xe9	arm64 treatment multi success

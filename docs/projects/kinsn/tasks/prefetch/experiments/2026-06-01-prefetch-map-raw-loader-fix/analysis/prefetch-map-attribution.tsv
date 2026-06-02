@@ -1,0 +1,5 @@
+benchmark	control_exec_ns_samples	treatment_exec_ns_samples	control_median_exec_ns	treatment_median_exec_ns	treatment_over_control	speedup_pct	control_native_bytes	treatment_native_bytes	native_bytes_delta	control_bpf_bytes	treatment_bpf_bytes	bpf_bytes_delta	control_result_ok	treatment_result_ok
+prefetch_map_indirect_page	14648,14641,14641,14640,14633	14764,15400,14717,14718,14711	14641	14718	1.005259	-0.526	720	728	8	1064	1096	32	true	true
+prefetch_map_line_dedup	14923,14490,14493,14495,14503	14534,14539,14536,14534,15499	14495	14536	1.002829	-0.283	976	984	8	1584	1600	16	true	true
+prefetch_map_page_stride	14047,14064,13840,14357,14132	14022,14014,14021,14024,14025	14064	14022	0.997014	0.299	632	640	8	920	936	16	true	true
+GEOMEAN					1.001694	-0.169								

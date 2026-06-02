@@ -1,0 +1,41 @@
+{
+  "date": "2026-06-01",
+  "experiment": "prefetch-micro-kernel-pass-path-fix",
+  "question": "Verify that micro kernel runtime applies BPFREJIT_BENCH_PASSES=prefetch through bpfopt before kernel test-run.",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "platform": "aws",
+  "arch": "x86",
+  "runtime": "kernel",
+  "instance_type": "t3.small",
+  "region": "us-east-1",
+  "commands": [
+    "python3 -m py_compile code/micro/driver.py",
+    "make -C code host-runner-x86",
+    "code/runner/build-llvmbpf/micro_exec --help",
+    "BPFREJIT_BENCH_PASSES=prefetch /home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH=prefetch_packet_first_deref RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=1000",
+    "BPFREJIT_BENCH_PASSES=prefetch /home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH=prefetch_map_page_stride RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=1000"
+  ],
+  "aws_instances": [
+    {
+      "instance_id": "i-0416af28c660548d6",
+      "instance_type": "t3.small",
+      "state_after_experiment": "terminated",
+      "launch_time_utc": "2026-06-01T10:28:31+00:00",
+      "shutting_down_observed_utc": "2026-06-01T10:34:18.584925+00:00",
+      "benchmark": "prefetch_packet_first_deref",
+      "result_dir": "code/micro/results/aws_x86_micro_20260601_103417_746687"
+    },
+    {
+      "instance_id": "i-02a4a531de4405e58",
+      "instance_type": "t3.small",
+      "state_after_experiment": "terminated",
+      "launch_time_utc": "2026-06-01T10:36:26+00:00",
+      "shutting_down_observed_utc": "2026-06-01T10:41:37.492448+00:00",
+      "benchmark": "prefetch_map_page_stride",
+      "result_dir": "code/micro/results/aws_x86_micro_20260601_104136_466415"
+    }
+  ],
+  "expected_result": "bpfopt artifacts are produced for kernel runtime samples; pass report shows whether current prefetch policy matched/applied sites.",
+  "status": "completed_with_policy_miss"
+}

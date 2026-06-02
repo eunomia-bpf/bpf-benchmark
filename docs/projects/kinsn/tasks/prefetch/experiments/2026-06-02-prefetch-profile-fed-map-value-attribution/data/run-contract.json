@@ -1,0 +1,123 @@
+{
+  "date": "2026-06-02",
+  "experiment": "prefetch-profile-fed-map-value-attribution",
+  "question": "Does a profile-fed map-value prefetch admission policy apply the intended map-value load site and produce a measurable paired microbenchmark effect on x86 and ARM64?",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "benchmark": "prefetch_map_page_stride",
+  "manifest": "/home/ruoji/github/bpf-opt/code/micro/config/micro_pure_jit.yaml",
+  "profile": "/home/ruoji/github/bpf-opt/code/micro/config/prefetch-map-page-stride-profile-pc52.json",
+  "runtime": "kernel",
+  "samples": 5,
+  "warmups": 1,
+  "inner_repeat": 10000,
+  "control": {
+    "passes": [],
+    "pass_args": []
+  },
+  "treatment": {
+    "passes": [
+      "prefetch"
+    ],
+    "pass_args": [
+      "--profile",
+      "/home/ruoji/github/bpf-opt/code/micro/config/prefetch-map-page-stride-profile-pc52.json"
+    ]
+  },
+  "commands": [
+    {
+      "arch": "x86",
+      "case": "smoke",
+      "cwd": "/home/ruoji/github/bpf-opt",
+      "command": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH=prefetch_map_page_stride RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=10000 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-map-page-stride-profile-pc52.json'",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_x86_micro_20260602_053114_114520"
+    },
+    {
+      "arch": "arm64",
+      "case": "smoke",
+      "cwd": "/home/ruoji/github/bpf-opt",
+      "command": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro BENCH=prefetch_map_page_stride RUNTIMES=kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=10000 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-map-page-stride-profile-pc52.json'",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260602_054258_718433"
+    },
+    {
+      "arch": "x86",
+      "case": "control",
+      "cwd": "/home/ruoji/github/bpf-opt",
+      "command": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH=prefetch_map_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=10000",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_x86_micro_20260602_055006_955057"
+    },
+    {
+      "arch": "x86",
+      "case": "treatment",
+      "cwd": "/home/ruoji/github/bpf-opt",
+      "command": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH=prefetch_map_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=10000 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-map-page-stride-profile-pc52.json'",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_x86_micro_20260602_055621_359189"
+    },
+    {
+      "arch": "arm64",
+      "case": "control",
+      "cwd": "/home/ruoji/github/bpf-opt",
+      "command": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro BENCH=prefetch_map_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=10000",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260602_060355_842916"
+    },
+    {
+      "arch": "arm64",
+      "case": "treatment",
+      "cwd": "/home/ruoji/github/bpf-opt",
+      "command": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro BENCH=prefetch_map_page_stride RUNTIMES=kernel SAMPLES=5 WARMUPS=1 INNER_REPEAT=10000 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-map-page-stride-profile-pc52.json'",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260602_061059_543563"
+    }
+  ],
+  "aws": {
+    "region": "us-east-1",
+    "x86_instance_type": "t3.small",
+    "arm64_instance_type": "t4g.small",
+    "remote_user": "ec2-user",
+    "root_volume_gb": 32,
+    "instances": [
+      {
+        "arch": "x86",
+        "case": "smoke",
+        "instance_id": "i-07f397108c08d36b2",
+        "state": "terminated"
+      },
+      {
+        "arch": "arm64",
+        "case": "smoke",
+        "instance_id": "i-0320d00f195c07b53",
+        "state": "terminated"
+      },
+      {
+        "arch": "x86",
+        "case": "control",
+        "instance_id": "i-0cbf011d0b30f1a4f",
+        "state": "terminated"
+      },
+      {
+        "arch": "x86",
+        "case": "treatment",
+        "instance_id": "i-0534d9ff54adb5ad9",
+        "state": "terminated"
+      },
+      {
+        "arch": "arm64",
+        "case": "control",
+        "instance_id": "i-08a2542fdd6fe0ac2",
+        "state": "terminated"
+      },
+      {
+        "arch": "arm64",
+        "case": "treatment",
+        "instance_id": "i-019d03615362c1488",
+        "state": "terminated"
+      }
+    ]
+  },
+  "analysis_files": [
+    "analysis/raw-samples.tsv",
+    "analysis/summary.tsv",
+    "analysis/paired-attribution.tsv",
+    "analysis/bpfopt-sites.tsv",
+    "analysis/aws-instances.tsv"
+  ]
+}

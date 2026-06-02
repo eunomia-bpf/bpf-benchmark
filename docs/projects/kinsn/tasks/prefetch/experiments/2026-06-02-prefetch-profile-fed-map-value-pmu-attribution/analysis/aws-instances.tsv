@@ -1,0 +1,3 @@
+arch	run_token	instance_id	instance_type	launch_time	terminate_time	state	aws_wall_seconds	aws_wall_minutes	compute_usd_est	ebs_usd_est
+x86	pmu-x86-smoke	i-08184e086166517da	t3.small	2026-06-02T06:34:59+00:00	2026-06-02 06:40:35 GMT	terminated	336	5.60	0.001941	0.000415
+arm64	pmu-arm64-smoke	i-0891ad85a1f8315dd	t4g.small	2026-06-02T06:42:25+00:00	2026-06-02 06:48:18 GMT	terminated	353	5.88	0.001647	0.000436

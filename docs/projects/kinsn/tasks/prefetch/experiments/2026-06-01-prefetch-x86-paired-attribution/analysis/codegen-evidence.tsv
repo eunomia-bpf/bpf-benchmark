@@ -1,0 +1,5 @@
+bench	condition	passes	result_dir	prefetcht0_counts_per_sample	prefetcht0_total	sites_matched_per_sample	sites_applied_per_sample	sites_skipped_per_sample	insn_count_before	insn_count_after	insn_delta
+prefetch_packet_first_deref	control	noop	aws_x86_micro_20260601_222520_226332	0,0,0,0,0	0						
+prefetch_packet_first_deref	treatment	prefetch	aws_x86_micro_20260601_223237_631554	1,1,1,1,1	5	1,1,1,1,1	1,1,1,1,1	0,0,0,0,0	135,135,135,135,135	137,137,137,137,137	2,2,2,2,2
+prefetch_map_page_stride	control	noop	aws_x86_micro_20260601_224018_661551	0,0,0,0,0	0						
+prefetch_map_page_stride	treatment	prefetch	aws_x86_micro_20260601_224712_350691	1,1,1,1,1	5	1,1,1,1,1	1,1,1,1,1	0,0,0,0,0	109,109,109,109,109	111,111,111,111,111	2,2,2,2,2

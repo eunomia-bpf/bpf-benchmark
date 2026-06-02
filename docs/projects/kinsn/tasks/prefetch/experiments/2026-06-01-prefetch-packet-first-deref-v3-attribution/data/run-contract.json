@@ -1,0 +1,56 @@
+{
+  "architectures": {
+    "arm64": {
+      "container": "bpf-benchmark/runner-runtime:arm64",
+      "instance_type": "t4g.small",
+      "kernel": "7.0.0-rc2+"
+    },
+    "x86": {
+      "container": "bpf-benchmark/runner-runtime:x86_64",
+      "instance_type": "t3.small",
+      "kernel": "7.0.0-rc2+"
+    }
+  },
+  "aws_pricing_source": {
+    "gp3_us_east_1_usd_per_gb_month": 0.08,
+    "method": "AWS Pricing API get-products, queried 2026-06-01 local / 2026-06-02 UTC",
+    "t3.small_linux_us_east_1_usd_per_hour": 0.0208,
+    "t4g.small_linux_us_east_1_usd_per_hour": 0.0168
+  },
+  "benchmarks": [
+    "prefetch_single_first_deref",
+    "prefetch_packet_first_deref"
+  ],
+  "code_head": "d9f007575bda699f0ddb154abd37cf80bcd1b120",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "control": {
+    "BPFREJIT_BENCH_PASSES": "noop"
+  },
+  "data_files": {
+    "aws_cost_estimate": "analysis/aws-cost-estimate.tsv",
+    "aws_instance_time": "analysis/aws-instance-time.tsv",
+    "local_logs": "data/local-logs/",
+    "overall_summary": "analysis/overall-summary.tsv",
+    "pass_and_codegen": "analysis/pass-and-codegen.tsv",
+    "per_run_summary": "analysis/per-run-summary.tsv",
+    "raw_results": "data/aws-results/",
+    "raw_samples": "analysis/raw-samples.tsv",
+    "result_map": "data/result-map.tsv"
+  },
+  "date_local": "2026-06-01",
+  "experiment": "2026-06-01-prefetch-packet-first-deref-v3-attribution",
+  "inner_repeat": 10000,
+  "note": "code worktree was dirty; see report for changed-file summary.",
+  "perf_counters": 1,
+  "perf_scope": "full_repeat_raw",
+  "question": "Does selector-v3 packet first-deref prefetch show stable same-LLC benefit on x86 and ARM64 kernel micro?",
+  "runtimes": [
+    "kernel"
+  ],
+  "samples": 5,
+  "treatment": {
+    "BPFREJIT_BENCH_PASSES": "prefetch"
+  },
+  "warmups": 1,
+  "workspace": "/home/ruoji/github/bpf-opt"
+}
