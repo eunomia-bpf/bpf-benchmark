@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-RUN_DIR = ROOT / "corpus/results/x86_kvm_corpus_20260531_093716_580979"
+RUN_DIR = ROOT / "corpus/results/x86_kvm_corpus_20260531_233035_656739"
 FIG_DIR = ROOT / "docs" / "figures"
 OUT_MD = ROOT / "docs" / "tmp" / "kinsn_eval_20260531_summary.md"
 FIG_OUT = FIG_DIR / "eval-kinsn-corpus-20260531.png"
@@ -113,6 +113,14 @@ def wins_losses(values: list[float]) -> tuple[int, int, int]:
 
 def fmt_ratio(value: float) -> str:
     return "n/a" if math.isnan(value) else f"{value:.3f}x"
+
+
+def render_diagnostic(diagnostic: object) -> str:
+    label = str(diagnostic).split(":", 1)[0]
+    return label.replace(
+        "x86_cond_select_probe_read_user_gate=",
+        "x86_cond_select_probe_read_user_blocked=",
+    )
 
 
 def app_path(stem: str) -> pathlib.Path:
@@ -226,7 +234,7 @@ def loadtime_summary() -> tuple[dict[str, dict[str, Counter[str]]], dict[str, Co
             if report.get("error") or record.get("error"):
                 summary["errors"] += 1
             for diagnostic in report.get("diagnostics") or []:
-                summary[f"diag:{str(diagnostic).split(':', 1)[0]}"] += 1
+                summary[f"diag:{render_diagnostic(diagnostic)}"] += 1
         summaries[key] = dict(per_pass)
         applied_names[key] = names
     return summaries, applied_names

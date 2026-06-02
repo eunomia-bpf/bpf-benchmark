@@ -44,6 +44,7 @@ const DEFAULT_KINSN_NAMES: &[&str] = &[
     "bpf_x86_movq", "bpf_x86_testq", "bpf_x86_cmpl", "bpf_x86_cmpq",
     "bpf_x86_cmovel", "bpf_x86_cmoveq", "bpf_x86_cmovnel", "bpf_x86_cmovneq",
     "bpf_x86_cmovbl", "bpf_x86_cmovbq",
+    "bpf_x86_cmp_cmove", "bpf_x86_cmp_cmovne", "bpf_x86_cmp_cmovb",
     "bpf_arm64_mov_x",
     // rotate
     "bpf_x86_rolq", "bpf_x86_rorxl", "bpf_arm64_extr_x", "bpf_arm64_extr_w",

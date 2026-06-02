@@ -703,7 +703,7 @@ void run_pass(Cli &cli)
 					output = input;
 					sites_applied = 0;
 					diagnostics.push_back(
-						"x86_cond_select_probe_read_user_gate=verifier_bounds");
+						"x86_cond_select_probe_read_user_blocked=verifier_bounds");
 				} else if (*cli.pass == "cond_select" &&
 					   x86_cond_select_large_if_conversion(
 						   input, output, *sites_applied)) {
