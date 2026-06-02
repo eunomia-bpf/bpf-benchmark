@@ -122,6 +122,192 @@ benchmarks:
     expected_result: 9377358970524074984
     tags: [memory, compare, branch, pure-jit]
 
+  - name: prefetch_distance_0
+    base_name: prefetch_research
+    program_name: prefetch_distance_0_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 5236797948973314713
+    tags: [memory, prefetch, distance-sweep, new-2026-05-31, pure-jit]
+
+  - name: prefetch_distance_2
+    base_name: prefetch_research
+    program_name: prefetch_distance_2_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 17644988031226504103
+    tags: [memory, prefetch, distance-sweep, new-2026-05-31, pure-jit]
+
+  - name: prefetch_distance_4
+    base_name: prefetch_research
+    program_name: prefetch_distance_4_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 1273944769105833849
+    tags: [memory, prefetch, distance-sweep, new-2026-05-31, pure-jit]
+
+  - name: prefetch_distance_8
+    base_name: prefetch_research
+    program_name: prefetch_distance_8_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 2656538606467263818
+    tags: [memory, prefetch, distance-sweep, new-2026-05-31, pure-jit]
+
+  - name: prefetch_distance_16
+    base_name: prefetch_research
+    program_name: prefetch_distance_16_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 7931970485254346198
+    tags: [memory, prefetch, distance-sweep, new-2026-05-31, pure-jit]
+
+  - name: prefetch_distance_32
+    base_name: prefetch_research
+    program_name: prefetch_distance_32_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 3173420694548969481
+    tags: [memory, prefetch, distance-sweep, new-2026-05-31, pure-jit]
+
+  - name: prefetch_indirect_lookup
+    base_name: prefetch_research
+    program_name: prefetch_indirect_lookup_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 16342531704906166951
+    tags: [memory, prefetch, indirect-lookup, new-2026-05-31, pure-jit]
+
+  - name: prefetch_indirect_two_stage
+    base_name: prefetch_research
+    program_name: prefetch_indirect_two_stage_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 901462245269644474
+    tags: [memory, prefetch, indirect-lookup, two-stage, new-2026-06-01, pure-jit]
+
+  - name: prefetch_cacheline_dedup_scan
+    base_name: prefetch_research
+    program_name: prefetch_cacheline_dedup_scan_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 14518078625247753906
+    tags: [memory, prefetch, cacheline-dedup, new-2026-06-01, pure-jit]
+
+  - name: prefetch_packet_offset_guarded
+    base_name: prefetch_research
+    program_name: prefetch_packet_offset_guarded_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 15179177712494507727
+    tags: [memory, prefetch, guarded-offset, new-2026-06-01, pure-jit]
+
+  - name: prefetch_full_packet_ring_scan
+    base_name: prefetch_research
+    program_name: prefetch_full_packet_ring_scan_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 1680051385401217701
+    tags: [memory, prefetch, packet-working-set, new-2026-06-01, pure-jit]
+
+  - name: prefetch_map_page_stride
+    base_name: prefetch_map_research
+    program_name: prefetch_map_page_stride_xdp
+    io_mode: map
+    kernel_input_size: 262144
+    input_generator: prefetch_map_research
+    expected_result: 5171437513957054730
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, page-stride, new-2026-06-01, kernel-only]
+
+  - name: prefetch_map_indirect_page
+    base_name: prefetch_map_research
+    program_name: prefetch_map_indirect_page_xdp
+    io_mode: map
+    kernel_input_size: 262144
+    input_generator: prefetch_map_research
+    expected_result: 4561226121441376886
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, indirect-page, new-2026-06-01, kernel-only]
+
+  - name: prefetch_map_line_dedup
+    base_name: prefetch_map_research
+    program_name: prefetch_map_line_dedup_xdp
+    io_mode: map
+    kernel_input_size: 262144
+    input_generator: prefetch_map_research
+    expected_result: 11442446661432043300
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, cacheline-dedup, new-2026-06-01, kernel-only]
+
+  - name: prefetch_upper_page_stride
+    base_name: prefetch_upper_bound
+    program_name: prefetch_upper_page_stride_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 10526166669351037997
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, page-stride, synthetic-control, upper-bound, new-2026-06-02, kernel-only]
+
+  - name: prefetch_pipeline_page_stride
+    base_name: prefetch_upper_bound
+    program_name: prefetch_pipeline_page_stride_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 2999102902642040864
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, page-stride, synthetic-control, next-pointer, software-pipeline, new-2026-06-02, kernel-only]
+
+  - name: prefetch_hot_l1_load
+    base_name: prefetch_research
+    program_name: prefetch_hot_l1_load_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 15525889724183181886
+    tags: [memory, prefetch, candidate-filtering, hot-l1, new-2026-05-31, pure-jit]
+
+  - name: prefetch_sequential_scan
+    base_name: prefetch_research
+    program_name: prefetch_sequential_scan_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 17814162929419258092
+    tags: [memory, prefetch, candidate-filtering, sequential, new-2026-05-31, pure-jit]
+
+  - name: prefetch_large_stride_scan
+    base_name: prefetch_research
+    program_name: prefetch_large_stride_scan_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 770719547157072484
+    tags: [memory, prefetch, candidate-filtering, large-stride, new-2026-05-31, pure-jit]
+
+  - name: prefetch_permuted_index_scan
+    base_name: prefetch_research
+    program_name: prefetch_permuted_index_scan_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 15322165717602243017
+    tags: [memory, prefetch, candidate-filtering, permuted-index, new-2026-05-31, pure-jit]
+
+  - name: prefetch_packet_first_deref
+    base_name: prefetch_research
+    program_name: prefetch_packet_first_deref_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 4428431760099841926
+    tags: [memory, prefetch, candidate-filtering, packet-first-deref, new-2026-05-31, pure-jit]
+
+  - name: prefetch_single_first_deref
+    base_name: prefetch_research
+    program_name: prefetch_single_first_deref_xdp
+    kernel_input_size: 1400
+    input_generator: prefetch_research
+    expected_result: 5246875435158093649
+    tags: [memory, prefetch, selector-v3, packet-first-deref, synthetic-control, new-2026-06-01, pure-jit]
+
   - name: packet_vlan_tcpopt_parser
     base_name: packet_vlan_tcpopt_parser
     io_mode: packet
