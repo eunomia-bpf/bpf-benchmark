@@ -129,6 +129,10 @@ def _memcmp_prefix_pattern_byte(index: int) -> int:
     return (((index * 29) ^ (index << 2) ^ 0xA5) + 0x11) & 0xFF
 
 
+def _prefetch_research_byte(index: int) -> int:
+    return (((index * 131) ^ (index >> 1) ^ ((index * index) >> 5) ^ 0x5A) & 0xFF)
+
+
 def generate_sorted_rule_binary_search(output: Path) -> dict[str, int]:
     data_len, query_len = 32, 16
     data = [index * 3 + 7 for index in range(data_len)]
@@ -179,6 +183,24 @@ def generate_payload_prefix_memcmp_scan(output: Path) -> dict[str, int]:
     blob.extend(full_match)
     output.write_bytes(blob)
     return {"scenario_count": scenario_count, "bytes_per_candidate": 64}
+
+
+def generate_prefetch_research(output: Path) -> dict[str, int]:
+    size = 1400
+    output.write_bytes(bytes(_prefetch_research_byte(index) for index in range(size)))
+    return {"bytes": size, "distance_cases": 6, "indirect_cases": 5, "candidate_filter_cases": 5}
+
+
+def generate_prefetch_map_research(output: Path) -> dict[str, int]:
+    size = 262144
+    output.write_bytes(bytes(_prefetch_research_byte(index * 17 + (index >> 3)) for index in range(size)))
+    return {"bytes": size, "working_set": "map-value", "new_cases": 3}
+
+
+def generate_prefetch_upper_bound(output: Path) -> dict[str, int]:
+    size = 1048576
+    output.write_bytes(bytes(_prefetch_research_byte(index * 19 + (index >> 4)) for index in range(size)))
+    return {"bytes": size, "working_set": "map-value", "source_type": "synthetic-control"}
 
 
 def generate_packet_vlan_tcpopt_parser(output: Path) -> dict[str, int]:

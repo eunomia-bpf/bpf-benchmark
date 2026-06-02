@@ -16,7 +16,8 @@ std::string usage_text()
         "[--io-mode map|staged|packet|context] [--raw-packet] [--inner-repeat N] "
         "[--warmup N] [--input-size N] [--perf-counters] "
         "[--perf-scope full_repeat_raw|full_repeat_avg] [--dump-jit] [--dump-jit-path <path>] "
-        "[--dump-xlated <path>]\n"
+        "[--dump-xlated <path>] [--bpfopt-passes <csv>] [--bpfopt-target <path>] "
+        "[--bpfopt-workdir <path>] [--bpfopt-bin <path>] [--bpfopt-pass-arg <arg>]...\n"
         "  micro_exec run-native [--program <path>|<path>] [--program-name <name>] "
         "[--memory <path>] [--io-mode staged|packet] [--inner-repeat N] [--input-size N]\n"
 #ifdef MICRO_EXEC_ENABLE_LLVMBPF
@@ -58,6 +59,20 @@ void validate_cli_options(const cli_options &options)
         ) &&
         options.repeat == 0) {
         fail("--inner-repeat must be >= 1");
+    }
+    if (!options.bpfopt_passes.empty()) {
+        if (options.command != "test-run") {
+            fail("--bpfopt-passes is only supported by test-run");
+        }
+        if (options.bpfopt_target.empty()) {
+            fail("--bpfopt-passes requires --bpfopt-target");
+        }
+        if (options.bpfopt_workdir.empty()) {
+            fail("--bpfopt-passes requires --bpfopt-workdir");
+        }
+    }
+    if (!options.bpfopt_pass_args.empty() && options.bpfopt_passes.empty()) {
+        fail("--bpfopt-pass-arg requires --bpfopt-passes");
     }
 }
 
@@ -328,6 +343,26 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--dump-xlated" && index + 1 < argc) {
             options.dump_xlated = std::filesystem::path(argv[++index]);
+            continue;
+        }
+        if (current == "--bpfopt-passes" && index + 1 < argc) {
+            options.bpfopt_passes = argv[++index];
+            continue;
+        }
+        if (current == "--bpfopt-target" && index + 1 < argc) {
+            options.bpfopt_target = std::filesystem::path(argv[++index]);
+            continue;
+        }
+        if (current == "--bpfopt-workdir" && index + 1 < argc) {
+            options.bpfopt_workdir = std::filesystem::path(argv[++index]);
+            continue;
+        }
+        if (current == "--bpfopt-bin" && index + 1 < argc) {
+            options.bpfopt_binary = argv[++index];
+            continue;
+        }
+        if (current == "--bpfopt-pass-arg" && index + 1 < argc) {
+            options.bpfopt_pass_args.push_back(argv[++index]);
             continue;
         }
         fail("unknown or incomplete argument: " + std::string(current));

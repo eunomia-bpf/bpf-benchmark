@@ -191,6 +191,8 @@ host-negative-arm64:
 host-runtime-libs-x86:
 	install -d "$(RUNTIME_LIBS_X86)"
 	touch "$(RUNTIME_LIBS_X86)/.keep"
+	cp -a /usr/lib/x86_64-linux-gnu/libspdlog.so* "$(RUNTIME_LIBS_X86)/"
+	cp -a /usr/lib/x86_64-linux-gnu/libfmt.so* "$(RUNTIME_LIBS_X86)/"
 
 host-runtime-libs-arm64: aarch64-sysroot
 	install -d "$(RUNTIME_LIBS_ARM64)"

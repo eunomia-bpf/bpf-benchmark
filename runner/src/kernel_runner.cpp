@@ -17,11 +17,15 @@
 #include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
+#include <iterator>
+#include <limits>
 #include <netinet/in.h>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <sys/socket.h>
@@ -151,6 +155,68 @@ struct live_fixture_map {
     uint32_t map_flags = 0;
     int fd = -1;
 };
+
+struct raw_loaded_map {
+    live_fixture_map info;
+    unique_fd fd;
+};
+
+struct raw_loaded_map_set {
+    std::vector<raw_loaded_map> maps;
+
+    const live_fixture_map *find(std::string_view name) const
+    {
+        for (const auto &map : maps) {
+            if (map.info.name == name) {
+                return &map.info;
+            }
+        }
+        return nullptr;
+    }
+
+    std::unordered_map<std::string, uint32_t> fd_table() const
+    {
+        std::unordered_map<std::string, uint32_t> table;
+        for (const auto &map : maps) {
+            if (map.info.fd < 0) {
+                fail("raw BTF map '" + map.info.name + "' has invalid fd");
+            }
+            table.emplace(map.info.name, static_cast<uint32_t>(map.info.fd));
+        }
+        return table;
+    }
+};
+
+struct raw_btf_map_spec {
+    std::string name;
+    uint32_t type = 0;
+    uint32_t key_size = 0;
+    uint32_t value_size = 0;
+    uint32_t max_entries = 0;
+    uint32_t map_flags = 0;
+};
+
+struct btf_deleter {
+    void operator()(btf *btf_object) const
+    {
+        if (btf_object != nullptr) {
+            btf__free(btf_object);
+        }
+    }
+};
+
+using btf_ptr = std::unique_ptr<btf, btf_deleter>;
+
+struct btf_ext_deleter {
+    void operator()(btf_ext *btf_ext_object) const
+    {
+        if (btf_ext_object != nullptr) {
+            btf_ext__free(btf_ext_object);
+        }
+    }
+};
+
+using btf_ext_ptr = std::unique_ptr<btf_ext, btf_ext_deleter>;
 
 bool katran_balancer_fixture_requested(const cli_options &options)
 {
@@ -543,6 +609,226 @@ std::string resolve_effective_io_mode(std::string_view requested_io_mode, bpf_ob
     return std::string(requested_io_mode);
 }
 
+std::string resolve_effective_io_mode(
+    std::string_view requested_io_mode,
+    const raw_loaded_map_set &maps)
+{
+    if (requested_io_mode != "map") {
+        return std::string(requested_io_mode);
+    }
+
+    const bool has_input_map = maps.find("input_map") != nullptr;
+    const bool has_result_map = maps.find("result_map") != nullptr;
+    if (has_input_map && !has_result_map) {
+        fail("io-mode map requires result_map when input_map is present");
+    }
+    return std::string(requested_io_mode);
+}
+
+const char *btf_name_or_fail(const btf *btf_object, uint32_t name_offset, const char *context)
+{
+    const char *name = btf__name_by_offset(btf_object, name_offset);
+    if (name == nullptr) {
+        fail(std::string("unable to resolve BTF name while ") + context);
+    }
+    return name;
+}
+
+const struct btf_type *btf_type_by_id_or_fail(
+    const btf *btf_object,
+    uint32_t type_id,
+    const char *context)
+{
+    const struct btf_type *type = btf__type_by_id(btf_object, type_id);
+    if (type == nullptr) {
+        fail(std::string("unable to resolve BTF type while ") + context);
+    }
+    return type;
+}
+
+const struct btf_type *btf_pointee_type_or_fail(
+    const btf *btf_object,
+    uint32_t type_id,
+    const char *field_name,
+    const char *map_name)
+{
+    const struct btf_type *ptr_type =
+        btf_type_by_id_or_fail(btf_object, type_id, "reading BTF map field");
+    if (!btf_is_ptr(ptr_type)) {
+        fail("BTF map '" + std::string(map_name) + "' field '" + field_name +
+             "' must be encoded as a pointer");
+    }
+    return btf_type_by_id_or_fail(btf_object, ptr_type->type, "reading BTF map field pointee");
+}
+
+uint32_t btf_map_uint_field(
+    const btf *btf_object,
+    uint32_t type_id,
+    const char *field_name,
+    const char *map_name)
+{
+    const struct btf_type *array_type =
+        btf_pointee_type_or_fail(btf_object, type_id, field_name, map_name);
+    if (!btf_is_array(array_type)) {
+        fail("BTF map '" + std::string(map_name) + "' field '" + field_name +
+             "' must use __uint(name, value)");
+    }
+    return btf_array(array_type)->nelems;
+}
+
+uint32_t btf_map_type_size_field(
+    const btf *btf_object,
+    uint32_t type_id,
+    const char *field_name,
+    const char *map_name)
+{
+    const struct btf_type *ptr_type =
+        btf_type_by_id_or_fail(btf_object, type_id, "reading BTF map type field");
+    if (!btf_is_ptr(ptr_type)) {
+        fail("BTF map '" + std::string(map_name) + "' field '" + field_name +
+             "' must use __type(name, type)");
+    }
+    const int resolved_type_id = btf__resolve_type(btf_object, ptr_type->type);
+    if (resolved_type_id < 0) {
+        fail("unable to resolve BTF map '" + std::string(map_name) + "' field '" +
+             field_name + "' type");
+    }
+    const auto size = btf__resolve_size(btf_object, static_cast<uint32_t>(resolved_type_id));
+    if (size < 0 || size > std::numeric_limits<uint32_t>::max()) {
+        fail("unable to resolve valid BTF size for map '" + std::string(map_name) +
+             "' field '" + field_name + "'");
+    }
+    return static_cast<uint32_t>(size);
+}
+
+raw_btf_map_spec parse_raw_btf_map_spec(
+    const btf *btf_object,
+    const struct btf_type *var_type)
+{
+    if (!btf_is_var(var_type)) {
+        fail("BTF .maps datasec entry does not reference a VAR");
+    }
+    raw_btf_map_spec spec;
+    spec.name = btf_name_or_fail(btf_object, var_type->name_off, "reading BTF map variable");
+    const struct btf_type *map_type =
+        btf_type_by_id_or_fail(btf_object, var_type->type, "reading BTF map definition");
+    if (!btf_is_struct(map_type)) {
+        fail("BTF map '" + spec.name + "' definition must be a struct");
+    }
+
+    bool has_type = false;
+    bool has_key = false;
+    bool has_value = false;
+    bool has_max_entries = false;
+    const struct btf_member *members = btf_members(map_type);
+    for (uint16_t index = 0; index < btf_vlen(map_type); ++index) {
+        const struct btf_member &member = members[index];
+        const char *field_name =
+            btf_name_or_fail(btf_object, member.name_off, "reading BTF map struct member");
+        if (std::string_view(field_name) == "type") {
+            spec.type = btf_map_uint_field(btf_object, member.type, field_name, spec.name.c_str());
+            has_type = true;
+        } else if (std::string_view(field_name) == "max_entries") {
+            spec.max_entries =
+                btf_map_uint_field(btf_object, member.type, field_name, spec.name.c_str());
+            has_max_entries = true;
+        } else if (std::string_view(field_name) == "key") {
+            spec.key_size =
+                btf_map_type_size_field(btf_object, member.type, field_name, spec.name.c_str());
+            has_key = true;
+        } else if (std::string_view(field_name) == "value") {
+            spec.value_size =
+                btf_map_type_size_field(btf_object, member.type, field_name, spec.name.c_str());
+            has_value = true;
+        } else if (std::string_view(field_name) == "map_flags") {
+            spec.map_flags =
+                btf_map_uint_field(btf_object, member.type, field_name, spec.name.c_str());
+        }
+    }
+
+    if (!has_type || !has_key || !has_value || !has_max_entries) {
+        fail("BTF map '" + spec.name +
+             "' must define type, key, value, and max_entries fields");
+    }
+    return spec;
+}
+
+raw_loaded_map_set create_raw_btf_maps(const std::filesystem::path &path)
+{
+    btf_ext *raw_ext = nullptr;
+    btf *raw_btf = btf__parse_elf(path.c_str(), &raw_ext);
+    const long parse_error = libbpf_get_error(raw_btf);
+    if (parse_error != 0) {
+        fail("btf__parse_elf failed while creating raw maps: " + libbpf_error_string(parse_error));
+    }
+    btf_ptr btf_object(raw_btf);
+    btf_ext_ptr btf_ext_object(raw_ext);
+
+    raw_loaded_map_set loaded_maps;
+    const int datasec_id = btf__find_by_name_kind(btf_object.get(), ".maps", BTF_KIND_DATASEC);
+    if (datasec_id < 0) {
+        return loaded_maps;
+    }
+    const struct btf_type *datasec =
+        btf_type_by_id_or_fail(btf_object.get(), static_cast<uint32_t>(datasec_id), "reading .maps");
+    if (!btf_is_datasec(datasec)) {
+        fail("BTF type named .maps is not a DATASEC");
+    }
+
+    const struct btf_var_secinfo *vars = btf_var_secinfos(datasec);
+    for (uint16_t index = 0; index < btf_vlen(datasec); ++index) {
+        const struct btf_var_secinfo &var_info = vars[index];
+        const struct btf_type *var_type =
+            btf_type_by_id_or_fail(btf_object.get(), var_info.type, "reading .maps variable");
+        const raw_btf_map_spec spec = parse_raw_btf_map_spec(btf_object.get(), var_type);
+        if (loaded_maps.find(spec.name) != nullptr) {
+            fail("duplicate BTF map name in raw object: " + spec.name);
+        }
+        if (spec.type == BPF_MAP_TYPE_PROG_ARRAY ||
+            spec.type == BPF_MAP_TYPE_ARRAY_OF_MAPS ||
+            spec.type == BPF_MAP_TYPE_HASH_OF_MAPS) {
+            fail("raw kinsn micro loader does not support reference-valued map '" + spec.name + "'");
+        }
+
+        LIBBPF_OPTS(bpf_map_create_opts, create_opts,
+            .map_flags = spec.map_flags,
+        );
+        const int fd = bpf_map_create(
+            static_cast<bpf_map_type>(spec.type),
+            spec.name.c_str(),
+            spec.key_size,
+            spec.value_size,
+            spec.max_entries,
+            &create_opts);
+        if (fd < 0) {
+            fail("bpf_map_create(" + spec.name + ") failed: " + std::string(strerror(errno)));
+        }
+
+        bpf_map_info info = {};
+        __u32 info_len = sizeof(info);
+        if (bpf_map_get_info_by_fd(fd, &info, &info_len) != 0) {
+            close(fd);
+            fail("bpf_map_get_info_by_fd(" + spec.name + ") failed: " +
+                 std::string(strerror(errno)));
+        }
+
+        live_fixture_map live_map = {
+            .name = spec.name,
+            .id = info.id,
+            .type = info.type,
+            .key_size = info.key_size,
+            .value_size = info.value_size,
+            .map_flags = info.map_flags,
+            .fd = fd,
+        };
+        loaded_maps.maps.push_back(raw_loaded_map{
+            .info = std::move(live_map),
+            .fd = unique_fd(new int(fd)),
+        });
+    }
+    return loaded_maps;
+}
+
 bool fixture_map_is_userspace_readonly(const live_fixture_map &map)
 {
     if ((map.map_flags & BPF_F_RDONLY) != 0) {
@@ -914,6 +1200,239 @@ std::string btf_name_for_fd(int fd)
     return name;
 }
 
+std::string trim_copy(std::string_view text)
+{
+    size_t first = 0;
+    while (first < text.size() && std::isspace(static_cast<unsigned char>(text[first]))) {
+        ++first;
+    }
+    size_t last = text.size();
+    while (last > first && std::isspace(static_cast<unsigned char>(text[last - 1]))) {
+        --last;
+    }
+    return std::string(text.substr(first, last - first));
+}
+
+std::vector<std::string> split_csv(std::string_view text)
+{
+    std::vector<std::string> out;
+    size_t start = 0;
+    while (start <= text.size()) {
+        const size_t comma = text.find(',', start);
+        const size_t end = comma == std::string_view::npos ? text.size() : comma;
+        auto token = trim_copy(text.substr(start, end - start));
+        if (!token.empty()) {
+            out.push_back(std::move(token));
+        }
+        if (comma == std::string_view::npos) {
+            break;
+        }
+        start = comma + 1;
+    }
+    return out;
+}
+
+std::string shell_quote(std::string_view text)
+{
+    std::string out = "'";
+    for (char ch : text) {
+        if (ch == '\'') {
+            out += "'\\''";
+        } else {
+            out += ch;
+        }
+    }
+    out += "'";
+    return out;
+}
+
+std::string prog_type_short_name(uint32_t prog_type)
+{
+    switch (prog_type) {
+    case BPF_PROG_TYPE_SOCKET_FILTER:
+        return "socket_filter";
+    case BPF_PROG_TYPE_KPROBE:
+        return "kprobe";
+    case BPF_PROG_TYPE_SCHED_CLS:
+        return "sched_cls";
+    case BPF_PROG_TYPE_SCHED_ACT:
+        return "sched_act";
+    case BPF_PROG_TYPE_TRACEPOINT:
+        return "tracepoint";
+    case BPF_PROG_TYPE_XDP:
+        return "xdp";
+    case BPF_PROG_TYPE_PERF_EVENT:
+        return "perf_event";
+    case BPF_PROG_TYPE_CGROUP_SKB:
+        return "cgroup_skb";
+    case BPF_PROG_TYPE_CGROUP_SOCK:
+        return "cgroup_sock";
+    case BPF_PROG_TYPE_SOCK_OPS:
+        return "sock_ops";
+    case BPF_PROG_TYPE_SK_SKB:
+        return "sk_skb";
+    case BPF_PROG_TYPE_SK_MSG:
+        return "sk_msg";
+    case BPF_PROG_TYPE_TRACING:
+        return "tracing";
+    default:
+        return std::to_string(prog_type);
+    }
+}
+
+struct target_btf_module {
+    uint32_t btf_id = 0;
+    uint32_t call_offset = 0;
+};
+
+std::vector<target_btf_module> parse_target_btf_modules(const std::filesystem::path &target_json)
+{
+    if (target_json.empty()) {
+        return {};
+    }
+    std::ifstream input(target_json);
+    if (!input.is_open()) {
+        fail("unable to read bpfopt target.json: " + target_json.string());
+    }
+    const std::string text(
+        (std::istreambuf_iterator<char>(input)),
+        std::istreambuf_iterator<char>());
+
+    std::vector<target_btf_module> modules;
+    size_t pos = 0;
+    while ((pos = text.find("\"btf_id\"", pos)) != std::string::npos) {
+        const size_t colon = text.find(':', pos);
+        if (colon == std::string::npos) {
+            break;
+        }
+        const char *btf_start = text.c_str() + colon + 1;
+        char *btf_end = nullptr;
+        const auto btf_id = static_cast<uint32_t>(std::strtoul(btf_start, &btf_end, 10));
+        if (btf_end == btf_start) {
+            pos = colon + 1;
+            continue;
+        }
+        const size_t call_key = text.find("\"call_offset\"", static_cast<size_t>(btf_end - text.c_str()));
+        if (call_key == std::string::npos) {
+            break;
+        }
+        const size_t call_colon = text.find(':', call_key);
+        if (call_colon == std::string::npos) {
+            break;
+        }
+        const char *call_start = text.c_str() + call_colon + 1;
+        char *call_end = nullptr;
+        const auto call_offset = static_cast<uint32_t>(std::strtoul(call_start, &call_end, 10));
+        pos = static_cast<size_t>(call_end - text.c_str());
+        if (btf_id == 0 || call_offset == 0) {
+            continue;
+        }
+        const bool duplicate = std::any_of(
+            modules.begin(),
+            modules.end(),
+            [&](const target_btf_module &module) {
+                return module.btf_id == btf_id && module.call_offset == call_offset;
+            });
+        if (!duplicate) {
+            modules.push_back({.btf_id = btf_id, .call_offset = call_offset});
+        }
+    }
+    return modules;
+}
+
+void append_target_json_btf_fds(
+    const std::filesystem::path &target_json,
+    std::vector<unique_fd> &owned_btf_fds,
+    std::vector<int> &fd_array)
+{
+    const auto modules = parse_target_btf_modules(target_json);
+    if (modules.empty()) {
+        return;
+    }
+
+    size_t total_slots = fd_array.size();
+    for (const auto &module : modules) {
+        total_slots = std::max(total_slots, static_cast<size_t>(module.call_offset) + 1);
+    }
+    fd_array.resize(total_slots, -1);
+
+    int first_module_fd = -1;
+    for (const auto &module : modules) {
+        const int fd = bpf_btf_get_fd_by_id(module.btf_id);
+        if (fd < 0) {
+            fail("bpf_btf_get_fd_by_id(" + std::to_string(module.btf_id) + "): " + std::string(strerror(errno)));
+        }
+        if (first_module_fd < 0) {
+            first_module_fd = fd;
+        }
+        if (fd_array[module.call_offset] >= 0) {
+            close(fd);
+            continue;
+        }
+        fd_array[module.call_offset] = fd;
+        owned_btf_fds.emplace_back(new int(fd));
+    }
+
+    if (!fd_array.empty() && fd_array[0] < 0 && first_module_fd >= 0) {
+        const int dup_fd = fcntl(first_module_fd, F_DUPFD_CLOEXEC, 0);
+        if (dup_fd < 0) {
+            fail("fcntl(F_DUPFD_CLOEXEC) for target.json BTF fd: " + std::string(strerror(errno)));
+        }
+        fd_array[0] = dup_fd;
+        owned_btf_fds.emplace_back(new int(dup_fd));
+    }
+}
+
+void apply_bpfopt_passes(program_image &image, const cli_options &options)
+{
+    const auto passes = split_csv(options.bpfopt_passes);
+    if (passes.empty()) {
+        return;
+    }
+    if (image.code.empty() || image.code.size() % sizeof(bpf_insn) != 0) {
+        fail("bpfopt pass path received invalid BPF instruction image");
+    }
+
+    std::filesystem::create_directories(options.bpfopt_workdir);
+    auto input_path = options.bpfopt_workdir / "input.bpf.bin";
+    write_binary_file(input_path, image.code.data(), image.code.size());
+
+    std::filesystem::path current = input_path;
+    const std::string prog_type = prog_type_short_name(image.prog_type);
+    for (size_t index = 0; index < passes.size(); ++index) {
+        const auto &pass = passes[index];
+        const std::string stem = "step" + std::to_string(index + 1) + "-" + pass;
+        const auto output = options.bpfopt_workdir / (stem + ".bpf.bin");
+        const auto report = options.bpfopt_workdir / (stem + ".report.json");
+        std::ostringstream command;
+        command
+            << shell_quote(options.bpfopt_binary)
+            << " --pass " << shell_quote(pass)
+            << " --input " << shell_quote(current.string())
+            << " --output " << shell_quote(output.string())
+            << " --report " << shell_quote(report.string())
+            << " --prog-type " << shell_quote(prog_type)
+            << " --target " << shell_quote(options.bpfopt_target.string());
+        if (!options.bpfopt_pass_args.empty()) {
+            command << " --";
+            for (const auto &arg : options.bpfopt_pass_args) {
+                command << " " << shell_quote(arg);
+            }
+        }
+        const int status = std::system(command.str().c_str());
+        if (status != 0) {
+            fail("bpfopt pass failed: " + command.str());
+        }
+        current = output;
+    }
+
+    image.code = read_binary_file(current);
+    if (image.code.empty() || image.code.size() % sizeof(bpf_insn) != 0) {
+        fail("bpfopt pass output has invalid BPF instruction image");
+    }
+    image.kinsn_calls.clear();
+}
+
 std::unordered_map<std::string, resolved_kinsn_call> resolve_kinsn_calls(
     const std::vector<kinsn_call_relocation> &calls,
     std::vector<unique_fd> &owned_btf_fds,
@@ -1015,7 +1534,7 @@ std::unordered_map<std::string, resolved_kinsn_call> resolve_kinsn_calls(
     return resolved;
 }
 
-int load_raw_kinsn_program(program_image &image)
+int load_raw_kinsn_program(program_image &image, const std::filesystem::path &target_json = {})
 {
     if (!image.maps.empty()) {
         fail("raw kinsn micro loader does not support maps");
@@ -1029,6 +1548,9 @@ int load_raw_kinsn_program(program_image &image)
     std::vector<unique_fd> owned_btf_fds;
     std::vector<int> fd_array;
     const auto resolved = resolve_kinsn_calls(image.kinsn_calls, owned_btf_fds, fd_array);
+    if (!target_json.empty()) {
+        append_target_json_btf_fds(target_json, owned_btf_fds, fd_array);
+    }
     for (const auto &call : image.kinsn_calls) {
         if (call.insn_index >= insn_count) {
             fail("kinsn relocation points beyond program image");
@@ -1091,9 +1613,11 @@ std::vector<sample_result> run_kernel(const cli_options &options)
 
     const auto object_open_start = std::chrono::steady_clock::now();
     program_image raw_image = load_program_image(options.program, options.program_name);
-    const bool raw_kinsn_program = !raw_image.kinsn_calls.empty();
+    const bool bpfopt_pass_program = !options.bpfopt_passes.empty();
+    const bool raw_kinsn_program = bpfopt_pass_program || !raw_image.kinsn_calls.empty();
     bpf_object_ptr object;
     unique_fd raw_program_fd;
+    raw_loaded_map_set raw_maps;
     int program_fd = -1;
     std::string effective_io_mode;
     clock_type::time_point object_open_end {};
@@ -1111,11 +1635,17 @@ std::vector<sample_result> run_kernel(const cli_options &options)
             fail("raw kinsn micro loader does not support map fixtures");
         }
         object_open_end = std::chrono::steady_clock::now();
+
         object_load_start = std::chrono::steady_clock::now();
-        raw_program_fd.reset(new int(load_raw_kinsn_program(raw_image)));
+        raw_maps = create_raw_btf_maps(options.program);
+        raw_image = load_program_image(options.program, options.program_name, raw_maps.fd_table());
+        if (bpfopt_pass_program) {
+            apply_bpfopt_passes(raw_image, options);
+        }
+        raw_program_fd.reset(new int(load_raw_kinsn_program(raw_image, options.bpfopt_target)));
         program_fd = *raw_program_fd;
         object_load_end = std::chrono::steady_clock::now();
-        effective_io_mode = options.io_mode;
+        effective_io_mode = resolve_effective_io_mode(options.io_mode, raw_maps);
     } else {
         bpf_object_open_opts open_opts = {};
         open_opts.sz = sizeof(open_opts);
@@ -1172,29 +1702,37 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         (effective_io_mode == "packet" || effective_io_mode == "staged");
 
     if (effective_io_mode == "map") {
+        bpf_map *input_map = nullptr;
+        bpf_map *result_map = nullptr;
+        const live_fixture_map *raw_input_map = nullptr;
+        const live_fixture_map *raw_result_map = nullptr;
         if (raw_kinsn_program) {
-            fail("raw kinsn micro loader does not support io-mode map");
+            raw_input_map = raw_maps.find("input_map");
+            raw_result_map = raw_maps.find("result_map");
+        } else {
+            input_map = bpf_object__find_map_by_name(object.get(), "input_map");
+            result_map = bpf_object__find_map_by_name(object.get(), "result_map");
         }
-        bpf_map *input_map = bpf_object__find_map_by_name(object.get(), "input_map");
-        bpf_map *result_map = bpf_object__find_map_by_name(object.get(), "result_map");
-        if (result_map == nullptr) {
+        if (result_map == nullptr && raw_result_map == nullptr) {
             fail("required result_map not found");
         }
 
-        result_fd = bpf_map__fd(result_map);
+        result_fd = raw_result_map != nullptr ? raw_result_map->fd : bpf_map__fd(result_map);
         if (result_fd < 0) {
             fail("unable to obtain map fd");
         }
 
         uint64_t zero = 0;
         exec_input_prepare_start = std::chrono::steady_clock::now();
-        if (input_map != nullptr) {
-            const uint32_t input_value_size = bpf_map__value_size(input_map);
+        if (input_map != nullptr || raw_input_map != nullptr) {
+            const uint32_t input_value_size =
+                raw_input_map != nullptr ? raw_input_map->value_size : bpf_map__value_size(input_map);
             if (input_bytes.size() < input_value_size) {
                 input_bytes.resize(input_value_size, 0);
             }
 
-            const int input_fd = bpf_map__fd(input_map);
+            const int input_fd =
+                raw_input_map != nullptr ? raw_input_map->fd : bpf_map__fd(input_map);
             if (input_fd < 0) {
                 fail("unable to obtain input_map fd");
             }

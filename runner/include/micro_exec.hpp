@@ -10,6 +10,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 struct map_spec {
@@ -63,6 +64,11 @@ struct cli_options {
     bool dump_jit = false;
     std::optional<std::filesystem::path> dump_jit_path;
     std::optional<std::filesystem::path> dump_xlated;
+    std::string bpfopt_passes;
+    std::filesystem::path bpfopt_target;
+    std::filesystem::path bpfopt_workdir;
+    std::string bpfopt_binary = "bpfopt";
+    std::vector<std::string> bpfopt_pass_args;
     /* native_lab-only: xdp | sched_cls | cgroup_skb. Defaults to xdp. */
     std::string native_lab_prog_type = "xdp";
     /* native_lab Stage 2: native_lab function symbol to extract when the
@@ -130,7 +136,8 @@ std::vector<uint8_t> materialize_memory(const std::optional<std::filesystem::pat
 std::vector<program_descriptor> list_programs(const std::filesystem::path &path);
 program_image load_program_image(
     const std::filesystem::path &path,
-    const std::optional<std::string> &program_name = std::nullopt);
+    const std::optional<std::string> &program_name = std::nullopt,
+    const std::unordered_map<std::string, uint32_t> &map_ids = {});
 std::vector<sample_result> run_kernel(const cli_options &options);
 sample_result run_llvmbpf(const cli_options &options);
 sample_result run_native(const cli_options &options);

@@ -679,7 +679,10 @@ std::vector<program_descriptor> list_programs(const std::filesystem::path &path)
     return programs;
 }
 
-program_image load_program_image(const std::filesystem::path &path, const std::optional<std::string> &program_name)
+program_image load_program_image(
+    const std::filesystem::path &path,
+    const std::optional<std::string> &program_name,
+    const std::unordered_map<std::string, uint32_t> &map_ids)
 {
     if (elf_version(EV_CURRENT) == EV_NONE) {
         fail("libelf initialization failed");
@@ -741,8 +744,6 @@ program_image load_program_image(const std::filesystem::path &path, const std::o
         image.code.data(),
         static_cast<const uint8_t *>(target_data->d_buf) + selected_symbol->offset_bytes,
         image.code.size());
-
-    std::unordered_map<std::string, uint32_t> map_ids;
 
     std::vector<section_slice> code_slices;
     code_slices.push_back(

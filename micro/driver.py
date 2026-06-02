@@ -6,6 +6,8 @@ import os
 import platform
 import random
 import re
+import shlex
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -38,10 +40,13 @@ from runner.libs.run_artifacts import (
     derive_run_type,
     sanitize_artifact_token,
 )
+from runner.libs.rejit import benchmark_rejit_enabled_passes
 
 
 DEFAULT_RUNTIME_ORDER_SEED = 0
 RUNNER_TIMEOUT_SECONDS = 180
+BPFREJIT_BENCH_PASSES_ENV = "BPFREJIT_BENCH_PASSES"
+BPFREJIT_BENCH_PASS_ARGS_ENV = "BPFREJIT_BENCH_PASS_ARGS"
 RUNTIME_COMMANDS = {
     "native": "run-native",
     "llvmbpf": "run-llvmbpf",
@@ -204,6 +209,52 @@ def require_suite_artifacts(suite: SuiteSpec) -> None:
     require_existing_paths(required_paths)
 
 
+def kernel_bpfopt_passes_from_env() -> list[str]:
+    raw = os.environ.get(BPFREJIT_BENCH_PASSES_ENV)
+    if raw is None or not raw.strip():
+        return []
+    return benchmark_rejit_enabled_passes()
+
+
+def kernel_bpfopt_pass_args_from_env() -> list[str]:
+    raw = os.environ.get(BPFREJIT_BENCH_PASS_ARGS_ENV)
+    if raw is None or not raw.strip():
+        return []
+    return shlex.split(raw)
+
+
+def _tool_candidate_paths(name: str) -> list[Path]:
+    return [
+        ROOT_DIR / "bpfopt" / "target" / "release" / name,
+        ROOT_DIR / "bpfopt" / "target" / "aarch64-unknown-linux-gnu" / "release" / name,
+        ROOT_DIR / "bpfopt" / "target" / "x86_64-unknown-linux-gnu" / "release" / name,
+    ]
+
+
+def resolve_tool(name: str) -> str:
+    for candidate in _tool_candidate_paths(name):
+        if candidate.exists() and os.access(candidate, os.X_OK):
+            return str(candidate)
+    found = shutil.which(name)
+    return found or name
+
+
+def ensure_bpfopt_target_json(artifact_dir: Path, kinsnprober_binary: str) -> Path:
+    target_dir = artifact_dir / "details" / "bpfopt"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target_json = target_dir / "target.json"
+    completed = run_command(
+        [kinsnprober_binary, "--out", str(target_json)],
+        cwd=ROOT_DIR,
+        check=False,
+        timeout=RUNNER_TIMEOUT_SECONDS,
+    )
+    if completed.returncode != 0:
+        detail = tail_text(completed.stderr or completed.stdout or "", max_lines=30, max_chars=4000)
+        raise RuntimeError(f"kinsnprober failed while preparing micro bpfopt target.json\n{detail}")
+    return target_json
+
+
 def runtimes_for_benchmark(benchmark: CatalogTarget, runtimes: list[RuntimeSpec]) -> list[RuntimeSpec]:
     allowed_runtime_names = set(benchmark.runtime_names)
     return [
@@ -244,6 +295,11 @@ def build_runner_command(
     cpu: str | None,
     dump_jit_path: Path | None = None,
     dump_xlated_path: Path | None = None,
+    bpfopt_passes: list[str] | None = None,
+    bpfopt_target: Path | None = None,
+    bpfopt_workdir: Path | None = None,
+    bpfopt_binary: str | None = None,
+    bpfopt_pass_args: list[str] | None = None,
 ) -> list[str]:
     runner_command = RUNTIME_COMMANDS.get(runtime.name)
     if runner_command is None:
@@ -277,6 +333,16 @@ def build_runner_command(
         command.extend(["--dump-jit-path", str(dump_jit_path)])
     if dump_xlated_path is not None:
         command.extend(["--dump-xlated", str(dump_xlated_path)])
+    if runtime.name == "kernel" and bpfopt_passes:
+        if bpfopt_target is None or bpfopt_workdir is None:
+            raise RuntimeError("kernel bpfopt passes require target and workdir")
+        command.extend(["--bpfopt-passes", ",".join(bpfopt_passes)])
+        command.extend(["--bpfopt-target", str(bpfopt_target)])
+        command.extend(["--bpfopt-workdir", str(bpfopt_workdir)])
+        if bpfopt_binary:
+            command.extend(["--bpfopt-bin", bpfopt_binary])
+        for arg in bpfopt_pass_args or []:
+            command.extend(["--bpfopt-pass-arg", arg])
     if cpu:
         return ["taskset", "-c", str(cpu), *command]
     return command
@@ -475,6 +541,21 @@ def main(argv: list[str] | None = None) -> int:
         metadata_builder=build_artifact_metadata,
     )
     artifact_dir = session.run_dir
+    kernel_bpfopt_passes = kernel_bpfopt_passes_from_env()
+    kernel_bpfopt_pass_args = kernel_bpfopt_pass_args_from_env()
+    if kernel_bpfopt_pass_args and not kernel_bpfopt_passes:
+        raise RuntimeError(f"{BPFREJIT_BENCH_PASS_ARGS_ENV} requires {BPFREJIT_BENCH_PASSES_ENV}")
+    bpfopt_binary = resolve_tool("bpfopt")
+    kinsnprober_binary = resolve_tool("kinsnprober")
+    bpfopt_target_json: Path | None = None
+    if kernel_bpfopt_passes and any(runtime.name == "kernel" for runtime in runtimes):
+        bpfopt_target_json = ensure_bpfopt_target_json(artifact_dir, kinsnprober_binary)
+        results["build"]["kernel_bpfopt_passes"] = list(kernel_bpfopt_passes)
+        if kernel_bpfopt_pass_args:
+            results["build"]["kernel_bpfopt_pass_args"] = list(kernel_bpfopt_pass_args)
+        results["build"]["bpfopt_binary"] = bpfopt_binary
+        results["build"]["kinsnprober_binary"] = kinsnprober_binary
+        results["build"]["bpfopt_target_json"] = str(bpfopt_target_json)
 
     def flush_artifact(status: str, *, error_message: str | None = None) -> None:
         progress_payload = {
@@ -571,8 +652,36 @@ def main(argv: list[str] | None = None) -> int:
                         perf_counters=args.perf_counters,
                         perf_scope=args.perf_scope,
                         cpu=args.cpu,
+                        bpfopt_passes=kernel_bpfopt_passes,
+                        bpfopt_target=bpfopt_target_json,
+                        bpfopt_workdir=(
+                            artifact_dir / "details" / "bpfopt_runs" /
+                            _dump_stem(benchmark.name, runtime.name) / "warmup"
+                        ),
+                        bpfopt_binary=bpfopt_binary,
+                        bpfopt_pass_args=kernel_bpfopt_pass_args,
                     )
-                    for _ in range(max(0, warmups)):
+                    for warmup_idx in range(max(0, warmups)):
+                        if runtime.name == "kernel" and kernel_bpfopt_passes:
+                            warmup_command = build_runner_command(
+                                runner_binary=runner_binary,
+                                benchmark=benchmark,
+                                runtime=runtime,
+                                inner_repeat=inner_repeat,
+                                memory_file=memory_file,
+                                perf_counters=args.perf_counters,
+                                perf_scope=args.perf_scope,
+                                cpu=args.cpu,
+                                bpfopt_passes=kernel_bpfopt_passes,
+                                bpfopt_target=bpfopt_target_json,
+                                bpfopt_workdir=(
+                                    artifact_dir / "details" / "bpfopt_runs" /
+                                    _dump_stem(benchmark.name, runtime.name) /
+                                    f"warmup{warmup_idx:02d}"
+                                ),
+                                bpfopt_binary=bpfopt_binary,
+                                bpfopt_pass_args=kernel_bpfopt_pass_args,
+                            )
                         sample = run_single_sample(warmup_command, cwd=ROOT_DIR)
                         if benchmark.expected_result is not None and sample.get("result") != benchmark.expected_result:
                             raise RuntimeError(
@@ -609,9 +718,21 @@ def main(argv: list[str] | None = None) -> int:
                             cpu=args.cpu,
                             dump_jit_path=dump_jit_path,
                             dump_xlated_path=dump_xlated_path,
+                            bpfopt_passes=kernel_bpfopt_passes,
+                            bpfopt_target=bpfopt_target_json,
+                            bpfopt_workdir=(
+                                artifact_dir / "details" / "bpfopt_runs" /
+                                _dump_stem(benchmark.name, runtime.name, sample_idx)
+                            ),
+                            bpfopt_binary=bpfopt_binary,
+                            bpfopt_pass_args=kernel_bpfopt_pass_args,
                         )
                         sample = run_single_sample(command, cwd=ROOT_DIR)
                         sample["sample_index"] = sample_idx
+                        if runtime.name == "kernel" and kernel_bpfopt_passes:
+                            sample["bpfopt_passes"] = list(kernel_bpfopt_passes)
+                            if kernel_bpfopt_pass_args:
+                                sample["bpfopt_pass_args"] = list(kernel_bpfopt_pass_args)
 
                         if benchmark.expected_result is not None and sample.get("result") != benchmark.expected_result:
                             raise RuntimeError(
