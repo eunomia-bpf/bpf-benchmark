@@ -413,7 +413,18 @@ std::vector<std::string> parse_kinsn_llvm_args(std::string_view pass,
 
 void configure_llvm_kinsn_select(const std::vector<std::string> &llvm_args)
 {
+	bool has_kinsn_mode = false;
+	for (const auto &arg : llvm_args) {
+		if (arg.starts_with("-bpf-kinsn-mode=")) {
+			has_kinsn_mode = true;
+			break;
+		}
+	}
+
 	std::vector<std::string> args{ "bpfopt", "-bpf-enable-kinsn-select" };
+	if (!has_kinsn_mode) {
+		args.push_back("-bpf-kinsn-mode=all=force");
+	}
 	for (const auto &arg : llvm_args) {
 		args.push_back(arg);
 	}

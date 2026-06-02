@@ -176,13 +176,75 @@ static int instantiate_lea_shadow(struct bpf_insn *insn_buf, u8 width,
 	return cnt;
 }
 
+static int instantiate_lea_bpf_reg(struct bpf_insn *insn_buf, u8 width,
+				   u8 dst_reg, u8 base_reg, u8 index_reg,
+				   u8 scale_log2, bool has_base,
+				   bool has_index, s32 disp)
+{
+	int add_count;
+	int cnt = 0;
+
+	if (has_base && has_index && dst_reg == index_reg) {
+		u8 index_eval_reg;
+		u32 scratch_mask;
+
+		index_eval_reg = kinsn_x86_scratch_avoid(dst_reg, base_reg,
+							 index_reg);
+		if (index_eval_reg == dst_reg || index_eval_reg == base_reg ||
+		    index_eval_reg == index_reg)
+			return -EINVAL;
+
+		scratch_mask = KINSN_X86_SCRATCH_MASK(index_eval_reg);
+		kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+		insn_buf[cnt++] = lea_mov(width, index_eval_reg, index_reg);
+		if (scale_log2)
+			insn_buf[cnt++] = lea_alu_imm(width, BPF_LSH,
+						      index_eval_reg,
+						      scale_log2);
+		if (dst_reg != base_reg)
+			insn_buf[cnt++] = lea_mov(width, dst_reg, base_reg);
+		insn_buf[cnt++] = lea_alu_reg(width, BPF_ADD, dst_reg,
+					      index_eval_reg);
+		if (disp)
+			insn_buf[cnt++] = lea_alu_imm(width, BPF_ADD,
+						      dst_reg, disp);
+		kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+		return cnt;
+	}
+
+	if (has_base) {
+		if (dst_reg != base_reg)
+			insn_buf[cnt++] = lea_mov(width, dst_reg, base_reg);
+		if (has_index) {
+			add_count = 1 << scale_log2;
+			while (add_count--)
+				insn_buf[cnt++] = lea_alu_reg(width, BPF_ADD,
+							      dst_reg,
+							      index_reg);
+		}
+	} else if (has_index) {
+		if (dst_reg != index_reg)
+			insn_buf[cnt++] = lea_mov(width, dst_reg, index_reg);
+		if (scale_log2)
+			insn_buf[cnt++] = lea_alu_imm(width, BPF_LSH,
+						      dst_reg, scale_log2);
+	} else {
+		insn_buf[cnt++] = lea_mov_imm(width, dst_reg, disp);
+	}
+
+	if (disp && (has_base || has_index))
+		insn_buf[cnt++] = lea_alu_imm(width, BPF_ADD, dst_reg, disp);
+	if (!cnt)
+		insn_buf[cnt++] = lea_mov(width, dst_reg, dst_reg);
+
+	return cnt;
+}
+
 static int instantiate_lea64(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 dst_reg, base_reg, index_reg, scale_log2;
 	bool has_base, has_index, arch_reg;
 	s32 disp;
-	int add_count;
-	int cnt = 0;
 	int err;
 
 	err = decode_lea_payload(payload, &dst_reg, &base_reg, &index_reg,
@@ -194,40 +256,9 @@ static int instantiate_lea64(u64 payload, struct bpf_insn *insn_buf)
 		return instantiate_lea_shadow(insn_buf, 64, dst_reg, base_reg,
 					      index_reg, scale_log2, has_base,
 					      has_index, arch_reg, disp);
-
-	if (has_base && has_index && dst_reg == index_reg && dst_reg != base_reg) {
-		if (scale_log2)
-			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, dst_reg, scale_log2);
-		insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, dst_reg, base_reg);
-	} else if (has_base) {
-		if (dst_reg != base_reg)
-			insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, base_reg);
-		if (has_index) {
-			if (dst_reg == index_reg && scale_log2) {
-				insn_buf[cnt++] = BPF_ALU64_IMM(BPF_MUL, dst_reg,
-								(1 << scale_log2) + 1);
-			} else {
-				add_count = 1 << scale_log2;
-				while (add_count--)
-					insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, dst_reg,
-									index_reg);
-			}
-		}
-	} else if (has_index) {
-		if (dst_reg != index_reg)
-			insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, index_reg);
-		if (scale_log2)
-			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, dst_reg, scale_log2);
-	} else if (!has_base) {
-		insn_buf[cnt++] = BPF_MOV64_IMM(dst_reg, disp);
-	}
-
-	if (disp && (has_base || has_index))
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_ADD, dst_reg, disp);
-	if (!cnt)
-		insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, dst_reg);
-
-	return cnt;
+	return instantiate_lea_bpf_reg(insn_buf, 64, dst_reg, base_reg,
+				       index_reg, scale_log2, has_base,
+				       has_index, disp);
 }
 
 static int instantiate_lea32(u64 payload, struct bpf_insn *insn_buf)
@@ -235,8 +266,6 @@ static int instantiate_lea32(u64 payload, struct bpf_insn *insn_buf)
 	u8 dst_reg, base_reg, index_reg, scale_log2;
 	bool has_base, has_index, arch_reg;
 	s32 disp;
-	int add_count;
-	int cnt = 0;
 	int err;
 
 	err = decode_lea_payload(payload, &dst_reg, &base_reg, &index_reg,
@@ -248,34 +277,9 @@ static int instantiate_lea32(u64 payload, struct bpf_insn *insn_buf)
 		return instantiate_lea_shadow(insn_buf, 32, dst_reg, base_reg,
 					      index_reg, scale_log2, has_base,
 					      has_index, arch_reg, disp);
-
-	if (has_base && has_index && dst_reg == base_reg && dst_reg == index_reg) {
-		insn_buf[cnt++] = BPF_ALU32_IMM(BPF_MUL, dst_reg, (1 << scale_log2) + 1);
-	} else if (has_base && (!has_index || dst_reg != index_reg)) {
-		if (dst_reg != base_reg)
-			insn_buf[cnt++] = BPF_MOV32_REG(dst_reg, base_reg);
-		if (has_index) {
-			add_count = 1 << scale_log2;
-			while (add_count--)
-				insn_buf[cnt++] = BPF_ALU32_REG(BPF_ADD, dst_reg, index_reg);
-		}
-	} else if (has_index) {
-		if (dst_reg != index_reg)
-			insn_buf[cnt++] = BPF_MOV32_REG(dst_reg, index_reg);
-		if (scale_log2)
-			insn_buf[cnt++] = BPF_ALU32_IMM(BPF_LSH, dst_reg, scale_log2);
-		if (has_base)
-			insn_buf[cnt++] = BPF_ALU32_REG(BPF_ADD, dst_reg, base_reg);
-	} else if (!has_base) {
-		insn_buf[cnt++] = BPF_MOV32_IMM(dst_reg, disp);
-	}
-
-	if (disp && (has_base || has_index))
-		insn_buf[cnt++] = BPF_ALU32_IMM(BPF_ADD, dst_reg, disp);
-	if (!cnt)
-		insn_buf[cnt++] = BPF_MOV32_REG(dst_reg, dst_reg);
-
-	return cnt;
+	return instantiate_lea_bpf_reg(insn_buf, 32, dst_reg, base_reg,
+				       index_reg, scale_log2, has_base,
+				       has_index, disp);
 }
 
 static void emit_lea(u8 *buf, u32 *len, bool is64,

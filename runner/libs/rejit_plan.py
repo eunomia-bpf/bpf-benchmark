@@ -4,11 +4,12 @@ Each pass declares its shim step in `runner/config/passes/<pass>/default.yaml`;
 optional per-app overrides live at `runner/config/passes/<pass>/<app>.yaml`
 with a `programs` map keyed by prog_name (and `default` fallback), an optional
 `program_insn_counts` map keyed by prog_name and original insn_cnt, plus an
-optional `hashes` map keyed by 16-hex normalized bytecode hash. YAML is the
-single source of truth; runner never queries bpfopt for pass metadata.
+optional `hashes` map keyed by the 16-hex loadtime policy hash printed by the
+shim. YAML is the single source of truth; runner never queries bpfopt for pass
+metadata.
 
 Lookup (no merge; first match is selected):
-  1. <pass>/<app>.yaml -> hashes[<bytecode_hash>]
+  1. <pass>/<app>.yaml -> hashes[<policy_hash>]
   2. <pass>/<app>.yaml -> program_insn_counts[<prog_name>][<insn_cnt>]
   3. <pass>/<app>.yaml -> programs[<prog_name>]
   4. <pass>/<app>.yaml -> programs.default
