@@ -50,8 +50,8 @@ static int instantiate_imulq_rr(u64 payload, struct bpf_insn *insn_buf)
 		return err;
 
 	if (!arch_reg &&
-	    !kinsn_x86_reg_is_shadowed(dst_reg) &&
-	    !kinsn_x86_reg_is_shadowed(src_reg)) {
+	    !kinsn_x86_reg_uses_stack_slot(dst_reg) &&
+	    !kinsn_x86_reg_uses_stack_slot(src_reg)) {
 		insn_buf[0] = BPF_ALU64_REG(BPF_MUL, dst_reg, src_reg);
 		return 1;
 	}

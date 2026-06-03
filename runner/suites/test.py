@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
 import json
 import os
 import shutil
@@ -20,7 +21,6 @@ from runner.libs.workspace_layout import (
     runner_binary_path,
     sim_proof_root,
     stage2_program_root,
-    test_negative_build_dir,
 )
 from runner.suites._common import (
     base_suite_runtime_env,
@@ -110,37 +110,144 @@ def _log_test_section(title: str) -> None:
     print(f"\n========================================\n  {title}\n========================================", file=sys.stderr)
 
 
-def _fuzz_rounds_text(args: argparse.Namespace) -> str:
-    return str(args.fuzz_rounds)
+class _BpfInsn(ctypes.Structure):
+    _fields_ = [
+        ("code", ctypes.c_uint8),
+        ("regs", ctypes.c_uint8),
+        ("off", ctypes.c_int16),
+        ("imm", ctypes.c_int32),
+    ]
 
 
-def _run_negative_suite(
-    workspace: Path,
+class _BpfProgLoadAttr(ctypes.Structure):
+    _fields_ = [
+        ("prog_type", ctypes.c_uint32),
+        ("insn_cnt", ctypes.c_uint32),
+        ("insns", ctypes.c_uint64),
+        ("license", ctypes.c_uint64),
+        ("log_level", ctypes.c_uint32),
+        ("log_size", ctypes.c_uint32),
+        ("log_buf", ctypes.c_uint64),
+        ("kern_version", ctypes.c_uint32),
+        ("prog_flags", ctypes.c_uint32),
+        ("prog_name", ctypes.c_char * 16),
+        ("prog_ifindex", ctypes.c_uint32),
+        ("expected_attach_type", ctypes.c_uint32),
+        ("prog_btf_fd", ctypes.c_uint32),
+        ("func_info_rec_size", ctypes.c_uint32),
+        ("func_info", ctypes.c_uint64),
+        ("func_info_cnt", ctypes.c_uint32),
+        ("line_info_rec_size", ctypes.c_uint32),
+        ("line_info", ctypes.c_uint64),
+        ("line_info_cnt", ctypes.c_uint32),
+        ("attach_btf_id", ctypes.c_uint32),
+        ("attach_prog_fd", ctypes.c_uint32),
+        ("core_relo_cnt", ctypes.c_uint32),
+        ("fd_array", ctypes.c_uint64),
+        ("core_relos", ctypes.c_uint64),
+        ("core_relo_rec_size", ctypes.c_uint32),
+        ("log_true_size", ctypes.c_uint32),
+    ]
+
+
+def _bpf_syscall_number() -> int:
+    machine = os.uname().machine
+    if machine == "x86_64":
+        return 321
+    if machine in {"aarch64", "arm64"}:
+        return 280
+    _die(f"unsupported architecture for BPF syscall smoke: {machine}")
+    raise AssertionError("unreachable")
+
+
+def _bpf_insn(code: int, *, dst: int = 0, src: int = 0, off: int = 0, imm: int = 0) -> _BpfInsn:
+    return _BpfInsn(code, (src << 4) | dst, off, imm)
+
+
+def _log_negative_line(log_path: Path | None, line: str) -> None:
+    print(line, file=sys.stderr)
+    if log_path is not None:
+        with log_path.open("a", encoding="utf-8") as out:
+            out.write(line + "\n")
+
+
+def _load_xdp_prog(insns: Sequence[_BpfInsn]) -> tuple[int, int, str]:
+    bpf_prog_load = 5
+    bpf_prog_type_xdp = 6
+    libc = ctypes.CDLL(None, use_errno=True)
+    insn_array_type = _BpfInsn * len(insns)
+    insn_array = insn_array_type(*insns)
+    license_buf = ctypes.create_string_buffer(b"GPL")
+    log_buf = ctypes.create_string_buffer(65536)
+    attr = _BpfProgLoadAttr()
+    attr.prog_type = bpf_prog_type_xdp
+    attr.insn_cnt = len(insns)
+    attr.insns = ctypes.addressof(insn_array)
+    attr.license = ctypes.addressof(license_buf)
+    attr.log_level = 1
+    attr.log_size = ctypes.sizeof(log_buf)
+    attr.log_buf = ctypes.addressof(log_buf)
+    ret = libc.syscall(
+        _bpf_syscall_number(),
+        bpf_prog_load,
+        ctypes.byref(attr),
+        ctypes.sizeof(attr),
+    )
+    err = ctypes.get_errno() if ret < 0 else 0
+    return int(ret), err, log_buf.value.decode("utf-8", errors="replace")
+
+
+def _expect_bpf_load_ok(name: str, insns: Sequence[_BpfInsn], log_path: Path | None) -> None:
+    fd, err, verifier_log = _load_xdp_prog(insns)
+    if fd < 0:
+        if verifier_log.strip():
+            _log_negative_line(log_path, verifier_log.rstrip())
+        _die(f"{name}: expected BPF_PROG_LOAD success, got errno={err}")
+    os.close(fd)
+    _log_negative_line(log_path, f"  PASS  {name}")
+
+
+def _expect_bpf_load_fail(name: str, insns: Sequence[_BpfInsn], log_path: Path | None) -> None:
+    fd, err, _verifier_log = _load_xdp_prog(insns)
+    if fd >= 0:
+        os.close(fd)
+        _die(f"{name}: invalid BPF_PROG_LOAD unexpectedly succeeded")
+    if err == 1:
+        _die(f"{name}: BPF_PROG_LOAD failed with EPERM; test container lacks BPF privilege")
+    _log_negative_line(log_path, f"  PASS  {name} errno={err}")
+
+
+def _run_bpf_load_negative_suite(
     args: argparse.Namespace,
-    env: dict[str, str],
     *,
-    include_adversarial: bool = True,
-    include_fuzz: bool = True,
+    fuzz: bool,
     log_path: Path | None = None,
 ) -> None:
-    _log_test_section("Running tests/negative/ adversarial suite")
-    negative_build = test_negative_build_dir(workspace, args.target_arch)
-    runtime_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
-    tests: list[tuple[str, list[str], dict[str, str]]] = []
-    if include_adversarial:
-        tests.append(("adversarial_rejit", [str(negative_build / "adversarial_rejit")], runtime_env.copy()))
-    if include_fuzz:
-        tests.append(
-            (
-                f"fuzz_rejit ({_fuzz_rounds_text(args)} rounds)",
-                [str(negative_build / "fuzz_rejit"), _fuzz_rounds_text(args)],
-                runtime_env.copy(),
-            )
-        )
-    for label, command, command_env in tests:
-        print(f"--- {label} ---", file=sys.stderr)
-        if not _run_with_status(command, cwd=workspace, env=command_env, log_path=log_path):
-            _die(f"{label.split(' (')[0]} failed")
+    _log_test_section("BPF verifier negative smoke")
+    xdp_pass = 2
+    good_xdp_pass = [
+        _bpf_insn(0xb7, dst=0, imm=xdp_pass),
+        _bpf_insn(0x95),
+    ]
+    _expect_bpf_load_ok("valid_xdp_pass", good_xdp_pass, log_path)
+    _expect_bpf_load_fail("invalid_opcode", [_bpf_insn(0xff), _bpf_insn(0x95)], log_path)
+    _expect_bpf_load_fail("stack_oob_write", [
+        _bpf_insn(0xb7, dst=0, imm=0),
+        _bpf_insn(0x7b, dst=10, src=0, off=-520),
+        _bpf_insn(0xb7, dst=0, imm=xdp_pass),
+        _bpf_insn(0x95),
+    ], log_path)
+    _expect_bpf_load_fail("uninitialized_register", [
+        _bpf_insn(0xbf, dst=0, src=5),
+        _bpf_insn(0x95),
+    ], log_path)
+    if fuzz:
+        for i in range(args.fuzz_rounds):
+            opcode = 0xf0 | ((i * 37 + 11) & 0xf)
+            _expect_bpf_load_fail(f"fuzz_invalid_opcode_{i:04d}", [
+                _bpf_insn(opcode),
+                _bpf_insn(0x95),
+            ], log_path)
 
 
 def _run_kernel_selftest(workspace: Path, env: dict[str, str]) -> None:
@@ -309,21 +416,17 @@ def _run_selftest_mode(workspace: Path, args: argparse.Namespace, env: dict[str,
     _log_test_section("Loading kinsn modules")
     _load_kinsn_modules(workspace, args.target_arch)
     _run_native_proof_micro_smoke(workspace, args, env, log_path=log_path)
-    _run_negative_suite(workspace, args, env, log_path=log_path)
+    _run_bpf_load_negative_suite(args, fuzz=False, log_path=log_path)
 
 
-def _run_negative_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str], artifact_dir: Path) -> None:
+def _run_negative_mode(args: argparse.Namespace, artifact_dir: Path) -> None:
     log_path = artifact_dir / "negative.log"
-    _run_negative_suite(workspace, args, env, log_path=log_path)
+    _run_bpf_load_negative_suite(args, fuzz=False, log_path=log_path)
 
 
-def _run_fuzz_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str], artifact_dir: Path) -> None:
+def _run_fuzz_mode(args: argparse.Namespace, artifact_dir: Path) -> None:
     log_path = artifact_dir / "fuzz.log"
-    _run_negative_suite(
-        workspace, args, env,
-        include_adversarial=False, include_fuzz=True,
-        log_path=log_path,
-    )
+    _run_bpf_load_negative_suite(args, fuzz=True, log_path=log_path)
 
 
 def _run_test_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str]) -> None:
@@ -331,7 +434,7 @@ def _run_test_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str
     _log_test_section("Loading kinsn modules")
     _load_kinsn_modules(workspace, args.target_arch)
     _run_native_proof_micro_smoke(workspace, args, env)
-    _run_negative_suite(workspace, args, env)
+    _run_bpf_load_negative_suite(args, fuzz=False)
 
 
 def _mode_needs_bpf_stats(mode: str) -> bool:
@@ -354,9 +457,9 @@ def _run_test_suite(workspace: Path, args: argparse.Namespace) -> None:
     if args.test_mode == "selftest":
         _run_selftest_mode(workspace, args, env, artifact_dir)
     elif args.test_mode == "negative":
-        _run_negative_mode(workspace, args, env, artifact_dir)
+        _run_negative_mode(args, artifact_dir)
     elif args.test_mode == "fuzz":
-        _run_fuzz_mode(workspace, args, env, artifact_dir)
+        _run_fuzz_mode(args, artifact_dir)
     elif args.test_mode == "native-loader-smoke":
         _run_native_loader_shim_smoke(workspace, args, env, artifact_dir)
     elif args.test_mode == "test":

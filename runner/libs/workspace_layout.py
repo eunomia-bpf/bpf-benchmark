@@ -13,7 +13,6 @@ RUNTIME_KINSN_MODULE_DIR = Path("/artifacts/kinsn")
 # (arm64_parts, x86_parts)
 _ARCH_PATHS: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "runner_binary_path":      (("runner", "build-arm64-llvmbpf", "micro_exec"), ("runner", "build-llvmbpf", "micro_exec")),
-    "test_negative_build_dir": (("tests", "negative", "build-arm64"), ("tests", "negative", "build")),
 }
 
 
@@ -29,7 +28,6 @@ def _vendor_arch(target_arch: str) -> str:
 
 def repo_artifact_root(workspace: Path, target_arch: str) -> Path:       return workspace / "vendor" / "build" / _vendor_arch(target_arch)
 def workload_tools_root(workspace: Path, target_arch: str) -> Path:      return workspace / "vendor" / "build" / _vendor_arch(target_arch) / "workload-tools"
-def test_negative_build_dir(workspace: Path, target_arch: str) -> Path:  return _p(workspace, target_arch, "test_negative_build_dir")
 
 def image_artifact_root(target_arch: str, subdir: str) -> Path:
     return RUNTIME_IMAGE_ARTIFACT_ROOT / subdir / str(target_arch).strip()

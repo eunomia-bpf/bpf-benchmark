@@ -237,7 +237,6 @@ x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-
 		--build-context runner-runtime-host-runner-build="$(RUNNER_DIR)/build-llvmbpf" \
 		--build-context runner-runtime-host-micro-programs="$(MICRO_PROGRAM_BUILD_X86)" \
 		--build-context runner-runtime-host-stage2-programs="$(STAGE2_PROGRAM_BUILD_X86)" \
-		--build-context runner-runtime-host-negative="$(ROOT_DIR)/tests/negative/build" \
 		--build-context runner-runtime-host-kernel-image="$(HOST_KERNEL_BUILD_DIR_X86)/arch/x86/boot" \
 		--build-context runner-runtime-host-kernel-config="$(HOST_KERNEL_CONFIG_CONTEXT_X86)" \
 		--build-context runner-runtime-host-kernel-offsets="$(MICRO_PROGRAM_BUILD_X86)" \
@@ -249,7 +248,6 @@ x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-
 		--build-arg RUN_TARGET_ARCH=x86_64 \
 		--build-arg VENDOR_BUILD_ARCH=x86 \
 		--build-arg RUNNER_BUILD_DIR_NAME=build-llvmbpf \
-		--build-arg TEST_BUILD_DIR=build \
 		--build-arg KERNEL_IMAGE_NAME=bzImage \
 		--build-arg BPFOPT_HOST_BIN="$(X86_BPFOPT_HOST_BIN)" \
 		--build-arg KINSNPROBER_HOST_BIN="$(X86_KINSNPROBER_HOST_BIN)" \
@@ -269,7 +267,6 @@ arm64-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM
 		--build-context runner-runtime-host-runner-build="$(RUNNER_DIR)/build-arm64-llvmbpf" \
 		--build-context runner-runtime-host-micro-programs="$(MICRO_PROGRAM_BUILD_ARM64)" \
 		--build-context runner-runtime-host-stage2-programs="$(STAGE2_PROGRAM_BUILD_ARM64)" \
-		--build-context runner-runtime-host-negative="$(ROOT_DIR)/tests/negative/build-arm64" \
 		--build-context runner-runtime-host-kernel-image="$(HOST_KERNEL_BUILD_DIR_ARM64)/arch/arm64/boot" \
 		--build-context runner-runtime-host-kernel-config="$(HOST_KERNEL_CONFIG_CONTEXT_ARM64)" \
 		--build-context runner-runtime-host-kernel-offsets="$(MICRO_PROGRAM_BUILD_ARM64)" \
@@ -281,7 +278,6 @@ arm64-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM
 		--build-arg RUN_TARGET_ARCH=arm64 \
 		--build-arg VENDOR_BUILD_ARCH=arm64 \
 		--build-arg RUNNER_BUILD_DIR_NAME=build-arm64-llvmbpf \
-		--build-arg TEST_BUILD_DIR=build-arm64 \
 		--build-arg KERNEL_IMAGE_NAME=vmlinuz.efi \
 		--build-arg BPFOPT_HOST_BIN="$(ARM64_BPFOPT_HOST_BIN)" \
 		--build-arg KINSNPROBER_HOST_BIN="$(ARM64_KINSNPROBER_HOST_BIN)" \

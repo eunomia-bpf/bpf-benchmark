@@ -103,7 +103,7 @@ static int instantiate_notl_r(u64 payload, struct bpf_insn *insn_buf)
 	if (err)
 		return err;
 
-	if (!arch_reg && !kinsn_x86_reg_is_shadowed(dst_reg)) {
+	if (!arch_reg && !kinsn_x86_reg_uses_stack_slot(dst_reg)) {
 		insn_buf[0] = BPF_ALU32_IMM(BPF_XOR, dst_reg, -1);
 		return 1;
 	}
@@ -137,7 +137,7 @@ static int instantiate_notq_r(u64 payload, struct bpf_insn *insn_buf)
 	if (err)
 		return err;
 
-	if (!arch_reg && !kinsn_x86_reg_is_shadowed(dst_reg)) {
+	if (!arch_reg && !kinsn_x86_reg_uses_stack_slot(dst_reg)) {
 		insn_buf[0] = BPF_ALU64_IMM(BPF_XOR, dst_reg, -1);
 		return 1;
 	}

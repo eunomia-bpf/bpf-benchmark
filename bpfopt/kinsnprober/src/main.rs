@@ -45,17 +45,14 @@ const DEFAULT_KINSN_NAMES: &[&str] = &[
     "bpf_arm64_rev_w", "bpf_arm64_rev_x", "bpf_arm64_strb",
     "bpf_arm64_tst", "bpf_arm64_ubfm_x",
     "bpf_x86_bextrq", "bpf_x86_blsiq", "bpf_x86_blsrq", "bpf_x86_andl",
-    "bpf_x86_bswapl", "bpf_x86_bswapq", "bpf_x86_cmovbl",
-    "bpf_x86_cmovbq", "bpf_x86_cmovel", "bpf_x86_cmoveq",
-    "bpf_x86_cmovnel", "bpf_x86_cmovneq", "bpf_x86_cmp_cmovb",
-    "bpf_x86_cmp_cmove", "bpf_x86_cmp_cmovne", "bpf_x86_cmpl",
-    "bpf_x86_cmpq", "bpf_x86_leal", "bpf_x86_leaq", "bpf_x86_movb",
+    "bpf_x86_bswapl", "bpf_x86_bswapq", "bpf_x86_cmp_cmovb",
+    "bpf_x86_cmp_cmove", "bpf_x86_cmp_cmovne", "bpf_x86_leal",
+    "bpf_x86_leaq", "bpf_x86_movb",
     "bpf_x86_movbe16", "bpf_x86_movbe32", "bpf_x86_movbe64",
     "bpf_x86_movl", "bpf_x86_movq", "bpf_x86_rolq", "bpf_x86_rolw",
     "bpf_x86_rorxl", "bpf_x86_movzbl", "bpf_x86_movzwl",
     "bpf_x86_popcntq", "bpf_x86_prefetcht0", "bpf_x86_shldl",
     "bpf_x86_shldq", "bpf_x86_shrdl", "bpf_x86_shrdq", "bpf_x86_shrq",
-    "bpf_x86_testq",
 ];
 
 #[derive(Serialize)]

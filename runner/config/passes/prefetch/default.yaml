@@ -29,17 +29,9 @@ kinsns:
   - name: bpf_x86_andl
   - name: bpf_x86_bswapl
   - name: bpf_x86_bswapq
-  - name: bpf_x86_cmovbl
-  - name: bpf_x86_cmovbq
-  - name: bpf_x86_cmovel
-  - name: bpf_x86_cmoveq
-  - name: bpf_x86_cmovnel
-  - name: bpf_x86_cmovneq
   - name: bpf_x86_cmp_cmovb
   - name: bpf_x86_cmp_cmove
   - name: bpf_x86_cmp_cmovne
-  - name: bpf_x86_cmpl
-  - name: bpf_x86_cmpq
   - name: bpf_x86_leal
   - name: bpf_x86_leaq
   - name: bpf_x86_movb
@@ -60,6 +52,5 @@ kinsns:
   - name: bpf_x86_shrdl
   - name: bpf_x86_shrdq
   - name: bpf_x86_shrq
-  - name: bpf_x86_testq
 command: |
   bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}

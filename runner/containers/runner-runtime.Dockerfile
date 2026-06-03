@@ -87,7 +87,6 @@ ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
 ARG VENDOR_BUILD_ARCH=x86
 ARG RUNNER_BUILD_DIR_NAME=build-llvmbpf
-ARG TEST_BUILD_DIR=build
 # Narrow build-contexts pointing at subdirs of the host kbuild O= dir to avoid
 # shipping the full kbuild output (~6 GB) as Docker context. Set by the image rule:
 #   x86_64 -> image-context = $(O)/arch/x86/boot   KERNEL_IMAGE_NAME=bzImage
@@ -143,7 +142,6 @@ RUN set -eux; \
 COPY --link --from=runner-runtime-host-runner-build /micro_exec ${IMAGE_WORKSPACE}/runner/${RUNNER_BUILD_DIR_NAME}/micro_exec
 COPY --link --from=runner-runtime-host-micro-programs / /artifacts/user/micro-programs/${RUN_TARGET_ARCH}/
 COPY --link --from=runner-runtime-host-stage2-programs / /artifacts/user/stage2-programs/${RUN_TARGET_ARCH}/
-COPY --link --from=runner-runtime-host-negative /adversarial_rejit /fuzz_rejit ${IMAGE_WORKSPACE}/tests/negative/${TEST_BUILD_DIR}/
 
 FROM runner-runtime-runtime-base AS runner-runtime
 
@@ -167,7 +165,7 @@ COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WO
 COPY --link --from=runner-runtime-artifacts /artifacts/user/micro-programs /artifacts/user/micro-programs
 COPY --link --from=runner-runtime-artifacts /artifacts/user/stage2-programs /artifacts/user/stage2-programs
 COPY --link --from=runner-runtime-host-native-bpf / /artifacts/user/native-bpf/${RUN_TARGET_ARCH}/
-COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/tests ${IMAGE_WORKSPACE}/tests
+COPY --link tests ${IMAGE_WORKSPACE}/tests
 COPY --link --chmod=0755 ${BPFOPT_HOST_BIN} /usr/local/bin/bpfopt
 COPY --link --chmod=0755 \
     ${KINSNPROBER_HOST_BIN} \

@@ -18,7 +18,6 @@ obj-m += bpf_x86_bmi1.o
 obj-m += bpf_x86_imul.o
 obj-m += bpf_x86_not.o
 obj-m += bpf_x86_shd.o
-obj-m += bpf_x86_stack.o
 obj-m += bpf_x86_native_lab.o
 
 all:

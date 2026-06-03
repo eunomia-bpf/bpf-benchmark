@@ -14,7 +14,6 @@ __bpf_kfunc void bpf_x86_divl(void) {}
 __bpf_kfunc void bpf_x86_incb(void) {}
 __bpf_kfunc void bpf_x86_incl(void) {}
 __bpf_kfunc void bpf_x86_incq(void) {}
-__bpf_kfunc void bpf_x86_sbbl(void) {}
 __bpf_kfunc void bpf_x86_xorb(void) {}
 __bpf_kfunc void bpf_x86_xorw(void) {}
 __bpf_kfunc void bpf_x86_orb(void) {}
@@ -55,7 +54,6 @@ BTF_ID_FLAGS(func, bpf_x86_orq)
 BTF_ID_FLAGS(func, bpf_x86_orw)
 BTF_ID_FLAGS(func, bpf_x86_sarl)
 BTF_ID_FLAGS(func, bpf_x86_sarq)
-BTF_ID_FLAGS(func, bpf_x86_sbbl)
 BTF_ID_FLAGS(func, bpf_x86_shlb)
 BTF_ID_FLAGS(func, bpf_x86_shll)
 BTF_ID_FLAGS(func, bpf_x86_shlq)
@@ -224,7 +222,7 @@ static int instantiate_x86_alu_mem(const struct kinsn_x86_alu_payload *alu,
 	dst_eval_reg = alu->dst_reg;
 	value_reg = kinsn_x86_scratch_avoid(alu->dst_reg, alu->base_reg, 0);
 	scratch_mask |= KINSN_X86_SCRATCH_MASK(value_reg);
-	if (kinsn_x86_reg_is_shadowed(alu->base_reg)) {
+	if (kinsn_x86_reg_uses_stack_slot(alu->base_reg)) {
 		if (x86_alu_uses_arch_base(alu->form))
 			return -EINVAL;
 		addr_reg = kinsn_x86_scratch_avoid(alu->dst_reg, value_reg, 0);
@@ -235,9 +233,9 @@ static int instantiate_x86_alu_mem(const struct kinsn_x86_alu_payload *alu,
 		scratch_mask |= KINSN_X86_SCRATCH_MASK(addr_reg);
 	}
 	if ((x86_alu_uses_arch_base(alu->form) &&
-	     kinsn_x86_arch_reg_is_shadowed(alu->dst_reg)) ||
+	     kinsn_x86_arch_reg_uses_stack_slot(alu->dst_reg)) ||
 	    (!x86_alu_uses_arch_base(alu->form) &&
-	     kinsn_x86_reg_is_shadowed(alu->dst_reg))) {
+	     kinsn_x86_reg_uses_stack_slot(alu->dst_reg))) {
 		dst_eval_reg = kinsn_x86_scratch_avoid(addr_reg, value_reg, 0);
 		scratch_mask |= KINSN_X86_SCRATCH_MASK(dst_eval_reg);
 	}
@@ -388,7 +386,7 @@ static int instantiate_x86_xorw_mem(const struct kinsn_x86_alu_payload *alu,
 					    value_reg);
 	scratch_mask |= KINSN_X86_SCRATCH_MASK(value_reg) |
 			KINSN_X86_SCRATCH_MASK(high_reg);
-	if (kinsn_x86_reg_is_shadowed(alu->base_reg)) {
+	if (kinsn_x86_reg_uses_stack_slot(alu->base_reg)) {
 		if (x86_alu_uses_arch_base(alu->form))
 			return -EINVAL;
 		addr_reg = kinsn_x86_scratch_avoid(value_reg, high_reg, 0);
@@ -398,7 +396,7 @@ static int instantiate_x86_xorw_mem(const struct kinsn_x86_alu_payload *alu,
 		addr_reg = kinsn_x86_scratch_avoid(value_reg, high_reg, 0);
 		scratch_mask |= KINSN_X86_SCRATCH_MASK(addr_reg);
 	}
-	if (kinsn_x86_reg_is_shadowed(alu->dst_reg)) {
+	if (kinsn_x86_reg_uses_stack_slot(alu->dst_reg)) {
 		dst_eval_reg = kinsn_x86_scratch_avoid(addr_reg, value_reg,
 						       high_reg);
 		scratch_mask |= KINSN_X86_SCRATCH_MASK(dst_eval_reg);
@@ -435,7 +433,7 @@ static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 	struct kinsn_x86_alu_payload decoded;
 	const struct kinsn_x86_alu_payload *alu = &decoded;
 	u8 dst_eval_reg, src_eval_reg;
-	bool arch_reg, dst_shadowed, src_shadowed;
+	bool arch_reg, dst_stacked, src_stacked;
 	u32 scratch_mask;
 	int cnt = 0;
 	int err;
@@ -453,10 +451,10 @@ static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 		return instantiate_x86_alu_sib(alu, insn_buf, op, width);
 
 	arch_reg = x86_alu_uses_arch_reg(alu->form);
-	dst_shadowed = arch_reg ? kinsn_x86_arch_reg_is_shadowed(alu->dst_reg) :
-				  kinsn_x86_reg_is_shadowed(alu->dst_reg);
-	src_shadowed = arch_reg ? kinsn_x86_arch_reg_is_shadowed(alu->src_reg) :
-				  kinsn_x86_reg_is_shadowed(alu->src_reg);
+	dst_stacked = arch_reg ? kinsn_x86_arch_reg_uses_stack_slot(alu->dst_reg) :
+				  kinsn_x86_reg_uses_stack_slot(alu->dst_reg);
+	src_stacked = arch_reg ? kinsn_x86_arch_reg_uses_stack_slot(alu->src_reg) :
+				  kinsn_x86_reg_uses_stack_slot(alu->src_reg);
 
 	if (alu->form == KINSN_X86_ALU_FORM_IMM ||
 	    alu->form == KINSN_X86_ALU_FORM_ARCH_IMM) {
@@ -464,7 +462,7 @@ static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 		    (alu->imm < 0 || alu->imm >= width))
 			return -EINVAL;
 		dst_eval_reg = alu->dst_reg;
-		if (dst_shadowed) {
+		if (dst_stacked) {
 			dst_eval_reg = KINSN_X86_SCRATCH0;
 			scratch_mask = KINSN_X86_SCRATCH_MASK(dst_eval_reg);
 			kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
@@ -480,7 +478,7 @@ static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 				       dst_eval_reg, alu->imm);
 		if (err)
 			return err;
-		if (dst_shadowed) {
+		if (dst_stacked) {
 			if (arch_reg)
 				kinsn_x86_write64_arch(insn_buf, &cnt,
 						       alu->dst_reg,
@@ -498,7 +496,7 @@ static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 	if (x86_alu_is_shift(op))
 		return instantiate_x86_shift_cl(alu, insn_buf, op, width);
 	if (op == BPF_XOR && alu->dst_reg == alu->src_reg) {
-		if (dst_shadowed) {
+		if (dst_stacked) {
 			scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0);
 			kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
 			insn_buf[cnt++] = BPF_MOV64_IMM(KINSN_X86_SCRATCH0, 0);
@@ -524,7 +522,7 @@ static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 
 	dst_eval_reg = alu->dst_reg;
 	src_eval_reg = alu->src_reg;
-	if (dst_shadowed || src_shadowed) {
+	if (dst_stacked || src_stacked) {
 		dst_eval_reg = KINSN_X86_SCRATCH0;
 		src_eval_reg = alu->src_reg == alu->dst_reg ?
 			       dst_eval_reg : KINSN_X86_SCRATCH1;
@@ -553,7 +551,7 @@ static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 			       dst_eval_reg, src_eval_reg);
 	if (err)
 		return err;
-	if (dst_shadowed || src_shadowed) {
+	if (dst_stacked || src_stacked) {
 		if (width == 32)
 			insn_buf[cnt++] = BPF_MOV32_REG(dst_eval_reg, dst_eval_reg);
 		if (arch_reg)
@@ -668,7 +666,7 @@ static int instantiate_inc(u64 payload, struct bpf_insn *insn_buf, u8 width)
 
 	dst_reg = decoded.dst_reg;
 	arch_reg = x86_alu_uses_arch_reg(decoded.form);
-	if (!arch_reg && !kinsn_x86_reg_is_shadowed(dst_reg) &&
+	if (!arch_reg && !kinsn_x86_reg_uses_stack_slot(dst_reg) &&
 	    !kinsn_x86_is_scratch(dst_reg)) {
 		if (width == 32)
 			insn_buf[0] = BPF_ALU32_IMM(BPF_ADD, dst_reg, 1);
@@ -725,58 +723,6 @@ static int instantiate_incl(u64 payload, struct bpf_insn *insn_buf)
 static int instantiate_incq(u64 payload, struct bpf_insn *insn_buf)
 {
 	return instantiate_inc(payload, insn_buf, 64);
-}
-
-static int instantiate_sbbl(u64 payload, struct bpf_insn *insn_buf)
-{
-	struct kinsn_x86_alu_payload decoded;
-	u8 dst_reg, eval_reg, cf_reg;
-	u32 scratch_mask;
-	bool dst_stacked, arch_reg;
-	int cnt = 0;
-	int err;
-
-	err = decode_x86_alu_payload(payload, &decoded);
-	if (err)
-		return err;
-	if ((decoded.form != KINSN_X86_ALU_FORM_IMM &&
-	     decoded.form != KINSN_X86_ALU_FORM_ARCH_IMM) ||
-	    decoded.imm != 0)
-		return -EINVAL;
-
-	dst_reg = decoded.dst_reg;
-	arch_reg = x86_alu_uses_arch_reg(decoded.form);
-	cf_reg = kinsn_x86_scratch_avoid(dst_reg, 0, 0);
-	eval_reg = dst_reg;
-	scratch_mask = KINSN_X86_SCRATCH_MASK(cf_reg);
-	dst_stacked = arch_reg || kinsn_x86_reg_is_shadowed(dst_reg) ||
-		      kinsn_x86_is_scratch(dst_reg);
-	if (dst_stacked) {
-		eval_reg = kinsn_x86_scratch_avoid(dst_reg, cf_reg, 0);
-		scratch_mask |= KINSN_X86_SCRATCH_MASK(eval_reg);
-	}
-
-	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (dst_stacked) {
-		if (arch_reg)
-			kinsn_x86_read32_arch(insn_buf, &cnt, eval_reg, dst_reg);
-		else
-			kinsn_x86_read32(insn_buf, &cnt, eval_reg, dst_reg);
-	}
-	insn_buf[cnt++] = BPF_LDX_MEM(BPF_W, cf_reg, BPF_REG_10,
-				      KINSN_X86_SHADOW_CF_OFF);
-	insn_buf[cnt++] = BPF_JMP_IMM(BPF_JEQ, cf_reg, 0, 1);
-	insn_buf[cnt++] = BPF_ALU32_IMM(BPF_SUB, eval_reg, 1);
-	if (dst_stacked) {
-		if (arch_reg)
-			kinsn_x86_write32_arch(insn_buf, &cnt, dst_reg,
-					       eval_reg, scratch_mask);
-		else
-			kinsn_x86_write32(insn_buf, &cnt, dst_reg, eval_reg,
-					  scratch_mask);
-	}
-	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
 }
 
 static int instantiate_divl(u64 payload, struct bpf_insn *insn_buf)
@@ -933,7 +879,7 @@ static int instantiate_xorb_sib(const struct kinsn_x86_alu_payload *alu,
 			KINSN_X86_SCRATCH_MASK(value_reg) |
 			KINSN_X86_SCRATCH_MASK(high_reg);
 	dst_eval_reg = alu->dst_reg;
-	if (kinsn_x86_reg_is_shadowed(alu->dst_reg)) {
+	if (kinsn_x86_reg_uses_stack_slot(alu->dst_reg)) {
 		dst_eval_reg = kinsn_x86_scratch_avoid(addr_reg, value_reg,
 						       high_reg);
 		scratch_mask |= KINSN_X86_SCRATCH_MASK(dst_eval_reg);
@@ -1528,37 +1474,6 @@ static int emit_incq_x86(u8 *image, u32 *off, bool emit,
 	return emit_inc_x86(image, off, emit, payload, prog, true);
 }
 
-static int emit_sbbl_x86(u8 *image, u32 *off, bool emit,
-			 u64 payload, const struct bpf_prog *prog,
-			 const u8 *final_ip)
-{
-	struct kinsn_x86_alu_payload decoded;
-	u8 buf[8];
-	u8 dst_reg;
-	u32 len = 0;
-	int err;
-
-	err = decode_x86_alu_payload(payload, &decoded);
-	if (err)
-		return err;
-	if ((decoded.form != KINSN_X86_ALU_FORM_IMM &&
-	     decoded.form != KINSN_X86_ALU_FORM_ARCH_IMM) ||
-	    decoded.imm != 0)
-		return -EINVAL;
-
-	dst_reg = x86_alu_uses_arch_reg(decoded.form) ? decoded.dst_reg :
-		  kinsn_x86_reg_for_prog(prog, decoded.dst_reg);
-	if (!kinsn_x86_valid(dst_reg))
-		return -EINVAL;
-
-	kinsn_emit_rex_rr(buf, &len, false, 0, dst_reg);
-	kinsn_emit_u8(buf, &len, 0x83);
-	kinsn_emit_u8(buf, &len, 0xd8 | kinsn_x86_code(dst_reg));
-	kinsn_emit_u8(buf, &len, 0);
-
-	return kinsn_emit_finish(image, off, emit, buf, len);
-}
-
 static int emit_divl_x86(u8 *image, u32 *off, bool emit,
 			 u64 payload, const struct bpf_prog *prog,
 			 const u8 *final_ip)
@@ -1628,14 +1543,6 @@ const struct bpf_kinsn bpf_x86_incl_desc = {
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_incl,
 	.emit_x86 = emit_incl_x86,
-};
-
-const struct bpf_kinsn bpf_x86_sbbl_desc = {
-	.owner = THIS_MODULE,
-	.max_insn_cnt = 5 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
-	.max_emit_bytes = 4,
-	.instantiate_insn = instantiate_sbbl,
-	.emit_x86 = emit_sbbl_x86,
 };
 
 const struct bpf_kinsn bpf_x86_divl_desc = {
@@ -1751,7 +1658,6 @@ static const struct bpf_kinsn * const bpf_x86_alu_kinsn_descs[] = {
 	&bpf_x86_orw_desc,
 	&bpf_x86_sarl_desc,
 	&bpf_x86_sarq_desc,
-	&bpf_x86_sbbl_desc,
 	&bpf_x86_shlb_desc,
 	&bpf_x86_shll_desc,
 	&bpf_x86_shlq_desc,

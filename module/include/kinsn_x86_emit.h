@@ -13,9 +13,7 @@ static __always_inline s32 kinsn_payload_s32(u64 payload, u8 shift)
 static __always_inline u8 kinsn_x86_reg_for_prog(const struct bpf_prog *prog,
 						 u8 x86_reg)
 {
-	if (prog && prog->aux && prog->aux->priv_stack_ptr &&
-	    x86_reg == BPF_REG_FP)
-		return KINSN_X86_REG_R9;
+	(void)prog;
 	return x86_reg;
 }
 
@@ -55,31 +53,12 @@ static __always_inline bool kinsn_x86_needs_rex8(u8 reg)
 	}
 }
 
-#define KINSN_X86_SHADOW_RAX_OFF	-512
-#define KINSN_X86_SHADOW_RCX_OFF	-504
-#define KINSN_X86_SHADOW_RDX_OFF	-496
-#define KINSN_X86_SHADOW_RBX_OFF	-488
-#define KINSN_X86_SHADOW_RSP_OFF	-480
-#define KINSN_X86_SHADOW_RBP_OFF	-472
-#define KINSN_X86_SHADOW_RSI_OFF	-464
-#define KINSN_X86_SHADOW_RDI_OFF	-456
-#define KINSN_X86_SHADOW_R8_OFF		-448
-#define KINSN_X86_SHADOW_R9_OFF		-440
-#define KINSN_X86_SHADOW_R10_OFF	-432
-#define KINSN_X86_SHADOW_R11_OFF	-424
-#define KINSN_X86_SHADOW_R12_OFF	-416
-#define KINSN_X86_SHADOW_R13_OFF	-408
-#define KINSN_X86_SHADOW_R14_OFF	-400
-#define KINSN_X86_SHADOW_R15_OFF	-392
-#define KINSN_X86_SHADOW_ZF_OFF		-384
-#define KINSN_X86_SHADOW_CF_OFF		-380
-#define KINSN_X86_SCRATCH_R6_OFF	-376
-#define KINSN_X86_SCRATCH_R7_OFF	-368
-#define KINSN_X86_SCRATCH_R8_OFF	-360
-#define KINSN_X86_SHADOW_GE_OFF		-352
-#define KINSN_X86_SHADOW_SF_OFF		-348
-#define KINSN_X86_PROOF_LHS_OFF		-344
-#define KINSN_X86_PROOF_RHS_OFF		-336
+#define KINSN_X86_SCRATCH_R6_OFF	-40
+#define KINSN_X86_SCRATCH_R7_OFF	-32
+#define KINSN_X86_SCRATCH_R8_OFF	-24
+#define KINSN_X86_PROOF_LHS_OFF		-16
+#define KINSN_X86_PROOF_RHS_OFF		-8
+#define KINSN_X86_STACK_BYTES		40
 
 #define KINSN_X86_SCRATCH0		BPF_REG_6
 #define KINSN_X86_SCRATCH1		BPF_REG_7
@@ -87,83 +66,25 @@ static __always_inline bool kinsn_x86_needs_rex8(u8 reg)
 #define KINSN_X86_SCRATCH_MASK(REG)	(1U << (REG))
 #define KINSN_X86_SAVE_RESTORE_INSN_CNT	6
 
-static __always_inline bool kinsn_x86_reg_is_shadowed(u8 reg)
-{
-	/*
-	 * BPF register operands must read the live verifier register state.
-	 * The shadow stack is only valid for arch-only x86 operands; ordinary
-	 * BPF instructions between kinsn sites do not keep these slots in sync.
-	 */
-	(void)reg;
-	return false;
-}
-
 static __always_inline bool kinsn_x86_reg_is_bpf_writable(u8 reg)
 {
 	return reg < BPF_REG_10;
 }
 
-static __always_inline s16 kinsn_x86_shadow_reg_off(u8 reg)
-{
-	switch (reg) {
-	case BPF_REG_0:
-		return KINSN_X86_SHADOW_RAX_OFF;
-	case BPF_REG_4:
-		return KINSN_X86_SHADOW_RCX_OFF;
-	case BPF_REG_3:
-		return KINSN_X86_SHADOW_RDX_OFF;
-	case BPF_REG_6:
-		return KINSN_X86_SHADOW_RBX_OFF;
-	case KINSN_X86_REG_RSP:
-		return KINSN_X86_SHADOW_RSP_OFF;
-	case BPF_REG_10:
-		return KINSN_X86_SHADOW_RBP_OFF;
-	case BPF_REG_2:
-		return KINSN_X86_SHADOW_RSI_OFF;
-	case BPF_REG_1:
-		return KINSN_X86_SHADOW_RDI_OFF;
-	case BPF_REG_5:
-		return KINSN_X86_SHADOW_R8_OFF;
-	case KINSN_X86_REG_R9:
-		return KINSN_X86_SHADOW_R9_OFF;
-	case KINSN_X86_REG_R10:
-		return KINSN_X86_SHADOW_R10_OFF;
-	case KINSN_X86_REG_R11:
-		return KINSN_X86_SHADOW_R11_OFF;
-	case KINSN_X86_REG_R12:
-		return KINSN_X86_SHADOW_R12_OFF;
-	case BPF_REG_7:
-		return KINSN_X86_SHADOW_R13_OFF;
-	case BPF_REG_8:
-		return KINSN_X86_SHADOW_R14_OFF;
-	case BPF_REG_9:
-		return KINSN_X86_SHADOW_R15_OFF;
-	default:
-		return 0;
-	}
-}
-
-static __always_inline bool kinsn_x86_arch_reg_is_shadowed(u8 reg)
-{
-	switch (reg) {
-	case BPF_REG_6:		/* rbx overlaps verifier scratch r6 */
-	case BPF_REG_7:		/* r13 overlaps verifier scratch r7 */
-	case BPF_REG_8:		/* r14 overlaps verifier scratch r8 */
-	case BPF_REG_10:	/* x86 rbp cannot use the BPF frame pointer register */
-	case KINSN_X86_REG_R9:
-	case KINSN_X86_REG_R10:
-	case KINSN_X86_REG_R11:
-	case KINSN_X86_REG_R12:
-	case KINSN_X86_REG_RSP:
-		return true;
-	default:
-		return false;
-	}
-}
-
 static __always_inline bool kinsn_x86_is_scratch(u8 reg)
 {
 	return reg >= KINSN_X86_SCRATCH0 && reg <= KINSN_X86_SCRATCH2;
+}
+
+static __always_inline bool kinsn_x86_reg_uses_stack_slot(u8 reg)
+{
+	(void)reg;
+	return false;
+}
+
+static __always_inline bool kinsn_x86_arch_reg_uses_stack_slot(u8 reg)
+{
+	return kinsn_x86_is_scratch(reg);
 }
 
 static __always_inline s16 kinsn_x86_scratch_off(u8 reg)
@@ -240,11 +161,10 @@ static __always_inline void kinsn_x86_read(struct bpf_insn *insn_buf,
 					   int *cnt, u8 dst_reg, u8 src_reg,
 					   bool width64, bool arch_regs)
 {
-	if ((arch_regs ? kinsn_x86_arch_reg_is_shadowed(src_reg) :
-			 kinsn_x86_reg_is_shadowed(src_reg)))
-		insn_buf[(*cnt)++] = BPF_LDX_MEM(BPF_DW, dst_reg, BPF_REG_10,
-						 kinsn_x86_shadow_reg_off(src_reg));
-	else if (!arch_regs && kinsn_x86_is_scratch(src_reg))
+	bool stacked = arch_regs ? kinsn_x86_arch_reg_uses_stack_slot(src_reg) :
+				   kinsn_x86_reg_uses_stack_slot(src_reg);
+
+	if (stacked)
 		insn_buf[(*cnt)++] = BPF_LDX_MEM(BPF_DW, dst_reg, BPF_REG_10,
 						 kinsn_x86_scratch_off(src_reg));
 	else if (dst_reg != src_reg) {
@@ -272,21 +192,13 @@ static __always_inline void kinsn_x86_write(struct bpf_insn *insn_buf,
 					      u8 value_reg, u32 saved_mask,
 					      bool width64, bool arch_regs)
 {
-	if ((arch_regs ? kinsn_x86_arch_reg_is_shadowed(dst_reg) :
-			 kinsn_x86_reg_is_shadowed(dst_reg)))
-		insn_buf[(*cnt)++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, value_reg,
-						 kinsn_x86_shadow_reg_off(dst_reg));
-	else if (!arch_regs && kinsn_x86_is_scratch(dst_reg))
+	bool stacked = arch_regs ? kinsn_x86_arch_reg_uses_stack_slot(dst_reg) :
+				   kinsn_x86_reg_uses_stack_slot(dst_reg);
+
+	if (stacked)
 		insn_buf[(*cnt)++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, value_reg,
 						 kinsn_x86_scratch_off(dst_reg));
 	else if (dst_reg != value_reg) {
-		if (width64)
-			insn_buf[(*cnt)++] = BPF_MOV64_REG(dst_reg, value_reg);
-		else
-			insn_buf[(*cnt)++] = BPF_MOV32_REG(dst_reg, value_reg);
-	}
-	if (!arch_regs && kinsn_x86_reg_is_bpf_writable(dst_reg) &&
-	    dst_reg != value_reg) {
 		if (width64)
 			insn_buf[(*cnt)++] = BPF_MOV64_REG(dst_reg, value_reg);
 		else
@@ -350,7 +262,7 @@ static __always_inline bool kinsn_bpf_gpr_valid(u8 reg)
 
 static __always_inline bool kinsn_x86_operand_valid(u8 reg)
 {
-	return kinsn_x86_valid(reg);
+	return reg <= BPF_REG_10 && kinsn_x86_valid(reg);
 }
 
 static __always_inline void kinsn_emit_u8(u8 *buf, u32 *len, u8 byte)

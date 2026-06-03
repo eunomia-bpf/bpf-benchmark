@@ -12,7 +12,6 @@
 #include <limits>
 #include <map>
 #include <optional>
-#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -62,11 +61,8 @@ constexpr uint8_t BPF_CALL = 0x85;
 constexpr uint8_t BPF_CALLX = BPF_CALL | 0x08;
 constexpr uint8_t BPF_EXIT = 0x95;
 constexpr uint8_t BPF_MOV32_X = 0xbc;
-constexpr uint8_t BPF_MOV32_K = 0xb4;
 constexpr uint8_t BPF_MOV64_X = 0xbf;
 constexpr uint8_t BPF_MOV64_K = 0xb7;
-constexpr uint8_t BPF_ADD64_X = 0x0f;
-constexpr uint8_t BPF_ADD64_K = 0x07;
 constexpr uint8_t BPF_LSH64_K = 0x67;
 constexpr uint8_t BPF_RSH64_K = 0x77;
 constexpr uint8_t BPF_AND32_K = 0x54;
@@ -105,23 +101,10 @@ constexpr uint8_t BPF_PSEUDO_KINSN_SIDECAR = 3;
 constexpr uint8_t BPF_PSEUDO_KINSN_CALL = 4;
 constexpr size_t INSN_SIZE = 8;
 
-// BPF helper function ids (uapi/linux/bpf.h __BPF_FUNC_MAPPER order). This pure
-// LLVM tool does not link libbpf, so the relevant ids are spelled out here like
-// the opcode constants above.
-constexpr int32_t BPF_FUNC_map_lookup_elem = 1;
 constexpr int32_t BPF_FUNC_map_update_elem = 2;
 constexpr int32_t BPF_FUNC_map_delete_elem = 3;
-constexpr int32_t BPF_FUNC_probe_read = 4;
-constexpr int32_t BPF_FUNC_get_current_comm = 16;
-constexpr int32_t BPF_FUNC_skb_load_bytes = 26;
-constexpr int32_t BPF_FUNC_probe_read_str = 45;
-constexpr int32_t BPF_FUNC_skb_load_bytes_relative = 68;
 constexpr int32_t BPF_FUNC_map_push_elem = 87;
 constexpr int32_t BPF_FUNC_map_pop_elem = 88;
-constexpr int32_t BPF_FUNC_probe_read_user = 112;
-constexpr int32_t BPF_FUNC_probe_read_kernel = 113;
-constexpr int32_t BPF_FUNC_probe_read_user_str = 114;
-constexpr int32_t BPF_FUNC_probe_read_kernel_str = 115;
 
 struct Cli {
 	bool canonicalize_map_refs = false;
@@ -412,7 +395,7 @@ void validate_kinsn_mode_arg(std::string_view value)
 			std::string_view(spec).substr(0, eq));
 		const std::string mode = trim_copy(
 			std::string_view(spec).substr(eq + 1));
-		if (mode != "disable" && mode != "cost" && mode != "force") {
+		if (mode != "disable" && mode != "force") {
 			throw std::runtime_error("invalid --kinsn-mode value: " +
 						 mode);
 		}
@@ -443,15 +426,9 @@ std::vector<std::string> parse_kinsn_llvm_args(std::string_view pass,
 						std::string_view(
 							"-bpf-kinsn-mode=")
 							.size()));
-			} else if (value.starts_with(
-					   "-bpf-kinsn-rotate-amortization-threshold=")) {
-				if (pass != "rotate" && pass != "kinsn") {
-					throw std::runtime_error(
-						"rotate amortization threshold is only valid for rotate/kinsn");
-				}
 			} else {
 				throw std::runtime_error(
-					"kinsn --llvm-arg only accepts BPF kinsn selector options");
+					"kinsn --llvm-arg only accepts BPF kinsn policy options");
 			}
 			llvm_args.push_back(std::move(value));
 		} else {
@@ -653,30 +630,13 @@ bool valid_bpf_stack_range(int off, int width)
 	return off >= -512 && off + width <= 0;
 }
 
-void reserve_stack_range(std::vector<std::pair<int, int>> &occupied, int off,
-			 int width)
-{
-	occupied.emplace_back(off, off + width);
-}
+constexpr int X86_KINSN_STACK_OFF = -40;
+constexpr int X86_KINSN_STACK_BYTES = 40;
 
-bool stack_range_is_free(const std::vector<std::pair<int, int>> &occupied,
-			 int off, int width)
+bool overlaps_x86_kinsn_stack_contract(int off, int width)
 {
-	const int end = off + width;
-	for (const auto &[used_start, used_end] : occupied) {
-		if (off < used_end && used_start < end) {
-			return false;
-		}
-	}
-	return true;
-}
-
-void reserve_x86_kinsn_stack_contract(std::vector<std::pair<int, int>> &occupied)
-{
-	// The current x86 kinsn emitters may use this verifier-visible scratch
-	// range after the kernel expands a pseudo call. Keep compiler spill slots
-	// out of it until the module stack contract is removed.
-	reserve_stack_range(occupied, -512, 184);
+	return byte_ranges_overlap(off, width, X86_KINSN_STACK_OFF,
+				   X86_KINSN_STACK_BYTES);
 }
 
 struct StackAccess {
@@ -685,37 +645,6 @@ struct StackAccess {
 	int width = 0;
 	bool write = false;
 };
-
-enum class KnownKind {
-	Unknown,
-	Frame,
-	ScalarConst,
-};
-
-struct KnownValue {
-	KnownKind kind = KnownKind::Unknown;
-	int64_t value = 0;
-};
-
-KnownValue unknown_value()
-{
-	return KnownValue{};
-}
-
-KnownValue frame_value(int64_t off)
-{
-	return KnownValue{ KnownKind::Frame, off };
-}
-
-KnownValue scalar_const_value(int64_t value)
-{
-	return KnownValue{ KnownKind::ScalarConst, value };
-}
-
-bool same_known_value(const KnownValue &lhs, const KnownValue &rhs)
-{
-	return lhs.kind == rhs.kind && lhs.value == rhs.value;
-}
 
 bool is_kinsn_sidecar(const std::vector<uint8_t> &bytes, size_t pc)
 {
@@ -727,266 +656,6 @@ bool is_kinsn_call(const std::vector<uint8_t> &bytes, size_t pc)
 {
 	return bytes[pc * INSN_SIZE] == BPF_CALL &&
 	       src_reg(bytes, pc) == BPF_PSEUDO_KINSN_CALL;
-}
-
-std::set<std::pair<int16_t, int32_t>>
-kinsn_call_ids_for_names(const KinsnTargetMap *targets,
-			 std::initializer_list<std::string_view> names)
-{
-	std::set<std::pair<int16_t, int32_t>> ids;
-	if (!targets) {
-		return ids;
-	}
-	for (std::string_view name : names) {
-		const auto it = targets->find(std::string(name));
-		if (it == targets->end()) {
-			continue;
-		}
-		ids.emplace(it->second.call_offset, it->second.btf_func_id);
-	}
-	return ids;
-}
-
-bool kinsn_call_matches(const std::vector<uint8_t> &bytes, size_t pc,
-			const std::set<std::pair<int16_t, int32_t>> &ids)
-{
-	if (!is_kinsn_call(bytes, pc)) {
-		return false;
-	}
-	return ids.contains({ read_off(bytes, pc), read_imm(bytes, pc) });
-}
-
-struct X86LeaPayload {
-	uint8_t dst = 0;
-	uint8_t base = 0;
-	uint8_t index = 0;
-	uint8_t scale_log2 = 0;
-	bool has_base = false;
-	bool has_index = false;
-	int32_t disp = 0;
-};
-
-std::optional<X86LeaPayload>
-decode_x86_lea_sidecar(const std::vector<uint8_t> &bytes, size_t pc)
-{
-	if (!is_kinsn_sidecar(bytes, pc) || dst_reg(bytes, pc) != 1) {
-		return std::nullopt;
-	}
-	const uint16_t payload16 = static_cast<uint16_t>(read_off(bytes, pc));
-	X86LeaPayload out;
-	out.dst = payload16 & 0xf;
-	out.base = (payload16 >> 4) & 0xf;
-	out.index = (payload16 >> 8) & 0xf;
-	out.scale_log2 = (payload16 >> 12) & 0x3;
-	out.has_index = (payload16 >> 14) & 0x1;
-	out.has_base = (payload16 >> 15) & 0x1;
-	out.disp = read_imm(bytes, pc);
-	return out;
-}
-
-std::optional<std::pair<uint8_t, uint8_t>>
-helper_stack_write_args(int32_t helper)
-{
-	switch (helper) {
-	case BPF_FUNC_probe_read:
-	case BPF_FUNC_get_current_comm:
-	case BPF_FUNC_probe_read_str:
-	case BPF_FUNC_probe_read_user:
-	case BPF_FUNC_probe_read_kernel:
-	case BPF_FUNC_probe_read_user_str:
-	case BPF_FUNC_probe_read_kernel_str:
-		return std::pair<uint8_t, uint8_t>{ 1, 2 };
-	case BPF_FUNC_skb_load_bytes:
-	case BPF_FUNC_skb_load_bytes_relative:
-		return std::pair<uint8_t, uint8_t>{ 3, 4 };
-	default:
-		return std::nullopt;
-	}
-}
-
-void clear_stack_value_range(std::map<int16_t, KnownValue> &stack, int off,
-			     int width)
-{
-	for (auto it = stack.begin(); it != stack.end();) {
-		if (byte_ranges_overlap(off, width, it->first, 8)) {
-			it = stack.erase(it);
-		} else {
-			++it;
-		}
-	}
-}
-
-void record_known_equivalent_slots(
-	std::map<int16_t, std::vector<std::set<int16_t>>> &equiv_by_slot,
-	std::set<int16_t> &unknown_store_slots, int16_t old_off,
-	const KnownValue &value, const std::map<int16_t, KnownValue> &stack)
-{
-	if (value.kind != KnownKind::Frame) {
-		unknown_store_slots.insert(old_off);
-		return;
-	}
-	std::set<int16_t> slots;
-	for (const auto &[off, slot_value] : stack) {
-		if (off % 8 != 0 || !valid_bpf_stack_range(off, 8)) {
-			continue;
-		}
-		if (same_known_value(value, slot_value)) {
-			slots.insert(off);
-		}
-	}
-	equiv_by_slot[old_off].push_back(std::move(slots));
-}
-
-void analyze_stack_values_and_accesses(
-	const std::vector<uint8_t> &bytes,
-	const std::map<int16_t, int> &invalid_slots,
-	const KinsnTargetMap *kinsn_targets,
-	std::vector<StackAccess> &accesses,
-	std::map<int16_t, std::vector<std::set<int16_t>>> &equiv_by_slot,
-	std::set<int16_t> &unknown_store_slots)
-{
-	const auto leaq_ids =
-		kinsn_call_ids_for_names(kinsn_targets, { "bpf_x86_leaq" });
-	std::array<KnownValue, 11> regs{};
-	std::map<int16_t, KnownValue> stack;
-	regs[10] = frame_value(0);
-	const size_t insn_count = bytes.size() / INSN_SIZE;
-
-	for (size_t pc = 0; pc < insn_count; pc++) {
-		const uint8_t opcode = bytes[pc * INSN_SIZE];
-		if (opcode == BPF_LD_IMM64) {
-			regs[dst_reg(bytes, pc)] = unknown_value();
-			pc++;
-			continue;
-		}
-
-		if (kinsn_call_matches(bytes, pc, leaq_ids) && pc > 0) {
-			if (const auto lea = decode_x86_lea_sidecar(bytes, pc - 1)) {
-				KnownValue value = unknown_value();
-				if (lea->has_base && !lea->has_index &&
-				    lea->base < regs.size() &&
-				    regs[lea->base].kind == KnownKind::Frame) {
-					value = frame_value(regs[lea->base].value +
-							    lea->disp);
-				} else if (!lea->has_base && !lea->has_index) {
-					value = scalar_const_value(lea->disp);
-				}
-				if (lea->dst < regs.size()) {
-					regs[lea->dst] = value;
-				}
-			}
-			continue;
-		}
-
-		if (const auto ref = fp_stack_mem_ref(bytes, pc)) {
-			const bool valid = valid_bpf_stack_range(ref->off, ref->width);
-			if (ref->write) {
-				clear_stack_value_range(stack, ref->off, ref->width);
-			}
-			if (!valid) {
-				if (ref->write && ref->width == 8 &&
-				    (opcode & BPF_CLASS_MASK) == BPF_STX_CLASS &&
-				    invalid_slots.contains(ref->off)) {
-					record_known_equivalent_slots(
-						equiv_by_slot, unknown_store_slots,
-						ref->off, regs[src_reg(bytes, pc)],
-						stack);
-				}
-			} else if (ref->write) {
-				if ((opcode & BPF_CLASS_MASK) == BPF_STX_CLASS &&
-				    ref->width == 8 && ref->off % 8 == 0 &&
-				    regs[src_reg(bytes, pc)].kind ==
-					    KnownKind::Frame) {
-					stack[ref->off] = regs[src_reg(bytes, pc)];
-				}
-			} else if (ref->width == 8) {
-				const auto it = stack.find(ref->off);
-				regs[dst_reg(bytes, pc)] =
-					it == stack.end() ? unknown_value() :
-							    it->second;
-			} else {
-				regs[dst_reg(bytes, pc)] = unknown_value();
-			}
-		}
-
-		switch (opcode) {
-		case BPF_MOV64_X:
-			regs[dst_reg(bytes, pc)] = regs[src_reg(bytes, pc)];
-			break;
-		case BPF_MOV32_X:
-			regs[dst_reg(bytes, pc)] = unknown_value();
-			break;
-		case BPF_MOV64_K:
-		case BPF_MOV32_K:
-			if (!is_kinsn_sidecar(bytes, pc)) {
-				regs[dst_reg(bytes, pc)] =
-					scalar_const_value(read_imm(bytes, pc));
-			}
-			break;
-		case BPF_ADD64_K:
-			if (regs[dst_reg(bytes, pc)].kind == KnownKind::Frame ||
-			    regs[dst_reg(bytes, pc)].kind ==
-				    KnownKind::ScalarConst) {
-				regs[dst_reg(bytes, pc)].value +=
-					read_imm(bytes, pc);
-			}
-			break;
-		case BPF_ADD64_X: {
-			const uint8_t dst = dst_reg(bytes, pc);
-			const uint8_t src = src_reg(bytes, pc);
-			if (regs[dst].kind == KnownKind::Frame &&
-			    regs[src].kind == KnownKind::ScalarConst) {
-				regs[dst].value += regs[src].value;
-			} else if (regs[dst].kind == KnownKind::ScalarConst &&
-				   regs[src].kind == KnownKind::Frame) {
-				regs[dst] = frame_value(regs[src].value +
-							regs[dst].value);
-			} else {
-				regs[dst] = unknown_value();
-			}
-			break;
-		}
-		case BPF_CALL:
-		case BPF_CALLX: {
-			if (src_reg(bytes, pc) == BPF_PSEUDO_KINSN_CALL ||
-			    src_reg(bytes, pc) == BPF_PSEUDO_CALL) {
-				break;
-			}
-			if (const auto args = helper_stack_write_args(
-				    read_imm(bytes, pc))) {
-				const auto [dst_arg, len_arg] = *args;
-				if (regs[dst_arg].kind == KnownKind::Frame) {
-					int width = 512;
-					if (regs[len_arg].kind ==
-						    KnownKind::ScalarConst &&
-					    regs[len_arg].value > 0 &&
-					    regs[len_arg].value <= 512) {
-						width = static_cast<int>(
-							regs[len_arg].value);
-					}
-					const int off =
-						static_cast<int>(regs[dst_arg].value);
-					if (off < 0) {
-						width = std::min(width, -off);
-						accesses.push_back(StackAccess{
-							pc, off, width, true });
-						clear_stack_value_range(stack, off,
-									width);
-					}
-				}
-			}
-			for (uint8_t reg = 0; reg <= 5; reg++) {
-				regs[reg] = unknown_value();
-			}
-			break;
-		}
-		default:
-			if (opcode_defines_dst(opcode)) {
-				regs[dst_reg(bytes, pc)] = unknown_value();
-			}
-			break;
-		}
-	}
 }
 
 bool candidate_access_overlaps(const StackAccess &access, int off, int width)
@@ -1042,27 +711,8 @@ bool candidate_is_free_for_range(const std::vector<StackAccess> &accesses,
 	return !next || next->write;
 }
 
-std::set<int16_t> intersect_equivalent_slot_sets(
-	const std::vector<std::set<int16_t>> &sets)
-{
-	std::set<int16_t> out;
-	if (sets.empty()) {
-		return out;
-	}
-	out = sets.front();
-	for (size_t i = 1; i < sets.size(); i++) {
-		std::set<int16_t> next;
-		std::set_intersection(out.begin(), out.end(), sets[i].begin(),
-				      sets[i].end(),
-				      std::inserter(next, next.begin()));
-		out = std::move(next);
-	}
-	return out;
-}
-
 int64_t remap_out_of_range_stack_spills(std::vector<uint8_t> &bytes,
-					bool reserve_x86_kinsn_stack,
-					const KinsnTargetMap *kinsn_targets)
+					bool reserve_x86_kinsn_stack)
 {
 	if (bytes.size() % INSN_SIZE != 0) {
 		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
@@ -1098,21 +748,6 @@ int64_t remap_out_of_range_stack_spills(std::vector<uint8_t> &bytes,
 		return 0;
 	}
 
-	std::map<int16_t, std::vector<std::set<int16_t>>> equiv_by_slot;
-	std::set<int16_t> unknown_store_slots;
-	analyze_stack_values_and_accesses(bytes, invalid_slots, kinsn_targets,
-					  accesses, equiv_by_slot,
-					  unknown_store_slots);
-
-	if (reserve_x86_kinsn_stack) {
-		std::vector<std::pair<int, int>> occupied;
-		reserve_x86_kinsn_stack_contract(occupied);
-		for (const auto &[start, end] : occupied) {
-			accesses.push_back(StackAccess{
-				0, start, end - start, true });
-		}
-	}
-
 	std::map<int16_t, int16_t> remap;
 	std::vector<StackAccess> remapped_accesses = accesses;
 	for (const auto &[old_off, width] : invalid_slots) {
@@ -1124,44 +759,21 @@ int64_t remap_out_of_range_stack_spills(std::vector<uint8_t> &bytes,
 		const size_t first_pc = refs_it->second.front().pc;
 		const size_t last_pc = refs_it->second.back().pc;
 		std::optional<int16_t> replacement;
-		if (!unknown_store_slots.contains(old_off)) {
-			const auto equiv_it = equiv_by_slot.find(old_off);
-			if (equiv_it != equiv_by_slot.end()) {
-				for (int16_t candidate :
-				     intersect_equivalent_slot_sets(
-					     equiv_it->second)) {
-					if (!valid_bpf_stack_range(candidate, width)) {
-						continue;
-					}
-					if (candidate_has_access_in_range(
-						    remapped_accesses, candidate,
-						    width, first_pc, last_pc,
-						    true)) {
-						continue;
-					}
-					replacement = candidate;
-					break;
-				}
+		for (int candidate = -512; candidate <= -8; candidate += 8) {
+			if (!valid_bpf_stack_range(candidate, width)) {
+				continue;
 			}
-		}
-		if (!replacement) {
-			for (int candidate = -512; candidate <= -8; candidate += 8) {
-				if (!valid_bpf_stack_range(candidate, width)) {
-					continue;
-				}
-				if (reserve_x86_kinsn_stack &&
-				    byte_ranges_overlap(candidate, width, -512,
-							184)) {
-					continue;
-				}
-				if (!candidate_is_free_for_range(
-					    remapped_accesses, candidate, width,
-					    first_pc, last_pc)) {
-					continue;
-				}
-				replacement = static_cast<int16_t>(candidate);
-				break;
+			if (reserve_x86_kinsn_stack &&
+			    overlaps_x86_kinsn_stack_contract(candidate, width)) {
+				continue;
 			}
+			if (!candidate_is_free_for_range(
+				    remapped_accesses, candidate, width,
+				    first_pc, last_pc)) {
+				continue;
+			}
+			replacement = static_cast<int16_t>(candidate);
+			break;
 		}
 		if (!replacement) {
 			throw std::runtime_error(
@@ -2383,14 +1995,13 @@ void run_pass(Cli &cli)
 			preserve_low16_bound_after_composite_u32_check(output);
 			preserve_shifted_offset_bound_after_guard(output);
 			compact_unreachable_insns(output);
-			remap_out_of_range_stack_spills(output, true,
-							&kinsn_targets);
+			remap_out_of_range_stack_spills(output, true);
 			sites_applied = count_kinsn_calls(output);
 			if (*sites_applied == 0) {
 				output = input;
 			}
 		} else {
-			remap_out_of_range_stack_spills(output, false, nullptr);
+			remap_out_of_range_stack_spills(output, false);
 		}
 	}
 	write_all(cli.output, output);
