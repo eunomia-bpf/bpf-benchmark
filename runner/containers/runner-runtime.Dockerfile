@@ -92,9 +92,7 @@ ARG TEST_BUILD_DIR=build
 # shipping the full kbuild output (~6 GB) as Docker context. Set by the image rule:
 #   x86_64 -> image-context = $(O)/arch/x86/boot   KERNEL_IMAGE_NAME=bzImage
 #   arm64  -> image-context = $(O)/arch/arm64/boot KERNEL_IMAGE_NAME=vmlinuz.efi
-# Manifest JSON is tiny (<200B) so we inline it as a build-arg instead of a context.
 ARG KERNEL_IMAGE_NAME
-ARG KERNEL_MANIFEST_JSON
 
 COPY --link --chmod=0755 vendor/build/${VENDOR_BUILD_ARCH}/tracee/bin/tracee /artifacts/tracee/bin/tracee
 COPY --link vendor/build/${VENDOR_BUILD_ARCH}/tetragon/ /artifacts/tetragon/
@@ -132,9 +130,9 @@ RUN set -eux; \
 
 COPY --link --from=runner-runtime-host-kernel-image /${KERNEL_IMAGE_NAME} /artifacts/kernel/${KERNEL_IMAGE_NAME}
 COPY --link --from=runner-runtime-host-kernel-config /config /artifacts/kernel/config
+COPY --link --from=runner-runtime-host-kernel-config /manifest.json /artifacts/manifest.json
 COPY --link --from=runner-runtime-host-kernel-offsets /kernel_offsets.h /artifacts/kernel/kernel_offsets.h
 COPY --link --from=runner-runtime-host-kernel-modules / /artifacts/lib/modules
-RUN mkdir -p /artifacts && printf '%s\n' "${KERNEL_MANIFEST_JSON}" > /artifacts/manifest.json
 RUN set -eux; \
     kernel_release="$(python3 -c 'import json; print(json.load(open("/artifacts/manifest.json"))["kernel_release"])')"; \
     mkdir -p /artifacts/boot /boot; \

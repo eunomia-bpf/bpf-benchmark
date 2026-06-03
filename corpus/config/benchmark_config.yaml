@@ -2,6 +2,7 @@ policy:
   groups:
     map-only: [noop, map_inline]
     map-dce:      [noop, map_inline, const_prop, dce]
+    kinsn: [kinsn]
     kinsn-5: [rotate, cond_select, extract, endian_fusion, bulk_memory]
     kinsn-6: [rotate, cond_select, extract, endian_fusion, bulk_memory, prefetch]
     br:      [noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec]
@@ -10,7 +11,7 @@ policy:
            wide_mem, bounds_check_merge, skb_load_bytes_spec,
            noop, const_prop, dce]
     full-x86: [noop, map_inline, const_prop, dce,
-               rotate, cond_select, extract, endian_fusion, lea, ccmp, bulk_memory, prefetch,
+               kinsn,
                wide_mem, bounds_check_merge, skb_load_bytes_spec,
                noop, const_prop, dce]
   platforms:

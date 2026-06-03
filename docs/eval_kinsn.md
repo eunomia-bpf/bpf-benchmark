@@ -1,15 +1,162 @@
 # Kinsn Corpus Evaluation
 
-Last updated: 2026-06-02
+Last updated: 2026-06-03
 
 This is the paper-facing evaluation note for kinsn-based ReJIT on the x86 KVM
 corpus. The benchmark framework records raw counters and workload payloads
 only; all ratios, tables, figures, and interpretation below are post-hoc
 analysis.
 
-## Current LEA Result
+## Current All-Force Result
 
-The current authoritative x86 KVM kinsn corpus result is the LEA run collected
+The current authoritative x86 KVM kinsn corpus result is the all-force run
+collected after making the backend default apply every currently enabled x86
+kinsn candidate. This SAMPLES=3 artifact was collected before the neutral
+`kinsn` pass alias existed, so its metadata shows `rotate` as the single
+bpfopt pass entrypoint; the backend default was already `all=force`, so the
+loadtime reports count all-force kinsn sites, not rotate-only sites. The
+current equivalent entrypoint is `BPFREJIT_BENCH_PASSES=kinsn`, verified by
+the smoke artifact below with identical apply coverage. No workload override,
+app disable, program filter, or YAML disable was used.
+
+Collection command for the authoritative artifact:
+
+```sh
+JOBS=12 IMAGE_BUILD_JOBS=12 BPFREJIT_BENCH_PASSES=rotate SAMPLES=3 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 TIMEOUT=7200 make corpus
+```
+
+Current equivalent command after adding the neutral `kinsn` pass alias:
+
+```sh
+JOBS=12 IMAGE_BUILD_JOBS=12 BPFREJIT_BENCH_PASSES=kinsn SAMPLES=3 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 TIMEOUT=7200 make corpus
+```
+
+Artifact:
+`corpus/results/x86_kvm_corpus_20260603_175429_964295`
+
+Smoke artifact using the `kinsn` alias:
+`corpus/results/x86_kvm_corpus_20260603_185015_116803`
+
+Post-hoc script:
+`docs/tmp/kinsn_all_force_eval_20260603.py`
+
+Headline result: **the x86 KVM all-force kinsn corpus completed all six apps
+with `status=ok`, applied `27,085` kinsn sites across `631` applied loadtime
+rows, and improved both workload throughput and BPF counters in this
+SAMPLES=3 run.** The workload post/baseline geomean is `1.081x`, the
+all-qualified BPF per-program cost geomean is `0.938x`, and the direct
+self-applied cost geomean is `0.933x`. This supersedes the earlier same-day
+all-force run at `corpus/results/x86_kvm_corpus_20260603_162736_632388`
+(`0.965x` all-qualified, `0.963x` direct) after tightening x86 JIT
+callee-saved register accounting around kinsn calls.
+
+![x86 KVM all-force kinsn corpus evaluation](figures/eval-kinsn-all-force-corpus-20260603.png)
+
+*Figure 1: x86 KVM all-force kinsn corpus result. Workload throughput uses
+post/baseline ratios, higher is better. BPF cost uses per-program geomean
+post/baseline `ns/run`, lower is better. Apply coverage is decoded post-hoc
+from retained loadtime workdir bytecode and split by kinsn family.*
+
+Correctness and apply coverage:
+
+| App | status | reports | applied programs | sites | skipped | errors |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `bcc` | `ok` | 77 | 25 | 68 | 0 | 0 |
+| `otel` | `ok` | 17 | 15 | 1207 | 0 | 0 |
+| `cilium` | `ok` | 169 | 131 | 2731 | 0 | 0 |
+| `tetragon` | `ok` | 308 | 290 | 15158 | 0 | 0 |
+| `katran` | `ok` | 6 | 1 | 39 | 0 | 0 |
+| `tracee` | `ok` | 182 | 169 | 7882 | 0 | 0 |
+| `total` | `ok` | 759 | 631 | 27085 | 0 | 0 |
+
+Applied kinsn families:
+
+| App | LEA | cond_select | rotate | extract | endian_fusion | bulk_memory | prefetch | other | total |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `bcc` | 68 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 68 |
+| `otel` | 1041 | 166 | 0 | 0 | 0 | 0 | 0 | 0 | 1207 |
+| `cilium` | 2346 | 385 | 0 | 0 | 0 | 0 | 0 | 0 | 2731 |
+| `tetragon` | 14744 | 414 | 0 | 0 | 0 | 0 | 0 | 0 | 15158 |
+| `katran` | 39 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 39 |
+| `tracee` | 7859 | 23 | 0 | 0 | 0 | 0 | 0 | 0 | 7882 |
+| `total` | 26097 | 988 | 0 | 0 | 0 | 0 | 0 | 0 | 27085 |
+
+The family table is decoded from the final `input.bin` retained by each
+applied loadtime workdir. The decoded kinsn call count is required to match
+the loadtime report's `sites_applied` count. The current all-force corpus
+therefore proves broad LEA coverage plus real cond_select coverage, while
+rotate/extract/endian_fusion/bulk_memory/prefetch had zero final applied sites
+in this workload corpus.
+
+Workload throughput:
+
+| App | baseline throughput | post-ReJIT throughput | post/baseline | sample ratios |
+| --- | ---: | ---: | ---: | --- |
+| `bcc` | 550764.13 | 552568.13 | 1.003x | 1.001x, 1.027x, 0.998x |
+| `otel` | 106252302.38 | 107717477.91 | 1.014x | 1.018x, 0.991x, 0.993x |
+| `cilium` | 1431915.00 | 1559427.00 | 1.089x | 1.001x, 1.089x, 1.100x |
+| `tetragon` | 333005.80 | 478208.91 | 1.436x | 2.217x, 1.452x, 1.321x |
+| `katran` | 2490402.00 | 2468118.00 | 0.991x | 0.980x, 0.991x, 1.000x |
+| `tracee` | 387374.92 | 391424.61 | 1.010x | 1.013x, 1.007x, 1.017x |
+
+BPF per-program counters:
+
+| App | retained rows | all-qualified geomean | wins/losses/ties | direct applied rows | direct applied geomean |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `bcc` | 15 | 1.014x | 8/7/0 | 11 | 1.014x |
+| `otel` | 1 | 1.102x | 0/1/0 | 1 | 1.102x |
+| `cilium` | 2 | 0.854x | 2/0/0 | 2 | 0.854x |
+| `tetragon` | 5 | 0.827x | 5/0/0 | 5 | 0.827x |
+| `katran` | 1 | 1.002x | 0/1/0 | 1 | 1.002x |
+| `tracee` | 40 | 0.925x | 35/5/0 | 40 | 0.925x |
+
+The global all-qualified BPF per-program geomean is `0.938x` over `64`
+retained rows. The direct self-applied geomean is `0.933x` over `60` retained
+rows. The full generated direct-row table is preserved in
+`docs/tmp/kinsn_all_force_eval_20260603_summary.md`.
+
+Interpretation caveats:
+
+- Raw bpfopt loadtime reports only provide total matched/applied site counts;
+  the family table and Figure 1 split families by decoding retained final
+  bytecode post-hoc. Under this corpus, all-force actual apply coverage is LEA
+  plus cond_select only.
+- OTEL still regresses in the retained direct BPF counter subset (`1.102x`
+  cost). BCC is now close to neutral (`1.014x`) after avoiding unconditional
+  x86 callee-saved BPF register saves around every kinsn call. Remaining costs
+  are the kfunc/call path, normal BPF prologue accounting, and native-body
+  clobbers visible through proof/shadow-slot usage.
+- Katran reports large raw pktgen `errors:` counts in workload payloads, as in
+  earlier kinsn runs; the app and ReJIT path still completed with `status=ok`.
+- Tetragon's workload samples are noisy (`2.217x`, `1.452x`, `1.321x`) but all
+  three post/baseline pairs are positive.
+
+## Current RQ Answers
+
+**RQ1 Correctness.** The all-force run completed all six x86 KVM corpus apps
+with `status=ok`, empty app error strings, three measured baseline workloads,
+and three measured post-ReJIT workloads per app. A verifier-log grep over
+retained loadtime workdirs found no invalid/unbounded/out-of-range verifier
+failure signatures.
+
+**RQ2 Apply coverage.** All-force kinsn applies broadly on x86: `27,085`
+sites across `631` applied loadtime rows. The largest site populations are
+Tetragon (`15,158`), Tracee (`7,882`), Cilium (`2,731`), and OTEL (`1,207`).
+No site was skipped in the loadtime reports. Post-hoc decoded family coverage
+is `26,097` LEA sites and `988` cond_select sites; rotate, extract,
+endian_fusion, bulk_memory, and prefetch have zero final applied sites in this
+corpus artifact.
+
+**RQ3 Performance.** In this run, workload throughput improves by `1.081x`
+unweighted geomean across the six app workloads. BPF-counter cost improves by
+per-program geomean (`0.938x` all-qualified, `0.933x` direct self-applied),
+driven by Cilium, Tetragon, and Tracee. OTEL remains the clear retained
+counter regression; BCC and Katran are near neutral and are secondary
+optimization targets.
+
+## Previous LEA Result, 2026-06-02
+
+The previous x86 KVM kinsn corpus result was the LEA run collected
 after enabling x86 LEA in the bpfopt policy path and removing the wrapper-side
 LLVM selector gate. It uses the same fixed corpus workloads as the smoke runs;
 only the pass list is narrowed to `lea`.
@@ -35,7 +182,7 @@ geomean is `0.873x`.
 
 ![x86 KVM LEA kinsn corpus evaluation](figures/eval-kinsn-lea-corpus-20260602.png)
 
-*Figure 1: x86 KVM LEA corpus result. Workload throughput uses
+*Figure 2: x86 KVM LEA corpus result. Workload throughput uses
 post/baseline ratios, higher is better. BPF cost uses per-program geomean
 post/baseline `ns/run`, lower is better. Direct-applied points are a
 conservative self-applied subset, not the full tail-call affected population.*
@@ -94,7 +241,7 @@ Interpretation caveats:
   but the app completed with `status=ok`; these are workload-side raw fields,
   not loadtime or ReJIT errors.
 
-## Current RQ Answers
+## LEA RQ Answers
 
 **RQ1 Correctness.** The LEA run completed all six x86 KVM corpus apps with
 `status=ok`, empty app error strings, one measured baseline workload and one
@@ -217,7 +364,7 @@ for tail-call descendants. Tail-called programs can report zero own
 
 ![x86 KVM kinsn-6 corpus evaluation](figures/eval-kinsn-corpus-20260531.png)
 
-*Figure 2: x86 KVM `kinsn-6` corpus result. Workload throughput uses
+*Figure 3: x86 KVM `kinsn-6` corpus result. Workload throughput uses
 post/baseline ratios, higher is better. BPF cost uses per-program geomean
 post/baseline `ns/run`, lower is better. Apply coverage shows real
 `cond_select` kinsn sites; the other five enabled kinsn-class passes had zero
@@ -336,19 +483,41 @@ that performance result while preserving it as a regression baseline.
 
 ## Appendix
 
-Current LEA post-hoc analysis script:
+Current all-force post-hoc analysis script:
+`docs/tmp/kinsn_all_force_eval_20260603.py`
+
+Current all-force generated summary:
+`docs/tmp/kinsn_all_force_eval_20260603_summary.md`
+
+Current all-force generated figure:
+`docs/figures/eval-kinsn-all-force-corpus-20260603.png`
+
+Current all-force authoritative artifact:
+`corpus/results/x86_kvm_corpus_20260603_175429_964295`
+
+Current all-force smoke artifact:
+`corpus/results/x86_kvm_corpus_20260603_185015_116803`
+
+Current all-force reproduction command:
+
+```sh
+JOBS=12 IMAGE_BUILD_JOBS=12 BPFREJIT_BENCH_PASSES=kinsn SAMPLES=3 WORKLOAD_DURATION=30 KEEP_WORKDIRS=1 TIMEOUT=7200 make corpus
+python3 docs/tmp/kinsn_all_force_eval_20260603.py
+```
+
+Previous LEA post-hoc analysis script:
 `docs/tmp/kinsn_eval_20260602.py`
 
-Current LEA generated summary:
+Previous LEA generated summary:
 `docs/tmp/kinsn_eval_20260602_summary.md`
 
-Current LEA generated figure:
+Previous LEA generated figure:
 `docs/figures/eval-kinsn-lea-corpus-20260602.png`
 
-Current LEA authoritative artifact:
+Previous LEA authoritative artifact:
 `corpus/results/x86_kvm_corpus_20260602_141656_778399`
 
-Current LEA reproduction command:
+Previous LEA reproduction command:
 
 ```sh
 BPFREJIT_BENCH_PASSES=lea SAMPLES=1 WORKLOAD_DURATION=30 TIMEOUT=7200 make corpus

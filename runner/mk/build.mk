@@ -229,6 +229,9 @@ x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	install -d "$(HOST_KERNEL_CONFIG_CONTEXT_X86)"
 	cp "$(HOST_KERNEL_BUILD_DIR_X86)/.config" "$(HOST_KERNEL_CONFIG_CONTEXT_X86)/config"
+	kernel_release="$$(cat "$(HOST_KERNEL_BUILD_DIR_X86)/include/config/kernel.release")"; \
+		test -n "$${kernel_release}"; \
+		printf '{"kernel_release":"%s","target_arch":"x86_64","kernel_image":"bzImage"}\n' "$${kernel_release}" > "$(HOST_KERNEL_CONFIG_CONTEXT_X86)/manifest.json"
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
 		--build-context runner-runtime-host-runner-build="$(RUNNER_DIR)/build-llvmbpf" \
@@ -248,7 +251,6 @@ x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-
 		--build-arg RUNNER_BUILD_DIR_NAME=build-llvmbpf \
 		--build-arg TEST_BUILD_DIR=build \
 		--build-arg KERNEL_IMAGE_NAME=bzImage \
-		--build-arg KERNEL_MANIFEST_JSON="$$(printf '{"kernel_release":"%s","target_arch":"x86_64","kernel_image":"bzImage"}' "$$(cat "$(HOST_KERNEL_BUILD_DIR_X86)/include/config/kernel.release")")" \
 		--build-arg BPFOPT_HOST_BIN="$(X86_BPFOPT_HOST_BIN)" \
 		--build-arg KINSNPROBER_HOST_BIN="$(X86_KINSNPROBER_HOST_BIN)" \
 		-t "$(X86_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
@@ -259,6 +261,9 @@ arm64-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	install -d "$(HOST_KERNEL_CONFIG_CONTEXT_ARM64)"
 	cp "$(HOST_KERNEL_BUILD_DIR_ARM64)/.config" "$(HOST_KERNEL_CONFIG_CONTEXT_ARM64)/config"
+	kernel_release="$$(cat "$(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/kernel.release")"; \
+		test -n "$${kernel_release}"; \
+		printf '{"kernel_release":"%s","target_arch":"arm64","kernel_image":"vmlinuz.efi"}\n' "$${kernel_release}" > "$(HOST_KERNEL_CONFIG_CONTEXT_ARM64)/manifest.json"
 	docker build --platform linux/arm64 \
 		--target runner-runtime \
 		--build-context runner-runtime-host-runner-build="$(RUNNER_DIR)/build-arm64-llvmbpf" \
@@ -278,7 +283,6 @@ arm64-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM
 		--build-arg RUNNER_BUILD_DIR_NAME=build-arm64-llvmbpf \
 		--build-arg TEST_BUILD_DIR=build-arm64 \
 		--build-arg KERNEL_IMAGE_NAME=vmlinuz.efi \
-		--build-arg KERNEL_MANIFEST_JSON="$$(printf '{"kernel_release":"%s","target_arch":"arm64","kernel_image":"vmlinuz.efi"}' "$$(cat "$(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/kernel.release")")" \
 		--build-arg BPFOPT_HOST_BIN="$(ARM64_BPFOPT_HOST_BIN)" \
 		--build-arg KINSNPROBER_HOST_BIN="$(ARM64_KINSNPROBER_HOST_BIN)" \
 		--build-arg NATIVE_LINK_HOST_BIN="native-sim/x86/native_lab/native_link/target/$(ARM64_RUST_TARGET)/release/native-link" \
