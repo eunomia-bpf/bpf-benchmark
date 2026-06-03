@@ -1,8 +1,10 @@
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <cstdio>
 #include <cstdint>
 #include <cstring>
+#include <deque>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -51,9 +53,38 @@
 namespace {
 
 constexpr uint8_t BPF_LD_IMM64 = 0x18;
+constexpr uint8_t BPF_LDXW = 0x61;
+constexpr uint8_t BPF_LDXH = 0x69;
+constexpr uint8_t BPF_LDXB = 0x71;
+constexpr uint8_t BPF_LDXDW = 0x79;
+constexpr uint8_t BPF_STXDW = 0x7b;
 constexpr uint8_t BPF_CALL = 0x85;
 constexpr uint8_t BPF_CALLX = BPF_CALL | 0x08;
 constexpr uint8_t BPF_EXIT = 0x95;
+constexpr uint8_t BPF_MOV32_X = 0xbc;
+constexpr uint8_t BPF_MOV64_X = 0xbf;
+constexpr uint8_t BPF_AND32_K = 0x54;
+constexpr uint8_t BPF_AND64_K = 0x57;
+constexpr uint8_t BPF_JGT32_K = 0x26;
+constexpr uint8_t BPF_JGE32_K = 0x36;
+constexpr uint8_t BPF_JLT32_K = 0xa6;
+constexpr uint8_t BPF_JLE32_K = 0xb6;
+constexpr uint8_t BPF_JA = 0x05;
+constexpr uint8_t BPF_JEQ64_K = 0x15;
+constexpr uint8_t BPF_CLASS_MASK = 0x07;
+constexpr uint8_t BPF_LD_CLASS = 0x00;
+constexpr uint8_t BPF_LDX_CLASS = 0x01;
+constexpr uint8_t BPF_ST_CLASS = 0x02;
+constexpr uint8_t BPF_STX_CLASS = 0x03;
+constexpr uint8_t BPF_ALU_CLASS = 0x04;
+constexpr uint8_t BPF_JMP_CLASS = 0x05;
+constexpr uint8_t BPF_JMP32_CLASS = 0x06;
+constexpr uint8_t BPF_ALU64_CLASS = 0x07;
+constexpr uint8_t BPF_SIZE_MASK = 0x18;
+constexpr uint8_t BPF_W_SIZE = 0x00;
+constexpr uint8_t BPF_H_SIZE = 0x08;
+constexpr uint8_t BPF_B_SIZE = 0x10;
+constexpr uint8_t BPF_DW_SIZE = 0x18;
 constexpr uint8_t BPF_PSEUDO_MAP_FD = 1;
 constexpr uint8_t BPF_PSEUDO_MAP_VALUE = 2;
 constexpr uint8_t BPF_PSEUDO_MAP_IDX = 5;
@@ -454,6 +485,878 @@ int64_t count_kinsn_calls(const std::vector<uint8_t> &bytes)
 	return count;
 }
 
+bool load_zero_extends_within_mask(uint8_t opcode, uint64_t mask)
+{
+	switch (opcode) {
+	case BPF_LDXB:
+		return mask >= 0xff;
+	case BPF_LDXH:
+		return mask >= 0xffff;
+	case BPF_LDXW:
+		return mask >= 0xffffffffULL;
+	default:
+		return false;
+	}
+}
+
+bool opcode_defines_dst(uint8_t opcode)
+{
+	switch (opcode & BPF_CLASS_MASK) {
+	case BPF_LD_CLASS:
+		return opcode == BPF_LD_IMM64;
+	case BPF_LDX_CLASS:
+	case BPF_ALU_CLASS:
+	case BPF_ALU64_CLASS:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool is_masked_range_intervening_insn(const std::vector<uint8_t> &bytes,
+				      size_t pc, uint8_t tmp, uint8_t src)
+{
+	const uint8_t opcode = bytes[pc * INSN_SIZE];
+	const uint8_t klass = opcode & BPF_CLASS_MASK;
+	if (klass == BPF_JMP_CLASS || klass == BPF_JMP32_CLASS ||
+	    klass == BPF_STX_CLASS || opcode == BPF_LD_IMM64) {
+		return false;
+	}
+	if (opcode_defines_dst(opcode)) {
+		const uint8_t dst = dst_reg(bytes, pc);
+		if (dst == tmp || dst == src) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool is_masked_range_branch(uint8_t opcode)
+{
+	return opcode == BPF_JGT32_K || opcode == BPF_JGE32_K ||
+	       opcode == BPF_JLT32_K || opcode == BPF_JLE32_K;
+}
+
+bool is_same_mask_and(uint8_t opcode, int32_t imm, uint64_t mask)
+{
+	if (imm < 0 || static_cast<uint64_t>(imm) != mask) {
+		return false;
+	}
+	return opcode == BPF_AND32_K || opcode == BPF_AND64_K;
+}
+
+void rewrite_insn_to_mov32_x(std::vector<uint8_t> &bytes, size_t pc,
+			     uint8_t dst, uint8_t src)
+{
+	const size_t off = pc * INSN_SIZE;
+	bytes[off] = BPF_MOV32_X;
+	bytes[off + 1] = static_cast<uint8_t>((src << 4) | dst);
+	bytes[off + 2] = 0;
+	bytes[off + 3] = 0;
+	write_imm(bytes, pc, 0);
+}
+
+void rewrite_insn_to_mov64_x(std::vector<uint8_t> &bytes, size_t pc,
+			     uint8_t dst, uint8_t src)
+{
+	const size_t off = pc * INSN_SIZE;
+	bytes[off] = BPF_MOV64_X;
+	bytes[off + 1] = static_cast<uint8_t>((src << 4) | dst);
+	bytes[off + 2] = 0;
+	bytes[off + 3] = 0;
+	write_imm(bytes, pc, 0);
+}
+
+std::optional<int> bpf_mem_width(uint8_t opcode)
+{
+	switch (opcode & BPF_SIZE_MASK) {
+	case BPF_B_SIZE:
+		return 1;
+	case BPF_H_SIZE:
+		return 2;
+	case BPF_W_SIZE:
+		return 4;
+	case BPF_DW_SIZE:
+		return 8;
+	default:
+		return std::nullopt;
+	}
+}
+
+std::optional<size_t> stack_ctx_slot_index(int16_t off)
+{
+	if (off < -512 || off > -8) {
+		return std::nullopt;
+	}
+	return static_cast<size_t>(-off);
+}
+
+bool byte_ranges_overlap(int lhs_start, int lhs_width, int rhs_start,
+			 int rhs_width)
+{
+	const int lhs_end = lhs_start + lhs_width;
+	const int rhs_end = rhs_start + rhs_width;
+	return lhs_start < rhs_end && rhs_start < lhs_end;
+}
+
+struct StackMemRef {
+	size_t pc = 0;
+	int16_t off = 0;
+	int width = 0;
+};
+
+std::optional<StackMemRef> fp_stack_mem_ref(const std::vector<uint8_t> &bytes,
+					    size_t pc)
+{
+	const uint8_t opcode = bytes[pc * INSN_SIZE];
+	const uint8_t klass = opcode & BPF_CLASS_MASK;
+	bool fp_based = false;
+	if (klass == BPF_LDX_CLASS) {
+		fp_based = src_reg(bytes, pc) == 10;
+	} else if (klass == BPF_ST_CLASS || klass == BPF_STX_CLASS) {
+		fp_based = dst_reg(bytes, pc) == 10;
+	}
+	if (!fp_based) {
+		return std::nullopt;
+	}
+	const auto width = bpf_mem_width(opcode);
+	if (!width) {
+		return std::nullopt;
+	}
+	return StackMemRef{ pc, read_off(bytes, pc), *width };
+}
+
+bool valid_bpf_stack_range(int off, int width)
+{
+	return off >= -512 && off + width <= 0;
+}
+
+void reserve_stack_range(std::vector<std::pair<int, int>> &occupied, int off,
+			 int width)
+{
+	occupied.emplace_back(off, off + width);
+}
+
+bool stack_range_is_free(const std::vector<std::pair<int, int>> &occupied,
+			 int off, int width)
+{
+	const int end = off + width;
+	for (const auto &[used_start, used_end] : occupied) {
+		if (off < used_end && used_start < end) {
+			return false;
+		}
+	}
+	return true;
+}
+
+void reserve_x86_kinsn_stack_contract(std::vector<std::pair<int, int>> &occupied)
+{
+	// The current x86 kinsn emitters may use this verifier-visible scratch
+	// range after the kernel expands a pseudo call. Keep compiler spill slots
+	// out of it until the module stack contract is removed.
+	reserve_stack_range(occupied, -512, 184);
+}
+
+int64_t remap_out_of_range_stack_spills(std::vector<uint8_t> &bytes,
+					bool reserve_x86_kinsn_stack)
+{
+	if (bytes.size() % INSN_SIZE != 0) {
+		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
+	}
+
+	std::vector<std::pair<int, int>> occupied;
+	std::map<int16_t, int> invalid_slots;
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	for (size_t pc = 0; pc < insn_count; pc++) {
+		const auto ref = fp_stack_mem_ref(bytes, pc);
+		if (!ref) {
+			continue;
+		}
+		if (valid_bpf_stack_range(ref->off, ref->width)) {
+			reserve_stack_range(occupied, ref->off, ref->width);
+			continue;
+		}
+		if (ref->width != 8 || ref->off % 8 != 0 || ref->off >= -512) {
+			throw std::runtime_error(
+				"LLVM output has non-remappable out-of-range stack access");
+		}
+		const auto [it, inserted] =
+			invalid_slots.emplace(ref->off, ref->width);
+		if (!inserted && it->second != ref->width) {
+			throw std::runtime_error(
+				"LLVM output has inconsistent out-of-range stack slot width");
+		}
+	}
+	if (invalid_slots.empty()) {
+		return 0;
+	}
+
+	if (reserve_x86_kinsn_stack) {
+		reserve_x86_kinsn_stack_contract(occupied);
+	}
+
+	std::map<int16_t, int16_t> remap;
+	for (const auto &[old_off, width] : invalid_slots) {
+		std::optional<int16_t> replacement;
+		for (int candidate = -512; candidate <= -8; candidate += 8) {
+			if (!valid_bpf_stack_range(candidate, width)) {
+				continue;
+			}
+			if (!stack_range_is_free(occupied, candidate, width)) {
+				continue;
+			}
+			replacement = static_cast<int16_t>(candidate);
+			break;
+		}
+		if (!replacement) {
+			throw std::runtime_error(
+				"LLVM output stack spills exceed the BPF 512-byte frame");
+		}
+		remap.emplace(old_off, *replacement);
+		reserve_stack_range(occupied, *replacement, width);
+	}
+
+	int64_t changed = 0;
+	for (size_t pc = 0; pc < insn_count; pc++) {
+		const auto ref = fp_stack_mem_ref(bytes, pc);
+		if (!ref) {
+			continue;
+		}
+		const auto it = remap.find(ref->off);
+		if (it == remap.end()) {
+			continue;
+		}
+		write_off(bytes, pc, it->second);
+		changed++;
+	}
+	return changed;
+}
+
+struct CtxState {
+	std::array<uint8_t, 11> reg{};
+	std::array<uint8_t, 513> stack{};
+};
+
+bool same_ctx_state(const CtxState &lhs, const CtxState &rhs)
+{
+	return lhs.reg == rhs.reg && lhs.stack == rhs.stack;
+}
+
+CtxState intersect_ctx_state(const CtxState &lhs, const CtxState &rhs)
+{
+	CtxState out;
+	for (size_t i = 0; i < out.reg.size(); i++) {
+		out.reg[i] = lhs.reg[i] && rhs.reg[i];
+	}
+	for (size_t i = 0; i < out.stack.size(); i++) {
+		out.stack[i] = lhs.stack[i] && rhs.stack[i];
+	}
+	return out;
+}
+
+void clear_ctx_reg(CtxState &state, uint8_t reg)
+{
+	if (reg < 10) {
+		state.reg[reg] = 0;
+	}
+}
+
+void clear_overlapping_stack_ctx(CtxState &state, int16_t off, int width)
+{
+	for (size_t slot = 1; slot < state.stack.size(); slot++) {
+		if (!state.stack[slot]) {
+			continue;
+		}
+		const int slot_off = -static_cast<int>(slot);
+		if (byte_ranges_overlap(off, width, slot_off, 8)) {
+			state.stack[slot] = 0;
+		}
+	}
+}
+
+bool is_conditional_jump(uint8_t opcode)
+{
+	const uint8_t klass = opcode & BPF_CLASS_MASK;
+	return (klass == BPF_JMP_CLASS || klass == BPF_JMP32_CLASS) &&
+	       opcode != BPF_JA && opcode != BPF_CALL &&
+	       opcode != BPF_CALLX && opcode != BPF_EXIT;
+}
+
+std::vector<uint8_t> compute_reachable_cfg(const std::vector<uint8_t> &bytes)
+{
+	if (bytes.size() % INSN_SIZE != 0) {
+		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
+	}
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	std::vector<uint8_t> reachable(insn_count, 0);
+	if (insn_count == 0) {
+		return reachable;
+	}
+
+	std::deque<size_t> worklist;
+	reachable[0] = 1;
+	worklist.push_back(0);
+
+	auto add_successor = [&](int64_t succ) {
+		if (succ < 0 || succ >= static_cast<int64_t>(insn_count)) {
+			throw std::runtime_error("branch target out of range");
+		}
+		const size_t next = static_cast<size_t>(succ);
+		if (!reachable[next]) {
+			reachable[next] = 1;
+			worklist.push_back(next);
+		}
+	};
+
+	while (!worklist.empty()) {
+		const size_t pc = worklist.front();
+		worklist.pop_front();
+		const uint8_t opcode = bytes[pc * INSN_SIZE];
+
+		if (opcode == BPF_EXIT) {
+			continue;
+		}
+		if (opcode == BPF_LD_IMM64) {
+			if (src_reg(bytes, pc) == BPF_PSEUDO_FUNC) {
+				add_successor(static_cast<int64_t>(pc) + 1 +
+					      static_cast<int64_t>(read_imm(bytes, pc)));
+			}
+			if (pc + 2 < insn_count) {
+				add_successor(static_cast<int64_t>(pc) + 2);
+			}
+			continue;
+		}
+		if (opcode == BPF_JA) {
+			add_successor(static_cast<int64_t>(pc) + 1 +
+				      static_cast<int64_t>(read_off(bytes, pc)));
+			continue;
+		}
+		if (is_conditional_jump(opcode)) {
+			add_successor(static_cast<int64_t>(pc) + 1 +
+				      static_cast<int64_t>(read_off(bytes, pc)));
+		}
+		if ((opcode == BPF_CALL || opcode == BPF_CALLX) &&
+		    src_reg(bytes, pc) == BPF_PSEUDO_CALL) {
+			add_successor(static_cast<int64_t>(pc) + 1 +
+				      static_cast<int64_t>(read_imm(bytes, pc)));
+		}
+		if (pc + 1 < insn_count) {
+			add_successor(static_cast<int64_t>(pc) + 1);
+		}
+	}
+
+	return reachable;
+}
+
+int64_t compact_unreachable_insns(std::vector<uint8_t> &bytes)
+{
+	if (bytes.size() % INSN_SIZE != 0) {
+		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
+	}
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	if (insn_count == 0) {
+		return 0;
+	}
+
+	const auto reachable = compute_reachable_cfg(bytes);
+	std::vector<uint8_t> keep(insn_count, 0);
+	for (size_t pc = 0; pc < insn_count; pc++) {
+		if (!reachable[pc]) {
+			continue;
+		}
+		keep[pc] = 1;
+		if (is_ldimm64(bytes, pc)) {
+			if (pc + 1 >= insn_count) {
+				throw std::runtime_error("truncated LD_IMM64");
+			}
+			keep[pc + 1] = 1;
+		}
+	}
+
+	size_t kept = 0;
+	for (const auto value : keep) {
+		kept += value != 0;
+	}
+	if (kept == insn_count) {
+		return 0;
+	}
+
+	constexpr size_t INVALID_PC = std::numeric_limits<size_t>::max();
+	std::vector<size_t> old_to_new(insn_count, INVALID_PC);
+	std::vector<uint8_t> compacted;
+	compacted.reserve(kept * INSN_SIZE);
+	for (size_t pc = 0; pc < insn_count; pc++) {
+		if (!keep[pc]) {
+			continue;
+		}
+		old_to_new[pc] = compacted.size() / INSN_SIZE;
+		compacted.insert(compacted.end(), bytes.begin() + pc * INSN_SIZE,
+				 bytes.begin() + (pc + 1) * INSN_SIZE);
+	}
+
+	auto mapped_target = [&](int64_t target) -> size_t {
+		if (target < 0 || target >= static_cast<int64_t>(insn_count)) {
+			throw std::runtime_error("branch target out of range");
+		}
+		const size_t old_pc = static_cast<size_t>(target);
+		if (old_to_new[old_pc] == INVALID_PC) {
+			throw std::runtime_error("branch target removed by compaction");
+		}
+		return old_to_new[old_pc];
+	};
+
+	for (size_t old_pc = 0; old_pc < insn_count; old_pc++) {
+		if (!keep[old_pc]) {
+			continue;
+		}
+		const size_t new_pc = old_to_new[old_pc];
+		const uint8_t opcode = bytes[old_pc * INSN_SIZE];
+		if (opcode == BPF_JA || is_conditional_jump(opcode)) {
+			const size_t new_target = mapped_target(
+				static_cast<int64_t>(old_pc) + 1 +
+				static_cast<int64_t>(read_off(bytes, old_pc)));
+			const int64_t new_off = static_cast<int64_t>(new_target) -
+						static_cast<int64_t>(new_pc) - 1;
+			if (new_off < std::numeric_limits<int16_t>::min() ||
+			    new_off > std::numeric_limits<int16_t>::max()) {
+				throw std::runtime_error(
+					"compacted branch offset out of range");
+			}
+			write_off(compacted, new_pc, static_cast<int16_t>(new_off));
+		} else if ((opcode == BPF_CALL || opcode == BPF_CALLX) &&
+			   src_reg(bytes, old_pc) == BPF_PSEUDO_CALL) {
+			const size_t new_target = mapped_target(
+				static_cast<int64_t>(old_pc) + 1 +
+				static_cast<int64_t>(read_imm(bytes, old_pc)));
+			const int64_t new_imm = static_cast<int64_t>(new_target) -
+						static_cast<int64_t>(new_pc) - 1;
+			if (new_imm < std::numeric_limits<int32_t>::min() ||
+			    new_imm > std::numeric_limits<int32_t>::max()) {
+				throw std::runtime_error(
+					"compacted call offset out of range");
+			}
+			write_imm(compacted, new_pc, static_cast<int32_t>(new_imm));
+		} else if (opcode == BPF_LD_IMM64 &&
+			   src_reg(bytes, old_pc) == BPF_PSEUDO_FUNC) {
+			const size_t new_target = mapped_target(
+				static_cast<int64_t>(old_pc) + 1 +
+				static_cast<int64_t>(read_imm(bytes, old_pc)));
+			const int64_t new_imm = static_cast<int64_t>(new_target) -
+						static_cast<int64_t>(new_pc) - 1;
+			if (new_imm < std::numeric_limits<int32_t>::min() ||
+			    new_imm > std::numeric_limits<int32_t>::max()) {
+				throw std::runtime_error(
+					"compacted function offset out of range");
+			}
+			write_imm(compacted, new_pc, static_cast<int32_t>(new_imm));
+		}
+	}
+
+	bytes.swap(compacted);
+	return static_cast<int64_t>(insn_count) - static_cast<int64_t>(kept);
+}
+
+void transfer_ctx_state(const std::vector<uint8_t> &bytes, size_t pc,
+			CtxState &state)
+{
+	const uint8_t opcode = bytes[pc * INSN_SIZE];
+	const uint8_t klass = opcode & BPF_CLASS_MASK;
+	const uint8_t dst = dst_reg(bytes, pc);
+	const uint8_t src = src_reg(bytes, pc);
+
+	if (opcode == BPF_CALL || opcode == BPF_CALLX) {
+		for (uint8_t reg = 0; reg <= 5; reg++) {
+			state.reg[reg] = 0;
+		}
+		return;
+	}
+
+	if (klass == BPF_ST_CLASS || klass == BPF_STX_CLASS) {
+		if (dst == 10) {
+			const auto width = bpf_mem_width(opcode);
+			if (width) {
+				const int16_t off = read_off(bytes, pc);
+				clear_overlapping_stack_ctx(state, off, *width);
+				const auto slot = stack_ctx_slot_index(off);
+				if (opcode == BPF_STXDW && width == 8 && slot &&
+				    src < 10 && state.reg[src]) {
+					state.stack[*slot] = 1;
+				}
+			}
+		}
+		return;
+	}
+
+	if (opcode == BPF_MOV64_X) {
+		if (dst < 10) {
+			state.reg[dst] = src < 10 && state.reg[src];
+		}
+		return;
+	}
+
+	if (opcode == BPF_LDXDW && src == 10) {
+		clear_ctx_reg(state, dst);
+		const auto slot = stack_ctx_slot_index(read_off(bytes, pc));
+		if (dst < 10 && slot && state.stack[*slot]) {
+			state.reg[dst] = 1;
+		}
+		return;
+	}
+
+	if (opcode_defines_dst(opcode)) {
+		clear_ctx_reg(state, dst);
+	}
+}
+
+std::vector<CtxState> compute_entry_ctx_states(const std::vector<uint8_t> &bytes,
+					       std::vector<uint8_t> &reachable)
+{
+	if (bytes.size() % INSN_SIZE != 0) {
+		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
+	}
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	std::vector<CtxState> states(insn_count);
+	reachable.assign(insn_count, 0);
+	if (insn_count == 0) {
+		return states;
+	}
+
+	CtxState entry;
+	entry.reg[1] = 1;
+	std::deque<size_t> worklist;
+	states[0] = entry;
+	reachable[0] = 1;
+	worklist.push_back(0);
+
+	auto merge_successor = [&](size_t succ, const CtxState &state) {
+		if (succ >= insn_count) {
+			throw std::runtime_error("branch target out of range");
+		}
+		if (!reachable[succ]) {
+			states[succ] = state;
+			reachable[succ] = 1;
+			worklist.push_back(succ);
+			return;
+		}
+		const CtxState merged = intersect_ctx_state(states[succ], state);
+		if (!same_ctx_state(states[succ], merged)) {
+			states[succ] = merged;
+			worklist.push_back(succ);
+		}
+	};
+
+	while (!worklist.empty()) {
+		const size_t pc = worklist.front();
+		worklist.pop_front();
+		const uint8_t opcode = bytes[pc * INSN_SIZE];
+		CtxState out = states[pc];
+		transfer_ctx_state(bytes, pc, out);
+
+		if (opcode == BPF_EXIT) {
+			continue;
+		}
+		if (opcode == BPF_LD_IMM64) {
+			if (pc + 2 < insn_count) {
+				merge_successor(pc + 2, out);
+			}
+			continue;
+		}
+		if (opcode == BPF_JA) {
+			const int64_t target = static_cast<int64_t>(pc) + 1 +
+					       static_cast<int64_t>(read_off(bytes, pc));
+			if (target < 0) {
+				throw std::runtime_error("branch target out of range");
+			}
+			merge_successor(static_cast<size_t>(target), out);
+			continue;
+		}
+		if (is_conditional_jump(opcode)) {
+			const int64_t target = static_cast<int64_t>(pc) + 1 +
+					       static_cast<int64_t>(read_off(bytes, pc));
+			if (target < 0) {
+				throw std::runtime_error("branch target out of range");
+			}
+			merge_successor(static_cast<size_t>(target), out);
+		}
+		if (pc + 1 < insn_count) {
+			merge_successor(pc + 1, out);
+		}
+	}
+
+	return states;
+}
+
+int64_t eliminate_entry_ctx_null_branches(std::vector<uint8_t> &bytes)
+{
+	int64_t total_changed = 0;
+	while (true) {
+		std::vector<uint8_t> reachable;
+		const auto states = compute_entry_ctx_states(bytes, reachable);
+		int64_t changed = 0;
+		const size_t insn_count = bytes.size() / INSN_SIZE;
+		for (size_t pc = 0; pc < insn_count; pc++) {
+			if (!reachable[pc]) {
+				continue;
+			}
+			const uint8_t opcode = bytes[pc * INSN_SIZE];
+			if (opcode != BPF_JEQ64_K) {
+				continue;
+			}
+			const uint8_t dst = dst_reg(bytes, pc);
+			if (dst >= 10 || !states[pc].reg[dst] ||
+			    read_imm(bytes, pc) != 0) {
+				continue;
+			}
+			rewrite_insn_to_mov64_x(bytes, pc, dst, dst);
+			changed++;
+		}
+		if (changed == 0) {
+			return total_changed;
+		}
+		total_changed += changed;
+	}
+}
+
+int64_t retarget_masked_range_branches(std::vector<uint8_t> &bytes)
+{
+	if (bytes.size() % INSN_SIZE != 0) {
+		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
+	}
+	int64_t changed = 0;
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	constexpr size_t MAX_INTERVENING_INSNS = 4;
+	for (size_t pc = 1; pc + 3 < insn_count; pc++) {
+		if (bytes[pc * INSN_SIZE] != BPF_MOV32_X ||
+		    bytes[(pc + 1) * INSN_SIZE] != BPF_AND32_K) {
+			continue;
+		}
+
+		const uint8_t tmp = dst_reg(bytes, pc);
+		const uint8_t src = src_reg(bytes, pc);
+		if (tmp == src || dst_reg(bytes, pc + 1) != tmp) {
+			continue;
+		}
+
+		const int32_t mask_imm = read_imm(bytes, pc + 1);
+		if (mask_imm < 0) {
+			continue;
+		}
+		const uint64_t mask = static_cast<uint64_t>(mask_imm);
+
+		const uint8_t def_opcode = bytes[(pc - 1) * INSN_SIZE];
+		if (dst_reg(bytes, pc - 1) != src ||
+		    !load_zero_extends_within_mask(def_opcode, mask)) {
+			continue;
+		}
+
+		const size_t max_jgt_pc =
+			std::min(insn_count - 2, pc + 2 + MAX_INTERVENING_INSNS);
+		for (size_t jgt_pc = pc + 2; jgt_pc <= max_jgt_pc; jgt_pc++) {
+			bool intervening_ok = true;
+			for (size_t mid = pc + 2; mid < jgt_pc; mid++) {
+				if (!is_masked_range_intervening_insn(bytes, mid,
+								     tmp, src)) {
+					intervening_ok = false;
+					break;
+				}
+			}
+			if (!intervening_ok) {
+				break;
+			}
+			if (!is_masked_range_branch(bytes[jgt_pc * INSN_SIZE]) ||
+			    dst_reg(bytes, jgt_pc) != tmp) {
+				continue;
+			}
+
+			const int32_t bound_imm = read_imm(bytes, jgt_pc);
+			if (bound_imm < 0 ||
+			    static_cast<uint64_t>(bound_imm) > mask) {
+				continue;
+			}
+
+			set_dst_reg(bytes, jgt_pc, src);
+			changed++;
+			break;
+		}
+	}
+	return changed;
+}
+
+int64_t propagate_masked_range_to_fallthrough_source(std::vector<uint8_t> &bytes)
+{
+	if (bytes.size() % INSN_SIZE != 0) {
+		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
+	}
+	int64_t changed = 0;
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	constexpr size_t MAX_INTERVENING_INSNS = 4;
+	for (size_t pc = 0; pc + 3 < insn_count; pc++) {
+		if (bytes[pc * INSN_SIZE] != BPF_MOV32_X ||
+		    bytes[(pc + 1) * INSN_SIZE] != BPF_AND32_K) {
+			continue;
+		}
+
+		const uint8_t tmp = dst_reg(bytes, pc);
+		const uint8_t src = src_reg(bytes, pc);
+		if (tmp == src || dst_reg(bytes, pc + 1) != tmp) {
+			continue;
+		}
+
+		const int32_t mask_imm = read_imm(bytes, pc + 1);
+		if (mask_imm < 0) {
+			continue;
+		}
+		const uint64_t mask = static_cast<uint64_t>(mask_imm);
+		if (pc > 0 && dst_reg(bytes, pc - 1) == src &&
+		    load_zero_extends_within_mask(bytes[(pc - 1) * INSN_SIZE],
+						 mask)) {
+			continue;
+		}
+
+		const size_t max_branch_pc =
+			std::min(insn_count - 2, pc + 2 + MAX_INTERVENING_INSNS);
+		for (size_t branch_pc = pc + 2; branch_pc <= max_branch_pc;
+		     branch_pc++) {
+			bool intervening_ok = true;
+			for (size_t mid = pc + 2; mid < branch_pc; mid++) {
+				if (!is_masked_range_intervening_insn(bytes, mid,
+								     tmp, src)) {
+					intervening_ok = false;
+					break;
+				}
+			}
+			if (!intervening_ok) {
+				break;
+			}
+			if (!is_masked_range_branch(bytes[branch_pc * INSN_SIZE]) ||
+			    dst_reg(bytes, branch_pc) != tmp) {
+				continue;
+			}
+
+			const int32_t bound_imm = read_imm(bytes, branch_pc);
+			if (bound_imm < 0 ||
+			    static_cast<uint64_t>(bound_imm) > mask) {
+				continue;
+			}
+
+			const size_t fallthrough_pc = branch_pc + 1;
+			if (!is_same_mask_and(
+				    bytes[fallthrough_pc * INSN_SIZE],
+				    read_imm(bytes, fallthrough_pc), mask) ||
+			    dst_reg(bytes, fallthrough_pc) != src) {
+				continue;
+			}
+
+			rewrite_insn_to_mov32_x(bytes, fallthrough_pc, src, tmp);
+			changed++;
+			break;
+		}
+	}
+	return changed;
+}
+
+int64_t propagate_masked_range_to_fallthrough_copies(std::vector<uint8_t> &bytes)
+{
+	if (bytes.size() % INSN_SIZE != 0) {
+		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
+	}
+	int64_t changed = 0;
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	constexpr size_t MAX_INTERVENING_INSNS = 4;
+	for (size_t pc = 0; pc + 4 < insn_count; pc++) {
+		if (bytes[pc * INSN_SIZE] != BPF_MOV32_X ||
+		    bytes[(pc + 1) * INSN_SIZE] != BPF_AND32_K) {
+			continue;
+		}
+
+		const uint8_t tmp = dst_reg(bytes, pc);
+		const uint8_t src = src_reg(bytes, pc);
+		if (tmp == src || dst_reg(bytes, pc + 1) != tmp) {
+			continue;
+		}
+
+		const int32_t mask_imm = read_imm(bytes, pc + 1);
+		if (mask_imm < 0) {
+			continue;
+		}
+		const uint64_t mask = static_cast<uint64_t>(mask_imm);
+
+		const size_t max_branch_pc =
+			std::min(insn_count - 3, pc + 2 + MAX_INTERVENING_INSNS);
+		for (size_t branch_pc = pc + 2; branch_pc <= max_branch_pc;
+		     branch_pc++) {
+			bool intervening_ok = true;
+			for (size_t mid = pc + 2; mid < branch_pc; mid++) {
+				if (!is_masked_range_intervening_insn(bytes, mid,
+								     tmp, src)) {
+					intervening_ok = false;
+					break;
+				}
+			}
+			if (!intervening_ok) {
+				break;
+			}
+			if (!is_masked_range_branch(bytes[branch_pc * INSN_SIZE]) ||
+			    dst_reg(bytes, branch_pc) != tmp) {
+				continue;
+			}
+
+			const int32_t bound_imm = read_imm(bytes, branch_pc);
+			if (bound_imm < 0 ||
+			    static_cast<uint64_t>(bound_imm) > mask) {
+				continue;
+			}
+
+			const size_t max_copy_pc =
+				std::min(insn_count - 2,
+					 branch_pc + 1 + MAX_INTERVENING_INSNS);
+			for (size_t copy_pc = branch_pc + 1; copy_pc <= max_copy_pc;
+			     copy_pc++) {
+				bool copy_intervening_ok = true;
+				for (size_t mid = branch_pc + 1; mid < copy_pc;
+				     mid++) {
+					if (!is_masked_range_intervening_insn(bytes,
+									     mid,
+									     tmp,
+									     src)) {
+						copy_intervening_ok = false;
+						break;
+					}
+				}
+				if (!copy_intervening_ok) {
+					break;
+				}
+
+				const uint8_t copy_opcode =
+					bytes[copy_pc * INSN_SIZE];
+				if (copy_opcode != BPF_MOV32_X &&
+				    copy_opcode != BPF_MOV64_X) {
+					continue;
+				}
+				const uint8_t copy_dst = dst_reg(bytes, copy_pc);
+				if (copy_dst == tmp || copy_dst == src ||
+				    src_reg(bytes, copy_pc) != src) {
+					continue;
+				}
+				const size_t and_pc = copy_pc + 1;
+				if (!is_same_mask_and(
+					    bytes[and_pc * INSN_SIZE],
+					    read_imm(bytes, and_pc), mask) ||
+				    dst_reg(bytes, and_pc) != copy_dst) {
+					continue;
+				}
+
+				rewrite_insn_to_mov32_x(bytes, copy_pc, copy_dst,
+							tmp);
+				changed++;
+				break;
+			}
+			break;
+		}
+	}
+	return changed;
+}
+
 void canonicalize_map_refs(Cli &cli)
 {
 	if (cli.pass) {
@@ -672,10 +1575,18 @@ void run_pass(Cli &cli)
 		output = run_llvm_roundtrip(
 			input, kinsn_pass ? &kinsn_targets : nullptr);
 		if (kinsn_pass) {
+			eliminate_entry_ctx_null_branches(output);
+			propagate_masked_range_to_fallthrough_source(output);
+			propagate_masked_range_to_fallthrough_copies(output);
+			retarget_masked_range_branches(output);
+			compact_unreachable_insns(output);
+			remap_out_of_range_stack_spills(output, true);
 			sites_applied = count_kinsn_calls(output);
 			if (*sites_applied == 0) {
 				output = input;
 			}
+		} else {
+			remap_out_of_range_stack_spills(output, false);
 		}
 	}
 	write_all(cli.output, output);
