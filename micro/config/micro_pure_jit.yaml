@@ -260,6 +260,146 @@ benchmarks:
     runtimes: [kernel]
     tags: [memory, prefetch, map-working-set, page-stride, synthetic-control, next-pointer, software-pipeline, new-2026-06-02, kernel-only]
 
+  - name: prefetch_pipeline_horizon1_page_stride
+    base_name: prefetch_upper_bound
+    program_name: prefetch_pipeline_horizon1_page_stride_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 8200235001385007165
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, page-stride, synthetic-control, horizon-sweep, horizon-1, new-2026-06-02, kernel-only]
+
+  - name: prefetch_pipeline_horizon2_page_stride
+    base_name: prefetch_upper_bound
+    program_name: prefetch_pipeline_horizon2_page_stride_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 12113551532357501091
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, page-stride, synthetic-control, horizon-sweep, horizon-2, new-2026-06-02, kernel-only]
+
+  - name: prefetch_pipeline_horizon4_page_stride
+    base_name: prefetch_upper_bound
+    program_name: prefetch_pipeline_horizon4_page_stride_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 12596034509844469521
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, page-stride, synthetic-control, horizon-sweep, horizon-4, new-2026-06-02, kernel-only]
+
+  - name: prefetch_pipeline_degree_page_stride
+    base_name: prefetch_upper_bound
+    program_name: prefetch_pipeline_degree_page_stride_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 13849133591390902369
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, page-stride, synthetic-control, true-degree, future-address, new-2026-06-02, kernel-only]
+
+  - name: prefetch_stride64_page_stride
+    base_name: prefetch_upper_bound
+    program_name: prefetch_stride64_page_stride_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 15225859168839832855
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, stride-class, stride-64, synthetic-control, pf-llm-inspired, new-2026-06-03, kernel-only]
+
+  - name: prefetch_stride256_page_stride
+    base_name: prefetch_upper_bound
+    program_name: prefetch_stride256_page_stride_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 8436913836453509640
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, stride-class, stride-256, synthetic-control, pf-llm-inspired, new-2026-06-03, kernel-only]
+
+  - name: prefetch_stride4096_page_stride
+    base_name: prefetch_upper_bound
+    program_name: prefetch_stride4096_page_stride_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 17013149044024548969
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, stride-class, stride-4096, synthetic-control, pf-llm-inspired, new-2026-06-03, kernel-only]
+
+  - name: prefetch_variable_stride_page_stride
+    base_name: prefetch_upper_bound
+    program_name: prefetch_variable_stride_page_stride_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 1927911296556179884
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, stride-class, variable-stride, synthetic-control, pf-llm-inspired, new-2026-06-03, kernel-only]
+
+  - name: prefetch_spatial_page_footprint
+    base_name: prefetch_upper_bound
+    program_name: prefetch_spatial_page_footprint_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 6004900016175552419
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, spatial-within-page, synthetic-control, pf-llm-inspired, new-2026-06-03, kernel-only]
+
+  - name: prefetch_struct_field_fixed_offsets
+    base_name: prefetch_upper_bound
+    program_name: prefetch_struct_field_fixed_offsets_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 12246088582525788897
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, fixed-offset-struct, synthetic-control, pf-llm-inspired, new-2026-06-03, kernel-only]
+
+  - name: prefetch_mlop_index_field
+    base_name: prefetch_upper_bound
+    program_name: prefetch_mlop_index_field_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 16018457391247339837
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, multi-level-offset, synthetic-control, pf-llm-inspired, new-2026-06-03, kernel-only]
+
+  - name: prefetch_degree123_page_stride
+    base_name: prefetch_upper_bound
+    program_name: prefetch_degree123_page_stride_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 11422350246704694431
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, normalized-degree, degree-1-2-3, synthetic-control, pf-llm-inspired, new-2026-06-03, kernel-only]
+
+  - name: prefetch_mixed_policy_table
+    base_name: prefetch_upper_bound
+    program_name: prefetch_mixed_policy_table_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 16217383686291505505
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, mixed-policy-table, negative-filtering, synthetic-control, pf-llm-inspired, new-2026-06-03, kernel-only]
+
+  - name: prefetch_stream_of_strides
+    base_name: prefetch_upper_bound
+    program_name: prefetch_stream_of_strides_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 2202534365130024933
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, stream-of-strides, multi-stream, synthetic-control, pf-llm-inspired, new-2026-06-04, kernel-only]
+
   - name: prefetch_hot_l1_load
     base_name: prefetch_research
     program_name: prefetch_hot_l1_load_xdp
