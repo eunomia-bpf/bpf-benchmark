@@ -1,9 +1,0 @@
-log_level: 1
-programs:
-  default:
-    command: |
-      bpfopt --pass kinsn
-        --input ${INPUT} --output ${OUTPUT} --report ${REPORT}
-        --prog-type ${PROG_TYPE} --target ${TARGET}
-        --
-        --kinsn-mode all=force

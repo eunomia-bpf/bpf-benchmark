@@ -440,7 +440,37 @@ std::vector<std::string> parse_kinsn_llvm_args(std::string_view pass,
 	return llvm_args;
 }
 
-void configure_llvm_kinsn_select(const std::vector<std::string> &llvm_args)
+std::optional<std::string> default_kinsn_mode_for_pass(std::string_view pass)
+{
+	if (pass == "kinsn") {
+		return "all=force,movbe-load=disable";
+	}
+	if (pass == "rotate") {
+		return "all=disable,rotate=force";
+	}
+	if (pass == "extract") {
+		return "all=disable,bextr=force,shd=force";
+	}
+	if (pass == "endian_fusion") {
+		return "all=disable,unary=force,movbe-be=force";
+	}
+	if (pass == "bulk_memory") {
+		return "all=disable,wide-load=force,indexed-load=force";
+	}
+	if (pass == "prefetch") {
+		return "all=disable";
+	}
+	if (pass == "cond_select") {
+		return "all=disable,cmov=force";
+	}
+	if (pass == "lea") {
+		return "all=disable,preemit-lea=force,scaled-index-mem=force";
+	}
+	return std::nullopt;
+}
+
+void configure_llvm_kinsn_select(std::string_view pass,
+				 const std::vector<std::string> &llvm_args)
 {
 	bool has_kinsn_mode = false;
 	for (const auto &arg : llvm_args) {
@@ -450,9 +480,15 @@ void configure_llvm_kinsn_select(const std::vector<std::string> &llvm_args)
 		}
 	}
 
-	std::vector<std::string> args{ "bpfopt", "-bpf-enable-kinsn-select" };
+	std::vector<std::string> args{ "bpfopt", "-bpf-enable-kinsn-select",
+				       "-bpf-stack-size=4096" };
 	if (!has_kinsn_mode) {
-		args.push_back("-bpf-kinsn-mode=all=force");
+		if (const auto mode = default_kinsn_mode_for_pass(pass)) {
+			args.push_back("-bpf-kinsn-mode=" + *mode);
+		} else {
+			throw std::runtime_error("no default kinsn mode for pass " +
+						 std::string(pass));
+		}
 	}
 	for (const auto &arg : llvm_args) {
 		args.push_back(arg);
@@ -689,6 +725,23 @@ llvm::json::Object counter_json(const std::map<std::string, int64_t> &counts)
 		out[name] = count;
 	}
 	return out;
+}
+
+std::map<std::string, int64_t>
+counter_delta(std::map<std::string, int64_t> after,
+	      const std::map<std::string, int64_t> &before)
+{
+	for (const auto &[name, count] : before) {
+		after[name] -= count;
+		if (after[name] < 0) {
+			throw std::runtime_error("kinsn report counter decreased for " +
+						 name);
+		}
+		if (after[name] == 0) {
+			after.erase(name);
+		}
+	}
+	return after;
 }
 
 std::map<std::string, int64_t>
@@ -951,7 +1004,7 @@ int64_t remap_out_of_range_stack_spills(std::vector<uint8_t> &bytes,
 				ref->pc, ref->off, ref->width, ref->write });
 			continue;
 		}
-		if (ref->width != 8 || ref->off % 8 != 0 || ref->off >= -512) {
+		if (ref->width <= 0 || ref->width > 8 || ref->off >= -512) {
 			throw std::runtime_error(
 				"LLVM output has non-remappable out-of-range stack access");
 		}
@@ -978,7 +1031,7 @@ int64_t remap_out_of_range_stack_spills(std::vector<uint8_t> &bytes,
 		const size_t first_pc = refs_it->second.front().pc;
 		const size_t last_pc = refs_it->second.back().pc;
 		std::optional<int16_t> replacement;
-		for (int candidate = -512; candidate <= -8; candidate += 8) {
+		for (int candidate = -512; candidate <= -width; candidate++) {
 			if (!valid_bpf_stack_range(candidate, width)) {
 				continue;
 			}
@@ -1795,55 +1848,115 @@ uint64_t low_bitmask_for_max(uint64_t max_value)
 	return mask;
 }
 
-int64_t preserve_low16_bound_after_composite_u32_check(std::vector<uint8_t> &bytes)
+struct Low16LoadSource {
+	size_t len = 0;
+	uint8_t dst = 0;
+	uint8_t base = 0;
+	int16_t off = 0;
+};
+
+std::optional<Low16LoadSource>
+low16_load_source_at(const std::vector<uint8_t> &bytes, size_t pc,
+		     const std::map<KinsnCallKey, std::string> &kinsn_names)
+{
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	if (pc >= insn_count) {
+		return std::nullopt;
+	}
+
+	if (bytes[pc * INSN_SIZE] == BPF_LDXH) {
+		return Low16LoadSource{ 1, dst_reg(bytes, pc),
+					src_reg(bytes, pc), read_off(bytes, pc) };
+	}
+
+	if (pc + 1 >= insn_count || !is_kinsn_sidecar(bytes, pc) ||
+	    !is_kinsn_call(bytes, pc + 1)) {
+		return std::nullopt;
+	}
+	const KinsnCallKey key{ read_off(bytes, pc + 1),
+				read_imm(bytes, pc + 1) };
+	const auto name = kinsn_names.find(key);
+	if (name == kinsn_names.end() || name->second != "bpf_x86_movzwl") {
+		return std::nullopt;
+	}
+	const uint64_t payload =
+		decode_kinsn_payload(read_kinsn_sidecar_payload(bytes, pc));
+	constexpr uint8_t x86_form_mem = 4;
+	if ((payload & 0xf) != x86_form_mem || payload >> 28) {
+		return std::nullopt;
+	}
+	return Low16LoadSource{
+		2,
+		static_cast<uint8_t>((payload >> 4) & 0xf),
+		static_cast<uint8_t>((payload >> 8) & 0xf),
+		static_cast<int16_t>((payload >> 12) & 0xffff),
+	};
+}
+
+int64_t preserve_low16_bound_after_composite_u32_check(
+	std::vector<uint8_t> &bytes, const KinsnTargetMap &kinsn_targets)
 {
 	if (bytes.size() % INSN_SIZE != 0) {
 		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
 	}
+	const auto kinsn_names = kinsn_target_name_by_call_key(kinsn_targets);
 	int64_t changed = 0;
 	size_t pc = 0;
 	while (true) {
 		const size_t insn_count = bytes.size() / INSN_SIZE;
-		if (pc + 7 >= insn_count) {
+		if (pc >= insn_count) {
 			break;
 		}
-		if (bytes[pc * INSN_SIZE] != BPF_LDXH ||
-		    bytes[(pc + 1) * INSN_SIZE] != BPF_LDXB ||
-		    bytes[(pc + 2) * INSN_SIZE] != BPF_LSH64_K ||
-		    bytes[(pc + 3) * INSN_SIZE] != BPF_LDXB ||
-		    bytes[(pc + 4) * INSN_SIZE] != BPF_LSH64_K ||
-		    bytes[(pc + 5) * INSN_SIZE] != BPF_OR64_X ||
-		    bytes[(pc + 6) * INSN_SIZE] != BPF_OR64_X ||
-		    bytes[(pc + 7) * INSN_SIZE] != BPF_JGT64_K) {
+		const auto low_load = low16_load_source_at(bytes, pc, kinsn_names);
+		if (!low_load) {
 			pc++;
 			continue;
 		}
 
-		const uint8_t low = dst_reg(bytes, pc);
-		const uint8_t base = src_reg(bytes, pc);
-		const int16_t low_off = read_off(bytes, pc);
-		const uint8_t high3 = dst_reg(bytes, pc + 1);
-		const uint8_t high2 = dst_reg(bytes, pc + 3);
-		const uint8_t full = dst_reg(bytes, pc + 5);
-		const int32_t bound = read_imm(bytes, pc + 7);
+		const size_t high3_pc = pc + low_load->len;
+		const size_t high3_shift_pc = high3_pc + 1;
+		const size_t high2_pc = high3_pc + 2;
+		const size_t high2_shift_pc = high3_pc + 3;
+		const size_t merge_high_pc = high3_pc + 4;
+		const size_t merge_low_pc = high3_pc + 5;
+		const size_t branch_pc = high3_pc + 6;
+		if (branch_pc >= insn_count ||
+		    bytes[high3_pc * INSN_SIZE] != BPF_LDXB ||
+		    bytes[high3_shift_pc * INSN_SIZE] != BPF_LSH64_K ||
+		    bytes[high2_pc * INSN_SIZE] != BPF_LDXB ||
+		    bytes[high2_shift_pc * INSN_SIZE] != BPF_LSH64_K ||
+		    bytes[merge_high_pc * INSN_SIZE] != BPF_OR64_X ||
+		    bytes[merge_low_pc * INSN_SIZE] != BPF_OR64_X ||
+		    bytes[branch_pc * INSN_SIZE] != BPF_JGT64_K) {
+			pc++;
+			continue;
+		}
+
+		const uint8_t low = low_load->dst;
+		const uint8_t base = low_load->base;
+		const int low_off = low_load->off;
+		const uint8_t high3 = dst_reg(bytes, high3_pc);
+		const uint8_t high2 = dst_reg(bytes, high2_pc);
+		const uint8_t full = dst_reg(bytes, merge_high_pc);
+		const int32_t bound = read_imm(bytes, branch_pc);
 		if (bound < 0 || bound > 0xffff ||
-		    src_reg(bytes, pc + 1) != base ||
-		    read_off(bytes, pc + 1) != low_off + 3 ||
-		    dst_reg(bytes, pc + 2) != high3 ||
-		    read_imm(bytes, pc + 2) != 24 ||
-		    src_reg(bytes, pc + 3) != base ||
-		    read_off(bytes, pc + 3) != low_off + 2 ||
-		    dst_reg(bytes, pc + 4) != high2 ||
-		    read_imm(bytes, pc + 4) != 16 ||
-		    full != high2 || src_reg(bytes, pc + 5) != high3 ||
-		    dst_reg(bytes, pc + 6) != full ||
-		    src_reg(bytes, pc + 6) != low ||
-		    dst_reg(bytes, pc + 7) != full) {
+		    src_reg(bytes, high3_pc) != base ||
+		    read_off(bytes, high3_pc) != low_off + 3 ||
+		    dst_reg(bytes, high3_shift_pc) != high3 ||
+		    read_imm(bytes, high3_shift_pc) != 24 ||
+		    src_reg(bytes, high2_pc) != base ||
+		    read_off(bytes, high2_pc) != low_off + 2 ||
+		    dst_reg(bytes, high2_shift_pc) != high2 ||
+		    read_imm(bytes, high2_shift_pc) != 16 ||
+		    full != high2 ||
+		    src_reg(bytes, merge_high_pc) != high3 ||
+		    dst_reg(bytes, merge_low_pc) != full ||
+		    src_reg(bytes, merge_low_pc) != low ||
+		    dst_reg(bytes, branch_pc) != full) {
 			pc++;
 			continue;
 		}
 
-		const size_t branch_pc = pc + 7;
 		const size_t insert_pc = branch_pc + 1;
 		if (insert_pc < bytes.size() / INSN_SIZE &&
 		    bytes[insert_pc * INSN_SIZE] == BPF_JGT64_K &&
@@ -1988,6 +2101,8 @@ int64_t preserve_shifted_offset_bound_after_guard(std::vector<uint8_t> &bytes)
 	}
 	return changed;
 }
+
+#include "bpf_kinsn_bytecode.hpp"
 
 void canonicalize_map_refs(Cli &cli)
 {
@@ -2149,28 +2264,27 @@ void write_report(const Cli &cli, const std::vector<uint8_t> &input,
 		{ "inlined_map_entries", std::move(inlined_entries) },
 	};
 	if (kinsn_targets) {
-		std::map<std::string, int64_t> by_name;
-		if (reported_sites > 0) {
-			by_name = count_kinsn_calls_by_name(output,
-							    *kinsn_targets);
-			int64_t counted_sites = 0;
-			for (const auto &[_, count] : by_name) {
-				counted_sites += count;
-			}
-			if (counted_sites != reported_sites) {
-				throw std::runtime_error(
-					"kinsn report count mismatch: output calls=" +
-					std::to_string(counted_sites) +
-					" sites_applied=" +
-					std::to_string(reported_sites));
-			}
+		auto by_name = counter_delta(
+			count_kinsn_calls_by_name(output, *kinsn_targets),
+			count_kinsn_calls_by_name(input, *kinsn_targets));
+		int64_t counted_sites = 0;
+		for (const auto &[_, count] : by_name) {
+			counted_sites += count;
 		}
+		if (counted_sites != reported_sites) {
+			throw std::runtime_error(
+				"kinsn report count mismatch: new output calls=" +
+				std::to_string(counted_sites) +
+				" sites_applied=" +
+				std::to_string(reported_sites));
+		}
+		auto payload_shapes = counter_delta(
+			count_kinsn_payload_shapes(output, *kinsn_targets),
+			count_kinsn_payload_shapes(input, *kinsn_targets));
 		report["kinsn_calls_by_name"] = counter_json(by_name);
 		report["kinsn_calls_by_family"] =
 			counter_json(kinsn_call_family_counts(by_name));
-		report["kinsn_payload_shapes"] =
-			counter_json(count_kinsn_payload_shapes(output,
-								*kinsn_targets));
+		report["kinsn_payload_shapes"] = counter_json(payload_shapes);
 	}
 	std::string json;
 	llvm::raw_string_ostream os(json);
@@ -2205,40 +2319,49 @@ void run_pass(Cli &cli)
 		}
 		kinsn_targets = read_kinsn_targets(*cli.target);
 		configure_llvm_kinsn_select(
+			*cli.pass,
 			parse_kinsn_llvm_args(*cli.pass, cli.pass_args));
 	} else if (*cli.pass != "map_inline" && !cli.pass_args.empty()) {
 		throw std::runtime_error("--pass " + *cli.pass +
 					 " does not accept pass-local args");
 	}
 	const auto input = read_all(cli.input);
+	const int64_t input_kinsn_calls =
+		kinsn_pass ? count_kinsn_calls(input) : 0;
 	std::vector<InlineRecord> inlined;
 	std::vector<uint8_t> output;
 	std::optional<int64_t> sites_applied;
 	std::vector<std::string> diagnostics;
-	if (kinsn_pass && count_kinsn_calls(input) > 0) {
-		output = input;
-		sites_applied = 0;
-		write_all(cli.output, output);
-		write_report(cli, input, output, inlined, sites_applied,
-			     diagnostics, &kinsn_targets);
-		return;
-	}
 	if (*cli.pass == "map_inline") {
 		output = run_map_inline_roundtrip(input, cli, inlined);
 	} else {
-		output = run_llvm_roundtrip(
-			input, kinsn_pass ? &kinsn_targets : nullptr);
+		if (kinsn_pass && count_kinsn_calls(input) > 0) {
+			output = input;
+		} else {
+			output = run_llvm_roundtrip(
+				input, kinsn_pass ? &kinsn_targets : nullptr);
+		}
 		if (kinsn_pass) {
-			eliminate_entry_ctx_null_branches(output);
-			propagate_masked_range_to_fallthrough_source(output);
-			propagate_masked_range_to_fallthrough_copies(output);
-			retarget_masked_range_branches(output);
-			preserve_low16_bound_after_composite_u32_check(output);
-			preserve_shifted_offset_bound_after_guard(output);
-			compact_unreachable_insns(output);
-			remap_out_of_range_stack_spills(output, true);
-			sites_applied = count_kinsn_calls(output);
-			if (*sites_applied == 0) {
+			if (input_kinsn_calls == 0) {
+				eliminate_entry_ctx_null_branches(output);
+				propagate_masked_range_to_fallthrough_source(output);
+				propagate_masked_range_to_fallthrough_copies(output);
+				retarget_masked_range_branches(output);
+				preserve_low16_bound_after_composite_u32_check(output,
+									       kinsn_targets);
+				preserve_shifted_offset_bound_after_guard(output);
+				compact_unreachable_insns(output);
+				remap_out_of_range_stack_spills(output, true);
+			}
+			apply_bytecode_kinsn_recovery(output, *cli.pass,
+						      kinsn_targets, diagnostics);
+			const int64_t output_kinsn_calls = count_kinsn_calls(output);
+			if (output_kinsn_calls < input_kinsn_calls) {
+				throw std::runtime_error(
+					"kinsn pass removed existing kinsn calls");
+			}
+			sites_applied = output_kinsn_calls - input_kinsn_calls;
+			if (output_kinsn_calls == 0) {
 				output = input;
 			}
 		} else {

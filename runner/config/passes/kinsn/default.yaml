@@ -1,4 +1,4 @@
-# Default per-pass step config for all-force kinsn.
+# Default per-pass step config for kinsn.
 # Read by runner/libs/rejit_plan.py at execute_plan build time.
 # Daemon substitutes ${...} vars; runner sends this command verbatim.
 log_level: 1
