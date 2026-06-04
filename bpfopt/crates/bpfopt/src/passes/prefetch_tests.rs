@@ -2,10 +2,22 @@
 
 use super::prefetch::PrefetchPass;
 use crate::insn::*;
+use crate::pass::Arch;
 use crate::test_helpers::*;
 
 fn prefetch_ctx() -> crate::pass::PassContext {
     ctx_with_kinsn("bpf_x86_prefetcht0", 7777)
+}
+
+fn prefetch_ctx_with_targets(targets: &[(&str, i32)], arch: Arch) -> crate::pass::PassContext {
+    let mut ctx = pass_ctx();
+    ctx.arch = arch;
+    for &(target, btf_id) in targets {
+        ctx.kinsn_registry
+            .set_kinsn_call_for_target_name(target, btf_id, 0)
+            .expect("test kinsn target should register");
+    }
+    ctx
 }
 
 fn map_lookup_program() -> Vec<BpfInsn> {
@@ -90,6 +102,197 @@ fn prefetch_allows_explicit_map_value_prefetch_point() {
     assert_eq!(run.result.sites_applied, 1);
     assert!(run.lowered[4].is_kinsn_sidecar());
     assert!(run.lowered[5].is_call_kinsn());
+}
+
+#[test]
+fn prefetch_allows_map_value_policy_point_prefetch_action() {
+    let pass = PrefetchPass::from_profile_json_for_test(
+        r#"{
+            "map_value_policy_points": [
+                { "pc": 4, "reg": 6, "action": "prefetch" }
+            ]
+        }"#,
+    )
+    .unwrap();
+    let input = vec![
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, 0),
+            0,
+            libbpf_sys::BPF_FUNC_map_lookup_elem as i32,
+        ),
+        BpfInsn::jeq_imm(BPF_REG_0, 0, 4),
+        BpfInsn::mov64_reg(BPF_REG_6, BPF_REG_0),
+        BpfInsn::alu64_imm(BPF_ADD, BPF_REG_6, 64),
+        BpfInsn::mov64_imm(BPF_REG_4, 123),
+        BpfInsn::ldx_mem(BPF_DW, BPF_REG_1, BPF_REG_0, 0),
+        BpfInsn::exit(),
+    ];
+    let run = run_pass_on_insns(pass, input, &prefetch_ctx());
+
+    assert_eq!(run.result.sites_applied, 1);
+    assert!(run.lowered[4].is_kinsn_sidecar());
+    assert!(run.lowered[5].is_call_kinsn());
+}
+
+#[test]
+fn prefetch_policy_point_skip_action_overrides_prefetch_action() {
+    let pass = PrefetchPass::from_profile_json_for_test(
+        r#"{
+            "map_value_policy_points": [
+                { "pc": 4, "reg": 6, "action": "prefetch" },
+                { "pc": 4, "reg": 6, "action": "skip" }
+            ]
+        }"#,
+    )
+    .unwrap();
+    let input = vec![
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, 0),
+            0,
+            libbpf_sys::BPF_FUNC_map_lookup_elem as i32,
+        ),
+        BpfInsn::jeq_imm(BPF_REG_0, 0, 4),
+        BpfInsn::mov64_reg(BPF_REG_6, BPF_REG_0),
+        BpfInsn::alu64_imm(BPF_ADD, BPF_REG_6, 64),
+        BpfInsn::mov64_imm(BPF_REG_4, 123),
+        BpfInsn::ldx_mem(BPF_DW, BPF_REG_1, BPF_REG_0, 0),
+        BpfInsn::exit(),
+    ];
+    let run = run_pass_on_insns(pass, input, &prefetch_ctx());
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert!(!run.lowered.iter().any(|i| i.is_call_kinsn()));
+}
+
+#[test]
+fn prefetch_policy_point_skip_pc_overrides_map_value_site() {
+    let pass = PrefetchPass::from_profile_json_for_test(
+        r#"{
+            "map_value_pcs": [2],
+            "map_value_policy_points": [
+                { "pc": 2, "action": "skip" }
+            ]
+        }"#,
+    )
+    .unwrap();
+    let run = run_pass_on_insns(pass, map_lookup_program(), &prefetch_ctx());
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_skip_reason(&run, 2, "map value prefetch requires profile");
+}
+
+#[test]
+fn prefetch_hint_selects_x86_variant_target() {
+    let pass = PrefetchPass::from_profile_json_with_options_for_test(
+        r#"{
+            "map_value_prefetch_points": [
+                { "pc": 4, "reg": 6 }
+            ]
+        }"#,
+        "t1",
+        1,
+    )
+    .unwrap();
+    let input = vec![
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, 0),
+            0,
+            libbpf_sys::BPF_FUNC_map_lookup_elem as i32,
+        ),
+        BpfInsn::jeq_imm(BPF_REG_0, 0, 4),
+        BpfInsn::mov64_reg(BPF_REG_6, BPF_REG_0),
+        BpfInsn::alu64_imm(BPF_ADD, BPF_REG_6, 64),
+        BpfInsn::mov64_imm(BPF_REG_4, 123),
+        BpfInsn::ldx_mem(BPF_DW, BPF_REG_1, BPF_REG_0, 0),
+        BpfInsn::exit(),
+    ];
+    let ctx = prefetch_ctx_with_targets(&[("bpf_x86_prefetcht1", 8101)], Arch::X86_64);
+    let run = run_pass_on_insns(pass, input, &ctx);
+
+    assert_eq!(run.result.sites_applied, 1);
+    assert!(run
+        .lowered
+        .iter()
+        .any(|insn| insn.is_call_kinsn() && insn.imm == 8101));
+}
+
+#[test]
+fn prefetch_hint_selects_arm64_variant_target() {
+    let pass = PrefetchPass::from_profile_json_with_options_for_test(
+        r#"{
+            "map_value_prefetch_points": [
+                { "pc": 4, "reg": 6 }
+            ]
+        }"#,
+        "pldl2strm",
+        1,
+    )
+    .unwrap();
+    let input = vec![
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, 0),
+            0,
+            libbpf_sys::BPF_FUNC_map_lookup_elem as i32,
+        ),
+        BpfInsn::jeq_imm(BPF_REG_0, 0, 4),
+        BpfInsn::mov64_reg(BPF_REG_6, BPF_REG_0),
+        BpfInsn::alu64_imm(BPF_ADD, BPF_REG_6, 64),
+        BpfInsn::mov64_imm(BPF_REG_4, 123),
+        BpfInsn::ldx_mem(BPF_DW, BPF_REG_1, BPF_REG_0, 0),
+        BpfInsn::exit(),
+    ];
+    let ctx = prefetch_ctx_with_targets(&[("bpf_arm64_prfm_pldl2strm", 8203)], Arch::Aarch64);
+    let run = run_pass_on_insns(pass, input, &ctx);
+
+    assert_eq!(run.result.sites_applied, 1);
+    assert!(run
+        .lowered
+        .iter()
+        .any(|insn| insn.is_call_kinsn() && insn.imm == 8203));
+}
+
+#[test]
+fn prefetch_profile_points_respect_max_sites_degree() {
+    let pass = PrefetchPass::from_profile_json_with_options_for_test(
+        r#"{
+            "map_value_prefetch_points": [
+                { "pc": 6, "reg": 6 },
+                { "pc": 6, "reg": 7 }
+            ]
+        }"#,
+        "t0",
+        2,
+    )
+    .unwrap();
+    let input = vec![
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, 0),
+            0,
+            libbpf_sys::BPF_FUNC_map_lookup_elem as i32,
+        ),
+        BpfInsn::jeq_imm(BPF_REG_0, 0, 6),
+        BpfInsn::mov64_reg(BPF_REG_6, BPF_REG_0),
+        BpfInsn::alu64_imm(BPF_ADD, BPF_REG_6, 64),
+        BpfInsn::mov64_reg(BPF_REG_7, BPF_REG_0),
+        BpfInsn::alu64_imm(BPF_ADD, BPF_REG_7, 128),
+        BpfInsn::mov64_imm(BPF_REG_4, 123),
+        BpfInsn::ldx_mem(BPF_DW, BPF_REG_1, BPF_REG_0, 0),
+        BpfInsn::exit(),
+    ];
+    let run = run_pass_on_insns(pass, input, &prefetch_ctx());
+    let prefetch_call_count = run
+        .lowered
+        .iter()
+        .filter(|insn| insn.is_call_kinsn() && insn.imm == 7777)
+        .count();
+
+    assert_eq!(run.result.sites_applied, 2);
+    assert_eq!(prefetch_call_count, 2);
 }
 
 #[test]

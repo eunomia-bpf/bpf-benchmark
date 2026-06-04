@@ -9,15 +9,36 @@ use std::fs;
 use std::path::{Path, PathBuf};
 pub(super) const HELPER_MAP_LOOKUP_ELEM: i32 = libbpf_sys::BPF_FUNC_map_lookup_elem as i32;
 const HELPER_XDP_ADJUST_HEAD: i32 = libbpf_sys::BPF_FUNC_xdp_adjust_head as i32;
+const X86_PREFETCH_NTA_TARGET_NAME: &str = "bpf_x86_prefetchnta";
 const X86_PREFETCH_TARGET_NAME: &str = "bpf_x86_prefetcht0";
+const X86_PREFETCH_T1_TARGET_NAME: &str = "bpf_x86_prefetcht1";
+const X86_PREFETCH_T2_TARGET_NAME: &str = "bpf_x86_prefetcht2";
 const ARM64_PREFETCH_TARGET_NAME: &str = "bpf_arm64_prfm_pldl1keep";
+const ARM64_PREFETCH_L1STRM_TARGET_NAME: &str = "bpf_arm64_prfm_pldl1strm";
+const ARM64_PREFETCH_L2KEEP_TARGET_NAME: &str = "bpf_arm64_prfm_pldl2keep";
+const ARM64_PREFETCH_L2STRM_TARGET_NAME: &str = "bpf_arm64_prfm_pldl2strm";
 const TARGET_PREFETCH_DISTANCE: usize = 8;
 const MAX_PREFETCH_DISTANCE: usize = 16;
 const POINTER_INDEX_USE_LOOKAHEAD: usize = 64;
 const MAX_PREFETCH_SITES_PER_PROGRAM: usize = 1;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
+        name: X86_PREFETCH_NTA_TARGET_NAME,
+        register_uses: prefetch_register_uses,
+        register_defs: no_regs,
+    },
+    KinsnDescriptor {
         name: X86_PREFETCH_TARGET_NAME,
+        register_uses: prefetch_register_uses,
+        register_defs: no_regs,
+    },
+    KinsnDescriptor {
+        name: X86_PREFETCH_T1_TARGET_NAME,
+        register_uses: prefetch_register_uses,
+        register_defs: no_regs,
+    },
+    KinsnDescriptor {
+        name: X86_PREFETCH_T2_TARGET_NAME,
         register_uses: prefetch_register_uses,
         register_defs: no_regs,
     },
@@ -26,19 +47,39 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
         register_uses: prefetch_register_uses,
         register_defs: no_regs,
     },
+    KinsnDescriptor {
+        name: ARM64_PREFETCH_L1STRM_TARGET_NAME,
+        register_uses: prefetch_register_uses,
+        register_defs: no_regs,
+    },
+    KinsnDescriptor {
+        name: ARM64_PREFETCH_L2KEEP_TARGET_NAME,
+        register_uses: prefetch_register_uses,
+        register_defs: no_regs,
+    },
+    KinsnDescriptor {
+        name: ARM64_PREFETCH_L2STRM_TARGET_NAME,
+        register_uses: prefetch_register_uses,
+        register_defs: no_regs,
+    },
 ];
 fn prefetch_register_uses(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0])
 }
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct PrefetchPass {
     profile: PrefetchProfileGate,
+    hint: PrefetchHint,
+    max_sites_per_program: usize,
 }
 
 impl PrefetchPass {
     pub fn from_cli_args(args: &[String]) -> Result<Box<dyn BpfPass>> {
+        let args = PrefetchCliArgs::parse(args)?;
         Ok(Box::new(Self {
-            profile: PrefetchCliArgs::parse(args)?.profile,
+            profile: args.profile,
+            hint: args.hint,
+            max_sites_per_program: args.max_sites_per_program,
         }))
     }
 
@@ -48,7 +89,11 @@ impl PrefetchPass {
             profile: PrefetchProfileGate {
                 map_value_pcs: pcs.into_iter().collect(),
                 map_value_prefetch_points: BTreeMap::new(),
+                map_value_skip_pcs: BTreeSet::new(),
+                map_value_skipped_prefetch_points: BTreeMap::new(),
             },
+            hint: PrefetchHint::default(),
+            max_sites_per_program: MAX_PREFETCH_SITES_PER_PROGRAM,
         }
     }
 
@@ -57,7 +102,73 @@ impl PrefetchPass {
         let json: PrefetchProfileJson = serde_json::from_str(input)?;
         Ok(Self {
             profile: json.into_gate()?,
+            hint: PrefetchHint::default(),
+            max_sites_per_program: MAX_PREFETCH_SITES_PER_PROGRAM,
         })
+    }
+
+    #[cfg(test)]
+    pub(super) fn from_profile_json_with_options_for_test(
+        input: &str,
+        hint: &str,
+        max_sites_per_program: usize,
+    ) -> Result<Self> {
+        let json: PrefetchProfileJson = serde_json::from_str(input)?;
+        if max_sites_per_program == 0 {
+            anyhow::bail!("test max_sites_per_program must be greater than zero");
+        }
+        Ok(Self {
+            profile: json.into_gate()?,
+            hint: PrefetchHint::parse(hint)?,
+            max_sites_per_program,
+        })
+    }
+}
+
+impl Default for PrefetchPass {
+    fn default() -> Self {
+        Self {
+            profile: PrefetchProfileGate::default(),
+            hint: PrefetchHint::default(),
+            max_sites_per_program: MAX_PREFETCH_SITES_PER_PROGRAM,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+enum PrefetchHint {
+    #[default]
+    L1Keep,
+    L1Stream,
+    L2Keep,
+    L2Stream,
+    X86Nta,
+}
+
+impl PrefetchHint {
+    fn parse(input: &str) -> Result<Self> {
+        match input {
+            "default" | "l1keep" | "t0" | "pldl1keep" => Ok(Self::L1Keep),
+            "l1strm" | "l1stream" | "pldl1strm" => Ok(Self::L1Stream),
+            "l2keep" | "t1" | "pldl2keep" => Ok(Self::L2Keep),
+            "l2strm" | "t2" | "l2stream" | "pldl2strm" => Ok(Self::L2Stream),
+            "nta" | "non-temporal" | "prefetchnta" => Ok(Self::X86Nta),
+            other => anyhow::bail!("prefetch unknown hint: {other}"),
+        }
+    }
+
+    fn target_name(self, arch: Arch) -> &'static str {
+        match (arch, self) {
+            (Arch::X86_64, Self::L1Keep) => X86_PREFETCH_TARGET_NAME,
+            (Arch::X86_64, Self::L1Stream) => X86_PREFETCH_T2_TARGET_NAME,
+            (Arch::X86_64, Self::L2Keep) => X86_PREFETCH_T1_TARGET_NAME,
+            (Arch::X86_64, Self::L2Stream) => X86_PREFETCH_T2_TARGET_NAME,
+            (Arch::X86_64, Self::X86Nta) => X86_PREFETCH_NTA_TARGET_NAME,
+            (Arch::Aarch64, Self::L1Keep | Self::X86Nta) => ARM64_PREFETCH_TARGET_NAME,
+            (Arch::Aarch64, Self::L1Stream) => ARM64_PREFETCH_L1STRM_TARGET_NAME,
+            (Arch::Aarch64, Self::L2Keep) => ARM64_PREFETCH_L2KEEP_TARGET_NAME,
+            (Arch::Aarch64, Self::L2Stream) => ARM64_PREFETCH_L2STRM_TARGET_NAME,
+        }
     }
 }
 
@@ -65,6 +176,8 @@ impl PrefetchPass {
 struct PrefetchProfileGate {
     map_value_pcs: BTreeSet<u64>,
     map_value_prefetch_points: BTreeMap<u64, BTreeSet<u8>>,
+    map_value_skip_pcs: BTreeSet<u64>,
+    map_value_skipped_prefetch_points: BTreeMap<u64, BTreeSet<u8>>,
 }
 
 impl PrefetchProfileGate {
@@ -76,25 +189,46 @@ impl PrefetchProfileGate {
     }
 
     fn allows_map_value_pc(&self, pc: u64) -> bool {
-        self.map_value_pcs.contains(&pc)
+        self.map_value_pcs.contains(&pc) && !self.map_value_skip_pcs.contains(&pc)
     }
 
     fn map_value_prefetch_point_regs(&self, pc: u64) -> Option<&BTreeSet<u8>> {
+        if self.map_value_skip_pcs.contains(&pc) {
+            return None;
+        }
         self.map_value_prefetch_points.get(&pc)
+    }
+
+    fn skips_map_value_prefetch_point(&self, pc: u64, reg: u8) -> bool {
+        self.map_value_skipped_prefetch_points
+            .get(&pc)
+            .is_some_and(|regs| regs.contains(&reg))
     }
 }
 
 struct PrefetchCliArgs {
     profile: PrefetchProfileGate,
+    hint: PrefetchHint,
+    max_sites_per_program: usize,
 }
 
 impl PrefetchCliArgs {
     fn parse(args: &[String]) -> Result<Self> {
         let mut profile_path = None;
+        let mut hint = PrefetchHint::default();
+        let mut max_sites_per_program = MAX_PREFETCH_SITES_PER_PROGRAM;
         let mut iter = args.iter();
         while let Some(arg) = iter.next() {
             if let Some(value) = arg.strip_prefix("--profile=") {
                 profile_path = Some(PathBuf::from(value));
+                continue;
+            }
+            if let Some(value) = arg.strip_prefix("--hint=") {
+                hint = PrefetchHint::parse(value)?;
+                continue;
+            }
+            if let Some(value) = arg.strip_prefix("--max-sites=") {
+                max_sites_per_program = parse_prefetch_max_sites(value)?;
                 continue;
             }
             match arg.as_str() {
@@ -104,6 +238,18 @@ impl PrefetchCliArgs {
                         .ok_or_else(|| anyhow::anyhow!("prefetch --profile requires FILE"))?;
                     profile_path = Some(PathBuf::from(value));
                 }
+                "--hint" => {
+                    let value = iter
+                        .next()
+                        .ok_or_else(|| anyhow::anyhow!("prefetch --hint requires VALUE"))?;
+                    hint = PrefetchHint::parse(value)?;
+                }
+                "--max-sites" => {
+                    let value = iter
+                        .next()
+                        .ok_or_else(|| anyhow::anyhow!("prefetch --max-sites requires N"))?;
+                    max_sites_per_program = parse_prefetch_max_sites(value)?;
+                }
                 other => anyhow::bail!("prefetch unknown pass-local arg: {other}"),
             }
         }
@@ -111,8 +257,22 @@ impl PrefetchCliArgs {
             Some(path) => PrefetchProfileGate::from_path(&path)?,
             None => PrefetchProfileGate::default(),
         };
-        Ok(Self { profile })
+        Ok(Self {
+            profile,
+            hint,
+            max_sites_per_program,
+        })
     }
+}
+
+fn parse_prefetch_max_sites(input: &str) -> Result<usize> {
+    let value = input
+        .parse::<usize>()
+        .with_context(|| format!("prefetch --max-sites expects a positive integer, got {input}"))?;
+    if value == 0 {
+        anyhow::bail!("prefetch --max-sites must be greater than zero");
+    }
+    Ok(value)
 }
 
 #[derive(Debug, Deserialize)]
@@ -123,6 +283,8 @@ struct PrefetchProfileJson {
     map_value_sites: Vec<PrefetchProfileSiteJson>,
     #[serde(default)]
     map_value_prefetch_points: Vec<PrefetchProfilePointJson>,
+    #[serde(default)]
+    map_value_policy_points: Vec<PrefetchProfilePolicyPointJson>,
     #[serde(default = "default_min_load_misses")]
     min_load_misses: u64,
     #[serde(default)]
@@ -144,6 +306,21 @@ struct PrefetchProfileSiteJson {
 struct PrefetchProfilePointJson {
     pc: u64,
     reg: u8,
+}
+
+#[derive(Debug, Deserialize)]
+struct PrefetchProfilePolicyPointJson {
+    pc: u64,
+    #[serde(default)]
+    reg: Option<u8>,
+    action: PrefetchProfilePolicyAction,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+enum PrefetchProfilePolicyAction {
+    Prefetch,
+    Skip,
 }
 
 fn default_min_load_misses() -> u64 {
@@ -171,23 +348,56 @@ impl PrefetchProfileJson {
             }
         }
         let mut map_value_prefetch_points = BTreeMap::<u64, BTreeSet<u8>>::new();
+        let mut map_value_skip_pcs = BTreeSet::<u64>::new();
+        let mut map_value_skipped_prefetch_points = BTreeMap::<u64, BTreeSet<u8>>::new();
         for point in self.map_value_prefetch_points {
-            if point.reg > BPF_REG_10 {
-                anyhow::bail!(
-                    "prefetch profile map_value_prefetch_points reg must be 0..10, got {}",
-                    point.reg
-                );
-            }
+            validate_prefetch_profile_reg("map_value_prefetch_points", point.reg)?;
             map_value_prefetch_points
                 .entry(point.pc)
                 .or_default()
                 .insert(point.reg);
         }
+        for point in self.map_value_policy_points {
+            match point.action {
+                PrefetchProfilePolicyAction::Prefetch => {
+                    let reg = point.reg.ok_or_else(|| {
+                        anyhow::anyhow!(
+                            "prefetch profile map_value_policy_points action=prefetch requires reg"
+                        )
+                    })?;
+                    validate_prefetch_profile_reg("map_value_policy_points", reg)?;
+                    map_value_prefetch_points
+                        .entry(point.pc)
+                        .or_default()
+                        .insert(reg);
+                }
+                PrefetchProfilePolicyAction::Skip => {
+                    if let Some(reg) = point.reg {
+                        validate_prefetch_profile_reg("map_value_policy_points", reg)?;
+                        map_value_skipped_prefetch_points
+                            .entry(point.pc)
+                            .or_default()
+                            .insert(reg);
+                    } else {
+                        map_value_skip_pcs.insert(point.pc);
+                    }
+                }
+            }
+        }
         Ok(PrefetchProfileGate {
             map_value_pcs,
             map_value_prefetch_points,
+            map_value_skip_pcs,
+            map_value_skipped_prefetch_points,
         })
     }
+}
+
+fn validate_prefetch_profile_reg(field: &str, reg: u8) -> Result<()> {
+    if reg > BPF_REG_10 {
+        anyhow::bail!("prefetch profile {field} reg must be 0..10, got {reg}");
+    }
+    Ok(())
 }
 #[derive(Clone, Copy, Debug)]
 struct PrefetchSite {
@@ -299,7 +509,11 @@ impl BpfPass for PrefetchPass {
                 dependent_load_depth: site.dependent_load_depth,
             });
         }
-        let candidates = apply_prefetch_site_budget(dedup_candidates(candidates), &mut skipped)?;
+        let candidates = apply_prefetch_site_budget(
+            dedup_candidates(candidates),
+            self.max_sites_per_program,
+            &mut skipped,
+        )?;
         if candidates.is_empty() {
             return Ok(PassResult::with_sites(0, skipped));
         }
@@ -308,16 +522,12 @@ impl BpfPass for PrefetchPass {
         let applied =
             apply_candidates_reverse(prog, &pairs, &mut skipped, |prog, _, candidate| {
                 let payload = prefetch_payload(candidate.ptr_reg)?;
-                Ok((0, prog.kinsn_emit(prefetch_target_name(ctx.arch), payload)?))
+                Ok((
+                    0,
+                    prog.kinsn_emit(self.hint.target_name(ctx.arch), payload)?,
+                ))
             })?;
         Ok(PassResult::with_sites(applied, skipped))
-    }
-}
-
-fn prefetch_target_name(arch: Arch) -> &'static str {
-    match arch {
-        Arch::X86_64 => X86_PREFETCH_TARGET_NAME,
-        Arch::Aarch64 => ARM64_PREFETCH_TARGET_NAME,
     }
 }
 
@@ -455,12 +665,7 @@ fn process_map_value_block(
             }
             continue;
         }
-        apply_map_value_alias_transfer(
-            insn,
-            site,
-            &mut state.regs,
-            &mut state.stack_aliases,
-        );
+        apply_map_value_alias_transfer(insn, site, &mut state.regs, &mut state.stack_aliases);
     }
     Ok(state)
 }
@@ -477,17 +682,19 @@ fn push_profiled_map_value_prefetch_points(
         return Ok(());
     };
     for &ptr_reg in regs {
-        if let Some(ptr_def) = state.regs[ptr_reg as usize] {
-            sites.push(PrefetchSite {
-                target: site,
-                ptr_reg,
-                ptr_root: ptr_def,
-                ptr_def,
-                mem_off: 0,
-                source: PrefetchSource::MapValueProfilePoint,
-                dependent_load_depth: 0,
-            });
+        if profile.skips_map_value_prefetch_point(pc, ptr_reg) {
+            continue;
         }
+        let ptr_def = state.regs[ptr_reg as usize].unwrap_or(site);
+        sites.push(PrefetchSite {
+            target: site,
+            ptr_reg,
+            ptr_root: ptr_def,
+            ptr_def,
+            mem_off: 0,
+            source: PrefetchSource::MapValueProfilePoint,
+            dependent_load_depth: 0,
+        });
     }
     Ok(())
 }
@@ -1040,7 +1247,9 @@ fn choose_prefetch_insert_site(
         let insn = prog.insn(site.target)?;
         if insn.is_call() || insn.is_exit() || insn.is_jmp_class() || insn.is_ldimm64_pseudo_func()
         {
-            return Ok(Err("profile prefetch point cannot be control-flow or pseudo func".into()));
+            return Ok(Err(
+                "profile prefetch point cannot be control-flow or pseudo func".into(),
+            ));
         }
         return Ok(Ok(site.target));
     }
@@ -1230,9 +1439,10 @@ fn same_prefetch_cacheline(a: i16, b: i16) -> bool {
 
 fn apply_prefetch_site_budget(
     mut candidates: Vec<PrefetchCandidate>,
+    max_sites_per_program: usize,
     skipped: &mut Vec<SiteSkipReason>,
 ) -> anyhow::Result<Vec<PrefetchCandidate>> {
-    if candidates.len() <= MAX_PREFETCH_SITES_PER_PROGRAM {
+    if candidates.len() <= max_sites_per_program {
         return Ok(candidates);
     }
     candidates.sort_by(|a, b| {
@@ -1243,7 +1453,7 @@ fn apply_prefetch_site_budget(
     });
     let mut kept = Vec::new();
     for candidate in candidates {
-        if kept.len() < MAX_PREFETCH_SITES_PER_PROGRAM {
+        if kept.len() < max_sites_per_program {
             kept.push(candidate);
         } else {
             skipped.push(SiteSkipReason::new(
