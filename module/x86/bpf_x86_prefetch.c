@@ -76,11 +76,12 @@ static int emit_prefetcht0_x86(u8 *image, u32 *off, bool emit,
 	u32 len = 0;
 	int err;
 
-	(void)prog;
-
 	err = decode_prefetcht0_payload(payload, &ptr_reg);
 	if (err)
 		return err;
+	ptr_reg = kinsn_x86_reg_for_prog(prog, ptr_reg);
+	if (!kinsn_x86_valid(ptr_reg))
+		return -EINVAL;
 
 	emit_prefetcht0_mem(buf, &len, ptr_reg);
 

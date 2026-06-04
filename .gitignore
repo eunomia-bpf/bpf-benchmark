@@ -135,6 +135,11 @@ micro/results/*/*.bpf.o
 **/results/*/details/failures/
 **/results/*/details/workdirs/
 
+# Native proof test results (keep JSON, ignore everything else)
+tests/results/77216644/**
+!tests/results/77216644/**/
+!tests/results/77216644/**/*.json
+
 # Claude Code internal state (per-session lock + scheduled tasks)
 .claude/scheduled_tasks.lock
 .claude/scheduled_tasks/

@@ -117,13 +117,18 @@ static int emit_cmp_cmov_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	u32 len = 0;
 	int err;
 
-	(void)prog;
-
 	err = decode_cmp_cmov_rr_payload(payload, &left_reg, &right_reg,
 					 &dst_reg, &src_reg, &cmp32,
 					 &value32);
 	if (err)
 		return err;
+
+	left_reg = kinsn_x86_reg_for_prog(prog, left_reg);
+	right_reg = kinsn_x86_reg_for_prog(prog, right_reg);
+	src_reg = kinsn_x86_reg_for_prog(prog, src_reg);
+	if (!kinsn_x86_valid(left_reg) || !kinsn_x86_valid(right_reg) ||
+	    !kinsn_x86_valid(dst_reg) || !kinsn_x86_valid(src_reg))
+		return -EINVAL;
 
 	kinsn_emit_rex_rr(buf, &len, !cmp32, right_reg, left_reg);
 	kinsn_emit_u8(buf, &len, 0x39);

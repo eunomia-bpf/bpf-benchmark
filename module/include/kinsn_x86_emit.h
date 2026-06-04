@@ -11,9 +11,11 @@ static __always_inline s32 kinsn_payload_s32(u64 payload, u8 shift)
 }
 
 static __always_inline u8 kinsn_x86_reg_for_prog(const struct bpf_prog *prog,
-						 u8 x86_reg)
+							 u8 x86_reg)
 {
-	(void)prog;
+	if (x86_reg == BPF_REG_10 && prog && prog->aux &&
+	    prog->aux->priv_stack_ptr)
+		return KINSN_X86_REG_R9;
 	return x86_reg;
 }
 

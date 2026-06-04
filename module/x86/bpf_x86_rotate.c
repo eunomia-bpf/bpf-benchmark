@@ -370,8 +370,6 @@ static int emit_rol_imm_x86(u8 *image, u32 *off, bool emit,
 	u32 len = 0;
 	int err;
 
-	(void)prog;
-
 	if (width != 32 && width != 64)
 		return -EINVAL;
 
@@ -380,6 +378,8 @@ static int emit_rol_imm_x86(u8 *image, u32 *off, bool emit,
 		return err;
 	if (rot.dst_reg != rot.src_reg || !rot.shift)
 		return -EINVAL;
+	if (rotate_payload_form(payload) != X86_ROTATE_FORM_ARCH_IMM)
+		rot.dst_reg = kinsn_x86_reg_for_prog(prog, rot.dst_reg);
 	if (!kinsn_x86_reg_valid(rot.dst_reg))
 		return -EINVAL;
 
@@ -397,11 +397,13 @@ static int emit_rotate32_x86(u8 *image, u32 *off, bool emit,
 	u32 len = 0;
 	int err;
 
-	(void)prog;
-
 	err = decode_rotate32_payload(payload, &dst_reg, &src_reg, &shift);
 	if (err)
 		return err;
+	if (rotate_payload_form(payload) != X86_ROTATE_FORM_ARCH_IMM) {
+		dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
+		src_reg = kinsn_x86_reg_for_prog(prog, src_reg);
+	}
 	if (!kinsn_x86_reg_valid(dst_reg) || !kinsn_x86_reg_valid(src_reg))
 		return -EINVAL;
 
@@ -419,14 +421,14 @@ static int emit_rol_cl_x86(u8 *image, u32 *off, bool emit,
 	u32 len = 0;
 	int err;
 
-	(void)prog;
-
 	if (width != 32 && width != 64)
 		return -EINVAL;
 
 	err = decode_rotate_cl_payload(payload, &dst_reg, &cnt_reg);
 	if (err)
 		return err;
+	if (rotate_payload_form(payload) != X86_ROTATE_FORM_ARCH_RR)
+		dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
 	if (!kinsn_x86_reg_valid(dst_reg))
 		return -EINVAL;
 	(void)cnt_reg;

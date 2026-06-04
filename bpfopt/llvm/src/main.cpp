@@ -16,6 +16,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "llvmbpf.hpp"
@@ -480,6 +481,224 @@ int64_t count_kinsn_calls(const std::vector<uint8_t> &bytes)
 		}
 	}
 	return count;
+}
+
+using KinsnCallKey = std::pair<int16_t, int32_t>;
+
+std::map<KinsnCallKey, std::string>
+kinsn_target_name_by_call_key(const KinsnTargetMap &targets)
+{
+	std::map<KinsnCallKey, std::string> names;
+	for (const auto &[name, target] : targets) {
+		const auto [_, inserted] = names.emplace(
+			KinsnCallKey{ target.call_offset, target.btf_func_id },
+			name);
+		if (!inserted) {
+			throw std::runtime_error(
+				"target.json has duplicate kinsn relocation tuple for " +
+				name);
+		}
+	}
+	return names;
+}
+
+std::string kinsn_family_for_name(std::string_view name)
+{
+	if (name.starts_with("bpf_x86_lea")) {
+		return "lea";
+	}
+	if (name.starts_with("bpf_x86_cmp_cmov") ||
+	    name.starts_with("bpf_x86_cmov") ||
+	    name.starts_with("bpf_arm64_csel")) {
+		return "cond_select";
+	}
+	if (name.starts_with("bpf_arm64_ccmp")) {
+		return "ccmp";
+	}
+	if (name == "bpf_x86_rolw" || name.starts_with("bpf_x86_bswap") ||
+	    name.starts_with("bpf_x86_movbe") ||
+	    name.starts_with("bpf_arm64_rev")) {
+		return "endian_fusion";
+	}
+	if (name.starts_with("bpf_x86_rol") ||
+	    name.starts_with("bpf_x86_ror") ||
+	    name.starts_with("bpf_arm64_extr")) {
+		return "rotate";
+	}
+	if (name.starts_with("bpf_x86_bextr") ||
+	    name.starts_with("bpf_x86_shld") ||
+	    name.starts_with("bpf_x86_shrd") ||
+	    name.starts_with("bpf_arm64_ubfm")) {
+		return "extract";
+	}
+	if (name.starts_with("bpf_x86_mov") ||
+	    name.starts_with("bpf_arm64_ldr") ||
+	    name.starts_with("bpf_arm64_str") ||
+	    name.starts_with("bpf_arm64_ldp")) {
+		return "bulk_memory";
+	}
+	if (name.starts_with("bpf_x86_prefetch") ||
+	    name.starts_with("bpf_arm64_prfm")) {
+		return "prefetch";
+	}
+	if (name.starts_with("bpf_x86_blsi") ||
+	    name.starts_with("bpf_x86_blsr") ||
+	    name.starts_with("bpf_x86_popcnt") ||
+	    name.starts_with("bpf_x86_and") ||
+	    name.starts_with("bpf_x86_not") ||
+	    name.starts_with("bpf_x86_imul")) {
+		return "bitops";
+	}
+	return "other";
+}
+
+std::map<std::string, int64_t>
+count_kinsn_calls_by_name(const std::vector<uint8_t> &bytes,
+			  const KinsnTargetMap &targets)
+{
+	if (bytes.size() % INSN_SIZE != 0) {
+		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
+	}
+	const auto names = kinsn_target_name_by_call_key(targets);
+	std::map<std::string, int64_t> counts;
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	for (size_t pc = 0; pc < insn_count; pc++) {
+		const uint8_t opcode = bytes[pc * INSN_SIZE];
+		if ((opcode != BPF_CALL && opcode != BPF_CALLX) ||
+		    src_reg(bytes, pc) != BPF_PSEUDO_KINSN_CALL) {
+			continue;
+		}
+		const KinsnCallKey key{ read_off(bytes, pc),
+					read_imm(bytes, pc) };
+		const auto it = names.find(key);
+		if (it == names.end()) {
+			throw std::runtime_error(
+				"output bytecode references a kinsn relocation tuple missing from target.json");
+		}
+		counts[it->second]++;
+	}
+	return counts;
+}
+
+uint64_t read_kinsn_sidecar_payload(const std::vector<uint8_t> &bytes,
+				    size_t pc)
+{
+	return static_cast<uint64_t>(dst_reg(bytes, pc) & 0xf) |
+	       (static_cast<uint64_t>(
+			static_cast<uint16_t>(read_off(bytes, pc)))
+		<< 4) |
+	       (static_cast<uint64_t>(
+			static_cast<uint32_t>(read_imm(bytes, pc)))
+		<< 20);
+}
+
+bool kinsn_payload_wire_escaped(uint64_t payload)
+{
+	const uint8_t marker = payload & 0xf;
+	const uint8_t original_low = (payload >> 4) & 0xf;
+	return marker == 10 && original_low >= 11 && original_low <= 15;
+}
+
+uint64_t decode_kinsn_payload(uint64_t payload)
+{
+	if (!kinsn_payload_wire_escaped(payload)) {
+		return payload;
+	}
+	return ((payload >> 8) << 4) | ((payload >> 4) & 0xf);
+}
+
+std::string bpf_reg_name(uint8_t reg)
+{
+	if (reg <= 10) {
+		return "r" + std::to_string(reg);
+	}
+	return "x" + std::to_string(reg);
+}
+
+std::string kinsn_payload_shape(std::string_view name, uint64_t payload)
+{
+	const uint64_t decoded = decode_kinsn_payload(payload);
+	if (name.starts_with("bpf_x86_lea")) {
+		if ((decoded & 0xf) != 1 || decoded >> 52) {
+			std::ostringstream os;
+			os << name << "|payload=0x" << std::hex << decoded;
+			return os.str();
+		}
+		const uint8_t dst = (decoded >> 4) & 0xf;
+		const uint8_t base = (decoded >> 8) & 0xf;
+		const uint8_t index = (decoded >> 12) & 0xf;
+		const uint8_t scale = (decoded >> 16) & 0x3;
+		const bool has_index = (decoded >> 18) & 1;
+		const bool has_base = (decoded >> 19) & 1;
+		const int32_t disp =
+			static_cast<int32_t>(static_cast<uint32_t>(decoded >> 20));
+
+		std::ostringstream os;
+		os << name << "|dst=" << bpf_reg_name(dst)
+		   << "|base=" << (has_base ? bpf_reg_name(base) : "none")
+		   << "|index=" << (has_index ? bpf_reg_name(index) : "none")
+		   << "|scale=" << static_cast<unsigned>(scale)
+		   << "|disp=" << disp;
+		return os.str();
+	}
+
+	std::ostringstream os;
+	os << name << "|payload=0x" << std::hex << decoded;
+	return os.str();
+}
+
+std::map<std::string, int64_t>
+count_kinsn_payload_shapes(const std::vector<uint8_t> &bytes,
+			   const KinsnTargetMap &targets)
+{
+	if (bytes.size() % INSN_SIZE != 0) {
+		throw std::runtime_error("bytecode length is not a multiple of 8 bytes");
+	}
+	const auto names = kinsn_target_name_by_call_key(targets);
+	std::map<std::string, int64_t> counts;
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	for (size_t pc = 0; pc < insn_count; pc++) {
+		const uint8_t opcode = bytes[pc * INSN_SIZE];
+		if ((opcode != BPF_CALL && opcode != BPF_CALLX) ||
+		    src_reg(bytes, pc) != BPF_PSEUDO_KINSN_CALL) {
+			continue;
+		}
+		if (pc == 0 || bytes[(pc - 1) * INSN_SIZE] != BPF_MOV64_K ||
+		    src_reg(bytes, pc - 1) != BPF_PSEUDO_KINSN_SIDECAR) {
+			throw std::runtime_error(
+				"output bytecode has kinsn call without preceding sidecar");
+		}
+		const KinsnCallKey key{ read_off(bytes, pc),
+					read_imm(bytes, pc) };
+		const auto it = names.find(key);
+		if (it == names.end()) {
+			throw std::runtime_error(
+				"output bytecode references a kinsn relocation tuple missing from target.json");
+		}
+		counts[kinsn_payload_shape(
+			it->second,
+			read_kinsn_sidecar_payload(bytes, pc - 1))]++;
+	}
+	return counts;
+}
+
+llvm::json::Object counter_json(const std::map<std::string, int64_t> &counts)
+{
+	llvm::json::Object out;
+	for (const auto &[name, count] : counts) {
+		out[name] = count;
+	}
+	return out;
+}
+
+std::map<std::string, int64_t>
+kinsn_call_family_counts(const std::map<std::string, int64_t> &by_name)
+{
+	std::map<std::string, int64_t> by_family;
+	for (const auto &[name, count] : by_name) {
+		by_family[kinsn_family_for_name(name)] += count;
+	}
+	return by_family;
 }
 
 bool load_zero_extends_within_mask(uint8_t opcode, uint64_t mask)
@@ -1891,13 +2110,17 @@ void write_report(const Cli &cli, const std::vector<uint8_t> &input,
 		  const std::vector<uint8_t> &output,
 		  const std::vector<InlineRecord> &inlined = {},
 		  std::optional<int64_t> sites_applied_override = std::nullopt,
-		  const std::vector<std::string> &diagnostics = {})
+		  const std::vector<std::string> &diagnostics = {},
+		  const KinsnTargetMap *kinsn_targets = nullptr)
 {
 	if (!cli.report) {
 		return;
 	}
 	const bool changed = input != output;
 	const bool is_map_inline = cli.pass && *cli.pass == "map_inline";
+	const int64_t reported_sites = sites_applied_override.value_or(
+		is_map_inline ? static_cast<int64_t>(inlined.size()) :
+				(changed ? 1 : 0));
 	llvm::json::Array inlined_entries;
 	llvm::json::Array diagnostic_entries;
 	for (const auto &record : inlined) {
@@ -1912,14 +2135,8 @@ void write_report(const Cli &cli, const std::vector<uint8_t> &input,
 	}
 	llvm::json::Object report{
 		{ "pass", *cli.pass },
-		{ "sites_applied",
-		  sites_applied_override.value_or(
-			  is_map_inline ? static_cast<int64_t>(inlined.size()) :
-					  (changed ? 1 : 0)) },
-		{ "sites_matched",
-		  sites_applied_override.value_or(
-			  is_map_inline ? static_cast<int64_t>(inlined.size()) :
-					  (changed ? 1 : 0)) },
+		{ "sites_applied", reported_sites },
+		{ "sites_matched", reported_sites },
 		{ "sites_skipped", 0 },
 		{ "skip_reasons", llvm::json::Object{} },
 		{ "skipped_sites", llvm::json::Array{} },
@@ -1931,6 +2148,30 @@ void write_report(const Cli &cli, const std::vector<uint8_t> &input,
 			  static_cast<int64_t>(input.size() / INSN_SIZE) },
 		{ "inlined_map_entries", std::move(inlined_entries) },
 	};
+	if (kinsn_targets) {
+		std::map<std::string, int64_t> by_name;
+		if (reported_sites > 0) {
+			by_name = count_kinsn_calls_by_name(output,
+							    *kinsn_targets);
+			int64_t counted_sites = 0;
+			for (const auto &[_, count] : by_name) {
+				counted_sites += count;
+			}
+			if (counted_sites != reported_sites) {
+				throw std::runtime_error(
+					"kinsn report count mismatch: output calls=" +
+					std::to_string(counted_sites) +
+					" sites_applied=" +
+					std::to_string(reported_sites));
+			}
+		}
+		report["kinsn_calls_by_name"] = counter_json(by_name);
+		report["kinsn_calls_by_family"] =
+			counter_json(kinsn_call_family_counts(by_name));
+		report["kinsn_payload_shapes"] =
+			counter_json(count_kinsn_payload_shapes(output,
+								*kinsn_targets));
+	}
 	std::string json;
 	llvm::raw_string_ostream os(json);
 	os << llvm::formatv("{0:2}", llvm::json::Value(std::move(report)))
@@ -1979,7 +2220,7 @@ void run_pass(Cli &cli)
 		sites_applied = 0;
 		write_all(cli.output, output);
 		write_report(cli, input, output, inlined, sites_applied,
-			     diagnostics);
+			     diagnostics, &kinsn_targets);
 		return;
 	}
 	if (*cli.pass == "map_inline") {
@@ -2005,7 +2246,8 @@ void run_pass(Cli &cli)
 		}
 	}
 	write_all(cli.output, output);
-	write_report(cli, input, output, inlined, sites_applied, diagnostics);
+	write_report(cli, input, output, inlined, sites_applied, diagnostics,
+		     kinsn_pass ? &kinsn_targets : nullptr);
 }
 
 std::string next_value(int &i, int argc, char **argv, std::string_view opt)

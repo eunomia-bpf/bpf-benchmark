@@ -214,14 +214,15 @@ static int emit_bextrq_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	u32 len = 0;
 	int err;
 
-	(void)prog;
-
 	if (!boot_cpu_has(X86_FEATURE_BMI1))
 		return -EOPNOTSUPP;
 
 	err = decode_bextr_payload(payload, &dst_reg, &src_reg, &ctl_reg);
 	if (err)
 		return err;
+	dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
+	src_reg = kinsn_x86_reg_for_prog(prog, src_reg);
+	ctl_reg = kinsn_x86_reg_for_prog(prog, ctl_reg);
 	if (!kinsn_x86_valid(dst_reg) || !kinsn_x86_valid(src_reg) ||
 	    !kinsn_x86_valid(ctl_reg))
 		return -EINVAL;
@@ -239,14 +240,14 @@ static int emit_bmi1_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	u32 len = 0;
 	int err;
 
-	(void)prog;
-
 	if (!boot_cpu_has(X86_FEATURE_BMI1))
 		return -EOPNOTSUPP;
 
 	err = decode_bmi1_payload(payload, &dst_reg, &src_reg);
 	if (err)
 		return err;
+	dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
+	src_reg = kinsn_x86_reg_for_prog(prog, src_reg);
 	if (!kinsn_x86_valid(dst_reg) || !kinsn_x86_valid(src_reg))
 		return -EINVAL;
 
