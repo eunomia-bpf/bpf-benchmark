@@ -1,0 +1,105 @@
+{
+  "arch": "x86_64",
+  "kinsns": {
+    "bpf_x86_andl": {
+      "btf_func_id": 131665,
+      "btf_id": 56,
+      "call_offset": 1
+    },
+    "bpf_x86_bswapl": {
+      "btf_func_id": 131626,
+      "btf_id": 58,
+      "call_offset": 2
+    },
+    "bpf_x86_cmoveq": {
+      "btf_func_id": 131648,
+      "btf_id": 59,
+      "call_offset": 3
+    },
+    "bpf_x86_cmovneq": {
+      "btf_func_id": 131650,
+      "btf_id": 59,
+      "call_offset": 3
+    },
+    "bpf_x86_leal": {
+      "btf_func_id": 131626,
+      "btf_id": 61,
+      "call_offset": 4
+    },
+    "bpf_x86_leaq": {
+      "btf_func_id": 131627,
+      "btf_id": 61,
+      "call_offset": 4
+    },
+    "bpf_x86_movb": {
+      "btf_func_id": 131636,
+      "btf_id": 62,
+      "call_offset": 5
+    },
+    "bpf_x86_movl": {
+      "btf_func_id": 131637,
+      "btf_id": 62,
+      "call_offset": 5
+    },
+    "bpf_x86_movq": {
+      "btf_func_id": 131638,
+      "btf_id": 62,
+      "call_offset": 5
+    },
+    "bpf_x86_movzbl": {
+      "btf_func_id": 131642,
+      "btf_id": 62,
+      "call_offset": 5
+    },
+    "bpf_x86_movzwl": {
+      "btf_func_id": 131643,
+      "btf_id": 62,
+      "call_offset": 5
+    },
+    "bpf_x86_prefetchnta": {
+      "btf_func_id": 131627,
+      "btf_id": 67,
+      "call_offset": 6
+    },
+    "bpf_x86_prefetcht0": {
+      "btf_func_id": 131628,
+      "btf_id": 67,
+      "call_offset": 6
+    },
+    "bpf_x86_prefetcht1": {
+      "btf_func_id": 131629,
+      "btf_id": 67,
+      "call_offset": 6
+    },
+    "bpf_x86_prefetcht2": {
+      "btf_func_id": 131630,
+      "btf_id": 67,
+      "call_offset": 6
+    },
+    "bpf_x86_rolq": {
+      "btf_func_id": 131628,
+      "btf_id": 68,
+      "call_offset": 7
+    },
+    "bpf_x86_rolw": {
+      "btf_func_id": 131629,
+      "btf_id": 58,
+      "call_offset": 2
+    },
+    "bpf_x86_rorxl": {
+      "btf_func_id": 131629,
+      "btf_id": 68,
+      "call_offset": 7
+    },
+    "bpf_x86_shrq": {
+      "btf_func_id": 131683,
+      "btf_id": 56,
+      "call_offset": 1
+    },
+    "bpf_x86_testq": {
+      "btf_func_id": 131660,
+      "btf_id": 59,
+      "call_offset": 3
+    }
+  }
+}

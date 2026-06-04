@@ -117,8 +117,8 @@ instance / kernel / virtualized PMU 暴露出来的具体硬件 events。
 
 同步更新文档：
 
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`
 
 ## 数据文件
 

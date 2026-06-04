@@ -159,7 +159,7 @@ Benchmark / input / manifest：
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-indirect-timeliness-micro-attribution/report.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-indirect-timeliness-micro-attribution/data/run-contract.json`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-indirect-timeliness-micro-attribution/analysis/*`
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
 
 ## 数据文件
 
@@ -264,8 +264,8 @@ Treatment 确实触发了 ARM64 `PRFM` kinsn path；没有正收益不是因为 
   - `/home/ruoji/github/bpf-opt/experiments/2026-05-31-prefetch-research-micro-attribution/report.md`
   - `/home/ruoji/github/bpf-opt/experiments/2026-05-31-prefetch-candidate-filtering-micro-attribution/report.md`
 - 相关文档：
-  - `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
-  - `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/literature-review.md`
+  - `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
+  - `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/literature/literature-review.md`
 
 发现和处理：
 

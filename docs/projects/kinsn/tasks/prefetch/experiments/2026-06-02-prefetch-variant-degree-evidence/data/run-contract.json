@@ -1,0 +1,74 @@
+{
+  "date": "2026-06-02",
+  "experiment": "prefetch-variant-degree-evidence",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "question": "Extend kinsn prefetch hint variants, then run true future-address horizon/degree paired attribution on x86 and ARM64 synthetic-control micro cases.",
+  "scope": {
+    "implemented": [
+      "x86 prefetch hint ABI variants: prefetchnta, prefetcht0, prefetcht1, prefetcht2",
+      "ARM64 PRFM hint ABI variants: pldl1keep, pldl1strm, pldl2keep, pldl2strm",
+      "bpfopt prefetch --hint option",
+      "bpfopt prefetch --max-sites option as a site-budget control",
+      "future-address horizon micro cases for i+1, i+2, i+4",
+      "true degree micro case that prefetches i+1, i+2, i+4 future map-value pointers"
+    ],
+    "not_implemented": [
+      "automatic next-iteration/future-address selector",
+      "PMU cache-miss attribution in the default AWS micro environment"
+    ]
+  },
+  "benchmarks": [
+    "prefetch_pipeline_horizon1_page_stride",
+    "prefetch_pipeline_horizon2_page_stride",
+    "prefetch_pipeline_horizon4_page_stride",
+    "prefetch_pipeline_degree_page_stride"
+  ],
+  "profile": "/home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-horizon-degree-page-stride-profile.json",
+  "common_run_params": {
+    "RUNTIMES": "kernel",
+    "SAMPLES": 7,
+    "WARMUPS": 1,
+    "INNER_REPEAT": 1000,
+    "PERF_COUNTERS": 1
+  },
+  "commands": {
+    "rust_tests": "cd /home/ruoji/github/bpf-opt/code/bpfopt && cargo test -p bpfopt prefetch",
+    "local_build": "cd /home/ruoji/github/bpf-opt/code && make -C micro/programs all",
+    "aws_arm64_control": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro RUN_TOKEN=pfarmctl195831 BENCH='prefetch_pipeline_horizon1_page_stride prefetch_pipeline_horizon2_page_stride prefetch_pipeline_horizon4_page_stride prefetch_pipeline_degree_page_stride' RUNTIMES=kernel SAMPLES=7 WARMUPS=1 INNER_REPEAT=1000 PERF_COUNTERS=1",
+    "aws_arm64_treatment_template": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro BENCH='prefetch_pipeline_horizon1_page_stride prefetch_pipeline_horizon2_page_stride prefetch_pipeline_horizon4_page_stride prefetch_pipeline_degree_page_stride' RUNTIMES=kernel SAMPLES=7 WARMUPS=1 INNER_REPEAT=1000 PERF_COUNTERS=1 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-horizon-degree-page-stride-profile.json --max-sites 3 --hint HINT'",
+    "aws_x86_control": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro RUN_TOKEN=pfx86ctl203416 BENCH='prefetch_pipeline_horizon1_page_stride prefetch_pipeline_horizon2_page_stride prefetch_pipeline_horizon4_page_stride prefetch_pipeline_degree_page_stride' RUNTIMES=kernel SAMPLES=7 WARMUPS=1 INNER_REPEAT=1000 PERF_COUNTERS=1",
+    "aws_x86_treatment_template": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 micro BENCH='prefetch_pipeline_horizon1_page_stride prefetch_pipeline_horizon2_page_stride prefetch_pipeline_horizon4_page_stride prefetch_pipeline_degree_page_stride' RUNTIMES=kernel SAMPLES=7 WARMUPS=1 INNER_REPEAT=1000 PERF_COUNTERS=1 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-horizon-degree-page-stride-profile.json --max-sites 3 --hint HINT'",
+    "aws_x86_terminate": "/home/ruoji/github/bpf-opt/aws-config/run.sh x86 terminate"
+  },
+  "aws": {
+    "region": "us-east-1",
+    "remote_user": "ec2-user",
+    "x86_instance_type": "t3.small",
+    "arm64_instance_type": "t4g.small",
+    "root_volume_gb": 32,
+    "kernel": "7.0.0-rc2+",
+    "x86_runtime_image": "bpf-benchmark/runner-runtime:x86_64",
+    "arm64_runtime_image": "bpf-benchmark/runner-runtime:arm64"
+  },
+  "result_dirs": {
+    "variant_smoke": [
+      "/home/ruoji/github/bpf-opt/code/micro/results/aws_x86_micro_20260602_221811_212815",
+      "/home/ruoji/github/bpf-opt/code/micro/results/aws_x86_micro_20260602_222526_406675",
+      "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260602_223212_019101",
+      "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260602_223911_428229"
+    ],
+    "degree_horizon": {
+      "arm64_control": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260603_000024_733232",
+      "arm64_l1keep": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260603_000849_265322",
+      "arm64_l1strm": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260603_001622_048610",
+      "arm64_l2keep": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260603_002356_463384",
+      "arm64_l2strm": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260603_003146_747479",
+      "x86_control": "/home/ruoji/github/bpf-opt/code/micro/results/aws_x86_micro_20260603_004208_489943",
+      "x86_t0": "/home/ruoji/github/bpf-opt/code/micro/results/aws_x86_micro_20260603_005048_125780",
+      "x86_t1": "/home/ruoji/github/bpf-opt/code/micro/results/aws_x86_micro_20260603_005810_555037",
+      "x86_t2": "/home/ruoji/github/bpf-opt/code/micro/results/aws_x86_micro_20260603_010552_992793",
+      "x86_nta": "/home/ruoji/github/bpf-opt/code/micro/results/aws_x86_micro_20260603_011322_532995"
+    }
+  }
+}

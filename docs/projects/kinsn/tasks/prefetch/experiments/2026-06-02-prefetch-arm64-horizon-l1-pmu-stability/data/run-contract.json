@@ -1,0 +1,59 @@
+{
+  "experiment": "2026-06-02-prefetch-arm64-horizon-l1-pmu-stability",
+  "date_local": "2026-06-02",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "purpose": "Validate ARM64 future-address horizon2/horizon4 L1 prefetch candidates with longer AWS kernel micro runs and PERF_COUNTERS enabled.",
+  "aws": {
+    "region": "us-east-1",
+    "profile": "default",
+    "arch": "arm64",
+    "instance_type": "t4g.small",
+    "instances": [
+      {
+        "role": "control",
+        "run_token": "pf-horizon-arm64-control-pmu1",
+        "instance_id": "i-0833b4986dc759cff",
+        "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260603_024138_256667"
+      },
+      {
+        "role": "horizon2_l1keep",
+        "run_token": "pf-horizon2-arm64-l1keep-pmu1",
+        "instance_id": "i-046988f0fe0837b81",
+        "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260603_025020_311804"
+      },
+      {
+        "role": "horizon4_l1keep",
+        "run_token": "pf-horizon4-arm64-l1keep-pmu1",
+        "instance_id": "i-03e2a47a7e9ca8274",
+        "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260603_025753_420811"
+      }
+    ]
+  },
+  "benchmark": {
+    "suite": "micro",
+    "runtime": "kernel",
+    "cases": [
+      "prefetch_pipeline_horizon2_page_stride",
+      "prefetch_pipeline_horizon4_page_stride"
+    ],
+    "samples": 10,
+    "warmups": 2,
+    "inner_repeat": 10000,
+    "perf_counters": true,
+    "io_mode": "map",
+    "input": "prefetch_upper_bound.mem"
+  },
+  "control_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro RUN_TOKEN=pf-horizon-arm64-control-pmu1 BENCH='prefetch_pipeline_horizon2_page_stride prefetch_pipeline_horizon4_page_stride' RUNTIMES=kernel SAMPLES=10 WARMUPS=2 INNER_REPEAT=10000 PERF_COUNTERS=1",
+  "horizon2_treatment_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro RUN_TOKEN=pf-horizon2-arm64-l1keep-pmu1 BENCH='prefetch_pipeline_horizon2_page_stride' RUNTIMES=kernel SAMPLES=10 WARMUPS=2 INNER_REPEAT=10000 PERF_COUNTERS=1 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-horizon2-page-stride-profile-pc23-r6.json --hint l1keep'",
+  "horizon4_treatment_command": "/home/ruoji/github/bpf-opt/aws-config/run.sh arm64 micro RUN_TOKEN=pf-horizon4-arm64-l1keep-pmu1 BENCH='prefetch_pipeline_horizon4_page_stride' RUNTIMES=kernel SAMPLES=10 WARMUPS=2 INNER_REPEAT=10000 PERF_COUNTERS=1 BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-horizon4-page-stride-profile-pc23-r9.json --hint l1keep'",
+  "raw_results_copied_to": "/home/ruoji/github/bpf-opt/experiments/2026-06-02-prefetch-arm64-horizon-l1-pmu-stability/data/aws-results",
+  "analysis_outputs": [
+    "analysis/runtime-summary.tsv",
+    "analysis/treatment-control-summary.tsv",
+    "analysis/pmu-availability.tsv",
+    "analysis/bpfopt-prefetch-aggregate.tsv",
+    "analysis/aws-instances.tsv",
+    "analysis/aws-cost-estimate.tsv"
+  ]
+}

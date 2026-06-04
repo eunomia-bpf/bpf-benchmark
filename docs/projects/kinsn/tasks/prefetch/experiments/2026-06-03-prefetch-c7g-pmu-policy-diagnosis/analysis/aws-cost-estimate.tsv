@@ -1,0 +1,19 @@
+run_label	instance_id	instance_type	final_state	wall_time_source	launch_time_utc	terminate_time_utc	aws_wall_hours	compute_cost_usd_est	ebs_cost_usd_est	total_cost_usd_est
+control-all	i-0b0d78ef212ae42d4	c7g.large	terminated	estimated-from-later-run-mean			0.087562	0.006348	0.000311	0.006660
+default-structural	i-05b4c30a1b8a4d473	c7g.large	terminated	estimated-from-later-run-mean			0.087562	0.006348	0.000311	0.006660
+map-page-stride	i-0521efe71b0ddea55	c7g.large	terminated	estimated-from-later-run-mean			0.087562	0.006348	0.000311	0.006660
+upper-page-stride	i-02c8d234c3e1d5ea2	c7g.large	terminated	estimated-from-later-run-mean			0.087562	0.006348	0.000311	0.006660
+pipeline-page-stride	i-015a86249f47d3c94	c7g.large	terminated	estimated-from-later-run-mean			0.087562	0.006348	0.000311	0.006660
+horizon1	i-061424f408fe8bc8d	c7g.large	terminated	estimated-from-later-run-mean			0.087562	0.006348	0.000311	0.006660
+horizon2	i-0da100df43869da8e	c7g.large	terminated	estimated-from-later-run-mean			0.087562	0.006348	0.000311	0.006660
+horizon4	i-06b9383595e0059dc	c7g.large	terminated	estimated-from-later-run-mean			0.087562	0.006348	0.000311	0.006660
+pipeline-degree	i-03b558e924e4f0403	c7g.large	terminated	estimated-from-later-run-mean			0.087562	0.006348	0.000311	0.006660
+stride64	i-0f0ac8711e18716ef	c7g.large	terminated	aws-describe-instances	2026-06-03T22:49:15+00:00	2026-06-03T22:54:08+00:00	0.081389	0.005901	0.000289	0.006190
+stride256	i-0e8a261fa6f06605b	c7g.large	terminated	aws-describe-instances	2026-06-03T22:55:19+00:00	2026-06-03T23:01:00+00:00	0.094722	0.006867	0.000337	0.007204
+stride4096	i-000e1890f9cd6e07a	c7g.large	terminated	aws-describe-instances	2026-06-03T23:02:11+00:00	2026-06-03T23:07:51+00:00	0.094444	0.006847	0.000336	0.007183
+variable-stride	i-04ea1676cb3eeaf10	c7g.large	terminated	aws-describe-instances	2026-06-03T23:09:02+00:00	2026-06-03T23:14:29+00:00	0.090833	0.006585	0.000323	0.006908
+spatial	i-04e99202e43cdca98	c7g.large	terminated	aws-describe-instances	2026-06-03T23:15:40+00:00	2026-06-03T23:20:12+00:00	0.075556	0.005478	0.000269	0.005746
+mlop	i-0f86f17158543f2a4	c7g.large	terminated	aws-describe-instances	2026-06-03T23:21:22+00:00	2026-06-03T23:27:19+00:00	0.099167	0.007190	0.000353	0.007542
+degree1	i-0c6546de035847f3b	c7g.large	terminated	aws-describe-instances	2026-06-03T23:28:30+00:00	2026-06-03T23:33:03+00:00	0.075833	0.005498	0.000270	0.005768
+degree2	i-0804f04cee98ada91	c7g.large	terminated	aws-describe-instances	2026-06-03T23:34:14+00:00	2026-06-03T23:39:21+00:00	0.085278	0.006183	0.000303	0.006486
+degree3	i-0acfbb8993be89ab6	c7g.large	terminated	aws-describe-instances	2026-06-03T23:40:34+00:00	2026-06-03T23:46:01+00:00	0.090833	0.006585	0.000323	0.006908

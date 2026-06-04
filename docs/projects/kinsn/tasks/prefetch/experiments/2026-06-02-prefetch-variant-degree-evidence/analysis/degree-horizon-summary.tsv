@@ -1,0 +1,33 @@
+arch	case	variant	treatment_control_mean	treatment_control_median	cv_exec_ns	status	native_bytes	bpf_bytes	mean_cycles	mean_task_clock_ns
+arm64	prefetch_pipeline_degree_page_stride	l1keep	0.982073	0.978835	0.012532	noise	1528	2528	53026851.142857	21265693.714286
+arm64	prefetch_pipeline_degree_page_stride	l1strm	1.001012	0.989603	0.036365	noise	1528	2528	53183845.428571	21711930.428571
+arm64	prefetch_pipeline_degree_page_stride	l2strm	1.017365	1.009843	0.023433	noise	1528	2528	54435509.571429	22059303.000000
+arm64	prefetch_pipeline_degree_page_stride	l2keep	1.052795	1.025970	0.066763	slow_high_cv	1528	2528	54341026.857143	22829095.285714
+arm64	prefetch_pipeline_horizon1_page_stride	l1keep	1.004758	0.975133	0.008812	noise	1360	2184	45868809.000000	18403039.142857
+arm64	prefetch_pipeline_horizon1_page_stride	l2strm	1.045345	1.017306	0.006152	slow	1360	2184	47629758.571429	19157795.000000
+arm64	prefetch_pipeline_horizon1_page_stride	l1strm	1.046112	0.990256	0.074532	slow_high_cv	1360	2184	46309752.142857	19177848.285714
+arm64	prefetch_pipeline_horizon1_page_stride	l2keep	1.052638	1.023323	0.010550	slow	1360	2184	48036583.000000	19293424.285714
+arm64	prefetch_pipeline_horizon2_page_stride	l1keep	0.954973	0.954907	0.006039	win	1408	2304	47166995.428571	18936492.428571
+arm64	prefetch_pipeline_horizon2_page_stride	l1strm	0.957488	0.957032	0.006803	win	1408	2304	47323256.857143	19000214.571429
+arm64	prefetch_pipeline_horizon2_page_stride	l2strm	0.999053	0.982742	0.051658	noise_high_cv	1408	2304	48293774.714286	19823782.142857
+arm64	prefetch_pipeline_horizon2_page_stride	l2keep	1.003412	0.994281	0.035618	noise	1408	2304	49504260.142857	19911774.714286
+arm64	prefetch_pipeline_horizon4_page_stride	l1keep	0.964590	0.964911	0.007015	win	1328	2216	44218417.428571	17744874.714286
+arm64	prefetch_pipeline_horizon4_page_stride	l1strm	0.966710	0.966658	0.009838	win	1328	2216	44272007.857143	17792390.285714
+arm64	prefetch_pipeline_horizon4_page_stride	l2strm	0.980974	0.979754	0.007512	noise	1328	2216	44886372.000000	18064180.285714
+arm64	prefetch_pipeline_horizon4_page_stride	l2keep	0.986399	0.987449	0.009072	noise	1328	2216	45180454.857143	18152413.857143
+x86	prefetch_pipeline_degree_page_stride	t1	0.996759	1.007660	0.007954	noise	1248	2528		11087895.571429
+x86	prefetch_pipeline_degree_page_stride	t2	1.045975	1.030362	0.055105	slow_high_cv	1248	2528		11669528.857143
+x86	prefetch_pipeline_degree_page_stride	t0	1.445870	1.055463	0.623098	slow_high_cv	1248	2528		16045052.428571
+x86	prefetch_pipeline_degree_page_stride	nta	1.610153	1.642396	0.015938	slow	1248	2528		17846424.142857
+x86	prefetch_pipeline_horizon1_page_stride	t2	0.998209	0.996843	0.014913	noise	1085	2184		9637170.000000
+x86	prefetch_pipeline_horizon1_page_stride	t0	1.001926	1.004840	0.014705	noise	1085	2184		9645247.857143
+x86	prefetch_pipeline_horizon1_page_stride	t1	1.008699	1.003998	0.014088	noise	1085	2184		9821466.428571
+x86	prefetch_pipeline_horizon1_page_stride	nta	2.944734	2.939815	0.016636	slow	1085	2184		28098507.285714
+x86	prefetch_pipeline_horizon2_page_stride	t1	0.981512	0.982342	0.008658	noise	1159	2304		10112932.142857
+x86	prefetch_pipeline_horizon2_page_stride	t0	1.000225	0.985301	0.031140	noise	1159	2304		10310884.142857
+x86	prefetch_pipeline_horizon2_page_stride	t2	1.040229	0.990924	0.129088	slow_high_cv	1159	2304		10777203.142857
+x86	prefetch_pipeline_horizon2_page_stride	nta	2.393923	2.395581	0.007775	slow	1159	2304		24431181.857143
+x86	prefetch_pipeline_horizon4_page_stride	t0	0.991978	0.991849	0.006169	noise	1130	2216		9780652.285714
+x86	prefetch_pipeline_horizon4_page_stride	t1	1.003474	0.991643	0.039687	noise	1130	2216		9894327.285714
+x86	prefetch_pipeline_horizon4_page_stride	nta	1.681460	1.667148	0.024937	slow	1130	2216		16466053.714286
+x86	prefetch_pipeline_horizon4_page_stride	t2	2.345639	1.314693	0.993536	slow_high_cv	1130	2216		24597450.285714

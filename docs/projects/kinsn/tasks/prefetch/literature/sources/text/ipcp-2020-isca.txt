@@ -1,0 +1,1374 @@
+                 2020 ACM/IEEE 47th Annual International Symposium on Computer Architecture (ISCA)
+
+
+
+
+     Bouquet of Instruction Pointers: Instruction Pointer
+       Classiﬁer-based Spatial Hardware Prefetching
+                                 Samuel Pakalapati                                                    Biswabandan Panda
+                       Intel Technology Private Limited                                  Dept. of Computer Science and Engineering
+               Birla Institute of Technology and Science, Pilani*                           Indian Institute of Technology Kanpur
+                                Hyderabad, India                                                        Kanpur, India
+                          samuel.pakalapati@intel.com                                               biswap@cse.iitk.ac.in
+
+
+
+     Abstract—Hardware prefetching is one of the common off-chip                   prefetchers demand less storage (closer to tens of KBs, except
+  DRAM latency hiding techniques. Though hardware prefetchers                      spatial memory streaming (SMS) [47] and Bingo [11]) as
+  are ubiquitous in the commercial machines and prefetching tech-                  compared to the temporal ones (closer to hundreds of KBs). In
+  niques are well studied in the computer architecture community,                  the 3rd Data Prefetching Championship (DPC-3) [3], variations
+  the “memory wall” problem still exists after decades of micro-
+  architecture research and is considered to be an essential problem               of these proposals were proposed1 .
+  to solve. In this paper, we make a case for breaking the memory                     It is well understood that the prefetchers at L1 and L2 would
+  wall through data prefetching at the L1 cache.                                   need to be different as the access patterns at the L2 are different
+     We propose a bouquet of hardware prefetchers that can handle                  from those at the L1 (ﬁltered by the L1). The primary reason
+  a variety of access patterns driven by the control ﬂow of an                     being, identifying access patterns at the L2 is not trivial as
+  application. We name our proposal Instruction Pointer Classiﬁer
+  based spatial Prefetching (IPCP). We propose IPCP in two                         the L1 prefetcher may cover a few demand misses or may
+  ﬂavors: (i) an L1 spatial data prefetcher that classiﬁes instruction             trigger additional inaccurate prefetch requests jumbling the
+  pointers at the L1 cache level, and issues prefetch requests                     access pattern at the L2. Note that, most of the recent spatial
+  based on the classiﬁcation, and (ii) a multi-level IPCP where                    prefetchers are L2 based with prefetchers like NL and IP-stride
+  the IPCP at the L1 communicates the classiﬁcation information                    dominating the space of L1 data prefetching.
+  to the L2 IPCP so that it can kick-start prefetching based on
+  this classiﬁcation done at the L1. Overall, IPCP is a simple,                       The opportunity: One of the key objectives behind design-
+  lightweight, and modular framework for L1 and multi-level                        ing hardware prefetchers is to break the memory wall by hiding
+  spatial prefetching. IPCP at the L1 and L2 incurs a storage                      the costly off-chip DRAM accesses. An ideal solution to the
+  overhead of 740 bytes and 155 bytes, respectively.                               memory wall problem would be an L1-D cache (L1-D) hit rate
+     Our empirical results show that, for memory-intensive single-                 of 100%, with permissible access latency. One of the ways to
+  threaded SPEC CPU 2017 benchmarks, compared to a baseline
+  system with no prefetching, IPCP provides an average perfor-                     achieve the same is through L1-D prefetching. Prefetching at
+  mance improvement of 45.1%. For the entire SPEC CPU 2017                         the L1-D provides the following beneﬁts (i) unﬁltered memory
+  suite, it provides an improvement of 22%. In the case of multi-                  access pattern, (ii) prefetched blocks can get ﬁlled into all the
+  core systems, IPCP provides an improvement of 23.4% (evaluated                   levels of cache hierarchy (more importantly, the L1-D), (iii) an
+  over more than 1000 mixes). IPCP outperforms the already high-                   ideal L1-D prefetcher can make the L2 prefetcher superﬂuous.
+  performing state-of-the-art prefetchers like SPP with PPF and
+  Bingo by demanding 30X to 50X less storage.                                         The challenges: The beneﬁts mentioned above come with
+     Index Terms—Hardware Prefetching, Caching                                     the following challenges. (i) Hardware overhead: an L1-
+                                                                                   D prefetcher should be light-weight. (ii) Prefetch address
+                          I. I NTRODUCTION                                         generation should meet the lookup latency requirement of
+                                                                                   L1-D. (iii) An L1-D prefetcher should not probe the L1-D on
+     Improved hardware prefetchers at the different levels of                      every prefetch access (to make sure that the address is already
+  cache hierarchy translate to performance gain by reducing the                    not present in the L1 cache) as L1-D is bandwidth starved. (iv)
+  off-chip costly DRAM accesses. Hardware prefetchers such                         Aggressive hardware prefetching may not be possible at the
+  as next-line (NL) and stride based on instruction pointer (IP-                   L1-D because of limited entries at the supporting hardware
+  stride) [18] are some of the simple, efﬁcient, and light-weight                  resources such as prefetch queue (PQ) and miss-status-holding-
+  data prefetchers employed at the L1 level. Well-established and                  registers (MSHRs). For example, typically, the #entries in the
+  recent spatial L2 prefetchers (prefetchers that prefetch within a                PQ and MSHR of L1-D is one-half of L2’s. (v) An L1-D
+  spatial region) [33], [13], [14], [38], [11], [45] have pushed the               prefetcher with low accuracy can pollute the small L1-D.
+  limits of data prefetching. Apart from these spatial prefetchers,                   The problem: State-of-the-art spatial prefetchers [45] [33],
+  there are temporal prefetchers [54], [55], [24], [12], [59], [58]                [11], [14], [13] are designed speciﬁcally for L2’s access patterns.
+  that target irregular but temporal accesses. In general, spatial
+                                                                                     1 A preliminary version of bouquet of prefetchers won the 3rd data
+    * A major part of the work was done through a remote internship, while
+  the author was at BITS Pilani.                                                   prefetching championship.
+
+
+
+978-1-7281-4661-4/20/$31.00 ©2020 IEEE                                       118
+DOI 10.1109/ISCA45697.2020.00021
+Prefetchers like SMS [47], [49] and Bingo [11] are capable                 dynamically controls the prefetch aggressiveness based on the
+of prefetching at the L1-D. However, both SMS and Bingo                    success probability of future deltas.
+demand hardware overhead closer to 100KB.                                     Spatial Memory Streaming (SMS) [47], [49] is a spatial
+   Our goal is to propose a lightweight spatial L1-D prefetcher            prefetcher that exploits the relationship between the IP of a
+that can overcome the challenges and seize the opportunities               memory request, and access pattern within a spatial region
+mentioned above without compromising the prefetch accuracy                 based on the IP and the ﬁrst offset within that region. SMS
+and prefetch coverage.                                                     incurs huge storage overhead, which is larger than the L1-D
+   Our approach: We propose a prefetching framework in the                 size. A recent work called Bingo [11], uses multiple signatures
+form of a bouquet of prefetchers based on instruction pointer              (like IP, IP+Offset, and memory region) and fuses them into
+(IP) classiﬁcation (driven by the control ﬂow of an application).          a single hardware table. Bingo provides better coverage than
+We cover a wide variety of memory access patterns like (i)                 SMS. However, Bingo incurs similar overhead as SMS (around
+only control ﬂow, (ii) control ﬂow predicted data ﬂow, and                 119KB). There are component prefetchers like division of labor
+(iii) control ﬂow coupled with data ﬂow. We ﬁnd that each                  (DOL) [35] that target speciﬁc program semantics (like pointer
+IP can be classiﬁed into unique IP-classes based on its access             chains, loops, etc.) for prefetching by getting the information
+patterns, and the resulting classiﬁcation could be used for better         of interest from the processor core.
+prefetching. We perform IP classiﬁcation at the L1-D and use it               Offset prefetchers: Offset based prefetchers such as Best-
+for L1-D prefetching. We also extend our framework to the L2               offset Prefetcher (BOP) [38] and Sandbox [42] prefetcher
+prefetcher by communicating the IP classiﬁcation information               explore multiple offsets. An offset of k means the cache block
+from the L1-D prefetcher.                                                  that is distanced by k cache blocks. These prefetchers choose
+   Overall, we make the following key contributions:                       the offset that provides the maximum likelihood of future use.
+   • We ﬁnd that spatial access patterns can be correlated with            BOP continues to prefetch with a particular offset till a new
+      the IPs and motivate the need for lightweight spatial L1-D           offset performs better than the current offset. Multi-Look-ahead
+      prefetchers (Section III).                                           Offset Prefetcher (MLOP) [44] is an extension of BOP that
+   • We propose Instruction Pointer Classiﬁcation based spatial            considers several lookaheads for each offset, and ﬁnds the best
+      Prefetching (IPCP) that classiﬁes IPs into three classes             offset for each look-ahead. MLOP is motivated by Jain’s Ph.D.
+      and design a tiny prefetcher per class (Section IV). These           thesis that proposed an Aggregate Stride Prefetcher (ASP) [23].
+      tiny prefetchers cover more than 60%, 70%, and 80% of                   Temporal Prefetchers: Temporal prefetchers like temporal
+      the L1, L2, and last-level cache (LLC) demand misses                 streaming [55], Irregular Stream Buffer (ISB) [24], and Domino
+      for memory-intensive (LLC MPKI≥1) SPEC CPU 2017                      [12] track the temporal order of accesses. Usually, temporal
+      applications, respectively (refer Figure 10).                        prefetchers demand hundreds of KBs. Recently, Managed ISB
+   • We propose a bouquet of tiny prefetchers that work in                 (MISB) [59] and Triage [58] have optimized the hardware
+      harmony with each other through per-class throttling and             overhead without compromising coverage.
+      hierarchical priority (Section V).                                      Prefetch ﬁlters/throttlers: To further improve the effective-
+   • We also communicate the classiﬁcation information from                ness of hardware prefetchers, prefetch ﬁlters like Perceptron-
+      L1-D to L2, facilitating multi-level prefetching using the           Prefetch-Filter (PPF) [14] and Evicted-Prefetch-Filter (EPF)
+      common theme. Overall, IPCP is an extremely lightweight              [43] have been proposed. Apart from ﬁlters, there are aggres-
+      framework that demands 895 bytes (Section V).                        siveness controllers (throttlers) [16], [20], [30], [31], [39]–[41],
+   • On average, compared to no prefetching, IPCP provides                 [50] that control the prefetch degree and prefetch distance based
+      a performance improvement of 45.1%, 22%, and 23.4%                   on prefetch metrics like accuracy, coverage, LLC pollution, and
+      for single-core memory-intensive applications, single-core           DRAM bandwidth. Dual Spatial Pattern Prefetcher (DSPatch)
+      all applications, and multi-core mixes with 4 and 8-cores,           [13] is an adjunct spatial prefetcher that works like a throttler. It
+      respectively. IPCP provides this performance with 30X to             improves the effectiveness of SPP based on DRAM bandwidth
+      50X lower hardware overhead when compared to state-                  utilization.
+      of-the-art spatial prefetchers (Section VI).
+                                                                                                   III. M OTIVATION
+                     II. R ELATED W ORK                                       Unique and persistent IP behavior: One of the major
+   Spatial prefetchers: Spatial prefetchers predict strides,               insights that drive IPCP is that each IP has a speciﬁc behavior
+streams, or complex strides within a spatial region providing              associated with it. For example, here is an L1-D access pattern
+competitive coverage. Prefetchers like variable length delta               (in terms of cache-line aligned addresses) of an IPA from SPEC
+prefetching (VLDP) [45] and signature path prefetching (SPP)               CPU 2017 benchmark named bwaves: C0,C3,C6,C7,C9.
+[33] are well known delta prefetchers. VLDP stores the                     This IP follows a constant stride of three for the most part. A
+history of deltas to predict future deltas. SPP is a state-of-the-         simple IP-stride prefetcher can provide high prefetch coverage,
+art delta prefetcher that predicts the non-constant (irregular)            in this case. Here is another access pattern for IPB from a
+strides (commonly known as deltas). SPP works based on the                 benchmark named mcf: C0,C1,C3,C4,C6,C7. The stride
+signatures (hash of deltas) seen within a physical OS page                 pattern of this IP is 1,2,1,2,1. In this case, an IP-stride prefetcher
+to index into a prediction table that predicts future delta. It            provides zero coverage as the prefetcher fails to get high
+
+
+
+
+                                                                     119
+                    1.4                                                                       IP Table
+                          L1 prefetching                       L2 prefetching
+ Speedup over no
+
+
+                   1.35                                                                        IP-tag Last-vpage Last-line-offset       Stride     Confidence
+   prefetching
+
+                          Prefetching at L1, filling till L2
+                    1.3
+                   1.25
+                    1.2                                                                                  Fig. 2: Hardware table for the CS class.
+                                  IP-stride                       Bingo         MLOP
+
+                              Fig. 1: Utility of L1-D prefetching.
+                                                                                             of access patterns is not a promising direction to improve
+                                                                                             performance. With IPCP, we seek for high performance with
+conﬁdence for either of the strides. Another access pattern                                  simplicity and modularity using the minimum silicon area. We
+that is common in streaming benchmarks like lbm and gcc                                      use extremely simple and tiny L1-D prefetchers enabling a
+is the following: IPC (C0,C2,C1),IPD (C3,C6,C4,C5),                                          highly practical design. On top of that, a new access pattern
+and IPE (C9,C8,C7). It is a global stream. Looking at the                                    can be added to the existing classes as a new class seamlessly,
+global pattern, we can see that all the accesses are contiguous                              thus enabling modularity.
+and limited to a small memory region. However, their access
+                                                                                                                      IV. IP C LASSIFIER
+pattern is a bit jumbled based on the program order. In this
+case, many IPs like IPC ,IPD , and IPE follow the global stream.                                We propose a spatial IPCP that classiﬁes an IP into three
+It is clear that IPs are unique and can be classiﬁed into different                          classes. We do not prefetch crossing the page boundary as
+classes based on its access patterns. Note that a particular IP                              IPCP is a simple spatial prefetcher that prefetches within a
+can move from one access pattern to another and it can stay                                  small region (2KB and 4KB)2 .
+active with one or more access patterns.                                                     A. Constant stride (CS):only control ﬂow
+    Utility of L1 prefetching: To understand the importance of
+prefetching into the L1-D, we perform a simple experiment                                       IPs that show constant stride in terms of cache line aligned
+with prefetchers like IP-stride, Bingo, and MLOP over 46                                     addresses belong to this class. It is a common pattern seen by
+memory-intensive SPEC CPU 2017 traces [8] [9] (refer Table                                   IPs and can be prefetched using an IP-stride prefetcher.
+II for the simulated systems parameters). Figure 1 shows the                                     Figure 2 shows an IP table for prefetching based on the
+utility of prefetching into the L1. On average, compared to a                                constant strides (CS). For the CS class, an IP table is tagged
+baseline with no prefetching, prefetching into the L1 provides                               and indexed by an IP. Each entry in the table has a stride
+6% to 13% additional speedup over L2 prefetching. The reasons                                ﬁeld that corresponds to the stride seen by the IP. A 2-bit
+for the performance difference is obvious: (i) in case of L2                                 conﬁdence counter confidence is incremented every time
+prefetching, prefetched blocks are brought till L2 only, and                                 the same stride is seen, and decremented otherwise. It is used
+(ii) access patterns learned at the L2 are noisy because of the                              to determine whether to prefetch using the constant stride or
+L1 ﬁltered accesses. To improve the learning, we also perform                                not. The entry also stores the last-vpage (last two least
+experiments where L1 prefetchers learn at L1 but prefetch                                    signiﬁcant bits (lsbs) of the last-virtual-page), and the last
+till the L2. It brings the performance gap to 3-7%. However,                                 cache-line-offset (last-line-offset) within a page. In
+there are traces (e.g., gcc-2226B) that show a performance                                   the virtual address space, pages are mostly contiguous and
+difference of more than 73% for Bingo and MLOP. Out of 46                                    a change in the last two lsbs is sufﬁcient to detect a page
+memory-intensive traces, only one trace (bwaves-2931B)                                       change (previous page or the next page) seen by the IP. For
+shows prefetching till L2 is better and by a marginal 1.4%,                                  a 4KB page and 64B cache lines, offset can vary from 0 to
+making a strong case for L1 prefetching.                                                     63). The last-line-offset, along with the last-virtual-page, is
+    Dearth of spatial L1-D prefetchers: Note that state-of-                                  used to calculate the stride between two accesses from the
+the-art spatial prefetchers like SMS, VLDP, SPP, Bingo, and                                  same IP. The virtual page information is used for learning and
+DSPatch are designed for L2 or the LLC. VLDP, SPP, and                                       calculating the stride when a new page is seen. For example, a
+DSPatch that are speciﬁcally designed for L2, provide better                                 change from an offset 63 to 0, with page change in the forward
+performance when employed at the L2 only. SMS and Bingo at                                   direction, would be (0-63) + 64 = stride of one. It is a small
+L1 do a good job but demand too much storage (∼100KB) for                                    addition to the IP-stride prefetcher.
+an L1-D prefetcher. Bingo provides better performance density                                   Training phase: An IP goes through training till it gains
+(speedup/KB) over SMS. Figure 1 shows Bingo’s performance                                    enough conﬁdence (counter value greater than one) to prefetch.
+with a 48KB L1 (our L1-D is of size 48KB, same as the                                           Trained phase: Once an IP gains conﬁdence, it is termed
+upcoming Intel Ice Lake’s L1 [7]).                                                           as trained, and it starts prefetching as follows: prefetch address
+    Key observations: The persistent behavior of IPs demands                                 = (current cache-line-address) + k × (learned-stride), where
+for an IP classiﬁcation. Each class can be handled by one                                    k varies from one to the prefetch degree. Note that a learned
+prefetcher. It is in contrast to global access based prefetchers                             IP stops prefetching in case of low conﬁdence and starts
+where a huge monolithic prefetcher is expected to learn and                                  prefetching again after gaining conﬁdence.
+predict all the memory access patterns. Also, as the state-of-                                  2 Exploring IPCP as a light-weight spatio-temporal prefetcher like STeMS
+the-art spatial prefetchers are not designed for L1-D or are                                 [48] along with a synergistic TLB prefetcher is a promising direction of
+heavy-weight, combining them at the L1-D to cater a variety                                  research and we leave the exploration to future work.
+
+
+
+
+                                                                                       120
+ IP Table                                                                                                 IP Table
+  IP-tag     Signature                                                                                    IP-tag     Last-vpage Last-line-offset Stream Valid? Direction
+                                                                                                      ❶
+                                                                                         L1 Access
+                             Complex Stride Prediction Table (CSPT)
+                                                                                     ❶    Region Stream Table (RST)
+                             ❶ Stride     Confidence
+                                                                                     Region- Last-line Bit      Pos/neg Dense    Trained?   Tentative?   Direction LRU bits
+                                                                                     id       offset   Vector count     count
+                                                 ❷
+  New ❸                             ❷
+  signature                                  Prefetch using the Stride till
+                            XOR              (#Prefetch-issued < degree)                        Fig. 4: Hardware table(s) for the GS class.
+                                    ❷
+                            Signature << 1
+                                                                                    uses an IP and there is a difference in the access patterns
+            Fig. 3: Hardware table(s) for the CPLX class.                           captured by CPLX. We ﬁnd, there are cases where IP driven
+                                                                                    complex strides hold the key. (i) The memory accesses (for a
+                                                                                    given IP) are sometimes not in the powers of two (memory
+B. Complex stride (CPLX):control ﬂow coupled with data ﬂow
+                                                                                    layout in data structures across cache lines), causing an non-
+   For access patterns like C,C+3,C+6,C+10,C+13,C+16,                               constant stride pattern. For example, consider a cache line of
+and C+20 with strides of 3,3,4,3,3,4, a CS class prefetcher                         8 bytes, and if every 12th byte is accessed, the accesses create
+would provide 66% coverage since it would be unable to predict                      strides as follows: byte addresses: 0, 12, 36, 48, 72; cache line
+stride 4. Also, if the stride pattern is 1,2,1,2,1,2, a CS class                    aligned addresses: 0, 1, 3, 4, 6; strides: 1, 2, 1, 2. (ii) Another
+prefetcher would lack the conﬁdence to prefetch any stride                          case is where the accesses are made by loops at various levels.
+since the two strides compete for the same entry in the IP table.                   An outer loop could make constant stride accesses (can be
+In this case, coverage would be zero. We call these patterns                        easily captured by the CS class). However, an inner loop could
+as complex strides and create a complex stride class (CPLX)                         make different stride accesses (depending on the strides of the
+for the corresponding IPs.                                                          outer loop), thus causing bumps in the stride pattern. An IP
+   We create an n-bit signature of strides seen by an IP and                        based CPLX can exploit this pattern.
+use it to index into a complex stride prediction table (CSPT)                          Also, CPLX class focuses on local order of complex strides
+that predicts future complex strides. An n-bit signature                            (capturing control and data ﬂow) unlike the global order (data
+captures the last n strides seen by an IP by hashing. The IP                        ﬂow) seen by SPP. Note that, SPP is a high performing
+table of CPLX class is also tagged and indexed by an IP. The                        prefetcher designed for L2 and CPLX alone cannot match SPP’s
+IP table of CPLX class stores the IP-tag and the signature                          effectiveness (apples vs oranges). CPLX’s implementation is
+that points to the previous stride(s) predicted by the IP. CSPT                     extremely lightweight since it is an L1-D prefetcher and has
+stores the next predicted stride pointed to by a signature and                      the added beneﬁt of reduced latency on the critical path of
+a 2-bit conﬁdence counter (similar to the CS class). Figure 3                       issuing a prefetch at the L1 (SPP has to calculate conﬁdence
+shows the IP table of CPLX class and the CSPT table.                                by using logic or lookup tables).
+   Training phase: An IP with its signature ﬁeld ﬁnds the
+stride at the CSPT. Every time it sees the same stride the                          C. Global stream (GS):control ﬂow predicted data ﬂow
+conﬁdence counter is incremented by one and decremented                                A global stream is a set of cache aligned accesses (within a
+otherwise. This stride is hashed with the existing signature,                       small memory region) that usually follow a bursty pattern, and
+and the CSPT is looked up again to issue prefetch requests. The                     these accesses can come from different IPs. Prefetching based
+stride obtained previously is added to the signature according                      on the global stream makes more sense as it preserves the global
+to the equation: signature = (signature << 1) ˆ stride. Note                        order of accesses (data ﬂow within a region) and results in much
+that we shift the signature by a single bit so that we can                          better timeliness. We propose a new prefetching technique to
+accommodate a highly complex stride pattern. Thus a pattern                         prefetch global streams. Figure 4 shows the prefetch tables of
+can produce many signatures, but we do not observe too many                         interest for the GS class.
+collisions in the CSPT because there are not many CPLX IPs                              Training phase: GS class prefetcher uses an IP ta-
+at the same point of time.                                                          ble (tagged and indexed in the same way as the previous
+   Trained phase: Every time the signature points to the stride,                    classes) and an IP corresponds to the GS class based on a
+and if the conﬁdence is high enough (≥ one in our case), the                        stream-valid bit with a direction of the stream. The
+complex stride is added to the cache line to produce the prefetch                   IP table gets this information from a Region Stream Table
+address. This look-ahead continues until the prefetch degree                        (RST).
+count is reached ( 2 , 3 , and 1 ). If the conﬁdence value is                          RST keeps track of regions and their denseness (#accesses).
+zero, then the stride is added to the signature using the above                     Each region is of size 2KB (bigger size regions take more
+equation to predict the next stride ( 3 ) and no prefetching is                     time to train and provide marginal performance improvement)
+done.                                                                               and it maintains a 32-bit bit-vector (for tracking 32 cache
+   CPLX and SPP: Fundamentally, CPLX class is different                             lines). When a new region is accessed, we allocate an entry
+from SPP. The latter uses a memory region (an OS page) and                          in RST. If a cache line within that region is accessed for the
+captures the deltas observed within a page. However, CPLX                           ﬁrst time, we set the corresponding bit in the bit-vector and
+
+
+
+
+                                                                              121
+increment a saturating counter called dense-count. The                        MPKI is too high, we turn off NL prefetching at the L1. Based
+last-line-offset within the region is also stored. Note                       on the MPKI values, a tentative-NL bit is set for each cache
+that the width of last-line-offset in the IP table is 6 bits whereas          level when the MPKI is low (50, chosen empirically based on
+in RST it is 5 bits. If dense-count counter crosses a GS                      average MPKI when prefetching turned off). NL prefetching
+threshold (75% of the cache blocks accessed within a region),                 is ON only when tentative-NL is set.
+then the region is a dense region contributing to the GS, and all
+the IPs accessing this region are classiﬁed as GS IPs. Also, the                             V. B OUQUET OF PREFETCHERS
+trained bit of the corresponding RST entry is set. Note                          Based on the classiﬁcation done in the previous Sections,
+that if a bit in the bit-vector is already set, the counter is not            we design a single IP table shared by all three classes as four
+incremented.                                                                  ﬁelds of the IP table are used by all the classes. We have
+   RST also uses an n-bit saturating counter (pos/neg                         auxiliary tables like CSPT and RST for CPLX and GS class,
+count) to determine the direction of the stream. Note that                    respectively. Figure 5 shows the IPCP as a framework. On L1
+                                                              n
+this counter does not start from zero. It is initialized to 22 . The          access, IPCP uses the corresponding IP-tag bits to compare
+direction is calculated by ﬁnding out the difference between                  entries with the IP table. Our IP table is a direct-mapped, 64
+two consecutive cache accesses (the difference between the                    entry table. We get marginal performance improvements with
+last-cache-line-offset and current access-offset within a region).            a 128 and 256 entry IP tables, corroborating with recent works
+The pos/neg count gets incremented on positive direction                      [38] and [13] that use IP-stride at the L1 with 64 entries. We
+and gets decremented on negative direction. Depending on                      use a 128 entry direct-mapped CSPT table that captures a
+the most signiﬁcant bit (msb) of the pos/neg count, the                       signature of width seven (seven strides).
+direction of a GS IP is determined.                                              Since a replacement policy would add latency into the
+   When a GS IP encounters a new region, we look at the                       critical path, we use a direct-mapped implementation instead.
+previous region it had accessed (using last-vpage and the                     All the conﬁdence counters are 2-bit wide. We use an
+msb of last-line-offset of the IP table). If the region                       eight entry RST to keep track of eight recent regions and
+had already been trained as dense, i.e., the trained bit is set               maintain LRU order among the regions. As the IP table
+in the RST, we assume the new region to be dense, tentatively                 is shared among the classes, IPCP learns the constant and
+(control ﬂow predicted data ﬂow). The tentative bit in the                    complex strides by sharing the IP-tag, last-vpage, and
+RST entry of the new region is set. If the trained bit is not                 last-line-offset ﬁelds. GS class use last-vpage,
+set in the previous region, it may mean that the GS nature is                 and the msb of last-line-offset to index into the RST
+no longer exhibited by the IPs and the tentative bit is not                   as mentioned in Section IV-C. Now, both CS and CPLX learn
+set. This feature is designed to prevent locking of behavior                  their respective strides when they see a new page, as mentioned
+due to initial conditions. The reason we are using this scheme                in Section IV-A.
+is because it takes some time for the region to be trained as                    IP table and hysteresis: As the IP table is direct-mapped
+dense, and we may not be able to issue GS prefetches during                   and tagged, it is a challenge to decide which IP to keep for
+this time. Hence we correlate the training information from                   prefetching, as there can be collisions between IPs matching to
+the previous region to tentatively issue GS prefetches in the                 the same table entry, we add an additional ﬁeld valid bit to
+new region.                                                                   maintain hysteresis (Figure 5). When an IP is encountered for
+   Trained phase: On a demand access, we check the trained                    the ﬁrst time, it is recorded in the IP table and the valid bit
+and tentative bits in the RST entry. If either of the bits is set, we         is set. When another IP maps to the same entry, the valid bit
+call the corresponding IP a GS IP and set the stream-valid                    is reset, but the previous entry remains active. If the valid bit
+and direction bits in the IP table. Note that, through this                   is reset when a new IP is seen then the table entry is allocated
+scheme, all IPs that access a dense region become GS IPs.                     to the new IP and the valid bit is set again, ensuring that at
+Once trained, a GS IP prefetcher just prefetches the next k                   least one of the two competing IPs is tracked in the IP table.
+cache lines based on the trained direction (positive/negative                 Note that, valid bit is also shared by all the classes.
+direction), where k is the prefetch degree.                                      Priority of classes: In case of an IP table hit ( 1 of Figure
+                                                                              5), IPCP checks all three classes concurrently ( 2 ). Note that,
+D. A case for tentative NL (tentative data ﬂow)                               at a given point of time, an IP can be a part of no class, one
+   In case a demand access does not fall into any of the                      class or multiple classes. RST is checked concurrently for its
+three classes (CS, CPLX, and GS), we use the NL prefetcher.                   training. In step 2 , IPCP ﬁnds out if the IP belongs to CS
+However, the usage of NL prefetcher can be detrimental to                     or GS class. IPCP prioritizes GS over CS if an IP gets a tie
+performance, especially in case of irregular access patterns.                 between GS and CS (primarily for better timeliness and global
+So, we make it tentative. We calculate the L1 misses per kilo                 order). So, at the end of step 2 , IPCP either prefetches based
+instructions (MPKI) per core. Two counters are used, one                      on GS or CS. In step 3 , IPCP goes for the CPLX class (it
+to count the number of L1 misses and the other to count the                   means the IP does not belong to CS or GS class) by indexing
+number of retired instructions (if this information is unavailable            into the CSPT, and if it gets a low-conﬁdence in the CSPT,
+then misses per kilo cycles can also be used and it is equally                then it goes for the tentative NL class by looking at the MPKI.
+effective). Since we cannot afford useless prefetches when the                In a nutshell, IPCP uses the following hierarchical priority:
+
+
+
+
+                                                                        122
+                Fields of IP table shared by CS, CPLX, and GS:                 Tentative NL
+                IP-tag, valid, last-vpage, Last-line-offset                                            ❸
+                                                                                                                      !CPLX
+
+                                                                                   CPLX
+                                                                                                           CSPT (128 entries)
+                                                                                                       ❸    Stride   Confidence
+                                                                        (!GS) && (!CS)                      7 bits 2 bits
+                                                                                   GS > CS
+                  L1 access [IP, Access address]
+                                                                                     ❷                                ❷
+                    IP Table (64 entries)                               CS                            GS               CPLX
+                     IP-tag   Valid? last-vpage    Last-line-offset Stride       Confidence Stream Valid? Direction Signature
+
+                 ❶ 9 bits 1 bit 2 bits             6 bits             7 bits     2 bits       1 bit          1 bit      7 bits
+
+                  RST (8 entries)
+                 ❶ Region-id Last-line-offset Bit-          Pos/neg       Dense? Trained? Tentative? Direction         LRU bits
+                                                  vector    count
+                     3 bits     5 bits            32 bits 6 bits          1 bit      1 bit     1 bit       1 bit       3 bits
+                                                  Fig. 5: IPCP as a bouquet of IP classes.
+
+GS, CS, CPLX, and then NL. If an IP belongs to multiple                     means more than 75% of the cache blocks will be accessed
+IP classes, then this priority order is used. Note that IPCP                within that region. For coordination among the classes, we use
+does not access the table multiple times to ﬁnd out the class               an epoch based prefetch accuracy driven throttling mechanism
+of particular demand access, because all the information is                 to control the prefetch degrees of the various classes at the
+stored as part of a single entry. IPCP checks all the classes               L1-D. Each cache line at the L1 contains two bits to indicate
+concurrently and ﬁnally selects the highest priority class, in              the class of the issued prefetch. Two counters are assigned to
+case an IP belongs to multiple (or all) classes. We discuss the             every class, one to count the number of issued prefetches and
+utility of priority orders in Section VI (Figure 13 (b)).                   the other for the number of useful prefetches.
+   Lookup latency: The latency incurred during the issue of                    For each class, once in 256 per-class prefetch ﬁlls, we
+a prefetch request is three cycles (cycle one: IP-table-lookup,             measure the accuracy. We use two watermark thresholds (based
+cycle two: prefetch based on CS or GS class as per the priority,            on empirical studies) in terms of prefetch accuracy: prefetch
+and CSPT table lookup, and cycle three: prefetch based on                   accuracy of 0.75 (high water mark) and 0.40 (low water-mark).
+CSPT if conﬁdence is high else tentative-NL prefetching).                   We do not throttle degrees if the accuracy of a class lies in
+Since an L1-D lookup is around 5 cycles (48KB L1-D), a                      between 0.40 to 0.75. If the accuracy is greater than 0.75, IPCP
+prefetch can be issued by the time the corresponding demand                 keeps on increasing the degree till it reaches the default degree
+request is serviced. In case an L1-D reads two requests per                 for that class. Similarly, if the accuracy is lower than 0.40,
+cycles (which is the case in our simulation framework and                   IPCP throttles down the prefetcher until it reaches a prefetch
+also in the commercial machines), we go for a pipelined IPCP.               degree of one. With this throttling, IPCP allows other classes
+Now, the second request is pipelined with the ﬁrst request’s                like CS and CPLX to prefetch if the accuracy of the high
+CSPT access, such that the second request’s prefetch can be                 priority class (GS) is too low. For example, if the accuracy of
+issued at the 4th cycle. We synthesize IPCP (at the RTL level               the GS class is below 0.4, then IPCP prefetches based on GS
+by using VHDL code) with the help of a Design Compiler for                  class with the throttled degree and also explores prefetching
+7nm technology, and verify the latency, clocked at 4GHz.                    using CS and CPLX.
+   If critical path of L1-D latency is an issue then for CSPT                  L1-D bandwidth and Recent Request Filter: An L1-D
+table lookups, the prefetch distance can be increased. For                  prefetcher probes the L1-D before issuing prefetch requests
+example, if CPLX generates the following prefetch addresses:                to make sure that it is generating a prefetch address that is
+10, 25, and 30 then instead of prefetching from address 10,                 not present in the L1-D. However, as mentioned in Section I,
+CPLX would start prefetching from address 25. Note that this                L1-D is bandwidth-starved and heavily ported, and adding an
+applies only to the CPLX class.                                             additional port, only for a prefetcher is costly, and may not
+   Coordinated Prefetch Throttling: IPCP issues prefetch                    be feasible. To solve this problem, we use a small (32 entry)
+requests with a default prefetch degree of three for CS and                 recent-request ﬁlter (RR ﬁlter) [15], that keeps track of recently
+CPLX classes and six for the GS class at L1. One of the primary             seen tags (partial tag is sufﬁcient) in the demand access and
+reasons for an aggressive GS is, once an IP becomes GS, it                  recent prefetch addresses generated by the IPCP. These tags
+
+
+
+
+                                                                      123
+        L1 Prefetcher                                                                                           TABLE I: Hardware Overhead with IPCP at L1 and L2.
+                                                            Class-type: CS, GS, NL, No class (2 bits)
+  L1 Miss                            Metadata            Stride/stream-direction (7 bits)                                   entry-size in bits × entries                              overhead
+       IP table (64 entries)                                                                                   IPCP at L1   IP table (36×64) + CSPT (9×128) + RST (53×8) +            5800 bits
+       IP-tag     Valid?     Class-type         Stride/Stream-direction                                                     2 class-bits per line ×64 sets×12 ways (48KB L1)
+       9 bits       1 bit       2 bits          7 bits                                                                      + RR ﬁlter (12 bit tag×32 entries)
+                                                                                                               Others       1 bit: tentative-NL + 8×4 bits: prefetch-issued/class +   113 bits
+                                                                                                                            8×4 bits: prefetch-hits/class + 10 bits: miss-counter
+    Note: IPCP does not prefetch with CPLX at L2.
+    The stride/stream-direction field stores the stream-direction in case of GS class.
+                                                                                                                            + 10 bits: instruction-counter + 7×4 bits: per-class
+                                                                                                                            accuracy registers and one 7-bit MPKI register
+                                  Fig. 6: IPCP at the L2.                                                      IPCP at L2   IP table (19 × 64) + 1 bit: tentative-NL + 10 bits:       1237 bits
+                                                                                                                            miss counter + 10 bits: instruction counter
+                                                                                                                            Total overhead: 740 bytes at L1 + 155 bytes at L2         895 bytes
+
+are most likely to stay in the L1-D or the L1 MSHRs (for the
+misses). Before generating a prefetch request, IPCP probes this                                               works on a local per-IP access pattern.
+ﬁlter and in case there is a hit, the prefetch request is dropped.                                               IPCP at the L2 uses an IP table of 64 entries (similar to L1
+    Multilevel Holistic IPCP: We implement IPCP at two                                                        IP table entries). Each entry contains an IP tag, an IP-valid
+cache levels: L1 and L2. We do not implement it at the LLC,                                                   bit, a 2-bit class-type ﬁeld (based on the metadata information
+as we do not see any considerable beneﬁt. The prefetch requests                                               there are four possibilities, three classes along with the case
+issued into L2 and L1 are also ﬁlled into the LLC. The access                                                 of no-class), 7-bit stride or the direction of the stream.
+stream at the L2 is now jumbled since it consists of prefetch                                                    On demand access at the L2, the L2 prefetcher issues
+requests and demand misses from the L1. Thus we cannot                                                        prefetch requests by consulting the L2 IP table that is populated
+train on the L1 misses since some of the misses are converted                                                 based on the metadata information communicated by the L1
+to hits due to L1 prefetching. This corruption of the stream                                                  prefetcher. The stride values of the classes are passed down to
+makes pattern matching at the L2 difﬁcult.                                                                    the L2 through the metadata only when the accuracy of the
+   Another alternative is to train the prefetcher at the L1 but                                               respective classes is greater than 75, preventing the L2 from
+to ﬁll it till L2. As IPCP at the L1 is already aggressive, if                                                learning and issuing low accuracy prefetches. For the NL class,
+we issue further prefetch requests (just to ﬁll till the L2), PQ                                              similar to the L1 level, we use the L2 MPKI threshold (40,
+(a FIFO) becomes full and starts dropping prefetch requests,                                                  chosen empirically, as per the guideline discussed for L1-D)
+frequently and creates indirect throttling at the L1, affecting                                               for tentative-NL prefetching. This threshold is essential for
+both coverage and timeliness. For example, if IP-A and IP-B                                                   high MPKI applications like mcf. Note that, if the L2 sees a
+are accessing the L1 concurrently and if we prefetch for IP-A                                                 prefetch request from L1-D with class NL, it simply prefetches
+at the L1 and also for ﬁlls till L2 on top of IPCP at the L1                                                  NL at the L2. At the L2, for the CS class, IPCP uses a prefetch
+(by prefetching additional requests) then PQ will become full,                                                degree four. We use a higher prefetch degree at L2 because of
+frequently and prefetch requests for IP-B will be dropped. Note                                               presence of additional MSHR and PQ entries.
+that even if the PQ is not full and the PQ occupancy is high                                                     Metadata Decoding at L2: When a prefetch request is
+all the time, it affects the timeliness of L1 prefetch requests.                                              issued from L1, IPCP communicates the metadata containing
+Hence we use the L1 prefetch requests to communicate the IP                                                   the class type along with its stride/stream-direction (in total 9
+classiﬁcation information to the L2 prefetcher by transmitting                                                bits, only). Modern caches use L1 to L2 bus width of 128-bits,
+lightweight metadata along with the prefetch requests. With                                                   256-bits [32] or more for carrying information for various
+our communication, we prefetch deep based on the L1 access                                                    micro-architecture optimizations. Usually 20 to 30 bits are
+stream but from L2 and till L2, only. Note that L2 has relatively                                             unused and IPCP can leverage it. However, a hardware vendor
+more resources (PQ=16 entries and MSHR=32 entries) for                                                        may not consider metadata transfer in case the bus width is
+aggressive prefetching.                                                                                       already utilized, fully. We discuss the utility of metadata transfer
+   The IP table at the L2 (Figure 6 ) is only used for book-                                                  in Section VI-B2. The metadata does not contain the IP because
+keeping purposes. IPCP at the L2 does not issue prefetch                                                      the IP of the request is passed to the L2. IP information has
+requests for the CPLX class. CPLX at the L2 does not yield                                                    been used extensively at the L2 and the LLC [14] [56], [60],
+any beneﬁts. It even causes performance degradation for some                                                  [25], [29], [11], [24], [59]. However, if a hardware vendor does
+of the benchmarks when used on top of IPCP at the L1. For                                                     not wish to communicate IP information to L2 (as mentioned
+the benchmarks that we use, CPLX with prefetch degree of                                                      in [34]), then IPCP provides a simple alternative. As both L1
+three at the L1 provides a sweet-spot In terms of prefetch                                                    and L2 IPCP tables are of the same size and use IP-tag, IPCP
+coverage and accuracy. CPLX helps IPCP mostly for high                                                        can communicate the IP-tag and the IP-index, which take up
+MPKI applications with irregular stride patterns. With degree                                                 to 15 bits together instead of a 64-bit IP.
+4 and above, CPLX degrades the performance for high MPKI                                                         Storage overhead: A self-contained Table I shows the
+benchmarks. As we ﬁnd no utility of deep CPLX prefetching                                                     storage demand of IPCP at L1 and IPCP as a framework. IPCP
+using higher degrees (in contrast to CS and GS classes where                                                  is extremely light-weight and tiny with a storage demand of 740
+we go for deep prefetching), we drop the idea of using CPLX                                                   bytes at the L1 and 895 bytes for the entire cache hierarchy.
+at the L2. Note that, with SPP, large depth (more degree) works                                               This is a signiﬁcant improvement compared to lightweight
+well as SPP works on a global access pattern whereas CPLX                                                     versions of MLOP [44], SPP+PPF [14], and Bingo [11] that
+
+
+
+                                                                                                        124
+          TABLE II: Simulated System parameters.                               simulations. For single-core, we warm-up caches for 50M sim-
+ Core     One to eight cores, 4GHz, 4-wide, 256-entry ROB
+                                                                               point instructions and report the performance (normalized to no
+ TLBs     64 entries ITLB, 64 entries DTLB, 1536 entry shared L2 TLB           prefetching) for the next 200M sim-point instructions. For four-
+ L1I      32KB, 8-way, 3 cycles, PQ: 8, MSHR: 8, 4 ports
+ L1D      48KB, 12-way, 5 cycles, PQ: 8, MSHR: 16, 2 ports
+                                                                               core and eight-core simulations, we warm-up caches for 50M
+                                                                               instructions per core and then report the normalized weighted-
+ L2
+ LLC
+          512KB, 8-way, 10 cycles, PQ: 16, MSHR: 32, 2 ports
+          2MB/core, 16-way, 20 cycles, PQ: 32×#cores, MSHR: 64×#cores
+                                                                                         i=N −1 IP Ctogether (i)
+                                                                               speedup ( i=0         IP Calone (i) ) compared to a baseline with
+ DRAM     4GB 1 channel/1-core, 8GB 2 channels/multi-core, 1600 MT/sec
+                                                                               no prefetching for the next sim-point 200M instructions. For
+                                                                               each mix, we simulate the benchmarks until each benchmark
+demands 10X, 30X, and 50X more storage, respectively. Note                     has executed at least 200M instructions. If a benchmark ﬁnishes
+that, IPCP at L1 uses virtual address for its training as our L1               fast, it gets replayed until all the benchmarks ﬁnish their
+is virtually-indexed and physically-tagged. In case of physical-               respective 200M instructions. IP Ctogether (i) is the instructions
+indexed and physically-tagged L1, IPCP demands around 2KB                      per cycle (IPC) of core i when it runs along with other N–1
+of storage.                                                                    applications on an N-core system. IP Calone (i) is the IPC of
+                                                                               core i when it runs alone on a multi-core system of N cores.
+A. IPCP and DOL
+   DOL [35] is a recent prefetching framework that uses                        A. Benchmarks and workloads
+component prefetchers (similar to IPCP). However, there are
+subtle differences that manifest in the performance difference                    We use the SPEC CPU 2017 [8], [9] and CloudSuite [5], [17]
+(refer Figure 7). The key differences are as follows: (i) DOL                  (four-core mixes spread across six phases [1], [5]) benchmarks.
+uses a prefetcher that identiﬁes loops and calculates strides to               We also use a set of Convolutional Neural Networks (CNNs)
+prefetch. Similarly it identiﬁes pointer chains. IPCP does not                 and a Recurrent Neural Network (RNN) [19], [21], [22], [36],
+depend on such application semantics and is only concerned                     [37], [46] that are commonly used in applications like object
+with accesses observed at the memory side. (ii) A component                    recognition and image classiﬁcation. We evaluate IPCP on the
+prefetcher called C1 is similar to our GS class, but the former                entire SPEC CPU 2017 suite based on the sim-point traces
+does not have a mechanism to declassify stream-based IPs                       provided by DPC-3 [9]. However for brevity, we discuss in
+once they stop being dense. Also, we measure the direction                     detail only the memory-intensive ones (46 traces with LLC
+of the global order, whereas DOL randomly prefetches all                       MPKI ≥ 1). For multi-core (4-core and 8-core) simulations,
+the cache lines in a region into the L2. (iii) DOL has a P1                    we simulate homogeneous mixes and heterogeneous mixes.
+component which is a prefetcher for linked data structures                     In case of homogeneous mixes, we simulate 92 (46 for 4-
+(LDSs) that can be integrated into our framework. However,                     core and 46 for 8-core) memory-intensive mixes where a mix
+IPCP focusses on spatial prefetching only. Overall, DOL uses                   contains the same memory-intensive traces, for all the cores.
+narrow component prefetchers that are tightly coupled with the                 For heterogeneous mixes, we simulate 1000 mixes: 500 random
+core’s 256 entry loop predictor, register ﬁles, 32 entry return                mixes (includes the entire SPEC CPU 2017 suite) and 500
+address stack (RAS), and 192 entry ROB. DOL also demands                       mixes containing only the memory-intensive traces.
+32 MSHR (too large for an L1-D) as the components do not                          Evaluated Prefetching Techniques: We compare the effec-
+have an upper limit on the prefetch degree. DOL’s performance                  tiveness of IPCP with L1 prefetchers like NL, Stream [51],
+is tightly coupled with the core’s parameters whereas IPCP is                  BOP, VLDP, SPP, DSPatch, MLOP, TSKID, DOL, SMS, and
+independent of the dynamics of the processor core. The above                   Bingo. Table III provides the details of top four multi-level
+points are the primary reasons for DOL’s poor performance                      prefetching combinations based on their performance on single-
+compared to state-of-the-art spatial prefetchers [11], [13], [14].             core and multi-core mixes. Note that for all the prefetchers, we
+                                                                               have used their highly tuned equivalent by sweeping through
+                         VI. E VALUATION                                       all of the possible parameter space including prefetch table
+                                                                               sizes (from 0.5KB onwards). Also, we sweep through all the
+   We evaluate IPCP with an extensively modiﬁed ChampSim                       possible combinations of L1, L2, and LLC prefetchers. We do
+[4] that faithfully models the entire memory system, including                 not implement Bingo at the LLC as it provides low performance
+the virtual memory system. ChampSim was used for the 2nd                       (the reason being, Bingo [11] is implemented with 37.5GBps
+and 3rd data prefetching championships (DPC-2 and DPC-3)                       DRAM bandwidth, ﬁxed latency DRAM. So with 12GBps it is
+[2], [3]. The simulation framework is enhanced with multi-level                unable to perform to its peak). Also, for L2 prefetching, SPP
+prefetching for DPC-3. ChampSim is an effective framework                      with PPF [14] and DSPatch [13] (SPP+Perceptron+DSPatch)
+to compare the recent cache replacement and prefetching                        provides better performance than SPP+PPF and SPP+DSPatch3 .
+techniques as the ﬁne-tuned source codes of the state-of-the-
+art techniques are available on the public domain. Recent
+prefetching proposals [11], [14], [33] have also been coded                       3 The SPP+PPF code available at DPC-3 is buggy. The authors of SPP
+and evaluated with ChampSim, helping the community for                         shared the bug-free SPP+PPF (P. Gratz, Personal Communication, October 28,
+a fair comparison of techniques. Table II shows the simula-                    2019). Applying DSPatch on top of SPP+PPF has mixed utility. So we decided
+tion parameters. We simulate single-core, 4-core, and 8-core                   to use both PPF and DSPatch as DSPatch provides additional coverage.
+
+
+
+
+                                                                         125
+                      1.45                                                                                                            TABLE III: Combinations for multi-level prefetching.
+ Normalized Speedup
+
+
+                       1.4
+                                                                                                                                    Combination      Prefetchers at L1, L2, and L3
+                      1.35                                                                                                          name
+                                                                                                                                    SPP+Perceptron   SPP+Perceptron+DSPatch(L2), throttled-NL(L1) [10], NL(LLC) =
+                       1.3                                                                                                          +DSPatch         32KB at L2 + 0.6KB at L1
+                                                                                                                                    MLOP             MLOP(L1) and NL(L2+LLC) = 8KB (L1)
+                      1.25
+                                                                                                                                    Bingo            Bingo(L1) and NL(L2+LLC): 6K entry history table = 48KB (L1)
+                       1.2                                                                                                          TSKID            TSKID(L1) and SPP(L2): 52KB at L1 + 6.4KB at L2 = 58.4KB
+                             NL (0 KB) Stream    SPP IP-Stride BOP        DOL     MLOP     Bingo    TSKID   IPCP    Bingo           IPCP             IPCP(L1+L2): 740 bytes at L1 + 155 bytes at L2 = 895B
+                                       (0.5KB) (6.4KB) (0.23KB) (1.3KB) (4.5KB)   (8KB)   (48KB)   (52KB) (0.72KB) (119KB)
+
+                         Fig. 7: L1 prefetchers for memory-intensive traces.                                                       TABLE IV: Prefetch Coverage and prefetch accuracy for
+                                                                                                                                   different Combinations of multi-level prefetching.
+                                                                                                                                    Combination name            Coverage                                 Accuracy
+B. Single-core Results                                                                                                              SPP+Perceptron+DSPatch      0.50 at L1, 0.75 at L2,and 0.83 at L3    0.75 at L2
+                                                                                                                                    MLOP                        0.59 at L1, 0.72 at L2, and 0.78 at L3   0.64 at L1
+   1) IPCP as an L1 only prefetcher: Figure 7 shows the                                                                             Bingo                       0.54 at L1, 0.72 at L2,and 0.80 at L3    0.79 at L1
+performance of competing prefetchers (for memory-intensive                                                                          TSKID                       0.67 at L1, 0.72 at L2, and 0.80 at L3   0.60 at L1
+SPEC CPU 2017 traces) when employed at the L1 (L2 and LLC                                                                           IPCP                        0.60 at L1, 0.79 at L2, and 0.83 at L3   0.80 at L1
+
+prefetchers are turned off). We do not show the performance
+of VLDP and DSPatch as on average, SPP performs better
+than VLDP and DSPatch, at the L1. Similarly, Bingo performs                                                                           2) Performance with multi-level prefetching: Due to space
+better than SMS [47] with relatively less storage demand. Note                                                                     limitations, we compare (Figure 8), in detail, IPCP with the top
+that Bingo demands 119KB at the L1-D. On average, Bingo                                                                            three prefetching combinations (in terms of performance) as
+provides similar performance with 44KB to 72KB hardware                                                                            mentioned in Table III. The effectiveness of Bingo goes down
+overhead. So, we tune Bingo to make it same as the L1-D size                                                                       in case of multi-level prefetching as two other combinations
+(48KB). We simulate Bingo with 119 KB, too. We also relax                                                                          use the state-of-the-art SPP at their respective L2s (Bingo
+the lookup latency bottleneck at the L1-D for all the competing                                                                    does not perform well with SPP at L2 as discussed in Section
+prefetchers. This helps us in understanding the best performance                                                                   VI-B). MLOP at L1 complements well with an NL at L2. Our
+that we can get with the ideal L1-D implementations. Clearly,                                                                      observations for Bingo are same as the trend observed at the
+IPCP outperforms all others except Bingo with 119KB. As                                                                            DPC-3 (refer slide no.4 [6]). For multicore workloads, the
+expected, SPP does not perform well at the L1-D. One of                                                                            trend changes as Bingo joins the league of top-performing
+the reasons for this is a region based global order driven                                                                         prefetchers. IPCP at the L2 improves performance on top of
+prefetching. Same applies to VLDP and DSPatch. Note that,                                                                          L1 because of the holistic semantics of IPCP, both at the
+these prefetchers improve performance when employed at L2.                                                                         L1 and L2. DOL [35] at L1 and L2 fails to outperform the
+   Next, we try to see the effects of L2 and LLC prefetchers on                                                                    top four prefetchers. IPCP performs better than DOL for the
+top of these prefetchers. We sweep through all the prefetchers                                                                     reasons mentioned in Section V-A.
+and their possible combinations at different cache levels and                                                                         Detailed Performance: Figure 8 shows the effectiveness
+ﬁnd that the combinations proposed at the DPC-3 are the best                                                                       of IPCP along with the next top three prefetchers (in terms
+multi-level prefetching options (Table III). Bingo at L1 with                                                                      of performance) for a set of 46 memory-intensive traces.
+48KB and a restrictive NL at L2 and LLC (NL on demand                                                                              On average, IPCP provides 45.1% improvement, where the
+accesses only) provides similar effectiveness as 119KB at L1.                                                                      rest three prefetchers perform equally well (improvements ∼
+   Note that, we ﬁnd, if the L1 prefetcher is high performing                                                                      42.5%). We also evaluate the entire SPEC CPU 2017 suite
+then L2 and LLC prefetchers bring marginal utility. This is                                                                        (a collection 98 traces) where on average, IPCP provides
+surprising and counter-intuitive. To understand this statement,                                                                    an average improvement of 22% whereas the next top three
+we simulate IPCP at the L1 with various L2 prefetchers                                                                             provide performance in the range of 18.2% to 18.8%. Note
+(SPP+Perceptron+DSPatch, BOP, VLDP, MLOP, IP-Stride, and                                                                           that there is only one benchmark named 623.xalancbmk
+Bingo) and ﬁnd that the utility of L2 prefetchers is negligible                                                                    (not shown in Figure 8 as it is not memory-intensive) where
+(less than 1.7%). SPP+Perceptron+DSPatch is the best L2                                                                            all the prefetchers fail to improve performance for traces
+prefetcher. Normally, L2 prefetchers should provide additional                                                                     that start after 325 billion instructions [9]. IPCP outperforms
+performance on top of an L1-D prefetcher by prefetching deep                                                                       other prefetchers for all the traces (or provide the same level
+into the access stream based on the L1-D’s prefetch accesses at                                                                    of effectiveness) except for cactusBSSN and fotonik.
+the L2. However, with an aggressive IPCP at L1, the opportunity                                                                    For cactusBSSN, TSKID and MLOP outperform all the
+for the other L2 prefetchers is limited. This observation applies                                                                  prefetchers at the L1-D. cactusBSSN has many IPs whose
+to other high performing L1 prefetchers like MLOP and Bingo.                                                                       reuse distance is more than 1024. So in an extreme case, we
+We observe a trend that is same as the DPC-3 [3] where                                                                             need a 1024 associative table, which is practically not feasible
+prefetchers used at L2 and LLC on top of a high performing                                                                         at the L1. When we simulate with a 1024 associative table,
+L1-D prefetcher are NL prefetchers. This observation opens up                                                                      we get performance closer to MLOP but not TSKID. Also,
+an interesting dimension on the multi-level prefetching where                                                                      the prefetched blocks, even though correct, are prefetched too
+we need L2 prefetchers that can complement L1-D prefetchers.                                                                       early and are replaced by other loads before they are used
+
+
+
+                                                                                                                             126
+                                                                                                                                                                                                                                            Prefetch Coverage                                                                                                                                      Average Demand MPKI
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                       10
+                                                                                                                                                                                                                                                                                                                                                                                                            15
+                                                                                                                                                                                                                                                                                                                                                                                                                 20
+                                                                                                                                                                                                                                                                                                                                                                                                                      25
+                                                                                                                                                                                                                                                                                                                                                                                                                                       30
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                               0
+                                                                                                                                                                                                                                                                                                                                                                                                   5
+
+
+
+
+                                                                                                                                                                                                                                    -0.1
+                                                                                                                                                                                                                                           0.1
+                                                                                                                                                                                                                                                 0.3
+                                                                                                                                                                                                                                                       0.5
+                                                                                                                                                                                                                                                             0.7
+                                                                                                                                                                                                                                                                                                      0.9
+                                                                                                                                                                                                                  600.perlbench_s-570B
+                                                                                                                                                                                                                        602.gcc_s-1850B
+                                                                                                                                                                                                                        602.gcc_s-2226B
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                       NOPF
+                                                                                                                                                                                                                          602.gcc_s-734B
+                                                                                                                                                                                                                    603.bwaves_s-1740B
+                                                                                                                                                                                                                    603.bwaves_s-2609B
+                                                                                                                                                                                                                    603.bwaves_s-2931B
+                                                                                                                                                                                                                     603.bwaves_s-891B
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                         LLC
+                                                                                                                                                                                                                       605.mcf_s-1152B
+                                                                                                                                                                                                                       605.mcf_s-1536B                                                                                                                                                                                                                                                                                                     Normalized Speedup
+                                                                                                                                                                                                                       605.mcf_s-1554B
+                                                                                                                                                                                                                       605.mcf_s-1644B
+                                                                                                                                                                                                                         605.mcf_s-472B
+
+
+
+
+      xalancbmk traces).
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       0.95
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       1.15
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       1.35
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       1.55
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       1.75
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       1.95
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       2.15
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       2.35
+
+
+
+
+                                                                                                                                                                                                                         605.mcf_s-484B
+                                                                                                                                                                                                                         605.mcf_s-665B
+                                                                                                                                                                                                                         605.mcf_s-782B
+                                                                                                                                                                                                                         605.mcf_s-994B                                                                                                                                                                                                                                                                           600.perlbench_s-570B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    3.6
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                       SPP+Perceptron+DSPatch
+                                                                                                                                                                                                                607.cactuBSSN_s-2421B                                                                                                                                                                                                                                                                                   602.gcc_s-1850B
+
+
+
+
+                                                                                                                                                                                                          L1
+                                                                                                                                                                                                                607.cactuBSSN_s-3477B
+                                                                                                                                                                                                                607.cactuBSSN_s-4004B                                                                                                                                                                                                                                                                                   602.gcc_s-2226B
+                                                                                                                                                                                                                       619.lbm_s-2676B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          602.gcc_s-734B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    3.3 3.7
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                       Tskid
+                                                                                                                                                                                                                       619.lbm_s-2677B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         3.8
+
+
+
+
+                                                                                                                                                                                                                       619.lbm_s-3766B
+
+
+
+
+                                                                                                                                                                                                          L2
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    603.bwaves_s-1740B
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                         L2
+                                                                                                                                                                                                                       619.lbm_s-4268B
+                                                                                                                                                                                                                   620.omnetpp_s-141B                                                                                                                                                                                                                                                                               603.bwaves_s-2609B
+                                                                                                                                                                                                                   620.omnetpp_s-874B                                                                                                                                                                                                                                                                               603.bwaves_s-2931B
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                       MLOP
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    3.0
+
+
+
+
+                                                                                                                                                                                                                        621.wrf_s-6673B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     603.bwaves_s-891B
+
+
+
+
+                                                                                                                                                                                                          LLC
+                                                                                                                                                                                                                        621.wrf_s-8065B
+                                                                                                                                                                                                                   623.xalancbmk_s-10B
+                                                                                                                                                                                                                 623.xalancbmk_s-165B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       605.mcf_s-1152B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    3.1
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                       IPCP
+                                                                                                                                                                                                                 623.xalancbmk_s-202B                                                                                                                                                                                                                                                                                  605.mcf_s-1536B
+                                                                                                                                                                                                                       627.cam4_s-490B
+                                                                                                                                                                                                                         628.pop2_s-17B                                                                                                                                                                                                                                                                                605.mcf_s-1554B
+                                                                                                                                                                                                                      641.leela_s-1083B                                                                                                                                                                                                                                                                                605.mcf_s-1644B
+                                                                                                                                                                                                                649.fotonik3d_s-10881B
+                                                                                                                                                                                                                 649.fotonik3d_s-1176B                                                                                                                                                                                                                                                                                   605.mcf_s-472B
+
+
+
+
+      67%, and MLOP covers 59% of the L1 misses.
+                                                                                                                                                                                                                 649.fotonik3d_s-7084B                                                                                                                                                                                                                                                                                   605.mcf_s-484B
+                                                                                                                                                                                                                 649.fotonik3d_s-8225B
+                                                                                                                                                                                                                      654.roms_s-1007B                                                                                                                                                                                                                                                                                   605.mcf_s-665B
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                         L1
+                                                                                                                                                                                                                      654.roms_s-1070B
+                                                                                                                                                                                                                      654.roms_s-1390B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         605.mcf_s-782B
+                                                                                                                                                                                                                      654.roms_s-1613B                                                                                                                                                                                                                                                                                   605.mcf_s-994B
+                                                                                                                                                                                                                       654.roms_s-293B
+                                                                                                                                                                                                                       654.roms_s-294B                                                                                                                                                                                                                                                                          607.cactuBSSN_s-2421B
+                                                                                                                                                                                                                       654.roms_s-523B                                                                                                                                                                                                                                                                          607.cactuBSSN_s-3477B
+                                                                                                                                                                                                                         657.xz_s-2302B
+
+
+
+
+                                                                                                                                                                                                                                                                                                                             Fig. 9: Reduction in demand MPKI for all the prefetchers.
+                                                                                                                                                                                                                                 Average                                                                                                                                                                                                                                                                        607.cactuBSSN_s-4004B
+
+
+
+
+         Note that for cactusBSSN, IPCP provides zero or less
+      two benchmarks. TSKID provides the best L1 coverage of
+      including IPCP, fail to cover a majority of misses for these
+      like mcf and omnetpp, IPCP provides poor coverage. This
+      respectively. For some of the irregular traces of benchmarks
+      MPKI for the competing prefetchers at all the cache levels. To
+         Prefetch coverage: Figure 9 shows the reduction in demand
+      minimum is a 2% degradation (only for post-325 billion
+      performance improvement with IPCP is 380% while the
+
+
+
+
+      the demand misses that are covered by IPCP at all the levels
+      better understand the MPKI improvements, Figure 10 shows
+      Overall, for the entire SPEC CPU 2017 suite, the maximum
+      (small L1-D). TSKID takes care of that by prefetching at
+                                                                                                                                             Fig. 10: Demand misses covered by IPCP at L1, L2, and LLC.
+
+
+
+
+      trend is well-known, and state-of-the-art spatial prefetchers,
+      and 83% of the demand misses at L1, L2, and the LLC,
+      of the cache hierarchy. On average, IPCP covers 60%, 79.5%,
+      the right time, but by consuming more than 50KB at L1-D.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       619.lbm_s-2676B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           SPP+Perceptron+DSPatch
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       619.lbm_s-2677B
+
+
+
+
+127
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       619.lbm_s-3766B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       619.lbm_s-4268B
+                                                                                                                                                                                                                         Per class contribution to                                                                                                                                        Coverage and overpredictions
+                                                                                                                                                                                                                          the prefetch coverage                                                                                                                                                                                                                                                                    620.omnetpp_s-141B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           Tskid
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                 0
+                                                                                                                                                                                                                                                                                                                                                                                               0.2
+                                                                                                                                                                                                                                                                                                                                                                                               0.4
+                                                                                                                                                                                                                                                                                                                                                                                               0.6
+                                                                                                                                                                                                                                                                                                                                                                                               0.8
+                                                                                                                                                                                                                                                                                                                                                                                                 1
+                                                                                                                                                                                                                                                                                                                                                                                               1.2
+                                                                                                                                                                                                                                                                                                                                                                                               1.4
+                                                                                                                                                                                                                                                                                                                                                                                               1.6
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   620.omnetpp_s-874B
+
+
+
+
+                                                                                                                                                                                                                          0%
+                                                                                                                                                                                                                         10%
+                                                                                                                                                                                                                         20%
+                                                                                                                                                                                                                         30%
+                                                                                                                                                                                                                         40%
+                                                                                                                                                                                                                         50%
+                                                                                                                                                                                                                         60%
+                                                                                                                                                                                                                         70%
+                                                                                                                                                                                                                         80%
+                                                                                                                                                                                                                         90%
+                                                                                                                                                                                                                        100%
+                                                                                                                                                                                                                                                                                                                      600.perlbench_s-570B                                                                                                                                                                              621.wrf_s-6673B
+                                                                                                                                                                                                                                                                                                                            602.gcc_s-1850B
+                                                                                                                                                     600.perlbench_s-570B                                                                                                                                                                                                                                                                                                                                               621.wrf_s-8065B
+                                                                                                                                                                                                                                                                                                                            602.gcc_s-2226B
+                                                                                                                                                           602.gcc_s-1850B
+                                                                                                                                                                                                                                                                                                                              602.gcc_s-734B                                                                                                                                                                       623.xalancbmk_s-10B
+                                                                                                                                                           602.gcc_s-2226B
+                                                                                                                                                             602.gcc_s-734B
+                                                                                                                                                                                                                                                                                                                        603.bwaves_s-1740B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 623.xalancbmk_s-165B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           MLOP
+
+
+
+
+                                                                                                                                                       603.bwaves_s-1740B                                                                                                                                               603.bwaves_s-2609B
+                                                                                                                                                       603.bwaves_s-2609B                                                                                                                                               603.bwaves_s-2931B                                                                                                                                                                       623.xalancbmk_s-202B
+                                                                                                                                                       603.bwaves_s-2931B                                                                                                                                                603.bwaves_s-891B
+                                                                                                                                                        603.bwaves_s-891B                                                                                                                                                  605.mcf_s-1152B                                                                                                                                                                             627.cam4_s-490B
+                                                                                                                                                          605.mcf_s-1152B                                                                                                                                                  605.mcf_s-1536B                                                                                                                                                                               628.pop2_s-17B
+                                                                                                                                                          605.mcf_s-1536B                                                                                                                                                  605.mcf_s-1554B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           IPCP
+
+
+
+
+                                                                                                                                                          605.mcf_s-1554B                                                                                                                                                  605.mcf_s-1644B                                                                                                                                                                            641.leela_s-1083B
+                                                                                                                                                          605.mcf_s-1644B                                                                                                                                                    605.mcf_s-472B
+                                                                                                                                                            605.mcf_s-472B                                                                                                                                                   605.mcf_s-484B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                649.fotonik3d_s-10881B
+                                                                                                                                                            605.mcf_s-484B                                                                                                                                                   605.mcf_s-665B                                                                                                                                                                      649.fotonik3d_s-1176B
+                                                                                                                                                                                                                                                                                                                                                                                                                                   Covered
+
+
+
+
+                                                                                                                                                            605.mcf_s-665B                                                                                                                                                   605.mcf_s-782B
+                                                                                                                                                            605.mcf_s-782B                                                                                                                                                   605.mcf_s-994B                                                                                                                                                                      649.fotonik3d_s-7084B
+                                                                                                                                                            605.mcf_s-994B                                                                                                                                          607.cactuBSSN_s-2421B
+
+
+
+
+                                                                                                                                      GS
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 649.fotonik3d_s-8225B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                   Fig. 8: Normalized performance compared to no prefetching.
+
+
+
+
+                                                                                                                                                   607.cactuBSSN_s-2421B                                                                                                                                            607.cactuBSSN_s-3477B
+                                                                                                                                                   607.cactuBSSN_s-3477B                                                                                                                                            607.cactuBSSN_s-4004B                                                                                                                                                                             654.roms_s-1007B
+
+
+
+
+                                                                                                                                      CS
+                                                                                                                                                   607.cactuBSSN_s-4004B                                                                                                                                                   619.lbm_s-2676B
+                                                                                                                                                          619.lbm_s-2676B                                                                                                                                                  619.lbm_s-2677B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      654.roms_s-1070B
+                                                                                                                                                                                                                                                                                                                                                                                                                                   Uncovered
+
+
+
+
+                                                                                                                                                          619.lbm_s-2677B                                                                                                                                                  619.lbm_s-3766B                                                                                                                                                                            654.roms_s-1390B
+                                                                                                                                                          619.lbm_s-3766B                                                                                                                                                  619.lbm_s-4268B
+
+
+
+
+                                                                                                                                      CPLX
+                                                                                                                                                          619.lbm_s-4268B                                                                                                                                              620.omnetpp_s-141B                                                                                                                                                                             654.roms_s-1613B
+                                                                                                                                                      620.omnetpp_s-141B                                                                                                                                               620.omnetpp_s-874B
+                                                                                                                                                      620.omnetpp_s-874B                                                                                                                                                                                                                                                                                                                                               654.roms_s-293B
+
+
+                                                                                                                                      NL
+                                                                                                                                                                                                                                                                                                                            621.wrf_s-6673B
+                                                                                                                                                           621.wrf_s-6673B                                                                                                                                                  621.wrf_s-8065B                                                                                                                                                                            654.roms_s-294B
+                                                                                                                                                           621.wrf_s-8065B                                                                                                                                             623.xalancbmk_s-10B
+                                                                                                                                                      623.xalancbmk_s-10B                                                                                                                                            623.xalancbmk_s-165B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       654.roms_s-523B
+
+
+
+
+      the multi-level prefetching combinations.
+                                                                                                                                                    623.xalancbmk_s-165B
+                                                                                                                                                                                                                                                                                                                     623.xalancbmk_s-202B
+                                                                                                                                                                                                                                                                                                                                                                                                                                   Overpredicted
+
+
+
+
+                                                                                                                                                    623.xalancbmk_s-202B
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         657.xz_s-2302B
+                                                                                                                                                                                                                                                                                                                           627.cam4_s-490B
+                                                                                                                                                          627.cam4_s-490B                                                                                                                                                                                                                                                                                                                                                      Geomean
+                                                                                                                                                                                                                                                                                                                             628.pop2_s-17B
+                                                                                                                                                            628.pop2_s-17B
+                                                                                                                                                                                                                                                                                                                          641.leela_s-1083B
+                                                                                                                                                         641.leela_s-1083B
+                                                                                                                                                                                                                                                                                                                    649.fotonik3d_s-10881B
+                                                                                                                                                   649.fotonik3d_s-10881B
+                                                                                                                                                    649.fotonik3d_s-1176B
+                                                                                                                                                                                                                                                                                                                     649.fotonik3d_s-1176B
+                                                                                                                                                    649.fotonik3d_s-7084B                                                                                                                                            649.fotonik3d_s-7084B
+                                                                                                                                                    649.fotonik3d_s-8225B                                                                                                                                            649.fotonik3d_s-8225B
+                                                                                                                                                         654.roms_s-1007B                                                                                                                                                 654.roms_s-1007B
+                                                                                                                                                         654.roms_s-1070B                                                                                                                                                 654.roms_s-1070B
+                                                                                                                                                         654.roms_s-1390B                                                                                                                                                 654.roms_s-1390B
+                                                                                                                                                         654.roms_s-1613B                                                                                                                                                 654.roms_s-1613B
+                                                                                                                                                          654.roms_s-293B                                                                                                                                                  654.roms_s-293B
+                                                                                                                                                          654.roms_s-294B                                                                                                                                                  654.roms_s-294B
+                                                                                                                                                                                                                                                              Fig. 11: Coverage and accuracy with IPCP at the L1.
+
+
+
+
+                                                                                                                                                          654.roms_s-523B                                                                                                                                                  654.roms_s-523B
+                                                                                                                                                            657.xz_s-2302B                                                                                                                                                   657.xz_s-2302B
+                                                                                                                                                                    Average                                                                                                                                                          Average
+                                                                       Fig. 12: Contribution of each class on L1 prefetch coverage.
+
+
+
+
+      prefetch coverage. On average, GS and CS classes contribute
+      the L1 and shows which class contributes how much to the
+      Figure 12 digs deep into the prefetch coverage numbers at
+      uncovered, and over-predicted with IPCP, at the L1. The
+      details about prefetch coverage and prefetch accuracy of all
+      the rest provide a coverage of 72%. Table IV provides the
+      At the L2 and LLC, IPCP covers 4.5% to 8% more misses
+
+      SPP+Perceptron+DSPatch provides a coverage of 75% while
+      pollution at L1 and L2 that can impact performance for all
+      than zero coverage at the L1. IPCP does not incur cache
+
+
+
+
+      trend remains similar for the L2 IPCP prefetcher (except for
+      Figure 11 shows the demand misses that are covered,
+         Predictions, over-predictions, and utility of classes:
+
+
+
+      cactusBSSN), with no contribution from the CPLX class.
+      compared to SPP+Perceptron+DSPatch, TSKID, and MLOP.
+      the traces (except for mcf, cactusBSSN, and omnetpp).
+                        1.47                                                                                                                                                         there will be a performance loss of 3.1% on memory-intensive
+   Normalized Speedup
+
+
+                        1.42
+                        1.37
+                        1.32
+                                                                                                                                                                                     applications. Metadata helps in synergistic IPCP prefetching
+                        1.27
+                        1.22
+                                                                                                                                                                                     at the L2.
+                        1.17
+                        1.12
+                                                                                                                                                                                        Differentiating factor: Compared to the competing
+
+
+
+
+                                                                                                                                                                   IPCP_L1 +
+                                 GS at L1 (C0)
+
+
+
+
+                                                 NL at L1 (C1)
+
+
+
+
+                                                                     CPLX at L1 (C2)
+
+
+
+
+                                                                                            CS at L1 (C3)
+
+
+
+
+                                                                                                              C2+C3 at L1
+
+
+
+
+                                                                                                                            C1+C2+C3 at L1
+
+
+
+                                                                                                                                             C0+C1+C2+C3 at
+
+
+
+
+                                                                                                                                                                    IPCP_L2
+                                                                                                                                               L1 (IPCP_L1)
+                                                                                                                                                                                     prefetchers, the differentiating factor with IPCP is (i) the usage
+          (a)
+                                                                                                                                                                                     of the GS class, (ii) its aggressiveness, and (iii) prioritization
+                         1.44
+                                                                                                                                                                                     order among the classes. Note that with GS, IPCP gets better
+ Normalized
+
+
+
+
+                                                                                                                                                                                     coverage and timeliness at the expense of accuracy. In the
+  Speedup
+
+
+
+
+                         1.39
+                                                                                                                                                                                     process, the GS class covers misses that are hard to cover by
+                         1.34                                                                                                                                                        the competing prefetchers.
+                                CPLX>GS>CS                   CPLX>CS>GS                GS>CPLX>CS           CS>CPLX>GS          CS>GS>CPLX                    GS>CS>CPLX
+          (b)                                                                                                                                                                          In summary, a lightweight IPCP covers a majority of
+       Fig. 13: (a) Utility of IPCP classes and (b) class priority.                                                                                                                  demand misses throughout the hierarchy resulting in 45.1%
+                                                                                                                                                                                     improvement for the memory-intensive traces and 22%
+                                                                                                                                                                                     improvement on the entire SPEC CPU 2017 suite. This
+30% and 46.7% of the total coverage, respectively. CPLX                                                                                                                              improvement comes with 16% additional DRAM trafﬁc and
+and NL cover some of the complex and irregular strides in                                                                                                                            895B storage overhead.
+the irregular benchmarks like mcf and omnetpp. Streaming                                                                                                                             C. Sensitivity studies
+benchmarks like lbm, and gcc beneﬁt from GS class the
+most, and in case the GS class fails, the CS class does a good                                                                                                                          Effect of LLC replacement policies: We study the ef-
+job to cover most of the misses. Some of the phases of mcf                                                                                                                           fectiveness of IPCP with a variety of replacement policies
+are regular (like the trace mcf-1152B) and are covered by                                                                                                                            [25]–[29], [56], [57], [60]. IPCP is resilient to the underlying
+the CS class. However, mcf-1536B has irregular accesses                                                                                                                              replacement policies with marginal performance difference
+and gets the coverage from CPLX class only. NL helps in                                                                                                                              (less than 1%). However, with multiperspective placement,
+covering some of the irregular accesses. However, in the                                                                                                                             promotion, and bypass (MPPPB) [29], all the prefetchers see
+process, brings in-accurate blocks too. The impact of NL’s                                                                                                                           an average performance drop of 3%. TSKID goes down by
+inaccurate prefetch is low as it is not called often and is only                                                                                                                     6% with HAWKEYE [25], [26], which is mostly attributed to
+triggered when none of the classes deliver. So, in terms of                                                                                                                          the inaccurate prefetch requests.
+absolute prefetch count, NL contributes marginally.                                                                                                                                     Effect of cache sizes and hierarchies: Based on the recent
+   DRAM bandwidth: Compared to no prefetching, IPCP                                                                                                                                  industry trends, we quantify the effect of IPCP with different
+demands additional bandwidth of 16.1% for performance                                                                                                                                combinations of cache sizes (32KB and 48KB of L1; 256KB,
+improvement of 45.1%. SPP+Perceptron+DSPatch and                                                                                                                                     512 KB, and 1MB of L2; and 1MB, 2MB, and 4MB of LLC).
+MLOP demand 28% additional bandwidth, whereas TSKID                                                                                                                                  IPCP is resilient to all the combinations with a maximum
+demands bandwidth of 38% (with a maximum of 692% for                                                                                                                                 performance difference of 1.05%. We also test IPCP with
+mcf-994B).                                                                                                                                                                           an extremely small LLC (512KB/core) and ﬁnd that IPCP
+   Utility of IPCP classes and metadata: Figure 13 (a)                                                                                                                               outperforms other prefetchers by the same margin as in the case
+shows the utility of each class when used in isolation, and                                                                                                                          of 2MB/core. However, in terms of an absolute performance
+when used as a bouquet in the form of IPCP. It is interesting                                                                                                                        improvement, it goes down by 3%, which is the case for all
+to see that GS class at the L1 alone is unable to provide more                                                                                                                       competing prefetchers too.
+than 15% performance improvement. CS and CPLX are the                                                                                                                                   Sensitivity to DRAM bandwidth: To understand the effect
+top performers in isolation, providing more than 30% when                                                                                                                            of DRAM bandwidth, we perform experiments with low DRAM
+employed at the L1. CS+CPLX crosses 34%, and with the                                                                                                                                bandwidth of 3.2GBps and high DRAM bandwidth of 25GBps
+help of tentative NL, it covers some of the irregular accesses                                                                                                                       (dual channel DDR4-1600). With 3.2GBps, benchmarks like
+providing a performance improvement of 36%. GS class alone                                                                                                                           mcf, fotonik3d, and omnetpp see a performance degrada-
+is not effective. However, when added to the bouquet, it                                                                                                                             tion for all the prefetchers. On average, IPCP beats the second-
+improves the effectiveness of IPCP to 40%. IPCP at the L2                                                                                                                            best prefetcher (MLOP in this case) by 1%. With 25GBps,
+provides an additional 5.1% performance improvement by                                                                                                                               all prefetchers (except MLOP) improve their performance by
+prefetching deep based on the L1 metadata.                                                                                                                                           2% to 3%. SPP+Perceptron+DSPatch does a good job with
+   To understand the utility of IPCP class priority, we perform                                                                                                                      high DRAM bandwidth and IPCP beats it by 1.5%. MLOP’s
+prefetching with different combinations of priorities. Figure                                                                                                                        performance does not scale well with the increase in DRAM
+13 (b) shows the utility of different priority orders. Prioritizing                                                                                                                  bandwidth and the performance does not improve.
+an aggressive GS over others provides the maximum beneﬁt                                                                                                                                PQ and MSHR entries: The effectiveness of an aggressive
+showing the effectiveness of IPCP’s priority order. If we                                                                                                                            IPCP at the L1 is limited by the #entries in the MSHR and
+change the priority order, then there is a performance gap of                                                                                                                        PQ. So far, we have evaluated IPCP with PQ of eight entries
+9%. IPCP without meta-data transfer sees a performance drop                                                                                                                          and MSHR of 16 entries. We sweep through the following pair
+of 3.1%. So, if a hardware vendor cannot use metadata then                                                                                                                           of (PQ,MSHR) entries: (2,4), (4, 8), and (16, 32) and evaluate
+
+
+
+
+                                                                                                                                                                               128
+           1.11                                                                                                               1.6
+           1.09
+                                                                                                                              1.5
+           1.07
+ Speedup
+
+
+
+
+           1.05                                                                                                               1.4
+
+
+
+
+                                                                                                                    Speedup
+           1.03
+                                                                                                                              1.3
+           1.01
+           0.99                                                                                                               1.2
+           0.97
+                                                                                                                              1.1
+           0.95
+           (a)     Cassandra       Classification      Cloud9         nutch          streaming     Geomean                     1
+            2.1                                                                                                                     SPEC 2K17: Homo. SPEC 2K17: Hetero.    CloudSuite       CNNs/RNN      Geomean (All)
+                                                                                                                                          Mixes            Mixes
+            1.9
+                                                                                                                                                Bingo    T-SKID    SPP+Perceptron+DSPatch   MLOP   IPCP
+            1.7
+  Speedup
+
+
+
+
+            1.5
+                                                                                                                                      Fig. 15: Summary of multi-core performance.
+            1.3
+            1.1
+            0.9
+                  Cifar10       Lstm          Nin     Resnet-50 Squeezenet    Vgg-19       Vgg-m   Geomean
+           (b)
+                               Bingo     T-SKID     SPP+Perceptron+DSPatch    MLOP      IPCP
+                                                                                                                   on 1000 mixes as discussed in Section VI-A. On average,
+     Fig. 14: Speedup for (a) CloudSuite and (b) CNNs/RNN.                                                         Bingo, MLOP, and IPCP perform similarly. IPCP provides an
+                                                                                                                   improvement of 27.4%, whereas Bingo and MLOP improve
+                                                                                                                   performance by 26.1% and 25.9%. Note that, this trend is a bit
+the effectiveness of IPCP. Compared to the baseline pair (8,16),                                                   different with the DPC-3 trend for multi-core mixes. One of
+(2,4) sees a performance drop of 2.7% (maximum drop for                                                            the key changes that help IPCP’s performance is the accuracy
+gcc-2226B that drops from 380% to 323%). We observe                                                                based coordinated throttling, which is crucial for heterogeneous
+marginal performance drop (around 1.5%) for applications like                                                      mixes with non-uniform DRAM bandwidth demands.
+lbm and bwaves. On average, applications with high memory                                                             Differentiating factor: Except TSKID, all prefetchers
+level parallelism (MLP) get affected with the (2,4) pair.                                                          perform on a similar scale for the majority of the mixes.
+   Sensitivity to prefetch table size: IPCP, in its current form                                                   The differentiating factor is the performance improvement
+is extremely light-weight and only brings marginal average                                                         in the case of mixes that are not well predicted by all the
+improvement (0.7%) when we increase the size of IP table,                                                          prefetchers, including IPCP. Some examples of these kinds of
+RST, and the CSPT, two to 100 times. This is not a surprising                                                      mixes are mixes that contain memory-intensive applications.
+trend. With 895 bytes, IPCP is able to capture the IPs that are                                                    A mix containing 605.mcf-1536B, 605.mcf-1554B,
+sufﬁcient for competitive spatial prefetching, for SPEC CPU                                                        605.mcf-1644B, and 605.mcf-994 is one such mix
+2017, CloudSuite, and CNNs/RNN. Note that, for large code                                                          where the competing prefetchers lose performance in the
+footprints or in case of outliers like cactusBSSN, size of the                                                     scale of 50 to 70%, whereas IPCP degrades by 9% thanks
+tables should be increased for better performance.                                                                 to coordinated throttling. Improving performance for these
+                                                                                                                   mixes is not trivial. Turning off all the prefetchers is the
+D. Multicore results                                                                                               obvious approach. We believe there is a need of future
+   For the evaluation of multi-core systems, we compare IPCP                                                       research for these kinds of mixes. Overall, we ﬁnd that
+with one additional prefetcher named Bingo that performs well                                                      SPP+Perceptron+DSPatch’s coverage is highly dependent on
+in the multi-core system. One of the primary reasons is that                                                       the accuracy of throttling decisions and some of the thresholds
+Bingo uses an NL prefetcher at the LLC that covers some of                                                         used are too strict (threshold of 90 in the scale of 100).
+the costly misses, and it complements well with Bingo.                                                             MLOP uses coverage and timeliness to select prefetch offsets,
+   Homogeneous memory-intensive mixes: For homoge-                                                                 providing better performance.
+neous mixes, on average, IPCP provides a 16.5% im-                                                                    Performance for CloudSuite and Neural Networks: Fig-
+provement, whereas Bingo provides 14% improvement, and                                                             ures 14 (a) and (b) show performance improvement with
+SPP+Perceptron+DSPatch and MLOP provide just above 13%.                                                            CloudSuite benchmarks and some of the applications from
+For homogeneous mixes of omnetpp, xalancbmk, and                                                                   the world of CNNs and RNN. Classification is one of
+xz, it degrades performance by 1%, whereas for mix of                                                              the benchmarks where all the prefetchers fail. On average,
+605.mcf-994B, IPCP degrades the performance by 4%, and                                                             SPP+Perceptron+DSPatch, Bingo, and IPCP perform on the
+it is the only mix where it fails. IPCP provides maximum im-                                                       same scale. It is well known that spatial prefetchers fail to
+provement of 66% for the mix containing fotonik.1176B.                                                             improve performance for server workloads like CloudSuite
+TSKID degrades performance signiﬁcantly (67% for mcf),                                                             [14], [33], [53], [58], [59] and additional prefetchers [12], [24],
+whereas others (SPP+Perceptron+DSPatch, MLOP, and Bingo)                                                           [52], [58], [59] can be used on top of IPCP to improve the
+degrade performance in the range of 10 to 14%. One of                                                              performance. As IPCP demands less than 900 bytes, all the
+the primary reasons for this trend across all the prefetchers,                                                     temporal prefetchers can use IPCP as their spatial counter-part.
+including IPCP is, contention at the LLC and the DRAM                                                              For the neural networks, IPCP outperforms the rest of the
+bandwidth. It is speciﬁc to these mixes as all cores run the                                                       prefetchers primarily because these applications are mostly
+same applications. We ﬁnd that DRAM bandwidth is the major                                                         streaming in nature.
+limiting factor compared to the LLC contention.                                                                       Figure 15 summarizes multi-core results spanning across
+   Heterogeneous mixes: For heterogeneous mixes, we use                                                            SPEC CPU 2017 homogeneous and heterogeneous mixes,
+both memory-intensive and non-intensive traces and evaluate                                                        CloudSuite, and neural networks. On average, IPCP provides
+
+
+
+
+                                                                                                             129
+performance improvement of 23.4% while the next best- Bingo                           [11] M. Bakhshalipour, M. Shakerinava, P. Lotﬁ-Kamran, and H. Sarbazi-Azad,
+                                                                                           “Bingo spatial data prefetcher,” in 2019 IEEE International Symposium
+and MLOP provide 20.9% and 20%, respectively.                                              on High Performance Computer Architecture (HPCA), Feb 2019, pp.
+                                                                                           399–411.
+                           VII. S UMMARY                                              [12] M. Bakhshalipour, P. Lotﬁ-Kamran, and H. Sarbazi-Azad, “Domino
+   In this paper, we make a case for tiny high-performing                                  temporal data prefetcher,” in IEEE International Symposium on High
+                                                                                           Performance Computer Architecture, HPCA 2018, Vienna, Austria,
+prefetchers at the L1-D level. We ﬁnd that a high-performing                               February 24-28, 2018, 2018, pp. 131–142. [Online]. Available:
+L1-D prefetcher can bring more performance and make the                                    https://doi.org/10.1109/HPCA.2018.00021
+utility of L2 prefetching marginal. To achieve high performance                       [13] R. Bera, A. V. Nori, O. Mutlu, and S. Subramoney, “Dspatch: Dual
+                                                                                           spatial pattern prefetcher,” in Proceedings of the 52nd Annual IEEE/ACM
+with extremely low storage overhead, we propose an IP                                      International Symposium on Microarchitecture, MICRO 2019, Columbus,
+Classiﬁer based spatial Prefetching framework (IPCP). IPCP                                 OH, USA, October 12-16, 2019., 2019, pp. 531–544. [Online]. Available:
+classiﬁes IPs into three classes that cover the majority of                                https://doi.org/10.1145/3352460.3358325
+                                                                                      [14] E. Bhatia, G. Chacon, S. H. Pugsley, E. Teran, P. V. Gratz, and
+access patterns and they work in harmony. We extend IPCP to                                D. A. Jiménez, “Perceptron-based prefetch ﬁltering,” in Proceedings
+the L2 level by communicating the classiﬁcation information,                               of the 46th International Symposium on Computer Architecture, ISCA
+making IPCP an attractive prefetching framework for the multi-                             2019, Phoenix, AZ, USA, June 22-26, 2019, 2019, pp. 1–13. [Online].
+                                                                                           Available: https://doi.org/10.1145/3307650.3322207
+level cache hierarchy. In summary, IPCP, as a framework,                              [15] M. Chaudhuri and N. Deshmukh, “Sangam: A multi-component core
+incurs a hardware overhead of 895 bytes only, and outperforms                              cache prefetcher,” in 3rd Data Prefetching Championship, 2019.
+state-of-the-art spatial prefetchers and multi-level prefetching                      [16] E. Ebrahimi, O. Mutlu, C. J. Lee, and Y. N. Patt, “Coordinated
+                                                                                           control of multiple prefetchers in multi-core systems,” in 42st Annual
+combinations. Based on the observations and insights, we                                   IEEE/ACM International Symposium on Microarchitecture (MICRO-42
+believe IPCP opens up new directions of research on multi-                                 2009), December 12-16, 2009, New York, New York, USA, 2009, pp.
+level prefetching, which are as follows: (i) designing a high-                             316–326. [Online]. Available: https://doi.org/10.1145/1669112.1669154
+                                                                                      [17] M. Ferdman, A. Adileh, Y. O. Koçberber, S. Volos, M. Alisafaee,
+performing L2 prefetcher that can cover the misses that are                                D. Jevdjic, C. Kaynak, A. D. Popescu, A. Ailamaki, and B. Falsaﬁ,
+not covered by the L1 prefetcher and (ii) enhancing IPCP                                   “Clearing the clouds: a study of emerging scale-out workloads on
+with a temporal component for covering temporal and irregular                              modern hardware,” in Proceedings of the 17th International Conference
+                                                                                           on Architectural Support for Programming Languages and Operating
+accesses.                                                                                  Systems, ASPLOS 2012, London, UK, March 3-7, 2012, 2012, pp. 37–48.
+                                                                                           [Online]. Available: https://doi.org/10.1145/2150976.2150982
+                        VIII. AVAILABILITY                                            [18] J. W. C. Fu, J. H. Patel, and B. L. Janssens, “Stride directed prefetching
+  The source code is available at https://www.cse.iitk.ac.in/                              in scalar processors,” in Proceedings of the 25th Annual International
+                                                                                           Symposium on Microarchitecture, ser. MICRO 25. Los Alamitos, CA,
+users/biswap/ipcp.html.                                                                    USA: IEEE Computer Society Press, 1992, pp. 102–110. [Online].
+                                                                                           Available: http://dl.acm.org/citation.cfm?id=144953.145006
+                    IX. ACKNOWLEDGEMENTS                                              [19] K. He, X. Zhang, S. Ren, and J. Sun, “Deep residual learning for image
+                                                                                           recognition,” in 2016 IEEE Conference on Computer Vision and Pattern
+  We would like to thank all the anonymous reviewers for their                             Recognition (CVPR), June 2016, pp. 770–778.
+helpful comments and suggestions. Special thanks to Nilay                             [20] W. Heirman, K. D. Bois, Y. Vandriessche, S. Eyerman, and I. Hur,
+Shah for helping us in running multi-core experiments. We                                  “Near-side prefetch throttling: Adaptive prefetching for high-performance
+                                                                                           many-core processors,” in Proceedings of the 27th International
+would also like to thank members of CARS research group,                                   Conference on Parallel Architectures and Compilation Techniques, ser.
+Andre Seznec, Pierre Michaud, R. Govindarajan, Rahul Bera,                                 PACT ’18. New York, NY, USA: ACM, 2018, pp. 28:1–28:11. [Online].
+and Nayan Deshmukh for their feedback on the initial draft.                                Available: http://doi.acm.org/10.1145/3243176.3243181
+                                                                                      [21] S. Hochreiter and J. Schmidhuber, “Long short-term memory,” Neural
+This work is supported by the SRC grant SRC-2922.001.                                      Comput., vol. 9, no. 8, pp. 1735–1780, Nov. 1997. [Online]. Available:
+                                                                                           http://dx.doi.org/10.1162/neco.1997.9.8.1735
+                             R EFERENCES                                              [22] F. N. Iandola, S. Han, M. W. Moskewicz, K. Ashraf, W. J. Dally,
+ [1] “2nd cache replacement championship.” [Online]. Available: https:                     and K. Keutzer, “Squeezenet: Alexnet-level accuracy with 50x fewer
+     //crc2.ece.tamu.edu/                                                                  parameters and <0.5mb model size,” arXiv:1602.07360, 2016.
+ [2] “2nd data prefetching championship.” [Online]. Available: http:                  [23] A. Jain, “Exploiting long-term behavior for improved memory system
+     //comparch-conf.gatech.edu/dpc2/                                                      performance,” in Ph.D. dissertation. Austin TX, USA, 2016.
+ [3] “3rd data prefetching championship.” [Online]. Available: https:                 [24] A. Jain and C. Lin, “Linearizing irregular memory accesses for
+     //dpc3.compas.cs.stonybrook.edu/?ﬁnal programs                                        improved correlated prefetching,” in The 46th Annual IEEE/ACM
+ [4] “Champsim simulator.” [Online]. Available: https://github.com/                        International Symposium on Microarchitecture, MICRO-46, Davis, CA,
+     ChampSim/ChampSim                                                                     USA, December 7-11, 2013, 2013, pp. 247–259. [Online]. Available:
+ [5] “Cloudsuite traces.” [Online]. Available: https://www.dropbox.com/sh/                 https://doi.org/10.1145/2540708.2540730
+     pgmnzfr3hurlutq/AACciuebRwSAOzhJkmj5SEXBa/CRC2 trace?dl=                         [25] A. Jain and C. Lin, “Back to the future: Leveraging belady’s
+     0&subfolder nav tracking=1                                                            algorithm for improved cache replacement,” in 43rd ACM/IEEE Annual
+ [6] “Dpc-3 closing remarks.” [Online]. Available: https://dpc3.compas.cs.                 International Symposium on Computer Architecture, ISCA 2016, Seoul,
+     stonybrook.edu/slides/dpc3 closing.pdf                                                South Korea, June 18-22, 2016, 2016, pp. 78–89. [Online]. Available:
+ [7] “Intel ice lake.” [Online]. Available: https://en.wikipedia.org/wiki/Ice              https://doi.org/10.1109/ISCA.2016.17
+     Lake (microprocessor)                                                            [26] A. Jain and C. Lin, “Rethinking belady’s algorithm to accommodate
+ [8] “Spec cpu 2017.” [Online]. Available: https://www.spec.org/cpu2017/                   prefetching,” in 45th ACM/IEEE Annual International Symposium
+ [9] “Spec cpu 2017 traces (spec speed: 6xx numbered).” [Online]. Available:               on Computer Architecture, ISCA 2018, Los Angeles, CA, USA,
+     http://hpca23.cse.tamu.edu/champsim-traces/speccpu/                                   June 1-6, 2018, 2018, pp. 110–123. [Online]. Available: https:
+[10] “Throttled {NL at L1 with spp+ppf.” [Online]. Available: https:                       //doi.org/10.1109/ISCA.2018.00020
+     //dpc3.compas.cs.stonybrook.edu/src/enhancing.zip                                [27] A. Jaleel, W. Hasenplaugh, M. Qureshi, J. Sebot, S. Steely, and J. Emer,
+                                                                                           “Adaptive insertion policies for managing shared caches,” in 2008
+                                                                                           International Conference on Parallel Architectures and Compilation
+                                                                                           Techniques (PACT), Oct 2008, pp. 208–219.
+
+
+
+
+                                                                                130
+[28] A. Jaleel, K. B. Theobald, S. C. S. Jr., and J. S. Emer, “High                      [45] M. Shevgoor, S. Koladiya, R. Balasubramonian, C. Wilkerson, S. H.
+     performance cache replacement using re-reference interval prediction                     Pugsley, and Z. Chishti, “Efﬁciently prefetching complex address patterns,”
+     (RRIP),” in 37th International Symposium on Computer Architecture                        in Proceedings of the 48th International Symposium on Microarchitecture,
+     (ISCA 2010), June 19-23, 2010, Saint-Malo, France, 2010, pp. 60–71.                      MICRO 2015, Waikiki, HI, USA, December 5-9, 2015, 2015, pp.
+     [Online]. Available: https://doi.org/10.1145/1815961.1815971                             141–152. [Online]. Available: https://doi.org/10.1145/2830772.2830793
+[29] D. A. Jiménez and E. Teran, “Multiperspective reuse prediction,”                   [46] K. Simonyan and A. Zisserman, “Very deep convolutional networks for
+     in Proceedings of the 50th Annual IEEE/ACM International                                 large-scale image recognition,” arXiv 1409.1556, 09 2014.
+     Symposium on Microarchitecture, MICRO 2017, Cambridge, MA,                          [47] S. Somogyi, T. F. Wenisch, A. Ailamaki, B. Falsaﬁ, and A. Moshovos,
+     USA, October 14-18, 2017, 2017, pp. 436–448. [Online]. Available:                        “Spatial memory streaming,” in 33rd International Symposium on
+     https://doi.org/10.1145/3123939.3123942                                                  Computer Architecture (ISCA’06), June 2006, pp. 252–263.
+[30] V. Jiménez, A. Buyuktosunoglu, P. Bose, F. P. O’Connell, F. J.                     [48] S. Somogyi, T. F. Wenisch, A. Ailamaki, and B. Falsaﬁ, “Spatio-
+     Cazorla, and M. Valero, “Increasing multicore system efﬁciency through                   temporal memory streaming,” in Proceedings of the 36th Annual
+     intelligent bandwidth shifting,” in 21st IEEE International Symposium                    International Symposium on Computer Architecture, ser. ISCA ’09.
+     on High Performance Computer Architecture, HPCA 2015, Burlingame,                        New York, NY, USA: ACM, 2009, pp. 69–80. [Online]. Available:
+     CA, USA, February 7-11, 2015, 2015, pp. 39–50. [Online]. Available:                      http://doi.acm.org/10.1145/1555754.1555766
+     https://doi.org/10.1109/HPCA.2015.7056020                                           [49] S. Somogyi, T. F. Wenisch, M. Ferdman, and B. Falsaﬁ, “Spatial
+[31] V. Jiménez, R. Gioiosa, F. J. Cazorla, A. Buyuktosunoglu, P. Bose, and                  memory streaming,” J. Instruction-Level Parallelism, vol. 13, 2011.
+     F. P. O’Connell, “Making data prefetch smarter: adaptive prefetching                     [Online]. Available: http://www.jilp.org/vol13/v13paper8.pdf
+     on POWER7,” in International Conference on Parallel Architectures                   [50] S. Srinath, O. Mutlu, H. Kim, and Y. N. Patt, “Feedback directed
+     and Compilation Techniques, PACT ’12, Minneapolis, MN, USA -                             prefetching: Improving the performance and bandwidth-efﬁciency of
+     September 19 - 23, 2012, 2012, pp. 137–146. [Online]. Available:                         hardware prefetchers,” in 13st International Conference on High-
+     https://doi.org/10.1145/2370816.2370837                                                  Performance Computer Architecture (HPCA-13 2007), 10-14 February
+[32] H. Kim and P. V. Gratz, “Leveraging unused cache block words                             2007, Phoenix, Arizona, USA, 2007, pp. 63–74. [Online]. Available:
+     to reduce power in CMP interconnect,” Computer Architecture                              https://doi.org/10.1109/HPCA.2007.346185
+     Letters, vol. 9, no. 1, pp. 33–36, 2010. [Online]. Available:                       [51] J. M. Tendler, J. S. Dodson, J. S. Fields, H. Le, and B. Sinharoy, “Power4
+     https://doi.org/10.1109/L-CA.2010.9                                                      system microarchitecture,” IBM Journal of Research and Development,
+[33] J. Kim, S. H. Pugsley, P. V. Gratz, A. L. N. Reddy, C. Wilkerson,                        vol. 46, no. 1, pp. 5–25, Jan 2002.
+     and Z. Chishti, “Path conﬁdence based lookahead prefetching,” in                    [52] J. Wang, R. Panda, and L. K. John, “Selsmap: A selective stride
+     49th Annual IEEE/ACM International Symposium on Microarchitecture,                       masking prefetching scheme,” ACM Trans. Archit. Code Optim.,
+     MICRO 2016, Taipei, Taiwan, October 15-19, 2016, 2016, pp. 60:1–60:12.                   vol. 15, no. 4, pp. 42:1–42:21, Oct. 2018. [Online]. Available:
+     [Online]. Available: https://doi.org/10.1109/MICRO.2016.7783763                          http://doi.acm.org/10.1145/3274650
+[34] J. Kim, E. Teran, P. V. Gratz, D. A. Jiménez, S. H. Pugsley, and                   [53] J. Wang, R. Panda, and L. K. John, “Prefetching for cloud workloads:
+     C. Wilkerson, “Kill the program counter: Reconstructing program                          An analysis based on address patterns,” in 2017 IEEE International
+     behavior in the processor cache hierarchy,” in Proceedings of the                        Symposium on Performance Analysis of Systems and Software, ISPASS
+     Twenty-Second International Conference on Architectural Support for                      2017, Santa Rosa, CA, USA, April 24-25, 2017, 2017, pp. 163–172.
+     Programming Languages and Operating Systems, ASPLOS 2017, Xi’an,                         [Online]. Available: https://doi.org/10.1109/ISPASS.2017.7975288
+     China, April 8-12, 2017, 2017, pp. 737–749. [Online]. Available:                    [54] T. F. Wenisch, M. Ferdman, A. Ailamaki, B. Falsaﬁ, and A. Moshovos,
+     https://doi.org/10.1145/3037697.3037701                                                  “Temporal streams in commercial server applications,” in 2008 IEEE
+[35] S. Kondguli and M. Huang, “Division of labor: A more effective approach                  International Symposium on Workload Characterization, Sep. 2008, pp.
+     to prefetching,” in 2018 ACM/IEEE 45th Annual International Symposium                    99–108.
+     on Computer Architecture (ISCA), June 2018, pp. 83–95.                              [55] T. F. Wenisch, M. Ferdman, A. Ailamaki, B. Falsaﬁ, and
+[36] A. Krizhevsky, “Learning multiple layers of features from tiny images,”                  A. Moshovos, “Practical off-chip meta-data for temporal memory
+     University of Toronto, 05 2012.                                                          streaming,” in 15th International Conference on High-Performance
+[37] M. Lin, Q. Chen, and S. Yan, “Network In Network,” arXiv e-prints, p.                    Computer Architecture (HPCA-15 2009), 14-18 February 2009,
+     arXiv:1312.4400, Dec 2013.                                                               Raleigh, North Carolina, USA, 2009, pp. 79–90. [Online]. Available:
+[38] P. Michaud, “Best-offset hardware prefetching,” in 2016 IEEE Interna-                    https://doi.org/10.1109/HPCA.2009.4798239
+     tional Symposium on High Performance Computer Architecture (HPCA),                  [56] C. Wu, A. Jaleel, W. Hasenplaugh, M. Martonosi, S. C. S. Jr.,
+     March 2016, pp. 469–480.                                                                 and J. S. Emer, “Ship: signature-based hit predictor for high
+[39] B. Panda, “SPAC: A synergistic prefetcher aggressiveness controller                      performance caching,” in 44rd Annual IEEE/ACM International
+     for multi-core systems,” IEEE Trans. Computers, vol. 65, no. 12, pp.                     Symposium on Microarchitecture, MICRO 2011, Porto Alegre, Brazil,
+     3740–3753, 2016. [Online]. Available: https://doi.org/10.1109/TC.2016.                   December 3-7, 2011, 2011, pp. 430–441. [Online]. Available:
+     2547392                                                                                  https://doi.org/10.1145/2155620.2155671
+[40] B. Panda and S. Balachandran, “CAFFEINE: A utility-driven prefetcher                [57] C. Wu, A. Jaleel, M. Martonosi, S. C. S. Jr., and J. S. Emer, “Pacman:
+     aggressiveness engine for multicores,” TACO, vol. 12, no. 3, pp.                         prefetch-aware cache management for high performance caching,” in
+     30:1–30:25, 2015. [Online]. Available: https://doi.org/10.1145/2806891                   44rd Annual IEEE/ACM International Symposium on Microarchitecture,
+[41] B. Panda and S. Balachandran, “Expert prefetch prediction: An                            MICRO 2011, Porto Alegre, Brazil, December 3-7, 2011, 2011, pp.
+     expert predicting the usefulness of hardware prefetchers,” Computer                      442–453. [Online]. Available: https://doi.org/10.1145/2155620.2155672
+     Architecture Letters, vol. 15, no. 1, pp. 13–16, 2016. [Online]. Available:         [58] H. Wu, K. Nathella, J. Pusdesris, D. Sunwoo, A. Jain, and
+     https://doi.org/10.1109/LCA.2015.2428703                                                 C. Lin, “Temporal prefetching without the off-chip metadata,”
+[42] S. H. Pugsley, Z. Chishti, C. Wilkerson, P. Chuang, R. L. Scott, A. Jaleel,              in Proceedings of the 52Nd Annual IEEE/ACM International
+     S. Lu, K. Chow, and R. Balasubramonian, “Sandbox prefetching: Safe                       Symposium on Microarchitecture, ser. MICRO ’52. New York,
+     run-time evaluation of aggressive prefetchers,” in 20th IEEE International               NY, USA: ACM, 2019, pp. 996–1008. [Online]. Available: http:
+     Symposium on High Performance Computer Architecture, HPCA 2014,                          //doi.acm.org/10.1145/3352460.3358300
+     Orlando, FL, USA, February 15-19, 2014, 2014, pp. 626–637. [Online].                [59] H. Wu, K. Nathella, D. Sunwoo, A. Jain, and C. Lin, “Efﬁcient
+     Available: https://doi.org/10.1109/HPCA.2014.6835971                                     metadata management for irregular data prefetching,” in Proceedings
+[43] V. Seshadri, S. Yedkar, H. Xin, O. Mutlu, P. B. Gibbons, M. A. Kozuch,                   of the 46th International Symposium on Computer Architecture, ser.
+     and T. C. Mowry, “Mitigating prefetcher-caused pollution using informed                  ISCA ’19. New York, NY, USA: ACM, 2019, pp. 449–461. [Online].
+     caching policies for prefetched blocks,” TACO, vol. 11, no. 4, pp.                       Available: http://doi.acm.org/10.1145/3307650.3322225
+     51:1–51:22, 2014. [Online]. Available: https://doi.org/10.1145/2677956              [60] V. Young, C.-C. Chou, A. Jaleel, and M. Qureshi, “Ship++ : Enhancing
+[44] M. Shakerinavaet, M. Bakhshalipour, P. L. Kamran, and H. Sarbazi-                        signature-based hit predictor for improved cache performance,” in 2nd
+     Azad, “Multi-lookahead offset prefetching,” in 3rd Data Prefetching                      Cache Replacement Championship, 2017.
+     Championship, 2019.
+
+
+
+
+                                                                                   131
+

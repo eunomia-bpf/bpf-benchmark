@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html>
+<!-- Created by GNU Texinfo 7.0dev, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!-- This file documents the use of the GNU compilers.
+
+Copyright © 1988-2026 Free Software Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with the
+Invariant Sections being "Funding Free Software", the Front-Cover
+Texts being (a) (see below), and with the Back-Cover Texts being (b)
+(see below).  A copy of the license is included in the section entitled
+"GNU Free Documentation License".
+
+(a) The FSF's Front-Cover Text is:
+
+A GNU Manual
+
+(b) The FSF's Back-Cover Text is:
+
+You have freedom to copy and modify this GNU Manual, like GNU
+     software.  Copies published by the Free Software Foundation raise
+     funds for GNU development. -->
+<title>Other Builtins (Using the GNU Compiler Collection (GCC))</title>
+
+<meta name="description" content="Other Builtins (Using the GNU Compiler Collection (GCC))">
+<meta name="keywords" content="Other Builtins (Using the GNU Compiler Collection (GCC))">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="index.html" rel="start" title="Top">
+<link href="Indices.html" rel="index" title="Indices">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Built-in-Functions.html" rel="up" title="Built-in Functions">
+<link href="Target-Builtins.html" rel="next" title="Target Builtins">
+<link href="New_002fDelete-Builtins.html" rel="prev" title="New/Delete Builtins">
+<style type="text/css">
+<!--
+a.copiable-link {visibility: hidden; text-decoration: none; line-height: 0em}
+div.example {margin-left: 3.2em}
+kbd.key {font-style: normal}
+span.r {font-family: initial; font-weight: normal; font-style: normal}
+span:hover a.copiable-link {visibility: visible}
+strong.def-name {font-family: monospace; font-weight: bold; font-size: larger}
+ul.mark-bullet {list-style-type: disc}
+-->
+</style>
+<link rel="stylesheet" type="text/css" href="/texinfo-manuals.css">
+
+
+</head>
+
+<body lang="en_US">
+<div class="section-level-extent" id="Other-Builtins">
+<div class="nav-panel">
+<p>
+Next: <a href="Target-Builtins.html" accesskey="n" rel="next">Built-in Functions Specific to Particular Target Machines</a>, Previous: <a href="New_002fDelete-Builtins.html" accesskey="p" rel="prev">Built-in functions for C++ allocations and deallocations</a>, Up: <a href="Built-in-Functions.html" accesskey="u" rel="up">Built-in Functions Provided by GCC</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<h3 class="section" id="Other-Built-in-Functions-Provided-by-GCC"><span>7.12 Other Built-in Functions Provided by GCC<a class="copiable-link" href="#Other-Built-in-Functions-Provided-by-GCC"> &para;</a></span></h3>
+
+<p>This section documents miscellaneous built-in functions available in GCC.
+</p>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fhas_005fattribute"><span class="category-def">Built-in Function: </span><span><code class="def-type">bool</code> <strong class="def-name">__builtin_has_attribute</strong> <code class="def-code-arguments">(<var class="var">type-or-expression</var>, <var class="var">attribute</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fhas_005fattribute"> &para;</a></span></dt>
+<dd><p>The <code class="code">__builtin_has_attribute</code> function evaluates to an integer constant
+expression equal to <code class="code">true</code> if the symbol or type referenced by
+the <var class="var">type-or-expression</var> argument has been declared with
+the <var class="var">attribute</var> referenced by the second argument.  For
+an <var class="var">type-or-expression</var> argument that does not reference a symbol,
+since attributes do not apply to expressions the built-in consider
+the type of the argument.  Neither argument is evaluated.
+The <var class="var">type-or-expression</var> argument is subject to the same
+restrictions as the argument to <code class="code">typeof</code> (see <a class="pxref" href="Typeof.html">Referring to a Type with <code class="code">typeof</code></a>).  The
+<var class="var">attribute</var> argument is an attribute name optionally followed by
+a comma-separated list of arguments enclosed in parentheses.  Both forms
+of attribute names&mdash;with and without double leading and trailing
+underscores&mdash;are recognized.  See <a class="xref" href="Attribute-Syntax.html">GNU Attribute Syntax</a>, for details.
+When no attribute arguments are specified for an attribute that expects
+one or more arguments the function returns <code class="code">true</code> if
+<var class="var">type-or-expression</var> has been declared with the attribute regardless
+of the attribute argument values.  Arguments provided for an attribute
+that expects some are validated and matched up to the provided number.
+The function returns <code class="code">true</code> if all provided arguments match.  For
+example, the first call to the function below evaluates to <code class="code">true</code>
+because <code class="code">x</code> is declared with the <code class="code">aligned</code> attribute but
+the second call evaluates to <code class="code">false</code> because <code class="code">x</code> is declared
+<code class="code">aligned (8)</code> and not <code class="code">aligned (4)</code>.
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">__attribute__ ((aligned (8))) int x;
+_Static_assert (__builtin_has_attribute (x, aligned), &quot;aligned&quot;);
+_Static_assert (!__builtin_has_attribute (x, aligned (4)), &quot;aligned (4)&quot;);
+</pre></div>
+
+<p>Due to a limitation the <code class="code">__builtin_has_attribute</code> function returns
+<code class="code">false</code> for the <code class="code">mode</code> attribute even if the type or variable
+referenced by the <var class="var">type-or-expression</var> argument was declared with one.
+The function is also not supported with labels, and in C with enumerators.
+</p>
+<p>Note that unlike the <code class="code">__has_attribute</code> preprocessor operator which
+is suitable for use in <code class="code">#if</code> preprocessing directives
+<code class="code">__builtin_has_attribute</code> is an intrinsic function that is not
+recognized in such contexts.
+</p>
+</dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fspeculation_005fsafe_005fvalue-1"><span class="category-def">Built-in Function: </span><span><code class="def-type"><var class="var">type</var></code> <strong class="def-name">__builtin_speculation_safe_value</strong> <code class="def-code-arguments">(<var class="var">type</var> <var class="var">val</var>, <var class="var">type</var> <var class="var">failval</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fspeculation_005fsafe_005fvalue-1"> &para;</a></span></dt>
+<dd>
+<p>This built-in function can be used to help mitigate against unsafe
+speculative execution.  <var class="var">type</var> may be any integral type or any
+pointer type.
+</p>
+<ol class="enumerate">
+<li> If the CPU is not speculatively executing the code, then <var class="var">val</var>
+is returned.
+</li><li> If the CPU is executing speculatively then either:
+<ul class="itemize mark-bullet">
+<li>The function may cause execution to pause until it is known that the
+code is no-longer being executed speculatively (in which case
+<var class="var">val</var> can be returned, as above); or
+</li><li>The function may use target-dependent speculation tracking state to cause
+<var class="var">failval</var> to be returned when it is known that speculative
+execution has incorrectly predicted a conditional branch operation.
+</li></ul>
+</li></ol>
+
+<p>The second argument, <var class="var">failval</var>, is optional and defaults to zero
+if omitted.
+</p>
+<p>GCC defines the preprocessor macro
+<code class="code">__HAVE_BUILTIN_SPECULATION_SAFE_VALUE</code> for targets that have been
+updated to support this builtin.
+</p>
+<p>The built-in function can be used where a variable appears to be used in a
+safe way, but the CPU, due to speculative execution may temporarily ignore
+the bounds checks.  Consider, for example, the following function:
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">int array[500];
+int f (unsigned untrusted_index)
+{
+  if (untrusted_index &lt; 500)
+    return array[untrusted_index];
+  return 0;
+}
+</pre></div>
+
+<p>If the function is called repeatedly with <code class="code">untrusted_index</code> less
+than the limit of 500, then a branch predictor will learn that the
+block of code that returns a value stored in <code class="code">array</code> will be
+executed.  If the function is subsequently called with an
+out-of-range value it will still try to execute that block of code
+first until the CPU determines that the prediction was incorrect
+(the CPU will unwind any incorrect operations at that point).
+However, depending on how the result of the function is used, it might be
+possible to leave traces in the cache that can reveal what was stored
+at the out-of-bounds location.  The built-in function can be used to
+provide some protection against leaking data in this way by changing
+the code to:
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">int array[500];
+int f (unsigned untrusted_index)
+{
+  if (untrusted_index &lt; 500)
+    return array[__builtin_speculation_safe_value (untrusted_index)];
+  return 0;
+}
+</pre></div>
+
+<p>The built-in function will either cause execution to stall until the
+conditional branch has been fully resolved, or it may permit
+speculative execution to continue, but using 0 instead of
+<code class="code">untrusted_value</code> if that exceeds the limit.
+</p>
+<p>If accessing any memory location is potentially unsafe when speculative
+execution is incorrect, then the code can be rewritten as
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">int array[500];
+int f (unsigned untrusted_index)
+{
+  if (untrusted_index &lt; 500)
+    return *__builtin_speculation_safe_value (&amp;array[untrusted_index], NULL);
+  return 0;
+}
+</pre></div>
+
+<p>which will cause a <code class="code">NULL</code> pointer to be used for the unsafe case.
+</p>
+</dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005ftypes_005fcompatible_005fp"><span class="category-def">Built-in Function: </span><span><code class="def-type">int</code> <strong class="def-name">__builtin_types_compatible_p</strong> <code class="def-code-arguments">(<var class="var">type1</var>, <var class="var">type2</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005ftypes_005fcompatible_005fp"> &para;</a></span></dt>
+<dd>
+<p>You can use the built-in function <code class="code">__builtin_types_compatible_p</code> to
+determine whether two types are the same.
+</p>
+<p>This built-in function returns 1 if the unqualified versions of the
+types <var class="var">type1</var> and <var class="var">type2</var> (which are types, not expressions) are
+compatible, 0 otherwise.  The result of this built-in function can be
+used in integer constant expressions.
+</p>
+<p>This built-in function ignores top level qualifiers (e.g., <code class="code">const</code>,
+<code class="code">volatile</code>).  For example, <code class="code">int</code> is equivalent to <code class="code">const
+int</code>.
+</p>
+<p>The type <code class="code">int[]</code> and <code class="code">int[5]</code> are compatible.  On the other
+hand, <code class="code">int</code> and <code class="code">char *</code> are not compatible, even if the size
+of their types, on the particular architecture are the same.  Also, the
+amount of pointer indirection is taken into account when determining
+similarity.  Consequently, <code class="code">short *</code> is not similar to
+<code class="code">short **</code>.  Furthermore, two types that are typedefed are
+considered compatible if their underlying types are compatible.
+</p>
+<p>An <code class="code">enum</code> type is not considered to be compatible with another
+<code class="code">enum</code> type even if both are compatible with the same integer
+type; this is what the C standard specifies.
+For example, <code class="code">enum {foo, bar}</code> is not similar to
+<code class="code">enum {hot, dog}</code>.
+</p>
+<p>You typically use this function in code whose execution varies
+depending on the arguments&rsquo; types.  For example:
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">#define foo(x)                                                  \
+  ({                                                           \
+    typeof (x) tmp = (x);                                       \
+    if (__builtin_types_compatible_p (typeof (x), long double)) \
+      tmp = foo_long_double (tmp);                              \
+    else if (__builtin_types_compatible_p (typeof (x), double)) \
+      tmp = foo_double (tmp);                                   \
+    else if (__builtin_types_compatible_p (typeof (x), float))  \
+      tmp = foo_float (tmp);                                    \
+    else                                                        \
+      abort ();                                                 \
+    tmp;                                                        \
+  })
+</pre></div>
+
+<p><em class="emph">Note:</em> This construct is only available for C.
+</p>
+</dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fchoose_005fexpr"><span class="category-def">Built-in Function: </span><span><code class="def-type"><var class="var">type</var></code> <strong class="def-name">__builtin_choose_expr</strong> <code class="def-code-arguments">(<var class="var">const_exp</var>, <var class="var">exp1</var>, <var class="var">exp2</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fchoose_005fexpr"> &para;</a></span></dt>
+<dd>
+<p>You can use the built-in function <code class="code">__builtin_choose_expr</code> to
+evaluate code depending on the value of a constant expression.  This
+built-in function returns <var class="var">exp1</var> if <var class="var">const_exp</var>, which is an
+integer constant expression, is nonzero.  Otherwise it returns <var class="var">exp2</var>.
+</p>
+<p>Like the &lsquo;<samp class="samp">? :</samp>&rsquo; operator, this built-in function does not evaluate the
+expression that is not chosen.  For example, if <var class="var">const_exp</var> evaluates to
+<code class="code">true</code>, <var class="var">exp2</var> is not evaluated even if it has side effects.  On the
+other hand, <code class="code">__builtin_choose_expr</code> differs from &lsquo;<samp class="samp">? :</samp>&rsquo; in that the
+first operand must be a compile-time constant, and the other operands are not
+subject to the &lsquo;<samp class="samp">? :</samp>&rsquo; type constraints and promotions.
+</p>
+<p>This built-in function can return an lvalue if the chosen argument is an
+lvalue.
+</p>
+<p>If <var class="var">exp1</var> is returned, the return type is the same as <var class="var">exp1</var>&rsquo;s
+type.  Similarly, if <var class="var">exp2</var> is returned, its return type is the same
+as <var class="var">exp2</var>.
+</p>
+<p>Example:
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">#define foo(x)                                                    \
+  __builtin_choose_expr (                                         \
+    __builtin_types_compatible_p (typeof (x), double),            \
+    foo_double (x),                                               \
+    __builtin_choose_expr (                                       \
+      __builtin_types_compatible_p (typeof (x), float),           \
+      foo_float (x),                                              \
+      /* <span class="r">The void expression results in a compile-time error</span>  \
+         <span class="r">when assigning the result to something.</span>  */          \
+      (void)0))
+</pre></div>
+
+<p><em class="emph">Note:</em> This construct is only available for C.  Furthermore, the
+unused expression (<var class="var">exp1</var> or <var class="var">exp2</var> depending on the value of
+<var class="var">const_exp</var>) may still generate syntax errors.  This may change in
+future revisions.
+</p>
+</dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005ftgmath"><span class="category-def">Built-in Function: </span><span><code class="def-type"><var class="var">type</var></code> <strong class="def-name">__builtin_tgmath</strong> <code class="def-code-arguments">(<var class="var">functions</var>, <var class="var">arguments</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005ftgmath"> &para;</a></span></dt>
+<dd>
+<p>The built-in function <code class="code">__builtin_tgmath</code>, available only for C
+and Objective-C, calls a function determined according to the rules of
+<code class="code">&lt;tgmath.h&gt;</code> macros.  It is intended to be used in
+implementations of that header, so that expansions of macros from that
+header only expand each of their arguments once, to avoid problems
+when calls to such macros are nested inside the arguments of other
+calls to such macros; in addition, it results in better diagnostics
+for invalid calls to <code class="code">&lt;tgmath.h&gt;</code> macros than implementations
+using other GNU C language features.  For example, the <code class="code">pow</code>
+type-generic macro might be defined as:
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">#define pow(a, b) __builtin_tgmath (powf, pow, powl, \
+                                    cpowf, cpow, cpowl, a, b)
+</pre></div>
+
+<p>The arguments to <code class="code">__builtin_tgmath</code> are at least two pointers to
+functions, followed by the arguments to the type-generic macro (which
+will be passed as arguments to the selected function).  All the
+pointers to functions must be pointers to prototyped functions, none
+of which may have variable arguments, and all of which must have the
+same number of parameters; the number of parameters of the first
+function determines how many arguments to <code class="code">__builtin_tgmath</code> are
+interpreted as function pointers, and how many as the arguments to the
+called function.
+</p>
+<p>The types of the specified functions must all be different, but
+related to each other in the same way as a set of functions that may
+be selected between by a macro in <code class="code">&lt;tgmath.h&gt;</code>.  This means that
+the functions are parameterized by a floating-point type <var class="var">t</var>,
+different for each such function.  The function return types may all
+be the same type, or they may be <var class="var">t</var> for each function, or they
+may be the real type corresponding to <var class="var">t</var> for each function (if
+some of the types <var class="var">t</var> are complex).  Likewise, for each parameter
+position, the type of the parameter in that position may always be the
+same type, or may be <var class="var">t</var> for each function (this case must apply
+for at least one parameter position), or may be the real type
+corresponding to <var class="var">t</var> for each function.
+</p>
+<p>The standard rules for <code class="code">&lt;tgmath.h&gt;</code> macros are used to find a
+common type <var class="var">u</var> from the types of the arguments for parameters
+whose types vary between the functions; complex integer types (a GNU
+extension) are treated like the complex type corresponding to the real
+floating type that would be chosen for the corresponding real integer type.
+If the function return types vary, or are all the same integer type,
+the function called is the one for which <var class="var">t</var> is <var class="var">u</var>, and it is
+an error if there is no such function.  If the function return types
+are all the same floating-point type, the type-generic macro is taken
+to be one of those from TS 18661 that rounds the result to a narrower
+type; if there is a function for which <var class="var">t</var> is <var class="var">u</var>, it is
+called, and otherwise the first function, if any, for which <var class="var">t</var>
+has at least the range and precision of <var class="var">u</var> is called, and it is
+an error if there is no such function.
+</p>
+</dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fconstant_005fp"><span class="category-def">Built-in Function: </span><span><code class="def-type">int</code> <strong class="def-name">__builtin_constant_p</strong> <code class="def-code-arguments">(<var class="var">exp</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fconstant_005fp"> &para;</a></span></dt>
+<dd><p>You can use the built-in function <code class="code">__builtin_constant_p</code> to
+determine if the expression <var class="var">exp</var> is known to be constant at
+compile time and hence that GCC can perform constant-folding on expressions
+involving that value.  The argument of the function is the expression to test.
+The expression is not evaluated, side-effects are discarded.  The function
+returns the integer 1 if the argument is known to be a compile-time
+constant and 0 if it is not known to be a compile-time constant.
+Any expression that has side-effects makes the function return 0.
+A return of 0 does not indicate that the expression is <em class="emph">not</em> a constant,
+but merely that GCC cannot prove it is a constant within the constraints
+of the active set of optimization options.
+</p>
+<p>You typically use this function in an embedded application where
+memory is a critical resource.  If you have some complex calculation,
+you may want it to be folded if it involves constants, but need to call
+a function if it does not.  For example:
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">#define Scale_Value(X)      \
+  (__builtin_constant_p (X) \
+  ? ((X) * SCALE + OFFSET) : Scale (X))
+</pre></div>
+
+<p>You may use this built-in function in either a macro or an inline
+function.  However, if you use it in an inlined function and pass an
+argument of the function as the argument to the built-in, GCC
+never returns 1 when you call the inline function with a string constant
+or compound literal (see <a class="pxref" href="Compound-Literals.html">Compound Literals</a>) and does not return 1
+when you pass a constant numeric value to the inline function unless you
+specify the <samp class="option">-O</samp> option.
+</p>
+<p>You may also use <code class="code">__builtin_constant_p</code> in initializers for static
+data.  For instance, you can write
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">static const int table[] = {
+   __builtin_constant_p (EXPRESSION) ? (EXPRESSION) : -1,
+   /* <span class="r">&hellip;</span> */
+};
+</pre></div>
+
+<p>This is an acceptable initializer even if <var class="var">EXPRESSION</var> is not a
+constant expression, including the case where
+<code class="code">__builtin_constant_p</code> returns 1 because <var class="var">EXPRESSION</var> can be
+folded to a constant but <var class="var">EXPRESSION</var> contains operands that are
+not otherwise permitted in a static initializer (for example,
+<code class="code">0 &amp;&amp; foo ()</code>).  GCC must be more conservative about evaluating the
+built-in in this case, because it has no opportunity to perform
+optimization.
+</p></dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fis_005fconstant_005fevaluated"><span class="category-def">Built-in Function: </span><span><code class="def-type">bool</code> <strong class="def-name">__builtin_is_constant_evaluated</strong> <code class="def-code-arguments">(void)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fis_005fconstant_005fevaluated"> &para;</a></span></dt>
+<dd><p>The <code class="code">__builtin_is_constant_evaluated</code> function is available only
+in C++.  The built-in is intended to be used by implementations of
+the <code class="code">std::is_constant_evaluated</code> C++ function.  Programs should make
+use of the latter function rather than invoking the built-in directly.
+</p>
+<p>The main use case of the built-in is to determine whether a <code class="code">constexpr</code>
+function is being called in a <code class="code">constexpr</code> context.  A call to
+the function evaluates to a core constant expression with the value
+<code class="code">true</code> if and only if it occurs within the evaluation of an expression
+or conversion that is manifestly constant-evaluated as defined in the C++
+standard.  Manifestly constant-evaluated contexts include constant-expressions,
+the conditions of <code class="code">constexpr if</code> statements, constraint-expressions, and
+initializers of variables usable in constant expressions.   For more details
+refer to the latest revision of the C++ standard.
+</p></dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fcounted_005fby_005fref"><span class="category-def">Built-in Function: </span><span><code class="def-type"><var class="var">type</var></code> <strong class="def-name">__builtin_counted_by_ref</strong> <code class="def-code-arguments">(<var class="var">ptr</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fcounted_005fby_005fref"> &para;</a></span></dt>
+<dd><p>The built-in function <code class="code">__builtin_counted_by_ref</code> checks whether the array
+object pointed by the pointer <var class="var">ptr</var> has another object associated with it
+that represents the number of elements in the array object through the
+<code class="code">counted_by</code> attribute (i.e. the counted-by object). If so, returns a
+pointer to the corresponding counted-by object.
+If such counted-by object does not exist, returns a null pointer.
+</p>
+<p>This built-in function is only available in C for now.
+</p>
+<p>The argument <var class="var">ptr</var> must be a pointer to an flexible array or a pointer
+inside a structure.
+The <var class="var">type</var> of the returned value is a pointer type pointing to the
+corresponding type of the counted-by object or a void pointer type in case
+of a null pointer being returned.
+</p>
+<p>For example:
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">struct foo1 {
+  int counter;
+  struct bar1 array[] __attribute__((counted_by (counter)));
+} *p;
+
+struct foo2 {
+  struct bar2 *pointer __attribute__((counted_by (counter2)));
+  int counter2;
+} *p2;
+
+struct foo3 {
+  int other;
+  struct bar3 array[];
+} *p3;
+
+</pre></div>
+
+<p>the following call to the built-in
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">__builtin_counted_by_ref (p-&gt;array)
+</pre></div>
+
+<p>returns:
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">&amp;p-&gt;counter with type <code class="code">int *</code>.
+</pre></div>
+
+<div class="example smallexample">
+<pre class="example-preformatted">__builtin_counted_by_ref (p2-&gt;pointer)
+</pre></div>
+
+<p>returns:
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">&amp;p2-&gt;counter2 with type <code class="code">int *</code>.
+</pre></div>
+
+
+<p>However, the following call to the built-in
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">__builtin_counted_by_ref (p3-&gt;array)
+</pre></div>
+
+<p>returns a null pointer to <code class="code">void</code>.
+</p>
+</dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fclear_005fpadding"><span class="category-def">Built-in Function: </span><span><code class="def-type">void</code> <strong class="def-name">__builtin_clear_padding</strong> <code class="def-code-arguments">(<var class="var">ptr</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fclear_005fpadding"> &para;</a></span></dt>
+<dd><p>The built-in function <code class="code">__builtin_clear_padding</code> function clears
+padding bits inside of the object representation of object pointed by
+<var class="var">ptr</var>, which has to be a pointer.  The value representation of the
+object is not affected.  The type of the object is assumed to be the type
+the pointer points to.  Inside of a union, the only cleared bits are
+bits that are padding bits for all the union members.
+</p>
+<p>This built-in-function is useful if the padding bits of an object might
+have indeterminate values and the object representation needs to be
+bitwise compared to some other object, for example for atomic operations.
+</p>
+<p>For C++, <var class="var">ptr</var> argument type should be pointer to trivially-copyable
+type, unless the argument is address of a variable or parameter, because
+otherwise it isn&rsquo;t known if the type isn&rsquo;t just a base class whose padding
+bits are reused or laid out differently in a derived class.
+</p></dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fbit_005fcast"><span class="category-def">Built-in Function: </span><span><code class="def-type"><var class="var">type</var></code> <strong class="def-name">__builtin_bit_cast</strong> <code class="def-code-arguments">(<var class="var">type</var>, <var class="var">arg</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fbit_005fcast"> &para;</a></span></dt>
+<dd><p>The <code class="code">__builtin_bit_cast</code> function is available only
+in C++.  The built-in is intended to be used by implementations of
+the <code class="code">std::bit_cast</code> C++ template function.  Programs should make
+use of the latter function rather than invoking the built-in directly.
+</p>
+<p>This built-in function allows reinterpreting the bits of the <var class="var">arg</var>
+argument as if it had type <var class="var">type</var>.  <var class="var">type</var> and the type of the
+<var class="var">arg</var> argument need to be trivially copyable types with the same size.
+When manifestly constant-evaluated, it performs extra diagnostics required
+for <code class="code">std::bit_cast</code> and returns a constant expression if <var class="var">arg</var>
+is a constant expression.  For more details
+refer to the latest revision of the C++ standard.
+</p></dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fexpect"><span class="category-def">Built-in Function: </span><span><code class="def-type">long</code> <strong class="def-name">__builtin_expect</strong> <code class="def-code-arguments">(long <var class="var">exp</var>, long <var class="var">c</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fexpect"> &para;</a></span></dt>
+<dd><a class="index-entry-id" id="index-fprofile-arcs-1"></a>
+<p>You may use <code class="code">__builtin_expect</code> to provide the compiler with
+branch prediction information.  In general, you should prefer to
+use actual profile feedback for this (<samp class="option">-fprofile-arcs</samp>), as
+programmers are notoriously bad at predicting how their programs
+actually perform.  However, there are applications in which this
+data is hard to collect.
+</p>
+<p>The return value is the value of <var class="var">exp</var>, which should be an integral
+expression.  The semantics of the built-in are that it is expected that
+<var class="var">exp</var> == <var class="var">c</var>.  For example:
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">if (__builtin_expect (x, 0))
+  foo ();
+</pre></div>
+
+<p>indicates that we do not expect to call <code class="code">foo</code>, since
+we expect <code class="code">x</code> to be zero.  Since you are limited to integral
+expressions for <var class="var">exp</var>, you should use constructions such as
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">if (__builtin_expect (ptr != NULL, 1))
+  foo (*ptr);
+</pre></div>
+
+<p>when testing pointer or floating-point values.
+</p>
+<p>For the purposes of branch prediction optimizations, the probability that
+a <code class="code">__builtin_expect</code> expression is <code class="code">true</code> is controlled by GCC&rsquo;s
+<code class="code">builtin-expect-probability</code> parameter, which defaults to 90%.
+</p>
+<p>You can also use <code class="code">__builtin_expect_with_probability</code> to explicitly
+assign a probability value to individual expressions.  If the built-in
+is used in a loop construct, the provided probability will influence
+the expected number of iterations made by loop optimizations.
+</p></dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fexpect_005fwith_005fprobability"><span class="category-def">Built-in Function: </span><span><code class="def-type">long</code> <strong class="def-name">__builtin_expect_with_probability</strong><a class="copiable-link" href="#index-_005f_005fbuiltin_005fexpect_005fwith_005fprobability"> &para;</a></span></dt>
+<dd><p>(long <var class="var">exp</var>, long <var class="var">c</var>, double <var class="var">probability</var>)
+</p>
+<p>This function has the same semantics as <code class="code">__builtin_expect</code>,
+but the caller provides the expected probability that <var class="var">exp</var> == <var class="var">c</var>.
+The last argument, <var class="var">probability</var>, is a floating-point value in the
+range 0.0 to 1.0, inclusive.  The <var class="var">probability</var> argument must be a
+constant floating-point expression.
+</p></dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005ftrap"><span class="category-def">Built-in Function: </span><span><code class="def-type">void</code> <strong class="def-name">__builtin_trap</strong> <code class="def-code-arguments">(void)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005ftrap"> &para;</a></span></dt>
+<dd><p>This function causes the program to exit abnormally.  GCC implements
+this function by using a target-dependent mechanism (such as
+intentionally executing an illegal instruction) or by calling
+<code class="code">abort</code>.  The mechanism used may vary from release to release so
+you should not rely on any particular implementation.
+</p></dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005funreachable"><span class="category-def">Built-in Function: </span><span><code class="def-type">void</code> <strong class="def-name">__builtin_unreachable</strong> <code class="def-code-arguments">(void)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005funreachable"> &para;</a></span></dt>
+<dd><p>If control flow reaches the point of the <code class="code">__builtin_unreachable</code>,
+the program is undefined.  It is useful in situations where the
+compiler cannot deduce the unreachability of the code.
+</p>
+<p>One such case is immediately following an <code class="code">asm</code> statement that
+either never terminates, or one that transfers control elsewhere
+and never returns.  In this example, without the
+<code class="code">__builtin_unreachable</code>, GCC issues a warning that control
+reaches the end of a non-void function.  It also generates code
+to return after the <code class="code">asm</code>.
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">int f (int c, int v)
+{
+  if (c)
+    {
+      return v;
+    }
+  else
+    {
+      asm(&quot;jmp error_handler&quot;);
+      __builtin_unreachable ();
+    }
+}
+</pre></div>
+
+<p>Because the <code class="code">asm</code> statement unconditionally transfers control out
+of the function, control never reaches the end of the function
+body.  The <code class="code">__builtin_unreachable</code> is in fact unreachable and
+communicates this fact to the compiler.
+</p>
+<p>Another use for <code class="code">__builtin_unreachable</code> is following a call a
+function that never returns but that is not declared
+<code class="code">__attribute__((noreturn))</code>, as in this example:
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">void function_that_never_returns (void);
+
+int g (int c)
+{
+  if (c)
+    {
+      return 1;
+    }
+  else
+    {
+      function_that_never_returns ();
+      __builtin_unreachable ();
+    }
+}
+</pre></div>
+
+</dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fassoc_005fbarrier"><span class="category-def">Built-in Function: </span><span><code class="def-type"><var class="var">type</var></code> <strong class="def-name">__builtin_assoc_barrier</strong> <code class="def-code-arguments">(<var class="var">type</var> <var class="var">expr</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fassoc_005fbarrier"> &para;</a></span></dt>
+<dd><p>This built-in inhibits re-association of the floating-point expression
+<var class="var">expr</var> with expressions consuming the return value of the built-in. The
+expression <var class="var">expr</var> itself can be reordered, and the whole expression
+<var class="var">expr</var> can be reordered with operands after the barrier. The barrier is
+relevant when <code class="code">-fassociative-math</code> is active.
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">float x0 = a + b - b;
+float x1 = __builtin_assoc_barrier(a + b) - b;
+</pre></div>
+
+<p>means that, with <code class="code">-fassociative-math</code>, <code class="code">x0</code> can be optimized to
+<code class="code">x0 = a</code> but <code class="code">x1</code> cannot.
+</p>
+<p>It is also relevant when <code class="code">-ffp-contract=fast</code> is active;
+it will prevent contraction between expressions.
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">float x0 = a * b + c;
+float x1 = __builtin_assoc_barrier (a * b) + c;
+</pre></div>
+
+<p>means that, with <code class="code">-ffp-contract=fast</code>, <code class="code">x0</code> may be optimized to
+use a fused multiply-add instruction but <code class="code">x1</code> cannot.
+</p>
+</dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fassume_005faligned"><span class="category-def">Built-in Function: </span><span><code class="def-type">void *</code> <strong class="def-name">__builtin_assume_aligned</strong> <code class="def-code-arguments">(const void *<var class="var">exp</var>, size_t <var class="var">align</var>, ...)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fassume_005faligned"> &para;</a></span></dt>
+<dd><p>This function returns its first argument, and allows the compiler
+to assume that the returned pointer is at least <var class="var">align</var> bytes
+aligned.  This built-in can have either two or three arguments,
+if it has three, the third argument should have integer type, and
+if it is nonzero means misalignment offset.  For example:
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">void *x = __builtin_assume_aligned (arg, 16);
+</pre></div>
+
+<p>means that the compiler can assume <code class="code">x</code>, set to <code class="code">arg</code>, is at least
+16-byte aligned, while:
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">void *x = __builtin_assume_aligned (arg, 32, 8);
+</pre></div>
+
+<p>means that the compiler can assume for <code class="code">x</code>, set to <code class="code">arg</code>, that
+<code class="code">(char *) x - 8</code> is 32-byte aligned.
+</p></dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fLINE"><span class="category-def">Built-in Function: </span><span><code class="def-type">int</code> <strong class="def-name">__builtin_LINE</strong> <code class="def-code-arguments">()</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fLINE"> &para;</a></span></dt>
+<dd><p>This function is the equivalent of the preprocessor <code class="code">__LINE__</code>
+macro and returns a constant integer expression that evaluates to
+the line number of the invocation of the built-in.  When used as a C++
+default argument for a function <var class="var">F</var>, it returns the line number
+of the call to <var class="var">F</var>.
+</p></dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fFUNCTION"><span class="category-def">Built-in Function: </span><span><code class="def-type">const char *</code> <strong class="def-name">__builtin_FUNCTION</strong> <code class="def-code-arguments">()</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fFUNCTION"> &para;</a></span></dt>
+<dd><p>This function is the equivalent of the <code class="code">__FUNCTION__</code> symbol
+and returns an address constant pointing to the name of the function
+from which the built-in was invoked, or the empty string if
+the invocation is not at function scope.  When used as a C++ default
+argument for a function <var class="var">F</var>, it returns the name of <var class="var">F</var>&rsquo;s
+caller or the empty string if the call was not made at function
+scope.
+</p></dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fFILE"><span class="category-def">Built-in Function: </span><span><code class="def-type">const char *</code> <strong class="def-name">__builtin_FILE</strong> <code class="def-code-arguments">()</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fFILE"> &para;</a></span></dt>
+<dd><p>This function is the equivalent of the preprocessor <code class="code">__FILE__</code>
+macro and returns an address constant pointing to the file name
+containing the invocation of the built-in, or the empty string if
+the invocation is not at function scope.  When used as a C++ default
+argument for a function <var class="var">F</var>, it returns the file name of the call
+to <var class="var">F</var> or the empty string if the call was not made at function
+scope.
+</p>
+<p>For example, in the following, each call to function <code class="code">foo</code> will
+print a line similar to <code class="code">&quot;file.c:123: foo: message&quot;</code> with the name
+of the file and the line number of the <code class="code">printf</code> call, the name of
+the function <code class="code">foo</code>, followed by the word <code class="code">message</code>.
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">const char*
+function (const char *func = __builtin_FUNCTION ())
+{
+  return func;
+}
+
+void foo (void)
+{
+  printf (&quot;%s:%i: %s: message\n&quot;, file (), line (), function ());
+}
+</pre></div>
+
+</dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005f_005f_005fclear_005fcache"><span class="category-def">Built-in Function: </span><span><code class="def-type">void</code> <strong class="def-name">__builtin___clear_cache</strong> <code class="def-code-arguments">(void *<var class="var">begin</var>, void *<var class="var">end</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005f_005f_005fclear_005fcache"> &para;</a></span></dt>
+<dd><p>This function is used to flush the processor&rsquo;s instruction cache for
+the region of memory between <var class="var">begin</var> inclusive and <var class="var">end</var>
+exclusive.  Some targets require that the instruction cache be
+flushed, after modifying memory containing code, in order to obtain
+deterministic behavior.
+</p>
+<p>If the target does not require instruction cache flushes,
+<code class="code">__builtin___clear_cache</code> has no effect.  Otherwise either
+instructions are emitted in-line to clear the instruction cache or a
+call to the <code class="code">__clear_cache</code> function in libgcc is made.
+</p></dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fprefetch"><span class="category-def">Built-in Function: </span><span><code class="def-type">void</code> <strong class="def-name">__builtin_prefetch</strong> <code class="def-code-arguments">(const void *<var class="var">addr</var>, ...)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fprefetch"> &para;</a></span></dt>
+<dd><p>This function is used to minimize cache-miss latency by moving data into
+a cache before it is accessed.
+You can insert calls to <code class="code">__builtin_prefetch</code> into code for which
+you know addresses of data in memory that is likely to be accessed soon.
+If the target supports them, data prefetch instructions are generated.
+If the prefetch is done early enough before the access then the data will
+be in the cache by the time it is accessed.
+</p>
+<p>The value of <var class="var">addr</var> is the address of the memory to prefetch.
+There are two optional arguments, <var class="var">rw</var> and <var class="var">locality</var>.
+The value of <var class="var">rw</var> is a compile-time constant zero, one or two; one
+means that the prefetch is preparing for a write to the memory address,
+two means that the prefetch is preparing for a shared read (expected to be
+read by at least one other processor before it is written if written at
+all) and zero, the default, means that the prefetch is preparing for a read.
+The value <var class="var">locality</var> must be a compile-time constant integer between
+zero and three.  A value of zero means that the data has no temporal
+locality, so it need not be left in the cache after the access.  A value
+of three means that the data has a high degree of temporal locality and
+should be left in all levels of cache possible.  Values of one and two
+mean, respectively, a low or moderate degree of temporal locality.  The
+default is three.
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">for (i = 0; i &lt; n; i++)
+  {
+    a[i] = a[i] + b[i];
+    __builtin_prefetch (&amp;a[i+j], 1, 1);
+    __builtin_prefetch (&amp;b[i+j], 0, 1);
+    /* <span class="r">&hellip;</span> */
+  }
+</pre></div>
+
+<p>Data prefetch does not generate faults if <var class="var">addr</var> is invalid, but
+the address expression itself must be valid.  For example, a prefetch
+of <code class="code">p-&gt;next</code> does not fault if <code class="code">p-&gt;next</code> is not a valid
+address, but evaluation faults if <code class="code">p</code> is not a valid address.
+</p>
+<p>If the target does not support data prefetch, the address expression
+is evaluated if it includes side effects but no other code is generated
+and GCC does not issue a warning.
+</p></dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fclassify_005ftype"><span class="category-def">Built-in Function: </span><span><code class="def-type">int</code> <strong class="def-name">__builtin_classify_type</strong> <code class="def-code-arguments">(<var class="var">arg</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fclassify_005ftype"> &para;</a></span></dt>
+<dt class="deftypefnx def-cmd-deftypefn" id="index-_005f_005fbuiltin_005fclassify_005ftype-1"><span class="category-def">Built-in Function: </span><span><code class="def-type">int</code> <strong class="def-name">__builtin_classify_type</strong> <code class="def-code-arguments">(<var class="var">type</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fclassify_005ftype-1"> &para;</a></span></dt>
+<dd><p>The <code class="code">__builtin_classify_type</code> returns a small integer with a category
+of <var class="var">arg</var> argument&rsquo;s type, like void type, integer type, enumeral type,
+boolean type, pointer type, reference type, offset type, real type, complex
+type, function type, method type, record type, union type, array type,
+string type, bit-precise integer type, vector type, etc.  When the argument
+is an expression, for backwards compatibility reason the argument is promoted
+like arguments passed to <code class="code">...</code> in varargs function, so some classes are
+never returned in certain languages.  Alternatively, the argument of the
+built-in function can be a typename, such as the <code class="code">typeof</code> specifier.
+</p>
+<div class="example smallexample">
+<pre class="example-preformatted">int a[2];
+__builtin_classify_type (a) == __builtin_classify_type (int[5]);
+__builtin_classify_type (a) == __builtin_classify_type (void*);
+__builtin_classify_type (typeof (a)) == __builtin_classify_type (int[5]);
+</pre></div>
+
+<p>The first comparison will never be true, as <var class="var">a</var> is implicitly converted
+to pointer.  The last two comparisons will be true as they classify
+pointers in the second case and arrays in the last case.
+</p></dd></dl>
+
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fextend_005fpointer"><span class="category-def">Built-in Function: </span><span><code class="def-type">Pmode</code> <strong class="def-name">__builtin_extend_pointer</strong> <code class="def-code-arguments">(void * <var class="var">x</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fextend_005fpointer"> &para;</a></span></dt>
+<dd><p>On targets where the user visible pointer size is smaller than the size
+of an actual hardware address this function returns the extended user
+pointer.  Targets where this is true included ILP32 mode on x86_64 or
+Aarch64.  This function is mainly useful when writing inline assembly
+code.
+</p></dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fgoacc_005fparlevel_005fid"><span class="category-def">Built-in Function: </span><span><code class="def-type">int</code> <strong class="def-name">__builtin_goacc_parlevel_id</strong> <code class="def-code-arguments">(int <var class="var">x</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fgoacc_005fparlevel_005fid"> &para;</a></span></dt>
+<dd><p>Returns the openacc gang, worker or vector id depending on whether <var class="var">x</var> is
+0, 1 or 2.
+</p></dd></dl>
+
+<dl class="first-deftypefn">
+<dt class="deftypefn" id="index-_005f_005fbuiltin_005fgoacc_005fparlevel_005fsize"><span class="category-def">Built-in Function: </span><span><code class="def-type">int</code> <strong class="def-name">__builtin_goacc_parlevel_size</strong> <code class="def-code-arguments">(int <var class="var">x</var>)</code><a class="copiable-link" href="#index-_005f_005fbuiltin_005fgoacc_005fparlevel_005fsize"> &para;</a></span></dt>
+<dd><p>Returns the openacc gang, worker or vector size depending on whether <var class="var">x</var> is
+0, 1 or 2.
+</p></dd></dl>
+
+
+</div>
+<hr>
+<div class="nav-panel">
+<p>
+Next: <a href="Target-Builtins.html">Built-in Functions Specific to Particular Target Machines</a>, Previous: <a href="New_002fDelete-Builtins.html">Built-in functions for C++ allocations and deallocations</a>, Up: <a href="Built-in-Functions.html">Built-in Functions Provided by GCC</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Indices.html" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

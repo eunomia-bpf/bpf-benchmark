@@ -1,0 +1,13 @@
+label	kind	bench	result	samples	exec_ns_values	exec_ns_mean	bpf_bytes	native_bytes	prfm_lines	sites_matched	sites_applied	sites_skipped	insn_delta
+prefetch-struct-field-arm64-control-smoke	smoke-control	prefetch_struct_field_fixed_offsets	12246088582525788897	1	24015	24015	2792	1688	0	0	0	0	0
+prefetch-struct-field-arm64-treatment-smoke	smoke-treatment	prefetch_struct_field_fixed_offsets	12246088582525788897	1	23144	23144	2840	1704	3	3	3	0	6
+prefetch-mixed-policy-arm64-control-smoke	smoke-control	prefetch_mixed_policy_table	16217383686291505505	1	22835	22835	2648	1624	0	0	0	0	0
+prefetch-mixed-policy-arm64-treatment-smoke	smoke-treatment	prefetch_mixed_policy_table	16217383686291505505	1	24302	24302	2664	1624	1	17	1	16	2
+prefetch-stream-arm64-control-smoke	smoke-control	prefetch_stream_of_strides	2202534365130024933	1	20894	20894	2648	1640	0	0	0	0	0
+prefetch-stream-arm64-treatment-smoke	smoke-treatment	prefetch_stream_of_strides	2202534365130024933	1	33156	33156	2680	1648	2	18	2	16	4
+prefetch-struct-field-arm64-control-paired	paired-control	prefetch_struct_field_fixed_offsets	12246088582525788897	5	24026,24242,23987,25711,24323	24457.8	2792	1688	0	0	0	0	0
+prefetch-struct-field-arm64-treatment-paired	paired-treatment	prefetch_struct_field_fixed_offsets	12246088582525788897	5	23512,23303,23512,23453,23538	23463.6	2840	1704	3	3	3	0	6
+prefetch-mixed-policy-arm64-control-paired	paired-control	prefetch_mixed_policy_table	16217383686291505505	5	22950,23154,23000,23016,22963	23016.6	2648	1624	0	0	0	0	0
+prefetch-mixed-policy-arm64-treatment-paired	paired-treatment	prefetch_mixed_policy_table	16217383686291505505	5	22528,22721,22758,23341,22648	22799.2	2664	1624	1	17	1	16	2
+prefetch-stream-arm64-control-paired	paired-control	prefetch_stream_of_strides	2202534365130024933	5	22908,22834,22936,22876,23063	22923.4	2648	1640	0	0	0	0	0
+prefetch-stream-arm64-treatment-paired	paired-treatment	prefetch_stream_of_strides	2202534365130024933	5	34291,34481,34881,37597,36859	35621.8	2680	1648	2	18	2	16	4

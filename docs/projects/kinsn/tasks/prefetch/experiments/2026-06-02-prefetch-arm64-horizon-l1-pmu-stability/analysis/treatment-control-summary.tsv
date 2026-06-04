@@ -1,0 +1,3 @@
+case	treatment	control_mean_exec_ns	treatment_mean_exec_ns	exec_ratio_t_over_c	exec_speedup_pct	control_median_exec_ns	treatment_median_exec_ns	median_ratio_t_over_c	control_mean_cycles	treatment_mean_cycles	cycles_ratio_t_over_c	control_native_bytes	treatment_native_bytes	control_bpf_bytes	treatment_bpf_bytes
+prefetch_pipeline_horizon2_page_stride	horizon2_l1keep	20194.300000	19090.900000	0.945361	5.779717	19868.000000	19046.500000	0.958652	494755983.500000	476787109.900000	0.963681	1400	1408	2288	2304
+prefetch_pipeline_horizon4_page_stride	horizon4_l1keep	18310.300000	17783.100000	0.971207	2.964612	18285.500000	17758.500000	0.971179	457054755.200000	443366784.900000	0.970052	1328	1328	2200	2216

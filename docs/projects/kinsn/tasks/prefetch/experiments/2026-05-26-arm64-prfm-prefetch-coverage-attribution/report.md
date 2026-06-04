@@ -145,11 +145,11 @@ AWS instance：
 - `/home/ruoji/github/bpf-opt/experiments/2026-05-26-arm64-prfm-prefetch-coverage-attribution/analysis/prefetch-pass-summary.tsv`
 - `/home/ruoji/github/bpf-opt/experiments/2026-05-26-arm64-prfm-prefetch-coverage-attribution/analysis/katran-raw-measurements.tsv`
 - `/home/ruoji/github/bpf-opt/experiments/2026-05-26-arm64-prfm-prefetch-coverage-attribution/analysis/aws-cost-estimate.tsv`
-- `/home/ruoji/github/bpf-opt/code/docs/tmp/2026-05-27/arm64-llvm-backend/report.md`
-- `/home/ruoji/github/bpf-opt/docs/arm-llvm-backend/families/prfm.md`
-- `/home/ruoji/github/bpf-opt/docs/arm-llvm-backend/implementation-plan.md`
-- `/home/ruoji/github/bpf-opt/docs/arm-llvm-backend/guide.md`
-- `/home/ruoji/github/bpf-opt/docs/arm-llvm-backend/experiment-matrix.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/archive/tmp/arm-llvm-backend/2026-05-27/arm64-llvm-backend/report.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/arm-llvm-backend/families/prfm.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/arm-llvm-backend/implementation-plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/arm-llvm-backend/guide.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/arm-llvm-backend/experiment-matrix.md`
 
 ## 数据文件
 
@@ -275,10 +275,10 @@ Pricing 和 EBS Pricing 页面。
 已回看：
 
 - 当前实验目录：`/home/ruoji/github/bpf-opt/experiments/2026-05-26-arm64-prfm-prefetch-coverage-attribution`
-- PRFM design 文档：`/home/ruoji/github/bpf-opt/docs/arm-llvm-backend/families/prfm.md`
-- 总体计划：`/home/ruoji/github/bpf-opt/docs/arm-llvm-backend/implementation-plan.md`
-- 实现指南：`/home/ruoji/github/bpf-opt/docs/arm-llvm-backend/guide.md`
-- 实验矩阵：`/home/ruoji/github/bpf-opt/docs/arm-llvm-backend/experiment-matrix.md`
+- PRFM design 文档：`/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/arm-llvm-backend/families/prfm.md`
+- 总体计划：`/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/arm-llvm-backend/implementation-plan.md`
+- 实现指南：`/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/arm-llvm-backend/guide.md`
+- 实验矩阵：`/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/arm-llvm-backend/experiment-matrix.md`
 - AWS run logs 和 result JSON。
 
 发现和处理：

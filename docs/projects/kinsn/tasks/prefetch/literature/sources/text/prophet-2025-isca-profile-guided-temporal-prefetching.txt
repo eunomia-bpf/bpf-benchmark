@@ -1,0 +1,1166 @@
+                                         Profile-Guided Temporal Prefetching
+                     Mengming Li                                                     Qijun Zhang                                    Yichuan Gao
+                   HKUST                                                             HKUST                                              Intel
+           mengming.li@connect.ust.hk                                        qzhangcs@connect.ust.hk                           yichuan.gao@intel.com
+
+                       Wenji Fang                                                          Yao Lu                                  Yongqing Ren
+                     HKUST                                                            HKUST                                            Intel
+             wfang838@connect.ust.hk                                            yludf@connect.ust.hk                          yongqing.ren@intel.com
+
+                                                                                      Zhiyao Xie∗
+                                                                                        HKUST
+                                                                                    eezhiyao@ust.hk
+
+Abstract                                                                                        ACM Reference Format:
+Temporal prefetching shows promise for handling irregular mem-                                  Mengming Li, Qijun Zhang, Yichuan Gao, Wenji Fang, Yao Lu, Yongqing Ren,
+                                                                                                and Zhiyao Xie. 2025. Profile-Guided Temporal Prefetching. In Proceedings
+ory access patterns, which are common in data-dependent and
+                                                                                                of the 52nd Annual International Symposium on Computer Architecture (ISCA
+pointer-based data structures. Recent studies introduced on-chip                                ’25), June 21–25, 2025, Tokyo, Japan. ACM, New York, NY, USA, 14 pages.
+metadata storage to reduce the memory traffic caused by access-                                 https://doi.org/10.1145/3695053.3731070
+ing metadata from off-chip DRAM. However, existing prefetching
+schemes struggle to efficiently utilize the limited on-chip storage.
+An alternative solution, software indirect access prefetching, re-                              1    Introduction
+mains ineffective for optimizing temporal prefetching.                                          Data prefetching, a widely studied technique for addressing the
+   In this work, we propose Prophet—a hardware-software co-                                     “memory wall” [59], has been extensively researched to enhance
+designed framework that leverages profile-guided methods to op-                                 processor performance. Among various data prefetching techniques
+timize metadata storage management. Prophet profiles programs                                   [7, 9–13, 20, 23–26, 30, 31, 37–39, 41, 42, 45, 46, 49, 50, 52, 53, 55–
+using counters instead of traces, injects hints into programs to                                58], temporal prefetching [7, 10, 26, 46, 55, 57, 58] shows particular
+guide metadata storage management, and dynamically tunes these                                  promise for addressing irregular memory access patterns, which
+hints to enable the optimized binary to adapt to different program                              often arise from indirect/data-dependent memory accesses and
+inputs. Prophet is designed to coexist with existing hardware tem-                              pointer-based data structures. Temporal prefetchers typically re-
+poral prefetchers, delivering efficient, high-performance solutions                             quire significant metadata storage to record correlations between
+for frequently executed workloads while preserving the original                                 memory addresses, making efficient metadata storage design vitally
+runtime scheme for less frequently executed workloads. Prophet                                  important. Recent studies [7, 56, 57] propose relocating metadata
+outperforms the state-of-the-art temporal prefetcher, Triangel, by                              storage from off-chip DRAM [10, 26, 46, 55, 58] to the on-chip
+14.23%, effectively addressing complex temporal patterns where                                  metadata table within LLC to reduce memory traffic. Since on-chip
+prior profile-guided solutions fall short (only achieving 0.1% per-                             storage is a limited resource, efficient management of the metadata
+formance gain). Prophet delivers superior performance across all                                table becomes even more critical.
+evaluated workload inputs, introducing negligible profiling, analy-                                Hardware temporal prefetcher. Existing hardware temporal
+sis, and instruction overhead.                                                                  prefetchers [7, 56, 57] employ various techniques for metadata table
+                                                                                                management, such as training data filtering, replacement policies,
+CCS Concepts                                                                                    and resizing. However, they fail to balance performance gains with
+• Computer systems organization → Architectures.                                                storage overhead. For example, Triage [57] adopts an advanced
+                                                                                                replacement policy (e.g., Hawkeye [27]) that incurs a 13 KB storage
+Keywords                                                                                        overhead but results in only a 0.25% performance gain. The state-
+                                                                                                of-the-art temporal prefetcher, Triangel [7], introduces additional
+Temporal Prefetching, Profile-Guided Optimization
+                                                                                                techniques like training data filtering to improve metadata table
+∗ Corresponding Author                                                                          management. However, according to its own ablation study [7], Tri-
+                                                                                                angel’s performance gain mostly comes from aggressive prefetching
+Permission to make digital or hard copies of all or part of this work for personal or
+classroom use is granted without fee provided that copies are not made or distributed           instead of its metadata table management, which actually incurs
+for profit or commercial advantage and that copies bear this notice and the full citation       90% of the storage overhead.
+on the first page. Copyrights for components of this work owned by others than the                 Ideal metadata table management involves two key requirements:
+author(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or
+republish, to post on servers or to redistribute to lists, requires prior specific permission   (1) storing all metadata that contributes to useful prefetches in the
+and/or a fee. Request permissions from permissions@acm.org.                                     metadata table; and (2) filtering out metadata that does not con-
+ISCA ’25, June 21–25, 2025, Tokyo, Japan                                                        tribute to useful prefetches. However, existing temporal prefetchers
+© 2025 Copyright held by the owner/author(s). Publication rights licensed to ACM.
+ACM ISBN 979-8-4007-1261-6/2025/06                                                              [7, 56, 57] fail to balance these two requirements. They either store
+https://doi.org/10.1145/3695053.3731070                                                         many invalid metadata entries (e.g., no insertion policy for Triage
+                             threshold                                                                       Input x                                  Input y
+             short-term                     not insert metadata + not prefetch
+                                                                                                                                                          Invalid
+                                                                                                                                                          New profiling
+                                                                                                             Binary                              New Binary (x)
+
+
+                                                                                                             Profile                  Prior works                Prophet
+                                                                                                     Trace             Counter
+                                                                                                     ~ GB               ~B
+                                                                                                  T1, PC1, …       Counter1,            Re-Profile                 Learn
+                                                                                                  T2, PC2, …       Counter2…            (Trace y)               (Counter x+y)
+
+
+                                                                                                                                             Analyze & Inject hint
+Figure 1: The bottom figure shows a metadata access pat-                                             Analyze & Inject hint
+tern: 1) Blue/Red dots are metadata accesses that result in                                                                          New Binary (y)        New Binary (x+y)
+useful/useless prefetches; 2) Blue/Red stars represent first                                                                                 Sub-optimal Optimal
+metadata access with/without temporal patterns. Their cor-                                                                                   Performance Performance
+responding metadata should/should not be inserted in the                                        Test
+metadata table. The top figure shows how Triangel [7] applies
+its PatternConf to the highlighted metadata access pattern.                                  Figure 2: Comparison between Prophet and prior profile-
+                                                                                             guided solutions. Prophet is lightweight as it only uses coun-
+[57]) or incorrectly filter out metadata entries that could result                           ters for profiling. Prophet can integrate counters from mul-
+in useful prefetches (e.g., overly conservative insertion policy for                         tiple inputs, enabling it to adapt to varying program inputs.
+Triangel [7]).
+    To investigate why Triangel’s metadata management is ineffi-                             [6, 29, 33, 60] for prefetching are ineffective for most temporal pat-
+cient, Figure 1 shows a metadata access pattern1,2 and analyzes                              terns. These solutions primarily focus on inserting software prefetch
+how Triangel applies its PatterConf to the pattern. The 4-bit Pattern-                       instructions for indirect memory accesses where the prefetch ker-
+Conf evaluates whether future memory accesses exhibit temporal                               nel follows a regular stride pattern. They struggle to handle more
+patterns. Triangel utilizes past short-term data to update the Pat-                          complex irregular patterns, such as pointer-chasing accesses and
+ternConf. Specifically, useful metadata accesses (blue dots) increase                        indirect memory accesses with complicated prefetch kernels. This
+the PatternConf, while useless metadata accesses (red dots) decrease                         limitation arises primarily because many irregular patterns involve
+it. When PatternConf falls below a threshold, indicating the absence                         long-chain dependencies [8], and computing dependent addresses
+of temporal patterns in the future, Triangel will completely disable                         along the chain significantly impacts prefetching timeliness.
+metadata insertion (no insertion for stars in Figure 1).                                        Our solution named Prophet. Driven by our analysis, we
+    We have two observations for Figure 1: (1) The metadata access                           propose Prophet3 —a hardware-software co-designed framework,
+patterns of temporal prefetching are highly variable, characterized                          which maintains the metadata table within hardware temporal
+by interleaved useful (blue) and useless (red) metadata accesses                             prefetchers while leveraging profile-guided methods to improve
+and large metadata reuse distance variance. (2) Triangel does not                            metadata table management. Prophet addresses aforementioned
+adapt to such dynamic variance of temporal patterns. As shown                                challenges without requiring significant hardware overheads: it
+in Figure 1, PatterConf drops to 0 due to the occurrence of many                             offloads hardware-intensive tasks (e.g., data analysis) to software
+red dots in a short term. As a result, Triangel incorrectly rejects                          and injects hints into programs to guide the metadata table insertion
+the insertion of subsequent interleaved blue stars (first metadata                           policy, replacement policy, and resizing operations.
+access with temporal pattern). Similar challenges also affect other                             Beyond the scope of temporal prefetching, Prophet introduces
+metadata management strategies, as we will cover in Section 2.1.                             an innovative, efficient profile-guided solution that overcomes key
+    Purely hardware-based temporal prefetching fails to handle the                           challenges in traditional profile-guided methods, as outlined below.
+dynamic variance of metadata accesses due to two main reasons:                                    • Adaptable. We investigate why profile-guided optimizations
+(1) they lack visibility into future program behavior, and (2) while                                 often struggle with varying program inputs and why hints
+long-term execution data could help mitigate this problem, storing                                   derived from one input may not apply to others. Based on
+and analyzing such data would introduce significant performance                                      these insights, we enable Prophet to integrate profiling data
+and storage overhead.                                                                                from multiple program inputs. Leveraging the aggregated
+    Profile-guided temporal prefetcher. To address the above                                         data, Prophet can generate a single optimized binary that
+challenges, profile-guided techniques are promising by leveraging                                    adapts effectively across these inputs, as shown in Figure 2.
+comprehensive program execution data to guide metadata table                                      • Lightweight. Prophet leverages Performance Monitoring
+management strategies. However, existing profile-guided solutions                                    Unit (PMU) counters instead of traces to profile programs, of-
+1 This pattern is derived from a hardware temporal prefetcher with an unlimited                      fering two major benefits: (1) it avoids the significant perfor-
+metadata table size and no insertion policy.                                                         mance and storage overhead linked to trace-based profiling;
+2 This pattern is extracted from a frequently accessed instruction in omnetpp, a work-
+load where Triangel shows limited effectiveness.                                             3 Prophet is open-sourced at: https://github.com/hkust-zhiyao/Prophet.
+
+                                                                                         2
+            Training Phase            Prediction Phase                      2.1.1 Insertion policy (training data filtering). Not every demand
+                                                                            request should be used to train the temporal prefetcher and trigger
+                 ……
+                                                                            metadata insertion. To improve the utilization of the metadata table,
+
+
+
+
+                                             Time
+               PC1, Addr3                           Addr2
+
+
+
+                            Time
+               PC1, Addr2                                                   temporal prefetchers should focus on handling demand requests
+               PC1, Addr1              Addr1                                that exhibit solvable temporal patterns. The “solvable” indicates
+                                                                            these patterns repeat in a short enough sequence to fit in the meta-
+                   L2 cache (Temporal Prefetcher)
+                                                                            data table. Ideally, the temporal prefetcher should reject metadata
+                                                                            insertion for demand requests that do not meet this criterion.
+          Store ……                                                              The first on-chip temporal prefetching scheme, Triage, does not
+                                       Addr2                                implement any insertion (i.e. filtering) policy. The state-of-the-art
+           Addr2       Addr3                                                temporal prefetcher, Triangel, leverages PatternConf and ReuseConf
+                                                    Addr3
+           Addr1       Addr2                                                to identify and filter out demand requests that do not fall within
+                                           Predict                          the capabilities of temporal prefetchers. The PatternConf checks
+                                                                            whether demand requests from a memory instruction exhibit a
+                     L3 cache (Metadata Table)                              temporal pattern. The ReuseConf further evaluates whether the
+                                                                            temporal pattern can fit the metadata table.
+  Figure 3: A general framework of temporal prefetching.                        Inefficiency of insertion policy. According to Triangel’s abla-
+       (2) it is readily applicable to current architectures without        tion study [7], filtering out demand requests with PatternConf and
+       requiring additional memory trace systems.                           ReuseConf only yields marginal overall performance improvements
+     • Compatible. Prophet can co-exist with existing hardware              and even degrades the performance for many applications. This lim-
+       temporal prefetchers. Prophet offers high-performance yet            itation stems from the inaccuracy of these metrics (i.e., PatternConf
+       efficient solutions for frequently executed workloads while          and ReuseConf ), as illustrated in Figure 1. As a result, inaccurate
+       maintaining the original runtime solution (e.g., Triangel [7])       filtering discards metadata that could lead to useful prefetches.
+       for rarely executed workloads.                                           Insertion policy in Prophet. Prophet implements a more ac-
+   We evaluate Prophet on applications representative of tempo-             curate insertion policy, filtering out only metadata that is highly
+ral patterns, which are commonly used in prior studies [7, 56–58].          unlikely to originate from temporal patterns. This is accomplished
+Across all applications, Prophet outperforms the state-of-the-art           by identifying PCs whose overall prefetching accuracy falls below
+software indirect memory access prefetching schemes, RPG2 [60]              an extremely low threshold, a metric easily obtained during the
+by 34.48% and hardware temporal prefetcher, Triangel [7] by 14.23%.         profiling stage. Unlike hardware temporal prefetchers, which rely
+This performance gain is driven by Prophet’s efficient metadata ta-         on short-term data to guide future program execution, the metrics
+ble management, which not only significantly enhances prefetching           gathered during profiling (e.g., prefetching accuracy) reflect the
+coverage but also maintains high prefetching accuracy. Extensive            actual behavior of programs, resulting in more precise decisions.
+evaluations demonstrate that Prophet can adapt to varying pro-
+gram inputs while introducing negligible profiling, analysis, and           2.1.2 Replacement Policy. When the metadata table capacity is
+instruction overheads.                                                      insufficient to accommodate a new entry, the temporal prefetcher
+                                                                            must decide which existing metadata entry to evict. Triage [57]
+2 Background                                                                observed that only a small fraction of metadata is frequently reused.
+                                                                            As a result, it employs an advanced replacement policy (e.g., Hawk-
+2.1 Hardware Temporal Prefetching                                           eye [27]) to evict metadata entries that are less likely to be accessed
+As shown in Figure 3, the core idea of hardware temporal prefetch-          in the future, thereby enhancing the utilization of metadata tables.
+ing [7, 10, 26, 46, 55–58] is to record previously accessed memory          However, according to Triangel [7], this replacement policy pro-
+addresses and their correlations, referred to as metadata. When             vides only marginal performance gains, achieving a speedup of
+recorded addresses are re-accessed, the prefetcher can use the cor-         less than 0.25%. As a result, Triangel replaces Hawkeye in Triage
+relation information to predict future memory accesses. To record           with a simpler replacement policy—SRRIP [28]—to balance storage
+metadata of various temporal patterns, hardware temporal prefetch-          overhead with performance gains.
+ing algorithms require significant data storage. Early temporal                Inefficiency of replacement policy. (1) The reuse distance of
+prefetchers [10, 26, 46, 55, 58] utilized DRAM to store the metadata.       metadata entries varies significantly, as shown in Figure 1. These
+However, fetching metadata from DRAM consumes a substantial                 replacement policies solely focus on predicting reuse distances,
+amount of memory bandwidth that could otherwise be used for                 making them inefficient for handling such high variance [54]. (2)
+demand memory accesses. To address this issue, Triage [56, 57]              They focus solely on increasing hits in metadata table without
+recently proposed storing metadata in a Markov table that shares            considering if metadata hits further result in useful prefetches.
+space with LLC, eliminating the need to load metadata from off-                Replacement policy in Prophet. Prophet enhances the re-
+chip memory. However, on-chip storage is precious, so temporal              placement policy by incorporating prefetching accuracy as an ad-
+prefetchers must operate with a limited metadata table size.                ditional metric for selecting victim entries in the metadata table.
+   To efficiently utilize on-chip memory, Triage [56, 57] and the           After filtering out metadata through the insertion policy, Prophet
+state-of-the-art temporal prefetcher, Triangel [7], introduce several       assigns different priority levels to the remaining metadata based
+techniques for managing the metadata table:                                 on the prefetching accuracy. Metadata entries that are less likely
+                                                                        3
+to generate useful prefetch requests are assigned lower priority             static solutions, programmers manually determine where to insert
+levels, making them prioritized candidates for replacement. Like             software prefetch instructions. However, due to the complexity
+the insertion policy, Prophet obtains prefetching accuracy during            of indirect memory accesses, manual insertion is prone to errors
+the profiling stage, ensuring precise and effective management.              and may cause performance slowdowns. Profile-guided solutions
+                                                                             overcome the limitations of static approaches. They profile running
+2.1.3 Resizing. The metadata table shares space with the LLC,                programs to automatically identify optimal positions for inserting
+requiring a careful balance in space allocation to avoid compromis-          prefetch instructions. Experimental results [29, 60] indicate that
+ing the LLC’s ability to serve regular demand requests. Previous             these approaches can significantly improve system performance
+schemes address this trade-off using methods like Bloom Filters [16]         on certain graph benchmarks, such as CRONO [5].
+or Set Dueller [7]. Triage employs a Bloom Filter to calculate the              Inefficiency of software indirect access prefetching. Ex-
+effective entries in the metadata table, but tracking approximately          isting software indirect access prefetching schemes are effective
+200,000 entries incurs a storage overhead exceeding 200 KB. To mit-          only for a narrow subset of indirect memory accesses where the
+igate this, Triangel introduces the Set Dueller, which uses a small          prefetch kernel follows a regular stride pattern. They fail to address
+subset of cache sets to model the full-size regular LLC and Markov           most irregular patterns effectively, including complex indirect ac-
+table. The Set Dueller works by simulating various partitioning              cesses (e.g., prefetch kernel without stride patterns) and pointer-
+configurations for the cache and the Markov table, evaluating their          chasing accesses. This limitation arises primarily because many
+respective hit rates. After a defined window, the Set Dueller selects        irregular patterns involve long-chain dependencies [8], and com-
+the configuration that maximizes the hit rate. This approach re-             puting dependent addresses along the chain significantly affects
+duces resizing overhead to approximately 2 KB by tracking only               the prefetching timeliness.
+selected cache sets instead of the entire metadata table.                       To validate their limitations, in Section 5.2, we evaluate the state-
+   Inefficiency of resizing. Similar to insertion and replacement            of-the-art PGO-based scheme, RPG2 [60], on representative SPEC
+policies, the hit rate between LLC and metadata table sampled by             CPU workloads commonly used in temporal prefetching studies
+Triangel’s resizing sometimes fails to accurately predict future meta-       [7, 56, 57]. Normalized to a baseline without a temporal prefetcher,
+data table requirements. For example, in workloads like omnetpp              RPG2 achieves only a 0.1% performance improvement, significantly
+and mcf, we observe that Triangel’s resizing often chooses overly            lower than its gains on graph benchmarks. We observe that this
+conservative metadata table sizes. Although this improves prefetch-          underperformance is due to the complexity of indirect memory
+ing accuracy, it reduces prefetching coverage, ultimately damaging           accesses in the evaluated workloads. For instance, in mcf, the index
+overall system performance. As a result, Set Dueller provides only           of a prefetch kernel is derived through a series of logical operations
+limited performance benefits for Triangel.                                   and multi-step arithmetic computations.
+   Resizing in Prophet. Prophet leverages profile-guided tech-                  Solution in Prophet. Prophet is applicable to all types of tem-
+niques to implement a Bloom-Filters-like method, which helps                 poral patterns because it gets rid of software prefetch instruction.
+maintain precision while avoiding significant storage overhead               Prophet only guides the execution of hardware structures with hints.
+introduced by runtime approaches. Specifically, Prophet allocates            By preserving the core functions of the metadata table, Prophet
+storage to the metadata table based on the peak metadata usage ob-           maintains the ability to handle all temporal patterns like hardware
+served during the profiling stage. This approach is adopted because          temporal prefetchers.
+resizing provides only marginal performance gains (Section 5.9),
+while incorrect resizing can significantly degrade performance.
+
+2.2    Software Indirect Access Prefetching                                  3 Overview
+Software indirect access prefetching [6, 17, 19, 22, 29, 33, 60] pre-        3.1 Architecture Overview
+dicts indirect memory accesses by inserting prefetch instructions            This section provides an overview of Prophet architecture, which
+into programs. Indirect memory accesses include prefetch kernel              is compatible with existing hardware temporal prefetchers. For
+accesses (e.g., b[i]) and data-dependent memory accesses linked to           the metadata format, Prophet packs 12 compressed metadata en-
+that prefetch kernel (e.g., a[b[i]]).                                        tries inside each 64-byte cache line, with each metadata entry con-
+   Software indirect access prefetching primarily targets situations         taining a 10-bit tag and a 31-bit target address. For the metadata
+where the prefetch kernel follows a stride pattern, such as when             table management, Prophet offers efficient, high-performance so-
+the accesses for a[b[i]] occur in loops with indices i, i + d, i + 2d,       lutions for frequently executed workloads while maintaining the
+and so on. These schemes generally follow a three-step process: (1)          original runtime solution (e.g., Triangel) for rarely executed work-
+identifying the prefetch kernel; (2) calculating the prefetch distance       loads. As shown in Figure 4, Prophet consists of three components:
+between the insertion position of software prefetch instructions             profile-guided insertion policy, profile-guided replacement policy
+and the prefetch kernel; and (3) inserting the software prefetch             (along with its associated replacement states), and profile-guided
+instructions into original programs. The most critical aspect is             resizing operations. These profile-guided components rely on two
+calculating the prefetching distance, as the position of prefetch            types of information granularity: application-level and PC-level.
+instructions determines the prefetching timeliness.                          The application-level information is embedded in the Control and
+   Based on the methods used to calculate the prefetching distance,          Status Register (CSR). The PC-level information is accompanied
+previous works can be categorized into static solutions [17, 19, 22]         by demand requests, referred to as Hint in Figure 4. Next, we will
+and profile-guided optimization (PGO) solutions [6, 29, 33, 60]. In          overview these components:
+                                                                         4
+                                                                  Demand Request
+                                                                                                               Update
+
+                                            CSR                                       Hint
+                                                                                                    Update
+
+                        Runtime            Prophet            Runtime                Prophet                Prophet                  Runtime
+                        Resizing           Resizing       Insertion Policy       Insertion Policy      Replacement State        Replacement State
+                                                                                                                         Victim
+                                                                                                                        Candidates
+
+                             Prophet > Runtime                     Prophet > Runtime
+
+                                                                                 Insert
+                                                 Resize                                                       Replace
+                                                                   Metadata Table
+
+Figure 4: Prophet architecture overview. Prophet coexists with hardware temporal prefetchers by sharing the same metadata
+table but leveraging more accurate profile-guided methods for metadata table management.
+    Prophet Insertion Policy: This policy determines whether to                                                                       Analyze
+train the temporal prefetcher with demand requests and insert their
+                                                                                              Binary                       PC Hint                  Simplified TP
+associated metadata into the table by checking the hint information
+carried by the demand requests. We disable the Runtime Insertion                                    Test                                                    Collect
+Policy when the Prophet Insertion Policy is enabled. Prophet’s
+building blocks are activated through CSR manipulation. Specifi-                          Simplified TP                    CSR Hint                 New Counter
+cally, after profiling the program, a CSR manipulation instruction
+is inserted at the beginning of the binary to enable Prophet.                                       Collect                     Inject                      Merge
+    Prophet Replacement Policy: This policy assigns replacement                                                                                        Merged
+                                                                                             Counter                     New Binary
+priorities to demand requests, with the priority information carried                                          Analyze                     Run          Counter
+by hints within demand requests. Upon inserting new metadata,
+we record the priority information from hints into the Prophet                            Step1: Profiling              Step2: Analysis             Step3: Learning
+Replacement State. During the replacement process, the Prophet
+Replacement Policy first generates candidate victims for the Run-                   Figure 5: Prophet process overview. Step1: Prophet lever-
+time Replacement Policy, which then chooses the final victim.                       ages the PMU to gather counters related to the temporal
+    Prophet Resizing: This policy retrieves the target metadata                     prefetcher’s performance. Step2: Prophet analyzes the col-
+table size from the CSR and allocates LLC space to the metadata                     lected counters to generate hints and then injects hints into
+table at the beginning of program execution. Similar to the Prophet                 the original binaries. Step 3: Prophet samples and learns
+Insertion Policy, we disable the Runtime Resizing when Prophet                      counters across different program inputs.
+Resizing is enabled.
+    Compatibility. In our framework, Prophet coexists with hard-                    of 1 MB, and a prefetching degree of 1. This configuration ensures
+ware temporal prefetchers by sharing the same metadata table but                    an unbiased evaluation of memory instructions under temporal
+leveraging more accurate profile-guided methods for metadata table                  prefetching, without incorporating any additional optimizations.
+management. Additionally, Prophet reuses the runtime solution’s                     Compared to other profile-guided solutions [29, 32, 35, 36, 54] that
+replacement states, integrating both reuse distance and prefetching                 uses trace for profiling, Prophet is more lightweight, introducing
+accuracy into its replacement policy for enhanced effectiveness.                    negligible profiling overhead in the Profiling step, as well as analysis
+Programmers can switch between Prophet and the hardware tem-                        and instruction overhead in the Analysis step (Section 5.4).
+poral prefetcher based on application execution frequency and the                      Step2: Analysis (Section 4.2). Prophet processes the counters
+trade-off between Prophet’s performance gains and its impact on                     collected in Step 1 through offline scripts, generating two types
+DRAM traffic (Section 5.9).                                                         of hints for efficient metadata table management: PC-level and
+                                                                                    application-level. PC-level hints are specific to individual memory
+                                                                                    instructions and are utilized in Prophet’s insertion policy and re-
+3.2    Process Overview                                                             placement policy. On the other hand, application-level hints are
+Figure 5 outlines the process flow of Prophet, comprising three                     applied globally through a CSR manipulation instruction at the pro-
+steps: Profiling, Analysis, and Learning. Next, we overview the                     gram’s start and are used in Prophet’s resizing operations. These
+operations involved in each step of Prophet’s process:                              hints are injected into the original binary, resulting in an optimized
+   Step1: Profiling (Section 4.1). Prophet executes target binaries                 binary that can execute with Prophet.
+with the simplified temporal prefetcher to collect counters through                    Step3: Learning (Section 4.3). At regular intervals, Prophet
+the user-space PMU interfaces, such as Linux’s perf tools [21]. These               samples new counters from varying inputs with the simplified
+collected counters are then analyzed in the subsequent Analysis                     Prophet and integrates them with previously collected counters.
+step to derive optimized metadata table management strategies.                      Then, the subsequent Analysis step will generate new hints based
+The simplified temporal prefetcher operates with a configuration                    on the merged counters, making Prophet’s insertion policy, replace-
+of Prophet with insertion policy disabled, a fixed metadata table                   ment policy, and resizing operations adaptable to all encountered
+                                                                             5
+                 Low                Medium         High
+                 Level               Level         Level                                                      𝐿2_𝑈 𝑠𝑒 𝑓 𝑢𝑙_𝑃𝑟𝑒 𝑓 𝑒𝑡𝑐ℎ𝑒𝑠
+                                                                                   𝑃𝑟𝑒 𝑓 𝑒𝑡𝑐ℎ𝑖𝑛𝑔 𝐴𝑐𝑐𝑢𝑟𝑎𝑐𝑦 =
+                                                                                                               𝐿2_𝐼𝑠𝑠𝑢𝑒𝑑_𝑃𝑟𝑒 𝑓 𝑒𝑡𝑐ℎ𝑒𝑠
+                                                                              The number of allocated entries in the metadata table, an application-
+                                                                           level metric, can be measured using standard PMU counters. For
+                                                                           instance, we can define two counters: one for the number of meta-
+                                                                           data table insertions and another for replacements. The number of
+                                                                           allocated entries in the metadata table can be calculated as:
+
+                                                                                    𝐴𝑙𝑙𝑜𝑐𝑎𝑡𝑒𝑑 𝐸𝑛𝑡𝑟𝑖𝑒𝑠 = 𝐼𝑛𝑠𝑒𝑟𝑡𝑖𝑜𝑛𝑠 − 𝑟𝑒𝑝𝑙𝑎𝑐𝑒𝑚𝑒𝑛𝑡𝑠
+Figure 6: The prefetching accuracy of temporal prefetching
+across different memory instructions in omnetpp.
+                                                                           4.2    Step 2: Analysis
+program inputs. Through repeated learning, Prophet innovatively            This step analyzes the counters collected in Step 1 to generate
+enables a single optimized binary to achieve optimal performance           PC-level and application-level hints for the insertion policy, re-
+across a wide range of program inputs.                                     placement policy, and resizing operations. Although both the inser-
+                                                                           tion and replacement policies are guided by prefetching accuracy,
+4 Design                                                                   Prophet adopts different strategies. The insertion policy filters out
+                                                                           memory instructions that clearly lack temporal patterns (those
+4.1 Step 1: Profiling                                                      with extremely low prefetching accuracy), while the replacement
+Two key questions arise in this step: What information is necessary        policy applies more refined management to the remaining memory
+to efficiently guide the management of the metadata table? How can         instructions. Our observations indicate that as long as a memory
+we acquire this information with current architectures? To answer          instruction’s prefetching accuracy is not particularly low, at least
+the first question, we identify two primary objectives for managing        some of its memory accesses exhibit a temporal pattern.
+the metadata table: (1) enhancing its utilization, and (2) reducing           Prophet Insertion Policy uses Equation 1 to decide whether
+its impact on the LLC. The insertion and replacement policies are          to use demand requests from PCs to train the temporal prefetcher
+well-suited for achieving the first goal, while resizing operations        and insert the corresponding metadata. We define 𝐸𝐿_𝐴𝐶𝐶 as an
+are suitable for the second. For enhancing utilization, prefetching        extremely low threshold for the prefetching accuracy, showing that
+accuracy per memory instruction serves as a critical metric.               memory instructions almost exhibit no temporal pattern.
+As shown in Figure 6, although individual metadata accesses (Fig-
+ure 1) exhibit high variability, the temporal prefetching accuracy
+                                                                                                        
+                                                                                                            1,   𝑎𝑐𝑐 ≥ 𝐸𝐿_𝐴𝐶𝐶
+of every instruction can be broadly classified into distinct levels.                        𝐼 (𝑎𝑐𝑐) =                                        (1)
+                                                                                                            0,   𝑎𝑐𝑐 < 𝐸𝐿_𝐴𝐶𝐶
+Since the prefetching accuracy reflects the adaptability of mem-
+                                                                              The above equation indicates that if a PC’s accuracy under tempo-
+ory instructions to the temporal prefetcher, lower-level memory
+                                                                           ral prefetching falls below 𝐸𝐿_𝐴𝐶𝐶, Prophet instructs the temporal
+instructions generate fewer memory accesses exhibiting temporal
+                                                                           prefetcher to discard all demand requests associated with that PC.
+patterns compared to higher-level memory instructions. Thus, the
+                                                                           This decision is encoded as a one-bit hint injected into the corre-
+insertion policy can filter out metadata entries from lowest-level
+                                                                           sponding memory instructions. All demand requests generated by
+memory instructions, while the replacement policy can assign fine-
+                                                                           these instructions will carry the embedded hint. Upon reaching
+grained replacement priorities to unfiltered metadata entries based
+                                                                           the prefetcher, a simple logic checks the hint to decide whether to
+on their levels. For reducing the metadata table’s impact on the
+                                                                           discard the corresponding requests.
+LLC, the number of allocated entries in the metadata table is a
+                                                                              Prophet Replacement Policy assigns a priority level to each
+useful metric. Sampling this metric at the program execution’s end
+                                                                           stored metadata entry, with lower levels prioritized for replacement.
+allows us to determine the maximum metadata table size.
+                                                                           Like the Prophet insertion policy, these priority levels are initially
+   We employ Intel’s Processor Event-Based Sampling (PEBS) [3]
+                                                                           embedded in memory access instructions. When inserting new
+utility to collect PC-level prefetching accuracy. PEBS records the
+                                                                           metadata entries, Prophet records their associated priority levels
+program context (e.g., PC) when specific events occur. Prior to data
+                                                                           into the Prophet Replacement State.
+collection, we configure the temporal prefetcher in its simplified
+                                                                              We apply Equation 2 to determine each memory instruction’s
+mode (Section 3.2) and disable all other L2 prefetchers. We then
+                                                                           priority level. The 𝑛 is a parameter controlled by the designer.
+enable PEBS to sample following events:
+    • MEM_LOAD_RETIRED.L2_Prefetch_Issue counts the num-                                      
+                                                                                               0,               𝐸𝐿_𝐴𝐶𝐶 ≤ 𝑎𝑐𝑐 < 21𝑛
+      ber of issued prefetch requests.                                                                             1           2
+                                                                                                1,                 2𝑛 ≤ 𝑎𝑐𝑐 < 2𝑛
+                                                                                              
+                                                                                              
+                                                                                              
+    • MEM_LOAD_RETIRED.L2_Prefetch_Useful tracks the num-                                                          2 ≤ 𝑎𝑐𝑐 < 3
+                                                                                      𝑅(𝑎𝑐𝑐) = 2,
+                                                                                              
+                                                                                              
+      ber of prefetches hit by demand requests.
+                                                                                                                   2𝑛          2𝑛            (2)
+                                                                                              
+                                                                                              
+                                                                                               ..               ..
+   The above two events can be implemented with minor modi-
+                                                                                              
+                                                                                                .                .
+                                                                                                                   2𝑛 −1 ≤ 𝑎𝑐𝑐 < 1
+                                                                                              
+                                                                                               𝑛
+fications to existing MEM_LOAD_RETIRED.L2_MISS (L2 cache miss)                                 2 − 1,               2𝑛
+event, which is already supported on Intel’s Xeon Processor [1].              When choosing victim entries in the metadata table, Prophet first
+Each PC’s prefetching accuracy can be computed as:                         identifies victim candidates with the lowest priority level. Then,
+                                                                       6
+  Execution Flow      Input X                                                            step 2 when it progresses to step 3 (e.g., input X). In step 3, we
+                           Load A              Load B              Load E                assume Prophet acquires new counters under previously unseen
+                           (hint1)             (hint2)             (hint4)               inputs (e.g., input Y). Prophet merges them with the previously
+      Binary                                                                             maintained counters. For prefetching accuracy per PC, we use the
+                      Input Y
+                           Load A              Load C              Load E
+                                                                                         Equation 4 for merging. The variable 𝑜 indicates old counter value
+                           (hint1)             (hint3)             (hint5)               under input X, while 𝑛 represents new counter value under input
+                                                                                         Y. The variable 𝑙 indicates the number of Prophet loops, where
+Figure 7: Challenges of traditional profile-guided optimiza-                             each execution of step 2 counts as one loop, and 𝐿 is a parameter
+tions across different program inputs.                                                   predefined by the designer.
+Prophet applies LRU among these victim candidates to determine                                                           1
+                                                                                                                  𝑜 + min(𝑙+1,𝐿) × (𝑛 − 𝑜),   ∃𝑜 ∈ 𝑋
+the final replaced entry.                                                                          𝑀𝑒𝑟𝑔𝑒𝑑 =                                                 (4)
+   Prophet Resizing estimates the metadata table size based on                                                    𝑛,                          𝑜 ∈ 𝑋
+the number of allocated metadata entries at the end of program                              For the number of allocated metadata entries at the end of pro-
+execution. Assuming the counter value is 𝑆, we first round it4 to                        gram execution, we apply the Equation 5 for merging:
+the nearest power of 2, and then use the Equation 3 to determine
+the number of ways allocated for the metadata table in the LLC:
+                                                                                                                   𝑀𝑒𝑟𝑔𝑒𝑑 = max(𝑜, 𝑛)                       (5)
+                                                         
+                                        𝑇 𝑎𝑟𝑔𝑒𝑡 𝑆𝑖𝑧𝑒                                        We assume a binary first encounters input X (steps 1 and 2),
+         𝐴𝑙𝑙𝑜𝑐𝑎𝑡𝑒𝑑 𝑊 𝑎𝑦𝑠 = 𝑐𝑒𝑖𝑙                                  (3)
+                                  𝑁𝑢𝑚𝑏𝑒𝑟 𝑜 𝑓 𝑠𝑒𝑡𝑠 𝑖𝑛 𝐿𝐿𝐶                                 followed by input Y (steps 3 and 2). Next, we will prove that the
+   We completely disable temporal prefetching when the outcome                           optimized binary can ultimately adapt to both the previous and the
+of the above equation is less than 0.5. Based on the result of Equa-                     newly observed inputs.
+tion 3, Prophet inserts a CSR manipulation instruction at the pro-                             • Merged prefetching accuracy for Load A: Since Load A
+gram’s start to configure the metadata table size.                                               could receive the same hints under input X and Y, both 𝑜
+                                                                                                 and 𝑛 fall within the same range as defined by Equation 1
+4.3     Step 3: Learning                                                                         and Equation 2. After applying Equation 4 with 𝑙 = 1, the
+In this step, Prophet collects counters from varying program inputs                              merged accuracy remains within the same range, resulting
+and integrates them, allowing the optimized binary to deliver opti-                              in the same hint being generated in the next step 2.
+mal performance across diverse program inputs. Figure 7 illustrates                            • Merged prefetching accuracy for Loads B and C: Prior
+why profile-guided methods are sensitive to different program inputs                             to input Y, Prophet lacks counters for Load C (i.e., 𝑜 ∈ 𝑋 ).
+and why the hints derived from one input may not be applicable to                                Therefore, the merged prefetching accuracy for Load C is set
+other inputs. A single binary may follow different execution paths                               to 𝑛. In the subsequent Step 2, Prophet injects new hints for
+depending on the input. For example, with input X, the binary might                              Load C based on 𝑛. As a result, Prophet successfully learns
+execute memory access instructions A, B, E, while input Y causes                                 hints for Load C, which was previously unrecorded.
+it to execute instructions A, C, E. When applying profile-guided                               • Merged prefetching accuracy for Load E: Load E could
+optimizations to this binary under inputs X and Y respectively,                                  receive different hints under input X and Y, causing 𝑜 and 𝑛
+there are three different scenarios:                                                             to fall into different ranges in Equation 1 or Equation 2. In
+     • Load A: Under both inputs X and Y, the binary executes Load                               this case, Equation 4 adjusts 𝑜 through the offset between 𝑛
+        A. Profile-guided optimizations generate identical hints for                             and 𝑜. If Prophet observes higher prefetching accuracy for
+        both inputs, possibly because they execute the same code                                 Load E under input Y (𝑛 − 𝑜 > 0), it increases the estimated
+        and produce similar profiling metrics. In this case, the hints                           accuracy, refining its hints accordingly. Conversely, if 𝑛 −
+        generated for Load A under input X remain effective for                                  𝑜 < 0, Prophet decreases the estimated accuracy. Over time,
+        Load A under input Y.                                                                    frequently observed counter values dominate merged results.
+     • Loads B and C: execute completely different instructions,                               • Merged allocated entries for the entire program: Prophet
+        resulting in distinct hint information. In this case, any hint                           adopts a conservative strategy to accommodate the metadata
+        derived from Load B under input X is ineffective for Load C                              table size requirements for all program inputs.
+        under input Y.
+     • Load E: Although both inputs X and Y execute Load E, the                          4.4     Hint Information Injection
+        global execution context impacts Load E differently under                        According to Equation 1 and Equation 2, each memory instruction
+        each input. Consequently, profile-guided methods may gen-                        requires at most 3-bit hint information. We design two methods for
+        erate distinct hints. In this case, the hints generated for Load                 injecting this 3-bit information into memory access instructions.
+        E under input X are ineffective for Load E under input Y.                           Hint buffer. Reference to the approach in Whisper [35], we can
+    Building on the three cases above, we develop a process that                         leverage specialized hint instructions to carry hints. When these
+enables our counter-based profile-guided optimizations to adapt                          hint instructions are executed, Prophet stores the hint informa-
+to different program inputs. Prophet maintains the counters from                         tion and PC tag in a hint buffer near the temporal prefetcher. Hint
+4 we ensure the rounded value does not exceed the maximum number of entries that a       instructions are only required to execute once. To minimize their im-
+1MB metadata table can accommodate.                                                      pact on total dynamic instructions, they can be inserted at the entry
+                                                                                     7
+                                                 T=1    T=2     T=3     T=4     T=5
+                            1.0
+Markov Targets Percentage
+
+
+                                                                                                                              Lookup Tag             Target           Counter
+
+                            0.8                                                                       LastAddr: B                                       C                2
+                                                                                                      CurAddr: D                 Tag (B)
+                            0.6                                                                                                                   NULL        D       NULL      1
+
+                            0.4                                                                                  Figure 9: The Multi-path Victim Buffer.
+                            0.2                                                                           • Replacement. We reuse Prophet Replacement Policy to
+                                                                                                            maintain frequently used Markov targets. As shown in Fig-
+                            0.0
+                                               kes 166 mcf
+                                                                                                            ure 9, we add a counter for each Markov target, incrementing
+                                                                   p        50 x3     k     an
+                                         b igla gcc_       o m netp _pds- sphin lancbm eome                 the counter value each time the target is accessed. We set
+                                      r _                             l e x      x a  G
+                                  asta                            sop                                       the priority levels as the maximal5 counter value of Markov
+     Figure 8: The percentage of Markov target number (T) in                                                targets (which differs from Equation 2).
+     temporal prefetching.                                                                                • Prefetch. Prefetching with the Reuse Buffer or metadata ta-
+                                                                                                            ble will also trigger a lookup in the Multi-path Victim Buffer.
+     point of programs using BOLT [48]. Prophet applies its optimiza-                                       Prophet uses the same lookup addresses to search for entries
+     tions to memory instructions whose PC matches an entry in the                                          in the Multi-path Victim Buffer. If Prophet detects different
+     hint buffer. To efficiently utilize the hint buffer, Prophet focuses on                                Markov targets, it prefetches these targets accordingly.
+     memory instructions that contribute the most to cache misses. We
+     pinpoint these instructions by using MEM_LOAD_RETIRED.L2_MISS                                   5 Evaluation
+     event at step 1. Empirical findings show that a 128-entry hint buffer
+     (0.19 KB) is sufficient for achieving high performance. Although this                           5.1 Experimental Setup
+     approach introduces additional storage overhead, it is compatible                                                   Table 1: System Configuration.
+     with all instruction set architectures.
+                                                                                                      Module                        Configuration
+        Reserved bits or instruction prefix. We can embed hints into
+     reserved bits within instructions, allowing hints to be decoded and                              Core                          5-wide fetch, 5-wide decode
+     combined with memory access instructions. This approach saves ad-                                                              10-wide issue, 10-wide commit
+     ditional space for storing hints but is constrained by the requirement                                                         120-entry IQ, 85/90-entry LQ/SQ
+     that commonly used memory access instructions include reserved                                                                 288-entry ROB
+     bits, limiting its applicability. For CISC architectures like x86, we                            Private L1 I/D cache          64 KB each, 4-way, 64B line, 16 MSHRs
+     can also add prefixes for memory instructions to carry hints. While                                                            PLRU, 2 cycles hit latency
+     this method does not require reserved bits, it increases the code                                                              degree-8 stride prefetcher for L1D cache
+     footprint and may impact I-cache performance. However, Prophet                                   Private L2 cache              512 KB, 8-way, 64B line, 32 MSHRs
+     focuses on at most 128 memory instructions and introduces only a                                                               PLRU, mostly_inclusive
+     3-bit prefix for these instructions. Therefore, Prophet maximally                                                              9 cycles hit latency
+     introduces 3×128
+                    64    = 6 Byte storage overhead to I-cache (usually                               Shared L3 cache               2 MB/core, 16-way, 64B line, 36 MSHRs
+     with 64 KB). Consequently, the x86 instruction prefix scheme has                                                               CHAR [18], mostly_exclusive
+     an almost negligible impact on I-cache performance.                                                                            20 cycles hit latency
+                                                                                                      Memory                        LPDDR5_5500_1x16_BG_BL32
+     4.5                          Multi-path Victim Buffer                                                                          Single channel, 1 rank per channel
+    We observe that the same memory address can appear in multiple                                      System Configuration. We evaluate Prophet using gem5’s FS
+    distinct temporal patterns. For example, if memory access sequences                              mode [14]. We utilize facilities within gem5 to collect counters
+    (A, B, C) and (A, B, D) exhibit temporal patterns, B has two potential                           required by Prophet (Section 4.1). Following the rules defined in
+    Markov targets: C and D. As shown in Figure 8, 54.85%, and 20.88%,                               Section 4.2, we use an offline script to analyze these counters and
+    9.71% of memory addresses in the SPEC CPU benchmark have 1, 2,                                   generate hints, which are then injected into binaries via the hint
+    and 3 Markov targets, respectively. However, previous on-chip tem-                               buffer (Section 4.4). Our simulation environment adopts parame-
+    poral prefetchers [7, 56, 57] store only one target per Markov entry,                            ters almost consistent with those utilized in the Triangel [7]. The
+    often resulting in inaccurate prefetches and unsolvable demand                                   primary system configurations are outlined in Table 1. Prophet
+    accesses. To address this issue, simply storing multiple prefetching                             and Triangel are trained on the L2 cache access stream, including
+    candidates in the metadata table is impractical, as it significantly                             prefetch requests generated by L1 stride prefetchers.
+    increases storage overhead.                                                                         Workloads. Following previous temporal prefetchers [7, 56–58]
+       In order to efficiently handle the above scenario, Prophet in-                                and software indirect prefetching schemes [6, 29, 33, 60], we evalu-
+    troduces a Multi-path Victim Buffer, allowing it to store Markov                                 ate Prophet with irregular SPEC CPU workloads and graphic work-
+    targets that have been evicted from the metadata table. Prophet                                  loads (i.e., CRONO [5]). These workloads exhibit diverse memory
+    manages Multi-path Victim Buffer based on the following rules:                                   access patterns that are representative of a wide range of bench-
+                             • Insertion. To efficiently utilize the space of Multi-path Vic-        marks. We apply the SimPoint technique [51] to generate check-
+                               tim Buffer, we store only Markov targets whose priority               points across all workloads. Each SimPoint-sampled checkpoint is
+                               levels (Equation 2) are greater than 0 (𝑎𝑐𝑐 > 𝐸𝐿_𝐴𝐶𝐶).                5 If we buffer two or more Markov targets per metadata entries
+
+                                                                                                 8
+                                                        RPG2        Triangel   Prophet                                                                          RPG2       Triangel   Prophet
+                                                                                                                             1.0
+
+
+
+
+                                                                                                      Prefetching Coverage
+Performance Speedup
+
+
+
+
+                          1.6                                                                                                0.8
+                                                                                                                             0.6
+                          1.4                                                                                                0.4
+                          1.2                                                                                                0.2
+                                                                                                                             0.0
+                          1.0                                                                                                                          s 6
+                                                                                                                                                  lakegcc_16   mcf       etpp         0 3
+                                                                                                                                                                                  ds-5 inx
+                                                                                                                                                                                              k
+                                                                                                                                                                                           cbm mea
+                                                                                                                                                                                                   n
+                                                                                                                                             b ig                    omn plex_p sph xalan Geo
+                                              kes 166
+                                          igla gcc_     mcf      etpp pds-50phinx3 ncbmk eomean                                    asta
+                                                                                                                                          r_
+                                                                                                                                                                            so
+                                      _b                      omn       lex_ s    xala G                                                                              (a) Coverage
+                                astar                               sop
+                                                                                                                                                                RPG2       Triangel   Prophet
+                     Figure 10: IPC speedup compared to RPG2 and Triangel.                                                   1.0
+
+
+
+
+                                                                                                      Prefetching Accuracy
+                                                                                                                             0.8
+                                                        RPG2        Triangel   Prophet
+                                                                                                                             0.6
+Normalized DRAM Traffic
+
+
+
+
+                          1.3                                                                                                0.4
+                          1.2                                                                                                0.2
+                                                                                                                             0.0
+                          1.1                                                                                                                          s 6
+                                                                                                                                                  lakegcc_16   mcf       etpp         0 3
+                                                                                                                                                                                  ds-5 inx
+                                                                                                                                                                                              k
+                                                                                                                                                                                           cbm mea
+                                                                                                                                                                                                   n
+                                                                                                                                          r_ b ig                    omn plex_p sph xalan Geo
+                          1.0                                                                                                      asta                                     so
+                                                                                                                                                                      (b) Accuracy
+                                                                                                                    Figure 12: Prefetching coverage and accuracy6 .
+                                              s 6
+                                           ake _16      mcf      etpp       0 3
+                                                                        ds-5 inx
+                                                                                     k
+                                                                                  cbm mea
+                                                                                          n
+                                     r_bigl gcc               omn plex_p sph xalan Geo                      additional memory traffic. The workload-specific performance im-
+                                asta                                so                                      provements are comparable to those reported in the original Tri-
+                                                                                                            angel paper [7]. However, the overall speedup for Triangel in our
+                  Figure 11: DRAM traffic compared to RPG2 and Triangel.
+                                                                                                            experiments is not identical because we use SimPoint to generate
+                                                                                                            checkpoints instead of the original method described in [4], which
+       warmed up with 250M instructions, followed by a simulation of the                                    evenly samples checkpoints throughout the program’s lifecycle,
+       next 50M instructions. The reported performance metrics for each                                     potentially misrepresenting actual program execution.
+       benchmark are calculated by aggregating the results from all its                                        Analysis: Prophet versus RPG2 . Our experimental results
+       checkpoints with weighted averages.                                                                  demonstrate that prior profile-guided indirect prefetching schemes
+          Baseline. We compare Prophet against the state-of-the-art hard-                                   are ineffective for most temporal patterns. We observe that most
+       ware temporal prefetcher, Triangel [7], and software indirect in-                                    active memory access instructions (i.e., those causing >90% cache
+       direct prefetching scheme, RPG2 [60]. For Triangel, we utilize the                                   misses) in the evaluated workloads exhibit pointer-chasing patterns
+       open-source implementation provided by its original paper [4], pre-                                  or indirect access patterns where the prefetch kernel does not follow
+       serving its complete functionality. For RPG2 , we follow its original                                stride patterns. As described in Section 2.2, prior solutions cannot
+       methodology, first identifying memory instructions that result in                                    handle these cases, leading to limited performance improvements.
+       at least 10% cache misses and have prefetch kernels supported by                                        Analysis: Prophet versus Triangel. Prophet consistently out-
+       RPG2 . Then, we utilize the hint buffer mechanism (Section 4.4) to                                   performs Triangel across most workloads. To validate this, we ana-
+       simulate prefetch instruction insertion. Specifically, we record the                                 lyze the temporal prefetcher’s prefetching coverage and accuracy,
+       PC of identified memory instructions along with an initial prefetch                                  as shown in Figure 12(a) and Figure 12(b). Prophet reduces demand
+       distance in the hint buffer. Upon encountering recorded PCs, we is-                                  misses by 42.75%, compared to 28.08% for Triangel. For prefetching
+       sue a prefetch request where the target address equals the accessed                                  accuracy, Prophet performs comparably to Triangel, indicating that
+       memory address + distance. Finally, we tune the distance using                                       Prophet’s performance gain comes from more efficient metadata
+       RPG2 ’s binary search method and record the performance with the                                     storage management rather than aggressive prefetching. For exam-
+       optimal distance as the final report.                                                                ple, Prophet can simultaneously enhance both prefetching coverage
+                                                                                                            and accuracy in workloads such as mcf and omnetpp. In the case
+       5.2                          Performance                                                             of gcc, which is particularly sensitive to cache pollution, Prophet’s
+                                                                                                            performance gain is slightly lower than Triangel.
+       Figure 10 compares the performance of Prophet with RPG2 and Tri-
+       angel. The results show that Prophet achieves a 34.58% speedup over
+       the baseline without temporal prefetchers, compared to 0.1% for
+                                                                                                            5.3                     Adaptable: Different Program Inputs
+       RPG2 and 20.35% for Triangel, outperforming RPG2 by 34.48% and                                       Figure 13 evaluates Prophet’s adaptability by making it iteratively
+       Triangel by 14.23%. Figure 11 shows that Prophet induces 18.67%                                      learn counters from different program inputs within a single ap-
+       memory traffic (cumulative DRAM reads + DRAM writes), com-                                           plication. The leftmost bar shows the performance of Triage4 +
+       pared to 0.07% for RPG2 and 10.33% for Triangel, indicating that                                     6 RPG2 does not identify qualified prefetch kernels for mcf, omnetpp, and soplex, so
+       Prophet’s performance gain over Triangel results in only 5.35%                                       we set their prefetching accuracy to 0.
+                                                                                                  9
+                       1.6
+                                           Disable      +166     +expr          +typeck       +expr2          Direct                                                                   RPG2           Triangel          Prophet
+                                                                                                                                                       1.6
+Performance Speedup
+
+
+
+
+                                                                                                                                 Performance Speedup
+                       1.4                                                                                                                             1.4
+
+                       1.2                                                                                                                             1.2
+
+                       1.0                                                                                                                             1.0
+                                     166 200 decl expr pr2 g23 _s04 ilab peck ean
+                                 gcc_ gcc_ gcc_cp gcc_ gcc_ex gcc_ gcc gcc_sc gcc_ty Geom
+
+
+
+
+                                                                                                                                                                                                                                      ean
+                                                                                                                                                                   0
+
+                                                                                                                                                                            _8
+
+                                                                                                                                                                                   16
+
+                                                                                                                                                                                            _8
+
+                                                                                                                                                                                                      0
+
+                                                                                                                                                                                                               0
+
+                                                                                                                                                                                                                       0
+
+
+                                                                                                                                                                                                                                10 0
+                                                                                                                                                                                                                                Ge _5
+                                                                                                                                                                  _1
+
+
+
+
+                                                                                                                                                                                                   _1
+
+                                                                                                                                                                                                            80
+
+                                                                                                                                                                                                                      40
+
+
+                                                                                                                                                                                                                              p_ 0_10
+                                                                                                                                                                        84
+
+                                                                                                                                                                                  0_
+
+                                                                                                                                                                                         00
+
+
+
+
+                                                                                                                                                                                                                                     00
+                                                                                                                                                                                                                                  om
+                                                                                                                                                                  00
+
+
+
+
+                                                                                                                                                                                                  00
+
+                                                                                                                                                                                                           0_
+
+                                                                                                                                                                                                                    0_
+                                                                                                                                                                       63
+
+                                                                                                                                                                                  00
+
+                                                                                                                                                                                        00
+
+
+
+
+                                                                                                                                                                                                                                  00
+                                                                                                                                                              00
+
+
+
+
+                                                                                                                                                                                                 00
+
+                                                                                                                                                                                                          00
+
+                                                                                                                                                                                                                  00
+
+
+                                                                                                                                                                                                                                  0
+                                                                                                                                                                       _5
+
+                                                                                                                                                                              00
+
+                                                                                                                                                                                       _8
+
+
+
+
+                                                                                                                                                                                                                            00
+                                                                                                                                                             _4
+
+
+
+
+                                                                                                                                                                                              _9
+
+                                                                                                                                                                                                       00
+
+                                                                                                                                                                                                                 00
+                                                                                                                                                                   bc
+
+                                                                                                                                                                             _1
+
+                                                                                                                                                                                   bfs
+
+
+
+
+                                                                                                                                                                                                                           10
+                                                                                                                                                             bc
+
+
+
+
+                                                                                                                                                                                            bfs
+
+                                                                                                                                                                                                      _8
+
+                                                                                                                                                                                                               _9
+                                                                                                                                                                            bfs
+
+
+
+
+                                                                                                                                                                                                                         k_
+                                                                                                                                                                                                                              sss
+                                                                                                                                                                                                   dfs
+
+                                                                                                                                                                                                            dfs
+                        Figure 13: Prophet learns counters from gcc’s inputs.
+
+
+
+
+                                                                                                                                                                                                                       an
+                                                                                                                                                                                                                    ger
+                                                                                                                                                                                                                   pa
+                                 Disable        +lake   +river   Direct             Disable   +pds     +ref        Direct
+                       1.15                                               1.4                                                                                 Figure 15: IPC speedup on graph workloads.
+ Performance Speedup
+
+
+
+
+                       1.10                                                                                                            5.4                   Lightweight: Profiling, Analysis, Instruction
+                       1.05                                               1.2                                                                                Overhead
+                                                                                                                                      5.4.1 Profiling Overhead. Prophet’s profiling overhead arises from
+                       1.00                                                                                                           collecting counters during Step 1 and Step 3 in Figure 5. Prophet
+                                                                          1.0
+                       0.95                                                                                                           utilizes the PEBS and standard PMU to gather these counters (Sec-
+                                     iglakesastar_rivers Geomean                          pds oplex_ref Geomean
+                             astar_b                                            soplex_       s                                       tion 4.1), so the profiling overhead depends on the implementation
+                                                                                                                                      of PEBS and PMU. According to [15], sampling 4 PEBS events in-
+      Figure 14: Prophet’s learning feature can be generalized to                                                                     curs less than 2% performance overhead, while sampling a single
+      other workloads, such as astar and soplex.                                                                                      standard PMU event incurs negligible overhead. Given Prophet
+                                                                                                                                      only requires sampling two or three PEBS events (depending on
+                                                                                                                                      the ways to inject hints) and one standard PMU event, it incurs less
+      Triangel metadata (Section 5.9), indicating the status where no in-                                                             than 2% profiling overhead. Importantly, not every program execu-
+      put is fed to Prophet (shown as “Disable”). Then, we provide the                                                                tion requires profiling. Prophet only sample counters at intervals
+      inputs in the following order: gcc_166, gcc_expr, gcc_typeck, and                                                               (Section 3.2), determined by the complexity of programs and input
+      gcc_expr2. The first input, gcc_166, is processed in Step 1, while                                                              variety. Empirically, profiling once every 10–100 executions suffices.
+      the subsequent inputs are integrated in Step 3, as shown in Figure 5.                                                           Most program executions incur no profiling overhead. Moreover,
+      To evaluate Prophet’s “ideal” performance for each input, we di-                                                                we can stop profiling when further performance gains are minimal.
+      rectly profile these inputs and make Prophet learn their respective                                                             5.4.2 Analysis Overhead. Prophet’s analysis overhead comes from
+      counters (learning goal, shown in the rightmost bar as “Direct”).                                                               analyzing the collected counters to generate hints during Step 2 in
+          Figure 13 demonstrates that, through repeated learning, Prophet                                                             Figure 5. Across all evaluated workloads, Prophet’s analysis over-
+      enables a single optimized binary to achieve optimal performance                                                                head is negligible, less than one second. Furthermore, as with pro-
+      across various program inputs. Initially, when learning only from                                                               filing, not every program execution incurs analysis overhead; only
+      gcc_166, Prophet delivers sub-optimal performance on gcc_expr,                                                                  those executions in which Prophet is enabled to collect counters
+      gcc_typeck, and gcc_expr2. However, as Prophet incorporates addi-                                                               will require analysis, further reducing the overall analysis overhead.
+      tional inputs, it progressively achieves optimal performance across
+      all of them. Notably, even without directly learning from inputs like                                                            5.4.3 Instruction Overhead. Prophet’s instruction overhead de-
+      gcc_200, Prophet improves its performance due to counters learned                                                                pends on the hint injection methods described in Section 4.4. If
+      from other inputs, such as gcc_expr, which share similar memory                                                                  reserved bits within instructions are used to carry hints, Prophet
+      access patterns. These results indicate that Prophet can achieve                                                                 incurs no additional instruction overhead. In contrast, if specialized
+      optimal performance across all program inputs with fewer training                                                                hint instructions are employed, the instruction overhead corre-
+      iterations than the total number of inputs. Consequently, with only                                                              sponds to the number of inserted hint instructions. In our setup, we
+      4 rounds of learning, Prophet achieves near-optimal performance                                                                  insert a maximum of 128 hint instructions at the entry point of pro-
+      across all 9 gcc inputs. Furthermore, Figure 14 demonstrates the                                                                 grams (Section 4.4). Compared to evaluated SPEC CPU workloads
+      learning features in Prophet can be generalized to other workloads.                                                              containing billions of instructions [44], Prophet introduces almost
+          Prophet versus Other profile-guided solutions. To the best                                                                   negligible overhead for overall static and dynamic instructions.
+      of our knowledge, existing profile-guided solutions lack an adaptive
+      mechanism for learning counters or traces from different inputs.                                                                 5.5                   Generalization: Graphic Workloads
+      These solutions either deliver sub-optimal performance when en-                                                                 Figure 15 evaluates Prophet’s performance using CRONO [5], a
+      countering new inputs or require fresh profiling (e.g., RPG2 ) but                                                              benchmark suite widely employed in indirect access prefetching
+      cannot leverage prior profiling data, making them unable to adapt to                                                            schemes [6, 29, 33, 60]. Experimental results demonstrate that
+      previously encountered inputs. In contrast, Prophet’s adaptability                                                              Prophet provides a performance speedup of 14.85% over the baseline
+      makes it more practical for deployment in commercial processors.                                                                with a hardware stride prefetcher alone, compared to 9.11% for RPG2
+                                                                                                                            10
+                                           EL_ACC=0.05              EL_ACC=0.15          EL_ACC=0.25                                                                  RPG2          Triangel    Prophet
+Performance Speedup
+
+
+                                                                                                                                       1.8
+                      1.6
+
+
+
+
+                                                                                                                 Performance Speedup
+                                                                                                                                       1.6
+                      1.4
+                      1.2                                                                                                              1.4
+                      1.0                                                                                                              1.2
+                                         s 6
+                                      ake _16         mcf       netp
+                                                                     p            -50 x3       mk
+                                                                               pds sphin alancb Geome
+                                                                                                      an
+                                 rbigl gcc
+                                   _                        o m         le x _           x                                             1.0
+                            asta                                    sop
+                                    (a) Sensitivity Study for EL_ACC in Prophet Insertion Policy                                                            kes 166
+                                                                                                                                                        igla gcc_     mcf         etpp pds-50phinx3 ncbmk eomean
+                                                            n=1        n=2        n=3                                                              _b                       omn          lex_ s    xala G
+                                                                                                                                              star
+Performance Speedup
+
+
+
+
+                                                                                                                                             a                                       sop
+                      1.6                                                                                                   Figure 17: IPC speedup with varying L1 prefetcher.
+                      1.4                                                                                              achieves the best trade-off between performance gain and storage
+                      1.2                                                                                              overhead. While prefetching more candidates improves prefetch-
+                      1.0                                                                                              ing coverage, it can negatively impact performance. For example,
+                                        kes 166       mcf        etpp              -50 x3       mk     an              prefetching additional Markov targets causes performance slow-
+                                  _bigla gcc_                 omn           x _ pds sphin alancb Geome                 down in astar, which is sensitive to cache pollution and memory
+                                                                          e
+                            astar                                   sop
+                                                                        l                 x                            bandwidth wastage. Furthermore, as shown in Figure 8, a large pro-
+                                       (b) Sensitivity Study for n in Prophet Replacement Policy                       portion of memory addresses tend to have fewer than two Markov
+                                             Candidate=1            Candidate=2         Candidate=4
+Performance Speedup
+
+
+
+
+                                                                                                                       targets, resulting in unnecessary storage overhead when excessive
+                      1.6                                                                                              Markov candidates are reserved in the buffer.
+                      1.4                                                                                              5.7                       Sensitivity: Impact of L1 Prefetcher
+                      1.2                                                                                             Figure 17 evaluates Prophet’s performance with varying L1 prefetch-
+                      1.0                                                                                             ers. As outlined in Table 1, our system configuration aligns with
+                                        kes 166
+                                    igla cc_          mcf     etpp            s-50 inx3  bm
+                                                                                            k ean                     Triangel’s setup for consistent comparison. However, commercial
+                                 r_b g                        omn    l e x _pd sph xalanc Geom
+                            asta
+                                                                                                                      processors typically include additional L1 prefetchers since they
+                                                                 sop                                                  can leverage more information (e.g., virtual addresses) and prefetch
+                                 (c) Sensitivity Study for Candidates in Multi-path Victim Buffer
+                                                                                                                      across page boundaries. For example, Arm’s Neoverse V2 [2] in-
+                        Figure 16: Sensitivity study.
+                                                                                                                      tegrates stream, stride, and spatial prefetchers in the L1 cache. To
+      and 8.41% for Triangel. Unlike SPEC CPU benchmarks, CRONO                                                       assess Prophet’s performance with a more realistic L1 prefetcher
+      features more prefetch kernels with stride patterns, aligning with                                              configuration, we replace the L1 stride prefetcher with IPCP [47],
+      RPG2 ’s strengths. As a result, RPG2 delivers greater performance                                               simulating the setup in Arm’s Neoverse V2.
+      gains on CRONO. Prophet outperforms RPG2 by handling more                                                           Figure 17 demonstrates that Prophet outperforms both RPG2
+      complex temporal patterns beyond RPG2 ’s scope.                                                                 and Triangel, achieving a performance speedup of 29.95% over the
+                                                                                                                      baseline without a temporal prefetcher. In comparison, RPG2 shows
+      5.6                       Sensitivity: Parameters in Prophet                                                    a modest speedup of 0.36%, while Triangel achieves a speedup of
+     Figure 16 evaluates primary parameters7 in Prophet, such as 𝐸𝐿_𝐴𝐶𝐶                                               17.51%. Prophet consistently outperforms other schemes across
+     for the Prophet Insertion Policy, 𝑛 for the Prophet Replacement                                                  all evaluated workloads. These results demonstrate that Prophet’s
+     Policy, and the candidates per metadata entry for the Multi-path                                                 performance improvement can also be applied to more complex L1
+     Victim Buffer.                                                                                                   prefetcher configurations.
+        For 𝐸𝐿_𝐴𝐶𝐶, we observe that both too high and too low param-
+     eter values can negatively impact performance. A low 𝐸𝐿_𝐴𝐶𝐶                                                       5.8                       Sensitivity: Memory Bandwidth
+     causes the metadata table to buffer too many metadata entries that                                                                                               RPG2          Triangel    Prophet
+     do not exhibit temporal patterns, while a high 𝐸𝐿_𝐴𝐶𝐶 has the                                                                     1.8
+                                                                                                                 Performance Speedup
+
+
+
+
+     opposite effect, potentially filtering out valuable entries.
+        For 𝑛, we observe that introducing additional bits to enable                                                                   1.6
+     fine-grained classification of temporal patterns results in improved                                                              1.4
+     performance. However, the performance improvement is limited,
+     and this modification introduces additional storage overhead for                                                                  1.2
+     the Prophet Replacement State. To balance the performance gain
+                                                                                                                                       1.0
+     with the storage overhead, we adopt a moderate configuration (n =
+     2, 2-bit Prophet Replacement State).                                                                                                                   kes 166
+                                                                                                                                                        igla gcc_     mcf         etpp pds-50phinx3 ncbmk eomean
+                                                                                                                                                   _b                       omn          lex_ s    xala G
+                                                                                                                                              star
+        For the number of Markov candidates in the Multi-path Victim
+     Buffer, we observe that having one candidate per metadata entry                                                                         a                                       sop
+      7 The green bar represents the parameters used in other experiments.                                                             Figure 18: IPC speedup with varying DRAM channels.
+                                                                                                            11
+                                        Triage4 + Triangel Meta      +Repla      +Insert     +MVB       +Resize
+                          1.8                                                                                          demand misses compared to the original metadata format design.
+Performance Speedup
+
+
+
+                                                                                                                       This feature contributes to performance improvements across mul-
+                          1.6                                                                                          tiple workloads, with soplex showing a notable 13.46% performance
+                          1.4                                                                                          speedup. The Multi-path Victim Buffer only slightly increases mem-
+                          1.2                                                                                          ory bandwidth by 1.95% due to our fine-grained management. Con-
+                                                                                                                       sequently, the Multi-path Victim Buffer enhances the performance
+                          1.0                                                                                          of astar (which is sensitive to constrained memory bandwidth)
+                                                 s      6   mcf        etpp            -50 x3       mk     an          rather than negatively impacting it.
+                                             lakegcc_16                             pds sphin alancb Geome
+                                       big                        omn            x_                                        Prophet Resizing allocates metadata table space based on ap-
+                                astar_                                    sop
+                                                                              le              x
+                                                                                                                       plication requirements, allowing more space for the LLC without
+                                                              (a) Performance Speedup                                  compromising metadata table capabilities. This approach yields
+                                        Triage4 + Triangel Meta      +Repla      +Insert     +MVB       +Resize        performance benefits, especially for applications with smaller meta-
+                          1.4
+Normalized DRAM Traffic
+
+
+
+
+                                                                                                                       data needs. For example, sphinx3, which requires less than 1 MB of
+                                                                                                                       metadata table, achieves a 1.5% performance gain.
+                          1.3
+                                                                                                                           The flexibility of Prophet. Prophet’s features are designed to
+                          1.2                                                                                          be modular, allowing programmers to selectively enable or disable
+                                                                                                                       specific features based on evaluated performance and memory traf-
+                          1.1                                                                                          fic. This adaptability means that if Prophet’s impact on performance
+                          1.0                                                                                          is unfavorable for certain workloads, programmers can selectively
+                                                 s
+                                             lakegcc_16
+                                                        6   mcf       etpp            -50 x3       mk
+                                                                                   pds sphin alancb Geome
+                                                                                                          an           roll back to a subset of Prophet’s features or revert to the runtime
+                                       big                        omn           x_
+                                astar_                                   sop
+                                                                             le              x                         temporal prefetcher, such as gcc_166.
+                                                            (b) Normalized DRAM Traffic
+                                                                                                                       5.10    Storage Overhead
+                                      Figure 19: Prophet Features Breakdown.
+                                                                                                                       The storage overhead of Prophet stems from its replacement state,
+                                                                                                                       the hint buffer, and the Multi-path Victim Buffer.
+                          Figure 18 evaluates Prophet, RPG2 , and Triangel with an in-
+       creased number of DRAM channels. Prophet provides a perfor-                                                         • Prophet replacement stats. Prophet supports a maximum
+       mance speedup of 32.27% over the baseline without temporal prefetch-                                                  metadata table of 1 MB, or 196,608 entries, with each entry
+       ers, compared to 0.1% for RPG2 and 18.17% for Triangel. The exper-                                                    requiring a 2-bit replacement state. Consequently, the total
+       imental results show that Prophet remains effective across varying                                                    storage overhead for Prophet’s replacement states is 48 KB.
+       memory bandwidth environments.                                                                                      • Hint buffer. If a hint buffer is used for processing hint
+                                                                                                                             information (Section 4.4), Prophet requires extra storage for
+       5.9                      Prophet Features Breakdown                                                                   this buffer. Our experiments indicate that a 128-entry hint
+                                                                                                                             buffer is sufficient for high performance, adding 0.19 KB.
+       Figure 19 illustrates the contribution of each feature provided by
+                                                                                                                           • Multi-path Victim Buffer requires an additional 43 bits of
+       Prophet. Our ablation study begins with Triage at a prefetch de-
+                                                                                                                             storage per metadata entry: 31 bits for the memory address,
+       gree of 4 [57], combined with Triangel’s metadata format. Overall,
+                                                                                                                             10 bits for the tag, and 2 bits for Prophet’s replacement policy
+       Prophet’s replacement policy, insertion policy, and Multi-path Vic-
+                                                                                                                             counter. For a buffer with 65,536 entries, this results in a stor-
+       tim Buffer contribute the most to performance speedup. Meanwhile,
+                                                                                                                             age overhead of 344 KB. We compare the performance gain
+       Prophet resizing proves most effective for workloads with relatively
+                                                                                                                             of allocating this additional storage to the LLC, observing
+       small metadata table requirements, such as sphinx3.
+                                                                                                                             that the Multi-path Victim Buffer achieves an extra 2.21%
+           Prophet replacement policy is effective across most workloads
+                                                                                                                             performance improvement (4.95% vs. 2.74%).
+       by providing fine-grained management: it prioritizes the retention
+       of metadata entries that achieve higher prefetching accuracy. Work-
+                                                                                                                       5.11    Energy Overhead
+       loads with large working sets that are sensitive to cache pollution,
+       such as mcf and omnetpp, particularly benefit from this feature,                                                We evaluate the energy overhead of Prophet with a focus on the
+       achieving performance gains of 14.53% and 9.89%, respectively. Ad-                                              memory hierarchy. We utilize CACTI [43] to model the energy
+       ditionally, the Prophet replacement policy also proves beneficial in                                            consumption of the on-chip memory hierarchy under a 22 nm tech-
+       reducing memory traffic for workloads like astar and omnetpp.                                                   nology node, and estimate the DRAM access energy overhead to
+           Prophet insertion policy is conservatively designed to avoid                                                be 25× that of the LLC access overhead, similar to Triangel [7].
+       filtering out useful metadata (Section 4.2). Unlike the PatternConf                                             Our experiments show that Prophet only introduces 1.6% energy
+       mechanism in Triangel, Prophet insertion policy avoids significant                                              overhead for the memory hierarchy compared to Triangel. Given
+       performance drops for omnetpp, soplex, and sphinx3. Meanwhile,                                                  that Prophet’s performance improvement over Triangel is 14.23%,
+       it yields a significant performance speedup for mcf (16.72%) and                                                the 1.6% energy overhead is relatively negligible.
+       effectively reduces memory traffic across various workloads.
+           Multi-path Victim Buffer is developed to predict complex                                                    6   Related Works
+       temporal patterns where a single memory address has multiple                                                    In this section, we discuss the most relevant work in hardware
+       potential Markov targets, providing an opportunity to reduce more                                               temporal prefetching and profile-guided prefetching.
+                                                                                                                  12
+   Hardware temporal prefetchers. The most related work to                    References
+Prophet is hardware temporal prefetchers [7, 10, 26, 46, 55–58]. Like          [1] [n. d.]. Intel’s PerfMon Events. https://perfmon-events.intel.com.
+these prefetchers, Prophet requires metadata storage to maintain               [2] 2023. Hot Chips 2023: arm’s neoverse v2. https://hc2023.hotchips.org/assets/
+                                                                                   program/conference/day1/CPU1/HC2023.Arm.MagnusBruce.v04.FINAL.pdf.
+correlations between memory addresses. However, to the best of                 [3] 2023.       Intel® 64 and IA-32 Architectures Software Developer’s Man-
+our knowledge, Prophet is the only approach that integrates profile-               ual. https://www.intel.com/content/www/us/en/developer/articles/technical/
+                                                                                   intel-sdm.html.
+guided techniques into metadata storage management. By lever-                  [4] 2024. Github: gem5-triangel. https://github.com/SamAinsworth/gem5-triangel.
+aging future knowledge, Prophet significantly optimizes metadata               [5] Masab Ahmad, Farrukh Hijaz, Qingchuan Shi, and Omer Khan. 2015. Crono:
+management while avoiding expensive hardware modifications.                        A benchmark suite for multithreaded graph algorithms executing on futuristic
+                                                                                   multicores. In 2015 IEEE International Symposium on Workload Characterization.
+Furthermore, Prophet is fully compatible with existing hardware                    44–55.
+temporal prefetchers, allowing chip designers to flexibly choose               [6] Sam Ainsworth and Timothy M Jones. 2017. Software prefetching for indirect
+between Prophet and hardware prefetchers (Section 5.9).                            memory accesses. In CGO. 305–317.
+                                                                               [7] Sam Ainsworth and Lev Mukhanov. 2024. Triangel: A High-Performance, Accu-
+   Profile-guided prefetching. Profile-guided techniques have                      rate, Timely On-Chip Temporal Prefetcher. In ISCA.
+been applied to various aspects of prefetching, such as software               [8] Grant Ayers, Heiner Litz, Christos Kozyrakis, and Parthasarathy Ranganathan.
+                                                                                   2020. Classifying memory access patterns for prefetching. In ASPLOS. 513–526.
+prefetching [8, 29, 33, 60], criticality-aware prefetching [40], and           [9] Jean-Loup Baer and Tien-Fu Chen. 1991. An effective on-chip preloading scheme
+instruction prefetching [34]. Profile-guided software prefetching                  to reduce data access penalty. In Proceedings of the 1991 ACM/IEEE conference on
+schemes identify prefetch kernels and utilize software prefetch in-                Supercomputing. 176–186.
+                                                                              [10] Mohammad Bakhshalipour, Pejman Lotfi-Kamran, and Hamid Sarbazi-Azad. 2018.
+structions to predict them. Profile-guided criticality-aware prefetch-             Domino temporal data prefetcher. In HPCA. 131–142.
+ing focuses on identifying demand misses that lead to ROB stalls and          [11] Mohammad Bakhshalipour, Mehran Shakerinava, Pejman Lotfi-Kamran, and
+extends the instruction scheduler to prioritize critical instructions.             Hamid Sarbazi-Azad. 2019. Bingo spatial data prefetcher. In HPCA. 399–411.
+                                                                              [12] Mohammad Bakhshalipour, Seyedali Tabaeiaghdaei, Pejman Lotfi-Kamran, and
+Profile-guided instruction prefetching schemes precisely identify                  Hamid Sarbazi-Azad. 2019. Evaluation of hardware data prefetchers on server
+I-cache misses and combine multiple non-contiguous prefetches                      processors. CSUR (2019), 1–29.
+                                                                              [13] Rahul Bera, Anant V Nori, Onur Mutlu, and Sreenivas Subramoney. 2019. Dspatch:
+into a single prefetch instruction.                                                Dual spatial pattern prefetcher. In MICRO. 531–544.
+   Prophet sets it apart from these existing profile-guided prefetch-         [14] Nathan Binkert, Bradford Beckmann, Gabriel Black, Steven K Reinhardt, Ali
+ing schemes by focusing on a distinct aspect of prefetching: tempo-                Saidi, Arkaprava Basu, Joel Hestness, Derek R Hower, Tushar Krishna, Somayeh
+                                                                                   Sardashti, et al. 2011. The gem5 simulator. ACM SIGARCH computer architecture
+ral prefetching, an area where prior techniques fall short. Addition-              news (2011).
+ally, Prophet introduces innovative methodologies for adaptable,              [15] Georgios Bitzes and Andrzej Nowak. 2014. The overhead of profiling using PMU
+lightweight, and compatible profile-guided optimizations, making it                hardware counters. CERN openlab report (2014), 1–16.
+                                                                              [16] Burton H Bloom. 1970. Space/time trade-offs in hash coding with allowable
+more seamless and practical to implement in industrial applications.               errors. Commun. ACM (1970), 422–426.
+                                                                              [17] David Callahan, Ken Kennedy, and Allan Porterfield. 1991. Software prefetching.
+                                                                                   ACM SIGARCH Computer Architecture News 19, 2 (1991), 40–52.
+                                                                              [18] Mainak Chaudhuri, Jayesh Gaur, Nithiyanandan Bashyam, Sreenivas Subra-
+                                                                                   money, and Joseph Nuzman. 2012. Introducing hierarchy-awareness in replace-
+                                                                                   ment and bypass algorithms for last-level caches. In PACT. 293–304.
+7   Conclusion                                                                [19] William Y Chen, Scott A Mahlke, Pohua P Chang, and Wen-mei W Hwu. 1991.
+In this paper, we propose Prophet, an adaptable, lightweight, and                  Data access microarchitectures for superscalar processors with compiler-assisted
+                                                                                   data prefetching. In MICRO. 69–73.
+compatible profile-guided solution for temporal prefetching. Prophet          [20] Fredrik Dahlgren and Per Stenstrom. 1995. Effectiveness of hardware-based
+injects hints into programs to guide the temporal prefetcher’s re-                 stride and sequential prefetching in shared-memory multiprocessors. In HPCA.
+                                                                                   68–77.
+placement policy, insertion policy, and resizing operations, while            [21] Arnaldo Carvalho De Melo. 2010. The new linux’perf’tools. In Slides from Linux
+dynamically tuning these hints to allow a single optimized binary                  Kongress. 1–42.
+to adapt to various program inputs. Our evaluations demonstrate               [22] Edward H Gornish, Elana D Granston, and Alexander V Veidenbaum. 1990.
+                                                                                   Compiler-directed data prefetching in multiprocessors with memory hierarchies.
+that Prophet outperforms the state-of-the-art hardware tempo-                      In ICS. 128–142.
+ral prefetcher and software indirect memory access prefetching                [23] Mingjian He, Hua Wang, Ke Zhou, Kaichao Cui, Huabing Yan, Chang Guo, and
+scheme, with negligible profiling, analysis, and instruction over-                 Rongfeng He. 2022. DSDP: Dual Stream Data Prefetcher. In PACT. 372–383.
+                                                                              [24] Ibrahim Hur and Calvin Lin. 2006. Memory prefetching using adaptive stream
+heads. Prophet demonstrates superior performance across a wide                     detection. In MICRO. 397–408.
+range of benchmarks and configurations.                                       [25] Yasuo Ishii, Mary Inaba, and Kei Hiraki. 2009. Access map pattern matching for
+                                                                                   data cache prefetch. In ICS. 499–500.
+                                                                              [26] Akanksha Jain and Calvin Lin. 2013. Linearizing irregular memory accesses for
+                                                                                   improved correlated prefetching. In MICRO. 247–259.
+                                                                              [27] Akanksha Jain and Calvin Lin. 2016. Back to the future: Leveraging Belady’s
+Acknowledgments                                                                    algorithm for improved cache replacement. ACM SIGARCH Computer Architecture
+We sincerely thank the anonymous reviewers for their insightful                    News (2016), 78–89.
+                                                                              [28] Aamer Jaleel, Kevin B Theobald, Simon C Steely Jr, and Joel Emer. 2010. High
+comments and suggestions. This research was supported by Na-                       performance cache replacement using re-reference interval prediction (RRIP).
+tional Natural Science Foundation of China (NSFC) 62304192, Hong                   ACM SIGARCH computer architecture news 38, 3 (2010), 60–71.
+Kong Research Grants Council (RGC) YCRG Grant C6003-24Y, and                  [29] Saba Jamilan, Tanvir Ahmed Khan, Grant Ayers, Baris Kasikci, and Heiner Litz.
+                                                                                   2022. Apt-get: Profile-guided timely software prefetching. In Eurosys. 747–764.
+ACCESS – AI Chip Center for Emerging Smart Systems, sponsored                 [30] Shizhi Jiang, Qiusong Yang, and Yiwei Ci. 2022. Merging similar patterns for
+by the InnoHK initiative of the Innovation and Technology Commis-                  hardware prefetching. In MICRO. 1012–1026.
+                                                                              [31] Norman P Jouppi. 1990. Improving direct-mapped cache performance by the
+sion of the Hong Kong Special Administrative Region Government.                    addition of a small fully-associative cache and prefetch buffers. ACM SIGARCH
+We thank HKUST Fok Ying Tung Research Institute and National                       Computer Architecture News 18, 2SI (1990), 364–373.
+Supercomputing Center in Guangzhou Nansha Sub-center for com-                 [32] Tanvir Ahmed Khan, Nathan Brown, Akshitha Sriraman, Niranjan K Soundarara-
+                                                                                   jan, Rakesh Kumar, Joseph Devietti, Sreenivas Subramoney, Gilles A Pokam,
+putational resources.
+                                                                         13
+     Heiner Litz, and Baris Kasikci. 2021. Twig: Profile-guided btb prefetching for             [48] Maksim Panchenko, Rafael Auler, Bill Nell, and Guilherme Ottoni. 2019. Bolt: a
+     data center applications. In MICRO. 816–829.                                                    practical binary optimizer for data centers and beyond. In CGO. 2–14.
+[33] Tanvir Ahmed Khan, Ian Neal, Gilles Pokam, Barzan Mozafari, and Baris Kasikci.             [49] Biswabandan Panda. 2023. CLIP: Load Criticality based Data Prefetching for
+     2021. Dmon: Efficient detection and correction of data locality problems using                  Bandwidth-constrained Many-core Systems. In MICRO. 714–727.
+     selective profiling. In OSDI. 163–181.                                                     [50] Seth H Pugsley, Zeshan Chishti, Chris Wilkerson, Peng-fei Chuang, Robert L
+[34] Tanvir Ahmed Khan, Akshitha Sriraman, Joseph Devietti, Gilles Pokam, Heiner                     Scott, Aamer Jaleel, Shih-Lien Lu, Kingsum Chow, and Rajeev Balasubramonian.
+     Litz, and Baris Kasikci. 2020. I-spy: Context-driven conditional instruction                    2014. Sandbox prefetching: Safe run-time evaluation of aggressive prefetchers.
+     prefetching with coalescing. In MICRO. IEEE, 146–159.                                           In HPCA. 626–637.
+[35] Tanvir Ahmed Khan, Muhammed Ugur, Krishnendra Nathella, Dam Sunwoo,                        [51] Timothy Sherwood, Erez Perelman, Greg Hamerly, and Brad Calder. 2002. Auto-
+     Heiner Litz, Daniel A Jiménez, and Baris Kasikci. 2022. Whisper: Profile-guided                 matically characterizing large scale program behavior. ACM SIGPLAN Notices
+     branch misprediction elimination for data center applications. In MCIRO. 19–34.                 (2002), 45–57.
+[36] Tanvir Ahmed Khan, Dexin Zhang, Akshitha Sriraman, Joseph Devietti, Gilles                 [52] Manjunath Shevgoor, Sahil Koladiya, Rajeev Balasubramonian, Chris Wilkerson,
+     Pokam, Heiner Litz, and Baris Kasikci. 2021. Ripple: Profile-guided instruction                 Seth H Pugsley, and Zeshan Chishti. 2015. Efficiently prefetching complex address
+     cache replacement for data center applications. In ISCA. 734–747.                               patterns. In MICRO. 141–152.
+[37] Jinchun Kim, Seth H Pugsley, Paul V Gratz, AL Narasimha Reddy, Chris Wilkerson,            [53] Stephen Somogyi, Thomas F Wenisch, Anastassia Ailamaki, Babak Falsafi, and
+     and Zeshan Chishti. 2016. Path confidence based lookahead prefetching. In                       Andreas Moshovos. 2006. Spatial memory streaming. ACM SIGARCH Computer
+     MICRO. 1–12.                                                                                    Architecture News (2006), 252–263.
+[38] Sunil Kim and Alexander V Veidenbaum. 1997. Stride-directed prefetching for                [54] Shixin Song, Tanvir Ahmed Khan, Sara Mahdizadeh Shahri, Akshitha Sriraman,
+     secondary caches. In ICPP. 314–321.                                                             Niranjan K Soundararajan, Sreenivas Subramoney, Daniel A Jiménez, Heiner
+[39] Mengming Li, Qijun Zhang, Yongqing Ren, and Zhiyao Xie. 2025. Integrating                       Litz, and Baris Kasikci. 2022. Thermometer: profile-guided btb replacement for
+     Prefetcher Selection with Dynamic Request Allocation Improves Prefetching                       data center applications. In ISCA. 742–756.
+     Efficiency. In HPCA.                                                                       [55] Thomas F Wenisch, Michael Ferdman, Anastasia Ailamaki, Babak Falsafi, and
+[40] Heiner Litz, Grant Ayers, and Parthasarathy Ranganathan. 2022. CRISP: critical                  Andreas Moshovos. 2009. Practical off-chip meta-data for temporal memory
+     slice prefetching. In ASPLOS. 300–313.                                                          streaming. In HPCA. 79–90.
+[41] Pierre Michaud. 2016. Best-offset hardware prefetching. In HPCA. 469–480.                  [56] Hao Wu, Krishnendra Nathella, Matthew Pabst, Dam Sunwoo, Akanksha Jain,
+[42] Sparsh Mittal. 2016. A survey of recent prefetching techniques for processor                    and Calvin Lin. 2021. Practical temporal prefetching with compressed on-chip
+     caches. CSUR (2016), 1–35.                                                                      metadata. IEEE Trans. Comput. (2021), 2858–2871.
+[43] Naveen Muralimanohar, Rajeev Balasubramonian, and Norman P Jouppi. 2009.                   [57] Hao Wu, Krishnendra Nathella, Joseph Pusdesris, Dam Sunwoo, Akanksha Jain,
+     CACTI 6.0: A tool to model large caches. HP laboratories 27 (2009), 28.                         and Calvin Lin. 2019. Temporal prefetching without the off-chip metadata. In
+[44] Arun A Nair and Lizy K John. 2008. Simulation points for SPEC CPU 2006. In                      MICRO. 996–1008.
+     ICCD. 397–403.                                                                             [58] Hao Wu, Krishnendra Nathella, Dam Sunwoo, Akanksha Jain, and Calvin Lin.
+[45] Agustín Navarro-Torres, Biswabandan Panda, Jesús Alastruey-Benedé, Pablo                        2019. Efficient metadata management for irregular data prefetching. In ISCA.
+     Ibáñez, Víctor Viñals-Yúfera, and Alberto Ros. 2022. Berti: an accurate local-delta             449–461.
+     data prefetcher. In MICRO. 975–991.                                                        [59] Wm A Wulf and Sally A McKee. 1995. Hitting the memory wall: Implications of
+[46] Kyle J Nesbit and James E Smith. 2004. Data cache prefetching using a global                    the obvious. ACM SIGARCH computer architecture news 23, 1 (1995), 20–24.
+     history buffer. In HPCA. 96–96.                                                            [60] Yuxuan Zhang, Nathan Sobotka, Soyoon Park, Saba Jamilan, Tanvir Ahmed Khan,
+[47] Samuel Pakalapati and Biswabandan Panda. 2020. Bouquet of instruction pointers:                 Baris Kasikci, Gilles A Pokam, Heiner Litz, and Joseph Devietti. 2024. RPG2:
+     Instruction pointer classifier-based spatial hardware prefetching. In ISCA.                     Robust Profile-Guided Runtime Prefetch Generation. In ASPLOS. 999–1013.
+
+
+
+
+                                                                                           14
+

@@ -1,0 +1,1481 @@
+                              Berti: an Accurate Local-Delta Data Prefetcher
+
+                            Agustı́n Navarro-Torres∗ , Biswabandan Panda† , Jesús Alastruey-Benedé∗ ,
+                                    Pablo Ibáñez∗ , Vı́ctor Viñals-Yúfera∗ , and Alberto Ros‡
+
+                ∗ Dept. Informática e Ingenierı́a de Sistemas - I3A, Universidad de Zaragoza, Zaragoza, Spain
+           † Dept. of Computer Science and Engineering, Indian Institute of Technology Bombay, Mumbai, India
+                           ‡ Computer Engineering Department, University of Murcia, Murcia, Spain
+Email: agusnt@unizar.es, biswa@cse.iitb.ac.in, jalastru@unizar.es, imarin@unizar.es, victor@unizar.es, aros@ditec.um.es
+
+
+                                                                                           100                                   100
+
+
+
+
+                                                                       Prefetch Accuracy
+   Abstract—Data prefetching is a technique that plays a crucial
+role in modern high-performance processors by hiding long                                   75                                    75
+latency memory accesses. Several state-of-the-art hardware
+prefetchers exploit the concept of deltas, defined as the difference                        50                                    50
+between the cache line addresses of two demand accesses.                                    25                                    25
+Existing delta prefetchers, such as best offset prefetching (BOP)
+                                                                                             0                                     0
+                                                                                              1D) (L1D) o (L2) F (L2) (L1D)         1D) (L1D) o (L2) F (L2) (L1D)
+and multi-lookahead prefetching (MLOP), train and predict
+future accesses based on global deltas. We observed that the                              ( L
+                                                                                         P CP n P rt  g      P       i          ( L
+                                                                                                                               P CP ng PP rti
+                                                                                      MLO IP Bi SPP- Be                     MLO IP Bi SPP- Be
+use of global deltas results in missed opportunities to anticipate
+memory accesses.
+   In this paper, we propose Berti, a first-level data cache                                       SPEC17-MemInt                                GAP
+prefetcher that selects the best local deltas, i.e., those that                                          (a) Accuracy of L1 and L2 prefetchers.
+consider only demand accesses issued by the same instruction.
+Thanks to a high-confidence mechanism that precisely detects                                2.0                                    2.0
+                                                                       Dynamic Energy
+
+
+
+the timely local deltas with high coverage, Berti generates                                 1.8                                    1.8
+                                                                         Normalized
+
+
+
+
+accurate prefetch requests. Then, it orchestrates the prefetch                              1.6                                    1.6
+requests to the memory hierarchy, using the selected deltas.                                1.4                                    1.4
+   Our empirical results using ChampSim and SPEC CPU2017                                    1.2                                    1.2
+and GAP workloads show that, with a storage overhead of just
+                                                                                            1.0                                    1.0
+                                                                                                   1D) (L1D) o (L2) F (L2) (L1D)         1D) (L1D) o (L2) F (L2) (L1D)
+2.55 KB, Berti improves performance by 8.5% compared to a
+baseline IP-stride and 3.5% compared to IPCP, a state-of-the-                                  ( L
+                                                                                              P CP n P rt  g      P       i          ( L
+                                                                                                                                    P CP ng PP rti
+art prefetcher. Our evaluation also shows that Berti reduces                               MLO IP Bi SPP- Be                     MLO IP Bi SPP- Be
+dynamic energy at the memory hierarchy by 33.6% compared                                                SPEC17-MemInt                                GAP
+to IPCP, thanks to its high prefetch accuracy.
+                                                                                            (b) Dynamic energy consumption normalized to no prefetching.
+  Keywords-data prefetching; hardware prefetching; first-level
+cache; local deltas; accuracy; timeliness                               Figure 1. Prefetch accuracy and dynamic energy consumption of the
+                                                                        memory hierarchy for state-of-the-art prefetchers (IPCP [40], MLOP [48],
+                                                                        SPP-PPF [17], and Bingo [13]) averaged across single-threaded traces from
+                       I. I NTRODUCTION                                 memory-intensive SPEC CPU2017 [55] and GAP [14] workloads.
+
+   Data prefetching techniques play an important role in
+hiding long-latency memory accesses. Hardware prefetchers               accesses better than an L2 or LLC prefetcher. L1D also
+learn memory access patterns and fetch data into the cache              sees a sequence of virtual addresses as compared to physical
+hierarchy before time so that future memory accesses get                addresses at the L2 and LLC, which can facilitate cross-
+cache hits. Data prefetching techniques can be employed                 page prefetching [24]. Also, compared to L1D, additional
+either at the private first-level data cache (L1D), second-level        contextual information is not easy to propagate to L2 and
+cache (L2), or at the shared last-level cache (LLC).                    LLC, such as instruction pointer (IP) [36], which is usually
+   Most of the recently proposed storage-efficient spatial              available at the L1D (e.g., Intel’s IP-stride at the L1D [20]).
+prefetchers target L2 [13], [17], [35], [38], [50]. Exceptions          However, designing a high-performance L1D prefetcher is
+are the multi-lookahead offset prefetching (MLOP) [48]                  hindered by (i) storage overhead, (ii) starved L1D bandwidth,
+and the instruction pointer classifier-based prefetching                (iii) L1D pollution because of inaccurate prefetching, and
+(IPCP) [40], which are L1D prefetchers. It is well known                (iv) narrow scope for aggressive prefetching because of the
+that an L1D prefetcher provides better performance than                 limited size of the prefetch queue (PQ) and the miss status
+an L2 prefetcher as the prefetched lines are brought into               holding registers (MSHR).
+L1D and not till L2. In addition, an L1D prefetcher sees                   State-of-the-art data prefetchers push the limit of single-
+unfiltered memory access patterns and can predict the future            thread performance with average performance boosts of
+3% to 5% [13], [17], [35], [40]. However, as shown in                                2      5        7      10      12             15
+                                                                       timeline
+Figure 1(a), these prefetchers load a large number of useless
+blocks, ranging from 22.6% to 35.1% for SPEC CPU2017                                                                   stride (+3)
+and from 35.8% to 81.2% for GAP workloads, which
+results in sub-optimal performance and additional dynamic
+energy consumption [34]. Figure 1(b) shows that state-of-                                              local deltas (+8, +5, +3)
+the-art prefetchers significantly increase the dynamic energy                                        time to fetch address 15
+consumption at the memory hierarchy (caches and DRAM) up
+to 30.1% and 86.9% for SPEC CPU2017 and GAP workloads,                                     timely local deltas (+13, +10)
+respectively.
+                                                                    Figure 2. Strides, local deltas, and timely local deltas. The values on
+   Our proposal, Berti, provides an accuracy of almost 90%,         the timeline (2, 5, 7 ...) represent the addresses referenced by the same
+which translates into a dynamic energy overhead of only             instruction.
+9.0% and 14.3% for SPEC CPU2017 and GAP, respectively.
+   Our approach. We ask the following simple question in
+                                                                       With Berti, we find the timely local deltas, and compute
+designing our approach: “for an L1D access to address X,
+                                                                    its respective coverage. We prefetch using deltas that used to
+what is the timely and accurate delta (d) that should be used
+                                                                    show high coverage, which translates to overall high prefetch
+for prefetching?” The best offset prefetcher (BOP) inspires us
+                                                                    accuracy as we show in this work. We call these deltas the
+to ask this question [38]. However, our approach is different
+                                                                    accurate and timely deltas.
+from BOP and other offset prefetchers [29], [48]. Our key
+                                                                       Contributions. We make the following key contributions:
+observation is that the best delta for access is dependent
+                                                                       • We motivate the need for a local L1D delta prefetcher
+on the local contextual information, such as an instruction
+pointer (IP), and it varies based on the context (e.g., the best          to achieve a high coverage with accurate and timely
+delta for IPX is different from IPY ). We argue that prefetching          prefetch requests (Section II).
+                                                                       • We propose Berti, a highly-accurate prefetcher that
+based on global (context-agnostic) deltas results in missing
+opportunities [39].                                                       learns timely local deltas and predicts their coverage
+   We propose Berti, a cost-effective, per-IP best request time           with high confidence. High accuracy (almost 90%) is
+delta L1D prefetcher that makes a strong case for timeliness              achieved by only triggering prefetch requests for deltas
+and accuracy. For each IP, Berti learns the deltas that result in         with high coverage. Berti incurs a storage overhead of
+timely prefetch requests, and issue prefetch requests only for            only 2.55 KB (Section III).
+                                                                       • Our evaluations show that for SPEC CPU2017 and GAP
+the deltas predicted to provide high coverage, which translates
+to overall high prefetch accuracy. Sited at the L1D and                   workloads, Berti consistently outperforms a baseline
+seeing all virtual addresses generated by the processor, Berti            IP-stride prefetcher (8.5% average speedup). It also
+orchestrates the prefetch requests to the memory hierarchy.               surpasses the highly-competitive state-of-the-art IPCP L1
+Our Berti prefetcher is inspired by Berti from DPC-3 [46].                prefetcher (3.5% average speedup), which is a significant
+   Accurate and timely local deltas. We define local delta as             uplift in performance, pushing further the limits of
+the difference in cache line addresses between two demand                 hardware prefetchers. Berti is equally effective with
+accesses that are issued by the same IP. The definition of                multicore heterogeneous mixes. Overall, Berti provides
+delta differs from the definition of stride, being the later the          the best trade-off in performance, storage overhead,
+difference between addresses of consecutive load accesses                 and energy consumption of the memory hierarchy
+with the same IP. For example, an IPX that accesses the                   (Section IV).
+following cache line addresses: X, X+2, X+4, X+6, sees a                       II. R ECENT W ORKS AND M OTIVATION
+sequence of strides as follows: +2, +2, and +2. In this case,
+the stride is 2. However, access X+6 sees the following deltas:     A. Recent advances in data prefetching
++6, +4, and +2. Figure 2 shows an example differentiating              Data prefetching plays an important role in designing
+strides, local deltas, and timely local deltas. If the goal of      high performance processors. Recent developments in this
+a prefetcher is to cover address 15, then the prefetcher can        field mainly come from the last two data prefetching
+initiate prefetching with deltas +3, +5, and +8 whenever            championships, DPC-2 [2] and DPC-3 [7], co-located with
+it sees the demand accesses to addresses 12, 10, and 7,             ISCA 2015 and ISCA 2019, respectively.
+respectively. However, if we consider time to prefetch address         Best offset prefetching (BOP). The winner of DPC-2 is
+15, then deltas of +3, +5, and +8 will not completely mitigate      a degree-one L2 prefetcher that finds an offset that provides
+the L1D miss latency, as they will be late prefetch requests.       the maximum likelihood of future use at the L2 cache [38].
+Instead, if a prefetcher issues a request for address 15 with       An offset of k means that a cache line is k cache lines
+deltas of +10 or +13 on demand accesses to address 5 or 2,          away from the current demand address. BOP takes timeliness
+respectively, it can prefetch address 15 well ahead of time.        into account while selecting the best offset per application
+phase. Multi-lookahead offset prefetching (MLOP) [48] is an                             64                                               1.0
+extension on BOP that is motivated by Jain’s Ph.D. thesis [29].                         56
+                                                                                        48                                               0.8
+MLOP considers multiple lookaheads for each offset and                                  40
+
+
+
+
+                                                                           Best Delta
+
+
+
+
+                                                                                                                                           Coverage
+                                                                                        32                                               0.6
+selects the offset and lookahead covering a specific cache
+                                                                                        24                                               0.4
+miss. Both BOP and MLOP treat the demand addresses                                      16
+in isolation, and for each demand access, trigger prefetch                               8                                               0.2
+requests based on the prefetch offset1 . In general, MLOP                                0
+                                                                                        -8                                               0.0
+provides better prefetch coverage than BOP.                                                               IP
+   Variable Length Delta Prefetching (VLDP). This spatial
+data prefetcher uses multiple histories of deltas between                  Figure 3. Best delta selected by BOP (based on global deltas) and Berti
+successive cache lines observed within an operating system                 (based on per-IP local deltas) for mcf-1554B. Prefetch coverage is shown
+(OS) page to predict the future memory accesses in other                   in grayscale. BOP selects +62 as the best delta (red line), which is not
+                                                                           always accurate and provides a coverage of only 2%.
+OS pages [50]. One of the key features of VLDP is that it
+uses multiple prediction tables and makes predictions based
+on different lengths of history in terms of deltas.                        (gray lines) for different IPs of the mcf-1554B benchmark.
+   Signature path prefetching (SPP). This state-of-the-art                 We can see that the best delta is different for distinct IPs
+delta prefetcher predicts irregular strides at the L2 cache [35].          making a strong case for prefetching local, timely deltas
+SPP works by relying on the signatures (hashes of consecutive              instead of a global best delta (oblivious to per-IP best deltas).
+strides) observed within an OS page to index into a table                  We can also see that the global delta (+62) as selected by
+that predicts future deltas. SPP uses a lookahead mechanism                BOP does not cover all cache accesses, and it is not the best
+that recursively finds out deltas to prefetch until a delta falls          delta. For mcf-1554B, BOP provides coverage of only 2%,
+below a confidence. Perceptron prefetch filtering (PPF) is                 whereas Berti, that selects local deltas (per IP), provides better
+a filter that further improves the effectiveness of SPP by                 coverage as shown in Figure 3. As we will see in Section IV,
+deciding whether to prefetch into L2 or not [17]. In general,              the use of a global delta may be beneficial in some cases
+SPP combined with PPF (SPP-PPF) provides better prefetch                   (e.g., in CactuBSSN), but this is not the common case.
+coverage than VLDP.                                                           Why not existing local L1D prefetchers? A conventional
+   Bingo. This L2 prefetcher makes a case for associating                  IP-stride prefetcher covers consecutive constant strides and
+spatial access patterns to both short (such as IP) and long                not necessarily timely deltas. For example, IP 0x401cb0
+events (such as IP, IP+offset, and memory region) and                      from lbm-2676B generates the following stride sequence:
+selecting the best pattern for prefetching [13]. A key point               +1, +2, +1, +2, ... +1, +2. For this pattern, an IP-stride
+of Bingo is the use of only one hardware table for both                    prefetcher will provide zero coverage and will not gather
+short and long events. This table enables multiple predictions             enough confidence to prefetch either with stride +1 or
+from a single entry, providing better coverage than single-                +2. IPCP’s CPLX prefetcher will be able to detect this
+event prefetching. In general, Bingo outperforms VLDP and                  pattern. However, IPCP ignores the timeliness of prefetching.
+SPP-PPF for SPEC CPU2017 traces. However, it requires                      In contrast to IP-stride and IPCP’s CPLX prefetcher, a
+significantly more storage than VLDP and SPP-PPF.                          more timely, accurate, and flexible approach would be to
+   Instruction pointer classifier prefetching (IPCP). The                  prefetch with deltas +3 or +6 that provide 100% coverage.
+winner of DPC-3 is a state-of-the-art L1D data prefetcher                  Moreover, for the irregular stride sequence: -1, -5, -2, -
+that is composite in nature [40]. It classifies an IP into three           1, -4, -1 associated to IP 0x402dc7 from mcf-1554B,
+classes: constant stride (CS), complex stride (CPLX), and                  IPCP’s CPLX prefetcher fails to predict a pattern through
+global stream (GS). IPCP uses three lightweight prefetchers                its lookahead based on confidence. However, a local delta
+that issue prefetch requests according to the IP class. If it              prefetcher with a delta of -1 can provide better coverage.
+fails to classify an IP into one of the three classes, it uses a              Effect of out-of-order loads at the L1D. In an out-of-
+next-line prefetcher.                                                      order processor, memory accesses get reordered due to out-
+                                                                           of-order scheduling. Hence, the training of a delta prefetcher
+B. Motivation: why a new delta prefetcher?                                 may be affected by the ordering of memory accesses. Let’s
+   Why not a global delta prefetcher? We observe that                      consider a loop with a single IP accessing memory addresses
+finding the best delta for an entire application results in                1, 2, 3, 4, 5, 6, and 7 with constant strides of +1, +1, +1, +1,
+missing opportunities because the best delta varies based on               +1, +1. An out-of-order processor can reorder, for example,
+the program context, e.g., an IP or the OS page. Figure 3                  the accesses to addresses 2 and 3, resulting in the following
+shows the best deltas selected by BOP (red line) and Berti                 sequence of addresses: 1, 3, 2, 4, 5, 6, 7 and strides +2, -1, +2,
+                                                                           +1, +1, +1 at the L1D. This cannot be covered by an IP-stride
+  1 For BOP and MLOP, we use the term global delta instead of offset for   or an IPCP’s CPLX prefetcher unless a specific mechanism
+the rest of the paper.                                                     can provide the commit order [24], [56]. However, timely
+deltas have the important property of seeing past accesses                                     2     5          7     10
+                                                                                timeline
+already in order, thus there is no requirement of such in-order
+commit mechanisms. Indeed, the last three accesses in our                                       time to fetch 10
+example will see the following past deltas: address 5 will                                 (a) Access address 10: no timely delta found.
+see +4, +2, +3, +1, address 6 will see +5, +3, +4, +2, +1,
+and address 7 will see +6, +4, +5, +3, +2, +1 that is, all                                     2     5          7     10      12
+                                                                                timeline
+possibilities regardless of their order. The prefetcher then can
+choose the timely deltas that can provide the best coverage                                              time to fetch 12
+from these set of values.
+                                                                                                    timely delta (+10)
+         III. B ERTI : A L OCAL -D ELTA P REFETCHER                                     (b) Access address 12: one timely delta found.
+   Berti is a data prefetcher sited at the L1D, where it can see
+all the requests generated by the processor and orchestrate                                    2     5          7     10      12           15
+the prefetch requests to the memory hierarchy. Berti makes                      timeline
+a strong case for prefetch accuracy. For each IP, it selects                                                         time to fetch 15
+the deltas2 that are timely and computes their respective
+local coverage. High accuracy is achieved by only using                                                  timely deltas (+13, +10)
+deltas with high coverage. Additionally, Berti is trained with
+                                                                                        (c) Access address 15: two timely deltas found.
+virtual addresses, which helps in finding larger deltas and
+facilitates cross-page prefetching. Next, we describe how                                       Figure 4.   Learning timely deltas.
+Berti performs training and prediction. Then, we propose a
+simple and cost-effective hardware implementation.                           computed by subtracting the address of each timely request
+                                                                             in the history from the current address. Figure 4 depicts how
+A. Training the prefetcher                                                   timely deltas are detected. All addresses represented in the
+   The goal of the training mechanism is to estimate the                     timeline are accessed by the same IP. When address 10 is
+coverage of each seen delta, considering only those deltas                   demanded and its fetch latency computed (Figure 4a), the
+that would result in a timely prefetch. The training consists                history of accesses for that IP is searched, from the point in
+of the following actions: measuring fetch latency, learning                  time, a timely prefetch should have been triggered. In this
+timely deltas, and computing the coverage of the deltas.                     case, no previous accesses are found. After accessing address
+   Measuring fetch latency. In order to learn the deltas                     12 and computing its fetch latency (Figure 4b), a timely
+that are timely it is necessary to measure the time required                 delta corresponding to address 2 is found. That is, address
+to fetch data to the L1D, i.e., the L1D miss latency. This                   2 should initiate the prefetch request for 12 in order to be
+measurement is performed for any cache line in L1D, both                     timely. The timely delta +10 is therefore learned. Similarly,
+for demand misses and prefetch requests. Computing latency                   when computing the latency for access 15 (Figure 4c), two
+for prefetch requests is fundamental because, in an ideal                    deltas, +10 and +13, are detected as timely.
+scenario, there would not be L1D misses but just L1D hits                       Berti triggers the procedure to learn timely deltas for
+due to timely prefetch requests. In addition, the latency of                 each miss that would have occurred in the baseline, which
+prefetch requests may be larger than the latency of demand                   translates to two scenarios. First, when a demand miss fills
+requests due to prefetch queue (PQ) contention or L1D port                   the L1D with the requested data. Second, when a cache line
+contention. Fetch latency can be measured by keeping a                       brought into L1D by a prefetch request is demanded (i.e.,
+timestamp for any L1D miss inserted into the MSHR and                        misses that would have occurred without a prefetcher). Berti
+any prefetch request inserted into the PQ. On an L1D fill,                   does not learn deltas on a cache fill caused by a prefetch
+the latency is simply computed by subtracting the stored                     request since its demand time is not known. Therefore, it is
+timestamp from the current one.                                              necessary to keep the latency of prefetch requests until the
+   Learning timely and accurate deltas. Once the fetch                       core demands the cache line.
+latency is obtained for each L1D fill, our prefetcher can                       Computing the coverage of deltas. On every search in
+precisely learn timely deltas, given that the history of accesses            the history, Berti obtains a set of timely deltas. Deltas that
+and timestamps by the same IP is recorded. By searching in                   frequently appear in the searches would cover a significant
+the history of recent accesses and comparing the timestamp                   fraction of misses, while deltas that rarely appear would
+of each previous access with the timestamp when a prefetch                   result in low coverage. It is easy to compute the coverage
+should be issued to be timely, the accesses that would                       by dividing the number of occurrences of a delta by the
+trigger timely prefetch requests are detected. Deltas are then               number of searches in the history. For example, in Figure 4,
+  2 For the rest of the paper, unless specified we use the terms delta and   after three accesses, the delta +10 has the higher coverage,
+local delta interchangeably.                                                 being in two out of three searches (66.7%). If the same
+access pattern continues, the delta +10 will reach close to                    L1D access
+                                                                                                                                                                   History table
+100% coverage. It is important to note that this local (per          VA                     VA                                     IP, VA
+IP) coverage translates into accuracy. If a delta covers 100%                                              L1D cache                                                      ...
+
+
+
+
+                                                                                                                                            Latency
+of cache lines, since each access-delta pair results in only
+
+
+
+
+                                                                                                                                                                                     Timely deltas
+                                                                                                 way 0 way 1                     way 11                              Write Search
+one prefetch request, that delta will bring 100% accuracy.           L1 dTLB
+                                                                                       PA
+                                                                                                                                            Hit p
+B. Prediction: issuing prefetch requests
+
+
+
+
+                                                                     Miss
+                                                                                                  ...          ...         ...    ...
+
+
+
+
+                                                                                Fill
+
+
+
+
+                                                                                                                                                IP, VA, latency
+    Once we know the deltas and their associated coverage,                                                                                                          Table of deltas
+                                                                                       PA
+we can orchestrate the prefetch requests across the cache                   STLB
+hierarchy. Based on both the coverage of each delta and the                                                                                                                 ...
+
+
+
+
+                                                                                                                                                                                     Pref. requests
+                                                                                                                                    Fill
+                                                                                                    Miss
+                                                                                                               MSHR
+L1D MSHR occupancy, we decide which deltas to use and                                                                ...                                           PQ
+till which cache level to prefetch. We use four watermarks to
+                                                                                                                                                                   ...
+decide where to issue the prefetch requests. If the coverage
+                                                                                                  Next cache level (L2)
+of a delta is above a high-coverage watermark and the
+L1D MSHR occupancy is below the occupancy watermark,               Figure 5.       Berti design overview. Hardware extensions are shown in gray.
+then prefetch requests using that delta get filled at all the
+cache levels till L1D. Otherwise, if the coverage is above a
+                                                                                         IP tag            line address                    timestamp
+medium-coverage watermark, irrespective of the L1D MSHR
+occupancy, prefetch requests get filled till L2. Finally, if the    History table            7                       24                                    16
+coverage is above a low-coverage watermark, requests get                                                                                   e                                              e
+                                                                                                                ter                     rag s                                          rag s
+filled only in the LLC.                                                                                      un                       ve tu                                          ve tu
+                                                                                            IP tag         co delta                 co sta                               delta     co sta
+    To generate a prefetch request, we add the selected delta       Table of deltas          10            4          13            4 2                      ...          13       4 2
+to the address of the current access and the resulting address
+is inserted in the PQ. Requests in the PQ are processed in a                 Figure 6.       History table and Table of deltas entry format.
+first-in-first-out (FIFO) order. Since our prefetcher is trained
+with virtual addresses, the generated prefetch requests are
+also in the virtual address space. A prefetch request obtains      considered for learning timely deltas. Based on our empirical
+the physical address from the L2 translation look-ahead            results, on average across GAP and SPEC CPU2017 traces,
+buffer (STLB). If the translation misses in the STLB, the          we see 1.08 overflows per kilo L1D fills.
+prefetch request is dropped. If the translation is obtained, the      Learning timely deltas. To be able to learn timely deltas,
+prefetch request checks if the target block is already present     the most recent accesses need to be tracked. The History
+in the cache it wants to fill. In case of a miss, the block is     table (see Figure 5) records that information and is organized
+prefetched, and the request is inserted into the MSHR.             as an 8-set, 16-way cache with a FIFO replacement policy
+                                                                   and indexed and searched with the IP. The format of each
+C. Hardware implementation                                         entry in the history table is depicted in Figure 6. Each entry
+   As outlined in Figure 5, Berti can be implemented with          keeps a tag corresponding to the seven least significant bits of
+a small hardware budget and using simple structures and            the IP (after removing the bits used for indexing the cache),
+logic. Next, we describe the structures required to train the      the 24 least significant bits of the target cache line address,
+prefetcher and decide on the prefetch requests to issue to         and a 16-bit timestamp. A new entry is inserted in the history
+each cache level.                                                  table (Write port in Figure 5) either on-demand misses (Miss
+   Measuring fetch latency. In order to be able to measure         arrow from the L1D in Figure 5) or on hits for prefetched
+the fetch latency, the MSHR is extended with a 16-bit field        cache lines (Hit p in Figure 5). The virtual address (VA) and
+(represented in Figure 5 in gray) that stores a timestamp on       the IP (IP, VA arrow in Figure 5) are stored in the new entry
+a demand L1D miss. Similarly, the PQ is also extended with         along with the current timestamp (not shown in the figure).
+an analogous field that stores the timestamp when a new               The search for timely deltas (Search port in Figure 5) is
+prefetch request is added. The timestamp can be obtained           performed either on a fill due to a demand access (Fill arrow
+from the clock of the local processor [47] or any other metric     from the MSHR in Figure 5) or on a hit due to a prefetched
+to approximate time (e.g., number of cache accesses). In our       cache line (Hit p in Figure 5). In the first case, the search is
+implementation, we use the former. When a prefetch request         done using the information from the MSHR (IP, VA, latency
+misses L1D, the timestamp is transferred from the PQ to the        arrow in Figure 5). In order to enable the search on L1D
+newly allocated MSHR entry. On an L1D fill, the latency of         hits, we keep the latency of the prefetch request (12 bits)
+the request can be computed with a simple subtraction. The         along with each entry in the L1D (see Figure 5 L1D shadow
+latency is stored using 12 bits. If an overflow is detected        part). Alternatively, an L1D shadow tag could be employed.
+when computing the latency, it is set to zero, and therefore not   A latency field set to zero indicates either an overflow when
+                                                                                                  Table I
+computing the latency or an already demanded cache line.                               S TORAGE OVERHEAD OF B ERTI .
+In that case, a search in the history table is not performed.
+Otherwise, the search is done when the demand hit takes             Structure                                                       Storage
+place, using the stored latency (Latency arrow in Figure 5),        History   8-set, 16-way (128-entry) cache, FIFO replace-        0.74 KB
+                                                                    table     ment policy. Each set: 4 bits (replacement policy).
+which is reset after the search. On every search, the 16-ways                 Each entry: 7-bit IP tag, 24-bit address, 16-bit
+of the history table are looked up for a matching IP tag.                     timestamp
+A maximum of eight timely deltas, the ones corresponding            Table of 16-entry, fully-associative, 4-bit FIFO replace-       0.62 KB
+                                                                    deltas    ment policy. Each entry: 10-bit IP tag, 4-bit
+to the youngest entries that would result in timely prefetch                  counter, and an array of 16 deltas (13-bit delta,
+requests, are collected.                                                      4-bit coverage, 2-bit status)
+   Computing the coverage of deltas. The results of each            PQ +      16+16 entries,                                        0.06 KB
+                                                                    MSHR      16-bit timestamp per entry
+search in the history table (Timely deltas arrow in Figure 5)       L1D       768 cache lines, 12-bit latency per line              1.13 KB
+are accumulated in the Table of deltas, a 16-entry fully-           Total                                                           2.55 KB
+associative cache with a FIFO replacement policy. The format
+of each entry in the table of deltas is depicted in Figure 6.
+Each entry consists of a 10-bit tag (based on hash function           Issuing prefetch requests. On every L1D access, the
+of the IP), a 4-bit counter, and an array of 16 deltas, each       table of deltas is searched looking with a matching IP (IP,
+of them containing the delta itself (13 bits), the coverage (4     VA arrow pointing to the table of deltas in Figure 5). Since
+bits), and the status (2 bits) indicating till which cache level   we use an L1D with two read ports and one write port, the
+to prefetch. The counter is increased on each search in the        table of deltas requires three search ports. The deltas with
+history table. For each timely delta found during the search,      status L1D pre f or L2 pre f are added to the current VA to
+its coverage counter is increased. When the counter overflows      form the prefetch requests that are inserted into the PQ (Pref.
+(its value increases to 16), we compute the coverage. Deltas       requests arrow in Figure 5). Those prefetch requests get filled
+that cross the high-coverage watermark (65% of coverage,           into all cache levels till L1D when the status is L1D pre f
+i.e., a coverage value higher than 10) set their status to         and the MSHR occupancy is below 70% (the occupancy
+L1D pre f . Deltas in between the high-coverage watermark          watermark). Otherwise, prefetch requests get filled till L2.
+and the medium-coverage watermark (between 65% and 35%,               Storage overhead. Berti does not require any complex
+i.e., a coverage value lower or equal than 10 and higher           operation (e.g., multiplications) nor complex logic. Our
+than 5) set the status to L2 pre f . The maximum number of         history table has two read ports and one write port. The
+deltas selected for any of those status is bounded to 12. The      latency of this structure is two cycles, based on CACTI-
+remaining deltas’ status is set to No pre f (i.e., do not issue    P [37]. Since prefetching training is out of the critical path
+prefetch requests for this delta). Once the status is set, the     of memory accesses, the history table does not affect the cycle
+counter and the array of confidences are reset, and a new          time. The storage requirements of Berti, whose breakdown
+learning phase begins.                                             per structure is provided in Table I, is just 2.55 KB.
+   While warming-up the status fields, prefetch requests
+                                                                                            IV. E VALUATION
+are also issued if at least eight deltas have been gathered,
+increasing the high-coverage watermark to 80%, as with             A. Simulation Methodology
+just four deltas the prefetcher needs more confidence. Our            We use the recently modified version of ChampSim [9],
+empirical study shows that using watermarks higher that 65%        a trace-driven simulator used for the 2nd and 3rd Data
+leads to high accuracy.                                            Prefetching Championships (DPC-2 [2] and DPC-3 [7]).
+   Although Berti opens the possibility of prefetching to          Recent prefetching proposals [13], [17], [40], [48] are also
+LLC only for low-coverage deltas, our evaluation showed            coded and evaluated on ChampSim. The recently modified
+no performance improvements when choosing this option.             ChampSim extends the one provided with the DPC-3 with a
+Hence, we set the low-coverage watermark to 35% (equal             decoupled front-end [45] and a detailed memory hierarchy
+to the medium-coverage one), to disable prefetching to LLC         support for address translation that further improve the
+only.                                                              baseline performance. Caches are non-inclusive, although
+   In order to constantly learn new deltas, evictions of deltas    Berti can work similarly with exclusion policies just by
+may be necessary. On the arrival of a non stored delta,            bypassing the allocation of memory blocks at the LLC. We
+deltas with less than 50% coverage in the previous phase           faithfully model DRAM, including the queuing delays that
+are candidates for evictions in the current phase. To this end,    contributes to the variable access time because of close vs.
+if the coverage when selecting the L2 pre f status is lower        open page, page hit vs miss, DRAM bank conflicts, etc.
+than 50%, the status is set to L2 pre f repl. The eviction         Table II summarizes our system configuration, mimicking an
+policy selects the delta with lower coverage whose status is       Intel Sunny Cove microarchitecture [5], [6], [23].
+L2 pre f repl or No pre f . In case no such delta exists, the         We evaluate Berti with single-core and multi-core sim-
+new delta is discarded.                                            ulations. We warm-up the caches for 50M sim-point in-
+                                                                                                 Table II
+structions [49] and collect statistics for the next 200M                      S IMULATION PARAMETERS OF THE BASELINE SYSTEM .
+sim-point instructions. For multi-core simulations, we use
+heterogeneous mixes of single-threaded traces. For each mix,         Core         Out-of-order, hashed perceptron branch predictor [32], 4 GHz
+                                                                                  with 6-issue width, 4-retire width, 352-entry ROB
+when a core finishes its 200M instructions, it gets replayed         TLBs         L1 iTLB/dTLB: 64 entries, 4-way, 1 cycle
+until all the cores finish their respective 200M instructions.                    STLB: 2048 entries, 16-way, 8 cycles
+For both single- and multi-core, we report performance in            MMU          2-entry PSCL5, 4-entry PSCL4, 8-entry PSCL3, 32-entry
+                                                                     Caches       PSCL2, searched in parallel, one cycle
+terms of IPC improvement (speedup) with respect to an L1D            L1I          32 KB, 8-way, 4 cycles
+with an IP-stride prefetcher. We use the geometric mean to           L1D          48 KB, 12-way, 5 cycles, with a 24-entry, fully associative
+average the speedups obtained by the different single-thread                      IP-stride prefetcher [18]
+traces.                                                              L2           512 KB 8-way associative, 10 cycles, SRRIP [31], non-
+                                                                                  inclusive
+   Energy model. We also report the dynamic energy                   LLC          2 MB/core, 16-way, 20 cycles, DRRIP [31], non-inclusive
+consumption of the memory hierarchy. We obtain the energy            MSHRs        8/16/32 at L1I/L1D/L2, 64/core at the LLC
+consumption of reads and writes to tag and data arrays at            DRAM         One channel/4-cores, 6400 MTPS [19], FR-FCFS, 64-entry
+                                                                     con-         RQ and WQ, reads prioritized over writes, write watermark:
+each cache level and DRAM with CACTI-P [37] and Micron               troller      7/8th
+DRAM power calculator [3]. Then, we compute the total                DRAM         4 KB row-buffer per bank, open page, burst length 16, tRP :
+energy expenditure by accounting for the number of accesses          chip         12.5 ns, tRCD : 12.5 ns, tCAS : 12.5 ns
+of each type across the memory hierarchy. We use 22 nm
+                                                                                                 Table III
+process technology for our energy calculations.                                 C ONFIGURATIONS OF EVALUATED PREFETCHERS .
+   Workloads. We use traces from SPEC CPU2017 [55] and
+single-threaded GAP benchmarks [14]. We limit our study              SPP-PPF [17]         256-entry ST, 512-entry 4-way PT, 8-entry GHR, Per-
+                                                                                          ceptron weights with the following entries: 4096×4,
+to memory-intensive traces (MemInt), i.e., those that showed                              2048×2, 1024×2, and 128×1 entries, 1024-entry
+at least one miss per kilo-instruction (MPKI) at the LLC in                               prefetch table, 1024-entry reject table
+our modeled baseline system. All GAP traces (20) and 44              Bingo [13]           2 KB region, 64/128/4K-entry FT/AT/PHT
+SPEC CPU2017 traces are memory-intensive.                            MLOP [48]            128-entry AMT, 500-update, 16-degree
+                                                                     IPCP [40]            128-entry IP table, 8-entry RST table, and 128-entry
+   SPEC CPU2017 traces were generated with the reference                                  CSPT table
+inputs. Both real (Twitter, Web, Road) and synthetic (Kron,
+Urand) graphs were used as input for the GAP benchmarks.
+   We also report performance for the CloudSuite bench-             its performance with prefetchers designed for L1D (no
+marks [22]. All traces are publicly available [4], [8], [10].       prefetching at the L2), and then with multi-level prefetching
+For multi-core experiments, we simulate 200 random hetero-          combinations. The L1D prefetchers are i) MLOP [48] (DPC-
+geneous mixes from SPEC CPU2017 and GAP.                            3, 3rd place), an extension of the BOP (DPC-2 winner), and
+   Berti and variable cache fill latency. Modern memory             ii) IPCP (DPC-3 winner published at ISCA 2020 [40]). For
+hierarchies can have variable cache fill latency that comes         multi-level prefetching, we evaluate two state-of-the-art L2
+from sources like MSHR contentions at the private and shared        prefetchers along with MLOP and Berti at the L1D: SPP-
+caches, read queue (RQ) and write queue (WQ) contentions            PPF [17], [35] and Bingo [13]. We also compare with a
+at various levels of caches and DRAM controller. At the             multi-level IPCP that uses IPCP both at the L1D and L2.
+DRAM level, memory access time gets affected because of             The evaluated prefetchers have been briefly described in
+row buffer conflicts, bank conflicts, etc. Our simulator reflects   Section II-A. For all prefetchers, we use a highly tuned
+all this variability. One of the primary reasons we propose         implementation as provided by the authors and tune it again
+Berti is because of the variable response latency. Even non         for the parameters mentioned in Table II. Fine tuning was an
+uniform cache access (NUCA) LLCs with multiple banks                easy exercise as all the competing prefetchers use ChampSim
+can cause variable fill latency. For example, suppose in a          for their evaluation. Table III shows the configurations used
+NUCA LLC with two banks an IP sees local deltas of +1               for all the evaluated prefetchers.
+and +2 that get mapped to bank-1 and bank-0, respectively,
+and the latency to bank-0 is different from bank-1. Even in         B. Speedup vs. storage requirements
+this case, Berti is able to learn the best deltas while looking        Figure 7 summarizes the speedup of the evaluated prefetch-
+at the history, facilitating timely and accurate prefetching.       ers with respect to IP-stride for SPEC CPU2017 and GAP,
+Note that in our experiments, the fill latency ranges from          along with their storage requirements. L1D prefetchers are
+22 to 2098 cycles with an average of 278 cycles averaged            shown with a circle, L2 prefetchers with a square, and multi-
+across SPEC CPU2017, GAP, and CloudSuite benchmarks                 level (L1D+L2) prefetchers with a diamond.
+and multicore mixes.                                                   Among the L1D prefetchers, Berti achieves the highest
+   Evaluated Prefetching Techniques. We compare the                 speedup with a size similar to IPCP, the prefetcher with
+effectiveness of Berti with high performing L1D and L1D+L2          the lowest storage budget. With only 2.55 KB of storage
+prefetchers. As Berti is an L1D prefetcher, we first compare        overhead, Berti improves performance by 8.5% over IP-stride
+                           1.12                                                                             MLOP        IPCP        Berti
+                                                                                             1.15
+Speedup (Geometric Mean)
+
+                                                         Berti+SPP-PPF                       1.10
+                           1.10                                      Berti+Bingo
+
+
+
+
+                                                                                   Speedup
+                                    Berti                                                    1.05
+                           1.08                                      MLOP+Bingo              1.00
+                                                      MLOP+SPP-PPF                           0.95
+                           1.06 IPCP+IPCP                 SPP-PPF Bingo                      0.90
+                                                                                                    SPEC17-MemInt                   GAP
+                                                                     IPCP+Bingo
+                                                        IPCP+SPP-PPF
+                           1.04 IPCP
+                                        MLOP                                       Figure 8. Speedup of L1D prefetchers compared to a system with L1D
+                                                                                   IP-stride for memory-intensive SPEC CPU2017 and GAP traces.
+                           1.02
+                                  0 5 10 15 20 25 30 35 40 45 50 55 60 65
+                                       Storage requirement for prefetching (KB)
+                                                                                      A key observation is that the state-of-the-art prefetchers do
+Figure 7. Speedup vs. storage requirements. Speedup is normalized to
+L1D IP-stride and averaged across memory-intensive SPEC CPU2017 and                not consistently improve performance over IP-stride across
+GAP traces. X+Y denotes prefetcher X at L1D and prefetcher Y at L2.                all workloads, but Berti only shows a small degradation of
+                                                                                   2.6% with respect to IP-stride for mcf_s-1536.
+and 3.5% over IPCP, the state-of-the-art L1D prefetcher.                              For SPEC CPU2017, Berti achieves its best result for
+   The Berti+SPP-PPF multi-level prefetcher obtains the                            mcf_s-1554 where it provides speedups of 1.89×, 1.65×,
+highest speedup (10.2%, additional 1.5% on top of Berti                            and 1.49× with respect to IP-stride, IPCP, and MLOP,
+at L1D) among all multi-level combinations with 41.8 KB                            respectively. MLOP and IPCP achieve performance at least
+combined storage for L1D and L2 prefetchers. However,                              1% below IP-stride on five and eight traces out of 44,
+the highlight of Figure 7 is that Berti at L1D without any                         the worst case being in mcf_s-782 with drops of 16.0%
+prefetching at L2 outperforms all the multi-level prefetching                      and 21.9%, respectively. In mcf_s-782, only three IPs
+combinations that do not include Berti.                                            (0x4049de, 0x4049e5, and 0x4049cc) represent the
+                                                                                   75% of all L1D accesses. MLOP uses a global delta to
+C. Performance of Berti as an L1D Prefetcher                                       prefetch that is affected by the interleaving of accesses from
+   Figure 8 shows the speedup achieved by the L1D prefetch-                        these three IPs. IPCP uses the CS and CPLX class prefetchers
+ers for SPEC CPU2017 and GAP. Berti is the best prefetcher                         but with an accuracy below 25%.
+across both suites. On average, Berti at the L1D improves                             As for GAP, Berti is the best prefetcher for all the
+performance by 11.6% and 1.9% for SPEC CPU2017                                     benchmarks but three (bfs-8, bfs-10 and bfs-14). It
+and GAP, respectively. All three prefetchers achieve good                          consistently achieves similar or better results than IP-stride
+speedups for SPEC CPU2017, and Berti outperforms IPCP                              for all traces, while MLOP and IPCP perform worse than
+and MLOP by 2.8% and 3.0%, respectively. The speedup                               IP-stride in 12 and 16 benchmarks, respectively. In some
+differences are more significant with the GAP traces, where                        cases, the MLOP slowdown is very significant, for example,
+Berti is the only L1D prefetcher that improves IP-Stride, by                       17.7% in sssp-3. We have also analyzed the behavior of
+up to 1.9%, while IPCP and MLOP are 2.9% and 7.8% below,                           the prefetchers in one of the GAP applications, namely bc-5.
+respectively. Overall, across SPEC CPU2017 and GAP traces,                         All bc-5 IPs show a rather chaotic memory access pattern
+Berti outperforms IP-stride and IPCP by 8.5% and 3.5%,                             except for one that is very regular. IP-stride and Berti, by
+respectively. This is significant performance improvement on                       separately tracing the IPs, detect the regular IP pattern and
+top of the high-performing state-of-the-art IPCP prefetcher.                       prefetch correctly for it. They do not prefetch for the other
+   Figure 9 shows the individual speedup for the memory-                           IPs. MLOP fails due to the use of a global delta. The accesses
+intensive SPEC CPU2017 and GAP traces. For CPU2017,                                issued by IPs with irregular pattern prevent discovering a
+Berti achieves similar or significantly better results than the                    global delta and therefore the prefetcher issues very few
+other prefetchers on all traces except for CactuBSSN. In this                      requests, and is not able to prefetch correctly for the regular
+benchmark, we observe that the memory access instructions                          IP. IPCP detects the delta pattern for the regular IP through its
+follow stride patterns. However, there are hundreds of these                       CPLX component, and prefetches correctly for it. However,
+instructions executing interleaved. Therefore, to track the                        the GS component generates many useless prefetches that
+local behavior of instructions in this benchmark, Berti                            drastically decreases the accuracy of IPCP and results in the
+would need very large history and delta tables. In contrast,                       loss of performance shown in Figure 9.
+prefetchers that detect patterns in the global address stream                         Accuracy. Figure 10 shows the accuracy of the L1D
+do not have this problem, as is the case with MLOP or                              prefetchers. Berti is a very accurate prefetcher. On average,
+the IPCP GS class. Barring the exception of CactuBSSN                              about 87.2% of its prefetched lines are useful compared to
+where global deltas perform better than local deltas, Berti                        62.4% for MLOP and 50.6% for IPCP. The effectiveness of
+shows that local deltas are prevalent across a large number                        IPCP is driven by the performance of several tiny prefetchers:
+of benchmarks and it accurately selects them.                                      a global stream prefetcher (GS class), a constant stride
+                  1.4        1.6                                                                                                                       1.4 1.7        1.4
+                1.5 1.4    1.6 1.6              1.9    1.5                    MLOP                      IPCP                   Berti                     1.51.7 1.7 1.4 1.4
+          1.4
+          1.3
+          1.2
+Speedup
+
+
+
+
+          1.1
+          1.0
+          0.9
+          0.8
+          0.7
+
+
+
+
+          wr p_s- 41
+           SN -3 1
+         lbm_s-4477
+         lbm_s-2004
+    bw gc_s-2250
+    bw ves c_s-726
+    bwaves_s-1734
+
+
+
+
+   xa w f_s- 874
+
+
+
+
+ fotnik3dop2 -490
+ fotonik3_s-1 s-17
+
+
+
+
+         roms_s-1070
+GE roms s-290
+   OM om _s- 3
+       GE N-M s-524
+           OM em 3
+      bwves_s-2600
+          av s-2 9
+         mces_s 931
+
+
+
+
+         lbm_s-2676
+    om lbm_s-3777
+    om etp -4266
+        ne p_s 68
+
+
+
+
+ xa ancbmk_ _s-10
+ xa ancbmk_ -165
+ xa ancbmk_ -202
+        cb k_s 25
+        camk_s-592
+   o p _s 0
+
+ fot nik3 _s-0881
+         mcf_s-1891
+
+
+
+
+        ik s- 76
+       rom3d_s 7084
+       roms_s-8225
+         mc _s-1152
+         mcf_s-1536
+           mc_s-1654
+           mcf_s-444
+           mcf_s-472
+ca mcf_s-664
+  ctu m _s 5
+ca tuBSSN_ _s-992
+  ctu SN s-2 4
+
+
+
+
+ xa lanc rf_s-6673
+ xa ancbbmk 8065
+
+
+
+
+                EA Int
+                         ll
+                     N-A
+       BS _s 42
+
+
+
+
+         r s_ 39
+        EA s_ 29
+        a _ 4
+
+
+
+
+                f 8
+ca BS cf -78
+
+
+
+
+fot m4 -70
+            tp -1
+             c 8
+
+
+
+
+                       6
+
+
+
+
+    lan m s-3
+
+
+
+
+     on d_ 11
+             f 5
+          gc _s-1
+
+
+
+
+                     1
+                     -
+
+
+
+
+                    _
+                   s
+                   s
+
+
+
+
+                   -
+               _ s
+             c
+
+
+
+
+             d
+             f
+          gc
+
+
+
+
+        n
+        a
+
+
+
+
+     o
+    l
+    l
+    l
+    l
+  c
+                                                                    (a) Memory-intensive SPEC CPU2017
+
+                                                                              MLOP                      IPCP                   Berti
+          1.1
+
+          1.0
+Speedup
+
+
+
+
+          0.9
+
+          0.8
+
+
+
+                                                                                                                           10
+
+                                                                                                                                   14
+
+                                                                                                                                         3
+
+                                                                                                                                                         5
+                -0
+                     -12
+
+                           -3
+
+                                     -5
+                                           -10
+
+                                                      -14
+
+                                                             -3
+
+                                                                   -8
+
+                                                                         13
+
+                                                                                14
+
+                                                                                        5
+
+                                                                                                                  6
+
+
+
+
+                                                                                                                                                        0
+
+                                                                                                                                                        4
+                                                                                                                                                      p-3
+
+
+                                                                                                                                               GE -5
+                                                                                                                                                        N
+                                                                                                                                        pr-
+
+                                                                                                                                                     pr-
+                                                                                       cc-
+
+                                                                                                                 cc-
+
+
+
+
+                                                                                                                                                    p-1
+
+                                                                                                                                                    p-1
+
+
+
+
+                                                                                                                                                     EA
+            bc
+
+
+
+                           bc
+
+                                bc
+
+
+
+
+                                                            bfs
+
+                                                                  bfs
+
+
+
+
+                                                                                                                                                      p
+                                                                                                                        pr-
+
+                                                                                                                                pr-
+                                                                        cc-
+
+                                                                              cc-
+                     bc
+
+
+
+
+                                          bfs
+
+                                                 bfs
+
+
+
+
+                                                                                                                                                  sss
+
+                                                                                                                                                  sss
+
+                                                                                                                                                 OM
+                                                                                                                                                 sss
+
+                                                                                                                                                 sss
+                                                                                     (b) GAP
+Figure 9. Speedup with Berti as an L1D prefetcher for (a) 44 SPEC CPU2017 and (b) 20 GAP memory-intensive traces normalized to L1D IP-stride.
+Geomean-all corresponds to the geometric mean of all the 95 SPEC CPU2017 traces.
+
+
+
+prefetcher (CS class), and a complex stride prefetcher (CPLX                                                                                  Timely          Late
+                                                                                                                 100                                   100
+                                                                                         L1D Prefetch Accuracy
+
+
+
+
+class) that work in tandem. For regular access patterns, the
+                                                                                                                  90                                    90
+CS prefetcher provides high accuracy. However, for complex                                                        80                                    80
+                                                                                                                  70                                    70
+access patterns, the effectiveness of the CPLX prefetcher                                                         60                                    60
+                                                                                                                  50                                    50
+is low, with an accuracy of 52.7% and 9.8% for SPEC                                                               40                                    40
+                                                                                                                  30                                    30
+CPU2017 [55] and GAP [14] workloads, respectively.                                                                20                                    20
+                                                                                                                  10                                    10
+   MLOP, like Berti, is based on the detection of the best                                                         0                                     0
+                                                                                                                            ride MLOP IPCP Berti                  ride MLOP IPCP Berti
+timely deltas. However, it achieves much lower accuracy.                                                               IP-st                                 IP-st
+The improvement of Berti over MLOP is mainly due to two                                                                      (a) SPEC17-MemInt                          (b) GAP
+factors: i) MLOP uses global deltas for the whole application
+while Berti detects different deltas for each IP. As we have                               Figure 10. Prefetch accuracy at the L1D. Percentages of useful requests
+                                                                                           are broken down into timely (gray) and late (black) prefetch requests.
+shown in Section II-B, benchmarks such as mcf generate
+different delta patterns for each IP. ii) Berti uses a stringent
+policy to decide which deltas to use for issuing prefetch
+requests into L1D, as we have described in Sections III-B                                   Coverage. Figure 11 shows demand misses per kilo
+and III-C, while MLOP generates prefetch requests for the                                instructions (MPKI) at the L1D, L2, and LLC with and
+best delta with each lookahead regardless of its confidence.                             without L1D prefetchers. Berti and IPCP achieve a similar
+   Timeliness. The darker part of each bar in Figure 10                                  reduction of misses in L1D (8.7% in GAP, 33.4% in SPEC
+represents the prefetch requests whose retrieved data arrive                             CPU2017) and slightly higher than MLOP. However, Berti
+late to L1D. Almost all prefetch requests generated by Berti                             manages to eliminate more misses than IPCP and MLOP at
+are timely, while MLOP and IPCP produce a significant                                    L2 and LLC due to its line preloading policy directed by
+number of late requests. IPCP does not use any mechanism                                 the L1D prefetcher. The biggest differences are observed in
+to adapt the prefetch requests timing to the miss latency,                               GAP, where Berti reduces LLC demand misses by 17.7% and
+while MLOP and Berti do. However, Berti achieves better                                  12.4% compared to MLOP and IPCP, respectively. Similarly,
+timeliness than MLOP due to specific and timely deltas for                               Berti reduces L2 demand misses by 6.7% and 5.6% compared
+each IP.                                                                                 to MLOP and IPCP, respectively.
+                  No-pref         IP-stride           MLOP         IPCP         Berti                                  MLOP                  IPCP                Berti+Bingo
+                50                                   90                                                                MLOP+Bingo            IPCP+IPCP           Berti+SPP-PPF
+                                                     80                                                                MLOP+SPP-PPF          Berti
+                40                                   70                                                  15                                     50
+  Demand MPKI
+
+
+
+
+                30                                   60                                                                                         45
+
+
+
+
+                                                                                        Demand MPKI
+                                                     50                                                                                         40
+                20                                   40                                                                                         35
+                                                     30                                                  10                                     30
+                10                                   20                                                                                         25
+                                                     10                                                                                         20
+                 0                                    0                                                         5                               15
+                      L1D       L2         LLC               L1D      L2     LLC                                        L2          LLC                    L2             LLC
+                        (a) SPEC17-MemInt                          (b) GAP                                             (a) SPEC17-MemInt                        (b) GAP
+Figure 11. Prefetch coverage in terms of average L1D, L2, and LLC                        Figure 13. Prefetch coverage in terms of average L2 and LLC demand
+demand MPKIs for all L1D prefetchers.                                                    MPKIs with multi-level prefetching.
+
+                      MLOP+Bingo                 IPCP+IPCP           Berti+SPP-PPF
+                      MLOP+SPP-PPF               Berti+Bingo         Berti                                                    L1D to L2        L2 to LLC          LLC to DRAM
+          1.15                                                                                                  2.00
+
+
+
+
+                                                                                           Normalized traffic
+          1.10                                                                                                  1.75
+Speedup
+
+
+
+
+          1.05                                                                                                  1.50
+          1.00
+          0.95                                                                                                  1.25
+          0.90                                                                                                  1.00
+                             SPEC17-MemInt                             GAP                                             IP-Stride MLOP MLOP MLOP IPCP IPCP Berti Berti Berti
+                                                                                                                                        +      +       +          +      +
+                                                                                                                                      Bingo SPP-PPF  IPCP       Bingo SPP-PPF
+Figure 12.              Spedup with multi-level prefetching normalized to L1D IP-
+stride.                                                                                                                      (a) Memory-intensive SPEC CPU2017
+
+
+D. Multi-level prefetching performance                                                                                        L1D to L2        L2 to LLC          LLC to DRAM
+                                                                                                                2.00
+                                                                                           Normalized traffic
+
+
+
+   Figure 12 shows the speedup achieved with the multi-                                                         1.75
+level prefetching combinations compared to a system with                                                        1.50
+IP-stride. We select the best five multi-level prefetching                                                      1.25
+combinations out of all possible combinations of L1D and                                                        1.00
+                                                                                                                       IP-stride MLOP MLOP MLOP IPCP IPCP Berti Berti Berti
+L2 prefetchers. Multi-level prefetching combinations do not                                                                             +      +       +          +      +
+offer a significant performance boost. The best multi-level                                                                           Bingo SPP-PPF  IPCP       Bingo SPP-PPF
+prefetching combinations without Berti are MLOP+Bingo                                                               (b) GAP
+for SPEC CPU2017 and MLOP+SPP-PPF for GAP. In both                                       Figure 14. L2, LLC and DRAM demand and prefetch traffic normalized
+                                                                                         to no-prefetching.
+cases, these combinations achieve a similar speedup to Berti
+alone, with a storage requirement 22 and 18 times higher,
+respectively. IPCP at L1D and L2 (IPCP+IPCP), with a                                     at L2 and LLC decrease for SPEC CPU2017 but remain
+meager hardware budget as Berti, achieves a significantly                                the same or even increase slightly when working with the
+lower speedup than Berti alone at the L1D, especially in                                 irregular access patterns of GAP. As a result, the MPKIs at
+GAP, with a difference of 4.6%.                                                          the L2 and LLC achieved by Berti at the L1D are always
+   Adding a prefetcher at the L2 cache along with Berti                                  better than those obtained by multi-level prefetchers with no
+at the L1D achieves a moderate performance gain. The                                     Berti, except for MLOP+Bingo in SPEC CPU2017.
+most significant gain is 2.0% and is obtained with the
+Berti+Bingo configuration in the memory-intensive subset                                 E. Memory hierarchy traffic and energy
+of SPEC CPU2017 traces. Given the high hardware cost of                                     Figure 14 shows the traffic between the different levels
+the L2 prefetchers, the configuration with Berti alone at the                            of the memory hierarchy (demand and prefetch requests)
+L1D seems to be a better design in terms of performance                                  for different prefetching combinations normalized to no
+and storage trade-off.                                                                   prefetching. All prefetchers increase traffic as a result of the
+   Coverage. Figure 13 shows demand MPKIs at the L1D,                                    useless blocks they request. For the systems with prefetcher
+L2, and LLC for the multi-level prefetching combinations.                                only at the L1D, we can observe how the traffic increase
+We also show MPKIs without prefetching at L2 for ease of                                 is inversely proportional to the prefetcher accuracy for
+analysis. MLOP+Bingo and MLOP+SPP-PPF decrease MPKI                                      SPEC CPU2017 (refer Figure 10). Consequently, Berti is
+relative to MLOP alone in both L2 and LLC consistently                                   the prefetcher with the lowest traffic increase at all levels.
+across all suites (maximum reduction in MPKI from 13.8 to                                For GAP, MLOP increases traffic marginally, despite its low
+11.7 at L2 for SPEC CPU2017). Adding a prefetcher at L2                                  accuracy, because it detects few patterns and generates scarce
+is less effective for IPCP and Berti. In both cases, MPKIs                               prefetch requests. Berti increases traffic with L2, LLC and
+                    IP-stride           MLOP+SPP-PPF    Berti                                         MLOP            IPCP        Berti
+                    MLOP                IPCP            Berti+Bingo               1.15                                  1.05
+                    MLOP+Bingo          IPCP+IPCP       Berti+SPP-PPF
+                                                                                  1.10                                 1.00
+
+
+
+
+                                                                        Speedup
+                 2.0
+Dynamic Energy
+
+
+
+
+                 1.8                                                              1.05                                 0.95
+  Normalized
+
+
+
+
+                 1.6                                                              1.00                                 0.90
+                 1.4                                                                  6400          3200       1600        6400      3200        1600
+                 1.2                                                                                MTPS                             MTPS
+                                                                                             (a) SPEC17-MemInt                      (b) GAP
+                 1.0
+                            SPEC17-MemInt              GAP
+Figure 15.    Dynamic energy consumption in the memory hierarchy        Figure 16.    Performance of L1D prefetchers in constrained DRAM
+normalized to no-prefetching.                                           bandwidth, in MTPS.
+
+
+DRAM by 1.0%, 9.2% and 13.9% respectively, whereas IPCP                                  MLOP+Bingo             IPCP+IPCP             Berti+SPP-PPF
+                                                                                         MLOP+SPP-PPF           Berti+Bingo
+increases traffic at these three levels around 90%.
+   The L2 prefetchers Bingo and SPP-PPF added to MLOP                             1.15                               1.05
+                                                                                  1.10                                 1.00
+
+
+
+
+                                                                        Speedup
+and Berti on L1 significantly increase traffic with LLC
+and DRAM, especially at GAP due to the irregular access                           1.05                                 0.95
+patterns. MLOP+Bingo induces 69.0% additional off-chip
+                                                                                  1.00                                 0.90
+traffic compared to MLOP alone, while Berti+Bingo adds                                6400          3200       1600        6400      3200        1600
+67.2% additional off-chip traffic compared to Berti alone.                                          MTPS                             MTPS
+                                                                                             (a) SPEC17-MemInt                      (b) GAP
+   Energy efficiency. Figure 15 shows the average dynamic
+energy consumption in the memory hierarchy (L1D, L2, LLC,
+and DRAM) normalized to no prefetching. As expected, there              Figure 17. Performance of multi-level prefetching in constrained DRAM
+                                                                        bandwidth, in MTPS.
+is a direct correlation between traffic and energy consumption
+overheads in the memory hierarchy. If we focus on the state-
+of-the-art L1D prefetchers, Berti consumes the least extra
+                                                                        Classification is one benchmark where all the prefetch-
+energy for SPEC CPU2017 (9.0% vs. 29.1 and 30.1% for
+                                                                        ers fail except Berti, thanks to its high prefetch accuracy.
+MLOP and IPCP), despite achieving the highest speedup
+                                                                        Note that for some of the benchmarks like cloud9 and
+(see Figure 8). As for GAP, the energy overheads of Berti
+                                                                        nutch, even an ideal L1D prefetcher (L1D with a hit rate of
+and MLOP are similar (14.3% vs. 14.2%), and significantly
+                                                                        100%) fails to provide significant performance, which shows
+lower than for IPCP (86.9%). Berti is the only prefetcher
+                                                                        that there is limited scope for data prefetching. The primary
+that manages to translate its dynamic energy increase into
+                                                                        reason for this trend is that the L1D MPKI of CloudSuite
+speedup. The L2 Bingo and SPP-PPF prefetchers on top of
+                                                                        without prefetch is low: 6.9 on average, with a maximum
+MLOP and Berti significantly increase energy consumption,
+                                                                        of 14.5, while the average L1D MPKI of SPEC and GAP
+especially in the case of Bingo for GAP, with increases of
+                                                                        is 42.2 and 83.6, respectively. On the other hand, the L1I
+over 60% with respect to MLOP and Berti alone.
+                                                                        MPKI of CloudSuite traces are higher than SPEC and GAP
+F. Effect of constrained DRAM bandwidth                                 traces.
+   So far, we have considered the latest DDR5-6400 channel
+                                                                        H. Interaction with a temporal prefetcher
+per four cores that provides 6400 million transfers per
+second (MTPS) with a per-core DRAM bandwidth of approx.                     We simulate managed irregular stream buffer (MISB)
+12.8 GBps. This Section evaluates prefetchers with DRAM                 prefetcher [59], a storage efficient version of ISB [30] at L2
+bandwidth configurations such as DDR4-3200 (MTPS of                     with MLOP, IPCP, and Berti at L1D, as shown in Figure 19.
+3200) and DDR3-1600 (MTPS of 1600) [19]. Figures 16                     ISB is an address correlation-based data prefetcher that
+and 17 show the effect of DRAM bandwidth on speedup for                 correlates cache accesses at a new indirection level named
+L1D and multi-level prefetching, respectively. When moving              structural address space. Berti with MISB improves the
+from 6400 to 1600 MTPS, the performance loss is negligible              effectiveness of multi-level prefetching for CloudSuite traces,
+for all the prefetchers with GAP traces and moderate for                in particular for Cassandra and Classification. For
+SPEC CPU2017 traces (maximum reduction of 4.1% with                     SPEC CPU2017 and GAP, MISB performs worse than
+Berti and Berti+SPP-PPF).                                               SPP-PPF with MLOP and Berti at the L1D. Note that the
+                                                                        performance improvement with CloudSuite comes with a
+G. CloudSuite performance                                               storage overhead of 98 KB with MISB, out of which 32 KB
+ Figure 18 shows speedup with the CloudSuite bench-                     is used for the metadata cache and 17 KB for the Bloom
+marks for L1D and multi-level prefetching combinations.                 filter.
+              MLOP                   IPCP                      Berti+Bingo                                              MLOP             MLOP+Bingo              Berti+Bingo
+              MLOP+Bingo             IPCP+IPCP                 Berti+SPP-PPF                                            IPCP             MLOP+SPP-PPF            Berti+SPP-PPF
+              MLOP+SPP-PPF           Berti                                                                              Berti            IPCP+IPCP
+          1.10                                                                                        1.18
+                                                                                                      1.16
+Speedup
+
+
+
+
+          1.05
+
+
+
+
+                                                                                Speedup
+          1.00                                                                                        1.14
+                                                                                                      1.12
+          0.95                                                                                        1.10
+                      dra         tion Cloud9          Nutch              ing
+                Cassan Classifica                                  Stream                             1.08
+                                                                                                                          Single-level                        Multi-level
+                        Figure 18.   Speedup for CloudSuite.
+                                                                                  Figure 20. Summary of multi-core speedups relative to a system with L1D
+                MLOP                    IPCP                   Berti              IP-stride prefetcher.
+                MLOP+SPP-PPF            IPCP+IPCP              Berti+SPP-PPF                                                                                                 1.10
+                                                                                                                   1.00 1.07 1.08 1.07 1.06 1.04 1.03 0.99 0.97 0.91 0.84
+
+
+
+
+                                                                                0 10 20 30 40 50 60 70 80 90 100
+                MLOP+MISB               IPCP+MISB              Berti+MISB
+          1.2                                                                                                      1.01 1.07 1.08 1.08 1.07 1.05 1.04 1.01 0.99 0.95         1.05
+          1.1                                                                                                      1.01 1.07 1.09 1.08 1.07 1.06 1.05 1.02 1.00
+Speedup
+
+
+
+
+          1.0                                                                                                      1.01 1.07 1.09 1.08 1.08 1.06 1.05 1.02                   1.00
+
+
+
+                                                                                         L1D confidence
+          0.9                                                                                                      1.01 1.08 1.09 1.09 1.08 1.07 1.06
+          0.8                                                                                                      1.01 1.08 1.09 1.09 1.08 1.07                             0.95
+                 SPEC17-MemInt             GAP                   Cloud                                             1.02 1.08 1.09 1.09 1.08
+                    Figure 19.   Speedup with and without MISB.                                                    1.02 1.08 1.09 1.09                                       0.90
+                                                                                                                   1.02 1.08 1.09
+                                                                                                                   1.01 1.08                                                 0.85
+I. Multi-core performance
+                                                                                                                   1.02
+   Figure 20 shows speedup on a 4-core simulated system                                                                                                                      0.80
+                                                                                                                     0 10 20 30 40 50 60 70 80 90 100
+averaged across 200 randomly generated heterogeneous mixes                                                                             L2 confidence
+based on memory-intensive SPEC CPU2017 and GAP traces.
+Among the L1D prefetchers, Berti performs the best with                          Figure 21. Normalized speedup with different L1D and L2 confidence
+a performance improvement of 16.2%, outperforming both                           watermarks averaged across memory intensive SPEC CPU2017 and GAP
+                                                                                 benchmarks. Speedup is rounded to two decimal places (1.085 is rounded
+MLOP and IPCP on average. There are only nine mixes                              to 1.09).
+in which MLOP and/or IPCP gain more than 10% over
+Berti, and CactuBSSN is part of seven of these mixes.
+Berti outperforms competing prefetchers for majority of the                      number of watermark configurations provide similar benefit
+mixes that do not have CactuBSSN. Overall, Berti performs                        in terms of speedup. Our chosen high watermarks provide
+better because in the case of multicore systems, per core                        maximum speedup with the maximum prefetch accuracy.
+available DRAM bandwidth goes down because of cross-core                            Effect of the size of Berti tables. Figure 22 shows
+contention. Thanks to Berti’s timely and accurate deltas, it                     the effect of the size of the Berti tables (history table,
+is still able to deliver high coverage even in the presence of                   table of deltas, and the number of deltas) on speedup.
+shared DRAM bandwidth contention.                                                Decreasing the size of the table of deltas by a quarter
+   Berti at L1D also outperforms other multi-level prefetching                   degrades performance by 12.1%, whereas decreasing the
+combinations making a strong case for Berti as an L1D-only                       number of deltas by a quarter reduces performance by 1.2%.
+prefetcher. Note that Berti outperforms MLOP+Bingo, the                          Also, doubling/quadrupling the size of the tables provides
+combination of the second place and first place prefetchers                      a marginal performance gain. CactuBSSN is one outlier
+in the 4-core evaluations at the DPC-3.                                          where increasing the table sizes to 1024 entries with 1024
+                                                                                 sets improve performance by 22%.
+J. Sensitivity to design choices                                                    Effect of the latency counter. In our evaluations, we use a
+  Effect of L1 and L2 watermarks. Figure 21 shows                                12-bit latency counter per line at the L1D. When we increase
+the effect of L1 and L2 confidence watermarks on overall                         its size to 32 bits, performance is not improved. However,
+speedup averaged across single-core SPEC CPU2017 and                             using a small 4-bit timestamp, we see a performance drop
+GAP benchmarks, normalized to the baseline system. Our                           from 1.16 to 1.07, and from 1.02 to 0.98, for SPEC CPU2017
+chosen watermarks, more than 65% for L1 and in between                           and GAP, respectively.
+35% to 65% for L2 provide the sweet-spot in terms of                                Effect of cross-page prefetching. As Berti is an L1D
+prefetch accuracy and prefetch coverage. Usage of extremely                      prefetcher and operates on virtual addresses, it does cross-
+small or extremely large watermarks affect both coverage and                     page prefetching as long as prefetch requests get a hit in the
+accuracy, and negatively affects speedup. Interestingly, a large                 STLB. To understand the utility of cross-page prefetching,
+                   History Table      Table of deltas        Num. Deltas   tunes a hardware prefetcher based on available DRAM
+          1.10                                                             bandwidth and selects memory access patterns based on
+                                                                           prefetch accuracy (if the available DRAM bandwidth is low)
+          1.05
+Speedup
+
+
+
+
+                                                                           and prefetch coverage (if the available DRAM bandwidth
+                                                                           is high). Overall, SPP-PPF performs marginally better than
+          1.00
+                                                                           SPP+DSPatch.
+          0.95                                                                Machine learning for hardware prefetching. Machine
+                 0.25X        0.50X        1X           2X            4X   learning (ML) has been used for microarchitecture research,
+Figure 22. Speedup vs. size of Berti tables and number of deltas. 0.25×
+                                                                           and ML techniques for data prefetching have been proposed
+to 4× correspond to one-fourth and four times, respectively.               in recent years [15], [25], [51]. In ISCA 2021, a prefetch-
+                                                                           ing competition with ML techniques shows that non-ML
+we evaluate Berti, where we do not issue prefetch requests                 techniques still outperform with limited storage. However,
+(but keep training) that cross an OS page. We see an average               ML techniques have the potential to learn highly complex
+performance drop from 1.02 to 1.01 and 1.16 to 1.10 for GAP                memory access patterns, and Pythia [15] shows that with a
+and SPEC CPU2017 traces, respectively. The performance                     high performing L2 prefetcher. Berti is an L1D prefetcher
+drop shows that most of the deltas selected by Berti are                   in contrast to Pythia, and with Berti at the L1D, we find
+within the OS page boundary of 4 KB.                                       negligible performance improvement with Pythia (less than
+                                                                           1%).
+                               V. R ELATED W ORK                              Prefetch filters and throttling mechanisms. Similar to
+   In Section IV we presented a quantitative comparison                    PPF [17] and DSPatch [16], there are proposals that control
+of Berti with recent hardware prefetching techniques [13],                 the aggressiveness of prefetchers by controlling its prefetch
+[17], [35], [38], [40], [48]. In this Section we compare other             degree and distance, or decides whether to prefetch into
+relevant prefetching techniques qualitatively.                             the L2 or to the LLC [11], [21], [26], [41], [42], [43],
+   Temporal prefetchers. Temporal prefetchers track the                    [54]. These techniques incur additional storage and perform
+temporal order of cache-line accesses (and not the deltas) [12],           well for conventional prefetchers with low prefetch accuracy.
+[27], [30], [33], [52], [57]. Temporal prefetchers usually                 However, with Berti, the accuracy is significantly higher than
+demand hundreds of KBs of storage, which demands the                       prior prefetching techniques, and the implicit confidence
+storage of prefetch metadata in the off-chip memory. Some of               mechanism acts like a prefetch throttler.
+the recent works on temporal prefetching are in the pursuit of
+                                                                                               VI. C ONCLUSIONS
+improving the storage overhead without affecting the prefetch
+coverage [58], [59]. Berti, on the other hand, incurs a storage               We proposed Berti and made a case for an L1D prefetcher
+overhead of just 2.55 KB per core.                                         based on local, timely deltas. Berti learns the best delta to
+   Spatial prefetchers. Compared to temporal prefetch-                     prefetch, keeping timeliness (in the form of time to prefetch
+ers, spatial prefetchers are lightweight in terms of stor-                 an address) and prefetch accuracy in mind. We showed that
+age overhead and usually learn memory access patterns                      Berti could learn varieties of memory access patterns. We
+within a small spatial region of a few KBs. Conventional                   quantified the effectiveness of Berti across SPEC CPU2017
+prefetchers like stride [20] and stream [24], [28], [53] are               and GAP workloads, and showed high prefetch accuracy and
+already deployed on commercial processors. Timely Stride                   timely prefetching into the cache hierarchy. On average, Berti
+prefetching improves the timeliness of conventional stride                 outperforms state-of-the-art L1D and L2 prefetchers. Berti is
+prefetchers [60]. However, it does not provide better prefetch             equally effective even in the constrained DRAM bandwidth
+coverage when compared with state-of-the-art L1D and                       scenarios and also for multi-core mixes. Berti consumes the
+L2 prefetching techniques. Spatial prefetchers like Spatial                least dynamic energy at the memory hierarchy among all
+Memory Streaming (SMS) [53] (similar to Bingo) usually                     state-of-the-art prefetchers. In summary, Berti provides high
+learn single repeating deltas or bit patterns within a spatial             prefetch accuracy, timely prefetching, and good coverage
+region, where a set bit denotes a cache line that should be                with a limited storage overhead of 2.55 KB per core.
+prefetched. All these techniques do not consider prefetch                                    ACKNOWLEDGEMENTS
+timeliness.
+   Kill the program counter (KPC) proposes a holistic                         This work was supported by MCIN/AEI/10.13039/
+cache replacement and prefetching framework [36]. However,                 501100011033 and by “ERDF A way of making Europe”
+the prefetching technique is similar to SPP, with similar                  (grants PID2019-105660RB-C21, RTI2018-098156-B-C53),
+performance improvements as SPP. Multi-level adaptive                      the European Research Council (ERC) under the Horizon
+prefetching based on performance gradient tracking [44] (3rd               2020 research and innovation program (grant agreement No
+place in DPC-1 [1]) is one of the first proposals that propose a           819134), and by Government of Aragon (T5820R research
+correlation between an IP and delta sequences. DSPatch [16]                group).
+                         A PPENDIX                              errors in execution. In order to ease the process of running
+A. Abstract                                                     the artifact, we provide two options in the main script: (1)
+                                                                The -g flag downloads and builds GCC 7.5.0 from scratch,
+  This artifact contains all the information necessary to       and (2) -d uses Docker to build the simulator. The Python3
+reproduce the main experiments in the paper. We describe        Packages can be installed using pip3.
+how the required software and the elements that compose it         3) Data sets: The traces for the full set of experiments
+can be obtained, and how to run the artifact.                   were downloaded from different championships. However,
+B. Artifact Check-list & Meta-information                       for this artifact only the SPEC CPU2017 traces from the
+                                                                3rd Data Prefetching Championship (http://hpca23.cse.tamu.
+  • Program: ChampSim
+                                                                edu/champsim-traces/speccpu/) are needed. These traces are
+  • Compilation: GNU GCC 7.5.0
+                                                                automatically downloaded by the artifact. GAP (from ML
+  • Data set: SPEC CPU2017 traces from 3rd Data Prefetch-
+                                                                for Computer Architecture and Systems https://sites.google.
+    ing Championship
+                                                                com/view/mlarchsys/) and CloudSuite (from the 2nd Cache
+    (http://hpca23.cse.tamu.edu/champsim-traces/speccpu/)
+                                                                Replacement Championship https://crc2.ece.tamu.edu) are
+  • Run-time environment: an AMD64 processor
+                                                                also used in the paper, so all results in the paper are easily
+  • Hardware: tested on an AMD EPYC 7702P
+                                                                reproducible by updating our scrips.
+  • Metrics: speedup and L1D Accuracy
+  • Output: three PDF files with graphs, single-thread          D. Installation & Experimental workflow
+    memory-intensive SPEC CPU2017 speedup and L1D                 The artifact is ready to be built and run automatically by
+    accuracy                                                    executing the run.sh script. The overall flow is as follows:
+  • How much disk space is required?: approximately 22
+                                                                  1) Clone the artifact:
+    GB
+                                                                      $ git clone
+  • How much time is needed to prepare the workflow?:
+                                                                      https://github.com/agusnt/Berti-Artifact
+    approximately 30 minutes
+                                                                  2) Enter the cloned repository:
+  • How much time is needed to complete experiments?:
+                                                                      $ cd Berti-Artifact
+    approximately 1 hour 30 minutes (running in parallel,
+                                                                  3) Run the script:
+    using 127 threads)
+                                                                      $ ./run.sh
+  • Publicly available?: yes
+                                                                      Optionally, you can speed up the simulations by
+  • Code licenses (if publicly available)?: GPL-3.0
+                                                                      running them in parallel:
+  • Archived (provide DOI)?: 10.5281/zenodo.6921331
+                                                                      $ ./run.sh -p [number of threads]
+C. Description                                                        In case of an error while building the artifact or running
+  1) How to access: The software can be obtained from                 the simulations, try compiling instead with the Docker
+GitHub: https://github.com/agusnt/Berti-Artifact                      flag; it can be used along with the parallelization option
+                                                                      (-p):
+Use the following command to clone the repository:                    $ ./run.sh -d
+$ git clone                                                     E. Evaluation and expected results
+https://github.com/agusnt/Berti-Artifact
+                                                                   The artifact provides speedup and L1D accuracy results for
+                                                                the memory-intensive single-thread SPEC CPU2017 traces
+   2) Software Dependencies: We test the artifact on a system
+                                                                at the end of the simulation. The execution of the artifact
+with these features:
+                                                                prints the following information:
+   • Ubuntu 18.04.6 LTS                                            Building with Docker
+   • Linux Kernel 5.4.0                                            Running in Parallel
+   • Python 3.6.9
+                                                                   Download SPEC CPU2017 traces [44/44]
+   • Bash 4.4.20
+                                                                   Building Berti... done
+   • GCC 7.5.0
+                                                                   Building MLOP... done
+   • Curl 7.61
+                                                                   Building IPCP... done
+   • Python3 Packages
+                                                                   Building IP Stride... done
+       – matplotlib 3.3.4                                          Making everything ready to run... done
+       – pprint 0.1                                                Running... done
+       – numpy 1.19.1                                              Results, it requires numpy, scipy,
+       – scipy 1.5.4                                            maptlotlib and pprint
+   However, in our tests, new GNU/Linux systems were able          Parsing data... done
+to run the artifact. Only newer GCC compilers may raise            SPEC CPU2017 Memory Intensive SpeedUp
+         Prefetch      Speedup      L1D Accuracy                    [4] “Cloudsuite traces for champsim,” Nov. 2017. [Online].
+         IPCP          09%          64.9%                               Available:   https://www.dropbox.com/sh/pgmnzfr3hurlutq/
+         MLOP          08%          68.0%                               AACciuebRwSAOzhJkmj5SEXBa/CRC2 trace?dl=0&
+         Berti         12%          88.0%                               subfolder nav tracking=1
+
+                                                                    [5] “SunnyCove microarhcitecture,” May 2018. [Online].
+                                                                        Available: https://en.wikichip.org/wiki/intel/microarchitectures/
+  Generating Figure 8                                                   sunny cove
+SPEC_CPU2017-MemInt... done                                         [6] “SunnyCove microarhcitecture latency,” May 2018. [Online].
+  Generating Figure 9(a)... done                                        Available: https://www.7-cpu.com/cpu/Ice Lake.html
+  Generating Figure 10
+SPEC_CPU2017-MemInt... done                                         [7] “The 3rd data prefetching championship (dpc-3),” Jun. 2019.
+                                                                        [Online]. Available: https://dpc3.compas.cs.stonybrook.edu/
+  Removing Temporal Files... done
+                                                                    [8] “SPEC CPU 2017 traces for champsim,” Feb. 2019.
+   It generates three graphs in PDF format named                        [Online]. Available: https://hpca23.cse.tamu.edu/champsim-
+fig8.pdf, fig9.pdf and fig10.pdf, in the working                        traces/speccpu/index.html
+directory (where run.sh is placed).                                 [9] “ChampSim simulator,” May 2020. [Online]. Available:
+                                                                        http://github.com/ChampSim/ChampSim
+F. Experiment customization
+                                                                   [10] “GAP      traces     for  champsim,”       Mar.     2021.
+   We implement two options to run the artifact in system               [Online].      Available:   https://utexas.app.box.com/s/
+with newer GCC compilers: (1) ./run.sh -g downloads                     2k54kp8zvrqdfaa8cdhfquvcxwh7yn85/folder/132804598561
+and builds GCC 7.5.0 from scratch to build the artifact, and
+(2) ./run.sh -d builds the artifact with Docker.                   [11] J. Albericio, R. Gran, P. Ibáñez, V. Viñals, and J. M. Llaberı́a,
+                                                                        “Abs: A low-cost adaptive controller for prefetching in a banked
+   To speedup the artifact we provide a -p [number of                   shared last-level cache,” ACM Transactions on Architecture
+threads] flag that allows to run the experiments in parallel.           and Code Optimization (TACO), vol. 8, no. 4, pp. 19:1–19:20,
+   The remaining parameters of our script are: -v verbose               Jan. 2012.
+mode, -h a help menu, -c deletes all temporal files, i.e.
+                                                                   [12] M. Bakhshalipour, P. Lotfi-Kamran, and H. Sarbazi-Azad,
+traces.
+                                                                        “Domino temporal data prefetcher,” in 24th Int’l Symp. on
+                                                                        High-Performance Computer Architecture (HPCA), Feb. 2018,
+G. Notes                                                                pp. 131–142.
+   The L1D accuracy reported by ChampSim is calculated
+                                                                   [13] M. Bakhshalipour, M. Shakerinava, P. Lotfi-Kamran, and
+differently from the reported by the artifact. Instead, the L1D         H. Sarbazi-Azad, “Bingo spatial data prefetcher,” in 25th Int’l
+accuracy reported by the artifact is calculated as:                     Symp. on High-Performance Computer Architecture (HPCA),
+                                                                        Feb. 2019, pp. 399–411.
+           L1DPre f etchLate + L1DPre f etchTimely
+                       L1DPre f etchFill                           [14] S. Beamer, K. Asanović, and D. A. Patterson, “The GAP
+                                                                        benchmark suite,” CoRR, vol. abs/1508.03619, Aug. 2015.
+   Our L1D accuracy formula represents the unnecessary
+traffic generated by the prefetcher, i.e. an accuracy of 90%       [15] R. Bera, K. Kanellopoulos, A. Nori, T. Shahroodi, S. Sub-
+                                                                        ramoney, and O. Mutlu, “Pythia: A customizable hardware
+indicates that there is 10% of unnecessary traffic. The                 prefetching framework using online reinforcement learning,”
+numerator includes all successful prefetches (timely or late),          in 54th Int’l Symp. on Microarchitecture (MICRO), Oct. 2021,
+i.e. prefetches that have not caused unnecessary extra traffic,         pp. 1121–1137.
+and the denominator represents the data brought into the
+                                                                   [16] R. Bera, A. V. Nori, , O. Mutlu, and S. Subramoney, “Dspatch:
+cache by the prefetcher.
+                                                                        Dual spatial pattern prefetcher,” in 52nd Int’l Symp. on
+                                                                        Microarchitecture (MICRO), Oct. 2019, pp. 531–544.
+                        R EFERENCES
+                                                                   [17] E. Bhatia, G. Chacon, S. H. Pugsley, E. Teran, P. V. Gratz,
+ [1] “The 1st data prefetching championship (dpc-1),” Feb. 2009.        and D. A. Jiménez, “Perceptron-based prefetch filtering,” in
+     [Online]. Available: https://jilp.org/dpc/                         46th Int’l Symp. on Computer Architecture (ISCA), Jun. 2019,
+                                                                        pp. 1–13.
+ [2] “The 2nd data prefetching championship (dpc-2),” Jun. 2015.
+     [Online]. Available: https://comparch-conf.gatech.edu/dpc2/   [18] Y. Chen, L. Pei, and T. E. Carlson, “Leaking control
+                                                                        flow information via the hardware prefetcher,” CoRR, vol.
+ [3] “Micron     dram      power   calculator,”   Dec.    2015.         abs/2109.00474, Sep. 2021.
+     [Online].        Available:       https://www.micron.com/-
+     /media/client/global/documents/products/technical-            [19] DDR, “DDR standards.” [Online]. Available: https://en.
+     note/dram/tn4007 ddr4 power calculation.pdf                        wikipedia.org/wiki/Double data rate
+[20] J. Doweck, “Inside intel core microarchitecture and smart          [34] N. S. Kalani and B. Panda, “Instruction criticality based
+     memory access,” in Intel whitepaper, 2006.                              energy-efficient hardware data prefetching,” IEEE Computer
+                                                                             Architecture Letters, vol. 20, no. 2, pp. 146–149, 2021.
+[21] E. Ebrahimi, O. Mutlu, C. J. Lee, and Y. N. Patt, “Coordinated
+     control of multiple prefetchers in multi-core systems,” in 42nd    [35] J. Kim, S. H. Pugsley, P. V. Gratz, A. L. N. Reddy, C. Wilker-
+     Int’l Symp. on Microarchitecture (MICRO), Dec. 2009, pp.                son, and Z. Chishti, “Path confidence based lookahead prefetch-
+     316–326.                                                                ing,” in 49th Int’l Symp. on Microarchitecture (MICRO), Oct.
+                                                                             2016, pp. 60:1–60:12.
+[22] M. Ferdman, A. Adileh, Y. O. Koçberber, S. Volos, M. Al-
+     isafaee, D. Jevdjic, C. Kaynak, A. D. Popescu, A. Ailamaki,        [36] J. Kim, E. Teran, P. V. Gratz, D. A. Jiménez, S. H. Pugsley,
+     and B. Falsafi, “Clearing the clouds: A study of emerging               and C. Wilkerson, “Kill the program counter: Reconstructing
+     scale-out workloads on modern hardware,” in 17th Int’l Conf.            program behavior in the processor cache hierarchy,” in
+     on Architectural Support for Programming Language and                   22nd Int’l Conf. on Architectural Support for Programming
+     Operating Systems (ASPLOS), Mar. 2012, pp. 37–48.                       Language and Operating Systems (ASPLOS), Apr. 2017, pp.
+                                                                             737–749.
+[23] A. Fog, “The microarchitecture of Intel, AMD and VIA
+     CPUs: An optimization guide for assembly programmers
+                                                                        [37] S. Li, K. Chen, J. H. Ahn, J. B. Brockman, and N. P. Jouppi,
+     and compiler makers,” 2020. [Online]. Available: https:
+                                                                             “Cacti-p: Architecture-level modeling for sram-based structures
+     //www.agner.org/optimize/microarchitecture.pdf
+                                                                             with advanced leakage reduction techniques,” in 2011 Int’l
+[24] B. Grayson, J. Rupley, G. D. Zuraski, E. Quinnell, D. A.                Conf. on Computer-Aided Design (ICCAD), Nov. 2011, pp.
+     Jiménez, T. Nakra, P. Kitchin, R. Hensley, E. Brekelbaum,              694–701.
+     V. Sinha, and A. Ghiya, “Evolution of the samsung exynos
+     cpu microarchitecture,” in 47th Int’l Symp. on Computer            [38] P. Michaud, “Best-offset hardware prefetching,” in 22nd Int’l
+     Architecture (ISCA), Jun. 2020, pp. 40–51.                              Symp. on High-Performance Computer Architecture (HPCA),
+                                                                             Mar. 2016, pp. 469–480.
+[25] M. Hashemi, K. Swersky, J. A. Smith, G. Ayers, H. Litz,
+     J. Chang, C. Kozyrakis, and P. Ranganathan, “Learning              [39] C. Öztürk, I. B. Karsli, and R. Sendag, “An analysis of address
+     memory access patterns,” in 35th Int’l Conf. on Machine                 and branch patterns with patternfinder,” in Int’l Symp. on
+     Learning (ICML), Jul. 2018, pp. 1924–1933.                              Workload Characterization (IISWC), Oct. 2014, pp. 232–242.
+
+[26] W. Heirman, K. D. Bois, Y. Vandriessche, S. Eyerman, and           [40] S. Pakalapati and B. Panda, “Bouquet of instruction pointers:
+     I. Hur, “Near-side prefetch throttling: Adaptive prefetching for        Instruction pointer classifier-based spatial hardware prefetch-
+     high-performance many-core processors,” in 27th Int’l Conf.             ing,” in 47th Int’l Symp. on Computer Architecture (ISCA),
+     on Parallel Architectures and Compilation Techniques (PACT),            Jun. 2020, pp. 118–131.
+     Nov. 2018, pp. 28:1–28:11.
+                                                                        [41] B. Panda and S. Balachandran, “Expert prefetch prediction:
+[27] Z. Hu, M. Martonosi, and S. Kaxiras, “Tcp: Tag correlating              An expert predicting the usefulness of hardware prefetchers,”
+     prefetchers,” in 9th Int’l Symp. on High-Performance Computer           IEEE Computer Architecture Letters, vol. 15, no. 1, pp. 13–16,
+     Architecture (HPCA), Feb. 2003, pp. 317–326.                            Jan. 2016.
+
+[28] S. Iacobovici, L. Spracklen, S. Kadambi, Y. Chou, and S. G.        [42] B. Panda, “SPAC: A synergistic prefetcher aggressiveness
+     Abraham, “Effective stream-based and execution-based data               controller for multi-core systems,” IEEE Transactions on
+     prefetching,” in 18th Int’l Conf. on Supercomputing (ICS), Jun.         Computers (TC), vol. 65, no. 12, pp. 3740–3753, Dec. 2016.
+     2004, pp. 1–11.
+                                                                        [43] B. Panda and S. Balachandran, “CAFFEINE: A utility-
+[29] A. Jain, “Exploiting long-term behavior for improved memory             driven prefetcher aggressiveness engine for multicores,” ACM
+     system performance,” Ph.D. dissertation, The University of              Transactions on Architecture and Code Optimization (TACO),
+     Texas at Austin, May 2016.                                              vol. 12, no. 3, pp. 30:1–30:25, Aug. 2015.
+[30] A. Jain and C. Lin, “Linearizing irregular memory accesses
+                                                                        [44] L. M. Ramos, J. L. Briz, P. E. Ibáñez, and V. Viñals, “Multi-
+     for improved correlated prefetching,” in 46th Int’l Symp. on
+                                                                             level adaptive prefetching based on performance gradient
+     Microarchitecture (MICRO), Dec. 2013, pp. 247–259.
+                                                                             tracking,” The Journal of Instruction-Level Parallelism, vol. 13,
+[31] A. Jaleel, K. B. Theobald, S. C. S. Jr., and J. S. Emer, “High          pp. 1–14, Jan. 2011.
+     performance cache replacement using re-reference interval
+     prediction (rrip),” in 37th Int’l Symp. on Computer Architecture   [45] G. Reinman, B. Calder, and T. Austin, “Fetch directed instruc-
+     (ISCA), Jun. 2010, pp. 60–71.                                           tion prefetching,” in 32nd Int’l Symp. on Microarchitecture
+                                                                             (MICRO), Dec. 1999, pp. 16–27.
+[32] D. A. Jiménez and C. Lin, “Dynamic branch prediction
+     with perceptrons,” in 7th Int’l Symp. on High-Performance          [46] A. Ros, “Berti: A per-page best-request-time delta prefetcher,”
+     Computer Architecture (HPCA), Jan. 2001, pp. 197–206.                   in The 3rd Data Prefetching Championship, Jun. 2019.
+
+[33] D. Joseph and D. Grunwald, “Prefetching using markov               [47] A. Ros and A. Jimborean, “A cost-effective entangling
+     predictors,” in 24th Int’l Symp. on Computer Architecture               prefetcher for instructions,” in 47th Int’l Symp. on Computer
+     (ISCA), Jun. 1997, pp. 252–263.                                         Architecture (ISCA), Jun. 2021, pp. 99–111.
+[48] M. Shakerinava, M. Bakhshalipour, P. Lotfi-Kamran, and                 efficiency of hardware prefetchers,” in 13th Int’l Symp. on
+     H. Sarbazi-Azad, “Multi-lookahead offset prefetching,” in              High-Performance Computer Architecture (HPCA), Feb. 2007,
+     The 3rd Data Prefetching Championship, Jun. 2019.                      pp. 63–74.
+
+[49] T. Sherwood, E. Perelman, G. Hamerly, and B. Calder,              [55] Standard Performance Evaluation Corporation, “SPEC
+     “Automatically characterizing large scale program behavior,”           CPU2017,” 2017. [Online]. Available: http://www.spec.org/
+     in 10th Int’l Conf. on Architectural Support for Programming           cpu2017
+     Language and Operating Systems (ASPLOS), Oct. 2002, pp.
+     45–57.
+                                                                       [56] K. Sundaram and A. Radhakrishnan, “Address re-ordering
+[50] M. Shevgoor, S. Koladiya, R. Balasubramonian, C. Wilkerson,            mechanism for efficient pre-fetch training in an out-of-order
+     S. H. Pugsley, and Z. Chishti, “Efficiently prefetching complex        processor,” U.S. Patent 9542323B2, Sep. 2014.
+     address patterns,” in 48th Int’l Symp. on Microarchitecture
+     (MICRO), Dec. 2015, pp. 141–152.                                  [57] D. A. Varkey, B. Panda, and M. Mutyam, “RCTP: Region cor-
+                                                                            related temporal prefetcher,” in 35th Int’l Conf. on Computer
+[51] Z. Shi, A. Jain, K. Swersky, M. Hashemi, P. Ranganathan,               Design (ICCD), Nov. 2017, pp. 73–80.
+     and C. Lin, “A hierarchical neural model of data prefetching,”
+     in 26th Int’l Conf. on Architectural Support for Programming      [58] H. Wu, K. Nathella, J. Pusdesris, D. Sunwoo, A. Jain, and
+     Language and Operating Systems (ASPLOS), Apr. 2021, pp.                C. Lin, “Temporal prefetching without the off-chip metadata,”
+     861–873.                                                               in 52nd Int’l Symp. on Microarchitecture (MICRO), Oct. 2019,
+                                                                            pp. 996–1008.
+[52] S. Somogyi, T. F. Wenisch, A. Ailamaki, and B. Falsafi,
+     “Spatio-temporal memory streaming,” in 36th Int’l Symp. on
+     Computer Architecture (ISCA), Jun. 2009, pp. 69–80.               [59] H. Wu, K. Nathella, D. Sunwoo, A. Jain, and C. Lin, “Efficient
+                                                                            metadata management for irregular data prefetching,” in 46th
+[53] S. Somogyi, T. F. Wenisch, A. Ailamaki, B. Falsafi, and                Int’l Symp. on Computer Architecture (ISCA), Jun. 2019, pp.
+     A. Moshovos, “Spatial memory streaming,” in 33rd Int’l Symp.           449–461.
+     on Computer Architecture (ISCA), Jun. 2006, pp. 252–263.
+                                                                       [60] H. Zhu, Y. Chen, and X.-H. Sun, “Timing local streams:
+[54] S. Srinath, O. Mutlu, H. Kim, and Y. N. Patt, “Feedback di-            improving timeliness in data prefetching,” in 24th Int’l Conf.
+     rected prefetching: Improving the performance and bandwidth-           on Supercomputing (ICS), Jun. 2010, pp. 169–178.
+

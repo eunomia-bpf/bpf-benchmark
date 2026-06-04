@@ -1,0 +1,1549 @@
+                                          Design and Evaluation of a
+                                       Compiler Algorithm for Prefetching
+
+                                    Todd C. Mowry, Monica S. Lam and Anoop Gupta
+                                                   Computer Systems Laboratory
+                                                   Stanford University, CA 94305
+
+
+
+Abstract                                                                     of a single-issue processor running at a 100 MHz internal clock.
+                                                                             The processor has an on-chip primary data cache of 8 Kbytes, and
+Software-controlled data prefetching is a promising technique for            a secondary cache of 256 Kbytes. Both caches are direct-mapped
+improving the performance of the memory subsystem to match                   and use 32 byte lines. The penalty of a primary cache miss that hits
+today’s high-performance processors. While prefetching is useful in          in the secondary cache is 12 cycles, and the total penalty of a miss
+hiding the latency, issuing prefetches incurs an instruction overhead        that goes all the way to memory is 75 cycles. To limit the com-
+and can increase the load on the memory subsystem. As a result,              plexity of the simulation, we assume that all instructions execute in
+care must be taken to ensure that such overheads do not exceed the           a single cycle and that all instructions hit in the primary instruction
+benefits.                                                                    cache.
+   This paper proposes a compiler algorithm to insert prefetch                  We present results for a collection of scientific programs drawn
+instructions into code that operates on dense matrices. Our algo-            from several benchmark suites. This collection includes NASA7
+rithm identifies those references that are likely to be cache misses,        and TOMCATV from the SPEC benchmarks[27], OCEAN – a uni-
+and issues prefetches only for them. We have implemented our                 processor version of a SPLASH benchmark[25], and CG (conjugate
+algorithm in the SUIF (Stanford University Intermediate Form) opti-          gradient), EP (embarassingly parallel), IS (integer sort), MG (multi-
+mizing compiler. By generating fully functional code, we have been           grid) from the NAS Parallel Benchmarks[3]. Since the NASA7
+able to measure not only the improvements in cache miss rates, but           benchmark really consists of 7 independent kernels, we study each
+also the overall performance of a simulated system. We show that             kernel separately (MXM, CFFT2D, CHOLSKY, BTRIX, GMTRY,
+our algorithm significantly improves the execution speed of our              EMIT and VPENTA). The performance of the benchmarks was sim-
+benchmark programs—some of the programs improve by as much                   ulated by instrumenting the MIPS object code using pixie[26] and
+as a factor of two. When compared to an algorithm that indiscrim-            piping the resulting trace into our cache simulator.
+inately prefetches all array accesses, our algorithm can eliminate              Figure 1 breaks down the total program execution time into
+many of the unnecessary prefetches without any significant decrease          instruction execution and stalls due to memory accesses. We
+in the coverage of the cache misses.                                         observe that many of the programs spend a significant amount of
+                                                                             time on memory accesses. In fact, 8 out of the 13 programs spend
+                                                                             more than half of their time stalled for memory accesses.
+1    Introduction
+                                                                             1.2 Memory Hierarchy Optimizations
+With ever-increasing clock rates and the use of instruction-level
+parallelism, the speed of microprocessors has and will continue to           Various hardware and software approaches to improve the memory
+increase dramatically. With numerical processing capabilities that           performance have been proposed recently[15]. A promising tech-
+rival the processing power of older generation supercomputers, these         nique to mitigate the impact of long cache miss penalties is software-
+microprocessors are particularly attractive as scientific engines due        controlled prefetching[5, 13, 16, 22, 23]. Software-controlled
+to their cost-effectiveness. In addition, these processors can be used       prefetching requires support from both hardware and software. The
+to build large-scale multiprocessors capable of an aggregate peak            processor must provide a special “prefetch” instruction. The soft-
+rate surpassing that of current vector machines.                             ware uses this instruction to inform the hardware of its intent
+   Unfortunately, a high computation bandwidth is meaningless                to use a particular data item; if the data is not currently in the
+unless it is matched by a similarly powerful memory subsystem.               cache, the data is fetched in from memory. The cache must be
+These microprocessors tend to rely on caches to reduce their effect-         lockup-free[17]; that is, the cache must allow multiple outstand-
+ive memory access time. While the effectiveness of caches has                ing misses. While the memory services the data miss, the program
+been well established for general-purpose code, their effectiveness          can continue to execute as long as it does not need the requested
+for scientific applications has not. One manifestation of this is that       data. While prefetching does not reduce the latency of the memory
+several of the scalar machines designed for scientific computation           access, it hides the memory latency by overlapping the access with
+do not use caches[6, 7].                                                     computation and other accesses. Prefetches on a scalar machine
+                                                                             are analogous to vector memory accesses on a vector machine. In
+                                                                             both cases, memory accesses are overlapped with computation and
+1.1 Cache Performance on Scientific Code                                     other accesses. Furthermore, similar to vector registers, prefetching
+                                                                             allows caches in scalar machines to be managed by software. A
+To illustrate the need for improving the cache performance of                major difference is that while vector machines can only operate on
+microprocessor-based systems, we present results below for a set             vectors in a pipelined manner, scalar machines can execute arbitrary
+of scientific programs. For the sake of concreteness, we pattern our         sets of scalar operations well.
+memory subsystem after the MIPS R4000. The architecture consists
+                                                                                Another useful memory hierarchy optimization is to improve data
+
+
+           To appear in ASPLOS−V.
+
+                                                                         1
+                                130
+
+
+
+                                      |
+    Normalized Execution Time
+                                                                                                                                                                          memory access stalls
+                                120                                                                                                                                       instructions
+
+                                      |
+                                110
+                                      |   100         100        100        100         100        100         100        100          100          100        100           100        100
+                                100
+                                      |
+
+                                                                                                                                                          16                       13
+                                90              23                                                       19
+                                      |
+
+
+                                                                                                                                                                                              29
+                                80
+                                      |
+
+
+
+
+                                                                                                                                55           53
+                                70                          62                    59
+                                      |
+
+
+
+
+                                                                       69                     66                     70                                              66
+                                60
+                                      |
+
+
+
+
+                                50
+                                      |
+
+
+
+
+                                                                                                                                                          84                       88
+                                40              77                                                       81
+                                      |
+
+
+
+
+                                                                                                                                                                                              71
+                                30
+                                      |
+
+
+
+
+                                                                                                                                45           47
+                                20                          38                    41
+                                      |
+
+
+
+
+                                                                       31                     34                     30                                              34
+                                10
+                                      |
+
+
+
+
+                                 0
+                                      |
+
+
+
+
+                                          MXM        CFFT2D CHOLSKY         BTRIX      GMTRY       EMIT       VPENTA TOMCATV         OCEAN          IS         CG            EP         MG
+
+
+
+
+                                                                               Figure 1: Breakdown of execution of scientific code.
+
+locality by reordering the execution of iterations. One important
+example of such a transform is blocking[1, 9, 10, 12, 21, 23, 29].                                                                   Table 1: Hit rates of affine array accesses.
+Instead of operating on entire rows or columns of an array, blocked
+algorithms operate on submatrices or blocks, so that data loaded                                                                                               Affine Access
+                                                                                                                                                  Benchmark    Hit Rate (%)
+into the faster levels of the memory hierarchy are reused. Other
+                                                                                                                                                    MXM             91.2
+useful transformations include unimodular loop transforms such as                                                                                  CFFT2D           87.7
+interchange, skewing and reversal[29]. Since these optimizations                                                                                  CHOLSKY           60.9
+improve the code’s data locality, they not only reduce the effect-                                                                                  BTRIX           68.7
+ive memory access time but also reduce the memory bandwidth                                                                                        GMTRY            36.0
+requirement. Memory hierarchy optimizations such as prefetching                                                                                     EMIT            87.1
+and blocking are crucial to turn high-performance microprocessors                                                                                  VPENTA           57.7
+                                                                                                                                                  TOMCATV           91.5
+into effective scientific engines.                                                                                                                 OCEAN            91.9
+                                                                                                                                                      IS            89.1
+                                                                                                                                                     CG             88.9
+1.3 An Overview                                                                                                                                      EP             75.7
+                                                                                                                                                     MG             95.4
+This paper proposes a compiler algorithm to insert prefetch instruc-
+tions in scientific code. In particular, we focus on those numerical
+algorithms that operate on dense matrices. Various algorithms have
+previously been proposed for this problem [13, 16, 23]. In this work,                                                to cause cache misses. To schedule the prefetch instructions early
+we improve upon previous algorithms and evaluate our algorithm in                                                    enough, we use the concept of software pipelining, where the
+the context of a full optimizing compiler. We also study the inter-                                                  computation of one iteration overlaps with the prefetches for a future
+action of prefetching with other data locality optimizations such as                                                 iteration.
+cache blocking.                                                                                                         We have implemented our prefetch algorithm in the SUIF
+   There are a few important concepts useful for developing prefetch                                                 (Stanford University Intermediate Form) compiler. The SUIF com-
+algorithms. Prefetches are possible only if the memory addresses                                                     piler includes many of the standard optimizations and generates
+can be determined ahead of time. Prefetches are unnecessary if the                                                   code competitive with the MIPS compiler[28]. Using this compiler
+data are already in the cache (or are being fetched into the cache)                                                  system, we have been able to generate fully functional and opti-
+at the time of prefetch. Even if a necessary prefetch is issued, it                                                  mized code with prefetching. (For the sake of simulation, prefetch
+may not be effective; it may be too early and the prefetched datum                                                   instructions are encoded as loads to R0.) By simulating the code
+is replaced from the cache before it is used; it may be too late and                                                 with a detailed architectural model, we can evaluate the effect of
+the datum is used before it has been fetched from memory.                                                            prefetching on overall system performance. It is important to focus
+   The domain of this work is the set of array accesses whose in-                                                    on the overall performance, because simple characterizations such
+dices are affine (i.e. linear) functions of the loop indices. A sub-                                                 as the miss rates alone are often misleading. We have also evalu-
+stantial number of data references in scientific code belong to this                                                 ated the interactions between prefetching and locality optimizations
+domain. These references have the property that their addresses                                                      such as blocking[29].
+can be determined ahead of time, and prefetching these locations is                                                     The organization of the rest of the paper is as follows. Section 2
+therefore possible.                                                                                                  describes our compiler algorithm, Section 3 describes our experi-
+   While these accesses are responsible for many of the cache                                                        mental framework, and Section 4 presents our results. In Section 4,
+misses, a significant number of them are also hits, as shown in                                                      we evaluate the effectiveness of our compiler algorithm on two vari-
+Table 1. This table suggests that if prefetches were issued for all                                                  ations of hardware support, and characterize the robustness of the
+the affine array accesses, then over 60% of the prefetches would be                                                  algorithm with respect to its compile-time parameters. We also eval-
+unnecessary for most of the programs. It is important to minimize                                                    uate the interaction between prefetching and blocking. Section 5
+unnecessary prefetches[23]. Unnecessary prefetches incur a compu-                                                    discusses related work, and includes a comparison between soft-
+tation overhead due to the prefetches themselves and instructions                                                    ware and hardware prefetching techniques. Section 6 describes
+needed to calculate the addresses. Prefetching can also increase                                                     future work to improve our algorithm, and finally, we conclude
+the demand for memory bandwidth, which can result in delays for                                                      in Section 7.
+normal memory accesses as well as prefetches.
+   We have developed a compiler algorithm that uses locality
+analysis to selectively prefetch only those references that are likely
+
+
+
+
+                                                                                                                                                                                                   Page 2
+2       A Prefetch Algorithm                                               (a)
+                                                                             for(i = 0; i < 3; i++)
+In this section, we will use the code in Figure 2(a) as a running              for(j = 0; j < 100; j++)
+example to illustrate our prefetch algorithm. We assume, for this                A[i][j] = B[j][0] + B[j+1][0];
+example, that the cache is 8K bytes, the prefetch latency is 100
+cycles and the cache line size is 4 words (two double-word array ele-
+ments to each cache line). In this case, the set of references that will   (b)
+cause cache misses can be determined by inspection (Figure 2(b)).
+In Figure 2(d), we show code that issues all the useful prefetches
+early enough to overlap the memory accesses with computation on
+other data. (This is a source-level representation of the actual code
+generated by our compiler for this case). The first three loops cor-
+respond to the computation of the i=0 iteration, and the remaining
+code executes the remaining iterations. This loop splitting step is
+necessary because the prefetch pattern is different for the different
+iterations. Furthermore, it takes three loops to implement the inner-
+most loop. The first loop is the prolog, which prefetches data for
+the initial set of iterations; the second loop is the steady state where
+each iteration executes the code for the iteration and prefetches for
+future iterations; the third loop is the epilog that executes the last
+iterations. This software pipelining transformation is necessary to
+issue the prefetches enough iterations ahead of their use[18, 24].
+   This example illustrates the three major steps in the prefetch
+algorithm:
+
+    1. For each reference, determine the accesses that are likely to be
+       cache misses and therefore need to be prefetched.
+    2. Isolate the predicted cache miss instances through loop split-
+       ting. This avoids the overhead of adding conditional statements
+       to the loop bodies.
+    3. Software pipeline prefetches for all cache misses.
+
+In the following, we describe each step of the algorithm and show
+how the algorithm develops the prefetch code for the above example
+systematically.
+
+
+2.1 Locality Analysis
+The first step determines those references that are likely to cause a
+cache miss. This locality analysis is broken down into two substeps.
+The first is to discover the intrinsic data reuses within a loop nest;
+the second is to determine the set of reuses that can be exploited
+by a cache of a particular size.
+
+2.1.1    Reuse Analysis
+Reuse analysis attempts to discover those instances of array accesses
+that refer to the same cache line. There are three kinds of reuse:
+temporal, spatial and group. In the above example, we say that
+the reference A[i][j] has spatial reuse within the innermost loop
+since the same cache line is used by two consecutive iterations in
+the innermost loop. The reference B[j][0] has temporal reuse in
+the outer loop since iterations of the outer loop refer to the same
+locations. Lastly, we say that different accesses B[j][0] and
+B[j+1][0] have group reuse because many of the instances of
+the former refer to locations accessed by the latter.
+   Trying to determine accurately all the iterations that use the same
+data is too expensive. We can succinctly capture our intuitive char-
+acterization that reuse is carried by a specific loop with the follow-
+ing mathematical formulation. We represent an -dimensional loop
+nest as a polytope in an -dimensional iteration space, with the
+outermost loop represented by the first dimension in the space. We
+represent the shape of the set of iterations that use the same data
+by a reuse vector space[29].
+   For example, the access
+                           of b[j][0] in our example is rep-
+                  0 1         ), so reuse occurs between iterations
+resented as B(
+                  0 0 
+   and   whenever
+  1 1         2 2                                                         necessarily a subspace of the localized vector space, the reuses will
+                  0 1                 0 1                               correspond to cache hits, and it is not necessary to prefetch the
+                             1                    2   or                  reuses.
+                   0 0       1        0 0      2
+                                                                                 Similar mathematical treatment determines whether spatial reuse
+                       0 1                   0                           translates into spatial locality. For group reuses, our algorithm
+                        0 0 
+                                   1   2  0                          determines the sets among the group that can exploit locality using
+                                    1     2
+                                                                              a similar technique. Furthermore, it determines for each set its
+That is, temporal reuse occurs whenever the difference    0 1 between        leading reference, the reference that accesses new data first and is
+the two iterations lies in the nullspace of                      , that is,   thus likely to incur cache misses. For example, of B[j][0] and
+                                                           0 0               B[j+1][0], B[j+1][0] is the first reference that accesses new
+span  1  0  . We refer to this vector space as the temporal reuse          data. The algorithm need only issue prefetches for B[j+1][0]
+vector space. This mathematical approach succinctly captures the              and not B[j][0].
+intuitive concept that the direction of reuse of B[j][0] lies along
+                                                                                 In the discussion so far, we have ignored the effects of cache
+the outer loop. This approach can handle more complicated access
+                                                                              conflicts. For scientific programs, one important source of cache
+patterns such as C[i+j] by representing their reuse vector space
+                                                                              conflicts is due to accessing data in the same matrix with a constant
+as span  1   1  .
+                                                                              stride. Such conflicts can be predicted, and can even be avoided by
+   Similar analysis can be used to find spatial reuse. For reuse              embedding the matrix in a larger matrix with dimensions that are
+among different array references, Gannon et al. observe that data             less problematic[19]. We have not implemented this optimization in
+reuse is exploitable only if the references are uniformly generated;          our compiler. Since such interference can greatly disturb our simu-
+that is, references whose array index expressions differ in at most           lation results, we manually changed the size of some of the matrices
+the constant term[11]. For example, references B[j][0] and                    in the benchmarks (details are given in Section 3.) Conflicts due
+B[j+1][0] are uniformly generated; references C[i] and C[j]                   to interference between two different matrices are more difficult to
+are not. Pairs of uniformly generated references can be analyzed in           analyze. We currently approximate this effect simply by setting the
+a similar fashion[29]. For our example in Figure 2(a), our algorithm          “effective” cache size to be a fraction of the actual cache size. We
+will determine that A[i][j] has spatial reuse on the inner loop,              will discuss the robustness of this model in Section 4.2 and suggest
+and both B[j][0] and B[j+1][0] share group reuse and also                     some further optimizations in Section 6.
+have temporal reuse on the outer loop.
+
+                                                                              2.1.3   The Prefetch Predicate
+2.1.2   Localized Iteration Space
+                                                                              The benefit of locality differs according to the type of reuse. If an
+Reuses translate to locality only if the subsequent use of data occurs        access has temporal locality within a loop nest, only the first access
+before the data are displaced from the cache. Factors that determine          will possibly incur a cache miss. If an access has spatial locality,
+if reuse translates to locality include the loop iteration count (since       only the first access to the same cache line will incur a miss.
+that determines how much data are brought in between reuses), the
+                                                                                 To simplify this exposition, we assume here that the iteration
+cache size, its set associativity and replacement policy.
+                                                                              count starts at 0, and that the data arrays are aligned to start on
+   We begin by considering the first two factors: the loop iteration          a cache line boundary. Without any locality, the default is to
+count and the cache size. In the example above, reuse of B[j][0]              prefetch all the time. However,       the presence of temporal locali-
+lies along the outer dimension. If the iteration count of the inner-                                     
+                                                                              ty in a loop with index means that prefetching is necessary only
+most loop is large relative to the cache size (e.g., if the upper bound       when        0. The presence of spatial locality in a loop     with index
+of the j loop in Figure 2(a) was 10,000 rather than 100), the data             means that                                              mod
+may be flushed from the cache before they are used in the next outer
+                                                                                             prefetching is necessary only when                    0,
+                                                                              where is the number of array elements in each cache line. Each of
+iteration. It is impossible to determine accurately whether data will         these predicates reduces the instances of iterations when data need
+remain in the cache due to factors such as symbolic loop iteration            to be prefetched. We define the prefetch predicate for a reference
+counts and the other cache characteristics. Instead of trying to rep-         to be the predicate that determines if a particular iteration needs to
+resent exactly which reuses would result in a cache hit, we capture           be prefetched. The prefetch predicate of a loop nest with multi-
+only the dimensionality of the iteration space that has data local-           ple levels of locality is simply the conjunction of all the predicates
+ity [29]. We define the localized iteration space to be the set of            imposed by each form of locality within the loop nest.
+loops that can exploit reuse. For example, if the localized iteration
+                                                                                 Figure 2(c) summarizes the outcome of the first step of our
+space consists of only the innermost loop, that means data fetched
+                                                                              prefetch algorithm when applied to our example. Because of the
+will be available to iterations within the same innermost loop, but
+                                                                              small loop iteration count, all the reuse in this case results in locality.
+not to iterations from the outer loops.
+                                                                              The spatial and temporal locality each translate to different prefetch
+   The localized iteration space is simply the set of innermost loops         predicates. Finally, since B[j][0] and B[j+1][0] share group
+whose volume of data accessed in a single iteration does not exceed           reuse, prefetches need to be generated only for the leading reference
+the cache size. We estimate the amount of data used for each level            B[j+1][0].
+of loop nesting, using the reuse vector information. Our algorithm
+is a simplified version of those proposed previously[8, 11, 23]. We
+assume loop iteration counts that cannot be determined at compile             2.2 Loop Splitting
+time to be small—this tends to minimize the number of prefetches.
+(Later, in Section 4.2, we present results where unknown loop it-             Ideally, only iterations satisfying the prefetch predicate should issue
+eration counts are assumed to be large). A reuse can be exploited             prefetch instructions. A naive way to implement this is to enclose
+only if it lies within the localized iteration space. By representing         the prefetch instructions inside an IF statement with the prefetch
+the localized iteration space also as a vector space, locality exists         predicate as the condition. However, such a statement in the inner-
+only if the reuse vector space is a subspace of the localized vector          most loop can be costly, and thus defeat the purpose of reducing
+space.                                                                        the prefetch overhead. We can eliminate this overhead by decom-
+   Consider our example in Figure 2(a). In this case, the loop bound          posing the loops into different sections so that the predicates for
+is known so our algorithm can easily determine that the volume of             all instances for the same section evaluate to the same value. This
+                                                                              process is known as loop splitting. In general, the predicate
+data used in each loop fits in the cache. Both loops are within
+                                                                              requires
+                                                                                                                                                   0
+the localized iteration space, and the localized vector space is rep-           mod the first   iteration of the loop to be peeled. The predicate
+resented as span  1  0   0  1  . Since the reuse vector space is                   0 requires the loop to be unrolled by a factor of .
+                                                                                         
+
+
+                                                                                                                                                 Page 4
+Peeling and unrolling can be applied recursively to handle predi-           cache tags. We assume, however, that an ongoing prefetch access
+cates in nested loops.                                                      cannot be interrupted. As a result, a secondary cache miss may
+   Going back to our example in Figure 2(a), the i = 0 predicate            be delayed by as many as 20 cycles (memory pipeline occupancy
+causes the compiler to peel the i loop. The (j mod 2) = 0 predicate         time) when it tries to access memory. Similarly the processor may
+then causes the j loop to be unrolled by a factor of 2—both in the          be stalled for up to 4 cycles (cache-tag busy time) when it executes
+peel and the main iterations of the i loop.                                 a load or store. If a cache miss occurs for a line for which there
+   However, peeling and unrolling multiple levels of loops can              is an outstanding prefetch waiting in the issue buffer, the miss is
+potentially expand the code by a significant amount. This may               given immediate priority and the prefetch request is removed from
+reduce the effectiveness of the instruction cache; also, existing opti-     the buffer. If the prefetch has already been issued to the memory
+mizing compilers are often ineffective for large procedure bodies.          system, any partial latency hiding that might have occurred is taken
+Our algorithm keeps track of how large the loops are growing. We            into account.
+suppress peeling or unrolling when the loop becomes too large.                 As we mentioned before in Section 1, the benchmarks evaluated
+This is made possible because prefetch instructions are only hints,         in this paper are all scientific applications taken from the SPEC,
+and we need not issue those and only those satisfying the prefetch          SPLASH and NAS Parallel benchmark suites. For four of the
+predicate. For temporal locality, if the loop is too large to peel,         benchmarks (MXM, CFFT2D, VPENTA and TOMCATV), we man-
+we simply drop the prefetches. For spatial locality, when the loop          ually changed the alignment of some of the matrices to reduce the
+becomes too large to unroll, we introduce a conditional statement.          number of cache conflicts.
+When the loop body has become this large, the cost of a conditional            The prefetching algorithm has a few compile-time parameters,
+statement is relatively small.                                              which we consistently set as follows: cache line size = 32 bytes,
+                                                                            effective cache size = 500 bytes, and prefetch latency = 300 cycles.
+                                                                            As discussed in Section 2.1.2, we choose an effective cache size to
+2.3 Scheduling Prefetches                                                   be a fraction of the actual size (8 Kbytes) as a first approximation
+                                                                            to the effects of cache conflicts (we consider the effects of varying
+Prefetches must be issued early enough to hide memory latency.              this parameter in Section 4.2). The prefetch latency indicates to the
+They must not be issued too early lest the data fetched be flushed          compiler how many cycles in advance it should try to prefetch a ref-
+out of the cache before they are used. We choose the number of              erence. The prefetch latency is larger than 75 cycles, the minimum
+iterations to be the unit of time scheduling in our algorithm. The          miss-to-memory penalty, to account for bandwidth-related delays.
+number of iterations to prefetch ahead is
+
+
+                                                                         4    Experimental Results
+where is the prefetch latency and  is the length of the shortest           We now present results from our simulation studies. We start by
+path through the loop body.                                                 evaluating the effectiveness of our compiler algorithm, including the
+                                                                            key aspects of locality analysis, loop splitting and software pipelin-
+   In our example in Figure 2(a), the latency is 100 cycles, the            ing. We evaluate the sensitivity of our performance results to varia-
+shortest path through the loop body is 36 instructions long, therefore,     tions in the architectural parameters used by the compiler. We then
+the j loops are software-pipelined three iterations ahead. Once the         compare two different architectural policies for handling situations
+iteration count is determined, the code transformation is mechanical.       when the memory subsystem is saturated with prefetch requests and
+   Since our scheduling quantum is an iteration, this scheme pre-           cannot accept any more. Finally, we explore the interaction between
+fetches a data item at least one iteration before it is used. If a single   prefetching and locality optimizations such as cache blocking.
+iteration of the loop can fetch so much data that the prefetched data
+may be replaced, we suppress issuing the prefetch.
+                                                                            4.1 Performance of Prefetching Algorithm
+
+3    Experimental Framework                                                 The results of our first set of experiments are shown in Figure 3
+                                                                            and Table 2. Figure 3 shows the overall performance improve-
+                                                                            ment achieved through our selective prefetching algorithm. For each
+To experiment with prefetching, we extend our base R4000 architec-
+                                                                            benchmark, the two bars correspond to the cases with no prefetch-
+ture (described previously in Section 1.1) as follows. We augment
+                                                                            ing (N) and with selective prefetching (S). In each bar, the bottom
+the instruction set to include a prefetch instruction that uses a base-
+                                                                            section is the amount of time spent executing instructions (includ-
+plus-offset addressing format and is defined to not take any memory
+                                                                            ing instruction overhead of prefetching), and the section above that
+exceptions. Both levels of the cache are lockup-free[17] in the sense
+                                                                            is the memory stall time. For the prefetching cases, there is also
+that multiple prefetches can be outstanding. The primary cache is
+                                                                            a third component—stall time due to memory overheads caused by
+checked in the cycle the prefetch instruction is executed. If the
+                                                                            prefetching. Specifically, the stall time corresponds to two situa-
+line is already in the cache, the prefetch is discarded. Otherwise,
+                                                                            tions: (1) when the processor attempts to issue a prefetch but the
+the prefetch is sent to a prefetch issue buffer, which is a structure
+                                                                            prefetch issue buffer is already full, and (2) when the processor
+that maintains the state of outstanding prefetches. For our study,
+                                                                            attempts to execute a load or store when the cache tags are already
+we assume a rather aggressive design of a prefetch issue buffer
+                                                                            busy with a prefetch fill.
+that contains 16 entries. If the prefetch issue buffer is already full,
+the processor is stalled until there is an available entry. (Later, in         As shown in Figure 3, the speedup in overall performance ranges
+Section 4.3, we compare this with an architecture where prefetches          from 5% to 100%, with 6 of the 13 benchmarks improving by over
+are simply dropped if the buffer is full.) The secondary cache is           45%. The memory stall time is significantly reduced in all the
+also checked before the prefetch goes to memory. We model con-              cases. Table 2 indicates that this is accomplished by reducing both
+tention for the memory bus by assuming a maximum pipelining rate            the primary miss-rate and the average primary-miss penalty. The
+of one access every 20 cycles. Once the prefetched line returns, it         miss penalty is reduced because even if a prefetched line is replaced
+is placed in both levels of the cache hierarchy. Filling the primary        from the primary cache before it can be referenced, it is still likely
+cache requires 4 cycles of exclusive access to the cache tags—during        to be present in the secondary cache. Also, the miss latency may
+this time, the processor cannot execute any loads or stores.                be partially hidden if the miss occurs while the prefetch access is
+                                                                            still in progress. Overall, 50% to 90% of the original memory stall
+   Since regular cache misses stall the processor, they are given
+                                                                            cycles are eliminated.
+priority over prefetch accesses both for the memory bus and the
+
+
+
+
+                                                                                                                                          Page 5
+                                140
+
+
+
+                                      |
+    Normalized Execution Time
+                                                                                                                                                                  prefetch memory overhead
+                                130                                                                                                                               memory access stalls
+
+                                      |
+                                120                                                                                                                               instructions
+                                      |
+                                110
+                                      |
+                                      100         100        100         100        100        100        100        100           100        100           100          100        100
+                                100
+                                      |
+
+                                                                                                     95
+                                90                                                                                                       88         87                         89         89
+                                      |
+
+
+
+                                            81                                                                             84
+                                80
+                                      |
+
+
+
+
+                                70                                             69
+                                      |
+
+
+
+
+                                                        58         61
+                                60                                                                                                                                55
+                                      |
+
+
+
+
+                                                                                          48                    50
+                                50
+                                      |
+
+
+
+
+                                40
+                                      |
+
+
+
+
+                                30
+                                      |
+
+
+
+
+                                20
+                                      |
+
+
+
+
+                                10
+                                      |
+
+
+
+
+                                 0
+                                      |
+
+
+
+
+                                          N S     N S     N S             N S        N S        N S        N S     N S    N S                  N        S   N S           N S       N S
+                                          MXM    CFFT2D CHOLSKY           BTRIX     GMTRY       EMIT      VPENTA TOMCATV OCEAN                     IS        CG            EP        MG
+
+
+
+                                  Figure 3: Overall performance of the selective prefetching algorithm (N = no prefetching, and S = selective prefetching).
+
+                                                                                                               The results of this experiment are shown in Figure 4 and in Tables
+Table 2: Memory performance improvement for the selective                                                   3 and 4. The ideal selective prefetch algorithm would achieve the
+prefetching algorithm.                                                                                      same level of memory stall reduction while decreasing the overheads
+                                                                                                            associated with issuing unnecessary prefetches.
+                                                  No Prefetch                Selective Prefetch
+                                                           Average             Average     Memory              Figure 4 shows that the speedup offered by prefetching selec-
+                                             Refs Miss       Miss       Miss     Miss        Stall          tively rather than indiscriminately ranges from 1% to 100%. In 6
+                                             per   Rate     Penalty     Rate Penalty Reduction              of the 13 cases, the speedup is greater than 20%. Table 3 shows
+   Benchmark                                 Inst  (%)     (cycles)     (%) (cycles)          (%)           that most of the benchmarks sacrifice very little in terms of memory
+     MXM                                     0.58 3.35       15.6       1.26     14.0         66.2          stall reduction by prefetching selectively. On the other hand, Figure
+    CFFT2D                                   0.55 5.53       53.2       1.29     53.4         76.5          4 shows that indiscriminate prefetching suffers more from both in-
+   CHOLSKY                                   0.45 19.69      24.8       6.09     12.3         83.9
+     BTRIX                                   0.55 12.29      21.3       3.20     17.0         76.5
+                                                                                                            creased instruction overhead and stress on the memory subsystem.
+    GMTRY                                    0.47 19.29      21.7       3.65     12.3         90.2          Overall, selective prefetching is effective. In some cases (CFFT2D
+     EMIT                                    0.56 2.26       18.7       1.26     13.7         58.4          and MG), selectiveness even turns prefetching from a performance
+    VPENTA                                   0.53 16.52      26.4       1.91     12.5         93.0          loss into a performance gain.
+   TOMCATV                                   0.48 7.06       36.6       4.21     12.5         71.8
+    OCEAN                                    0.43 5.07       52.3       2.20     48.6         54.6
+       IS                                    0.32 1.62       36.9       0.93     16.0         75.1          Table 3: Memory performance improvement for the indiscriminate
+      CG                                     0.40 12.57      38.3       8.33     17.5         69.2          and selective prefetching algorithms.
+      EP                                     0.23 1.05       59.5       0.31     13.8         93.3
+      MG                                     0.60 2.09       33.0       1.54     15.7         71.4
+                                                                                                                                   Indiscriminate Prefetch              Selective Prefetch
+                                                                                                                                        Average     Memory                Average Memory
+                                                                                                                                Miss      Miss        Stall        Miss     Miss        Stall
+                                                                                                                                Rate Penalty Reduction             Rate Penalty Reduction
+   Having established the benefits of prefetching, we now focus on                                              Benchmark       (%)     (cycles)      (%)          (%) (cycles)          (%)
+the costs. Figure 3 shows that the instruction overhead of prefetch-                                              MXM           1.37      13.0        66.0         1.26     14.0        66.2
+ing causes less than a 15% increase in instruction count in over half                                            CFFT2D         0.34      16.6        98.1         1.29     53.4        76.5
+of the benchmarks. In fact, in two of those cases (MXM and IS) the                                              CHOLSKY         6.27      12.2        84.1         6.09     12.3        83.9
+number of instructions actually decreased due to savings through                                                  BTRIX         2.10      13.7        87.1         3.20     17.0        76.5
+loop unrolling. In other cases (CHOLSKY, BTRIX, VPENTA,                                                          GMTRY          3.22      12.4        89.4         3.65     12.3        90.2
+                                                                                                                  EMIT          1.01      14.2        65.7         1.26     13.7        58.4
+TOMCATV, OCEAN), the number of instructions increased by 25%                                                     VPENTA         2.48      12.5        90.2         1.91     12.5        93.0
+to 50%. Finally, the stalls due to prefetching memory overhead are                                              TOMCATV         3.25      12.4        73.5         4.21     12.5        71.8
+typically small—never more than 15% of original execution time.                                                  OCEAN          2.38      49.8        45.0         2.20     48.6        54.6
+In each case, we observe that the overheads of prefetching are low                                                  IS          0.87      16.3        76.4         0.93     16.0        75.1
+enough compared to the gains that the net improvement remains                                                      CG           7.20      14.1        75.9         8.33     17.5        69.2
+large. In the following subsections, we present a detailed evalua-                                                 EP           0.35      13.8        92.3         0.31     13.8        93.3
+                                                                                                                   MG           1.03      15.5        72.7         1.54     15.7        71.4
+tion of each aspect of our selective prefetching algorithm.
+
+4.1.1                           Locality Analysis                                                              We evaluate the selective algorithm in more detail by using the
+                                                                                                            following two concepts. The coverage factor is the fraction of
+The goal of using locality analysis is to eliminate prefetching over-
+                                                                                                            original misses that are prefetched. A prefetch is unnecessary if the
+head by prefetching only those references that cause cache misses.
+                                                                                                            line is already in the cache or is currently being fetched. An ideal
+To evaluate the effectiveness of this analysis, we performed the
+                                                                                                            prefetching scheme would provide a coverage factor of 100% and
+following experiment. We implemented a compiler algorithm which
+                                                                                                            would generate no unnecessary prefetches.
+prefetches all data references within our domain (i.e. array refer-
+ences whose indices are affine functions of loop indices). We refer                                            Table 4 contains several statistics about the effectiveness of the
+to this algorithm as indiscriminate (as opposed to selective) prefetch-                                     two prefetching algorithms. This includes the percentage of pre-
+ing. The indiscriminate algorithm uses the same software pipelining                                         fetches issued that are unnecessary, and a breakdown of the impact
+technique as selective prefetching to schedule prefetches far enough                                        of prefetching on the original cache misses. This breakdown con-
+in advance. However, it has no need for locality analysis or loop                                           tains three categories: (1) those that are prefetched and subsequently
+splitting.                                                                                                  hit in the primary cache (pf-hit), (2) those that are prefetched but
+
+
+
+
+                                                                                                                                                                                          Page 6
+                              140
+
+
+                                    |
+  Normalized Execution Time                                                                                                                                                                  prefetch memory overhead
+                              130                                                                                                                                                            memory access stalls
+                              120   |
+                                    |                         117                                                                                                                            instructions
+                                                                                                                                                                                                                                                   113
+                              110
+                                    |
+
+                                    100 101             100              100             100             100               100 97          100               100             100                100             100 98        100            100
+                              100                                                                                                                                  95
+                                    |
+
+
+                                                                                                                                      95                                           94                 93
+                              90                                                                                                                                                        88                 87                       90 89                89
+                                    |
+
+
+
+
+                                                 81                                                                                                                     84
+                              80                                                               78
+                                    |
+
+
+
+
+                              70                                               68                   69                                           68
+                                    |
+
+
+
+
+                                                                    58              61                         59
+                              60                                                                                                                                                                                         55
+                                    |
+
+
+
+
+                                                                                                                    48                                50
+                              50
+                                    |
+
+
+
+
+                              40
+                                    |
+
+
+
+
+                              30
+                                    |
+
+
+
+
+                              20
+                                    |
+
+
+
+
+                              10
+                                    |
+
+
+
+
+                                0
+                                    |
+
+
+
+
+                                        N    I    S     N      I    S    N     I    S    N     I    S    N     I    S       N     I   S    N     I    S      N     I    S    N      I   S        N    I    S    N   I    S     N    I    S   N      I    S
+                                            MXM         CFFT2D           CHOLSKY          BTRIX          GMTRY               EMIT          VPENTA            TOMCATV         OCEAN                    IS            CG              EP             MG
+
+
+
+Figure 4: Overall performance comparison between the indiscriminate and selective prefetching algorithms (N = no prefetching, I = indis-
+criminate prefetching, and S = selective prefetching).
+
+                                                                    Table 4: Prefetching effectiveness for the indiscriminate and selective prefetching algorithms.
+
+                                                                          Indiscriminate Prefetch                                     Indiscriminate                                         Selective Prefetch
+                                                      Unnecessary        Original Miss Breakdown (%)                      Inst         to Selective          Unnecessary           Original Miss Breakdown (%)                     Inst per PF
+                        Benchmark                     Prefetch %         pf-hit pf-miss      nopf-miss                   per PF          PF Ratio            Prefetch %            pf-hit pf-miss      nopf-miss              wrt Orig wrt Split
+                          MXM                            91.2            59.2       6.2         34.6                       1.3              4.7                 60.4               59.2      8.3         32.5                   -2.7          3.9
+                         CFFT2D                          87.7            93.8       1.4         4.8                        1.4              9.4                  6.0               76.5      1.1         22.3                    3.5          3.5
+                        CHOLSKY                          61.0            67.7      28.4         3.9                        2.0              2.3                  8.6               67.5     29.5          3.0                    4.9          5.8
+                          BTRIX                          68.7            79.9      15.5         4.6                        1.8              1.7                 53.6               70.6     14.4         15.0                    1.8          2.1
+                         GMTRY                           36.0            81.5      15.7         2.8                        1.9              1.5                  3.5               82.5     15.8          1.6                    0.8          0.8
+                          EMIT                           87.1            54.6       4.1         41.2                       1.6              6.2                 37.4               42.2      4.4         53.5                    5.8          5.8
+                         VPENTA                          57.7            79.3      17.5         3.3                        2.5              1.8                 29.4               85.2      4.8         10.0                    2.5          2.9
+                        TOMCATV                          91.5            22.1      17.8         60.1                       4.0              2.3                 81.4               17.7     20.4         61.9                    7.0          7.0
+                         OCEAN                           91.9            42.2       6.7         51.1                       2.5              6.6                 42.0               51.6      0.8         47.6                  17.5          18.4
+                            IS                           89.1            46.6       3.3         50.1                       1.0              8.4                 10.5               42.8      6.1         51.1                   -7.9          2.1
+                           CG                            88.9            34.6       3.6         61.8                       2.5              6.7                 25.0               32.8      5.3         61.9                   -0.1          7.2
+                           EP                            75.7            66.7       3.1         30.3                       1.8              4.1                  0.0               67.6      3.1         29.3                    2.4          2.4
+                           MG                            95.4            41.9       7.1         51.1                       3.4             20.9                 18.4               39.8      1.8         58.5                  20.2          20.2
+
+
+
+remained misses (pf-miss), and (3) those that are not prefetched                                                                                     rates have not increased substantially, and the reduction in memory
+(nopf-miss). The coverage factor is equal to the sum of the pf-hit                                                                                   stall cycles is comparable. In the cases where the coverage did
+and pf-miss categories.                                                                                                                              go down, the problem is typically due to the presence of cache
+   The coverage factor of the indiscriminate case is interesting, since                                                                              conflicts. Comparing the percentages of unnecessary prefetches in
+it represents the fraction of cache misses that are within the domain                                                                                Table 4, we see that the improvement from selective prefetching is
+of our analysis in most cases. Looking at Table 4, we notice that                                                                                    dramatic in many cases (CFFT2D, CHOLSKY, IS, EP, MG). (Note
+in 5 of the 13 cases the coverage factor is well over 90%, but in                                                                                    that these percentages are computed with respect to the number of
+5 of the other cases it is less than 50%. In the case of CG, the                                                                                     prefetches issued, which changes between the two cases.)
+coverage is only 38% because it is a sparse matrix algorithm and                                                                                        The advantage of selective prefetching is summarized by the ratio
+we are only prefetching the dense index arrays. The same is true for                                                                                 of indiscriminate to selective prefetches in Table 4. Prefetching
+IS. MXM (a blocked matrix multiplication kernel) is a surprising                                                                                     selectively can reduce the number of prefetches by as much as
+case, since all of the important references are obviously affine, yet                                                                                a factor of 21. At the same time, the coverage factor remains
+the coverage factor is only 65%. This is a result of the way we                                                                                      competitive. Overall, this selection process appears to be quite
+account for prefetches in our experiment; we associate a prefetch                                                                                    successful.
+only with the very next reference to the same cache line. Suppose
+the algorithm issues two prefetches for the same line followed by
+references to two consecutive words in that cache line, we say that                                                                                  4.1.2    Loop Splitting
+the first reference is prefetched but not the second. In the case                                                                                    The goal of loop splitting is to isolate the cache miss instances while
+of MXM, cache conflicts between accesses to different arrays can                                                                                     introducing as little instruction overhead as possible. To quantify the
+cause the second access to the same cache line to miss. Similar                                                                                      advantage of loop splitting, we implemented the naive alternative
+behavior also occurs in TOMCATV, OCEAN, and MG. Finally, in                                                                                          for isolating cache miss instances—placing conditional statements
+the cases of EMIT and EP, many of the remaining cache misses                                                                                         inside the loops. Figure 5 shows that for 5 of the 13 benchmarks
+occur in library routines rather than the programs themselves.                                                                                       (MXM,BTRIX,VPENTA,CG and MG), the performance advantage
+   Table 4 shows that a large fraction of prefetches issued under                                                                                    of loop splitting is greater than 25%.
+the indiscriminate scheme are unnecessary. In all but one case, this                                                                                    A good measure of the success of loop splitting is the instruc-
+fraction ranged from 60% to 95%. These unnecessary prefetches                                                                                        tion overhead per prefetch issued. Ideally, isolating the cache miss
+can lead to large instruction overheads (MG) or significant delays                                                                                   instances will not increase the instruction overhead. One of the
+due to a saturated memory subsystem (CFFT2D and CG).                                                                                                 advantages of having implemented the prefetching schemes in the
+   A selective algorithm is successful if it can maintain a simi-                                                                                    compiler is that we can quantify this instruction overhead. Previous
+lar coverage while lowering the number of unnecessary prefetches.                                                                                    studies have only been able to estimate instruction overhead [4].
+Table 4 shows that in 11 of the 13 cases, the coverage is reduced by                                                                                    Table 4 shows the number of instructions required to issue each
+less than 10%. Table 3 also supports this by showing that the miss
+
+
+
+
+                                                                                                                                                                                                                                                   Page 7
+                                     140
+
+
+                                                  |
+  Normalized Execution Time                                                                                                                                                                                                                              prefetch memory overhead
+                                     130                                                                                                                                                                                                                 memory access stalls
+                                     120          |
+                                                  |                                                                                                                                                                                                      instructions
+                                                                                                                                                                                                                                                                                                                  113
+                                     110
+                                                           109
+                                                  |
+
+                                                   100                  100             100             100               100                                   100            100                  100           100                                       100               100             100           100
+                                     100                                                                                                                              95 95                                                                                        96
+                                                  |
+
+
+                                                                                                                                                                                                                        94
+                                             90                                                               89                                                                                                                  88                                    87                          89 89               89
+                                                  |
+
+
+
+
+                                                                 81                                                                                                                                       83 84
+                                             80                                                                                                                                                                                                                                     76
+                                                  |
+
+
+
+
+                                             70                                               68                   69
+                                                  |
+
+
+
+
+                                                                              62                   61                                                                                63
+                                             60                                    58                                                                                                                                                                                                    55
+                                                  |
+
+
+
+
+                                                                                                                                                      50 48                               50
+                                             50
+                                                  |
+
+
+
+
+                                             40
+                                                  |
+
+
+
+
+                                             30
+                                                  |
+
+
+
+
+                                             20
+                                                  |
+
+
+
+
+                                             10
+                                                  |
+
+
+
+
+                                              0
+                                                  |
+
+
+
+
+                                                       N C S            N C S           N C S           N C S                  N C S                            N C S           N C S               N C S         N C S                                        N C S          N C S           N C S          N C S
+                                                       MXM              CFFT2D          CHOLSKY          BTRIX                 GMTRY                              EMIT         VPENTA              TOMCATV        OCEAN                                            IS               CG              EP            MG
+
+
+
+Figure 5: Loop splitting effectiveness (N = no prefetching, C = selective prefetching with conditional statements, and S = selective prefetching
+with loop splitting).
+
+                                             130                                                                                                      130                                                                                                130
+                                                       |
+
+
+
+
+                                                                                                                                                            |
+
+
+
+
+                                                                                                                                                                                                                                                               |
+                 Normalized Execution Time
+
+
+
+
+                                                                                                                          Normalized Execution Time
+
+
+
+
+                                                                                                                                                                                                                             Normalized Execution Time
+                                                                      prefetch memory overhead                                                                        prefetch memory overhead                                                                                       prefetch memory overhead
+                                             120                      memory access stalls                                                            120             memory access stalls                                                               120                         memory access stalls
+                                                       |
+
+
+
+
+                                                                                                                                                            |
+
+
+
+
+                                                                                                                                                                                                                                                               |
+                                                                      instructions                                                                                    instructions                                                                                                   instructions
+                                             110                                                                                                      110                                                                                                110
+                                                       |
+
+
+
+
+                                                                                                                                                            |
+
+
+
+
+                                                                                                                                                                                                                                                               |
+                                             100
+                                                                 100                                                                                  100
+                                                                                                                                                                100                                                                                      100
+                                                                                                                                                                                                                                                                        100
+                                                       |
+
+
+
+
+                                                                                                                                                            |
+
+
+
+
+                                                                                                                                                                                                                                                               |
+                                                                                   93
+                                                  90                                          89                                                       90                                                                                                 90
+                                                       |
+
+
+
+
+                                                                                                                                                            |
+
+
+
+
+                                                                                                                                                                                                                                                               |
+                                                  80                                                                                                   80                                                                                                 80                                                 76
+                                                       |
+
+
+
+
+                                                                                                                                                            |
+
+
+
+
+                                                                                                                                                                                                                                                               |
+                                                                                                                                                                               71
+                                                  70                                                                                                   70                                                                                                 70
+                                                       |
+
+
+
+
+                                                                                                                                                            |
+
+
+
+
+                                                                                                                                                                                                                                                               |
+                                                                                                                                                                                               58                                                                                                   61
+                                                  60                                                                                                   60                                                                                                 60
+                                                       |
+
+
+
+
+                                                                                                                                                            |
+
+
+
+
+                                                                                                                                                                                                                                                               |
+                                                                                                                                                                                                                                                                                      53
+                                                  50                                                                                                   50                                                                                                 50
+                                                       |
+
+
+
+
+                                                                                                                                                            |
+
+
+
+
+                                                                                                                                                                                                                                                               |
+                                                  40                                                                                                   40                                                                                                 40
+                                                       |
+
+
+
+
+                                                                                                                                                            |
+
+
+
+
+                                                                                                                                                                                                                                                               |
+                                                  30                                                                                                   30                                                                                                 30
+                                                       |
+
+
+
+
+                                                                                                                                                            |
+
+
+
+
+                                                                                                                                                                                                                                                               |
+                                                  20                                                                                                   20                                                                                                 20
+                                                       |
+
+
+
+
+                                                                                                                                                            |
+
+
+
+
+                                                                                                                                                                                                                                                               |
+                                                  10                                                                                                   10                                                                                                 10
+                                                       |
+
+
+
+
+                                                                                                                                                            |
+
+
+
+
+                                                                                                                                                                                                                                                               |
+                                                   0                                                                                                   0                                                                                                   0
+                                                       |
+
+
+
+
+                                                                                                                                                            |
+
+
+
+
+                                                                                                                                                                                                                                                               |
+                                                                  N                S          S                                                                   N            S               S                                                                         N               S          S        S
+ Loop Policy:                                                                 Large Small                               Eff Cache Size:                                       8 KB        500 B                          PF Latency:                                                100         300         1000
+                                                                              MG                                                                                         CFFT2D                                                                                                      CHOLSKY
+                                                                              (a)                                                                                          (b)                                                                                                          (c)
+                                                            Figure 6: Sensitivity of results to compile-time parameters (N = no prefetching, S = selective prefetching variations).
+
+prefetch. For the indiscriminate prefetching scheme, the overhead                                                                                                                     the scheduling algorithm is generally effective. The exceptions are
+per prefetch ranges from 1 to 4 instructions. This is well within the                                                                                                                 CHOLSKY and TOMCATV, where over a third of the prefetched
+bounds of what one would intuitively expect. One of the instructions                                                                                                                  references are not found in the cache. The problem in these cases is
+is the prefetch itself, and the rest are for address calculation. For the                                                                                                             that cache conflicts remove prefetched data from the primary cache
+selective prefetching scheme, Table 4 shows the prefetch instruction                                                                                                                  before it can be referenced. However, there is still a performance
+overhead both with respect to the original code and with respect to                                                                                                                   advantage since the data tends to remain in the secondary cache,
+code where the loop splitting transformations are performed but no                                                                                                                    and therefore the primary-miss penalty is reduced, as shown earlier
+prefetches are inserted. Loop splitting generally increases the over-                                                                                                                 in Table 2.
+head per prefetch. In a few cases, the overhead has become quite
+large (OCEAN and MG). In other cases, the overhead with respect
+                                                                                                                                                                                      4.1.4          Summary
+to the original code is actually negative, due to the savings through
+loop unrolling (MXM, IS and CG). In the case of OCEAN, the                                                                                                                            To summarize, we have seen that in most cases the selective
+loop bodies are quite large, and the combination of loop unrolling                                                                                                                    prefetching scheme performs noticeably better than the indiscrimi-
+and software pipelining makes it necessary for the compiler to spill                                                                                                                  nate scheme. The advantage comes primarily from a reduction in
+registers. The penalty for register spills is averaged over just the                                                                                                                  prefetching overhead while still maintaining a comparable savings
+prefetches, and this penalty can become quite high. In the case of                                                                                                                    in memory stall time.
+MG, the number of prefetches has been drastically reduced (by a
+factor of 21). Averaging all the loop and transformation overheads
+over only a small number of prefetches results in a high instruction-                                                                                                                 4.2 Sensitivity to Compile-Time Parameters
+per-prefetch overhead. In most of the cases, however, the overhead
+per prefetch remains low.                                                                                                                                                             The selective prefetching algorithm uses several compile-time pa-
+                                                                                                                                                                                      rameters to model the behavior of the memory subsystem. Specifi-
+                                                                                                                                                                                      cally these parameters include the following: (1) cache line size, (2)
+4.1.3                                             Software Pipelining                                                                                                                 whether unknown loop bounds are assumed to be large or small, (3)
+The effectiveness of the software pipelining algorithm is reflected                                                                                                                   effective cache size, and (4) prefetch latency. The most concrete of
+by the pf-miss figures in Table 4. A large number means that the                                                                                                                      these parameters is the cache line size, which can be set precisely.
+prefetches are either not issued early enough, in which case the line                                                                                                                 The other parameters, however, are more heuristic in nature. To
+does not return to the primary cache by the time it is referenced,                                                                                                                    evaluate the robustness of our algorithm, we measured the effects
+or not issued late enough, in which case the line has already been                                                                                                                    of varying these less obvious parameters.
+replaced in the cache before it is referenced. The results indicate that                                                                                                                 The SUIF compiler performs aggressive interprocedural constant
+
+
+
+
+                                                                                                                                                                                                                                                                                                                  Page 8
+                              140
+
+
+                                    |
+  Normalized Execution Time                                                                                                                                                   prefetch memory overhead
+                              130                                                                                                                                             memory access stalls
+                              120   |
+                                    |                                                                                                                                         instructions
+                                                                                                                                                                                                                                      113
+                              110
+                                    |
+
+                                    100 101           100           100             100           100           100 97        100             100             100                100             100             100            100
+                              100
+                                    |
+
+
+                                                                                                                         95                                         94                 93
+                                                                                                                                                    91                   88                                            90 89                89
+                              90                                                                                                                                                            87
+                                    |
+
+
+
+
+                                                 81                                                                                                      84
+                              80                                                                                                                                                                       78
+                                                                          75
+                                    |
+
+
+
+
+                                                                               68         70 72
+                              70
+                                    |
+
+
+
+
+                              60
+                                                            60 58                                                                   58                                                                      55
+                                    |
+
+
+
+
+                                                                                                        51 49                            49
+                              50
+                                    |
+
+
+
+
+                              40
+                                    |
+
+
+
+
+                              30
+                                    |
+
+
+
+
+                              20
+                                    |
+
+
+
+
+                              10
+                                    |
+
+
+
+
+                                0
+                                    |
+
+
+
+
+                                        N    I    S   N     I   S   N     I    S    N     I   S   N     I   S   N   I    S    N     I    S     N    I    S    N     I    S        N    I    S    N     I    S    N     I    S   N      I    S
+                                            MXM       CFFT2D        CHOLSKY          BTRIX        GMTRY           EMIT        VPENTA          TOMCATV         OCEAN                    IS              CG              EP             MG
+
+
+
+Figure 7: Prefetches are dropped (rather than stalling) when issue buffers are full (N = no prefetching, I = indiscriminate prefetching, and S
+= selective prefetching).
+
+propagation to statically determine as many loop bounds as possible.                                                                    parameter we varied. Overall, the algorithm appears to be quite
+When this fails, our current algorithm assumes unknown loop counts                                                                      robust.
+to be small, which tends to overestimate what remains in the cache.
+When the compiler assumes unknown iteration counts to be large,
+it produces identical code for 11 of the 13 benchmarks—the two                                                                          4.3 Dropping Prefetches vs. Stalling
+benchmarks that change are OCEAN and MG. For OCEAN, the
+difference in performance is negligible. However, MG performs                                                                           In the architectural model presented so far, the memory subsys-
+4% worse with the large-loop policy, as shown in Figure 6(a). In                                                                        tem has a finite (16-entry) prefetch issue buffer to hold outstanding
+this case, the benefit of the extra prefetches is more than offset                                                                      prefetch requests. Our model includes a few hardware optimiza-
+by increased instruction overhead. Although assuming small loop                                                                         tions to help mitigate the negative effects of the finite buffer size.
+counts happens to be better in this case, the opposite could easily                                                                     In particular, a prefetch is only inserted into the buffer if it misses in
+be true in programs where unknown iteration counts are actually                                                                         the primary cache and there is not already an outstanding prefetch
+large. One solution may be to resolve loop counts through profiling                                                                     for the same cache line. Also, a prefetch is removed from the issue
+feedback. However, the more interesting result of this experiment is                                                                    buffer as soon as it completes (i.e. the buffer is not a FIFO queue).
+how rarely loop bound uncertainty affects performance. We observe                                                                       However, in spite of these optimizations, the buffer may still fill up
+that while nearly half the benchmarks contain loops with unknown                                                                        if the processor issues prefetches faster than the memory subsystem
+bounds, in most cases this has no impact on locality, due to the                                                                        can service them.
+patterns of data reuse within those loops.                                                                                                 Once the prefetch issue buffer is full, the processor is unable
+   For our experiments so far, the effective cache size has been set                                                                    to issue further prefetches. The model we use so far stalls the
+to 500 bytes, which is only a small fraction of the actual cache size                                                                   processor until a buffer entry becomes available. An alternative
+(8 Kbytes). When the effective cache size is set to the full 8 Kbytes,                                                                  is to simply drop the prefetch and continue executing. Intuitive
+our compiler generates identical code for 7 of the 13 benchmarks.                                                                       arguments might be presented to support either approach. On one
+For 5 of the 6 benchmarks that do change, the difference in per-                                                                        hand, if the data is needed in the future and is not presently in the
+formance is negligible. The one case that changes significantly is                                                                      cache (since only prefetches that miss go into the buffer), it may
+CFFT2D, as shown in Figure 6(b). In this case, fewer prefetches                                                                         appear to be cheaper to stall now until a single entry is free rather
+are issued with the larger effective cache size. However, the pre-                                                                      than to suffer an entire cache miss sometime in the future. On the
+fetches that are eliminated happen to be useful, since they fetch data                                                                  other hand, since a prefetch is only a performance hint, perhaps it
+that is replaced due to cache conflicts. As a result, the performance                                                                   is better to continue executing useful instructions.
+suffers, as we see Figure 6(b). (Note that this is in contrast with the                                                                    To understand this issue, we ran each of our benchmarks again
+effect we see in Figure 6(a), where issuing more prefetches hurts                                                                       using a model where prefetches are dropped rather than stalling the
+performance.) In the case of CFFT2D, many critical loops refer-                                                                         processor when the prefetch issue buffer is full. The results of this
+ence 2 Kbytes of data, and these loops happen to suffer from cache                                                                      experiment are shown in Figure 7. Comparing this with Figure 4,
+conflicts. An effective cache size of 500 bytes produces the desired                                                                    we see that there is a difference in performance for seven of the cas-
+result in this case. Overall, however, the results are robust with                                                                      es (CFFT2D, CHOLSKY, BTRIX, GMTRY, VPENTA, TOMCATV,
+respect to effective cache size.                                                                                                        and CG). In each of these cases, the performance of the indis-
+   Finally, for our experiments in Section 4.1, we set the prefetch                                                                     criminate prefetching algorithm is improved by dropping prefetches.
+latency to 300 cycles. We chose a value greater than 75 cycles to                                                                       The improvement is dramatic in the two cases that had previously
+account for bandwidth-related delays. To evaluate whether this was                                                                      stalled the most due to full buffers (CFFT2D and CG). The selective
+a good choice, we compiled each benchmark again using prefetch                                                                          prefetch algorithm, however, did not improve from dropping pre-
+latencies of 100 and 1000 cycles. In nearly all the cases, the impact                                                                   fetches since it suffered very little from full prefetch issue buffers in
+on performance is small. In many cases, the 100-cycle case is                                                                           the first place. In fact, in three of the cases (CHOLSKY, BTRIX and
+slightly worse than the 300-cycle case due to bandwidth-related                                                                         GMTRY), the selective algorithm performed slightly worse when
+delays. The most interesting case is CHOLSKY, as shown in Figure                                                                        prefetches are dropped. Dropping prefetches has the effect of sac-
+6(c). In this case, prefetched data tends to be replaced from the                                                                       rificing some amount of coverage (and therefore memory stall re-
+cache shortly after it arrives, so ideally it should arrive “just in                                                                    duction) for the sake of reducing prefetch issue overhead. This
+time”. Therefore, the lowest prefetch latency (100 cycles) offers                                                                       effect is most clearly illustrated in the case of CG (compare the I
+the best the performance, as we see in Figure 6(c). However, in                                                                         bars in Figures 4 and 7), where memory stall time doubles for the
+such cases the best approach may be to eliminate the cache conflicts                                                                    indiscriminate algorithm once prefetches are dropped.
+cause this behavior[19].                                                                                                                   There are two reasons why the performance improves substan-
+   In summary, the performance of our selective algorithm was                                                                           tially for the indiscriminate prefetching algorithm. The first reason
+affected noticeably in only one of the 13 benchmarks for each                                                                           is that dropping prefetches increases the chances that future pre-
+
+
+
+
+                                                                                                                                                                                                                                      Page 9
+                                110                                                                                               110
+
+
+
+                                      |
+
+
+
+
+                                                                                                                                        |
+    Normalized Execution Time
+
+
+
+
+                                                                                                      Normalized Execution Time
+                                                                   prefetch memory overhead                                                                        prefetch memory overhead
+                                          100                      memory access stalls                                                     100                    memory access stalls
+                                100                                                                                               100
+                                      |
+
+
+
+
+                                                                                                                                        |
+                                                                   instructions                                                                                    instructions
+                                 90   |                                                                                            90
+
+
+
+
+                                                                                                                                        |
+                                 80                                                                                                80                               79
+                                      |
+
+
+
+
+                                                                                                                                        |
+                                 70                                                                                                70                68
+                                      |
+
+
+
+
+                                                                                                                                        |
+                                                   59                                                                                                                      61
+                                 60                                                                                                60
+                                      |
+
+
+
+
+                                                                                                                                        |
+                                                           48                                                                                                50
+                                 50                                                                                                50
+                                      |
+
+
+
+
+                                                                                                                                        |
+                                                                           44
+                                                                    41             41                                                                                              40
+                                 40                                                                                                40
+                                      |
+
+
+
+
+                                                                                                                                        |
+                                 30                                                                                                30
+                                      |
+
+
+
+
+                                                                                                                                        |
+                                 20                                                                                                20
+                                      |
+
+
+
+
+                                                                                                                                        |
+                                 10                                                                                                10
+                                      |
+
+
+
+
+                                                                                                                                        |
+                                 0                                                                                                  0
+                                      |
+
+
+
+
+                                                                                                                                        |
+                                          N        I       S           N    I      S                                                        N        I       S      N       I      S
+                                                Original          Locality-Optimized                                                              Original        Locality-Optimized
+                                                               GMTRY                                                                                          VPENTA
+                                Figure 8: Results with locality-optimizer (N = no prefetching, I = indiscriminate prefetching, and S = selective prefetching).
+
+fetches will find open slots in the prefetch issue buffer. The second                             head by recognizing that blocking has occurred and thereby issuing
+is that since the indiscriminate algorithm has a larger number of re-                             fewer prefetches. The best performance overall occurs with block-
+dundant (i.e. unnecessary) prefetches, dropping a prefetch does not                               ing, both alone and in combination with selective prefetching.
+necessarily lead to a cache miss. It is possible that the algorithm                                  For VPENTA, the locality optimizer introduces spatial locality
+will issue a prefetch of the same line before the line is referenced.                             for every reference in the inner loop by interchanging two of the
+Since selective prefetching has eliminated much of this redundancy,                               surrounding loops. So rather than missing on every iteration, the
+it is more likely that dropping a prefetch would translate into a sub-                            references only miss when they cross cache line boundaries (every
+sequent cache miss. However, as we have already seen in Figure                                    fourth iteration). With this locality optimization alone, the perfor-
+4, the selective algorithm tends to suffer very little from full issue                            mance improves significantly. However, the selective prefetching
+buffers, and therefore performs well in either case.                                              scheme without this optimization still performs better, since it man-
+                                                                                                  ages to eliminate almost all memory stall cycles. Comparing the
+                                                                                                  prefetching schemes before and after the loop interchange, we see
+4.4 Interaction with Locality-Optimizer                                                           that the indiscriminate prefetching scheme changes very little while
+Since prefetching hides rather than reduces latency, it can only                                  the selective prefetching scheme improves considerably. The selec-
+improve performance if additional memory bandwidth is available.                                  tive scheme improves because it recognizes that after loop inter-
+This is because prefetching does not decrease the number of memory                                change it only has to issue one fourth as many prefetches. Conse-
+accesses—it simply tries to perform them over a shorter period of                                 quently it is able to reduce its instruction overhead accordingly.
+time. Therefore, if a program is already memory-bandwidth limited,                                The best overall performance, by a substantial margin, comes only
+it is impossible for prefetching to increase performance. Locality                                through the combination of both locality optimization and prefetch-
+optimizations such as cache blocking, however, actually decrease                                  ing.
+the number of accesses to memory, thereby reducing both latency                                      Finally, we would like to note that this is the first time that experi-
+and required bandwidth. Therefore, the best approach for coping                                   mental results have been presented where both locality optimization
+with memory latency is to first reduce it as much as possible, and                                and prefetch insertion have been handled fully automatically by the
+then hide whatever latency remains. Our compiler can do both                                      compiler. The results have demonstrated the complementary inter-
+things automatically by first applying locality optimizations and then                            actions that can occur between locality optimizations and prefetch-
+inserting prefetches.                                                                             ing. Locality optimizations help prefetching by reducing the amount
+   We compiled each of the benchmarks with the locality optimizer                                 of data that needs to be prefetched, and prefetching helps locality
+enabled [29]. In two of the cases (GMTRY and VPENTA) there                                        optimizations by hiding any latency that could not be eliminated.
+was a significant improvement in locality. Both of those cases are
+presented in Figure 8. In the figure, we show the three original
+performance bars (seen previously in Figure 4) as well as three new                               5                 Related Work
+cases which include locality optimization by itself and in combina-
+tion with the two prefetching schemes.                                                            Several strategies for utilizing prefetching have been presented in
+   In the case of GMTRY, the locality optimizer is able to block the                              the past. Some of these approaches use software support to issue
+critical loop nest. With this locality optimization alone, 90% of the                             prefetches, while others are strictly hardware-based. In this section,
+original memory stall time is eliminated. Comparing blocking with                                 we discuss previous work in both categories.
+prefetching, we see that blocking had better overall performance
+than prefetching in this case. Although prefetching reduces more of
+the memory stall cycles, blocking has the advantage of not suffering
+                                                                                                  5.1 Software Prefetching
+any of the instruction or memory overhead of prefetching. Compar-                                 Porterfield [4, 23] presented a compiler algorithm for inserting pre-
+ing the prefetching schemes before and after blocking, we see that                                fetches. He implemented it as a preprocessing pass that inserted
+blocking has improved the performance of both schemes. One rea-                                   prefetching into the source code. His initial algorithm prefetched all
+son is that memory overheads associated with prefetching have been                                array references in inner loops one iteration ahead. He recognized
+eliminated with blocking since less memory bandwidth is consumed.                                 that this scheme was issuing too many unnecessary prefetches, and
+Also, the selective prefetching scheme reduces its instruction over-                              presented a more intelligent scheme based on dependence vectors
+
+
+
+
+                                                                                                                                                                                        Page 10
+and overflow iterations. Since the simulation occurred at a fairly         targeted for many different memory systems, this lack of flexibility
+abstract level, the prefetching overhead was estimated rather than         can be a serious limitation—not only in terms of tuning for different
+presented. Overall performance numbers were not presented. Also,           memory latencies, but also a prefetching scheme that is appropriate
+the more sophisticated scheme was not automated (the overflow it-          for a uniprocessor may be entirely inappropriate for a multiproces-
+erations were calculated by hand) and did not take cache line reuse        sor [22]. Finally, while hardware-based schemes have no software
+into account.                                                              cost, they may have a significant hardware cost, both in terms of
+   Klaiber and Levy [16] extended the work by Porterfield by rec-          chip area and possibly gate delays.
+ognizing the need to prefetch more than a single iteration ahead.
+They included several memory system parameters in their equation
+for how many iterations ahead to prefetch, and inserted prefetches         6    Future Work
+by hand at the assembly-code level. The results were presented in
+terms of average memory access latency rather than overall perfor-         The scope of this compiler algorithm was limited to affine array
+mance. Also, in contrast with our study, they proposed prefetching         accesses within scientific applications. By prefetching only the
+into a separate fetchbuffer rather than directly into the cache. How-      affine accesses, we covered over 90% of the cache misses for rough-
+ever, our results have demonstrated that prefetching directly into the     ly half of the benchmarks, while the coverage was closer to 50%
+cache can provide impressive speedups, and without the disadvan-           of the misses for the remaining benchmarks. In order to increase
+tage of sacrificing cache size to accommodate a fetchbuffer.               our coverage, we need to handle more complex access patterns. A
+   Gornish, Granston and Veidenbaum [13, 14] presented an                  good starting point would be sparse matrices, which would account
+algorithm for determining the earliest time when it is safe to prefetch    for many of the remaining misses in CG.
+shared data in a multiprocessor with software-controlled cache co-            Another problem we observed was the large number of conflicts
+herency. This work is targeted for a block prefetch instruction,           that can occur in direct-mapped caches. These conflicts can have
+rather than the single-line prefetches considered in this paper.           a severe impact on memory performance, regardless of whether
+   Chen et al. [5] considered prefetching of non-scientific code.          prefetching is used. In the case of our algorithm, random conflicts
+They attempt to move address generation back as far as possible be-        make it even more difficult to predict the contents of the cache. For
+fore loads to hide a small cache miss latency (10 cycles). The paper       our experiments, we alleviated this problem by manually changing
+also suggested that prefetch buffers would be helpful for reducing         the alignment of some matrices in four of the applications. How-
+the effects of cache pollution. It is considerably more difficult to       ever, the burden of fixing such problems should not rest entirely on
+generate addresses early in non-scientific code where the access           the programmer.
+patterns can be very irregular. At the same time, these applications          The use of profiling feedback might also improve the accuracy of
+tend to make better use of the cache in a uniprocessor.                    our algorithm. As we mentioned earlier in Section 4.2, control-flow
+                                                                           profiling information could be used to resolve unknown iteration
+                                                                           counts. Also, techniques for profiling memory performance may
+5.2 Hardware Prefetching                                                   give the compiler more insight into the caching behavior of the
+                                                                           program. At one extreme, the exact miss rates of each reference
+While software-controlled prefetching schemes require support from
+                                                                           could be measured—however, this would require simulating the
+both hardware and software, several schemes have been proposed
+                                                                           application, which may be prohibitively expense. On the other hand,
+that are strictly hardware-based. Porterfield [23] evaluated several
+                                                                           less expensive profiling techniques may provide the compiler with
+cacheline-based hardware prefetching schemes. In some cases they
+                                                                           enough useful information, such as which loops suffer the greatest
+were quite effective at reducing miss rates, but at the same time
+                                                                           memory penalty. We are currently evaluating this tradeoff between
+they often increased memory traffic substantially. Lee [20] pro-
+                                                                           the cost of collecting profiling information and benefit offered in
+posed an elaborate lookahead scheme for prefetching in a multi-
+                                                                           terms of performance.
+processor where all shared data is uncacheable. He found that the
+effectiveness of the scheme was limited by branch prediction and by
+synchronization. Baer and Chen [2] proposed a scheme that uses a
+history buffer to detect strides. In their scheme, a “look ahead PC”       7    Conclusions
+speculatively walks through the program ahead of the normal PC
+using branch prediction. When the look ahead PC finds a match-             This paper focuses on translating the concept of prefetching into real
+ing stride entry in the table, it issues a prefetch. They evaluated        performance. Software-controlled prefetching not only incurs an
+the scheme in a memory system with a 30 cycle miss latency and             instruction overhead, but can also increase the load on the memory
+found good results.                                                        subsystem. It is important to reduce the prefetch overhead by elimi-
+   Hardware-based prefetching schemes have two main advantages             nating prefetches for data already in the cache. We have developed
+over software-based schemes: (1) they have better dynamic infor-           an algorithm that identifies those references that are likely to be
+mation, and therefore can recognize things such as unexpected cache        cache misses, and only issues prefetches for them.
+conflicts that are difficult to predict in the compiler, and (2) they do      Our experiments show that our algorithm can greatly improve
+not add any instruction overhead to issue prefetches.                      performance—for some programs by as much as a factor of two.
+   However, the hardware-based schemes have several important              We also demonstrate that our algorithm is significantly better than
+disadvantages. The primary difficulty is detecting the memory              an algorithm that prefetches indiscriminately. Our algorithm re-
+access patterns. The only case where it does reasonably well is            duces the total number of prefetches without decreasing much of
+for constant-stride accesses. However, for the types of applications       the coverage of the cache misses. Finally, our experiments show
+where constant-stride accesses are dominant, the compiler is quite         that software prefetching can complement blocking in achieving
+successful at understanding the access patterns, as we have shown.         better overall performance.
+Additionally, in the future our compiler will be able to prefetch com-        Future microprocessors, with their even faster computation rates,
+plex access patterns such as indirection which the hardware will not       must provide support for memory hierarchy optimizations. We
+be able to recognize. Hardware-based schemes also suffer from a            advocate that the architecture provide lockup-free caches and
+limited scope. Branch prediction is successful for speculating across      prefetch instructions. More complex hardware prefetching appears
+a few branches, but when memory latency is on the order of hun-            unnecessary.
+dreds of cycles, there is little hope of predicting that many branches
+correctly. Also, hardware-based schemes must be “hard-wired” into
+the processor. For a commercially available microprocessor that is
+
+
+
+
+                                                                                                                                        Page 11
+8    Acknowledgments                                                     [14] E. H. Gornish. Compile time analysis for data prefetching.
+                                                                              Master’s thesis, University of Illinois at Urbana-Champaign,
+We thank the entire SUIF compiler team for developing and sup-                December 1989.
+porting the SUIF compiler. We particularly thank Michael Wolf
+                                                                         [15] A. Gupta, J. Hennessy, K. Gharachorloo, T. Mowry, and W-D.
+for the locality optimizer, and Steve Tjiang for the scalar optimizer.
+                                                                              Weber. Comparative evaluation of latency reducing and toler-
+This research is supported by DARPA Contract N00039-91-C-0138.
+                                                                              ating techniques. In Proceedings of the 18th Annual Interna-
+Anoop Gupta is also supported by an NSF Presidential Young In-
+                                                                              tional Symposium on Computer Architecture, pages 254–263,
+vestigator Award.
+                                                                              May 1991.
+                                                                         [16] A. C. Klaiber and H. M. Levy. Architecture for software-
+References                                                                    controlled data prefetching. In Proceedings of the 18th Annual
+                                                                              International Symposium on Computer Architecture, pages 43–
+ [1] W. Abu-Sufah, D. J. Kuck, and D. H. Lawrie. Automatic                    63, May 1991.
+     program transformations for virtual memory computers. Proc.
+     of the 1979 National Computer Conference, pages 969–974,            [17] D. Kroft. Lockup-free instruction fetch/prefetch cache organi-
+     June 1979.                                                               zation. In Proceedings of the 8th Annual International Sym-
+                                                                              posium on Computer Architecture, pages 81–85, 1981.
+ [2] J-L. Baer and T-F. Chen. An effective on-chip preloading
+     scheme to reduce data access penalty. In Proceedings of Su-         [18] M. S. Lam. Software pipelining: An effective scheduling tech-
+     percomputing ’91, 1991.                                                  nique for vliw machines. In Proc. ACM SIGPLAN 88 Confer-
+                                                                              ence on Programming Language Design and Implementation,
+ [3] D. Bailey, J. Barton, T. Lasinski, and H. Simon. The NAS                 pages 318–328, June 1988.
+     Parallel Benchmarks. Technical Report RNR-91-002, NASA
+     Ames Research Center, August 1991.                                  [19] M. S. Lam, E. E. Rothberg, and M. E. Wolf. The cache perfor-
+                                                                              mance and optimizations of blocked algorithms. In Proceed-
+ [4] D. Callahan, K. Kennedy, and A. Porterfield. Software                    ings of the Fourth International Conference on Architectural
+     prefetching. In Proceedings of the Fourth International Con-             Support for Programming Languages and Operating Systems,
+     ference on Architectural Support for Programming Languages               pages 63–74, April 1991.
+     and Operating Systems, pages 40–52, April 1991.
+                                                                         [20] R. L. Lee. The Effectiveness of Caches and Data Prefetch
+ [5] W. Y. Chen, S. A. Mahlke, P. P. Chang, and W. W. Hwu.                    Buffers in Large-Scale Shared Memory Multiprocessors. PhD
+     Data access microarchitectures for superscalar processors with           thesis, Department of Computer Science, University of Illinois
+     compiler-assisted data prefetching. In Proceedings of Micro-             at Urbana-Champaign, May 1987.
+     computing 24, 1991.
+                                                                         [21] A. C. McKeller and E. G. Coffman. The organization of ma-
+ [6] R. P. Colwell, R. P. Nix, J. J. O’Donnell, D. B. Papworth,               trices and matrix operations in a paged multiprogramming en-
+     and P. K. Rodman. A vliw architecture for a trace scheduling             vironment. CACM, 12(3):153–165, 1969.
+     compiler. In Proc. Second Intl. Conf. on Architectural Support
+     for Programming Languages and Operating Systems, pages              [22] T. Mowry and A. Gupta. Tolerating latency through software-
+     180–192, Oct. 1987.                                                      controlled prefetching in shared-memory multiprocessors.
+                                                                              Journal of Parallel and Distributed Computing, 12(2):87–106,
+ [7] J. C. Dehnert, P. Y.-T. Hsu, and J. P. Bratt. Overlapped loop            1991.
+     support in the cydra 5. In Third International Conference on
+     Architectural Support for Programming Languages and Oper-           [23] A. K. Porterfield. Software Methods for Improvement of Cache
+     ating Systems (ASPLOS III), pages 26–38, April 1989.                     Performance on Supercomputer Applications. PhD thesis, De-
+                                                                              partment of Computer Science, Rice University, May 1989.
+ [8] J. Ferrante, V. Sarkar, and W. Thrash. On estimating and
+     enhancing cache effectiveness. In Fourth Workshop on Lan-           [24] B. R. Rau and C. D. Glaeser. Some Scheduling Techniques
+     guages and Compilers for Parallel Computing, Aug 1991.                   and an Easily Schedulable Horizontal Architecture for High
+                                                                              Performance Scientific Computing. In Proceedings of the 14th
+ [9] K. Gallivan, W. Jalby, U. Meier, and A. Sameh. The impact of             Annual Workshop on Microprogramming, pages 183–198, Oc-
+     hierarchical memory systems on linear algebra algorithm de-              tober 1981.
+     sign. Technical Report UIUCSRD 625, University of Illinios,
+     1987.                                                               [25] J. P. Singh, W-D. Weber, and A. Gupta. Splash: Stanford par-
+                                                                              allel applications for shared memory. Technical Report CSL-
+[10] D. Gannon and W. Jalby. The influence of memory hierarchy                TR-91-469, Stanford University, April 1991.
+     on algorithm organization: Programming FFTs on a vector
+     multiprocessor. In The Characteristics of Parallel Algorithms.      [26] M. D. Smith. Tracing with pixie. Technical Report CSL-TR-
+     MIT Press, 1987.                                                         91-497, Stanford University, November 1991.
+
+[11] D. Gannon, W. Jalby, and K. Gallivan. Strategies for cache and      [27] SPEC. The SPEC Benchmark Report. Waterside Associates,
+     local memory management by global program transformation.                Fremont, CA, January 1990.
+     Journal of Parallel and Distributed Computing, 5:587–616,
+                                                                         [28] S. W. K. Tjiang and J. L. Hennessy. Sharlit: A tool for building
+     1988.
+                                                                              optimizers. In SIGPLAN Conference on Programming Lan-
+[12] G. H. Golub and C. F. Van Loan. Matrix Computations. Johns               guage Design and Implementation, 1992.
+     Hopkins University Press, 1989.
+                                                                         [29] M. E. Wolf and M. S. Lam. A data locality optimizing
+[13] E. Gornish, E. Granston, and A. Veidenbaum. Compiler-                    algorithm. In Proceedings of the SIGPLAN ’91 Conference
+     Directed Data Prefetching in Multiprocessors with Memory                 on Programming Language Design and Implementation, pages
+     Hierarchies. In International Conference on Supercomputing,              30–44, June 1991.
+     1990.
+
+
+
+
+                                                                                                                                     Page 12
+

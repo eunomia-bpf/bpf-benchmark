@@ -141,7 +141,7 @@ worktree。
 
 文档改动：
 
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
   - 更新 x86 micro path 状态：从 “runner 未应用 pass” 改为 “path 已修复，但当前 policy miss”。
 
 ## 数据文件
@@ -257,7 +257,7 @@ insn_delta = 0
 已回看：
 
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-x86-prefetch-current-policy-micro-attribution/report.md`
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
 - 当前新增 raw result 和 bpfopt pass reports。
 
 发现和处理：

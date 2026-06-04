@@ -63,8 +63,8 @@ cargo fmt -p bpfopt --check
 
 文档和实验记录：
 
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-profile-gate-impl/report.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-profile-gate-impl/data/run-contract.json`
 
@@ -158,8 +158,8 @@ admission 规则：
 已回看：
 
 - 当前 prefetch task 文档：
-  `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
-  和 `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`。
+  `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
+  和 `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`。
 - 相关前序实验：
   `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-packet-first-deref-v3-attribution/report.md`。
 - 当前代码测试：

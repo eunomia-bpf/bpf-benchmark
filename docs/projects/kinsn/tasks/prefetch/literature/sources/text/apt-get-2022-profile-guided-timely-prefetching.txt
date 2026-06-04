@@ -1,0 +1,1169 @@
+                   APT-GET : Profile-Guided Timely Software
+                                  Prefetching
+                   Saba Jamilan                                       Tanvir Ahmed Khan                                       Grant Ayers
+     University of California, Santa Cruz                              University of Michigan                                    Google
+                    USA                                                         USA                                               USA
+             sjamilan@ucsc.edu                                           takh@umich.edu                                    granta@google.com
+
+                                                Baris Kasikci                                            Heiner Litz
+                                           University of Michigan                             University of California, Santa Cruz
+                                                    USA                                                      USA
+                                            barisk@umich.edu                                            hlitz@ucsc.edu
+Abstract                                                                                      Keywords: Software Prefetching, Compiler Analysis
+Prefetching which predicts future memory accesses and
+preloads them from main memory, is a widely-adopted tech-                                     ACM Reference Format:
+                                                                                              Saba Jamilan, Tanvir Ahmed Khan, Grant Ayers, Baris Kasikci,
+nique to overcome the processor-memory performance gap.
+                                                                                              and Heiner Litz. 2022. APT-GET : Profile-Guided Timely Software
+Unfortunately, hardware prefetchers implemented in today’s
+                                                                                              Prefetching. In Seventeenth European Conference on Computer Sys-
+processors cannot identify complex and irregular memory                                       tems (EuroSys ’22), April 5–8, 2022, RENNES, France. ACM, New
+access patterns exhibited by modern data-driven applications                                  York, NY, USA, 18 pages. https://doi.org/10.1145/3492321.3519583
+and hence developers need to rely on software prefetching
+techniques. We investigate the challenges of enabling effec-
+tive, automated software data prefetching. Our investigation
+                                                                                              1    Introduction
+reveals that the state-of-the-art compiler-based prefetching
+mechanism falls short in achieving high performance due to                                    A vast majority of today’s software runs on processors
+its static nature. Based on this insight, we design APT-GET ,                                 inspired by the Von-Neumann architecture. Consequently,
+a novel profile-guided technique that ensures prefetch time-                                  the Von-Neumann bottleneck (i.e., the processor-memory
+liness by leveraging dynamic execution time information.                                      speed gap [49, 80, 125]) is the root cause of many perfor-
+APT-GET leverages efficient hardware support such as Intel’s                                  mance problems in today’s software systems [14, 50, 62, 65,
+Last Branch Record (LBR), for collecting application execu-                                   98]. To make matters worse, the data-driven nature of mod-
+tion profiles with negligible overhead to characterize the                                    ern applications (e.g., machine learning [6, 34, 127],mobile
+execution time of loads. APT-GET then introduces a novel                                      applications [22, 24], and data analytics [23, 25, 128, 130])
+analytical model to find the optimal prefetch-distance and                                    has increased data footprints significantly, thus limiting the
+prefetch injection site based on the collected profile to enable                              ability of traditional approaches such as deeper cache/mem-
+timely prefetches. We study APT-GET in the context of 10                                      ory hierarchies or compile-time data locality optimiza-
+real-world applications and demonstrate that it achieves a                                    tions to scale and provide significant performance improve-
+speedup of up to 1.98× and of 1.30× on average. By ensur-                                     ments [14]. Consequently, widely-used modern applications
+ing prefetch timeliness, APT-GET improves the performance                                     lose more than 60% of all processor cycles due to frequent
+by 1.25× over the state-of-the-art software data prefetching                                  on-chip cache misses and the subsequently induced high
+mechanism.                                                                                    memory access latency [13, 41, 62, 113].
+                                                                                                 Prefetching—anticipating upcoming memory accesses and
+CCS Concepts: • Software and its engineering → Com-                                           loading them before their use—can hide this memory access
+pilers; • Computer systems organization → Architec-                                           latency if performed accurately and in a timely manner [48].
+tures.                                                                                        Therefore, a rich body of hardware [18, 30, 40, 59, 68, 88,
+                                                                                              95, 108, 114, 121, 122] and software [9, 32, 33, 37, 78, 83, 89–
+                                                                                              91, 116] data prefetching mechanisms have been proposed
+                                                                                              in the literature to reduce memory access latency. While
+This work is licensed under a Creative Commons Attribution International 4.0 License.         there exists an exotic range of irregular data prefetching
+                                                                                              proposals (e.g., record and replay prefetchers [118] and
+EuroSys ’22, April 5–8, 2022, RENNES, France
+                                                                                              indirect prefetchers [126]) in the computer architecture lit-
+© 2022 Copyright held by the owner/author(s).
+ACM ISBN 978-1-4503-9162-7/22/04.                                                             erature, only simple prefetchers (e.g., next-line [109] and
+https://doi.org/10.1145/3492321.3519583                                                       stride prefetchers [61]) are implemented in today’s hard-
+                                                                                              ware since complex prefetchers require impractical on-chip
+
+
+
+                                                                                        747
+EuroSys ’22, April 5–8, 2022, RENNES, France                       Saba Jamilan, Tanvir Ahmed Khan, Grant Ayers, Baris Kasikci, and Heiner Litz
+
+
+metadata storage along with significant hardware modifica-               In particular, APT-GET profiles the elapsed time between two
+tions [8, 10].                                                           instances of the same memory access instruction to deter-
+   Consequently, to avoid the memory access latency induced              mine near optimal prefetch-distance and prefetch injection
+by irregular access patterns (e.g., indirect array access of             site for the corresponding prefetch.
+the form, 𝐴[𝐵 [𝑖]]), developers must rely on software data                  We evaluate APT-GET in the context of 10 real-world,
+prefetching mechanisms [65]. Manual software prefetching                 memory-latency-bound applications. Across all applica-
+performed by programmers has shown to be cumbersome                      tions, APT-GET achieves an average execution time speedup
+and error prone as it is difficult to evaluate the efficacy of           of 1.30×. By optimizing the prefetching timeliness, APT-
+a manually inserted prefetch [76]. For irregular accesses,               GET significantly outperforms the state-of-the-art software
+memory addresses are computed by sequences of instruc-                   prefetching mechanism [9] and provides on average 1.25×
+tions (the load-slice) rendering manual prefetch injection               greater speedup.
+challenging [9]. Code changes can easily break the prefetch                 Overall, we make the following contributions:
+address computation leading to inaccurate prefetches. As                 • A thorough investigation of how existing software
+software prefetching introduces an instruction overhead,                    prefetching techniques fall significantly short of an ideal
+inaccurate prefetches can lead to a performance regression.                 data prefetcher due to lack of prefetch timeliness
+Recent work on compiler-based automatic prefetch injection               • APT-GET : A profile-guided mechanism to ensure software
+schemes [9] has addressed the challenge of generating accu-                 prefetch timeliness by identifying the optimal prefetch-
+rate prefetch-slices, however, it is still unable to address the            distance and the optimal prefetch injection site.
+memory access latency problem satisfactorily.                            • An LLVM compiler pass for automatically injecting
+   In this work, we first perform a comprehensive characteri-               prefetches that supports variable prefetch-distance and
+zation of existing automated software data prefetching mech-                prefetch injection site.
+anisms. Specifically, we investigate why the state-of-the-art            • An evaluation showing APT-GET ’s effectiveness at ensur-
+software data prefetching mechanism [9] falls significantly                 ing prefetch timeliness for several widely-used memory-
+short of an ideal (in terms of accuracy, coverage, and time-                bound applications while achieving a significant perfor-
+lines) data prefetcher. In our investigation, we find that the              mance improvement.
+existing static software-based solutions fail to prefetch mem-              As an outline for the rest of this paper, we first charac-
+ory blocks in a timely manner, thereby missing significant               terize the key challenges of automated software prefetching
+performance opportunities. In particular, prefetches gener-              in §2. Next, we describe APT-GET ’s design in §3. We then
+ated too early may be evicted from the processor’s caches                describe APT-GET ’s evaluation on real-world applications
+unused while late prefetches are unable to hide the access               and benchmarks in §4. After discussing the related work in
+latency of demand loads completely. We find that for timely              §5, we finally conclude in §6.
+prefetching, dynamic information such as the execution time
+of the optimized code is required. Unfortunately, state-of-              2   Understanding the Challenges of
+the-art software mechanisms only rely on static heuristics
+                                                                             Automated Software Prefetching
+to inject prefetch instructions and hence cannot achieve the
+full performance potential of an ideal data prefetcher.                  In this section, we investigate the performance of exist-
+   Driven by our analysis, we propose APT-GET 1 , a novel                ing automated software prefetching techniques and show
+profile-guided mechanism to ensure the timeliness of                     why they fall short of providing high performance. In
+software prefetch operations. APT-GET realizes software                  particular, we demonstrate that while existing techniques
+prefetch timeliness by effectively finding the optimal value             can achieve high accuracy and coverage, they are often
+for two key parameters: prefetch-distance and prefetch injec-            unable to generate timely prefetches. This is because existing
+tion site. We define prefetch-distance as the distance between           approaches utilize static techniques to inject prefetch instruc-
+the current memory access and a future memory access, mea-               tions without incorporating dynamic information such as
+sured in terms of the number of memory accesses. It defines              execution time. We perform this in-depth investigation using
+how far into the future we need to prefetch and it is deter-             a microbenchmark and highlight the challenges of injecting
+mined by the program execution time that elapses in between              timely prefetch instructions.
+the memory accesses. Prefetch injection site, on the other
+hand, determines the program location where the prefetch                 2.1 Methodology
+instruction is inserted. Instead of exhaustively searching               We analyze existing automated software prefetching tech-
+over all-possible values of prefetch-distance and prefetch               niques using a microbenchmark with an indirect memory
+injection site, APT-GET obtains these values through a new               access pattern as shown in Listing 1. The microbenchmark
+profiling methodology leveraging existing hardware support.              implements a two-nested loop leveraging indirect memory
+                                                                         addresses to retrieve a data value from a target array T.
+1 as an appropriate and timely (APT ) prefetch (GET )                    The inner loop furthermore executes a do_work() function
+
+
+
+                                                                   748
+ APT-GET : Profile-Guided Timely Software Prefetching                                                   EuroSys ’22, April 5–8, 2022, RENNES, France
+
+
+ 1   #define SIZE = ... ;
+ 2   int BI[SIZE]; // all values are between 0 and SIZE
+ 3   int BO[SIZE]; // all values are between 0 and SIZE
+ 4   int T[2*SIZE];
+ 5
+ 6   void mbench(int prefetch_distance, int INNER) {
+ 7      int OUTER = SIZE/INNER;
+ 8      for (int e : OUTER) {
+ 9        for (int i : INNER) {
+10            int val = T[BO[e]+BI[i]];
+11            //__builtin_prefetch((&T[BO[e]+BI[i+prefetch_distance]]));
+12            do_work(COMPLEXITY, val);
+13        }
+14      }
+15   }
+                                                                                 Figure 1. Performance impact of prefetching various dis-
+ Listing 1. Microbenchmark executing indirect memory                             tances for indirect memory accesses with 256 inner loop
+ accesses and a work function. The parameters INNER and                          iterations and varying work function complexity
+ COMPLEXITY denote the number of inner loop iterations
+ and the complexity of the work function respectively.
+                                                                                 load instruction with a prefetch instruction. The prefetch
+                                                                                 instruction’s address is computed by adding a constant
+                                                                                 prefetch-distance to the address of the original memory
+ whose work is dependent on the loaded data. We define                           access. This allows prefetching memory blocks that will be
+ two parameters to affect the behavior of the microbench-                        accessed in subsequent loop iterations. We note that the
+ mark. INNER determines the trip count [57] of the inner                         technique described above relies on static code transfor-
+ loop, while COMPLEXITY defines the time spent in the work                       mation, and it also depends on programmer-specified flags
+ function. We perform our microbenchmark analysis on an                          (e.g.,-DFETCHDIST=32) to ensure the timeliness of prefetches
+ Intel Xeon Gold 6242R CPU running at 3.10GHz (4.1GHz                            by tuning the prefetch-distance.
+ Turbo) and 768GByte of DDR4-2666 DRAM. Because the                                 Next, we show that static approaches do not generalize
+ microbenchmark is performing indirect memory accesses,                          well across a large variety of application use cases. Moreover,
+ Intel’s hardware prefetchers [115] are unable to predict the                    we also demonstrate that static techniques are unable to
+ irregular memory addresses, leaving opportunities for soft-                     realize a significant amount of the performance benefits
+ ware prefetching.                                                               offered by the optimal software prefetching mechanism that
+    We automatically inject software prefetches utilizing the                    prefetches memory blocks with near-perfect accuracy, i.e., by
+ state-of-the-art software prefetching approach [9] imple-                       covering all potential data cache misses in a timely manner.
+ mented as an LLVM compiler pass. The pass operates at the
+ intermediate representation (IR) level of LLVM and deter-                       2.2 Prefetching Timeliness
+ mines software prefetching opportunities through static code                    For the first experiment, we configure the microbenchmark
+ analysis. The pass identifies indirect memory accesses (loads)                  to utilize a loop trip count of 𝐼 𝑁 𝑁 𝐸𝑅 = 256. We choose three
+ and then performs a backward data dependency analysis uti-                      different work functions with low, medium, and high com-
+ lizing depth-first search until it finds the first loop induction               plexity. Figure 1 shows the speedup obtained by injecting
+ variable, while keeping track of all the instructions that are                  prefetches for different prefetch-distance. There are a num-
+ encountered during this search. Since load instructions are                     ber of interesting observations. First, the potential perfor-
+ located inside the loop, their memory addresses are depen-                      mance gains delivered by prefetching are significant, exceed-
+ dent on the induction variable of the loop. Therefore, we                       ing 200% for a prefetch-distance of 16 and a medium complex-
+ need to know the value of the induction variable in each loop                   ity work function. Second, choosing the optimal prefetching
+ iteration to calculate the next memory addresses of the load                    distance has a significant performance impact. Third, the
+ that we want to prefetch. We can calculate the addresses for                    optimal prefetch-distance varies between configurations and
+ the next iterations by adding the prefetch-distance to the                      depends on the complexity of the work function. In particu-
+ current induction variable. Additionally, the key difference                    lar, for the low, medium, and high complexity work functions,
+ between irregular access patterns such as in pointer chases                     the optimal prefetch-distance is 32, 16, and 4 respectively.
+ and indirect memory accesses inside loops is, that all indi-                    Existing techniques [9] utilize a static prefetch-distance and
+ rect accesses depend on the induction variable. Therefore,                      hence do not provide optimal and generalized performance
+ we need to know the induction variable value to generate                        for different applications.
+ prefetch instructions.
+    The identified instructions, which we refer to as a                          2.3 PMU Counter Study
+ load-slice, are duplicated for prefetching. This duplicated                     To provide additional insight, we perform a performance
+ load-slice is then transformed by replacing the original                        analysis with the tool, perf stat [43, 71]. We analyze
+
+
+
+                                                                           749
+EuroSys ’22, April 5–8, 2022, RENNES, France                     Saba Jamilan, Tanvir Ahmed Khan, Grant Ayers, Baris Kasikci, and Heiner Litz
+
+
+Table 1. Prefetch accuracy and timeliness depending on the
+prefetch-distance
+
+      Prefetch     IPC    Prefetch Accuracy    Late Prefetch
+      None         0.33           0%                0%
+      Dist-1       0.42          72%                95%
+      Dist-64      0.73          70%                1%
+      Dist-1024    0.29           3%                0%
+
+
+
+the performance of the microbenchmark choosing a low                   Figure 2. Performance impact of prefetch-distance for indi-
+work complexity and 𝐼 𝑁 𝑁 𝐸𝑅 = 256 while varying the                   rect memory access kernel with low work function complex-
+prefetching distance between 0, 1, 64, and 1024. Table 1               ity and varying inner loop trip count
+shows the instructions per cycle (IPC) performance as
+well as the prefetch accuracy which is defined as the                  2.4 Prefetch Injection Site
+number of prefetches (offcore_requests.all_data_rd-
+offcore_requests.demand_data_rd) divided by the num-                   Table 1 showed that for a too-large prefetch-distance,
+ber of all loads (offcore_requests.all_data_rd). As can                prefetches are no longer accurate (nor timely) and hence
+be seen, as soon as prefetching is enabled with a prefetch-            may lead to a performance regression. Figure 2 shows the
+distance of 1 or 64, 70% of all demand loads are effectively           prefetching performance for the microbenchmark using low
+prefetched, proving that automated injection passes are effec-         work function complexity while varying the loop trip count
+tive in determining the correct addresses to prefetch. How-            between 4, 16, and 64. It can be seen that for a loop trip count
+ever, when the distance (1024) exceeds the loop trip count,            of 4, prefetching is no longer beneficial while for trip counts
+prefetches are no longer accurate, since most of them are too          of 16 and 64 improvements are moderate and furthermore
+early prefetches. Therefore, prefetches which are generated            require a small prefetch-distance. Existing static prefetch
+by using a very large prefetch-distance, can be evicted from           injection techniques offer no flexibility besides injecting
+the cache before they are used while displacing other useful           prefetches in the inner loop as they possess no information
+data.                                                                  about the optimal prefetch injection site. To enable significant
+                                                                       prefetching performance gains in cases where the loop trip
+   Observation: PMU counters reveal that for a range                   count is small, a prefetching mechanism should also be able
+   of prefetch-distance, a significant fraction of demand              to evaluate additional prefetch injection sites such as the
+   loads can be correctly prefetched using automatic                   outer loop based on dynamic profiling information.
+   prefetch injection.
+                                                                          Observation: Choosing the prefetch injection site
+   Insight: Static prefetch injection is sufficient to enable
+                                                                          statically for example by always injecting prefetches
+   high prefetching coverage and accuracy.
+                                                                          into the inner loop does not provide significant perfor-
+  Column 4 of Table 1 shows the late prefetch ratio                       mance gains for loops with low trip counts.
+which is defined as the number of demand loads hitting                    Insight: Dynamic techniques are required to determine
+a prefetch residing in the fill buffer (FB) of the proces-                the optimal injection site of a prefetch.
+sor (LOAD_HIT_PRE.SW_PF). Processors utilize fill buffers or
+miss status hold registers to coalesce multiple loads to the           2.5 Static Techniques to Infer Execution Time
+same cache line into a single memory access. The occur-
+                                                                       Static compile-time techniques can, in principle, predict
+rence of this event means that a demand load was correctly
+                                                                       the execution time of input-independent loops by count-
+prefetched, however, that the prefetch was issued too late.
+                                                                       ing the number of instructions and by leveraging cost mod-
+As the prefetched cache line has not yet been retrieved from
+                                                                       els [27, 44, 123] to infer the cost of each instruction. However,
+memory, the demand load needs to stall until the prefetch
+                                                                       due to the complexity of contemporary microprocessors,
+has been completed.
+                                                                       cost models show limited accuracy [36]. The state-of-the-art
+   Observation: For small prefetching distances, proces-               static techniques [4, 29, 58, 73, 74, 87, 103] incur 9-36% aver-
+   sors exhibit many events where a demand load hits a                 age errors while predicting the execution time of basic blocks
+   corresponding prefetch in the fill buffer.                          even under the assumption that all memory access times are
+   Insight: Static prefetching techniques are unable to                constant and well-known [36]. Moreover, these cost models
+   consistently achieve timely prefetches, thus dynamic pro-           have to be well maintained and frequently updated when
+   filing information is required.                                     the hardware changes [58]. For instance, as modern super-
+                                                                       scalar processors are deeply pipelined executing multiple
+
+
+
+                                                                 750
+APT-GET : Profile-Guided Timely Software Prefetching                                              EuroSys ’22, April 5–8, 2022, RENNES, France
+
+
+instructions simultaneously, the cycle-per-instruction (CPI)                   PC     OE    IE    IE     OE     IE     IE      IE    OE
+of a particular instruction is not fixed, but instead, it depends            Target   OS    IS    IS     OS     IS     IS      IS    OS
+on its data and control flow dependencies. Furthermore, the                   Time    4     9     11     13     19     21     24      26
+average memory access time of a load is significantly affected
+by its locality and cache-ability which is generally unknown              Figure 3. Schematic view of the Intel CPU’s Last Branch
+at compile time. Lastly, in the presence of input-dependent               Record (LBR) highlighting the outer loop branches in blue,
+code, static techniques cannot predict the execution time.                the inner loop branches in orange and the cycle times of
+For these reasons, we propose a dynamic profile-guided tech-              each branch in green
+nique to predict the execution time of loops enabling us to
+infer the elapsed time between two instances of the same
+load instruction.
+                                                                          iteration. For instance, as shown in the analysis section
+                                                                          (§2), we need to determine the elapsed time between two
+3    Design of APT-GET                                                    instances of the same load instruction for computing the
+Our analysis shows that the prefetch timeliness, both in                  optimal prefetch-distance. The loop latency (execution time)
+terms of the prefetch-distance and the prefetch injection                 is hereby defined by two components: the instruction compo-
+site, significantly affects the effectiveness of automated soft-          nent (IC) and the memory component (MC). The instruction
+ware prefetching mechanisms in achieving predictable high-                component includes all (non-load) instructions implement-
+performance gains across different applications. While a                  ing the loop. The latency of this component, IC_latency
+complete design space exploration can identify the best con-              depends on the number of instructions and their data and
+figuration, performing such an exhaustive search over all                 control flow dependencies. However, frequently in practice,
+prefetch-distances and prefetch injection sites is infeasible             IC_latency does not differ significantly across different loop
+in large-scale real-world software systems. Hence, we pro-                iterations. Moreover, this latency is constant even in the pres-
+pose APT-GET , a novel profile-guided mechanism to iden-                  ence of optimal prefetching. The memory component, on the
+tify the optimal prefetch-distance and the optimal prefetch               other hand, includes the loads causing frequent cache misses.
+injection site using only a single profiling run to capture               Therefore, the latency of this component, MC_latency is
+the dynamic behavior of an application. Specifically, APT-                determined by the level within the memory hierarchy that
+GET employs efficient hardware support (Intel’s LBR [70])                 serves the load. As the L1 cache access latency (4 cycles) dif-
+to collect the application profile with negligible overhead               fers significantly from the DRAM access latency (hundreds of
+(§3.1). As widely-used profile-guided code layout optimiza-               cycles), MC_latency is highly variable. Our prefetching tech-
+tion techniques [31, 52, 66, 96, 97] already collect similar              nique captures this variance to identify the optimal prefetch-
+program execution profiles in production, APT-GET can be                  distance. To determine the optimal prefetch-distance, we
+seamlessly integrated into existing systems. Based on this                need to learn the latency of both the instruction and mem-
+profile, APT-GET applies a novel analytical technique to                  ory component, so that:
+find both the optimal prefetch-distance (§3.2) and the opti-
+mal prefetch injection site (§3.3). Without LBR, APT-GET                        𝐼𝐶_𝑙𝑎𝑡𝑒𝑛𝑐𝑦 × 𝑝𝑟𝑒 𝑓 𝑒𝑡𝑐ℎ_𝑑𝑖𝑠𝑡𝑎𝑛𝑐𝑒 = 𝑀𝐶_𝑙𝑎𝑡𝑒𝑛𝑐𝑦              (1)
+lacks the dynamic information needed to improve prefetch
+                                                                          If Equation (1) holds then the MC_latency can be hidden with
+timeliness. While it may be possible to estimate loop exe-                prefetching. To separate the IC_latency from the MC_latency,
+cution times with software techniques [86], LBR provides                  it is insufficient to measure the average time between two
+the most accurate results with the lowest overheads. Apart                instances of a load. Instead, we need to predict the execution
+from Intel processors, AMD processors support branch sam-                 time of a loop in the absence of cache misses deriving the
+pling [47] and future ARM processors will implement the
+                                                                          optimal prefetch distance.
+Branch Record Buffer Extension (BRBE) [99], which can be
+                                                                             To enable the load characterization outlined above, we
+used as an alternative to LBR. Finally, APT-GET revises exist-            leverage the Last Branch Record (LBR) feature offered by
+ing compiler-based prefetching mechanisms to incorporate                  Intel CPUs [70]. The LBR is a buffer that holds several key
+these optimal prefetch configurations to ensure the timeli-               pieces of information about the last 32 basic blocks (BBL)
+ness of prefetch operations (§3.5).                                       executed by the CPU. A basic block is defined as a sequence
+                                                                          of consecutive instructions that was terminated by a taken
+3.1 Profile Collection                                                    branch. Hence, when APT-GET collects hardware perfor-
+Enabling timely prefetches requires a detailed character-                 mance event samples with the LBR feature enabled, the
+ization of the corresponding demand loads. This charac-                   collected profile includes LBR entries for the last 32 taken
+terization includes the hit/miss ratio and the performance                branches immediately preceding the instruction that triggers
+impact of the load, the trip count of the loop containing the             the performance event. We show an example schematic view
+load instruction, and the execution time of a single loop                 of the multiple LBR entries in Figure 3.
+
+
+
+                                                                    751
+EuroSys ’22, April 5–8, 2022, RENNES, France                      Saba Jamilan, Tanvir Ahmed Khan, Grant Ayers, Baris Kasikci, and Heiner Litz
+
+
+   As we show in Figure 3, each LBR entry contains the
+program counter (PC) of a taken branch, the target of the
+branch, and the CPU cycle when the branch was executed. By
+finding two instances of the same branch PC implementing a
+loop and subtracting their cycle counts, we can compute the
+execution time of a loop iteration. As a specific demand load
+instruction exists exactly once for a single loop iteration,
+this enables us to compute the elapsed time between two
+instances of the same load instruction. In the case of a nested
+loop, if we know the branch PC corresponding to the outer
+loop and the branch PC corresponding to the inner loop,
+we can count the number of inner branch PCs within two
+outer branch PCs in the LBR to compute the number of inner
+loop iterations. For instance, in Figure 3, the average loop
+execution time of I is 2.2 and the average loop trip count of
+I is 2.5.
+                                                                        Figure 4. Distribution of a loop’s execution time containing
+                                                                        a delinquent load [39] in terms of CPU cycles measured using
+3.2 Determining the Optimal Prefetch Distance                           LBR samples
+As we describe in §3.1, measuring the average loop iteration
+time is insufficient for determining the optimal prefetch-              being served from different levels of the memory hierar-
+distance. In particular, we need to predict the loop’s instruc-         chy such as the L1, L2, LLC, and DRAM. From this data
+tion component (IC) execution time under the assumption                 we derive that 𝐼𝐶_𝑙𝑎𝑡𝑒𝑛𝑐𝑦 = 80 cycles and 𝑀𝐶_𝑙𝑎𝑡𝑒𝑛𝑐𝑦 =
+that memory blocks corresponding to all memory accesses                 650−𝐼𝐶_𝑙𝑎𝑡𝑒𝑛𝑐𝑦 = 570 cycles. According to Equation (1) this
+have already been prefetched and that they can be served                allows us to compute the 𝑝𝑟𝑒 𝑓 𝑒𝑡𝑐ℎ_𝑑𝑖𝑠𝑡𝑎𝑛𝑐𝑒 = 570/80 ≈ 7.
+with low latency. During the profiling step of our technique,
+we have not injected any prefetches yet and hence this infor-           3.3 Finding the Optimal Prefetch Injection Site
+mation is unavailable. To address this challenge, we profile            As we demonstrate in §2.4, when loops have low trip counts
+the latency distribution of delinquent loads (loads that cause          and low execution time per iteration, prefetch instructions
+frequent LLC misses) [39], instead of solely measuring their            inserted in the inner loop could not provide any performance
+average memory access time, resulting in the following appli-           benefit. We extend APT-GET ’s LBR-based analytical tech-
+cation profiling technique.                                             nique described in §3.2 to identify such inner loops and inject
+   First, we capture delinquent load PCs that induce frequent           prefetch instructions into the outer loop instead of the inner
+Last Level Cache (LLC) misses utilizing precise event-based             loop. This optimization enables APT-GET to prefetch ahead
+sampling (PEBS) [71, 119]. Second, we capture LBR samples               and improve prefetch timeliness. To determine whether to
+at the default frequency of once per millisecond while exe-             inject prefetches in the outer or inner loop, APT-GET ana-
+cuting the application. Third, we search all LBR samples that           lyzes the recorded LBR samples and determines the average
+contain a delinquent load PC. In particular, the load PC must           trip count of the inner loop (e.g., 2.2 in the example shown
+be greater or equal to the start PC of a BBL and smaller than           in Figure 3). Then, APT-GET injects prefetch instructions
+the terminating branch PC of the BBL (as provided by PC                 into the outer loop instead of in the inner loop only if the
+and target information of two consecutive branch entries in             following equation holds.
+the LBR). Fourth, for all LBR samples that contain at least
+two instances of the BBL containing the delinquent load, we                     𝑙𝑜𝑜𝑝_𝑡𝑟𝑖𝑝_𝑐𝑜𝑢𝑛𝑡 × 𝑘 < 𝑝𝑟𝑒 𝑓 𝑒𝑡𝑐ℎ_𝑑𝑖𝑠𝑡𝑎𝑛𝑐𝑒                 (2)
+measure the loop execution time by subtracting the cycle                  In Equation 2, 𝑘 represents a constant and APT-GET deter-
+counts of the two subsequent branches. Fifth, we analyze the            mines its value based on the loop characteristics. Every loop,
+latency distribution of the loop’s execution time to predict            where prefetch instructions are injected, contains a prologue
+the latency in the case that the load is served from the L1 or          and epilogue of size prefetch-distance (in iterations) in which
+L2 cache.                                                               prefetching does not occur. No prefetches are executed for
+   Figure 4 shows a distribution plot of the execution time             the loads in the prologue and the prefetches performed in
+of a loop containing the delinquent load PC as used in the              the epilogue will not match any corresponding demand load.
+graph benchmarks evaluated in (§4). The plot shows four                 As a result, if we want to prefetch 80% of all demand loads,
+peaks at around 80, 230, 400, and 650 cycles. As the execu-             the value of 𝑘 needs to be 5. If APT-GET determines to inject
+tion time of non-load instructions is relatively stable across          prefetches in the outer loop, the prefetch-distance will be
+loop iterations, we posit that these peaks are caused by loads          computed on the execution latency distribution of the outer
+
+
+
+                                                                  752
+APT-GET : Profile-Guided Timely Software Prefetching                                                EuroSys ’22, April 5–8, 2022, RENNES, France
+
+
+loop as described in Section 3.2. To implement prefetching
+in the outer loop, we extend our LLVM pass to extract the                Algorithm 2. An overview of proposed profile-guided
+load-slice in the inner loop and replicate it into the outer             LLVM pass for software prefetching
+loop. Furthermore, the induction variable of the outer loop              1   // REQUIRE input profiling file
+                                                                         2   bool AutoFDOMapping;
+which is considered a constant from the perspective of the               3   doInitialization(Module &M){
+inner loop (and the extracted load-slice), needs to be multi-            4     for (F: M):
+                                                                         5       if(SamplesFound):
+plied with the prefetch-distance to form the final prefetching           6          AutoFDOMapping=true;
+instruction sequence. Next, we provide APT-GET ’s further                7   }
+                                                                         8   runOnFunction(Function &F) {
+implementation details.                                                  9     modified = false;
+                                                                        10     //vectors to keep candidate loads and their
+                                                                        11     //prefetch-distance for emitting prefetches
+3.4 Automated Profiling Methodology                                     12     SmallVector<Instruction*,30> prefetches;
+                                                                        13     SmallVector<Instruction*,30> prefetchDists;
+APT-GET performs a fully automated approach consisting                  14     if(AutoFDOMapping):
+                                                                        15
+of the following steps to generate timely software prefetch             16
+                                                                                  //Map the PC to the correct load instruction
+                                                                                  //inside the IR
+instructions. First, APT-GET utilizes perf record [43, 71]              17        for(curLoad: BBL):
+                                                                        18
+to detect frequent cache miss inducing loads and derives the            19
+                                                                                     HintsFound =FoundHints(curLoad,SamplesFound);
+                                                                                     if(HintsFound):
+start PCs of their basic blocks. Second, APT-GET captures               20              for(S: HintsFound)
+                                                                        21
+application’s LBR profiles and filters them for the PCs deter-          22
+                                                                                          prefechDist = S.second;
+                                                                                          if(SearchAlgorithm(curLoad, SetOfPhiNodes,
+mined in the previous step. To compute prefetch-distance                                        SetOfPhiLoads, SetOfInstrs)):
+                                                                        23
+and prefetch injection site, APT-GET extracts the average               24
+                                                                                             prefetches.push_back(curLoad);
+                                                                                             prefetchDists.push_back(prefechDist);
+loop trip count by counting the number of consecutive inner             25        for(p: prefetches):
+                                                                        26
+loop PCs in the LBR record. It furthermore, computes the                27
+                                                                                     if(SetOfPhiNodes[p].size()>1):
+                                                                                        //The load is located inside a nested
+average iteration execution time from the cycle counts in               28              //loops
+                                                                        29
+the LBR record. Therefore, APT-GET obtains the peaks in                 30
+                                                                                         if(InjectPrefechesMorePhis(p, prefechDists[p])):
+                                                                                              modified =true;
+the scatter plot as they represent the execution time of the            31           else:
+                                                                        32
+BBL when the delinquent load PC is served from a level in               33
+                                                                                        //The load is located inside a single
+                                                                                         //loop
+the memory hierarchy. For detecting the peaks inside the                34               if(InjectPrefechesOnePhi(p, prefechDists[p])):
+                                                                        35
+plot automatically, APT-GET uses find_peaks_cwt [2, 45]                 36      else:
+                                                                                              modified =true;
+
+of scipy.signal [1], which performs a continuous wavelet                37       //Search BBLs statically to emit prefetches
+                                                                        38
+transform algorithm to find the location of the peaks. The              39
+                                                                                 //for all indirect memory patterns
+                                                                                return modified;
+result of our automated approach is a list of delinquent load           40   }
+PCs with their corresponding prefetch-distance and prefetch
+injection site which can be consumed by the LLVM software
+prefetching pass.
+                                                                         to capture all load instructions with indirect memory access
+                                                                         patterns for generating prefetch-slices.
+3.5 LLVM Prefetch Injection Pass                                            If there exists an AutoFDO mapping for a function con-
+We implement a function level LLVM pass that detects indi-               taining a delinquent load PC (line 14-35), the algorithm tra-
+rect memory access patterns inside the IR of an application              verses the BBLs inside the function to capture the delinquent
+and injects prefetching kernels based on the generated list              load PCs identified inside the LBR sample. In Line 18, the
+of delinquent loads. To convert a delinquent load PC to an               FoundHints function compares the debugging location of
+instruction in the IR, APT-GET utilizes AutoFDO’s [31] capa-             each load instruction inside the BBLs with the profiling infor-
+bility of converting arbitrary PCs into lines of code in the             mation in the sample to find the precise delinquent Load PC’s
+IR. Algorithm 2 describes an overview of our implemented                 location. When a delinquent load PC is found inside the IR
+LLVM pass for software prefetching of indirect memory                    the algorithm reads the sample to capture the corresponding
+access patterns. During the initialization of our algorithm,             calculated prefetch-distance from LBR analysis for the load
+Lines 3-7, it scans through every function in the module                 instruction (lines 18-20).
+and checks whether there are samples related to functions                   In Lines 22-24, the algorithm calls the SearchAlgorithm
+inside the application IR or not. If it finds at least one sam-          function, which is a load slice search function similar
+ple, we can use the input profile to find precisely the delin-           to Depth-First Search (DFS) algorithm proposed by
+quent load PC inside the IR. In this case, the algorithm sets            Ainsworth & Jones [9]. This function extracts the load slices
+AutoFDOMapping variable to True. If the algorithm doesn’t                of the load instructions by performing a backward data
+find any sample during initialization, Lines 35-38, it performs          dependency analysis while tracking all instructions that form
+the same static searching scheme as proposed by Ainsworth                the load slice. The search terminates when all loop induc-
+& Jones [9] to traverse through all BBLs inside each function            tion variables (PHINode), that the load is dependent have
+
+
+
+                                                                  753
+EuroSys ’22, April 5–8, 2022, RENNES, France                         Saba Jamilan, Tanvir Ahmed Khan, Grant Ayers, Baris Kasikci, and Heiner Litz
+
+
+been found. We extend Ainsworth & Jones’s algorithm by                      1   for.body1:
+continuing to search for backward-dependent instructions                    2     %iv1 = phi i64
+                                                                            3
+after the first induction variable is found for the purpose                 4
+                                                                                  %1 = getelementptr inbounds i32, i32* %BO, i64 %iv1
+                                                                                  [....]
+of enabling outer-loop prefetch injection. In particular, we                5   for.body2: ; preds = %for.body1
+                                                                            6
+explore the previous BBL and if the two BBLs implement                      7
+                                                                                  %iv2 = phi i64
+                                                                                  %2 = load i32, i32* %1
+a nested loop, we determine the induction variable of the                   8     %3 = getelementptr inbounds i32, i32* %BI, i64 %v2
+                                                                            9
+outer loop by extending the prefetch slice to contain both                 10
+                                                                                  %4 = load i32, i32* %3
+                                                                                  %5 = add i32 %2, %4
+induction variables enabling injection into both the inner                 11     %6 = sext i32 %5 to i64
+                                                                           12
+and/or outer loop.                                                         13
+                                                                                  %7 = getelementptr inbounds i32, i32* %T, i64 %6
+                                                                                  %8 = load i32, i32* %7
+   After capturing load slices determined by the PHINodes                  14     [....]
+of delinquent load instructions (lines 25-35), the algorithm
+                                                                            Listing 3. The simplified LLVM’s IR-level representation of
+executes the corresponding prefetching function to inject the
+                                                                            the microbenchmark 1 before injecting the prefetch slice
+prefetch-slice into the IR of the application. If the number of
+captured PHINodes for a delinquent load PC is more than one,
+it means that the load is located inside a nested loop and algo-
+rithm calls the InjectPrefechesMorePhis function, other-                    1   for.body1:
+                                                                            2
+wise, the algorithm calls the InjectPrefechesOnePhi func-                   3
+                                                                                  %iv1 = phi i64
+                                                                                  %1 = getelementptr inbounds i32, i32* %BO, i64 %iv1
+tion for inserting the slice. For generating the prefetch slice,            4     [....]
+                                                                            5
+the captured load slice is replicated while replacing the delin-            6
+                                                                                for.body2: ; preds = %for.body1
+                                                                                  %iv2 = phi i64
+quent load instruction with a prefetch instruction and adding               7     %2 = load i32, i32* %1
+                                                                            8
+the calculated prefetch-distance from LBR analysis to the                   9
+                                                                                  %3 = getelementptr inbounds i32, i32* %BI, i64 %v2
+                                                                                  %4 = load i32, i32* %3
+BBL induction variable.                                                    10     %5 = add i32 %2, %4
+                                                                           11
+   Listing 3 illustrates the simplified IR representation of               12
+                                                                                  %6 = sext i32 %5 to i64
+                                                                                  %7 = getelementptr inbounds i32, i32* %T, i64 %6
+the nested loop with an indirect memory access pattern as                  13     %9 = add i64 %iv2, prefetch_distance
+shown in the microbenchmark code 1.The indirect pattern                    14     %10 = icmp slt i64 %INNER, %9
+                                                                           15
+load is located in line 13 and is dependent on the instructions                   %11 = select %10, i64 %INNER, i64 %9
+                                                                           16     %12 = getelementptr inbounds i32, i32* %BI, i64 %11
+in lines 7-12 as well as on the inner loop induction variable              17     %13 = load i32, i32* %12
+%iv2 in line 6. It is also dependent on the outer loop induc-              18     %14 = add i32 %2, %13
+tion variable %iv1 in line 2 and the instruction in line3. For             19     %15 = sext i32 %14 to i64
+this code, we can inject the prefetch instructions inside the              20     %16 = getelementptr inbounds i32, i32* %T, i64 %15
+                                                                           21
+inner loop for the indirect pattern load by replicating lines                     %17 = bitcast i32* %16 to i8*
+                                                                           22     call void @llvm.prefetch.p0i8(i8* %17, i32 0, i32 3, i32 1)
+2-7. In this case the outer loop induction variable %iv1 is                23     %8 = load i32, i32* %7
+considered a constant for all executions of the inner loop.                24     [....]
+The highlighted lines, line 13-21, in Listing 4 illustrates the IR          Listing 4. The simplified LLVM’s IR-level representation
+representation of the microbenchmark 1 after injecting the                  of the microbenchmark 1 after injecting the prefetch slice
+prefetch slice for the indirect pattern load inside the inner               inside the inner loop
+loop. In line 9, the calculated prefetch-distance value by APT-
+GET is added to the inner loop induction variable, %iv2, to
+generate timely prefetch instructions. If we want to inject
+prefetches into the outer loop, %iv1 is no longer considered                add support for multiple and complex exit conditions to break
+a constant, hence, we need to extend our prefetch-slice by                  out of a loop such as for(i:K){if(cond(i)) break;}.
+following dependencies across the inner BBL including %iv1.
+Note that, from the outer loop perspective, the inner loop                  3.6 Limitations of APT-GET
+induction variable %iv2 is unknown (it depends on the inner                 Our proposed technique has a number of limitations. How-
+loop iteration). As a result, we assign %iv2 to 0, line 6, so that          ever, none of these limitations has shown to be a significant
+only the first inner loop iteration is prefetched in the outer              issue in practice. The first two limitations are due to the
+loop. To improve coverage, we can emit multiple prefetches                  limited size of the LBR containing only 32 entries on our sys-
+where %iv2 is swept from 0 to the average number of inner                   tem. In the case of a two-nested loop, where the inner loop
+loop iterations as observed in §2 using LBR-based profile.                  containing the delinquent load has a high loop trip count,
+   To further generalize our technique, our pass introduces                 LBR samples will only contain the branch PC implementing
+the capability for detecting indirect pattern loads that have               the inner loop. As a result, we cannot measure the outer loop
+non-canonical-type induction variables. In particular, our                  latency. This is not a real problem because with high loop
+pass supports arbitrary computation on the loop induction                   trip counts we can always prefetch in the inner loop and do
+variable such as i*=2 instead of just allowing i++. We also                 not have to revert to outer loop prefetch injection.
+
+
+
+                                                                     754
+APT-GET : Profile-Guided Timely Software Prefetching                                                EuroSys ’22, April 5–8, 2022, RENNES, France
+
+
+   Another potential scenario limiting APT-GET ’s effective-                             Table 3. The list of real-applications
+ness can occur when the inner loop containing the delin-
+quent load also contain 32 other taken branches. Conse-                           App                         Description
+quently, LBR samples contain the inner loop branch PC only                                              Searches a target vertex
+                                                                                  BFS
+once prohibiting latency measurements. In this case, the loop                                        given a start node in a graph
+                                                                                                        Searches a target vertex
+execution time is generally high enough so that a default
+                                                                                  DFS           by performing a depth-first traversal
+prefetch-distance of one is sufficient.                                                                    given a start node
+   Lastly, if the execution time of a loop is input data-                         PR               Computes ranking of web-pages
+dependent, we need to re-profile the application for each                                      A measure of centrality computed by
+input. This means that in contrast to static compile-time tech-                   BC           finding all the shortest paths between
+niques, APT-GET also allows optimizing input-dependent                                                         all vertices
+code. We believe re-profiling is feasible in this case, especially                                   Computes the shortest path
+                                                                                  SSSP
+in the data center setting where profile-guided optimization                                     to all vertices given a source vertex
+techniques have been most successful [15, 64–67, 79, 96, 112]                     IS              Bucket sorting of random integers
+and where applications are compiled and released at high                          CG                sparse matrix multiplications
+cadence. Furthermore, AutoFDO [31] has shown that even                                                    Measuring memory
+                                                                                  RandAcc
+                                                                                                          system performance
+stale profiles enable PGO techniques to provide good perfor-
+                                                                                  HJ2/HJ8         Represents a database application
+mance as data inputs tend to change slowly over the course
+                                                                                                          Breadth-first search
+of multiple weeks.                                                                Graph500
+                                                                                                        on an undirected graph
+
+4    Evaluation                                                                          Table 4. Graph data-sets properties
+In this section, we describe the software infrastructure, test
+setups, real world benchmarks and data sets that we use to                         Data-set Name             #Vertices      #Edges
+evaluate APT-GET .                                                                 web-Google (WG)            875,713      5,105,039
+                                                                                   p2p-Gnutella31 (P2P)       62,586        147,892
+4.1 Experimental Setup                                                             roadNet-CA (CA)           1,965,206     2,766,607
+The techniques described in Section 3 are implemented as                           roadNet-PA (PA)           1,088,092     1,541,898
+a function level LLVM pass [72] that is available at [5].                          loc-Brightkite (LBE)       58,228        214,078
+We utilize the Clang compiler, version 10.0, on Ubuntu                             web-BerkStan (WB)          685,230      7,600,595
+Linux 20.04 with kernel version 5.4 to apply the pass on                           web-NotreDame (WN)         325,729      1,497,134
+the IR representation of the applications. We enable the high-                     web-Stanford (WS)          281,903      2,312,497
+est compiler-level optimizations (-O3). We use (-gmlt) and
+(-fdebug-info-for-profiling) to emit debugging infor-                      4.2 Methodology
+mation for identifying delinquent load PCs inside the pass [3].
+                                                                           Our proposed technique is generic and automated; hence it
+We compare APT-GET against a no-prefetching baseline and
+                                                                           can in principle be applied to any application that is perfor-
+against the static prefetch injection technique Ainsworth
+                                                                           mance limited by LLC cache misses. For evaluating APT-GET ,
+& Jones [9]. We execute each experiment three times and
+                                                                           we examine ten real-world, memory-bound applications as
+utilize perf stat [43, 71] to obtain the results presented
+                                                                           described in Table 3. In accordance with prior work [9],
+in this section. The machine configuration of the evaluated
+                                                                           applications were selected for exhibiting indirect memory
+system is described in Table 2.
+                                                                           accesses located inside loops (including nested loops) as
+                                                                           hardware prefetchers do not handle those. Figure 5 shows
+             Table 2. The Machine Configuration                            how much the selected applications are bounded by the L3
+                                                                           cache and DRAM. In particular, we evaluated graph full pro-
+        Component                   Parameters                             grams including breadth-first search (BFS), depth-first
+                          Intel(R) Xeon(R) Gold 5218 CPU                   search (DFS), pageRank (PR), betweenness centrality
+        Core
+                             @2.30GHz (3.9GHz Turbo)                       (BC), and single-source shortest path algorithm (SSSP)
+        L1 I/D Cache                 64KiB/core                            from the CRONO benchmark suite [7]. Traversing graph
+        L2 Cache                     1MiB/core
+                                                                           data structures frequently requires executing indirect mem-
+        LLC                         22MiB shared
+                                                                           ory access patterns inside a nested loop where the loop
+                                    DIMM DDR4
+        Main Memory         capacity: 32GiB, channels: 6,                  trip counts depends on the number of graph vertices or
+                                     @2666MHz                              edges. For running these applications, we use both real-world
+                                                                           graph data-sets from the Stanford Network Analysis Plat-
+                                                                           form (SNAP) [77] as well as synthetic graphs that exhibit
+
+
+
+                                                                     755
+EuroSys ’22, April 5–8, 2022, RENNES, France                       Saba Jamilan, Tanvir Ahmed Khan, Grant Ayers, Baris Kasikci, and Heiner Litz
+
+
+                                                                         4.3 Performance Improvement
+                                                                         Figure 6 shows the execution time speedup of APT-GET
+                                                                         and Ainsworth & Jones [9] across all benchmarks over the
+                                                                         no-prefetching baseline. Ainsworth & Jones utilizes a static
+                                                                         prefetch-distance and, furthermore, is limited to injecting
+                                                                         prefetches into the inner loop. As can be seen, APT-GET pro-
+                                                                         vides a maximum speedup of 1.98× for HJ8 and BFS and an
+                                                                         average speedup of 1.30× over the baseline while Ainsworth
+                                                                         & Jones only provides gains for few applications resulting
+                                                                         in an average speedup of 1.04×. We calculate the average
+                                                                         speedup values by using the geometric mean. Except for the
+                                                                         CG benchmark, APT-GET improves performance for all appli-
+                                                                         cations whereas Ainsworth & Jones shows a performance
+                                                                         regression for BC. This shows that injecting prefetches with
+                                                                         non-optimal prefetch-distance and prefetch injection site can
+                                                                         reduce performance due to the injected instruction overhead.
+Figure 5. The percentage of L3/DRAM stalls is obtained for
+each application’s non-prefetching baseline. On average, the             4.4 Cache Miss Reduction
+performance of selected applications is 49.37% bounded by                In Figure 7 we show the cache miss reduction
+the memory system.                                                       enabled by APT-GET measured in misses per kilo
+                                                                         instructions (MPKI). We measure misses utilizing the
+                                                                         offcore_requests.demand_data_rd PMU counter and
+                                                                         compare against the non-prefetching baseline. Note that
+a sufficiently large number of vertices and edges per ver-
+                                                                         demand loads that hit a prefetch to the same address in the
+tex to induce high Misses Per Kilo Instructions (MPKI) in
+                                                                         fill buffer are counted as a cache miss. In average, APT-GET
+the Last Level Cache (LLC) for the non-prefetching base-
+                                                                         reduces cache misses by 65.4%, while Ainsworth & Jones
+line configuration. The utilized graph data sets are shown in
+                                                                         reduces cache misses by 48.3% and MPKI improvements are
+Table 4.
+                                                                         most significant where APT-GET also provides the highest
+   We evaluate additional applications including Integer
+                                                                         execution time benefits. We leave analyzing the interplay of
+Sort (IS) and Conjugate Gradient (CG) applications from
+                                                                         hardware and software prefetches for future work. While
+the NAS parallel benchmark suite [16]. The integer sort algo-
+                                                                         for BC with 50K nodes and degree of 8, Ainsworth &
+rithm induces indirect memory access patterns during the
+                                                                         Jones reduces cache misses over APT-GET it also injects
+bucket sorting process of random integers inside an array. For
+                                                                         significantly more instructions as we will show in Figure 11
+evaluating IS we set the number of the iterations to 25 using
+                                                                         explaining the higher execution time improvement of
+two different problem sizes, Class B and Class C. The CG
+                                                                         APT-GET . To provide further insights, in the following
+benchmark executes sparse matrix multiplications generat-
+                                                                         sections, we evaluate the individual techniques of APT-GET .
+ing irregular indirect memory accesses for traversing vectors
+in the compressed sparse row (CSR) format. We also evaluate
+                                                                         4.5 Effectiveness of the LBR Profiling
+the RandomAccess (randAccess) benchmark from HPC
+Challenge Benchmark Suite[85] which randomly updates                     We first evaluate the effectiveness of our LBR profiling tech-
+elements of a large table to compute the giga updates per                nique to determine the optimal prefetch-distance. Therefore,
+second (GUPS) memory system performance. We utilize a                    we execute all benchmarks with the following 8 different
+table size of 1GiB for the RandomAccess benchmark suite.                 prefetch distances 𝐷 = {1, 2, 4, 8, 16, 32, 64, 128}. We then
+   We also use two different forms of the Hash join bench-               take the prefetch-distance that performed best and compare
+mark [19], Hash Join 2EPB (HJ2) and Hash Join 8EPB                       the achieved performance against APT-GET . As shown in
+(HJ8), to evaluate the performance of APT-GET . Both Hash                Figure 8, the proposed LBR approach is able to determine a
+Join benchmarks implement hashing to lookup target values                near optimal prefetch-distance for all applications.
+based on some key distribution, where HJ8 utilizes hash buck-
+ets of 8 elements while HJ2 just utilizes 2 elements per bucket.         4.6   Effectiveness of the Prefetch Distance
+The size of hash table is 970 MiB and we run both of these                     Optimization
+benchmarks with two hasing algorithms (NPO and NPO_st).                  In figure 9, we evaluate the effectiveness of our proposed LBR
+The Graph500 benchmark [92] executes breadth-first search                sampling technique against using a static prefetch-distance
+on an undirected graph that has an average degree of 16. We              approach. We compare the speedup results for APT-GET
+utilize a scale factor of 22 and an edge-factor of 10.                   against 3 different static prefetch-distance values of 4, 16, 64,
+
+
+
+                                                                   756
+APT-GET : Profile-Guided Timely Software Prefetching                                              EuroSys ’22, April 5–8, 2022, RENNES, France
+
+
+
+
+Figure 6. Execution time speedup provided by APT-GET over the non-prefetching baseline: APT-GET achieves 1.30× average
+speedup on average, compared to the 1.04× speedup provided by the state of the art (Ainsworth & Jones).
+
+
+
+
+Figure 7. APT-GET ’s LLC MPKI, misses per 1000-instructions, reduction over the non-prefetching baseline (lower is better):
+on average, APT-GET provides 1.35× greater MPKI reduction than the state of the art (Ainsworth & Jones).
+
+and the calculated prefetch-distance value from LBR samples                DFS, injecting prefetch instructions inside the inner loop
+for each workload. As we can see, for most of the applications             decreases the performance over the non-prefetching base-
+APT-GET achieves a higher performance gain by using the                    line. Therefore, it is crucial to enable outer-loop prefetching
+calculated prefetch-distance from LBR samples than utilizing               but also to detect the appropriate prefetch injection site
+a static prefetch-distance of 4, 16, 64, highlighting the efficacy         for each prefetch individually. We can see that based on
+of our approach. While a static prefetch-distance of 64 also               the number of edges and vertices the input graph contains,
+performs well it is outperformed by APT-GET by 1.06× for                   the achieved performance gain from inner or outer loop
+RandomAccess and by 1.09× for HJ2-NPO.                                     prefetching can be significantly different. For example, if
+                                                                           we compare the achieved speedup for the BFS application
+                                                                           by considering two different inputs, loc-Brightkite with 58K
+4.7   Effectiveness of the Prefetch Injection Site                         nodes and an average edge degree of 3, as well as graph
+      Optimization                                                         with 80K nodes and an average edge degree of 8, we can see
+Figure 10 shows the effect of optimizing the prefetch injec-               that the achieved speedup gain from outer loop prefetching
+tion site for all applications. In this experiment, we measure             differs significantly.
+the speedup of APT-GET by prefetching either in the outer or
+the inner loop for all applications that contain nested loops.
+The goal of these experiments is to evaluate the effective-                4.8 Instruction Overhead
+ness of our proposed approach for detecting the appropri-                  Injecting prefetch slices introduces overheads in terms of
+ate prefetch injection site. For all the workloads except for              additional instructions that need to be executed by the
+
+
+
+                                                                     757
+EuroSys ’22, April 5–8, 2022, RENNES, France                      Saba Jamilan, Tanvir Ahmed Khan, Grant Ayers, Baris Kasikci, and Heiner Litz
+
+
+
+
+Figure 8. Speedup of prefetch-distance from LBR sampling technique and optimal prefetch-distance over non-prefetching
+baseline: LBR sampling technique achieves 1.30× overall speedup in average, compared to 1.32× speedup of optimal prefetch-
+distance, over non-prefetching baseline.
+
+
+
+
+Figure 9. Speedup for different static offset values and LBR over non-prefetching baseline: prefetch-distance of 4, 16, 64, and
+LBR sampling technique achieve 1.16×, 1.26×, 1.28×, and 1.30× speedup in average over non-prefetching baseline, respectively.
+
+processor. In particular, while prefetching almost always               APT-GET on the same input (TRAIN-DATA) vs. evaluating
+improves the instructions per cycle (IPC) performance of                on a different input (TEST-DATA). The obtained results indi-
+an application it increases the instruction count potentially           cate that there are no significant performance differences
+offsetting the performance gains. While we have already                 between the two inputs showing that APT-GET can general-
+shown that APT-GET provides a net performance gain, Fig-                ize across inputs.
+ure 11 provides insight about the number of instructions
+injected by APT-GET and Ainsworth & Jones. While for
+most applications the instruction overhead is negligible, for
+IS and RandomAccess, it is significant which limits the per-
+formance gains provided for these applications. We believe
+there exist future research opportunities in considering the            4.10 Profiling overhead
+instruction overhead for conditional prefetch slice injection.          In Google’s data centers, all applications are already contin-
+                                                                        uously profiled [15, 102] and recompiled before deployment.
+                                                                        Our technique does not introduce additional overheads here.
+4.9 Inputs for profiling and testing                                    Our approach only requires a single profiling run. The aver-
+We use different realistic data sets (such as graphs) for eval-         age total overhead is less than 15-20 seconds. Note that opti-
+uating the input sensitivity of APT-GET . In particular, Fig-           mization is performed only once in data centers while the
+ure 12 shows the performance of training and evaluating                 application is executed on 1000s of nodes.
+
+
+
+                                                                  758
+APT-GET : Profile-Guided Timely Software Prefetching                                         EuroSys ’22, April 5–8, 2022, RENNES, France
+
+
+
+
+Figure 10. Speedup of injecting prefetches inside the outer or inner loops over non-prefetching baseline: For most of the
+applications, injecting prefeches inside the outer loop achieves 1.20× overall speedup in average, while injecting prefetches
+inside the inner loop improves speedup for DFS up to 1.11× over non-prefethcing baseline.
+
+
+
+
+Figure 11. The overhead of injected prefetching instructions over non-prefetching baseline: APT-GET increases the total
+number of instructions 1.14× in average, compared to 1.19× in average of Ainsworth & Jones, over non-prefetching baseline.
+
+5    Related Work                                                    whenever a pointer is inserted into a data structure. In con-
+Prefetching is a well-studied and yet widely open area               trast, APT-GET does not rely on source code modification, it
+that spans many types of access patterns and implemen-               can handle arbitrarily complex indirect and direct access pat-
+tations. We classify prior works in three categories. Soft-          terns, and uses profiling information to identify performance-
+ware prefetching. Traditional software prefetching [26]              critical loads and tune prefetch distances to improve prefetch
+techniques utilize compilers to perform static code analysis         timeliness.
+to generate fixed prefetch targets [11, 35, 53, 111]. These             Improving upon static methods, some prior works utilize
+approaches are limited by lacking knowledge about which              dynamic profiling to better identify prefetch candidates [81,
+memory accesses actually cause performance degradation               84], but they don’t utilize profiling information to improve
+and which prefetch distances should be used. Furthermore,            timeliness, or introduce overheads by requiring to executed a
+they are limited by practical constraints such as the abil-          separate prefetching thread in parallel to the workload [131].
+ity to only detect simple patterns such as Singly-Nested                Hardware prefetching. Stream prefetchers [56, 106] and
+Loop Nests [120] or strides [63, 91, 124]. Other approaches          pattern-based prefetchers [42, 59, 68, 69, 88, 95, 100, 107, 109]
+can analyze more complex behaviors like linked list traver-          can be implemented with low to moderate hardware com-
+sals and insert jump pointers into source code at compile            plexity and are capable of prefetching strides and other
+time [38, 83, 104, 105]. However, these require source code          simple access patterns. Spatial [18, 21, 51, 110] and tempo-
+modification and result in additional run-time storage costs         ral [17, 28, 55, 60, 117] prefetchers can learn and replay more
+
+
+
+
+                                                               759
+EuroSys ’22, April 5–8, 2022, RENNES, France                      Saba Jamilan, Tanvir Ahmed Khan, Grant Ayers, Baris Kasikci, and Heiner Litz
+
+
+
+
+Figure 12. Execution time speedup provided by APT-GET over the non-prefetching baseline for different inputs as train/test
+data: APT-GET achieves 1.36× average speedup on average for test data sets compared to the 1.39× average speedup obtained
+for train data sets
+
+complex memory access patterns, but they require costly on-             6   Conclusion
+chip storage and rely upon highly-recurrent access patterns.            We propose a novel automated prefetch injection technique
+None of these prefetchers is well-suited for large instruction          for reducing stall cycles in memory latency-bound programs.
+footprint applications exhibiting many irregular and indirect           Our approach provides performance gains of up to 1.98×
+memory patterns such as pointer-based traversals.                       and 1.30× in average over state-of-the-art mechanisms. To
+   Several hardware mechanisms have been proposed to                    motivate our technique, we first study prior software-based
+prefetch complex memory access patterns that are based                  prefetching mechanisms for indirect memory access patterns
+on the data and control flow of an application [12, 39, 46,             that cannot be handled by existing hardware prefetchers.
+54, 75, 82, 93, 94, 101, 132]. While general-purpose in nature,         This analysis reveals that, while existing techniques provide
+they require fast and complex hardware resources such as                high accuracy and coverage, due to their static nature, they
+helper threads to run ahead of the application and prefetch             are unable to generate timely prefetches. To address this chal-
+upcoming memory accesses. Unlike APT-GET , these tech-                  lenge, we propose a profile-guided optimization technique
+niques cannot easily filter relevant address calculations from          utilizing the last branch record capability of contemporary
+the main application and their high cost and complexity is              microprocessors. Our approach, implemented as an LLVM
+often better spent on additional CPU cores.                             compiler pass, enables a detailed characterization of mem-
+   Hybrid            hardware-software           prefetching.           ory latency-bound loops, enabling timely prefetching of the
+Hybrid       hardware-software         prefetching     mecha-           performance limiting loads. We believe that this work can
+nisms [10, 20, 66, 114, 129] attempts to combine the                    establish dynamic prefetch injection as a generic, efficient,
+best of both worlds while also addressing the limitations of            low-overhead compiler technique.
+hardware-only and software-only mechanisms. However,
+these techniques require both hardware prefetching support
+and software programming model, neither of which exists in
+today’s processor. In contrast, APT-GET employs hardware                Acknowledgments
+and software interfaces already available in today’s pro-               We thank the anonymous reviewers for their insightful feed-
+cessors, identifies the key limitation of software-managed              back and suggestions. This work was supported by Google
+prefetching in terms of prefetch timeliness, and proposes               and NSF grants #1942754 and #2010810, and the Applications
+a profile-guided low-overhead mechanism to ensure the                   Driving Architectures (ADA) Research Center, a JUMP Cen-
+timeliness. Hence, APT-GET can be readily be employed                   ter co-sponsored by SRC and DARPA. Any opinions, findings,
+on existing processors to optimize the performance of                   conclusions, or recommendations expressed in this material
+real-world applications.                                                are those of the authors and do not necessarily reflect the
+                                                                        views of the funding agencies. We thank Anant Nori and
+                                                                        Ahmad Yasin from Intel for their helpful discussions and
+                                                                        feedback.
+
+
+
+                                                                  760
+APT-GET : Profile-Guided Timely Software Prefetching                                                             EuroSys ’22, April 5–8, 2022, RENNES, France
+
+
+References                                                                                International Symposium on High Performance Computer Architecture
+  [1] 2008. scipy.signal. https://docs.scipy.org/doc/scipy/reference/signal.              (HPCA). IEEE, 131–142.
+      html                                                                           [18] Mohammad Bakhshalipour, Mehran Shakerinava, Pejman Lotfi-
+  [2] 2008. scipy.signal.find_peaks_cwt. https://docs.scipy.org/doc/scipy/                Kamran, and Hamid Sarbazi-Azad. 2019. Bingo spatial data prefetcher.
+      reference/generated/scipy.signal.find_peaks_cwt.html                                In 2019 IEEE International Symposium on High Performance Computer
+  [3] 2018. Support for inserting profile-directed cache prefetches. https:               Architecture (HPCA). IEEE, 399–411.
+      //reviews.llvm.org/D54052                                                      [19] Cagri Balkesen, Jens Teubner, Gustavo Alonso, and M Tamer Özsu.
+  [4] 2021. llvm-mca - LLVM Machine Code Analyzer. https://llvm.org/                      2013. Main-memory hash joins on multi-core CPUs: Tuning to the
+      docs/CommandGuide/llvm-mca.html. [Online; accessed 9-October-                       underlying hardware. In 2013 IEEE 29th International Conference on
+      2021].                                                                              Data Engineering (ICDE). IEEE, 362–373.
+  [5] 2022. Profile Guided Software Prefetching. https://github.com/                 [20] Abanti Basak, Shuangchen Li, Xing Hu, Sang Min Oh, Xinfeng Xie, Li
+      SabaJamilan/Profile-Guided-Software-Prefetching                                     Zhao, Xiaowei Jiang, and Yuan Xie. 2019. Analysis and optimization of
+  [6] Martín Abadi, Paul Barham, Jianmin Chen, Zhifeng Chen, Andy                         the memory hierarchy for graph processing workloads. In 2019 IEEE
+      Davis, Jeffrey Dean, Matthieu Devin, Sanjay Ghemawat, Geoffrey Irv-                 International Symposium on High Performance Computer Architecture
+      ing, Michael Isard, Manjunath Kudlur, Josh Levenberg, Rajat Monga,                  (HPCA). IEEE, 373–386.
+      Sherry Moore, Derek G. Murray, Benoit Steiner, Paul Tucker, Vijay              [21] Rahul Bera, Anant V Nori, Onur Mutlu, and Sreenivas Subramoney.
+      Vasudevan, Pete Warden, Martin Wicke, Yuan Yu, and Xiaoqiang                        2019. Dspatch: Dual spatial pattern prefetcher. In Proceedings of the
+      Zheng. 2016. TensorFlow: A System for Large-Scale Machine Learn-                    52nd Annual IEEE/ACM International Symposium on Microarchitecture.
+      ing. In 12th USENIX Symposium on Operating Systems Design and                       531–544.
+      Implementation (OSDI 16). USENIX Association, Savannah, GA, 265–               [22] Ketan Bhardwaj, Matt Saunders, Nikita Juneja, and Ada Gavrilovska.
+      283. https://www.usenix.org/conference/osdi16/technical-sessions/                   2019. Serving mobile apps: A slice at a time. In Proceedings of the
+      presentation/abadi                                                                  Fourteenth EuroSys Conference 2019. 1–15.
+  [7] Masab Ahmad, Farrukh Hijaz, Qingchuan Shi, and Omer Khan. 2015.                [23] Laurent Bindschaedler, Jasmina Malicevic, Nicolas Schiper, Ashvin
+      Crono: A benchmark suite for multithreaded graph algorithms exe-                    Goel, and Willy Zwaenepoel. 2018. Rock you like a hurricane: Taming
+      cuting on futuristic multicores. In 2015 IEEE International Symposium               skew in large scale analytics. In Proceedings of the Thirteenth EuroSys
+      on Workload Characterization. IEEE, 44–55.                                          Conference. 1–15.
+  [8] Sam Ainsworth and Timothy M Jones. 2016. Graph prefetching using               [24] Amirali Boroumand, Saugata Ghose, Youngsok Kim, Rachata
+      data structure knowledge. In Proceedings of the 2016 International                  Ausavarungnirun, Eric Shiu, Rahul Thakur, Daehyun Kim, Aki
+      Conference on Supercomputing. 1–11.                                                 Kuusela, Allan Knies, Parthasarathy Ranganathan, et al. 2018. Google
+  [9] Sam Ainsworth and Timothy M Jones. 2017. Software prefetching for                   workloads for consumer devices: Mitigating data movement bottle-
+      indirect memory accesses. In 2017 IEEE/ACM International Symposium                  necks. In Proceedings of the Twenty-Third International Conference
+      on Code Generation and Optimization (CGO). IEEE, 305–317.                           on Architectural Support for Programming Languages and Operating
+ [10] Sam Ainsworth and Timothy M Jones. 2018. An event-triggered                         Systems. 316–331.
+      programmable prefetcher for irregular workloads. ACM Sigplan                   [25] Rodrigo Bruno, Duarte Patricio, José Simão, Luis Veiga, and Paulo Fer-
+      Notices 53, 2 (2018), 578–592.                                                      reira. 2019. Runtime object lifetime profiler for latency sensitive big
+ [11] Hassan Al-Sukhni, Ian Bratt, and Daniel A Connors. 2003. Compiler-                  data applications. In Proceedings of the Fourteenth EuroSys Conference
+      directed content-aware prefetching for dynamic data structures. In                  2019. 1–16.
+      2003 12th International Conference on Parallel Architectures and Com-          [26] David Callahan, Ken Kennedy, and Allan Porterfield. 1991. Software
+      pilation Techniques. IEEE, 91–100.                                                  Prefetching. In Proceedings of the Fourth International Conference
+ [12] Murali Annavaram, Jignesh M Patel, and Edward S Davidson. 2001.                     on Architectural Support for Programming Languages and Operating
+      Data prefetching by dependence graph precomputation. In Proceed-                    Systems (Santa Clara, California, USA) (ASPLOS IV). ACM, New York,
+      ings 28th Annual International Symposium on Computer Architecture.                  NY, USA, 40–52. https://doi.org/10.1145/106972.106979
+      IEEE, 52–61.                                                                   [27] Steve Carr, Kathryn S McKinley, and Chau-Wen Tseng. 1994. Compiler
+ [13] Grant Ayers, Jung Ho Ahn, Christos Kozyrakis, and Parthasarathy                     optimizations for improving data locality. ACM SIGPLAN Notices 29,
+      Ranganathan. 2018. Memory hierarchy for web search. In 2018 IEEE                    11 (1994), 252–262.
+      International Symposium on High Performance Computer Architecture              [28] Chandranil Chakraborttii and Heiner Litz. 2020. Learning i/o access
+      (HPCA). IEEE, 643–656.                                                              patterns to improve prefetching in ssds. In Joint European Conference
+ [14] Grant Ayers, Heiner Litz, Christos Kozyrakis, and Parthasarathy Ran-                on Machine Learning and Knowledge Discovery in Databases. Springer,
+      ganathan. 2020. Classifying Memory Access Patterns for Prefetching.                 427–443.
+      In Proceedings of the Twenty-Fifth International Conference on Archi-          [29] Andres S Charif-Rubial, Emmanuel Oseret, José Noudohouenou,
+      tectural Support for Programming Languages and Operating Systems.                   William Jalby, and Ghislain Lartigue. 2014. CQA: A code quality
+      513–526.                                                                            analyzer tool at binary level. In 2014 21st International Conference on
+ [15] Grant Ayers, Nayana Prasad Nagendra, David I August, Hyoun Kyu                      High Performance Computing (HiPC). IEEE, 1–10.
+      Cho, Svilen Kanev, Christos Kozyrakis, Trivikram Krishnamurthy,                [30] Mark J Charney and Anthony P Reeves. 1995. Generalized correlation-
+      Heiner Litz, Tipp Moseley, and Parthasarathy Ranganathan. 2019.                     based hardware prefetching. Technical Report. Technical Report EE-
+      AsmDB: understanding and mitigating front-end stalls in warehouse-                  CEG-95-1, Cornell University.
+      scale computers. In Proceedings of the 46th International Symposium            [31] Dehao Chen, David Xinliang Li, and Tipp Moseley. 2016. AutoFDO:
+      on Computer Architecture. ACM, 462–473.                                             Automatic feedback-directed optimization for warehouse-scale appli-
+ [16] David Bailey, Tim Harris, William Saphir, Rob Van Der Wijngaart,                    cations. In Proceedings of the 2016 International Symposium on Code
+      Alex Woo, and Maurice Yarrow. 1995. The NAS parallel benchmarks                     Generation and Optimization. ACM, 12–23.
+      2.0. Technical Report. Technical Report NAS-95-020, NASA Ames                  [32] Shimin Chen, Anastassia Ailamaki, Phillip B Gibbons, and Todd C
+      Research Center.                                                                    Mowry. 2004. Improving Hash Join Performance through Prefetching.
+ [17] Mohammad Bakhshalipour, Pejman Lotfi-Kamran, and Hamid                              In Proceedings of the 20th International Conference on Data Engineering.
+      Sarbazi-Azad. 2018. Domino temporal data prefetcher. In 2018 IEEE                   116.
+
+
+
+
+                                                                               761
+EuroSys ’22, April 5–8, 2022, RENNES, France                                  Saba Jamilan, Tanvir Ahmed Khan, Grant Ayers, Baris Kasikci, and Heiner Litz
+
+
+ [33] Shimin Chen, Phillip B Gibbons, and Todd C Mowry. 2001. Improving             [51] Michael Ferdman, Stephen Somogyi, and Babak Falsafi. 2009. Spatial
+      index performance through prefetching. ACM SIGMOD Record 30, 2                     memory streaming with rotated patterns. 1st JILP Data Prefetching
+      (2001), 235–246.                                                                   Championship 29 (2009).
+ [34] Tianqi Chen, Thierry Moreau, Ziheng Jiang, Lianmin Zheng, Eddie               [52] Google. 2020. Propeller: Profile Guided Optimizing Large Scale LLVM-
+      Yan, Haichen Shen, Meghan Cowan, Leyuan Wang, Yuwei Hu, Luis                       based Relinker. https://github.com/google/llvm-propeller.
+      Ceze, et al. 2018. TVM: An automated end-to-end optimizing compiler           [53] Edward H Gornish, Elana D Granston, and Alexander V Veidenbaum.
+      for deep learning. In 13th USENIX Symposium on Operating Systems                   2014. Compiler-directed data prefetching in multiprocessors with
+      Design and Implementation (OSDI 18). 578–594.                                      memory hierarchies. In ACM International Conference on Supercom-
+ [35] William Y Chen, Scott A Mahlke, Pohua P Chang, and Wen-mei W                       puting 25th Anniversary Volume. ACM, 128–142.
+      Hwu. 1991. Data access microarchitectures for superscalar processors          [54] Milad Hashemi, Onur Mutlu, and Yale N Patt. 2016. Continuous
+      with compiler-assisted data prefetching. In MICRO, Vol. 24. 69–73.                 runahead: Transparent hardware acceleration for memory intensive
+ [36] Yishen Chen, Ajay Brahmakshatriya, Charith Mendis, Alex Renda,                     workloads. In The 49th Annual IEEE/ACM International Symposium
+      Eric Atkinson, Ondřej Sỳkora, Saman Amarasinghe, and Michael                      on Microarchitecture. IEEE Press, 61.
+      Carbin. 2019. BHive: A benchmark suite and measurement framework              [55] Milad Hashemi, Kevin Swersky, Jamie A Smith, Grant Ayers, Heiner
+      for validating x86-64 basic block performance models. In 2019 IEEE                 Litz, Jichuan Chang, Christos Kozyrakis, and Parthasarathy Ran-
+      International Symposium on Workload Characterization (IISWC). IEEE,                ganathan. 2018. Learning memory access patterns. arXiv preprint
+      167–177.                                                                           arXiv:1803.02329 (2018).
+ [37] Trishul M Chilimbi and Martin Hirzel. 2002. Dynamic hot data                  [56] Ibrahim Hur and Calvin Lin. 2006. Memory prefetching using adap-
+      stream prefetching for general-purpose programs. In Proceedings of                 tive stream detection. In Proceedings of the 39th Annual IEEE/ACM
+      the ACM SIGPLAN 2002 Conference on Programming language design                     International Symposium on Microarchitecture. IEEE Computer Soci-
+      and implementation. 199–209.                                                       ety, 397–408.
+ [38] Jamison Collins, Suleyman Sair, Brad Calder, and Dean M Tullsen.              [57] Tatsushi Inagaki, Tamiya Onodera, Hideaki Komatsu, and Toshio
+      2002. Pointer cache assisted prefetching. In Proceedings of the 35th               Nakatani. 2003. Stride prefetching by dynamically inspecting objects.
+      annual ACM/IEEE international symposium on Microarchitecture. IEEE                 ACM SIGPLAN Notices 38, 5 (2003), 269–277.
+      Computer Society Press, 62–73.                                                [58] Intel Corporation. 2019. Intel Architecture Code Analyzer. https:
+ [39] Jamison D Collins, Hong Wang, Dean M Tullsen, Christopher Hughes,                  //software.intel.com/content/www/us/en/develop/articles/intel-
+      Yong-Fong Lee, Dan Lavery, and John P Shen. 2001. Speculative pre-                 architecture-code-analyzer.html. [Online; accessed 9-October-2021].
+      computation: Long-range prefetching of delinquent loads. In Proceed-          [59] Yasuo Ishii, Mary Inaba, and Kei Hiraki. 2011. Access map pat-
+      ings 28th Annual International Symposium on Computer Architecture.                 tern matching for high performance data cache prefetch. Journal of
+      IEEE, 14–25.                                                                       Instruction-Level Parallelism 13, 2011 (2011), 1–24.
+ [40] Robert Cooksey, Stephan Jourdan, and Dirk Grunwald. 2002. A state-            [60] Akanksha Jain and Calvin Lin. 2013. Linearizing irregular memory
+      less, content-directed data prefetching mechanism. ACM SIGPLAN                     accesses for improved correlated prefetching. In Proceedings of the
+      Notices 37, 10 (2002), 279–290.                                                    46th Annual IEEE/ACM International Symposium on Microarchitecture.
+ [41] Charlie Curtsinger and Emery D Berger. 2015. Coz: Finding code that                ACM, 247–259.
+      counts with causal profiling. In Proceedings of the 25th Symposium on         [61] Norman P Jouppi. 1990. Improving direct-mapped cache performance
+      Operating Systems Principles. 184–197.                                             by the addition of a small fully-associative cache and prefetch buffers.
+ [42] Fredrik Dahlgren and Per Stenström. 1995. Effectiveness of Hardware-               ACM SIGARCH Computer Architecture News 18, 2SI (1990), 364–373.
+      Based Stride and Sequential Prefetching in Shared-Memory Multi-               [62] Svilen Kanev, Juan Pablo Darago, Kim Hazelwood, Parthasarathy
+      processors.. In hpca. 68–77.                                                       Ranganathan, Tipp Moseley, Gu-Yeon Wei, and David Brooks. 2015.
+ [43] Arnaldo Carvalho De Melo. 2010. The new linux’perf’tools. In Slides                Profiling a Warehouse-scale Computer. In Proceedings of the 42Nd
+      from Linux Kongress, Vol. 18. 1–42.                                                Annual International Symposium on Computer Architecture (Portland,
+ [44] Jialin Dou and Marcelo Cintra. 2007. A compiler cost model for                     Oregon) (ISCA ’15). ACM, New York, NY, USA, 158–169. https:
+      speculative parallelization. ACM Transactions on Architecture and                  //doi.org/10.1145/2749469.2750392
+      Code Optimization (TACO) 4, 2 (2007), 12–es.                                  [63] Muneeb Khan, Andreas Sandberg, and Erik Hagersten. 2014. A case
+ [45] Pan Du, Warren A Kibbe, and Simon M Lin. 2006. Improved peak                       for resource efficient prefetching in multicores. In 2014 43rd Interna-
+      detection in mass spectrum by incorporating continuous wavelet                     tional Conference on Parallel Processing. IEEE, 101–110.
+      transform-based pattern matching. bioinformatics 22, 17 (2006), 2059–         [64] Tanvir Ahmed Khan, Nathan Brown, Akshitha Sriraman, Niran-
+      2065.                                                                              jan K Soundararajan, Rakesh Kumar, Joseph Devietti, Sreenivas
+ [46] James Dundas and Trevor Mudge. 1997. Improving data cache per-                     Subramoney, Gilles A Pokam, Heiner Litz, and Baris Kasikci. 2021.
+      formance by pre-executing instructions under a cache miss. In Inter-               Twig: Profile-Guided BTB Prefetching for Data Center Applications.
+      national Conference on Supercomputing. Citeseer, 68–75.                            In MICRO-54: 54th Annual IEEE/ACM International Symposium on
+ [47] Stephane Eranian. 2021. Add AMD Fam19h Branch Sampling support.                    Microarchitecture. 816–829.
+      https://lwn.net/Articles/875869/.                                             [65] Tanvir Ahmed Khan, Ian Neal, Gilles Pokam, Barzan Mozafari, and
+ [48] Babak Falsafi and Thomas F Wenisch. 2014. A primer on hardware                     Baris Kasikci. 2021. DMon: Efficient Detection and Correction of Data
+      prefetching. Synthesis Lectures on Computer Architecture 9, 1 (2014),              Locality Problems using Selective Profiling. In Proceedings of the 15th
+      1–67.                                                                              USENIX Symposium on Operating Systems Design and Implementation
+ [49] Alireza Farshin, Amir Roozbeh, Gerald Q Maguire Jr, and Dejan Kostić.              (OSDI) (OSDI 2021). USENIX Association.
+      2019. Make the most out of last level cache in intel processors. In           [66] Tanvir Ahmed Khan, Akshitha Sriraman, Joseph Devietti, Gilles
+      Proceedings of the Fourteenth EuroSys Conference 2019. 1–17.                       Pokam, Heiner Litz, and Baris Kasikci. 2020. I-SPY: Context-Driven
+ [50] Michael Ferdman, Almutaz Adileh, Onur Kocberber, Stavros Volos,                    Conditional Instruction Prefetching with Coalescing. In 2020 53rd
+      Mohammad Alisafaee, Djordje Jevdjic, Cansu Kaynak, Adrian Daniel                   Annual IEEE/ACM International Symposium on Microarchitecture
+      Popescu, Anastasia Ailamaki, and Babak Falsafi. 2012. Clearing the                 (MICRO). IEEE, 146–159.
+      clouds: a study of emerging scale-out workloads on modern hardware.
+      In ACM SIGPLAN Notices, Vol. 47. ACM, 37–48.
+
+
+
+
+                                                                              762
+APT-GET : Profile-Guided Timely Software Prefetching                                                                 EuroSys ’22, April 5–8, 2022, RENNES, France
+
+
+ [67] Tanvir Ahmed Khan, Dexin Zhang, Akshitha Sriraman, Joseph Devi-                    [84] Chi-Keung Luk, Robert Muth, Harish Patil, Richard Weiss, P Geof-
+      etti, Gilles Pokam, Heiner Litz, and Baris Kasikci. 2021. Ripple: Profile-              frey Lowney, and Robert Cohn. 2002. Profile-guided post-link stride
+      Guided Instruction Cache Replacement for Data Center Applications.                      prefetching. In Proceedings of the 16th international conference on
+      In Proceedings of the 48th International Symposium on Computer Archi-                   Supercomputing. ACM, 167–178.
+      tecture (ISCA) (ISCA 2021).                                                        [85] Piotr R Luszczek, David H Bailey, Jack J Dongarra, Jeremy Kepner,
+ [68] Jinchun Kim, Seth H Pugsley, Paul V Gratz, AL Narasimha Reddy,                          Robert F Lucas, Rolf Rabenseifner, and Daisuke Takahashi. 2006. The
+      Chris Wilkerson, and Zeshan Chishti. 2016. Path confidence based                        HPC Challenge (HPCC) benchmark suite. In Proceedings of the 2006
+      lookahead prefetching. In 2016 49th Annual IEEE/ACM International                       ACM/IEEE conference on Supercomputing, Vol. 213. 1188455–1188677.
+      Symposium on Microarchitecture (MICRO). IEEE, 1–12.                                [86] Gabriel Marin, Alexey Alexandrov, and Tipp Moseley. 2021. Break
+ [69] Jinchun Kim, Elvira Teran, Paul V Gratz, Daniel A Jiménez, Seth H                       dancing: low overhead, architecture neutral software branch trac-
+      Pugsley, and Chris Wilkerson. 2017. Kill the program counter: Recon-                    ing. In Proceedings of the 22nd ACM SIGPLAN/SIGBED International
+      structing program behavior in the processor cache hierarchy. ACM                        Conference on Languages, Compilers, and Tools for Embedded Systems.
+      SIGPLAN Notices 52, 4 (2017), 737–749.                                                  122–133.
+ [70] Andi Kleen. 2016. An Introduction to Last Branch Records. https:                   [87] Charith Mendis, Alex Renda, Saman Amarasinghe, and Michael
+      //lwn.net/Articles/680985/                                                              Carbin. 2019. Ithemal: Accurate, portable and fast basic block through-
+ [71] Andi Kleen. 2022. GitHub - andikleen/pmu-tools: Intel PMU profiling                     put estimation using deep neural networks. In International Confer-
+      tools. https://github.com/andikleen/pmu-tools                                           ence on machine learning. PMLR, 4505–4515.
+ [72] Chris Lattner and Vikram Adve. 2004. LLVM: A compilation frame-                    [88] Pierre Michaud. 2016. Best-offset hardware prefetching. In 2016 IEEE
+      work for lifelong program analysis & transformation. In International                   International Symposium on High Performance Computer Architecture
+      Symposium on Code Generation and Optimization, 2004. CGO 2004.                          (HPCA). IEEE, 469–480.
+      IEEE, 75–86.                                                                       [89] Todd Mowry and Anoop Gupta. 1991. Tolerating latency through
+ [73] Jan Laukemann, Julian Hammer, Georg Hager, and Gerhard Wellein.                         software-controlled prefetching in shared-memory multiprocessors.
+      2019. Automatic throughput and critical path analysis of x86 and                        Journal of parallel and Distributed Computing 12, 2 (1991), 87–106.
+      ARM assembly kernels. In 2019 IEEE/ACM Performance Modeling,                       [90] Todd C. Mowry, Angela K. Demke, and Orran Krieger. 1996. Auto-
+      Benchmarking and Simulation of High Performance Computer Systems                        matic Compiler-Inserted I/O Prefetching for Out-of-Core Applica-
+      (PMBS). IEEE, 1–6.                                                                      tions. In Proceedings of the Second USENIX Symposium on Operating
+ [74] Jan Laukemann, Julian Hammer, Johannes Hofmann, Georg Hager,                            Systems Design and Implementation (OSDI), Seattle, Washington, USA,
+      and Gerhard Wellein. 2018. Automated instruction stream throughput                      October 28-31, 1996, Karin Petersen and Willy Zwaenepoel (Eds.).
+      prediction for intel and amd microarchitectures. In 2018 IEEE/ACM                       ACM, 3–17. https://doi.org/10.1145/238721.238734
+      performance modeling, benchmarking and simulation of high perfor-                  [91] Todd C. Mowry, Monica S. Lam, and Anoop Gupta. 1992. Design
+      mance computer systems (PMBS). IEEE, 121–131.                                           and Evaluation of a Compiler Algorithm for Prefetching. In Proceed-
+ [75] Jaejin Lee, Changhee Jung, Daeseob Lim, and Yan Solihin. 2009.                          ings of the Fifth International Conference on Architectural Support
+      Prefetching with helper threads for loosely coupled multiproces-                        for Programming Languages and Operating Systems (Boston, Mas-
+      sor systems. IEEE Transactions on Parallel and Distributed Systems 20,                  sachusetts, USA) (ASPLOS V). ACM, New York, NY, USA, 62–73.
+      9 (2009), 1309–1324.                                                                    https://doi.org/10.1145/143365.143488
+ [76] Jaekyu Lee, Hyesoon Kim, and Richard Vuduc. 2012. When prefetch-                   [92] Richard C Murphy, Kyle B Wheeler, Brian W Barrett, and James A
+      ing works, when it doesn’t, and why. ACM Transactions on Architec-                      Ang. 2010. Introducing the graph 500. Cray Users Group (CUG) 19
+      ture and Code Optimization (TACO) 9, 1 (2012), 1–29.                                    (2010), 45–74.
+ [77] Jure Leskovec and Andrej Krevl. 2014. SNAP Datasets: Stanford large                [93] Onur Mutlu, Hyesoon Kim, and Yale N Patt. 2005. Techniques for
+      network dataset collection.                                                             efficient processing in runahead execution engines. In ACM SIGARCH
+ [78] Chuanpeng Li, Kai Shen, and Athanasios E Papathanasiou. 2007.                           Computer Architecture News, Vol. 33. IEEE Computer Society, 370–
+      Competitive prefetching for concurrent sequential I/O. In Proceedings                   381.
+      of the 2nd ACM SIGOPS/EuroSys European Conference on Computer                      [94] Onur Mutlu, Jared Stark, Chris Wilkerson, and Yale N Patt. 2003.
+      Systems 2007. 189–202.                                                                  Runahead execution: An alternative to very large instruction win-
+ [79] Heiner Litz, Grant Ayers, and Parthasarathy Ranganathan. 2022.                          dows for out-of-order processors. In The Ninth International Sympo-
+      CRISP: Critical Slice Prefetching. In Proceedings of the 27th Interna-                  sium on High-Performance Computer Architecture, 2003. HPCA-9 2003.
+      tional Conference on Architectural Support for Programming Languages                    Proceedings. IEEE, 129–140.
+      and Operating Systems (ASPLOS).                                                    [95] Kyle J Nesbit and James E Smith. 2004. Data cache prefetching using
+ [80] Christianto C Liu, Ilya Ganusov, Martin Burtscher, and Sandip Tiwari.                   a global history buffer. In 10th International Symposium on High
+      2005. Bridging the processor-memory performance gap with 3D IC                          Performance Computer Architecture (HPCA’04). IEEE, 96–96.
+      technology. IEEE Design & Test of Computers 22, 6 (2005), 556–564.                 [96] Maksim Panchenko, Rafael Auler, Bill Nell, and Guilherme Ottoni.
+ [81] Jiwei Lu, Howard Chen, Rao Fu, Wei-Chung Hsu, Bobbie Othmer,                            2019. BOLT: a practical binary optimizer for data centers and beyond.
+      Pen-Chung Yew, and Dong-Yuan Chen. 2003. The performance of                             In Proceedings of the 2019 IEEE/ACM International Symposium on Code
+      runtime data cache prefetching in a dynamic optimization system. In                     Generation and Optimization. IEEE Press, 2–14.
+      Proceedings of the 36th annual IEEE/ACM International Symposium on                 [97] Maksim Panchenko, Rafael Auler, Laith Sakka, and Guilherme Ottoni.
+      Microarchitecture. IEEE Computer Society, 180.                                          2021. Lightning BOLT: powerful, fast, and scalable binary optimiza-
+ [82] Jiwei Lu, Abhinav Das, Wei-Chung Hsu, Khoa Nguyen, and Santosh G                        tion. In Proceedings of the 30th ACM SIGPLAN International Conference
+      Abraham. 2005. Dynamic helper threaded prefetching on the sun                           on Compiler Construction. 119–130.
+      ultrasparc cmp processor. In Proceedings of the 38th annual IEEE/ACM               [98] Aleksey Pesterev, Nickolai Zeldovich, and Robert T Morris. 2010.
+      International Symposium on Microarchitecture. IEEE Computer Society,                    Locating cache performance bottlenecks using data profiling. In Pro-
+      93–104.                                                                                 ceedings of the 5th European conference on Computer systems. ACM,
+ [83] Chi-Keung Luk and Todd C Mowry. 1996. Compiler-based prefetch-                          335–348.
+      ing for recursive data structures. In ACM SIGOPS Operating Systems                 [99] Lucas Prates. 2020. Add support for the Branch Record Buffer exten-
+      Review, Vol. 30. ACM, 222–233.                                                          sion. https://reviews.llvm.org/D92389.
+
+
+
+
+                                                                                   763
+EuroSys ’22, April 5–8, 2022, RENNES, France                                  Saba Jamilan, Tanvir Ahmed Khan, Grant Ayers, Baris Kasikci, and Heiner Litz
+
+
+[100] Seth H Pugsley, Zeshan Chishti, Chris Wilkerson, Peng-fei Chuang,                   hardware/software approach. In 30th Annual International Symposium
+      Robert L Scott, Aamer Jaleel, Shih-Lien Lu, Kingsum Chow, and                       on Computer Architecture, 2003. Proceedings. IEEE, 388–398.
+      Rajeev Balasubramonian. 2014. Sandbox prefetching: Safe run-time              [117] Thomas F Wenisch, Michael Ferdman, Anastasia Ailamaki, Babak
+      evaluation of aggressive prefetchers. In 2014 IEEE 20th International               Falsafi, and Andreas Moshovos. 2009. Practical off-chip meta-data
+      Symposium on High Performance Computer Architecture (HPCA). IEEE,                   for temporal memory streaming. In 2009 IEEE 15th International Sym-
+      626–637.                                                                            posium on High Performance Computer Architecture. IEEE, 79–90.
+[101] Tanausu Ramirez, Alex Pajuelo, Oliverio J Santana, and Mateo Valero.          [118] Thomas F Wenisch, Stephen Somogyi, Nikolaos Hardavellas, Jang-
+      2008. Runahead threads to improve SMT performance. In 2008 IEEE                     woo Kim, Anastassia Ailamaki, and Babak Falsafi. 2005. Temporal
+      14th International Symposium on High Performance Computer Archi-                    streaming of shared memory. In 32nd International Symposium on
+      tecture. IEEE, 149–158.                                                             Computer Architecture (ISCA’05). IEEE, 222–233.
+[102] Gang Ren, Eric Tune, Tipp Moseley, Yixin Shi, Silvius Rus, and Robert         [119] Thomas Willhalm and Roman Dementiev. 2012. Intel Perfor-
+      Hundt. 2010. Google-wide profiling: A continuous profiling infras-                  mance Counter Monitor - A Better Way to Measure CPU Utiliza-
+      tructure for data centers. IEEE micro 30, 4 (2010), 65–79.                          tion. https://software.intel.com/en-us/articles/intel-performance-
+[103] Alex Renda, Yishen Chen, Charith Mendis, and Michael Carbin. 2020.                  counter-monitor#abstracting.
+      Difftune: Optimizing cpu simulator parameters with learned differen-          [120] Michael Joseph Wolfe and Michael Wolfe. 1996. High performance
+      tiable surrogates. In 2020 53rd Annual IEEE/ACM International Sym-                  compilers for parallel computing. Vol. 102. Addison-Wesley Reading.
+      posium on Microarchitecture (MICRO). IEEE, 442–455.                           [121] Hao Wu, Krishnendra Nathella, Joseph Pusdesris, Dam Sunwoo,
+[104] Amir Roth, Andreas Moshovos, and Gurindar S Sohi. 1998. Depen-                      Akanksha Jain, and Calvin Lin. 2019. Temporal prefetching without
+      dence based prefetching for linked data structures. ACM SIGOPS                      the off-chip metadata. In Proceedings of the 52nd Annual IEEE/ACM
+      Operating Systems Review 32, 5 (1998), 115–126.                                     International Symposium on Microarchitecture. 996–1008.
+[105] Amir Roth and Gurindar S Sohi. 1999. Effective jump-pointer prefetch-         [122] Hao Wu, Krishnendra Nathella, Dam Sunwoo, Akanksha Jain, and
+      ing for linked data structures. In ACM SIGARCH Computer Architec-                   Calvin Lin. 2019. Efficient metadata management for irregular data
+      ture News, Vol. 27. IEEE Computer Society, 111–121.                                 prefetching. In 2019 ACM/IEEE 46th Annual International Symposium
+[106] Suleyman Sair, Timothy Sherwood, and Brad Calder. 2003. A decou-                    on Computer Architecture (ISCA). IEEE, 1–13.
+      pled predictor-directed stream prefetching architecture. IEEE Trans.          [123] Peng Wu, Arun Kejariwal, and Călin Caşcaval. 2008. Compiler-driven
+      Comput. 52, 3 (2003), 260–276.                                                      dependence profiling to guide program parallelization. In Interna-
+[107] Manjunath Shevgoor, Sahil Koladiya, Rajeev Balasubramonian, Chris                   tional Workshop on Languages and Compilers for Parallel Computing.
+      Wilkerson, Seth H Pugsley, and Zeshan Chishti. 2015. Efficiently                    Springer, 232–248.
+      prefetching complex address patterns. In 2015 48th Annual IEEE/ACM            [124] Youfeng Wu. 2002. Efficient discovery of regular stride patterns
+      International Symposium on Microarchitecture (MICRO). IEEE, 141–                    in irregular programs and its use in compiler prefetching. In ACM
+      152.                                                                                SIGPLAN Notices, Vol. 37. ACM, 210–221o.
+[108] Zhan Shi, Akanksha Jain, Kevin Swersky, Milad Hashemi,                        [125] Wm. A. Wulf and Sally A. McKee. 1995. Hitting the Memory Wall:
+      Parthasarathy Ranganathan, and Calvin Lin. 2021. A hierarchical                     Implications of the Obvious. SIGARCH Comput. Archit. News 23, 1
+      neural model of data prefetching. In Proceedings of the 26th ACM                    (March 1995), 20–24. https://doi.org/10.1145/216585.216588
+      International Conference on Architectural Support for Programming             [126] Xiangyao Yu, Christopher J Hughes, Nadathur Satish, and Srinivas
+      Languages and Operating Systems. 861–873.                                           Devadas. 2015. IMP: Indirect memory prefetcher. In Proceedings of
+[109] Alan Jay Smith. 1978. Sequential program prefetching in memory                      the 48th International Symposium on Microarchitecture. 178–190.
+      hierarchies. Computer 12 (1978), 7–21.                                        [127] Yuan Yu, Martín Abadi, Paul Barham, Eugene Brevdo, Mike Burrows,
+[110] Stephen Somogyi, Thomas F Wenisch, Anastassia Ailamaki, Babak                       Andy Davis, Jeff Dean, Sanjay Ghemawat, Tim Harley, Peter Hawkins,
+      Falsafi, and Andreas Moshovos. 2006. Spatial memory streaming.                      et al. 2018. Dynamic control flow in large-scale machine learning. In
+      ACM SIGARCH Computer Architecture News 34, 2 (2006), 252–263.                       Proceedings of the Thirteenth EuroSys Conference. 1–15.
+[111] Seung Woo Son, Mahmut Kandemir, Mustafa Karakoy, and Dhruva                   [128] Matei Zaharia, Mosharaf Chowdhury, Michael J Franklin, Scott
+      Chakrabarti. 2009. A compiler-directed data prefetching scheme for                  Shenker, Ion Stoica, et al. 2010. Spark: Cluster computing with work-
+      chip multiprocessors. In ACM Sigplan Notices, Vol. 44. ACM, 209–218.                ing sets. HotCloud (2010).
+[112] Shixin Song, Tanvir Ahmed Khan, Sara Mahdizadeh Shahri,                       [129] Chao Zhang, Yuan Zeng, John Shalf, and Xiaochen Guo. 2020. RnR:
+      Akshitha Sriraman, Niranjan K Soundararajan, Sreenivas Subra-                       A software-assisted record-and-replay hardware prefetcher. In 2020
+      money, Daniel A Jiménez, Heiner Litz, and Baris Kasikci. 2022. Ther-                53rd Annual IEEE/ACM International Symposium on Microarchitecture
+      mometer: Profile-Guided BTB Replacement for Data Center Applica-                    (MICRO). IEEE, 609–621.
+      tions.. In 49th Annual International Symposium on Computer Architec-          [130] Haoyu Zhang, Brian Cho, Ergin Seyfe, Avery Ching, and Michael J
+      ture (ISCA).                                                                        Freedman. 2018. Riffle: optimized shuffle service for large-scale data
+[113] Akshitha Sriraman, Abhishek Dhanotia, and Thomas F Wenisch. 2019.                   analytics. In Proceedings of the Thirteenth EuroSys Conference. 1–15.
+      Softsku: Optimizing server architectures for microservice diversity@          [131] Weifeng Zhang, Brad Calder, and Dean M Tullsen. 2006. A self-
+      scale. In Proceedings of the 46th International Symposium on Computer               repairing prefetcher in an event-driven dynamic optimization frame-
+      Architecture. 513–526.                                                              work. In Proceedings of the International Symposium on Code Genera-
+[114] Nishil Talati, Kyle May, Armand Behroozi, Yichen Yang, Kuba Kaszyk,                 tion and Optimization. IEEE Computer Society, 50–64.
+      Christos Vasiladiotis, Tarunesh Verma, Lu Li, Brandon Nguyen,                 [132] Weifeng Zhang, Dean M Tullsen, and Brad Calder. 2007. Accelerating
+      Jiawen Sun, et al. 2021. Prodigy: Improving the memory latency                      and adapting precomputation threads for efficient prefetching. In 2007
+      of data-indirect irregular workloads using hardware-software co-                    IEEE 13th International Symposium on High Performance Computer
+      design. In 2021 IEEE International Symposium on High-Performance                    Architecture. IEEE, 85–95.
+      Computer Architecture (HPCA). IEEE, 654–667.
+[115] Vish Viswanathan. 2014. Disclosure of hardware prefetcher control
+      on some Intel processors. Intel SW Developer Zone (2014).
+[116] Zhenlin Wang, Doug Burger, Kathryn S McKinley, Steven K Reinhardt,
+      and Charles C Weems. 2003. Guided region prefetching: A cooperative
+
+
+
+
+                                                                              764
+

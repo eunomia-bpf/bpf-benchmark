@@ -324,8 +324,8 @@ instance id / launch time was not retained in the copied logs.
 - 当前实验失败 attempt：`attempts/profile-args-missing`。
 - 当前实验本地 build failure：`attempts/docker-buildx-cache-failure`。
 - 前序 prefetch 文档：
-  `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`、
-  `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`。
+  `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`、
+  `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`。
 - 前序实验：
   `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-profile-gate-impl/report.md`、
   `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-selector-v3-policy-smoke/report.md`、
@@ -334,8 +334,8 @@ instance id / launch time was not retained in the copied logs.
 发现和处理：
 
 - 旧文档仍写着 “profile-fed AWS attribution 未跑”。已更新
-  `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md` 和
-  `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`，记录为
+  `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md` 和
+  `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`，记录为
   “已完成一轮 x86/ARM64 paired attribution，结果是 preliminary positive signal but not
   default-enable evidence”。
 - 第一次 failed smoke 的结论已更新为 runner env propagation 问题，不再作为 selector failure。

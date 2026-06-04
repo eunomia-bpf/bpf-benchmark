@@ -1,0 +1,7 @@
+label	bench	kind	rc	start	end
+prefetch-struct-field-arm64-control-paired	prefetch_struct_field_fixed_offsets	control	0	2026-06-04T06:33:24-04:00	2026-06-04T06:40:52-04:00
+prefetch-struct-field-arm64-treatment-paired	prefetch_struct_field_fixed_offsets	treatment	0	2026-06-04T06:40:52-04:00	2026-06-04T06:47:58-04:00
+prefetch-mixed-policy-arm64-control-paired	prefetch_mixed_policy_table	control	0	2026-06-04T06:47:58-04:00	2026-06-04T06:54:40-04:00
+prefetch-mixed-policy-arm64-treatment-paired	prefetch_mixed_policy_table	treatment	0	2026-06-04T06:54:40-04:00	2026-06-04T07:01:51-04:00
+prefetch-stream-arm64-control-paired	prefetch_stream_of_strides	control	0	2026-06-04T07:01:51-04:00	2026-06-04T07:08:46-04:00
+prefetch-stream-arm64-treatment-paired	prefetch_stream_of_strides	treatment	0	2026-06-04T07:08:46-04:00	2026-06-04T07:14:56-04:00

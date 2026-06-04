@@ -131,7 +131,7 @@ Benchmark / input / manifest：
 
 文档 / 实验记录：
 
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-05-31-prefetch-research-micro-attribution/report.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-05-31-prefetch-research-micro-attribution/analysis/*`
 
@@ -265,7 +265,7 @@ total:   $0.014124542
 
 - 当前失败 run：`data/control-r1-initial-result`。
 - 修复后所有 control/treatment run：r1/r2/r3。
-- 相关文档：`/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`。
+- 相关文档：`/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`。
 - 前序 smoke：`/home/ruoji/github/bpf-opt/experiments/2026-05-31-prefetch-research-micro-smoke/report.md`。
 
 发现和处理：

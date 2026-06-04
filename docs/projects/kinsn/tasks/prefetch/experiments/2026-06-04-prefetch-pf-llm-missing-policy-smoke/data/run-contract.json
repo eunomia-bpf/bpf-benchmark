@@ -1,0 +1,49 @@
+{
+  "experiment": "2026-06-04-prefetch-pf-llm-missing-policy-smoke",
+  "date": "2026-06-04",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "question": "Can Kinsn prefetch express and emit PF-LLM-inspired struct-field, mixed-policy-table, and stream-of-strides policies through BPF bytecode profile points?",
+  "scope": "correctness and emit smoke only; no performance conclusion",
+  "platforms": [
+    {
+      "name": "local-build",
+      "arch": "x86",
+      "commands": [
+        "cd /home/ruoji/github/bpf-opt/code && make -C micro/programs OUTPUT_DIR=build-x86 all",
+        "cd /home/ruoji/github/bpf-opt/code/bpfopt && cargo fmt --all",
+        "cd /home/ruoji/github/bpf-opt/code/bpfopt && cargo test prefetch -- --nocapture"
+      ]
+    },
+    {
+      "name": "aws-x86",
+      "arch": "x86_64",
+      "instance_type": "t3.small",
+      "region": "us-east-1",
+      "remote_user": "ec2-user",
+      "kernel_release": "7.0.0-rc2+",
+      "container_image": "bpf-benchmark/runner-runtime:x86_64",
+      "samples": 1,
+      "warmups": 0,
+      "inner_repeat": 1
+    }
+  ],
+  "benchmarks": [
+    "prefetch_struct_field_fixed_offsets",
+    "prefetch_mixed_policy_table",
+    "prefetch_stream_of_strides"
+  ],
+  "profiles": [
+    "/home/ruoji/github/bpf-opt/code/micro/config/prefetch-struct-field-fixed-offsets-profile-pc29-r2-r6-r4.json",
+    "/home/ruoji/github/bpf-opt/code/micro/config/prefetch-mixed-policy-table-profile-pc23-r2.json",
+    "/home/ruoji/github/bpf-opt/code/micro/config/prefetch-stream-of-strides-profile-pc316-r2-r9.json"
+  ],
+  "aws_instances": [
+    "i-0b5b199d1cb8ce5e1",
+    "i-0ac875a238ac791f5",
+    "i-0168c3ad0fd352c3d",
+    "i-0f6214f6bea4dfcbb",
+    "i-0ec3f2776b7ae80a6"
+  ],
+  "status": "completed_with_one_expected-result-rerun"
+}

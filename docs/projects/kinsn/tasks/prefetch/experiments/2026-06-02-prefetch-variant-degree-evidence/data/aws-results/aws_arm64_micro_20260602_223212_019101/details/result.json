@@ -1,0 +1,122 @@
+{
+  "benchmarks": [
+    {
+      "expected_result": 2999102902642040864,
+      "input": "/home/ruoji/github/bpf-opt/code/micro/generated-inputs/prefetch_upper_bound.mem",
+      "io_mode": "map",
+      "name": "prefetch_pipeline_page_stride",
+      "runs": [
+        {
+          "inner_repeat": 1000,
+          "runtime": "kernel",
+          "samples": [
+            {
+              "bpfopt_pass_args": [
+                "--profile",
+                "/home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-page-stride-profile-pc45-r1.json",
+                "--hint",
+                "pldl2keep"
+              ],
+              "bpfopt_passes": [
+                "prefetch"
+              ],
+              "code_size": {
+                "bpf_bytecode_bytes": 2112,
+                "native_code_bytes": 1280
+              },
+              "compile_ns": 67761083,
+              "exec_ns": 18780,
+              "jited_prog_len": 1280,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "map_prepare_ns": 324157,
+                "memory_prepare_ns": 595610,
+                "object_load_ns": 63959953,
+                "object_open_ns": 3801130,
+                "prog_run_wall_ns": 40628980,
+                "result_read_ns": 10338
+              },
+              "result": 2999102902642040864,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 2112
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "memory",
+        "prefetch",
+        "map-working-set",
+        "page-stride",
+        "synthetic-control",
+        "next-pointer",
+        "software-pipeline",
+        "new-2026-06-02",
+        "kernel-only"
+      ]
+    }
+  ],
+  "build": {
+    "bpfopt_binary": "/usr/local/bin/bpfopt",
+    "bpfopt_target_json": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260602_223212_019101/details/bpfopt/target.json",
+    "kernel_bpfopt_pass_args": [
+      "--profile",
+      "/home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-page-stride-profile-pc45-r1.json",
+      "--hint",
+      "pldl2keep"
+    ],
+    "kernel_bpfopt_passes": [
+      "prefetch"
+    ],
+    "kinsnprober_binary": "/usr/local/bin/kinsnprober",
+    "runner_binary": "/home/ruoji/github/bpf-opt/code/runner/build-arm64-llvmbpf/micro_exec"
+  },
+  "defaults": {
+    "inner_repeat": 1000,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "generated_at": "2026-06-02T22:32:12.019101+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "ip-172-31-14-39.ec2.internal",
+    "kernel_cmdline": "BOOT_IMAGE=(hd0,gpt1)/boot/vmlinuz-7.0.0-rc2+ root=UUID=7e75db7b-0182-40fc-8f7e-c1f405fd374d ro console=tty0 console=ttyS0,115200n8 nvme_core.io_timeout=4294967295 rd.emergency=poweroff rd.shell=0 selinux=1 security=selinux quiet numa_cma=1:64M",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-aarch64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "manifest": "/home/ruoji/github/bpf-opt/code/micro/config/micro_pure_jit.yaml",
+  "provenance": {
+    "cpu_model": "aarch64",
+    "environment": "bare-metal",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 1000,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-06-02T22:32:12.042767+00:00"
+  },
+  "suite": "micro_staged_codegen"
+}

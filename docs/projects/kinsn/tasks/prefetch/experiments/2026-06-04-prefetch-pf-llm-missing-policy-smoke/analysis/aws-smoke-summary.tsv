@@ -1,0 +1,6 @@
+case	run_dir	status	result	bpf_bytes	native_bytes	passes	pass_args
+prefetch_stream_of_strides	aws_x86_micro_20260604_085136_579819	error					
+prefetch_stream_of_strides	aws_x86_micro_20260604_090025_116106	completed	2202534365130024933	2648	1360		
+prefetch_stream_of_strides	aws_x86_micro_20260604_090715_792636	completed	2202534365130024933	2680	1367	prefetch	--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-stream-of-strides-profile-pc316-r2-r9.json --max-sites=2 --hint=t0
+prefetch_struct_field_fixed_offsets	aws_x86_micro_20260604_091609_304735	completed	12246088582525788897	2840	1425	prefetch	--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-struct-field-fixed-offsets-profile-pc29-r2-r6-r4.json --max-sites=3 --hint=t0
+prefetch_mixed_policy_table	aws_x86_micro_20260604_092305_849754	completed	16217383686291505505	2664	1314	prefetch	--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-mixed-policy-table-profile-pc23-r2.json --max-sites=1 --hint=t0

@@ -133,7 +133,7 @@ AWS treatment：
 
 文档 / 实验记录改动：
 
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-map-large-working-set-attribution/report.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-map-raw-loader-fix/report.md`
 
@@ -273,7 +273,7 @@ AWS CLI `describe-instances` 显示 4 个 instance 均为 `terminated`。
 - 前序失败实验：`/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-map-large-working-set-attribution/report.md`
 - 当前实验初始失败 smoke：`data/aws-treatment-smoke.log` 和 `data/remote-treatment-smoke.log`
 - 当前实验修复后 smoke/control/treatment raw result
-- Prefetch task 文档：`/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
+- Prefetch task 文档：`/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
 
 发现和处理：
 

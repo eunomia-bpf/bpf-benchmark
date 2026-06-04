@@ -1,0 +1,275 @@
+<head>
+<title>The Profet Project</title>
+<base href="http://www.cs.cmu.edu/~profet">
+
+<body background="http://www.cs.cmu.edu/~profet/images/bg.jpg" bgcolor="00003f" text="ffffff" link="ffff00" vlink="ff0000">
+<body>
+<H1 align=center> The Profet Project </H1>
+
+
+<h2> Overview: </h2>
+
+The goal of the Profet project is to avoid wasting time whenever we access
+data.  To accomplish this, we proactively manage caches such that the data
+that you want is available in the cache before you actually need it.
+<p>
+
+The name "Profet" comes from "PROactive FETching data".  Profet is also
+a deliberate misspelling of both "prophet" (as in predicting the future,
+which is what we do improve cache performance) and "profit" (as in
+optimizing "cash" - sic), and it is pronounced like both of those words.
+
+<p>
+
+<HR>
+
+<h2> People Working for Profet: </h2>
+
+<h3> Project Leader: </h3> 
+<ul>
+<li> <a href="http://www.cs.cmu.edu/~tcm">Prof. Todd C. Mowry</a>
+</ul>
+
+<h3> Graduate Students: </h3> 
+<ul>
+<li> <a href="http://www.cs.cmu.edu/~demke/">Angela Demke Brown</a> 
+<li> <a href="http://www.cs.cmu.edu/~chensm">Shimin Chen</a> 
+<li> <a href="http://www.cs.cmu.edu/~mzwang">Mengzhi Wang</a>
+</ul>
+
+<h3> Undergrads: </h3> 
+<ul>
+<li> <a href="http://www.andrew.cmu.edu/~wilson2">James Wilson</a> 
+</ul>
+
+<h3> Dearly Departed: </h3> 
+<ul>
+<li> <a href="http://www.cs.cmu.edu/~luk">C.K. Luk</a>, PhD 2000.
+</ul>
+
+<p>
+
+<HR>
+
+<h2> Publications: </h2>
+
+<h3>Improving the Cache Performance of Databases:</h3>
+<ul>
+
+<li> 
+<b>
+Improving Index Performance through Prefetching.</b>
+[<a href="~profet/papers/index_pf_final.ps">ps</a>], 
+[<a href="~profet/papers/index_pf_final.ps.gz">ps.gz</a>]
+<br> <a href="http://www.cs.cmu.edu/~chensm">Shimin Chen</a>, 
+<a href="http://www1.bell-labs.com/user/pbgibbons/">Phillip B. Gibbons</a> 
+and <a href="http://www.cs.cmu.edu/~tcm/">Todd C. Mowry</a>.<br>
+Proceedings of the SIGMOD 2001 Conference, May 2001.
+<p>
+<ul>
+<li><em>Full-blown Tech Report Version:</em>
+<br>
+<b>
+Improving Index Performance through Prefetching.</b>
+[<a href="~profet/papers/index_pf_tr00.ps">ps</a>], 
+[<a href="~profet/papers/index_pf_tr00.ps.gz">ps.gz</a>]
+<br> <a href="http://www.cs.cmu.edu/~chensm">Shimin Chen</a>, 
+<a href="http://www1.bell-labs.com/user/pbgibbons/">Phillip B. Gibbons</a> 
+and <a href="http://www.cs.cmu.edu/~tcm/">Todd C. Mowry</a>.<br>
+Technical Report CMU-CS-00-177, School of Computer Science,
+Carnegie Mellon University, December 2000.
+</ul>
+</ul>
+
+
+<h3>Prefetching Data from Memory into Cache:</h3>
+<ul>
+
+<li> 
+<b>
+<a href="http://www.computer.org/tc/tc1999/t0134abs.htm">
+Automatic Compiler-Inserted Prefetching for Pointer-Based
+Applications.</a></b> <br> <a href="http://www.cs.cmu.edu/~luk">Chi-Keung
+Luk</a> and <a href="http://www.cs.cmu.edu/~tcm">Todd C. Mowry</a>.<br> In
+<a href="http://www.computer.org/tc/">IEEE Transactions on Computers</a>,
+Vol. 48, No. 2, February 1999
+<p>
+
+<li> 
+<b>Compiler-Based Prefetching for Recursive Data Structures.</b> 
+[<a href="~profet/papers/asplos96_RDS_pf.ps.gz">ps.gz</a>]
+<br> <a href="http://www.cs.cmu.edu/~luk">Chi-Keung Luk</a> and <a href="http://www.cs.cmu.edu/~tcm">Todd C. Mowry</a>.<br>
+Proceedings of the Seventh International Conference on Architectural Support
+for Programming Languages and Operating Systems, pages 222-233, October 1996.<p>
+
+</ul>
+<h3>Prefetching Data from Disk into Memory:</h3>
+<ul>
+
+<li> <b>Taming the Memory Hogs: Using Compiler-Inserted Releases to Manage
+Physical Memory Intelligently.</b>
+[<a href="~profet/papers/mem_hogs_osdi00.ps">ps</a>],
+[<a href="~profet/papers/mem_hogs_osdi00.ps.gz">ps.gz</a>]
+<br> <a href="http://www.cs.cmu.edu/~demke">Angela Demke Brown</a> and <a href="http://www.cs.cmu.edu/~tcm/">Todd C. Mowry</a>.<br>
+Proceedings of the Fourth Symposium on Operating Systems Design and 
+Implementation (OSDI 2000), pages 31-44, October 2000.<p>
+
+<li> 
+<b>Automatic Compiler-Inserted I/O Prefetching for Out-of-Core Applications.</b>
+[<a href="~profet/papers/io_pf_osdi96.ps.gz">ps.gz</a>]
+<br> <a href="http://www.cs.cmu.edu/~tcm">Todd C. Mowry</a>, Angela K. Demke and Orran Krieger.<br>
+Proceedings of the Second Symposium on Operating Systems Design and 
+Implementation (OSDI '96), pages 3-17, October 1996.<p>
+
+</ul>
+<h3>Prefetching Instructions:</h3>
+<ul>
+
+<li> 
+<b>Cooperative Prefetching: Compiler and Hardware Support for Effective Instruction 
+Prefetching in Modern Processors.</b>
+[<a href="~profet/papers/ipf_micro98.ps">ps</a>], 
+[<a href="~profet/papers/ipf_micro98.ps.gz">ps.gz</a>]
+<br> <a href="http://www.cs.cmu.edu/~luk">Chi-Keung Luk</a> and <a href="http://www.cs.cmu.edu/~tcm">Todd C. Mowry</a>.<br>
+In Proceedings of Micro-31, Nov. 30 - Dec. 2, 1998, Dallas, Texas.<p>
+<ul>
+<li><em>Earlier Tech Report Version:</em>
+<br>
+<b>
+Compiler and Hardware Support for Automatic Instruction Prefetching: A Cooperative Approach.</b>
+[<a href="~profet/papers/ipf_tr98.ps">ps</a>], 
+[<a href="~profet/papers/ipf_tr98.ps.gz">ps.gz</a>]
+<br> <a href="http://www.cs.cmu.edu/~luk">Chi-Keung Luk</a> and <a href="http://www.cs.cmu.edu/~tcm">Todd C. Mowry</a>.<br>
+Technical Report CMU-CS-98-140, School of Computer Science,
+Carnegie Mellon University, June 1998.
+</ul>
+<p>
+
+
+</ul>
+<h3>Facilitating Data Layout Optimizations:</h3>
+<ul>
+
+<li> 
+<b>
+Memory Forwarding: Enabling Aggressive Layout Optimizations 
+by Guaranteeing the Safety of Data Relocation.</b>
+[<a href="~profet/papers/forwarding_isca99.ps">ps</a>], 
+[<a href="~profet/papers/forwarding_isca99.ps.gz">ps.gz</a>]
+<br> <a href="http://www.cs.cmu.edu/~luk">Chi-Keung Luk</a> and <a href="http://www.cs.cmu.edu/~tcm">Todd C. Mowry</a>.<br>
+In Proceedings of the 26th Annual International Symposium on Computer
+Architecture, May 1999. <p>
+
+
+</ul>
+<h3>Predicting When Cache Misses Occur:</h3>
+<ul>
+
+<li>
+<b>
+<a href="http://www.computer.org/tc/tc2000/t0369abs.htm">
+Understanding Why Correlation Profiling Improves the Predictability of Data
+Cache Misses in Nonnumeric Applications.</a>
+</b>
+<br> 
+<a href="http://www.cs.cmu.edu/~tcm">Todd C. Mowry</a> and 
+<a href="http://www.cs.cmu.edu/~luk">Chi-Keung Luk</a>. 
+<br>
+In <a href="http://www.computer.org/tc/">IEEE Transactions on
+Computers</a>, Vol. 49, No. 4, April 2000.
+<p>
+
+<li> 
+<b>
+Predicting Data Cache Misses in Non-Numeric Applications Through Correlation Profiling.</b>
+[<a href="~profet/papers/mowry_luk_micro30.ps">ps</a>], 
+[<a href="~profet/papers/mowry_luk_micro30.ps.gz">ps.gz</a>]
+<br> <a href="http://www.cs.cmu.edu/~tcm">Todd C. Mowry</a> and <a href="http://www.cs.cmu.edu/~luk">Chi-Keung Luk</a>.<br>
+Proceedings of Micro-30, December 1-3, 1997, Research
+Triangle Park, North Carolina.<p>
+<ul>
+<li><em>Extended Tech Report Version:</em>
+<br>
+<b>Predicting Data Cache Misses in Non-Numeric Applications Through Correlation Profiling.</b>
+[<a href="~profet/papers/miss_predict_TR.ps">ps</a>], 
+[<a href="~profet/papers/miss_predict_TR.ps.gz">ps.gz</a>]
+<br> <a href="http://www.cs.cmu.edu/~tcm">Todd C. Mowry</a> and <a href="http://www.cs.cmu.edu/~luk">Chi-Keung Luk</a><br>
+<a href="http://www.cs.cmu.edu/Reports/index.html">
+Technical Report</a> CMU-CS-97-175, 
+School of Computer Science, Carnegie Mellon University,
+Pittsburgh, PA 15213, September 1997.<p>
+</ul>
+
+</ul>
+<h3>Informing Memory Operations:</h3>
+<ul>
+
+<li> <b>
+Software-Controlled Multithreading Using Informing Memory Operations. </b>
+[<a href="~profet/papers/swmt_hpca00.ps">ps</a>], 
+[<a href="~profet/papers/swmt_hpca00.ps.gz">ps.gz</a>]
+<br> <a href="http://www.cs.cmu.edu/~tcm">Todd C. Mowry</a> and Sherwyn R. Ramkissoon. 
+<br>
+In Proceedings of the Sixth International Symposium on High-Performance Computer Architecture, 
+January, 2000.
+<p>
+<ul>
+<li><em>Earlier Tech Report Version:</em>
+<br>
+<b>
+Software-Controlled Multithreading Using Informing Memory Operations.</b>
+[<a href="~profet/papers/sw_mt_tr98.ps">ps</a>],
+[<a href="~profet/papers/sw_mt_tr98.ps.gz">ps.gz</a>]
+<br> <a href="http://www.cs.cmu.edu/~tcm">Todd C. Mowry</a> and Sherwyn R. Ramkissoon.<br>
+Technical Report CMU-CS-98-169, School of Computer Science,
+Carnegie Mellon University, October 1998.
+</ul>
+<p>
+
+<li> 
+<b>
+<a href="http://www.acm.org/pubs/citations/journals/tocs/1998-16-2/p170-horowitz">
+Informing Memory Operations: Memory Performance Feedback Mechanisms and Their
+Applications</a>.</b>
+<br>Mark Horowitz, <a href="http://www.ee.princeton.edu/~mrm">Margaret Martonosi</a>, 
+<a href="http://www.cs.cmu.edu/~tcm">Todd C. Mowry</a>, 
+and <a href="http://www.eecs.harvard.edu/~smith">Michael D. Smith</a>.<br>
+In <a href="http://www.acm.org/tocs">ACM Transactions
+on Computer Systems</a>, 16(2):170-205, May 1998.<p>
+
+<li> <b>Informing Memory Operations:
+Providing Memory Performance Feedback in Modern Processors.</b> 
+[<a href="~profet/papers/inf_mem_isca96.ps.gz">ps.gz</a>]
+<br> Mark Horowitz, <a href="http://www.ee.princeton.edu/~mrm">Margaret Martonosi</a>, <a href="http://www.cs.cmu.edu/~tcm">Todd C. Mowry</a>, and <a href="http://www.eecs.harvard.edu/~smith">Michael D. Smith</a>.<br>
+Proceedings of the 23rd Annual International Symposium on Computer
+Architecture, pages 260-270, May 1996.<p>
+<ul>
+<li><em>Earlier Tech Report Version:</em>
+<br>
+<b>
+Informing Loads: Enabling Software
+to Observe and React to Memory Behavior.</b>
+[<a href="~profet/papers/inf_load_TR95.ps.gz">ps.gz</a>]
+<br> Mark Horowitz, <a href="http://www.ee.princeton.edu/~mrm">Margaret Martonosi</a>, <a href="http://www.cs.cmu.edu/~tcm">Todd C. Mowry</a>, and <a href="http://www.eecs.harvard.edu/~smith">Michael D. Smith</a>.<br>
+Stanford University Technical Report CSL-TR-95-673 (also numbered STAN-CS-95-675),
+July 1995.<p>
+</ul>
+
+</ul>
+<h3>Tolerating Network Latencies:</h3>
+<ul>
+
+<li> 
+<b>
+Comparative Evaluation of Latency Tolerance Techniques for Software Distributed Shared Memory.</b>
+[<a href="~profet/papers/dsm_latency_hpca4.ps">ps</a>],
+[<a href="~profet/papers/dsm_latency_hpca4.ps.gz">ps.gz</a>]
+<br> <a href="http://www.cs.cmu.edu/~tcm">Todd C. Mowry</a>, Charles Q. C. Chan and Adley K. W. Lo.<br>
+Proceedings of the Fourth International Symposium on High-Performance Computer 
+Architecture, February 2-4, 1998, Las Vegas, Nevada.<p>
+
+
+</ul>
+
+<HR>
+

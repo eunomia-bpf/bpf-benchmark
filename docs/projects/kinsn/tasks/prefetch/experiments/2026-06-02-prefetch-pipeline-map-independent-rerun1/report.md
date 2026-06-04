@@ -148,8 +148,8 @@ AWS instances：
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-02-prefetch-pipeline-map-independent-rerun1/analysis/stability-samples.tsv`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-02-prefetch-pipeline-map-independent-rerun1/analysis/stability-summary.tsv`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-02-prefetch-pipeline-map-independent-rerun1/analysis/aws-instance-summary.tsv`
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`
 
 ## 数据文件
 
@@ -230,8 +230,8 @@ Paired ratio：
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-02-prefetch-pipeline-map-attribution/report.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-02-prefetch-upper-bound-map-attribution/report.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-02-prefetch-profile-fed-map-value-pmu-attribution/report.md`
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`
 
 发现和处理：
 

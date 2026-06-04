@@ -1,0 +1,1137 @@
+                                      RPG2: Robust Profile-Guided
+                                      Runtime Prefetch Generation
+                 Yuxuan Zhang                                           Nathan Sobotka                                      Soyoon Park
+           zyuxuan@seas.upenn.edu                                 nsobotka@seas.upenn.edu                             soyoon@seas.upenn.edu
+           University of Pennsylvania                             University of Pennsylvania                         University of Pennsylvania
+
+                   Saba Jamilan                                     Tanvir Ahmed Khan                                       Baris Kasikci
+             sjamilan@ucsc.edu                                        tk3070@columbia.edu                            baris@cs.washington.edu
+     University of California, Santa Cruz                              Columbia University                       University of Washington & Google
+
+                 Gilles A Pokam                                             Heiner Litz                                   Joseph Devietti
+            gilles.a.pokam@intel.com                                  hlitz@ucsc.edu                                  devietti@cis.upenn.edu
+                        Intel                               University of California, Santa Cruz                     University of Pennsylvania
+
+Abstract                                                                                   prefetching ends up being harmful and roll back to the orig-
+Data cache prefetching is a well-established optimization                                  inal code – something that static compilers cannot. RPG2
+to overcome the limits of the cache hierarchy and keep the                                 improves prefetching robustness by preserving its perfor-
+processor pipeline fed with data. In principle, accurate, well-                            mance benefits, while avoiding slowdowns.
+timed prefetches can sidestep the majority of cache misses
+and dramatically improve performance. In practice, how-                                    ACM Reference Format:
+ever, it is challenging to identify which data to prefetch and                             Yuxuan Zhang, Nathan Sobotka, Soyoon Park, Saba Jamilan, Tanvir
+when to do so. In particular, data can be easily requested                                 Ahmed Khan, Baris Kasikci, Gilles A Pokam, Heiner Litz, and Joseph
+                                                                                           Devietti. 2024. RPG2 : Robust Profile-Guided Runtime Prefetch Gen-
+too early, causing eviction of useful data from the cache, or
+                                                                                           eration. In 29th ACM International Conference on Architectural Sup-
+requested too late, failing to avoid cache misses. Competi-                                port for Programming Languages and Operating Systems, Volume 1
+tion for limited off-chip memory bandwidth must also be                                    (ASPLOS ’24), April 27-May 1, 2024, La Jolla, CA, USA. ACM, New
+balanced between prefetches and a program’s regular “de-                                   York, NY, USA, 15 pages. https://doi.org/10.1145/3620665.3640396
+mand” accesses. Due to these challenges, prefetching can
+both help and hurt performance, and the outcome can de-
+pend on program structure, decisions about what to prefetch
+and when to do it, and, as we demonstrate in a series of                                   1    Introduction
+experiments, program input, processor microarchitecture,                                   As modern applications scale to ever-larger datasets, the
+and their interaction as well.                                                             pressure on the memory hierarchy to provide data to the
+   To try to meet these challenges, we have designed the                                   processor pipeline efficiently continues to grow. In particular,
+RPG2 system for online prefetch injection and tuning. RPG2                                 data center applications can spend most of their cycles on
+is a pure-software system that operates on running C/C++                                   cache misses, waiting for data to be fetched from main mem-
+programs, profiling them, injecting prefetch instructions,                                 ory [30]. Modern processor techniques such as out-of-order
+and then tuning those prefetches to maximize performance.                                  scheduling can frequently hide the latency of L1 misses but
+Across dozens of inputs, we find that RPG2 can provide                                     struggle with misses in deeper levels of the cache hierarchy.
+speedups of up to 2.15×, comparable to the best profile-                                      Data prefetching is a popular strategy to improve the per-
+guided prefetching compilers, but can also respond when                                    formance of the memory system by proactively bringing
+                                                                                           unrequested lines into the cache in anticipation (and hope-
+Permission to make digital or hard copies of all or part of this work for                  fully avoidance) of future misses. The ability to predict and
+personal or classroom use is granted without fee provided that copies                      efficiently prefetch data depends on the workload’s mem-
+are not made or distributed for profit or commercial advantage and that
+copies bear this notice and the full citation on the first page. Copyrights
+                                                                                           ory access patterns [6], which often include stride accesses
+for components of this work owned by others than the author(s) must                        (a[i]), indirect memory accesses (a[b[i]]), and random
+be honored. Abstracting with credit is permitted. To copy otherwise, or                    accesses (pointer-chasing). While numerous academic pro-
+republish, to post on servers or to redistribute to lists, requires prior specific         posals exist [10, 13, 18–20, 22, 23, 25, 26, 29, 33, 37, 39, 41,
+permission and/or a fee. Request permissions from permissions@acm.org.                     46, 47, 49, 53, 56, 58, 59, 65, 68] to prefetch these diverse ac-
+ASPLOS ’24, April 27-May 1, 2024, La Jolla, CA, USA
+                                                                                           cess patterns, few have been implemented in real hardware.
+© 2024 Copyright held by the owner/author(s). Publication rights licensed
+to ACM.                                                                                    In particular, we have found that modern processors such
+ACM ISBN 979-8-4007-0385-0/24/04. . . $15.00                                               as Intel Cascade Lake can prefetch stride accesses well but
+https://doi.org/10.1145/3620665.3640396                                                    still struggle to prefetch indirect memory accesses efficiently.
+
+
+
+                                                                                     999
+ASPLOS ’24, April 27-May 1, 2024, La Jolla, CA, USA                                                                                              Zhang et al.
+
+
+                                              ZZZWVU/HZ^LSS                                a different input from the Stanford Network Analysis Plat-
+                               
+                                                                        96LKNLZ             form (SNAP) [38], the speedup over a no-prefetch baseline
+                                                                        HTHaVU           when prefetching for 1 to 100 iterations ahead. The best per-
+                                                                        NV^HSSH
+                                                                                          forming range of prefetch distances is shaded, which reveals
+                                                                        5V[YL+HTL
+  ZWLLK\WOPNOLYPZIL[[LY
+
+
+
+
+                                                                                             that all inputs show substantially different behaviors: RO-
+                                                                                          edges (the top line) performs best with a distance of 20-34,
+                                                                                             while gowalla is best with 1-2 (which would fare poorly on
+                                                                                          RO-edges). The prefetch distance, however, must be baked
+                                                                                             into the instructions that perform prefetching (typically as a
+                                                                                          displacement in x86 addressing), and any single choice for
+                                                                                             these sssp inputs may work well in some cases but can leave
+                                                                       
+                                              WYLML[JOKPZ[HUJL                              a lot of performance on the table in others.
+                                                                                                In response to this finding, we propose the pure-software
+Figure 1. The sssp benchmark from CRONO [2] has very                                         RPG2 system for dynamic prefetch insertion and tuning.
+different optimal prefetch distances (shaded regions) with                                   RPG2 profiles a running C/C++ program, adds prefetch in-
+different inputs.                                                                            structions as indicated by the profile, and tunes prefetch
+                                                                                             distance online using the program’s real-time performance
+                                                                                             to guide adjustments. RPG2 is, to our knowledge, the first
+To address the challenge of prefetching complex access pat-                                  system to enable dynamic software prefetching. RPG2 can
+terns, CPU vendors have introduced software prefetch in-                                     adapt prefetching to program inputs while the program runs,
+structions that can be utilized via compiler intrinsics such as                              avoiding the pitfalls of ahead-of-time profiling and static
+__builtin_prefetch() in gcc and clang. As software developers                                compiler optimization. RPG2 can also disable prefetching if
+are generally aware of the memory access patterns exhibited                                  it causes slowdown, as we see in many cases, and restore
+by their code, these powerful instructions can theoretically                                 baseline performance. Like other compiler-based prefetch-
+prefetch any pattern.                                                                        ing optimizations [3, 28, 34], RPG2 targets programs with
+   Unfortunately, these software prefetch instructions are                                   1-2 small hot loops, each containing a small number of load
+also challenging to use efficiently. First, the developer needs                              instructions that are potentially prefetchable. Unlike prior
+to extract the prefetch kernel for computing the address that                                work, RPG2 builds on the BOLT [50, 51] binary optimization
+should be prefetched. Second, the prefetch instruction (and                                  tool and thus does not need access to source code: RPG2 op-
+its kernel) must be inserted into the correct code location                                  erates on a program binary and the process launched from it.
+to enable timely prefetches. In particular, the time between                                 Prefetching is a well-known “double-edged sword” that can
+the prefetch and the usage of a data item must match the                                     as easily lift as lower performance. RPG2 provides a safer
+time needed to load data from the main memory which rep-                                     framework for data cache prefetching that makes that sword
+resents an almost impossible-to-resolve task for developers                                  much easier to wield.
+due to out-of-order execution and the complex memory hier-
+archies employed by modern CPUs. Finally, the timeliness of                                  2   Background
+a prefetch depends not only on the source code of an appli-
+cation but also on its inputs. For instance, the average vertex                              In this section, we describe the main elements of effective
+degree of a graph may affect the time between (indirect)                                     memory prefetching, some of the performance challenges
+memory accesses. While many automatic compiler passes                                        that prefetching can present, and current compiler tech-
+exist to insert prefetching as well [3, 4, 12, 15, 21, 28, 34],                              niques for automatic prefetching.
+they struggle with this same set of challenges.
+   In this work, we shed light on the scope of the data pre-                                 2.1 Prefetching Basics
+fetching challenge via a large-scale study of program behav-                                 A data prefetch is used to proactively request data that are
+ior across dozens of inputs, much more than have been con-                                   used by a subsequent demand memory request; we use the
+sidered in previous work. This study reveals that prefetching                                “demand” qualifier to distinguish requests that are part of the
+can be very sensitive to both microarchitecture and pro-                                     semantics of the program from prefetch requests that are
+gram input, making it very challenging to perform effective                                  logically NOPs. We typically care only about demand loads,
+software prefetching via static compiler instrumentation.                                    as the latency of store misses can be hidden in most cases
+   For example, consider Figure 1, which shows the speedup                                   via out-of-order execution and a hardware store buffer.
+obtainable from prefetching in the sssp benchmark from the                                      The success of a prefetch is determined by three qualities:
+CRONO suite [2], running on a 16-core Haswell machine.                                       its accuracy, coverage, and timeliness. Accuracy means that
+The x-axis shows the prefetch distance: essentially, how many                                there exists a future demand load to the same address as
+loop iterations ahead we prefetch for. Each line illustrates, for                            the prefetch; prefetches (since they are NOPs) may also be
+
+
+
+                                                                                      1000
+RPG2 : Robust Profile-Guided Runtime Prefetch Generation                                                                          ASPLOS ’24, April 27-May 1, 2024, La Jolla, CA, USA
+
+
+                                                                  WY                                             of instructions between the execution of the prefetch and
+                                  
+                                                                                                                 demand load. However, as modern CPUs support variable
+                                                                    ^PRP[VWJH[Z*HZJHKL3HRL
+                                                                                                                 clock frequencies, execute at different instructions per cycle
+ZWLLK\WOPNOLYPZIL[[LY
+
+
+
+
+                                                                        []ZOV^LKNLZ/HZ^LSS
+                                                                    ^PRP[VWJH[Z/HZ^LSS                     (IPC), and deploy out-of-order execution, no analytical ap-
+                                                                        []ZOV^LKNLZ*HZJHKL3HRL
+                                                                                                             proach to determine the optimal prefetch injection site or
+                                                                                                             prefetch distance exists.
+                                                                                                                Furthermore, the three prefetch properties are hard to im-
+                                                                                                                 prove simultaneously: higher coverage often leads to lower
+                                                                                                     accuracy, and improving timeliness may require sacrificing
+                                                          WYLML[JOKPZ[HUJL
+                                                                                                                 coverage or accuracy. This interplay makes it challenging to
+                                                                                                                 diagnose performance problems with prefetching. Modern
+Figure 2. The pr benchmark from CRONO [2] sees a speedup                                                         hardware performance monitoring mechanisms offer few in-
+or a slowdown with prefetching, depending on the microar-                                                        sights, making it hard to know whether prefetching is always
+chitecture.                                                                                                      bad for a given program/input, or merely misconfigured.
+
+                                                                                                                 2.2 Performance Pitfalls
+                                                                 IMZ
+                                                                                                                 In addition to the challenges of input-dependent prefetch
+                                                                                                              distances, which we showed in Figure 1, our study with SNAP
+              ZWLLK\WOPNOLYPZIL[[LY
+
+
+
+
+                                                                         HTHaVU*HZJHKL3HRL
+                                                                                                                 [38] inputs has also revealed that prefetching’s performance
+                                           
+                                                                         HTHaVU/HZ^LSS                      can be microarchitecture-dependent. Figure 2 shows results
+                                                                         96LKNLZ/HZ^LSS
+                                           
+                                                                         96LKNLZ*HZJHKL3HRL
+                                                                                                                 for two different inputs with the pr benchmark from CRONO
+                                           
+                                                                                                                 [2], where on an Intel Cascade Lake machine (dashed lines),
+                                                                                                                 the wiki-topcats input (light blue lines) experiences a nearly
+                                                                                                     2x speedup with prefetching, across a wide range of prefetch
+                                                          WYLML[JOKPZ[HUJL
+                                                                                                                 distances (x-axis). The tvshow-edges input (dark green lines),
+                                                                                                                 however, experiences a mild slowdown with prefetching.
+Figure 3. The bfs benchmark from CRONO [2] often (but                                                            The story is reversed on an Intel Haswell machine (solid
+not always) suffers significant performance slowdown with                                                        lines) where tvshow-edges sees a moderate speedup with
+prefetching.                                                                                                     prefetching and wiki-topcats sees a moderate slowdown
+                                                                                                                 with prefetching. Unless the program is re-profiled and re-
+                                                                                                                 compiled for each machine, some performance will be left
+issued speculatively for addresses that may or may not match                                                     on the table.
+a future demand load. Any prefetch for an address that is                                                           We also found a significant number of situations where
+never used later wastes memory bandwidth and pollutes the                                                        prefetching hurts performance. Figure 3 shows for the bfs
+on-chip caches. Coverage refers to the fraction of cache                                                         benchmark from CRONO not only the machine-dependent
+misses that are prefetched – higher coverage leads to more                                                       behavior of prefetching (where the amazon0505 input in light
+misses being transformed into cache hits. Finally, timeliness                                                    blue benefits from prefetching on Cascade Lake but not on
+refers to the requirement that a prefetch occur far enough in                                                    Haswell) but also significant machine-dependent slowdowns
+advance of the demand load to bring the load’s data into the                                                     of 50-70% for the RO-edges input (dark green lines).
+L1 cache from wherever it currently resides (which may be
+DRAM, hundreds of cycles away). Furthermore, it also must                                                        2.3 Current Approaches to Software Prefetching
+not occur too far in advance of the demand load, as in that                                                      There exists a large body of work on software prefetching,
+case, it may be evicted from the cache before the demand                                                         including automatic compiler approaches that analyze only
+load occurs. As a result, prefetches are most effective within                                                   static code [4, 12, 15, 21] or additionally leverage profiling
+a certain window.                                                                                                information [3, 28, 34] to insert prefetch instructions with-
+   Figure 1 shows these timeliness windows visually in terms                                                     out programmer intervention. All of these schemes need to
+of the prefetch distance, a measure of how far ahead in the                                                      balance accuracy, coverage, and timeliness by adjusting the
+execution we are prefetching. The typical unit of time for                                                       placement of prefetch instructions and the chosen prefetch
+prefetch distance is a loop iteration. In Figure 1, the timeli-                                                  distance. Ultimately, these schemes produce a single binary
+ness windows are the width of each shaded region, which                                                          that contains one fixed set of prefetch instructions. While
+show the best-performing ranges of prefetch distances. Some-                                                     it is possible to re-profile and produce additional binaries
+times these windows are quite narrow, as for the gowalla                                                         tuned for different inputs or microarchitectures, there is a
+input, where prefetching too far ahead quickly triggers in-                                                      significant operational burden for doing so. Profiling can
+terference. Timeliness can be tuned by varying the number                                                        be very time-consuming: the recent APT-GET [28] system
+
+
+
+                                                                                                          1001
+ASPLOS ’24, April 27-May 1, 2024, La Jolla, CA, USA                                                                                                             Zhang et al.
+
+                                 target process                         running                                     paused
+                                                  top:                                    newtop:                                    newtop:
+                                   backwards       ld [r0+r1]➔r2                           push r5                                    push r2
+
+
+
+
+                                                                        prefetch kernel
+                                slice (§3.2.2)     ld [r3+r2]➔r4                           add r1,#20➔r5                              add r1,#32➔r2
+                                                   add r1,#1➔r1                            cmp r5,#100                                cmp r2,#100
+                                                   cmp r1,#100                             bgte cleanup                               bgte cleanup
+                                                   bnz top                                 ld [r0+r5]➔r5                              ld [r0+r2]➔r2
+                                                                                           pf [r3+r5]                                 pf [r3+r2]
+                                                  identify                                cleanup:                                   cleanup:
+                                                   frequent                                pop r5                                     ...
+                                                    LLC misses                             ld [r0+r1]➔r2
+                                                                                           ld [r3+r2]➔r4
+                                                                                           ...
+                                                                                           bnz newtop
+
+                                       phases       1. Profile (§3.1)      2. Build new binary (§3.2)        3. Insert code (§3.3)    4. Tune (§3.4-3.5)
+
+
+
+                          Figure 4. RPG2 proceeds through four phases when optimizing a target process.
+
+for profile-guided static recompilation-based prefetch inser-                                              code and only requires the program binary that launched
+tion can spend several minutes profiling and compiling a                                                   the target process we wish to optimize. Our new BOLT pass
+benchmark, though admittedly no attempt has been made to                                                   investigates the example code and sees a loop it can optimize,
+optimize this offline processing. Even once a set of binaries                                              with r1 as the loop induction variable. The LLC-miss-causing
+has been produced, they must be stored and organized for                                                   load is an indirect load, whose data address depends on the
+future retrieval, and something must decide which binary to                                                value returned in r2 by the previous load – indirect loads
+use at program launch time. Given the variability we have                                                  are RPG2 ’s main optimization target, though it can target
+seen across inputs and machines, it seems very challenging                                                 direct loads as well as we discuss in § 3.2. As a result, RPG2 ’s
+to predict the gain or loss from prefetching a priori.                                                     inserted prefetching code, which we call a prefetch kernel and
+   Ultimately, prefetching is an unreliable optimization with                                              is shaded in Figure 4, must replicate this indirect structure.
+benefits that are benchmark-, input- and microarchitecture-                                                Moreover, this prefetch kernel must also ultimately act as a
+dependent. Its fragility makes developers rightfully wary, as                                              NOP, leaving the semantics of the original code unchanged.
+prefetching can cause significant harm by evicting useful                                                     Figure 4 shows the resulting prefetch kernel for our ex-
+data from the cache and stealing memory bandwidth from                                                     ample program. While we discuss this kernel in much more
+demand loads. While additional research into better static                                                 detail in § 3.2.3, we provide a brief overview here: first, we
+prefetching schemes can surely help, in this paper, we in-                                                 compute the address we want to access, which is 20 itera-
+stead embrace prefetching’s mercurial nature and build the                                                 tions ahead. Because this may be beyond the bounds of the
+RPG2 runtime framework for adding, tuning, and remov-                                                      original loop, we must insert a bounds check to guard the
+ing prefetch instructions while a program is running. We                                                   demand load that we insert – otherwise, a program crash
+describe how RPG2 works next.                                                                              could arise from accessing unmapped virtual memory. Fi-
+                                                                                                           nally, we add the prefetch instruction for the indirect load
+                                                                                                           and run the original loop body.
+3    Design of RPG2                                                                                           Having produced a new binary with prefetch code added,
+We first give an overview of RPG2 by describing at a high                                                  RPG2 now enters its third phase: injecting the prefetch code
+level how it optimizes the example code in Figure 4 by insert-                                             into the running process and transferring control to it. RPG2
+ing prefetch instructions. Subsequent sections then examine                                                adds code at function granularity, writing a new version of
+in detail each of RPG2 ’s main phases.                                                                     the optimized function into the address space. This requires
+   RPG2 ’s first phase starts by profiling a running process to                                            a short pause of the target process to add the optimized func-
+discover where last-level cache (LLC) misses are occurring                                                 tion’s code and to patch any references to the old function
+and also to establish the baseline IPC for the running applica-                                            that exist in program counters, call sites, or stack return
+tion. RPG2 uses Intel’s Precise Event-Based Sampling (PEBS)                                                addresses to refer to the new function instead.
+hardware performance monitoring feature for this task, as                                                     The target process now resumes, and RPG2 enters its
+it can track the instruction PCs that trigger LLC misses. In                                               fourth phase: tuning the prefetch distance. RPG2 performs
+Figure 4, an example program in pseudo-assembly has a load                                                 a bounded search, from a randomized starting point, over
+into r4 that is identified as a frequent source of LLC misses.                                             a set of possible distances and examines how IPC responds.
+   RPG2 ’s second phase builds on Meta’s Binary Optimiza-                                                  Each adjustment of the prefetch distance requires a brief
+tion and Layout Tool (BOLT) [50], which lifts an executable                                                pause of the target process to edit the few bytes represent-
+into a low-level IR format, performs optimizations, and then                                               ing the prefetch distance as an offset in the machine code.
+produces a new BOLTed executable. BOLT ships with a va-                                                    For example, in Figure 4, RPG2 changes the initial prefetch
+riety of code layout and peephole optimizations. Thanks to                                                 distance of 20 to 32 by adjusting the immediate value of the
+BOLT, RPG2 does not need access to the application source
+
+
+
+                                                                                                   1002
+RPG2 : Robust Profile-Guided Runtime Prefetch Generation                                                         ASPLOS ’24, April 27-May 1, 2024, La Jolla, CA, USA
+
+
+add instruction. After the search completes, RPG2 re-enables                                            original code                    optimized code
+the best-performing prefetch distance. If the search does not                                         top:                      newtop:
+                                                                                            backwards ld [r0+r1]➔r2              push r5              save reg
+discover any prefetch distance that outperforms the original                                                                     add r1,#20➔r5        pf distance
+                                                                                                 slice ld [r3+r2]➔r4
+
+
+
+
+                                                                                                                                                                    prefetch kernel
+IPC, RPG2 steers execution back to the original code instead.                                          add r1,#1➔r1              cmp r5,#100          bounds
+As Figure 4 shows, most of RPG2 ’s work happens concur-                                                cmp r1,#100               bgte cleanup         check
+                                                                                                       bnz top                   ld [r0+r5]➔r5        do
+rently with the execution of the target process to minimize                                                                      pf [r3+r5]           prefetch
+performance interference.                                                                      pf dist + bounds check
+                                                                                                                                cleanup:
+   In the remainder of this section, we describe in detail each                                                                  pop r5               restore reg
+                                                                                                                                 ld [r0+r1]➔r2
+major phase of RPG2 ’s operation, starting with profiling.                                                   do prefetch         ld [r3+r2]➔r4        original
+                                                                                                   cleanup                       add r1,#1➔r1         code
+3.1 Phase 1: Profiling                                                                                                           cmp r1,#100
+                                                                                                orig loop body                   bnz newtop
+RPG2 employs Linux’s perf utility to profile the execution of a
+running process. To identify candidate loads for prefetching,                              Figure 5. Annotated example of RPG2 code transformations.
+RPG2 uses perf’s Processor Event-Based Sampling (PEBS)
+event MEM_LOAD_RETIRED.L3_MISS/ppp to identify LLC
+misses. PEBS samples LLC misses at a specified rate and                                    Indirect loads, represent a frequent source of LLC misses
+stores a PEBS record in memory for each sampled miss. This                                 that cannot be covered efficiently by hardware prefetchers.
+PEBS record contains information about the miss includ-                                    We leave prefetching of additional memory access patterns
+ing its data address and PC. RPG2 filters PEBS records by                                  (e.g., pure pointer-based data structures without arrays) for
+only considering as prefetch candidates the instructions that                              future work.
+cause at least 10% of the misses within their respective func-                                RPG2 ’s prefetch strategy for the first two load types in Ta-
+tion. For an online scheme like RPG2 , there exists a trade-off                            ble 1 is straightforward. At every iteration i, RPG2 prefetches
+between collecting additional profiling data to make bet-                                  the data to be used for iteration i+d where d is the prefetch
+ter optimization decisions and implementing optimizations                                  distance (measured in loop iterations). For a[j] (direct) ac-
+quickly to accelerate as much of the program execution as                                  cesses, line-level spatial locality and hardware prefetchers
+possible. By default, RPG2 samples 2 seconds of execution;                                 typically work well, though if RPG2 sees significant LLC
+we examine the impact of this sampling period in § 4.                                      misses (likely due to a sub-optimal choice of the prefetch
+                                                                                           distance by the hardware prefetcher) then it can improve
+3.2 Phase 2: Code Analysis & Generation
+                                                                                           performance further even for this simple access pattern.
+RPG2 adds a new InjectPrefetchPass pass to BOLT to add                                        For indirect memory accesses in the a[𝑓 (b[i])+j] cate-
+prefetch kernels to a given binary. The binary code analysis                               gory, RPG2 ’s strategy is to prefetch the data feeding a future
+and transformation in InjectPrefetchPass begins by identify-                               iteration’s indirect load a[𝑓 (b[i+d])] instead of prefetching
+ing different code patterns that are amenable to prefetching.                              a future iteration of the inner loop with a[𝑓 (b[i])+j+d].
+3.2.1 Prefetch Categories. RPG2 can prefetch both indi-                                    While we experimented with both, we found that the former
+rect memory access and direct memory access. The prefetch-                                 approach performs better since it attacks a more difficult
+able memory accesses are grouped into three categories                                     access pattern.
+shown in Table 1 where a[] and b[] are two arrays, i is                                       In order to identify which prefetch category a load falls
+the induction variable for the outer loop, j the induction                                 into, RPG2 starts by analyzing the two innermost loops
+variable for the inner loop, d the prefetch distance, and 𝑓 ()                             within each loop nest and identifying their loop induction
+represents the data dependency chain from the load of b[]                                  variables. RPG2 places its prefetch kernel in the loop header,
+to the demand load that needs to be prefetched.                                            which runs at the beginning of each loop iteration. A key
+                                                                                           decision is whether to place the kernel in the header of the
+ demand access   prefetch          description
+                                                                                           inner loop or (if there is one) the outer. The decision depends
+ a[j]            a[j+d]            direct access using inner loop induction var            on what data are used by the prefetch operation, which we
+ a[𝑓 (b[j])]     a[𝑓 (b[j+d])]     indirect access using inner loop induction var          discuss next.
+ a[𝑓 (b[i])+j]   a[𝑓 (b[i+d])+j]   indirect access using inner and outer loop
+                                   induction vars
+                                                                                           3.2.2 Backwards Slicing. To prefetch for indirect mem-
+  Table 1. Memory access categories that RPG2 supports                                     ory accesses, RPG2 must check whether the memory address
+                                                                                           is prefetchable and, if so, compute the address for prefetching.
+                                                                                           Our detection algorithm computes the backward slice [62]
+   RPG2 currently only supports loads that fall into these                                 starting at the demand load that causes the most LLC misses
+three categories, but we have found these patterns general                                 in the function. The slice extends until it reaches an instruc-
+enough to match many code patterns, like dense arrays and                                  tion whose source registers are either loop invariant or loop
+stencils (category 1) and sparse arrays (categories 2 and 3).                              induction variables. Figure 5 zooms in on the example code
+
+
+
+                                                                                    1003
+ASPLOS ’24, April 27-May 1, 2024, La Jolla, CA, USA                                                                                 Zhang et al.
+
+
+from Figure 4: ld [r3+r2]→r4 is the demand load where                                        before                      after
+we begin computing a backward slice, which encompasses
+only ld [r0+r1]→r2 since r0 and r3 are loop-invariant                                   f0                          f0
+                                                                                PC                            PC
+and r1 is the loop induction variable.                                                  g0    call f0               g0    call f1
+   RPG2 analyzes the backwards slice to see which category                              h0    call f0               h0    call f1
+(Table 1) it matches, using the presence of indirect loads and
+loop induction variables as key indicators. If a slice does not                                                     f1
+match one of the supported categories, RPG2 cannot cur-
+rently optimize it. For loads like a[𝑓 (b[i])+j], the prefetch
+kernel will be inserted in the outer loop since, as was men-              Figure 6. The PC register and code memory of the target
+tioned in § 3.2.1, this performs better. Otherwise, the prefetch          process before and after, RPG2 ’s code replacement.
+kernel is added to the inner loop.
+   RPG2 ’s slice computation can traverse dependencies via
+stack memory at fixed offsets from the stack pointer where                overcoming several challenges. Consider that the unopti-
+there is no intervening stack pointer manipulation, however,              mized original loop resides within a function 𝑓0 . If we over-
+dependencies via non-stack memory or that involve condi-                  write 𝑓0 with the optimized function directly in memory, we
+tional control flow (such as multiple reaching definitions)               must consider that PCs are shifted due to the insertion of
+are currently unsupported. These cases did not arise in our               the prefetch kernel, and hence branch targets must be ad-
+evaluation benchmarks. Some of these cases (such as con-                  justed. Furthermore, if the optimized function 𝑓1 , containing
+ditional dependencies) could be supported with additional                 the prefetch kernel, is larger, it may no longer fit within the
+engineering effort; BOLT already provides dominator and                   space allocated to 𝑓0 . To sidestep these issues, RPG2 instead
+reaching definition analyses as a starting point.                         places 𝑓1 at a new location in the address space, leaving 𝑓0 in-
+                                                                          tact in its original spot. This adds the benefit of automatically
+3.2.3 Code Generation. Once we have generated the back-                   preserving all code pointers to 𝑓0 , no matter how exotic they
+ward slice, we can create the code for prefetching, referred              are, including function pointers, setjmp buffers, etc. Also, in
+to as a prefetch kernel. Our correctness criterion is that the            the event that prefetching causes a performance regression,
+prefetch kernel behaves like a NOP. Prefetch instructions                 which sometimes happens, we can steer the execution back
+themselves are natural NOPs, however, the kernel also con-                to 𝑓0 to restore the original performance.
+tains supporting code needed to enable the prefetch, e.g.,                   Inspired by Google’s XRay [9] function call tracing system,
+instructions in the backward slice must be run as real in-                we also initially considered ahead-of-time compiler support
+structions to compute the correct prefetch address.                       to add regions of NOPs to code where prefetches were likely
+   As our example code in Figure 5 falls into the a[𝑓 (b[j])]             to prove useful, allowing these NOPs to be quickly overwrit-
+category, our prefetch kernel requires a scratch register to              ten with a prefetch kernel at runtime. However, these NOPs
+assist with the address computation, which we obtain by                   inside hot loops had a noticeable runtime cost of up to 5%
+spilling a register (here r5) to the stack. The kernel then uses          in some cases, causing us to prefer our current pay-as-you-
+the prefetch distance to compute the element b[j], which is               go approach, which has zero ongoing runtime costs when
+being prefetched, and additionally needs to perform a bounds              prefetching is disabled.
+check to ensure that b[j] refers to a mapped, accessible ad-                 RPG2 leverages Linux’s ptrace API to perform the actual
+dress. We copy the bounds check condition from the original               code insertion. ptrace allows RPG2 to pause or resume the
+loop latch, inverting the condition (from bnz to bgte) since              target process and update its register and memory contents.
+we are checking whether to skip the prefetch and adjust for               While ptrace is powerful, it is also somewhat slow, so to
+the prefetch distance. The demand load of a[] that we wish                accelerate code insertion, we have also developed a library
+to prefetch for is converted to a prefetch instruction. If the            libpg2 that is loaded into the address space of the target pro-
+bounds check succeeds, the backward slice (which includes                 cess when it launches via Linux’s LD_PRELOAD mechanism.
+the prefetch) is executed. Afterwards, we run cleanup code                Because libpg2 runs inside the address space of the target
+to restore the scratch register we commandeered and then                  process, it can edit target process memory directly with low
+run the original loop body.                                               overhead; in contrast, ptrace would require a series of sys-
+   These code transformations are implemented in the In-                  tem calls to accomplish the same. Nevertheless, ptrace is still
+jectPrefetchPass BOLT pass, which produces a new BOLTed                   required for some operations, such as pausing and resuming
+binary containing the new code with the prefetch kernel.                  process execution and changing register values.
+                                                                             libpg2 does nothing until code injection is triggered via
+3.3 Phase 3: Runtime Code Insertion                                       ptrace. To begin code injection, RPG2 uses ptrace to pause
+With our optimized code in hand, we must insert this new                  the target process, moves the PC to the relevant function
+code into the target process’s address space. This requires               within libpg2, bumps the stack pointer to avoid clobbering
+
+
+
+                                                                   1004
+RPG2 : Robust Profile-Guided Runtime Prefetch Generation                                    ASPLOS ’24, April 27-May 1, 2024, La Jolla, CA, USA
+
+
+the red zone of the target process, and then resumes the                  signal to send a notification via ptrace. Upon receiving the
+process to let libpg2 run. mmap is then used to allocate new              SIGSTOP, RPG2 moves the stack pointer back to the original
+memory and copy the 𝑓1 code into it.                                      value and updates thread PCs to point to their corresponding
+                                                                          instructions in the 𝑓1 code. Then RPG2 resumes the target
+3.3.1 On-Stack Replacement. Our task now becomes to                       process, which from now on executes 𝑓1 instead of 𝑓0 code.
+redirect execution to 𝑓1 . Figure 6 illustrates how this works.
+Direct calls to 𝑓0 from other functions are patched to refer              3.4 Phase 4: Monitoring And Tuning
+to 𝑓1 instead. Much more challenging is translating thread                After the prefetch kernel has been inserted, RPG2 determines
+PCs which refer to 𝑓0 : these are cases where execution is                the optimal prefetch distance via binary search. In particular,
+in the middle of an invocation of 𝑓0 . While it is tempting               RPG2 changes the program code to implement a new prefetch
+to simply wait until a function call boundary – optimizing                distance and then monitors the resulting performance impact.
+the next invocation of 𝑓0 instead of trying to optimize the               Prefetch distance adjustments require rewriting just a few
+currently-running one – we have found that such waiting is                bytes of program code (and accompanying system calls to
+a non-starter for our workloads since they often spend most               enable code edits and disable them again afterward) and
+of their execution within a single function invocation which              are performed via libpg2. RPG2 monitors performance by
+contains a hot loop that must be optimized. Waiting would                 measuring IPC via perf stat.
+thus be a huge missed optimization opportunity.                              The prefetch distance search algorithm has three stages.
+   The problem of moving between different versions of a                  In the first stage, RPG2 decides the direction for searching.
+function at runtime is known in the managed languages lit-                Starting from a random number 𝑟 drawn from the interval
+erature as on-stack replacement [24] (OSR), and many sophis-              [1, 100] as the initial prefetch distance, RPG2 takes three
+ticated language VMs use it to switch to a more optimized                 measurements of the IPC of 𝑟 − 5, 𝑟 , and 𝑟 + 5 to determine a
+version of a running function, or to deoptimize a function                gradient that identifies the direction towards higher IPC. We
+when the memory layout of a class changes. While OSR is                   empirically determined that most optimal prefetch distances
+commonplace in managed languages, RPG2 is the only sys-                   are smaller than 100, so we chose it as an upper bound for
+tem we are aware of to support it for unmanaged languages                 the initial prefetch distance. In the second stage, RPG2 sam-
+like C/C++, as mapping both code and data across function                 ples coarsely in the identified direction to find a region of
+versions is complex, and there is essentially no existing com-            promising prefetch distances.
+piler support. Even the recent Ocolos [69] system, which                     In stage 2, RPG2 keeps on doubling the jump size to com-
+provides online code layout optimization for unmanaged                    pute the new prefetch distance in the chosen direction, so
+languages, does not support OSR.                                          long as RPG2 sees increasing IPC. Prefetch distances are
+   RPG2 is able to support OSR for two reasons. First, RPG2               capped to be within [1,200]; if the algorithm attempts to
+prefetch kernels are designed with OSR in mind. As they                   step outside this range, the search terminates, and the best
+have a logical NOP structure, it is relatively easy to slot them          prefetch distance is chosen from among the measurements
+into an existing function without changing semantics. In                  taken so far. Otherwise, once RPG2 finds an IPC decrease, it
+initial versions of RPG2 we tried to leverage prior prefetching           sets the 𝑛 th prefetch distance and the 𝑛 −1th prefetch distance
+compilers like APT-GET [28] that operate at the compiler IR               as the upper and lower bounds of the interval for the third
+level. However, we discovered that adding a prefetch kernel               stage, which is binary search within this interval to identify
+at the IR level triggers myriad small changes in the resulting            a local optimum.
+machine code. For example, a program variable 𝑣 would                        If a program has multiple prefetch locations, the prefetch
+be allocated to different registers in 𝑓0 versus 𝑓1 (or stack-            distance can, in principle, be tuned separately for each loca-
+allocated in one and register-allocated in the other); moving             tion. As we show in Figure 13, there is sometimes a benefit
+execution to 𝑓1 then requires understanding how variables                 to such asymmetric prefetch distances, though our search
+are mapped to data, which is not transparent in existing                  algorithm scales exponentially in the number of prefetch
+unmanaged compilers. Inspired by these challenges, RPG2 ’s                locations. For efficiency, RPG2 currently restricts all prefetch
+code transformations instead incur zero data layout changes.              locations to have the same distance.
+   The second reason RPG2 can support OSR is that, even                      After RPG2 determines the best prefetch distance 𝑑, it
+though RPG2 necessarily makes code layout changes, BOLT                   pauses the target process one final time to install 𝑑 and then
+provides a handy BOLT Address Translation Table (BATT)                    detaches from the process to run without ongoing overheads
+that maps PCs between an original function and the version                except for those of the prefetch kernel itself.
+modified by BOLT passes. The BATT is embedded in an
+ELF section in binaries produced by BOLT. BOLT uses the                   3.4.1 Rolling Back Prefetches. In some cases, inserting
+BATT to support re-optimizing a binary that it has optimized              prefetches can harm program performance, irrespective of
+before; RPG2 uses the BATT to map PCs from 𝑓0 to 𝑓1 during                the prefetch distance. In such cases, after the prefetch dis-
+OSR. Once code insertion completes, libpg2 raises a SIGSTOP               tance search completes, RPG2 rolls back to the original 𝑓0
+
+
+
+                                                                   1005
+ASPLOS ’24, April 27-May 1, 2024, La Jolla, CA, USA                                                                           Zhang et al.
+
+
+code, which remains in the address space (Figure 6). When                that they last at least 1 minute. To avoid profiling the initial-
+RPG2 decides to roll back, it pauses the target process to undo          ization phase of a workload, which can be very different from
+its previous changes: reverting changes to direct call sites             the main application phase, we modify each benchmark to
+and program counters. The BATT is crucial for translating                signal the end of its initialization phase. Future work could
+𝑓1 locations into their corresponding 𝑓0 locations. However,             leverage program phase detection techniques [16, 57] to do
+there is one additional corner case to consider. If a thread is          this automatically. We run each benchmark+input combi-
+currently inside the prefetch kernel, there will be no BATT              nation until we find 5 successful results. If none of the first
+entry because there is no corresponding 𝑓0 location. So, RPG2            5 runs can activate RPG2 , we just record the execution re-
+instead single-steps the target process via ptrace until the             ported by the original binary. RPG2 collects LLC misses via
+PC hits an address that is stored in the BATT, which can                 PEBS for 2 seconds at the maximum supported sampling
+then be translated into an 𝑓0 location.                                  frequency of 25,750 samples/sec on Haswell and 12,500 on
+                                                                         Cascade Lake. During the tuning phase, RPG2 measures IPC
+                                                                         for 0.3 seconds.
+4    Evaluation
+Our evaluation has five main parts. After explaining our                 4.1.1 Baselines. We accurately gauge RPG2 ’s performance,
+experimental setup, we show RPG2 ’s performance compared                 we compare it to the following alternative schemes.
+to a range of baselines. Next, we examine how accurate                   • APT-GET , the latest profile-guided static compiler for
+RPG2 ’s prefetch distance search is, how much profiling data               automatic prefetch injection [28]. APT-GET profiles a ran-
+it needs to work well, and how long key RPG2 operations take.              domly chosen input and the resulting binary is run on the
+Then, we measure RPG2 ’s behavior at the microarchitectural                remaining inputs. This configuration captures a real-world
+level by measuring the impact on LLC MPKI (misses per                      use case where it is not feasible to build a new binary for
+kilo-instruction) and instruction count. Finally, we expand                each individual input. APT-GET data is missing for sssp,
+on the data in Figures 1-3 to demonstrate additional facets                bfs, and randacc as APT-GET would not reliably generate
+to the prefetching challenge.                                              prefetch instructions for these benchmarks after we ex-
+                                                                           tended their running time, and our consultation with the
+                                                                           authors was not able to resolve these issues.
+4.1 Experimental Setup
+                                                                         • manual prefetching by the benchmark developers. This
+We run our experiments on an Intel Xeon Gold 6230R Cas-                    configuration is only available for the AJ benchmarks.
+cade Lake and an Intel Xeon(R) CPU E5-2618L v3 Haswell                   • the active-only subset of RPG2 runs when it gathers
+server. The Cascade Lake server has two sockets with 26                    enough profiling data to enable optimization (which does
+cores and 52 threads per socket, all running at 2.1GHz. Each               not always occur, as we explore later in § 4.3). The main
+core has a 32 KiB L1i, a 32 KiB L1d, a 1 MiB L2, and access                RPG2 bars, in contrast, also include runs where RPG2 starts
+to a shared 36 MiB L3 and 384GiB of RAM. The Haswell                       but does not receive enough profiling information to jus-
+server has 2 sockets with 8 cores and 16 threads per socket,               tify enabling prefetching.
+all running at 2.3GHz. Each core has a 32 KiB L1i, a 32 KiB              • an offline version of RPG2 where a binary is produced
+L1d, a 256 KiB L2, and access to a shared 20 MiB L3 cache                  for each input using the manually chosen best prefetch
+and 128GiB of RAM. All available hardware prefetchers are                  distance. This scheme represents in some ways an upper
+enabled on both machines. Both machines run Linux version                  bound on RPG2 ’s performance, as the best prefetch dis-
+5.40. Our BOLT is built based on commit 56ff67ccd907 from                  tance is always chosen, sidestepping any shortcomings
+BOLT’s GitHub repository [1]. We use Clang version 10.0                    in the prefetch distance search algorithm, and the opti-
+to compile all workloads. We use BAT-dump from LLVM’s                      mized code is running the entire time, avoiding the delay
+GitHub repository on commit 2b88298c2ab2.                                  of RPG2 ’s online profiling, code generation, code injec-
+   We use the CRONO [2] benchmark suite’s BFS, PR, BC,                     tion, and prefetch tuning. However, prefetching is always
+and SSSP benchmarks. For inputs, we use both real-world                    enabled in this configuration, so for benchmarks where
+graph data sets from the Stanford Network Analysis Platform                prefetching is harmful, this offline scheme may experience
+(SNAP) [38] and synthetic inputs from APT-GET [28]. We                     a net slowdown.
+run the IS, CG, and randAccess benchmarks and inputs from
+Ainsworth and Jones [3], and call these the “AJ” benchmarks.
+In this work, we focus on graph workloads as they frequently             4.2 Performance
+exhibit indirect memory access patterns that RPG2 optimizes.             Figure 7 shows how RPG2 performs on our Cascade Lake
+   All benchmarks are compiled with their default optimiza-              and Haswell machines. All results are normalized to the
+tion level -O3 and with the linker flag -Wl,–emit-relocs,                original, non-prefetch code. For the CRONO benchmarks
+which enables BOLT’s function relocation. We extend the                  (left graphs), pr, bfs and sssp’s results are averaged across
+runtime of the measured workloads by adding iterations so                71 inputs from SNAP [38] on Cascade Lake and 67 inputs
+
+
+
+                                                                  1006
+RPG2 : Robust Profile-Guided Runtime Prefetch Generation                                                                                          ASPLOS ’24, April 27-May 1, 2024, La Jolla, CA, USA
+
+
+                                                                           *9656*HZJHKL3HRL                                                                                                  (1*HZJHKL3HRL
+                         
+                                                                                                                        97.               VMMSPUL                                97.                   (7;.,;
+                                                                                                                     HJ[P]LVUS`        (7;.,;                                   HJ[P]LVUS`            THU\HS
+                                                                                                                                                                                  VMMSPUL
+
+
+
+
+                                                                                                                                                       ZWLLK\WV]LYVYPNPUHS
+ ZWLLK\WV]LYVYPNPUHS
+
+
+
+
+                         
+                                                                                                                                                                               
+                         
+                                                                                                                                                                               
+                         
+                                                                                                                                                                               
+                         
+                                                                                                                                                                               
+                         
+                                                                                                                                                                               
+                               WYHSS      WY       WY     ZZZWHSS     ZZZW     ZZZW    IMZHSS      IMZ      IMZ    IJHSS      IJ       IJ                                        JN                PZ             YHUKHJJ
+                                    ZWLLK\W ZSV^KV^U          ZWLLK\W ZSV^KV^U         ZWLLK\W ZSV^KV^U         ZWLLK\W ZSV^KV^U
+                                                                                                                 
+
+
+                                                                              *9656/HZ^LSS                                                                                                        (1/HZ^LSS
+                         
+                                                                                                                        97.               VMMSPUL                                97.                   (7;.,;
+                                                                                                                     HJ[P]LVUS`        (7;.,;                                   HJ[P]LVUS`            THU\HS
+                                                                                                                                                                                  VMMSPUL
+
+
+
+
+                                                                                                                                                       ZWLLK\WV]LYVYPNPUHS
+ ZWLLK\WV]LYVYPNPUHS
+
+
+
+
+                         
+                                                                                                                                                                               
+                         
+                                                                                                                                                                               
+                         
+                                                                                                                                                                               
+                         
+                                                                                                                                                                               
+                         
+                                                                                                                                                                               
+                               WYHSS      WY       WY     ZZZWHSS     ZZZW     ZZZW    IMZHSS      IMZ      IMZ    IJHSS      IJ       IJ                                        JN                PZ             YHUKHJJ
+                                    ZWLLK\W ZSV^KV^U          ZWLLK\W ZSV^KV^U         ZWLLK\W ZSV^KV^U         ZWLLK\W ZSV^KV^U
+                                                                                                                 
+
+
+
+
+                                            Figure 7. RPG2 and baseline performance on Cascade Lake (top) and Haswell (bottom).
+
+on Haswell, as some of the largest inputs exceeded our 10-                                                             A greater separation appears in the slowdown groups, where
+minute timeout on the older machine. The bc benchmark                                                                  RPG2 does a better job of preserving the original’s perfor-
+does not support the graph formats used in SNAP and only                                                               mance than APT-GET or offline. This is especially noticeable
+runs on a smaller number of synthetic graphs drawn from                                                                in the pr slowdown group as well as with bfs, where all ex-
+the APT-GET [28] evaluation. The graphs on the right side                                                              cept from a few inputs suffer a slowdown from prefetching.
+show the AJ benchmarks, where we use the single inputs                                                                 RPG2 offers higher average performance and much lower
+used in [3]. Error bars show the standard deviation, which is                                                          standard deviation in these cases.
+often large for the CRONO benchmarks where we aggregate                                                                   The gap between RPG2 and the active-only bars arises be-
+data from many distinct inputs due to space reasons. The                                                               cause of the noise intrinsic to online profiling, where some-
+runtime variance on each particular input, however, is low.                                                            times there are an insufficient number of sampled LLC misses
+   For the CRONO benchmarks, given the large number                                                                    to activate RPG2 ’s optimization phases. The gap between
+of inputs, we show three groups of bars. The first group                                                               active-only and offline shows the price of RPG2 ’s online
+(all) shows speedup averaged across all inputs. The second                                                             phases, which incur a delay before the optimized code can
+speedup group shows results averaged across the subset of                                                              begin to execute. With longer-running programs, these costs
+inputs where RPG2 outperforms the original code. The final                                                             can be more effectively amortized.
+slowdown group includes only inputs where RPG2 detects a                                                                  The results also show some immediate opportunities for
+performance regression and rolls back to the original code. In                                                         improvement. For example, we noticed that sssp running
+some cases RPG2 neither improves over the original perfor-                                                             the as20000102 input on Cascade Lake suffers a significant
+mance nor rolls back, so the all group includes some inputs                                                            slowdown with prefetching, but RPG2 fails to roll back to the
+that are in neither the speedup group nor the slowdown                                                                 original code. This is due to insufficient profiling: a low-IPC
+group. The number of inputs in each group is shown in                                                                  program phase during the profiling period, followed by a
+parentheses below each group name on the x-axis.                                                                       higher-IPC phase, causes RPG2 to incorrectly attribute the
+   We break out the speedup and slowdown groups to high-                                                               IPC improvement to prefetching instead of the phase tran-
+light the gap between cases where prefetching helps and                                                                sition. Without prefetching, IPC would be higher still. This
+hurts: this discrepancy is easily lost when averaging perfor-                                                          case indicates that IPC alone is not always a good perfor-
+mance but can be important in settings where predictable                                                               mance indicator. There is also a sizeable gap between RPG2
+tail latency is required. Considering the speedup group first,                                                         and optimal and manual for the randacc benchmark. We
+RPG2 ’s performance gains are on par with what is achievable                                                           found this benchmark, which randomly jumps around an ar-
+via a state-of-the-art static approach like APT-GET or offline.                                                        ray with indirect accesses, exhibits a very peculiar behavior
+
+
+
+
+                                                                                                               1007
+ASPLOS ’24, April 27-May 1, 2024, La Jolla, CA, USA                                                                                                                                  Zhang et al.
+
+                                                                                                                     OPNNZYL[^LL[FUL[^VYR                           ZVJZPNUIP[JVPUHSWOHLKP[
+                                                                                                          
+                                                                                                                                                       
+                                                                                                          
+                                                                                                                                                         
+                                                                                                          
+                                                                                                                                                         
+                                                                                                                                                      
+
+
+
+
+                                                                                                                                                   07*
+                                                                                                    07*
+                                                                                                                                                    
+                                                                                                          
+MYLX\LUJ`
+
+
+
+
+                                                                                                                                                          
+                                                                                                                                                      
+                                                                                                                                                                                 WYLML[JOHJ[P]L
+                                                                                                                                                     
+                                                                                                                                                                                      
+                                                                                                                     LSHWZLK[PTLZLJVUKZ                           LSHWZLK[PTLZLJVUKZ
+             
+
+                                                                                                                     Figure 10. RPG2 ’s impact on IPC over time.
+             
+                                                                             
+                                HIZVS\[LKPZ[HUJLMYVTVW[PTHSWYLML[JOKPZ[HUJL
+
+
+                                                                                                    on Cascade Lake. While RPG2 profiles for 2 seconds by de-
+Figure 8. How close RPG2 gets to the optimal prefetch dis-
+                                                                                                    fault, we also measured the effect of profiling for shorter and
+tance, for inputs with a single optimal distance.
+                                                                                                    longer periods. Each bar shows, across all runs of each pr
+                                                                                                    input, how often RPG2 ’s optimization phases (code genera-
+                     
+                                UL]LY                                                               tion, injection and tuning) were always, sometimes (“mixed”)
+                                                                                                  or never activated. As the profiling phase increases, RPG2
+                                                                                                    optimizations are activated more often, though the influence
+                              TP_LK                                                               is mild. Longer profiling also diminishes, per Amdahl’s Law,
+                                                                                                    the time that optimizations can accelerate execution. We
+                      
+                                                                                                    have found two seconds to be a reasonable trade-off in prac-
+                      
+                                                                                                    tice, but longer-running benchmarks could amortize longer
+                                HS^H`Z
+                                                                                                    profiling for further improved performance.
+                       
+                                 Z           Z            Z                   Z               4.3.1 RPG2 Latencies. The left side of Figure 10 shows a
+                                         K\YH[PVUVMWYVMPSPUNWOHZL                                “live” view of RPG2 in action, with IPC measured every 300
+                                                                                                    milliseconds for an execution of pr with the higgs-retweet-
+Figure 9. The impact of profiling phase duration on RPG2 ’s                                         network input on our Haswell machine. The process has an
+optimization activation.                                                                            initial IPC of about 0.44, which dips slightly around the 6-
+                                                                                                    second mark as RPG2 enters code injection and tuning. After
+where prefetch distances that are multiples of 8 perform very                                       tuning, RPG2 settles on 62 as the prefetch distance which
+well, and all other distances perform much worse. RPG2 ’s                                           boosts IPC by over 25%.
+prefetch search assumes the search space is relatively smooth                                          The right graph in Figure 10 shows a similar view for the
+and, therefore, sometimes misses these special distances.                                           soc-sign-bitcoinalpha-edit input with pr on Cascade Lake,
+                                                                                                    where RPG2 discovers that prefetching harms performance
+4.3 RPG2 Characterization                                                                           instead. Prefetching remains active for a few seconds (the
+In this section, we explore different aspects of RPG2 ’s oper-                                      shaded region) while the prefetch distance search attempts
+ation, starting with its ability to find the optimal prefetch                                       to find a beneficial distance, before rolling back at around the
+distance for a given input. Figure 8 shows, for just the 120                                        8-second mark, restoring the original code’s performance.
+inputs across all our benchmarks that exhibit a clear single,                                          Table 2 examines in more detail the latency of key steps
+optimal prefetch distance 𝑑, how far away RPG2 ’s search                                            within RPG2 ’s execution. Each cell shows an average across
+result was from 𝑑 in absolute terms. The single optimal dis-                                        all inputs for the given benchmark. The first row shows
+tance makes it easy to measure how well RPG2 is doing. The                                          RPG2 ’s overall execution time, from when profiling begins
+results are summarized as a histogram, so the leftmost bar                                          until RPG2 detaches having completed prefetch distance tun-
+shows that, for 22 inputs, RPG2 was within 3 of the correct                                         ing. For most of this time, the target process can continue
+distance and within 10 for just over half of the inputs. Being                                      running in parallel. The next row shows that BOLT takes
+closer to the optimal distance is generally better, but the                                         about 30 milliseconds to generate a binary containing the
+performance gain from additional proximity is not always                                            prefetch kernel (§ 3.2.3), which also occurs in the background.
+very high. Overall, Figure 8 shows that RPG2 ’s prefetch dis-                                          The last three rows show the latency of RPG2 ’s stop-the-
+tance search (§ 3.4) does well most of the time. The biggest                                        world operations where the target process must be paused:
+impediment to improving the search results is noisy IPC mea-                                        initial code insertion (§ 3.3) takes 3-4ms, a single prefetch
+surements, which sometimes give a misleading view of the                                            distance edit takes 1.1-1.4ms and 11-12 distances are explored
+search space, causing the search to terminate prematurely.                                          during RPG2 ’s prefetch distance search. These low latencies
+   In Figure 9, we evaluate RPG2 ’s sensitivity to the duration                                     contribute to RPG2 ’s mild impact on performance during
+of its initial profiling phase (§ 3.1), for the pr benchmark                                        code insertion and tuning, as reflected in Figure 10.
+
+
+
+                                                                                             1008
+RPG2 : Robust Profile-Guided Runtime Prefetch Generation                                                                                              ASPLOS ’24, April 27-May 1, 2024, La Jolla, CA, USA
+
+
+                                                                                                                                                        Cascade Lake                   Haswell
+                  
+                                                                                                                                           type      pr sssp bfs bc             pr    sssp bfs      bc
+                                                                                                                                   single optimal 26 25       1   2          18     23   0       1
+                                                                                                                                      range optimal 2      7     1   3          7       9   0       0
+                  
+     ZWLLK\W
+
+
+
+
+                                                                                                                                        asymptotic   15 13       2   2          18     14   1       6
+                                                                                                                                      both bad    11 10      52 0            11     10  52       0
+                                                                                                                                       Haswell bad    -    -     -   -          1       1   5       0
+                  
+                                                                                                                                       Cascade bad   2     2     5   0           -      -   -        -
+                                                                                                                                         noisy     4     3     1   0          7       2   4       1
+                                                                                                                                           other     2     2     0   2          0       3   0       1
+                                                                                                               
+                                                     JOHUNLPU33*4720                                                             Table 3. The influence of prefetch distance on performance.
+
+
+Figure 11. The relationship between speedup and LLC MPKI
+for pr on Cascade Lake.                                                                                                             to the original no-prefetch execution, for all inputs of pr
+                                                                                                                                    on Cascade Lake. Depending on the size of a program’s
+               benchmark               pr        sssp          bfs          bc              is       randacc          cg            prefetchable data structures (which is input-dependent) and
+             RPG2 exec (s)              7.6       7.9          7.8         8.5          8.6              7.9           8.8          the chosen prefetch distance, varying number of prefetches
+         BOLT (ms)                     30.3      28.4         28.6        29.1         27.2             32.0          26.4          will be in-bounds and thus executed, affecting the dynamic
+      code insert (ms)                  3.9       3.3          3.1         3.4          3.3              3.0           2.9          instruction count. Figure 12 is a histogram showing how
+       1x pd edit (ms)                  1.2       1.1          1.4         1.4          1.2              1.1           1.1          frequently we observed a particular increase in instruction
+         # pd edits                    11.1      11.3         11.5        12.7         11.4              8.8          12.0
+                                                                                                                                    count. Overall, half of the inputs see an increase beneath
+                       Table 2. Average latency of RPG2 operations.                                                                 15%, and the worst-case was a 37% increase. RPG2 ’s speedup
+                                                                                                                                    results already include (and overcome) the overhead of these
+                                                                                                                                    extra instructions.
+             
+
+                                                                                                                                  4.5 Prefetch Distance Sensitivity
+              
+                                                                                                                                    To better quantify the challenge of doing prefetching well, we
+ MYLX\LUJ`
+
+
+
+
+              
+
+              
+                                                                                                                                    used the offline configuration to measure the performance
+              
+                                                                                                                                    of all prefetch distances in the range [1,100]. While a subset
+                                                                                                                                   of these results were presented earlier in Figures 1-3, we
+                                                                                   
+                                        K`UHTPJPUZ[Y\J[PVUJV\U[UVYTHSPaLK[VVYPNPUHS                                           give a more comprehensive view in Table 3. For each (bench-
+                                                                                                                                    mark,input) pair, we manually examined its prefetch distance
+Figure 12. RPG2 ’s impact on dynamic instruction count for                                                                          versus runtime data and classified it into one of eight types:
+pr on Cascade Lake.                                                                                                                 single optimal where there is a clear single prefetch distance
+                                                                                                                                    that performs best, range optimal where a bounded range of
+                                                                                                                                    distances all perform equivalently, asymptotic where perfor-
+4.4 Performance Counter Validation                                                                                                  mance saturates as distance increases (e.g., all of the curves in
+To validate that RPG2 ’s speedup comes from reducing cache                                                                          Figure 2), both bad where prefetching hurts performance on
+misses via prefetching, we measured LLC MPKI via perf stat                                                                          both machines, Haswell bad and Cascade bad where prefetch-
+for all of pr’s inputs on Cascade Lake and show the results                                                                         ing is harmful on one machine but beneficial on the other,
+in Figure 11. Speedup is shown on the y-axis. While RPG2                                                                            noisy where the behavior is too erratic to be cleanly classi-
+reduces LLC MPKI, the relationship between the amount of                                                                            fied, and other for all remaining cases. Table 3 quantifies the
+LLC MPKI reduction and speedup is not especially strong.                                                                            challenge of identifying good prefetch distances – generally,
+We initially experimented with using LLC MPKI, instead                                                                              fewer than half of inputs exhibit the asymptotic shape that
+of IPC, as our performance metric during the tuning phase                                                                           makes it especially easy to find a good prefetch distance.
+but were unable to find good prefetch distances, as different                                                                       For single and range optimal cases, some kind of prefetch
+distances had little impact on MPKI despite a large impact on                                                                       distance search is necessary. The behavior of inputs is also
+performance. We believe that a reduction in misses elsewhere                                                                        not especially stable across machines, e.g., 27 pr inputs are
+in the hierarchy, as well as changes in DRAM bandwidth                                                                              single optimal on Cascade Lake, but only 17 are on Haswell.
+consumption, can explain the rest of the change in speedup.                                                                         This input- and microarchitecture-variability makes it hard
+   We also measure RPG2 ’s impact on the dynamic instruc-                                                                           to prefetch well in the absence of dynamic feedback.
+tion count for the extra instructions needed to run the prefetch                                                                       While most of our benchmarks present only a single de-
+kernel. We measured dynamic instruction count, normalized                                                                           mand load that can be accelerated via prefetching, sssp has
+
+
+
+                                                                                                                             1009
+ASPLOS ’24, April 27-May 1, 2024, La Jolla, CA, USA                                                                                           Zhang et al.
+
+
+                                                                                         what and how to prefetch. However, once a binary is pro-
+                                                                                         duced, the prefetch location and distance within it are fixed,
+                                                                                         which prevents adapting to runtime conditions as RPG2 can.
+                                                                                            Hardware prefetching mechanisms. Hardware prefetch-
+                                                                                     ing techniques include a wide-range of prefetchers [18–20,
+                                                                                     22, 25, 26, 29, 37, 41, 46, 47, 49, 53, 56, 58, 59, 68] that can
+OPNOLYPZIL[[LY
+
+
+
+
+                                                                                         capture a variety of patterns, including indirect prefetch-
+                 
+     ZWLLK\W
+
+
+
+
+                                                                                         ers [61, 65] and criticality-aware prefetchers [39, 52]. Modern
+                     
+                                                                                         processors adopt a combination of these hardware prefetch-
+
+
+
+
+                                                                           JL
+                                                                                     ers [5, 27, 31, 36, 48], while also relying on software prefetch-
+                                                                    
+
+
+
+
+                                                                          PZ[HU
+                                                                                   ing techniques to cover other complex memory access pat-
+
+
+
+
+                                                                        JOK
+                                                                                   terns [3, 28, 34]. RPG2 is complementary to existing hardware
+                                                                 
+
+
+
+
+                                                                    LML[
+                                                                                         techniques, and all hardware prefetchers were enabled for
+                                                            
+                                           
+
+
+                                                                   WY
+                                                                                    our experiments.
+                            SVHKWYLML[JOK
+                                             PZ[HUJL
+                                                                  SVHK                      Programmable hardware prefetching mechanisms.
+                                                                                         Others have proposed hybrid hardware-software approaches
+Figure 13. The relationship between multiple loads’ prefetch                             to prefetching [8, 24, 35, 61, 66], where the hardware prefetch-
+distances and performance for sssp running the p2p-                                      er can be programmed by software. If such prefetchers one
+Gnutella05 input on Cascade Lake.                                                        day appear in commercial processors, they would be an ideal
+                                                                                         complement to RPG2 that could provide low-overhead ways
+                                                                                         to implement prefetch kernels, avoiding some of the software
+two such loads. The prefetch distance for each prefetch can                              costs that RPG2 incurs to support on-stack replacement.
+thus be set differently. We found a variety of behaviors for
+sssp across different inputs. Sometimes using a “symmetric”                                 Dynamic software optimizations. While we are not
+configuration with the same distance for both prefetches                                 aware of any other dynamic prefetch injection systems for
+(which is RPG2 ’s behavior) was optimal; sometimes symmet-                               unmanaged languages, there are related systems for dynamic
+ric performed the worst, but all asymmetric configurations                               code optimization. OCOLOS [69] performs code layout op-
+performed equally well. Figure 13 shows another interest-                                timizations at runtime for unmanaged code and also uses
+ing asymmetric case where performance depends largely                                    BOLT [50], though it does not support on-stack replace-
+on load0’s distance (x-axis), though getting load1’s distance                            ment. HP’s Dynamo system [7] performs optimizations on
+right is worth a few additional percentage points of speedup                             unmanaged code at runtime, though it does not insert data
+as well. Efficiently searching the space of prefetch distances                           prefetches. DynamoRIO [11] and Intel’s Pin [42] are dynamic
+with multiple loads may present an interesting direction for                             binary instrumentation platforms that can be used to imple-
+future work.                                                                             ment optimizations though that is not their primary focus.
+                                                                                         LiteInst [14] is another instrumentation platform focused on
+5                Related Work                                                            low-overhead trampolines to instrumentation code, though
+                                                                                         with a higher runtime cost (and lower fixed cost) than our
+As the gap between processor and memory speeds is the                                    current approach. It would be interesting to consider using
+underlying cause of many performance problems in today’s                                 LiteInst to quickly insert prefetches and judge their efficacy,
+computer systems, researchers have proposed a myriad of                                  only resorting to BOLT once we are confident that prefetch-
+hardware, compiler, and operating systems techniques to                                  ing is beneficial.
+improve data locality. We discuss the most closely related
+work in software prefetching, hardware prefetching, and in                               6   Conclusion
+dynamic program optimization.
+                                                                                         In this paper, we have described the RPG2 system to add,
+    Software prefetching mechanisms. The most related                                    monitor and adjust prefetching online while a program is
+work to RPG2 are compiler-based approaches to software                                   running. We showed that prefetching can be highly sensitive
+prefetch injection [4, 12, 15, 17, 21, 32, 40, 43–45, 54, 55, 60,                        to program input and microarchitecture and that RPG2 can
+63, 64, 67]. These systems analyze source code to identify                               adapt the prefetching configuration to the current environ-
+patterns that are amenable to prefetching and can automat-                               ment. RPG2 is especially effective at adding guardrails around
+ically add software prefetch instructions accordingly, and                               the performance cliffs that prefetching can expose by auto-
+can suggest new source code patterns that RPG2 can support                               matically restoring the speed of the original no-prefetching
+(§ 3.2). Some of these schemes [3, 28, 34] can leverage pro-                             baseline within a few seconds if we happen to fall from one
+filing information to make more informed decisions about                                 of these cliffs.
+
+
+
+                                                                                  1010
+RPG2 : Robust Profile-Guided Runtime Prefetch Generation                                                   ASPLOS ’24, April 27-May 1, 2024, La Jolla, CA, USA
+
+
+Acknowledgments                                                                      [12] David Callahan, Ken Kennedy, and Allan Porterfield. Software prefetch-
+                                                                                          ing. In Proceedings of the Fourth International Conference on Archi-
+We thank the anonymous reviewers for their insightful sug-                                tectural Support for Programming Languages and Operating Systems,
+gestions and feedback. We thank Pranoti Dhamal for help on                                ASPLOS IV, page 40–52, New York, NY, USA, 1991. Association for
+earlier versions of this work. This work was supported by                                 Computing Machinery.
+generous gifts from Intel Labs, the Intel TSA project, Google,                       [13] Chandranil Chakraborttii and Heiner Litz. Learning i/o access pat-
+NSF/Intel joint grant #2011168, NSF #1942754, NSF #2346057,                               terns to improve prefetching in ssds. In Joint European Conference
+                                                                                          on Machine Learning and Knowledge Discovery in Databases, pages
+NSF #1841545, and the PRISM Research Center, a JUMP Cen-
+                                                                                          427–443. Springer, 2020.
+ter cosponsored by SRC and DARPA. Any opinions, findings,                            [14] Buddhika Chamith, Bo Joel Svensson, Luke Dalessandro, and Ryan R.
+conclusions, or recommendations expressed in this material                                Newton. Instruction punning: Lightweight instrumentation for x86-64.
+are those of the authors and do not necessarily reflect the                               In Proceedings of the 38th ACM SIGPLAN Conference on Programming
+views of the funding agencies.                                                            Language Design and Implementation, PLDI 2017, page 320–332, New
+                                                                                          York, NY, USA, 2017. Association for Computing Machinery.
+                                                                                     [15] William Y. Chen, Scott A. Mahlke, Pohua P. Chang, and Wen-mei W.
+                                                                                          Hwu. Data access microarchitectures for superscalar processors with
+                                                                                          compiler-assisted data prefetching. In Proceedings of the 24th Annual
+                                                                                          International Symposium on Microarchitecture, MICRO 24, page 69–73,
+                                                                                          New York, NY, USA, 1991. Association for Computing Machinery.
+References                                                                           [16] Meng-Chieh Chiu, Benjamin Marlin, and Eliot Moss. Real-time
+                                                                                          program-specific phase change detection for java programs. In Pro-
+ [1] BOLT: Binary Optimization and Layout Tool, 2019. https://github.
+                                                                                          ceedings of the 13th International Conference on Principles and Practices
+     com/facebookarchive/BOLT.
+                                                                                          of Programming on the Java Platform: Virtual Machines, Languages, and
+ [2] Masab Ahmad, Farrukh Hijaz, Qingchuan Shi, and Omer Khan. Crono:
+                                                                                          Tools, PPPJ ’16, New York, NY, USA, 2016. Association for Computing
+     A benchmark suite for multithreaded graph algorithms executing
+                                                                                          Machinery.
+     on futuristic multicores. In 2015 IEEE International Symposium on
+                                                                                     [17] Jamison Collins, Suleyman Sair, Brad Calder, and Dean M. Tullsen.
+     Workload Characterization, pages 44–55, 2015.                                        Pointer cache assisted prefetching. In 35th Annual IEEE/ACM Interna-
+ [3] Sam Ainsworth and Timothy M. Jones. Software prefetching for                         tional Symposium on Microarchitecture, 2002. (MICRO-35). Proceedings.,
+     indirect memory accesses. In 2017 IEEE/ACM International Symposium
+                                                                                          pages 62–73, 2002.
+     on Code Generation and Optimization (CGO), pages 305–317, 2017.                 [18] Jamison D. Collins, Hong Wang, Dean M. Tullsen, Christopher Hughes,
+ [4] Hassan Al-Sukhni, Ian Bratt, and Daniel A. Connors. Compiler-                        Yong-Fong Lee, Dan Lavery, and John P. Shen. Speculative precom-
+     directed content-aware prefetching for dynamic data structures. In
+                                                                                          putation: long-range prefetching of delinquent loads. In Proceedings
+     Proceedings of the 12th International Conference on Parallel Architec-
+                                                                                          28th Annual International Symposium on Computer Architecture, pages
+     tures and Compilation Techniques, PACT ’03, page 91, USA, 2003. IEEE
+                                                                                          14–25, 2001.
+     Computer Society.                                                               [19] Fredrik Dahlgren and Per Stenstrom. Effectiveness of hardware-based
+ [5] Erika S Alcorta, Mahesh Madhav, Scott Tetrick, Neeraja J Yadwadkar,                  stride and sequential prefetching in shared-memory multiprocessors.
+     and Andreas Gerstlauer. Lightweight ml-based runtime prefetcher
+                                                                                          In Proceedings of 1995 1st IEEE Symposium on High Performance Com-
+     selection on many-core platforms. arXiv preprint arXiv:2307.08635,
+                                                                                          puter Architecture, pages 68–77, 1995.
+     2023.
+                                                                                     [20] James Dundas and Trevor Mudge. Improving data cache performance
+ [6] Grant Ayers, Heiner Litz, Christos Kozyrakis, and Parthasarathy Ran-                 by pre-executing instructions under a cache miss. In Proceedings of the
+     ganathan. Classifying memory access patterns for prefetching. In
+                                                                                          11th International Conference on Supercomputing, ICS ’97, page 68–75,
+     Proceedings of the Twenty-Fifth International Conference on Architec-                New York, NY, USA, 1997. Association for Computing Machinery.
+     tural Support for Programming Languages and Operating Systems, pages
+                                                                                     [21] Edward H. Gornish, Elana D. Granston, and Alexander V. Veiden-
+     513–526, 2020.                                                                       baum. Compiler-directed data prefetching in multiprocessors with
+ [7] Vasanth Bala, Evelyn Duesterwald, and Sanjeev Banerjia. Dynamo:                      memory hierarchies. In Proceedings of the 4th International Conference
+     A transparent dynamic optimization system. In Proceedings of the
+                                                                                          on Supercomputing, ICS ’90, page 354–368, New York, NY, USA, 1990.
+     ACM SIGPLAN 2000 Conference on Programming Language Design
+                                                                                          Association for Computing Machinery.
+     and Implementation, PLDI ’00, page 1–12, New York, NY, USA, 2000.
+                                                                                     [22] Milad Hashemi, Onur Mutlu, and Yale N. Patt. Continuous runahead:
+     Association for Computing Machinery.
+                                                                                          Transparent hardware acceleration for memory intensive workloads.
+ [8] Abanti Basak, Shuangchen Li, Xing Hu, Sang Min Oh, Xinfeng Xie,                      In 2016 49th Annual IEEE/ACM International Symposium on Microar-
+     Li Zhao, Xiaowei Jiang, and Yuan Xie. Analysis and optimization of
+                                                                                          chitecture (MICRO), pages 1–12, 2016.
+     the memory hierarchy for graph processing workloads. In 2019 IEEE               [23] Milad Hashemi, Kevin Swersky, Jamie Smith, Grant Ayers, Heiner Litz,
+     International Symposium on High Performance Computer Architecture                    Jichuan Chang, Christos Kozyrakis, and Parthasarathy Ranganathan.
+     (HPCA), pages 373–386, 2019.
+                                                                                          Learning memory access patterns. In International Conference on
+ [9] Dean Michael Berris, Alistair Veitch, Nevin Heintze, Eric Anderson,
+                                                                                          Machine Learning, pages 1919–1928. PMLR, 2018.
+     and Ning Wang. XRay: A Function Call Tracing System, 2016. https:
+                                                                                     [24] Urs Hölzle and David Ungar. A third-generation self implementation:
+     //research.google/pubs/pub45287/.
+                                                                                          Reconciling responsiveness with performance. In Proceedings of the
+[10] Peter Braun and Heiner Litz. Understanding memory access patterns                    Ninth Annual Conference on Object-Oriented Programming Systems,
+     for prefetching. In International Workshop on AI-assisted Design for
+                                                                                          Language, and Applications, OOPSLA ’94, page 229–243, New York,
+     Architecture (AIDArc), held in conjunction with ISCA, 2019.                          NY, USA, 1994. Association for Computing Machinery.
+[11] Derek Bruening, Timothy Garnett, and Saman Amarasinghe. An                      [25] Ibrahim Hur and Calvin Lin. Memory prefetching using adaptive
+     infrastructure for adaptive dynamic optimization. In Proceedings of                  stream detection. In 2006 39th Annual IEEE/ACM International Sympo-
+     the International Symposium on Code Generation and Optimization:
+                                                                                          sium on Microarchitecture (MICRO’06), pages 397–408, 2006.
+     Feedback-Directed and Runtime Optimization, CGO ’03, page 265–275,
+     USA, 2003. IEEE Computer Society.
+
+
+
+
+                                                                              1011
+ASPLOS ’24, April 27-May 1, 2024, La Jolla, CA, USA                                                                                                     Zhang et al.
+
+
+[26] Yasuo Ishii, Mary Inaba, and Kei Hiraki. Access map pattern matching               [41] Jiwei Lu, A. Das, Wei-Chung Hsu, Khoa Nguyen, and S.G. Abraham.
+     for data cache prefetch. In Proceedings of the 23rd International Confer-               Dynamic helper threaded prefetching on the sun ultrasparc/spl reg/
+     ence on Supercomputing, ICS ’09, page 499–500, New York, NY, USA,                       cmp processor. In 38th Annual IEEE/ACM International Symposium on
+     2009. Association for Computing Machinery.                                              Microarchitecture (MICRO’05), pages 12 pp.–104, 2005.
+[27] Majid Jalili and Mattan Erez. Managing prefetchers with deep rein-                 [42] Chi-Keung Luk, Robert Cohn, Robert Muth, Harish Patil, Artur Klauser,
+     forcement learning. IEEE Computer Architecture Letters, 21(2):105–108,                  Geoff Lowney, Steven Wallace, Vijay Janapa Reddi, and Kim Hazel-
+     2022.                                                                                   wood. Pin: Building customized program analysis tools with dynamic
+[28] Saba Jamilan, Tanvir Ahmed Khan, Grant Ayers, Baris Kasikci, and                        instrumentation. In Proceedings of the 2005 ACM SIGPLAN Confer-
+     Heiner Litz. Apt-get: Profile-guided timely software prefetching. In                    ence on Programming Language Design and Implementation, PLDI ’05,
+     Proceedings of the Seventeenth European Conference on Computer Sys-                     page 190–200, New York, NY, USA, 2005. Association for Computing
+     tems, EuroSys ’22, page 747–764, New York, NY, USA, 2022. Association                   Machinery.
+     for Computing Machinery.                                                           [43] Chi-Keung Luk and Todd C. Mowry. Compiler-based prefetching for
+[29] Doug Joseph and Dirk Grunwald. Prefetching using markov predic-                         recursive data structures. In Proceedings of the Seventh International
+     tors. In Proceedings of the 24th Annual International Symposium on                      Conference on Architectural Support for Programming Languages and
+     Computer Architecture, ISCA ’97, page 252–263, New York, NY, USA,                       Operating Systems, ASPLOS VII, page 222–233, New York, NY, USA,
+     1997. Association for Computing Machinery.                                              1996. Association for Computing Machinery.
+[30] Svilen Kanev, Juan Pablo Darago, Kim Hazelwood, Parthasarathy Ran-                 [44] Chi-Keung Luk, Robert Muth, Harish Patil, Richard Weiss, P. Geoffrey
+     ganathan, Tipp Moseley, Gu-Yeon Wei, and David Brooks. Profiling                        Lowney, and Robert Cohn. Profile-guided post-link stride prefetching.
+     a warehouse-scale computer. In 2015 ACM/IEEE 42nd Annual Inter-                         In Proceedings of the 16th International Conference on Supercomputing,
+     national Symposium on Computer Architecture (ISCA), pages 158–169,                      ICS ’02, page 167–178, New York, NY, USA, 2002. Association for
+     2015.                                                                                   Computing Machinery.
+[31] Hui Kang and Jennifer L. Wong. To Hardware Prefetch or Not to                      [45] Todd C. Mowry, Monica S. Lam, and Anoop Gupta. Design and eval-
+     Prefetch? A Virtualized Environment Study and Core Binding Ap-                          uation of a compiler algorithm for prefetching. In Proceedings of the
+     proach. In Proceedings of the Eighteenth International Conference on                    Fifth International Conference on Architectural Support for Programming
+     Architectural Support for Programming Languages and Operating Sys-                      Languages and Operating Systems, ASPLOS V, page 62–73, New York,
+     tems, ASPLOS ’13, page 357–368, New York, NY, USA, 2013. Association                    NY, USA, 1992. Association for Computing Machinery.
+     for Computing Machinery.                                                           [46] Onur Mutlu, Hyesoon Kim, and Yale N. Patt. Techniques for effi-
+[32] Muneeb Khan, Andreas Sandberg, and Erik Hagersten. A case for                           cient processing in runahead execution engines. In 32nd International
+     resource efficient prefetching in multicores. In 2014 43rd International                Symposium on Computer Architecture (ISCA’05), pages 370–381, 2005.
+     Conference on Parallel Processing, pages 101–110, 2014.                            [47] Onur Mutlu, Jared Stark, Chris Wilkerson, and Yale N. Patt. Runahead
+[33] Tanvir Ahmed Khan, Nathan Brown, Akshitha Sriraman, Niranjan K                          execution: an alternative to very large instruction windows for out-
+     Soundararajan, Rakesh Kumar, Joseph Devietti, Sreenivas Subramoney,                     of-order processors. In The Ninth International Symposium on High-
+     Gilles A Pokam, Heiner Litz, and Baris Kasikci. Twig: Profile-guided                    Performance Computer Architecture, 2003. HPCA-9 2003. Proceedings.,
+     btb prefetching for data center applications. In MICRO-54: 54th Annual                  pages 129–140, 2003.
+     IEEE/ACM International Symposium on Microarchitecture, pages 816–                  [48] Carlos Navarro, Josué Feliu, Salvador Petit, Maria E Gomez, and Julio
+     829, 2021.                                                                              Sahuquillo. Bandwidth-aware dynamic prefetch configuration for
+[34] Tanvir Ahmed Khan, Ian Neal, Gilles Pokam, Barzan Mozafari, and                         ibm power8. IEEE Transactions on Parallel and Distributed Systems,
+     Baris Kasikci. Dmon: Efficient detection and correction of data locality                31(8):1970–1982, 2020.
+     problems using selective profiling. In 15th USENIX Symposium on                    [49] Kyle J. Nesbit and James E. Smith. Data cache prefetching using a global
+     Operating Systems Design and Implementation (OSDI 21), pages 163–                       history buffer. In 10th International Symposium on High Performance
+     181. USENIX Association, July 2021.                                                     Computer Architecture (HPCA’04), pages 96–96, 2004.
+[35] Tanvir Ahmed Khan, Akshitha Sriraman, Joseph Devietti, Gilles Pokam,               [50] Maksim Panchenko, Rafael Auler, Bill Nell, and Guilherme Ottoni.
+     Heiner Litz, and Baris Kasikci. I-spy: Context-driven conditional                       Bolt: A practical binary optimizer for data centers and beyond. In 2019
+     instruction prefetching with coalescing. In 2020 53rd Annual IEEE/ACM                   IEEE/ACM International Symposium on Code Generation and Optimiza-
+     International Symposium on Microarchitecture (MICRO), pages 146–159.                    tion (CGO), pages 2–14, 2019.
+     IEEE, 2020.                                                                        [51] Maksim Panchenko, Rafael Auler, Laith Sakka, and Guilherme Ottoni.
+[36] Sushant Kondguli and Michael Huang. Division of labor: A more                           Lightning bolt: Powerful, fast, and scalable binary optimization. In
+     effective approach to prefetching. In 2018 ACM/IEEE 45th Annual                         Proceedings of the 30th ACM SIGPLAN International Conference on
+     International Symposium on Computer Architecture (ISCA), pages 83–                      Compiler Construction, CC 2021, page 119–130, New York, NY, USA,
+     95. IEEE, 2018.                                                                         2021. Association for Computing Machinery.
+[37] Jaejin Lee, Changhee Jung, Daeseob Lim, and Yan Solihin. Prefetching               [52] Biswabandan Panda. Clip: Load criticality based data prefetching
+     with helper threads for loosely coupled multiprocessor systems. IEEE                    for bandwidth-constrained many-core systems. In Proceedings of the
+     Transactions on Parallel and Distributed Systems, 20(9):1309–1324, 2009.                56th Annual IEEE/ACM International Symposium on Microarchitecture
+[38] Jure Leskovec and Andrej Krevl. Snap datasets: Stanford large network                   (MICRO ’23), 2023.
+     dataset collection., 2014. https://snap.stanford.edu/data/.                        [53] Tanausu Ramirez, Alex Pajuelo, Oliverio J. Santana, and Mateo Valero.
+[39] Heiner Litz, Grant Ayers, and Parthasarathy Ranganathan. Crisp:                         Runahead threads to improve smt performance. In 2008 IEEE 14th
+     critical slice prefetching. In Proceedings of the 27th ACM International                International Symposium on High Performance Computer Architecture,
+     Conference on Architectural Support for Programming Languages and                       pages 149–158, 2008.
+     Operating Systems, pages 300–313, 2022.                                            [54] Amir Roth, Andreas Moshovos, and Gurindar S. Sohi. Dependence
+[40] Jiwei Lu, Howard Chen, Rao Fu, Wei-Chung Hsu, Bobbie Othmer, Pen-                       based prefetching for linked data structures. In Proceedings of the
+     Chung Yew, and Dong-Yuan Chen. The performance of runtime data                          Eighth International Conference on Architectural Support for Program-
+     cache prefetching in a dynamic optimization system. In Proceedings.                     ming Languages and Operating Systems, ASPLOS VIII, page 115–126,
+     36th Annual IEEE/ACM International Symposium on Microarchitecture,                      New York, NY, USA, 1998. Association for Computing Machinery.
+     2003. MICRO-36., pages 180–190, 2003.
+
+
+
+
+                                                                                 1012
+RPG2 : Robust Profile-Guided Runtime Prefetch Generation                                                   ASPLOS ’24, April 27-May 1, 2024, La Jolla, CA, USA
+
+
+[55] Amir Roth and Gurindar S. Sohi. Effective jump-pointer prefetching for           [62] Mark Weiser. Program slicing. IEEE Transactions on Software Engi-
+     linked data structures. In Proceedings of the 26th Annual International               neering, SE-10(4):352–357, 1984.
+     Symposium on Computer Architecture, ISCA ’99, page 111–121, USA,                 [63] Michael Joseph Wolfe, Carter Shanklin, and Leda Ortega. High Perfor-
+     1999. IEEE Computer Society.                                                          mance Compilers for Parallel Computing. Addison-Wesley Longman
+[56] Suleyman Sair, Timothy Sherwood, and Brad Calder. A decoupled                         Publishing Co., Inc., USA, 1995.
+     predictor-directed stream prefetching architecture. IEEE Transactions            [64] Youfeng Wu. Efficient discovery of regular stride patterns in irregular
+     on Computers, 52(03):260–276, mar 2003.                                               programs and its use in compiler prefetching. In Proceedings of the
+[57] Timothy Sherwood, Erez Perelman, Greg Hamerly, and Brad Calder.                       ACM SIGPLAN 2002 Conference on Programming Language Design and
+     Automatically characterizing large scale program behavior. In Pro-                    Implementation, PLDI ’02, page 210–221, New York, NY, USA, 2002.
+     ceedings of the 10th International Conference on Architectural Support                Association for Computing Machinery.
+     for Programming Languages and Operating Systems, ASPLOS X, page                  [65] Xiangyao Yu, Christopher J Hughes, Nadathur Satish, and Srinivas
+     45–57, New York, NY, USA, 2002. Association for Computing Machin-                     Devadas. Imp: Indirect memory prefetcher. In Proceedings of the 48th
+     ery.                                                                                  International Symposium on Microarchitecture, pages 178–190, 2015.
+[58] Alan Jay Smith. Sequential program prefetching in memory hierar-                 [66] Chao Zhang, Yuan Zeng, John Shalf, and Xiaochen Guo. Rnr: A
+     chies. Computer, 11(12):7–21, 1978.                                                   software-assisted record-and-replay hardware prefetcher. In 2020
+[59] Yan Solihin, Jaejin Lee, and Josep Torrellas. Using a user-level mem-                 53rd Annual IEEE/ACM International Symposium on Microarchitecture
+     ory thread for correlation prefetching. In Proceedings 29th Annual                    (MICRO), pages 609–621. IEEE, 2020.
+     International Symposium on Computer Architecture, pages 171–182,                 [67] Weifeng Zhang, Brad Calder, and Dean M. Tullsen. A self-repairing
+     2002.                                                                                 prefetcher in an event-driven dynamic optimization framework. In In-
+[60] Seung Woo Son, Mahmut Kandemir, Mustafa Karakoy, and Dhruva                           ternational Symposium on Code Generation and Optimization (CGO’06),
+     Chakrabarti. A compiler-directed data prefetching scheme for chip                     pages 12 pp.–64, 2006.
+     multiprocessors. In Proceedings of the 14th ACM SIGPLAN Sympo-                   [68] Weifeng Zhang, Dean M. Tullsen, and Brad Calder. Accelerating and
+     sium on Principles and Practice of Parallel Programming, PPoPP ’09,                   adapting precomputation threads for effcient prefetching. In 2007
+     page 209–218, New York, NY, USA, 2009. Association for Computing                      IEEE 13th International Symposium on High Performance Computer
+     Machinery.                                                                            Architecture, pages 85–95, 2007.
+[61] Nishil Talati, Kyle May, Armand Behroozi, Yichen Yang, Kuba Kaszyk,              [69] Yuxuan Zhang, Tanvir Ahmed Khan, Gilles Pokam, Baris Kasikci,
+     Christos Vasiladiotis, Tarunesh Verma, Lu Li, Brandon Nguyen, Jiawen                  Heiner Litz, and Joseph Devietti. Ocolos: Online code layout optimiza-
+     Sun, et al. Prodigy: Improving the memory latency of data-indirect                    tions. In 2022 55th IEEE/ACM International Symposium on Microarchi-
+     irregular workloads using hardware-software co-design. In 2021 IEEE                   tecture (MICRO), pages 530–545, 2022.
+     International Symposium on High-Performance Computer Architecture
+     (HPCA), pages 654–667. IEEE, 2021.
+
+
+
+
+                                                                               1013
+

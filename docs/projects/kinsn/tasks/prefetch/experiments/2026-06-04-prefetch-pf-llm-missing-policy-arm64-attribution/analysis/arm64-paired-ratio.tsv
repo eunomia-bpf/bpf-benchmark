@@ -1,0 +1,4 @@
+bench	control_mean_exec_ns	treatment_mean_exec_ns	treatment_over_control
+prefetch_struct_field_fixed_offsets	24457.8	23463.6	0.959350
+prefetch_mixed_policy_table	23016.6	22799.2	0.990555
+prefetch_stream_of_strides	22923.4	35621.8	1.553949

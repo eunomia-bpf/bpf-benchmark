@@ -146,7 +146,7 @@ BENCHES='prefetch_distance_0,prefetch_distance_2,prefetch_distance_4,prefetch_di
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-x86-prefetch-current-policy-micro-attribution/report.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-x86-prefetch-current-policy-micro-attribution/data/run-contract.json`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-x86-prefetch-current-policy-micro-attribution/analysis/*`
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
 
 注意：工作树里已有其他 prefetch task 的代码和结果改动，它们不是本实验新引入的改动。
 
@@ -280,7 +280,7 @@ micro runner 没有实际应用这个 pass。
 
 - 当前实验 smoke/control/treatment raw result。
 - 当前 prefetch task 文档：
-  `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`。
+  `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`。
 - 相关前序 prefetch experiments：
   - `2026-05-31-prefetch-research-micro-attribution`
   - `2026-05-31-prefetch-candidate-filtering-micro-attribution`

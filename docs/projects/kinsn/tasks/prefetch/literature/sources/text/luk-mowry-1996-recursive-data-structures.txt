@@ -1,0 +1,1584 @@
+        Compiler-Based Prefetching for Recursive Data Structures
+                                            Chi-Keung Luk and Todd C. Mowry
+
+
+                                             Department of Computer Science
+                                     Department of Electrical and Computer Engineering
+                                                   University of Toronto
+                                                Toronto, Canada M5S 3G4
+                                                  fluk,tcmg@eecg.toronto.edu
+
+
+Abstract                                                                  of applications: those containing pointer-based data structures
+                                                                          (also known as \recursive" data structures).
+Software-controlled data prefetching o ers the potential for                 Recursive Data Structures (RDSs) include familiar objects
+bridging the ever-increasing speed gap between the memory                 such as linked lists, trees, graphs, etc., where individual nodes
+subsystem and today's high-performance processors. While                  are dynamically allocated from the heap, and nodes are linked
+prefetching has enjoyed considerable success in array-based nu-           together through pointers to form the overall structure. For
+meric codes, its potential in pointer-based applications has re-          our purposes, \recursive data structures" can be broadly in-
+mained largely unexplored. This paper investigates compiler-              terpreted to include most pointer-linked data structures (e.g.,
+based prefetching for pointer-based applications|in particular,           mutually-recursive data structures, or even a graph of heteroge-
+those containing recursive data structures. We identify the               neous objects). From a memory performance perspective, these
+fundamental problem in prefetching pointer-based data struc-              pointer-based data structures are expected to be an important
+tures and propose a guideline for devising successful prefetching         concern for the following reasons. For an application to suf-
+schemes. Based on this guideline, we design three prefetching             fer a large memory penalty due to data replacement misses, it
+schemes, we automate the most widely applicable scheme (greedy            typically must have a large data set relative to the cache size.
+prefetching) in an optimizing research compiler, and we evaluate          Aside from multi-dimensional arrays, recursive data structures
+the performance of all three schemes on a modern superscalar              are one of the most common and convenient methods of building
+processor similar to the MIPS R10000. Our results demonstrate             large data structures (e.g, B-trees in database applications, oc-
+that compiler-inserted prefetching can signi cantly improve the           trees in graphics applications, etc.). As we traverse a large RDS,
+execution speed of pointer-based codes|as much as 45% for the             we may potentially visit enough intervening nodes to displace a
+applications we study. In addition, the more sophisticated algo-          given node from the cache before it is revisited; hence temporal
+rithms (which we currently perform by hand, but which might be            locality may be poor. Finally, in contrast with arrays, where
+implemented in future compilers) can improve performance by as            consecutive elements are at contiguous addresses and therefore
+much as twofold. Compared with the only other compiler-based              stride-one accesses can exploit long cache lines, there is little in-
+pointer prefetching scheme in the literature, our algorithms o er         herent spatial locality between consecutively-accessed nodes in
+substantially better performance by avoiding unnecessary over-            an RDS since they are dynamically allocated from the heap and
+head and hiding more latency.                                             can have arbitrary addresses. Therefore, techniques for coping
+                                                                          with the latency of accessing these pointer-based data structures
+                                                                          are essential.
+1 Introduction
+Memory latency is becoming an increasingly important perfor-              1.1 Coping with Memory Latency for RDSs
+mance bottleneck as the gap between processor and memory                  Ideally, the rst step toward coping with memory latency would
+speeds continues to grow. While cache hierarchies are an im-              be to reduce latency by restructuring either the computation or
+portant step toward addressing the latency problem, they are              the data to minimize cache misses. Unfortunately, the local-
+not a complete solution. To further reduce or tolerate memory             ity optimizations developed for numeric applications (e.g., tiling,
+latency, automatic compiler techniques such as locality optimiza-         loop interchange, etc. [4, 21]) are not applicable to RDSs. Al-
+tions [4, 21] and software-controlled prefetching [3, 16] have been       though we do explore one optimization which potentially im-
+proposed and evaluated in the past. While these techniques have           proves spatial locality in RDSs (data linearization, as described
+shown considerable promise, they have been limited in scope to            later in Section 2.2.3), a signi cant number of cache misses still
+array-based numeric applications. In this paper, we explore how           remain, and therefore techniques for tolerating latency are also
+to expand the compiler's scope to include another important class         needed.
+                                                                             Tolerating write latency is not a fundamental problem, since
+                                                                          we can bu er and pipeline writes. The real challenge is tolerat-
+                                                                          ing read latency, which requires that we decouple the request for
+                                                                          data from the use of that data, while nding enough useful par-
+                                                                          allelism to keep the processor busy in between. The two main
+                                                                          techniques for tolerating read latency are prefetching [2, 3, 15]
+  0                                                                       and multithreading [1, 9, 11, 13]. Prefetching tolerates latency
+                                                                          by anticipating what data is needed and moving it to the cache
+
+
+
+                                                                      1
+ahead of time. Prefetching can be controlled either by hardware       2 Software-Controlled Prefetching for
+or software. Hardware-based schemes typically look for patterns
+in previous accesses to predict future behavior, and software-          RDSs
+based schemes rely on either the programmer or the compiler           In this section we discuss the major issues and challenges in-
+to insert explicit prefetch instructions. In contrast, multithread-   volved in software-controlled prefetching for RDSs, we present
+ing tolerates latency by switching from one concurrent thread to      guidelines for overcoming these challenges, and we describe three
+another upon a cache miss.                                            prefetching algorithms based on these guidelines.
+   Comparing prefetching with multithreading, the advantage of
+multithreading is that unlike prefetching, it does not require the
+ability to predict data addresses ahead of time. Although this is     2.1 Challenges in Prefetching RDSs
+not an issue in numeric codes (since ane array addresses can
+always be computed ahead of time), it does present a serious          Any software-controlled prefetching scheme can be viewed as hav-
+challenge when we want to prefetch RDS codes due to the tight         ing two major phases. First, an analysis phase predicts which dy-
+control and data dependences (we will discuss this in detail later    namic memory references are likely to su er caches misses, and
+in Section 2). Prefetching, however, does o er some important         hence should be prefetched. Second, a scheduling phase attempts
+advantages over multithreading. First, prefetching can accelerate     to insert prefetches suciently far in advance such that latency is
+a single thread of execution, unlike multithreading which requires    e ectively hidden, while introducing minimal runtime overhead.
+multiple concurrent threads. This additional concurrency may or       For array-based applications, the compiler can use locality anal-
+may not exist|particularly in a uniprocessor environment, it is       ysis to predict which dynamic references to prefetch, and loop
+unlikely that the programmer would go through the pain of par-        splitting and software pipelining to schedule prefetches [15].
+allelizing their application just for the sake of multithreading.        A fundamental di erence between array references and pointer
+Second, multithreading requires a signi cant amount of hard-          dereferences is the way addresses are generated. The address of
+ware support to minimize thread switching overhead (e.g., repli-      an array reference A[i] can always be computed once a value of
+cated register les). In contrast, software-controlled prefetching     i is chosen. In contrast, the address of a pointer dereference p
+requires very little hardware support|in fact, most commercial        is unknown unless the value stored in p is read. This di erence
+microprocessors today already support prefetch instructions.          makes both the analysis and scheduling phases signi cantly more
+   Comparing software vs. hardware-controlled prefetching, a po-      challenging for RDSs than for arrays.
+tential drawback of a software-based approach is the additional
+instruction overhead necessary to issue prefetches. However, with                                             (b) No Locality
+today's superscalar processors, it may be possible to overlap
+much of this overhead with other computation. The software-                                                   listHead[1]
+based approach has the major advantages of requiring less hard-       (a) Example Code                        listHead[2]
+ware support (the hardware already exists), being more exible,                                   f
+and (most importantly) being able to exploit application-speci c        for (i=1; i<=n; i++)
+                                                                          listNode *p = listHead[i];
+knowledge about future access patterns. (It is not clear how a            while(p)   f                        listHead[n]
+hardware-based scheme could predict the chaotic-seeming access                      !
+                                                                            work(p data);                     (c) Temporal Locality
+patterns that occur when an RDS is traversed.)                                     !
+                                                                            p = p next;
+   Up until now, there has been no suitable solution for toler-             g                                 listHead[1]
+ating the latency of RDS codes in commercial systems: there             g                                     listHead[2]
+are no commodity microprocessors that support multithread-
+ing, e ective hardware-based prefetching schemes have yet to be                                                             a common tail
+demonstrated, and the compiler support for exploiting software-                                               listHead[n]
+controlled prefetching for RDSs has remained an open question.
+In this paper, we address this open research question by designing    Figure 1: Example of list traversals, both with and without tem-
+and evaluating compiler-based prefetching schemes which suc-          poral data locality.
+cessfully tolerate the latency of accessing recursive data struc-
+tures in modern microprocessor-based systems.
+                                                                      2.1.1 Analysis
+1.2 An Overview                                                       To illustrate the diculty of analyzing data locality in RDSs,
+                                                                      consider the code in Figure 1(a), where we are traversing n dif-
+This paper is organized as follows. We begin in Section 2             ferent linked lists. In one extreme, the nodes may be entirely
+by identifying the fundamental problem that makes prefetching         disjoint (as illustrated in Figure 1(b)), in which case we would
+RDSs dicult, and proposing a guideline for devising successful       want to prefetch every list node. Another possibility might be
+prefetching schemes. Based on this guideline, we design three         that each list shares a long common \tail" starting with the sec-
+di erent prefetching algorithms. In Section 3, we describe how        ond list node (as illustrated in Figure 1(c)). In this latter case,
+the most widely applicable of these schemes (greedy prefetch-         there would be signi cant temporal locality (assuming the cache
+ing) has been implemented in an optimizing research compiler          is large enough to contain the common tail), and ideally we would
+(SUIF). Section 4 describes our experimental framework, and           only want to prefetch the nodes in the common tail during the
+Section 5 presents our experimental results where we evaluate           rst list traversal (i.e. when i=1). Unfortunately, despite the
+all three prefetching algorithms on the Olden benchmark suite         signi cant progress that has been made recently in pointer anal-
+through detailed simulations of a MIPS R10000-like processor.         ysis techniques for heap-allocated objects [6, 8, 10], compilers are
+Section 6 discusses related work, including a quantitative com-       still not sophisticated enough to di erentiate these two cases au-
+parison between our schemes and the only other compiler-based         tomatically. In general, analyzing the addresses of heap-allocated
+pointer prefetching scheme proposed in the literature. Section 7      objects is a very dicult problem for the compiler.
+describes future work to improve our algorithms, and nally, we
+conclude in Section 8.
+
+
+
+                                                                                                                                   Page 2
+                          (a) Traversing an RDS                              pointer-chasing problem, we would like kFk to be as small as
+                                                                             possible. If F is implemented by following the pointer chain
+                 Currently visiting             Would like to prefetch       from ni to ni+d , then kFk = d. Instead, we will consider the
+                                                                             cases where kFk = 1 and kFk = 0 (other values of kFk are
+                                                                             possible, but do not appear to be interesting).
+                         ni           ni +1   ni +2       ni +3                 The case where kFk = 1 means that only one pointer deref-
+(b) Prefetching 3 Nodes Ahead                 (c) Prefetching 1 Node Ahead   erence is needed within the RDS to compute Ai+d at node ni .
+                                                                             This implies that ni needs a direct pointer to ni+d |we call this
+while (p) f                  while (p) f                                     pointer a jump-pointer. Jump-pointers can occur either naturally
+  prefetch(p!next!next!next); prefetch(p!next);                              or arti cially with respect to the RDS: a natural jump-pointer is
+  work(p!data);                work(p!data);                                 a pointer that already exists in ni, whereas an arti cial jump-
+  p = p!next;                  p = p!next;                                   pointer is added to ni for the purpose of prefetching. With
+g                                             g                              natural jump-pointers, we are using one of the pointers at ni
+                                                                             to approximate Ai+d . The advantage is that no extra storage
+        Figure 2: Illustration of the pointer-chasing problem.               or computation is needed to create a natural jump-pointer, but
+                                                                             unfortunately the e ectiveness of prefetching may be limited by
+2.1.2 Scheduling                                                             the accuracy of this approximation. In contrast, we require ad-
+                                                                             ditional storage and computation to add arti cial jump-pointers
+Our ability to schedule prefetches for an RDS is also constrained            to an RDS, but hopefully these pointers will yield Ai+d more pre-
+by the fact that nodes are linked together through pointers. For             cisely (particularly if the structure of the RDS does not change
+example, consider the case shown in Figure 2(a), where assuming              rapidly between times when the arti cial jump-pointers are set).
+that three nodes worth of computation is needed to hide the                     The case where kFk = 0 means that no pointer dereferences
+latency, we would like to initiate a prefetch for node ni+3 while            are required to compute Ai+d at ni. This is obviously a good
+we are visiting node ni . The problem is that to compute the                 case, but how can one compute the address of a heap-allocated
+address of node ni+3 , we must rst dereference a pointer in node             object (which normally can reside at an arbitrary address) with-
+ni+2 , and to do that, we must rst dereference a pointer in node             out dereferencing any pointers? The answer is that we must have
+ni+1 , etc. As a result, one cannot prefetch (or fetch) a future             special knowledge of an RDS's layout in memory such that Ai+d
+node until all nodes between it and the current node have been               can be directly implied from Ai and d.2 There are many ways to
+fetched. However, the very act of touching these intermediate                accomplish this. For example, one could map a tree into an array
+nodes means that we cannot tolerate the latency of fetching more             structure such that there was a one-to-one mapping between the
+than one node ahead. For example, the prefetching code shown                 tree position and an array index. We will discuss the details of
+in Figure 2(b) will not hide any more latency than the code in               the approach we take later in Section 2.2.3.
+Figure 2(c).1 In fact, the code in Figure 2(c) is likely to run faster          In the remainder of this section, we propose three prefetch-
+since it has less instruction overhead. This example illustrates             ing schemes with various kFk which avoid the pointer-chasing
+what we refer to as the pointer-chasing problem.                             problem: greedy prefetching corresponds to kFk = 1 using nat-
+   Since scheduling RDS prefetches is such a dicult problem, we             ural jump-pointers; history-pointer prefetching corresponds to
+make it the primary focus of this paper. Improvements in anal-               kFk = 1 using arti cial jump-pointers; and data-linearization
+ysis tend to reduce prefetching overhead by eliminating unnec-               prefetching is a case where kFk = 0.
+essary prefetches. However, without sucient scheduling tech-
+niques, there will be no upside to prefetching and hence reducing            2.2.1 Greedy Prefetching
+overhead will be irrelevant. Fortunately, as we discuss in the
+next subsection, there are techniques for scheduling prefetches              In a k-ary RDS, each node contains k pointers to other nodes.
+that avoid the pointer-chasing problem.                                      Greedy prefetching exploits the fact that when k > 1, only one
+                                                                             of these k pointers can be immediately followed by control ow
+2.2 Overcoming the Pointer-Chasing Prob-                                     as the next node in the traversal. Hence the remaining k 1
+                                                                             pointers serve as natural jump-pointers, and can be prefetched
+    lem                                                                      immediately upon rst visiting a node. Although none of these
+Let us formalize the pointer-chasing problem as follows. At a                jump-pointers may actually point to ni+d , hopefully each of them
+given RDS node ni with address Ai , we wish to prefetch the                  points to ni+d0 for some d0 > 0. If d0 < d, then the latency may
+node ni+d that will be visited d nodes after ni . We choose d (the           be partially hidden; if d0  d, then we expect the latency to be
+prefetching distance) to be just large enough to hide the cache
+                                                                             fully hidden, provided that the node is not displaced from the
+miss latency: d = d WL e, where L is the expected miss latency               cache before it is referenced (which may occur if d0  d).
+and W is the estimated amount of computation between node                       To illustrate how greedy prefetching works, consider the pre-
+accesses in cycles. To prefetch ni+d, we must compute its address            order traversal of a binary tree (i.e. k = 2), where Figure 3(a)
+Ai+d based on the information available at ni . The relationship             shows the code with greedy prefetching added. Assuming that
+between Ai and Ai+d can be expressed as:                                     the computation in process() takes half as long as the cache
+                                                                             miss latency, we would want to prefetch two nodes ahead (i.e.
+                         Ai+d = F (d; Ai)                                    d = 2) to fully hide the latency. Figure 3(b) shows the caching
+                                                                             behavior of each node. We obviously su er a full cache miss at
+where F is an address generating function.                                   the root node (node 1), since there was no opportunity to fetch
+  A key factor in whether prefetch scheduling is e ective is the             it ahead of time. However, we would only su er half of the miss
+number of pointer-chain dereferences required within the RDS                 penalty ( L2 ) when we visit node 2, and no miss penalty when
+to evaluate F (d; Ai), which we denote as kFk. To overcome the               we eventually visit node 3 (since the time to visit the subtree
+                                                                                2 We may also need to take other information into account, such as the
+    Assuming that nodes are not larger than cache lines; if they are, then
+    1
+                                                                             traversal order, but nothing can involve dereferencing a pointer within n .
+prefetching further ahead can potentially result in a pipelining bene t.                                                                             i
+
+
+
+
+                                                                                                                                                Page 3
+ (a) Code with Greedy Prefetching (b) Cache Miss Behavior
+                                    f
+                                                                                                                                                                1
+                                                                    1
+      preorder(treeNode * t)
+                             f
+                                                                                                                   6
+        if (t != NULL)
+                        !
+           prefetch(t left);                            2                       3                     youngest
+                        !
+                                                                                                                                              2                                   3
+           prefetch(t right);                                                                                      3
+
+                        !
+           process(t data);
+                                                4            5            6           7                                just set
+
+                         !
+                                                                                                  FIFO (d = 3)    11
+                                                                                                                                      4                5                 6                 7
+           preorder(t left);
+                         !
+           preorder(t right);
+                                            8       9       10 11       12 13       14 15                         10                                        just set
+
+          g
+                                                                                                      oldest
+
+      g
+                                                    cache miss                cache hit                                           8       9       10       11       12       13       14       15
+                                                    partial latency cache miss                                     5
+
+                                                                                                                                                           History Pointer
+              Figure 3: Illustration of greedy prefetching.
+                                                                                               Figure 4: Example showing the update of history-pointers
+rooted at node 2 is greater than L). In this example, the latency
+is fully hidden for roughly half of the nodes, and reduced by                               the latency).3 However, on subsequent traversals of the RDS,
+50% for the other half (minus the root node). If we generalize                              history-pointer prefetching will hide nearly all of the latency,
+this example to a k-ary tree, we would expect the fraction of                               whereas greedy prefetching will continue to hide only a fraction
+nodes where latency is fully hidden to be roughly k k 1 (assuming                           of the latency.
+that prefetched nodes are generally not displaced from the cache                               While history-pointer prefetching o ers the potential advan-
+before they are referenced). Hence a larger value of k is likely                            tage of improved latency tolerance, this comes at the expense
+to improve the performance of greedy prefetching, since more                                of two additional forms of overhead: (i) execution overhead to
+natural jump-pointers are available.                                                        construct the history-pointers, and (ii) space overhead for stor-
+   Greedy prefetching o ers the following advantages: (i) it has                            ing these new pointers. To minimize execution overhead, we
+low runtime overhead, since no additional storage or computa-                               can potentially update the history-pointers less frequently, de-
+tion is needed to construct the natural jump-pointers; (ii) it is                           pending on how rapidly the structure of the RDS changes. In
+applicable to a wide variety of RDSs, regardless of how they are                            one extreme, if the RDS never changes, we only need to set the
+accessed or whether their structure is modi ed frequently; and                              history-pointers once. The problem with space overhead is that
+(iii) it is relatively straightforward to implement in a compiler (in                       it potentially worsens the caching behavior. The desire to elimi-
+fact, we have implemented it in the SUIF compiler, as we describe                           nate this space overhead altogether is the motivation for our next
+later in Section 3). The main disadvantage of greedy prefetch-                              prefetching scheme.
+ing is that it does not o er precise control over the prefetching
+distance, which is the motivation for our next algorithm.                                   2.2.3 Data-Linearization Prefetching
+2.2.2 History-Pointer Prefetching                                                           The goal of data-linearization prefetching is to achieve an F such
+                                                                                            that Ai+d can be predicted precisely, but without requiring any
+Rather than relying on natural jump-pointers to approximate                                 pointer dereferences (i.e. kFk = 0). Another advantage of this
+Ai+d , we can potentially synthesize more accurate jump-pointers                            scheme is that it improves spatial locality. The basic idea is to
+based on the actual RDS traversal patterns, while still achieving                           map heap-allocated nodes that are likely to be accessed close
+kFk = 1. The idea behind the history-pointer prefetching scheme                             together in time into contiguous memory locations. With this
+is that we create a new jump-pointer (called a history-pointer)                             mapping, one can easily predict Ai+d and hence prefetch it early
+in ni which contains the observed value of Ai+d during a recent                             enough.
+traversal of the RDS. (Note that we could potentially store multi-                            Recall that the address of an array element x[i + d] can be
+ple arti cial jump-pointers in ni to account for multiple traversal                         computed relative to x[i] as follows (using C-like syntax):
+orderings.) On subsequent traversals of the RDS, we prefetch the
+nodes pointed to by these history-pointers. This scheme is most                                             &x[i + d] = &x[i] + d  sizeof (x[0])                                                   (1)
+e ective when the traversal pattern does not change rapidly over
+time, in which case the history-pointer in ni is likely to point                            Therefore, if we can map the RDS onto an array x of nodes such
+to either ni+d or else hopefully a node that will be visited soon.                          that Ai = &x[i], no pointer dereference is needed to compute
+On the other hand, if the structure of the RDS changes radically                            Ai+d|we simply need two arithmetic operations per prefetch ad-
+between traversals, the history-pointers might not be e ective.                             dress.
+   To construct the history-pointers, we maintain a FIFO queue                                 The question is how and when can this mapping (which we
+of length d which contains pointers to the last d nodes that have                           call data linearization) be performed? In theory, one could dy-
+just been visited. When we visit a new node ni, the oldest node in                          namically remap the data even after the RDS has been initially
+the queue will be ni d (i.e. the node visited d nodes earlier), and                         constructed, but doing so may result in large runtime overheads
+hence we update the history-pointer of ni d to point to ni . After                          and may also violate program semantics.4 Instead, the best time
+the rst complete traversal of the RDS, all of the history-pointers                          to map the nodes is at creation time, which is appropriate if ei-
+will be set. Figure 4 illustrates a snapshot of this bookkeeping                            ther the creation order already matches the traversal order, or
+process for the tree shown earlier in Figure 3. Assuming that                               if it can be safely reordered to do so. Since dynamic remapping
+d = 3 and that we have just reached node 6, we would now update                             is expensive (or impossible), this scheme obviously works best
+the history-pointer of the oldest node in the 3-entry queue (node                           if the structure of the RDS changes only slowly (or not at all).
+10) to point to node 6.                                                                        3 Hence we may want to use greedy prefetching for the rst traversal of
+   Comparing the performance of this scheme with greedy                                     an RDS when the history-pointers are being initialized.
+prefetching, history-pointer prefetching o ers no improvement                                  4 All pointers to these objects would also need to be updated, and under-
+on the rst traversal of an RDS, since the history-pointers have                             standing pointer aliasing for heap-allocated objects is quite dicult for the
+yet to be set (greedy prefetching would hide some fraction of                               compiler.
+
+
+
+
+                                                                                                                                                                                                Page 4
+                                                                         struct T    f              struct A     f                  struct C     f
+                                                                           int data;                  int i;                          int j;
+          1   2   4   8   9   5 10 11 3   6 12 13 7 14 15
+                                                                           struct T *left;            struct B **kids[8];             double f;
+                                                                           struct T *right;         g                               g
+                                                                         g
+                                    Prefetch
+
+     Figure 5: Illustration of data-linearization prefetching                (a) RDS type               (b) RDS type           (c) Not RDS type
+
+If the RDS does change radically, the program will still behave        Figure 6: Examples of whether type declarations are recognized
+correctly, but prefetching will not improve performance.               as being RDS types.
+   Figure 5 illustrates how data-linearization prefetching works
+for the tree shown earlier in Figures 3 and 4. The ordering            the same type, since RDSs may be comprised of heterogeneous
+of nodes in the array corresponds to the pre-order traversal or-       nodes.) For example, the type declarations in Figure 6(a) and
+der. To prefetch d nodes ahead, one simply uses equation (1)           Figure 6(b) would be recognized as RDS types, whereas Fig-
+to compute Ai+d . In addition, if a single cache line can hold         ure 6(c) would not.5
+m > 1 nodes, we can exploit this spatial locality by only issuing        After discovering data structures with the appropriate types,
+a prefetch once every m nodes. If we are traversing the RDS            the compiler then looks for control structures that are used to
+inside a loop, we can accomplish this by unrolling the loop by         traverse the RDSs. In particular, the compiler looks for loops or
+a factor of m (similar to what is done in array-based prefetch-        recursive procedure calls such that during each new loop iteration
+ing [15]). For a traversal through recursion, one could potentially    or procedure invocation, a pointer p to an RDS is assigned a value
+keep track of the number of nodes visited between prefetches, but      resulting from a dereference of p|we refer to this as a recurrent
+the overhead of doing so may be comparable to simply issuing           pointer update. This heuristic corresponds to how RDS codes
+a prefetch for every node. The arrows in Figure 5 indicate the         are typically written. To detect recurrent pointer updates, the
+desired prefetches when d = 3 and m = 3.                               compiler propagates pointer values using a simpli ed (but less
+                                                                       precise) version of earlier pointer analysis algorithms [7, 12].
+2.3 Summary                                                                    (a) while (l) f                (b) for (...) f
+The nature of recursive data structures makes both the analysis                          listNode *m;                    listNode *n;
+and scheduling of prefetches quite challenging. Before attempt-                          ...                             ...
+ing to minimize prefetching overhead through improved analysis,                                 !
+                                                                                         m = l next;                     n = g(n);
+we must rst maximize the latency-hiding gain through e ec-                                      !
+                                                                                         l = m next;                     ...
+tive prefetch scheduling techniques. The fundamental problem                             ...                         g
+in scheduling prefetches for RDSs is the pointer-chasing problem,                    g
+which we formalize as the number of pointer-chain dereferences                 (c) f(treeNode *t) f (d) k(treeNode tn) f
+required to compute a prefetch address (kFk). Based on our de-                           ...                             ...
+sire to minimize kFk, we have identi ed three promising prefetch-                           !
+                                                                                         f(t left);                      k(*(tn.left));
+ing schemes: greedy prefetching (kFk = 1 with natural jump-                                 !
+                                                                                         f(t right);                     k(*(tn.right));
+pointers), history-pointer prefetching (kFk = 1 with arti cial                           ...                             ...
+jump-pointers), and data-linearization prefetching (kFk = 0).                        g                               g
+   Of these three schemes, greedy prefetching is perhaps the most
+widely applicable since it does not rely on traversal history infor-   Figure 7: Examples of recognizable control structures for RDS
+mation, and it requires no additional storage or computation to        traversals.
+construct prefetch addresses. For these reasons, we have imple-           Figure 7 shows some example program fragments that our com-
+mented a version of greedy prefetching as an automatic compiler        piler treats as RDS accesses. In Figure 7(a), l is updated to
+pass, and we will simulate the other two algorithms by hand to         l!next!next inside the while-loop. In Figure 7(b), n is as-
+compare their performance with greedy prefetching. In the next         signed the result of the function call g(n) inside the for-loop.
+section, we describe the implementation details of our greedy          (Since our implementation does not perform interprocedural
+prefetching compiler pass.                                             analysis, it assumes that g(n) results in a value n!...!next.)
+                                                                       In Figure 7(c), two dereferences of the function argument t are
+3 Implementation                               of      Greedy          passed as the parameters to two recursive calls. Figure 7(d)
+                                                                       is similar to Figure 7(c), except that a record (rather than a
+  Prefetching                                                          pointer) is passed as the function argument.
+                                                                          Ideally, the next step would be to analyze data locality across
+Our implementation of greedy prefetching within the SUIF com-          RDS nodes|e.g., to distinguish the two cases shown in Fig-
+piler [20] consists of an analysis phase to recognize RDS accesses,    ure 1|to eliminate any unnecessary prefetches. Although we
+and a scheduling phase to insert prefetches.                           have not automated this step in our compiler, we will evaluate
+                                                                       its potential bene t later in Section 5.3.
+3.1 Analysis: Recognizing RDS Accesses
+To recognize RDS accesses, the compiler uses both type declara-
+                                                                       3.2 Scheduling Prefetches
+tion information to recognize which data objects are RDSs, and         Once RDS accesses have been recognized, the compiler inserts
+control structure information to recognize when these objects are      greedy prefetches as follows. At the point where an RDS object
+being traversed. An RDS type is a record type r containing                5 The compiler may fail to recognize cases with explicit type casting|e.g.,
+at least one pointer that points either directly or indirectly to      casting j to be of type (struct C*) in Figure 6(c)|but such cases do not
+a record type s. (Note that r and s are not restricted to be           appear to be common.
+
+
+
+
+                                                                                                                                            Page 5
+                                                           Table 1: Benchmark characteristics.
+  Benchmark Description                                          Recursive Data Structures Used          Input Data Set        Node Memory Allocated
+  BH        Barnes-Hut's N-body force-calculation                Heterogenous octree                       4K bodies           4128 x 136 B = 548 KB
+            algorithm                                                                                                          + 2021 x 88 B = 173 KB
+  Bisort    Sorts two disjoint bitonic sequences and             Binary tree                             250,000 integers     131,017 x 12 B = 1535 KB
+            then merges them
+  EM3D      Simulates the propagation of electromagnetic         Singly-linked lists                    2000 H-nodes, 100      4000 x 28 B = 109 KB
+            waves in a 3D object                                                                        E-nodes, 75% local   + 400,000 x 4 B = 1562 KB
+  Health    Simulation of the Columbian health care              Four-way tree and doubly-linked         max. level = 5,        341 x 100 B = 33 KB
+            system                                               lists                                   max. time = 500     + 57,111 x 16 B = 892 KB
+  MST       Finds the minimum spanning tree of a graph           Array of singly-linked lists               512 nodes            512 x 20 B = 10 KB
+  Perimeter Computes perimeters of regions in images             A quadtree                              4K x 4K image       235,717 x 28 B = 6445 KB
+  Power         Solves the power system optimization             Multi-way tree and singly-linked       10,000 customers          200 x 56 B = 11 KB
+                problem                                          lists                                                          + 1000 x 96 B = 94 KB
+                                                                                                                               + 10,000 x 32 B = 313 KB
+  TreeAdd       Sums the values distributed on a tree            Binary tree                              1024K nodes        1,048,576 x 12 B = 12,288 KB
+  TSP           Traveling salesman problem                       Binary tree and doubly-linked lists      100,000 cities       131,071 x 40 B = 5120 KB
+  Voronoi       Computes the voronoi diagram of a set of         Binary tree                              20,000 points        633,032 x 16 B = 9891 KB
+                points                                                                                                        + 32,768 x 32 B = 1024 KB
+
+
+
+        while (l) f                        while (l) f                                                 Table 2: Simulation parameters.
+                 !
+            work(l data);       =)          prefetch(l!next);
+                !
+            l = l next;                                !
+                                               work(l data);
+                                                                                                             Pipeline Parameters
+        g                                             !
+                                               l = l next;
+                                                                                         Issue Width                                                 4
+                                           g                                             Functional Units
+                                                                                         Reorder Bu er Size
+                                                                                                                     2 Int, 2 FP, 2 Memory, 1 Branch
+                                                                                                                                                    32
+                               (a) Loop                                                  Integer Multiply                                    12 cycles
+                                                                                         Integer Divide                                      76 cycles
+    f(treeNode *t) f                           f(treeNode *t) f                          All Other Integer                                     1 cycle
+        treeNode *q;             =)                treeNode *q;                          FP Divide                                           15 cycles
+                  !
+        if (test(t data))                                    !
+                                                   prefetch(t left);                     FP Square Root                                      20 cycles
+                !
+           q = t left;                                       !
+                                                   prefetch(t right);                    All Other FP                                         2 cycles
+                  !
+        else q = t right;                                    !
+                                                   if (test(t data))                     Branch Prediction Scheme                      2-bit Counters
+        if (q != NULL)                                     !
+                                                      q = t left;                                            Memory Parameters
+           f(q);                                             !
+                                                   else q = t right;                    Primary Instr and Data Caches 16KB, 2-way set-associative
+    g                                              if (q != NULL)                       Uni ed Secondary Cache            512KB, 2-way set-associative
+                                                      f(q);                             Line Size                                                  32B
+                                               g                                        Primary-to-Secondary Miss
+                                                                                        Primary-to-Memory Miss
+                                                                                                                                              12 cycles
+                                                                                                                                              75 cycles
+                            (b) Procedure
+                                                                                        Data Cache Miss Handlers                                      8
+                                                                                        Data Cache Banks                                              2
+        Figure 8: Examples of greedy prefetch scheduling.                               Data Cache Fill Time                                   4 cycles
+                                                                                        (Requires Exclusive Access)
+                                                                                        Main Memory Bandwidth                    1 access per 20 cycles
+is being traversed (i.e. where the recurrent pointer update oc-
+curs), the compiler inserts prefetches of all pointers within this
+object that point to RDS-type objects (these are the natural
+jump-pointers6) at the earliest points where these addresses are                   dynamically allocated.
+available within the surrounding loop or procedure body. The                          Our simulation model varies slightly from the actual MIPS
+availability of prefetch addresses is computed by propagating the                  R10000 (e.g., we model two memory units, and we assume that
+earliest generation points of pointer values along with the val-                   all functional units are fully-pipelined), but we do model the
+ues themselves. Two examples of greedy prefetch scheduling are                     rich details of the processor including the pipeline, register re-
+shown in Figure 8.                                                                 naming, the reorder bu er, branch prediction, instruction fetch-
+                                                                                   ing, branching penalties, the memory hierarchy (including con-
+                                                                                   tention), etc. The parameters of our model are shown in Table 2.
+4 Experimental Framework                                                           We use pixie [18] to instrument the optimized MIPS object les
+                                                                                   produced by the compiler, and pipe the resulting trace into our
+To evaluate the performance of our three prefetching schemes,                      simulator.
+we performed detailed cycle-by-cycle simulations of the entire                        To minimize the impact of store stalls during the initialization
+Olden benchmark suite [17] on a dynamically-scheduled, super-                      of dynamically-allocated objects, we use our own memory allo-
+scalar processor similar to the MIPS R10000. The Olden bench-                      cator for these experiments which is similar to mallopt provided
+mark suite contains ten pointer-based applications written in C,                   in the Irix C library [19], but also contains built-in prefetching
+which are brie y summarized in Table 1. The rightmost column                       to avoid such store misses. This optimization alone led to dra-
+in Table 1 shows the number and size of each node type that was                    matic improvements (greater than two-fold speedups) over us-
+   6 Note that we do not prefetch all pointers within an RDS object|only           ing malloc for the majority of the applications|particularly the
+the ones that point to other RDS nodes (potentially of di erent types than         ones that frequently allocate small objects.
+the given object).
+
+
+
+
+                                                                                                                                                     Page 6
+                                                    Normalized Execution Time
+                                                                                                                                                                                                                                                                                                                                                                load stall
+                                                                                          100.0             100.0 101.2    100.0 99.8       100.0                                         100.0 101.6              100.0                          100.0 99.9             100.0                        100.0                    100.0 99.4                       store stall
+                                                                                100               96.6
+                                                                                      |
+                                                                                                                                                                                                                                                                                                                                                                inst stall
+                                                                                                                                                                                                                                                                                                                91.3                                            busy
+                                                                                                                                                                                                                                 88.7
+                                                                                                                                                                                                                                                                                     79.8
+                                                                                80
+                                                                                      |
+
+
+
+
+                                                                                                                                                    68.6
+
+                                                                                60
+                                                                                      |
+
+
+
+
+                                                                                40
+                                                                                      |
+
+
+
+
+                                                                                20
+                                                                                      |
+
+
+
+
+                                                                                  0
+                                                                                      |
+
+
+
+
+                                                                                           N      G          N     G        N     G          N      G                                      N           G              N              G                 N      G            N         G                    N      G                 N       G
+                                                                                               bh           bisort          em3d            health                                             mst               perimeter                         power                 treeadd                           tsp                voronoi
+
+
+                                               Figure 9: Performance of compiler-inserted greedy prefetching (N = no prefetching, G = greedy prefetching).
+          % of Original Load D-Cache Misses
+
+
+
+
+                                                                                                                                                           % of PF that Hit in D-Cache
+
+                                                                                                                                        nopf_miss
+                                                                                                                                        pf_miss
+                                              100                                                                                                                                        100
+                                                    |
+
+
+
+
+                                                                                                                                                                                               |
+                                                                                                                                        pf_hit                                                                                                                                        94
+                                                                                                                                                                                                                 88                                                                                                      87                89
+
+                                              80                                                                                                                                                                      77
+                                                    |
+
+
+
+
+                                                                                                                                                                                                                           67                                                                                                                              65 65 65 65
+                                              60                                                                                                                                                   59 59 59 59
+                                                    |
+
+
+
+
+                                                                                                                                                                                                                                                                                                                              54
+                                                                                                                                                                                         50                                          49                               48 48 48 48
+                                                                                                                                                                                               |
+
+
+
+
+                                                                                                                                                                                                                                                       41 41 41 41                         40
+                                              40                                                                                                                                                                                                                                                                                   38 38
+                                                    |
+
+
+
+
+                                                                                                                                                                                                                                31        29 29                                                 31
+
+                                              20                                                                                                                                                                                                  19                                                      19
+                                                    |
+
+
+
+
+                                                                                                                                                                                                                                                                                                     11                                         11 11 11
+                                                                                                                                                                                                                                                                                                               4 4 4
+                                               0                                                                                                                                          0
+                                                    |
+
+
+
+
+                                                                                                                                                                                               |
+
+
+
+
+                                                                                bisort    health   perimeter treeadd     voronoi                                                               100 99 95 90      100 99 95 90        100 99 95 90      100 99 95 90   100 99 95 90    100 99 95 90        100 99 95 90   100 99 95 90      100 99 95 90    100 99 95 90
+                                                                bh                    em3d       mst      power      tsp
+                                                                                                                                                                                                      bh          bisort                 em3d              health        mst         perimeter power treeadd                                    tsp        voronoi
+
+
+                                                                                 (a) Coverage Factor                                                                                                                                        (b) Unnecessary Prefetches
+                                                                                                         Figure 10: Additional performance metrics for evaluating greedy prefetching.
+
+5 Experimental Results                                                                                                                                                                                                As we see in Figure 9, half of the applications enjoy a speedup
+                                                                                                                                                                                                                   ranging from 4% to 45% (the other half are within 2% of their
+We now present results from our simulation studies. We start by                                                                                                                                                    original performance). For the applications with the largest
+evaluating the performance of compiler-inserted greedy prefetch-                                                                                                                                                   memory stall penalties (i.e. health, perimeter, and treeadd),
+ing, and then compare this with hand-inserted versions of history-                                                                                                                                                 much of this stall time has been eliminated. In the cases of
+pointer prefetching and data-linearization prefetching. Next, we                                                                                                                                                   bisort and mst, prefetching overhead more than o set the re-
+evaluate the potential performance gains from better analysis to                                                                                                                                                   duction in memory stalls (thus resulting in a slight performance
+reduce unnecessary prefetches. Finally, we explore the perfor-                                                                                                                                                     degradation), but this was not a problem in the other eight ap-
+mance impact of architectural support.                                                                                                                                                                             plications. (Later, in Section 5.3, we will explore how to further
+                                                                                                                                                                                                                   reduce this overhead.)
+5.1 Performance of                                                                                                        Compiler-Inserted                                                                           To understand the performance results in greater depth, Fig-
+                                                                                                                                                                                                                   ure 10 presents two additional performance metrics. Figure 10(a)
+    Greedy Prefetching                                                                                                                                                                                             breaks down the original primary cache misses into three cate-
+The results of our rst set of experiments are shown in Figures 9                                                                                                                                                   gories: (i) those that are prefetched and subsequently hit in the
+and 10. Figure 9 shows the overall performance improvement                                                                                                                                                         primary cache (pf hit), (ii) those that are prefetched but remain
+o ered by greedy prefetching, where the two bars correspond to                                                                                                                                                     primary misses (pf miss), and (iii) those that are not prefetched
+the cases without prefetching (N) and with greedy prefetching                                                                                                                                                      (nopf miss). The sum of the pf hit and pf miss cases is also
+(G). These bars represent execution time normalized to the case                                                                                                                                                    known as the coverage factor, which ideally should be 100%. For
+                                                                                                                                                                                                                   em3d, power, and voronoi, the coverage factor is quite low (un-
+without prefetching, and they are broken down into four cate-                                                                                                                                                      der 20%) because most of their misses are caused by array or
+gories explaining what happened during all potential graduation                                                                                                                                                    scalar references|hence prefetching RDSs yields little improve-
+slots.7 The bottom section (busy) is the number of slots when                                                                                                                                                      ment. In all other cases, the coverage factor is above 60%, and in
+instructions actually graduate, the top two sections are any non-                                                                                                                                                  four cases we achieve nearly perfect coverage. If the pf miss cat-
+graduating slots that are immediately caused by the oldest in-                                                                                                                                                     egory is large, this indicates that prefetches were not scheduled
+struction su ering either a load or store miss,8 and the inst stall                                                                                                                                                e ectively|either they were issued too late to hide the latency,
+section is all other slots where instructions do not graduate. Note                                                                                                                                                or else they were too early and the prefetched data was displaced
+that the load stall and store stall sections are only a rst-order                                                                                                                                                  from the cache before it could be referenced. This category is
+approximation of the performance loss due to cache stalls, since                                                                                                                                                   most prominent in mst, where the compiler is unable to prefetch
+these delays also exacerbate subsequent data dependence stalls.                                                                                                                                                    early enough during the traversal of very short linked lists within
+   7 The number of graduation slots is the issue width (4 in this case) mul-                                                                                                                                       a hash table. Since the natural jump-pointers in greedy prefetch-
+tiplied by the number of cycles. We focus on graduation rather than issue                                                                                                                                          ing o er little control over prefetching distance, it is not surpris-
+slots to avoid counting speculative operations that are squashed.                                                                                                                                                  ing that scheduling is imperfect|in fact, it is encouraging that
+   8 Store misses only stall the processor when the 32-entry memory issue
+bu er is full.                                                                                                                                                                                                     the pf miss fractions are this low. Later, in Section 5.2, we will
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                              Page 7
+                                   160               156.4
+
+                                                                                                                                  (a) bh                                          (b) bisort
+                                         |
+    % of Original Memory Traffic
+
+
+
+
+                                                                                                               prefetch
+                                   140                                                                         load+store
+                                         |
+
+
+
+
+                                                                                                                                                                                  int Bimerge(root,spr val,dir)
+                                                                                                                                  bh walk(..., node*t, ...) f                         rv = root!value;
+                                                                                                                                     prefetch(t!children[0]);                         pl = root!left; pr = root!right;
+                                   120
+                                         |
+
+
+
+
+                                                                               111.3
+
+                                                                                                                                     prefetch(t!children[1]);
+                                                                       107.2
+                                                                                                                                                                                      ...
+                                                                                                                104.2
+
+                                                                                                                                                                                      while ((pl != NIL)) f
+                                             100.8                                             100.7                     100.6
+
+                                                                                                                                     prefetch(t!children[2]);
+                                                              100.0                                    100.0
+                                   100                                                 96.8
+                                         |
+
+
+
+
+                                                                                                                                     prefetch(t!children[3]);                             prefetch(pl!left);
+                                                                                                                                     prefetch(t!children[4]);                             prefetch(pl!right));
+                                   80
+                                                                                                                                                                                          prefetch(pr!left);
+                                         |
+
+
+
+
+                                                                                                                                     prefetch(t!children[5]);
+                                   60
+                                                                                                                                     prefetch(t!children[6]);                             prefetch(pr!right);
+                                                                                                                                     prefetch(t!children[7]);                             lv = pl!value;
+                                         |
+
+
+
+
+                                                                                                                                     if (bh test(p)) f                                    pll = pl!left; plr = pl!right;
+                                                                                                                                                                                          rv = pr!value;
+                                   40
+                                                                                                                                         for (k=0; k<8; k++)f
+                                         |
+
+
+
+
+                                                                                                                                             r = t!children[k];                           prl = pr!left; prr = pr!right;
+                                                                                                                                                                                          if (...) f
+                                   20
+                                         |
+
+
+
+
+                                                                                                                                             if (r)
+                                                                                                                                                 bh walk(..., r, ...);                        if (...) f
+                                    0
+                                                                                                                                         g                                                        SwapValRight(pl,pr,plr,prr,lv,rv);
+                                         |
+
+
+
+
+                                                                                                                                     g else bh work(..., t, ...);
+                                             (1%)    (2%)     (4%)    (31%)    (8%)    (15%)   (0%)    (24%)    (6%)     (5%)
+                                                                                                                                                                                                  pl = pll; pr = prl;
+                                             bh      bisort   em3d    health   mst perimeter power treeadd      tsp     voronoi
+                                                                                                                                                                                              g else  f
+                                                                                                                                  g                                                           g   pl = plr; pr = prr;
+                                                                                                                                                                                          g else  f
+                                                                                                                                                                                              if (...) f
+Figure 11: Increase in total memory trac due to greedy                                                                                                                                           SwapValLeft(pl,pr,pll,prl,lv,rv);
+prefetching. Numbers below the bars indicate the memory uti-                                                                                                                                      pl = plr; pr = prr;
+                                                                                                                                                                                              g else  f
+lization with greedy prefetching.                                                                                                                                                                 pl = pll; pr = prl;
+                                                                                                                                                                                            g g
+                                                                                                                                                                                       gif ((root
+                                                                                                                                  (c) health                                                      !left != NIL)) f
+                                                                                                                                                                                            prefetch(root!left);
+explore techniques for improving prefetch scheduling.                                                                                                                                       prefetch(root!right);
+                                                                                                                                                                                            ...
+   To help evaluate the costs of prefetching, Figure 10(b) shows                                                                  void waiting(Village *village, List *list)
+                                                                                                                                     while (list != NULL) f                                 rl = root!left; rr = root!right;
+                                                                                                                                        prefetch(list!forward);                             ...
+the fraction of dynamic prefetches that are unnecessary because                                                                         i = village!hosp.free personnel;
+                                                                                                                                        p = list!patient;
+                                                                                                                                                                                            root!value=Bimerge(rl,value,dir);
+the data is found in the primary cache. For each application,                                                                           if (i > 0) f                                  g... spr val=Bimerge(rr,spr val,dir);
+                                                                                                                                             t = village!hosp.free personnel;     g
+we show four di erent bars indicating the total (dynamic) un-                                                                                village!hosp.free personnel = t-1;
+                                                                                                                                             p!time left = 3;
+necessary prefetches caused by static prefetch instructions with                                                                             p!time = t + 3;
+hit rates up to a given threshold. Hence the bar labeled \100"                                                                               l = &(village!hosp.waiting);
+                                                                                                                                             removeList(l, p);                    (d) mst
+                                                                                                                                             l = &(village!hosp.assess);
+corresponds to all unnecessary prefetches, whereas the bar la-                                                                               addList(l, p);
+                                                                                                                                        g else   f                                void *HashLookup(int key, Hash hash) f
+                                                                                                                                                                                     j = (hash!mapfunc)(key);
+beled \99" shows the total unnecessary prefetches if we exclude                                                                              t = p!time;                             for (ent = hash!array[j];
+prefetch instructions with hit rates over 99%, etc. This break-                                                                         glistp=!list
+                                                                                                                                                 time = t + 1;
+                                                                                                                                                     !forward;
+                                                                                                                                                                                         ent && ent!key!=key;
+                                                                                                                                                                                         ent=ent!next)
+                                                                                                                                                                                            prefetch(ent!next);
+down indicates the potential for reducing overhead by eliminating                                                                 g g                                                if (ent) return ent!entry;
+                                                                                                                                                                                     return NULL;
+static prefetch instructions that are clearly of little value. For ex-                                                                                                            g
+ample, eliminating prefetches with hit rates over 99% would elim-
+inate over half of the unnecessary prefetches in perimeter, thus                                                                  Figure 12: Abstract representation of the output of the greedy
+decreasing overhead signi cantly. In contrast, reducing overhead                                                                  prefetching compiler for some interesting code fragments in the
+with a at distribution (e.g., bh) is more dicult since prefetches                                                                Olden benchmarks.
+that sometimes hit also miss at least 10% of the time (therefore,
+eliminating them may sacri ce some latency-hiding bene t). We                                                                     bisort: The main RDS is a binary tree, and the important cache
+will quantify the bene t of eliminating unnecessary prefetches                                                                        misses occur in Bimerge(), which contains both loops and
+later in Section 5.3.                                                                                                                 recursion (see Figure 12(b)). The four \grandchildren" of
+   To further evaluate the costs of greedy prefetching, Figure 11                                                                     root are prefetched early in the while loop. Although load
+shows its impact on memory bandwidth. Ideally, prefetching                                                                            misses are completely hidden, execution time increases by
+will not increase memory trac, since the original memory refer-                                                                      1.2% due to unnecessary prefetching overhead. Locality
+ences will simply be converted into prefetches. (In fact, previous                                                                    analysis might help this case by recognizing that a portion of
+studies have demonstrated that prefetching can actually reduce                                                                        data accessed in the recursive calls has already been brought
+the memory trac in a shared-memory multiprocessor through                                                                            into the cache by the while loop.
+exclusive-mode hints [15].) However, since the natural jump-
+pointers used by greedy prefetching may point to nodes that will                                                                  health: Over 90% of load stalls are due to linked-list accesses
+not be accessed in the near future (or perhaps not at all), greedy                                                                    inside waiting() (see Figure 12(c)). Despite a noticeable
+prefetching can potentially increase the memory bandwidth de-                                                                         increase in overhead, the 50% reduction in load stalls results
+mands through useless prefetches. As we see in Figure 11, greedy                                                                      in a large speedup.
+prefetching has increased memory trac by less than 12% for all
+but one application (in one case|perimeter|the trac actu-                                                                        mst: 90% of load stalls occur in HashLookup(), where it searches
+ally decreased slightly due to fortuitous cache replacement behav-                                                                    for an item in an array of linked lists (see Figure 12(d)).
+ior in the set-associative caches). In the case of bisort, where                                                                      Although the compiler prefetches ent!next, only a small
+we do see a noticeable increase of 56%, the total memory utiliza-                                                                     portion of the latency can be hidden since the loop body is
+tion still remains so low with greedy prefetching (2%) that there                                                                     so small. This appears to be a general problem with hash
+is no impact on performance. Hence greedy prefetching does not                                                                        tables, and prefetching prior to the hash function invocation
+appear to be su ering from memory bandwidth problems.                                                                                 is beyond the scope of our algorithm.
+   Although space constraints prevent a detailed discussion of                                                                    perimeter: A quadtree is traversed through recursive procedure
+each application, we brie y summarize some of the highlights                                                                          calls. All load misses are covered, but the 94% unnecessary
+(code fragments are shown in Figure 12).                                                                                              prefetches result in signi cant overheads. There are two rea-
+bh: Nodes of an octree are traversed in bh walk(), and 70%                                                                            sons for the unnecessary prefetches: (i) the same parts of
+        of load stalls occur in bh test() and bh work() (see Fig-                                                                     the quadtree can be visited through di erent recursive pro-
+        ure 12(a)). The compiler immediately prefetches all eight                                                                     cedures, thus resulting in unanticipated data locality; and
+        children of the current node t before bh test() is called.                                                                    (ii) each node contains a pointer to its parent, which the
+        Although 59% of prefetches are unnecessary, the overhead                                                                      compiler prefetches along with the four child pointers, but
+        remains low and there is a 4% speedup.                                                                                        the parent is already in the cache.
+
+
+
+
+                                                                                                                                                                                                                         Page 8
+                                                         Normalized Execution Time
+
+
+
+
+                                                                                                                                                                                                                                       Normalized Execution Time
+                                                                                                     100.0                                                   load stall                                                                                                  100.0                          100.0                                                      load stall
+                                                                                     100                                                                                                                                                                           100
+
+
+                                                                                              |
+
+
+
+
+                                                                                                                                                                                                                                                                         |
+                                                                                                                                                             store stall                                                                                                                                                                                           store stall
+                                                                                                                                                             inst stall                                                                                                              88.7                                                                          inst stall
+                                                                                                                                                             busy                                                                                                                            81.4                                          79.8                    busy
+                                                                                         80   |                                                                                                                                                                    80
+
+
+
+
+                                                                                                                                                                                                                                                                         |
+                                                                                                              68.6                                                                                                                                                                                                                                     67.6
+                                                                                         60                                                                                                                                                                        60
+                                                                                              |
+
+
+
+
+                                                                                                                                                                                                                                                                         |
+                                                                                                                                                    49.0
+                                                                                         40                                                                                                                                                                        40
+                                                                                              |
+
+
+
+
+                                                                                                                                                                                                                                                                         |
+                                                                                         20                                                                                                                                                                        20
+                                                                                              |
+
+
+
+
+                                                                                                                                                                                                                                                                         |
+                                                                                          0                                                                                                                                                                         0
+                                                                                              |
+
+
+
+
+                                                                                                                                                                                                                                                                         |
+                                                                                                      N        G                                     H                                                                                                                       N        G       D          N                                   G            D
+                                                                                                                                                                                                                                                                                 perimeter                                   treeadd
+
+                                                                                          (a) Execution Time                                                                                                                                                                      (a) Execution Time
+       % of Original Load D-Cache Misses
+
+
+
+
+                                                                                                                     % of PF that Hit in D-Cache
+
+
+
+
+                                                                                                                                                                             % of Original Load D-Cache Misses
+
+
+
+
+                                                                                                                                                                                                                                                                                                             % of PF that Hit in D-Cache
+                                                                                                  nopf_miss                                                                                                                                                                                 nopf_miss
+                                           100                                                                                                     100                                                           100                                                                                                                       100       94
+                                                 |
+
+
+
+
+                                                                                                                                                         |
+
+
+
+
+                                                                                                                                                                                                                       |
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                 |
+                                                                                                  pf_miss                                                                                                                                                                                   pf_miss
+                                                                                                  pf_hit                                                                                                                                                                                    pf_hit                                                                       87
+                                                                                                                                                                                                                                                                                                                                                              78                 81
+                                           80                                                                                                      80                                                            80                                                                                                                        80
+                                                 |
+
+
+
+
+                                                                                                                                                         |
+
+
+
+
+                                                                                                                                                                                                                       |
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                 |
+                                           60                                                                                                      60                                                            60                                                                                                                        60
+                                                 |
+
+
+
+
+                                                                                                                                                         |
+
+
+
+
+                                                                                                                                                                                                                       |
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                 |
+                                           40                                                                                                      40
+                                                                                                                                                               41                                                40                                                                                                                        40
+                                                 |
+
+
+
+
+                                                                                                                                                         |
+
+
+
+
+                                                                                                                                                                                                                       |
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                 |
+                                                                                                                                                                     29
+                                           20                                                                                                      20                                                            20                                                                                                                        20
+                                                 |
+
+
+
+
+                                                                                                                                                         |
+
+
+
+
+                                                                                                                                                                                                                       |
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                 |
+                                            0                                                                                                       0                                                             0                                                                                                                         0
+                                                 |
+
+
+
+
+                                                                                                                                                         |
+
+
+
+
+                                                                                                                                                                                                                       |
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                 |
+                                                     G                               H                                                                         G      H                                                     G    D                                   G           D                                                                   G        D           G      D
+                                                                                                                                                                                                                           perimeter                                 treeadd                                                                         perimeter            treeadd
+                              (b) Coverage Factor (c) Unnecessary Prefetches                                                                                                                                           (b) Coverage Factor                                                               (c) Unnecessary Prefetches
+Figure 13: Performance of health with history-pointer prefetch-                                                                                                            Figure 14: Performance of perimeter and treeadd with data-
+ing (N = no prefetching, G = greedy prefetching, H = history-                                                                                                              linearization prefetching (N = no prefetching, G = greedy
+pointer prefetching).                                                                                                                                                      prefetching, D = data-linearization prefetching).
+tsp: Each RDS node contains four pointers: two for binary tree-                                                                                                               Data-linearization prefetching is applicable to both perimeter
+     like accesses, and two for doubly-linked list-like accesses.                                                                                                          and treeadd, because the creation order is identical to the ma-
+     The abundant unnecessary prefetches occur for the same rea-                                                                                                           jor subsequent traversal order in both cases. As a result, data
+     sons as perimeter. Prefetching reduces the inst stall time                                                                                                            linearization does not require changing the data layout in these
+     (see Figure 9) in this case by accelerating data dependency                                                                                                           cases (hence spatial locality is una ected). As we see in Fig-
+     chains.                                                                                                                                                               ure 14, data-linearization prefetching o ers additional speedups
+  In summary, we have seen that automatic compiler-inserted                                                                                                                ranging from 9% to 18% through fewer unnecessary prefetches
+prefetching can result in signi cant speedups for applications                                                                                                             (and hence less prefetching overhead), while still maintaining
+containing recursive data structures. In the next two sections, we                                                                                                         good coverage factors. Unnecessary prefetches are reduced be-
+will evaluate techniques for increasing these gains even further.                                                                                                          cause only one prefetch is issued per node (whereas greedy
+                                                                                                                                                                           prefetching may follow multiple natural jump-pointers), and cov-
+                                                                                                                                                                           erage su ers slightly because there are multiple traversal or-
+5.2 History-Pointer Prefetching and Data-                                                                                                                                  ders, and data linearization only captures the most common one.
+    Linearization Prefetching                                                                                                                                              Overall, we see that both history-pointer prefetching and data-
+                                                                                                                                                                           linearization can potentially o er signi cant improvements over
+To quantify the performance potential of the more sophisti-                                                                                                                greedy prefetching when applicable.
+cated prefetching schemes proposed earlier in Section 2.2, we
+applied them by hand to our applications. Figure 13 shows                                                                                                                  5.3 Reducing Overhead Through Locality
+the performance of the one application that improves under
+history-pointer prefetching: health. History-pointer prefetch-                                                                                                                 Analysis
+ing works in this case because the structure of the lists accessed
+in waiting() (see Figure 12(c)) remains unchanged throughout                                                                                                               Our compiler currently does not attempt to analyze data locality
+the over ten thousand times it is called. Two history-pointers are                                                                                                         across RDS node accesses. As a result, we may prefetch nodes
+added to the List record: one for prefetching list and one for                                                                                                             unnecessarily that already reside in the cache (as discussed ear-
+prefetching list!patient, with prefetching distances of four                                                                                                               lier in Section 5.1). For numeric applications, sophisticated lo-
+and two, respectively. As we see in Figure 13, history-pointer                                                                                                             cality analysis techniques have been combined with loop split-
+prefetching results in a 40% speedup over greedy prefetching                                                                                                               ting techniques to isolate the dynamic iterations that should be
+through better miss coverage and fewer unnecessary prefetches.                                                                                                             prefetched [16]. Unfortunately, the control structures in RDS
+Coverage is improved because list!patient is successfully                                                                                                                  codes are less amenable to isolating dynamic node visitations,
+prefetched|under greedy prefetching, the compiler does not rec-                                                                                                            so our only option may be to eliminate static prefetch instruc-
+ognize list!patient as an RDS access,9 and even if it did,                                                                                                                 tions altogether. This makes sense for prefetches that are almost
+there would not be sucient time to hide the latency. Although                                                                                                             always unnecessary (i.e. have very high hit rates).
+history-pointer prefetching has a smaller fraction of unnecessary                                                                                                             To estimate the performance potential of exploiting locality in-
+prefetches, it has more overhead than greedy prefetching due to                                                                                                            formation, we used memory feedback information from our sim-
+the extra work required to maintain the history-pointers.                                                                                                                  ulator to eliminate prefetch instructions with hit rates above a
+   9 The reason why greedy prefetching does not recognize list!patient as
+                                                                                                                                                                           certain threshold from the greedy prefetching code. Figure 15
+                                                                                                                                                                           shows our results for the four applications that were a ected
+an RDS access is that there is no recurrent pointer update for the patient                                                                                                 by setting this threshold to 99%, 95%, and 90% hit rates. As
+object type. As we discussed earlier in Section 3, the compiler does not
+prefetch pointers unless they point to RDSs.                                                                                                                               we see in Figure 15, eliminating prefetches with hit rates above
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                     Page 9
+                                 140
+                                                                |
+
+
+
+
+                                                                                                                                                                                                  Normalized Execution Time
+     Normalized Execution Time
+
+
+
+
+                                                                                                                                                                         load stall                                                                                                                                                                                                    load stall
+                                                                                                                                                                                                                                                                                                                                  100.0                                                store stall
+                                                                                                                                                                         store stall                                                 100                          100.0               100.0 98.5
+                                                                                                                                                                                                                                                                                                   97.9
+                                                                                                                                                                                                                                                                                                           100.0                                          100.0
+
+
+
+
+                                                                                                                                                                                                                                                              |
+                                                                                                                                                                         inst stall                                                                                                                                                                                                    inst stall
+                                 120                                                                                                                                                                                                                                                                                                                                                   busy
+                                                                |
+
+
+
+
+                                                                                                                                                                         busy
+                                                                                                                                                                                                                                                                                                                   83.7
+                                                                                                                                                                                                                                                                                                                          80.4
+                                                                       100.0 99.5 99.0               100.0 97.9          102.6   100.0 99.2                      100.0                                                                               80                                                                                   77.9
+
+
+
+
+                                                                                                                                                                                                                                                              |
+                                                                                                                                                                                                                                                                                                                                                                  76.5
+                                                                                                                                                                                                                                                                          74.3 73.3
+                                 100                                                        96.2                  96.9                          96.3 96.3
+                                                                |
+
+
+
+
+                                                                                                                                                                         92.9 92.9 92.9                                                                                                                                                          71.3
+                                                                                                                                                                                                                                                                                                                                                                         68.2
+
+
+                                 80                                                                                                                                                                                                                  60
+
+
+
+
+                                                                                                                                                                                                                                                              |
+                                                                |
+
+
+
+
+                                 60                                                                                                                                                                                                                  40
+                                                                |
+
+
+
+
+                                                                                                                                                                                                                                                              |
+                                 40
+                                                                |
+
+
+
+
+                                                                                                                                                                                                                                                     20
+
+
+
+
+                                                                                                                                                                                                                                                              |
+                                 20
+                                                                |
+
+
+
+
+                                                                                                                                                                                                                                                          0
+
+
+
+
+                                                                                                                                                                                                                                                              |
+                                                                                                                                                                                                                                                                   1 2 4               1 2 4                1 2 4                  1 2 4                     1 2 4
+                                  0                                                                                                                                                                                                                                    bh              health             perimeter treeadd                                     tsp
+                                                                |
+
+
+
+
+                                                                        G F99 F95 F90                 G F99 F95 F90               G F99 F95 F90                   G F99 F95 F90
+
+                                                                                                                                                                                                                                             (a) Execution Time (Normalized to case 1)
+                                                                                 bisort                 perimeter                     treeadd                                 tsp
+
+
+                                                                         (a) Execution Time (Normalized to G)
+                                                                                                                                                                                                                                                                                                          Insts per Loads per
+                                                                                                                                                                                                                                                                                Application               Prefetch Prefetch
+                                   % of Original Load D-Cache Misses
+
+
+
+
+                                                                                                                                                                  nopf_miss
+
+                                                                                                                                                                                                                                                                                bh                           3.6       0.5
+                                                                       120                                                                                        pf_miss
+                                                                             |
+
+
+
+
+                                                                                                                                                                  pf_hit
+
+                                                                                                                                                                                                                                                                                bisort                       2.9       1.3
+                                                                                                                                                                                                                                                                                em3d                         4.8       1.4
+                                                                       100
+                                                                             |
+
+
+
+
+                                                                       80                                                                                                                                                                                                       health                       3.6       0.5
+                                                                             |
+
+
+
+
+                                                                                                                                                                                                                                                                                mst                          5.9       0.7
+                                                                       60                                                                                                                                                                                                       perimeter                    2.1       0.5
+                                                                             |
+
+
+
+
+                                                                                                                                                                                                                                                                                power                        4.1       0.4
+                                                                       40
+                                                                                                                                                                                                                                                                                treeadd                      3.7       1.2
+                                                                             |
+
+
+
+
+                                                                                                                                                                                                                                                                                tsp                          2.0       0.5
+                                                                       20
+                                                                                                                                                                                                                                                                                voronoi                      3.2       0.9
+                                                                             |
+
+
+
+
+                                                                                                                                                                                                                                                                                 (b) Prefetching Overhead
+                                                                        0
+                                                                             |
+
+
+
+
+                                                                                 G F99 F95 F90         G F99 F95 F90             G F99 F95 F90              G F99 F95 F90
+                                                                                    bisort              perimeter                  treeadd                      tsp
+
+                                                                                                   (b) Coverage Factor
+                                                                                                                                                                                          Figure 16: Performance of greedy prefetching when the number
+                                   % of PF that Hit in D-Cache
+
+
+
+
+                                                                                                                                                                                          of memory memory units is varied, plus a breakdown of the over-
+                                                                       100
+                                                                             |
+
+
+
+
+                                                                                                       94
+                                                                                                                                                            89
+
+                                                                                                                                                                                          head per prefetch (1 = 1 memory unit, 2 = 2 memory units, 4
+                                                                                 88                                              87
+
+                                                                       80
+                                                                             |
+
+
+
+
+                                                                                      75
+
+
+                                                                       60
+                                                                                           68
+                                                                                                            62
+                                                                                                                                      70
+                                                                                                                                           63     63                                      = 4 memory units).
+                                                                             |
+
+
+
+
+                                                                                                                  55
+                                                                                                50
+                                                                                                                                                                  46     46    46
+                                                                       40
+                                                                             |
+
+
+
+
+                                                                                                                                                                                                                              Normalized Execution Time
+
+
+
+
+                                                                                                                         31                                                                                                                                                                                                               107.3                                 load stall
+                                                                                                                                                                                                                                                                                                                                                                104.9           store stall
+                                                                                                                                                                                                                                                                      100.0 100.8      100.0 101.2         100.0 101.7           100.0                  100.0                   inst stall
+                                                                                                                                                                                                                                                          100
+                                                                                                                                                                                                                                                                  |
+
+
+
+
+                                                                       20                                                                                                                                                                                                                                                                                                       busy
+                                                                             |
+
+
+
+
+                                                                                                                                                                                                                                                          80
+                                                                                                                                                                                                                                                                  |
+
+
+
+
+                                                                        0
+                                                                             |
+
+
+
+
+                                                                                 G F99 F95 F90         G F99 F95 F90             G F99 F95 F90              G F99 F95 F90
+                                                                                    bisort              perimeter                  treeadd                      tsp
+                                                                                                                                                                                                                                                          60
+                                                                                                                                                                                                                                                                  |
+
+
+
+
+                                                                                           (c) Unnecessary Prefetches                                                                                                                                     40
+                                                                                                                                                                                                                                                                  |
+
+
+
+
+Figure 15: Performance of feedback-guided greedy prefetching                                                                                                                                                                                              20
+                                                                                                                                                                                                                                                                  |
+
+
+
+
+on four benchmarks (G = greedy prefetching, Fxx = greedy                                                                                                                                                                                                      0
+prefetching where static prefetch instructions with hit rates over
+                                                                                                                                                                                                                                                                  |
+
+
+
+
+                                                                                                                                                                                                                                                                       N        E        N         E        N         E           N         E            N        E
+                                                                                                                                                                                                                                                                           bh           health            perimeter treeadd                                tsp
+xx% have been eliminated).
+                                                                                                                                                                                          Figure 17: Greedy prefetching with excepting vs. non-excepting
+95% improves performance by 1-7% for these applications by                                                                                                                                prefetches (N = non-excepting, E = excepting). Execution time
+eliminating unnecessary prefetches without sacri cing much cov-                                                                                                                           is normalized to the N case.
+erage. However, eliminating prefetches with hit rates over 90%
+does hurt performance in perimeter, since the coverage factor                                                                                                                             MIPS R10000 contains only a single address calculation unit, we
+drops dramatically. Therefore, improved locality analysis may                                                                                                                             ran the experiments presented thus far using two units, since
+help performance by eliminating prefetches that are almost al-                                                                                                                            we found this to be important. Figure 16(a) shows the perfor-
+ways unnecessary (e.g., the \parent" pointer in perimeter), but                                                                                                                           mance when the number of memory units is varied for the ve
+without more powerful techniques for isolating dynamic node vis-                                                                                                                          applications that showed signi cant improvements under greedy
+itations, the gains do not appear to be as large as with numeric                                                                                                                          prefetching (the \2" bars correspond to the \G" bars in earlier
+codes.                                                                                                                                                                                      gures). As we see in Figure 16(a), having two memory units is
+                                                                                                                                                                                          important, since it improves performance by up to 35% over a
+                                                                                                                                                                                          single unit. The marginal gain of having four units is consider-
+5.4 Architectural Support for Prefetching                                                                                                                                                 ably smaller.
+    RDSs
+We now explore the impact of two key architectural issues on the                                                                                                                          5.4.2 Support for Non-Excepting Memory Operations
+performance of our greedy prefetching algorithm.                                                                                                                                          In array-based codes, invalid prefetch addresses typically only
+                                                                                                                                                                                          occur if one prefetches o the end of an array. In contrast, invalid
+5.4.1 Number of Memory Functional Units                                                                                                                                                   prefetch addresses may occur frequently in RDS codes due to
+                                                                                                                                                                                          invalid or NULL pointers. To quantify the bene t of having non-
+Prefetching RDSs increases the demand for memory functional                                                                                                                               excepting prefetches, we forced the greedy prefetching compiler
+units in two ways. In addition to the prefetches themselves, we                                                                                                                           to enclose any prefetches that may have invalid addresses with a
+may also need additional loads (e.g., for jump-pointers) to com-                                                                                                                          NULL test. As we see in Figure 17, our dynamically-scheduled
+pute the prefetch addresses. Figure 16(b) shows that an average                                                                                                                           processor was not able to hide all of this overhead, hence resulting
+of 0.4-1.4 loads were required per prefetch. Although the actual
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                  Page 10
+             Normalized Execution Time
+
+                                                                                                                                                                                                                                                                                                                                                                      load stall
+                                                                                                                          102.4                                                                                                                                                                                                                         103.9         store stall
+                                                                                   100.0                    100.0 101.2              100.0 99.8 100.1                           100.0 101.6 99.6                                                           100.0 99.9 100.6                                                100.9
+                                         100                                               96.6
+                                                                                                  99.2                                                  100.0          98.3                         100.0                                                                       100.0                       100.0                        100.0 99.4                   inst stall
+                                                                              |
+                                                                                                                                                                                                                    95.4                                                                                                                                              busy
+                                                                                                                                                                                                                                                                                                                    91.3
+                                                                                                                                                                                                            88.7                                                                                88.0
+
+                                             80                                                                                                                                                                                                                                          79.8
+                                                                              |
+
+
+
+
+                                                                                                                                                                68.6
+
+                                             60
+                                                                              |
+
+
+
+
+                                             40
+                                                                              |
+
+
+
+
+                                             20
+                                                                              |
+
+
+
+
+                                                                      0
+                                                                              |
+
+
+
+
+                                                                                    N G S                    N G S                    N G S              N G S                   N G S                  N G S                                               N G S                   N G S                    N G S                           N G S
+                                                                                           bh                 bisort                   em3d              health                     mst            perimeter                                                power               treeadd                          tsp                         voronoi
+
+                                                                                                                                                                               (a) Execution Time
+                                         % of Original Load D-Cache Misses
+
+
+
+
+                                                                                                                                                                                                                   % of PF that Hit in D-Cache
+                                                                                                                                                                                            nopf_miss                                                                                                                                   99
+                                                                             100                                                                                                                                                                 100                      97                                                                                               97
+                                                                                   |
+
+
+
+
+                                                                                                                                                                                                                                                       |
+                                                                                                                                                                                            pf_miss                                                                                                                 94
+                                                                                                                                                                                            pf_hit                                                                                                                                                              93
+                                                                                                                                                                                                                                                                     88                         89                       88                   87           89
+                                                                                                                                                                                                                                                                                                                                                   81
+                                                                             80                                                                                                                                                                  80
+                                                                                   |
+
+
+
+
+                                                                                                                                                                                                                                                       |
+                                                                                                                                                                                                                                                                76
+                                                                                                                                                                                                                                                                                                            68
+                                                                                                                                                                                                                                                                                                                                                                      65
+                                                                             60                                                                                                                                                                  60        59
+                                                                                   |
+
+
+
+
+                                                                                                                                                                                                                                                       |
+                                                                                                                                                                                                                                                                                    55
+                                                                                                                                                                                                                                                                               49                      48
+                                                                                                                                                                                                                                                                                           41
+                                                                             40                                                                                                                                                                  40
+                                                                                   |
+
+
+
+
+                                                                                                                                                                                                                                                       |
+                                                                             20                                                                                                                                                                  20                                                                                19
+                                                                                   |
+
+
+
+
+                                                                                                                                                                                                                                                       |
+                                                                              0                                                                                                                                                                   0
+                                                                                   |
+
+
+
+
+                                                                                                                                                                                                                                                       |
+                                                                                       G S         G S     G S      G S           G S   G S      G S    G S            G S     G S                                                                         G S        G S      G S         G S         G S   G S      G S    G S                           G S        G S
+                                                                                        bh        bisort   em3d    health         mst perimeter power treeadd          tsp    voronoi                                                                       bh       bisort    em3d       health       mst perimeter power treeadd                         tsp       voronoi
+
+
+
+                                                                                                           (b) Coverage Factor                                                                                                                                        (c) Unnecessary Prefetches
+Figure 18: Performance comparison between SPAID and greedy prefetching (N = no prefetching, G = greedy prefetching, S = SPAID).
+
+in up to a 7% increase in execution time. In addition to non-                                                                                                                                               the conclusion in the SPAID paper [14] that the best performance
+excepting prefetches, non-excepting load instructions also appear                                                                                                                                           is achieved by inserting only one prefetch per call site|the S bars
+to be quite useful for prefetching pointer-based codes, although                                                                                                                                            in Figure 18 correspond to this optimal case. When a procedure
+we currently are not exploiting them aggressively in our compiler.                                                                                                                                          has multiple pointer arguments, we select the rst one pointing to
+                                                                                                                                                                                                            any RDS to prefetch. We also improved the performance of the
+                                                                                                                                                                                                            proposed SPAID scheme for treeadd from a slowdown of 13% to
+6 Related Work                                                                                                                                                                                              a speedup of 14% by prefetching two cache lines at a time rather
+                                                                                                                                                                                                            than one. As we see in Figure 18, greedy prefetching outperforms
+Although prefetching has been studied extensively for array-                                                                                                                                                SPAID in all cases except mst. The problem with SPAID is that
+based numeric codes [2, 16], relatively little work has been done                                                                                                                                           it pays signi cant prefetching overhead without covering many
+on non-numeric applications. Chen et al. [5] used global in-                                                                                                                                                cache misses, as shown by the low coverage factors and high frac-
+struction scheduling techniques to move address generation back                                                                                                                                             tion of unnecessary prefetches in Figure 18. In contrast, greedy
+as early as possible to hide a small cache miss latency (10 cy-                                                                                                                                             prefetching does a better job of choosing what to prefetch, and
+cles), and found mixed results. In contrast, our algorithms fo-                                                                                                                                             can schedule prefetches earlier to hide more latency.
+cus only on RDS accesses, and can issue prefetches much earlier
+(across procedure and loop iteration boundaries) by overcoming
+the pointer-chasing problem. Zhang and Torrellas [22] proposed a                                                                                                                                            7 Future Work
+hardware-assisted scheme for prefetching irregular applications in
+shared-memory multiprocessors. Under their scheme, programs                                                                                                                                                 Based on the lessons we have learned from these experiments,
+are annotated to bind together groups of data (e.g., elds in                                                                                                                                                we are currently extending our research in the following direc-
+a record or two records linked by a pointer), which are then                                                                                                                                                tions. First, we are exploring how to automate history-pointer
+prefetched under hardware control. Compared to our compiler-                                                                                                                                                and data-linearization prefetching in the compiler|and how to
+based approach, their scheme has two shortcomings: (i) annota-                                                                                                                                              automatically choose the best scheme among the three for a
+tions are inserted manually, and (ii) their hardware extensions                                                                                                                                             given application|to capture the bene ts demonstrated in Sec-
+are not likely to be applicable in uniprocessors.                                                                                                                                                           tion 5.2. Second, the results in Section 5.3 suggest that improved
+   To our knowledge, the only compiler-based pointer prefetching                                                                                                                                            prefetching analysis can help to reduce overheads. However, since
+scheme in the literature is the SPAID scheme proposed by Lipasti                                                                                                                                            predicting data locality through static compile-time analysis is
+et al. [14]. Based on an observation that procedures are likely to                                                                                                                                          dicult|and since feedback-based compilation has its own set
+dereference any pointers passed to them as arguments, SPAID                                                                                                                                                 of problems|we are exploring the possibility of generating code
+inserts prefetches for the objects pointed to by these pointer ar-                                                                                                                                          with prefetching that dynamically adapts to its own memory be-
+guments at the call sites. Therefore this scheme is only e ec-                                                                                                                                              havior. Third, our experience with the mst application illustrates
+tive if the interval between the start of a procedure call and its                                                                                                                                          the diculty of prefetching hash table accesses, where linked lists
+dereference of a pointer is comparable to the cache miss latency.                                                                                                                                           are quite short, and the head of the list is data-dependent on
+To quantify the performance di erence between SPAID and our                                                                                                                                                 the hashing function. To hide the latency in such cases, we must
+greedy prefetching scheme, we implemented several versions of                                                                                                                                               prefetch before the hashing function is called|although the over-
+SPAID in our experimental framework with di erent numbers of                                                                                                                                                heads of doing so may be signi cant, it does appear to be feasible.
+prefetches inserted per call site. Our results are consistent with                                                                                                                                          Finally, we are investigating the performance of our schemes in
+                                                                                                                                                                                                            shared-memory multiprocessors, where although the large cache
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                    Page 11
+miss latencies increase the potential bene t of prefetching, they           [7] M. Emami, R. Ghiya, and L. J. Hendren. Context-sensitive inter-
+also intensify the pointer-chasing problem.                                     procedural points-to analysis in the presence of function point-
+                                                                                ers. In Proceedings of the ACM SIGPLAN'94 Conference on
+                                                                                Programming Language Design and Implementation, pages 242{
+                                                                                256, June 1994.
+8 Conclusions                                                               [8] R. Ghiya and L. J. Hendren. Is it a Tree, a DAG, or a Cyclic
+                                                                                Graph? A shape analysis for heap-directed pointers in C. In
+While automatic compiler-inserted prefetching has shown consid-                 Proceedings of the 23rd Annual ACM SIGPLAN-SIGACT Sym-
+erable success in hiding the memory latency of array-based codes,               posium on Principles of Programming Languages, pages 1{15,
+the compiler technology for successfully prefetching pointer-                   January 1996.
+based data structures has thus far been lacking. In this paper, we          [9] R. H. Halstead, Jr. and T. Fujita. MASA: A multithreaded pro-
+propose three prefetching schemes which overcome the pointer-                   cessor architecture for parallel symbolic computing. In Proceed-
+chasing problem, we automate the most widely applicable scheme                  ings of the 15th Annual International Symposium on Computer
+(greedy prefetching) in the compiler, and we evaluate the perfor-               Architecture, pages 443{451, June 1988.
+mance of all three schemes on a modern superscalar processor               [10] L. J. Hendren, J. Hummel, and A. Nicolau. A general data depen-
+similar to the MIPS R10000.                                                     dence test for dynamic, pointer-based data structures. In Pro-
+   Our experiments show that automatic compiler-inserted                        ceedings of the SIGPLAN'94 Conference on Programming Lan-
+                                                                                guage Design and Implementation, pages 218{229, June 1994.
+prefetching can accelerate pointer-based applications by as much
+as 45%. In addition, the more sophisticated algorithms (which              [11] J. S. Kowalik, editor. Parallel MIMD Computation : The HEP
+we currently simulate by hand) can improve performance by as                    Supercomputer and Its Applications. MIT Press, 1985.
+much as twofold. Our experiments also demonstrate the poten-               [12] W. Landi, B. G. Ryder, and S. Zhang. Interprocedural modi ca-
+tial bene t of using data locality information to further reduce                tion side e ect analysis with pointer aliasing. In Proceedings of
+prefetching overhead.                                                           the SIGPLAN '93 Conference on Programming Language Design
+                                                                                and Implementation, pages 56{67, June 1993.
+   From an architectural perspective, these encouraging results
+suggest that the latency problem for pointer-based codes may be            [13] J. Laudon, A. Gupta, and M. Horowitz. Interleaving: A multi-
+addressed largely through the prefetch instructions that already                threading technique targeting multiprocessors and workstations.
+                                                                                In Proceedings of the Sixth International Conference on Archi-
+exist in many recent microprocessors. To fully exploit prefetch-                tectural Support for Programming Languages and Operating Sys-
+ing, our results indicate that an architecture should provide at                tems, pages 308{318, October 1994.
+least two memory units and a non-excepting prefetch instruc-               [14] M. H. Lipasti, W. J. Schmidt, S. R. Kunkel, and R. R. Roedi-
+tion. We believe that this work provides a foothold for additional              ger. SPAID: Software prefetching in pointer- and call-intensive
+research on compiler-based prefetching for non-numeric applica-                 environments. In Proceedings of the 28th Annual IEEE/ACM
+tions.                                                                          International Symposium on Microarchitecture, 1995.
+                                                                           [15] T. C. Mowry. Tolerating Latency Through Software-Controlled
+9 Acknowledgments                                                               Data Prefetching. PhD thesis, Stanford University, March 1994.
+                                                                                Technical Report CSL-TR-94-626.
+This work is supported by grants from the Natural Sciences and             [16] T. C. Mowry, M. S. Lam, and A. Gupta. Design and evalua-
+Engineering Research Council of Canada, and by a grant from                     tion of a compiler algorithm for prefetching. In Proceedings of
+                                                                                the Fifth International Conference on Architectural Support for
+IBM Canada's Centre for Advanced Studies. Chi-Keung Luk is                      Programming Languages and Operating Systems, pages 62{73,
+partially supported by a Canadian Commonwealth Fellowship.                      October 1992.
+Todd C. Mowry is partially supported by a Faculty Development              [17] A. Rogers, M. Carlisle, J. Reppy, and L. Hendren. Supporting
+Award from IBM.                                                                 dynamic data structures on distributed memory machines. ACM
+                                                                                Trans. on Programming Languages and Systems, 17(2), March
+References                                                                      1995.
+                                                                           [18] M. D. Smith. Tracing with pixie. Technical Report CSL-TR-91-
+ [1] A. Agarwal, B.-H. Lim, D. Kranz, and J. Kubiatowicz. April:                497, Stanford University, November 1991.
+     A processor architecture for multiprocessing. In Proceedings of
+     the 17th Annual International Symposium on Computer Archi-            [19] C. J. Stephenson. Fast ts. In Proceedings of the ACM 9th
+     tecture, pages 104{114, May 1990.                                          Symposium on Operating Systems, October 1983.
+ [2] J.-L. Baer and T.-F. Chen. An e ective on-chip preloading             [20] S. W. K. Tjiang and J. L. Hennessy. Sharlit: A tool for building
+     scheme to reduce data access penalty. In Proceedings of Super-             optimizers. In SIGPLAN Conference on Programming Language
+     computing '91, 1991.                                                       Design and Implementation, 1992.
+ [3] D. Callahan, K. Kennedy, and A. Porter eld. Software prefetch-        [21] M. E. Wolf and M. S. Lam. A data locality optimizing algorithm.
+     ing. In Proceedings of the Fourth International Conference on              In Proceedings of the SIGPLAN '91 Conference on Programming
+     Architectural Support for Programming Languages and Operat-                Language Design and Implementation, pages 30{44, June 1991.
+     ing Systems, pages 40{52, April 1991.
+                                                                           [22] Z. Zhang and J. Torrellas. Speeding up irregular applications
+ [4] S. Carr, K. S. McKinley, and C.-W. Tseng. Compiler optimiza-               in shared-memory multiprocessors: Memory binding and group
+     tions for improving data locality. In Proceedings of the Sixth             prefetching. In Proceedings of the 22nd Annual International
+     International Conference on Architectural Support for Program-             Symposium on Computer Architecture, pages 188{200, June
+     ming Languages and Operating Systems, pages 252{262, October               1995.
+     1994.
+ [5] W. Y. Chen, S. A. Mahlke, P. P. Chang, and W. W. Hwu.
+     Data access microarchitectures for superscalar processors with
+     compiler-assisted data prefetching. In Proceedings of Microcom-
+     puting 24, 1991.
+ [6] A. Deutsch. A storeless model of aliasing and its abstractions us-
+     ing nite respresentation of right-regular equivalence relations. In
+     Proceedings of the 1992 International Conference on Computer
+     Languages, pages 2{13, April 1992.
+
+
+
+
+                                                                                                                                        Page 12
+

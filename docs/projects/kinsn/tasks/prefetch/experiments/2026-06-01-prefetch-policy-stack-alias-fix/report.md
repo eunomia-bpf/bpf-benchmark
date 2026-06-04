@@ -67,7 +67,7 @@ performance win 结论。
 文档更新：
 
 ```text
-/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md
+/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md
 ```
 
 完整 diff 见：

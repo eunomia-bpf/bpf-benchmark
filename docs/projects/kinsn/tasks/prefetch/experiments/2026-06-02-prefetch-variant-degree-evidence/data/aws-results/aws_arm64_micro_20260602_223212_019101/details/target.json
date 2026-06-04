@@ -1,0 +1,80 @@
+{
+  "arch": "aarch64",
+  "kinsns": {
+    "bpf_arm64_ccmp_w": {
+      "btf_func_id": 125950,
+      "btf_id": 54,
+      "call_offset": 1
+    },
+    "bpf_arm64_ccmp_x": {
+      "btf_func_id": 125951,
+      "btf_id": 54,
+      "call_offset": 1
+    },
+    "bpf_arm64_cmp_w": {
+      "btf_func_id": 125952,
+      "btf_id": 54,
+      "call_offset": 1
+    },
+    "bpf_arm64_cmp_x": {
+      "btf_func_id": 125953,
+      "btf_id": 54,
+      "call_offset": 1
+    },
+    "bpf_arm64_cset_x_cond": {
+      "btf_func_id": 125954,
+      "btf_id": 54,
+      "call_offset": 1
+    },
+    "bpf_arm64_extr_w": {
+      "btf_func_id": 125947,
+      "btf_id": 56,
+      "call_offset": 2
+    },
+    "bpf_arm64_extr_x": {
+      "btf_func_id": 125948,
+      "btf_id": 56,
+      "call_offset": 2
+    },
+    "bpf_arm64_ldrb": {
+      "btf_func_id": 125951,
+      "btf_id": 58,
+      "call_offset": 3
+    },
+    "bpf_arm64_mov_x": {
+      "btf_func_id": 125947,
+      "btf_id": 59,
+      "call_offset": 4
+    },
+    "bpf_arm64_prfm_pldl1keep": {
+      "btf_func_id": 125947,
+      "btf_id": 60,
+      "call_offset": 5
+    },
+    "bpf_arm64_prfm_pldl1strm": {
+      "btf_func_id": 125948,
+      "btf_id": 60,
+      "call_offset": 5
+    },
+    "bpf_arm64_prfm_pldl2keep": {
+      "btf_func_id": 125949,
+      "btf_id": 60,
+      "call_offset": 5
+    },
+    "bpf_arm64_prfm_pldl2strm": {
+      "btf_func_id": 125950,
+      "btf_id": 60,
+      "call_offset": 5
+    },
+    "bpf_arm64_strb": {
+      "btf_func_id": 125952,
+      "btf_id": 62,
+      "call_offset": 6
+    },
+    "bpf_arm64_ubfm_x": {
+      "btf_func_id": 125947,
+      "btf_id": 63,
+      "call_offset": 7
+    }
+  }
+}

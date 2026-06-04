@@ -1,0 +1,5 @@
+result_dir	arch	hint	native_evidence
+aws_x86_micro_20260602_221811_212815	x86	t1	prefetcht1 BYTE PTR [rdi]
+aws_x86_micro_20260602_222526_406675	x86	nta	prefetchnta BYTE PTR [rdi]
+aws_arm64_micro_20260602_223212_019101	arm64	pldl2keep	prfm pldl2keep, [x0]
+aws_arm64_micro_20260602_223911_428229	arm64	pldl1strm	prfm pldl1strm, [x0]

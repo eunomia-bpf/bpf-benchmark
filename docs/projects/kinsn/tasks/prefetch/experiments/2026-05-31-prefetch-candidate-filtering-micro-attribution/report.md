@@ -146,7 +146,7 @@ Benchmark / input / manifest：
 
 文档 / 实验记录：
 
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-05-31-prefetch-candidate-filtering-micro-attribution/report.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-05-31-prefetch-candidate-filtering-micro-attribution/analysis/*`
 
@@ -291,7 +291,7 @@ total:     $0.022585729
 - 前一轮 distance sweep report：
   `/home/ruoji/github/bpf-opt/experiments/2026-05-31-prefetch-research-micro-attribution/report.md`。
 - prefetch task plan：
-  `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`。
+  `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`。
 
 发现和处理：
 

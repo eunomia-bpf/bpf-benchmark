@@ -1,0 +1,632 @@
+      FetchBPF: Customizable Prefetching Policies
+                  in Linux with eBPF
+   Xuechun Cao, Shaurya Patel, and Soo Yee Lim, University of British Columbia;
+Xueyuan Han, Wake Forest University; Thomas Pasquier, University of British Columbia
+                https://www.usenix.org/conference/atc24/presentation/cao
+
+
+
+
+          This paper is included in the Proceedings of the
+            2024 USENIX Annual Technical Conference.
+                      July 10–12, 2024 • Santa Clara, CA, USA
+                                   978-1-939133-41-0
+
+
+
+
+                                          Open access to the Proceedings of the
+                                        2024 USENIX Annual Technical Conference
+                                                    is sponsored by
+               FetchBPF: Customizable Prefetching Policies in Linux with eBPF
+
+            Xuechun Cao                                   Shaurya Patel                               Soo Yee Lim
+    University of British Columbia                University of British Columbia              University of British Columbia
+                                Xueyuan Han                                  Thomas Pasquier
+                             Wake Forest University                    University of British Columbia
+
+
+                           Abstract                                     a large number of pointers. In §2, we provide empirical results
+                                                                        to demonstrate this challenge more concretely.
+Monolithic operating systems are infamously complex. Linux
+                                                                           An obvious, albeit naïve, way to address the first challenge
+in particular has a tendency to intermingle policy and mecha-
+                                                                        is perhaps to have multiple prefetching policies in the ker-
+nisms in a manner that hinders modularity. This is especially
+                                                                        nel and choose from them the most appropriate one based
+problematic when developers aim to finely optimize perfor-
+                                                                        on specific memory access patterns [26]. However, whether
+mance, since it is often the case that a default policy in Linux,
+                                                                        this approach would scale to an arbitrary number of policies
+while performing well on average, cannot achieve the optimal
+                                                                        is unknown. In fact, an optimal set of policies that would
+performance in all circumstances. However, developing and
+                                                                        accommodate all possible access patterns likely does not ex-
+maintaining a bespoke kernel to satisfy the need of a specific
+                                                                        ist. Meanwhile, implementing a new policy in the kernel is a
+application is usually an unrealistic endeavor due to the high
+                                                                        Herculean task. Evidence from studies of other kernel develop-
+software engineering cost. Therefore, we need a mechanism to
+                                                                        ment [21] suggests that the engineering effort would typically
+easily customize kernel policies and its behavior. In this paper,
+                                                                        exceed the capacity of an average developer team. Even if the
+we design a framework called FetchBPF that addresses this
+                                                                        implementation was successful, further complications, such
+problem in the context of memory prefetching. FetchBPF ex-
+                                                                        as maintaining a bespoke kernel distribution or convincing the
+tends the widely used eBPF framework to allow developers to
+                                                                        mainline kernel to adopt the policy (e.g., in the Linux case),
+easily express, develop, and deploy prefetching policies with-
+                                                                        would require a tremendous amount of labor and time [22].
+out modifying the kernel codebase. We implement various
+memory prefetching policies from the literature and demon-                 To ease development and maintenance, prior work [31, 35]
+strate that our deployment model incurs negligible overhead             has considered implementing prefetching policies in user
+as compared to the equivalent native kernel implementation.             space. On the one hand, user-space applications could better
+                                                                        inform the prefetching mechanism of finer semantic hints; on
+                                                                        the other hand, a lack of kernel access eventually complicates
+1     Introduction                                                      development [25]. This approach also introduces significant
+                                                                        overhead, mainly from context switches between user space
+With a growing demand of memory capacity in memory-                     and the kernel. This could negate any performance gain, as
+intensive applications, especially machine learning programs,           recent work [35] has shown that prefetched pages are typically
+researchers and practitioners alike have turned their attention         used by an application within a very short time frame.
+to improving the memory management system [24, 36]. In                     We introduce FetchBPF, an alternative solution that lever-
+particular, one focus area is to optimize memory prefetch-              ages eBPF to overcome these challenges. eBPF is a Linux
+ing [6, 9, 10, 17, 26, 28, 29, 31, 32, 35, 37, 38]. Despite the         framework that allows users to load customized features to
+progress, existing solutions face the following challenges to           the kernel without modifying the kernel’s codebase [3]. Build-
+be widely adopted.                                                      ing atop the eBPF framework and expanding its functionality,
+    First, a one-size-fits-all prefetcher that provides optimal per-    FetchBPF simplifies the development of new prefetching poli-
+formance for all applications does not exist. A new prefetching         cies in the kernel with negligible performance overhead. To
+policy might excel in one memory access pattern but not an-             design FetchBPF, we study existing prefetching policies in the
+other. For example, Leap [28] outperforms the built-in Linux            literature and identify fundamental kernel mechanisms that
+prefetcher – which is optimized for sequential access patterns          drive their implementations. Following these observations,
+– when an application exhibits a large strided pattern; however,        we modify the kernel by adding new eBPF hooks to imple-
+it lags behind Canvas [35] for workloads that involve chasing           ment custom prefetching policies and additional eBPF helper
+
+
+
+USENIX Association                                                                2024 USENIX Annual Technical Conference         369
+         Figure 1: Workflow of the eBPF framework.                        Figure 2: An overview of prefetching in Linux.
+
+
+functions to evoke necessary kernel mechanisms.                    eBPF supports a variety of kernel hooks, e.g., system calls,
+                                                                   tracepoints, and kernel probes. The type of an eBPF program
+Contributions                                                      dictates the set of hooks it can be attached to. It also deter-
+                                                                   mines the list of in-kernel helper functions it is allowed to call,
+    • We empirically show that applications with different         as eBPF programs cannot call arbitrary kernel functions. eBPF
+      memory access patterns benefit from different policies       programs use eBPF maps to persist data across programs and
+      (§2).                                                        execution instances, and to share data with user space.
+    • We propose an extension to the Linux eBPF framework
+      to implement prefetching policies (§3).                      2.2    Linux Prefetching Policy
+    • We implement (§4) and evaluate (§5) a number of policies
+                                                                   When memory is under stress, pages are swapped out. Re-
+      from the literature to showcase FetchBPF.
+                                                                   trieving those pages when they are needed again is expensive.
+                                                                   To improve performance, an operating system (OS) tries to
+2     Background & Motivation                                      predict which swapped-out pages will be needed and prefetch
+                                                                   them. We summarize at a high level Linux’s prefetching policy
+We describe the eBPF framework in §2.1 and how prefetching         and mechanisms in Fig. 2.
+works in Linux in §2.2. We then motivate FetchBPF by show-            When a page fault is detected, the kernel first checks if the
+ing how the performances of different prefetching policies         page resides in the page cache. A minor fault occurs when the
+vary under different workloads in §2.3.                            page is present in the cache but not yet mapped. The kernel
+                                                                   simply updates the page-fault statistics and maps the page. If
+                                                                   the page is not found in the cache, then a remote request is
+2.1     eBPF
+                                                                   issued to bring the page to memory. As remote accesses are
+The extended Berkeley Packet Filter (eBPF) is a Linux frame-       expensive (e.g., when reading from the disk), in addition to
+work that allows users to extend the kernel without any modi-      loading the requested page, the kernel prefetches pages that it
+fication to the kernel’s source code. To ensure that the kernel    predicts will be used in the near future. To determine which
+extension is safe, all user-provided eBPF programs are stati-      pages to prefetch, the default Linux prefetching policy follows
+cally checked by the eBPF verifier before they are allowed to      a sequential pattern [16]. Once the kernel has identified the
+execute. Once verified, eBPF programs are JIT-compiled into        pages to be prefetched, it issues remote access requests and
+native machine code for performance. With safety and effi-         maps the requested page.
+ciency at the core of the eBPF design, eBPF is widely adopted
+for tracing [1] and networking [2, 5]. Furthermore, eBPF can
+                                                                   2.3    Motivating Experiments
+also be used to customize and fine-tune the behavior of core
+kernel policies (e.g., scheduling [8] and auditing [27]).          In Fig. 3, we show the execution time of six prefetching poli-
+   As shown in Fig. 1, eBPF programs are event-driven, in-         cies for six regimes described in §5.3. In §5, we dive into
+voked when the hooks they are attached to are triggered. For       these results and discuss how a prefetching policy impacts the
+example, an XDP program is a type of an eBPF program at-           execution time. Each regime showcases a particular memory
+tached to the network interface card (NIC). When a packet          access pattern described in prior work [6, 11, 26, 28]. Given a
+arrives at the NIC, control is transferred to the eBPF program,    regime, the best policy is the one that minimizes the execution
+where users can process the packet before it reaches the kernel.   time. We observe that no policy outperforms the others in all
+
+
+
+370    2024 USENIX Annual Technical Conference                                                                USENIX Association
+                                                                  typically uses the historical statistics computed from the eBPF
+    3                                                             program at ⃝.A
+    2                                                             ⃝,
+                                                                   1 ⃝,2 and ⃝  3 Prefetching policies issue I/O requests, but the
+                                                                  specific I/O mechanism depends on the backend device, not
+    1                                                             the policy itself. For example, batching requests together is
+                                                                  preferred when the backend is a disk-based device [6, 28] but
+  0                                                               not when an RDMA (remote direct memory access) backend
+ sqn sqnsqn strid e    sqn      ide     dder
+                randomrandom str sqn larandom ladd
+                                                  er
+                                                                  is used [9, 28]. I/Os are functionalities provided by the kernel,
+                                                                  which should be available to developers when they implement
+Figure 3: Execution time (lower is better) of ■ default,          the policy.
+■ VMA, ■ leap, ■ leap VMA, ■ ladder, ■ ladder VMA,
+under six different regimes. Values are normalized using the      3.2    eBPF Hooks
+best performing policy on a particular regime.
+                                                                  The Linux kernel executes an eBPF program when it encoun-
+                                                                  ters an eBPF hook that the program is attached to. Hooks
+regimes. For example, the ■ leap policy is the best on the        are predefined in the kernel; they capture events such as sys-
+sqn stride regime but the worst on all other five regimes.        tem calls, function entries and exits, and network activities.
+On the random sqn regime, running the ■ leap policy mul-          We add two hooks in the kernel to support the expression of
+tiplies the execution time by more than three compared to the     customized prefetching policies.
+best performing policy. Clearly, deploying policies that best     A prefetch_stats: FetchBPF triggers an eBPF program
+                                                                  ⃝
+fit specific workloads can significantly improve performance.     attached to this hook every time a page fault occurs, including
+                                                                  both major and minor faults. Policies such as Leap [28] use
+                                                                  the history of faulting addresses to gain insight into memory
+3       Design & Implementation                                   access patterns. Therefore, this hook is typically used to record
+                                                                  such data. Parameters passed to it include information about
+FetchBPF is an extension to the existing eBPF framework; its      the physical and virtual address of the faulting page to support
+design is guided by our analysis of existing prefetching poli-    policies based on these addresses.
+cies (§3.1). Specifically, we modify the kernel to include two
+additional hook points where prefetching-related eBPF pro-
+                                                                  ⃝B prefetch_policy: FetchBPF triggers an eBPF pro-
+grams can be triggered (§3.2): ⃝A when a page fault occurs and    gram attached to this hook before the execution of the default
+⃝B when the kernel decides on the specific pages to prefetch      Linux prefetching policy. Like in ⃝, A information about the
+(see Fig. 2). We also include additional eBPF helper functions    physical and virtual address of the faulting page is passed
+(§3.3); they enable developers to evoke kernel mechanisms         as parameters. The eBPF programs attached to this hook are
+related to page prefetching (⃝,   2 and ⃝
+                               1 ⃝,        3 in Fig. 2).          expected to (1) identify pages of interest and (2) request the
+                                                                  kernel to prefetch them through helper functions (§3.3). They
+                                                                  must return either an error code or one of the two values:
+3.1      Design Process                                           PREFETCH_RA_DEFAULT_PREFETCH or PREFETCH_RA_SKIP.
+                                                                  The former indicates that the default policy must be executed,
+The first step in our design process is to understand existing    whereas the latter skips the default policy execution. This
+prefetchers and identify common components and patterns in        enables developers to either completely replace the default
+their workflows. This investigation informs us of fundamental     policy or complement it (as done in Leap [28], for example).
+building blocks, which guides us to build a flexible framework
+that supports the development and deployment of custom in-
+kernel prefetchers. We make the following observations of the     3.3    Helper Functions
+common workflow features from existing prefetchers:               eBPF programs, unlike the built-in kernel code, drivers, or
+A Prefetching policies [6, 10, 28] typically require as input
+⃝                                                                 loadable kernel modules, have no access to the entire kernel
+a history of memory accesses, either physical or virtual. The     address space and cannot call arbitrary kernel functions. In-
+exact type and computation of such information needed by          stead, they are limited to their program parameters and kernel-
+a prefetcher is policy specific. Therefore, FetchBPF should       provided helper functions that perform actions on their behalf.
+allow developers to customize the capture and computation         FetchBPF implements the following helper functions:
+of the historical information through an eBPF program.            ⃝1 bpf_prefetch_physical_page: This helper func-
+⃝B Prefetchers [6,10,26,28,35,37] run before a faulting page is   tion triggers the mechanism to prefetch pages based on phys-
+requested; prefetching requests are then issued along with the    ical addresses. It takes as input the parameters given to the
+page. FetchBPF should enable the prefetcher to call an eBPF       eBPF program (§3.2). Specifically, the information about phys-
+program that implements custom prefetching logic, which           ical swap entry offsets is used to perform page I/O.
+
+
+
+USENIX Association                                                          2024 USENIX Annual Technical Conference           371
+ 1       SEC (" prefetch_policy ")                                     Leap algorithm to make prefetching decisions based on
+ 2       int policy_handler ( struct swap_entry_info * ctx )           page table entries instead of physical addresses. VMA-based
+ 3       {                                                             prefetching is shown to be more effective [26], since a
+ 4         unsigned int count = 0;
+ 5
+                                                                       program’s access pattern is based on virtual rather than
+ 6           // turn on block device plug                              physical addresses. The prefetch_stats program now
+ 7           bpf_start_block_plug (ctx -> plug );                      records page table entries and their relative distances. The
+ 8
+                                                                       prefetch_policy program is modified accordingly and calls
+ 9           while ( count < 2) {
+10             bpf_prefetch_physical_page ( ctx );
+                                                                       the bpf_prefetch_virtual_page helper function.
+11             // increment the offset to the faulting page
+12             ctx -> offset ++;
+13             count ++;
+14           }                                                         5     Evaluation
+15           // turn off block device plug
+16           bpf_stop_block_plug (ctx -> plug );
+17       }                                                             We implement FetchBPF on the Linux kernel version 6.1.8.
+                                                                       We run our expriments on an Intel i7-12700 [4] machine with 8
+     Figure 4: A simple policy fetching the faulting page and two      performance cores 2.10GHz-4.90GHz (16 threads), 4 efficient
+     subsequent physical pages.                                        cores 1..60GHz-3.60 GHz (4 threads), 32GB DDR5 RAM,
+                                                                       and an NVMe drive as the swap backend. We use cgroups to
+                                                                       intentionally limit the amount of memory available to appli-
+     ⃝2 bpf_prefetch_virtual_page: This helper func-                   cations. Our evaluation focuses on answering the following
+     tion triggers the mechanism to prefetch pages based on virtual    two research questions:
+     addresses. It takes the same input as the previous helper func-   Q1. Does implementing a prefetching policy using FetchBPF
+     tion; however, the function prefetches pages based on pte         affect the policy’s accuracy and coverage performance?
+     (page table entries) and pte offsets.
+                                                                       Q2. Is there performance degradation when using FetchBPF
+     ⃝3 bpf_<start/stop>_block_plug: These two                         as compared to implementing a policy natively in the kernel?
+     helper functions enable a policy to control prefetching request
+     batching. All requests made after bpf_start_block_plug
+     are batched. When bpf_stop_block_plug is called, batched
+     requests are processed (e.g., sorted and merged) to optimize      5.1    Metrics
+     I/O. The idea behind plugging is to build up requests to better
+     utilize the hardware and to merge sequential requests into        We use three metrics to quantitatively evaluate FetchBPF:
+     larger ones.                                                      Accuracy, defined as the ratio of cache hits over the number
+                                                                                                   cache hits
+                                                                       of prefetched pages ( # of prefetched  pages
+                                                                                                                    ), measures the number
+     4       Policy Examples                                           of prefetched pages that are indeed used by an application.
+                                                                       Coverage, defined as the ratio of cache hits over total page
+        We use a simple policy (Fig. 4) to illustrate how developers                   cache hits
+                                                                       faults ( cache hits+cache         ), measures the extent to which the
+     can implement a prefetching policy in FetchBPF. This policy                                  misses
+                                                                       pages predicted by the prefetcher help reduce major faults.
+     loads the faulting page and two subsequent pages. In §5, we
+     discuss five policies that we implemented in FetchBPF. Due to     Execution time is the overall execution time of a benchmark.
+     space constraints, we discuss the implementation of the leap
+     and leap VMA policies here to illustrate the use of FetchBPF.
+     Leap. Leap [28] uses the Boyer-Moore algorithm [14] to            5.2    Policies
+     find the majority stride pattern within the page fault his-
+     tory. We use an eBPF map (of the array type) to store the         We implemented five prefetching policies in both FetchBPF
+     memory access history. Specifically, the prefetch_stats           and the Linux kernel. These policies are the VMA policy [6], the
+     program populates the map with the address of a faulting          leap and leap VMA policies described in §4, and a ladder pol-
+     page and its distance from the address of the previous fault-     icy based on physical addresses (ladder) and VMA (ladder
+     ing page. The prefetch_policy program uses this infor-            VMA) from prior work [26]. The ladder policy is tailored for
+     mation to identify the majority stride, i.e., the most fre-       applications where memory accesses initially follow a strided
+     quent distance between two faulting pages. It then calls the      pattern for a short period of time but then jump to a different
+     bpf_prefetch_physical_page helper function to prefetch            memory location followed by another strided pattern. Prior
+     the relevant pages.                                               work [26] has shown that policies like leap do not perform
+     Leap VMA (Virtual Memory Area). We modified the                   well under this type of patterns.
+
+
+
+     372      2024 USENIX Annual Technical Conference                                                               USENIX Association
+  1
+
+
+0.5
+
+
+  0
+           sqn sqn            sqn stride             random sqn            random stride          sqn ladder         random ladder
+                                                   (a) Accuracy (the higher the better)
+
+  1
+
+
+0.5
+
+
+  0
+           sqn sqn            sqn stride             random sqn            random stride          sqn ladder         random ladder
+                                                   (b) Coverage (the higher the better)
+150
+
+100
+
+  50
+
+   0
+            sqn sqn            sqn stride             random sqn            random stride          sqn ladder         random ladder
+                                           (c) Execution time in seconds (the lower the better)
+
+Figure 5: Performance evaluation of ■ default, ■ VMA, ■ VMA eBPF, ■ leap, ■ leap eBPF, ■ leap VMA, ■ leap VMA
+eBPF, ■ ladder, ■ ladder eBPF, ■ ladder VMA, ■ ladder VMA eBPF, under six different regimes. The first part of the
+regime label represents the allocation pattern and the second part the access pattern.
+
+
+5.3    Experimental Results                                             access array elements on every third virtual page (i.e., a stride
+                                                                        of three pages), and (3) ladder (ladder), where we access
+Microbenchmarks                                                         array elements with an increasing stride with every access.
+                                                                        After accessing seven elements, we access an element that is
+We design and run a suite of six microbenchmark programs to
+                                                                        three pages beyond the last accessed page. Then, we access
+evaluate FetchBPF. Each program allocates a 5GB array but
+                                                                        another element that is 20 pages ahead of the page that we
+differs from each other in terms of its allocation and access
+                                                                        just accessed. We repeat this ladder-like access pattern.
+pattern. We define below two allocation patterns and three
+access patterns; we call each unique combination of the two                Fig. 5 shows the accuracy (Fig. 5a), coverage (Fig. 5b), and
+types of patterns a regime.                                             execution time (Fig. 5c) of all six regimes. We limit DRAM
+                                                                        allowance to 20% of working set size. As a quick sanity check,
+Allocation Patterns. (1) Sequential allocation (sqn), where             we note that a policy outperforms the other policies on the
+we allocate array elements (pages) in order in physical mem-            regime that it is designed for. For example, the ■ leap VMA
+ory, and (2) random allocation (random), where we allocate              policy excels on the random stride regime, because (1) VMA
+elements randomly; it simulates a scenario where multiple               is oblivious to physical memory allocation order but bases
+threads allocate pages simultaneously.                                  its prefetching decisions on virtual addresses, and (2) leap is
+Access Patterns. (1) Sequential (sqn), where we access array            designed to identify stride patterns of memory access. This
+elements in a sequential order, (2) stride (stride), where we           matches our intuition and the observations in §2.3.
+
+
+
+USENIX Association                                                                 2024 USENIX Annual Technical Conference          373
+        1                                                         kernel implementations (■ VMA, ■ leap, and ■ leap VMA).
+                                                                  The normalized performance results for each experiment are
+                                                                  shown in Fig. 7 (and the raw data are reported in Appendix A).
+                                                                  FetchBPF does not degrade application performance com-
+                                                                  pared to the native kernel implementations. We note that the
+   0.995
+                                                                  performance of different policies varies depending on the
+                                                                  amount of memory available to them. More importantly, good
+                                                                  prefetching decisions result in a more significant improvement
+                                                                  on performance when the available resources become more
+      0.99                                                        scarce (Fig. 7a).
+                                                                     High-performance applications such as those in Fig. 7 are
+                                               Native             highly optimized for the Linux default prefetcher, which takes
+                                              FetchBPF            countless hours of engineering effort. FetchBPF represents
+   0.985                                                          a paradigm shift, where the policy instead gets optimized
+             0       10      20       30       40      50
+                                                                  to improve the performance of the application. Recent ad-
+                      Latency in cycles (x1e7)                    vances [15, 20] indicate that this process could be automated.
+
+Figure 6: CDF of the latency of the VMA policy implemented
+in FetchBPF vs natively in the kernel.                            6   Related Work
+                                                                  eBPF and Custom Policies. eBPF is a popular framework
+   More importantly, we see that the FetchBPF implemen-           to customize kernel behavior. For example, Lake [18] ex-
+tations of prefetching policies have the same accuracy and        tends eBPF to enable developers to deploy custom policies to
+coverage as their in-kernel counterparts on all regimes, which    manage the use of hardware accelerators for machine learn-
+again aligns with our expectation. For execution time, the dif-   ing. Google recently developed an eBPF version [7, 8] of
+ference between a FetchBPF and in-kernel implementation is        Ghost [21] to customize the Linux scheduling policy. Prior
+statistically insignificant. This supports our hypothesis that    work and ours share the same observations that the kernel’s de-
+eBPF is a good mechanism to implement prefetching policies.       fault policy does not fit all workloads, but supporting bespoke
+Page-fault Latency. Fig. 6 shows the cumulative distribu-         policies natively in the kernel is not sensible. eBPF is the best
+tion function (CDF) of page-fault latencies of the ■ VMA and      alternative to facilitate the expression of tailored policies.
+■ VMA eBPF policies implemented in the kernel and with               Like FetchBPF, P2Cache [25] also targets prefetching but
+FetchBPF respectively. FetchBPF does not incur significant        offers far less flexibility. For example, it allows developers
+additional latency. This is not surprising, because (1) latency   to customize only certain aspects of the default policy, while
+is dominated by page retrieval; and (2) eBPF programs are         FetchBPF supports completely new policies. We were not able
+JIT compiled and executed as native machine code in the           to evaluate FetchBPF against P2Cache, because, to the best of
+kernel [19], achieving performance similar to that of built-in    our knowledge, it is closed-source (at the time of writing) and
+kernel functions.                                                 the complexity of its API makes reimplementing P2Cache
+                                                                  ourselves based purely on the publication difficult.
+Macrobenchmarks                                                   Other Types of Prefetchers. Past work [12, 26, 29] has ex-
+We evaluate the end-to-end performance on five benchmarks         plored hardware features to obtain more precise information
+from three popular systems:                                       about memory access patterns. FetchBPF could be extended
+                                                                  to support such approaches, e.g., by adding dedicated helper
+  1. VoltDB running TPC-C (voltdb);                               functions to access hardware information. We could also ex-
+  2. two variations of Redis’ memtier benchmark, random           tend FetchBPF to obtain user-space information to facilitate
+     (redis-random) and sequential (redis-sequential)             prefetching. Unlike prior work [35, 37] that involves solving
+     key access;                                                  complex engineering issues to access user-space information
+                                                                  across kernel boundary, FetchBPF can simplify this process.
+  3. GapBS’s [13] PageRank (gapbs-pr) and betwee-
+     ness centrality (gapbs-bc) algorithms on the Twitter         Data Path Optimization. We can optimize an application’s
+     dataset [23].                                                performance by not only improving prefetching policies but
+                                                                  also optimizing page I/O paths [9, 28, 35]. For example,
+  For each experiment, we limit DRAM allowance to 25%             Fastswap [9] optimizes page I/O by removing head-of-line
+(Fig. 7a) and 50% (Fig. 7b) of the size of its working set. We    blocking from critical paths. Leap [28] removes Linux’s disk
+compare the ■ VMA eBPF, ■ leap eBPF, and ■ leap VMA               I/O optimization from its block I/O interface to make it suit-
+eBPF policies implemented in FetchBPF against their native        able for faster access storage such as RDMA. Canvas [35]
+
+
+
+374    2024 USENIX Annual Technical Conference                                                              USENIX Association
+    2
+
+
+1.5
+
+
+    1
+
+
+0.5
+
+
+    0                                                             l                          r                         c
+           voltdb           redis-ra
+                                     ndom                  quentia                    gapbs-p                  gapbs-b
+                                                   redis-se
+                            (a) We limit DRAM allowance to 25% of the size of the experiment working set.
+
+
+
+    2
+
+
+1.5
+
+
+    1
+
+
+0.5
+
+
+    0                                                              l                         r                         c
+           voltdb           redis-ra
+                                     ndom                  quentia                    gapbs-p                  gapbs-b
+                                                   redis-se
+                            (b) We limit DRAM allowance to 50% of the size of the experiment working set.
+
+
+Figure 7: Performance of ■ VMA, ■ VMA eBPF, ■ leap, ■ leap eBPF, ■ leap VMA, ■ leap VMA eBPF for five benchmarks.
+Values are normalized using the best performing policy under a particular workload (i.e., the lower the value, the better). Numerical
+results are available in Appendix A.
+
+
+implements a two-tier scheduling policy for page I/O requests.         policies through the use of application hints [15, 30, 33, 34].
+While FetchBPF focuses on prefetching, a future extension
+could explore the possibilities of I/O data path customization.
+                                                                       Acknowledgments
+7       Conclusion & Future Work
+                                                                       We thank USENIX ATC 2024 reviewers for their feedback
+Customizing a prefetching policy that is tailored to an appli-         and their help in improving the paper. We acknowledge the
+cation’s page access patterns can improve its performance.             support of the Natural Sciences and Engineering Research
+FetchBPF is an extension to the eBPF framework that enables            Council of Canada (NSERC). Nous remercions le Conseil
+users to easily deploy new prefetching policies without de-            de recherches en sciences naturelles et en génie du Canada
+veloping or maintaining a dedicated kernel. Our evaluation             (CRSNG) de son soutien. This material is based upon work
+shows that FetchBPF accomplishes the same functionality                supported by the U.S. National Science Foundation under
+but incurs no additional performance overhead when com-                Grant CNS-2245442. Any opinions, findings, and conclusions
+pared to a policy directly implemented in the kernel. In future        or recommendations expressed in this material are those of
+work, we plan to achieve FetchBPF’s full potentially by au-            the author(s) and do not necessarily reflect the views of the
+tomatically generating application- and environment-specific           National Science Foundation.
+
+
+
+USENIX Association                                                               2024 USENIX Annual Technical Conference          375
+References                                                    [13] Scott Beamer, Krste Asanović, and David Patterson. The
+                                                                   gap benchmark suite. arXiv preprint arXiv:1508.03619,
+ [1] bpftrace. Online (Accessed: 5th June 2024). https:            2015.
+     //github.com/iovisor/bpftrace.
+                                                              [14] Robert S Boyer and J Strother Moore. A fast string
+ [2] Cilium. Online (Accessed: 5th June 2024). https:              searching algorithm. Communications of the ACM, 1977.
+     //github.com/cilium/cilium.
+                                                              [15] Christopher Branner-Augmon, Narek Galstyan, Sam Ku-
+ [3] ebpf. Online (Accessed: 5th June 2024). https://eb            mar, Emmanuel Amaro, Amy Ousterhout, Aurojit Panda,
+     pf.io/.                                                       Sylvia Ratnasamy, and Scott Shenker. 3PO: Programmed
+                                                                   Far-Memory Prefetching for Oblivious Applications.
+ [4] Intel Core i7-12700 Processor. Online (Accessed:              arXiv preprint arXiv:2207.07688, 2022.
+     5th June 2024). https://ark.intel.com/cont
+     ent/www/us/en/ark/products/134591/intel-c                [16] Ali Butt R., Chris Gniady, and Y. Charlie Hu. The Per-
+     ore-i7-12700-processor-25m-cache-up-to-4-9                    formance Impact of Kernel Prefetching on Buffer Cache
+     0-ghz.html.                                                   Replacement Algorithms. In International Conference
+                                                                   on Measurement and Modeling of Computer Systems
+ [5] Katran. Online (Accessed: 5th June 2024). https:              (SIGMETRICS’05). ACM, 2005.
+     //engineering.fb.com/2018/05/22/open-sourc
+     e/open-sourcing-katran-a-scalable-network                [17] Viacheslav Fedorov, Jinchun Kim, Mian Qin, Paul
+    -load-balancer/.                                               Gratz V, and A. L. Narasimha Reddy. Speculative Paging
+                                                                   for Future NVM Storage. In International Symposium
+ [6] mm, swap: VMA based swap readahead, 2017. https:              on Memory Systems (MEMSYS’17). ACM, 2017.
+     //lwn.net/Articles/716296/.
+                                                              [18] Henrique Fingler, Isha Tarte, Hangchen Yu, Ariel
+ [7] ghOSt: Fast & Flexible User-Space Delegation of Linux         Szekely, Bodun Hu, Aditya Akella, and Christopher Ross-
+     Scheduling, 2021. https://lwn.net/Articles/873                bach J. Towards a Machine Learning-Assisted Kernel
+     244/.                                                         with LAKE. In International Conference on Architec-
+                                                                   tural Support for Programming Languages and Operat-
+ [8] eBPF Kernel Scheduling with Ghost, 2022. https:               ing Systems (ASPLOS’23). ACM, 2023.
+     //lpc.events/event/16/contributions/1365/a
+     ttachments/986/1912/lpc22-ebpf-kernel-sch                [19] Mark Fleming. A thorough introduction to eBPF. Online
+     eduling-with-ghost.pdf.                                       (Accessed: 5th June 2024). https://lwn.net/Arti
+                                                                   cles/740157/.
+ [9] Emmanuel Amaro, Christopher Branner-Augmon, Zhi-
+     hong Luo, Amy Ousterhout, Marcos K Aguilera, Aurojit     [20] Zhiyuan Guo, Zijian He, and Yiying Zhang. Mira: A
+     Panda, Sylvia Ratnasamy, and Scott Shenker. Can far           Program-Behavior-Guided Far Memory System. In Sym-
+     memory improve job throughput? In European Confer-            posium on Operating Systems Principles (SOSP’23),
+     ence on Computer Systems (EuroSys’16). ACM, 2020.             pages 692–708. ACM, 2023.
+
+[10] Amro Awad, Sergey Blagodurov, and Yan Solihin. Write-    [21] Jack Tigar Humphries, Neel Natu, Ashwin Chaugule,
+     Aware Management of NVM-based Memory Exten-                   Ofir Weisse, Barret Rhoden, Josh Don, Luigi Rizzo,
+     sions. In International Conference on Supercomputing          Oleg Rombakh, Paul Turner, and Christos Kozyrakis.
+     (ICS’16). ACM, 2016.                                          ghOSt: Fast & Flexible User-Space Delegation of Linux
+                                                                   Scheduling. In Symposium on Operating Systems Prin-
+[11] Grant Ayers, Heiner Litz, Christos Kozyrakis, and             ciples (SOSP’21). ACM, 2021.
+     Parthasarathy Ranganathan. Classifying Memory Ac-
+     cess Patterns for Prefetching. In Conference on Archi-   [22] Yujuan Jiang, Bram Adams, and Daniel M German. Will
+     tectural Support for Programming Languages and Op-            my patch make it? and how fast? case study on the Linux
+     erating Systems (ASPLOS’20). ACM, 2020.                       kernel. In Working conference on Mining Software
+                                                                   Repositories (MSR’13). IEEE, 2013.
+[12] Reza Azimi, Livio Soares, Michael Stumm, Thomas
+     Walsh, and Demke Angela Brown. Path: Page Access         [23] Haewoon Kwak, Changhyun Lee, Hosung Park, and Sue
+     Tracking to Improve Memory Management. In Interna-            Moon. What is Twitter, a social network or a news me-
+     tional Symposium on Memory Management (ISMM’07).              dia? In International Conference on World Wide Web
+     ACM, 2007.                                                    (WWW’10), pages 591–600. ACM, 2010.
+
+
+
+376   2024 USENIX Annual Technical Conference                                                        USENIX Association
+[24] Andres Lagar-Cavilla, Junwhan Ahn, Suleiman Souhlal,           Chishti. Efficiently prefetching complex address pat-
+     Neha Agarwal, Radoslaw Burny, Shakeel Butt, Jichuan            terns. In International Symposium on Microarchitecture
+     Chang, Ashwin Chaugule, Nan Deng, Junaid Shahid,               (MICRO’15). IEEE/ACM, 2015.
+     Greg Thelen, Kamil Adam Yurtsever, Yu Zhao, and           [33] Andrew Tomkins, R Hugo Patterson, and Garth Gib-
+     Parthasarathy Ranganathan. Software-Defined Far Mem-           son. Informed multi-process prefetching and caching.
+     ory in Warehouse-Scale Computers. In International             ACM SIGMETRICS Performance Evaluation Review,
+     Conference on Architectural Support for Programming            25(1):100–114, 1997.
+     Languages and Operating Systems (ASPLOS’19). ACM,
+                                                               [34] Steve VanDeBogart, Christopher Frost, and Eddie Kohler.
+     2019.
+                                                                    Reducing seek overhead with application-directed
+[25] Dusol Lee, Inhyuk Choi, Chanyoung Lee, Sungjin                 prefetching. In Annual Technical Conference (ATC’09).
+     Lee, and Jihong Kim. P2Cache: An Application-                  USENIX, 2009.
+     Directed Page Cache for Improving Performance of Data-    [35] Chenxi Wang, Yifan Qiao, Haoran Ma, Shi Liu, Yiying
+     Intensive Applications. In Workshop on Hot Topics in           Zhang, Wenguang Chen, Ravi Netravali, Miryung Kim,
+     Storage and File Systems (HotStorage’23), pages 31–36.         and Harry Guoqing Xu. Canvas: Isolated and Adaptive
+     ACM, 2023.                                                     Swapping for Multi-Applications on Remote Memory.
+                                                                    In Symposium on Networked Systems Design and Imple-
+[26] Ting Liang, Zuojun Li, Tianyue Lu, Hui Yuam, Yinben            mentation (NSDI’23). USENIX, 2023.
+     Xia, Yungang Bao, Mingyu Chen, Shan Yizhou, Haifeng
+     Li, and Ke Liu. HoPP: Hardware-Software Co-Designed       [36] Johannes Weiner, Niket Agarwal, Dan Schatzberg, Leon
+     Page Prefetching for Disaggregated Memory. In Inter-           Yang, Hao Wang, Blaise Sanouillet, Bikash Sharma,
+     national Symposium on High-Performance Computer                Tejun Heo, Mayank Jain, Chunqiang Tang, and Dim-
+     Architecture (HPCA’23). IEEE, 2023.                            itrios Skarlatos. TMO: Transparent Memory Offloading
+                                                                    in Datacenters. In International Conference on Archi-
+[27] Soo Yee Lim, Bogdan Stelea, Xueyuan Han, and Thomas            tectural Support for Programming Languages and Op-
+     Pasquier. Secure Namespaced Kernel Audit for Contain-          erating Systems (ASPLOS’22). ACM, 2022.
+     ers. In Symposium on Cloud Computing (SoCC ’21).
+                                                               [37] Wonsup Yoon, Jinyoung Oh, Jisu Ok, Sue Moon, and
+     ACM, 2021.
+                                                                    Youngjin Kwon. DiLOS: adding performance to paging-
+[28] Hasan Al Maruf and Mosharaf Chowdhury. Effectively             based memory disaggregation. In Asia-Pacific Workshop
+     Prefetching Remote Memory with Leap. In Annual Tech-           on Systems (APSys’21). ACM, 2021.
+     nical Conference (ATC’20). USENIX, 2020.                  [38] Wonsup Yoon, Jisu Ok, Jinyoung Oh, Sue Moon, and
+                                                                    Youngjin Kwon. DiLOS: Do Not Trade Compatibility
+[29] Shaurya Patel, Sidharth Agrawal, Alexandra Fedorova,           for Performance in Memory Disaggregation. In Euro-
+     and Margo Seltzer.      CHERI-Picking: Leveraging              pean Conference on Computer Systems (EuroSys’23),
+     Capability Hardware for Prefetching. In Workshop               pages 266–282. ACM, 2023.
+     on Programming Languages and Operating Systems
+     (PLOS’23). ACM, 2023.
+                                                               A    End-to-end Evaluation Raw Data
+[30] R Hugo Patterson, Garth A Gibson, Eka Ginting, Daniel
+     Stodolsky, and Jim Zelenka. Informed prefetching and      Table 1 results are normalized in Fig. 7 by dividing the exe-
+     caching. In Symposium on Operating Systems Principles     cution time of a policy by the minimum among all policies.
+     (SOSP’95), pages 79–95. ACM, 1995.                        We compute the values this way, so that the best performing
+                                                               policy normalizes to 1. This allows us to present in Fig. 7 con-
+[31] Zhenyuan Ruan, Malte Schwarzkopf, K. Marcos Aguil-        sistent results with other benchmark experiments below. In
+     era, and Adam Belay.         AIFM: high-performance,      all benchmarks, the closer a value is to 1, the better the result.
+     application-integrated far memory. In Conference on Op-      Table 2 and Table 3 results are normalized in Fig. 7 by di-
+     erating Systems Design and Implementation (OSDI’20).      viding the maximum number of operations per second among
+     USENIX, 2020.                                             all policies by the value of each policy.
+                                                                  Table 4 and Table 5 results are normalized in Fig. 7 by
+[32] Manjunath Shevgoor, Sahil Koladiya, Rajeev Balasubra-     dividing the execution time of a policy by the minimum among
+     monian, Chris Wilkerson, Seth H Pugsley, and Zeshan       all policies.
+
+
+
+
+USENIX Association                                                       2024 USENIX Annual Technical Conference            377
+ Policy               Execution Time for 25% DRAM Allowance (s)         Execution Time for 50% DRAM Allowance (s)
+ ■ VMA                                                  527.17                                            165.26
+ ■ VMA eBPF                                             532.39                                            166.50
+ ■ leap                                                 705.51                                            180.06
+ ■ leap eBPF                                            703.76                                            176.95
+ ■ leap VMA                                             624.42                                            165.53
+ ■ leap VMA eBPF                                        632.04                                            166.26
+
+                                       Table 1: Voltdb-tpcc benchmark results.
+
+
+ Policy              1, 000 operations/sec for 25% DRAM Allowance      1, 000 operations/sec for 50% DRAM Allowance
+ ■ VMA                                                      13,511                                            31,306
+ ■ VMA eBPF                                                 12,924                                            31,299
+ ■ leap                                                      8,492                                            23,147
+ ■ leap eBPF                                                 7,951                                            22,736
+ ■ leap VMA                                                 10,997                                            31,983
+ ■ leap VMA eBPF                                            11,025                                            31,680
+
+                                  Table 2: Redis memtier random benchmark results.
+
+
+ Policy              1, 000 operations/sec for 25% DRAM Allowance      1, 000 operations/sec for 50% DRAM Allowance
+ ■ VMA                                                      13,089                                            22,399
+ ■ VMA eBPF                                                 12,838                                            22,648
+ ■ leap                                                      6,754                                            14,289
+ ■ leap eBPF                                                 6,892                                            13,576
+ ■ leap VMA                                                  6,898                                            17,049
+ ■ leap VMA eBPF                                             6,924                                            17,920
+
+                                 Table 3: Redis memtier sequential benchmark results.
+
+
+ Policy               Execution Time for 25% DRAM Allowance (s)         Execution Time for 50% DRAM Allowance (s)
+ ■ VMA                                                   2,329                                               857
+ ■ VMA eBPF                                              2,438                                               942
+ ■ leap                                                  4,373                                               960
+ ■ leap eBPF                                             4,518                                               972
+ ■ leap VMA                                              3,286                                               846
+ ■ leap VMA eBPF                                         3,623                                               872
+
+                          Table 4: GapBS PageRank benchmark results on the Twitter dataset.
+
+
+ Policy               Execution Time for 25% DRAM Allowance (s)         Execution Time for 50% DRAM Allowance (s)
+ ■ VMA                                                   1,783                                               323
+ ■ VMA eBPF                                              1,821                                               331
+ ■ leap                                                  3,465                                               396
+ ■ leap eBPF                                             3,620                                               398
+ ■ leap VMA                                              2,438                                               320
+ ■ leap VMA eBPF                                         2,686                                               330
+
+                    Table 5: GapBS betweenness centrality benchmark results on the Twitter dataset.
+
+
+
+
+378   2024 USENIX Annual Technical Conference                                                         USENIX Association
+

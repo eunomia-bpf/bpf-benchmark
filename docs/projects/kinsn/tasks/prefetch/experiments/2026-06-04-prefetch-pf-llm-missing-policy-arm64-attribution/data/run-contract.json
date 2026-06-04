@@ -1,0 +1,40 @@
+{
+  "date": "2026-06-04",
+  "experiment": "prefetch-pf-llm-missing-policy-arm64-attribution",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "question": "Run ARM64 treatment smoke and paired attribution for struct-field, mixed-policy-table, and stream-of-strides prefetch policies.",
+  "platform": "aws",
+  "arch": "arm64",
+  "planned_instance_type": "t4g.small",
+  "planned_cases": [
+    "prefetch_struct_field_fixed_offsets",
+    "prefetch_mixed_policy_table",
+    "prefetch_stream_of_strides"
+  ],
+  "planned_control": {
+    "passes": "none",
+    "samples": 5,
+    "warmups": 1,
+    "inner_repeat": 10000
+  },
+  "planned_treatments": [
+    {
+      "case": "prefetch_struct_field_fixed_offsets",
+      "passes": "prefetch",
+      "pass_args": "--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-struct-field-fixed-offsets-profile-pc29-r2-r6-r4.json --max-sites=3 --hint=pldl1keep"
+    },
+    {
+      "case": "prefetch_mixed_policy_table",
+      "passes": "prefetch",
+      "pass_args": "--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-mixed-policy-table-profile-pc23-r2.json --max-sites=1 --hint=pldl1keep"
+    },
+    {
+      "case": "prefetch_stream_of_strides",
+      "passes": "prefetch",
+      "pass_args": "--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-stream-of-strides-profile-pc316-r2-r9.json --max-sites=2 --hint=pldl1keep"
+    }
+  ],
+  "status": "blocked_before_launch",
+  "blocker": "AWS CLI session expired during terminate precheck."
+}

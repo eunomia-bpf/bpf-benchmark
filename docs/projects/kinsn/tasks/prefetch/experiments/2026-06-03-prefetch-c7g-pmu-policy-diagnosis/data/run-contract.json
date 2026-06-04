@@ -1,0 +1,23 @@
+{
+  "date": "2026-06-03",
+  "experiment": "prefetch-c7g-pmu-policy-diagnosis",
+  "question": "Run PMU-backed diagnosis for every currently implemented Kinsn prefetch policy/case on AWS ARM64 c7g.large.",
+  "platform": "aws",
+  "arch": "arm64",
+  "instance_type": "c7g.large",
+  "runtime": "kernel",
+  "suite": "micro",
+  "makefile_entry": "./aws-config/run.sh arm64 micro",
+  "pmu_scope": "full_repeat_raw",
+  "samples": 3,
+  "warmups": 1,
+  "inner_repeat": 10000,
+  "cpu": 0,
+  "status": "completed",
+  "blocker": "",
+  "notes": [
+    "Initial attempt was blocked by expired AWS login. User reauthenticated and the experiment resumed in the same directory.",
+    "Used c7g.large specifically because the preceding PMU capability matrix showed t4g.small lacks the generic cache/instruction counters needed for this diagnosis.",
+    "All benchmark invocations used ./aws-config/run.sh arm64 micro."
+  ]
+}

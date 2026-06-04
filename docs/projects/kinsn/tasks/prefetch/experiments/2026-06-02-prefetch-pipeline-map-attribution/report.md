@@ -229,8 +229,8 @@ AWS instances：
 - `/home/ruoji/github/bpf-opt/code/micro/programs/prefetch_upper_bound.md`
 - `/home/ruoji/github/bpf-opt/code/micro/config/micro_pure_jit.yaml`
 - `/home/ruoji/github/bpf-opt/code/micro/config/prefetch-pipeline-page-stride-profile-pc45-r1.json`
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-02-prefetch-pipeline-map-attribution/report.md`
 
 ## 数据文件
@@ -408,8 +408,8 @@ geomean treatment/control 是 `0.858777`，independent rerun 是 `0.962181`。�
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-02-prefetch-upper-bound-map-attribution/report.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-02-prefetch-profile-fed-map-value-attribution/report.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-02-prefetch-profile-fed-map-value-pmu-attribution/report.md`
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/policy-matrix.md`
 - `/home/ruoji/github/bpf-opt/code/micro/programs/prefetch_upper_bound.md`
 
 发现和处理：

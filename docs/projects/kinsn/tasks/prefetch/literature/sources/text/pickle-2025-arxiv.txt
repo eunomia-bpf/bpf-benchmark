@@ -1,0 +1,1031 @@
+                                                 Pickle Prefetcher: Programmable and Scalable
+                                                          Last-Level Cache Prefetcher
+                                                                   Hoa Nguyen                                                   Pongstorn Maidee
+                                                            Dept. of Computer Science                                                AMD
+                                                             University of California                                   Research & Advanced Development
+                                                                 Davis, CA, USA                                                San Jose, CA, USA
+                                                           hoanguyen@ucdavis.edu                                        pongstorn.maidee@amd.com
+
+                                                               Jason Lowe-Power                                                  Alireza Kaviani
+                                                            Dept. of Computer Science                                                 AMD
+arXiv:2511.19973v1 [cs.AR] 25 Nov 2025
+
+
+
+
+                                                             University of California                                   Research & Advanced Development
+                                                                 Davis, CA, USA                                                San Jose, CA, USA
+                                                          jlowepower@ucdavis.edu                                         alireza.kaviani@amd.com
+
+
+
+
+                                            Abstract—Modern high-performance architectures employ                   core, prefetchers can significantly reduce the average memory
+                                         large last-level caches (LLCs). While large LLCs can reduce                access latency for workloads with a high degree of locality
+                                         average memory access latency for workloads with a high degree             and recognizable memory access patterns.
+                                         of locality, they can also increase latency for workloads with
+                                         irregular memory access patterns, where they are less effective.              However, existing memory access pattern prediction-based
+                                         Prefetchers are widely used to mitigate the performance impact             prefetchers often struggle with detecting irregular memory
+                                         of memory latency by prefetching data into the cache hierarchy             access patterns with a large memory footprint. This type of
+                                         before it is accessed by the core. However, existing prediction-           pattern is especially prevalent in modern applications, such as
+                                         based prefetchers often struggle with irregular memory access              graph processing, machine learning, and data analytics. There
+                                         patterns, which are especially prevalent in modern applications.
+                                            This paper introduces the Pickle Prefetcher, a programmable             has been active research on improving prefetchers to handle
+                                         and scalable LLC prefetcher designed to handle independent                 irregular memory access patterns for specific applications.
+                                         irregular memory access patterns effectively. Instead of relying           However, these approaches often require complex hardware
+                                         on static heuristics or complex prediction algorithms, the Pickle          prediction logic or static heuristics that are not easily adaptable
+                                         Prefetcher allows software to define its own prefetching strategies        to different workloads [1], [18], [40].
+                                         using a simple programming interface without expanding the
+                                         instruction set architecture (ISA). By trading the logic complexity           Prodigy [35] is an example towards generalization of hard-
+                                         of hardware prediction for software programmability, the Pickle            ware prefetchers which can handle common irregular memory
+                                         Prefetcher can adapt to a wide range of access patterns, including         access patterns present in graph processing while being generic
+                                         irregular ones, without requiring extensive hardware resources             enough to be used in other applications. However, the Prodigy
+                                         for prediction. This allows the prefetcher to dedicate its resources       prefetcher is still limited by the hardware resources available in
+                                         to scheduling and issuing timely prefetch requests.
+                                            Graph applications are an example where the memory access
+                                                                                                                    the core and is sensitive to prefetch distance and long-latency
+                                         pattern is irregular but easily predictable by software. Through           accesses. In addition, prefetchers are sensitive to prefetch
+                                         extensive evaluations of the Pickle Prefetcher on gem5 full-system         parameters, such as prefetch distance, which can vary sig-
+                                         simulations, we demonstrate that the Pickle Prefetcher signif-             nificantly across different workloads. While a stream pattern
+                                         icantly outperforms traditional prefetching techniques, making             in a memcpy function can be benefited from an aggressive
+                                         it a promising solution for future high-performance computing
+                                         systems. Our results show that the Pickle Prefetcher achieves
+                                                                                                                    prefetch distance, a graph traversal pattern in a breadth-first
+                                         speedups of up to 1.74x on the GAPBS breadth-first search (BFS)            search (BFS) algorithm can be harmed by the same prefetch
+                                         implementation over a baseline system. When combined with                  distance and aggressiveness. This makes it difficult to design
+                                         private cache prefetchers, the Pickle Prefetcher provides up to a          a single prefetcher that can handle all workloads effectively.
+                                         1.40x speedup over systems using only private cache prefetchers.              While software landscape evolves quickly, hardware archi-
+                                                                                                                    tectures are also continually evolving to meet the demands
+                                                                                                                    of emerging workloads and new performance requirements.
+                                                                I. I NTRODUCTION
+                                                                                                                    Hardware must be frequently redesigned, a costly and time-
+                                           Prefetchers are ubiquitous in modern high-performance                    intensive process. In contrast, software exhibits significantly
+                                         computing systems. By prefetching data into the private caches             greater flexibility and is able to rapidly adapt to changing ap-
+                                         and last-level cache (LLC) before the data is accessed by the              plication demands, hardware configurations, and user require-
+
+
+
+                                                                                                                1
+ments through simple updates and reconfiguration. Leveraging            part) shows a parallel BFS using OpenMP, where threads
+software programmability to manage complexity allows for a              process nodes in the queue and iterate over their neighbors.
+more dynamic response to the shifting computing landscape,              Each neighbor is marked as visited (done atomically via
+providing substantial advantages over purely hardware-driven            compare-and-swap) and added to a local_work_queue.
+solutions. Therefore, emphasizing software programmability in           Figure 1 illustrates how BFS accesses neighbors in CSR.
+prefetcher design ensures adaptability and longevity, enabling
+systems to efficiently keep pace with ongoing technological             B. Pattern Recognition-based Prefetchers
+advancements and workload diversification.                                 General-purpose prefetchers, such as stride [6], IMP [39],
+   In this paper, we present the design of Pickle Prefetcher with       SMS [33], BOP [25], AMPM [17], Bingo [7], and DMP [13],
+the key idea of bringing flexibility to the prefetcher, allowing        predict future accesses based on spatial and temporal locality,
+the prefetcher to adapt to different needs of different work-           typically using cache miss history. However, the irregular
+loads. Instead of relying on complex hardware prediction logic          and data-dependent nature of graph processing workloads,
+and static heuristics, the Pickle Prefetcher uses programmable          such as BFS, poses challenges for conventional prefetching
+technology to let software define its own prefetching strategies,       techniques. As previously discussed, using the CSR format
+including prefetch logic and its parameters, using a simple             involves multiple levels of indirection with limited strided
+programming interface without expanding the instruction set             accesses to the neighbors array. The stride length is often
+architecture (ISA). Pickle Prefetcher introduces the separation         too short for the prefetcher to detect the pattern with enough
+of concerns between prefetching logic and prefetch scheduling,          confidence.
+fundamentally shifting the complexity of memory prefetching                The indirect memory prefetcher (IMP) [39] predicts whether
+from memory access patterns prediction to managing the                  an access to B[i] will induce an access to A[B[i]], where B[i]
+scheduling and issuing of prefetch requests. The prefetch logic         is accessed as a stream pattern. The IMP prefetcher can be
+is constructed entirely in software, allowing it to be easily           configured to work on the virtual address space. It uses a table
+modified and extended without requiring changes to the hard-            to store the last B[i] and A[B[i]] pairs, and when an access
+ware. This approach enables finding the optimal prefetching             to B[i] is detected, it checks the table for the corresponding
+strategy part of software development process, allowing users           A[B[i]]. However, the IMP prefetcher is limited by its table
+to iterate through different solutions quickly. We demonstrate          size, the types of accesses it recognizes, and the number of
+that the Pickle Prefetcher effectively handles irregular memory         levels of indirect accesses it can handle. For example, IMP
+access patterns, which are common in modern applications,               does not have a mechanism to detect ranged accesses, such as
+by allowing software to define prefetching strategies that are          those used when the BFS algorithm accesses the neighbors
+tailored to specific workloads.                                         array.
+   Our key contributions are as follows:                                   Prodigy is an in-core prefetcher that incorporates a data indi-
+   • We introduce the Pickle Prefetcher, a programmable and
+                                                                        rection graph (DIG) to generate accurate prefetches for indirect
+      scalable LLC prefetcher that allows software to define            accesses. The DIG contains the array boundaries and the type
+      prefetching strategies.                                           of access to the next level of indirection. Prodigy observes
+   • A programming interface allowing software to send
+                                                                        memory accesses from the core and generates prefetches ac-
+      prefetch requests to the Pickle Prefetcher without requir-        cordingly. In the context of a graph prefetcher, Prodigy is able
+      ing changes to the instruction set architecture (ISA).            to generate accurate prefetches for the neighbors_ptr,
+   • We evaluate the Pickle Prefetcher on modern workloads
+                                                                        neighbors, and visited arrays from an access to the
+      using the gem5 full-system simulator, demonstrating its           work_queue. Prodigy works directly with virtual addresses
+      effectiveness in handling irregular memory access pat-            and shares the same translation and cache resources with
+      terns on existing systems, including systems with private         the core, which can lead to contention and performance
+      cache prefetchers.                                                degradation. Like other in-core prefetchers, Prodigy is also
+   • We analyze the effect of the Pickle Prefetcher on perfor-
+                                                                        limited by the number of concurrent prefetch requests it can
+      mance, and on memory bandwidth and cache utilization.             handle, making it difficult to manage prefetch timeliness.
+                                                                                             III. D ESIGN G OALS
+                      II. BACKGROUND
+                                                                           In order to introduce a programmable prefetcher to a system,
+A. BFS Algorithm: An example of Irregular Memory Access                 we have the following design goals:
+Pattern                                                                    Flexible to different prefetching strategies. Having a
+   Breadth-first search (BFS) is a graph traversal algorithm            programmable prefetcher allows the prefetcher to adapt to
+that explores nodes level by level. In the CSR format, two ar-          different memory access patterns and workloads. However, the
+rays, neighbors_ptr and neighbors, store graph edges                    resources provided to the prefetcher to issue prefetch requests
+compactly. The ith entry of neighbors_ptr points to the                 effectively. For example, processing a large graph requires
+start of node i’s neighbors in neighbors. BFS uses a                    handling multiple long-latency memory requests concurrently.
+work_queue for nodes to visit and a visited array to                    The amount of requests easily exceeds the memory system at
+avoid revisiting nodes. Algorithm 1 (excluding the highlighted          the prefetcher can handle. Therefore, the memory system at
+
+
+
+                                                                    2
+                                                                             prefetcher can serve multiple cores. This allows the prefetcher
+                                                                             to be used in highly parallel applications. Moreover, as the
+                                                                             number of cores in a system increases, the prefetcher design
+                                                                             must support multiple instances of the prefetcher in the system.
+                                                                                Working with virtual address space. Because the prefetch
+                                                                             logic comes from software, working with virtual address space
+                                                                             is essential, as userspace software operates in virtual address
+                                                                             space. Working with virtual address space also provides the
+                                                                             benefit of supporting cross-page prefetching, which is essential
+                                                                             for modern workloads with large memory footprints. More-
+Fig. 1: An example of memory access pattern of the Breadth-first             over, it allows the prefetcher to benefit from process isolation
+Search algorithm running on two cores. Each core may progress at
+a different pace, as a core can be scheduled out at any time. Here,
+                                                                             and improved security, enabling multiple processes to use the
+the prefetch distance is set to 4, meaning the prefetcher fetches the        prefetcher without interfering with each other.
+node that is 4 positions ahead in the work_queue along with that
+node’s neighbors. With a prefetch distance of 4, core 1 cannot issue a            IV. T HE A NATOMY OF THE P ICKLE P REFETCHER
+prefetch because it has only one unit of work remaining, while core
+2 is able to issue a prefetch.                                                                              6
+
+
+
+Algorithm 1 Top Down Implementation of Breadth-first
+Search (BFS) with Pickle Prefetcher                                                            3
+                                                                                                       Pending       5a
+
+                                                                                 PicklePG              Prefetch
+  device ptr ← getPickleDevicePtr()                                                                     Queue
+                                                                                                                                            5b
+
+  while work queue is not empty do:                                                                                         Pickle Cache          R
+                                                                                      2                     4a
+     #pragma omp parallel                                                                                            4b
+                                                                                                                                             4c
+     {local queue ← new Queue()                                                   Pending             TLB   PTW
+     #pragma omp parallel for                                                  Prefetch Work
+                                                                                   Queue              PickleMMU
+     for u ← work queue.pop() do
+         if work queue.size() ≥ PF DIST then                                          1
+             device ptr ← work queue.get ptr(u+PF DIST)
+         end if                                                              Fig. 2: The architecture of the Pickle Prefetcher with data paths. The
+         for v ptr ← neighbors ptr[u] to neighbors ptr[u+1] do               prefetcher and the data paths are described in Section IV-A.
+             if visited[v] is false then
+                 compare and swap(visited[v], false, true)
+                 local queue.push(v)                                         A. Overview
+             end if
+                                                                                At a high level, Pickle Prefetcher is an offload engine that
+         end for
+     end for                                                                 proactively executes memory accesses ahead of the cores,
+     work queue.extend(local queue) }                                        issuing load requests to prefetch data into the cache hierarchy
+  end while                                                                  before it is needed by the application.
+                                                                                Figure 2 illustrates the prefetcher along with the data paths
+                                                                             of the prefetches. The Pickle Prefetcher comprises five main
+the prefetcher must be calibrated to handle memory-intensive                 components: the prefetch generator (PicklePG), the pend-
+workloads without overwhelming the memory system.                            ing prefetch work queue, the pending prefetch queue, the
+   Easy to program at the application level. Extending an                    PickleMMU, and the Pickle Cache. The prefetch generator,
+instruction set architecture (ISA) requires modifications to the             PicklePG, is responsible for generating prefetches upon an
+core design as well as the entire software stack. Using a                    event from the core, such as a prefetch hint or a prefetch
+memory-mapped I/O (MMIO) interface allows the prefetcher                     response from the Pickle Cache. The pending prefetch work
+to be programmed using existing programming languages                        queue is a priority queue that stores prefetch hints from the
+and tools, and enables easy integration into existing software               core. The pending prefetch queue (PQ) is a priority queue that
+ecosystems. This allows the prefetcher to be incorporated                    stores the prefetch requests generated by the PicklePG, where
+into existing systems without requiring intrusive changes to                 the scheduler decides the priority of each prefetch request.
+hardware or software.                                                        As the PicklePG generates the virtual addresses of data to
+   Data coherence. The prefetcher must be able to maintain                   prefetch, the PickleMMU is responsible for translating these
+data coherence with the rest of the system, as it may need to                virtual addresses to physical addresses, allowing the prefetch
+read from memory spaces shared with the cores. This enables                  to be sent to the cache hierarchy. Finally, the Pickle Cache is
+the prefetcher to be used in a wide range of applications                    the prefetcher’s private cache, which is part of the system’s
+with indirect memory accesses, such as graph processing and                  cache hierarchy. The Pickle Cache is responsible for keeping
+machine learning.                                                            prefetched data coherent with the rest of the memory hierarchy.
+   Scalability. The prefetcher must be able to handle a                         Prefetch Work For the rest of the paper, we use the term
+large number of prefetch requests concurrently, as a single                  prefetch work to refer to the collection of prefetch requests
+
+
+
+                                                                         3
+               MemTile                R                R            MemTile            Algorithm 2 prefetch kernel 0
+                                                                                         procedure P REFETCHER I NITIALIZATION(args):
+               CoreTile               R                R            CoreTile                 work queue info = args.work queue info
+                                                                                             neighbor ptr info = args.neighbor ptr info
+               CoreTile               R                R            CoreTile                 neighbors info = args.neighbors info
+                               1                                                             visited info = args.visited info
+               CoreTile               R                R            CoreTile                 prefetch distance = args.prefetch distance
+                                              3
+                                                                                         end procedure
+               CoreTile               R                R            CoreTile             procedure P REFETCH E VENT H ANDLER(event):
+                                                                                             if event == prefetch hint then Prefetch(curr node vaddr +
+               MemTile                R                R            MemTile              prefetch distance * work queue type size)
+                                                                                             end if
+               DMATile                R                R            MemTile                  if event == prefetch response then
+                                              2
+                                                                                                 if response.vaddr ∈ neighbor ptr range then
+                     (a) Data paths of a last-level cache miss.                                      Prefetch(neighbor ptr vaddr + value from step 1 * neigh-
+                                                                                         bor ptr size)
+                                                       R        PickleTile                           Prefetch(neighbor ptr vaddr + (value from step 1 + 1) *
+                                                                                         neighbor ptr size)
+               MemTile                R                R        MemTile
+                                                                                                 end if
+                                                  1
+                                                                                                 if response.vaddr ∈ neighbor ptr range then
+               CoreTile               R                R            CoreTile
+                                                  4                                                  while vaddr < value 2 from step 2 do
+               CoreTile                                                                                  Prefetch(vaddr)
+                                      R                R            CoreTile
+                               6          5                                                              vaddr += neighbors size
+                                                            3
+               CoreTile               R                R            CoreTile                         end while
+                                                                                                 end if
+               CoreTile               R                R            CoreTile                     if response.vaddr ∈ neighbors range then
+                                                                                                     for value in values from step 3 do
+               MemTile                R                R        MemTile                                  Prefetch(visited vaddr + value * visited size)
+                                                                                                     end for
+               DMATile                R                R        MemTile                          end if
+                                              2
+                                                                                             end if
+                                                                                         end procedure
+                        (b) Data paths of a timely prefetch.
+Fig. 3: Data paths of cache accesses involving the Pickle Prefetcher.
+The data paths are described in Section IV-F. The NoC is described
+in Section V-A1.                                                                          Prefetch Hint A prefetch hint is an uncacheable store
+                                                                                       request sent from the core to the prefetcher. The data of the
+                                                                                       store contains the hint, and the prefetch logic is responsible
+#include<pickle.h>
+                                                                1                      for generating the prefetch requests accordingly. When the
+auto pdev = std::make_unique<PickleDeviceManager>();
+                                                                                       prefetch hint arrives from the core, it enters the pending
+void bfs() {
+    //...                                                                              prefetch hint queue, as indicated in data path 1 in Figure 2.
+    pdev->prefetch(csr_pf_kernel, curr_node_vaddr));
+                                                                                       The details of how the uncacheable store is sent from software
+                                                           2a Uncacheable
+    //...
+    pdev->prefetch(memcpy_kernel, src_array_vaddr);
+    //...                                                    Virtual Page              are described in Section IV-G.
+}
+                                                                                          The following subsections discuss each component in detail
+int main() {                                                vaddr: 0x70000
+                                                      3a                               and use the BFS example to illustrate the prefetching process.
+    pdev->configure("bfs_kernels");                         -> paddr: 0x01001000
+    return 0;
+}
+                                                            vaddr: 0x70008             B. PicklePG: The Pickle Prefetch Generator
+                                                            -> paddr: 0x01001008
+           PicklePrefetcher
+ if paddr == 0x01001008:
+                                                       3b                                 The Pickle Prefetch Generator (PicklePG) is a pro-
+     prefetch_kernel_1(src_array_vaddr)                                                grammable hardware component that allows the prefetcher to
+ if paddr == 0x01001000:
+     prefetch_kernel_0(                                2b
+                                                                                       generate new prefetch requests upon two triggering events:
+        curr_node_vaddr + prefetch_distance
+     )
+                                                                                       when a prefetch hint is promoted from the prefetch hint queue
+Fig. 4: Data paths for sending a prefetch hint from the core to the                    to PicklePG, and when prefetch responses arrive from the
+prefetcher. At the beginning of the program, a UC page is created                      Pickle Cache, shown as 2 and 6 , respectively, in Figure
+( 1 ), mapping a 4KiB page to the prefetcher I/O physical address.                     2. A prefetch hint is promoted to PicklePG when PicklePG is
+Prefetch hints are sent from the core to the prefetcher via uncacheable                available to receive more prefetch hints.
+store requests ( 2a and 3a ). The virtual address of the prefetch                         The PicklePG is analogous to a function that takes an integer
+determines the prefetch kernel, as shown in ( 2b and 3b ). More                        as an argument and returns prefetch request addresses. The
+details are provided in Section IV-G.                                                  function is defined in software and is injected into hardware
+                                                                                       during the initialization of the application. The argument is
+                                                                                       the content of the store. In this paper, we abstract the physical
+corresponding to a prefetch hint. In the BFS example, a                                implementation of the PicklePG and focus on how PicklePG
+prefetch work is the collection of prefetch requests prefetching                       interacts with the rest of the prefetcher components.
+the node id from the work queue, its neighbor pointers, the                               At the beginning of the application runtime, the PicklePG
+neighbors, and the visited elements of the node’s neighbors.                           is initialized with the prefetching parameters and logic. In the
+
+
+
+                                                                                   4
+case of BFS, the prefetching parameters include the address              latency to the address translation process, as well as more
+ranges of the work queue, neighbor pointers, neighbors, and              traffic between the prefetcher and the cores. Sharing resources
+visited nodes, as well as the prefetch distance. We assume that          with the core also leads to TLB and cache pollution in the core.
+each of the data structures is a contiguous array and that the              Security & Process Isolation. Having the PickleMMU
+elements are of fixed size.                                              enables the PicklePG, the programmable part of the prefetcher,
+   Algorithm 2 illustrates a typical prefetching logic for BFS.          to work solely with virtual addresses, limiting the attack
+The prefetch logic handles prefetch hints and prefetch re-               surface of malicious applications using the prefetcher. The
+sponses based on the source and address of the event. When               PicklePG could also open a new surface for side-channel
+a prefetch hint arrives, the PicklePG interprets the data from           attacks. In this paper, we assume the application is not run in
+the request as the virtual address of the current node in the            a shared environment. The MMU also allows the prefetcher to
+work_queue, and starts generating prefetches for the node                avoid accessing the cores’ MMUs for address translation, fur-
+that is prefetch_distance ahead in the work_queue                        ther reducing the attack surface. Having a dedicated memory
+array. When a prefetch response arrives from the Pickle Cache,           management unit enables the prefetcher to concurrently work
+PicklePG checks the address of the response to determine                 with multiple applications.
+which part of the prefetching logic to execute. For example, if             Handling Page Fault. An important aspect of working with
+the prefetch response address is within the range of the work            virtual addresses is handling page faults. A page fault typically
+queue, the PicklePG executes the logic to prefetch the neighbor          occurs when the application accesses a page that is not present
+pointers of the current node. The new prefetch is then sent to           in physical memory but is present in the virtual address space.
+the pending prefetch queue, which follows the data path 3                If this occurs in the core, the core will signal the OS to handle
+from Figure 2.                                                           the page fault. However, if a page fault occurs in a prefetch,
+                                                                         we opt to silently drop the prefetch, as signaling the core to
+C. Pending Prefetch Queue, and Prefetch Scheduling
+                                                                         handle the page fault stalls the application’s progress.
+   A prefetch request contains the virtual address of the data
+to be prefetched and metadata indicating the priority of the             E. Pickle Cache: The Pickle Prefetch Cache
+prefetch. Every prefetch request corresponds to a prefetch hint,            The Pickle Cache is the Pickle Prefetcher’s private cache.
+and the priority of the prefetch request is determined by the            It is designed to be similar to the core’s L1 cache but with
+order in which the prefetch hint arrives at the Pickle Prefetcher.       a larger capacity, higher bandwidth, and the ability to handle
+A prefetch corresponding to a prefetch hint that arrived earlier         a large number of concurrent requests. The cache is shared
+has a higher priority than a prefetch corresponding to a                 by the prefetch queue, for sending memory requests, and
+prefetch hint that arrived later.                                        PickleMMU, for page walking.
+   The pending prefetch queue is a fixed-capacity priority                  Data Locality & Cache Coherency. The cache captures
+queue storing prefetch requests generated by PicklePG. When              locality in prefetcher accesses, reducing traffic to other parts of
+the PickleMMU is available, the prefetch request with the                the system. By dedicating more area for the cache controller
+highest priority becomes active and is sent to the PickleMMU             and cache storage, the prefetcher maintains data coherence
+for address translation. The address translation process is              with the rest of the memory hierarchy. This design allows the
+similar to that of the core and is indicated by data paths 4a ,          prefetcher and core to transparently share memory, eliminating
+ 4b , and 4c in Figure 2. After the address translation process,         the need for explicit cache maintenance by the core, an
+a load request to the location of the prefetch data is sent to the       important feature since the prefetcher often needs access to
+Pickle Cache as indicated by data paths 5a and 5b . The load             data updated by the core. In the BFS example, the tail of
+request not only prefetches the data to the cache hierarchy, it          work_queue is updated by the core, and data coherency
+also brings the data for the prefetcher to calculate the location        allows updates from the core to be visible to the prefetcher.
+of the next prefetches.                                                     Impact on Scalability. Maintaining cache coherency with
+                                                                         the rest of the system naturally enables having multiple Pickle
+D. PickleMMU: The Pickle Memory Management Unit                          Prefetchers in the system, allowing the prefetcher to scale
+   Address Translation. The Pickle Prefetcher is designed to             in the same way as the cache does. This is in contrast to
+work with virtual addresses. It has its own memory manage-               the design of DX100 [19], which requires extra logic in the
+ment unit, using the PickleMMU’s TLB and page table walkers              coherence agent to scale the number of accelerator instances.
+(PTWs) to handle address translation. The prefetcher has the             Another key difference between Pickle Prefetcher design and
+same TLB capacity and number of PTWs as a core.                          DX100 is that the former only handles load requests, while
+   Noc Traffic Reduction & TLB Pollution. An important                   the latter handles both loads and stores. This significantly
+aspect of having a separate MMU for the prefetcher is to                 simplifies the prefetcher’s design and allows the prefetcher
+reduce traffic between the prefetcher and the core. Private              to scale out.
+core prefetchers typically share address translation resources
+with their associated core. Because our prefetcher is physically         F. Putting It All Together: How the Prefetcher Works?
+distant from the cores and shared among multiple cores,                   Figure 3 illustrates the difference between the data paths of
+sharing the MMU with the cores would introduce additional                memory requests coming from the core.
+
+
+
+                                                                     5
+   Figure 3a depicts the sequence of actions when the data is           in Figure 4, the address of the UC store is used to determine
+not located in the cache hierarchy. In this case, the request           the logic kernel to be executed by the PicklePG. The UC store
+is first sent to the home node cache directory to query the             request contains the prefetch hint with 64-bit data. In the case
+location of the data in the cache hierarchy, as shown in data           of BFS, the prefetch hint is the virtual address of the current
+path 1 . Upon a cache miss at the home node cache directory,            node in the work queue. However, this is not a requirement,
+the request is sent to DRAM, as shown in data path 2 . When             and the prefetch hint can be any information that the prefetch
+DRAM responds, the data is sent directly to the requesting              logic can use to generate prefetch requests.
+core, as shown in data path 3 . This occurs at the same time
+as the home node directory is updated. Note that, since the             H. More on Prefetch Scheduling
+last-level cache is a victim cache and not an inclusive cache,             Prefetch Ordering. While building Pickle Prefetcher, we
+the home node cache does not have a copy of the data upon               initially used a simple first-in-first-out (FIFO) queue to store
+a response from DRAM.                                                   the prefetch requests. However, we found that aggressively
+   Figure 3b depicts the sequence of actions when the Pickle            working on all prefetch hints from the cores leads to a large
+Prefetcher handles a prefetch in a timely manner, meaning               number of prefetch requests being sent to the Pickle Cache,
+the prefetcher prefetches the data before the core consumes             which leads to performance degradation due to the cache
+it. When a prefetch request is sent to the Pickle Cache, the            being overwhelmed by the prefetch requests. To mitigate this,
+request is first sent to the home node cache directory to query         we limit the number of activated prefetch works and use a
+the location of the data in the cache hierarchy, as shown in data       priority queue to store the prefetch hint and prefetch requests.
+path 1 . Upon a cache miss at the home node cache directory,            The prefetch requests are scheduled based on the priority of
+the request is sent to DRAM, as shown in data path 2 . When             the prefetch hint, where the prefetch hint that arrives earlier
+DRAM responds, the data is sent to the Pickle Cache, as shown           has a higher priority than the prefetch hint that arrives later.
+in data path 3 . Upon an eviction from the Pickle Cache, the            This follows the earliest deadline first (EDF) scheduling policy
+data is sent to the home node cache directory, as shown in              [11], in which we assume that the prefetch hint that arrives
+data path 4 . When the core accesses the data, the request is           earlier has an earlier deadline than the prefetch hint that arrives
+sent to the home node cache directory, as shown in data path            later. We acknowledge that this deadline assumption is not
+ 5 . Upon a cache hit at the home node cache directory, the             always true, as different prefetch hints have different amount
+data is sent to the core, as shown in data path 6 . Note that,          of work, and EDF is only optimal when there is only one task
+since the last-level cache is a victim cache, when the data is          is executed at a time.
+evicted from the Pickle Cache, it is sent to the home node.                Dropping Prefetch Requests. When a prefetch hint is
+   In the next subsection, we will discuss the programming              activated, the core might already have consumed the data that
+interface of the PicklePG, including how a prefetch event is            the prefetch hint is supposed to prefetch, leading to useless
+triggered, and a chain of actions that eventually leads to the          prefetches. To mitigate this, we drop the prefetch requests
+generation of prefetch requests.                                        that are unlikely to be timely. A prefetch request is considered
+                                                                        timely if the prefetch request is sent to the Pickle Cache before
+G. Pickle Prefetcher Programming Interface                              the core accesses the data that the prefetch request is supposed
+   Unlike most prefetchers, where prefetcher hints are in the           to prefetch. If the prefetch request is not timely, it is dropped.
+form of instructions [2], [4], [16], the Pickle Prefetcher uses            This requires the prefetcher to know the node that the core is
+uncacheable (UC) stores to trigger prefetching. A UC store,             currently working on. Fortunately, the prefetch hint contains
+also known as a non-cacheable store, is a store instruction             the virtual address of the current node in the work queue,
+executed on a UC memory region.                                         and the prefetcher can use this information to determine the
+   Offloading & Overhead. At the beginning of the appli-                current node that the core is working on. Thus, we can track
+cation runtime, the software offloads the prefetching logic to          the progress of the core and drop any prefetch requests that are
+the PicklePG via I/O memory operations. In software, a UC               not potentially timely. For example, when we set the prefetch
+memory region is created and mapped to a specific physical              distance to 32 and the prefetch drop threshold to 16, then at the
+address reserved for the prefetcher.                                    time of its activation (data path 2 in Figure 2), the prefetch
+   During the runtime, the prefetch hints are sent via store            hint will be dropped if the core is working on a node that is
+requests to the UC memory region. UC memory requests have               less than 16 nodes ahead of the current node. In other words,
+an overhead of causing the write buffer of the core to be               the prefetch drop mechanism ensures that the prefetcher only
+flushed before the request takes place [2]. Similar to a regular        prefetches data required for accessing the node that is between
+store, UC store requests are also not speculative. However,             16 and 32 nodes ahead of the current node. This improves the
+the UC requests do not block the reordering of other types              number of timely prefetches and lifts the performance of the
+of memory requests as the UC requests are not ordered with              Pickle Prefetcher, as shown in Section VI-B.
+respect to other types of memory requests.
+   Prefetch Hint Format. A UC store provides two pieces                 I. Pickle Prefetcher Overhead
+of information to the prefetcher: the address of the UC store             The Pickle Prefetcher is designed to be a low-overhead
+request, and the data of the UC store request. As illustrated           accelerator. To provide an upper bound on the area overhead
+
+
+
+                                                                    6
+    TABLE I: Default System Parameters Used for Evaluation.                                         TABLE III: Graphs Used For Evaluation.
+                              1 CCD (8 cores @ 4GHz), ARM ISA                                                                                         Active
+      Cores
+                             Load/Store Queue Size: 256/128 entries                            Graph                                                 Working
+                                private split instruction/data TLBs                                               #Nodes       #Edges      Degrees
+                                                                                               Names                                                 Set Size
+                                            2-level TLB;                                                                                              (MiB)
+   Core MMU                   L1 TLB: 64 entries, fully associative;                        amazon [37]           334,863      925,872      2.8        8.6
+                             L2 TLB: 1024 entries, 8-way associative
+                                                                                             twitch [31]          168,114     6,797,557     40.4       28.5
+                          4-level pages with HugePage support, 1 PTW
+                                private split instruction/data caches                       youtube [37]         1,134,890    2,987,624     2.6        28.7
+                          Capacity: 32KiB for L1I and 48KiB for L1D                       web google [23]         875,713     5,105,039     5.8        32.8
+    L1 Cache                                                                             web berkstan [23]        685,230     7,600,595     11.1       39.4
+               8-way set associative for L1I and 12-way set associative for L1D
+                                     L1I has a stride prefetcher                          roadNetCA [23]         1,965,206    2,766,607     1.4        40.6
+    L2 Cache      private unified cache, 1MiB capacity, 16-way set associative          wiki talk [21], [22]     2,394,385    5,021,410     2.1        55.7
+                               victim cache, shared among all cores                           higgs [12]          456,631     14,855,875    32.5       63.6
+    L3 Cache                32MiB total capacity (4MiB per CoreTile)                   wiki topcats [20], [38]   1,791,489    28,511,807    15.9      136.1
+                                       16-way set associative                                pokec [34]          1,632,803    30,622,564    18.8      141.7
+                                   4GiB, 4-channel DDR5 8400                            livejournal [5], [23]    4,847,571    68,993,773    14.2      337.2
+     Memory
+                             67GiB/s theoretical maximum bandwidth
+                                                                                              orkut [37]         3,072,441   117,185,083    38.1      493.9
+                              1 PicklePG @ 4GHz clock frequency
+Pickle Prefetcher
+                      256KiB private PickleCache, 16-way set associative
+                                            2-level TLB;
+                              L1 TLB: 64 entries, fully associative;
+   PickleMMU                                                                          full-system simulation with the ARM ISA and Zen5-like
+                             L2 TLB: 1024 entries, 8-way associative
+                          4-level pages with HugePage support, 1 PTW                  system configurations. Using the ARM ISA allows us to
+                             Ubuntu Server 24.04.2 LTS Cloud Image
+Operating System
+                         Linux v6.6.71, Transparent Hugepage Enabled
+                                                                                      leverage gem5’s implementation of the CHI protocol [3] to
+ Guest Compiler                               gcc 13.3.0                              model a detailed NoC, and to take advantage of the up-to-
+      gem5                                     v24.1.0.2                              date implementation of the ARM ISA in gem5.
+        TABLE II: Private Cache Prefetcher Configurations.
+  Prefetchers                    Configurations                                       A. System Overview
+               L1 Cache: Degrees: 4, Table size: 256 entries;
+    Stride
+              L2 Cache: Degrees: 20, Table size: 2048 entries.                           The system configuration used for the experiments is spec-
+                                   L1 Cache:                                          ified in Table I. The baseline system is illustrated in Figure
+                 Indirect Pattern Detector Table: 128 entries,                        3a, and the system with the Pickle Prefetcher is illustrated
+                          Prefetch Table: 256 entries;                                in Figure 3b Both systems consist of a single core complex
+     IMP
+                                   L2 Cache:                                          die (CCD) with 8 CoreTiles, where each CoreTile consists
+                Indirect Pattern Detector Table: 1024 entries,
+                         Prefetch Table: 2048 entries.
+                                                                                      of an out-of-order core, a private split L1 cache, a private
+                  L1 Cache: Access Map Table: 256 entries;                            L2 cache, and a slice of the L3 victim cache. The CoreTiles
+   AMPM                                                                               are connected in a 4×2 mesh, along with four MemoryTiles.
+                 L2 Cache: Access Map Table: 2048 entries.
+                                                                                      Each MemoryTile corresponds to a memory channel of a 4-
+                                                                                      channel DDR5 memory controller, which has a theoretical
+of the prefetcher, we assume the area of the Pickle Prefetcher                        maximum bandwidth of 67 GiB/s. For the system with the
+to be smaller than that of a simple in-order RV32I core. The                          Pickle Prefetcher, the prefetcher and its own cache are placed
+Xuantie-910 [10] is a commercial RISC-V core, in which the                            in a PickleTile, which is part of the mesh. All the tiles form
+area of the core is 0.8 mm2 on TSMC 12nm technology. This                             a network-on-chip (NoC) with a mesh topology.
+area accounts for an out-of-order core with a 12-stage pipeline,                         1) NoC Configuration: The NoC is modeled using gem5’s
+excluding the L2 cache.                                                               RUBY implementation of the CHI protocol [3], which is used
+   In Fig. 3 of [10], the area of the vector floating point unit                      in ARM platforms. We configure the CHI cache to a MOESI-
+is larger than half of the 512 KiB L2 cache. Note that our                            like protocol where the shared dirty state is allowed. The L3
+prefetcher does not have floating point or vector support, and                        cache is a victim cache, and mostly exclusive of the L1 and L2
+the L2 cache is 256 KiB. Therefore, we assume the area of                             caches. The L1 cache, L2 cache, and each slice of the L3 cache
+the prefetcher to be smaller than 0.4 mm2 .                                           are configured to handle 16, 64, and 256 concurrent requests,
+   According to [32], the transistor density of TSMC 12nm                             respectively. The Pickle Cache is configured to handle 1024
+technology is between 28.88M/mm2 and 52.51M/mm2 , and                                 concurrent requests.
+that of TSMC 4nm technology is 143.7M/mm2 . Assuming                                     2) Simulation Checkpointing: We utilize simulation check-
+perfect area scaling, the area of the prefetcher is between                           pointing to ensure fairness across system comparisons. Sim-
+0.016 mm2 and 0.029 mm2 on TSMC 4nm technology, which                                 ulation checkpointing is a technique that allows saving the
+accounts for 0.023% to 0.041% of the 70.6 mm2 area of one                             state of the simulated system at a certain point in time. The
+AMD Zen5 CCD [26].                                                                    checkpoint can be restored to that exact state later. This allows
+                                                                                      us to run the same simulation multiple times with different
+                         V. M ETHODOLOGY
+                                                                                      configurations without having to re-run the entire simulation
+  We evaluate the Pickle Prefetcher using the event-based,                            from the beginning. This ensures fairness across system eval-
+cycle-level gem5 simulator [9], [24], a hardware simulator                            uations, as all systems are restored to the exact starting point,
+widely adopted by academia and industry. We utilize gem5                              avoiding result variations due to different starting points.
+
+
+
+                                                                                  7
+B. Private Cache Prefetchers                                           speedup of 1.34x, with a maximum speedup of 1.74x and a
+   In addition to the baseline system without prefetchers, we          minimum speedup of 1.10x.
+also evaluate existing private cache prefetchers: the stride              Using private cache prefetchers in combination with the
+prefetcher [6], the access map pattern matching prefetcher             Pickle Prefetcher consistently improves performance com-
+(AMPM) [17], and the indirect memory prefetcher (IMP)                  pared to using only the private cache prefetchers. More specif-
+[39]. For each private cache prefetcher setup, the prefetcher is       ically, using the stride prefetcher with the Pickle Prefetcher
+enabled at both the L1 data and L2 caches of each core. Table          results in a geometric mean speedup of 1.26x compared to the
+II details the configurations of the private core prefetchers.         system with only the stride prefetcher. The geometric mean
+Note that the prefetcher for the L1 instruction cache is always        speedups for the AMPM and IMP prefetchers are 1.25x and
+the stride prefetcher, regardless of the system configuration.         1.23x, respectively. These results highlight the performance
+                                                                       benefits of using the Pickle Prefetcher on existing systems.
+C. Benchmarks                                                             Notably, using private cache prefetchers alone might cause
+   We evaluate the Pickle Prefetcher using the top-down im-            slowdowns compared to the baseline system. The Pickle
+plementation of the BFS algorithm from GAPBS [8] on 12                 Prefetcher does not suffer slowdowns compared to the baseline
+different graphs of various sizes and degrees, as shown in Ta-         system across all graphs, highlighting the benefits of placing
+ble III. For the baseline system without the Pickle Prefetcher,        the prefetcher at the LLC. Being at the LLC, which has
+we use the implementation that follows Algorithm 1 without             a large capacity, allows the prefetcher to be less prone to
+the highlighted part. When the Pickle Prefetcher is enabled,           over-prefetching, which is one of the biggest challenges in
+we use the implementation that follows Algorithm 1 with                designing a private cache prefetcher.
+the highlighted part. In the simulated system, we are able to             Pickle Prefetcher speedups compared to ideal prefetcher
+merge both implementations into a single binary. This allows           speedups. Figure 6 depicts the speedups achieved by using
+us to use the same checkpoint for both baseline and Pickle             only the Pickle Prefetcher compared to those of an ideal LLC
+prefetcher evaluations. The prefetch distance and whether the          prefetcher. We define an ideal LLC prefetcher as one that
+Pickle Prefetcher is used are parameters of the simulation, and        covers the entire memory footprint of the guest system during
+are passed to the guest system upon checkpoint restoration.            runtime. The ideal prefetcher does not assume infinite NoC
+This allows us to ensure fairness across system evaluations.           link bandwidth, infinite queueing capacity, or perfect switches.
+   For each graph, we simulate the BFS algorithm twice with            For the ideal LLC prefetcher experiment, we configure the
+the same starting node. The results reported in this paper are         LLC to have a capacity of 6 GiB and an associativity of 1024.
+the performance of the second run of the BFS algorithm.                The BFS algorithm is run twice without any prefetchers: the
+The first run of the BFS algorithm is used to warm up the              first run places all data blocks into the cache system, and the
+caches, ensuring that any locality at the last-level cache will        data is collected from the second run.
+be captured. All simulations are run until the second run                 The maximum achievable speedups from using an LLC
+completes.                                                             prefetcher on the 12 graphs range from 1.22x to 2.89x, with
+                                                                       most performance upsides being above 2.09x. We define the
+              VI. E VALUATION & D ISCUSSION                            upside of performance as the achievable speedup when using
+A. Performance                                                         only the LLC prefetcher, and the upside captured as the por-
+This section examines how the Pickle Prefetcher and several            tion of that speedup achieved by the Pickle Prefetcher. While
+private cache prefetcher configurations impact different aspects       our prefetcher has yet to capture most of the performance
+of system performance.                                                 upside, it was able to capture 62.91% and 58.37% of the upside
+   Speedups over baseline systems. Figure 5 shows the                  for the berkstan and roadNetCA graphs, respectively. These
+speedups over the baseline system of different prefetcher se-          results highlight that the Pickle Prefetcher can effectively
+tups. Systems with Pickle Prefetcher are named using the for-          leverage the LLC to improve performance, even though there
+mat picklepf-distance-X-<PCPF>-drop-Y, where                           is still room for further improvement.
+X is the prefetch distance of the prefetch hint, PCPF is the
+name of the private cache prefetcher, and Y is the prefetch            B. The Prefetcher’s Perspective: Prefetch Scheduling Policy
+drop threshold. The definition of the prefetch drop threshold          and Prefetch Timeliness
+is discussed in Section IV-H. Note that stride, AMPM, and                 Figure 7 illustrates the correlation between the percentage of
+IMP are private cache prefetchers, while Pickle Prefetcher is          timely prefetches and the percentage of upside captured. The
+an LLC prefetcher.                                                     upside captured indicates the amount of potential performance
+   Compared to the baseline system with no data cache                  gain achieved by the prefetcher, which is calculated by the
+prefetchers, using only the Pickle Prefetcher achieves a geo-          formula prefetcher  speedup−1
+                                                                                   ideal speedup−1 . The blue bar shows the upside
+metric mean speedup of 1.32x on the BFS workload across 12             captured, and the yellow points show the proportion of timely
+different graphs of varying sizes and degrees, with a maximum          prefetch tasks out of all prefetch tasks. For this result, prefetch
+speedup of 1.47x and a minimum speedup of 1.13x. In com-               is defined at the task granularity (i.e., all memory requests
+bination with private cache prefetchers, the Pickle Prefetcher         involved in obtaining a node in a work_queue until all
+further enhances performance, achieving a geometric mean               neighbors of that node have their visited array updated). A
+
+
+
+                                                                   8
+                       2.0
+                                                                                                                                                                                                                                                                                                          prefetcher
+                       1.5                                                                                                                                                                                                                                                                      Baseline (No Prefetchers)
+                                                                                                                                                                                                                                                                                                stride
+Speedups
+
+
+
+                       1.0                                                                                                                                                                                                                                                                      ampm
+                                                                                                                                                                                                                                                                                                imp
+                                                                                                                                                                                                                                                                                                picklepf-distance-32-drop-16
+                       0.5                                                                                                                                                                                                                                                                      picklepf-distance-32-stride-drop-16
+                                                                                                                                                                                                                                                                                                picklepf-distance-32-ampm-drop-16
+                       0.0 amazon                                                                                                                                                                                                                                                               picklepf-distance-32-imp-drop-16
+                                               twitch
+                          youtube google berkstan roadNetCA wiki_talk higgs wiki_topcats pokec livejournal orkut
+                                                     Graph Names
+   Fig. 5: Speedup of various prefetcher configurations over the baseline system. The graphs are sorted with increasing sizes from left to right.
+   The result is discussed in Section VI-A.
+
+                       3.0
+                       2.5
+                       2.0                                                                                                                                                                                                                                                                                            prefetcher
+Speedups
+
+
+
+
+                       1.5                                                                                                                                                                                                                                                                                     Baseline (No Prefetchers)
+                                                                                                                                                                                                                                                                                                               Ideal LLC
+                       1.0                                                                                                                                                                                                                                                                                     picklepf-distance-32
+                                                                                                                                                                                                                                                                                                               picklepf-distance-32-drop-16
+                       0.5
+                       0.0 amazon                twitch      youtube google berkstan roadNetCA wiki_talk                                                                     higgs wiki_topcats pokec livejournal orkut
+                                                                                        Graph Names
+   Fig. 6: Speedup of the Pickle Prefetcher compared to an ideal LLC prefetcher. The graphs are sorted with increasing sizes from left to right.
+   The ideal LLC prefetcher is defined as a prefetcher that covers all memory footprint of the whole guest system during the runtime. The
+   result is discussed in Section VI-A.
+
+
+                      100                                                                                                              100
+                               Upside Percentage                                                                                                                                                            1.0
+                                                                                                                                            Timely Prefetch Percentage (%)
+
+
+
+
+                       80      Timely Prefetch Percentage                                                                              80
+                                                                                                                                                                                 Portion of Prefetch Work
+Upside Captured (%)
+
+
+
+
+                       60                                                                                                              60                                                                   0.8
+                       40                                                                                                              40
+                       20                                                                                                              20                                                                   0.6
+                        0                                                                                                              0
+                       20                                                                                                                20
+                                                                                                                                                                                                            0.4
+                            amazon   twitch youtube google berkstan roadNetCA wiki_talk   higgs wiki_topcats pokec livejournal orkut
+                                                                                                                                                                                                                             not dropped
+                                                                       Graph Names                                                                                                                          0.2              dropped due to core too close
+                      100
+                               Upside Percentage
+                                                                                                                                       100                                                                                   dropped due to core worked on it
+                                                                                                                                            Timely Prefetch Percentage (%)
+
+
+
+
+                       80      Timely Prefetch Percentage                                                                              80
+                                                                                                                                                                                                            0.0
+Upside Captured (%)
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                livejournal
+                                                                                                                                                                                                                    amazon
+
+                                                                                                                                                                                                                              twitch
+
+                                                                                                                                                                                                                                          youtube
+
+                                                                                                                                                                                                                                                        google
+
+                                                                                                                                                                                                                                                                     berkstan
+
+
+
+                                                                                                                                                                                                                                                                                            wiki_talk
+
+                                                                                                                                                                                                                                                                                                           higgs
+
+                                                                                                                                                                                                                                                                                                                     wiki_topcats
+                                                                                                                                                                                                                                                                                roadNetCA
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                    pokec
+
+
+
+                                                                                                                                                                                                                                                                                                                                                              orkut
+                       60                                                                                                              60
+                       40                                                                                                              40
+                       20                                                                                                              20                                                                                                                                       graph_name
+                        0 amazon                                                                                                       0                                             Fig. 8: Breakdown of dropped prefetch work normalized to the total
+                                     twitch youtube google berkstan roadNetCA wiki_talk   higgs wiki_topcats pokec livejournal orkut
+                                                                       Graph Names                                                                                                   number of prefetch hints issued by the prefetcher. The prefetch drop
+   Fig. 7: Timeliness of Pickle Prefetcher in comparison with upside                                                                                                                 threshold is set to 16. The result is discussed in Section VI-B.
+   captured by the prefetcher with different scheduling policy. The
+   systems of the top and the bottom graphs both are evaluated using                                                                                                                                     150
+   Pickle Prefetcher of distance 32. However, only the system on the                                                                                                                                     125                                                                                                                                   prefetcher
+                                                                                                                                                                                  Load To Use (Cycles)
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                     Baseline (No Prefetchers)
+                                                                                                                                                                                                         100                                                                                                                         stride
+   bottom graph implements prefetch drop at distance 16. The result is                                                                                                                                    75
+                                                                                                                                                                                                                                                                                                                                     ampm
+                                                                                                                                                                                                                                                                                                                                     imp
+   discussed in Section VI-B.                                                                                                                                                                             50                                                                                                                         picklepf-distance-32-drop-16
+                                                                                                                                                                                                                                                                                                                                     picklepf-distance-32-stride-drop-16
+                                                                                                                                                                                                          25                                                                                                                         picklepf-distance-32-ampm-drop-16
+                                                                                                                                                                                                           0                                                                                                                         picklepf-distance-32-imp-drop-16
+                                                                                                                                                                                                                  berkstan    roadNetCA         wiki_talk           higgs         pokec          livejournal       orkut
+                                                                                                                                                                                                                                                                 Graph Names
+                                                                                                                                                                                     Fig. 9: Load-to-use latency of memory accesses across the cores. The
+   prefetch task is timely if the last prefetch of the task is                                                                                                                       result is discussed in Section VI-C.
+   completed before the core starts working on the node in the
+   work_queue array.
+      Both graphs in Figure 7 show the general trend that a lower                                                                                                                    system with prefetch drop at a distance of 16, meaning
+   timely prefetch ratio implies a lower upside captured. The                                                                                                                        the prefetcher will not issue any prefetch requests that are
+   top graph presents the upside captured on the system without                                                                                                                      fewer than 16 nodes away from the node that the core is
+   prefetch drop, in which most of the graphs have a timely                                                                                                                          currently working on. The prefetch drop significantly im-
+   prefetch ratio below 30%, corresponding to less than 20% of                                                                                                                       proves the timely prefetch ratio, with most graphs having a
+   the potential performance gain being captured. For the twitch,                                                                                                                    timely prefetch ratio above 40%, which lifts all slowdowns to
+   pokec, and orkut graphs, the timely prefetch ratio is nearly                                                                                                                      speedups.
+   0%, which results in system slowdowns.                                                                                                                                               Interestingly, the timely prefetch ratio of the orkut graph
+      The bottom graph presents the upside captured on the                                                                                                                           is approximately 10%, which corresponds to nearly 40% of
+
+
+
+                                                                                                                                                                             9
+                           0.10
+                                                                                                                                                            by the cores, resulting in an insignificant number of DRAM
+Avg LLC Link Utilization
+
+                           0.08                                                                                            prefetcher
+                                                                                                                 Baseline (No Prefetchers)
+                                                                                                                 stride                                     accesses.
+       per Cycle
+
+
+                           0.06                                                                                  ampm
+                           0.04                                                                                  imp
+
+                           0.02
+                                                                                                                 picklepf-distance-32-drop-16
+                                                                                                                 picklepf-distance-32-stride-drop-16           Figure 11a shows that a significant portion of the cores’
+                                                                                                                 picklepf-distance-32-ampm-drop-16
+                           0.00   berkstan   roadNetCA   wiki_talk      higgs      pokec   livejournal   orkut
+                                                                                                                 picklepf-distance-32-imp-drop-16           demand accesses are converted from DRAM accesses to Pickle
+                                                                     Graph Names
+  Fig. 10: Average Utilization per Cycle of across all links connecting                                                                                     cache hits rather than LLC hits. On average, during the runtime
+  LLC slices to the rest of the NoC. Utilization is the ratio of the link                                                                                   of the BFS algorithm on the berkstan graph, the core-to-Pickle-
+  bandwidth that is used at a given cycle, with 0 being no data is sent,                                                                                    Cache access latency is 57.6 cycles, which is significantly
+  and 1 being the all bandwidth is used. The result is discussed in                                                                                         higher than the core-to-LLC access latency of 40.3 cycles.
+  Section VI-D.
+                                                                                                                                                            Both are much faster than the core-to-DRAM access latency
+                                                                                                                                                            of 330.8 cycles. Note that these are runtime latencies, which
+  the potential performance gain. On the other hand, the twitch                                                                                             are subject to the influence of NoC and memory system
+  graph has a timely prefetch ratio of more than 20%, but                                                                                                   contention. This helps explain why, even though the berkstan
+  captures less than 10% of the potential performance gain. The                                                                                             graph has a high timely prefetch ratio, it only captures 62.91%
+  roadNetCA graph also shows a similar trend, where more than                                                                                               of the potential performance gain. Figure 11b shows that the
+  90% of the prefetch tasks are timely, but this only translates                                                                                            effects of Pickle Prefetcher on the livejournal graph follow a
+  to less than 60% of the potential performance gain.                                                                                                       similar trend; however, a smaller amount of performance gain
+     Figure 8 shows that, for most graphs, more than 40% of the                                                                                             is obtained due to the DRAM accesses remaining significant.
+  prefetch tasks are dropped by the prefetch drop threshold. This                                                                                              The latency data also show a side effect of LLC prefetching,
+  corresponds to the amount of performance gain introduced by                                                                                               where the prefetch forces dirty blocks from the cores’ L1D
+  the prefetch drop threshold. Even though the prefetch drop                                                                                                and L2 to synchronize and change to the Shared state. This
+  reduces the number of prefetch tasks, it significantly improves                                                                                           synchronization process incurs additional latency and increases
+  the timely prefetch ratio, as it allows the prefetch tasks to                                                                                             traffic within the NoC.
+  prioritize the prefetch requests that are more likely to be                                                                                                  Figures 11b and 11a show that the amount of DRAM
+  timely. The prefetch drop threshold is a simple yet effective                                                                                             accesses in the livejournal baseline is significantly higher than
+  way to improve the timeliness of the prefetch tasks, which in                                                                                             that of the berkstan graph, which results in significantly more
+  turn improves the performance of the system.                                                                                                              upside for the former than the latter, as shown in Figure 6.
+     The above results highlight that a high timely prefetch per-
+  centage is necessary, but not sufficient, for higher performance.                                                                                         D. The NoC’s Perspective: Utilization of LLC Links
+  The results from the core’s perspective in Section VI-C offer                                                                                                Figure 10 captures the average link utilization per cycle of
+  a deeper look into why this is the case.                                                                                                                  links connecting LLC slices to the NoC. The figure shows
+  C. The Core’s Perspective: Load-to-use Latency & The Shift                                                                                                that enabling Pickle Prefetcher significantly increases the
+  in Data Movement                                                                                                                                          utilization of the links to the LLC slices. Figures 10 and 5
+                                                                                                                                                            show that Pickle Prefetcher is able to increase the utilization
+     Figure 5 and Figure 9 show a strong correlation between
+                                                                                                                                                            of LLC links for better performance. The result highlights that
+  the speedups and the load-to-use latency of memory accesses
+                                                                                                                                                            LLC resources are underutilized in current systems, as the
+  across all cores. This confirms that the workload is indeed
+                                                                                                                                                            graph workloads do have a sufficient amount of locality for
+  memory-latency bounded. Pickle Prefetcher achieves the goal
+                                                                                                                                                            the LLC to be effective, and the prefetcher is able to utilize the
+  of consistently lowering the memory access latency across
+                                                                                                                                                            LLC resources for better performance. Therefore, improving
+  all graphs, while private cache prefetchers might increase the
+                                                                                                                                                            the utilization of resources at the LLCs is a source of potential
+  access latency.
+                                                                                                                                                            performance improvement, and Pickle Prefetcher is able to
+     Figure 11 shows the breakdown of the locations of data
+                                                                                                                                                            achieve this.
+  requested by the cores, excluding local L1D hits. In other
+  words, it counts the number of data movements from each
+                                                                                                                                                            E. The Memory System’s Perspective: Memory Bandwidth
+  data source to the cores for every core’s demand data access.
+                                                                                                                                                            Utilization & Total Data Movement
+  We exclude the local L1D hits from the count, as a significant
+  number of L1D hits are induced by the cores waiting for                                                                                                      Memory Bandwidth Utilization. Figure 12 shows the
+  other cores to finish their work, which involves busy-waiting                                                                                             increase in DRAM bandwidth utilization when any prefetcher
+  to acquire a lock. Therefore, we remove the local L1D access                                                                                              is enabled. In general, the Pickle Prefetcher consumes more
+  count when comparing the distribution of data sources for a                                                                                               DRAM bandwidth compared to the stride and AMPM
+  fairer comparison. As a result, we observe the expected result                                                                                            prefetchers, and less DRAM bandwidth compared to the IMP
+  that the number of demand accesses remains consistent among                                                                                               prefetcher. As the DRAM bandwidth is underutilized in the
+  different prefetcher setups.                                                                                                                              baseline system, the prefetchers are able to utilize more
+     Figures 11a and 11b show the effects of the Pickle cache,                                                                                              DRAM bandwidth for better performance.
+  where a significant portion of DRAM accesses in the baseline                                                                                                 Total Data Movement. Figure 13 shows the total amount
+  are converted to Pickle cache hits and LLC hits. In the ideal                                                                                             of data movement between the DRAM and the cache system.
+  case, the prefetcher is able to prefetch all data blocks requested                                                                                        Total data movement is defined as the total amount of data
+
+
+
+                                                                                                                                                       10
+                                                                                                                                                                       Local L1D                                                                                                                                                                     Local L1D
+              Graph & Prefetchers
+
+
+
+
+                                                                                                                                                                                           Graph & Prefetchers
+                                                         berkstan-baseline                                                                                             Local L2                                                        livejournal-baseline                                                                                          Local L2
+                                                          berkstan-ideal_l3                                                                                            Other L1D                                                        livejournal-ideal_l3                                                                                         Other L1D
+                                                                                                                                                                       Other L2                                                                                                                                                                      Other L2
+                                            berkstan-picklepf-distance-32                                                                                              LLC                                                livejournal-picklepf-distance-32                                                                                           LLC
+                                    berkstan-picklepf-distance-32-drop-16                                                                                              Pickle Cache                              livejournal-picklepf-distance-32-drop-16                                                                                            Pickle Cache
+                                                                                                                                                                       DRAM                                                                                                                                                                          DRAM
+                                                                          0.0               0.2            0.4         0.6         0.8               1.0         1.2                                                                                       0.0            0.5       1.0       1.5      2.0      2.5                3.0     3.5
+                                                                                                                 Data Source Count                              1e6                                                                                                                           Data Source Count                               1e7
+                                                                                  Other L1D       Local L2       Other L2     LLC          Pickle Cache    DRAM                                                                                                    Other L1D     Local L2     Other L2        LLC          Pickle Cache   DRAM
+                                          berkstan-baseline                              67.2            9.6           47.5         39.9            0.0       293.8                                                     livejournal-baseline                              58.4         10.8         49.1            35.8            0.0      378.2
+                                          berkstan-ideal_l3                              69.7            9.7           48.5         35.7            0.0       294.5                                                     livejournal-ideal_l3                              66.3         12.2         58.6            44.7            0.0      468.8
+                                          berkstan-picklepf-distance-32                  67.7            9.7           47.8         40.8           65.6       327.7                                                     livejournal-picklepf-distance-32                  60.9         10.9         51.5            38.1           87.3      413.2
+                                          berkstan-picklepf-distance-32-drop-16          69.0            9.7           47.6         40.3           57.6       330.8                                                     livejournal-picklepf-distance-32-drop-16          60.1         10.9         51.1            37.9           71.1      433.9
+
+
+                                                                                           (a) berkstan graph                                                                                                                                                           (b) livejournal graph
+    Fig. 11: Data source distribution (graph) and access latencies (table, measurement are in cycles) of demand requests from the cores excluding
+    local L1D hits.
+
+                         40
+DRAM Bandwidth (GiB/s)
+
+
+
+
+                                                                                                                                                                                                                                                                                                                     prefetcher
+                         30                                                                                                                                                                                                                                                                                Baseline (No Prefetchers)
+                                                                                                                                                                                                                                                                                                           stride
+                         20                                                                                                                                                                                                                                                                                ampm
+                                                                                                                                                                                                                                                                                                           imp
+                                                                                                                                                                                                                                                                                                           picklepf-distance-32-drop-16
+                         10                                                                                                                                                                                                                                                                                picklepf-distance-32-stride-drop-16
+                                                                                                                                                                                                                                                                                                           picklepf-distance-32-ampm-drop-16
+                                    0 amazon                                                                                                                                                                                                                                                               picklepf-distance-32-imp-drop-16
+                                                                twitch
+                        youtube google berkstan roadNetCA wiki_talk higgs wiki_topcats pokec livejournal orkut
+                                                   Graph Names
+    Fig. 12: Total DRAM Bandwidth across four memory channels when using different combinations of prefetchers. The result is discussed in
+    Section VI-E.
+
+
+                                     2.5
+Normalized Data Transfer
+
+
+
+
+                                                                                                                                                                                                                                                                                                                     prefetcher
+   from/to DRAM (GiB)
+
+
+
+
+                                     2.0                                                                                                                                                                                                                                                                   Baseline (No Prefetchers)
+                                                                                                                                                                                                                                                                                                           stride
+                                     1.5                                                                                                                                                                                                                                                                   ampm
+                                                                                                                                                                                                                                                                                                           imp
+                                     1.0                                                                                                                                                                                                                                                                   picklepf-distance-32-drop-16
+                                     0.5                                                                                                                                                                                                                                                                   picklepf-distance-32-stride-drop-16
+                                                                                                                                                                                                                                                                                                           picklepf-distance-32-ampm-drop-16
+                                     0.0 amazon                                                                                                                                                                                                                                                            picklepf-distance-32-imp-drop-16
+                                                                     twitch
+                              youtube google berkstan roadNetCA wiki_talk higgs wiki_topcats pokec livejournal orkut
+                                                         Graph Names
+    Fig. 13: Total data movement between the DRAM and the cache normalized to the total data movement of the baseline system. The lower
+    the value, the less data is moved. The result is discussed in Section VI-E.
+
+
+    transferred between the DRAM and the cache system, includ-                                                                                                                                                                                        VII. OTHER R ELATED W ORK
+    ing both demand requests, and prefetch requests. Compared to
+                                                                                                                                                                                              Runahead Techniques. The Pickle Prefetcher is similar
+    the baseline system, using the Pickle Prefetcher without private
+                                                                                                                                                                                           to runahead techniques [27]–[30], which execute memory
+    cache prefetchers results in a geometric mean increase of 1.01x
+                                                                                                                                                                                           instructions ahead of time. Unlike runahead, the Pickle
+    in total data movement, while achieving a geometric mean
+                                                                                                                                                                                           Prefetcher exploits task-level independence and can prefetch
+    speedup of 1.32x as mentioned in Section VI-A. In a system
+                                                                                                                                                                                           N tasks ahead without executing the previous N − 1 tasks,
+    with private cache prefetchers, the Pickle Prefetcher incurs
+                                                                                                                                                                                           making it more flexible for different prefetch distances. Runa-
+    a geometric mean increase of 1.02x in total data movement,
+                                                                                                                                                                                           head methods require core changes and are less effective for
+    while achieving a geometric mean speedup of 1.34x. This
+                                                                                                                                                                                           high-latency, irregular graph accesses [36].
+    shows that the Pickle Prefetcher is able to improve perfor-
+    mance while maintaining a similar amount of data movement                                                                                                                                 Instruction-based Prefetch Hint. Sending prefetch hints to
+    compared to the baseline system. Total data movement is a                                                                                                                              Pickle Prefetcher is conceptually similar to prefetch instruc-
+    good indicator of the system’s energy consumption, as the                                                                                                                              tions in x86 and ARM ISAs [2], [4], but those instructions
+    energy consumption of the memory system is proportional                                                                                                                                only prefetch a single address. This is inefficient for graph
+    to the amount of data moved between the DRAM and the                                                                                                                                   workloads, where next addresses are not known until the
+    cache system [15]. The accuracy of the prefetcher allows us                                                                                                                            current level is processed. Pickle Prefetcher can trigger a chain
+    to offset the negligible increase in total data movement with                                                                                                                          of prefetches with a single store, reducing code overhead.
+    significant performance gains, resulting in a more energy-                                                                                                                                Scatter-Gather Offloading. DX100 [19] offloads scatter-
+    efficient system.                                                                                                                                                                      gather operations to dedicated hardware, with a translation
+                                                                                                                                                                                           and programmable unit similar to Pickle Prefetcher. DX100
+                                                                                                                                                                                           performs computation at the accelerator and transforms large
+                                                                                                                                                                                           volumes of memory accesses into more hardware-friendly
+
+
+
+                                                                                                                                                                                      11
+patterns. In contrast, Pickle Prefetcher is designed as a plug-                        [15] M. Horowitz, “1.1 computing’s energy problem (and what we can do
+and-use prefetcher that can benefit any compute unit, providing                             about it),” in 2014 IEEE international solid-state circuits conference
+                                                                                            digest of technical papers (ISSCC). IEEE, 2014, pp. 10–14.
+flexible prefetching support across the system.                                        [16] Intel, Intel 64 and IA-32 Architectures Software Developer’s
+                                                                                            Manual, Mar. 2025, vol. Volume 3 (3A, 3B, 3C & 3D):
+                          VIII. C ONCLUSION                                                 System Programming Guide, accessed: 2025-04-13. [Online].
+                                                                                            Available:         https://www.intel.com/content/dam/www/public/us/en/
+   This paper draws inspiration from the approach of hard-                                  documents/manuals/64-ia-32-architectures-software-developer-system-
+ware/software co-design [14] to address the challenges of                                   programming-manual-325384.pdf
+                                                                                       [17] Y. Ishii, M. Inaba, and K. Hiraki, “Access map pattern matching for data
+the ever-increasing complexity of both hardware and software                                cache prefetch,” in Proceedings of the 23rd international conference on
+systems. We take a step further by proposing a new approach                                 Supercomputing, 2009, pp. 499–500.
+to hardware/software co-design that leverages the programma-                           [18] A. M. Kaushik, G. Pekhimenko, and H. Patel, “Gretch: A hardware
+bility of hardware systems to enable dynamic adaptation to                                  prefetcher for graph analytics,” ACM Transactions on Architecture and
+                                                                                            Code Optimization (TACO), vol. 18, no. 2, pp. 1–25, 2021.
+changing workloads and requirements, instead of adapting the                           [19] A. Khadem, K. Kamalakkannan, Z. Zhu, A. Poptani, Y. Gu, J. B.
+software stack to the underlying hardware and vice versa. This                              Dominguez-Trujillo, N. Talati, D. Fujiki, S. Mahlke, G. Shipman et al.,
+paper demonstrates the potential of this approach to create                                 “Dx100: Programmable data access accelerator for indirection,” in
+                                                                                            Proceedings of the 52nd Annual International Symposium on Computer
+more efficient and flexible systems that can better meet the                                Architecture, 2025, pp. 1641–1658.
+demands of modern applications.                                                        [20] C. Klymko, D. Gleich, and T. G. Kolda, “Using triangles to im-
+                                                                                            prove community detection in directed networks,” arXiv preprint
+                        ACKNOWLEDGEMENTS                                                    arXiv:1404.5874, 2014.
+                                                                                       [21] J. Leskovec, D. Huttenlocher, and J. Kleinberg, “Predicting positive and
+   AMD, the AMD Arrow logo and combinations thereof are                                     negative links in online social networks,” in Proceedings of the 19th
+                                                                                            international conference on World wide web, 2010, pp. 641–650.
+trademarks of Advanced Micro Devices, Inc.
+                                                                                       [22] J. Leskovec, D. Huttenlocher, and J. Kleinberg, “Signed networks in
+                                                                                            social media,” in Proceedings of the SIGCHI conference on human
+                              R EFERENCES                                                   factors in computing systems, 2010, pp. 1361–1370.
+                                                                                       [23] J. Leskovec, K. J. Lang, A. Dasgupta, and M. W. Mahoney, “Community
+ [1] S. Ainsworth and T. M. Jones, “Graph prefetching using data structure
+                                                                                            structure in large networks: Natural cluster sizes and the absence of large
+     knowledge,” in Proceedings of the 2016 International Conference on
+                                                                                            well-defined clusters,” Internet Mathematics, vol. 6, no. 1, pp. 29–123,
+     Supercomputing, 2016, pp. 1–11.
+                                                                                            2009.
+ [2] AMD, “Amd64 architecture programmer’s manual volume 2: System
+                                                                                       [24] J. Lowe-Power, A. M. Ahmad, A. Akram, M. Alian, R. Amslinger,
+     programming,” vol. 1-5, 2024.
+                                                                                            M. Andreozzi, A. Armejach, N. Asmussen, B. Beckmann, S. Bharad-
+ [3] ARM, “AMBA 5 CHI architecture specification,” https://developer.arm.
+                                                                                            waj et al., “The gem5 simulator: Version 20.0+,” arXiv preprint
+     com/documentation/ihi0050/D/, accessed: 2024-11-24.
+                                                                                            arXiv:2007.03152, 2020.
+ [4] Arm, “Arm a-profile a64 instruction set architecture,” accessed: 2025-
+                                                                                       [25] P. Michaud, “Best-offset hardware prefetching,” in 2016 IEEE Interna-
+     04-13.
+                                                                                            tional Symposium on High Performance Computer Architecture (HPCA).
+ [5] L. Backstrom, D. Huttenlocher, J. Kleinberg, and X. Lan, “Group
+                                                                                            IEEE, 2016, pp. 469–480.
+     formation in large social networks: membership, growth, and evolution,”
+     in Proceedings of the 12th ACM SIGKDD international conference on                 [26] H. Mujtaba and H. Mujtaba, “Amd granite ridge ”zen 5” ccd
+     Knowledge discovery and data mining, 2006, pp. 44–54.                                  gets beautiful & high-res die shots, reveals brand new tsv
+                                                                                            layout for 3d v-cache cpus,” Wccftech, Oct. 2024. [Online].
+ [6] J.-L. Baer and T.-F. Chen, “An effective on-chip preloading scheme
+                                                                                            Available: https://wccftech.com/amd-zen-5-ccd-beautiful-high-res-die-
+     to reduce data access penalty,” in Proceedings of the 1991 ACM/IEEE
+                                                                                            shots-brand-new-tsv-layout-3d-v-cache-cpus/
+     conference on Supercomputing, 1991, pp. 176–186.
+ [7] M. Bakhshalipour, M. Shakerinava, P. Lotfi-Kamran, and H. Sarbazi-                [27] A. Naithani, S. Ainsworth, T. M. Jones, and L. Eeckhout, “Vector
+     Azad, “Bingo spatial data prefetcher,” in 2019 IEEE International Sym-                 runahead,” in 2021 ACM/IEEE 48th Annual International Symposium
+     posium on High Performance Computer Architecture (HPCA). IEEE,                         on Computer Architecture (ISCA). IEEE, 2021, pp. 195–208.
+     2019, pp. 399–411.                                                                [28] A. Naithani, S. Ainsworth, T. M. Jones, and L. Eeckhout, “Vector
+ [8] S. Beamer, K. Asanović, and D. Patterson, “The gap benchmark suite,”                  runahead for indirect memory accesses,” IEEE Micro, vol. 42, no. 4,
+     arXiv preprint arXiv:1508.03619, 2015.                                                 pp. 116–123, 2022.
+ [9] N. Binkert, B. Beckmann, G. Black, S. K. Reinhardt, A. Saidi, A. Basu,            [29] A. Naithani, J. Roelandts, S. Ainsworth, T. M. Jones, and L. Eeck-
+     J. Hestness, D. R. Hower, T. Krishna, S. Sardashti et al., “The gem5                   hout, “Decoupled vector runahead,” in Proceedings of the 56th Annual
+     simulator,” ACM SIGARCH computer architecture news, vol. 39, no. 2,                    IEEE/ACM International Symposium on Microarchitecture, 2023, pp.
+     pp. 1–7, 2011.                                                                         17–31.
+[10] C. Chen, X. Xiang, C. Liu, Y. Shang, R. Guo, D. Liu, Y. Lu, Z. Hao,               [30] J. Roelandts, A. Naithani, S. Ainsworth, T. M. Jones, and L. Eeckhout,
+     J. Luo, Z. Chen et al., “Xuantie-910: A commercial multi-core 12-                      “Scalar vector runahead,” in 2024 57th IEEE/ACM International Sym-
+     stage pipeline out-of-order 64-bit high performance risc-v processor with              posium on Microarchitecture (MICRO). IEEE, 2024, pp. 1367–1381.
+     vector extension: Industrial product,” in 2020 ACM/IEEE 47th Annual               [31] B. Rozemberczki and R. Sarkar, “Twitch gamers: a dataset for evaluating
+     International Symposium on Computer Architecture (ISCA).             IEEE,             proximity preserving and structural role-based node embeddings,” 2021.
+     2020, pp. 52–64.                                                                  [32] D. Schor, “Tsmc n3, and challenges ahead,” May 2023. [Online].
+[11] H. Chetto and M. Chetto, “Some results of the earliest deadline schedul-               Available: https://fuse.wikichip.org/news/7375/tsmc-n3-and-challenges-
+     ing algorithm,” IEEE Transactions on software engineering, vol. 15,                    ahead/
+     no. 10, p. 1261, 1989.                                                            [33] S. Somogyi, T. F. Wenisch, A. Ailamaki, B. Falsafi, and A. Moshovos,
+[12] M. De Domenico, A. Lima, P. Mougel, and M. Musolesi, “The anatomy                      “Spatial memory streaming,” ACM SIGARCH Computer Architecture
+     of a scientific rumor,” Scientific reports, vol. 3, no. 1, p. 2980, 2013.              News, vol. 34, no. 2, pp. 252–263, 2006.
+[13] G. Fu, T. Xia, Z. Luo, R. Chen, W. Zhao, and P. Ren, “Differential-               [34] L. Takac and M. Zabovsky, “Data analysis in public social networks,” in
+     matching prefetcher for indirect memory access,” in 2024 IEEE Interna-                 International scientific conference and international workshop present
+     tional Symposium on High-Performance Computer Architecture (HPCA).                     day trends of innovations, vol. 1, no. 6, 2012.
+     IEEE, 2024, pp. 439–453.                                                          [35] N. Talati, K. May, A. Behroozi, Y. Yang, K. Kaszyk, C. Vasiladiotis,
+[14] J. L. Hennessy and D. A. Patterson, “A new golden age for computer                     T. Verma, L. Li, B. Nguyen, J. Sun et al., “Prodigy: Improving the
+     architecture,” Communications of the ACM, vol. 62, no. 2, pp. 48–60,                   memory latency of data-indirect irregular workloads using hardware-
+     2019.                                                                                  software co-design,” in 2021 IEEE International Symposium on High-
+
+
+
+
+                                                                                  12
+     Performance Computer Architecture (HPCA). IEEE, 2021, pp. 654–
+     667.
+[36] F. Xue, C. Han, X. Li, J. Wu, T. Zhang, T. Liu, Y. Hao, Z. Du,
+     Q. Guo, and F. Zhang, “Tyche: An efficient and general prefetcher for
+     indirect memory accesses,” ACM Transactions on Architecture and Code
+     Optimization, vol. 21, no. 2, pp. 1–26, 2024.
+[37] J. Yang and J. Leskovec, “Defining and evaluating network communities
+     based on ground-truth,” in Proceedings of the ACM SIGKDD workshop
+     on mining data semantics, 2012, pp. 1–8.
+[38] H. Yin, A. R. Benson, J. Leskovec, and D. F. Gleich, “Local higher-
+     order graph clustering,” in Proceedings of the 23rd ACM SIGKDD
+     international conference on knowledge discovery and data mining, 2017,
+     pp. 555–564.
+[39] X. Yu, C. J. Hughes, N. Satish, and S. Devadas, “Imp: Indirect memory
+     prefetcher,” in Proceedings of the 48th International Symposium on
+     Microarchitecture, 2015, pp. 178–190.
+[40] P. Zhang, R. Kannan, A. V. Nori, and V. K. Prasanna, “Accelerating
+     graph analytics using attention-based data prefetcher,” SN Computer
+     Science, vol. 5, no. 5, p. 646, 2024.
+
+
+
+
+                                                                              13
+

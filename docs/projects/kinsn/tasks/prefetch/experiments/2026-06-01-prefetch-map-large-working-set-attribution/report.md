@@ -151,7 +151,7 @@ AWS treatment attempt:
 
 文档和实验记录：
 
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-map-large-working-set-attribution/report.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-map-large-working-set-attribution/data/run-contract.json`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-map-large-working-set-attribution/analysis/*`
@@ -292,7 +292,7 @@ data/aws-active-after.json => []
   - `/home/ruoji/github/bpf-opt/experiments/2026-05-31-prefetch-candidate-filtering-micro-attribution/report.md`
   - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-indirect-timeliness-micro-attribution/report.md`
 - task doc：
-  - `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
+  - `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
 
 发现和处理：
 

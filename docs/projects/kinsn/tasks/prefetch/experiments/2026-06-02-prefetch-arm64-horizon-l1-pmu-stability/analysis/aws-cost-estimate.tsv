@@ -1,0 +1,5 @@
+run_dir	instance_id	instance_type	state	launch_time_utc	benchmark_finished_utc	billable_seconds_lower_bound	minutes_lower_bound	usd_per_hour	ec2_compute_usd_lower_bound
+aws_arm64_micro_20260603_024138_256667	i-0833b4986dc759cff	t4g.small	terminated	2026-06-03T02:35:45+00:00	2026-06-03T02:41:38.256667+00:00	353.3	5.89	0.0168000000	0.001649
+aws_arm64_micro_20260603_025020_311804	i-046988f0fe0837b81	t4g.small	terminated	2026-06-03T02:43:42+00:00	2026-06-03T02:50:20.311804+00:00	398.3	6.64	0.0168000000	0.001859
+aws_arm64_micro_20260603_025753_420811	i-03e2a47a7e9ca8274	t4g.small	terminated	2026-06-03T02:51:56+00:00	2026-06-03T02:57:53.420811+00:00	357.4	5.96	0.0168000000	0.001668
+	TOTAL									0.005176

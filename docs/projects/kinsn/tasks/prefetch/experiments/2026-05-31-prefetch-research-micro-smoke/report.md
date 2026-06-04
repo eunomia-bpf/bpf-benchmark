@@ -77,7 +77,7 @@ make -C code/micro/programs \
 
 文档 / 实验记录：
 
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-05-31-prefetch-research-micro-smoke/report.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-05-31-prefetch-research-micro-smoke/data/run-contract.json`
 - `/home/ruoji/github/bpf-opt/experiments/2026-05-31-prefetch-research-micro-smoke/analysis/new-prefetch-cases.tsv`
@@ -136,7 +136,7 @@ make -C code/micro/programs \
 
 已回看：
 
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
 - 相关 action：`01-code-change-flow.md`、`02-experiment-flow.md`、
   `05-documentation-flow.md`、`08-experiment-record-flow.md`。
 

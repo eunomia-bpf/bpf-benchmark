@@ -1,0 +1,194 @@
+<!-- MHonArc v2.6.16 -->
+<!--X-Subject: Re: [Qemu&#45;devel] [Qemu&#45;arm] [patch 1/1]about armv8's prefetch decode -->
+<!--X-From-R13: Brgre [nlqryy <crgre.znlqryyNyvaneb.bet> -->
+<!--X-Date: Fri, 24 Mar 2017 06:06:47 &#45;0400 -->
+<!--X-Message-Id: CAFEAcA_0UA1hnP9XVBn8w0B66eyR12GnnUoCOxjirPSDgHcHvQ@mail.gmail.com -->
+<!--X-Content-Type: text/plain -->
+<!--X-Reference: 1459777195&#45;7907&#45;1&#45;git&#45;send&#45;email&#45;vijayak@caviumnetworks.com -->
+<!--X-Reference: 1459777195&#45;7907&#45;3&#45;git&#45;send&#45;email&#45;vijayak@caviumnetworks.com -->
+<!--X-Reference: CAFEAcA_755uEOZoGj0SCtmT&#45;5PyLMntkK3wZeuHvZ_kPG9A1aQ@mail.gmail.com -->
+<!--X-Reference: 5703D7EE.2000005@redhat.com -->
+<!--X-Reference: CAFEAcA8G_&#45;jQOtnVag2Ef++RbfbEJ&#45;XzNnyYM=o9Sh8c6ohecA@mail.gmail.com -->
+<!--X-Reference: C94A741879221447B4FC9B607EB4FFCD79EA34F4@DGGEMA504&#45;MBX.china.huawei.com -->
+<!--X-Reference: CAJhHMCDDu_kEJichH=60N=np+ZKbU1e9bWK&#45;pP9Z&#45;9=Fn4w1_w@mail.gmail.com -->
+<!--X-Reference: C94A741879221447B4FC9B607EB4FFCD79EA7BA3@DGGEMA504&#45;MBX.china.huawei.com -->
+<!--X-Head-End-->
+<!doctype html public "-//W3C//DTD HTML//EN">
+<html>
+<head>
+<title>Re: [Qemu-devel] [Qemu-arm] [patch 1/1]about armv8's prefetch decode</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+<center>
+<table border=0 cellspacing=2 cellpadding=0 bgcolor="#000000">
+<tr><td><table border=0 bgcolor="#FFFFCC">
+<tr><td><big><b>qemu-devel</b></big></td></tr></table></tr></table>
+<div class="nowrap">
+<small>[<a href="../"
+>Top</a>][<a href="/archive/html">All Lists</a>]</small>
+</div>
+<form method="get" action="/archive/cgi-bin/namazu.cgi">
+<input type="text" name="query" size="30">
+<input type="submit" name="submit" value="Search">
+<input type="hidden" name="idxname" value="qemu-devel">
+<a href="/archive/cgi-bin/namazu.cgi?idxname=qemu-devel">Advanced</a>
+</form>
+
+</center>
+<!--X-Body-Begin-->
+<!--X-User-Header-->
+<!--X-User-Header-End-->
+<!--X-TopPNI-->
+<hr>
+[<a href="msg04906.html">Date Prev</a>][<a href="msg04908.html">Date Next</a>][<a href="msg04950.html">Thread Prev</a>][<a href="msg05072.html">Thread Next</a>][<a
+href="index.html#04907">Date Index</a>][<a
+href="threads.html#04907">Thread Index</a>]
+
+<!--X-TopPNI-End-->
+<!--X-MsgBody-->
+<!--X-Subject-Header-Begin-->
+<h2>Re: [Qemu-devel] [Qemu-arm] [patch 1/1]about armv8's prefetch decode</h2>
+<hr>
+<table border=0>
+<tbody>
+<tr>
+<td align="right" valign="top">
+<b>From</b>: </td>
+<td align="left">
+Peter Maydell</td>
+</tr>
+<!--X-Subject-Header-End-->
+<!--X-Head-of-Message-->
+
+<tr>
+<td align="right" valign="top">
+<b>Subject</b>: </td>
+<td align="left">
+Re: [Qemu-devel] [Qemu-arm] [patch 1/1]about armv8's prefetch decode</td>
+</tr>
+
+<tr>
+<td align="right" valign="top">
+<b>Date</b>: </td>
+<td align="left">
+Fri, 24 Mar 2017 10:06:21 +0000</td>
+</tr>
+
+</tbody>
+</table>
+<!--X-Head-of-Message-End-->
+<!--X-Head-Body-Sep-Begin-->
+<hr>
+<!--X-Head-Body-Sep-End-->
+<!--X-Body-of-Message-->
+<pre>On 24 March 2017 at 06:14, Wangjintang &lt;address@hidden&gt; wrote:
+&gt;<i> Hi Pranith,</i>
+&gt;<i></i>
+&gt;<i>         Thanks for your reply. patch as below, new added code default is off, </i>
+&gt;<i> please review.</i>
+&gt;<i> The major thinking is about translate Armv8's prefetch instruction into </i>
+&gt;<i> intermediate code, at the same time don't effect the rm/rn register.</i>
+&gt;<i></i>
+&gt;<i></i>
+&gt;<i> diff --git a/translate-a64.c b/translate-a64.c</i>
+&gt;<i> index 814f30f..86da8ee 100644</i>
+&gt;<i> --- a/translate-a64.c</i>
+&gt;<i> +++ b/translate-a64.c</i>
+&gt;<i> @@ -2061,7 +2061,11 @@ static void disas_ld_lit(DisasContext *s, uint32_t </i>
+&gt;<i> insn)</i>
+&gt;<i>      } else {</i>
+&gt;<i>          if (opc == 3) {</i>
+&gt;<i>              /* PRFM (literal) : prefetch */</i>
+&gt;<i> +            #ifdef TCG_AARCH64_PREFETCH_TRANSLATE</i>
+&gt;<i> +            ;</i>
+&gt;<i> +            #else</i>
+&gt;<i>              return;</i>
+&gt;<i> +            #endif</i>
+&gt;<i>          }</i>
+
+No, these changes look wrong. PRFM instructions do not need to
+do anything and should definitely not be emitting any intermediate
+code. In particular if you let execution fall through and try
+do_gpr_ld() then it will really do a load, which might cause
+an exception -- this is specifically forbidden for PRFM.
+Architecturally the ARM ARM says &quot;it is valid for the PE to
+treat any or all prefetch instructions as a NOP&quot;, which is
+what QEMU does.
+
+The existing code is correct. In general you should not
+expect to be able to deduce the guest instructions from
+the intermediate code representation.
+
+thanks
+-- PMM
+
+
+</pre>
+<!--X-Body-of-Message-End-->
+<!--X-MsgBody-End-->
+<!--X-Follow-Ups-->
+<hr>
+<form method="post" action="/mp/yyz.py" enctype="multipart/form-data">
+<input type="hidden" name="a" value="peter.maydell">
+<input type="hidden" name="b" value="Re: [Qemu-devel] [Qemu-arm] [patch 1/1]about armv8's prefetch decode">
+<input type="hidden" name="d" value="CAFEAcA_0UA1hnP9XVBn8w0B66eyR12GnnUoCOxjirPSDgHcHvQ@mail.gmail.com">
+<input type="hidden" name="c" value="linaro.org">
+<center>reply via email to<br><input type="submit" value=" Peter Maydell "></center>
+</form>
+<hr>
+<table width="100%">
+<tr><td align="left">[<a href="msg04950.html">Prev in Thread</a>]</td>
+<td align="center"><b>Current Thread</b></td>
+<td align="right">[<a href="msg05072.html">Next in Thread</a>]</td></tr></table>
+<ul>
+<li><b><a name="04736" href="msg04736.html">Re: [Qemu-devel] [Qemu-arm] about armv8's prefetch decode</a></b>, <i>Pranith Kumar</i>, <tt>2017/03/23</tt>
+<ul>
+<li><b><a name="04950" href="msg04950.html">Re: [Qemu-devel] [Qemu-arm] [patch 1/1]about armv8's prefetch decode</a></b>, <i>Wangjintang</i>, <tt>2017/03/24</tt>
+<ul>
+<li><font color="#666666"><strong>Re: [Qemu-devel] [Qemu-arm] [patch 1/1]about armv8's prefetch decode</strong>,
+<em>Peter Maydell</em></font>&nbsp;<b>&lt;=</b>
+<ul>
+<li><b><a name="05072" href="msg05072.html">Re: [Qemu-devel] [Qemu-arm] [patch 1/1]about armv8's prefetch decode</a></b>, <i>Wangjintang</i>, <tt>2017/03/24</tt>
+<li><b><a name="05088" href="msg05088.html">Re: [Qemu-devel] [Qemu-arm] [patch 1/1]about armv8's prefetch decode</a></b>, <i>Peter Maydell</i>, <tt>2017/03/25</tt>
+</li>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<hr>
+<!--X-Follow-Ups-End-->
+<!--X-References-->
+<!--X-References-End-->
+<!--X-BotPNI-->
+<ul>
+<li>Prev by Date:
+<strong><a href="msg04906.html">Re: [Qemu-devel] [PATCH 42/51] ram: Pass RAMBlock to bitmap_sync</a></strong>
+</li>
+<li>Next by Date:
+<strong><a href="msg04908.html">Re: [Qemu-devel] [RFC 1/4] [UNTESTED] xen: Don't force has_dynamic_sysbus on machine class</a></strong>
+</li>
+<li>Previous by thread:
+<strong><a href="msg04950.html">Re: [Qemu-devel] [Qemu-arm] [patch 1/1]about armv8's prefetch decode</a></strong>
+</li>
+<li>Next by thread:
+<strong><a href="msg05072.html">Re: [Qemu-devel] [Qemu-arm] [patch 1/1]about armv8's prefetch decode</a></strong>
+</li>
+<li>Index(es):
+<ul>
+<li><a href="index.html#04907"><strong>Date</strong></a></li>
+<li><a href="threads.html#04907"><strong>Thread</strong></a></li>
+</ul>
+</li>
+</ul>
+
+<!--X-BotPNI-End-->
+<!--X-User-Footer-->
+<!--X-User-Footer-End-->
+</body>
+</html>

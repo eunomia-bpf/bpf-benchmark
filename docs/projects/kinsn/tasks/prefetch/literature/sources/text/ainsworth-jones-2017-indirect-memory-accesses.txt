@@ -1,0 +1,922 @@
+              Software Prefetching for Indirect Memory Accesses
+                                            Sam Ainsworth           Timothy M. Jones                                                 t if act *
+                                                                                                                           Ar      en
+                                                                                                                                      t   * Co m p let e
+
+
+
+
+                                                                                                                                                            A ECDo
+                                                                                                                                                       *
+                                                                                                                           st
+                                                                                                                  C GO *
+
+
+
+
+                                                                                                                                                           We
+                                                                                                                       * Co n si
+                                                  University of Cambridge, UK
+
+
+
+
+                                                                                                                                                             ll
+                                                                                                                                                                 *
+                                                                                                                                                           cu m
+                                                                                                                              se
+                                                                                                                           eu
+                                           {sam.ainsworth,timothy.jones}@cl.cam.ac.uk
+
+
+
+
+                                                                                                                                                               Ev
+                                                                                                                                                           e
+                                                                                                                                                 R    nt
+                                                                                                                                   ed
+                                                                                                                                      * Easy t o
+
+
+
+
+                                                                                                                     *
+                                                                                                                              alu d
+                                                                                                                                 at e
+
+
+Abstract                                                             for the address generation cause stalls themselves. Further,
+Many modern data processing and HPC workloads are heav-              prefetching too far ahead risks cache pollution and the data
+ily memory-latency bound. A tempting proposition to solve            being evicted before use; prefetching too late risks the data
+this is software prefetching, where special non-blocking             not being fetched early enough to mask the cache miss. In-
+loads are used to bring data into the cache hierarchy just           deed, these factors can often cause software prefetches to
+before being required. However, these are difficult to insert        under-perform, or show no benefit, even in seemingly ideal
+to effectively improve performance, and techniques for au-           situations.
+tomatic insertion are currently limited.                                 Therefore, to ease programmer effort it is desirable to au-
+    This paper develops a novel compiler pass to automat-            tomate the insertion of prefetches into code. Examples exist
+ically generate software prefetches for indirect memory              in the literature to do this for both stride [2, 23] and linked-
+accesses, a special class of irregular memory accesses of-           list access patterns [17]. However, the former is usually bet-
+ten seen in high-performance workloads. We evaluate this             ter achieved in hardware to avoid instruction overhead, and
+across a wide set of systems, all of which gain benefit from         the latter has limited performance improvement due to the
+the technique. We then evaluate the extent to which good             lack of memory-level parallelism inherent in linked struc-
+prefetch instructions are architecture dependent. Across a set       tures. Neither of these caveats apply to indirect memory ac-
+of memory-bound benchmarks, our automated pass achieves              cesses, which contain abundant memory-level parallelism.
+average speedups of 1.3× and 1.1× for an Intel Haswell pro-          However, no automated approach is currently available for
+cessor and an ARM Cortex-A57, both out-of-order cores,               the majority of systems and access patterns.
+and performance improvements of 2.1× and 3.7× for the                    To address this, we develop a novel algorithm to auto-
+in-order ARM Cortex-A53 and Intel Xeon Phi.                          mate the insertion of software prefetches for indirect mem-
+                                                                     ory accesses into programs. Within the compiler, we find
+Categories and Subject Descriptors D.3.4 [Programming                loads that reference loop induction variables, and use a
+Languages]: Processors - Compilers, Optimization                     depth-first search algorithm to identify the set of instruc-
+Keywords Software Prefetching, Compiler Analysis                     tions which need to be duplicated to load in data for fu-
+                                                                     ture iterations. On workloads of interest to the scientific
+1.   Introduction                                                    computing [1], HPC [19], big data [24] and database [26]
+Many modern workloads for high-performance compute                   communities, our automated prefetching technique gives
+(HPC) and data processing are heavily memory-latency                 an average 1.3× performance improvement for an Intel
+bound [10, 13, 18, 25]. The traditional solution to this has         Haswell machine, 1.1× for an Arm Cortex-A57, 2.1× for
+been prefetching: using hardware to detect common access             an Arm Cortex-A53, and 2.7× for Xeon Phi. We then con-
+patterns such as strides [4, 28], and thus bring the required        sider reasons for the wide variance in performance attainable
+data into fast cache memory before it is requested by the pro-       through software prefetching across different architectures
+cessor. However, these techniques do not work for irregular          and benchmarks, showing that look-ahead distance, memory
+access patterns, as seen in linked data structures, and also in      bandwidth, dynamic instruction count and TLB support can
+indirect memory accesses, where the addresses loaded are             all affect the utility of software prefetch.
+based on indices stored in arrays.                                   2.   Related Work
+   Software prefetching [2] is a tempting proposition for
+these data access patterns. The idea is that the program-            Software prefetching has been studied in detail in the past,
+mer uses data structure and algorithmic knowledge to insert          and we give an overview of techniques that analyse their
+instructions into the program to bring the required data in          performance, automate their insertion, and determine the
+early, thus improving performance by overlapping memory              look-ahead, in addition to those providing software prefetch
+accesses. However, it is difficult to get right. To gain benefit,    though code transformations.
+the cost of generating the address and issuing the prefetch          Prefetching Performance Studies Lee et al. [15] show
+load must be outweighed by the latency saved from avoiding           speedups for a variety of SPEC benchmarks with both
+the cache miss. This is often not the case, as dynamic instruc-      software and hardware prefetching. However, these bench-
+tion count increases significantly, and any loads required           marks don’t tend to show indirect memory-access patterns
+in performance-critical regions of the code, limiting the ob-                1 for (i=0; i<base_array_size; i++) {
+servable behaviour. By comparison, Mowry [22] considers                      2   target_array[func(base_array[i])]++;
+                                                                             3 }
+both Integer Sort and Conjugate Gradient from the NAS Par-
+allel Benchmarks [1], which do. Both papers only consider
+                                                                                 (a) Code containing stride-indirect accesses
+simulated hardware. However, we show the microarchitec-
+tural impact on the efficacy of software prefetching is im-
+portant: Integer Sort gains a 7× improvement on an Intel
+Xeon Phi machine, but a negligible speedup on an ARM
+Cortex-A57. In contrast, Chen et al. [3] insert prefetches
+for database hash tables by hand, whereas we develop an
+algorithm and automate insertion for this and other patterns.
+Automatic Software Prefetch Generation Software pre-
+fetching for regular stride access patterns has been imple-
+mented in several tools, such as the Intel C Compiler [11].
+                                                                                      (b) Prefetching from target array
+These are particularly useful when they can beat the perfor-
+mance of the hardware stride prefetcher, such as in the Xeon        Figure 1: Many workloads perform stride-indirect traversals start-
+Phi [21]. Methods for doing this in the literature directly in-     ing from an array. We can look ahead in the base array and prefetch
+sert software prefetches into loops, for example Callahan           future values from the target array.
+et al. [2]. Mowry [22] extends this with techniques to re-          get right. Lee et al. [15] extend this by splitting instruc-
+duce branching, removing bounds checks for prefetches in-           tions per cycle (IPC) and average instruction count, which
+side loops by splitting out the last few iterations of the loop.    are both determined from application profiling. As these are
+Wu et al. [29] use profiles to prefetch applications that are ir-   all small numbers, and errors are multiplicative, accuracy is
+regular but happen to exhibit stride-like patterns at runtime.      challenging: the latter multiplies the distance by 4 to bias
+Examples also exist in the literature for software prefetch-        the result in favour of data being in the cache too early. In
+ing of both recursive data structures, for example Luk and          comparison, our algorithm schedule prefetches based on the
+Mowry [17] prefetch linked lists, and function arguments,           number of loads required to generate an address.
+such as Lipasti et al. perform [16].
+   Mowry’s PhD dissertation [22] discusses indirect prefetch-       Techniques Involving Software Prefetches Rather than
+ing for high level C-like code. In contrast, in this paper we       directly inserting software prefetches within loops, some
+give a full algorithm to deal with the complexities of in-          works have used them as parts of separate loops to improve
+termediate representations, including fault avoidance tech-         performance or power efficiency. Jimborean et al. [6] use
+niques and value tracking. An algorithm for simple stride-          compiler analysis to duplicate and simplify code, to separate
+indirect patterns is implemented in the Xeon Phi com-               loads and computation. This is to enable different frequency-
+piler [12], but it is not enabled by default and little infor-      voltage scaling properties for different sections of the code.
+mation is available on its inner workings. Further, it picks           Software prefetches can also be moved to different threads,
+up relatively few access patterns, and is comprehensively           to reduce the impact of the large number of extra instruc-
+outclassed by our technique, as shown in section 6.                 tions added to facilitate prefetching. Kim and Yeung [9] use
+   VanderWiel and Lilja [27] propose moving the software            a profile-guided compiler pass to generate “helper threads”,
+prefetches to a dedicated programmable hardware prefetch            featuring prefetch instructions, to run ahead of the main
+controller, to reduce the associated overheads, but their anal-     thread. Malhotra and Kozyrakis [20] create helper threads
+ysis technique also only works for regular address patterns         by adding software prefetch instructions to shared libraries
+without loads. Khan et al. [7, 8] choose to instead insert soft-    and automatically detecting data structure traversals.
+ware prefetches at runtime using a runtime framework for            Summary Although Mowry has analysed indirect memory
+code modification. This allows prefetching to be done for           access in the past [22], nobody has yet performed a ma-
+applications where the source code is unavailable, and also         jor study of software prefetching for them, nor developed
+gives access to runtime data, but limits access to static infor-    an automated compiler pass to exploit them. The next sec-
+mation such as types, and also adds overhead.                       tion shows the potential for software prefetch for these ac-
+Scheduling Prefetches A variety of fine-grained prefetch            cess patterns, before developing our algorithm for automatic
+scheduling techniques, to set the appropriate look-ahead dis-       prefetch generation.
+tance, have been considered in the past. Mowry et al. [23]
+consider estimated instruction time against an estimated            3.   Prefetch Potential
+memory system time. The former is difficult to estimate             To show how software prefetches can aid common indi-
+correctly on a modern system, and the latter is microarchi-         rect access patterns, consider figure 1. Here, we have an
+tecture dependent, which makes these numbers difficult to           access pattern that involves sequential movement through
+  1 for (i=0; i<NUM_KEYS; i++) {                                           1    DFS(inst) {
+  2   // The intuitive case, but also                                      2      candidates = {}
+  3   // required for optimal performance.                                 3      foreach (o: inst.src_operands):
+  4   SWPF(key_buff1[key_buff2[i + offset]]);                              4        // Found induction variable, finished this path.
+  5   // Required for optimal performance.                                 5        if (o is an induction variable):
+  6   SWPF(key_buff2[i + offset*2]);                                       6          candidates ∪= {(o, {inst})}
+  7   key_buff1[key_buff2[i]]++;                                           7        // Recurse to find an induction variable.
+  8 }                                                                      8        elif (o is a variable and is defined in a loop):
+                                                                           9          if (((iv, set) = DFS(loop_def(o))) != null):
+                                                                          10            candidates ∪= {(iv, {inst}∪set)}
+Code listing 1: An integer sort benchmark showing software                11
+prefetch locations. The intuitive prefetch to insert is only at line 4,   12        // Simple cases of 0 or 1 induction variable.
+                                                                          13        if (candidates.size == 0):
+whereas optimal performance also requires that at line 6.                 14          return null
+                                                                          15        elif (candidates.size == 1):
+          1.4                                                             16          return candidates[0]
+          1.3                                                             17
+                                                                          18        // There are paths based on multiple induction
+Speedup
+
+
+
+
+          1.2                                                             19        // variables, so choose the induction variable in
+          1.1                                                             20        // the closest loop to the load.
+                                                                          21        indvar = closest_loop_indvar(candidates)
+           1                                                              22
+                                                                          23        // Merge paths which depend on indvar.
+          0.9                                                             24        return merge_instructions(indvar, candidates)
+                Intuitive   Offset too small Offset too big   Optimal     25    }
+                                Prefetching Technique                     26
+                                                                          27    // Generate initial set of loads to prefetch and
+                                                                          28    // their address generation instructions.
+Figure 2: Software prefetching performance for code listing 1 on          29    prefetches = {}
+an Intel Haswell micro-architecture. Inserting software prefetches        30    foreach (l: loads within a loop):
+for maximal performance is a challenge even in simple cases, be-          31      if (((indvar, set) = DFS(l)) != null):
+                                                                          32        prefetches ∪= {(l, indvar, set)}
+cause intuitive schemes leave performance on the table, and choos-        33
+ing the correct offset is similarly critical for high performance.        34    // Function calls only allowed if side-effect free.
+                                                                          35    remove(prefetches, contains function calls)
+base array, followed by access into target array, based                   36    // Prefetches should not cause new program faults.
+                                                                          37    remove(prefetches, contains loads which may fault)
+on a function func on the data from the first array. When                 38    // Non-induction variable phi nodes allowed if the
+using the identity function (i.e., func(x) = x), this repre-              39    // pass can cope with complex control flow.
+                                                                          40    remove(prefetches, contains non-induction phi nodes)
+sents a simple stride-indirect pattern. If func(x) is more                41
+complex, it represents a hashing access.                                  42    // Emit the prefetches and address generation code.
+                                                                          43    foreach ((ld, iv, set): prefetches):
+    Both patterns are suitable for software prefetching, pro-             44      off = calc_offset(list, iv, load)
+vided that func(x) is side-effect free. As the addresses ac-              45      insts = copy(set)
+                                                                          46      foreach (i: insts):
+cessed in target array are data-dependent, a hardware                     47        // Update induction variable uses.
+stride prefetcher will be unable to discern any pattern, so               48        if (uses_var(i, iv)):
+                                                                          49          replace(i, iv, min(iv.val + off, max(iv.val)))
+will fail to accurately prefetch them. However, future mem-               50        // Final load becomes the prefetch.
+ory access addresses can easily be calculated in software due             51        if (i == copy_of(ld)):
+                                                                          52          insts = (insts - {i}) ∪ {prefetch(i)}
+to being able to look ahead in base array.                                53      // Place all code just before the original load.
+    Still, inserting the correct prefetch code, with suitable             54      add_at_position(ld, insts)
+
+look-ahead distances (or offset from the current iteration),              Algorithm 1: The software prefetch generation algorithm, assum-
+is challenging for an end user. Code listing 1 shows the code             ing the intermediate representation is in SSA form.
+required to prefetch a simple stride-indirect access pattern
+from an integer sort benchmark (as described in section 5.1),
+and figure 2 shows the performance of different schemes.                  find suitable access patterns within their code, and allows
+The intuitive approach inserts only the prefetch at line 4, giv-          the generation of good prefetch code without needing to be
+ing a speedup of 1.08×. However, for optimal performance,                 an expert in the properties of software prefetches.
+staggered prefetches to both the base array key buff2 and
+the indirect array key buff1 are required, even in the pres-              4.        Software Prefetch Generation
+ence of a hardware stride prefetcher, meaning the prefetch                We present a pass which finds loads that can be prefetched
+at line 6 is also required to give a speedup of 1.30×. Fur-               based on look-ahead within an array, and generates software
+ther, choosing a good prefetch distance is critical to avoid              prefetches for those that will not be identified by a stride
+fetching the data too late (when the offset is too large), or             prefetcher. We first describe the analysis required, then the
+polluting the cache (when the offset is too small).                       actual code generated. An overview is given in algorithm 1.
+    Given these complexities, even for the simple exam-
+ple shown, we propose an automated software-prefetch-                     4.1       Analysis
+generation pass for indirect memory-access patterns within                The overall aim of our analysis pass is to identify loads that
+modern compilers. This avoids the programmer having to                    can be profitably prefetched and determine the code required
+to generate prefetch instructions for them. Target loads are       tures that are used to generated load addresses within the
+those where it is possible to generate a prefetch with look-       software prefetch code (line 37). For example, in the code
+ahead: that is, we check whether we can generate a new load        x[y[z[i]]], if there were stores to z, we would not be able
+address by increasing the value of a referenced induction          to safely prefetch x. This could be avoided with additional
+variable within the address calculation by a certain offset.       bounds checking instructions, but would add to the complex-
+Our analysis considers a function at a time and does not cross     ity of prefetch code. We also disallow any prefetches where
+procedure boundaries.                                              loads for the address-generating instructions are conditional
+    We start with loads that are part of a loop (line 30 in al-    on loop-variant values other than the induction variable. To-
+gorithm 1). We walk the data dependence graph backwards            gether, these ensure that the addresses generated for interme-
+using a depth-first search from each load to find an induction     diate loads leading to prefetches will be exactly the same as
+variable within the transitive closure of the input operands       when computation reaches the equivalent point, several loop
+(line 1). We stop searching along a particular path when we        iterations later.
+reach an instruction that is not inside any loop. When we              The first strategy requires knowledge of each data struc-
+find an induction variable, we record all instructions that ref-   ture’s size. In some cases, this is directly available as part of
+erence this induction variable (directly or indirectly) along      the intermediate representation’s type analysis. For others,
+each path to the load (lines 6 and 10). If multiple paths ref-     walking back through the data dependence graph can iden-
+erence different induction variables, we only record the in-       tify the memory allocation instruction which generated the
+structions which reference the innermost ones (line 21). This      array. However, in general, this is not the case. For example,
+reflects the fact that these variables are likely to be the most   it is typical in languages such as C for arrays to be passed
+fine-grained form of memory-level parallelism available for        to functions as a pointer and associated size, in two sepa-
+that loop.                                                         rate arguments. In these cases, and more complicated ones,
+    Our recorded set of instructions will become the code          we can only continue if the following two conditions hold.
+to generate the prefetch address in a later stage of our al-       First, the loop must have only a single loop termination con-
+gorithm. However, we must constrain this set further, such         dition, since then we can be sure that all iterations of the
+that no function calls (line 35) or non-induction-variable phi     loop will give valid induction values. Second, accesses to
+nodes (line 40) appear within it, because the former may           the look-ahead array must use the induction variable which
+result in side-effects occurring and the latter may indicate       should be monotonically increasing or decreasing.
+complex control flow changes are required. In these cases we           Given these conditions, the maximum value of the in-
+throw away the whole set of instructions, and do not gener-        duction variable within the loop will be the final element
+ate prefetches for the target load. Nevertheless, both could be    accessed in the look-ahead array in that loop and we can
+allowed with further analysis. For example, side-effect-free       therefore use this value as a substitute for size informa-
+function calls could be permitted, allowing the prefetch to        tion of the array, to ensure correctness. Although these con-
+call the function and obtain the same value as the target load.    ditions are sufficient alone, to ease analysis in our proto-
+Non-induction phi nodes require more complicated control           type implementation, we further limit the second constraint
+flow generation than we currently support, along with more         such that the look-ahead array must be accessed using the
+complex control flow analysis. However, without this analy-        induction variable as a direct index (base array[i] not
+sis, the conditions are required to ensure that we can insert a    base array[f(i)]) and add a constraint that the induction
+new prefetch instruction next to the old load, without adding      variable must be in canonical form.
+further control flow.                                                  The software prefetch instructions themselves cannot
+                                                                   change correctness, as they are only hints. The checks de-
+4.2   Fault Avoidance
+                                                                   scribed in this section further ensure that address generation
+While software prefetches themselves cannot cause faults,          code doesn’t create faults if the original code was correct.
+intermediate loads used to calculate addresses can (e.g., the      However, the pass can still change runtime behaviour if the
+load from key buff2 to generate a prefetch of key buff1            program originally caused memory faults. While no memory
+at line 4 in code listing 1). We therefore need to ensure that     access violations will occur if none were in the original pro-
+any look-ahead values will be valid addresses and, if they         gram, if memory access violations occur within prefetched
+are to be used for other intermediate loads, that they contain     loops, they may manifest earlier in execution as a result of
+valid data.                                                        prefetches, unless size information comes directly from code
+    To address this challenge, we follow two strategies. First,    analysis instead of from the loop size.
+we add address bounds checks into our software prefetch
+code, to limit the range of induction variables to known valid     4.3   Prefetch Generation
+values (line 49 in algorithm 1). For example, checking that i      Having identified all instructions required to generate a soft-
++ 2*offset < NUM KEYS at line 6 in code listing 1. Sec-            ware prefetch, and met all conditions to avoid introducing
+ond, we analyse the loop containing the load, and only pro-        memory faults, the next task is to actually insert new instruc-
+ceed with prefetching if we do not find stores to data struc-      tions into the code. These come from the set of instructions
+recorded as software prefetch code in section 4.1 and aug-
+mented in section 4.2.                                             1 start: alloc a, asize
+                                                                   2        alloc b, bsize
+    We insert an add instruction (line 49 in algorithm 1) to       3 loop: phi i, [#0, i.1]
+increase the induction variable by a value (line 44), which is     4        gep t1, a, i
+                                                                   5        ld l2, t1
+the offset for prefetch. Determining this value is described in    6        gep t3, b, t2
+section 4.4. We then generate an instruction (either a select      7        ld t4, t3
+                                                                   8        add t5, t4, #1
+or conditional branch, depending on the architecture) to take      9        str t3, t5
+the minimum value of the size of the data structure and the       10        add i.1, i, #1
+                                                                  11        cmp size, i.1
+offset induction variable (line 49). We create new copies         12        bne loop
+(line 45) of the software prefetch code instructions, but with
+any induction-variable affected operands (determined by the              (a) Original compiler IR code
+earlier depth-first search) replaced by the instruction copies
+(line 49). Finally, we generate a software prefetch instruction    1    add p1, i, #32
+(line 52) instead of the final load (i.e., the instruction we      2    min p2, p1, asize
+started with in section 4.1).                                      3    gep p3, a, p2
+                                                                   4    ld p4, p3
+    We only generate software prefetches for stride accesses       5    gep p5, b, p4
+if they are part of a load for an indirect access. Otherwise,      6    prefetch p5
+                                                                   7    add p6, i, #64
+we leave the pattern to be picked up by the hardware stride        8    gep p7, a, p6
+prefetcher, or a more complicated stride software prefetch         9    prefetch p7
+
+generation pass which is able to take into account, for exam-
+ple, reuse analysis [23].                                               (c) Generated prefetching code           (b) Depth-first search
+
+4.4   Scheduling                                                        Figure 3: Our pass running on an integer sort benchmark.
+Our goal is to schedule prefetches by finding a look-ahead        before it is used, either as part of the next prefetch in a
+distance that is generous enough to prevent data being            sequence, or as an original load.
+fetched too late, yet avoids polluting the cache and extracts
+                                                                  4.5     Example
+sufficient memory parallelism to gain performance. Previ-
+ous work [23] has calculated prefetch distance using a ratio      An example of our prefetching pass is given in figure 3.
+of memory bandwidth against number of instructions. How-          From the load in line 7 in figure 3(a), we work backwards
+ever, code featuring indirect accesses is typically memory        through the data dependence graph (DDG) using a depth-
+bound, so execution time is dominated by load instructions.       first search. The path followed is shown in figure 3(b). From
+We therefore generate look-ahead distances using the fol-         the gep in line 6, we find an alloc that is not in a loop
+lowing formula.                                                   (line 2), and so stop searching down this path and follow
+                                                                  the next. We next encounter the ld in line 5 and continue
+                                c(t − l)                          working through the DDG until reaching the alloc in line 1,
+                      offset =                            (1)
+                                    t                             which is also outside a loop, stopping search down this path.
+where t is the total number of loads in a prefetch sequence,      These two allocation instructions give the bounds of the a
+l is the position of a given load in its sequence, and c is       and b arrays.
+a microarchitecture-specific constant, which represents the           Continuing along the other path from the gep is the phi in
+look-ahead required for a simple loop, and is influenced by       line 3, at which point we have found an induction variable.
+a combination of the memory latency and throughput (e.g.,         We take this set of instructions along the path from the phi
+instructions-per-cycle (IPC)) of the system. High memory          node to the original load (dark red in figure 3(b)) and note
+latency requires larger look-ahead distances to overcome,         that there are two loads that require prefetching. Therefore
+and high IPC means the CPU will move through loop it-             we calculate the offset for the original load as 32 and that
+erations quickly, meaning many iterations will occur within       for the load at line 5 as 64. From this, we generate the
+one memory latency of time.                                       code shown in figure 3(c), where all references to i are
+    As an example of this scheduling, for the code in code        replaced with min(i+32, a) for the prefetch at line 6 to
+listing 1, two prefetches are generated: one for the stride       avoid creating any faults with the intermediate load (line 4).
+on key buff2, and one using a previously prefetched look-
+ahead value to index into key buff1. This means t = 2 for         4.6     Prefetch Loop Hoisting
+these loads. For the first, l = 0, so offset = c by eq. (1)       It is possible for analysed loads to be within inner loops rel-
+so we issue a prefetch to key buff2[i+c]. For the second,         ative to the induction variable observed. In this case, the in-
+l = 1, so we issue a prefetch to key buff[i+c/2].                 ner loop may not feature an induction variable (for example,
+    This has the property that it spaces out the look-ahead       a linked list walking loop), or may be too small to gener-
+for dependent loads equally: each is prefetched ct iterations     ate look-ahead from. However, if we can guarantee control
+flow, and remove loop-dependent values for some iterations,      the bucket of each observed value. We run this on the NAS
+it may be beneficial to add prefetches for these outside the     parallel benchmark size B and insert software prefetches in
+inner loop.                                                      the loop which increments each bucket, by looking ahead in
+    We implement this by generating prefetches for loads         the outer array, and issuing prefetch instructions based on
+inside loops where control flow indicates that any phi nodes     the index value from the resulting load.
+used in the calculation reference a value from an outer loop.
+                                                                 Conjugate Gradient (CG) Conjugate Gradient is another
+We then replace the phi node in the prefetch with the value
+                                                                 benchmark from the NAS Parallel suite [1]. It performs
+from the outer loop, and attempt to make the prefetch loop
+                                                                 eigenvalue estimation on sparse matrices, and is designed to
+invariant by hoisting the instructions upwards. This will fail
+                                                                 be typical of unstructured grid computations. As before, we
+if there are other loop invariant values on which the load
+                                                                 run this on the NAS parallel benchmark size B.
+depends. We must also guarantee the control flow occurs
+                                                                     The sparse matrix multiplication computation exhibits an
+such that the loads generated by the software prefetches
+                                                                 array-indirect pattern, which allows us to insert software
+won’t cause any new faults to occur. We can do this provided
+                                                                 prefetches based on the NZ matrix (which stores non-zeros),
+we can guarantee execution of any of the original loads we
+                                                                 using the stored indices of the dense vector it points to. The
+duplicate to generate new prefetches, or that the loads will
+                                                                 irregular access is on a smaller dataset than IS, meaning it
+be valid due to other static analyses.
+                                                                 is more likely to fit in the L2 cache, and presents less of a
+4.7   Summary                                                    challenge for the TLB system.
+We have described a pass to automatically generate software      RandomAccess (RA) HPCC RandomAccess is from the
+prefetch for indirect memory accesses, which are likely to       HPC Challenge Benchmark Suite [19], and is designed to
+miss in the cache, cannot be picked up by current hardware       measure memory performance in the context of HPC sys-
+prefetchers, and are simple to extract look-ahead from. We       tems. It generates a stream of pseudo-random values which
+have further provided a set of sufficient conditions to en-      are used as indices into a large array. The access pattern is
+sure the code generated will not cause memory faults, pro-       more complicated than in CG and IS, in that we look ahead
+vided the original code was correct. We have also described      in the random number array, then perform a hash function on
+a scheduling technique for these prefetches which is aimed       the value to generate the final address for prefetching. Thus,
+at modern architectures, where despite variation in perfor-      each prefetch involves more computation than in IS or CG.
+mance, the critical determiner of look-ahead distance is how     Hash Join 2EPB (HJ-2) Hash Join [26] is a kernel de-
+many dependent loads are in each loop, rather than total         signed to mimic the behaviour of database systems, in that it
+number of instructions.                                          hashes the keys of one relation, and uses them as index into
+                                                                 a hash table. Each bucket in the hash table is a linked list of
+5.    Experimental Setup                                         items to search within. In HJ-2, we run the benchmark with
+We implement the algorithm described in section 4 as an          an input that creates only two elements in each hash bucket,
+LLVM IR pass [14], which is used within Clang. Clang can-        causing the access pattern to involve no linked-list traversals
+not generate code for the Xeon Phi, so instead we manually       (due to the data structure used). Therefore, the access pattern
+insert the same prefetches our pass generates for the other      is prefetched by looking ahead in the first relation’s keys,
+architectures and compile using ICC. For Clang, we always        computing the hash function on the value obtained, and fi-
+use the O3 setting, as it is optimal for each program; how-      nally a prefetch of this hashed value into the hash table. This
+ever, for ICC we use whichever of O1, O2 or O3 works best        is similar to the access pattern in RA, but involves more con-
+for each program. We set c = 64 for all systems to sched-        trol flow, therefore, more work is done per element.
+ule prefetches, as described in section 4.4, and evaluate the
+                                                                 Hash Join 8EPB (HJ-8) This kernel is the same as HJ-2,
+extent to which this is suitable in section 6.2.
+                                                                 but in this instance the input creates eight elements per hash
+5.1   Benchmarks                                                 bucket. This means that, as well as an indirect access to the
+                                                                 hash table bucket, there are also three linked-list elements to
+To evaluate software prefetching, we use a variety of bench-
+                                                                 be walked per index in the key array we use for look-ahead.
+marks that include indirect loads from arrays that are ac-
+                                                                 It is unlikely that any of these loads will be in the cache,
+cessed sequentially. We run each benchmark to completion,
+                                                                 therefore there are four different addresses we must prefetch
+timing everything apart from data generation and initialisa-
+                                                                 per index, each dependent on loading the previous one. This
+tion functions, repeating experiments three times.
+                                                                 means a direct prefetch of the last linked-list element in
+Integer Sort (IS) Integer Sort is a memory-bound kernel          the bucket would cause three cache misses to calculate the
+from the NAS Parallel Benchmarks [1], designed to be rep-        correct address. To avoid this, we can stagger prefetches to
+resentative of computational fluid dynamics workloads. It        each element, making sure the previous one is in the cache
+sorts integers using a bucket sort, walking an array of in-      by the time the next is prefetched in a future iteration. For
+tegers and resulting in array-indirect accesses to increment     example, we can fetch the first bucket element at offset 16,
+                                                                   the performance of the best manual software prefetches we
+ System       Specifications
+                                                                   could generate.
+ Haswell      Intel Core i5-4570 CPU, 3.20GHz, 4 cores, 32KB
+                                                                   Haswell Haswell gets close to ideal performance on HJ-
+              L1D, 256KiB L2, 8MiB L3, 16GiB DDR3
+                                                                   2, and IS, as the access patterns are fully picked up by
+ Xeon Phi     Intel Xeon Phi 3120P CPU, 1.10GHz, 57 cores,         the compiler pass. This is also true of CG but, as with
+              32KiB L1D, 512KiB L2, 6GiB GDDR5                     RA, performance improvement with software prefetches is
+ A57          Nvidia TX1, ARM Cortex-A57 CPU, 1.9GHz, 4            limited because the latency of executing the additional code
+              cores, 32KiB L1D, 2MiB L2, 4GiB LPDDR4               masks the improvement in cache hit rates.
+ A53          Odroid C2, ARM Cortex-A53 CPU, 2.0GHz, 4                 HJ-8 gets a limited improvement. The stride-hash-indirect
+              cores, 32KiB L1D, 1MiB L2, 2GiB DDR3                 pattern is picked up by the compiler, but the analysis cannot
+                                                                   pick up the fact that we walk a particular number of linked-
+       Table 1: System setup for each processor evaluated.         list elements each time in a loop. This is a runtime property
+                                                                   of the input that the compiler could never know, but manual
+followed by the first linked-list element at offset 12, then       prefetches can take advantage of this additional knowledge.
+offsets 8 and 4 for the second and third respectively.                 While G500 shows a performance improvement for both
+Graph500 Seq-CSR (G500) Graph500 [24] is designed to               the s16 and s21 setups, it isn’t close to what we can achieve
+be representative of modern graph workloads, by perform-           by manual insertion of prefetch instructions. This is because
+ing a breadth-first search on a generated Kronecker graph in       the automated pass cannot pick up prefetches to the edge
+compressed sparse row format. This results in four different       list, the largest data structure, due to complicated control
+possible prefetches. We can prefetch each of the vertex, edge      flow. In addition, it inserts prefetches within the innermost
+and parent lists from the breadth-first search’s work list us-     loop, which are suboptimal on Haswell due to the stride-
+ing a staggered approach, as for HJ-8. Further, as there are       indirect pattern being short-distance, something only known
+multiple edges per vertex, we can prefetch parent informa-         with runtime knowledge.
+tion based on each edge, provided the look-ahead distance
+                                                                   A57 The performance for the Cortex-A57 follows a simi-
+is small enough to be within the same vertex’s edges. The
+                                                                   lar pattern to Haswell, as both are out-of-order architectures.
+efficacy of each prefetch then depends on how many instruc-
+                                                                   For IS, CG and HJ-2, differences between the automated
+tions we can afford to execute to mask the misses and, in the
+                                                                   pass and manual prefetches are simply down to different
+latter case, how likely the value is to be used: longer prefetch
+                                                                   code generation. However, the A57 can only support one
+distances are more likely to successfully hide latency, but are
+                                                                   page-table walk at a time on a TLB miss, limiting improve-
+less likely to be in the same vertex, and thus be accessed.
+                                                                   ments for IS and HJ-2. CG’s irregular dataset is smaller
+    We run this benchmark on both a small, 10MiB Graph,
+                                                                   than for other benchmarks, so fewer page-table walks are
+with options -s 16 -e 10 (G500-s16), and a larger 700MiB
+                                                                   required and a lack of parallelism in the TLB system doesn’t
+graph (G500-s21, options -s 21 -e 10), to get perfor-
+                                                                   prevent memory-level parallelism from being extracted via
+mance for a wide set of inputs with different probabilities
+                                                                   software prefetch instructions. The newer Cortex-A73 is
+of the data already being in the cache.
+                                                                   able to support two page-table walks at once [5], likely im-
+5.2    Systems                                                     proving prefetch performance.
+Table 1 shows the parameters of the systems we have evalu-         A53 As the Cortex-A53 is in-order, significant speedups
+ated. Each is equipped with a hardware prefetcher to deal          are achieved across the board using our compiler pass. RA
+with regular access patterns; our software prefetches are          achieves a significant improvement in performance because
+used to prefetch the irregular, indirect accesses based on ar-     the core cannot overlap the irregular memory accesses across
+rays. Haswell and A57 are out-of-order superscalar cores;          loop iterations at by itself (because it stalls on load misses),
+A53 and Xeon Phi are in-order.                                     so the comparatively high cost of the hash computation
+                                                                   within the prefetch is easily offset by the reduction in mem-
+6.    Evaluation                                                   ory access time. However, autogenerated performance for
+We first present the results of our autogenerated software         RA is lower than manual, as the inner loop is small (128
+prefetch pass across benchmarks and systems, showing sig-          iterations). Though this loop is repeated multiple times, our
+nificant improvements comparable to fine-tuned manual in-          compiler analysis is unable to observe this, and so does not
+sertion of prefetch instructions. We then evaluate the factors     generate prefetches for future iterations of the outside loop,
+that affect software prefetching in different systems.             meaning the first few elements of each 128 element iteration
+                                                                   miss in the cache.
+6.1    Autogenerated Performance                                       In the G500 benchmark, the edge to visited list stride-
+Figure 4 shows the performance improvement for each sys-           indirect patterns dominate the execution time on in-order
+tem and benchmark using our compiler pass, along with              systems, because the system does not extract any memory-
+          3.5                                                                                 3.5
+                                                       Autogenerated                                                                                        Autogenerated
+                                                             Manual                                                                                               Manual
+           3                                                                                   3
+
+          2.5                                                                                 2.5
+Speedup
+
+
+
+
+                                                                                Speedup
+           2                                                                                   2
+
+          1.5                                                                                 1.5
+
+           1                                                                                   1
+
+          0.5                                                                                 0.5
+
+           0                                                                                   0
+                IS   CG   RA     HJ-2     HJ-8   G500-s16 G500-s21 Geomean                               IS        CG        RA       HJ-2     HJ-8   G500-s16 G500-s21 Geomean
+
+
+                               (a) Haswell                                                                                           (b) A57
+           4                                                                              9
+                                                       Autogenerated                                                                                       ICC-generated
+          3.5                                                Manual                       8                                                                Autogenerated
+                                                                                                                                                                 Manual
+                                                                                          7
+           3
+                                                                                          6
+          2.5
+Speedup
+
+
+
+
+                                                                             Speedup
+                                                                                          5
+           2
+                                                                                          4
+          1.5
+                                                                                          3
+           1
+                                                                                          2
+          0.5                                                                             1
+
+           0                                                                              0
+                IS   CG   RA     HJ-2     HJ-8   G500-s16 G500-s21 Geomean                          IS        CG        RA          HJ-2     HJ-8     G500-s16 G500-s21 Geomean
+
+
+                                (c) A53                                                                                           (d) Xeon Phi
+Figure 4: Performance of our autogenerated software prefetching pass and the best manual software prefetches found. Also shown for the
+Xeon Phi is the performance of ICC-generated software prefetches.
+          2.5
+                                                         Indirect Only
+                                                                             putation. Its pass also misses out on any performance im-
+                                                      Indirect + Stride      provement for G500, despite the two simple stride-indirects
+           2
+                                                                             present, from both work to vertex lists and edge to visited
+          1.5
+                                                                             lists, likely because it is unable to determine the size of ar-
+Speedup
+
+
+
+
+                                                                             rays and guarantee the safety of inserting loads to the work
+           1                                                                 list and edge list structures.
+                                                                                 We see dramatic performance improvements across the
+          0.5
+                                                                             board on this architecture. The in-order Xeon Phi is unable
+                                                                             to parallelise memory accesses by itself, so prefetching is
+           0
+                IS   CG   RA     HJ-2     HJ-8   G500-s16 G500-s21 Geomean   necessary for good performance.
+
+Figure 5: Performance of inserting staggered stride software                 Stride Prefetch Generation As discussed previously in
+prefetches along with the indirect prefetch, compared to the indirect        figure 1, performance for prefetching is optimal when, in
+alone, for Haswell, with our automated scheme.                               addition to the prefetch for the indirect access, a staggered
+                                                                             prefetch for the initial, sequentially-accessed array is also in-
+level parallelism. Therefore, autogenerated performance is                   serted. Figure 5 shows this for each benchmark on Haswell
+much closer to ideal than on the out-of-order systems.                       for our automated scheme: performance improvements are
+Xeon Phi The Xeon Phi is the only system we evaluate for                     observed across the board, despite the system featuring a
+which the compiler can already generate software prefetches                  hardware stride prefetcher.
+for some indirect access patterns, using an optional flag.
+Therefore, figure 4(d) also shows prefetches autogenerated                   6.2                Microarchitectural Impact
+by the Intel compiler’s own pass, “ICC-generated”.                           Our compiler prefetch-generation pass creates the same code
+    For the simplest patterns, IS and CG, which are pure                     regardless of target microarchitecture. Given the signifi-
+stride-indirects, the compiler is already able to generate                   cantly varying performance improvements attainable on the
+prefetches successfully. For IS, Intel’s compiler is more op-                different machines we evaluate, this may not always be the
+timal than ours, due to reducing overhead by moving the                      optimal choice. Here, we consider how the target microar-
+checks on the prefetch to outer loops.                                       chitecture affects the best prefetching strategy, in terms of
+    As the Intel pass only looks for the simplest patterns, their            look-ahead distances, which prefetches we generate when
+algorithm entirely misses the potential for improvement in                   there are multiple possibilities, and whether we generate
+RA and HJ-2, as it cannot pick up the necessary hash com-                    prefetches at all. We evaluate this based on manual insertion
+          8                                                                                        4
+                  Xeon Phi                                                                                      Xeon Phi
+          7       A53                                                                          3.5              A53
+                  Haswell                                                                                       Haswell
+          6       A57                                                                              3            A57
+          5                                                                                    2.5
+Speedup
+
+
+
+
+                                                                                 Speedup
+          4                                                                                        2
+          3                                                                                    1.5
+          2                                                                                        1
+          1                                                                                    0.5
+          0                                                                                        0
+              4   8            16       32          64    128       256                                4        8          16        32         64    128         256
+                               Look-Ahead Distance (c)                                                                     Look-ahead Distance (c)
+
+                              (a) Integer Sort (IS)                                                                  (b) Conjugate Gradient (CG)
+          8                                                                                5
+                  Xeon Phi                                                                                                                           Xeon Phi
+          7       A53                                                                                                                                A53
+                  Haswell                                                                  4                                                         Haswell
+          6       A57                                                                                                                                A57
+          5
+Speedup
+
+
+
+
+                                                                               Speedup
+                                                                                           3
+          4
+          3                                                                                2
+
+          2
+                                                                                           1
+          1
+          0                                                                                0
+              4   8            16       32          64    128       256                        4            8           16       32          64      128          256
+                               Look-Ahead Distance (c)                                                                  Look-Ahead Distance (c)
+
+                         (c) RandomAccess (RA)                                                                       (d) Hash Join 2EPB (HJ-2)
+                             Figure 6: Varying look-ahead distance shows the best is usually the consistent across systems.
+
+of software prefetches, to show the limits of performance                                                           1        2        3        4
+achievable across systems regardless of algorithm.                                                 3
+                                                                                               2.5
+                                                                                 Speedup
+
+
+
+
+                                                                                                   2
+Look-Ahead Distance Figure 6 gives speedup plotted                                             1.5
+against look-ahead distance (c from eq. (1) in section 4.4)                                        1
+for IS, CG, RA and HJ-2 for each architecture. Notably,                                        0.5
+and perhaps surprisingly, the optimal look-ahead distance is                                       0
+                                                                                                           Haswell         Xeon Phi          A57            A53
+relatively consistent, despite wide disparity in the number
+of instructions per loop, microarchitectural differences, and                  Figure 7: Performance improvement for prefetching progressively
+varied memory latencies. Setting c = 64 is close to optimal                    more dependent loads, for Hash Join 8EPB (HJ-8)
+for every benchmark and microarchitecture combination.                         means we can be generous in setting look-ahead distances in
+The A53 has an optimal look-ahead slightly lower than this,                    general, with only a minor performance impact.
+at 16–32, depending on the benchmark, as does the Xeon
+                                                                               Prefetch Stagger Depth Even when it is possible to gen-
+Phi on HJ-2, but performance doesn’t drop significantly for
+                                                                               erate prefetches for all cache misses, it may not always be
+c = 64, and we can set c generously. The trends for other
+                                                                               the optimal strategy. The extra instructions to prefetch more
+benchmarks are similar, but as there are multiple possible
+                                                                               nested loads (see section 4.4) may outweigh the benefits
+prefetches and thus multiple offsets to choose in HJ-8 and
+                                                                               from issuing the prefetches, because prefetches at one off-
+G500, we show only the simpler benchmarks here.
+                                                                               set require a real load at another for the next prefetch in the
+   The reasons for this are twofold. First, the optimal look-
+                                                                               sequence. This results in O(n2 ) new code, where n is the
+ahead distance in general for a prefetch is the memory la-
+                                                                               number of loads in a sequence. We may therefore choose to
+tency divided by the time for each loop iteration [23]. How-
+                                                                               prefetch fewer loads in a sequence to quadratically reduce
+ever, for memory bound workloads, the time per loop iter-
+                                                                               the additional code size.
+ation is dominated by memory latency, meaning that high
+                                                                                  For example, HJ-8 involves a stride-hash-indirect fol-
+memory latencies (e.g., from GDDR5 DRAM), despite caus-
+                                                                               lowed by three linked-list elements per bucket. This makes
+ing a significant overall change in performance, has only a
+                                                                               for four irregular accesses per loop iteration. However, as
+minor effect on look-ahead distance.
+                                                                               we see from figure 7, for all of the architectures tested, it is
+   Second, it is more detrimental to be too late issuing
+                                                                               optimal to prefetch only the first three of these.
+prefetches than too early. Although the latter results in cache
+pollution, it has a lower impact on performance than the in-                   Costs of Prefetching For some benchmarks, the expense
+creased stall time from the prefetches arriving too late. This                 of calculating the prefetches outweighs the benefit from a
+                       80                                                                                       No Prefetching                 Prefetching
+
+
+
+
+                                                                                  Normalized Throughput
+                       70                                                                                 1.4
+% Extra Instructions
+
+
+
+
+                       60                                                                                 1.2
+                                                                                                            1
+                       50
+                                                                                                          0.8
+                       40
+                                                                                                          0.6
+                       30                                                                                 0.4
+                       20                                                                                 0.2
+                       10                                                                                   0
+                       0                                                                                        1                      2                      4
+                              IS      CG   RA   HJ-2   HJ-8   G500-s16 G500-s21                                                  Number of Cores
+
+Figure 8: Percentage increase in dynamic instruction count for                    Figure 9: Throughput for IS on Haswell, normalised to one task
+Haswell as a result of adding software prefetches, with the optimal               running on one core without prefetching. A value of 1 indicates the
+scheme chosen in each case.                                                       same amount of work is being done per time unit as the program
+                                                                                  running on one core without prefetching.
+reduction in cache misses. Figure 8 shows the increase in
+dynamic instruction count for each benchmark on Haswell.                                                  2.5
+                                                                                                                Small Pages
+For all but the Graph500 benchmarks, dynamic instruction                                                   2    Huge Pages
+count increases dramatically by adding software prefetching,
+
+
+
+
+                                                                                  Speedup
+                                                                                                          1.5
+by almost 70% for IS and RA, and almost 80% for CG.
+                                                                                                           1
+In Graph500 workloads, prefetches reduce performance on
+Haswell within the innermost loop, and thus are only used                                                 0.5
+
+on outer loops.                                                                                            0
+                                                                                                                IS                     RA                    HJ-2
+Bandwidth DRAM bandwidth can become a bottleneck
+                                                                                  Figure 10: Speedup for prefetching with transparent huge pages
+for some systems and benchmarks. Out-of-order cores can
+                                                                                  enabled and disabled, normalised to no prefetching with the same
+saturate the bus by executing multiple loops at the same
+                                                                                  page policy.
+time. We demonstrate this in figure 9. IS running on multiple
+cores slows down significantly on Haswell, with throughput                        ory latency. Still, performance improvement can be limited
+below 1 for four cores, meaning that running four copies                          by microarchitectural features such as a lack of memory
+of the benchmark simultaneously on four different cores is                        bandwidth, an increase in dynamic instruction count, and a
+slower than running the four in sequence on a single core.                        lack of parallelism in the virtual memory system. Despite
+This shows that the shared memory system is a bottleneck.                         these factors, every system we evaluate attains a net perfor-
+However, even with four cores, software prefetching still                         mance benefit from our technique.
+improves performance.
+                                                                                  7.                      Conclusion
+TLB Support All architectures have 4KiB memory pages,
+but Haswell’s kernel also has transparent huge pages en-                          While software prefetching appears to make sense as a tech-
+abled. Figure 10 shows the impact of prefetching with and                         nique to reduce memory latency costs, it is often the case
+without this support. Huge pages reduce the relative per-                         that prefetching instructions do not improve performance,
+formance improvement attained by our scheme slightly for                          as good prefetches are difficult to insert by hand. To ad-
+simpler benchmarks (like IS and RA), because we do not                            dress this, we have developed an automated compiler pass to
+gain as much from bringing in TLB entries that would other-                       identify loads suitable for prefetching and insert the neces-
+wise miss, as a side effect of software prefetching. However,                     sary code to calculate their addresses and prefetch the data.
+it increases our performance improvement on page-table-                           These target indirect memory-access patterns, which have
+bound benchmarks, such as HJ-2. All other benchmarks are                          high potential for improvement due to their low cache hit
+unaffected and, overall, trends stay consistent regardless of                     rates and simple address computations. Across four differ-
+whether huge pages are enabled or not.                                            ent in-order and out-of-order architectures, we gain aver-
+                                                                                  age speedups between 2.1× and 2.7× for a set of memory-
+6.3                         Summary                                               bound benchmarks, and then investigate the various factors
+Our autogenerated pass generates code with close to optimal                       that contribute to software prefetch performance.
+performance compared to manual insertion of prefetches
+across a variety of systems, except where the optimal choice                      Acknowledgements
+is input dependent (HJ-8), or requires complicated control                        This work was supported by the Engineering and Physical
+flow knowledge (G500, RA).                                                        Sciences Research Council (EPSRC), through grant refer-
+    A compiler pass which is microarchitecture specific                           ences EP/K026399/1 and EP/M506485/1, and ARM Ltd.
+would only improve performance slightly: similar prefetch                         Additional data related to this publication is available in the
+look-ahead distances are optimal for all the architectures we                     data repository at http://dx.doi.org/10.17863/
+evaluate, despite large differences in performance and mem-                       CAM.6349.
+References                                                             [15] J. Lee, H. Kim, and R. Vuduc. When prefetching works, when
+ [1] D. H. Bailey, E. Barszcz, J. T. Barton, D. S. Browning, R. L.          it doesn’t, and why. ACM Trans. Archit. Code Optim., 9(1),
+     Carter, L. Dagum, R. A. Fatoohi, P. O. Frederickson, T. A.             Mar. 2012.
+     Lasinski, R. S. Schreiber, H. D. Simon, V. Venkatakrishnan,       [16] M. H. Lipasti, W. J. Schmidt, S. R. Kunkel, and R. R.
+     and S. K. Weeratunga. The NAS Parallel benchmarks –                    Roediger. SPAID: Software prefetching in pointer- and call-
+     summary and preliminary results. In SC, 1991.                          intensive environments. In MICRO, 1995.
+ [2] D. Callahan, K. Kennedy, and A. Porterfield.         Software     [17] C.-K. Luk and T. C. Mowry. Compiler-based prefetching for
+     prefetching. In ASPLOS, 1991.                                          recursive data structures. In ASPLOS, 1996.
+ [3] S. Chen, A. Ailamaki, P. B. Gibbons, and T. C. Mowry. Im-         [18] A. Lumsdaine, D. Gregor, B. Hendrickson, and J. Berry. Chal-
+     proving hash join performance through prefetching. ACM                 lenges in parallel graph processing. Parallel Processing Let-
+     Trans. Database Syst., 32(3), Aug. 2007.                               ters, 17(01), 2007.
+ [4] T.-F. Chen and J.-L. Baer. Reducing memory latency via non-       [19] P. R. Luszczek, D. H. Bailey, J. J. Dongarra, J. Kepner, R. F.
+     blocking and prefetching caches. In ASPLOS, 1992.                      Lucas, R. Rabenseifner, and D. Takahashi. The HPC chal-
+                                                                            lenge (HPCC) benchmark suite. In SC, 2006.
+ [5] A. Frumusanu. The ARM Cortex A73 – Artemis Un-
+     veiled. http://www.anandtech.com/show/10347/                      [20] V. Malhotra and C. Kozyrakis. Library-based prefetching for
+     arm-cortex-a73-artemis-unveiled/2, 2016.                               pointer-intensive applications. Technical report, Computer
+                                                                            Systems Laboratory, Stanford University, 2006.
+ [6] A. Jimborean, K. Koukos, V. Spiliopoulos, D. Black-Schaffer,
+     and S. Kaxiras. Fix the code. don’t tweak the hardware: A         [21] J. D. McCalpin.     Native computing and optimiza-
+     new compiler approach to voltage-frequency scaling. In CGO,            tion on the Intel Xeon Phi coprocessor.  https:
+     2014.                                                                  //portal.tacc.utexas.edu/documents/13601/
+                                                                            933270/MIC_Native_2013-11-16.pdf, 2013.
+ [7] M. Khan and E. Hagersten. Resource conscious prefetching
+     for irregular applications in multicores. In SAMOS, 2014.         [22] T. C. Mowry.       Tolerating Latency Through Software-
+                                                                            Controlled Data Prefetching. PhD thesis, Stanford University,
+ [8] M. Khan, M. A. Laurenzano, J. Mars, E. Hagersten, and
+                                                                            Computer Systems Laboratory, 1994.
+     D. Black-Schaffer. AREP : Adaptive resource efficient
+     prefetching for maximizing multicore performance. In PACT,        [23] T. C. Mowry, M. S. Lam, and A. Gupta. Design and evaluation
+     2015.                                                                  of a compiler algorithm for prefetching. In ASPLOS, 1992.
+ [9] D. Kim and D. Yeung. Design and evaluation of compiler            [24] R. C. Murphy, K. B. Wheeler, B. W. Barrett, and J. A. Ang.
+     algorithms for pre-execution. SIGPLAN Not., 37(10), Oct.               Introducing the Graph 500. Cray User’s Group (CUG), May
+     2002.                                                                  5, 2010.
+[10] O. Kocberber, B. Grot, J. Picorel, B. Falsafi, K. Lim, and        [25] K. Nilakant, V. Dalibard, A. Roy, and E. Yoneki. Prefedge:
+     P. Ranganathan. Meet the Walkers: Accelerating index traver-           SSD prefetcher for large-scale graph traversal. In SYSTOR,
+     sals for in-memory databases. In MICRO, 2013.                          2014.
+[11] R. Krishnaiyer. Compiler prefetching for the Intel Xeon           [26] J. Teubner, G. Alonso, C. Balkesen, and M. T. Ozsu. Main-
+     Phi coprocessor.  https://software.intel.com/                          memory hash joins on multi-core cpus: Tuning to the under-
+     sites/default/files/managed/54/77/5.3-                                 lying hardware. In ICDE, 2013.
+     prefetching-on-mic-update.pdf, 2012.                              [27] S. VanderWiel and D. Lilja. A compiler-assisted data prefetch
+[12] R. Krishnaiyer, E. Kultursay, P. Chawla, S. Preis, A. Zvezdin,         controller. In ICCD, 1999.
+     and H. Saito. Compiler-based data prefetching and streaming       [28] V. Viswanathan.  Disclosure of h/w prefetcher control
+     non-temporal store generation for the Intel(R) Xeon Phi(TM)            on some intel processors.     https://software.
+     coprocessor. In IPDPSW, 2013.                                          intel.com/en-us/articles/disclosure-
+[13] S. Kumar, A. Shriraman, V. Srinivasan, D. Lin, and J. Phillips.        of-hw-prefetcher-control-on-some-intel-
+     SQRL: Hardware accelerator for collecting software data                processors, Sept. 2014.
+     structures. In PACT, 2014.                                        [29] Y. Wu, M. J. Serrano, R. Krishnaiyer, W. Li, and J. Fang.
+[14] C. Lattner and V. Adve. LLVM: A compilation framework for              Value-profile guided stride prefetching for irregular code. In
+     lifelong program analysis & transformation. In CGO, 2004.              CC, 2002.
+A.      Artefact Description                                         A.2.4     Software Dependencies
+A.1     Abstract                                                     Our binary files assume Ubuntu 16.04 on both x86-64 and
+Our artefact provides x86-64 and AArch64 binaries for all            AArch64 systems, with 64-bit executable support on both.
+of our evaluated benchmarks, along with scripts to use these         Similar Linux distributions should also work. We assume
+benchmarks to regenerate the time data for the graphs in the         transparent huge pages are enabled on x86: however, fig-
+paper. This will allow evaluation of our results on any of the       ure 10 shows the expected difference in performance when
+Haswell, Cortex-A57 or Cortex-A53 systems described in               huge pages are disabled.
+the paper (or similar micro-architectures).                             No further software requirements are necessary for eval-
+   We also provide source code for all of our benchmarks             uating the binaries provided. However, if you would like to
+and our evaluation pass itself, along with scripts to compile        recompile our binaries from source without using CK, an
+binaries for both x86-64 and ARM machines.                           x86-64 system along with Clang 3.9 or above, and aarch64-
+   We further provide Collective Knowledge (CK) integra-             gnu-linux-gcc (from the Ubuntu package gcc-aarch64-linux-
+tion to automatically compile and run benchmarks, and gen-           gnu) are required: the former for both binaries, and the latter
+erate graphs.                                                        for linking AArch64 binaries.
+                                                                        The CK tools may require Ubuntu 16.04 or above (14.04
+A.2     Description                                                  can sometimes cause issues).
+A.2.1    Check-List (Artefact Meta Information)                      A.3     Installation
+ • Algorithm: Automated software prefetching.
+                                                                     Using CK To install CK, do:
+ • Program: Graph 500, NAS, HPCC, Hash Join (all sources and
+                                                                      1      $ sudo apt-get install python python-pip git
+   binaries included).                                                2      $ sudo pip install ck
+ • Compilation: Clang 3.9 or above.
+                                                                          You can install our repository via CK as follows:
+ • Transformations: Software prefetch insertion implemented as        1 $ ck pull repo --url=https://github.com/SamAinsworth
+   an LLVM pass.                                                             ,→/reproduce-cgo2017-paper
+
+ • Binary: Included for Linux (Ubuntu 16.04 recommended) for
+   both x86-64 and AArch64. Source code and scripts included to      Manual      You can pull our scripts and benchmarks from
+   regenerate binaries.                                              Github:
+ • Run-time environment: Provided binaries are for Linux (Ubuntu      1 $ git pull https://github.com/SamAinsworth/reproduce
+                                                                             ,→-cgo2017-paper
+   16.04) x86-64 and AArch64, but source code given.
+ • Hardware: We recommend a Haswell i5-4570 for verifying
+                                                                     A.4     Experiment Workflow
+   x86 results, or an ARM Cortex-A57 and/or Cortex-A53 for ver-
+   ifying ARM results. Similar systems should give comparable        Using CK Once you have installed the above packages,
+   results.                                                          simply run:
+ • Output: Speedup graphs are output by the CK framework.             1 $ ck run workflow-from-cgo2017-paper
+   For scripts without CK, the time is written to files along with
+   program output. These are generated for each figure in the             To run benchmarks continuously without prompts, run
+   original paper.                                                    1 $ ck run workflow-from-cgo2017-paper --quiet
+
+ • Experiment workflow: Collective Knowledge, or manual
+   Linux shell scripts.                                              Manual Navigate to script/reproduce-cgo2017-
+                                                                     paper.
+ • Publicly available?: Yes.
+                                                                        To run the experiments on an x86-64 machine, run
+A.2.2    How Delivered                                               ./run_x86.sh while in the root directory of our pro-
+                                                                     vided evaluation directory tree. Tests should take around 20
+Our benchmarks, source code, scripts and CK integra-
+                                                                     minutes on a modern machine.
+tion are available on Github: https://github.com/
+                                                                        To run the experiments on an AArch64 machine, run
+SamAinsworth/reproduce-cgo2017-paper.
+                                                                     ./run_arm.sh while in the root directory of our provided
+A.2.3    Hardware Dependencies                                       evaluation directory tree. Tests should take around two hours
+                                                                     on an out-of-order ARM system, and around four hours on
+We recommend testing on an Intel Haswell (an i5-4570 was
+                                                                     an in order ARM system.
+our test system, but any should give similar results), an
+                                                                        To recompile all of our benchmarks (not necessary)
+ARM Cortex-A57 (we used an Nvidia TX1), or an ARM
+                                                                     on an x86-64 machine, run ./compile_x86.sh and
+Cortex-A53 (we used an Odroid C2). Any similar micro-
+                                                                     ./compile_aarch64.sh while in the root directory of
+architectures should give comparable results.
+                                                                     our provided evaluation directory tree.
+   For low-variance results, we advise running the exper-         ries for each benchmark, or module/workflow-from-
+iments on a system with no other compute- or memory-              cgo-paper/module.py using CK. Similarly, source
+intensive applications running in the background.                 and a shared object are provided for the software prefetch-
+                                                                  ing pass, to allow it to be applied to other code or with other
+A.5   Evaluation and Expected Result
+                                                                  offsets, if desired. These can be used in the same way exem-
+Using CK Once you have run the CK workflow, you can               plified in the currently provided scripts.
+then run:                                                             Experiments can also be run on different micro-
+ 1 $ ck dashboard workflow-from-cgo2017-paper                     architectures from those we have evaluated: either differ-
+   This will include the generated time data from running         ent x86-64 or AArch64 systems with the provided scripts,
+the experiments, along with reference results for comparison      or others with slight modification.
+for either Haswell or A57 depending on the architecture.              If you would like to recompile our software prefetch-
+                                                                  ing pass without using CK, you can do so by nav-
+Manual Move directory to script/reproduce-
+                                                                  igating to package/plugin-llvm-sw-prefetch-
+cgo2017-paper. Files for the relevant figures in
+                                                                  pass and using make. The Makefile within this folder will
+the paper will be output by the ./run_x86.sh and
+                                                                  have to be reconfigured with LLVM_DIR set to the directory
+./run_arm.sh scripts. These will contain the outputs of
+                                                                  of your LLVM Clang source and build.
+each program, including a time value. These time values can
+                                                                      The software prefetching shared object pass can also be
+be compared with the speedups given in the corresponding
+                                                                  compiled and installed using CK, then used separately:
+figures of the paper for similar micro-architectures. De-
+                                                                   1    $ ck install package:plugin-llvm-sw-prefetch-pass
+pending on the similarity of the micro-architecture being          2     $ clang -Xclang -load -Xclang $(ck find package:
+used for evaluation, speedups of comparable magnitude and                     ,→plugin-llvm-sw-prefetch-pass)/lib/
+                                                                              ,→SwPrefetchPass.so -O3 ...
+trends should be observed.
+    Example output taken from a Haswell machine is given
+in the folder example_data.                                       A.7   Submission and Reviewing Methodology
+A.6   Experiment Customisation                                    The artefact for this paper was reviewed according
+                                                                  to the guidelines at http://cTuning.org/ae/
+Scripts are all customisable to allow different fetch distances   submission-20161020.html.
+to be chosen at compile time: check the relevant directo-
+

@@ -1,6 +1,6 @@
 # Kinsn Prefetch Experiment Artifacts
 
-最后更新：2026-06-02。
+最后更新：2026-06-04。
 
 ## 结论
 
@@ -53,8 +53,14 @@
 | `2026-06-02-prefetch-upper-bound-map-attribution` | 7 | same-iteration upper-bound map prefetch attribution。 |
 | `2026-06-02-prefetch-pipeline-map-attribution` | 8 | next-iteration pipeline prefetch first stability run。 |
 | `2026-06-02-prefetch-pipeline-map-independent-rerun1` | 6 | next-iteration pipeline independent rerun。 |
+| `2026-06-02-prefetch-variant-degree-evidence` | 28 | hint variant ABI/native emit smoke；horizon1/2/4 和 degree paired sweep。 |
+| `2026-06-02-prefetch-arm64-horizon-l1-pmu-stability` | 12 | ARM64 horizon2/horizon4 L1 long-repeat run；确认 timing/cycles 方向，默认 `t4g.small` PMU cache counters 不可用。 |
+| `2026-06-03-prefetch-c7g-pmu-policy-diagnosis` | 9 | AWS ARM64 `c7g.large` PMU-backed policy diagnosis；确认 MLOP、degree1、horizon2、pipeline、spatial 有 cache-miss-drop evidence。 |
+| `2026-06-04-prefetch-pf-llm-missing-policy-smoke` | 4 | 补 struct-field、mixed-policy-table、stream-of-strides 的 x86 correctness / emit smoke；不是性能结论。 |
+| `2026-06-04-prefetch-pf-llm-missing-policy-arm64-attribution` | 9 | 补 struct-field、mixed-policy-table、stream-of-strides 的 ARM64 smoke 和 paired attribution；struct-field positive，mixed noise-level，stream-of-strides slowdown。 |
 
-合计：20 个实验，144 个小型 artifact 文件，约 1.2 MiB。
+合计：25 个实验，207 个小型 artifact 文件。完整 raw result directory 仍保存在顶层
+`/home/ruoji/github/bpf-opt/experiments`。
 
 ## 如何阅读
 

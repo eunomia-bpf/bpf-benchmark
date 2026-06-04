@@ -1,0 +1,8 @@
+check	result	evidence
+rust-prefetch-tests	passed	cargo test -p bpfopt prefetch => 17 tests passed
+x86-module-variant-symbols	passed	bpf_x86_prefetchnta/t0/t1/t2 exported and BTF-listed
+arm64-module-variant-symbols	passed	bpf_arm64_prfm_pldl1keep/l1strm/l2keep/l2strm exported and BTF-listed
+x86-aws-hint-t1	passed	result.json completed; native prefetcht1 emitted
+x86-aws-hint-nta	passed	result.json completed; native prefetchnta emitted
+arm64-aws-hint-l2keep	passed	result.json completed; native prfm pldl2keep emitted
+arm64-aws-hint-l1strm	passed	result.json completed; native prfm pldl1strm emitted

@@ -1,0 +1,1220 @@
+                                           Guided Region Prefetching:
+                                    A Cooperative Hardware/Software Approach
+                                                                                                               
+            Zhenlin Wang           Doug Burger           Kathryn S. McKinley             Steven K. Reinhardt         Charles C. Weems
+                                 Dept. of Computer Science          
+                                                                     Dept. of Computer Sciences          Dept. of EECS
+                              Univ. of Massachusetts, Amherst     The University of Texas at Austin   University of Michigan
+
+
+                                Abstract                                         latencies [28]. Hardware only schemes can prefetch spatial re-
+                                                                                 gions [10, 11, 22, 34, 38], pointer chains [14, 21, 35], or recur-
+Despite large caches, main-memory access latencies still cause significant       ring patterns [26]. While these schemes can hide much of the main
+performance losses in many applications. Numerous hardware and soft-             memory access time, they can also consume substantial amounts
+ware prefetching schemes have been proposed to tolerate these latencies.         of memory bandwidth. This additional traffic need not degrade
+Software prefetching typically provides better prefetch accuracy than hard-      uniprocessor performance, but it increases power consumption, and
+ware, but is limited by prefetch instruction overheads and the compiler’s        will likely degrade performance on multiprocessors. Since off-chip
+limited ability to schedule prefetches sufficiently far in advance to cover      bandwidth will be the dominant limiter of scalability for future chip
+level-two cache miss latencies. Hardware prefetching can be effective at         multiprocessors (CMPs) [20], prefetch schemes that consume band-
+hiding these large latencies, but generates many useless prefetches and          width inefficiently will not be practical. While some schemes throt-
+consumes considerable memory bandwidth. In this paper, we propose a              tle prefetching when the accuracy drops below a threshold, they
+cooperative hardware-software prefetching scheme called Guided Region            then miss opportunities for issuing useful prefetches [16].
+Prefetching (GRP), which uses compiler-generated hints encoded in load in-           In this paper, we propose a cooperative hardware/software
+structions to regulate an aggressive hardware prefetching engine. We com-        prefetch framework called Guided Region Prefetching (GRP). In
+pare GRP against a sophisticated pure hardware stride prefetcher and a           GRP, sophisticated compiler analysis is used to produce a rich set
+scheduled region prefetching (SRP) engine. SRP and GRP show the best             of load hints, including the presence or absence of spatial locality,
+performance, with respective 22% and 21% gains over no prefetching, but          pointer structures, or indirect array accesses. A runtime hardware
+SRP incurs 180% extra memory traffic—nearly tripling bandwidth require-          engine, triggered by L2 cache misses, generates prefetches based
+ments. GRP achieves performance close to SRP, but with a mere eighth of          on the compiler’s hints. GRP thus benefits from compiler analysis
+the extra prefetching traffic, a 23% increase over no prefetching. The GRP       of application reference patterns, but—unlike traditional software
+hardware-software collaboration thus combines the accuracy of compiler-          prefetching—the compiler is not required to generate or schedule
+based program analysis with the performance potential of aggressive hard-        individual prefetch addresses. Because the hardware generates the
+ware prefetching, bringing the performance gap versus a perfect L2 cache         prefetches, it can run far ahead of the missing references. Because
+under 20%.                                                                       the compiler guides it, the hardware need not struggle to deduce
+                                                                                 future references with complex pattern matching on prior accesses
+                                                                                 stored in large tables.
+1   Introduction                                                                     Using previously proposed techniques [28], the GRP hard-
+Modern out-of-order processors can tolerate latencies for multi-                 ware prefetching engine keeps uniprocessor bus contention low by
+cycle level-one cache hits, and many of the level-one cache misses               prefetching only when the memory bus is otherwise idle, and keeps
+that result in level-two hits [42]. However, the hundreds of cy-                 cache pollution low by loading prefetches into the LRU set of the
+cles that result from DRAM accesses cannot be tolerated, thus                    L2 cache. Without compiler support, this prefetching hardware is
+causing significant performance degradations. For the SPEC2000                   effective at improving performance, but consumes copious band-
+benchmarks running on a modern, high-performance microproces-                    width. Through GRP, the compiler informs the hardware of applica-
+sor, over half of the time is spent stalling for loads that miss in the          tion reference patterns, enabling the hardware to prefetch only when
+level-two cache [28]. We observe similar results in our simulations              it is likely to be effective. We evaluate compiler hints that mark
+for a subset of SPEC2000 benchmarks and Sphinx, a speech recog-                  loads with the following hints: spatial–prefetch the spatial region
+nition application [27]. Figure 1 compares the performance of a                  around a load; size–how many lines to fetch on a spatial reference;
+system with a realistic memory hierarchy versus one with a perfect               pointer–prefetch by following the pointer in the load’s cache line;
+L1 cache and one with a perfect L2 cache, in the leftmost stacked                recursive–prefetch this pointer data structure recursively. For size
+bar for each benchmark. The benchmarks are sorted by the size of                 hints, the compiler can encode a variable-size region that specifies
+the gap between a realistic system and one with a perfect L2 cache,              how much to prefetch based on enclosing loop bounds, instead of
+a geometric mean performance gap of 33.7%. As a summary of                       using a fixed value. The compiler also generates indirect prefetch-
+our results, we also show the performance afforded by the traffic-               ing instructions which trigger prefetching a set of references using
+efficient GRP L2 prefetching scheme, displayed as the rightmost                  an indirection array.
+bar for each benchmark.                                                              This cooperative GRP hardware/software interface improves the
+   To tolerate these latencies, researchers have proposed a large                high performance of the previously proposed scheduled region
+number of both software and hardware prefetching schemes. Each                   prefetching (SRP) [28] by over 10% on two of the SPEC2000
+of these two classes of prefetch solutions have distinct advantages              benchmarks, and match the performance of SRP on the rest. Ta-
+and drawbacks. Pure software prefetching is typically highly ac-                 ble 1 shows a summary of the GRP results using the geometric
+curate, but incurs runtime overhead and cannot issue prefetches                  mean. We show GRP both with (GRP/Var) and without (GRP/Fix)
+sufficiently far in advance of a load to hide main memory access                 variable-size region prefetching. Without prefetching, the mean
+          3
+
+
+
+
+          2
+                                                                                                                                                        Perfect L1
+                                                                                                                                                        Perfect L2
+    IPC
+
+
+
+
+                                                                                                                                                        Base
+                                                                                                                                                        GRP
+
+
+          1
+
+
+
+
+          0
+              cr
+
+
+                        m
+
+
+                               ap
+
+
+                                      gz
+
+
+                                             ga
+
+
+                                                   am
+
+
+                                                          w
+
+
+                                                          m
+
+
+                                                                       vp
+
+
+                                                                             bz
+
+
+                                                                                     tw
+
+
+                                                                                             pa
+
+
+                                                                                                      m
+
+
+                                                                                                            sp
+
+
+                                                                                                                     ap
+
+
+                                                                                                                             eq
+
+
+                                                                                                                             ar
+
+
+                                                                                                                                       sw
+
+
+                                                                                                                                              av
+                                                           up
+                af
+
+
+                         es
+
+
+
+
+                                                            gr
+
+
+
+
+                                                                                                       cf
+
+
+
+
+                                                                                                                               t
+                                                                                       ol
+                                        ip
+
+
+
+
+                                                                         r
+
+
+                                                                               ip
+
+
+
+
+                                                                                                              hi
+
+
+
+
+                                                                                                                                                er
+                                 si
+
+
+
+
+                                               p
+
+
+
+
+                                                                                               rs
+
+
+
+
+                                                                                                                       pl
+
+
+                                                                                                                                ua
+
+
+
+
+                                                                                                                                         im
+                                                     m
+                   ty
+
+
+
+
+                                                              id
+
+
+
+
+                                                                                         f
+                                                               w
+
+
+
+
+                                                                                 2
+
+
+
+
+                                                                                                                nx
+                           a
+
+
+
+
+                                                                                                                         u
+                                                                                                 er
+
+
+
+
+                                                                                                                                                  ag
+                                                      p
+
+
+
+
+                                                                                                                                  ke
+                                                                 is
+
+
+
+
+                                                                                                                                                    e
+                                                                   e
+                                                                Figure 1: Processor performance
+
+
+                                              traffic     Performance gap               a load instruction. Conceptually, the latency of a given load in-
+                               Speedup       increase     from perfect L2               struction is hidden by inserting a prefetch with the same effective
+     No prefetching               1              1             33.72                    address into the instruction stream sufficiently far in advance of the
+  Stride prefetching            1.147          1.09            23.99                    load. Because the compiler only inserts prefetches for known (or
+                SRP             1.226          2.80            18.75                    very likely) loads, software prefetch accuracy is typically high. In
+           GRP/Fix              1.216          1.62            19.42                    practice, the compiler faces two key challenges in data prefetching:
+           GRP/Var              1.212          1.23            19.69                    selection and scheduling.
+    Table 1: Summary of prefetching performance and traffic                                 Because prefetch instructions occupy instruction cache space,
+                                                                                        pipeline slots, and data cache ports, the compiler must select a sub-
+                                                                                        set of the loads for which to generate prefetches. Accurate compile-
+performance across the benchmark suite is 33.7% lower than a per-                       time identification of the loads that will cause cache misses at run-
+fect level-two cache. Stride prefetching (using the Sherwood et al.                     time is complex, requiring both knowledge of hardware parame-
+design [38]) provides a 15% speedup over no prefetching. SRP,                           ters (cache block size, capacity, and associativity) and sophisticated
+which uses no compiler analysis, outperforms stride prefetching by                      code analysis (e.g., to determine the volume of other data accessed
+7%, but consumes excessive memory bandwidth, a 180% increase                            between references to a particular block) [7, 17, 33, 45].
+over a system with no prefetching. GRP provides near-equivalent                             The compiler also faces the difficult challenge of issuing the
+performance to SRP but with substantially less traffic, an increase                     prefetches sufficiently early to hide the memory latency, but not so
+of only 23% over the not prefetching. This reduction in traffic saves                   early that useful data are needlessly evicted. To find that point, the
+power and is more amenable to multiprocessor systems, where ad-                         compiler must estimate cache miss latencies and run-time instruc-
+ditional traffic can directly affect performance. Both SRP and GRP                      tion execution rates [25]. The compiler is further constrained in that
+still incur a 19% gap versus a perfect L2.                                              it cannot schedule a prefetch until it can compute the effective ad-
+    We review related work in Section 2, showing that much of it                        dress. While this constraint is not significant for arrays [6, 33], it
+does not pursue a balance between aggressive prefetching and ef-                        limits compiler-based greedy pointer prefetching [5, 30, 36]. Jump
+ficient use of memory bandwidth. Section 3 describes the hard-                          pointers bypass this limitation by identifying records several links
+ware used for the GRP hardware prefetching engine, and how it                           ahead in the structure, but require much more sophisticated anal-
+uses the hints. Section 4 describes the compiler analysis in detail.                    ysis, dynamic updates, and the addition of a jump pointer to each
+Section 5 evaluates the degree to which a GRP engine can bring the                      object [5, 30, 36]. Other approaches prefetch pointer arguments
+performance of most benchmarks close to that of a perfect L2 cache                      at call sites [29], and decouple prefetches from the main program
+while keeping memory traffic increases small. Section 5 also com-                       using a separate thread context [13, 24, 31].
+pares the performance of GRP to that of stride prefetching [38]. We                         The converse approach is hardware-only prefetching, in which
+conclude in Section 6 that GRP eliminates main memory accesses                          the hardware predicts prefetch addresses by observing a program’s
+as a source of performance loss for all but four of the SPEC2000                        runtime behavior. Since prefetches do not not incur overhead in the
+benchmarks and sphinx. Of those four, one simply requires more                          processor itself, the hardware need not be as selective about issuing
+memory bandwidth, and can benefit from more sophisticated soft-                         prefetch operations. Recent work shows that simple dynamic prior-
+ware/hardware cooperation.                                                              itization techniques eliminates memory bandwidth contention and
+                                                                                        cache pollution problems [28]. However, unlike the compiler, the
+2 Related Work                                                                          hardware has no direct knowledge of future memory references;
+In this section, we focus on the most pertinent aspects of the large                    the key challenge in hardware-based prefetching is determining a
+body of literature on software and hardware data prefetching, along                     reasonable set of predicted addresses to use as prefetch targets.
+with the small number of previously proposed hybrid schemes.                            Hardware prefetching thus suffers relative to software prefetching
+   Software prefetching relies on non-binding prefetch instructions                     in both accuracy (because the predictions may be wrong) and cov-
+that bring the indicated block of memory into the cache, much like                      erage (because some addresses may require the compiler’s scope to
+predict).                                                                                                 Prefetch
+    Many hardware prefetchers exploit only spatial locality,                                              Engine
+
+prefetching one or more subsequent blocks on a cache miss [15,
+22, 40]. More sophisticated schemes detect non-unit strided ac-               Prefetch                    L2 Cache
+                                                                                                          Controller                     L1 Cache
+                                                                              Queue
+cess patterns, such as Chen and Baer’s reference prediction table
+(RPT) [10] and Palacharla and Kessler’s strided stream buffers [34].
+Other approaches exploit pointer-based access sequences, as with
+correlation-based and Markov prefetching [1, 9, 21], or a broader             Prefetch              Access
+                                                                                                                       MSHRs
+class of patterns, using dead block information [26]. Another                 Prioritizer           Prioritizer
+
+approach involves decoupling the data structure traversal from
+the computation, using specialized pointer-traversal hardware [35]                                                             Rambus Channel
+                                                                               Bank
+or dedicated pre-execution hardware [2]. Researchers have also                 State                   Rambus Controller
+                                                                                                                                  .
+                                                                                                                                  .
+proposed memory-side prefetching to reduce latencies between                                                                   Rambus Channel
+prefetches [19, 41, 46].
+    Most pertinent to this work are two previous papers. First,
+                                                                                            Figure 2: Prefetch Engine Organization
+predictor-directed stream buffering, proposed by Sherwood et
+al. [38], unifies strided stream buffers and Markov prefetching into
+a single, consistent hardware prefetching framework. In Section 5,      with loads, which an aggressive, simple, and general hardware
+we compare the GRP scheme to the strided stream buffers scheme          prefetcher uses only when necessary. Thus, the pertinent compiler
+only, since the Markov predictor consumes too much state to be          analysis is communicated to the hardware without requiring exten-
+practical. Second, Cooksey et al. [14] propose a stateless approach     sive static lookahead, software guarantees, or high instruction over-
+to pointer prefetching, foregoing explicit identification of pointer    head. In the subsequent sections, we describe first the hardware
+traversal patterns and simply prefetching any referenced memory         engine, then the software hints and analysis necessary for the hard-
+value that could be reasonably interpreted as a memory address.         ware to balance prefetch coverage and accuracy.
+Our hardware schemes are also stateless. We find that for our
+benchmarks, GRP with spatial hints usually performs better or the       3 Hardware Prefetching Engine
+same as pointer prediction with or without pointer hints.               The GRP hardware prefetching engine builds on the scheduled re-
+    In the end, all hardware schemes are forced to trade coverage       gion prefetching design by Lin et al. [28]. We extend the original
+for accuracy (or vice versa), and focus either only on structured       design with two capabilities. First, we add support for aggressive
+access patterns which can be predicted with high accuracy (forgoing     prefetching of pointer-based data structures. Second, we add the
+coverage of less structured access patterns), or consume significant    ability to prefetch indirect array references under software control.
+amounts of bandwidth with incorrect prefetches in an attempt to
+                                                                        3.1     Scheduled Region Prefetching
+cover less-structured references.
+    The relative strengths and weaknesses of hardware and soft-         Scheduled region prefetching (SRP) aggressively exploits spatial
+ware prefetching are complementary and thus suggest a combined          locality by attempting to prefetch large (4 KB) memory regions
+hardware/software approach. An ideal scheme would exploit the           on each L2 cache miss [28]. The two negative effects of aggres-
+compiler’s knowledge of future reference patterns, and use a low-       sive prefetching—memory bus contention and cache pollution—are
+overhead channel to convey this information to a hardware prefetch-     addressed directly by reducing the priority of prefetches in mem-
+ing engine, which could then generate and schedule appropriate          ory bus request scheduling and in replacement decisions, respec-
+prefetches based on dynamic information regarding cache miss            tively. Unlike most prefetching schemes, which must maintain
+events and resource availability.                                       high prefetch accuracy to avoid degrading performance, SRP can
+    The limited previous work in this area has either exploited         identify and access prefetch candidates liberally without degrading
+prefetching for restricted classes of access patterns, or provided an   uniprocessor performance.
+interface that is overly general and complex. On the conservative          Figure 2 shows the memory system with the SRP engine that
+side, Gornish and Veidenbaum [18] let software select the number        forms the experimental baseline. The access prioritizer is the cen-
+of contiguous blocks to prefetch upon a miss, whereas Chen and          tral component of the SRP prefetching engine. It forwards requests
+Baer [11, 12] use the compiler to supply address and stride infor-      to the memory controller whenever the controller indicates that the
+mation to augment a reference prediction table. Skeppstedt and          memory channels are idle. The prioritizer forwards prefetch re-
+Dubois use a trap handler to trigger prefetching using similar in-      quests only when there are no outstanding demand misses from the
+formation [39]. Karlsson et al. [23] use prefetch arrays to enable      L2 cache. Demand misses thus encounter contention only from
+a hardware engine to perform a generalized variant of greedy and        prefetches the memory controller has already issued, and not from
+jump-pointer prefetching. Zhang and Torrellas [47] use the com-         prefetch candidates buffered in the prefetch queue. The miss status
+piler to mark blocks in memory as belonging to contiguous spatially     holding registers (MSHRs) track all outstanding accesses, regard-
+local regions or containing indirection pointers. Their scheme re-      less of type.
+quires additional bits in main memory and significant support in the       On an L2 cache miss, the prefetching engine allocates a new
+memory controller. Finally, fully programmable prefetch engines         entry in the prefetch queue representing the aligned memory region
+provide flexibility but require significant memory system support       containing the accessed block. Each prefetch queue entry contains
+and have not yet demonstrated that the required compiler support is     the base address of the region, a bit vector indicating the prefetch
+realistic [41, 43, 46].                                                 candidate blocks in the region, and an index field which identifies
+    GRP combines the advantages of both software and hardware           the next block within the region to prefetch. On the first miss to a
+prefetching in a scheme that is simple yet effective. It conveys        region, the engine initializes the bit vector to identify the blocks not
+sophisticated compiler analysis by associating a range of hints         already present in the L2 cache, and sets the index field to indicate
+the next prefetch candidate block after the miss block. It adds these
+new entries to the head of the queue, giving them priority over older,                                                        recursive
+and thus typically less relevant, entries. The queue is a fixed size                code in loop   spatial indirect pointer    pointer        size
+(32 in these experiments), and old entries fall off the bottom. On a            a[i]                                                     
+miss to a region already in the queue, it clears the bit corresponding
+                                                                                
+                                                                                a[b[i]]                      
+to the miss block, sets the index field to the next prefetch candidate           p; p+=c            
+block after the new miss block, and moves the prefetch bit vector               p f                                   
+entry to the head of the queue. In this work, we use a base region              p = p next                                      
+size of 4 KB and a cache block size of 64 bytes, resulting in a 64-bit
+vector and a 6-bit index field. Once the controller prefetches all the
+candidates, it deallocates the entry.                                     Table 2: Compiler Hints for Representative References in Loops
+   Although the access prioritizer practically eliminates perfor-
+mance loss from useless prefetches due to bandwidth contention,
+                                                                         it translates the virtual address to a physical address and forwards
+prefetching can still pollute the cache by generating a heavy
+                                                                         the address to the SRP prefetch queue, which allocates a region-
+prefetch stream. We address this issue by placing prefetched data
+                                                                         style entry for the prefetch. Because these pointer dereferences fre-
+in the lowest priority position of the replacement scheme. The con-
+                                                                         quently do not exhibit spatial locality, it sets only two bits in the en-
+troller puts prefetched data in the LRU position of the pertinent
+                                                                         try’s prefetch bit vector, indicating the block containing the prefetch
+cache set, and moves a block to the MRU position only if it is
+                                                                         address and its immediate successor (which prefetches data struc-
+referenced explicitly by the CPU. As a result, useless prefetches
+                                                          
+in an -way associative cache can displace at most one th of the
+                                                                         tures that span two cache blocks). We generalize this mechanism to
+                                                                         chase recursive pointers by scanning prefetched lines for addresses
+useful data in the cache. (We use a 4-way set associative cache in
+                                                                         and generating additional prefetches.
+our experiments.) The drawback is that the controller occasionally
+replaces potentially useful prefetches before they are referenced;
+                                                                         3.3   GRP: Incorporating Compiler Prefetch Hints
+however, previous work [28] shows this effect to be insignificant.
+As a final optimization, the queue issues prefetches first to those      This section describes the compiler hints used by GRP to improve
+DRAM banks that already have the needed page open.                       the precision of L2 spatial and pointer prefetching.
+   Scheduled region prefetching is highly effective at exploiting           The GRP compiler annotates load instructions with hints predict-
+spatial locality to improve performance [28]. However, it has two        ing whether spatial or pointer-based prefetches will be useful. In
+shortcomings addressed by GRP. First, SRP does not provide any           this study, the compiler conveys the hints with unused Alpha VAX-
+direct support for non-spatial reference patterns. We add a pure         format floating point load opcodes. The memory system propagates
+hardware pointer prefetching mechanism to address this issue (see        the load’s hint bits through the memory hierarchy with any result-
+Section 3.2). We also add an indirect array scheme that requires         ing request. Table 2 presents the five hints and shows typical rep-
+compiler support (see Section 3.3). However, for the SPEC bench-         resentative code snippets for each. We summarize the changes to
+marks, we find that spatial prefetching works as well as pointer         the hardware for each hint below, and then describe the pointers,
+schemes—even for pointer-intensive benchmarks—because of the             recursive pointers, and the indirection hardware in more detail.
+regular layout programmers use and memory allocation patterns
+for pointer data structures. Second, SRP can produce copious                   A spatial hint indicates that a reference is likely to exhibit
+amounts of excess memory traffic. Although this useless traffic                spatial locality. GRP initiates a spatial prefetch only when the
+does not reduce uniprocessor performance due to SRP’s prioriti-                L2 miss is marked spatial.
+zation techniques, it consumes energy, can cause contention from
+useful prefetches, and may reduce performance in a multiprocessor              A size hint combined with a loop upper bound indicates how
+environment. We thus use compiler hints for spatial and pointer ac-            many cache lines prefetch.
+cesses to gain both low bandwidth and high accuracy. We describe
+the GRP hardware modifications and hints below in Section 3.3,
+                                                                               An indirect hint indicates that the program is using an array to
+and the compiler analysis itself in Section 4.
+                                                                               index a second array. On an indirect L2 miss, GRP generates
+3.2       Hardware Prefetching of Pointer-Based Structures                     sets of prefetches based on the base address and the index
+                                                                               values.
+As discussed in Section 2, hardware prefetching for pointer-based
+structures is challenging. Instead of using complex hardware to rec-
+                                                                               A pointer hint indicates that the reference is to a structure
+ognize pointer traversal patterns or store pointer correlations, the
+                                                                               that contains one or more other pointers that the program is
+base GRP pointer prefetching scheme greedily generates a prefetch
+                                                                               likely to follow. If the reference is an L2 miss, GRP scans
+for any fetched value that falls within the ranges of legitimate heap
+                                                                               the returned block for pointer values and generates prefetches
+memory addresses. The GRP implementation performs a simple
+                                                                               only for those values.
+base-and-bounds check using the start and end addresses of the
+heap. In the Alpha ISA, pointers are aligned 8-byte entities; thus
+the engine must check only eight values out of each 64-byte cache              A recursive pointer hint indicates not only that the reference is
+block.1                                                                        to a structure that contains other pointers, but that the program
+   Once the controller identifies a datum as a possible pointer value,         recursively follows these pointers. On a recursive pointer L2
+                                                                               miss, GRP scans the returned data for pointer values, gener-
+      1
+     Cooksey et al. [14] describe a similar but more efficient pointer         ates prefetches for these addresses, and continues generating
+test using bit masks, and apply it to prefetching in the more chal-                                               
+                                                                               prefetches on the subsequent levels into the recursive data
+lenging IA32 environment.                                                      structure. (We use        in our experiments.)
+3.3.1   GRP for Pointer and Recursive Pointer References                  implementation could use a single instruction prior to a loop nest to
+GRP uses the same mechanism for pointer and recursive pointer             set the base address, and an additional hint bit on the b[i] loads
+hints. However, GRP applies the mechanism only to a pointer hint          to trigger the indirect prefetches. This approach would reduce exe-
+miss, and GRP applies it repeatedly to the resulting prefetched lines     cution overhead at the cost of limiting an application to prefetching
+for recursive pointer hints.                                              one single indirection array concurrently per base address/indirect
+                                                                          hint pair.
+    We implement GRP for pointer and recursive pointer hints by
+adding a three-bit counter to both the L2 MSHRs and prefetch
+                                                                          4     Compiler Analysis Framework
+queue entries to control pointer and recursive pointer prefetching
+uniformly. GRP initializes the counter on the L2 miss: for pointers,      This section describes the analyses for the five classes of hints (spa-
+it sets the value to one, and for recursive pointers, it sets the value   tial, size, indirect, pointer, recursive pointer) that guide the L2
+to six. Thus the only difference between a pointer and recursive          prefetching engine. We implement these analyses in the Scale com-
+pointer prefetching is their initial counter value.                       piler and use it to generate these hints automatically for both C and
+    When GRP fetches a pointer hinted missing line, it starts the         Fortran codes.
+pointer prefetching engine on the returned line. The engine checks
+                                                                          4.1    Spatial Locality Analysis for Arrays
+the counter. If it is zero, it stops queuing prefetches. Otherwise, it
+decrements the counter, and queues prefetches for pointers in the         In GRP, the compiler predicts which misses truly have spatial lo-
+returned line. We prefetch two cache blocks for each pointer based        cality, examining arrays in Fortran or C, and spatial pointer ac-
+on our statistics that the typical structure size in SPEC benchmarks      cesses to structures in C. The compiler uses locality analysis to
+is less than 64 bytes (one L2 cache block in our configuration). Two      mark references with the spatial hint annotation, and the compiler
+blocks are sufficient to cover structure alignment. The engine thus       back-end augments the special load instruction with a spatial hint.
+terminates after one level for pointers and six levels for recursive      The prefetch engine then only prefetches misses with marked spa-
+prefetching.2                                                             tial references and does not prefetch misses without spatial marks.
+                                                                          We describe our array analysis and then spatial pointer analysis.
+3.3.2   GRP for Variable-Size Region Prefetching
+                                                                              We augment prior work that statically detects spatial locality by
+GRP by default prefetches the same fixed region size as SRP. If           extending dependence testing [32, 44]. Dependence testing first
+the spatial reuse of a reference does not span the default region         finds induction variables and then detects when the spatial dimen-
+size, prefetching wastes bandwidth. We enhanced GRP to allow              sion (the row in C, the column in Fortran) is accessed as a function
+the compiler to control region sizes for references in singly nested      of the index variable, and whether it is the inner or outer nesting
+loops. The compiler computes the loop upper bound for the primary         level. The dependence testing detects locality only for affine sub-
+induction variable and conveys the bound to the hardware using a          scription expressions, i.e., linear functions of loop induction vari-
+special instruction. The compiler encodes a coefficient for each          ables. Our approach marks references with either inner or outer
+spatial reference in the loop. On a miss, the prefetch engine uses        loop spatial locality. The typical array reference with spatial local-
+this bound and the coefficient to calculate the region size as loop       ity is accessed in its spatial dimension in an innermost loop. For
+bound    coefficient value.                                            example, we mark a(i,j) in Figure 3, assuming column-major For-
+3.3.3   GRP for Indirect Array References                                 tran storage. The compiler also marks arrays with spatial locality
+                                                                          that crosses larger distances within a deep nest or between two nests
+Two of the benchmarks from the SPEC2000 suite (vpr and bzip2)             (inter-nest reuse). We use the level 2 cache size as our upper bound
+incur a significant number of misses due to indirect array references     on the distance of the spatial reuse we mark, assuming that the level-
+of the form a[b[i]]. References to a are not amenable to spatial          2 cache has sufficient set associativity to avoid conflict misses and
+prefetching unless the b[i] values are clustered, which cannot be         exploit the reuse.
+determined statically. Pointer prefetching for these references is            If the compiler determines the loop bounds and step sizes, it can
+ineffective since the desired addresses are computed, not contained       compute the reuse distances accurately at compile time. For ar-
+in the memory as pointers. A specialized extension to GRP targets         rays with spatial intra- and inter-nest locality, it computes the reuse
+these patterns. A single indirect prefetch instruction conveys both       distances. It marks all array references with spatial locality with
+a base address (&a[0]), an element size (sizeof(a[0])), and               a known distance less than the level 2 cache size. When the com-
+an index array address (&b[i]) to the prefetching engine. The             piler does not know the reuse distances statically due to symbolic
+prefetch engine reads the cache block containing &b[i] and, for           loop bounds and uncertain executions paths, it estimates the reuse
+each word in the block, generates a prefetch address by adding the        distance based on the nesting level of the loop. The compiler is
+scaled value to &a[0]. GRP then forwards these addresses to the           conservative when reuse distance is unknown; we mark a reference
+prefetch queue, as in the pointer prefetching scheme. Currently,          as spatial only if its spatial reuse is in the innermost enclosing loop.
+we assume the index array element size (sizeof(b[0])) is 4,                   The above analysis works well for Fortran arrays and heap arrays
+which is typical on most systems, although the element size could         in C if the array elements are referenced as subscript expressions.
+be included in the instruction if necessary.                              We handle heap arrays in C using the same analysis. In Figure 4, buf
+   This scheme is distinct from the mechanisms proposed in this pa-       is a heap array with type T**. In addition to detecting the obvious
+per because the information is encoded as a separate instruction, not                           
+                                                                                                                           !  #"$%
+                                                                          spatial reuse of             when is an loop induction variable, the
+a hint on an existing load. Although the introduction of an explicit      compiler is able to find the spatial reuse of                     when
+prefetch instruction adds overhead, the number of such instructions
+is small, and each one generates up to 16 prefetches (one for each
+                                                                          !       
+                                                                             and are constants.
+
+index within a cache block of the indirection array). An alternate        4.2    Spatial Locality Analysis for Pointer Dereferences
+   2
+     For mcf, we terminate recursion after three levels to make sim-      To prefetch pointer references that show spatial locality, as illus-
+ulation tractable.                                                        trated in Figure 5, the compiler performs loop induction variable
+                                                                                                                                                                                                                                   struct t       )
+                                                                                            T  &'&  buf ;
+                                                                                                                                                          & &                                                                  -
+                                                                                                                                                                                                                                     T      f;
+                                                                                                                                                                                                                                     struct t            &    next ;
+                                                                                            ...                                                        T p,      s;
+                                                                                                                                                                                                                                                  &
+                                                                                                                                                           && (                             )
+                                                                                            buf = malloc ( . . . ) ;                                   ...                                                                         struct     t       a;
+
+       i n t e g e r a [ N] [ M] , B[ N]
+                                                                                            ...
+                                                                                            buf [ i ] = malloc ( . . . ) ;
+                                                                                                                                                       for ( ; p
+                                                                                                                                                         /
+                                                                                                                                                                     s ; p += c )
+                                                                                                                                                             if T is a primary type                  &   /
+                                                                                                                                                                                                                                             *.*,+ + )
+                                                                                                                                                                                                                                   while ( . . . )
+       do j = 1 , m                                                                         ...
+                                                                                                                   ((                                   &
+                                                                                                                                                       ... p . . . ;
+                                                                                                                                                                                                &                                    ... a         f ...;
+
+                                                                                                                                                       - *,+                                                                   -
+         do i = 1 , n                                                                       f o r ( i = 0 ; i m; i ++)                                 /   if T is a structure    /                                                 a = a next ;
+              ... a( i , j )...                                                               f o r ( j = 0 ; j n ; j ++)                              ... p f ...;                                                                  ...
+              . . . c(b( i ), j ) ) . . .                                                            . . . buf [ i ] [ j ] . . .
+
+
+
+  Figure 3: Fortran Array                                                           Figure 4: C Heap Array                                             Figure 5: C Induction Pointer                             Figure 6: C Recursive Pointer
+
+
+
+) &
+g en era te s pat ia l hi nts ()
+
+  /  recognize induction variables including                                                                   pointers   &       /
+                                                                                                                                                             )   generate pointe r hints ()
+
+                                                                                                                                                                       for ( each f i e l d a c c e s s )    )
+  /&
+  induction variable recognition ();
+     perform dependence t e s t i n g
+  dependence testing ();
+                                      /                                 &                                                                                                i f ( a p o i n t e r f i e l d from t h e same s t r u c t u r e
+                                                                                                                                                                               i s a c c e s s e d i n t h e same l o o p )
+                                                                                                                                                                            mark t h e f i e l d a c c e s s a s p o i n t e r ;
+
+
+            &
+  for ( each loop )                                    )                                &                                                                          -
+                                                                                                                                                                         if ( the f i e l d access updates a r e c u r r e n t p o i n t e r )
+                                                                                                                                                                            mark t h e f i e l d a c c e s s a s r e c u r s i v e p o i n t e r ;
+    /     generate basic s patial hints                /
+    f o r ( e a c h memory r e f e r e n c e r i n t h e l o o p )
+        i f ( r i s an a r r a y r e f e r e n c e )                            )                              )                                                       f o r ( e a c h a r r a y r e f e r e n c e marked a s s p a t i a l
+                                                                                                                                                                                                                                                         -)
+                                                                                                                                                             - -
+            i f ( r has s p a t i a l reuse in the e n c l o s i n g innermost                                                            loop )                           i f ( t h e r e f e r e n c e p o i n t s t o a heap a r r a y )
+               mark r
+            else
+                          spatial ;
+                                    )                                                                                                                                         mark t h e r e f e r e n c e a s p o i n t e r ;
+
+
+                                                                    (
+               compute t h e r e u s e d i s t a n c e f o r r i f a p p l i c a b l e ;
+
+                    -/-
+                if ( reuse d i s t a n c e     the l e v e l 2 cache s i z e )
+                  mark r s p a t i a l ;                                                                                                                         Figure 8: Algorithm generating pointer and recursive pointer hints
+
+        -
+                    i f ( r i s an l o o p i n d u c t i o n                 pointer )
+
+                                                                                                                                                             4 , as described in Section 3.3.
+                       mark r s p a t i a l ;
+
+
+        /   &)
+             p r o p a g a t e s p a t i a l h i n t s for loop i n d u c t i o n p o i n t e r s                                     &    /
+        do
+           f o r ( e a c h memory r e f e r e n c e r )                             )                                                                        4.4                Variable-Size Region Analysis
+                                            &
+               i f ( r i s a loop i n d u c t i o n p o i n t e r )
+                   mark r a s s p a t i a l ;
+                                                           *,+                                                                )                              The compiler detects and marks array references within singly
+                -                                *0+
+               e l s e i f ( r i s a f && a i s marked a s s p a t i a l )
+
+                                                                                                                                                                                                        ! 5  "<4=6
+                                                                                                                                                             nested loops for variable-size region prefetching. For an array ac-
+
+-- -                                                                                                                                                                                                                                                                       ;
+                   mark a f a s s p a t i a l ;
+                                                                                                                                                             cess with a pattern of               and an array element size of ,
+                    w h i l e ( no new h i n t s                 generated );
+                                                                                                                                                                                                       ;                                                      >       >?A@
+                                                                                                                                                                                                    ;
+                                                                                                                                                             the compiler encodes        into a three-bit value such that
+                                                                                                                                                                          B'C
+                                                                                                                                                             and is closest to       . We reserve the encoding value 7 for fixed-
+                              Figure 7: Algorithm generating spatial hints                                                                                   size region prefetching. The compiler marks the upper bound of
+                                                                                                                                                                                                                 
+                                                                                                                                                             the loop induction variable . The two hints are used to control the
+                                                                                                                                                             region size as described in Section 3.3.
+recognition on pointers that are repeatedly incremented by a con-
+stant. The type T in Figure 4 and Figure 5 does not have to be                                                                                               4.5                Pointer and Recursive Pointer Analysis
+
+spatial hints for                                 21      1 3
+a primary type. We treat pointer p as a special integer, and insert
+                     or        , if constant c is small. This paper’s
+                                                                                                                                                             As with spatial locality, the compiler can improve the accuracy of
+                                                                                                                                                             hardware-based pointer prefetching by restricting it to misses on a
+analysis on L2 cache misses shows almost all spatial reuses in C
+                                                                                                                                                             load to a field from a structure that contains a pointer or recursive
+code are covered by regular spatially local array references along
+                                                                                                                                                             field. We mark a field reference as pointer if a pointer field from
+with the cases in Figure 4 and Figure 5.
+                                                                                                                                                             the same structure is accessed in the same loop. We mark a pointer
+   Figure 7 summarizes the algorithm used for generating spatial
+                                                                                                                                                             update to be recursive if it updates itself in a loop with an object
+hints for both arrays and spatial pointer accesses. The first part of
+the algorithm inserts the spatial hints for arrays and loop induction
+                                                                                                                                                             of the same data type. For example, in Figure 6, is updated with                                      !
+                                                                                                                                                             its next field which points to a structure of the same type struct t.
+pointers, and the second part propagates spatial hints to the uses of
+                                                                                                                                                             This idiom analysis simply identifies pointer updates in a loop that
+loop induction pointers. This algorithm is intra-procedural and flow
+                                                                                                                                                             use a field with the same type and marks them as recursive pointer
+insensitive, and it marks only references enclosed in loops.
+                                                                                                                                                             updates.
+4.3             Indirect Analysis                                                                                                                                We mark pointer accesses with the spatial hint for references to
+The compiler also detects and marks indirect array accesses, such                                                                                            arrays of pointers. For example, Figure 4 shows an array refer-
+   450576%896                                                                                                                                                                D
+                                                                                                                                                             ence buf , whose access pattern results in a spatial hint from the
+                                                !5:  0576/";6
+as           in Figure 3. In particular, it looks for the access pattern
+in the form of                    where and are constants, and                                   :         ;                                                compiler. Furthermore, each buf points to a heap array, so the  D
+is a loop induction variable. Dependence testing detects the spatial                                                                                         compiler marks it with the pointer hint as well. GRP will then use
+reuse on                  0576
+               in the standard way. We add a simple analysis that                                                                                            the address to prefetch the pointed-to array.
+detects when a sequentially accessed array is used as an index into                                                                                              The algorithm to generate pointer and recursive pointer reference
+                                        4
+another array ( in this example), and generates an indirect prefetch                                                                                         hints is shown in Figure 8. It is complementary to the spatial mark-
+instruction using the address of        and the base address of array       0576                                                                          ing algorithm for pointers shown in Figure 7.
+                   3
+
+
+
+
+                   2                                                                                                                        Perfect L2
+                                                                                                                                            Base
+                                                                                                                                            Pointer
+             IPC
+
+
+
+
+                                                                                                                                            Recursive
+                                                                                                                                            SRP
+                                                                                                                                            SRP + Pointer
+
+                   1
+
+
+
+
+                   0
+                             gap             vpr          twolf        parser        mcf   sphinx        equake    art       mean
+                                                             Figure 9: Performance gains from pointer prefetching
+
+
+    Benchmark          mem insts   spatial     pointer   recursive   ratio(%)   indirect
+    164.gzip              1873        433         268            0       37.1         9
+                                                                                           Alpha-ISA and configure the simulator as a 1.6 GHZ, 4-way issue,
+    168.wupwise             507       152            0           0       30.0         0    64-entry RUU (reorder buffer), out-of-order core with 64K 2-way
+    171.swim                250       115            0           0       46.0         0    split level one caches and a unified 4-way 1MB level 2 cache. This
+    172.mgrid               314       232            0           0       73.9         3
+    173.applu             1491        858            0           0       57.5         0    cache hierarchy is combined with an effective 800-Mhz, 4-channel
+    175.vpr               4230      1001          682           74       33.8        84    Rambus memory system. The L1 and L2 latencies are 3 and 12
+    177.mesa             26777      4532         4419           76       32.8         9
+    179.art               1016        732         278            0       77.6         0
+                                                                                           cycles 3 , respectively. Each cache contains 8 MSHRs. For SRP, the
+    181.mcf                 845       168         287         201        60.8         0    prefetching queue size is 32 and uses LIFO scheduling. The stride
+    183.equake            1679        597         473            0       51.3         7
+    186.crafty           11702      1994          736            0       21.6         5
+                                                                                           predictor [38] uses a 4-way history table with 1K entries. There are
+    188.ammp              6271      1043         1158            0       33.2         5    8 entries in each of 8 streaming buffers sharing the history table.
+    197.parser            4090        915         932        1263        70.2         2    Finally, we use the SimPoint [37] tool set to select a representative
+    254.gap              29781      5102        11243            0       52.6        36
+    256.bzip2               698       279          59            0       48.3        14    starting point beyond the program’s initialization phase. We simu-
+    300.twolf            12397      2080         2577        1398        45.1        38    late for 200M instructions from that point.
+    301.apsi              3225      1001             0           0       31.0         0
+    sphinx                6335      2211         1129         364        46.8       106       We use the 17 SPEC CPU2000 C and Fortran benchmarks that
+                                                                                           the Scale infrastructure is able to compile correctly, plus Sphinx, a
+        Table 3: Number of compiler hints for each benchmark                               speech recognition application [27]. Table 3 lists these benchmarks,
+                                                                                           along with statistics on memory instructions and the number and
+                                                                                           type of compiler hints generated. The second column contains the
+5     Experimental Evaluation
+                                                                                           total number of static memory reference instructions. Columns 3
+In this section, we compare the performance benefits of SRP, GRP,                          to 5 show the number of instructions the compiler marks as spatial,
+and unified stride prefetching for the SPEC CPU2000 benchmarks,                            pointer, and recursive. (Note that the compiler can mark an instruc-
+and one additional benchmark. We demonstrate that GRP provides                             tion both spatial and pointer.) Column 6 lists the fraction of static
+a compelling balance between higher performance and increased                              memory operations with hints, and Column 7 shows the static num-
+memory traffic among the three prefetching techniques. We demon-                           ber of indirect prefetch instructions. We do not present the results
+strate the effectiveness of the compiler generated size information,                       for crafty in subsequent results because its L2 miss rate is negligible
+and the sensitivity of our results to the compiler’s heuristic for com-                    (0.4%).
+puting the useful distance of spatial locality. We conclude with a
+discussion of the characteristics of the remaining benchmarks for                          5.2       Comparison of Stride Prefetching, SRP, and GRP
+which GRP does not eliminate main memory accesses as a signifi-
+                                                                                           In this section, we first present the effects of both hardware pointer
+cant loss of performance.
+                                                                                           and recursive pointer prefetching. We show that explicit pointer
+5.1     Experimental Methodology                                                           prefetching is generally subsumed by aggressive spatial prefetching
+                                                                                           (SRP or GRP). We then compare stride prefetching with SRP and
+The Scale compiler infrastructure inserts the prefetch hints [3]. It                       GRP. GRP uses all the compiler analysis including variable region
+performs a number of scalar optimizations such as constant propa-                          sizes. The end of this section compares variable and fixed region
+gation and common subexpression elimination. It compiles C and                             sizes, and finds variable sizes decrease bandwidth requirements for
+Fortran 77 code to Alpha assembly code, with the memory hints an-                          3 programs.
+notated as comments. We then post-process the annotated assembly                              We apply pointer prefetching alone to all benchmarks, which un-
+code to generate binaries containing compiler-hinted instructions.                         surprisingly has little effect on the Fortran benchmarks. Eight C
+   We simulate program binaries on a version of sim-outorder [4]                           benchmarks show a significant performance improvement, notably
+with scheduled region prefetching (SRP) [28] added to the simula-                          a 48.3% boost for equake, a 15.9% increase for mcf, and a 14.4%
+tor. We added the GRP hardware pointer prefetching mechanisms,
+                                                                                                 3
+and modified the simulator to accept compiler hints and schedule                               We mistakenly put 1 and 16 in our published version. But they
+prefetches accordingly if the binaries contain the hints. We use the                       do not affect our conclusions.
+          3
+
+
+
+
+          2                                                                                                                       Perfect L2
+                                                                                                                                  Base
+    IPC
+
+
+
+
+                                                                                                                                  Stride
+                                                                                                                                  SRP
+                                                                                                                                  GRP
+
+          1
+
+
+
+
+          0
+               gzip         gap         twolf        vpr         bzip2     parser        mcf           sphinx      mean
+                      Figure 10: Performance gains from region prefetching and stride prefetching for integer benchmarks
+
+
+improvement for sphinx as shown in Figure 9. For equake, the                                   GRP Traffic       Region Size Distribution
+performance gain is not from the pointer structure traversal as ex-                            Var  Fix         2      4      8        64
+pected. It stems instead from prefetching arrays of pointers from the               mesa       1.11 6.55        90.3 9.5      0.1      0.1
+heap arrays. Similarly, in mcf, the performance gain comes from a                   bzip2      1.47 4.97        76.8 22.4 0.0          0.8
+loop which sequentially resets a field in each object in a heap array.              sphinx     2.09 11.66       82.9 1.0      16.1 0.0
+Pointer prefetching happens to prefetch the objects accessed later.
+                                                                                               Table 4: GRP/Var versus GRP/Fix
+Pointer prefetching outperforms SRP only for twolf and sphinx, by
+2%. In all other cases, SRP performs much better than pointer or
+recursive prefetching. Applying SRP and pointer prefetching to-
+                                                                          5.3   Prefetching Accuracy, Coverage, and Memory Traffic
+gether gives little benefit and sometimes degrades the performance
+due to much higher bandwidth consumption, which can result in             Although SRP and GRP provide comparable performance, SRP
+fewer successful prefetches. GRP with pointer and recursive hints         consumes much more bandwidth than does GRP. Figure 12 shows
+shows performance gains similar to SRP for the seven benchmarks,          the normalized memory traffic for the three prefetch schemes. SRP
+but with lower average memory traffic .                                   increases memory traffic from 2% to a factor of 25.5 times over no
+                                                                          prefetching. GRP generates a mean of only 23.0% additional traffic
+    Figure 10 and Figure 11 show the performance of SRP, GRP, and
+                                                                          compared to no prefetching, versus an SRP increase of 180%. GRP
+stride prefetching for integer and floating point benchmarks respec-
+                                                                          eliminates over 20% of the total memory traffic for ten of the sev-
+tively. In most cases and on average, SRP and GRP both perform
+                                                                          enteen benchmarks compared to SRP, and over 50% for six bench-
+better than stride prefetching. For 10 benchmarks, SRP improves
+                                                                          marks. The traffic for stride prefetching is 11% less than GRP, but
+performance to within 10% of a perfect L2. For swim, GRP per-
+                                                                          stride prefetching only achieves 69% of the performance improve-
+forms over 10% better than SRP due to its lower traffic. Due to the
+                                                                          ment that GRP does.
+indirect prefetching, GRP is 4% faster than SRP for bzip2. It also
+outperforms SRP for art and ammp. For gzip, mcf, parser, and gap,            Compared to GRP/Fix, GRP (GRP/Var) cuts memory traffic sig-
+the IPC of GRP is at least 2% less than that of SRP. A typical reason     nificantly for three benchmarks while showing the same traffic for
+is that the compiler misses locality outside of loops.                    the others. Table 4 lists the three benchmarks and their traffic in-
+                                                                          crease compared to no prefetching in columns one through three.
+   Although we detect indirect references in 11 benchmarks, indi-         The subsequent four columns show the distribution of prefetching
+rect prefetching shows significant speedups for only vpr and bzip2.       requests by the region sizes (no regions of 16 or 32 blocks are pro-
+For vpr, the indirect references show high spatial locality. SRP thus     duced). We observe that GRP/Var only prefetches one additional
+performs as well as GRP, but with 50% additional traffic. bzip2 is        block (region size = 2) in most cases due to the poor spatial locality
+one of the benchmarks where SRP does not perform well. With in-           of these references.
+direct prefetching, the gap from a perfect L2 is reduced to 12.5%            Table 5 shows both prefetching accuracies and coverage for the
+from 15.9%, with only 15% of the memory traffic of SRP.                   three prefetching techniques that we implemented. We use the per-
+   In terms of both performance and memory traffic, GRP using a           centage reduction in L2 misses as a metric for coverage. On aver-
+variable region size (GRP/Var) and a fixed region size (GRP/Fix)          age, SRP provides the best coverage and the worst accuracy. Stride
+only differ in three benchmarks, mesa, bzip2, and sphinx. Table 4         prefetching trades the lowest coverage with the highest accuracy.
+shows that for mesa and bzip2, both strategies deliver roughly the        GRP obtains the best of both worlds: an accuracy that is closer to
+same performance while GRP/Var results in much less traffic than          stride prefetching, but coverage closer to that of SRP.
+GRP/Fix, as we discuss in Section 5.3. For sphinx, GRP/Var has               Since the normalized traffic in Figure 12 does not reflect the
+5.8% lower performance than GRP/Fix, but benefits from an 82%             absolute bandwidth consumption of each benchmark, we also list
+traffic reduction. The compiler cannot guarantee that there is spa-       the actual memory traffic, in bytes, of each benchmark in Table 5.
+tial locality, so it chooses small prefetch regions, and misses some      On average, SRP consumes 99.8% more memory bandwidth over
+opportunities.                                                            the no-prefetching system. GRP and stride prefetching produce a
+                     3
+
+
+
+
+                     2                                                                                                                                                                                      Perfect L2
+                                                                                                                                                                                                            Base
+IPC
+
+
+
+
+                                                                                                                                                                                                            Stride
+                                                                                                                                                                                                            SRP
+                                                                                                                                                                                                            GRP
+
+                     1
+
+
+
+
+                     0
+                          mesa           apsi               ammp             wupwise           mgrid          applu           equake          art                  swim           mean
+                                Figure 11: Performance gains from region prefetching and stride prefetching for floating-point benchmarks
+
+
+
+
+                         25.5                                    14.0                           3.9    15.9       9.7                         11.9
+
+                     3
+Normalized Traffic
+
+
+
+
+                     2
+                                                                                                                                                                                                                Stride
+                                                                                                                                                                                                                SRP
+                                                                                                                                                                                                                GRP
+
+
+
+                     1
+
+
+
+
+                     0
+                         m
+
+
+                                   ap
+
+
+                                         gz
+
+
+                                                       ga
+
+
+                                                                am
+
+
+                                                                           w
+
+
+                                                                                      m
+
+
+                                                                                               vp
+
+
+                                                                                                       tw
+
+
+                                                                                                                  bz
+
+
+                                                                                                                           pa
+
+
+                                                                                                                                   m
+
+
+                                                                                                                                              sp
+
+
+                                                                                                                                                         ap
+
+
+                                                                                                                                                                    eq
+
+
+                                                                                                                                                                                 ar
+
+
+                                                                                                                                                                                          sw
+
+
+                                                                                                                                                                                                 m
+                                                                            up
+                         es
+
+
+
+
+                                                                                      gr
+
+
+
+
+                                                                                                                                    cf
+
+
+
+
+                                                                                                                                                                                                  ea
+                                                                                                                                                                                 t
+                                                                                                        ol
+                                           ip
+
+
+
+
+                                                                                                r
+
+
+
+
+                                                                                                                  ip
+
+
+
+
+                                                                                                                                               hi
+                                    si
+
+
+
+
+                                                        p
+
+
+
+
+                                                                                                                             rs
+
+
+
+
+                                                                                                                                                          pl
+
+
+                                                                                                                                                                      ua
+
+
+
+
+                                                                                                                                                                                            im
+                                                                   m
+
+
+
+
+                                                                                          id
+
+
+
+
+                                                                                                         f
+                                                                               w
+
+
+
+
+                                                                                                                      2
+
+
+
+
+                                                                                                                                                    nx
+                             a
+
+
+
+
+                                                                                                                                                               u
+                                                                                                                              er
+
+
+
+
+                                                                                                                                                                                                     n
+                                                                       p
+
+
+
+
+                                                                                                                                                                          ke
+                                                                               is
+                                                                                 e
+
+
+
+
+                                                                                           Figure 12: Normalized traffic
+
+
+
+
+                         Benchmark               Base                                      Stride                                   SRP                                                GRP
+                                         Miss Rate           Traffic       Coverage       Accuracy      Traffic        Coverage    Accuracy          Traffic        Coverage          Accuracy    Traffic
+                         mesa                    9.3           51k             60.9            93.2       53K              29.3         0.8          1305K                43.5            70.1      56K
+                         apsi                   25.0           85K             79.2            99.8       85K              96.4        95.8            86K                88.8            97.6      84K
+                         gzip                   25.3          182K             65.2            99.8      183K              76.3        94.4           192K                 0.0            91.2     182K
+                         gap                    46.8          179K             66.7            99.6      179K              97.6        86.3           202K                52.8            99.3     179K
+                         ammp                   15.3          594K             -7.8            23.1      982K              -7.8         0.9          8340K                 0.7            27.5     665K
+                         wupwise                73.1          486K             42.5            75.4      553K              96.3        60.2           788K                96.2            61.6     772K
+                         mgrid                  43.9          504K             77.9            89.9      544K              87.5        80.7           597K                85.6            81.7     589K
+                         vpr                    40.2          730K             15.9            85.5      749K              86.3        27.6          2820K                76.4            49.4    1399K
+                         twolf                  12.6         1125K              0.0            27.3     1167K              15.9         4.2         17878K                 3.2            28.7    1575K
+                         bzip2                  22.4         1163K              8.4            85.7     1186K              27.2         5.3         11255K                37.1            51.6    1713K
+                         parser                 33.4         1450K             67.4            75.0     1756K              77.5        44.7          2804K                56.0            82.5    1625K
+                         mcf                    61.6        43901K             51.0            80.5    49284K              24.7        53.9         65263K                 5.4            51.1   52656K
+                         sphinx                 65.9         1208K             12.6            27.3     1449K              42.8         4.7         14429K                21.7             20     2521K
+                         applu                  58.0         2578K             62.6            95.7     2631K              96.9        89.0          2810K                96.9            89.2    2806K
+                         equake                 59.8         3628K             75.6            99.2     3649K              96.3        86.9          4127K                95.2            95.3    3790K
+                         art                    44.4        20229K             17.3            99.7    21189K               8.6        40.6         28632K                20.9            78.0   23031K
+                         swim                   57.8         7861K             34.6            70.8     8966K              67.3        65.2         10249K                68.2            96.5    8021K
+                         average                40.9        5057K              42.9            78.1    5565K               59.9        49.5         10105K                49.9            68.9   5981K
+
+                                                                   Table 5: Prefetching accuracy, coverage and memory traffic
+ Benchmark    GRP Performance Gap (%)                   L2 Miss Causes       Ratio (%)   hardware prefetching, the compiler analysis saves bandwidth by
+ 171.swim                       38.32             transpose array access         92.08
+ 179.art                        56.07                         bandwidth          24.26   avoiding useless prefetches to addresses with little locality.
+                                            transpose heap array access          35.92      We also extend the hardware prefetching engine to address
+ 181.mcf                        63.94                      tree traversal        60.70
+ 188.ammp                       15.18                linked list traversal       88.64
+                                                                                         pointer-based applications by aggressively prefetching any datum
+ 256.bzip2                      15.89           indirect array reference         49.68   that appears to be a pointer. As with spatial locality, we see sig-
+ 300.twolf                      22.40   linked list and random pointers          35.37
+ sphinx                         31.28                  hash table lookup         28.79
+                                                                                         nificant traffic benefits from having the compiler indicate pointer
+                                                                                         and recursive-pointer loads. However, for the SPEC2000 bench-
+                Table 6: Level 2 miss characteristics                                    marks, the aggressive spatial locality analysis subsumes the pointer
+                                                                                         prefetches for most benchmarks, due to spatially local layouts of
+18.3% and 10.1% increase in memory requests, respectively.                               pointer-connected objects. Even Sphinx, which we chose for its
+                                                                                         sparse irregular pointer behavior, benefits very little from pointer
+5.4   Compiler Sensitivity                                                               prefetching. It still remains to be seen whether this phenomenon
+We explored the sensitivity of our results to the compiler policy by                     will dominate the benchmarks that other researchers have used to
+implementing both more and less aggressive variants of the scheme                        show the importance of greedy pointer hardware prefetching [14].
+described in Section 4. The more aggressive policy marks a refer-                           With solely the spatial and indirect hints, the GRP com-
+ence as spatial even its reuse distance is greater than the L2 cache                     piler/hardware prefetch framework eliminates most L2-related
+size. The more conservative scheme marks a reference as spatial                          stalls across the SPEC2000 suite, with comparatively modest in-
+only when its reuse sits in the innermost loop. Compared to our                          creases in traffic. The remaining three benchmarks that are limited
+default GRP policy, the aggressive policy degrades performance by                        by L2 memory system performance are either bandwidth bound
+2% overall and increases traffic by an additional 5%. The conser-                        (art) or contain many irregular linked-lists and/or tree traversals
+vative scheme shows little effect on memory traffic compared with                        (mcf, twolf) where memory-side prefetching may help. For the
+GRP, but causes moderate performance losses across four bench-                           rest of the SPEC2000 suite, however, the GRP approach eliminates
+marks: applu, art, equake, and apsi, and reduces performance by                          physical memory accesses as a performance bottleneck while mak-
+an average of 5% across the benchmark suite.                                             ing significantly more efficient use of the system bandwidth than
+                                                                                         similarly aggressive prefetch engines.
+5.5   Remaining L2 Misses
+                                                                                         Acknowledgments
+Seven of the benchmarks show a gap of greater than 15% between
+                                                                                         This work is supported by NSF ITR grant CCR-0085792, NSF
+SRP and a perfect L2. We list them in Table 6 with a description of
+                                                                                         grants CCR-0105503, ACI-0203895, and CCR-9985109, NSF Re-
+the key causes of the misses, obtained by analyzing the source.
+                                                                                         search Instrumentation grant EIA-9985991, the Defense Advanced
+   With its more accurate prefetching, coupled with indirect ac-                         Research Projects Agency under contracts F30602-98-1-0101 and
+cesses and pointer prefetching, GRP is able to bring bzip2 and                           F33615-01-C-1892, grants from the Intel Research Council, an
+ammp under 15%. Swim has a low IPC due to pathological array                             IBM University Partnership award and other gifts from IBM, and
+conflicts. We can prevent that benchmark from being memory-                              two Alfred P. Sloan Research Fellowships.
+bound by manually applying loop distribution and loop permuta-
+tion [8]. We observe that art is bandwidth bound. While GRP re-                          References
+duces traffic and increases performance over SRP by 10.7%, the                            [1] T. Alexander and G. Kedem. Distributed predictive cache design for
+                                                                                              high performance memory system. In Second International Sympo-
+performance gap is still large. Larger caches and wider channels                              sium on High Performance Computer Architecture, Feb. 1996.
+improve art appreciably. For sphinx, the hash table lookup usu-
+                                                                                          [2] M. Annavaram, J. M. Patel, and E. S. Davidson. Data prefetching by
+ally touches only a small number of adjacent hash slots in a short                            dependence graph precomputation. In Proceedings of the 28th An-
+loop. Prefetches occur simply too late to tolerate the latencies. Fi-                         nual International Symposium on Computer Architecture, pages 52–
+nally, mcf and twolf contain heavy traversals of short linked lists and                       61, 2001.
+tree data structures, making them poor matches for the GRP pointer                        [3] Architecture and Language Implementation Group, University of
+prefetching or spatially-based schemes.                                                       Massachusetts, Amherst. Scale compiler infrastructure. In http://ali-
+                                                                                              www.cs.umass.edu/Scale.
+6 Conclusions and Future Work                                                             [4] D. Burger and T. M. Austin. The simplescalar tool set version 2.0.
+Purely compiler-based prefetching techniques have difficulty man-                             Technical Report 1342, Computer Sciences Department, University
+                                                                                              of Wisconsin, June 1997.
+aging the large latencies of modern main memories. Previous work
+shows that aggressive hardware prefetching addresses this issue ef-                       [5] B. Cahoon and K. S. McKinley. Data flow analysis for software
+                                                                                              prefetching linked data structures in Java. In Proceedings of the
+fectively for applications with spatial locality, at the cost of poten-                       2001 International Conference on Parallel Architectures and Com-
+tially significant increases in memory bandwidth. As the number of                            piler Techniques, pages 280–291, Barcelona, Spain, Sept. 2001.
+processors per chip increases, this bandwidth will become increas-                        [6] B. Cahoon and K. S. McKinley. Simple and effective array prefetching
+ingly precious.                                                                               for Java. In ACM Java Grande, pages 86–95, Seattle, WA, Nov. 2002.
+   This paper shows that a cooperative approach between compiler-                         [7] D. Callahan, K. Kennedy, and A. Porterfield. Software prefetching. In
+based analysis and hardware-based aggressive prefetching provides                             Proceedings of the Fourth International Conference on Architectural
+benefits comparable to aggressive hardware prefetching with much                              Support for Programming Languages and Operating Systems, pages
+lower traffic. Compiler techniques identify accesses that clearly                             40–52, Santa Clara, CA, Apr. 1991.
+possess spatial locality. Rather than use this information to at-                         [8] S. Carr, K. S. McKinley, and C. Tseng. Compiler optimizations for
+tempt to schedule software prefetches—with the resulting compli-                              improving data locality. In Proceedings of the Sixth International Con-
+                                                                                              ference on Architectural Support for Programming Languages and
+cations of providing timely prefetches while minimizing instruction                           Operating Systems, pages 252–262, San Jose, CA, Oct. 1994.
+overhead—our system simply passes this access-pattern informa-                            [9] M. Charney and A. Reeves. Generalized correlation-based hardware
+tion to a hardware prefetching engine. The engine then generates                              prefetching. Technical Report EE CEG 95-1, Cornell University, Feb.
+prefetches at the L2 cache with low overhead. Compared to pure                                1995.
+[10] T. Chen and J. Baer. Reducing memory latency via non-blocking and          [29] M. H. Lipasti, W. J. Schmidt, S. R. Kunkel, and R. R. Roediger.
+     prefetching caches. In Proceedings of the Fifth International Confer-           SPAID: Software prefetching in pointer- and call-intensive environ-
+     ence on Architectural Support for Programming Languages and Op-                 ments. In Proceedings of the 28th Annual IEEE/ACM International
+     erating Systems, pages 51–61, Boston, MA, Oct. 1992.                            Symposium on Microachitecture, pages 231–236, Nov. 1995.
+[11] T. Chen and J. Baer. Effective hardware based data prefetching. IEEE       [30] C. Luk and T. C. Mowry. Compiler-based prefetching for recursive
+     Transactions on Computers, 44(5):609–623, May 1995.                             data structures. In Proceedings of the Seventh International Confer-
+[12] T.-F. Chen. An effective programmable prefetch engine for high-                 ence on Architectural Support for Programming Languages and Op-
+     performance processors. In Proceedings of the 29th International                erating Systems, pages 222–233, Cambridge, MA, Oct. 1996.
+     Symposium on Microarchitecture, Ann Arbor, Michigan, Nov. 1995.            [31] C.-K. Luk. Tolerating memory latency through software-controlled
+[13] J. D. Collins, H. Wang, D. M. Tullsen, C. Hughes, Y.-F. Lee, D. Lav-            pre-execution on simultaneous multithreading processors. In Proceed-
+     ery, and J. P. Shen. Speculative precomputation: Long-range prefetch-           ings of the 28th International Symposium on Computer Architecture,
+     ing of delinquent loads. In Proceedings of the 28th International Sym-          pages 40–51, June 2001.
+     posium on Computer Architecture, pages 14–25, June 2001.                   [32] K. S. McKinley, S. Carr, and C. Tseng. Improving data locality with
+[14] R. Cooksey, S. Jordan, and D. Grunwald. A stateless, content-directed           loop transformations. ACM Transactions on Programming Languages
+     data prefetching mechanism. In Proceedings of the Tenth Annual                  and Systems, 18(4):424–453, July 1996.
+     International Conference on Architectural Support for Programming          [33] T. Mowry, M. S. Lam, and A. Gupta. Design and evaluation of a
+     Languages and Operating Systems, pages 279–290, San Jose, CA, Oc-               compiler algorithm for prefetching. In Proceedings of the Fifth Inter-
+     tober 2002.                                                                     national Conference on Architectural Support for Programming Lan-
+[15] F. Dahlgren, M. Dubois, and P. Stenstrom. Fixed and adaptive sequen-            guages and Operating Systems, pages 62–73, Boston, MA, Oct. 1992.
+     tial prefetching in shared-memory multiprocessors. In Proceedings of       [34] S. Palacharla and R. E. Kessler. Evaluating stream buffers as a sec-
+     the 1993 International Conference on Parallel Processing, pages 56–             ondary cache replacement. In Proceedings of the 21th International
+     63, St Charles, IL, 1993.                                                       Symposium on Computer Architecture, pages 24–33, Chicago, IL, Apr.
+[16] F. Dahlgren and P. Stenstrom. Effectiveness of hardware-based stride            1994.
+     and sequential prefetching in shared-memory multiprocessors. In First      [35] A. Roth, A. Moshovos, and G. S. Sohi. Dependence based prefetch-
+     International Symposium on High Performance Computer Architec-                  ing for linked data structures. In Proceeding of the Eighth Interna-
+     ture, pages 68–77, Raleigh, NC, Jan. 1995.                                      tional Conference on Architectural Support for Programming Lan-
+[17] S. Ghosh, M. Martonosi, and S. Malik. Precise miss analysis for pro-            guages and Operating Systems, pages 115–126, 1998.
+     gram transformations with caches of arbitrary associativity. In Pro-       [36] A. Roth and G. Sohi. Effective jump-pointer prefetching for linked
+     ceedings of the Eighth International Conference on Architectural Sup-           data structures. In Proceedings of the 26th International Symposium
+     port for Programming Languages and Operating Systems, pages 228–                on Computer Architecture, pages 111–121, Atlanta, GA, May 1999.
+     239, San Jose, CA, Oct. 1998.
+                                                                                [37] T. Sherwood, E. Perelman, and B. Calder. Basic block distribution
+[18] E. H. Gornish and A. V. Veidenbaum.            An integrated hard-
+                                                                                     analysis to find periodic behavior and simulation points in applica-
+     ware/software scheme for shared-memory multiprocessors. In Pro-
+                                                                                     tions. In Proceedings of the 2001 International Conference on Paral-
+     ceedings of the 1994 International Conference on Parallel Processing,
+                                                                                     lel Architectures and Compilation Techniques, pages 3–14, Barcelona,
+     pages 281–284, St Charles, IL, 1994.
+                                                                                     Spain, Sept. 2001.
+[19] C. J. Hughes and S. Adve. Memory-side prefetching for linked data
+     structures. Technical Report UIUCDCS-R-2001-2221, University of            [38] T. Sherwood, S. Sair, and B. Calder. Predictor-directed stream buffers.
+     Illinios, Urbana Champagne, May 2001.                                           In Proceedings of the 33rd International Symposium on Microarchi-
+                                                                                     tecture, pages 42–53, Monterey, California, Dec. 2000.
+[20] J. Huh, D. Burger, and S. W. Keckler. Exploring the design space of
+     future CMPs. In Proceedings of the 2001 International Conference on        [39] J. Skeppstedt and M. Dubois. Hybrid compiler/hardware prefetch-
+     Parallel A rchitectures and Compilation Techniques, pages 199–210,              ing for multiprocessors using low-overhead cache miss traps. In Pro-
+     Sep 2001.                                                                       ceedings of the 1997 International Conference on Parallel Processing,
+                                                                                     pages 298–307, Bloomington, IL, 1997.
+[21] D. Joseph and D. Grunwald. Prefetching using Markov predictors.
+     In Proceedings of the 24th Annual International Symposium on Com-          [40] A. J. Smith. Cache memories. Computing Surveys, 14(3):473–530,
+     puter Architecture, pages 252–263, 1997.                                        Sept. 1982.
+[22] N. P. Jouppi. Improving direct-mapped cache performance by the ad-         [41] Y. Solihin, J. Lee, and J. Torrellas. Using a user-level memory thread
+     dition of a small fully-associative cache and prefetch buffers. In Pro-         for correlation prefetching. In Proceedings of the 29th International
+     ceedings of the 17th International Symposium on Computer Architec-              Symposium on Computer Architecture, pages 171–182, May 2002.
+     ture, pages 364–373, Seattle, WA, June 1990.                               [42] S. T. Srinivasan and A. R. Lebeck. Load latency tolerance in dynam-
+[23] M. Karlsson, F. Dahlgren, and P. Sternstrom. A prefetching technique            ically scheduled processors. Journal of Instruction Level Parallelism,
+     for irregular accesses to linked data structures. In Sixth International        1:1–24, 1999.
+     Symposium on High Performance Computer Architecture, page 206,             [43] S. P. Vanderwiel and D. J. Lijia. A compiler-assisted data prefetch
+     Toulouse, France, Jan. 2000.                                                    controller. In Proceedings of International Conference on Computer
+[24] D. Kim and D. Yeung. Design and evaluation of compiler algorithms               Design, Austin, TX, 1999.
+     for pre-execution. In Proceedings of the Tenth International Confer-       [44] M. E. Wolf and M. Lam. A data locality optimizing algorithm. In
+     ence on Architectural Support for Programming Languages and Op-                 Proceedings of the SIGPLAN ’91 Conference on Programming Lan-
+     erating Systems, pages 159–170, San Jose, CA, Oct. 2002.                        guage Design and Implementation, pages 30–44, Toronto, Canada,
+[25] A. C. Klaiber and H. M. Levy. An architecture for software-controlled           June 1991.
+     data prefetching. In Proceedings of the 18th International Symposium
+                                                                                [45] Y. Wu. Efficient discovery of regular stride patterns in irregular por-
+     on Computer Architecture, pages 43–53, Toronto, Canada, May 1991.
+                                                                                     grams and its use in compiler prefetching. In Proceedings of the SIG-
+[26] A.-C. Lai, C. Fide, and B. Falsafi. Dead-block prediction and dead-             PLAN 2002 Conference on Programming Language Design and Im-
+     block correlating prefetchers. In Proceedings of the 28th International         plementation, pages 210–221, Berlin, Germany, June 2002.
+     Symposium on Computer Architecture, July 2001.
+                                                                                [46] C.-L. Yang and A. R. Lebeck. Push vs. pull: Data movement for
+[27] K.-F. Lee, H.-W. Hon, and R. Reddy. An overview of the SPHINX                   linked data structures. In Proceedings of the 1997 ACM International
+     speech recoginition system. In IEEE Transactions on Acoustics,                  Conference on Supercomputing, pages 176–186, May 2000.
+     Speech and Signal Precessing, volume 38(1), pages 35–44, 1990.
+                                                                                [47] Z. Zhang and T. Torrellas. Speeding up irregular applications in shared
+[28] W.-F. Lin, S. K. Reinhardt, and D. Burger. Reducing DRAM latencies              memory multiprocessors: Memory binding and group prefetching. In
+     with an integrated memory hierarchy design. In Proceedings of the               Proceedings of the 22nd International Symposium on Computer Ar-
+     7th International Symposium on High Performance Computer Archi-                 chitecture, pages 1–19, Santa Margherita Ligure, Italy, June 1995.
+     tecture, pages 301–312, Jan 2001.
+

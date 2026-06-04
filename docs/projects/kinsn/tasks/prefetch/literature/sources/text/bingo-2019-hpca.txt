@@ -1,0 +1,1519 @@
+                      2019 IEEE International Symposium on High Performance Computer Architecture (HPCA)
+
+
+
+
+                                       Bingo Spatial Data Prefetcher
+
+        Mohammad Bakhshalipour†‡                   Mehran Shakerinava†                Pejman Lotﬁ-Kamran‡                  Hamid Sarbazi-Azad†‡
+                                  † Department of Computer Engineering, Sharif University of Technology
+                         ‡ School of Computer Science, Institute for Research in Fundamental Sciences (IPM)
+
+
+
+    Abstract—Applications extensively use data objects with a                      continual growth of the datasets of applications (e.g., graph
+ regular and ﬁxed layout, which leads to the recurrence of                         processing and machine learning) have led to data sets of
+ access patterns over memory regions. Spatial data prefetching                     hundreds of gigabytes or even a few terabytes; several orders
+ techniques exploit this phenomenon to prefetch future memory
+ references and hide the long latency of DRAM accesses. While                      of magnitude larger than the largest possible cache on the
+ state-of-the-art spatial data prefetchers are effective at reducing               active die.
+ the number of data misses, we observe that there is still                            System architects have used various tools to bridge the
+ signiﬁcant room for improvement. To select an access pattern                      processor-memory performance gap. Data prefetching is one
+ for prefetching, existing spatial prefetchers associate observed                  of these tools that has demonstrated great potential for
+ access patterns to either a short event with a high probability of
+ recurrence or a long event with a low probability of recurrence.                  mitigating the latency of cache misses [11], [12], [13]. Data
+ Consequently, the prefetchers either offer low accuracy or lose                   prefetching is the act of predicting future memory accesses
+ signiﬁcant prediction opportunities.                                              and fetching those that are not in the cache before the pro-
+    We identify that associating the observed spatial patterns                     cessor explicitly asks for them, to hide the long delay of off-
+ to just a single event signiﬁcantly limits the effectiveness of                   chip accesses. Nowadays, almost every high-performance
+ spatial data prefetchers. In this paper, we make a case for
+ associating the observed spatial patterns to both short and long                  processor uses data prefetching (e.g., Intel Xeon Phi [14],
+ events to achieve high accuracy while not losing prediction                       AMD Opteron [15], and UltraSPARC III [16]), targeting
+ opportunities. We propose Bingo spatial data prefetcher in                        regular and/or irregular memory access patterns.
+ which short and long events are used to select the best access                       Spatial data prefetchers predict future memory accesses
+ pattern for prefetching. We propose a storage-efﬁcient design                     by relying on spatial address correlation: the similarity of
+ for Bingo in such a way that just one history table is needed to
+ maintain the association between the access patterns and the                      access patterns among multiple pages1 of memory. That is,
+ long and short events. Through a detailed evaluation of a set                     if a program has visited locations {X, Y, Z} of Page A,
+ of big-data applications, we show that Bingo improves system                      it is likely to touch the {X, Y, Z} locations of the same
+ performance by 60% over a baseline with no data prefetcher                        or similar pages in the future. Access patterns demonstrate
+ and 11% over the best-performing prior spatial data prefetcher.                   spatial correlation because applications use data objects with
+   Keywords-Big-Data Applications, Memory System, Data                             a regular and ﬁxed layout, and accesses reoccur when data
+ Prefetching, Spatial Correlation.                                                 structures are traversed [17], [18].
+                                                                                      Whenever an application requests a page, spatial data
+                           I. I NTRODUCTION                                        prefetchers (e.g., [18], [19], [20], [21]) observe all accesses
+    The long-latency off-chip memory accesses are a well-                          to the page, and record a footprint, indicating which blocks
+ known performance bottleneck for many big-data applica-                           of the page are used by the application. Then they assign the
+ tions. Due to the mismatch between the speed of a processor                       footprint to an event and store the event, f ootprint pair in
+ and the off-chip memory, the processor can easily get stalled                     a history table, in order to use the recorded footprint in the
+ for hundreds of cycles upon each DRAM access, losing sig-                         future, whenever the event reoccurs. The event is usually
+ niﬁcant performance potentials. Today’s highly-speculative                        extracted from the trigger access, i.e., the ﬁrst access to
+ and deeply-pipelined out-of-order processors can, at best,                        the page2 . Upon the recurrence of the same event, spatial
+ tolerate primary data cache misses, and incur considerable                        prefetchers use the recorded footprint to prefetch future
+ performance penalties upon off-chip memory accesses [1],                          memory references of the currently requested page.
+ [2], [3], [4], [5], [6], [7].                                                        Spatial data prefetchers, as compared to other types of
+    Traditionally, processor designers have increased the ca-                      data prefetchers, e.g., temporal data prefetchers [22], [23],
+ pacity of on-chip caches to improve the hit ratio and reduce                      [24], [25], [26], [27], [28], require orders of magnitude
+ the number of off-chip accesses. Such an approach, however,
+                                                                                        1 Here, a page is a chunk of contiguous cache blocks in the memory,
+ is less applicable to today’s processors as it causes the cache
+ hit latency to increase [3], [8], [9], [10]. Moreover, using the                  holding several kilobytes of data. Such a page is not necessarily the same
+                                                                                   as an OS page or a DRAM page, in neither nature nor size.
+ silicon real estate to increase the number of cores is more                            2 For example, the Program Counter (PC) of the instruction that requests
+ beneﬁcial than enlarging caches [3], [8], [9]. Finally, the                       the page for the ﬁrst time can be an event to which a footprint is assigned.
+
+
+2378-203X/19/$31.00 ©2019 IEEE                                               399
+DOI 10.1109/HPCA.2019.00053
+ Authorized licensed use limited to: Carnegie Mellon University Libraries. Downloaded on January 17,2024 at 22:59:50 UTC from IEEE Xplore. Restrictions apply.
+less storage for metadata. Moreover, spatial prefetchers                                       (a) Baseline                                             (c) Bingo
+can prefetch performance-critical compulsory misses (i.e.,
+                                                                                                                                                   Event                 Pred.
+
+
+
+
+                                                                                                                                      Event
+                                                                                                Event Pred.
+
+
+
+
+                                                                                       Event
+unseen cache misses) by generalizing access patterns learned
+                                                                                                                                                E1, E2, E3                P1
+                                                                                                 E1        P1
+
+
+
+
+                                                                                                                                                                                   Prediction
+from similar pages to new unobserved pages, thereby sig-
+                                                                                                                                                E2, E3, E4                P2
+
+
+
+
+                                                                                                                         Prediction
+niﬁcantly improving system performance. Finally, as recent                                       E2        P2
+
+
+
+
+                                                                                                                                                         …
+
+
+
+                                                                                                                                                                          …
+work showed [29], not only do spatial prefetchers increase
+
+
+
+
+                                                                                                 …
+
+
+                                                                                                           …
+the performance by decreasing the number of off-chip                                                                                          Look up with a different event
+
+accesses, but also they improve memory system energy-                                                                                                            Event
+efﬁciency by reducing the number of energy-hungry DRAM                                  Event Pred.                       Event Pred.                               Event        Pred.
+row activations.                                                                           E1         P1                   E1, E2        P1                       E1, E2, E3      P1
+
+
+
+
+                                                                                                            Prediction
+
+
+
+
+                                                                                                                                                    Prediction
+
+
+
+
+                                                                                                                                                                                                Prediction
+   Traditionally, miss coverage, i.e., the fraction of cache                               E2         P2                   E2, E3        P2                       E2, E3, E4      P2
+misses eliminated by the prefetcher, was the single pri-
+
+
+
+
+                                                                                           …
+
+
+                                                                                                      …
+
+
+
+
+                                                                                                                                 …
+
+
+                                                                                                                                         …
+
+
+
+
+                                                                                                                                                                         …
+
+
+
+                                                                                                                                                                                  …
+mary consideration in the design of prefetchers. As such,
+prefetchers have grown in their ability to eliminate cache                                            (b) Prior TAGE-Like Predictors
+misses, while other factors such as storage efﬁciency and
+prefetching accuracy have been marginalized. Nonetheless,                         Figure 1. Comparison of proposals for predictor-based hardware optimiz-
+                                                                                  ers.
+with the widespread use of multi-core processors, other
+factors like storage requirement and prefetching accuracy                         of a long event recurring is low. Therefore, if a predictor
+are becoming increasingly important. The storage overhead                         only relies on a history of long events, it can rarely make
+of hardware optimizers, like prefetchers, should be minimal;                      a prediction (but when a prediction is made, it is highly
+otherwise, it might be beneﬁcial to eliminate the optimizer                       accurate). On the contrary, short events have a high chance
+and dedicate its silicon real estate to further increase the                      of recurrence, but predictions based on them are not expected
+number of cores [30]. Prefetching accuracy has also become                        to be as accurate as the predictions based on long events. To
+critical because high core count has driven the designs into                      get the best of both worlds, TAGE-like predictors record the
+the memory bandwidth wall, mainly because of poor pin                             history of both long and short events. Whenever there is a
+count scalability [31], [32], [33], [34], [35], [36]. Therefore,                  need for a prediction, they check the history tables, logically
+prefetchers should be highly accurate to efﬁciently use the                       one after another; they start from the longest history table
+limited bandwidth of DRAM modules [37], [38], [39], [40],                         (most accurate but least recurring) to make a prediction. If
+[41]. Out of the two, prefetch accuracy is of more importance                     a prediction cannot be made, they switch to the next-longest
+than storage efﬁciency as designs usually hit the bandwidth                       history table and repeat the process. This process enables
+wall ﬁrst [8], [9], [42], [43].                                                   the predictor to predict as accurately as possible while not
+   Inspired by TAGE [44], a state-of-the-art branch predictor,                    losing the opportunity of making a prediction.
+many pieces of recent work improved the efﬁciency of                                 Many pieces of prior work demonstrated great potential
+predictor-based hardware optimizers using multiple cas-                           by using a TAGE-like strategy to improve the efﬁciency
+caded history tables3 . In this strategy, instead of relying on                   of various predictor-based hardware optimizers. A TAGE-
+a single history table to predict future events (Figure 1-(a)),                   like strategy is used for branch prediction [46], [47], [48],
+several history tables, each with speciﬁc information, are                        data prefetching [28], [49], [50], data value prediction [51],
+used to make predictions (Figure 1-(b)). These tables hold                        [52], [53], memory dependency prediction [54], [55], cache
+the history of long and short events. Long events refer to                        hit/miss prediction [56], quality prediction in approximate
+the coincidence of several speciﬁc incidents. For example,                        computing [57], prediction-based DRAM scheduling [58],
+“accessing the 3rd cache block of page P2 with instruction                        and instruction type prediction [59].
+I5 ” may be considered a long event (a coincidence of                                In this paper, we leverage this idea in the context of spatial
+three incidents). Short events, on the other hand, refer                          data prefetching and propose Bingo, an efﬁcient mechanism
+to the coincidence of few speciﬁc incidents. For example,                         to identify and prefetch spatially-correlated data accesses.
+“execution of instruction I5 ” may be considered a short event                    Bingo, like prior approaches (e.g., [17], [18], [19], [20],
+(just one incident).                                                              [21]), stores the footprint of each page as the metadata,
+   Each of the multiple cascaded history tables in TAGE-                          but unlike them, associates each footprint to more than
+like predictors stores the history of events with a speciﬁc                       one event. Whenever the time for prefetching comes (i.e.,
+length and offers a prediction of what will happen after the                      a triggering access occurs), Bingo ﬁnds the footprint that is
+stored event. The predictions made based on long events are                       associated with the longest occurred event. As such, Bingo
+expected to have high accuracy; however, the probability                          issues accurate prefetch requests without losing prefetch
+                                                                                  opportunities, proactively supplying the processor with the
+    3 The TAGE branch predictor itself is inspired by prior work [45] on
+                                                                                  requested data.
+data compression, which studies predictability limits.
+                                                                                     A naive implementation of Bingo requires dedicating
+
+
+
+                                                                            400
+
+Authorized licensed use limited to: Carnegie Mellon University Libraries. Downloaded on January 17,2024 at 22:59:50 UTC from IEEE Xplore. Restrictions apply.
+ multiple history tables to the prefetcher to keep the metadata.                  or a delta (i.e., the distance of two consecutive accesses that
+ In such an implementation, whenever a footprint needs                            fall into a page) and are not required to store the full address.
+ to be stored, it is inserted into all metadata tables and                        As a result, they need signiﬁcantly less storage for storing
+ assigned to events with different lengths in each table.                         the metadata. Moreover, in spatial prefetching, the order of
+ This approach, which has been adopted by prior TAGE-like                         accesses inside the page boundaries is of less importance,
+ predictors, imposes signiﬁcant area overhead, as is evident                      and as such, it is not required to record intra-page access
+ from Figure 1-(b). We observe that, in the context of spatial                    order, which further reduces the storage requirement. As
+ data prefetching, a signiﬁcant fraction of the metadata stored                   the memory pages on which spatial prefetchers train and
+ in the cascaded TAGE-like tables is redundant. To effectively                    prefetch are usually smaller than or equal to a DRAM row
+ eliminate the redundancies, we propose an elegant solution                       (e.g., 1–2 KB as compared to 2–8 KB), all prefetch requests
+ to consolidate the metadata of all history tables into a single                  sent along with the trigger access enjoy a row buffer hit, and
+ uniﬁed table. With the proposed implementation, a single                         hence, all of them are rapidly fetched and cached inside
+ history table is looked up multiple times, each time with                        the last-level cache (LLC), downplaying the impact of fetch
+ a different event to ﬁnd the prediction associated with the                      order [29].
+ longest event (Figure 1-(c)). By organizing the metadata in                         Another equally remarkable strength of spatial data
+ a single history table, we signiﬁcantly reduce the storage                       prefetchers is their ability to eliminate compulsory cache
+ requirements of Bingo.                                                           misses. Compulsory cache misses are a major source of
+    In this paper, we make the following contributions:                           performance degradation in important classes of applica-
+    • We show that relying on a single event to issue prefetch                    tions, e.g., scan-dominated workloads, where scanning large
+       requests is a major source of inefﬁciency in state-of-the-                 volumes of data produces a bulk of unseen memory accesses
+       art spatial data prefetchers.                                              that cannot be captured by caches [67]. By utilizing the
+    • We propose a TAGE-like predictor to accurately and                          pattern that was observed in a past page to a new unobserved
+       maximally extract spatially-correlated data access pat-                    page, spatial prefetchers can alleviate the compulsory cache
+       terns.                                                                     misses, signiﬁcantly enhancing system performance.
+    • We suggest a scheme to consolidate multiple history                            Finally, an accurate spatial data prefetcher improves not
+       tables into a single uniﬁed metadata table, signiﬁcantly                   only performance but also memory subsystem energy usage.
+       reducing the storage requirements.                                         Spatial data prefetchers have the opportunity to increase
+    • Putting all together, we propose a spatial data                             the DRAM row buffer hit ratio, by precisely predicting
+       prefetcher, named Bingo, and meticulously evaluate it                      expected-to-be-used cache blocks, and fetching all useful
+       for various big-data applications. We show that our                        cache blocks in a single DRAM row activation. By doing
+       proposal improves the system performance by 60%                            so, they prevent from multiple energy-hungry DRAM row
+       on average and up to 285% over a baseline with                             activations that otherwise would have happened if no spatial
+       no prefetcher. Meanwhile, it outperforms the best-                         prefetcher had been present [29].
+       performing prior spatial data prefetcher by 11% on                            We separate prior work on spatial data prefetching into
+       average and up to 67%.                                                     two classes: Per-Page History (PPH) and SHared History
+                                                                                  (SHH) methods. PPH refers to approaches that record an
+                          II. BACKGROUND                                          access history for each page (usually page footprint), then
+    Modern big-data applications have vast datasets that dwarf                    correlate the recorded history with an event, and ﬁnally store
+ capacity-limited caches and reside in memory. Therefore,                         the history in a metadata table. On the other hand, SHH
+ processors executing these workloads encounter frequent                          points to methods that observe all accesses at the global
+ cache misses that stall the cores, causing a signiﬁcant                          level, and save the history information (usually deltas) in a
+ performance loss [3], [4], [28], [34], [60], [61]. Spatial                       shared metadata organization.
+ data prefetchers [18], [19], [20], [21], [50], [62], [63], [64],                    The SHH class of spatial prefetchers target storage
+ [65], [66] reduce the number of cache misses by prefetching                      efﬁciency as their foremost design consideration. These
+ future memory references based on the similarity of access                       prefetchers range from straightforward stride prefetch-
+ patterns among memory pages.                                                     ers [68], [69], [70] to more advanced prefetchers with
+    Spatial data prefetching has long been considered effective                   sophisticated heuristics for prefetching [50], [62], [63],
+ due to the unique intrinsic features that it offers. First, spatial              [64]. Typically, these prefetchers maintain a single metadata
+ prefetchers, as compared to other types of data prefetchers,                     structure to record the patterns observed by all pages. In
+ e.g., temporal data prefetchers [22], [23], [24], [25], [26],                    other words, they do not store a pattern for each page;
+ [27], [28], require orders of magnitude less storage for                         instead, they fuse the everywhere-observed access patterns
+ keeping metadata information. Unlike temporal prefetchers,                       into a single uniﬁed organization. For example, a delta-based
+ spatial prefetchers need to store only an offset (i.e., the                      SHH prefetcher (e.g., [50]) might observe three consecutive
+ distance of a block address from the beginning of a page)                        accesses, say, A1 , A2 , and A3 in a speciﬁc page P1 , and
+
+
+
+                                                                            401
+
+Authorized licensed use limited to: Carnegie Mellon University Libraries. Downloaded on January 17,2024 at 22:59:50 UTC from IEEE Xplore. Restrictions apply.
+ generate two successive deltas, d1 and d2 (d1 = A2 − A1                              An associated challenge with these approaches is ﬁnding
+ and d2 = A3 − A2 ). In this case, instead of recording that                       the best event to which the footprint of a page should
+ “A1 , A2 , and A3 were observed in page P1 ,” it records in                       be assigned. Each heuristic has its own advantages and
+ a global metadata history that “d2 follows d1 .”                                  disadvantages. For example, of the two mentioned events,
+    SHH strategy signiﬁcantly reduces the storage require-                         ‘PC+Address’ [17] is highly accurate as it conservatively
+ ments of the prefetcher; however, it also signiﬁcantly reduces                    waits for the same instruction to be re-executed and the
+ the ability of prefetcher at eliminating cache misses when the                    same address to be touched. While accurate, this method
+ prefetcher uses the d1 , d2  correlation entry in a page whose                  is unable to cover compulsory cache misses, because the
+ behavior is different from P1 . Another important challenge                       exact same page should be requested in order for the stored
+ in SHH approaches is the prefetching degree: the number of                        footprint to be used. ‘PC+Offset’ [18], on the other hand,
+ requests that the prefetcher issues at once. In PPH methods,                      is aggressive and can cover compulsory misses by applying
+ as we discuss shortly, whenever the prefetcher is triggered,                      the footprint information of a page to another, but predictions
+ it fetches all expected-to-be-used blocks of the page at once                     made based on it are not much accurate. In this paper,
+ as determined by the page footprint. In SHH approaches,                           we show that relying merely on one of these heuristics is
+ however, there is no such wealth of information, and hence,                       suboptimal as compared to a mechanism that correlates each
+ the prefetcher does not know how many prefetches it should                        footprint with multiple events, and uses the best-matching
+ issue in order to receive the blocks in a timely manner.                          event for prefetching.
+ SPP [62], an SHH-based method, proposes techniques to
+                                                                                                                          III. M OTIVATION
+ adaptively throttle the prefetching degree: a prefetch is only
+ issued if the estimated accuracy of that prediction is above                         Planning to architect a high-performance spatial data
+ a certain threshold. While such heuristics might be useful                        prefetcher, we narrow the design space of Bingo to PPH-
+ at controlling the degree of prefetching, they cause the                          based approaches. Figure 2 shows the accuracy and match
+ miss coverage and timeliness of the prefetcher to become                          probability of various heuristics as the event to which
+ increasingly dependent on the accuracy of the throttling                          the footprints of pages are associated, averaged across all
+ decisions.                                                                        applications4 . Accuracy is the percentage of all prefetched
+    Another class of spatial prefetching is PPH. Once a page                       cache blocks that have been used by the processor before
+ is requested by an application for the ﬁrst time (i.e., trigger                   eviction, and match probability is the fraction of events that
+ access), PPH approaches start to observe and record later                         have been found in the history table.
+ accesses to that page as long as the page is actively used
+                                                                                                                      Accuracy        Match Probability
+ by the application. Whenever the page is no longer utilized
+ (i.e., end of page residency), these approaches associate                                           100%
+                                                                                Metric of Interest
+
+
+
+
+ the recorded access patterns to an event and then store the
+ event, pattern pair in their history tables.                                                       75%
+    The recorded history is usually a bit vector, known as                                            50%
+ the page footprint, in which each bit corresponds to a
+ block of the page: a ‘1’ in the footprint indicates that                                             25%
+ the block has been used during the page residency, while                                              0%
+ a ‘0’ indicates otherwise. The event to which the foot-
+ print is associated is usually extracted from the trigger
+ access. For example, Kumar and Wilkerson [17] proposed                                                                                Event
+                                                                                                            Longest                                         Shortest
+ using the ‘PC+Address’ of the trigger access as the
+ event: the ‘PC’ of the trigger instruction combined with                          Figure 2. Accuracy and match probability of various heuristics as the
+ the ‘Address’ that was requested by the trigger in-                               event to which access history of pages are associated.
+ struction. As another case, Somogyi et al. [18] evaluated
+ several heuristics as the event, and empirically found that                          As the event becomes longer, the accuracy of predic-
+ ‘PC+Offset’ performs better than the other ones: the                              tions increases while the matching probability generally de-
+ ‘PC’ of the trigger instruction combined with ‘Offset,’                           creases. Among the evaluated heuristics, ‘PC+Address’
+ the distance of the requested cache block from the beginning                      is the longest event (i.e., the same instruction and the
+ of the requested page. Later, upon the recurrence of the same                     same address should simultaneously happen) which gives
+ event (e.g., for the case of ‘PC+Offset,’ an instruction                          the highest prediction accuracy, but with this event, there is
+ with the same ‘PC’ requests a cache block that is in the                          less opportunity for prediction as the probability of the event
+ ‘Offset’ distance of a page), these prefetchers apply                             reoccurring is low. Therefore, if the predictor merely relies
+ the stored footprint to predict and prefetch future memory
+ references of the currently requested page.                                                         4 See Section V for a complete list of applications.
+
+
+
+
+                                                                            402
+
+Authorized licensed use limited to: Carnegie Mellon University Libraries. Downloaded on January 17,2024 at 22:59:50 UTC from IEEE Xplore. Restrictions apply.
+on this event, its predictions will be accurate, but it will not                                                Coverage    Accuracy
+be able to make a prediction often.
+   On the other hand, as the events become shorter, the accu-                                        100%
+
+
+
+
+                                                                                Metric of Interest
+racy of predictions decreases but the prediction opportunity                                         75%
+generally increases. With ‘Offset’ as the event, which is
+the shortest event among the evaluated ones (i.e., just the                                          50%
+distance of a block from the beginning of the page should
+reoccur), there is a high opportunity for prediction; but the                                        25%
+predictions are not as accurate as those of the longer events.
+                                                                                                      0%
+Therefore, if a prefetcher only uses this event, it will often
+be able to issue prefetch requests, but the prefetches will be                                              1        2        3           4           5
+unacceptably inaccurate.                                                           Figure 3. Coverage and accuracy of a TAGE-like prefetcher with varying
+   This observation motivates a mechanism in which more                            number of events to which the footprints of pages are associated. When
+than one event is used to make predictions. Once a page                            the prefetcher uses one event, the event is PC+Address. As the number
+                                                                                   of events increases, the shorter events become available to the prefetcher.
+footprint is recorded, it is associated with more than one                         When the number of events becomes ﬁve, all events are available to the
+event, and then stored in the history table. That is, a                            prefetcher.
+page footprint is associated with, say, ‘PC+Address,’
+‘PC+Offset,’ and ‘PC,’ and then stored in the history                              page and starts to record a footprint for it. At the end of
+table. Whenever the time for prefetching comes (i.e., a                            the residency of the page (i.e., whenever a block from the
+trigger access occurs), the prefetcher looks up the history                        page is invalidated or evicted from the cache [18]), Bingo
+with the longest event (i.e., ‘PC+Address’): if a match is                         transfers the recorded pattern to its history table and frees
+found, the prefetcher issues prefetch requests based on the                        the corresponding entry in the auxiliary storage.
+matched footprint; otherwise, it looks up the history with                            Unlike prior work, Bingo uses both ‘PC+Address’ and
+the next-longest event (i.e., ‘PC+Offset’), in a recursive                         ‘PC+Offset’ events for prefetching. A naive implemen-
+manner. This way, the prefetcher beneﬁts from both high                            tation of Bingo requires two distinct history tables, just
+accuracy and high opportunity, overcoming the limitations                          like prior TAGE-like approaches. One table maintains the
+of previously-proposed spatial prefetchers.                                        history of footprints observed after each ‘PC+Address,’
+   To demonstrate the importance of using more than one                            while the other keeps the footprint metadata associated with
+event, Figure 3 shows the miss coverage and accuracy                               ‘PC+Offset.’ Upon looking for a pattern to prefetch,
+of a spatial prefetcher that associates page footprints to                         logically, ﬁrst, the ‘PC+Address’ of the trigger access is
+multiple events when the number of events varies from one                          used to search the long history table. If a match is found, the
+to ﬁve. When the number of events is one, the prefetcher                           corresponding footprint is utilized to issue prefetch requests.
+always associates page footprints to the longest event (i.e.,                      Otherwise, the ‘PC+Offset’ of the trigger access is used
+‘PC+Address’). As the number of events increases, the                              to look up the short history table. In case of a match, the
+prefetcher can associate page footprints to shorter events.                        footprint metadata of the matched entry will be used for
+When the number of events is ﬁve, the prefetcher is able to                        prefetching. If no matching entry is found, no prefetch will
+associate page footprints to all events, including the shortest                    be issued.
+event (i.e., ‘Offset’).                                                               Such an implementation, however, would impose signif-
+   As shown in Figure 3, increasing the number of events en-                       icant storage overhead. We observe that, in the context
+ables the prefetcher to cover more cache misses while main-                        of spatial data prefetching, a considerable fraction of the
+taining prefetch accuracy. We observe the highest improve-                         metadata that is stored in the cascaded TAGE-like history
+ment when we go from one event (i.e., ‘PC+Address’)                                tables are redundant. By redundancy, we mean cases where
+to two events (i.e., ‘PC+Address’ and ‘PC+Offset’),                                both metadata tables (tables associated with long and short
+as there is a signiﬁcant increase in the miss coverage of                          events) offer the same predictions. Figure 4 shows the redun-
+the prefetcher. Increasing the number of events beyond two,                        dancy of TAGE-like history tables for spatial prefetching. In
+however, does not result in a major improvement; therefore,                        this experiment, every time the spatial prefetcher needs to
+for the sake of simplicity, we use two events for the proposed                     make a prediction, we determine if the long and short events
+spatial prefetcher, Bingo.                                                         offer the same prediction. As shown, there is considerable
+                IV. B INGO S PATIAL P REFETCHER                                    redundancy ranging from 26% in SAT Solver to 93% in
+                                                                                   Mix2.
+   Like prior work [18], Bingo uses a small auxiliary storage
+                                                                                      To efﬁciently eliminate redundancies in the metadata
+to record spatial patterns while the processor accesses spatial
+                                                                                   storage, instead of using multiple history tables, we propose
+regions. Upon an access to a new page (i.e., trigger access),
+                                                                                   having a single history table but look it up multiple times,
+Bingo allocates an entry in its auxiliary storage for the
+                                                                                   each time with a different event. Figure 5 details our practical
+
+
+
+                                                                            403
+
+Authorized licensed use limited to: Carnegie Mellon University Libraries. Downloaded on January 17,2024 at 22:59:50 UTC from IEEE Xplore. Restrictions apply.
+             100%                                                                    Trigger                                V   Tag    Recency   Footprint
+                                                                                     Access
+Redundancy
+
+
+             75%
+             50%                                                                                   Hash of
+                                                                                                  PC+Offset                                          …
+             25%
+
+
+
+
+                                                                                                                                                                …
+                                                                                                                       …
+
+
+
+
+                                                                                                                                         …
+              0%
+                                                                                                                       =                =                       =
+
+
+
+
+                                                                                        PC+Address
+
+
+
+
+                                                                                                                                                                          PC+Offset Bits
+                                                                                                                                      Any Match?                Yes                  Footprint
+
+
+
+
+                                                                                        PC+Offset Bits
+ Figure 4. Redundancy in the history metadata of TAGE-like predictors
+ for spatial prefetching. Redundancy is deﬁned as the fraction of lookups
+ for which both long and short events offer an identical prediction.
+
+
+ design for Bingo which uses only one history table. The                                                               =                =                       =
+ main idea is based on the fact that short events are carried
+ in long events. That is, by having the long event at hand, we                                                                        Any Match?
+                                                                                                         No Prefetch   No                               Yes   Footprint
+ can ﬁnd out what the short events are, just by ignoring parts
+ of the long event. For the case of Bingo, the information of                     Figure 5. The details of the history table lookup in Bingo prefetcher. Gray
+ ‘PC+Offset’ is carried in ‘PC+Address;’ therefore,                               parts indicate the case where lookup with long event fails to ﬁnd a match.
+ by knowing the ‘PC+Address,’ we also know what                                   Each large rectangle indicates a physical way of the history table.
+ the ‘PC+Offset’ is5 . To exploit this phenomenon, we
+ propose having only one history table which stores just the
+                                                                                  is ﬁrst looked up with the longest event; if a match is found,
+ history of the long event but is looked up with both long and
+                                                                                  it will be used to make a prediction. Otherwise, the table
+ short events. For the case of Bingo, the history table stores
+                                                                                  should be looked up with the next-longest event. As both
+ footprints which were observed after each ‘PC+Address’
+                                                                                  long and short events are mapped to the same set, there is
+ event, but is looked up with both the ‘PC+Address’ and
+                                                                                  no need to check a new set; instead, the entries of the same
+ ‘PC+Offset’ of the trigger access in order to offer high
+                                                                                  set are tested to ﬁnd a match with the shorter event.
+ accuracy while not losing prefetching opportunities.
+    To enable this, we ﬁnd that the table should only be                             With Bingo, the table is ﬁrst looked up with the
+ indexed with a hash of the shortest event but tagged with                        ‘PC+Address’ of the trigger access. If a match is found,
+ the longest event. Whenever a piece of information is going                      the corresponding footprint metadata will be used for issuing
+ to be stored in the history metadata, it is associated with                      prefetch requests. Otherwise, the table should be looked up
+ the longest event, and then stored in the history table. To                      with the ‘PC+Offset’ of the trigger access. As we know
+ do so, the bits corresponding to the shortest event are                          both ‘PC+Address’ and ‘PC+Offset’ are mapped to
+ used for indexing the history table to ﬁnd the set in which                      the same set, there is no need to check a new set. That
+ the metadata should be stored; however, all bits of the                          is, all the corresponding ‘PC+Offset’ entries should be
+ longest event is used to tag the entry. More speciﬁcally,                        in the same set. Therefore, we test the entries of the same
+ with Bingo, whenever a new footprint is going to be stored                       set to ﬁnd a match. In this case, however, not all the bits
+ in the metadata organization, it is associated with the corre-                   of the stored tags in the entries are necessary to match;
+ sponding ‘PC+Address.’ To ﬁnd a location in the history                          only the ‘PC+Offset’ bits need to be matched. This
+ table for the new entry, a hash of only ‘PC+Offset’ is                           way, we associate each footprint with more than one event
+ used to index the table6 . By knowing the set, the baseline                      (i.e., both ‘PC+Address’ and ‘PC+Offset’) but store
+ replacement algorithm (e.g., LRU) is used to choose a victim                     the footprint metadata in the table with only one of them
+ to open a room for storing the new entry. After determining                      (the longer one) to reduce the storage requirement. Doing
+ the location, the entry is stored in the history table, but all                  so, redundancies are automatically eliminated because a
+ bits of the ‘PC+Address’ are used for tagging the entry.                         metadata footprint is stored once with its ‘PC+Address’
+    Whenever there is a need for prediction, the history table                    tag.
+                                                                                     In the proposed design, whenever the table is looked up
+     5 This is also true for events that we discarded and did not use for         with a shorter event, it is possible that more than one match
+ Bingo. All events like ‘PC,’ ‘Address,’ and ‘Offset’ are known                   is found. With Bingo, it is possible that none of the entries
+ when we know ‘PC+Address.’ Moreover, this is also the case for other             match the ‘PC+Address’ of the trigger access, and in the
+ TAGE-like predictors, including the original TAGE branch predictor [44]
+ where multiple history lengths are used to index the metadata tables.
+                                                                                  meantime, more than one entry matches the ‘PC+Offset’
+     6 Repeatedly, the bits correspond to ‘PC+Offset’ are carried in              of the access. Such cases present a challenge to Bingo
+ ‘PC+Address.’                                                                    in that it should issue prefetch requests based on multi-
+
+
+
+                                                                            404
+
+Authorized licensed use limited to: Carnegie Mellon University Libraries. Downloaded on January 17,2024 at 22:59:50 UTC from IEEE Xplore. Restrictions apply.
+ple footprint information that may be dissimilar. Various                               of 10 seconds of simulated time as observed by the OS.
+heuristics can be employed in such cases: e.g., choosing the                            Then we run 200 K instructions from each checkpoint,
+most recent footprint based on the recency information7 or                              using the ﬁrst 40 K instructions for warming queues (e.g.,
+issuing prefetch requests for blocks that are indicated in the                          ROB), and the rest for actual measurements. Based on
+footprint of all of the matching entries. We evaluated many                             SimFlex [78], our measurements are computed with 95%
+of such heuristics and empirically found that considering all                           conﬁdence and less than 4% error. For SPEC benchmarks,
+matching footprint information at issuing prefetch requests                             we run the simulations for at least 100 M instructions on
+gives the best performance: a cache block is prefetched if                              every core and use the ﬁrst 20 M as the warm-up and the
+it is present in the footprint of at least 20% of matching                              next 80 M for measurements.
+entries.
+                          V. M ETHODOLOGY                                                                              Table II
+                             8                                                                                A PPLICATION PARAMETERS .
+   We use ChampSim [71], the simulation infrastructure                                     Application                     Description                LLC MPKI
+used in the Second Data Prefetching Championship (DPC-                                    Data Serving   Cassandra Database, 15GB Yahoo! Benchmark       6.7
+2) [72], to meticulously simulate a system whose conﬁgu-                                  SAT Solver      Cloud9 Parallel Symbolic Execution Engine      1.7
+                                                                                           Streaming        Darwin Streaming Server, 7500 Clients        3.9
+ration is shown in Table I. We model a system based on                                        Zeus         Zeus Web Server v4.3, 16 K Connections        5.2
+Intel’s recent Xeon Processor [73]. The chip has four OoO                                    em3d        400K Nodes, Degree 2, Span 5, 15% Remote       32.4
+                                                                                             Mix 1               lbm, omnetpp, soplex, sphinx3          15.7
+cores with an 8 MB shared last-level cache (LLC). Two                                        Mix 2             lbm, libquantum, sphinx3, zeusmp         12.5
+memory channels are used for accessing off-chip DRAM,                                        Mix 3              milc, omnetpp, perlbench, soplex        12.7
+                                                                                             Mix 4                astar, omnetpp, soplex, tonto         14.7
+providing a maximum bandwidth of 37.5 GB/s. The OS                                           Mix 5          GemsFDTD, gromacs, omnetpp, soplex          12.6
+uses 4 KB pages and virtual to physical address mapping
+is accomplished through a random ﬁrst-touch translation
+mechanism, enabling long-running simulations [74]. We
+estimate the delay of the caches using CACTI 7.0 [75]. The                              B. Prefetchers’ Conﬁgurations
+cache block size is 64 bytes in the entire memory hierarchy.                               We compare our proposal with state-of-the-art spatial data
+                                                                                        prefetchers. For every prefetcher, we perform a sensitivity
+                                 Table I
+                        E VALUATION PARAMETERS .                                        analysis in order to ﬁnd the storage required to offer
+     Parameter                               Value                                      reasonable miss coverage in our workload suite. We begin
+       Chip                         14 nm, 4 GHz, 4 cores                               with the conﬁguration suggested in the original work and
+      Cores              4-wide OoO, 256-entry ROB, 64-entry LSQ                        measure the average miss coverage across all workloads.
+    Fetch Unit           Perceptron [76], 16-entry pre-dispatch queue                   Then we increase the capacity of metadata tables to observe
+      L1-D/I               Split I/D, 64 KB, 8-way, 8-entry MSHR
+    L2 Cache             8 MB, 16-way, 4 banks, 15-cycle hit latency
+                                                                                        how sensitive the prefetcher is to the allocated storage. If the
+   Main Memory        60 ns zero-load latency, 37.5 GB/s peak bandwidth                 average miss coverage does not change signiﬁcantly (> 5%),
+                                                                                        we allocate the same storage to the prefetcher as stated in
+                                                                                        the original proposal. Otherwise, we increase the storage
+A. Workloads                                                                            of the prefetcher until its average miss coverage plateaus.
+                                                                                        In what follows, we describe the prefetchers’ conﬁgurations:
+   Table II summarizes the key characteristics of our sim-
+ulated workloads. In line with the literature [18], [23],
+                                                                                        Best Offset Prefetcher: BOP [63] is a recent data
+[28], [67], we choose several big-data server and scientiﬁc
+                                                                                        prefetcher, as well as the winner of the Second Data
+applications for evaluation. We also consider ﬁve four-
+                                                                                        Prefetching Championship (DPC-2) [72]. BOP builds upon
+core representative mix workloads from a set of memory-
+                                                                                        prior work, namely the Sandbox Prefetcher [64], and
+intensive SPEC programs [77] whose execution performance
+                                                                                        attempts to enhance its timeliness. On each access, BOP
+is highly sensitive to the latency of memory accesses.
+                                                                                        tests a single offset to determine whether it would have
+   We use the SimFlex [78] methodology to simulate server
+                                                                                        been able to predict the current access. By evaluating
+workloads. For every server application, we create ﬁve
+                                                                                        various offsets, it attempts to discover offsets that are
+checkpoints with warmed caches, branch predictors, and
+                                                                                        expected to produce timely prefetches. We evaluate BOP
+prediction tables. Each checkpoint is drawn over an interval
+                                                                                        with a 256-entry Recent Requests Table.
+     7 Entries in the history table (just like any other associative structure)
+store a few replacement bits (e.g., recency) to help choose a victim when               Signature Path Prefetcher: SPP [62] is another recent
+the set is full and one entry needs to be evicted (e.g., LRU). Based on this            data prefetcher that computes a signature for each
+information, we can select the most recent entry among multiple matches.                delta offset pattern, and estimates the probability of
+     8 The    source code of our simulator and the imple-
+mentation of evaluated data prefetchers are available at                                delta predictions for each signature. By utilizing these
+<https://github.com/bakhshalipour/Bingo>.                                               probabilities, SPP adaptively changes its prefetching
+
+
+
+                                                                                  405
+
+Authorized licensed use limited to: Carnegie Mellon University Libraries. Downloaded on January 17,2024 at 22:59:50 UTC from IEEE Xplore. Restrictions apply.
+degree, putting less bandwidth pressure on the DRAM                                                               VI. E VALUATION
+modules. We evaluate SPP with a 256-entry Signature                                 A. Storage Requirement
+Table, 512-entry Pattern Table, and 1024-entry Prefetch
+                                                                                       The effectiveness of Bingo, like any other data prefetcher,
+Filter.
+                                                                                    directly depends on the size of the history with which the
+                                                                                    predictions are made. Figure 6 shows how the miss coverage
+Variable Length Delta Prefetcher: VLDP [50] is a                                    of Bingo changes when the number of entries dedicated to
+state-of-the-art spatial data prefetcher which uses multiple                        its history table varies. As the history table becomes larger,
+histories of deltas to predict the stream of accesses in                            the miss coverage also increases because the prefetcher is
+a given page. We simulate VLDP with a 16-entry Delta                                able to compare the observed event with a distant past
+History Buffer, 64-entry Offset Prediction Table, and three                         history, and hence, the likelihood of a match increases.
+64-entry Delta Prediction Tables.                                                   Beyond 16 K entries, the coverage plateaus, effectively
+                                                                                    exploiting the available opportunity. Therefore, we decide
+                                                                                    to devote 16 K entries to the history table of Bingo. With a
+Access Map Pattern Matching: AMPM [21] is another                                   16 K-entry history table, the total storage requirement of the
+state-of-the-art spatial prefetcher and the winner of the                           prefetcher is 119 KB, accounting for only 6% of the LLC
+First Data Prefetching Championship (DPC-1) [79]. AMPM                              capacity.
+marks recently accessed cache blocks in a table called the
+                                                                                            100%                                                      Data Serving
+Memory Access Map. Based on the stored information,
+                                                                                                                                                      SAT Solver
+AMPM detects strided access patterns and then predicts                                                                                                Streaming
+                                                                                                  75%
+future blocks that will be accessed. We enlarge the Memory
+                                                                                  Miss Coverage
+                                                                                                                                                      Zeus
+Access Map Table to cover the whole capacity of the LLC.                                                                                              em3d
+                                                                                                  50%
+                                                                                                                                                      Mix 1
+                                                                                                                                                      Mix 2
+Spatial Memory Streaming: SMS is a powerful spatial                                               25%                                                 Mix 3
+data prefetcher and the base of our proposal. SMS                                                                                                     Mix 4
+
+associates footprint metadata to the ‘PC+Offset’ of the                                           0%                                                  Mix 5
+
+triggering access. SMS has since signiﬁcantly outgrown its                                              1K   2K   4K       8K      16K    32K   64K
+purpose and showed great potential in scopes like spatio-                                                         History Table Entries
+
+temporal prefetching [67], determining the commodity                                Figure 6. The miss coverage of the proposed data prefetcher as a function
+DRAM fetching granularity [29], and managing die-stacked                            of the number of entries in the history table.
+DRAM caches [36], [80], [81]. We equip SMS with a
+16 K-entry 16-way associative history table.
+                                                                                    B. Miss Coverage & Overpredictions
+                                                                                       To evaluate the effectiveness of the proposed prefetcher,
+Bingo: Our proposal associates spatial patterns to more than                        Figure 7 shows the coverage and overprediction of all the
+one event and stores all of the patterns in a single uniﬁed                         competing prefetching techniques. Covered misses are the
+history table in a capacity-optimized manner. We use a                              ones that are successfully captured by a prefetcher. Over-
+16-way set-associative structure for the history table and set                      predictions are incorrect prefetches, which are normalized
+its capacity based on the sensitivity analysis in Section VI-A.                     to the number of data misses in the baseline system without
+                                                                                    a prefetcher9 .
+                                                                                       As shown, Bingo offers the highest miss coverage across
+   We study all data prefetchers in the context of the LLC                          all workloads. By associating footprint metadata to more
+since the fairly large capacity of a multi-megabyte LLC                             than one event, and matching the longest event, Bingo
+(as compared to primary caches) paves the way for longer                            maximally and precisely extracts spatially-correlated data
+residency of pages at this level. Whenever pages linger in the                      access patterns and signiﬁcantly reduces the number of cache
+cache for a long time, a much larger opportunity is unleashed                       misses. On average, Bingo covers more than 63% of cache
+for different data pieces to be accessed within that page.                          misses, outperforming the second-best prefetcher by 8%.
+This enables spatial prefetchers to completely observe the                          The overprediction of Bingo is on par with the rest of the
+data accesses of each page and precisely learn the intra-                           competing prefetchers.
+page access patterns [28], [36], [81]. We consider every                               Corroborating many pieces of prior work (e.g., [3], [23],
+core to have its own prefetcher, independent of others (i.e.,                       [28]), complex access patterns in the context of modern
+no metadata sharing among cores [30]). All methods are
+triggered upon LLC accesses and prefetch directly into the                              9 Not to be confused with accuracy which is referred to the fraction of
+LLC (i.e., no prefetch buffer [23], [28]).                                          correct prefetches out of all prefetches.
+
+
+
+
+                                                                            406
+
+Authorized licensed use limited to: Carnegie Mellon University Libraries. Downloaded on January 17,2024 at 22:59:50 UTC from IEEE Xplore. Restrictions apply.
+                                                                          Coverage      Uncovered          Overprediction
+                         156%
+                 150%
+% Consumptions
+
+
+
+
+                 100%
+
+
+                 50%
+
+
+                  0%
+
+
+
+
+                         Bingo
+
+                           SPP
+
+
+
+                         Bingo
+                         Bingo
+
+
+
+
+                           SPP
+
+
+
+                         Bingo
+                           SPP
+
+
+
+                         Bingo
+
+                           SPP
+
+
+
+
+                         Bingo
+
+
+
+
+                           SPP
+                         Bingo
+
+                           SPP
+
+
+
+                         Bingo
+
+                           SPP
+
+
+
+
+                           SPP
+
+
+
+
+                           SPP
+                         Bingo
+
+                           SPP
+
+
+
+                         Bingo
+
+                           SPP
+
+
+
+                         Bingo
+
+
+
+
+                          SMS
+
+
+
+
+                          SMS
+
+
+
+
+                          SMS
+
+
+
+
+                          SMS
+                          SMS
+
+
+
+
+                         VLDP
+                        AMPM
+
+
+
+
+                         VLDP
+                        AMPM
+                          SMS
+                         VLDP
+                        AMPM
+
+
+
+
+                         VLDP
+
+                          SMS
+
+
+
+                         VLDP
+
+                          SMS
+
+
+
+                         VLDP
+
+                          SMS
+
+
+
+                         VLDP
+
+                          SMS
+
+
+
+                         VLDP
+
+
+
+
+                         VLDP
+                        AMPM
+
+
+
+
+                         VLDP
+                        AMPM
+
+
+
+
+                          BOP
+                          BOP
+
+
+
+
+                          BOP
+
+
+                        AMPM
+
+
+
+
+                        AMPM
+
+
+
+
+                        AMPM
+
+
+
+
+                        AMPM
+
+
+
+
+                        AMPM
+                          SMS
+
+
+
+                         VLDP
+                        AMPM
+
+
+
+
+                          BOP
+
+
+
+
+                          BOP
+                          BOP
+
+
+
+
+                          BOP
+
+
+
+
+                          BOP
+
+
+
+
+                          BOP
+
+
+
+
+                          BOP
+
+
+
+
+                          BOP
+                        Data Serving      SAT Solver       Streaming      Zeus        em3d         Mix 1         Mix 2      Mix 3       Mix 4        Mix 5   Average
+
+
+                                       Figure 7.       Coverage and overprediction of Bingo as compared to the competing spatial data prefetchers.
+
+
+
+  server workloads are beyond what can be captured by simple                                       without a prefetcher. Bingo consistently outperforms the
+  delta-based approaches. Server workloads repeatedly tra-                                         competing prefetching approaches across all workloads. The
+  verse various data structures, resulting in frequent switches                                    performance improvement of Bingo ranges from 11% in
+  among pages (e.g., in a database buffer pool [67]). When-                                        Zeus to 285% in em3d. Miss coverage, timeliness, and
+  ever various pages are traversed at the same time, many                                          the accuracy of prefetches are the main contributors to
+  patterns are manifested in a page, which are not necessarily                                     Bingo’s superior performance improvement. For most of
+  exhibited in other pages; as a consequence, SHH-based                                            the workloads, Bingo provides a signiﬁcant performance
+  spatial prefetchers (e.g., BOP, SPP, VLDP) are faced with                                        improvement. In Zeus, however, memory accesses are more
+  signiﬁcant challenges, which prevent them from offering a                                        temporally correlated than spatially [28]. Even those ac-
+  high level of miss coverage.                                                                     cesses that are spatially predictable are already fetched in
+     Techniques like what has been proposed in BOP and SPP                                         parallel by the out-of-order processing, resulting in a negli-
+  throttle down the prefetcher when it offers high overpre-                                        gible performance improvement with spatial prefetchers.
+  dictions. However, by doing so, they also reduce the miss                                           As a result of low miss coverage, techniques like BOP and
+  coverage because prefetch requests, including the correct                                        SPP provide lower performance improvement as compared
+  ones, are lazily issued. VLDP uses multiple histories of                                         to the other methods, especially on server workloads. VLDP
+  deltas for prediction, and hence, offers higher miss coverage.                                   offers higher performance, mainly because of having better
+  However, it suffers from the inefﬁciencies of its multi-                                         miss coverage. However, it falls behind PPH-based methods
+  degree prefetching. Upon predicting the next access in a                                         like AMPM and SMS that keep page footprints and use that
+  page, VLDP uses the prediction as input to the history                                           to issue more accurate prefetches for all expected-to-be-used
+  tables to make more predictions. We observe that this                                            cache blocks (cf. Section II). While AMPM and SMS offer
+  strategy is inaccurate for server workloads and produces                                         high levels of performance improvement, their performance
+  more overpredictions as the prefetching degree increases10 .                                     is still signiﬁcantly less than that of Bingo. By associating
+     By maintaining footprint metadata for each page, AMPM                                         footprint metadata to more than one event and matching
+  and SMS offer an order of magnitude higher coverage as                                           the longest event, Bingo maximally and accurately extracts
+  compared to other prior prefetchers. SMS, however, is more                                       spatially-correlated data access patterns and uses them for
+  aggressive than AMPM, resulting in higher overprediction                                         accurate and timely prefetching.
+  and higher miss coverage. SMS correlates footprints with
+  the ‘PC+Offset’ of the trigger accesses and applies the                                          D. Performance Density
+  learned footprint whenever the same ‘PC+Offset’ is ob-
+                                                                                                      Many pieces of prior work [8], [9], [30], [83] argue
+  served again. However, as we showed, the ‘PC+Offset’
+                                                                                                   that the performance gain of hardware optimizers, like
+  is not long enough to offer high accuracy.
+                                                                                                   prefetchers, should outweigh their area overhead. Otherwise,
+  C. System Performance                                                                            using the silicon real estate to further increase the number
+     Figure 8 shows the performance improvement of Bingo                                           of cores may be more beneﬁcial. Prior work used a metric
+  along with other prefetching techniques, over a baseline                                         called performance density, deﬁned as throughput per unit
+                                                                                                   area, to quantify how efﬁciently a design uses the silicon real
+      10 This observation was also made by prior work [28], [62] for VLDP
+                                                                                                   estate: incorporating the hardware prefetcher into a system
+  in the context of data prefetching. Moreover, a similar observation for the
+  inaccuracy of such a strategy was made by Kolli et al. [82] in the context                       is beneﬁcial only if it is able to increase the performance
+  of instruction prefetching for server workloads.                                                 density [8], [30].
+
+
+
+                                                                                             407
+
+Authorized licensed use limited to: Carnegie Mellon University Libraries. Downloaded on January 17,2024 at 22:59:50 UTC from IEEE Xplore. Restrictions apply.
+                                                                                           179%
+                                                                                           165%
+                                                                                           220%
+                                                                                           221%
+                                                                                           218%
+                                                                                           285%
+
+
+
+
+                                                                                                                     113%
+
+                                                                                                                     130%
+                                                                                                                     136%
+                                                                                                                     149%
+                                                                                                                     90%
+                                                                                                                     93%
+                                                                                                                     90%
+                                   80%
+Performance Improvement
+
+
+
+
+                                   60%
+
+
+                                   40%
+
+
+                                   20%
+
+
+                                   0%     Bingo
+
+                                            SPP
+                                            SPP
+
+
+
+
+                                            SPP
+                                          Bingo
+
+
+
+
+                                            SPP
+
+
+
+
+                                            SPP
+
+
+
+
+                                            SPP
+                                            SPP
+
+
+
+
+                                           SMS
+
+
+
+
+                                            SPP
+                                          VLDP
+
+                                           SMS
+
+
+
+                                          VLDP
+
+                                           SMS
+                                          Bingo
+
+
+
+
+                                          Bingo
+
+
+
+
+                                            SPP
+                                          VLDP
+
+                                           SMS
+                                          Bingo
+
+
+
+
+                                           SMS
+                                          Bingo
+
+
+
+
+                                            SPP
+
+
+
+
+                                            SPP
+
+
+
+
+                                          Bingo
+                                          VLDP
+
+                                           SMS
+
+
+
+
+                                          VLDP
+
+
+
+
+                                          Bingo
+
+
+
+
+                                          Bingo
+
+
+
+
+                                          VLDP
+
+                                           SMS
+
+
+
+                                          VLDP
+
+                                           SMS
+                                          Bingo
+
+
+
+
+                                          Bingo
+                                           BOP
+
+
+                                         AMPM
+
+
+                                           BOP
+
+
+                                         AMPM
+
+
+
+
+                                           BOP
+
+
+                                         AMPM
+
+
+
+
+                                          VLDP
+
+                                           SMS
+
+
+
+
+                                           BOP
+
+
+
+
+                                          VLDP
+
+                                           SMS
+                                           BOP
+
+
+                                         AMPM
+
+
+
+
+                                           BOP
+
+
+                                         AMPM
+
+
+
+
+                                          VLDP
+
+                                           SMS
+
+
+
+                                          VLDP
+
+
+
+
+                                         AMPM
+                                           BOP
+
+
+                                         AMPM
+
+
+
+
+                                           BOP
+
+
+                                         AMPM
+                                           BOP
+
+
+                                         AMPM
+
+
+
+
+                                           BOP
+
+
+                                         AMPM
+                                           BOP
+
+
+                                         AMPM
+                                         Data Serving   SAT Solver   Streaming     Zeus        em3d          Mix 1      Mix 2        Mix 3        Mix 4       Mix 5   GMean
+
+
+                                                Figure 8.   Performance comparison of prefetching techniques, normalized to a baseline system with no prefetcher.
+
+
+
+         As the area requirement of the evaluated prefetchers                                                design for high-performance processors.
+      are different from one another, to better understand how
+      effectively they use the chip silicon area, we evaluate their                                          E. ISO-Degree Comparison
+      performance density. Figure 9 summarizes the results of this
+                                                                                                                Certainly, a signiﬁcant fraction of the performance im-
+      study, showing the performance density improvement of all
+                                                                                                             provement of Bingo and other PPH-based methods over
+      evaluated designs as compared to a baseline system with
+                                                                                                             SHH-based ones comes from their better timeliness. Bingo,
+      no prefetcher. For this experiment, we only consider the
+                                                                                                             like other PPH-based methods, gathers a footprint for every
+      area of cores, caches, interconnect, and memory channels,
+                                                                                                             page and issues prefetch requests for all expected-to-be-used
+      neglecting the area of I/O devices.
+                                                                                                             blocks of the page at once, resulting in superior timeliness.
+         Bingo improves the performance density of the baseline                                              However, in SHH-based methods, there is no information
+      system by 59%, which is 10% higher than that of the second                                             about the footprint of pages; hence, the methods do not
+      best-performing method. As compared to other prefetchers,                                              know how many prefetches they should issue whenever they
+      the performance density improvement of Bingo is slightly                                               are triggered. Prior work employs various mechanisms in
+      lower than its performance improvement. The main reason                                                order to enable multi-degree prefetching in the context of
+      is the larger history table of Bingo in comparison to the                                              SHH-based methods. For example, VLDP, upon predicting
+      metadata table(s) of other approaches. However, the drop                                               the next access in the page, uses the prediction as input
+      in the performance density is insigniﬁcant (less than 1%)                                              to the history tables to issue more prefetches. Typically,
+      as the total area overhead of Bingo is less than 6% of the                                             there is a trade-off between the degree of prefetching and its
+      LLC area and a small fraction of the whole chip area. The                                              prediction accuracy: the more aggressive the prefetcher is,
+      results indicate that the performance improvement of Bingo                                             the more wrong prefetches are expected. To cope with the
+      far outweighs its storage overhead, making it a practical                                              overprediction of multi-degree prefetching, prior pieces of
+                                                                                                             work, using various heuristics, attempt to limit the number
+                                                                                                             of multi-degree prefetches. For example, VLDP allows the
+ Performance Density Improvement
+
+
+
+
+                                   60%                                                                       prefetching degree to be up to four.
+                                                                                                                In this section, in order to provide an iso-degree compar-
+                                   40%                                                                       ison, we lift the ban and allow the SHH-based prefetchers
+                                                                                                             to issue further prefetch requests upon each activation. We
+                                   20%                                                                       set the maximum degree of BOP/VLDP to 32 and set the
+                                                                                                             conﬁdence threshold [62] of SPP to 1%. Figure 10 shows
+                                   0%                                                                        the results of this experiment. Due to better timeliness,
+                                                                                                             the performance of SHH-based methods slightly increases;
+                                                                                                             however, their overprediction likewise increases because of
+                                                                                                             many wrong prefetches, resulting in signiﬁcant off-chip
+      Figure 9. Performance Density improvement of evaluated methods over                                    bandwidth pollution. With iso-degree prefetching, Bingo
+      a baseline system without a prefetcher.                                                                still signiﬁcantly outperforms all other methods.
+
+
+
+                                                                                                       408
+
+Authorized licensed use limited to: Carnegie Mellon University Libraries. Downloaded on January 17,2024 at 22:59:50 UTC from IEEE Xplore. Restrictions apply.
+                                : 39% → 47%                                                                       VIII. C ONCLUSION
+Performance Improvement
+                                                             : 41% → 47%
+                          60%   : 25% → 286%
+                                               : 32% → 43%
+                                                                                           Long latency off-chip misses, which often stall the
+                                               : 14% → 31%   : 26% → 79%
+                                                                                        processor for the data to arrive, are a major source of
+                          40%                                                           performance degradation in big-data applications. Spatial
+                                                                                        data prefetching is a technique for reducing the number
+                          20%                                                           of cache misses or their harmful effect. Spatial data
+                                                                                        prefetchers exploit the fact that data accesses are spatially
+                          0%                                                            correlated over memory regions of several kilobytes, and
+                                                                                        this correlation is predictable. In this work, we showed
+                                                                                        that state-of-the-art spatial data prefetchers do not fully
+                                                                                        take advantage of the existing opportunities because
+                                                                                        of associating the footprint metadata to just a single
+   Figure 10. ISO-degree comparison of prefetching methods. ‘Orig’ indi-                event. We proposed a practical approach to associate the
+   cates the original and so-far–evaluated version of an SHH-based prefetcher;
+   however, ‘Aggr’ represents the aggressive and high-degree version. Callouts          footprint metadata to more than one event to improve the
+   indicate how the coverage and overprediction of prefetchers vary from the            coverage and accuracy of spatial prefetching. Moreover, we
+   original version to the aggressive version: ‘C’ and ‘O’ stand for ‘Coverage’         suggested a general mechanism to eliminate redundancies
+   and ‘Overprediction,’ respectively.
+                                                                                        in the metadata table of history-based predictors. We
+                                                                                        showed that the proposed spatial prefetcher signiﬁcantly
+                                                                                        outperforms the competing spatial prefetchers.
+                                         VII. R ELATED W ORK
+
+                                                                                                                  ACKNOWLEDGMENT
+      Many pieces of recent work target long latency memory
+   stalls in the context of hardware data prefetchers. IMP [84]                            We thank the anonymous reviewers for their valuable
+   identiﬁes and prefetches irregular memory accesses from                              comments. We appreciate Mark Sutherland from PARSA-
+   indirect patterns of the form A[B[i]], which are copious                             EPFL for providing us with the required tools for simulating
+   in many applications like graph analytics and sparse linear                          server workloads in the context of our framework. We thank
+   algebra. TEMPO [85] augments memory controllers to track                             members of IPM HPC center for maintaining and managing
+   accesses to page table entries in order to prefetch post-                            the cluster that is used to carry out the experiments.
+   translation accesses. Domino [28] uses a combination of
+   one or two last data misses to ﬁnd the correct temporal
+   address stream in the history and prefetch the subsequent                                                           R EFERENCES
+   data misses. B-Fetch [86] utilizes the branch predictor to run                       [1] T. S. Karkhanis and J. E. Smith, “A First-Order Superscalar Processor Model,” in
+                                                                                            Proceedings of the International Symposium on Computer Architecture (ISCA),
+   ahead of the executing program, thereby prefetching load                                 pp. 338–349, 2004.
+   instructions along the expected future path. A few recent
+                                                                                        [2] R. Hameed, W. Qadeer, M. Wachs, O. Azizi, A. Solomatnikov, B. C. Lee,
+   studies [87], [88] also evaluated the use of deep learning                               S. Richardson, C. Kozyrakis, and M. Horowitz, “Understanding Sources of
+   algorithms for prediction of memory accesses. None of these                              Inefﬁciency in General-purpose Chips,” in Proceedings of the International
+                                                                                            Symposium on Computer Architecture (ISCA), pp. 37–47, 2010.
+   methods rely on spatial correlation, and hence, can be used
+   orthogonally with our proposal.                                                      [3] M. Ferdman, A. Adileh, O. Kocberber, S. Volos, M. Alisafaee, D. Jevdjic,
+                                                                                            C. Kaynak, A. D. Popescu, A. Ailamaki, and B. Falsaﬁ, “Clearing the Clouds: A
+                                                                                            Study of Emerging Scale-Out Workloads on Modern Hardware,” in Proceedings
+      Several approaches use spatial pattern predictors outside                             of the International Conference on Architectural Support for Programming
+   the context of data prefetching. SFP [17] uses a predictor                               Languages and Operating Systems (ASPLOS), pp. 37–48, 2012.
+   based on spatial footprints to recognize useful words of                             [4] M. Ferdman, A. Adileh, O. Kocberber, S. Volos, M. Alisafaee, D. Jevdjic,
+   cache blocks and stores such words in a decoupled sec-                                   C. Kaynak, A. D. Popescu, A. Ailamaki, and B. Falsaﬁ, “Quantifying the
+                                                                                            Mismatch Between Emerging Scale-Out Applications and Modern Processors,”
+   tored cache [89]. BuMP [29] determines the DRAM fetch                                    ACM Transactions on Computer Systems (TOCS), vol. 30, pp. 15:1–15:24, Nov.
+   granularity by relying on a spatial footprint predictor that                             2012.
+   identiﬁes the usage density of the opened DRAM row.                                  [5] A. Mirhosseini, A. Sriraman, and T. F. Wenisch, “Enhancing Server Efﬁciency in
+   Footprint caching [36], [80], [81] proposes to manage the                                the Face of Killer Microseconds,” Proceedings of the International Symposium
+                                                                                            on High-Performance Computer Architecture (HPCA), 2019.
+   die-stacked DRAM as a page-based cache with multiple-
+   block fetch granularity. Footprint caching approaches em-                            [6] M. Hashemi, E. Ebrahimi, O. Mutlu, and Y. N. Patt, “Accelerating Dependent
+                                                                                            Cache Misses with an Enhanced Memory Controller,” in Proceedings of the
+   ploy spatial footprint predictors to fetch and cache only the                            International Symposium on Computer Architecture (ISCA), pp. 444–455, 2016.
+   expected-to-be-used cache blocks of every page, reducing
+                                                                                        [7] M. Hashemi, O. Mutlu, and Y. N. Patt, “Continuous Runahead: Transparent
+   the bandwidth pressure on DRAM modules. Our proposal                                     Hardware Acceleration for Memory Intensive Workloads,” in Proceedings of
+   can be incorporated into such schemes to achieve higher                                  the International Symposium on Microarchitecture (MICRO), pp. 61:1–61:12,
+                                                                                            2016.
+   prediction efﬁciency.
+
+
+
+                                                                                  409
+
+Authorized licensed use limited to: Carnegie Mellon University Libraries. Downloaded on January 17,2024 at 22:59:50 UTC from IEEE Xplore. Restrictions apply.
+ [8] P. Lotﬁ-Kamran, B. Grot, M. Ferdman, S. Volos, O. Kocberber, J. Picorel,                    [28] M. Bakhshalipour, P. Lotﬁ-Kamran, and H. Sarbazi-Azad, “Domino Temporal
+     A. Adileh, D. Jevdjic, S. Idgunji, E. Ozer, and B. Falsaﬁ, “Scale-Out Processors,”               Data Prefetcher,” in Proceedings of the International Symposium on High-
+     in Proceedings of the International Symposium on Computer Architecture                           Performance Computer Architecture (HPCA), pp. 131–142, 2018.
+     (ISCA), pp. 500–511, 2012.
+                                                                                                 [29] S. Volos, J. Picorel, B. Falsaﬁ, and B. Grot, “BuMP: Bulk Memory Access
+ [9] P. Esmaili-Dokht, M. Bakhshalipour, B. Khodabandeloo, P. Lotﬁ-Kamran, and                        Prediction and Streaming,” in Proceedings of the International Symposium on
+     H. Sarbazi-Azad, “Scale-Out Processors & Energy Efﬁciency,” arXiv preprint                       Microarchitecture (MICRO), pp. 545–557, 2014.
+     arXiv:1808.04864, 2018.
+                                                                                                 [30] C. Kaynak, B. Grot, and B. Falsaﬁ, “SHIFT: Shared History Instruction Fetch for
+[10] N. Hardavellas, M. Ferdman, B. Falsaﬁ, and A. Ailamaki, “Reactive NUCA:                          Lean-Core Server Processors,” in Proceedings of the International Symposium
+     Near-Optimal Block Placement and Replication in Distributed Caches,” in                          on Microarchitecture (MICRO), pp. 272–283, 2013.
+     Proceedings of the International Symposium on Computer Architecture (ISCA),
+     pp. 184–195, 2009.                                                                          [31] B. M. Rogers, A. Krishna, G. B. Bell, K. Vu, X. Jiang, and Y. Solihin,
+                                                                                                      “Scaling the Bandwidth Wall: Challenges in and Avenues for CMP Scaling,” in
+[11] D. Guttman, M. T. Kandemir, M. Arunachalamy, and V. Calina, “Performance                         Proceedings of the International Symposium on Computer Architecture (ISCA),
+     and Energy Evaluation of Data Prefetching on Intel Xeon Phi,” in Proceedings of                  pp. 371–382, 2009.
+     the International Symposium on Performance Analysis of Systems and Software
+     (ISPASS), pp. 288–297, 2015.                                                                [32] J. Huh, D. Burger, and S. W. Keckler, “Exploring the Design Space of Future
+                                                                                                      CMPs,” in Proceedings of the International Conference on Parallel Architectures
+[12] V. Jiménez, R. Gioiosa, F. J. Cazorla, A. Buyuktosunoglu, P. Bose, and F. P.                    and Compilation Techniques (PACT), pp. 199–210, 2001.
+     O’Connell, “Making Data Prefetch Smarter: Adaptive Prefetching on POWER7,”
+     in Proceedings of the International Conference on Parallel Architectures and                [33] M. Bakhshalipour, A. Faraji, S. A. Vakil Ghahani, F. Samandi, P. Lotﬁ-Kamran,
+     Compilation Techniques (PACT), pp. 137–146, 2012.                                                and H. Sarbazi-Azad, “Reducing Writebacks Through In-Cache Displacement,”
+                                                                                                      ACM Transactions on Design Automation of Electronic Systems (TODAES),
+[13] H. Kang and J. L. Wong, “To Hardware Prefetch or Not to Prefetch?: A                             2019.
+     Virtualized Environment Study and Core Binding Approach,” in Proceedings
+     of the International Conference on Architectural Support for Programming                    [34] M. Bakhshalipour, H. Zare, P. Lotﬁ-Kamran, and H. Sarbazi-Azad, “Die-Stacked
+     Languages and Operating Systems (ASPLOS), pp. 357–368, 2013.                                     DRAM: Memory, Cache, or MemCache?,” arXiv preprint arXiv:1809.08828,
+                                                                                                      2018.
+[14] A. Sodani, R. Gramunt, J. Corbal, H.-S. Kim, K. Vinod, S. Chinthamani,
+     S. Hutsell, R. Agarwal, and Y.-C. Liu, “Knights Landing: Second-Generation                  [35] H. A. Esfeden, F. Khorasani, H. Jeon, D. Wong, and N. Abu-Ghazaleh,
+     Intel Xeon Phi Product,” IEEE Micro, vol. 36, no. 2, pp. 34–46, 2016.                            “CORF: Coalescing Operand Register File for GPUs,” in Proceedings of the
+                                                                                                      International Conference on Architectural Support for Programming Languages
+[15] P. Conway and B. Hughes, “The AMD Opteron Northbridge Architecture,” IEEE                        and Operating Systems (ASPLOS), 2019.
+     Micro, vol. 27, no. 2, pp. 10–21, 2007.
+                                                                                                 [36] D. Jevdjic, S. Volos, and B. Falsaﬁ, “Die-Stacked DRAM Caches for Servers: Hit
+[16] T. Horel and G. Lauterbach, “UltraSPARC-III: Designing Third-Generation 64-                      Ratio, Latency, or Bandwidth? Have It All with Footprint Cache,” in Proceedings
+     bit Performance,” IEEE Micro, vol. 19, no. 3, pp. 73–85, 1999.                                   of the International Symposium on Computer Architecture (ISCA), pp. 404–415,
+                                                                                                      2013.
+[17] S. Kumar and C. Wilkerson, “Exploiting Spatial Locality in Data Caches Using
+     Spatial Footprints,” in Proceedings of the International Symposium on Computer              [37] E. Ebrahimi, C. J. Lee, O. Mutlu, and Y. N. Patt, “Prefetch-Aware Shared Re-
+     Architecture (ISCA), pp. 357–368, 1998.                                                          source Management for Multi-core Systems,” in Proceedings of the International
+                                                                                                      Symposium on Computer Architecture (ISCA), pp. 141–152, 2011.
+[18] S. Somogyi, T. F. Wenisch, A. Ailamaki, B. Falsaﬁ, and A. Moshovos,
+     “Spatial Memory Streaming,” in Proceedings of the International Symposium                   [38] E. Ebrahimi, O. Mutlu, C. J. Lee, and Y. N. Patt, “Coordinated Control of
+     on Computer Architecture (ISCA), pp. 252–263, 2006.                                              Multiple Prefetchers in Multi-Core Systems,” in Proceedings of the International
+                                                                                                      Symposium on Microarchitecture (MICRO), pp. 316–326, 2009.
+[19] J. F. Cantin, M. H. Lipasti, and J. E. Smith, “Stealth Prefetching,” in Proceedings
+     of the International Conference on Architectural Support for Programming                    [39] E. Ebrahimi, O. Mutlu, and Y. N. Patt, “Techniques for Bandwidth-Efﬁcient
+     Languages and Operating Systems (ASPLOS), pp. 274–282, 2006.                                     Prefetching of Linked Data Structures in Hybrid Prefetching Systems,” in
+                                                                                                      Proceedings of the International Symposium on High-Performance Computer
+[20] C. F. Chen, S.-H. Yang, B. Falsaﬁ, and A. Moshovos, “Accurate and Complexity-                    Architecture (HPCA), pp. 7–17, 2009.
+     Effective Spatial Pattern Prediction,” in Proceedings of the International Sympo-
+     sium on High-Performance Computer Architecture (HPCA), pp. 276–287, 2004.                   [40] C. J. Lee, O. Mutlu, V. Narasiman, and Y. N. Patt, “Prefetch-Aware DRAM Con-
+                                                                                                      trollers,” in Proceedings of the International Symposium on Microarchitecture
+[21] Y. Ishii, M. Inaba, and K. Hiraki, “Access Map Pattern Matching for Data Cache                   (MICRO), pp. 200–209, 2008.
+     Prefetch,” in Proceedings of the International Conference on Supercomputing
+     (ICS), pp. 499–500, 2009.                                                                   [41] S. Srinath, O. Mutlu, H. Kim, and Y. N. Patt, “Feedback Directed Prefetching:
+                                                                                                      Improving the Performance and Bandwidth-Efﬁciency of Hardware Prefetchers,”
+[22] Y. Solihin, J. Lee, and J. Torrellas, “Using a User-Level Memory Thread for                      in Proceedings of the International Symposium on High-Performance Computer
+     Correlation Prefetching,” in Proceedings of the International Symposium on                       Architecture (HPCA), pp. 63–74, 2007.
+     Computer Architecture (ISCA), pp. 171–182, 2002.
+                                                                                                 [42] N. Hardavellas, M. Ferdman, B. Falsaﬁ, and A. Ailamaki, “Toward Dark Silicon
+[23] T. F. Wenisch, S. Somogyi, N. Hardavellas, J. Kim, A. Ailamaki, and B. Falsaﬁ,                   in Servers,” vol. 31, no. 4, pp. 6–15, 2011.
+     “Temporal Streaming of Shared Memory,” Proceedings of the International
+     Symposium on Computer Architecture (ISCA), pp. 222–233, 2005.                               [43] M. Bakhshalipour, P. Lotﬁ-Kamran, A. Mazloumi, F. Samandi, M. Naderan,
+                                                                                                      M. Modarressi, and H. Sarbazi-Azad, “Fast Data Delivery for Many-Core
+[24] M. Ferdman and B. Falsaﬁ, “Last-Touch Correlated Data Streaming,” in Pro-                        Processors,” IEEE Transactions on Computers (TC), vol. 67, no. 10, pp. 1416–
+     ceedings of the International Symposium on Performance Analysis of Systems                       1429, 2018.
+     and Software (ISPASS), pp. 105–115, 2007.
+                                                                                                 [44] A. Seznec, “A Case for (Partially)-Tagged Geometric History Length Predictors,”
+[25] Y. Chou, “Low-Cost Epoch-Based Correlation Prefetching for Commercial Ap-                        Journal of Instruction-Level Parallelism (JILP), 2006.
+     plications,” in Proceedings of the International Symposium on Microarchitecture
+     (MICRO), pp. 301–313, 2007.                                                                 [45] J. Cleary and I. Witten, “Data Compression Using Adaptive Coding and Partial
+                                                                                                      String Matching,” IEEE Transactions on Communications (TCOM), vol. 32,
+[26] T. F. Wenisch, M. Ferdman, A. Ailamaki, B. Falsaﬁ, and A. Moshovos, “Practical                   no. 4, pp. 396–402, 1984.
+     Off-Chip Meta-Data for Temporal Memory Streaming,” in Proceedings of the
+     International Symposium on High-Performance Computer Architecture (HPCA),                   [46] A. Seznec, “A New Case for the TAGE Branch Predictor,” in Proceedings of the
+     pp. 79–90, 2009.                                                                                 International Symposium on Microarchitecture (MICRO), pp. 117–127, 2011.
+
+[27] A. Jain and C. Lin, “Linearizing Irregular Memory Accesses for Improved                     [47] A. Seznec, J. San Miguel, and J. Albericio, “The Inner Most Loop Iteration
+     Correlated Prefetching,” in Proceedings of the International Symposium on                        Counter: A New Dimension in Branch History,” in Proceedings of the Interna-
+     Microarchitecture (MICRO), pp. 247–259, 2013.                                                    tional Symposium on Microarchitecture (MICRO), pp. 347–357, 2015.
+
+
+
+
+                                                                                           410
+
+Authorized licensed use limited to: Carnegie Mellon University Libraries. Downloaded on January 17,2024 at 22:59:50 UTC from IEEE Xplore. Restrictions apply.
+[48] P. Michaud, “An Alternative TAGE-Like Conditional Branch Predictor,” ACM                  [67] S. Somogyi, T. F. Wenisch, A. Ailamaki, and B. Falsaﬁ, “Spatio-Temporal Mem-
+     Transactions on Architecture and Code Optimization (TACO), vol. 15, pp. 30:1–                  ory Streaming,” in Proceedings of the International Symposium on Computer
+     30:23, Aug. 2018.                                                                              Architecture (ISCA), pp. 69–80, 2009.
+
+[49] M. Bakhshalipour, P. Lotﬁ-Kamran, and H. Sarbazi-Azad, “An Efﬁcient Tempo-                [68] J.-L. Baer and T.-F. Chen, “An Effective On-Chip Preloading Scheme to
+     ral Data Prefetcher for L1 Caches,” IEEE Computer Architecture Letters (CAL),                  Reduce Data Access Penalty,” in Proceedings of the International Conference
+     vol. 16, no. 2, pp. 99–102, 2017.                                                              on Supercomputing (ICS), pp. 176–186, 1991.
+
+[50] M. Shevgoor, S. Koladiya, R. Balasubramonian, C. Wilkerson, S. H. Pugsley, and            [69] S. Iacobovici, L. Spracklen, S. Kadambi, Y. Chou, and S. G. Abraham, “Effective
+     Z. Chishti, “Efﬁciently Prefetching Complex Address Patterns,” in Proceedings                  Stream-Based and Execution-Based Data Prefetching,” in Proceedings of the
+     of the International Symposium on Microarchitecture (MICRO), pp. 141–152,                      International Conference on Supercomputing (ICS), pp. 1–11, 2004.
+     2015.                                                                                     [70] N. P. Jouppi, “Improving Direct-Mapped Cache Performance by the Addition of
+                                                                                                    a Small Fully-Associative Cache and Prefetch Buffers,” in Proceedings of the
+[51] A. Perais and A. Seznec, “Practical Data Value Speculation for Future High-
+                                                                                                    International Symposium on Computer Architecture (ISCA), pp. 364–373, 1990.
+     End Processors,” in Proceedings of the International Symposium on High-
+     Performance Computer Architecture (HPCA), pp. 428–439, 2014.                              [71] “ChampSim.” https://github.com/ChampSim/, 2017.
+[52] A. Perais and A. Seznec, “EOLE: Paving the Way for an Effective Implemen-                 [72] S. Pugsley, A. Alameldeen, C. Wilkerson, and H. Kim, “The Second Data
+     tation of Value Prediction,” in Proceedings of the International Symposium on                  Prefetching Championship (DPC-2),” 2015.
+     Computer Architecture (ISCA), pp. 481–492, 2014.
+                                                                                               [73] “Intel Xeon Processor E3-1220 v6.” https://www.intel.com/content/www/us/en/
+[53] A. Perais and A. Seznec, “BeBoP: A Cost Effective Predictor Infrastructure for                 products/processors/xeon/e3-processors/e3-1220-v6.html/, 2017.
+     Superscalar Value Prediction,” in Proceedings of the International Symposium
+     on High-Performance Computer Architecture (HPCA), pp. 13–25, 2015.                        [74] S. Franey and M. Lipasti, “Tag Tables,” in Proceedings of the International
+                                                                                                    Symposium on High-Performance Computer Architecture (HPCA), pp. 514–525,
+[54] A. Perais and A. Seznec, “Cost Effective Physical Register Sharing,” in                        2015.
+     Proceedings of the International Symposium on High-Performance Computer
+                                                                                               [75] “CACTI 7.0: A Tool to Model Caches/Memories, 3D Stacking, and Off-Chip
+     Architecture (HPCA), pp. 694–706, 2016.
+                                                                                                    IO.” https://github.com/HewlettPackard/cacti/, 2017.
+[55] A. Perais, F. A. Endo, and A. Seznec, “Register Sharing for Equality Prediction,”         [76] D. A. Jiménez and C. Lin, “Dynamic Branch Prediction with Perceptrons,” in
+     in Proceedings of the International Symposium on Microarchitecture (MICRO),                    Proceedings of the International Symposium on High-Performance Computer
+     pp. 4:1–4:12, 2016.                                                                            Architecture (HPCA), pp. 197–206, 2001.
+[56] J. Sim, G. H. Loh, H. Kim, M. O’Connor, and M. Thottethodi, “A Mostly-Clean               [77] J. L. Henning, “SPEC CPU2006 Benchmark Descriptions,” ACM SIGARCH
+     DRAM Cache for Effective Hit Speculation and Self-Balancing Dispatch,” in                      Computer Architecture News, 2006.
+     Proceedings of the International Symposium on Microarchitecture (MICRO),
+     pp. 247–257, 2012.                                                                        [78] T. F. Wenisch, R. E. Wunderlich, M. Ferdman, A. Ailamaki, B. Falsaﬁ, and
+                                                                                                    J. C. Hoe, “SimFlex: Statistical Sampling of Computer System Simulation,”
+[57] D. Mahajan, A. Yazdanbakhsh, J. Park, B. Thwaites, and H. Esmaeilzadeh,                        IEEE Micro, vol. 26, no. 4, pp. 18–31, 2006.
+     “Prediction-Based Quality Control for Approximate Accelerators,” in Workshop
+     on Approximate Computing Across the System Stack (WACAS), 2015.                           [79] “The First JILP Data Prefetching Championship (DPC-1).” https://www.jilp.org/
+                                                                                                    dpc/online/papers/DPC-1-intro.pdf/, 2009.
+[58] K. Kuroyanagi and A. Seznec, “Service Value Aware Memory Scheduler by
+                                                                                               [80] H. Jang, Y. Lee, J. Kim, Y. Kim, J. Kim, J. Jeong, and J. W. Lee, “Efﬁcient Foot-
+     Estimating Request Weight and Using Per-Thread Trafﬁc Lights,” in Memory
+                                                                                                    print Caching for Tagless DRAM Caches,” in Proceedings of the International
+     Scheduling Championship (MSC), 2012.
+                                                                                                    Symposium on High-Performance Computer Architecture (HPCA), pp. 237–248,
+[59] N. Prémillieu and A. Seznec, SPREPI: Selective Prediction and Replay for                      2016.
+     Predicated Instructions. PhD thesis, INRIA, 2013.                                         [81] D. Jevdjic, G. H. Loh, C. Kaynak, and B. Falsaﬁ, “Unison Cache: A Scalable
+                                                                                                    and Effective Die-Stacked DRAM Cache,” in Proceedings of the International
+[60] F. Khorasani, H. A. Esfeden, N. Abu-Ghazaleh, and V. Sarkar, “In-Register                      Symposium on Microarchitecture (MICRO), pp. 25–37, 2014.
+     Parameter Caching for Dynamic Neural Nets with Virtual Persistent Processor
+     Specialization,” in Proceedings of the International Symposium on Microarchi-             [82] A. Kolli, A. Saidi, and T. F. Wenisch, “RDIP: Return-Address-Stack Directed
+     tecture (MICRO), 2018.                                                                         Instruction Prefetching,” in Proceedings of the International Symposium on
+                                                                                                    Microarchitecture (MICRO), pp. 260–271, 2013.
+[61] A. Vakil-Ghahani, S. Mahdizadeh-Shahri, M.-R. Lotﬁ-Namin, M. Bakhshalipour,
+     P. Lotﬁ-Kamran, and H. Sarbazi-Azad, “Cache Replacement Policy Based on                   [83] P. Lotﬁ-Kamran, M. Modarressi, and H. Sarbazi-Azad, “Near-Ideal Networks-
+     Expected Hit Count,” IEEE Computer Architecture Letters (CAL), vol. 17, no. 1,                 on-Chip for Servers,” in Proceedings of the International Symposium on High-
+     pp. 64–67, 2018.                                                                               Performance Computer Architecture (HPCA), pp. 277–288, 2017.
+
+[62] J. Kim, S. H. Pugsley, P. V. Gratz, A. L. N. Reddy, C. Wilkerson, and                     [84] X. Yu, C. J. Hughes, N. Satish, and S. Devadas, “IMP: Indirect Memory
+     Z. Chishti, “Path Conﬁdence Based Lookahead Prefetching,” in Proceedings                       Prefetcher,” in Proceedings of the International Symposium on Microarchitecture
+     of the International Symposium on Microarchitecture (MICRO), pp. 60:1–60:12,                   (MICRO), pp. 178–190, 2015.
+     2016.
+                                                                                               [85] A. Bhattacharjee, “Translation-Triggered Prefetching,” in Proceedings of the
+[63] P. Michaud, “Best-Offset Hardware Prefetching,” in Proceedings of the In-                      International Conference on Architectural Support for Programming Languages
+     ternational Symposium on High-Performance Computer Architecture (HPCA),                        and Operating Systems (ASPLOS), pp. 63–76, 2017.
+     pp. 469–480, 2016.                                                                        [86] D. Kadjo, J. Kim, P. Sharma, R. Panda, P. Gratz, and D. Jimenez, “B-
+                                                                                                    Fetch: Branch Prediction Directed Prefetching for Chip-Multiprocessors,” in
+[64] S. H. Pugsley, Z. Chishti, C. Wilkerson, P.-f. Chuang, R. L. Scott, A. Jaleel,
+                                                                                                    Proceedings of the International Symposium on Microarchitecture (MICRO),
+     S.-L. Lu, K. Chow, and R. Balasubramonian, “Sandbox Prefetching: Safe Run-
+                                                                                                    pp. 623–634, 2014.
+     Time Evaluation of Aggressive Prefetchers,” in Proceedings of the International
+     Symposium on High-Performance Computer Architecture (HPCA), pp. 626–637,                  [87] M. Hashemi, K. Swersky, J. A. Smith, G. Ayers, H. Litz, J. Chang, C. Kozyrakis,
+     2014.                                                                                          and P. Ranganathan, “Learning Memory Access Patterns,” in International
+                                                                                                    Conference on Machine Learning (ICML), 2018.
+[65] K. J. Nesbit, A. S. Dhodapkar, and J. E. Smith, “AC/DC: An Adaptive Data
+     Cache Prefetcher,” in Proceedings of the International Conference on Parallel             [88] L. Peled, U. Weiser, and Y. Etsion, “Towards Memory Prefetching with Neural
+     Architectures and Compilation Techniques (PACT), pp. 135–145, 2004.                            Networks: Challenges and Insights,” arXiv preprint arXiv:1804.00478, 2018.
+
+[66] K. J. Nesbit and J. E. Smith, “Data Cache Prefetching Using a Global History              [89] A. Seznec, “Decoupled Sectored Caches: Conciliating Low Tag Implementation
+     Buffer,” in Proceedings of the International Symposium on High-Performance                     Cost,” in Proceedings of the International Symposium on Computer Architecture
+     Computer Architecture (HPCA), pp. 96–96, 2004.                                                 (ISCA), pp. 384–393, 1994.
+
+
+
+
+                                                                                         411
+
+Authorized licensed use limited to: Carnegie Mellon University Libraries. Downloaded on January 17,2024 at 22:59:50 UTC from IEEE Xplore. Restrictions apply.
+

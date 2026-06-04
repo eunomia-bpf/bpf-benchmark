@@ -119,7 +119,7 @@ Instance：
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-x86-paired-attribution/data/aws-price-t3-small-linux-us-east-1.json`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-x86-paired-attribution/data/aws-price-gp3-us-east-1.json`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-x86-paired-attribution/analysis/*.tsv`
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
 
 ## 数据文件
 
@@ -260,7 +260,7 @@ Map treatment JIT snippet：
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-indirect-timeliness-micro-attribution/report.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-map-large-working-set-attribution/report.md`
 - `/home/ruoji/github/bpf-opt/experiments/2026-06-01-prefetch-map-raw-loader-fix/report.md`
-- `/home/ruoji/github/bpf-opt/docs/projects/kinsn/tasks/prefetch/plan.md`
+- `/home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/plan.md`
 
 发现和处理：
 
