@@ -11,8 +11,7 @@ use anyhow::{anyhow, bail, Context, Result};
 use clap::Parser;
 use libbpf_sys::{
     btf, btf__find_by_name_kind, btf__free, btf__load_from_kernel_by_id,
-    btf__load_from_kernel_by_id_split, btf__load_vmlinux_btf, libbpf_get_error,
-    BTF_KIND_FUNC,
+    btf__load_from_kernel_by_id_split, btf__load_vmlinux_btf, libbpf_get_error, BTF_KIND_FUNC,
 };
 use serde::Serialize;
 use std::collections::BTreeMap;
@@ -21,7 +20,10 @@ use std::path::PathBuf;
 use std::ptr::NonNull;
 
 #[derive(Parser)]
-#[command(name = "kinsnprober", about = "Emit a bpfopt target.json from loaded kinsn BTF modules")]
+#[command(
+    name = "kinsnprober",
+    about = "Emit a bpfopt target.json from loaded kinsn BTF modules"
+)]
 struct Cli {
     /// Output file (target.json compatible with `bpfopt --target`).
     #[arg(long, value_name = "FILE")]
@@ -38,23 +40,48 @@ struct Cli {
 /// shim invokes kinsnprober with no `--name` flags and gets this set.
 const DEFAULT_KINSN_NAMES: &[&str] = &[
     // ccmp (arm64)
-    "bpf_arm64_cmp_x", "bpf_arm64_cmp_w", "bpf_arm64_ccmp_x", "bpf_arm64_ccmp_w",
+    "bpf_arm64_cmp_x",
+    "bpf_arm64_cmp_w",
+    "bpf_arm64_ccmp_x",
+    "bpf_arm64_ccmp_w",
     "bpf_arm64_cset_x_cond",
     // cond_select
-    "bpf_x86_movq", "bpf_x86_testq", "bpf_x86_cmovneq", "bpf_x86_cmoveq",
+    "bpf_x86_movq",
+    "bpf_x86_testq",
+    "bpf_x86_cmovneq",
+    "bpf_x86_cmoveq",
     "bpf_arm64_mov_x",
     // rotate
-    "bpf_x86_rolq", "bpf_x86_rorxl", "bpf_arm64_extr_x", "bpf_arm64_extr_w",
+    "bpf_x86_rolq",
+    "bpf_x86_rorxl",
+    "bpf_arm64_extr_x",
+    "bpf_arm64_extr_w",
     // lea
-    "bpf_x86_leaq", "bpf_x86_leal",
+    "bpf_x86_leaq",
+    "bpf_x86_leal",
     // endian_fusion
-    "bpf_x86_movzwl", "bpf_x86_movl", "bpf_x86_rolw", "bpf_x86_bswapl",
+    "bpf_x86_movzwl",
+    "bpf_x86_movl",
+    "bpf_x86_rolw",
+    "bpf_x86_bswapl",
     // bulk_memory
-    "bpf_x86_movzbl", "bpf_x86_movb", "bpf_arm64_ldrb", "bpf_arm64_strb",
+    "bpf_x86_movzbl",
+    "bpf_x86_movb",
+    "bpf_arm64_ldrb",
+    "bpf_arm64_strb",
     // prefetch
-    "bpf_x86_prefetcht0", "bpf_arm64_prfm_pldl1keep",
+    "bpf_x86_prefetchnta",
+    "bpf_x86_prefetcht0",
+    "bpf_x86_prefetcht1",
+    "bpf_x86_prefetcht2",
+    "bpf_arm64_prfm_pldl1keep",
+    "bpf_arm64_prfm_pldl1strm",
+    "bpf_arm64_prfm_pldl2keep",
+    "bpf_arm64_prfm_pldl2strm",
     // extract
-    "bpf_x86_shrq", "bpf_x86_andl", "bpf_arm64_ubfm_x",
+    "bpf_x86_shrq",
+    "bpf_x86_andl",
+    "bpf_arm64_ubfm_x",
 ];
 
 #[derive(Serialize)]
@@ -87,10 +114,9 @@ impl KernelBtf {
         Self::from_raw("btf__load_vmlinux_btf", unsafe { btf__load_vmlinux_btf() })
     }
     fn load_by_id(id: u32) -> Result<Self> {
-        Self::from_raw(
-            &format!("btf__load_from_kernel_by_id({id})"),
-            unsafe { btf__load_from_kernel_by_id(id) },
-        )
+        Self::from_raw(&format!("btf__load_from_kernel_by_id({id})"), unsafe {
+            btf__load_from_kernel_by_id(id)
+        })
     }
     fn load_by_id_split(id: u32, base: &KernelBtf) -> Result<Self> {
         Self::from_raw(
@@ -100,9 +126,8 @@ impl KernelBtf {
     }
     fn find_func(&self, name: &str) -> Result<Option<u32>> {
         let c_name = CString::new(name).map_err(|_| anyhow!("name has NUL: {name:?}"))?;
-        let ret = unsafe {
-            btf__find_by_name_kind(self.ptr.as_ptr(), c_name.as_ptr(), BTF_KIND_FUNC)
-        };
+        let ret =
+            unsafe { btf__find_by_name_kind(self.ptr.as_ptr(), c_name.as_ptr(), BTF_KIND_FUNC) };
         if ret >= 0 {
             return Ok(Some(ret as u32));
         }
@@ -124,8 +149,12 @@ fn next_btf_id(start_id: u32) -> Result<Option<u32>> {
     let mut next: u32 = 0;
     let ret = unsafe { libbpf_sys::bpf_btf_get_next_id(start_id, &mut next) };
     if ret < 0 {
-        let errno = std::io::Error::last_os_error().raw_os_error().unwrap_or(libc::EIO);
-        if errno == libc::ENOENT { return Ok(None); }
+        let errno = std::io::Error::last_os_error()
+            .raw_os_error()
+            .unwrap_or(libc::EIO);
+        if errno == libc::ENOENT {
+            return Ok(None);
+        }
         return Err(anyhow!("BPF_BTF_GET_NEXT_ID: errno {errno}"));
     }
     Ok(Some(next))
@@ -136,7 +165,8 @@ fn detect_arch() -> String {
         "x86_64" => "x86_64",
         "aarch64" => "aarch64",
         other => other,
-    }.to_string()
+    }
+    .to_string()
 }
 
 fn main() -> Result<()> {
@@ -155,7 +185,9 @@ fn main() -> Result<()> {
     let mut saw_btf = false;
 
     loop {
-        let Some(btf_id) = next_btf_id(start_id)? else { break };
+        let Some(btf_id) = next_btf_id(start_id)? else {
+            break;
+        };
         saw_btf = true;
         start_id = btf_id;
         // Standalone load works for vmlinux; split-load for modules.
@@ -164,8 +196,12 @@ fn main() -> Result<()> {
             Err(_) => (KernelBtf::load_by_id_split(btf_id, &vmlinux)?, true),
         };
         for name in &names {
-            if found.contains_key(name) { continue; }
-            let Some(func_id) = btf.find_func(name)? else { continue };
+            if found.contains_key(name) {
+                continue;
+            }
+            let Some(func_id) = btf.find_func(name)? else {
+                continue;
+            };
             let func_id = i32::try_from(func_id)
                 .map_err(|_| anyhow!("BTF func id overflows i32 for {name}"))?;
             let call_offset = if is_module {
@@ -177,20 +213,28 @@ fn main() -> Result<()> {
             } else {
                 0
             };
-            found.insert(name.clone(), TargetKinsnJson {
-                btf_func_id: func_id,
-                btf_id,
-                call_offset,
-            });
+            found.insert(
+                name.clone(),
+                TargetKinsnJson {
+                    btf_func_id: func_id,
+                    btf_id,
+                    call_offset,
+                },
+            );
         }
-        if found.len() == names.len() { break; }
+        if found.len() == names.len() {
+            break;
+        }
     }
 
     if !saw_btf {
         bail!("no kernel BTF objects visible — is BPF enabled?");
     }
 
-    let out = TargetJson { arch: detect_arch(), kinsns: found };
+    let out = TargetJson {
+        arch: detect_arch(),
+        kinsns: found,
+    };
     let json = serde_json::to_string_pretty(&out)?;
     std::fs::write(&cli.out, json).with_context(|| format!("write {}", cli.out.display()))?;
     Ok(())
