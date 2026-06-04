@@ -31,38 +31,38 @@ CORPUS = {
     "bcc": {
         "app": "bcc/set",
         "stem": "bcc__set",
-        "stats_on": "TODO",
-        "stats_off": "TODO",
+        "stats_on": "corpus/results/x86_kvm_corpus_20260604_060059_192193",
+        "stats_off": "corpus/results/x86_kvm_corpus_20260604_090456_427289",
     },
     "otel": {
         "app": "otelcol-ebpf-profiler/profiling",
         "stem": "otelcol-ebpf-profiler__profiling",
-        "stats_on": "TODO",
-        "stats_off": "TODO",
+        "stats_on": "corpus/results/x86_kvm_corpus_20260604_063237_481303",
+        "stats_off": "corpus/results/x86_kvm_corpus_20260604_093627_878868",
     },
     "cilium": {
         "app": "cilium/agent",
         "stem": "cilium__agent",
-        "stats_on": "TODO",
-        "stats_off": "TODO",
+        "stats_on": "corpus/results/x86_kvm_corpus_20260604_070210_639497",
+        "stats_off": "corpus/results/x86_kvm_corpus_20260604_100557_313063",
     },
     "tetragon": {
         "app": "tetragon/observer",
         "stem": "tetragon__observer",
-        "stats_on": "TODO",
-        "stats_off": "TODO",
+        "stats_on": "corpus/results/x86_kvm_corpus_20260604_073221_306100",
+        "stats_off": "corpus/results/x86_kvm_corpus_20260604_103609_366182",
     },
     "katran": {
         "app": "katran",
         "stem": "katran",
-        "stats_on": "TODO",
-        "stats_off": "TODO",
+        "stats_on": "corpus/results/x86_kvm_corpus_20260604_080246_742228",
+        "stats_off": "corpus/results/x86_kvm_corpus_20260604_110614_563901",
     },
     "tracee": {
         "app": "tracee/monitor",
         "stem": "tracee__monitor",
-        "stats_on": "TODO",
-        "stats_off": "TODO",
+        "stats_on": "corpus/results/x86_kvm_corpus_20260604_083301_316989",
+        "stats_off": "corpus/results/x86_kvm_corpus_20260604_113548_863406",
     },
 }
 
@@ -413,7 +413,7 @@ def plot_corpus(
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     labels = [row.key for row in workloads]
     x = list(range(len(labels)))
-    fig, axes = plt.subplots(1, 3, figsize=(16.2, 4.9), dpi=180)
+    fig, axes = plt.subplots(1, 3, figsize=(16.6, 5.2), dpi=180)
 
     ax = axes[0]
     workload_values = [row.post_over_baseline for row in workloads]
@@ -449,7 +449,7 @@ def plot_corpus(
     visible = [value for value in bpf_values + direct_y if not math.isnan(value)]
     ax.set_ylim(min(0.75, min(visible) * 0.94), max(1.25, max(visible) * 1.06))
     ax.grid(axis="y", color="0.9")
-    ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, 1.18), ncol=2)
+    ax.legend(frameon=False, loc="upper left", fontsize=8)
     for index, key in enumerate(labels):
         row = bpf_by_key[key]
         ax.text(index, bpf_values[index] + 0.015, f"n={len(row.qualified)}", ha="center", va="bottom", fontsize=8)
@@ -483,7 +483,7 @@ def plot_corpus(
     ax.set_ylim(0, max(1.0, max(sites) * 1.28))
     ax.grid(axis="y", color="0.9")
     if active_families:
-        ax.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, 1.2), ncol=2)
+        ax.legend(frameon=False, loc="upper left", ncol=2, fontsize=8)
     max_sites = max(sites) if sites else 0
     for index, site_count in enumerate(sites):
         ax.text(
@@ -496,7 +496,7 @@ def plot_corpus(
         )
 
     fig.suptitle("Kinsn ReJIT on x86 KVM corpus apps", fontsize=16)
-    fig.tight_layout(rect=(0, 0.03, 1, 0.93))
+    fig.tight_layout(rect=(0, 0.03, 1, 0.92))
     fig.savefig(FIG_OUT, bbox_inches="tight")
     plt.close(fig)
     return FIG_OUT
