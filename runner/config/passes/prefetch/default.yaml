@@ -12,4 +12,4 @@ kinsns:
   - name: bpf_arm64_prfm_pldl2keep
   - name: bpf_arm64_prfm_pldl2strm
 command: |
-  timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}
+  timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} ${BPFREJIT_BENCH_PASS_ARGS}

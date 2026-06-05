@@ -71,6 +71,7 @@ pub struct PrefetchPass {
     profile: PrefetchProfileGate,
     hint: PrefetchHint,
     max_sites_per_program: usize,
+    emit_candidate_diagnostics: bool,
 }
 
 impl PrefetchPass {
@@ -80,6 +81,7 @@ impl PrefetchPass {
             profile: args.profile,
             hint: args.hint,
             max_sites_per_program: args.max_sites_per_program,
+            emit_candidate_diagnostics: args.emit_candidate_diagnostics,
         }))
     }
 
@@ -94,6 +96,7 @@ impl PrefetchPass {
             },
             hint: PrefetchHint::default(),
             max_sites_per_program: MAX_PREFETCH_SITES_PER_PROGRAM,
+            emit_candidate_diagnostics: false,
         }
     }
 
@@ -104,6 +107,7 @@ impl PrefetchPass {
             profile: json.into_gate()?,
             hint: PrefetchHint::default(),
             max_sites_per_program: MAX_PREFETCH_SITES_PER_PROGRAM,
+            emit_candidate_diagnostics: false,
         })
     }
 
@@ -121,7 +125,14 @@ impl PrefetchPass {
             profile: json.into_gate()?,
             hint: PrefetchHint::parse(hint)?,
             max_sites_per_program,
+            emit_candidate_diagnostics: false,
         })
+    }
+
+    #[cfg(test)]
+    pub(super) fn with_candidate_diagnostics_for_test(mut self) -> Self {
+        self.emit_candidate_diagnostics = true;
+        self
     }
 }
 
@@ -131,6 +142,7 @@ impl Default for PrefetchPass {
             profile: PrefetchProfileGate::default(),
             hint: PrefetchHint::default(),
             max_sites_per_program: MAX_PREFETCH_SITES_PER_PROGRAM,
+            emit_candidate_diagnostics: false,
         }
     }
 }
@@ -170,14 +182,29 @@ impl PrefetchHint {
             (Arch::Aarch64, Self::L2Stream) => ARM64_PREFETCH_L2STRM_TARGET_NAME,
         }
     }
+
+    fn profile_name(self) -> &'static str {
+        match self {
+            Self::L1Keep => "l1keep",
+            Self::L1Stream => "l1strm",
+            Self::L2Keep => "l2keep",
+            Self::L2Stream => "l2strm",
+            Self::X86Nta => "nta",
+        }
+    }
 }
 
 #[derive(Clone, Debug, Default)]
 struct PrefetchProfileGate {
     map_value_pcs: BTreeSet<u64>,
-    map_value_prefetch_points: BTreeMap<u64, BTreeSet<u8>>,
+    map_value_prefetch_points: BTreeMap<u64, BTreeMap<u8, PrefetchPointPolicy>>,
     map_value_skip_pcs: BTreeSet<u64>,
     map_value_skipped_prefetch_points: BTreeMap<u64, BTreeSet<u8>>,
+}
+
+#[derive(Clone, Copy, Debug, Default)]
+struct PrefetchPointPolicy {
+    hint: Option<PrefetchHint>,
 }
 
 impl PrefetchProfileGate {
@@ -192,7 +219,7 @@ impl PrefetchProfileGate {
         self.map_value_pcs.contains(&pc) && !self.map_value_skip_pcs.contains(&pc)
     }
 
-    fn map_value_prefetch_point_regs(&self, pc: u64) -> Option<&BTreeSet<u8>> {
+    fn map_value_prefetch_points(&self, pc: u64) -> Option<&BTreeMap<u8, PrefetchPointPolicy>> {
         if self.map_value_skip_pcs.contains(&pc) {
             return None;
         }
@@ -210,6 +237,7 @@ struct PrefetchCliArgs {
     profile: PrefetchProfileGate,
     hint: PrefetchHint,
     max_sites_per_program: usize,
+    emit_candidate_diagnostics: bool,
 }
 
 impl PrefetchCliArgs {
@@ -217,6 +245,7 @@ impl PrefetchCliArgs {
         let mut profile_path = None;
         let mut hint = PrefetchHint::default();
         let mut max_sites_per_program = MAX_PREFETCH_SITES_PER_PROGRAM;
+        let mut emit_candidate_diagnostics = false;
         let mut iter = args.iter();
         while let Some(arg) = iter.next() {
             if let Some(value) = arg.strip_prefix("--profile=") {
@@ -232,6 +261,12 @@ impl PrefetchCliArgs {
                 continue;
             }
             match arg.as_str() {
+                "--emit-candidates" => {
+                    emit_candidate_diagnostics = true;
+                }
+                "--candidate-diagnostics" => {
+                    emit_candidate_diagnostics = true;
+                }
                 "--profile" => {
                     let value = iter
                         .next()
@@ -261,6 +296,7 @@ impl PrefetchCliArgs {
             profile,
             hint,
             max_sites_per_program,
+            emit_candidate_diagnostics,
         })
     }
 }
@@ -314,6 +350,16 @@ struct PrefetchProfilePolicyPointJson {
     #[serde(default)]
     reg: Option<u8>,
     action: PrefetchProfilePolicyAction,
+    #[serde(default)]
+    policy: Option<String>,
+    #[serde(default)]
+    horizon: Option<u32>,
+    #[serde(default)]
+    degree: Option<u32>,
+    #[serde(default)]
+    hint: Option<String>,
+    #[serde(default)]
+    reason: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -347,7 +393,8 @@ impl PrefetchProfileJson {
                 map_value_pcs.insert(site.pc);
             }
         }
-        let mut map_value_prefetch_points = BTreeMap::<u64, BTreeSet<u8>>::new();
+        let mut map_value_prefetch_points =
+            BTreeMap::<u64, BTreeMap<u8, PrefetchPointPolicy>>::new();
         let mut map_value_skip_pcs = BTreeSet::<u64>::new();
         let mut map_value_skipped_prefetch_points = BTreeMap::<u64, BTreeSet<u8>>::new();
         for point in self.map_value_prefetch_points {
@@ -355,9 +402,10 @@ impl PrefetchProfileJson {
             map_value_prefetch_points
                 .entry(point.pc)
                 .or_default()
-                .insert(point.reg);
+                .insert(point.reg, PrefetchPointPolicy::default());
         }
         for point in self.map_value_policy_points {
+            let hint = validate_prefetch_policy_point_metadata(&point)?;
             match point.action {
                 PrefetchProfilePolicyAction::Prefetch => {
                     let reg = point.reg.ok_or_else(|| {
@@ -369,7 +417,7 @@ impl PrefetchProfileJson {
                     map_value_prefetch_points
                         .entry(point.pc)
                         .or_default()
-                        .insert(reg);
+                        .insert(reg, PrefetchPointPolicy { hint });
                 }
                 PrefetchProfilePolicyAction::Skip => {
                     if let Some(reg) = point.reg {
@@ -399,6 +447,31 @@ fn validate_prefetch_profile_reg(field: &str, reg: u8) -> Result<()> {
     }
     Ok(())
 }
+
+fn validate_prefetch_policy_point_metadata(
+    point: &PrefetchProfilePolicyPointJson,
+) -> Result<Option<PrefetchHint>> {
+    if let Some(policy) = point.policy.as_deref() {
+        validate_non_empty_profile_text("policy", policy)?;
+    }
+    if let Some(reason) = point.reason.as_deref() {
+        validate_non_empty_profile_text("reason", reason)?;
+    }
+    if point.horizon.is_some_and(|value| value == 0) {
+        anyhow::bail!("prefetch profile map_value_policy_points horizon must be positive");
+    }
+    if point.degree.is_some_and(|value| value == 0) {
+        anyhow::bail!("prefetch profile map_value_policy_points degree must be positive");
+    }
+    point.hint.as_deref().map(PrefetchHint::parse).transpose()
+}
+
+fn validate_non_empty_profile_text(field: &str, value: &str) -> Result<()> {
+    if value.trim().is_empty() {
+        anyhow::bail!("prefetch profile map_value_policy_points {field} must be non-empty");
+    }
+    Ok(())
+}
 #[derive(Clone, Copy, Debug)]
 struct PrefetchSite {
     target: InsnSite,
@@ -408,6 +481,7 @@ struct PrefetchSite {
     mem_off: i16,
     source: PrefetchSource,
     dependent_load_depth: u8,
+    hint_override: Option<PrefetchHint>,
 }
 #[derive(Clone, Debug)]
 struct PrefetchCandidate {
@@ -418,12 +492,49 @@ struct PrefetchCandidate {
     mem_off: i16,
     source: PrefetchSource,
     dependent_load_depth: u8,
+    hint_override: Option<PrefetchHint>,
 }
+
+struct PrefetchLayout {
+    pcs: BTreeMap<InsnSite, u64>,
+}
+
+impl PrefetchLayout {
+    fn from_program(prog: &ProgramCFG) -> anyhow::Result<Self> {
+        Ok(Self {
+            pcs: report_site_pcs(prog)?,
+        })
+    }
+
+    fn pc(&self, site: InsnSite) -> anyhow::Result<u64> {
+        self.pcs
+            .get(&site)
+            .copied()
+            .ok_or_else(|| anyhow::anyhow!("site {:?} is not in current program order", site))
+    }
+
+    fn offset(&self, site: InsnSite) -> anyhow::Result<SlotDistance> {
+        let pc = usize::try_from(self.pc(site)?)
+            .map_err(|_| anyhow::anyhow!("report PC for {site:?} does not fit usize"))?;
+        Ok(SlotDistance::from_slots(pc))
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum PrefetchSource {
     MapValue,
     MapValueProfilePoint,
     Packet,
+}
+
+impl PrefetchSource {
+    fn report_name(self) -> &'static str {
+        match self {
+            Self::MapValue => "map-value",
+            Self::MapValueProfilePoint => "map-value-profile-point",
+            Self::Packet => "packet",
+        }
+    }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum TrackedValue {
@@ -487,12 +598,17 @@ impl BpfPass for PrefetchPass {
         }
         let mut candidates = Vec::new();
         let mut skipped = Vec::new();
-        for site in scan_prefetch_sites(prog, ctx.prog_type, &self.profile)? {
-            if let Some(reason) = reject_unprofitable_site(prog, site, &self.profile)? {
+        let mut site_diagnostics = Vec::new();
+        let layout = PrefetchLayout::from_program(prog)?;
+        for site in scan_prefetch_sites(prog, ctx.prog_type, &self.profile, &layout)? {
+            if self.emit_candidate_diagnostics {
+                site_diagnostics.push(prefetch_site_diagnostic(site, &layout)?);
+            }
+            if let Some(reason) = reject_unprofitable_site(prog, site, &self.profile, &layout)? {
                 skipped.push(checked_site_skip(prog, site.target, reason)?);
                 continue;
             }
-            let insert_site = match choose_prefetch_insert_site(prog, site)? {
+            let insert_site = match choose_prefetch_insert_site(prog, site, &layout)? {
                 Ok(insert) => insert,
                 Err(reason) => {
                     skipped.push(checked_site_skip(prog, site.target, reason)?);
@@ -507,6 +623,7 @@ impl BpfPass for PrefetchPass {
                 mem_off: site.mem_off,
                 source: site.source,
                 dependent_load_depth: site.dependent_load_depth,
+                hint_override: site.hint_override,
             });
         }
         let candidates = apply_prefetch_site_budget(
@@ -515,28 +632,61 @@ impl BpfPass for PrefetchPass {
             &mut skipped,
         )?;
         if candidates.is_empty() {
-            return Ok(PassResult::with_sites(0, skipped));
+            return Ok(PassResult {
+                site_skipped: skipped,
+                site_diagnostics,
+                ..Default::default()
+            });
         }
         let pairs: Vec<(InsnSite, PrefetchCandidate)> =
             candidates.into_iter().map(|c| (c.insert, c)).collect();
         let applied =
             apply_candidates_reverse(prog, &pairs, &mut skipped, |prog, _, candidate| {
                 let payload = prefetch_payload(candidate.ptr_reg)?;
-                Ok((
-                    0,
-                    prog.kinsn_emit(self.hint.target_name(ctx.arch), payload)?,
-                ))
+                let hint = candidate.hint_override.unwrap_or(self.hint);
+                Ok((0, prog.kinsn_emit(hint.target_name(ctx.arch), payload)?))
             })?;
-        Ok(PassResult::with_sites(applied, skipped))
+        Ok(PassResult {
+            sites_applied: applied,
+            site_skipped: skipped,
+            site_diagnostics,
+            ..Default::default()
+        })
     }
+}
+
+fn prefetch_site_diagnostic(
+    site: PrefetchSite,
+    layout: &PrefetchLayout,
+) -> anyhow::Result<SiteDiagnostic> {
+    let ptr_root_pc = layout.pc(site.ptr_root)?;
+    let ptr_def_pc = layout.pc(site.ptr_def)?;
+    let hint = site
+        .hint_override
+        .map(PrefetchHint::profile_name)
+        .unwrap_or("default");
+    Ok(SiteDiagnostic {
+        site: site.target,
+        message: format!(
+            "prefetch_candidate source={} ptr_reg=r{} ptr_root_pc={} ptr_def_pc={} mem_off={} dependent_load_depth={} hint={}",
+            site.source.report_name(),
+            site.ptr_reg,
+            ptr_root_pc,
+            ptr_def_pc,
+            site.mem_off,
+            site.dependent_load_depth,
+            hint,
+        ),
+    })
 }
 
 fn scan_prefetch_sites(
     prog: &ProgramCFG,
     prog_type: u32,
     profile: &PrefetchProfileGate,
+    layout: &PrefetchLayout,
 ) -> anyhow::Result<Vec<PrefetchSite>> {
-    let mut sites = scan_map_value_prefetch_sites(prog, profile)?;
+    let mut sites = scan_map_value_prefetch_sites(prog, profile, layout)?;
     if let Some(layout) = packet_ctx_layout(prog_type, PacketCtxLayoutScope::PacketAccess) {
         sites.extend(scan_packet_prefetch_sites(prog, layout)?);
     }
@@ -545,30 +695,42 @@ fn scan_prefetch_sites(
 fn scan_map_value_prefetch_sites(
     prog: &ProgramCFG,
     profile: &PrefetchProfileGate,
+    layout: &PrefetchLayout,
 ) -> anyhow::Result<Vec<PrefetchSite>> {
     let mut sites = Vec::new();
-    let entry_states = map_value_block_entry_states(prog)?;
-    for block in prog.block_ids().collect::<Vec<_>>() {
+    let blocks = prog.block_ids().collect::<Vec<_>>();
+    let entry_states = map_value_block_entry_states(prog, layout)?;
+    for block in blocks {
         let state = entry_states[block.0].clone();
-        process_map_value_block(prog, block, state, profile, Some(&mut sites))?;
+        process_map_value_block(prog, block, state, profile, layout, Some(&mut sites))?;
     }
     Ok(sites)
 }
 
-fn map_value_block_entry_states(prog: &ProgramCFG) -> anyhow::Result<Vec<MapValueState>> {
-    let block_count = prog.block_ids().count();
+fn map_value_block_entry_states(
+    prog: &ProgramCFG,
+    layout: &PrefetchLayout,
+) -> anyhow::Result<Vec<MapValueState>> {
+    let blocks = prog.block_ids().collect::<Vec<_>>();
+    let block_count = blocks.len();
     let mut entry_states = vec![MapValueState::unknown(); block_count];
     let mut exit_states = vec![None::<MapValueState>; block_count];
     for _ in 0..block_count.saturating_mul(4).max(1) {
         let mut changed = false;
-        for block in prog.block_ids().collect::<Vec<_>>() {
+        for &block in &blocks {
             let entry = merge_map_value_predecessor_states(prog, block, &exit_states);
             if entry_states[block.0] != entry {
                 entry_states[block.0] = entry.clone();
                 changed = true;
             }
-            let exit =
-                process_map_value_block(prog, block, entry, &PrefetchProfileGate::default(), None)?;
+            let exit = process_map_value_block(
+                prog,
+                block,
+                entry,
+                &PrefetchProfileGate::default(),
+                layout,
+                None,
+            )?;
             if exit_states[block.0].as_ref() != Some(&exit) {
                 exit_states[block.0] = Some(exit);
                 changed = true;
@@ -634,12 +796,13 @@ fn process_map_value_block(
     block: BlockId,
     mut state: MapValueState,
     profile: &PrefetchProfileGate,
+    layout: &PrefetchLayout,
     mut sites: Option<&mut Vec<PrefetchSite>>,
 ) -> anyhow::Result<MapValueState> {
     for site in prog.sites_in_block_with_terminator(block)? {
         let insn = prog.insn(site)?;
         if let Some(sites) = sites.as_deref_mut() {
-            push_profiled_map_value_prefetch_points(prog, site, profile, &state, sites)?;
+            push_profiled_map_value_prefetch_points(site, profile, &state, layout, sites)?;
         }
         if let Some(base_reg) = load_base_reg(insn) {
             if let Some(ptr_def) = state.regs[base_reg as usize] {
@@ -652,6 +815,7 @@ fn process_map_value_block(
                         mem_off: insn.off,
                         source: PrefetchSource::MapValue,
                         dependent_load_depth: 0,
+                        hint_override: None,
                     });
                 }
             }
@@ -671,17 +835,17 @@ fn process_map_value_block(
 }
 
 fn push_profiled_map_value_prefetch_points(
-    prog: &ProgramCFG,
     site: InsnSite,
     profile: &PrefetchProfileGate,
     state: &MapValueState,
+    layout: &PrefetchLayout,
     sites: &mut Vec<PrefetchSite>,
 ) -> anyhow::Result<()> {
-    let pc = report_site_pc(prog, site)?;
-    let Some(regs) = profile.map_value_prefetch_point_regs(pc) else {
+    let pc = layout.pc(site)?;
+    let Some(points) = profile.map_value_prefetch_points(pc) else {
         return Ok(());
     };
-    for &ptr_reg in regs {
+    for (&ptr_reg, point_policy) in points {
         if profile.skips_map_value_prefetch_point(pc, ptr_reg) {
             continue;
         }
@@ -694,6 +858,7 @@ fn push_profiled_map_value_prefetch_points(
             mem_off: 0,
             source: PrefetchSource::MapValueProfilePoint,
             dependent_load_depth: 0,
+            hint_override: point_policy.hint,
         });
     }
     Ok(())
@@ -744,8 +909,9 @@ fn scan_packet_prefetch_sites(
     layout: PacketCtxLayout,
 ) -> anyhow::Result<Vec<PrefetchSite>> {
     let mut sites = Vec::new();
+    let blocks = prog.block_ids().collect::<Vec<_>>();
     let entry_states = packet_block_entry_states(prog, layout)?;
-    for block in prog.block_ids().collect::<Vec<_>>() {
+    for block in blocks {
         let state = entry_states[block.0].clone();
         process_packet_block(prog, block, layout, state, Some(&mut sites))?;
     }
@@ -756,12 +922,13 @@ fn packet_block_entry_states(
     prog: &ProgramCFG,
     layout: PacketCtxLayout,
 ) -> anyhow::Result<Vec<PacketState>> {
-    let block_count = prog.block_ids().count();
+    let blocks = prog.block_ids().collect::<Vec<_>>();
+    let block_count = blocks.len();
     let mut entry_states = vec![PacketState::unknown(); block_count];
     let mut exit_states = vec![None::<PacketState>; block_count];
     for _ in 0..block_count.saturating_mul(4).max(1) {
         let mut changed = false;
-        for block in prog.block_ids().collect::<Vec<_>>() {
+        for &block in &blocks {
             let entry = if block.0 == 0 {
                 PacketState::entry()
             } else {
@@ -833,6 +1000,7 @@ fn process_packet_block(
                         mem_off: insn.off,
                         source: PrefetchSource::Packet,
                         dependent_load_depth,
+                        hint_override: None,
                     });
                 }
             }
@@ -1125,11 +1293,12 @@ fn reject_unprofitable_site(
     prog: &ProgramCFG,
     site: PrefetchSite,
     profile: &PrefetchProfileGate,
+    layout: &PrefetchLayout,
 ) -> anyhow::Result<Option<String>> {
     match site.source {
         PrefetchSource::MapValueProfilePoint => Ok(None),
         PrefetchSource::MapValue => {
-            let pc = report_site_pc(prog, site.target)?;
+            let pc = layout.pc(site.target)?;
             if profile.allows_map_value_pc(pc) {
                 Ok(None)
             } else {
@@ -1138,15 +1307,16 @@ fn reject_unprofitable_site(
                 )))
             }
         }
-        PrefetchSource::Packet => reject_unprofitable_packet_site(prog, site),
+        PrefetchSource::Packet => reject_unprofitable_packet_site(prog, site, layout),
     }
 }
 
 fn reject_unprofitable_packet_site(
     prog: &ProgramCFG,
     site: PrefetchSite,
+    layout: &PrefetchLayout,
 ) -> anyhow::Result<Option<String>> {
-    if packet_load_feeds_later_packet_pointer(prog, site)? {
+    if packet_load_feeds_later_packet_pointer(prog, site, layout)? {
         return Ok(Some(
             "packet load is an address source for a later dereference".into(),
         ));
@@ -1167,6 +1337,7 @@ fn reject_unprofitable_packet_site(
 fn packet_load_feeds_later_packet_pointer(
     prog: &ProgramCFG,
     site: PrefetchSite,
+    layout: &PrefetchLayout,
 ) -> anyhow::Result<bool> {
     let target = prog.insn(site.target)?;
     let loaded_reg = target.dst_reg();
@@ -1175,7 +1346,9 @@ fn packet_load_feeds_later_packet_pointer(
     scalar_aliases.insert(loaded_reg);
     packet_ptr_aliases.insert(site.ptr_reg);
     packet_ptr_aliases.insert(prog.insn(site.ptr_root)?.dst_reg());
-    for scan_site in pf_sites_after_in_frame(prog, site.target, POINTER_INDEX_USE_LOOKAHEAD)? {
+    for scan_site in
+        pf_sites_after_in_frame(prog, site.target, POINTER_INDEX_USE_LOOKAHEAD, layout)?
+    {
         if scan_site == site.target {
             continue;
         }
@@ -1242,6 +1415,7 @@ fn update_pointer_index_scan_aliases(
 fn choose_prefetch_insert_site(
     prog: &ProgramCFG,
     site: PrefetchSite,
+    layout: &PrefetchLayout,
 ) -> anyhow::Result<std::result::Result<InsnSite, String>> {
     if site.source == PrefetchSource::MapValueProfilePoint {
         let insn = prog.insn(site.target)?;
@@ -1253,7 +1427,13 @@ fn choose_prefetch_insert_site(
         }
         return Ok(Ok(site.target));
     }
-    let window = pf_prefetch_window_sites(prog, site.ptr_def, site.target, MAX_PREFETCH_DISTANCE)?;
+    let window = pf_prefetch_window_sites(
+        prog,
+        site.ptr_def,
+        site.target,
+        MAX_PREFETCH_DISTANCE,
+        layout,
+    )?;
     if window.is_empty() {
         return Ok(Err("no valid prefetch insertion window".into()));
     }
@@ -1264,7 +1444,7 @@ fn choose_prefetch_insert_site(
         return Ok(Err(reason));
     }
     let Some(insert_site) =
-        pf_nearest_prefetch_insert_site(prog, &window, site.target, TARGET_PREFETCH_DISTANCE)?
+        pf_nearest_prefetch_insert_site(&window, site.target, TARGET_PREFETCH_DISTANCE, layout)?
     else {
         return Ok(Err(
             "prefetch insertion window has no instruction boundary".into()
@@ -1277,17 +1457,18 @@ fn pf_sites_after_in_frame(
     prog: &ProgramCFG,
     anchor: InsnSite,
     max_slots: usize,
+    layout: &PrefetchLayout,
 ) -> anyhow::Result<Vec<InsnSite>> {
     prog.insn(anchor)?;
     let frame = prog.site_frame(anchor)?;
-    let scan_start = pf_site_end_offset(prog, anchor)?;
+    let scan_start = pf_site_end_offset(prog, anchor, layout)?;
     let scan_end = scan_start
         .checked_add(SlotDistance::from_slots(max_slots))
         .ok_or_else(|| anyhow::anyhow!("prefetch scan after {:?} overflows", anchor))?;
     let mut sites = Vec::new();
     for block in prog.subprog_blocks(frame) {
         for site in prog.sites_in_block_with_terminator(block)? {
-            let site_start = prog.site_layout_offset(site)?;
+            let site_start = layout.offset(site)?;
             if site_start < scan_start {
                 continue;
             }
@@ -1305,6 +1486,7 @@ fn pf_prefetch_window_sites(
     ptr_def: InsnSite,
     target: InsnSite,
     max_slots: usize,
+    layout: &PrefetchLayout,
 ) -> anyhow::Result<Vec<InsnSite>> {
     prog.insn(ptr_def)?;
     prog.insn(target)?;
@@ -1318,9 +1500,9 @@ fn pf_prefetch_window_sites(
         );
     }
     let ptr_def_block = prog.site_block(ptr_def);
-    let block_start = first_block_layout_offset(prog, target_block)?;
-    let target_start = prog.site_layout_offset(target)?;
-    let ptr_def_end = pf_site_end_offset(prog, ptr_def)?;
+    let block_start = first_block_layout_offset(prog, target_block, layout)?;
+    let target_start = layout.offset(target)?;
+    let ptr_def_end = pf_site_end_offset(prog, ptr_def, layout)?;
     if ptr_def_block == target_block && ptr_def_end > target_start {
         return Ok(Vec::new());
     }
@@ -1337,7 +1519,7 @@ fn pf_prefetch_window_sites(
     }
     let mut sites = Vec::new();
     for site in prog.sites_in_block(target_block)? {
-        let site_start = prog.site_layout_offset(site)?;
+        let site_start = layout.offset(site)?;
         if site_start >= valid_start && site_start <= target_start {
             sites.push(site);
         }
@@ -1346,17 +1528,17 @@ fn pf_prefetch_window_sites(
 }
 
 fn pf_nearest_prefetch_insert_site(
-    prog: &ProgramCFG,
     sites: &[InsnSite],
     target: InsnSite,
     ideal_distance: usize,
+    layout: &PrefetchLayout,
 ) -> anyhow::Result<Option<InsnSite>> {
-    let ideal = prog
-        .site_layout_offset(target)?
+    let ideal = layout
+        .offset(target)?
         .saturating_sub(SlotDistance::from_slots(ideal_distance));
     let mut best: Option<(SlotDistance, SlotDistance, InsnSite)> = None;
     for &site in sites {
-        let site_start = prog.site_layout_offset(site)?;
+        let site_start = layout.offset(site)?;
         let distance = site_start.abs_diff(ideal);
         if best.is_none_or(|(best_distance, best_start, _)| {
             distance < best_distance || (distance == best_distance && site_start < best_start)
@@ -1367,15 +1549,24 @@ fn pf_nearest_prefetch_insert_site(
     Ok(best.map(|(_, _, site)| site))
 }
 
-fn pf_site_end_offset(prog: &ProgramCFG, site: InsnSite) -> anyhow::Result<SlotDistance> {
-    prog.site_layout_offset(site)?
+fn pf_site_end_offset(
+    prog: &ProgramCFG,
+    site: InsnSite,
+    layout: &PrefetchLayout,
+) -> anyhow::Result<SlotDistance> {
+    layout
+        .offset(site)?
         .checked_add(SlotDistance::from_slots(prog.insn_slot_width(site)?))
         .ok_or_else(|| anyhow::anyhow!("prefetch site {:?} end offset overflows", site))
 }
 
-fn first_block_layout_offset(prog: &ProgramCFG, block: BlockId) -> anyhow::Result<SlotDistance> {
+fn first_block_layout_offset(
+    prog: &ProgramCFG,
+    block: BlockId,
+    layout: &PrefetchLayout,
+) -> anyhow::Result<SlotDistance> {
     match prog.sites_in_block_with_terminator(block)?.first() {
-        Some(&first) => prog.site_layout_offset(first),
+        Some(&first) => layout.offset(first),
         None => Ok(SlotDistance::ZERO),
     }
 }

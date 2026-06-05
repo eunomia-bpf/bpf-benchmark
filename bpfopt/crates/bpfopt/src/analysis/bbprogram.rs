@@ -589,7 +589,7 @@ impl ProgramCFG {
     pub fn sites_in_block_with_terminator(&self, block: BlockId) -> anyhow::Result<Vec<InsnSite>> {
         Ok(logical_sites_for_block(self.block(block)?))
     }
-    pub(super) fn current_site_pcs(&self) -> anyhow::Result<BTreeMap<InsnSite, usize>> {
+    pub(crate) fn current_site_pcs(&self) -> anyhow::Result<BTreeMap<InsnSite, usize>> {
         current_site_pcs(self)
     }
     pub(crate) fn original_pc_to_site(&self, pc: usize) -> Option<InsnSite> {

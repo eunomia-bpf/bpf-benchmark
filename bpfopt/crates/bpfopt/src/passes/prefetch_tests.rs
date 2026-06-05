@@ -47,6 +47,43 @@ fn prefetch_skips_map_value_without_profile_gate() {
 }
 
 #[test]
+fn prefetch_reports_candidate_census_for_skipped_map_value() {
+    let run = run_pass_on_insns(
+        PrefetchPass::default().with_candidate_diagnostics_for_test(),
+        map_lookup_program(),
+        &prefetch_ctx(),
+    );
+
+    assert_eq!(run.result.sites_applied, 0);
+    let diagnostic = run
+        .result
+        .site_diagnostics
+        .iter()
+        .find(|diagnostic| diagnostic.message.contains("prefetch_candidate"))
+        .expect("prefetch should report skipped candidate metadata");
+    assert_eq!(run.report_prog.rep_site_slot(diagnostic.site).unwrap(), 2);
+    assert!(diagnostic.message.contains("source=map-value"));
+    assert!(diagnostic.message.contains("ptr_reg=r0"));
+    assert!(diagnostic.message.contains("ptr_root_pc=0"));
+    assert!(diagnostic.message.contains("ptr_def_pc=0"));
+    assert!(diagnostic.message.contains("mem_off=0"));
+    assert!(diagnostic.message.contains("dependent_load_depth=0"));
+}
+
+#[test]
+fn prefetch_suppresses_candidate_census_by_default() {
+    let run = run_pass_on_insns(
+        PrefetchPass::default(),
+        map_lookup_program(),
+        &prefetch_ctx(),
+    );
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert!(run.result.site_diagnostics.is_empty());
+    assert_skip_reason(&run, 2, "map value prefetch requires profile");
+}
+
+#[test]
 fn prefetch_allows_map_value_with_profile_gate() {
     let pass = PrefetchPass::with_map_value_profile_pcs([2]);
     let run = run_pass_on_insns(pass, map_lookup_program(), &prefetch_ctx());
@@ -253,6 +290,74 @@ fn prefetch_hint_selects_arm64_variant_target() {
         .lowered
         .iter()
         .any(|insn| insn.is_call_kinsn() && insn.imm == 8203));
+}
+
+#[test]
+fn prefetch_policy_point_metadata_selects_point_hint() {
+    let pass = PrefetchPass::from_profile_json_with_options_for_test(
+        r#"{
+            "map_value_policy_points": [
+                {
+                    "pc": 4,
+                    "reg": 6,
+                    "action": "prefetch",
+                    "policy": "horizon",
+                    "horizon": 2,
+                    "degree": 1,
+                    "hint": "pldl2keep",
+                    "reason": "synthetic future pointer"
+                }
+            ]
+        }"#,
+        "pldl1keep",
+        1,
+    )
+    .unwrap();
+    let input = vec![
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, 0),
+            0,
+            libbpf_sys::BPF_FUNC_map_lookup_elem as i32,
+        ),
+        BpfInsn::jeq_imm(BPF_REG_0, 0, 4),
+        BpfInsn::mov64_reg(BPF_REG_6, BPF_REG_0),
+        BpfInsn::alu64_imm(BPF_ADD, BPF_REG_6, 64),
+        BpfInsn::mov64_imm(BPF_REG_4, 123),
+        BpfInsn::ldx_mem(BPF_DW, BPF_REG_1, BPF_REG_0, 0),
+        BpfInsn::exit(),
+    ];
+    let ctx = prefetch_ctx_with_targets(&[("bpf_arm64_prfm_pldl2keep", 8202)], Arch::Aarch64);
+    let run = run_pass_on_insns(pass, input, &ctx);
+
+    assert_eq!(run.result.sites_applied, 1);
+    assert!(run
+        .lowered
+        .iter()
+        .any(|insn| insn.is_call_kinsn() && insn.imm == 8202));
+}
+
+#[test]
+fn prefetch_policy_point_rejects_invalid_metadata() {
+    let err = PrefetchPass::from_profile_json_for_test(
+        r#"{
+            "map_value_policy_points": [
+                {
+                    "pc": 4,
+                    "reg": 6,
+                    "action": "prefetch",
+                    "policy": "horizon",
+                    "horizon": 0,
+                    "degree": 1,
+                    "hint": "pldl1keep",
+                    "reason": "bad horizon"
+                }
+            ]
+        }"#,
+    )
+    .unwrap_err();
+
+    assert!(err.to_string().contains("horizon must be positive"));
 }
 
 #[test]

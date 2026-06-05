@@ -474,6 +474,20 @@ pub fn report_site_pc(program: &ProgramCFG, site: InsnSite) -> anyhow::Result<u6
     u64::try_from(pc).map_err(|_| anyhow::anyhow!("report PC {pc} for {site:?} does not fit u64"))
 }
 
+pub fn report_site_pcs(program: &ProgramCFG) -> anyhow::Result<BTreeMap<InsnSite, u64>> {
+    program
+        .current_site_pcs()?
+        .into_iter()
+        .map(|(site, pc)| {
+            Ok((
+                site,
+                u64::try_from(pc)
+                    .map_err(|_| anyhow::anyhow!("report PC {pc} for {site:?} does not fit u64"))?,
+            ))
+        })
+        .collect()
+}
+
 fn program_instruction_slots(program: &ProgramCFG) -> anyhow::Result<usize> {
     let mut len = 0usize;
     for site in program.all_sites() {
