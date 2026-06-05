@@ -7,9 +7,6 @@
 [submodule "vendor/linux-framework"]
 	path = vendor/linux-framework
 	url = https://github.com/eunomia-bpf/linux.git
-[submodule "docs/paper"]
-	path = docs/paper
-	url = https://github.com/yunwei37/bpfrejit-paper
 [submodule "llvm-backend/llvm"]
 	path = llvm-backend/llvm
 	url = https://github.com/eunomia-bpf/bpf-kinsn-llvm.git

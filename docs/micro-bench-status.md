@@ -1,6 +1,6 @@
 # Micro Benchmark Status
 
-Last updated: 2026-05-27
+Last updated: 2026-06-05
 
 This is the current paper-facing status page for microbenchmark data. The
 previous long evaluation note is archived at
@@ -32,8 +32,9 @@ The current research questions are:
   arm64 when compared against arm64 kernel eBPF?
 - **RQ5 Machine-code footprint:** how does generated machine-code size compare
   against kernel eBPF JIT output?
-- **RQ6 LLVM-kinsn upper-bound opportunity:** what speedups are visible in the
-  best local full-suite LLVM-kinsn candidate?
+- **RQ6 kinsn opportunity and coverage:** what speedups are visible in the best
+  local full-suite LLVM-kinsn candidate, and do matched arm64 kinsn ReJIT runs
+  apply sites on the full micro suites?
 
 The full four-way comparison is available in the latest x86 KVM artifacts:
 `llvmbpf` is userspace eBPF, `native` is userspace native, `kernel` is kernel
@@ -50,6 +51,13 @@ The authoritative micro runs use:
 SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 make micro
 
 PLATFORM=aws ARCH=arm64 SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 make micro
+
+PLATFORM=aws ARCH=arm64 SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 \
+  RUNTIMES="kernel kernel_rejit" BPFREJIT_BENCH_PASSES=kinsn make micro
+
+PLATFORM=aws ARCH=arm64 SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 \
+  RUNTIMES="kernel kernel_rejit" BPFREJIT_BENCH_PASSES=kinsn \
+  SUITE=micro/config/micro_stage2.yaml make micro
 ```
 
 The measured suites are:
@@ -70,6 +78,8 @@ The measured runtimes are:
   four-way run.
 - **llvmbpf:** userspace eBPF through the LLVM-BPF runtime, available in the
   latest x86 KVM four-way run.
+- **kernel_rejit:** kernel eBPF after the requested ReJIT pass list. It is used
+  only for the arm64 kinsn follow-up in Appendix D.
 
 The platform details recorded in the artifacts are:
 
@@ -176,11 +186,14 @@ are 0.541x for kernel native, 0.565x for userspace eBPF, and 0.539x for
 userspace native. Kernel native is also smaller on x86 with helpers/maps
 (0.610x), arm64 pure bytecode (0.495x), and arm64 with helpers/maps (0.724x).
 
-**RQ6 LLVM-kinsn upper-bound opportunity.** The best local raw LLVM-kinsn
-candidate shows a 1.216x all-29 geomean speedup over the latest stock-kernel
-baseline, with top individual cases reaching 2.267x. This is an exploratory
+**RQ6 kinsn opportunity and coverage.** The best local raw LLVM-kinsn candidate
+shows a 1.216x all-29 geomean speedup over the latest stock-kernel baseline,
+with top individual cases reaching 2.267x. This remains an exploratory
 upper-bound datapoint because the artifact does not record an exact matched
-compiler-control run.
+compiler-control run. The new matched arm64 AWS kinsn ReJIT full-suite runs
+apply zero kinsn sites on both pure bytecode 29 and with-helpers/maps 13, so
+their 1.002x and 1.000x geomeans are parity/noise checks rather than kinsn
+speedups.
 
 The concise paper claim supported by these data is:
 
@@ -203,9 +216,11 @@ The concise paper claim supported by these data is:
 - Userspace runtime data for the with-helpers/maps suite exists in the raw
   artifact but is not a kernel-helper/map-path comparison, so it is
   intentionally excluded from the main helper/map claim.
-- The LLVM-kinsn result is reported as an upper-bound opportunity only. It uses
-  a real full-suite raw artifact but lacks an exact matched compiler-control
-  artifact in metadata.
+- The x86 LLVM-kinsn result is reported as an upper-bound opportunity only. It
+  uses a real full-suite raw artifact but lacks an exact matched
+  compiler-control artifact in metadata. The arm64 kinsn ReJIT artifacts are
+  matched `kernel` versus `kernel_rejit` runs, but they applied zero kinsn sites
+  on the full micro suites.
 - Some very small x86 helper/map kernel baselines show high per-sample CV
   because one of three samples can be an outlier at tens-of-nanoseconds scale.
   The reported aggregate therefore uses per-case medians and the outliers are
@@ -311,6 +326,36 @@ across three samples with `INNER_REPEAT=100000`. The geomean speedup is 1.216x
 over 29 cases with zero correctness mismatches, but this is not a matched
 compiler-control comparison.*
 
+### arm64 AWS Matched Kinsn ReJIT
+
+The 2026-06-05 arm64 follow-up runs are matched `kernel` versus
+`kernel_rejit` artifacts using `BPFREJIT_BENCH_PASSES=kinsn`. Unlike the x86
+upper-bound artifact above, these runs do have an exact same-run compiler
+control. They show that the current full arm64 micro suites do not exercise the
+kinsn bytecode selectors yet: both suites report zero matched and zero applied
+kinsn sites.
+
+![arm64 kinsn ReJIT matched micro](figures/kinsn-micro-arm64-rejit-20260605.png)
+
+*Figure 7: arm64 AWS matched kinsn ReJIT microbenchmark follow-up. Bars report
+`kernel / kernel_rejit` speedup from median `exec_ns` across three samples.
+Gray bars mean the benchmark applied zero kinsn sites. The pure-bytecode
+geomean is 1.002x and the with-helpers/maps geomean is 1.000x; both are parity
+checks, not optimization wins.*
+
+| Suite | Result source | Benchmarks | Expected-result mismatches | Speedup geomean | Wins / losses / ties | Matched sites | Applied sites | Code-size ratio |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| arm64 AWS pure bytecode 29 | `micro/results/aws_arm64_micro_20260605_195615_598255/details/result.json` | 29 | 0 | 1.002x | 2 / 2 / 25 | 0 | 0 | 1.000x |
+| arm64 AWS with helpers/maps 13 | `micro/results/aws_arm64_micro_20260605_201826_257732/details/result.json` | 13 | 0 | 1.000x | 2 / 2 / 9 | 0 | 0 | 1.000x |
+
+The lack of arm64 micro coverage is a selector/apply issue, not proof that
+these programs contain no candidate shapes. For example,
+`siphash_rotate64_mixer`'s raw xlated bytecode contains 54 split-copy
+rotate-like windows of the form `MOV; RSH; MOV; LSH; OR`, while the kinsn pass
+report for the same benchmark records `sites_matched=0` and `sites_applied=0`.
+That points to the current bytecode matcher or its safety predicates being too
+narrow for this lowered full-suite shape.
+
 ## Appendix E: Artifact And Noise Checks
 
 The LLVM-kinsn upper-bound figures use these raw artifacts:
@@ -319,6 +364,13 @@ The LLVM-kinsn upper-bound figures use these raw artifacts:
 |---|---|---|---|---:|---:|---:|
 | LLVM-kinsn upper-bound candidate | `micro/results/x86_kvm_micro_20260519_114214_364050` | 2026-05-19T11:42:14Z | kernel | 29 | 87 | 0 |
 | Stock-kernel baseline | `micro/results/x86_kvm_micro_20260526_210351_224315` | 2026-05-26T21:03:51Z | kernel, llvmbpf, native, native_kernel | 29 | 348 | 0 |
+
+The arm64 matched kinsn ReJIT figure uses these raw artifacts:
+
+| Role | Result source | Generated at | Runtimes | Benchmarks | Samples | Expected-result mismatches |
+|---|---|---|---|---:|---:|---:|
+| arm64 kinsn ReJIT pure bytecode | `micro/results/aws_arm64_micro_20260605_195615_598255` | 2026-06-05T19:56:15Z | kernel, kernel_rejit | 29 | 174 | 0 |
+| arm64 kinsn ReJIT with helpers/maps | `micro/results/aws_arm64_micro_20260605_201826_257732` | 2026-06-05T20:18:26Z | kernel, kernel_rejit | 13 | 78 | 0 |
 
 Per-run variability check. For each benchmark/runtime pair, this computes the
 CV of the three `exec_ns` samples; runtime aggregates use the median sample.
@@ -352,4 +404,11 @@ The plotting script for Figures 5-6 is
 
 ```sh
 python3 docs/tmp/plot_kinsn_micro_20260527.py
+```
+
+The plotting script for Figure 7 is
+`docs/tmp/plot_arm64_kinsn_micro_20260605.py`.
+
+```sh
+python3 docs/tmp/plot_arm64_kinsn_micro_20260605.py
 ```
