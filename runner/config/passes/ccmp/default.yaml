@@ -15,12 +15,17 @@ kinsns:
   - name: bpf_arm64_ldr_x
   - name: bpf_arm64_ldrb
   - name: bpf_arm64_ldrh
+  - name: bpf_arm64_ldp_x
   - name: bpf_arm64_mov_x
   - name: bpf_arm64_prfm_pldl1keep
   - name: bpf_arm64_rev16_w
   - name: bpf_arm64_rev_w
   - name: bpf_arm64_rev_x
   - name: bpf_arm64_strb
+  - name: bpf_arm64_strh
+  - name: bpf_arm64_str_w
+  - name: bpf_arm64_str_x
+  - name: bpf_arm64_stp_x
   - name: bpf_arm64_tst
   - name: bpf_arm64_ubfm_x
   - name: bpf_x86_bextrq
@@ -40,6 +45,7 @@ kinsns:
   - name: bpf_x86_movbe64
   - name: bpf_x86_movl
   - name: bpf_x86_movq
+  - name: bpf_x86_roll
   - name: bpf_x86_rolq
   - name: bpf_x86_rolw
   - name: bpf_x86_rorxl

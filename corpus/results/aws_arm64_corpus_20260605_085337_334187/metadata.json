@@ -1,0 +1,28 @@
+{
+  "bpf_stats": true,
+  "config": {
+    "enabled_passes": [
+      "rotate",
+      "extract",
+      "endian_fusion",
+      "bulk_memory",
+      "prefetch",
+      "cond_select"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "corpus suite reported errors",
+  "generated_at": "2026-06-05T09:23:30.180175+00:00",
+  "last_updated_at": "2026-06-05T09:23:30.178411+00:00",
+  "launcher_boot_id": "5f9da0a5-cd32-432e-b12e-49cc258758cb",
+  "launcher_pid": 2665,
+  "launcher_start_ticks": 1946,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "run_type": "aws_arm64_corpus",
+  "samples": 3,
+  "started_at": "2026-06-05T08:53:37.334187+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_only": false,
+  "workload_seconds": 30.0
+}

@@ -354,6 +354,49 @@ selector/proof gaps or absent corpus shapes: `bpf_x86_blsiq`,
 `bpf_x86_popcntq`, `bpf_x86_prefetcht0`, `bpf_x86_shldl`,
 `bpf_x86_shldq`, `bpf_x86_shrdl`, and `bpf_x86_shrq`.
 
+### x86 prefetch, roll, and SHD recovery
+
+A later x86 smoke expanded bytecode recovery again: map-lookup fallthrough
+prefetch emits `bpf_x86_prefetcht0`; 32-bit rotate can emit destructive
+`bpf_x86_roll`; and split-copy funnel-shift forms can emit `bpf_x86_shrdq`.
+
+Artifact:
+`corpus/results/x86_kvm_corpus_20260605_070536_784629`
+(`SAMPLES=1`, `WORKLOAD_DURATION=10`, all six apps).
+
+Result: all six apps completed `status=ok`. Total coverage was `38,823`
+sites, including the newly reached `prefetch` family:
+
+| Family | sites |
+| --- | ---: |
+| `lea` | 25759 |
+| `bulk_memory` | 3784 |
+| `prefetch` | 3024 |
+| `endian_fusion` | 1112 |
+| `cond_select` | 988 |
+| `extract` | 92 |
+| `rotate` | 64 |
+
+The new notable names were `bpf_x86_prefetcht0` (`3024`) and `bpf_x86_shrdq`
+(`3`). A subsequent smoke after enabling `bpf_x86_roll` reached `20`
+`bpf_x86_roll` Katran sites in
+`corpus/results/x86_kvm_corpus_20260605_082448_492730`, but that run also
+recorded a natural Tetragon `generic_kprobe_filter_arg` `EINVAL`; it is
+therefore retained as selector coverage evidence, not as a clean six-app
+performance artifact. A Tetragon-only repeat
+(`corpus/results/x86_kvm_corpus_20260605_084211_375649`) reproduced the same
+Tetragon load failure while showing only the existing Tetragon LEA/prefetch/
+bulk/cond_select mix before failure, so the new `roll`/`shrdq`/BMI1 recovery
+is not the obvious cause.
+
+The remaining enabled-but-zero x86 names after these smokes are still
+`bpf_x86_blsiq`, `bpf_x86_blsrq`, `bpf_x86_andl`, `bpf_x86_movbe64`,
+`bpf_x86_rolq`, `bpf_x86_popcntq`, `bpf_x86_shldl`, `bpf_x86_shldq`,
+`bpf_x86_shrdl`, and `bpf_x86_shrq`. The low-risk missed opportunity is
+mostly proof quality: the corpus has many ordinary ALU/load/store operations,
+but converting scalar one-instruction BPF operations into kfunc calls is not a
+useful performance default without a stronger cost model.
+
 ### arm64 QEMU smoke
 
 The arm64 target initially exposed a real policy/selector bug: the LLVM
@@ -361,7 +404,8 @@ selector was still allowed to emit x86 pseudo-kinsns such as `bpf_x86_leaq`
 when the target JSON contained only arm64 kinsns. The fix disables LLVM kinsn
 selection for arm64-only targets and uses arm64 bytecode recovery for rotate,
 extract, and endian operations. The x86 per-app no-bulk overrides are also
-guarded by `RUN_TARGET_ARCH`, so arm64 uses the full default command.
+guarded by `RUN_TARGET_ARCH`, so arm64 does not inherit the x86 no-bulk
+overrides and instead uses the target-specific default command.
 
 QEMU smoke command:
 
@@ -427,6 +471,98 @@ sites are reachable in a large corpus app, but the current call overhead/site
 mix was not profitable at the workload level. Tracee also proves arm64 endian
 coverage, but the app did not produce a valid post-ReJIT measurement.
 
+### arm64 selector expansion and AWS coverage-max
+
+The final arm64 follow-up added bytecode recovery for adjacent pair
+loads/stores (`bpf_arm64_ldp_x`, `bpf_arm64_stp_x`), map-lookup fallthrough
+prefetch (`bpf_arm64_prfm_pldl1keep`), wider `ubfm` extract shapes, and a
+strict boolean-chain `ccmp` recovery. The kinsn target/prober YAMLs were also
+updated so the arm64 pair-memory names and x86 `bpf_x86_roll` are visible to
+the runner.
+
+The current arm64 `kinsn` umbrella default is conservative: it keeps the
+coverage-safe rotate/extract path and does not force the high-overhead
+endian/bulk/prefetch families under the default umbrella policy. A conservative
+AWS rerun completed BCC, Cilium, Katran, OTEL, and Tracee, with Tetragon
+failing naturally:
+
+Artifact:
+`corpus/results/aws_arm64_corpus_20260605_080836_924256`
+(`PLATFORM=aws ARCH=arm64 SAMPLES=3 WORKLOAD_DURATION=30
+BPFREJIT_BENCH_PASSES=kinsn make corpus`).
+
+| App | status | sites applied | workload ratio | BPF cost ratio |
+| --- | --- | ---: | ---: | ---: |
+| `bcc/set` | ok | 0 | 1.002x | 0.954x |
+| `cilium/agent` | ok | 2 | 0.983x | 0.997x |
+| `katran` | ok | 21 | 1.073x | 0.941x |
+| `otelcol-ebpf-profiler/profiling` | ok | 0 | 0.985x | 1.048x |
+| `tetragon/observer` | error | 1 | n/a | n/a |
+| `tracee/monitor` | ok | 0 | 1.009x | 1.012x |
+
+Coverage-max arm64 was then run by forcing every implemented arm64 bytecode
+family through the pass list:
+
+```sh
+PLATFORM=aws ARCH=arm64 SAMPLES=3 WORKLOAD_DURATION=30 \
+  BPFREJIT_BENCH_PASSES=rotate,extract,endian_fusion,bulk_memory,prefetch,cond_select,ccmp \
+  make corpus
+```
+
+Artifact:
+`corpus/results/aws_arm64_corpus_20260605_094729_221231`.
+The reference coverage-max artifact without `ccmp` is
+`corpus/results/aws_arm64_corpus_20260605_085337_334187`.
+
+![arm64 AWS kinsn follow-up](figures/eval-kinsn-arm64-aws-20260605.png)
+
+*Figure 3: arm64 AWS coverage-max follow-up. OTel and Tetragon are shown as
+`n/a` for workload/BPF ratios because they failed naturally during startup or
+post-ReJIT loading. Sites applied are still shown from loadtime reports.*
+
+The with-`ccmp` run applied `11,309` sites. `ccmp` was enabled and exercised by
+the full pass list, but matched `0` real corpus sites; the current strict
+matcher only recognizes compact boolean-materialization chains, and the real
+corpus does not expose that shape after BPF round-trip.
+
+| Family | sites |
+| --- | ---: |
+| `bulk_memory` | 8685 |
+| `prefetch` | 1810 |
+| `endian_fusion` | 791 |
+| `rotate` | 20 |
+| `extract` | 3 |
+
+| Kinsn | sites |
+| --- | ---: |
+| `bpf_arm64_stp_x` | 6656 |
+| `bpf_arm64_ldp_x` | 2029 |
+| `bpf_arm64_prfm_pldl1keep` | 1810 |
+| `bpf_arm64_rev16_w` | 699 |
+| `bpf_arm64_rev_w` | 46 |
+| `bpf_arm64_rev_x` | 46 |
+| `bpf_arm64_extr_w` | 20 |
+| `bpf_arm64_ubfm_x` | 3 |
+
+Performance was worse than the conservative run:
+
+| App | status | sites applied | workload ratio | BPF cost ratio | retained rows |
+| --- | --- | ---: | ---: | ---: | ---: |
+| `bcc/set` | ok | 50 | 0.980x | 1.016x | 14 |
+| `cilium/agent` | ok | 2976 | 0.978x | 1.066x | 2 |
+| `katran` | ok | 62 | 0.995x | 1.006x | 1 |
+| `otelcol-ebpf-profiler/profiling` | error | 12 | n/a | n/a | 0 |
+| `tetragon/observer` | error | 139 | n/a | n/a | 0 |
+| `tracee/monitor` | ok | 8070 | 0.938x | 1.047x | 60 |
+
+So the arm64 conclusion is now split: the selector can apply many more real
+arm64 sites when forced, but the high-count pair-memory and prefetch coverage
+is not a performance policy. The best arm64 performance signal remains the
+conservative Katran result (`1.073x` workload, `0.941x` BPF cost). The scalar
+`ldr`/`str`/`mov` names remain target-visible but unselected; forcing ordinary
+single-instruction BPF memory operations through kfunc calls would increase
+site count without a defensible cost model.
+
 ## Discussion
 
 The important corrective result is coverage, not headline speedup. Earlier
@@ -441,23 +577,28 @@ why Cilium and Katran expose endian-fusion patterns, and why bulk-memory
 
 This run also clarifies policy versus selector behavior. There is no
 benchmark-level policy filter preventing these pass names from running under
-`kinsn`, and the default kinsn pass remains full-kinsn. The remaining explicit
-x86 selector default is `movbe-load=disable` in the umbrella mode; this does
-not disable the observed endian `movbe-be` path. `prefetch=0` should be read
-as "enabled but no matched corpus shape," not as a corpus gate.
+`kinsn`. On x86, the default kinsn pass remains full-kinsn. On arm64, the
+umbrella default is deliberately more conservative after the follow-up because
+forced endian/bulk/prefetch coverage was not profitable. The remaining
+explicit x86 selector default is `movbe-load=disable` in the umbrella mode;
+this does not disable the observed endian `movbe-be` path. The main
+authoritative x86 run had `prefetch=0`; the later selector follow-up reached
+`3024` `bpf_x86_prefetcht0` sites, so the old zero was a selector/dataflow gap,
+not a corpus gate.
 
 A default-name coverage audit gives the same answer. The x86/arm64 target list
 contains `49` kinsn names; the authoritative x86 full-corpus reports applied
 `17` x86 names. The x86 names that are enabled but zero in this corpus are
 `bpf_x86_blsiq`, `bpf_x86_blsrq`, `bpf_x86_andl`,
 `bpf_x86_movbe64`, `bpf_x86_rolq`, `bpf_x86_popcntq`,
-`bpf_x86_prefetcht0`, `bpf_x86_shldl`, `bpf_x86_shldq`,
-`bpf_x86_shrdl`, and `bpf_x86_shrq`. In the authoritative run,
-`bpf_x86_movbe16` was also zero; the 2026-06-05 selector follow-up above added
-that recovery shape and observed `268` real corpus sites. The remaining zero
-names are not disabled by benchmark policy; the current corpus either has no
-profitable matched shape for them or needs a new selector/dataflow proof before
-they are worth forcing.
+`bpf_x86_shldl`, `bpf_x86_shldq`, `bpf_x86_shrdl`, and
+`bpf_x86_shrq`. In the authoritative run, `bpf_x86_movbe16` and
+`bpf_x86_prefetcht0` were also zero; the 2026-06-05 selector follow-ups above
+added those recovery shapes and observed `268` and `3024` real corpus sites.
+The later `roll` follow-up also observed `20` `bpf_x86_roll` sites. The
+remaining zero names are not disabled by benchmark policy; the current corpus
+either has no profitable matched shape for them or needs a new
+selector/dataflow proof before they are worth forcing.
 
 A follow-up no-bulk ablation was used only to guide selector tuning. It added
 a controlled way to disable `bulk_memory` while keeping the single umbrella
@@ -498,6 +639,11 @@ Post-hoc script and generated data:
 - Figure: `docs/figures/eval-kinsn-corpus-20260604.png`
 - Tuned 3-app figure:
   `docs/figures/eval-kinsn-tuned-3app-20260605.png`
+- arm64 follow-up script: `docs/tmp/kinsn_arm64_eval_20260605.py`
+- arm64 follow-up summary:
+  `docs/tmp/kinsn_arm64_eval_20260605_summary.md`
+- arm64 follow-up figure:
+  `docs/figures/eval-kinsn-arm64-aws-20260605.png`
 
 Authoritative stats-on/stats-off artifacts:
 
@@ -524,8 +670,14 @@ Negative/diagnostic selector-tuning artifacts:
 | `bcc,cilium,katran,tetragon,tracee` scalar-only exploratory | `corpus/results/x86_kvm_corpus_20260605_024544_394150` | SAMPLES=1, Tetragon failed EINVAL |
 | `cilium,katran,tracee` LLVM-only Cilium repeat | `corpus/results/x86_kvm_corpus_20260605_032129_844272` | SAMPLES=3, 30s; worse than the no-bulk tuned policy |
 | `x86 movbe16 selector smoke` | `corpus/results/x86_kvm_corpus_20260605_040502_276228` | SAMPLES=1, 30s; all six apps ok; `bpf_x86_movbe16` applied 268 sites |
+| `x86 prefetch/SHD selector smoke` | `corpus/results/x86_kvm_corpus_20260605_070536_784629` | SAMPLES=1, 10s; all six apps ok; `bpf_x86_prefetcht0` applied 3024 sites and `bpf_x86_shrdq` applied 3 sites |
+| `x86 roll selector smoke` | `corpus/results/x86_kvm_corpus_20260605_082448_492730` | SAMPLES=1, 10s; `bpf_x86_roll` applied 20 Katran sites; Tetragon failed naturally |
+| `x86 Tetragon roll follow-up` | `corpus/results/x86_kvm_corpus_20260605_084211_375649` | Tetragon-only repeat; reproduced `generic_kprobe_filter_arg` EINVAL before any roll/SHD/BMI1 hit |
 | `arm64 QEMU apply smoke` | `corpus/results/arm64_qemu_corpus_19700101_000005_560691` | SAMPLES=1, 30s; Cilium/Katran ok; confirmed arm64 `rev`/`extr`/`ubfm` apply |
 | `arm64 AWS corpus follow-up` | `corpus/results/aws_arm64_corpus_20260605_053223_453376` | SAMPLES=3, 30s; BCC/Cilium/Katran ok; OTel/Tetragon/Tracee failed naturally |
+| `arm64 AWS conservative follow-up` | `corpus/results/aws_arm64_corpus_20260605_080836_924256` | SAMPLES=3, 30s; BCC/Cilium/Katran/OTel/Tracee ok; Katran positive; Tetragon failed naturally |
+| `arm64 AWS coverage-max without ccmp` | `corpus/results/aws_arm64_corpus_20260605_085337_334187` | SAMPLES=3, 30s; forced rotate/extract/endian/bulk/prefetch/cond_select; 11,339 sites |
+| `arm64 AWS coverage-max with ccmp` | `corpus/results/aws_arm64_corpus_20260605_094729_221231` | SAMPLES=3, 30s; forced rotate/extract/endian/bulk/prefetch/cond_select/ccmp; 11,309 sites; ccmp matched 0 |
 
 ## Previous Results
 

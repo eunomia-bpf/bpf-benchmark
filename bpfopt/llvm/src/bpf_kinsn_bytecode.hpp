@@ -17,6 +17,10 @@ constexpr uint8_t BPF_LSH32_K = 0x64;
 constexpr uint8_t BPF_RSH32_K = 0x74;
 constexpr uint8_t BPF_AND32_X = 0x5c;
 constexpr uint8_t BPF_OR32_X = 0x4c;
+constexpr uint8_t BPF_NEG64 = 0x87;
+constexpr uint8_t BPF_JNE64_K = 0x55;
+constexpr uint8_t BPF_JEQ32_K = 0x16;
+constexpr uint8_t BPF_JNE32_K = 0x56;
 constexpr uint8_t BPF_END_BE = 0xdc;
 constexpr uint8_t BPF_END_LE = 0xd4;
 constexpr int32_t BPF_FUNC_map_lookup_elem = 1;
@@ -124,6 +128,16 @@ uint64_t pack_x86_bextr_payload(uint8_t dst, uint8_t src, uint8_t ctl)
 	return pack_u4(dst, 0) | pack_u4(src, 4) | pack_u4(ctl, 8);
 }
 
+uint64_t pack_x86_shd_payload(uint8_t dst, uint8_t src, uint8_t shift)
+{
+	return pack_u4(dst, 0) | pack_u4(src, 4) | pack_u8(shift, 8);
+}
+
+uint64_t pack_x86_bmi1_payload(uint8_t dst, uint8_t src)
+{
+	return pack_u4(dst, 0) | pack_u4(src, 4);
+}
+
 uint64_t pack_arm64_rotate_payload(uint8_t dst, uint8_t src, uint8_t tmp,
 				   uint8_t shift)
 {
@@ -135,6 +149,41 @@ uint64_t pack_arm64_extract_payload(uint8_t dst, uint8_t start,
 				    uint8_t bit_len)
 {
 	return pack_u4(dst, 0) | pack_u8(start, 8) | pack_u8(bit_len, 16);
+}
+
+uint64_t pack_arm64_pair_payload(uint8_t lane0, uint8_t lane1, uint8_t base,
+				 int16_t off)
+{
+	return pack_u4(lane0, 0) | pack_u4(lane1, 4) | pack_u4(base, 8) |
+	       pack_u16(static_cast<uint16_t>(off), 12);
+}
+
+uint64_t pack_arm64_csel_payload(uint8_t dst, uint8_t true_reg,
+				 uint8_t false_reg, uint8_t cond_reg)
+{
+	return pack_u4(dst, 0) | pack_u4(true_reg, 4) |
+	       pack_u4(false_reg, 8) | pack_u4(cond_reg, 12);
+}
+
+uint64_t pack_arm64_ccmp_payload(uint8_t reg, uint8_t mode)
+{
+	return pack_u4(reg, 0) | pack_u4(mode, 4);
+}
+
+uint64_t pack_arm64_cset_payload(uint8_t dst, uint8_t count, uint8_t mode,
+				 bool width32, const std::vector<uint8_t> &regs)
+{
+	if (count < 2 || count > 4 || regs.size() != count) {
+		throw std::runtime_error("invalid arm64 ccmp term count");
+	}
+	uint64_t payload = pack_u4(dst, 0) |
+			   pack_u4(static_cast<uint8_t>(count - 2), 4) |
+			   pack_u4(mode, 6) |
+			   pack_u4(width32 ? 1 : 0, 7);
+	for (size_t i = 0; i < regs.size(); i++) {
+		payload |= pack_u4(regs[i], 8 + static_cast<unsigned>(4 * i));
+	}
+	return payload;
 }
 
 void append_kinsn_pair(std::vector<uint8_t> &out, const KinsnTargetMap &targets,
@@ -872,10 +921,24 @@ std::vector<uint8_t> emit_rotate_replacement(const KinsnTargetMap &targets,
 					  site.dst, site.dst,
 					  static_cast<uint8_t>(site.shift)));
 	} else {
-		append_kinsn_pair(out, targets, "bpf_x86_rorxl",
-				  pack_x86_rotate_payload(
-					  site.dst, site.val,
-					  static_cast<uint8_t>(site.shift)));
+		if (target_has_kinsn(targets, "bpf_x86_roll")) {
+			if (site.dst != site.val) {
+				const auto mov = make_bpf_insn(
+					BPF_MOV32_X, site.dst, site.val, 0, 0);
+				out.insert(out.end(), mov.begin(), mov.end());
+			}
+			append_kinsn_pair(out, targets, "bpf_x86_roll",
+					  pack_x86_rotate_payload(
+						  site.dst, site.dst,
+						  static_cast<uint8_t>(
+							  site.shift)));
+		} else {
+			append_kinsn_pair(out, targets, "bpf_x86_rorxl",
+					  pack_x86_rotate_payload(
+						  site.dst, site.val,
+						  static_cast<uint8_t>(
+							  site.shift)));
+		}
 	}
 	return out;
 }
@@ -994,29 +1057,195 @@ std::optional<uint8_t> find_dead_scratch_reg_after(const std::vector<uint8_t> &b
 	return std::nullopt;
 }
 
+struct ShdSite {
+	size_t start = 0;
+	size_t old_len = 0;
+	const char *name = nullptr;
+	uint8_t dst = 0;
+	uint8_t src = 0;
+	uint8_t tmp = 0;
+	uint8_t shift = 0;
+};
+
+const char *shd_name_for(bool left, RotateWidth width)
+{
+	if (left) {
+		return width == RotateWidth::W64 ? "bpf_x86_shldq" :
+						   "bpf_x86_shldl";
+	}
+	return width == RotateWidth::W64 ? "bpf_x86_shrdq" :
+					   "bpf_x86_shrdl";
+}
+
+std::optional<ShdSite> match_shd_site(const std::vector<uint8_t> &bytes,
+				      size_t pc, RotateWidth width)
+{
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	const uint8_t lsh_op =
+		width == RotateWidth::W32 ? BPF_LSH32_K : BPF_LSH64_K;
+	const uint8_t rsh_op =
+		width == RotateWidth::W32 ? BPF_RSH32_K : BPF_RSH64_K;
+	const uint8_t or_op =
+		width == RotateWidth::W32 ? BPF_OR32_X : BPF_OR64_X;
+	if (pc >= insn_count) {
+		return std::nullopt;
+	}
+	size_t shift_pc = pc;
+	uint8_t dst = dst_reg(bytes, pc);
+	if (is_reg_mov_for_width(bytes, pc, width)) {
+		if (pc + 5 > insn_count) {
+			return std::nullopt;
+		}
+		shift_pc = pc + 1;
+		dst = dst_reg(bytes, pc);
+	} else if (pc + 4 > insn_count) {
+		return std::nullopt;
+	}
+	const size_t mov_tmp_pc = shift_pc + 1;
+	const size_t shift_tmp_pc = shift_pc + 2;
+	const size_t or_pc = shift_pc + 3;
+	if (!is_reg_mov_for_width(bytes, mov_tmp_pc, width) ||
+	    bytes[or_pc * INSN_SIZE] != or_op ||
+	    dst_reg(bytes, shift_pc) != dst ||
+	    dst_reg(bytes, or_pc) != dst ||
+	    src_reg(bytes, or_pc) != dst_reg(bytes, mov_tmp_pc)) {
+		return std::nullopt;
+	}
+	const uint8_t tmp = dst_reg(bytes, mov_tmp_pc);
+	const uint8_t src = src_reg(bytes, mov_tmp_pc);
+	if (tmp == dst || tmp == src) {
+		return std::nullopt;
+	}
+	const int width_bits = static_cast<int>(rotate_width_bits(width));
+	const int dst_shift = read_imm(bytes, shift_pc);
+	const int tmp_shift = read_imm(bytes, shift_tmp_pc);
+	if (dst_shift <= 0 || dst_shift >= width_bits ||
+	    tmp_shift <= 0 || tmp_shift >= width_bits ||
+	    dst_shift + tmp_shift != width_bits) {
+		return std::nullopt;
+	}
+	const uint8_t dst_shift_op = bytes[shift_pc * INSN_SIZE];
+	const uint8_t tmp_shift_op = bytes[shift_tmp_pc * INSN_SIZE];
+	const bool shld = dst_shift_op == lsh_op && tmp_shift_op == rsh_op;
+	const bool shrd = dst_shift_op == rsh_op && tmp_shift_op == lsh_op;
+	if (!shld && !shrd) {
+		return std::nullopt;
+	}
+	const size_t start = shift_pc;
+	const size_t old_len = or_pc + 1 - start;
+	return ShdSite{ start, old_len, shd_name_for(shld, width), dst, src,
+			tmp, static_cast<uint8_t>(dst_shift) };
+}
+
+int64_t apply_shd_bytecode_kinsns(std::vector<uint8_t> &bytes,
+				  const KinsnTargetMap &targets)
+{
+	if (!target_is_x86_kinsn_set(targets)) {
+		return 0;
+	}
+	int64_t applied = 0;
+	size_t pc = 0;
+	while (pc < bytes.size() / INSN_SIZE) {
+		std::optional<ShdSite> site;
+		for (RotateWidth width : { RotateWidth::W64, RotateWidth::W32 }) {
+			site = match_shd_site(bytes, pc, width);
+			if (site) {
+				break;
+			}
+		}
+		if (!site || !target_has_kinsn(targets, site->name) ||
+		    !range_is_replaceable(bytes, site->start, site->old_len) ||
+		    reg_read_before_write_on_any_path_after(
+			    bytes, site->start + site->old_len, site->tmp)) {
+			pc++;
+			continue;
+		}
+		std::vector<uint8_t> replacement;
+		append_kinsn_pair(replacement, targets, site->name,
+				  pack_x86_shd_payload(site->dst, site->src,
+						       site->shift));
+		replace_insn_range(bytes, site->start, site->old_len,
+				   replacement);
+		applied++;
+		pc = site->start + replacement.size() / INSN_SIZE;
+	}
+	return applied;
+}
+
+std::optional<std::pair<uint8_t, uint8_t>>
+extract_from_shifted_mask(uint64_t mask, int32_t shift)
+{
+	if (shift < 0 || shift >= 64) {
+		return std::nullopt;
+	}
+	const uint64_t low_bits =
+		shift == 0 ? 0 : ((uint64_t{ 1 } << shift) - 1);
+	if (mask & low_bits) {
+		return std::nullopt;
+	}
+	const auto bit_len = low_mask_width(mask >> shift);
+	if (!bit_len || *bit_len == 0 ||
+	    shift + static_cast<int32_t>(*bit_len) > 64 ||
+	    (*bit_len > 32 && *bit_len != 64)) {
+		return std::nullopt;
+	}
+	return std::pair<uint8_t, uint8_t>{ static_cast<uint8_t>(shift),
+					    static_cast<uint8_t>(*bit_len) };
+}
+
+std::optional<uint64_t> extract_and_mask_value(const std::vector<uint8_t> &bytes,
+					       size_t pc)
+{
+	const uint8_t opcode = bytes[pc * INSN_SIZE];
+	if (opcode == BPF_AND64_K) {
+		return static_cast<uint64_t>(
+			static_cast<int64_t>(read_imm(bytes, pc)));
+	}
+	if (opcode != BPF_AND64_X) {
+		return std::nullopt;
+	}
+	return const_reg_value_before(bytes, pc, src_reg(bytes, pc));
+}
+
 int64_t apply_extract_bytecode_kinsns(std::vector<uint8_t> &bytes,
 				      const KinsnTargetMap &targets)
 {
 	int64_t applied = 0;
 	size_t pc = 0;
+	if (target_is_x86_kinsn_set(targets)) {
+		applied += apply_shd_bytecode_kinsns(bytes, targets);
+	}
 	while (pc + 1 < bytes.size() / INSN_SIZE) {
-		if (bytes[pc * INSN_SIZE] != BPF_RSH64_K ||
-		    bytes[(pc + 1) * INSN_SIZE] != BPF_AND64_K ||
-		    dst_reg(bytes, pc) != dst_reg(bytes, pc + 1) ||
+		if (dst_reg(bytes, pc) != dst_reg(bytes, pc + 1) ||
 		    !range_is_replaceable(bytes, pc, 2)) {
 			pc++;
 			continue;
 		}
-		const int32_t shift_imm = read_imm(bytes, pc);
-		if (shift_imm < 0 || shift_imm >= 64) {
-			pc++;
-			continue;
+		std::optional<std::pair<uint8_t, uint8_t>> extract;
+		if (bytes[pc * INSN_SIZE] == BPF_RSH64_K) {
+			if (const auto mask = extract_and_mask_value(bytes, pc + 1);
+			    mask && (bytes[(pc + 1) * INSN_SIZE] == BPF_AND64_K ||
+				     bytes[(pc + 1) * INSN_SIZE] == BPF_AND64_X)) {
+				const auto bit_len = low_mask_width(*mask);
+				const int32_t shift_imm = read_imm(bytes, pc);
+				if (shift_imm >= 0 && shift_imm < 64 && bit_len &&
+				    shift_imm + static_cast<int32_t>(*bit_len) <= 64 &&
+				    (*bit_len <= 32 || *bit_len == 64)) {
+					extract = std::pair<uint8_t, uint8_t>{
+						static_cast<uint8_t>(shift_imm),
+						static_cast<uint8_t>(*bit_len)
+					};
+				}
+			}
+		} else if ((bytes[pc * INSN_SIZE] == BPF_AND64_K ||
+			    bytes[pc * INSN_SIZE] == BPF_AND64_X) &&
+			   bytes[(pc + 1) * INSN_SIZE] == BPF_RSH64_K) {
+			if (const auto mask = extract_and_mask_value(bytes, pc)) {
+				extract = extract_from_shifted_mask(
+					*mask, read_imm(bytes, pc + 1));
+			}
 		}
-		const uint64_t mask = static_cast<uint64_t>(
-			static_cast<int64_t>(read_imm(bytes, pc + 1)));
-		const auto bit_len = low_mask_width(mask);
-		if (!bit_len || shift_imm + static_cast<int32_t>(*bit_len) > 64 ||
-		    (*bit_len > 32 && *bit_len != 64)) {
+		if (!extract) {
 			pc++;
 			continue;
 		}
@@ -1031,9 +1260,8 @@ int64_t apply_extract_bytecode_kinsns(std::vector<uint8_t> &bytes,
 			}
 			append_kinsn_pair(replacement, targets, "bpf_arm64_ubfm_x",
 					  pack_arm64_extract_payload(
-						  dst,
-						  static_cast<uint8_t>(shift_imm),
-						  static_cast<uint8_t>(*bit_len)));
+						  dst, extract->first,
+						  extract->second));
 		} else {
 			const auto ctl_reg =
 				find_dead_scratch_reg_after(bytes, pc + 2, { dst });
@@ -1042,8 +1270,8 @@ int64_t apply_extract_bytecode_kinsns(std::vector<uint8_t> &bytes,
 				continue;
 			}
 			const uint32_t ctl =
-				static_cast<uint32_t>(shift_imm) |
-				(static_cast<uint32_t>(*bit_len) << 8);
+				static_cast<uint32_t>(extract->first) |
+				(static_cast<uint32_t>(extract->second) << 8);
 			const auto ctl_mov =
 				make_bpf_insn(BPF_MOV64_K, *ctl_reg, 0, 0,
 					      static_cast<int32_t>(ctl));
@@ -1056,6 +1284,107 @@ int64_t apply_extract_bytecode_kinsns(std::vector<uint8_t> &bytes,
 		replace_insn_range(bytes, pc, 2, replacement);
 		applied++;
 		pc += replacement.size() / INSN_SIZE;
+	}
+	return applied;
+}
+
+struct Bmi1Site {
+	size_t start = 0;
+	size_t old_len = 0;
+	const char *name = nullptr;
+	uint8_t dst = 0;
+	uint8_t src = 0;
+	std::optional<uint8_t> dropped_copy_reg;
+};
+
+std::optional<Bmi1Site> match_bmi1_site(const std::vector<uint8_t> &bytes,
+					size_t pc)
+{
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	if (pc + 3 > insn_count || bytes[pc * INSN_SIZE] != BPF_MOV64_X) {
+		return std::nullopt;
+	}
+	const uint8_t tmp = dst_reg(bytes, pc);
+	const uint8_t src = src_reg(bytes, pc);
+	if (tmp != src && dst_reg(bytes, pc + 1) == tmp &&
+	    dst_reg(bytes, pc + 2) == tmp &&
+	    bytes[(pc + 2) * INSN_SIZE] == BPF_AND64_X &&
+	    src_reg(bytes, pc + 2) == src) {
+		if (bytes[(pc + 1) * INSN_SIZE] == BPF_ADD64_K &&
+		    read_imm(bytes, pc + 1) == -1) {
+			return Bmi1Site{ pc, 3, "bpf_x86_blsrq", tmp, src,
+					 std::nullopt };
+		}
+		if (bytes[(pc + 1) * INSN_SIZE] == BPF_NEG64) {
+			return Bmi1Site{ pc, 3, "bpf_x86_blsiq", tmp, src,
+					 std::nullopt };
+		}
+	}
+	if (tmp != src && pc + 4 <= insn_count &&
+	    bytes[(pc + 1) * INSN_SIZE] == BPF_MOV64_X &&
+	    src_reg(bytes, pc + 1) == src &&
+	    bytes[(pc + 3) * INSN_SIZE] == BPF_AND64_X &&
+	    dst_reg(bytes, pc + 2) == dst_reg(bytes, pc + 1) &&
+	    dst_reg(bytes, pc + 3) == dst_reg(bytes, pc + 1) &&
+	    src_reg(bytes, pc + 3) == tmp) {
+		const uint8_t dst = dst_reg(bytes, pc + 1);
+		if (dst != tmp) {
+			if (bytes[(pc + 2) * INSN_SIZE] == BPF_ADD64_K &&
+			    read_imm(bytes, pc + 2) == -1) {
+				return Bmi1Site{ pc, 4, "bpf_x86_blsrq", dst,
+						 src, tmp };
+			}
+			if (bytes[(pc + 2) * INSN_SIZE] == BPF_NEG64) {
+				return Bmi1Site{ pc, 4, "bpf_x86_blsiq", dst,
+						 src, tmp };
+			}
+		}
+	}
+	if (tmp != src && dst_reg(bytes, pc + 1) == src &&
+	    bytes[(pc + 2) * INSN_SIZE] == BPF_AND64_X &&
+	    dst_reg(bytes, pc + 2) == src &&
+	    src_reg(bytes, pc + 2) == tmp) {
+		if (bytes[(pc + 1) * INSN_SIZE] == BPF_ADD64_K &&
+		    read_imm(bytes, pc + 1) == -1) {
+			return Bmi1Site{ pc, 3, "bpf_x86_blsrq", src, src,
+					 tmp };
+		}
+		if (bytes[(pc + 1) * INSN_SIZE] == BPF_NEG64) {
+			return Bmi1Site{ pc, 3, "bpf_x86_blsiq", src, src,
+					 tmp };
+		}
+	}
+	return std::nullopt;
+}
+
+int64_t apply_bmi1_bytecode_kinsns(std::vector<uint8_t> &bytes,
+				   const KinsnTargetMap &targets)
+{
+	if (!target_is_x86_kinsn_set(targets)) {
+		return 0;
+	}
+	int64_t applied = 0;
+	size_t pc = 0;
+	while (pc < bytes.size() / INSN_SIZE) {
+		const auto site = match_bmi1_site(bytes, pc);
+		if (!site || !target_has_kinsn(targets, site->name) ||
+		    !range_is_replaceable(bytes, site->start, site->old_len)) {
+			pc++;
+			continue;
+		}
+		if (site->dropped_copy_reg &&
+		    reg_read_before_write_on_any_path_after(
+			    bytes, site->start + site->old_len,
+			    *site->dropped_copy_reg)) {
+			pc++;
+			continue;
+		}
+		std::vector<uint8_t> replacement;
+		append_kinsn_pair(replacement, targets, site->name,
+				  pack_x86_bmi1_payload(site->dst, site->src));
+		replace_insn_range(bytes, site->start, site->old_len, replacement);
+		applied++;
+		pc = site->start + replacement.size() / INSN_SIZE;
 	}
 	return applied;
 }
@@ -1238,6 +1567,204 @@ int64_t apply_endian_bytecode_kinsns(std::vector<uint8_t> &bytes,
 		}
 		replace_insn_range(bytes, site->start, site->old_len, replacement);
 		applied++;
+		pc = site->start + replacement.size() / INSN_SIZE;
+	}
+	return applied;
+}
+
+struct CondSelectSite {
+	size_t start = 0;
+	uint8_t dst = 0;
+	uint8_t true_reg = 0;
+	uint8_t false_reg = 0;
+	uint8_t cond_reg = 0;
+};
+
+std::optional<CondSelectSite>
+match_arm64_csel_ne_site(const std::vector<uint8_t> &bytes, size_t pc)
+{
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	if (pc + 4 > insn_count ||
+	    (bytes[pc * INSN_SIZE] != BPF_JEQ64_K &&
+	     bytes[pc * INSN_SIZE] != BPF_JNE64_K) ||
+	    bytes[(pc + 1) * INSN_SIZE] != BPF_MOV64_X ||
+	    bytes[(pc + 2) * INSN_SIZE] != BPF_JA ||
+	    bytes[(pc + 3) * INSN_SIZE] != BPF_MOV64_X ||
+	    read_imm(bytes, pc) != 0 || read_off(bytes, pc) != 2 ||
+	    read_off(bytes, pc + 2) != 1) {
+		return std::nullopt;
+	}
+	const uint8_t dst = dst_reg(bytes, pc + 1);
+	if (dst_reg(bytes, pc + 3) != dst) {
+		return std::nullopt;
+	}
+	if (bytes[pc * INSN_SIZE] == BPF_JEQ64_K) {
+		return CondSelectSite{ pc, dst, src_reg(bytes, pc + 1),
+				       src_reg(bytes, pc + 3), dst_reg(bytes, pc) };
+	}
+	return CondSelectSite{ pc, dst, src_reg(bytes, pc + 3),
+			       src_reg(bytes, pc + 1), dst_reg(bytes, pc) };
+}
+
+int64_t apply_cond_select_bytecode_kinsns(std::vector<uint8_t> &bytes,
+					  const KinsnTargetMap &targets)
+{
+	const bool arm64_only = target_is_arm64_kinsn_set(targets) &&
+				!target_is_x86_kinsn_set(targets);
+	if (!arm64_only || !target_has_kinsn(targets, "bpf_arm64_tst") ||
+	    !target_has_kinsn(targets, "bpf_arm64_csel_ne")) {
+		return 0;
+	}
+	int64_t applied = 0;
+	size_t pc = 0;
+	while (pc < bytes.size() / INSN_SIZE) {
+		const auto site = match_arm64_csel_ne_site(bytes, pc);
+		if (!site || !range_is_replaceable(bytes, site->start, 4)) {
+			pc++;
+			continue;
+		}
+		std::vector<uint8_t> replacement;
+		append_kinsn_pair(replacement, targets, "bpf_arm64_tst",
+				  pack_u4(site->cond_reg, 0));
+		append_kinsn_pair(replacement, targets, "bpf_arm64_csel_ne",
+				  pack_arm64_csel_payload(
+					  site->dst, site->true_reg,
+					  site->false_reg, site->cond_reg));
+		replace_insn_range(bytes, site->start, 4, replacement);
+		applied += 2;
+		pc = site->start + replacement.size() / INSN_SIZE;
+	}
+	return applied;
+}
+
+constexpr uint8_t ARM64_CCMP_MODE_FAIL_EQ = 0;
+constexpr uint8_t ARM64_CCMP_MODE_FAIL_NE = 1;
+
+struct CcmpSite {
+	size_t start = 0;
+	size_t old_len = 0;
+	bool width32 = false;
+	uint8_t dst = 0;
+	uint8_t mode = 0;
+	std::vector<uint8_t> regs;
+};
+
+bool is_bool_mov_imm(const std::vector<uint8_t> &bytes, size_t pc, uint8_t value)
+{
+	const uint8_t opcode = bytes[pc * INSN_SIZE];
+	return (opcode == BPF_MOV64_K || opcode == BPF_MOV32_K) &&
+	       read_imm(bytes, pc) == value;
+}
+
+std::optional<CcmpSite> match_arm64_ccmp_site(const std::vector<uint8_t> &bytes,
+					      size_t pc)
+{
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	if (pc + 4 > insn_count || !is_bool_mov_imm(bytes, pc, 0)) {
+		return std::nullopt;
+	}
+	const uint8_t dst = dst_reg(bytes, pc);
+	if (dst > 9) {
+		return std::nullopt;
+	}
+
+	std::vector<uint8_t> regs;
+	std::optional<bool> width32;
+	std::optional<uint8_t> mode;
+	for (size_t i = 0; i < 4 && pc + 1 + i < insn_count; i++) {
+		const size_t branch_pc = pc + 1 + i;
+		const uint8_t opcode = bytes[branch_pc * INSN_SIZE];
+		bool branch_width32 = false;
+		uint8_t branch_mode = 0;
+		if (opcode == BPF_JEQ64_K) {
+			branch_mode = ARM64_CCMP_MODE_FAIL_EQ;
+		} else if (opcode == BPF_JNE64_K) {
+			branch_mode = ARM64_CCMP_MODE_FAIL_NE;
+		} else if (opcode == BPF_JEQ32_K) {
+			branch_width32 = true;
+			branch_mode = ARM64_CCMP_MODE_FAIL_EQ;
+		} else if (opcode == BPF_JNE32_K) {
+			branch_width32 = true;
+			branch_mode = ARM64_CCMP_MODE_FAIL_NE;
+		} else {
+			break;
+		}
+		if (read_imm(bytes, branch_pc) != 0 || dst_reg(bytes, branch_pc) == dst) {
+			break;
+		}
+		if (width32 && *width32 != branch_width32) {
+			break;
+		}
+		if (mode && *mode != branch_mode) {
+			break;
+		}
+		width32 = branch_width32;
+		mode = branch_mode;
+		regs.push_back(dst_reg(bytes, branch_pc));
+	}
+
+	if (regs.size() < 2 || !width32 || !mode) {
+		return std::nullopt;
+	}
+	const size_t mov_one_pc = pc + 1 + regs.size();
+	if (mov_one_pc >= insn_count || !is_bool_mov_imm(bytes, mov_one_pc, 1) ||
+	    dst_reg(bytes, mov_one_pc) != dst) {
+		return std::nullopt;
+	}
+	const size_t skip_pc = mov_one_pc + 1;
+	for (size_t i = 0; i < regs.size(); i++) {
+		const size_t branch_pc = pc + 1 + i;
+		if (read_off(bytes, branch_pc) !=
+		    static_cast<int16_t>(skip_pc - branch_pc - 1)) {
+			return std::nullopt;
+		}
+	}
+	return CcmpSite{ pc, regs.size() + 2, *width32, dst, *mode, regs };
+}
+
+int64_t apply_ccmp_bytecode_kinsns(std::vector<uint8_t> &bytes,
+				   const KinsnTargetMap &targets)
+{
+	const bool arm64_only = target_is_arm64_kinsn_set(targets) &&
+				!target_is_x86_kinsn_set(targets);
+	if (!arm64_only || !target_has_kinsn(targets, "bpf_arm64_cmp_x") ||
+	    !target_has_kinsn(targets, "bpf_arm64_cmp_w") ||
+	    !target_has_kinsn(targets, "bpf_arm64_ccmp_x") ||
+	    !target_has_kinsn(targets, "bpf_arm64_ccmp_w") ||
+	    !target_has_kinsn(targets, "bpf_arm64_cset_x_cond")) {
+		return 0;
+	}
+
+	int64_t applied = 0;
+	size_t pc = 0;
+	while (pc < bytes.size() / INSN_SIZE) {
+		const auto site = match_arm64_ccmp_site(bytes, pc);
+		if (!site || !range_is_replaceable(bytes, site->start, site->old_len)) {
+			pc++;
+			continue;
+		}
+
+		const char *cmp_name = site->width32 ? "bpf_arm64_cmp_w" :
+						     "bpf_arm64_cmp_x";
+		const char *ccmp_name = site->width32 ? "bpf_arm64_ccmp_w" :
+						      "bpf_arm64_ccmp_x";
+		std::vector<uint8_t> replacement;
+		append_kinsn_pair(replacement, targets, cmp_name,
+				  pack_u4(site->regs[0], 0));
+		for (size_t i = 1; i < site->regs.size(); i++) {
+			append_kinsn_pair(replacement, targets, ccmp_name,
+					  pack_arm64_ccmp_payload(site->regs[i],
+								  site->mode));
+		}
+		append_kinsn_pair(replacement, targets, "bpf_arm64_cset_x_cond",
+				  pack_arm64_cset_payload(
+					  site->dst,
+					  static_cast<uint8_t>(site->regs.size()),
+					  site->mode, site->width32, site->regs));
+
+		replace_insn_range(bytes, site->start, site->old_len,
+				   replacement);
+		applied += static_cast<int64_t>(site->regs.size() + 1);
 		pc = site->start + replacement.size() / INSN_SIZE;
 	}
 	return applied;
@@ -1489,9 +2016,91 @@ std::vector<uint8_t> emit_memset_lane_kinsns(const KinsnTargetMap &targets,
 	return out;
 }
 
+bool arm64_ldstp_soff_ok(int16_t off)
+{
+	return off >= -512 && off <= 504 && (off % 8) == 0;
+}
+
+int64_t apply_arm64_pair_memory_bytecode_kinsns(std::vector<uint8_t> &bytes,
+						const KinsnTargetMap &targets)
+{
+	const bool arm64_only = target_is_arm64_kinsn_set(targets) &&
+				!target_is_x86_kinsn_set(targets);
+	if (!arm64_only) {
+		return 0;
+	}
+
+	int64_t applied = 0;
+	size_t pc = 0;
+	while (pc + 1 < bytes.size() / INSN_SIZE) {
+		std::vector<uint8_t> replacement;
+		if (bytes[pc * INSN_SIZE] == BPF_LDXDW &&
+		    bytes[(pc + 1) * INSN_SIZE] == BPF_LDXDW &&
+		    src_reg(bytes, pc) == src_reg(bytes, pc + 1) &&
+		    dst_reg(bytes, pc) != dst_reg(bytes, pc + 1) &&
+		    src_reg(bytes, pc) != dst_reg(bytes, pc) &&
+		    src_reg(bytes, pc) != dst_reg(bytes, pc + 1) &&
+		    target_has_kinsn(targets, "bpf_arm64_ldp_x") &&
+		    range_is_replaceable(bytes, pc, 2)) {
+			const int16_t off0 = read_off(bytes, pc);
+			const int16_t off1 = read_off(bytes, pc + 1);
+			if (off1 == off0 + 8 && arm64_ldstp_soff_ok(off0)) {
+				append_kinsn_pair(
+					replacement, targets, "bpf_arm64_ldp_x",
+					pack_arm64_pair_payload(
+						dst_reg(bytes, pc),
+						dst_reg(bytes, pc + 1),
+						src_reg(bytes, pc), off0));
+			} else if (off0 == off1 + 8 &&
+				   arm64_ldstp_soff_ok(off1)) {
+				append_kinsn_pair(
+					replacement, targets, "bpf_arm64_ldp_x",
+					pack_arm64_pair_payload(
+						dst_reg(bytes, pc + 1),
+						dst_reg(bytes, pc),
+						src_reg(bytes, pc), off1));
+			}
+		} else if (bytes[pc * INSN_SIZE] == BPF_STXDW &&
+			   bytes[(pc + 1) * INSN_SIZE] == BPF_STXDW &&
+			   dst_reg(bytes, pc) == dst_reg(bytes, pc + 1) &&
+			   target_has_kinsn(targets, "bpf_arm64_stp_x") &&
+			   range_is_replaceable(bytes, pc, 2)) {
+			const int16_t off0 = read_off(bytes, pc);
+			const int16_t off1 = read_off(bytes, pc + 1);
+			if (off1 == off0 + 8 && arm64_ldstp_soff_ok(off0)) {
+				append_kinsn_pair(
+					replacement, targets, "bpf_arm64_stp_x",
+					pack_arm64_pair_payload(
+						src_reg(bytes, pc),
+						src_reg(bytes, pc + 1),
+						dst_reg(bytes, pc), off0));
+			} else if (off0 == off1 + 8 &&
+				   arm64_ldstp_soff_ok(off1)) {
+				append_kinsn_pair(
+					replacement, targets, "bpf_arm64_stp_x",
+					pack_arm64_pair_payload(
+						src_reg(bytes, pc + 1),
+						src_reg(bytes, pc),
+						dst_reg(bytes, pc), off1));
+			}
+		}
+		if (replacement.empty()) {
+			pc++;
+			continue;
+		}
+		replace_insn_range(bytes, pc, 2, replacement);
+		applied++;
+		pc += replacement.size() / INSN_SIZE;
+	}
+	return applied;
+}
+
 int64_t apply_bulk_memory_bytecode_kinsns(std::vector<uint8_t> &bytes,
 					  const KinsnTargetMap &targets)
 {
+	if (target_is_arm64_kinsn_set(targets) && !target_is_x86_kinsn_set(targets)) {
+		return apply_arm64_pair_memory_bytecode_kinsns(bytes, targets);
+	}
 	constexpr size_t MinBulkBytes = 16;
 	int64_t applied = 0;
 	size_t pc = 0;
@@ -1627,9 +2236,74 @@ bool previous_is_same_prefetch(const std::vector<uint8_t> &bytes, size_t pc,
 	return (read_kinsn_sidecar_payload(bytes, pc - 2) & 0xf) == ptr_reg;
 }
 
+std::optional<std::string_view>
+prefetch_target_name(const KinsnTargetMap &targets)
+{
+	const bool arm64_only = target_is_arm64_kinsn_set(targets) &&
+				!target_is_x86_kinsn_set(targets);
+	if (arm64_only && target_has_kinsn(targets, "bpf_arm64_prfm_pldl1keep")) {
+		return "bpf_arm64_prfm_pldl1keep";
+	}
+	if (target_is_x86_kinsn_set(targets) &&
+	    target_has_kinsn(targets, "bpf_x86_prefetcht0")) {
+		return "bpf_x86_prefetcht0";
+	}
+	return std::nullopt;
+}
+
+bool scan_prefetch_alias_path(std::vector<uint8_t> &bytes,
+			      const KinsnTargetMap &targets,
+			      std::string_view target_name, size_t start,
+			      size_t scan_end, std::array<uint8_t, 11> alias,
+			      size_t &next_pc, int64_t &applied)
+{
+	for (size_t scan = start; scan < scan_end; scan++) {
+		const uint8_t opcode = bytes[scan * INSN_SIZE];
+		if (const auto base = memory_base_reg(bytes, scan)) {
+			if (*base < alias.size() && alias[*base]) {
+				if (!previous_is_same_prefetch(bytes, scan, *base)) {
+					std::vector<uint8_t> replacement;
+					append_kinsn_pair(replacement, targets,
+							  target_name,
+							  pack_u4(*base, 0));
+					replace_insn_range(bytes, scan, 0,
+							    replacement);
+					applied++;
+				}
+				next_pc = scan + 2;
+				return true;
+			}
+		}
+		if (opcode == BPF_EXIT || opcode == BPF_JA ||
+		    is_conditional_jump(opcode) || opcode == BPF_CALL ||
+		    opcode == BPF_CALLX || opcode == BPF_LD_IMM64) {
+			break;
+		}
+		if (opcode == BPF_MOV64_X) {
+			alias[dst_reg(bytes, scan)] =
+				src_reg(bytes, scan) < alias.size() ?
+					alias[src_reg(bytes, scan)] :
+					0;
+		} else if ((opcode == BPF_ADD64_K ||
+			    opcode == BPF_SUB64_K) &&
+			   dst_reg(bytes, scan) < alias.size() &&
+			   alias[dst_reg(bytes, scan)]) {
+			alias[dst_reg(bytes, scan)] = 1;
+		} else if (opcode_defines_dst(opcode) &&
+			   dst_reg(bytes, scan) < alias.size()) {
+			alias[dst_reg(bytes, scan)] = 0;
+		}
+	}
+	return false;
+}
+
 int64_t apply_prefetch_bytecode_kinsns(std::vector<uint8_t> &bytes,
 				       const KinsnTargetMap &targets)
 {
+	const auto target_name = prefetch_target_name(targets);
+	if (!target_name) {
+		return 0;
+	}
 	int64_t applied = 0;
 	size_t pc = 0;
 	while (pc < bytes.size() / INSN_SIZE) {
@@ -1641,47 +2315,29 @@ int64_t apply_prefetch_bytecode_kinsns(std::vector<uint8_t> &bytes,
 		}
 		std::array<uint8_t, 11> alias{};
 		alias[0] = 1;
-		const size_t scan_end = std::min(bytes.size() / INSN_SIZE, pc + 65);
+		const size_t insn_count = bytes.size() / INSN_SIZE;
 		bool inserted = false;
-		for (size_t scan = pc + 1; scan < scan_end; scan++) {
-			const uint8_t opcode = bytes[scan * INSN_SIZE];
-			if (const auto base = memory_base_reg(bytes, scan)) {
-				if (*base < alias.size() && alias[*base]) {
-					if (!previous_is_same_prefetch(bytes, scan,
-								       *base)) {
-						std::vector<uint8_t> replacement;
-						append_kinsn_pair(
-							replacement, targets,
-							"bpf_x86_prefetcht0",
-							pack_u4(*base, 0));
-						replace_insn_range(bytes, scan, 0,
-								    replacement);
-						applied++;
-					}
-					pc = scan + 2;
-					inserted = true;
-					break;
-				}
+		if (pc + 1 < insn_count &&
+		    bytes[(pc + 1) * INSN_SIZE] == BPF_JEQ64_K &&
+		    dst_reg(bytes, pc + 1) == 0 &&
+		    read_imm(bytes, pc + 1) == 0 &&
+		    read_off(bytes, pc + 1) > 0) {
+			const size_t target_pc =
+				pc + 2 + static_cast<size_t>(read_off(bytes, pc + 1));
+			if (target_pc <= insn_count) {
+				const size_t scan_end =
+					std::min(target_pc, pc + 65);
+				inserted = scan_prefetch_alias_path(
+					bytes, targets, *target_name, pc + 2,
+					scan_end, alias, pc, applied);
 			}
-			if (opcode == BPF_EXIT || opcode == BPF_JA ||
-			    is_conditional_jump(opcode) || opcode == BPF_CALL ||
-			    opcode == BPF_CALLX || opcode == BPF_LD_IMM64) {
-				break;
-			}
-			if (opcode == BPF_MOV64_X) {
-				alias[dst_reg(bytes, scan)] =
-					src_reg(bytes, scan) < alias.size() ?
-						alias[src_reg(bytes, scan)] :
-						0;
-			} else if ((opcode == BPF_ADD64_K ||
-				    opcode == BPF_SUB64_K) &&
-				   dst_reg(bytes, scan) < alias.size() &&
-				   alias[dst_reg(bytes, scan)]) {
-				alias[dst_reg(bytes, scan)] = 1;
-			} else if (opcode_defines_dst(opcode) &&
-				   dst_reg(bytes, scan) < alias.size()) {
-				alias[dst_reg(bytes, scan)] = 0;
-			}
+		}
+		if (!inserted) {
+			const size_t scan_end =
+				std::min(bytes.size() / INSN_SIZE, pc + 65);
+			inserted = scan_prefetch_alias_path(
+				bytes, targets, *target_name, pc + 1, scan_end,
+				alias, pc, applied);
 		}
 		if (!inserted) {
 			pc++;
@@ -1717,6 +2373,12 @@ int64_t apply_bytecode_kinsn_recovery(std::vector<uint8_t> &bytes,
 	}
 	const int64_t before = count_kinsn_calls(bytes);
 	if (is_arm64 && !is_x86) {
+		if (bytecode_kinsn_family_enabled(pass, "ccmp", policy)) {
+			apply_ccmp_bytecode_kinsns(bytes, targets);
+		}
+		if (bytecode_kinsn_family_enabled(pass, "cond_select", policy)) {
+			apply_cond_select_bytecode_kinsns(bytes, targets);
+		}
 		if (bytecode_kinsn_family_enabled(pass, "rotate", policy)) {
 			apply_rotate_bytecode_kinsns(bytes, targets);
 		}
@@ -1726,7 +2388,16 @@ int64_t apply_bytecode_kinsn_recovery(std::vector<uint8_t> &bytes,
 		if (bytecode_kinsn_family_enabled(pass, "endian_fusion", policy)) {
 			apply_endian_bytecode_kinsns(bytes, targets);
 		}
+		if (bytecode_kinsn_family_enabled(pass, "bulk_memory", policy)) {
+			apply_bulk_memory_bytecode_kinsns(bytes, targets);
+		}
+		if (bytecode_kinsn_family_enabled(pass, "prefetch", policy)) {
+			apply_prefetch_bytecode_kinsns(bytes, targets);
+		}
 	} else {
+		if (bytecode_kinsn_family_enabled(pass, "bitops", policy)) {
+			apply_bmi1_bytecode_kinsns(bytes, targets);
+		}
 		if (bytecode_kinsn_family_enabled(pass, "rotate", policy)) {
 			apply_rotate_bytecode_kinsns(bytes, targets);
 		}

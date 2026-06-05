@@ -427,8 +427,8 @@ void validate_kinsn_mode_arg(std::string_view value)
 bool is_bytecode_kinsn_family(std::string_view family)
 {
 	static constexpr std::string_view families[] = {
-		"all", "rotate", "extract", "endian_fusion", "bulk_memory",
-		"prefetch",
+		"all", "rotate", "cond_select", "extract", "endian_fusion",
+		"bulk_memory", "prefetch", "bitops", "ccmp",
 	};
 	return std::find(std::begin(families), std::end(families), family) !=
 	       std::end(families);
@@ -589,6 +589,29 @@ configure_llvm_kinsn_select(std::string_view pass,
 	return args;
 }
 
+void apply_target_bytecode_policy_defaults(std::string_view pass,
+					   const KinsnTargetMap &kinsn_targets,
+					   KinsnPassOptions &options)
+{
+	const bool arm64_only = target_is_arm64_kinsn_set(kinsn_targets) &&
+				!target_is_x86_kinsn_set(kinsn_targets);
+	if (!arm64_only || pass != "kinsn" || options.bytecode_policy.all_enabled) {
+		return;
+	}
+	static constexpr std::string_view disabled_by_default[] = {
+		"endian_fusion",
+		"bulk_memory",
+		"prefetch",
+	};
+	for (std::string_view family : disabled_by_default) {
+		const std::string key(family);
+		if (options.bytecode_policy.family_enabled.find(key) ==
+		    options.bytecode_policy.family_enabled.end()) {
+			options.bytecode_policy.family_enabled[key] = false;
+		}
+	}
+}
+
 int64_t count_kinsn_calls(const std::vector<uint8_t> &bytes)
 {
 	if (bytes.size() % INSN_SIZE != 0) {
@@ -638,6 +661,10 @@ std::string kinsn_family_for_name(std::string_view name)
 	if (name.starts_with("bpf_arm64_ccmp")) {
 		return "ccmp";
 	}
+	if (name.starts_with("bpf_arm64_cmp") ||
+	    name.starts_with("bpf_arm64_cset")) {
+		return "ccmp";
+	}
 	if (name == "bpf_x86_rolw" || name.starts_with("bpf_x86_bswap") ||
 	    name.starts_with("bpf_x86_movbe") ||
 	    name.starts_with("bpf_arm64_rev")) {
@@ -657,7 +684,8 @@ std::string kinsn_family_for_name(std::string_view name)
 	if (name.starts_with("bpf_x86_mov") ||
 	    name.starts_with("bpf_arm64_ldr") ||
 	    name.starts_with("bpf_arm64_str") ||
-	    name.starts_with("bpf_arm64_ldp")) {
+	    name.starts_with("bpf_arm64_ldp") ||
+	    name.starts_with("bpf_arm64_stp")) {
 		return "bulk_memory";
 	}
 	if (name.starts_with("bpf_x86_prefetch") ||
@@ -855,7 +883,8 @@ bytecode_kinsn_family_policy_json(std::string_view pass,
 				  const BytecodeKinsnPolicy &policy)
 {
 	static constexpr std::string_view families[] = {
-		"rotate", "extract", "endian_fusion", "bulk_memory", "prefetch",
+		"rotate", "cond_select", "extract", "endian_fusion",
+		"bulk_memory", "prefetch", "bitops", "ccmp",
 	};
 
 	llvm::json::Object out;
@@ -2525,6 +2554,8 @@ void run_pass(Cli &cli)
 		}
 		kinsn_targets = read_kinsn_targets(*cli.target);
 		kinsn_options = parse_kinsn_pass_args(*cli.pass, cli.pass_args);
+		apply_target_bytecode_policy_defaults(*cli.pass, kinsn_targets,
+						      kinsn_options);
 		kinsn_options.effective_llvm_args =
 			configure_llvm_kinsn_select(*cli.pass,
 						    kinsn_options.llvm_args,
