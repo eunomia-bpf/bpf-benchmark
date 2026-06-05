@@ -1,6 +1,6 @@
 # Kinsn ReJIT Corpus Evaluation
 
-Last updated: 2026-06-04
+Last updated: 2026-06-05
 
 This is the paper-facing evaluation note for kinsn-based ReJIT on the x86 KVM
 corpus. The benchmark framework records raw counters and workload payloads
@@ -79,16 +79,31 @@ Policy/gate status:
 
 - `corpus/config/benchmark_config.yaml` maps `kinsn` to the single kinsn
   umbrella pass and keeps the kinsn-class pass names in the `full-x86` list.
-- `runner/config/passes/kinsn` contains only `default.yaml`; there are no
-  app-specific kinsn YAML disables.
+- `runner/config/passes/kinsn/default.yaml` is the default full-kinsn
+  entrypoint. It invokes `bpfopt --pass kinsn` without pass-local selector
+  overrides, so the effective policy comes from the bpfopt umbrella default.
+  The authoritative artifacts in this note did not use app-specific kinsn YAML
+  disables or per-program overrides.
 - `bpfopt/llvm/src/main.cpp` treats `kinsn`, `rotate`, `cond_select`,
   `extract`, `endian_fusion`, `bulk_memory`, `lea`, `prefetch`, and `ccmp` as
-  kinsn passes. The umbrella default is `all=force,movbe-load=disable`; this
-  is a selector-mode default, not a corpus/app filter. The endian movbe-be
-  path is still active and produced `bpf_x86_movbe32` sites in Katran.
+  kinsn passes. The `kinsn` umbrella default is
+  `all=force,movbe-load=disable` for LLVM selector mode, while bytecode
+  recovery is enabled for the umbrella bytecode families
+  (`rotate`, `extract`, `endian_fusion`, `bulk_memory`, and `prefetch`). This
+  is a selector-mode default, not a corpus/app filter. The remaining explicit
+  x86 exception, `movbe-load=disable`, does not disable the observed endian
+  `movbe-be` path; Katran still produced `bpf_x86_movbe32` sites.
 - `ccmp` is arm64-only in this target set, so the x86 corpus is not expected
   to report ccmp sites. `prefetch` is enabled in the target list but had zero
   x86 corpus hits in this run.
+- Current post-evaluation tooling also supports a pass-local
+  `--bytecode-kinsn-mode` override for controlled ablations, and new
+  per-program kinsn reports include a `kinsn_policy` provenance block with the
+  effective LLVM selector arguments and bytecode-family enables. This is
+  provenance/tuning infrastructure; it does not change the `kinsn` default.
+  The older authoritative artifacts above predate `kinsn_policy`, so their
+  effective policy is reconstructed from `loadtime-plans/*.json` plus the
+  bpfopt default described here.
 
 ## Methodology
 
@@ -122,7 +137,9 @@ for tail-call descendants. Tail-called programs can report zero own
 Loadtime apply coverage is read from raw loadtime reports. The report's
 `sites_applied`, `sites_matched`, `sites_skipped`,
 `kinsn_calls_by_family`, and `kinsn_calls_by_name` fields are checked
-post-hoc for consistency. No framework code computes these summaries.
+post-hoc for consistency. Newer reports also include `kinsn_policy`, which is
+used only to audit which selector policy produced a program's transformed
+bytecode. No framework code computes these summaries.
 
 ## Main Results
 
@@ -234,6 +251,62 @@ positive than the retained BPF counter geomean because application-level noise,
 tail-call accounting, and non-BPF work can dominate small per-program counter
 differences.
 
+## Per-App Tuned Result
+
+After the full-kinsn corpus run, the best workload-oriented policy among the
+tested full versus no-bulk configurations was to keep the umbrella `kinsn`
+pass but disable `bulk_memory` for Cilium, Katran, and Tracee only:
+
+```sh
+bpfopt --pass kinsn ... -- \
+  --kinsn-mode all=force,wide-load=disable,indexed-load=disable,movbe-load=disable \
+  --bytecode-kinsn-mode bulk_memory=disable
+```
+
+This is implemented as app-specific pass config under
+`runner/config/passes/kinsn/{cilium,katran,tracee}.yaml`; the default
+`runner/config/passes/kinsn/default.yaml` remains full-kinsn and is not changed
+into no-bulk.
+
+The tuned run used the same setup as the authoritative corpus runs:
+`SAMPLES=3`, `WORKLOAD_DURATION=180`, `WARMUPS=1`,
+`BPFREJIT_BENCH_PASSES=kinsn`, and the app subset
+`tracee/monitor,cilium/agent,katran`. The stats-on artifact is
+`corpus/results/x86_kvm_corpus_20260604_232313_992341`; the stats-off artifact
+is `corpus/results/x86_kvm_corpus_20260605_004607_636479`.
+
+![Per-app tuned kinsn result](figures/eval-kinsn-tuned-3app-20260605.png)
+
+*Figure 2: per-app tuned kinsn result for Cilium, Katran, and Tracee.
+Workload ratios use stats-off artifacts, higher is better. BPF cost ratios use
+stats-on artifacts, lower is better. This figure is not a full-corpus result;
+it isolates the three app-specific no-bulk overrides.*
+
+Workload throughput improved on all three tuned apps, with a `1.061x`
+three-app geomean:
+
+| App | full-kinsn workload ratio | tuned workload ratio | tuned sample ratios | workload note |
+| --- | ---: | ---: | --- | --- |
+| `cilium` | 1.074x | 1.114x | 1.102x, 1.128x, 1.112x | strongest tuned workload win, no pktgen errors |
+| `katran` | 1.030x | 1.052x | 1.070x, 1.041x, 1.044x | stable packet-path win; raw pktgen errors remain workload payload fields |
+| `tracee` | 1.003x | 1.019x | 1.016x, 1.023x, 1.017x | smaller but consistent stress-ng throughput win |
+
+The same run confirms that all three overrides really disabled bulk-memory
+while keeping the other families enabled:
+
+| App | sites applied | LEA | cond_select | rotate | extract | endian_fusion | bulk_memory |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `cilium` | 3512 | 2359 | 385 | 0 | 2 | 766 | 0 |
+| `katran` | 71 | 39 | 0 | 20 | 1 | 11 | 0 |
+| `tracee` | 7898 | 7859 | 23 | 0 | 0 | 16 | 0 |
+
+BPF counters do not support the same three-app claim. Katran remains a clear
+BPF-counter win (`0.942x`, one retained hot XDP row), but Cilium and Tracee
+were slower in the 2026-06-04 stats-on rerun (`1.062x` and `1.064x`). Tracee's
+hash-based pairing confirms this is not an occurrence-index pairing artifact.
+The useful claim from the tuned dataset is therefore workload-level for
+Cilium/Katran/Tracee, plus a BPF-counter win for Katran.
+
 ## Discussion
 
 The important corrective result is coverage, not headline speedup. Earlier
@@ -248,10 +321,28 @@ why Cilium and Katran expose endian-fusion patterns, and why bulk-memory
 
 This run also clarifies policy versus selector behavior. There is no
 benchmark-level policy filter preventing these pass names from running under
-`kinsn`, and there are no app-specific kinsn disables. The remaining explicit
+`kinsn`, and the default kinsn pass remains full-kinsn. The remaining explicit
 x86 selector default is `movbe-load=disable` in the umbrella mode; this does
 not disable the observed endian `movbe-be` path. `prefetch=0` should be read
 as "enabled but no matched corpus shape," not as a corpus gate.
+
+A follow-up no-bulk ablation was used only to guide selector tuning. It added
+a controlled way to disable `bulk_memory` while keeping the single umbrella
+kinsn pass, and it confirmed that `bulk_memory` can dominate regressions in
+some apps. On the five apps that completed under that ablation, BPF
+per-program geomean improved from `1.009x` full-kinsn to `0.966x` no-bulk
+over the matched retained rows; Tracee improved from `1.028x` to `0.920x`,
+Cilium from `1.009x` to `0.935x`, and Katran from `0.940x` to `0.936x`.
+However, Tetragon failed under no-bulk with a load-time `EINVAL`, and BCC/OTEL
+regressed. This is not a replacement default policy; it motivates per-app or
+per-program tuning with full-kinsn as the fallback.
+
+The later per-app tuned rerun above keeps that fallback model: full-kinsn stays
+the default, while Cilium, Katran, and Tracee use an app-specific no-bulk
+override because it is the best workload policy among the tested full versus
+no-bulk configurations. The BPF-counter repeatability is weaker than the
+workload signal for Cilium and Tracee, so those apps should be reported as
+workload wins, not BPF-counter wins.
 
 The BPF counter result should be read with the tail-call accounting caveat from
 `AGENTS.md`: many tail-called programs report zero own runtime counters, so
@@ -271,6 +362,8 @@ Post-hoc script and generated data:
 - Script: `docs/tmp/kinsn_eval_20260604.py`
 - Summary: `docs/tmp/kinsn_eval_20260604_summary.md`
 - Figure: `docs/figures/eval-kinsn-corpus-20260604.png`
+- Tuned 3-app figure:
+  `docs/figures/eval-kinsn-tuned-3app-20260605.png`
 
 Authoritative stats-on/stats-off artifacts:
 
@@ -282,6 +375,12 @@ Authoritative stats-on/stats-off artifacts:
 | `tetragon` | `corpus/results/x86_kvm_corpus_20260604_073221_306100` | `corpus/results/x86_kvm_corpus_20260604_103609_366182` |
 | `katran` | `corpus/results/x86_kvm_corpus_20260604_080246_742228` | `corpus/results/x86_kvm_corpus_20260604_110614_563901` |
 | `tracee` | `corpus/results/x86_kvm_corpus_20260604_083301_316989` | `corpus/results/x86_kvm_corpus_20260604_113548_863406` |
+
+Per-app tuned artifacts:
+
+| Scope | stats-on artifact | stats-off artifact |
+| --- | --- | --- |
+| `cilium,katran,tracee` no-bulk overrides | `corpus/results/x86_kvm_corpus_20260604_232313_992341` | `corpus/results/x86_kvm_corpus_20260605_004607_636479` |
 
 ## Previous Results
 
