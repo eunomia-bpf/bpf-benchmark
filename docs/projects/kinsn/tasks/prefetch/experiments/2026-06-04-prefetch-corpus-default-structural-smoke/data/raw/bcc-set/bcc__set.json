@@ -1,0 +1,10 @@
+{
+  "app": "bcc/set",
+  "baseline": null,
+  "error": "BCC tool biosnoop exited with rc=1: libbpf: prog 'blk_account_io_start': failed to attach: ERROR: strerror_r(-524)=22\nfailed to attach blk_account_io_start: Unknown error 524\nstderr tail:\nbiosnoop:\nlibbpf: prog 'blk_account_io_start': failed to attach: ERROR: strerror_r(-524)=22\nfailed to attach blk_account_io_start: Unknown error 524\nsyscount:\nausyscall required for syscalls number/name mapping",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "bcc_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "error"
+}

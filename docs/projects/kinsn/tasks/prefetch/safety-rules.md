@@ -1,6 +1,6 @@
 # Kinsn Prefetch Safety and Admission Rules
 
-最后更新：2026-06-03。
+最后更新：2026-06-04。
 
 ## 结论
 
@@ -46,8 +46,9 @@ load-only filtering 是 policy
 | verifier-safe placement | hint 必须位于 bounds/null check 之后，不能在 pointer 被证明安全前插入。 | 已由局部窗口和 case 设计覆盖，仍需要更强 dominance 规则。 |
 | load-only target | 当前只对 read load 插入，不对 store 插入。 | 已实现。 |
 | same-cacheline dedup | 同一 pointer / cacheline 的多个 loads 只保留一个 prefetch candidate。 | 已实现。 |
-| site budget | 限制每个 program 的 prefetch site 数，避免代码膨胀。 | 已实现 `--max-sites`；这不是 true degree。 |
+| site budget | 限制每个 program 的 prefetch site 数，避免代码膨胀。 | 已实现 `--max-sites`；这不是 degree 参数。 |
 | map-value profile gate | map-value candidate 默认 skip，只有 profile allow-list 通过才插入。 | 已实现。 |
+| policy-point metadata validation | `map_value_policy_points` 中 `policy` / `reason` 必须非空，`horizon` / `degree` 必须为正数，`hint` 必须是已支持 variant。 | 已实现并有 Rust unit test。 |
 | dependent-depth gate | packet first-deref 只允许 depth 1 final deref；depth 0 和 depth > 1 默认 skip。 | 已实现 selector v3。 |
 
 ## 当前不足
@@ -59,11 +60,11 @@ load-only filtering 是 policy
 | missing rule | 为什么需要 |
 |---|---|
 | dominance-aware bounds proof | 现在主要依赖同 basic block / local window；复杂 CFG 下需要证明 bounds/null check dominate insertion point。 |
-| automatic future-pointer validity | horizon policy 现在靠 hand-profiled PC/register；自动 selector 需要证明 future pointer 已物化且 live。 |
+| automatic future-pointer validity | future-address policy 的 horizon 参数现在靠 hand-profiled PC/register；自动 selector 需要证明 future pointer 已物化且 live。 |
 | per-site profitability guard | safety rules 只保证安全，不保证有收益；仍需要 policy / profile 判断。 |
-| profile schema validation | profile 文件指定 PC/register 时，需要更严格检查 PC 是否仍对应同一 program shape。 |
+| profile stale-shape validation | profile 文件指定 PC/register 时，需要更严格检查 PC 是否仍对应同一 program shape。当前只校验 metadata 格式，不校验 profile 是否过期。 |
 
-## 和 true degree 的区别
+## 和 degree 参数的区别
 
 `--max-sites N` 只是 site budget：
 
@@ -71,7 +72,7 @@ load-only filtering 是 policy
 最多允许插 N 个 prefetch candidates。
 ```
 
-True degree 是 policy：
+Degree 是 prefetch policy 的参数：
 
 ```text
 对同一 logical access stream，一次预取几个未来地址，例如 i+1、i+2、i+4。
@@ -80,7 +81,7 @@ True degree 是 policy：
 因此：
 
 - site budget 属于 safety / admission。
-- true degree 属于 policy。
+- degree 属于参数，必须绑定到具体 policy，例如 future-address single-stream 或 spatial-within-page。
 
 ## 和 PF-LLM 的 demand filtering 区别
 

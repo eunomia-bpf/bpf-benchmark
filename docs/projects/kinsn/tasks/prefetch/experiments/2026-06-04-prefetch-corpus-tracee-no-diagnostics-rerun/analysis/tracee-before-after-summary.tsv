@@ -1,0 +1,3 @@
+run	programs	program_ok	program_error	total_bpfopt_ms	max_bpfopt_ms	total_rejit_syscall_ms	sites_matched	sites_applied	sites_skipped	diagnostics_len	skipped_sites_len
+before_default_candidate_diagnostics	167	166	1	308187	26817	31516	15542	0	15542	15542	15542
+after_default_no_candidate_diagnostics	167	166	1	51357	2781	31318	15542	0	15542	0	15542

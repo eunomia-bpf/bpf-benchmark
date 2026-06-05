@@ -1,0 +1,4 @@
+run	instance_id	instance_type	final_state	launch_time_utc	terminate_time_utc	wall_seconds	compute_cost_usd	ebs_cost_usd	total_cost_usd
+rerun1	i-0abc701af793d4ccc	t4g.small	terminated	2026-06-04T14:09:52+00:00	2026-06-04T14:15:34+00:00	342	0.001596	0.000333	0.001929
+rerun2	i-0a4436c93ff0897a5	t4g.small	terminated	2026-06-04T14:17:35+00:00	2026-06-04T14:23:34+00:00	359	0.001675	0.000350	0.002025
+rerun3	i-04ffa91e53036012a	t4g.small	terminated	2026-06-04T14:26:08+00:00	2026-06-04T14:31:47+00:00	339	0.001582	0.000330	0.001912

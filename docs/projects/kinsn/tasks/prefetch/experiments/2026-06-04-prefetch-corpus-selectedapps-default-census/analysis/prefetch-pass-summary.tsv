@@ -1,0 +1,6 @@
+app	program_passes	sites_matched	sites_applied	sites_skipped	insn_delta	total_bpfopt_ms	max_bpfopt_ms
+bpftrace/set	0	0	0	0	0	0	0
+katran	1	224	0	224	0	11322	11322
+katran/wrk	0	0	0	0	0	0	0
+tetragon/observer	0	0	0	0	0	0	0
+tracee/monitor	167	15542	0	15542	0	308187	26817

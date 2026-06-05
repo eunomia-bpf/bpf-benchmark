@@ -1,0 +1,21 @@
+prog_id	prog_name	program_status	pass_status	bpfopt_ms	rejit_syscall_ms	orig_insns	sites_matched	sites_applied	sites_skipped	diagnostics_len	skipped_sites_len	error
+253	tracepoint__exe	ok	ok	2781	176	11827	592	0	592	0	592	
+124	lkm_seeker_proc	ok	ok	1847	1520	13343	271	0	271	0	271	
+118	lkm_seeker_modt	ok	ok	1495	921	13815	290	0	290	0	290	
+122	lkm_seeker_kset	ok	ok	1409	2138	14602	259	0	259	0	259	
+145	trace_security_	ok	ok	1381	248	6699	303	0	303	0	303	
+137	uprobe_syscall_	error	failed_rejit	1275	1561	12994	153	0	153	0	153	processed 481275 insns (limit 1000000) max_states_per_insn 19 total_states 8544 peak_states 5221 mark_read 0  BPF_PROG_LOAD errno=28 (post-verifier) ctx: prog_btf_fd=569 attach_btf_obj_fd=0 attach_pro
+238	trace_security_	ok	ok	1150	401	9459	152	0	152	0	152	
+112	syscall__execve	ok	ok	1136	26	4191	327	0	327	0	327	
+232	trace_execute_f	ok	ok	1133	636	4888	280	0	280	0	280	
+135	trace_call_user	ok	ok	1072	250	4821	314	0	314	0	314	
+188	trace_security_	ok	ok	1038	364	7451	191	0	191	0	191	
+114	syscall__execve	ok	ok	1036	37	4245	331	0	331	0	331	
+249	cgroup_skb_egre	ok	ok	980	67	3602	671	0	671	0	671	
+113	syscall__execve	ok	ok	879	23	4219	329	0	329	0	329	
+248	cgroup_skb_ingr	ok	ok	841	63	3602	671	0	671	0	671	
+111	syscall__execve	ok	ok	821	22	4165	325	0	325	0	325	
+189	trace_security_	ok	ok	777	310	7303	122	0	122	0	122	
+178	trace_ret_kerne	ok	ok	687	167	6283	92	0	92	0	92	
+168	trace_ret_vfs_w	ok	ok	620	165	6283	92	0	92	0	92	
+173	trace_ret_vfs_w	ok	ok	594	160	6306	96	0	96	0	96	

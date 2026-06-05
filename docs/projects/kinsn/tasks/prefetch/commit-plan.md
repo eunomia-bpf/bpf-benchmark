@@ -4,7 +4,7 @@
 
 ## 结论
 
-本文件记录本次实际提交拆分。提交发生在 `code` repo，不是在顶层 workspace：
+Prefetch task 的可提交内容应提交到 `code` repo，不提交到顶层 workspace：
 
 ```text
 repo:   /home/ruoji/github/bpf-opt/code
@@ -12,60 +12,58 @@ remote: origin git@github.com:eunomia-bpf/bpf-benchmark.git
 branch: codex/llvm-arm-backend
 ```
 
-本次只提交 Kinsn prefetch task 相关改动。不要提交：
+本计划只覆盖 Kinsn prefetch task。不要把下面内容混入 prefetch commits：
 
-- `/home/ruoji/github/bpf-opt/experiments` 顶层完整 raw logs；
-- `code/micro/results/aws_*` 大型 runner result directories；
+- `/home/ruoji/github/bpf-opt/experiments` 顶层完整 AWS raw logs；
+- `code/micro/results/aws_*` 和 `code/corpus/results/aws_*` 大型 runner result directories；
 - `llvm-backend/llvm` 子模块 dirty state；
-- docs 迁移 / archive 的无关大批量改动；
+- docs project migration / archive 的大批量无关改动；
 - `Makefile`、`cond_select.rs`、`vendor/Makefile` 等非 prefetch task 改动。
 
-本次拆成 4 个 commit：
+如果要提交当前 prefetch batch，建议拆成 5 个 commit。这样拆分按工程边界分离：
+selector/profile 机制、pass scalability 修复、micro probes、profile/corpus helper、文档与 compact
+experiment artifacts。
 
-1. `module: add prefetch hint variants`
-2. `bpfopt: add profile-gated prefetch policy`
-3. `micro: add prefetch policy probes`
-4. `docs: add kinsn prefetch reports`
-
-这样拆分符合代码边界：module ABI / kfunc target、bpfopt selector、micro workload、docs 和
-实验 artifact 分开提交。
-
-## Commit 1: module hint variants
+## Commit 1: bpfopt prefetch profile policy
 
 Subject:
 
 ```text
-module: add prefetch hint variants
+bpfopt: add profile-gated prefetch policies
 ```
 
-Stage only:
+Stage only the relevant hunks from:
 
 ```text
-module/x86/bpf_x86_prefetch.c
-module/arm64/bpf_arm64_prfm.c
+bpfopt/crates/bpfopt/src/passes/prefetch.rs
+bpfopt/crates/bpfopt/src/passes/prefetch_tests.rs
 runner/config/passes/prefetch/default.yaml
-bpfopt/kinsnprober/src/main.rs
+corpus/config/prefetch/*.json
+micro/config/prefetch-*.json
 ```
 
 Purpose:
 
 ```text
-Expose x86 prefetchnta/prefetcht0/prefetcht1/prefetcht2 and ARM64
-prfm pldl1keep/pldl1strm/pldl2keep/pldl2strm so policy experiments can
-separate hint selection from placement and degree.
+Add a conservative prefetch selector that can be driven by a per-PC profile
+table. The profile supports prefetch/skip actions, per-point hint override,
+policy metadata, horizon, degree, and reason fields. The default path remains
+evidence-gated and does not insert prefetch without profile evidence.
 ```
 
-## Commit 2: bpfopt policy
+## Commit 2: bpfopt prefetch census scalability
 
 Subject:
 
 ```text
-bpfopt: add profile-gated prefetch policy
+bpfopt: reduce prefetch corpus census overhead
 ```
 
-Stage only:
+Stage only the relevant hunks from:
 
 ```text
+bpfopt/crates/bpfopt/src/analysis/bbprogram.rs
+bpfopt/crates/bpfopt/src/pass.rs
 bpfopt/crates/bpfopt/src/passes/prefetch.rs
 bpfopt/crates/bpfopt/src/passes/prefetch_tests.rs
 ```
@@ -73,12 +71,38 @@ bpfopt/crates/bpfopt/src/passes/prefetch_tests.rs
 Purpose:
 
 ```text
-Add conservative packet/map pointer tracking, profile-gated map-value
-prefetch points, same-cacheline dedup, site budgeting, hint selection,
-and per-site prefetch/skip actions.
+Disable per-candidate diagnostics by default, add explicit candidate export
+flags, and cache site PC / layout offsets inside the prefetch pass. This keeps
+large-program corpus census usable while preserving an explicit diagnostics
+mode for profile generation.
 ```
 
-## Commit 3: micro probes
+## Commit 3: tools prefetch profile generator
+
+Subject:
+
+```text
+tools: generate prefetch profiles from corpus candidates
+```
+
+Stage:
+
+```text
+scripts/prefetch_profile_from_candidates.py
+corpus/config/prefetch/katran-profile-pc16-r0.json
+corpus/config/prefetch/katran-profile-multisite-map-value.json
+corpus/config/prefetch/katran-profile-generated-map-value-top12.json
+```
+
+Purpose:
+
+```text
+Convert candidate diagnostics TSV into per-PC prefetch profile JSON. The first
+generator supports source filtering, site budget, hint/policy/horizon/degree
+metadata, and rank-column based ordering for future profile/PMU evidence.
+```
+
+## Commit 4: micro prefetch policy probes
 
 Subject:
 
@@ -86,24 +110,26 @@ Subject:
 micro: add prefetch policy probes
 ```
 
-Stage only:
+Stage:
 
 ```text
 micro/config/micro_pure_jit.yaml
-micro/programs/prefetch_upper_bound.bpf.c
-micro/programs/prefetch_upper_bound.md
+micro/programs/prefetch_*.bpf.c
+micro/programs/prefetch_*.md
 micro/config/prefetch-*.json
+micro/programs/build-x86/kernel_offsets.h
+micro/programs/kernel_offsets.h
 ```
 
 Purpose:
 
 ```text
-Add synthetic-control micro cases and profile JSONs for horizon, degree,
-spatial footprint, MLOP/index-field, struct-field, mixed policy table,
-and stream-of-strides prefetch policy probes.
+Add synthetic-control micro cases for fixed distance, packet/map candidates,
+future-address horizon, degree, hint variants, spatial footprint, MLOP,
+struct-field, mixed policy table, and stream-of-strides probes.
 ```
 
-## Commit 4: docs and experiment artifacts
+## Commit 5: docs prefetch task report
 
 Subject:
 
@@ -111,7 +137,7 @@ Subject:
 docs: add kinsn prefetch reports
 ```
 
-Stage only:
+Stage:
 
 ```text
 docs/projects/kinsn/tasks/prefetch/README.md
@@ -121,6 +147,7 @@ docs/projects/kinsn/tasks/prefetch/safety-rules.md
 docs/projects/kinsn/tasks/prefetch/policy-matrix.md
 docs/projects/kinsn/tasks/prefetch/microbench-design.md
 docs/projects/kinsn/tasks/prefetch/results.md
+docs/projects/kinsn/tasks/prefetch/completion-audit.md
 docs/projects/kinsn/tasks/prefetch/commit-plan.md
 docs/projects/kinsn/tasks/prefetch/literature/
 docs/projects/kinsn/tasks/prefetch/experiments/
@@ -130,21 +157,38 @@ Purpose:
 
 ```text
 Provide a self-contained task report, policy matrix, microbenchmark design,
-literature review, and compact experiment artifact bundle. Full raw AWS logs
-remain in /home/ruoji/github/bpf-opt/experiments.
+literature review, compact experiment artifact bundle, and final completion
+audit. Full raw AWS logs remain in /home/ruoji/github/bpf-opt/experiments.
 ```
 
-## Validation referenced by commits
+## Required validation before push
 
-Commands and results are recorded in:
+At minimum rerun:
+
+```bash
+cd /home/ruoji/github/bpf-opt/code/bpfopt
+cargo test -p bpfopt prefetch
+
+cd /home/ruoji/github/bpf-opt/code
+python3 -m py_compile scripts/prefetch_profile_from_candidates.py
+```
+
+Recent experiment evidence is summarized in:
 
 ```text
 /home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/results.md
 /home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/experiments
 ```
 
-Recent key experiments:
+Key referenced experiments:
 
 - `2026-06-03-prefetch-c7g-pmu-policy-diagnosis`: c7g PMU-backed attribution.
 - `2026-06-04-prefetch-pf-llm-missing-policy-smoke`: x86 correctness / emit smoke.
-- `2026-06-04-prefetch-pf-llm-missing-policy-arm64-attribution`: ARM64 smoke and paired attribution for struct-field, mixed-policy-table, and stream-of-strides.
+- `2026-06-04-prefetch-pf-llm-missing-policy-arm64-attribution`: ARM64 paired attribution for
+  struct-field, mixed-policy-table, and stream-of-strides.
+- `2026-06-04-prefetch-corpus-default-structural-smoke`: first `katran` corpus census and candidate TSV.
+- `2026-06-04-prefetch-corpus-profile-fed-smoke`: real `katran` single-site profile-fed insertion.
+- `2026-06-04-prefetch-corpus-multisite-profile-fed`: real `katran` multi-site profile-fed insertion.
+- `2026-06-04-prefetch-corpus-generated-profile-table`: diagnostics TSV to generated profile smoke.
+- `2026-06-04-prefetch-corpus-tracee-no-diagnostics-rerun`: Tracee overhead fix validation.
+- `2026-06-04-prefetch-corpus-allapps-no-diagnostics-rerun`: all-app corpus runnability status.

@@ -1,0 +1,95 @@
+{
+  "date": "2026-06-04",
+  "experiment": "prefetch-corpus-default-structural-smoke",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "question": "Can the current default structural Kinsn prefetch selector run through AWS ARM64 corpus and does it apply prefetch sites without profile evidence?",
+  "commands": [
+    {
+      "name": "bcc-set-smoke",
+      "cwd": "/home/ruoji/github/bpf-opt",
+      "command": "./aws-config/run.sh arm64 corpus BPFREJIT_CORPUS_APPS=bcc/set BPFREJIT_BENCH_PASSES=prefetch SAMPLES=1 WARMUPS=0 WORKLOAD_DURATION=1"
+    },
+    {
+      "name": "katran-smoke",
+      "cwd": "/home/ruoji/github/bpf-opt",
+      "command": "./aws-config/run.sh arm64 corpus BPFREJIT_CORPUS_APPS=katran BPFREJIT_BENCH_PASSES=prefetch SAMPLES=1 WARMUPS=0 WORKLOAD_DURATION=1"
+    },
+    {
+      "name": "cleanup",
+      "cwd": "/home/ruoji/github/bpf-opt",
+      "command": "./aws-config/run.sh arm64 terminate"
+    },
+    {
+      "name": "katran-config-rerun",
+      "cwd": "/home/ruoji/github/bpf-opt",
+      "command": "./aws-config/run.sh arm64 corpus BPFREJIT_CORPUS_APPS=katran BPFREJIT_BENCH_PASSES=prefetch SAMPLES=1 WARMUPS=0 WORKLOAD_DURATION=1"
+    },
+    {
+      "name": "cleanup-after-config-rerun",
+      "cwd": "/home/ruoji/github/bpf-opt",
+      "command": "./aws-config/run.sh arm64 terminate"
+    }
+  ],
+  "aws": {
+    "arch": "arm64",
+    "region": "us-east-1",
+    "profile": "default",
+    "remote_user": "ec2-user",
+    "instance_type": "t4g.small",
+    "root_volume_gb": 32,
+    "kernel": "7.0.0-rc2+",
+    "container_image": "bpf-benchmark/runner-runtime:arm64",
+    "instances": [
+      {
+        "app": "bcc/set",
+        "instance_id": "i-0a4b2f2720d1fd41a",
+        "launch_time_utc": "2026-06-04T13:09:27+00:00",
+        "terminate_time_utc": "2026-06-04T13:15:40+00:00",
+        "final_state": "terminated"
+      },
+      {
+        "app": "katran",
+        "instance_id": "i-088092f93c692ba19",
+        "launch_time_utc": "2026-06-04T13:17:37+00:00",
+        "terminate_time_utc": "2026-06-04T13:23:47+00:00",
+        "final_state": "terminated"
+      },
+      {
+        "app": "katran-config-rerun",
+        "instance_id": "i-06cf7ae2cc75d225b",
+        "launch_time_utc": "2026-06-04T13:34:42+00:00",
+        "terminate_time_utc": "2026-06-04T13:40:42+00:00",
+        "final_state": "terminated"
+      }
+    ]
+  },
+  "results": {
+    "bcc_set": {
+      "status": "error",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/corpus/results/aws_arm64_corpus_20260604_131517_886998",
+      "cause": "BCC biosnoop failed to attach blk_account_io_start before baseline/ReJIT measurement."
+    },
+    "katran": {
+      "status": "completed",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/corpus/results/aws_arm64_corpus_20260604_132321_206430",
+      "sites_matched": 224,
+      "sites_applied": 0,
+      "sites_skipped": 224,
+      "insn_delta": 0,
+      "skip_summary": {
+        "map_value_requires_profile_or_pmu_evidence": 123,
+        "packet_requires_data_dependent_dereference": 101
+      }
+    },
+    "katran_config_rerun": {
+      "status": "completed",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/corpus/results/aws_arm64_corpus_20260604_134016_122651",
+      "sites_matched": 224,
+      "sites_applied": 0,
+      "sites_skipped": 224,
+      "insn_delta": 0,
+      "command_contains_pass_args_env": true
+    }
+  }
+}

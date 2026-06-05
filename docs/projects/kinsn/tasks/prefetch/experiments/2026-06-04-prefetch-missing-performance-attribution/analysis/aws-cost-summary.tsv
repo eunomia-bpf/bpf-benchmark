@@ -1,0 +1,4 @@
+run	instance_id	instance_type	launch_time_utc	terminate_time_utc	wall_seconds	wall_hours	compute_usd	ebs_usd	final_state
+control	i-0f2e03258733c25ea	c7g.medium	2026-06-05T07:07:33Z	2026-06-05T07:12:56Z	323	0.089722	0.003257	0.000319	terminated
+treatment	i-016339d9796c06e4c	c7g.medium	2026-06-05T07:14:46Z	2026-06-05T07:19:58Z	312	0.086667	0.003146	0.000308	terminated
+total			2026-06-05T07:07:33Z	2026-06-05T07:19:58Z	635	0.176389	0.006403	0.000627	terminated

@@ -1,0 +1,1381 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "83": {
+        "bytes_jited": 14456,
+        "bytes_xlated": 23808,
+        "id": 83,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 1018588,
+        "run_time_ns_delta": 216531290,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 1.0521496579999976,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 9  udp_src_max: 9  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags:\nCurrent:\n     pkts-sofar: 1018588  errors: 0\n     started: 15700006us  stopped: 16651966us idle: 0us\n     seq_num: 1018589  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 9\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 951960(c951960+d0) usec, 1018588 (64byte,-1frags)\n  1069990pps 547Mb/sec (547834880bps) errors: 0",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "84": {
+        "bytes_jited": 14456,
+        "bytes_xlated": 23808,
+        "id": 84,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 1029127,
+        "run_time_ns_delta": 210913912,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 1.1287607259999994,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 9  udp_src_max: 9  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags:\nCurrent:\n     pkts-sofar: 1029127  errors: 0\n     started: 29720044us  stopped: 30670866us idle: 0us\n     seq_num: 1029128  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 9\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 950821(c950821+d0) usec, 1029127 (64byte,-1frags)\n  1082355pps 554Mb/sec (554165760bps) errors: 0",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "83": {
+        "passes": [
+          {
+            "bpfopt_ms": 11296,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=16: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=13 ptr_def_pc=13 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=19: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=13 ptr_def_pc=13 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=367: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=365 ptr_def_pc=365 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=373: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=365 ptr_def_pc=365 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=466: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=464 ptr_def_pc=464 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=472: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=464 ptr_def_pc=464 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=524: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=520 ptr_def_pc=520 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=543: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=541 ptr_def_pc=541 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=548: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=547 ptr_def_pc=547 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=553: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=547 ptr_def_pc=547 mem_off=4 dependent_load_depth=0 hint=default",
+                "site at PC=572: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=570 ptr_def_pc=570 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=594: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=592 ptr_def_pc=592 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=602: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=592 ptr_def_pc=592 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=618: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=616 ptr_def_pc=616 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=624: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=616 ptr_def_pc=616 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=656: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=654 ptr_def_pc=654 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=662: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=654 ptr_def_pc=654 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=775: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=770 ptr_def_pc=770 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=795: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=793 ptr_def_pc=793 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=800: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=799 ptr_def_pc=799 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=805: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=799 ptr_def_pc=799 mem_off=4 dependent_load_depth=0 hint=default",
+                "site at PC=825: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=823 ptr_def_pc=823 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=846: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=844 ptr_def_pc=844 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=853: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=844 ptr_def_pc=844 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=992: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=863 ptr_def_pc=863 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1026: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1025 ptr_def_pc=1025 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1046: prefetch_candidate source=map-value ptr_reg=r2 ptr_root_pc=1043 ptr_def_pc=1043 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1060: prefetch_candidate source=map-value ptr_reg=r7 ptr_root_pc=1057 ptr_def_pc=1057 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1088: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1086 ptr_def_pc=1086 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1092: prefetch_candidate source=map-value ptr_reg=r7 ptr_root_pc=1057 ptr_def_pc=1057 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1117: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1113 ptr_def_pc=1113 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1121: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1113 ptr_def_pc=1113 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1130: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1128 ptr_def_pc=1128 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1134: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1128 ptr_def_pc=1128 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1140: prefetch_candidate source=map-value ptr_reg=r1 ptr_root_pc=1139 ptr_def_pc=1139 mem_off=16 dependent_load_depth=0 hint=default",
+                "site at PC=1159: prefetch_candidate source=map-value ptr_reg=r6 ptr_root_pc=1158 ptr_def_pc=1158 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1160: prefetch_candidate source=map-value ptr_reg=r6 ptr_root_pc=1158 ptr_def_pc=1158 mem_off=1 dependent_load_depth=0 hint=default",
+                "site at PC=1161: prefetch_candidate source=map-value ptr_reg=r6 ptr_root_pc=1158 ptr_def_pc=1158 mem_off=2 dependent_load_depth=0 hint=default",
+                "site at PC=1162: prefetch_candidate source=map-value ptr_reg=r6 ptr_root_pc=1158 ptr_def_pc=1158 mem_off=3 dependent_load_depth=0 hint=default",
+                "site at PC=1163: prefetch_candidate source=map-value ptr_reg=r6 ptr_root_pc=1158 ptr_def_pc=1158 mem_off=4 dependent_load_depth=0 hint=default",
+                "site at PC=1164: prefetch_candidate source=map-value ptr_reg=r6 ptr_root_pc=1158 ptr_def_pc=1158 mem_off=5 dependent_load_depth=0 hint=default",
+                "site at PC=1230: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1229 ptr_def_pc=1229 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1250: prefetch_candidate source=map-value ptr_reg=r7 ptr_root_pc=1247 ptr_def_pc=1247 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1260: prefetch_candidate source=map-value ptr_reg=r7 ptr_root_pc=1247 ptr_def_pc=1247 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1266: prefetch_candidate source=map-value ptr_reg=r1 ptr_root_pc=1265 ptr_def_pc=1265 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1284: prefetch_candidate source=map-value ptr_reg=r1 ptr_root_pc=1283 ptr_def_pc=1283 mem_off=4 dependent_load_depth=0 hint=default",
+                "site at PC=1294: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1292 ptr_def_pc=1292 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1324: prefetch_candidate source=map-value ptr_reg=r1 ptr_root_pc=1323 ptr_def_pc=1323 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1353: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1351 ptr_def_pc=1351 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1356: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1351 ptr_def_pc=1351 mem_off=4 dependent_load_depth=0 hint=default",
+                "site at PC=1359: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1351 ptr_def_pc=1351 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1362: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1351 ptr_def_pc=1351 mem_off=12 dependent_load_depth=0 hint=default",
+                "site at PC=1372: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1351 ptr_def_pc=1351 mem_off=16 dependent_load_depth=0 hint=default",
+                "site at PC=1383: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1381 ptr_def_pc=1381 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1387: prefetch_candidate source=map-value ptr_reg=r1 ptr_root_pc=1386 ptr_def_pc=1386 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1417: prefetch_candidate source=map-value ptr_reg=r7 ptr_root_pc=1416 ptr_def_pc=1416 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1419: prefetch_candidate source=map-value ptr_reg=r7 ptr_root_pc=1416 ptr_def_pc=1416 mem_off=1 dependent_load_depth=0 hint=default",
+                "site at PC=1420: prefetch_candidate source=map-value ptr_reg=r7 ptr_root_pc=1416 ptr_def_pc=1416 mem_off=2 dependent_load_depth=0 hint=default",
+                "site at PC=1421: prefetch_candidate source=map-value ptr_reg=r7 ptr_root_pc=1416 ptr_def_pc=1416 mem_off=3 dependent_load_depth=0 hint=default",
+                "site at PC=1422: prefetch_candidate source=map-value ptr_reg=r7 ptr_root_pc=1416 ptr_def_pc=1416 mem_off=4 dependent_load_depth=0 hint=default",
+                "site at PC=1423: prefetch_candidate source=map-value ptr_reg=r7 ptr_root_pc=1416 ptr_def_pc=1416 mem_off=5 dependent_load_depth=0 hint=default",
+                "site at PC=1448: prefetch_candidate source=map-value ptr_reg=r3 ptr_root_pc=1447 ptr_def_pc=1447 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1516: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1514 ptr_def_pc=1514 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1553: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1550 ptr_def_pc=1550 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1556: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1550 ptr_def_pc=1550 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1563: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=927 ptr_def_pc=927 mem_off=16 dependent_load_depth=0 hint=default",
+                "site at PC=1566: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=927 ptr_def_pc=927 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1575: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1573 ptr_def_pc=1573 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1580: prefetch_candidate source=map-value ptr_reg=r2 ptr_root_pc=1579 ptr_def_pc=1579 mem_off=80 dependent_load_depth=0 hint=default",
+                "site at PC=1584: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=896 ptr_def_pc=896 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1595: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1593 ptr_def_pc=1593 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1638: prefetch_candidate source=map-value ptr_reg=r7 ptr_root_pc=1635 ptr_def_pc=1635 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1661: prefetch_candidate source=map-value ptr_reg=r2 ptr_root_pc=1660 ptr_def_pc=1660 mem_off=88 dependent_load_depth=0 hint=default",
+                "site at PC=1672: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1670 ptr_def_pc=1670 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1694: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1692 ptr_def_pc=1692 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1707: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=896 ptr_def_pc=896 mem_off=16 dependent_load_depth=0 hint=default",
+                "site at PC=1710: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=896 ptr_def_pc=896 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1720: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=1713 ptr_def_pc=1713 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1732: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=1727 ptr_def_pc=1727 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1739: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=1727 ptr_def_pc=1727 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1764: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=1761 ptr_def_pc=1761 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1791: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1789 ptr_def_pc=1789 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1795: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=1761 ptr_def_pc=1761 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1819: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1815 ptr_def_pc=1815 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1822: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1815 ptr_def_pc=1815 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1831: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1829 ptr_def_pc=1829 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1834: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1829 ptr_def_pc=1829 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1840: prefetch_candidate source=map-value ptr_reg=r1 ptr_root_pc=1839 ptr_def_pc=1839 mem_off=16 dependent_load_depth=0 hint=default",
+                "site at PC=1859: prefetch_candidate source=map-value ptr_reg=r6 ptr_root_pc=1858 ptr_def_pc=1858 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1860: prefetch_candidate source=map-value ptr_reg=r6 ptr_root_pc=1858 ptr_def_pc=1858 mem_off=1 dependent_load_depth=0 hint=default",
+                "site at PC=1861: prefetch_candidate source=map-value ptr_reg=r6 ptr_root_pc=1858 ptr_def_pc=1858 mem_off=2 dependent_load_depth=0 hint=default",
+                "site at PC=1862: prefetch_candidate source=map-value ptr_reg=r6 ptr_root_pc=1858 ptr_def_pc=1858 mem_off=3 dependent_load_depth=0 hint=default",
+                "site at PC=1863: prefetch_candidate source=map-value ptr_reg=r6 ptr_root_pc=1858 ptr_def_pc=1858 mem_off=4 dependent_load_depth=0 hint=default",
+                "site at PC=1864: prefetch_candidate source=map-value ptr_reg=r6 ptr_root_pc=1858 ptr_def_pc=1858 mem_off=5 dependent_load_depth=0 hint=default",
+                "site at PC=1936: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1935 ptr_def_pc=1935 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1955: prefetch_candidate source=map-value ptr_reg=r7 ptr_root_pc=1951 ptr_def_pc=1951 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=1964: prefetch_candidate source=map-value ptr_reg=r7 ptr_root_pc=1951 ptr_def_pc=1951 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1971: prefetch_candidate source=map-value ptr_reg=r1 ptr_root_pc=1970 ptr_def_pc=1970 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=1987: prefetch_candidate source=map-value ptr_reg=r1 ptr_root_pc=1986 ptr_def_pc=1986 mem_off=4 dependent_load_depth=0 hint=default",
+                "site at PC=1997: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=1995 ptr_def_pc=1995 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=2035: prefetch_candidate source=map-value ptr_reg=r1 ptr_root_pc=2034 ptr_def_pc=2034 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=2068: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=2062 ptr_def_pc=2062 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=2070: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=2062 ptr_def_pc=2062 mem_off=16 dependent_load_depth=0 hint=default",
+                "site at PC=2081: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=2079 ptr_def_pc=2079 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=2085: prefetch_candidate source=map-value ptr_reg=r1 ptr_root_pc=2084 ptr_def_pc=2084 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=2114: prefetch_candidate source=map-value ptr_reg=r3 ptr_root_pc=2113 ptr_def_pc=2113 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=2116: prefetch_candidate source=map-value ptr_reg=r3 ptr_root_pc=2113 ptr_def_pc=2113 mem_off=1 dependent_load_depth=0 hint=default",
+                "site at PC=2118: prefetch_candidate source=map-value ptr_reg=r3 ptr_root_pc=2113 ptr_def_pc=2113 mem_off=2 dependent_load_depth=0 hint=default",
+                "site at PC=2119: prefetch_candidate source=map-value ptr_reg=r3 ptr_root_pc=2113 ptr_def_pc=2113 mem_off=3 dependent_load_depth=0 hint=default",
+                "site at PC=2120: prefetch_candidate source=map-value ptr_reg=r3 ptr_root_pc=2113 ptr_def_pc=2113 mem_off=4 dependent_load_depth=0 hint=default",
+                "site at PC=2121: prefetch_candidate source=map-value ptr_reg=r3 ptr_root_pc=2113 ptr_def_pc=2113 mem_off=5 dependent_load_depth=0 hint=default",
+                "site at PC=2147: prefetch_candidate source=map-value ptr_reg=r3 ptr_root_pc=2146 ptr_def_pc=2146 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=2234: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=2232 ptr_def_pc=2232 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=2238: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=896 ptr_def_pc=896 mem_off=80 dependent_load_depth=0 hint=default",
+                "site at PC=2242: prefetch_candidate source=map-value ptr_reg=r7 ptr_root_pc=1635 ptr_def_pc=1635 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=2248: prefetch_candidate source=map-value ptr_reg=r2 ptr_root_pc=2247 ptr_def_pc=2247 mem_off=96 dependent_load_depth=0 hint=default",
+                "site at PC=2251: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=927 ptr_def_pc=927 mem_off=32 dependent_load_depth=0 hint=default",
+                "site at PC=2267: prefetch_candidate source=map-value ptr_reg=r7 ptr_root_pc=2264 ptr_def_pc=2264 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=2289: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=896 ptr_def_pc=896 mem_off=88 dependent_load_depth=0 hint=default",
+                "site at PC=2300: prefetch_candidate source=map-value ptr_reg=r0 ptr_root_pc=2298 ptr_def_pc=2298 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=2304: prefetch_candidate source=map-value ptr_reg=r7 ptr_root_pc=2264 ptr_def_pc=2264 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=2309: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=896 ptr_def_pc=896 mem_off=96 dependent_load_depth=0 hint=default",
+                "site at PC=2312: prefetch_candidate source=map-value ptr_reg=r8 ptr_root_pc=896 ptr_def_pc=896 mem_off=32 dependent_load_depth=0 hint=default",
+                "site at PC=22: prefetch_candidate source=packet ptr_reg=r8 ptr_root_pc=2 ptr_def_pc=2 mem_off=12 dependent_load_depth=0 hint=default",
+                "site at PC=23: prefetch_candidate source=packet ptr_reg=r8 ptr_root_pc=2 ptr_def_pc=2 mem_off=13 dependent_load_depth=0 hint=default",
+                "site at PC=46: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=14 dependent_load_depth=0 hint=default",
+                "site at PC=49: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=15 dependent_load_depth=0 hint=default",
+                "site at PC=51: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=23 dependent_load_depth=0 hint=default",
+                "site at PC=53: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=20 dependent_load_depth=0 hint=default",
+                "site at PC=57: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=16 dependent_load_depth=0 hint=default",
+                "site at PC=59: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=26 dependent_load_depth=0 hint=default",
+                "site at PC=61: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=30 dependent_load_depth=0 hint=default",
+                "site at PC=69: prefetch_candidate source=packet ptr_reg=r3 ptr_root_pc=30 ptr_def_pc=43 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=169: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=20 dependent_load_depth=0 hint=default",
+                "site at PC=171: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=14 dependent_load_depth=0 hint=default",
+                "site at PC=174: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=15 dependent_load_depth=0 hint=default",
+                "site at PC=179: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=18 dependent_load_depth=0 hint=default",
+                "site at PC=182: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=34 dependent_load_depth=0 hint=default",
+                "site at PC=184: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=30 dependent_load_depth=0 hint=default",
+                "site at PC=187: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=26 dependent_load_depth=0 hint=default",
+                "site at PC=189: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=22 dependent_load_depth=0 hint=default",
+                "site at PC=192: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=50 dependent_load_depth=0 hint=default",
+                "site at PC=194: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=46 dependent_load_depth=0 hint=default",
+                "site at PC=197: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=38 dependent_load_depth=0 hint=default",
+                "site at PC=198: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=42 dependent_load_depth=0 hint=default",
+                "site at PC=209: prefetch_candidate source=packet ptr_reg=r3 ptr_root_pc=153 ptr_def_pc=166 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=215: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=26 dependent_load_depth=0 hint=default",
+                "site at PC=216: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=30 dependent_load_depth=0 hint=default",
+                "site at PC=218: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=16 dependent_load_depth=0 hint=default",
+                "site at PC=219: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=14 dependent_load_depth=0 hint=default",
+                "site at PC=221: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=18 dependent_load_depth=0 hint=default",
+                "site at PC=224: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=20 dependent_load_depth=0 hint=default",
+                "site at PC=226: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=22 dependent_load_depth=0 hint=default",
+                "site at PC=228: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=26 dependent_load_depth=0 hint=default",
+                "site at PC=230: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=28 dependent_load_depth=0 hint=default",
+                "site at PC=232: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=30 dependent_load_depth=0 hint=default",
+                "site at PC=234: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=32 dependent_load_depth=0 hint=default",
+                "site at PC=310: prefetch_candidate source=packet ptr_reg=r3 ptr_root_pc=153 ptr_def_pc=166 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=320: prefetch_candidate source=packet ptr_reg=r3 ptr_root_pc=30 ptr_def_pc=43 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=326: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=26 dependent_load_depth=0 hint=default",
+                "site at PC=327: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=30 dependent_load_depth=0 hint=default",
+                "site at PC=329: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=14 dependent_load_depth=0 hint=default",
+                "site at PC=331: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=18 dependent_load_depth=0 hint=default",
+                "site at PC=335: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=22 dependent_load_depth=0 hint=default",
+                "site at PC=337: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=26 dependent_load_depth=0 hint=default",
+                "site at PC=339: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=28 dependent_load_depth=0 hint=default",
+                "site at PC=341: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=30 dependent_load_depth=0 hint=default",
+                "site at PC=343: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=32 dependent_load_depth=0 hint=default",
+                "site at PC=370: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=58 dependent_load_depth=0 hint=default",
+                "site at PC=381: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=68 dependent_load_depth=0 hint=default",
+                "site at PC=386: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=90 dependent_load_depth=0 hint=default",
+                "site at PC=388: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=86 dependent_load_depth=0 hint=default",
+                "site at PC=391: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=98 dependent_load_depth=0 hint=default",
+                "site at PC=393: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=94 dependent_load_depth=0 hint=default",
+                "site at PC=396: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=74 dependent_load_depth=0 hint=default",
+                "site at PC=398: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=70 dependent_load_depth=0 hint=default",
+                "site at PC=401: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=78 dependent_load_depth=0 hint=default",
+                "site at PC=402: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=82 dependent_load_depth=0 hint=default",
+                "site at PC=422: prefetch_candidate source=packet ptr_reg=r4 ptr_root_pc=153 ptr_def_pc=415 mem_off=12 dependent_load_depth=0 hint=default",
+                "site at PC=428: prefetch_candidate source=packet ptr_reg=r4 ptr_root_pc=153 ptr_def_pc=415 mem_off=12 dependent_load_depth=0 hint=default",
+                "site at PC=434: prefetch_candidate source=packet ptr_reg=r4 ptr_root_pc=153 ptr_def_pc=415 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=436: prefetch_candidate source=packet ptr_reg=r4 ptr_root_pc=153 ptr_def_pc=415 mem_off=2 dependent_load_depth=0 hint=default",
+                "site at PC=450: prefetch_candidate source=packet ptr_reg=r3 ptr_root_pc=153 ptr_def_pc=443 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=452: prefetch_candidate source=packet ptr_reg=r3 ptr_root_pc=153 ptr_def_pc=443 mem_off=2 dependent_load_depth=0 hint=default",
+                "site at PC=454: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=55 dependent_load_depth=0 hint=default",
+                "site at PC=469: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=60 dependent_load_depth=0 hint=default",
+                "site at PC=484: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=71 dependent_load_depth=0 hint=default",
+                "site at PC=489: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=78 dependent_load_depth=0 hint=default",
+                "site at PC=491: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=74 dependent_load_depth=0 hint=default",
+                "site at PC=494: prefetch_candidate source=packet ptr_reg=r4 ptr_root_pc=153 ptr_def_pc=415 mem_off=2 dependent_load_depth=0 hint=default",
+                "site at PC=496: prefetch_candidate source=packet ptr_reg=r4 ptr_root_pc=153 ptr_def_pc=415 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=498: prefetch_candidate source=packet ptr_reg=r3 ptr_root_pc=153 ptr_def_pc=443 mem_off=2 dependent_load_depth=0 hint=default",
+                "site at PC=500: prefetch_candidate source=packet ptr_reg=r3 ptr_root_pc=153 ptr_def_pc=443 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=597: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=153 mem_off=55 dependent_load_depth=0 hint=default",
+                "site at PC=606: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=35 dependent_load_depth=0 hint=default",
+                "site at PC=621: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=40 dependent_load_depth=0 hint=default",
+                "site at PC=637: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=51 dependent_load_depth=0 hint=default",
+                "site at PC=642: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=58 dependent_load_depth=0 hint=default",
+                "site at PC=644: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=54 dependent_load_depth=0 hint=default",
+                "site at PC=659: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=38 dependent_load_depth=0 hint=default",
+                "site at PC=673: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=48 dependent_load_depth=0 hint=default",
+                "site at PC=678: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=78 dependent_load_depth=0 hint=default",
+                "site at PC=680: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=74 dependent_load_depth=0 hint=default",
+                "site at PC=683: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=70 dependent_load_depth=0 hint=default",
+                "site at PC=685: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=66 dependent_load_depth=0 hint=default",
+                "site at PC=688: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=58 dependent_load_depth=0 hint=default",
+                "site at PC=690: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=62 dependent_load_depth=0 hint=default",
+                "site at PC=692: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=50 dependent_load_depth=0 hint=default",
+                "site at PC=694: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=54 dependent_load_depth=0 hint=default",
+                "site at PC=713: prefetch_candidate source=packet ptr_reg=r4 ptr_root_pc=30 ptr_def_pc=706 mem_off=12 dependent_load_depth=0 hint=default",
+                "site at PC=719: prefetch_candidate source=packet ptr_reg=r4 ptr_root_pc=30 ptr_def_pc=706 mem_off=12 dependent_load_depth=0 hint=default",
+                "site at PC=726: prefetch_candidate source=packet ptr_reg=r4 ptr_root_pc=30 ptr_def_pc=706 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=728: prefetch_candidate source=packet ptr_reg=r4 ptr_root_pc=30 ptr_def_pc=706 mem_off=2 dependent_load_depth=0 hint=default",
+                "site at PC=742: prefetch_candidate source=packet ptr_reg=r3 ptr_root_pc=30 ptr_def_pc=735 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=744: prefetch_candidate source=packet ptr_reg=r3 ptr_root_pc=30 ptr_def_pc=735 mem_off=2 dependent_load_depth=0 hint=default",
+                "site at PC=746: prefetch_candidate source=packet ptr_reg=r4 ptr_root_pc=30 ptr_def_pc=706 mem_off=2 dependent_load_depth=0 hint=default",
+                "site at PC=748: prefetch_candidate source=packet ptr_reg=r4 ptr_root_pc=30 ptr_def_pc=706 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=750: prefetch_candidate source=packet ptr_reg=r3 ptr_root_pc=30 ptr_def_pc=735 mem_off=2 dependent_load_depth=0 hint=default",
+                "site at PC=752: prefetch_candidate source=packet ptr_reg=r3 ptr_root_pc=30 ptr_def_pc=735 mem_off=0 dependent_load_depth=0 hint=default",
+                "site at PC=849: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=30 mem_off=35 dependent_load_depth=0 hint=default",
+                "site at PC=875: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=870 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=885: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=153 ptr_def_pc=870 mem_off=13 dependent_load_depth=0 hint=default",
+                "site at PC=908: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=903 mem_off=8 dependent_load_depth=0 hint=default",
+                "site at PC=918: prefetch_candidate source=packet ptr_reg=r7 ptr_root_pc=30 ptr_def_pc=903 mem_off=13 dependent_load_depth=0 hint=default"
+              ],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "prefetch",
+              "sites_applied": 0,
+              "sites_matched": 224,
+              "sites_skipped": 224,
+              "skip_reasons": {
+                "map value prefetch requires profile or PMU evidence for pc 1026": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1046": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1060": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1088": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1092": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1117": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1121": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1130": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1134": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1140": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1159": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1160": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1161": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1162": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1163": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1164": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1230": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1250": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1260": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1266": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1284": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1294": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1324": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1353": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1356": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1359": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1362": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1372": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1383": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1387": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1417": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1419": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1420": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1421": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1422": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1423": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1448": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1516": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1553": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1556": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1563": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1566": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1575": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1580": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1584": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1595": 1,
+                "map value prefetch requires profile or PMU evidence for pc 16": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1638": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1661": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1672": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1694": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1707": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1710": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1720": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1732": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1739": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1764": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1791": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1795": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1819": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1822": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1831": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1834": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1840": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1859": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1860": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1861": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1862": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1863": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1864": 1,
+                "map value prefetch requires profile or PMU evidence for pc 19": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1936": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1955": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1964": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1971": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1987": 1,
+                "map value prefetch requires profile or PMU evidence for pc 1997": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2035": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2068": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2070": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2081": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2085": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2114": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2116": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2118": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2119": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2120": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2121": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2147": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2234": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2238": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2242": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2248": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2251": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2267": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2289": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2300": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2304": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2309": 1,
+                "map value prefetch requires profile or PMU evidence for pc 2312": 1,
+                "map value prefetch requires profile or PMU evidence for pc 367": 1,
+                "map value prefetch requires profile or PMU evidence for pc 373": 1,
+                "map value prefetch requires profile or PMU evidence for pc 466": 1,
+                "map value prefetch requires profile or PMU evidence for pc 472": 1,
+                "map value prefetch requires profile or PMU evidence for pc 524": 1,
+                "map value prefetch requires profile or PMU evidence for pc 543": 1,
+                "map value prefetch requires profile or PMU evidence for pc 548": 1,
+                "map value prefetch requires profile or PMU evidence for pc 553": 1,
+                "map value prefetch requires profile or PMU evidence for pc 572": 1,
+                "map value prefetch requires profile or PMU evidence for pc 594": 1,
+                "map value prefetch requires profile or PMU evidence for pc 602": 1,
+                "map value prefetch requires profile or PMU evidence for pc 618": 1,
+                "map value prefetch requires profile or PMU evidence for pc 624": 1,
+                "map value prefetch requires profile or PMU evidence for pc 656": 1,
+                "map value prefetch requires profile or PMU evidence for pc 662": 1,
+                "map value prefetch requires profile or PMU evidence for pc 775": 1,
+                "map value prefetch requires profile or PMU evidence for pc 795": 1,
+                "map value prefetch requires profile or PMU evidence for pc 800": 1,
+                "map value prefetch requires profile or PMU evidence for pc 805": 1,
+                "map value prefetch requires profile or PMU evidence for pc 825": 1,
+                "map value prefetch requires profile or PMU evidence for pc 846": 1,
+                "map value prefetch requires profile or PMU evidence for pc 853": 1,
+                "map value prefetch requires profile or PMU evidence for pc 992": 1,
+                "packet prefetch requires a data-dependent dereference": 101
+              },
+              "skipped_sites": [
+                {
+                  "pc": 16,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 16"
+                },
+                {
+                  "pc": 19,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 19"
+                },
+                {
+                  "pc": 367,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 367"
+                },
+                {
+                  "pc": 373,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 373"
+                },
+                {
+                  "pc": 466,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 466"
+                },
+                {
+                  "pc": 472,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 472"
+                },
+                {
+                  "pc": 524,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 524"
+                },
+                {
+                  "pc": 543,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 543"
+                },
+                {
+                  "pc": 548,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 548"
+                },
+                {
+                  "pc": 553,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 553"
+                },
+                {
+                  "pc": 572,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 572"
+                },
+                {
+                  "pc": 594,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 594"
+                },
+                {
+                  "pc": 602,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 602"
+                },
+                {
+                  "pc": 618,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 618"
+                },
+                {
+                  "pc": 624,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 624"
+                },
+                {
+                  "pc": 656,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 656"
+                },
+                {
+                  "pc": 662,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 662"
+                },
+                {
+                  "pc": 775,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 775"
+                },
+                {
+                  "pc": 795,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 795"
+                },
+                {
+                  "pc": 800,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 800"
+                },
+                {
+                  "pc": 805,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 805"
+                },
+                {
+                  "pc": 825,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 825"
+                },
+                {
+                  "pc": 846,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 846"
+                },
+                {
+                  "pc": 853,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 853"
+                },
+                {
+                  "pc": 992,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 992"
+                },
+                {
+                  "pc": 1026,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1026"
+                },
+                {
+                  "pc": 1046,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1046"
+                },
+                {
+                  "pc": 1060,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1060"
+                },
+                {
+                  "pc": 1088,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1088"
+                },
+                {
+                  "pc": 1092,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1092"
+                },
+                {
+                  "pc": 1117,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1117"
+                },
+                {
+                  "pc": 1121,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1121"
+                },
+                {
+                  "pc": 1130,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1130"
+                },
+                {
+                  "pc": 1134,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1134"
+                },
+                {
+                  "pc": 1140,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1140"
+                },
+                {
+                  "pc": 1159,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1159"
+                },
+                {
+                  "pc": 1160,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1160"
+                },
+                {
+                  "pc": 1161,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1161"
+                },
+                {
+                  "pc": 1162,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1162"
+                },
+                {
+                  "pc": 1163,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1163"
+                },
+                {
+                  "pc": 1164,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1164"
+                },
+                {
+                  "pc": 1230,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1230"
+                },
+                {
+                  "pc": 1250,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1250"
+                },
+                {
+                  "pc": 1260,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1260"
+                },
+                {
+                  "pc": 1266,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1266"
+                },
+                {
+                  "pc": 1284,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1284"
+                },
+                {
+                  "pc": 1294,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1294"
+                },
+                {
+                  "pc": 1324,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1324"
+                },
+                {
+                  "pc": 1353,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1353"
+                },
+                {
+                  "pc": 1356,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1356"
+                },
+                {
+                  "pc": 1359,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1359"
+                },
+                {
+                  "pc": 1362,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1362"
+                },
+                {
+                  "pc": 1372,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1372"
+                },
+                {
+                  "pc": 1383,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1383"
+                },
+                {
+                  "pc": 1387,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1387"
+                },
+                {
+                  "pc": 1417,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1417"
+                },
+                {
+                  "pc": 1419,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1419"
+                },
+                {
+                  "pc": 1420,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1420"
+                },
+                {
+                  "pc": 1421,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1421"
+                },
+                {
+                  "pc": 1422,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1422"
+                },
+                {
+                  "pc": 1423,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1423"
+                },
+                {
+                  "pc": 1448,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1448"
+                },
+                {
+                  "pc": 1516,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1516"
+                },
+                {
+                  "pc": 1553,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1553"
+                },
+                {
+                  "pc": 1556,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1556"
+                },
+                {
+                  "pc": 1563,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1563"
+                },
+                {
+                  "pc": 1566,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1566"
+                },
+                {
+                  "pc": 1575,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1575"
+                },
+                {
+                  "pc": 1580,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1580"
+                },
+                {
+                  "pc": 1584,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1584"
+                },
+                {
+                  "pc": 1595,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1595"
+                },
+                {
+                  "pc": 1638,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1638"
+                },
+                {
+                  "pc": 1661,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1661"
+                },
+                {
+                  "pc": 1672,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1672"
+                },
+                {
+                  "pc": 1694,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1694"
+                },
+                {
+                  "pc": 1707,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1707"
+                },
+                {
+                  "pc": 1710,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1710"
+                },
+                {
+                  "pc": 1720,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1720"
+                },
+                {
+                  "pc": 1732,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1732"
+                },
+                {
+                  "pc": 1739,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1739"
+                },
+                {
+                  "pc": 1764,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1764"
+                },
+                {
+                  "pc": 1791,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1791"
+                },
+                {
+                  "pc": 1795,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1795"
+                },
+                {
+                  "pc": 1819,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1819"
+                },
+                {
+                  "pc": 1822,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1822"
+                },
+                {
+                  "pc": 1831,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1831"
+                },
+                {
+                  "pc": 1834,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1834"
+                },
+                {
+                  "pc": 1840,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1840"
+                },
+                {
+                  "pc": 1859,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1859"
+                },
+                {
+                  "pc": 1860,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1860"
+                },
+                {
+                  "pc": 1861,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1861"
+                },
+                {
+                  "pc": 1862,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1862"
+                },
+                {
+                  "pc": 1863,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1863"
+                },
+                {
+                  "pc": 1864,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1864"
+                },
+                {
+                  "pc": 1936,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1936"
+                },
+                {
+                  "pc": 1955,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1955"
+                },
+                {
+                  "pc": 1964,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1964"
+                },
+                {
+                  "pc": 1971,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1971"
+                },
+                {
+                  "pc": 1987,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1987"
+                },
+                {
+                  "pc": 1997,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 1997"
+                },
+                {
+                  "pc": 2035,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2035"
+                },
+                {
+                  "pc": 2068,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2068"
+                },
+                {
+                  "pc": 2070,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2070"
+                },
+                {
+                  "pc": 2081,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2081"
+                },
+                {
+                  "pc": 2085,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2085"
+                },
+                {
+                  "pc": 2114,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2114"
+                },
+                {
+                  "pc": 2116,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2116"
+                },
+                {
+                  "pc": 2118,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2118"
+                },
+                {
+                  "pc": 2119,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2119"
+                },
+                {
+                  "pc": 2120,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2120"
+                },
+                {
+                  "pc": 2121,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2121"
+                },
+                {
+                  "pc": 2147,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2147"
+                },
+                {
+                  "pc": 2234,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2234"
+                },
+                {
+                  "pc": 2238,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2238"
+                },
+                {
+                  "pc": 2242,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2242"
+                },
+                {
+                  "pc": 2248,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2248"
+                },
+                {
+                  "pc": 2251,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2251"
+                },
+                {
+                  "pc": 2267,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2267"
+                },
+                {
+                  "pc": 2289,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2289"
+                },
+                {
+                  "pc": 2300,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2300"
+                },
+                {
+                  "pc": 2304,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2304"
+                },
+                {
+                  "pc": 2309,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2309"
+                },
+                {
+                  "pc": 2312,
+                  "reason": "map value prefetch requires profile or PMU evidence for pc 2312"
+                },
+                {
+                  "pc": 22,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 23,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 46,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 49,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 51,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 53,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 57,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 59,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 61,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 69,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 169,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 171,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 174,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 179,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 182,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 184,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 187,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 189,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 192,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 194,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 197,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 198,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 209,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 215,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 216,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 218,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 219,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 221,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 224,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 226,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 228,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 230,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 232,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 234,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 310,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 320,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 326,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 327,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 329,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 331,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 335,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 337,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 339,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 341,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 343,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 370,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 381,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 386,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 388,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 391,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 393,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 396,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 398,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 401,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 402,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 422,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 428,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 434,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 436,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 450,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 452,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 454,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 469,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 484,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 489,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 491,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 494,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 496,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 498,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 500,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 597,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 606,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 621,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 637,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 642,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 644,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 659,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 673,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 678,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 680,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 683,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 685,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 688,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 690,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 692,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 694,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 713,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 719,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 726,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 728,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 742,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 744,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 746,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 748,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 750,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 752,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 849,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 875,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 885,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 908,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                },
+                {
+                  "pc": 918,
+                  "reason": "packet prefetch requires a data-dependent dereference"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 283,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} ${BPFREJIT_BENCH_PASS_ARGS}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          }
+        ],
+        "prog_id": 83,
+        "program": {
+          "final_insn_count": 2542,
+          "orig_insn_count": 2542,
+          "prog_id": 84,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_pktgen",
+  "status": "ok"
+}

@@ -1,0 +1,19 @@
+  a8:	f9000fe4 	str	x4, [sp, #24]
+  ac:	92782c84 	and	x4, x4, #0xfff00
+  b0:	910000e3 	add	x3, x7, #0x0
+  b4:	8b040063 	add	x3, x3, x4
+  b8:	91000061 	add	x1, x3, #0x0
+  bc:	91000073 	add	x19, x3, #0x0
+  c0:	91010273 	add	x19, x19, #0x40
+  c4:	91020063 	add	x3, x3, #0x80
+  c8:	f9800020 	prfm	pldl1keep, [x1]
+  cc:	f9800060 	prfm	pldl1keep, [x3]
+  d0:	f9800260 	prfm	pldl1keep, [x19]
+  d4:	f9400fe3 	ldr	x3, [sp, #24]
+  d8:	12923fea 	mov	w10, #0xffff6e00            	// #-37376
+  dc:	0b0a0063 	add	w3, w3, w10
+  e0:	92782c63 	and	x3, x3, #0xfff00
+  e4:	d379e084 	lsl	x4, x4, #7
+  e8:	91000061 	add	x1, x3, #0x0
+  ec:	d3638821 	lsl	x1, x1, #29
+  f0:	aa010084 	orr	x4, x4, x1

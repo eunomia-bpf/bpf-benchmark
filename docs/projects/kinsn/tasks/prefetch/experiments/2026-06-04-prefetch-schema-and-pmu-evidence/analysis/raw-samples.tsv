@@ -1,0 +1,19 @@
+case	variant	bench	sample_index	exec_ns	cycles	instructions	cache_references	cache_misses	branch_misses	branches	task_clock_ns	native_code_bytes	bpf_bytecode_bytes	perf_collected	perf_error
+struct-field	control	prefetch_struct_field_fixed_offsets	0	16548	195514772	880621021	72883246	371431	3907	3037637	165669873	1688	2792	True	
+struct-field	control	prefetch_struct_field_fixed_offsets	1	16543	195297329	881479792	72744549	364645	3910	3038686	165554751	1688	2792	True	
+struct-field	control	prefetch_struct_field_fixed_offsets	2	16394	191412066	889413668	71438372	350705	4918	3068346	164102984	1688	2792	True	
+struct-field	treatment	prefetch_struct_field_fixed_offsets	0	16373	191086881	898206411	71239921	59555	3987	3059963	163918627	1704	2840	True	
+struct-field	treatment	prefetch_struct_field_fixed_offsets	1	16209	186795360	907217832	69892073	51522	3966	3125382	162243344	1704	2840	True	
+struct-field	treatment	prefetch_struct_field_fixed_offsets	2	16219	186915133	906635717	69911012	52579	3892	3088008	162340101	1704	2840	True	
+mixed-policy-table	control	prefetch_mixed_policy_table	0	16084	183519487	860950987	47561938	1286552	8499	8877910	161031269	1624	2648	True	
+mixed-policy-table	control	prefetch_mixed_policy_table	1	16083	183381279	861157975	47490746	1278030	7622	8842684	160978328	1624	2648	True	
+mixed-policy-table	control	prefetch_mixed_policy_table	2	16086	183473469	860903673	47520299	1280110	7670	8841237	161013091	1624	2648	True	
+mixed-policy-table	treatment	prefetch_mixed_policy_table	0	15713	180364723	883867870	45133268	12220	5348	9034229	157259203	1624	2664	True	
+mixed-policy-table	treatment	prefetch_mixed_policy_table	1	15732	180426691	882000130	45313514	17135	7726	9034077	157436498	1624	2664	True	
+mixed-policy-table	treatment	prefetch_mixed_policy_table	2	15716	180439748	883373078	45132343	11735	4151	9035714	157306714	1624	2664	True	
+stream-of-strides	control	prefetch_stream_of_strides	0	15325	180369529	908704568	57044555	45609	7421	9275915	153358186	1640	2648	True	
+stream-of-strides	control	prefetch_stream_of_strides	1	15340	180461143	908166428	57204277	48664	7450	9267572	153527626	1640	2648	True	
+stream-of-strides	control	prefetch_stream_of_strides	2	15346	180343259	907445683	57279624	50056	4011	9260753	153583920	1640	2648	True	
+stream-of-strides	treatment	prefetch_stream_of_strides	0	23873	307401648	874965935	67147014	32334	6850	7953090	238838668	1648	2680	True	
+stream-of-strides	treatment	prefetch_stream_of_strides	1	23921	308767325	875518869	67099367	28868	3631	7928286	239356228	1648	2680	True	
+stream-of-strides	treatment	prefetch_stream_of_strides	2	23871	307339809	874812024	67149519	32240	4326	7949978	238823749	1648	2680	True	

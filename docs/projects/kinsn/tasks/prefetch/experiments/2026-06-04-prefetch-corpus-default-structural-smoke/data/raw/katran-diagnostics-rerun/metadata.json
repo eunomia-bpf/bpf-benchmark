@@ -1,0 +1,21 @@
+{
+  "completed_at": "2026-06-04T13:55:57.433688+00:00",
+  "config": {
+    "enabled_passes": [
+      "prefetch"
+    ]
+  },
+  "details_dir": "details",
+  "generated_at": "2026-06-04T13:55:57.433693+00:00",
+  "last_updated_at": "2026-06-04T13:55:57.433688+00:00",
+  "launcher_boot_id": "7d66121d-8d84-4ccc-a547-528351bf842c",
+  "launcher_pid": 2620,
+  "launcher_start_ticks": 1123,
+  "manifest": "/home/ruoji/github/bpf-opt/code/corpus/config/macro_apps.yaml",
+  "run_type": "aws_arm64_corpus",
+  "samples": 1,
+  "started_at": "2026-06-04T13:55:34.131778+00:00",
+  "status": "completed",
+  "suite": "corpus",
+  "workload_seconds": 1.0
+}

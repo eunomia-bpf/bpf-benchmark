@@ -1,0 +1,9 @@
+{
+  "name": "prefetch-corpus-allapps-default-census",
+  "date": "2026-06-04",
+  "platform": "aws",
+  "arch": "arm64",
+  "instance_type": "t4g.small",
+  "status": "interrupted_no_result_sync",
+  "command": "./aws-config/run.sh arm64 corpus RUN_TOKEN=prefetch-corpus-allapps-default-census BPFREJIT_CORPUS_APPS=otelcol-ebpf-profiler/profiling,cilium/agent,tetragon/observer,katran,katran/wrk,tracee/monitor,bpftrace/set BPFREJIT_BENCH_PASSES=prefetch SAMPLES=1 WARMUPS=0 WORKLOAD_DURATION=1"
+}

@@ -1,0 +1,13 @@
+  a0:	1400013f 	b	0x59c
+  a4:	b9000be1 	str	w1, [sp, #8]
+  a8:	f94003e7 	ldr	x7, [sp]
+  ac:	910000e1 	add	x1, x7, #0x0
+  b0:	8b040021 	add	x1, x1, x4
+  b4:	f9800020 	prfm	pldl1keep, [x1]
+  b8:	394100e1 	ldrb	w1, [x7, #64]
+  bc:	394104f4 	ldrb	w20, [x7, #65]
+  c0:	d378de94 	lsl	x20, x20, #8
+  c4:	aa010294 	orr	x20, x20, x1
+  c8:	d37df000 	lsl	x0, x0, #3
+  cc:	91000263 	add	x3, x19, #0x0
+  d0:	8b000063 	add	x3, x3, x0

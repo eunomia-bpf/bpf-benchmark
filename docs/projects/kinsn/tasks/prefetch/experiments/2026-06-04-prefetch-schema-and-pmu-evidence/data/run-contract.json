@@ -1,0 +1,65 @@
+{
+  "date": "2026-06-04",
+  "experiment": "prefetch-schema-and-pmu-evidence",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "platform": "aws",
+  "arch": "arm64",
+  "instance_type": "c7g.large",
+  "region": "us-east-1",
+  "suite": "micro",
+  "common_env": {
+    "PERF_COUNTERS": "1",
+    "PERF_SCOPE": "full_repeat_raw",
+    "CPU": "0",
+    "RUNTIMES": "kernel",
+    "SAMPLES": "3",
+    "WARMUPS": "1",
+    "INNER_REPEAT": "10000",
+    "AWS_ARM64_BENCH_INSTANCE_TYPE": "c7g.large"
+  },
+  "control_runs": [
+    {
+      "run_token": "prefetch-struct-c7g2-control",
+      "bench": "prefetch_struct_field_fixed_offsets",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260604_121254_662142"
+    },
+    {
+      "run_token": "prefetch-mixed-c7g2-control",
+      "bench": "prefetch_mixed_policy_table",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260604_122548_663006"
+    },
+    {
+      "run_token": "prefetch-stream-c7g2-control",
+      "bench": "prefetch_stream_of_strides",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260604_123959_864948"
+    }
+  ],
+  "treatment_runs": [
+    {
+      "run_token": "prefetch-struct-c7g2-treatment",
+      "bench": "prefetch_struct_field_fixed_offsets",
+      "profile": "/home/ruoji/github/bpf-opt/code/micro/config/prefetch-struct-field-fixed-offsets-profile-pc29-r2-r6-r4.json",
+      "pass_args": "--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-struct-field-fixed-offsets-profile-pc29-r2-r6-r4.json --max-sites=3 --hint=pldl1keep",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260604_121851_379231"
+    },
+    {
+      "run_token": "prefetch-mixed-c7g2-treatment",
+      "bench": "prefetch_mixed_policy_table",
+      "profile": "/home/ruoji/github/bpf-opt/code/micro/config/prefetch-mixed-policy-table-profile-pc23-r2.json",
+      "pass_args": "--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-mixed-policy-table-profile-pc23-r2.json --max-sites=1 --hint=pldl1keep",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260604_123246_004133"
+    },
+    {
+      "run_token": "prefetch-stream-c7g2-treatment",
+      "bench": "prefetch_stream_of_strides",
+      "profile": "/home/ruoji/github/bpf-opt/code/micro/config/prefetch-stream-of-strides-profile-pc316-r2-r9.json",
+      "pass_args": "--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-stream-of-strides-profile-pc316-r2-r9.json --max-sites=2 --hint=pldl1keep",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260604_124601_021206"
+    }
+  ],
+  "local_verification": [
+    "cd /home/ruoji/github/bpf-opt/code/bpfopt && cargo fmt -p bpfopt",
+    "cd /home/ruoji/github/bpf-opt/code/bpfopt && cargo test -p bpfopt prefetch"
+  ]
+}

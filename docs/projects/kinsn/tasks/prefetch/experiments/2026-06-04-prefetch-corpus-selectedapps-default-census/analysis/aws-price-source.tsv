@@ -1,0 +1,4 @@
+item	region	price	unit	source
+EC2 t4g.small Linux On-Demand	us-east-1	0.0168000000	USD/hour	AWS Price List API value reused from prior 2026-05-29/2026-06-04 project experiments
+EBS gp3 root volume	us-east-1	0.0800000000	USD/GB-month	AWS Price List API value reused from prior 2026-05-29/2026-06-04 project experiments
+root volume size	us-east-1	32	GB	aws-config AWS_ARM64_ROOT_VOLUME_GB

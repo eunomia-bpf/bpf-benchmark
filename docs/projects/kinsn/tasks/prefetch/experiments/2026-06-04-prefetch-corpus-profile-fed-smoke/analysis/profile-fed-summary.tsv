@@ -1,0 +1,4 @@
+run	result_dir	app_status	app_error	program_id	pass_status	pass_error	sites_matched	sites_applied	sites_skipped	insn_delta	diagnostics_count
+rerun1-arg-forwarding-failure	aws_arm64_corpus_20260604_141520_133795	ok		82	failed_bpfopt	error: unexpected argument '--profile' found    tip: to pass '--profile' as a value, use '-- --profile'  Usage: bpfopt --pass <NAME> --input <FILE> --output <FILE> --report <FILE> --prog-type <TYPE> --target <FILE> [-- [PASS_ARGS]...]  For more information, try '--help'. 					0
+rerun2-profile-path-failure	aws_arm64_corpus_20260604_142320_617549	ok		85	failed_bpfopt	error: failed to read /home/ruoji/github/bpf-opt/code/docs/projects/kinsn/tasks/prefetch/experiments/2026-06-04-prefetch-corpus-profile-fed-smoke/data/katran-profile-pc16-r0.json: No such file or directory (os error 2) 					0
+rerun3-profile-fed-success	aws_arm64_corpus_20260604_143121_259823	ok		79	ok		225	1	224	2	225

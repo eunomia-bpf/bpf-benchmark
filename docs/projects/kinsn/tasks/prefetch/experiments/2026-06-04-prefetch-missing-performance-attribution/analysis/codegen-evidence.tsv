@@ -1,0 +1,2 @@
+benchmark	sites_matched	sites_applied	sites_skipped	insn_delta	control_bpf_bytes	treatment_bpf_bytes	control_native_bytes	treatment_native_bytes	native_hints
+prefetch_stream_of_strides_high_miss	18	2	16	4	2912	2944	1744	1752	prfm pldl1keep [x22]; prfm pldl1keep [x0]

@@ -1,0 +1,4 @@
+case	variant	result_dir	prfm_count_sample00	prfm_lines_sample00
+struct-field	treatment	/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260604_121851_379231	3	c8:	f9800020 	prfm	pldl1keep, [x1] | cc:	f9800060 	prfm	pldl1keep, [x3] | d0:	f9800260 	prfm	pldl1keep, [x19]
+mixed-policy-table	treatment	/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260604_123246_004133	1	b4:	f9800020 	prfm	pldl1keep, [x1]
+stream-of-strides	treatment	/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260604_124601_021206	2	618:	f98002c0 	prfm	pldl1keep, [x22] | 61c:	f9800020 	prfm	pldl1keep, [x1]

@@ -6,7 +6,7 @@
 
 - P18 hint variant：x86 `prefetchnta/prefetcht0/prefetcht1/prefetcht2` 和 ARM64
   `prfm pldl1keep/pldl1strm/pldl2keep/pldl2strm` ABI/native emit 已打通。
-- P20 true degree：新增 `prefetch_pipeline_degree_page_stride`，在同一 logical site 对
+- P20 degree parameter：新增 `prefetch_pipeline_degree_page_stride`，在同一 logical site 对
   `i+1/i+2/i+4` 三个 future map-value pointer 发 prefetch。
 - P21 horizon sweep：新增 `prefetch_pipeline_horizon1/2/4_page_stride`，分别提前 1/2/4
   个 logical step 预取 future pointer。
@@ -358,9 +358,9 @@ timing positive/negative + native hint emitted + code size changed + PMU cache c
 
 发现和处理：
 
-- 旧 report 只覆盖 hint smoke，仍把 true degree/horizon 写成未完成。已更新为 degree/horizon 第一轮
+- 旧 report 只覆盖 hint smoke，仍把 degree/horizon 参数写成未完成。已更新为 degree/horizon 第一轮
   attribution 已完成。
-- 旧文档容易把 `--max-sites` 误读为 true degree。已明确：本轮 true degree 是多个 future addresses，
+- 旧文档容易把 `--max-sites` 误读为 degree 参数。已明确：本轮 degree 参数是多个 future addresses，
   不是 site budget。
 - 旧文档没有把新 micro case 标清楚。已在本 report 的 Micro benchmark 说明里全部标注为新增
   `synthetic-control`。

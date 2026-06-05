@@ -1,0 +1,16 @@
+ 5f8:	f2cb05a0 	movk	x0, #0x582d, lsl #32
+ 5fc:	f2ad4700 	movk	x0, #0x6a38, lsl #16
+ 600:	f28591a0 	movk	x0, #0x2c8d
+ 604:	ca0002b5 	eor	x21, x21, x0
+ 608:	f90027e2 	str	x2, [sp, #72]
+ 60c:	91000040 	add	x0, x2, #0x0
+ 610:	92741c00 	and	x0, x0, #0xff000
+ 614:	8b0002d6 	add	x22, x22, x0
+ 618:	f98002c0 	prfm	pldl1keep, [x22]
+ 61c:	f9800020 	prfm	pldl1keep, [x1]
+ 620:	f90013f6 	str	x22, [sp, #32]
+ 624:	910004e7 	add	x7, x7, #0x1
+ 628:	52800020 	mov	w0, #0x1                   	// #1
+ 62c:	f9001be7 	str	x7, [sp, #48]
+ 630:	f10000ff 	cmp	x7, #0x0
+ 634:	54ffd3e0 	b.eq	0xb0  // b.none

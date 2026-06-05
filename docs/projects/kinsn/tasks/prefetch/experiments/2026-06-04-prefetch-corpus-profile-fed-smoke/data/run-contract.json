@@ -1,0 +1,47 @@
+{
+  "date": "2026-06-04",
+  "experiment": "prefetch-corpus-profile-fed-smoke",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "platform": "aws",
+  "arch": "arm64",
+  "suite": "corpus",
+  "instance_type": "t4g.small",
+  "region": "us-east-1",
+  "app": "katran",
+  "pass": "prefetch",
+  "purpose": "Verify that a real katran candidate exported by default structural census can be fed back through a profile table and applied by bpfopt in the AWS corpus runner.",
+  "runs": [
+    {
+      "name": "initial-local-token-failure",
+      "status": "failed_before_aws",
+      "reason": "RUN_TOKEN was missing.",
+      "log": "/home/ruoji/github/bpf-opt/experiments/2026-06-04-prefetch-corpus-profile-fed-smoke/data/aws-arm64-corpus-katran-profile-fed-smoke.log"
+    },
+    {
+      "name": "rerun1-arg-forwarding-failure",
+      "run_token": "prefetch-corpus-profile-fed",
+      "status": "failed_bpfopt",
+      "reason": "BPFREJIT_BENCH_PASS_ARGS did not include '--' before pass args, so bpfopt parsed --profile as a top-level argument.",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/corpus/results/aws_arm64_corpus_20260604_141520_133795"
+    },
+    {
+      "name": "rerun2-profile-path-failure",
+      "run_token": "prefetch-corpus-profile-fed-rerun2",
+      "status": "failed_bpfopt",
+      "reason": "Profile was stored under code/docs, which is not copied into the runner image.",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/corpus/results/aws_arm64_corpus_20260604_142320_617549"
+    },
+    {
+      "name": "rerun3-profile-fed-success",
+      "run_token": "prefetch-corpus-profile-fed-rerun3",
+      "status": "ok",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/corpus/results/aws_arm64_corpus_20260604_143121_259823",
+      "profile": "/home/ruoji/github/bpf-opt/code/corpus/config/prefetch/katran-profile-pc16-r0.json",
+      "sites_matched": 225,
+      "sites_applied": 1,
+      "sites_skipped": 224,
+      "insn_delta": 2
+    }
+  ]
+}

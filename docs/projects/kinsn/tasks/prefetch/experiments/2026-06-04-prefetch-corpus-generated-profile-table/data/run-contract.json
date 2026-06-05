@@ -1,0 +1,26 @@
+{
+  "experiment": "2026-06-04-prefetch-corpus-generated-profile-table",
+  "question": "Can a diagnostics TSV be converted into a prefetch profile JSON and consumed by the corpus pipeline to apply multiple profile-fed map-value prefetch sites?",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "generator": "/home/ruoji/github/bpf-opt/code/scripts/prefetch_profile_from_candidates.py",
+  "candidate_tsv": "/home/ruoji/github/bpf-opt/experiments/2026-06-04-prefetch-corpus-default-structural-smoke/analysis/katran-diagnostics-candidates.tsv",
+  "generated_profile": "/home/ruoji/github/bpf-opt/code/corpus/config/prefetch/katran-profile-generated-map-value-top12.json",
+  "validation": [
+    "python3 -m py_compile code/scripts/prefetch_profile_from_candidates.py",
+    "jq '.map_value_policy_points | length' code/corpus/config/prefetch/katran-profile-generated-map-value-top12.json"
+  ],
+  "aws_command": "./aws-config/run.sh arm64 corpus RUN_TOKEN=prefetch-corpus-generated-profile BPFREJIT_CORPUS_APPS=katran BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS=\"-- --profile /home/ruoji/github/bpf-opt/code/corpus/config/prefetch/katran-profile-generated-map-value-top12.json --max-sites=12 --hint=pldl1keep\" SAMPLES=1 WARMUPS=0 WORKLOAD_DURATION=1",
+  "platform": "aws",
+  "arch": "arm64",
+  "instance": {
+    "id": "i-0494ea51138acd8ca",
+    "type": "t4g.small",
+    "region": "us-east-1",
+    "launch_time": "2026-06-04T15:04:26Z",
+    "terminate_time": "2026-06-04T15:10:40Z",
+    "final_state": "terminated"
+  },
+  "result_dir": "/home/ruoji/github/bpf-opt/code/corpus/results/aws_arm64_corpus_20260604_151014_311732",
+  "status": "completed"
+}

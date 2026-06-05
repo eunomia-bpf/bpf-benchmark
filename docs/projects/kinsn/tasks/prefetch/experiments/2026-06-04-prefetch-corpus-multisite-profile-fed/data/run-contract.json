@@ -1,0 +1,13 @@
+{
+  "experiment": "2026-06-04-prefetch-corpus-multisite-profile-fed",
+  "question": "Can a real Katran corpus candidate table drive multi-site profile-fed Kinsn prefetch insertion through the AWS ARM64 corpus runner?",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "command": "./aws-config/run.sh arm64 corpus RUN_TOKEN=prefetch-corpus-profile-fed-multisite BPFREJIT_CORPUS_APPS=katran BPFREJIT_BENCH_PASSES=prefetch BPFREJIT_BENCH_PASS_ARGS='-- --profile /home/ruoji/github/bpf-opt/code/corpus/config/prefetch/katran-profile-multisite-map-value.json --max-sites=12 --hint=pldl1keep' SAMPLES=1 WARMUPS=0 WORKLOAD_DURATION=1",
+  "platform": "aws",
+  "arch": "arm64",
+  "instance_type": "t4g.small",
+  "run_token": "prefetch-corpus-profile-fed-multisite",
+  "result_dir": "/home/ruoji/github/bpf-opt/code/corpus/results/aws_arm64_corpus_20260604_145019_931644",
+  "profile": "/home/ruoji/github/bpf-opt/code/corpus/config/prefetch/katran-profile-multisite-map-value.json"
+}

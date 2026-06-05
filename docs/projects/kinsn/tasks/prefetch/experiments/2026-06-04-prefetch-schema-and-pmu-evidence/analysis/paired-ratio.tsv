@@ -1,0 +1,4 @@
+case	bench	control_mean_exec_ns	treatment_mean_exec_ns	treatment_over_control_exec	speedup_percent	control_mean_cycles	treatment_mean_cycles	treatment_over_control_cycles	control_cache_miss_rate	treatment_cache_miss_rate	cache_miss_rate_delta	control_cv_exec	treatment_cv_exec
+struct-field	prefetch_struct_field_fixed_offsets	16495.000000	16267.000000	0.986178	1.382	194074722.333333	188265791.333333	0.970069	0.005006681	0.000775463	-0.004231218	0.005305	0.005652
+mixed-policy-table	prefetch_mixed_policy_table	16084.333333	15720.333333	0.977369	2.263	183458078.333333	180410387.333333	0.983388	0.026966484	0.000303070	-0.026663413	0.000095	0.000650
+stream-of-strides	prefetch_stream_of_strides	15337.000000	23888.333333	1.557562	-55.756	180391310.333333	307836260.666667	1.706492	0.000841429	0.000463972	-0.000377457	0.000705	0.001185

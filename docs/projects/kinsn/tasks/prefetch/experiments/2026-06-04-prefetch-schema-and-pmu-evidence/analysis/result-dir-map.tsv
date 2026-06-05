@@ -1,0 +1,7 @@
+case	variant	bench	result_dir	bpfopt_passes	bpfopt_pass_args	samples
+struct-field	control	prefetch_struct_field_fixed_offsets	/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260604_121254_662142			3
+struct-field	treatment	prefetch_struct_field_fixed_offsets	/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260604_121851_379231	prefetch	--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-struct-field-fixed-offsets-profile-pc29-r2-r6-r4.json --max-sites=3 --hint=pldl1keep	3
+mixed-policy-table	control	prefetch_mixed_policy_table	/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260604_122548_663006			3
+mixed-policy-table	treatment	prefetch_mixed_policy_table	/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260604_123246_004133	prefetch	--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-mixed-policy-table-profile-pc23-r2.json --max-sites=1 --hint=pldl1keep	3
+stream-of-strides	control	prefetch_stream_of_strides	/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260604_123959_864948			3
+stream-of-strides	treatment	prefetch_stream_of_strides	/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260604_124601_021206	prefetch	--profile /home/ruoji/github/bpf-opt/code/micro/config/prefetch-stream-of-strides-profile-pc316-r2-r9.json --max-sites=2 --hint=pldl1keep	3

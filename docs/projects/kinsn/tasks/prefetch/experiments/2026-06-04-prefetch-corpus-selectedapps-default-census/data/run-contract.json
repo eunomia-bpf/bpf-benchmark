@@ -1,0 +1,10 @@
+{
+  "name": "prefetch-corpus-selectedapps-default-census",
+  "date": "2026-06-04",
+  "platform": "aws",
+  "arch": "arm64",
+  "instance_type": "t4g.small",
+  "status": "completed_with_app_errors",
+  "result_dir": "/home/ruoji/github/bpf-opt/code/corpus/results/aws_arm64_corpus_20260604_155504_082524",
+  "command": "./aws-config/run.sh arm64 corpus RUN_TOKEN=prefetch-corpus-selectedapps-default-census BPFREJIT_CORPUS_APPS=tetragon/observer,katran,katran/wrk,tracee/monitor,bpftrace/set BPFREJIT_BENCH_PASSES=prefetch SAMPLES=1 WARMUPS=0 WORKLOAD_DURATION=1"
+}
