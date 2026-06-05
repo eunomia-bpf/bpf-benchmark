@@ -1,0 +1,24 @@
+{
+  "map_value_policy_points": [
+    {
+      "pc": 24,
+      "reg": 9,
+      "action": "prefetch",
+      "policy": "stream-of-strides-high-miss",
+      "horizon": 4,
+      "degree": 2,
+      "hint": "pldl1keep",
+      "reason": "stream pointer r9 is formed at PC 23 and dereferenced after delay work"
+    },
+    {
+      "pc": 31,
+      "reg": 1,
+      "action": "prefetch",
+      "policy": "stream-of-strides-high-miss",
+      "horizon": 4,
+      "degree": 2,
+      "hint": "pldl1keep",
+      "reason": "stream pointer r1 is formed at PC 30 and dereferenced after delay work"
+    }
+  ]
+}

@@ -68,6 +68,27 @@ static __always_inline u32 prefetch_upper_mlop_offset(u32 index)
     return record * PREFETCH_UPPER_MLOP_RECORD_STRIDE + field;
 }
 
+static __always_inline u32 prefetch_upper_first_deref_key_offset(u32 index)
+{
+    return prefetch_upper_line_offset(index, 64U, 149U);
+}
+
+static __always_inline u32
+prefetch_upper_first_deref_target_offset(u32 index, u32 key)
+{
+    u32 page = ((key * 37U) ^ (index * 131U) ^ (index >> 1)) & 255U;
+    u32 in_page = ((key * 17U) ^ (index * 29U) ^ (key >> 2)) & 504U;
+    return page * PREFETCH_UPPER_PAGE_STRIDE + in_page;
+}
+
+static __always_inline u32 prefetch_upper_stream_page_offset(u32 index,
+                                                            u32 stream)
+{
+    u32 page = ((index * 131U) + (stream * 67U) + (index >> 2)) & 255U;
+    u32 in_page = ((stream * 128U) + ((index * 17U) ^ (stream * 43U))) & 504U;
+    return page * PREFETCH_UPPER_PAGE_STRIDE + in_page;
+}
+
 static __always_inline u64 prefetch_upper_rotmix(u64 acc, u32 index, u32 salt)
 {
     acc ^= ((u64)index << 32) ^ ((u64)salt * 0xA0761D6478BD642FULL);
@@ -460,6 +481,113 @@ bench_prefetch_mlop_index_field(const u8 *data, u64 *out)
 }
 
 static __always_inline int
+bench_prefetch_first_deref_page_stride(const u8 *data, u64 *out)
+{
+    u64 acc = 0x4D3C2B1A99887766ULL;
+
+    _Pragma("clang loop unroll(disable)")
+    for (u32 index = 0; index < PREFETCH_UPPER_ROUNDS; index++) {
+        u32 cur_key_offset = prefetch_upper_first_deref_key_offset(index);
+        u32 future_key_offset =
+            prefetch_upper_first_deref_key_offset(index + 2U);
+        u32 cur_key;
+        u32 future_key;
+        u32 cur_offset;
+        u32 future_offset;
+        const volatile u8 *cur;
+        const volatile u8 *future;
+
+        if (!prefetch_upper_has_bytes(cur_key_offset, 1U) ||
+            !prefetch_upper_has_bytes(future_key_offset, 1U)) {
+            return -1;
+        }
+
+        cur_key = data[cur_key_offset];
+        future_key = data[future_key_offset];
+        cur_offset =
+            prefetch_upper_first_deref_target_offset(index, cur_key);
+        future_offset =
+            prefetch_upper_first_deref_target_offset(index + 2U, future_key);
+        cur = data + cur_offset;
+        future = data + future_offset;
+
+        future = prefetch_upper_ptr_barrier(future);
+
+        if (!prefetch_upper_has_bytes(cur_offset, 8U) ||
+            !prefetch_upper_has_bytes(future_offset, 8U)) {
+            return -1;
+        }
+
+        __asm__ __volatile__("" : "+r"(future));
+
+        acc = prefetch_upper_delay(
+            acc ^ ((u64)future_key << 41) ^ ((u64)future_offset << 9) ^
+                cur_offset,
+            index + 107U);
+        acc = prefetch_upper_mix(acc, prefetch_upper_read_u64_le(cur),
+                                 index ^ cur_key);
+    }
+
+    *out = acc;
+    return 0;
+}
+
+static __always_inline int
+bench_prefetch_future_first_deref_window(const u8 *data, u64 *out)
+{
+    u64 acc = 0x93579BDF2468ACE1ULL;
+
+    _Pragma("clang loop unroll(disable)")
+    for (u32 index = 0; index < PREFETCH_UPPER_ROUNDS; index++) {
+        u32 cur_key_offset = prefetch_upper_first_deref_key_offset(index);
+        u32 future_key_offset =
+            prefetch_upper_first_deref_key_offset(index + 4U);
+        u32 cur_key;
+        u32 future_key;
+        u32 cur_offset;
+        u32 future_offset;
+        const volatile u8 *cur;
+        const volatile u8 *future;
+
+        if (!prefetch_upper_has_bytes(cur_key_offset, 1U) ||
+            !prefetch_upper_has_bytes(future_key_offset, 1U)) {
+            return -1;
+        }
+
+        cur_key = data[cur_key_offset];
+        future_key = data[future_key_offset];
+        cur_offset =
+            prefetch_upper_first_deref_target_offset(index, cur_key);
+        future_offset =
+            prefetch_upper_first_deref_target_offset(index + 4U, future_key);
+        cur = data + cur_offset;
+        future = data + future_offset;
+
+        future = prefetch_upper_ptr_barrier(future);
+
+        if (!prefetch_upper_has_bytes(cur_offset, 8U) ||
+            !prefetch_upper_has_bytes(future_offset, 8U)) {
+            return -1;
+        }
+
+        __asm__ __volatile__("" : "+r"(future));
+
+        acc = prefetch_upper_delay(
+            acc ^ ((u64)future_key << 43) ^ ((u64)future_offset << 11) ^
+                ((u64)cur_key << 3) ^ cur_offset,
+            index + 127U);
+        acc = prefetch_upper_delay(
+            acc ^ ((u64)future_offset << 17) ^ ((u64)cur_offset << 31),
+            index + 131U);
+        acc = prefetch_upper_mix(acc, prefetch_upper_read_u64_le(cur),
+                                 index ^ cur_key ^ future_key);
+    }
+
+    *out = acc;
+    return 0;
+}
+
+static __always_inline int
 bench_prefetch_degree123_page_stride(const u8 *data, u64 *out)
 {
     u64 acc = 0x6C5B4A3928171605ULL;
@@ -494,6 +622,90 @@ bench_prefetch_degree123_page_stride(const u8 *data, u64 *out)
             index + 83U);
         acc = prefetch_upper_mix(acc, prefetch_upper_read_u64_le(cur),
                                  index ^ 0x7bU);
+    }
+
+    *out = acc;
+    return 0;
+}
+
+static __always_inline int
+bench_prefetch_stream_of_strides_degree1_high_miss(const u8 *data, u64 *out)
+{
+    u64 acc = 0x2A4C6E8091B3D5F7ULL;
+
+    _Pragma("clang loop unroll(disable)")
+    for (u32 index = 0; index < PREFETCH_UPPER_ROUNDS; index++) {
+        u32 cur_a_offset = prefetch_upper_stream_page_offset(index, 0U);
+        u32 cur_b_offset = prefetch_upper_stream_page_offset(index, 1U);
+        u32 future_a_offset =
+            prefetch_upper_stream_page_offset(index + 4U, 0U);
+        const volatile u8 *cur_a = data + cur_a_offset;
+        const volatile u8 *cur_b = data + cur_b_offset;
+        const volatile u8 *future_a = data + future_a_offset;
+
+        future_a = prefetch_upper_ptr_barrier(future_a);
+
+        if (!prefetch_upper_has_bytes(cur_a_offset, 8U) ||
+            !prefetch_upper_has_bytes(cur_b_offset, 8U) ||
+            !prefetch_upper_has_bytes(future_a_offset, 8U)) {
+            return -1;
+        }
+
+        __asm__ __volatile__("" : "+r"(future_a));
+
+        acc = prefetch_upper_delay(
+            acc ^ ((u64)future_a_offset << 13) ^ cur_a_offset ^
+                ((u64)cur_b_offset << 39),
+            index + 137U);
+        acc = prefetch_upper_mix(acc, prefetch_upper_read_u64_le(cur_a),
+                                 index ^ 0x6cU);
+        acc = prefetch_upper_mix(acc, prefetch_upper_read_u64_le(cur_b),
+                                 index ^ 0xc6U);
+    }
+
+    *out = acc;
+    return 0;
+}
+
+static __always_inline int
+bench_prefetch_stream_of_strides_high_miss(const u8 *data, u64 *out)
+{
+    u64 acc = 0x7711223344556699ULL;
+
+    _Pragma("clang loop unroll(disable)")
+    for (u32 index = 0; index < PREFETCH_UPPER_ROUNDS; index++) {
+        u32 cur_a_offset = prefetch_upper_stream_page_offset(index, 0U);
+        u32 cur_b_offset = prefetch_upper_stream_page_offset(index, 1U);
+        u32 future_a_offset =
+            prefetch_upper_stream_page_offset(index + 4U, 0U);
+        u32 future_b_offset =
+            prefetch_upper_stream_page_offset(index + 4U, 1U);
+        const volatile u8 *cur_a = data + cur_a_offset;
+        const volatile u8 *cur_b = data + cur_b_offset;
+        const volatile u8 *future_a = data + future_a_offset;
+        const volatile u8 *future_b = data + future_b_offset;
+
+        future_a = prefetch_upper_ptr_barrier(future_a);
+        future_b = prefetch_upper_ptr_barrier(future_b);
+
+        if (!prefetch_upper_has_bytes(cur_a_offset, 8U) ||
+            !prefetch_upper_has_bytes(cur_b_offset, 8U) ||
+            !prefetch_upper_has_bytes(future_a_offset, 8U) ||
+            !prefetch_upper_has_bytes(future_b_offset, 8U)) {
+            return -1;
+        }
+
+        __asm__ __volatile__("" : "+r"(future_a), "+r"(future_b));
+
+        acc = prefetch_upper_delay(
+            acc ^ ((u64)future_a_offset << 11) ^
+                ((u64)future_b_offset << 23) ^ cur_a_offset ^
+                ((u64)cur_b_offset << 37),
+            index + 113U);
+        acc = prefetch_upper_mix(acc, prefetch_upper_read_u64_le(cur_a),
+                                 index ^ 0x5aU);
+        acc = prefetch_upper_mix(acc, prefetch_upper_read_u64_le(cur_b),
+                                 index ^ 0xa5U);
     }
 
     *out = acc;
@@ -642,11 +854,19 @@ DEFINE_PREFETCH_UPPER_XDP_BENCH(prefetch_struct_field_fixed_offsets_xdp,
                                 bench_prefetch_struct_field_fixed_offsets)
 DEFINE_PREFETCH_UPPER_XDP_BENCH(prefetch_mlop_index_field_xdp,
                                 bench_prefetch_mlop_index_field)
+DEFINE_PREFETCH_UPPER_XDP_BENCH(prefetch_first_deref_page_stride_xdp,
+                                bench_prefetch_first_deref_page_stride)
+DEFINE_PREFETCH_UPPER_XDP_BENCH(prefetch_future_first_deref_window_xdp,
+                                bench_prefetch_future_first_deref_window)
 DEFINE_PREFETCH_UPPER_XDP_BENCH(prefetch_degree123_page_stride_xdp,
                                 bench_prefetch_degree123_page_stride)
 DEFINE_PREFETCH_UPPER_XDP_BENCH(prefetch_mixed_policy_table_xdp,
                                 bench_prefetch_mixed_policy_table)
 DEFINE_PREFETCH_UPPER_XDP_BENCH(prefetch_stream_of_strides_xdp,
                                 bench_prefetch_stream_of_strides)
+DEFINE_PREFETCH_UPPER_XDP_BENCH(prefetch_stream_of_strides_degree1_high_miss_xdp,
+                                bench_prefetch_stream_of_strides_degree1_high_miss)
+DEFINE_PREFETCH_UPPER_XDP_BENCH(prefetch_stream_of_strides_high_miss_xdp,
+                                bench_prefetch_stream_of_strides_high_miss)
 
 MICRO_LICENSE_ATTR();

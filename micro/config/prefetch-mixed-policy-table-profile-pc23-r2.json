@@ -1,6 +1,21 @@
 {
   "map_value_policy_points": [
-    { "pc": 23, "reg": 0, "action": "skip" },
-    { "pc": 23, "reg": 2, "action": "prefetch" }
+    {
+      "pc": 23,
+      "reg": 0,
+      "action": "skip",
+      "policy": "negative-filter",
+      "reason": "hot fixed-offset map-value load should not consume a prefetch slot"
+    },
+    {
+      "pc": 23,
+      "reg": 2,
+      "action": "prefetch",
+      "policy": "page-stride-lookahead",
+      "horizon": 2,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "future page-stride pointer selected by per-PC policy table"
+    }
   ]
 }

@@ -1,0 +1,14 @@
+{
+  "map_value_policy_points": [
+    {
+      "pc": 62,
+      "reg": 8,
+      "action": "prefetch",
+      "policy": "future-first-dereference-window",
+      "horizon": 4,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "target pointer is computed from a future first-dereference key; bpfopt candidate diagnostics reported source=map-value ptr_root_pc=43 ptr_def_pc=43 at demand load PC 62"
+    }
+  ]
+}

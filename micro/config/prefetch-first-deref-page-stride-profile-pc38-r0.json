@@ -1,0 +1,14 @@
+{
+  "map_value_policy_points": [
+    {
+      "pc": 38,
+      "reg": 0,
+      "action": "prefetch",
+      "policy": "first-dereference",
+      "horizon": 1,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "target pointer is formed at PC 37 and dereferenced at PC 71 after delay work"
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "map_value_policy_points": [
+    {
+      "pc": 16,
+      "reg": 0,
+      "action": "prefetch",
+      "policy": "corpus-generated-map-value-top12",
+      "horizon": 1,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "generated from prefetch diagnostics candidate: source=map-value ptr_root_pc=13 ptr_def_pc=13 mem_off=8 dependent_load_depth=0"
+    },
+    {
+      "pc": 367,
+      "reg": 0,
+      "action": "prefetch",
+      "policy": "corpus-generated-map-value-top12",
+      "horizon": 1,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "generated from prefetch diagnostics candidate: source=map-value ptr_root_pc=365 ptr_def_pc=365 mem_off=0 dependent_load_depth=0"
+    },
+    {
+      "pc": 466,
+      "reg": 0,
+      "action": "prefetch",
+      "policy": "corpus-generated-map-value-top12",
+      "horizon": 1,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "generated from prefetch diagnostics candidate: source=map-value ptr_root_pc=464 ptr_def_pc=464 mem_off=0 dependent_load_depth=0"
+    },
+    {
+      "pc": 524,
+      "reg": 0,
+      "action": "prefetch",
+      "policy": "corpus-generated-map-value-top12",
+      "horizon": 1,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "generated from prefetch diagnostics candidate: source=map-value ptr_root_pc=520 ptr_def_pc=520 mem_off=0 dependent_load_depth=0"
+    },
+    {
+      "pc": 543,
+      "reg": 0,
+      "action": "prefetch",
+      "policy": "corpus-generated-map-value-top12",
+      "horizon": 1,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "generated from prefetch diagnostics candidate: source=map-value ptr_root_pc=541 ptr_def_pc=541 mem_off=0 dependent_load_depth=0"
+    },
+    {
+      "pc": 548,
+      "reg": 8,
+      "action": "prefetch",
+      "policy": "corpus-generated-map-value-top12",
+      "horizon": 1,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "generated from prefetch diagnostics candidate: source=map-value ptr_root_pc=547 ptr_def_pc=547 mem_off=0 dependent_load_depth=0"
+    },
+    {
+      "pc": 572,
+      "reg": 0,
+      "action": "prefetch",
+      "policy": "corpus-generated-map-value-top12",
+      "horizon": 1,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "generated from prefetch diagnostics candidate: source=map-value ptr_root_pc=570 ptr_def_pc=570 mem_off=0 dependent_load_depth=0"
+    },
+    {
+      "pc": 594,
+      "reg": 0,
+      "action": "prefetch",
+      "policy": "corpus-generated-map-value-top12",
+      "horizon": 1,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "generated from prefetch diagnostics candidate: source=map-value ptr_root_pc=592 ptr_def_pc=592 mem_off=0 dependent_load_depth=0"
+    },
+    {
+      "pc": 618,
+      "reg": 0,
+      "action": "prefetch",
+      "policy": "corpus-generated-map-value-top12",
+      "horizon": 1,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "generated from prefetch diagnostics candidate: source=map-value ptr_root_pc=616 ptr_def_pc=616 mem_off=0 dependent_load_depth=0"
+    },
+    {
+      "pc": 656,
+      "reg": 0,
+      "action": "prefetch",
+      "policy": "corpus-generated-map-value-top12",
+      "horizon": 1,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "generated from prefetch diagnostics candidate: source=map-value ptr_root_pc=654 ptr_def_pc=654 mem_off=0 dependent_load_depth=0"
+    },
+    {
+      "pc": 775,
+      "reg": 0,
+      "action": "prefetch",
+      "policy": "corpus-generated-map-value-top12",
+      "horizon": 1,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "generated from prefetch diagnostics candidate: source=map-value ptr_root_pc=770 ptr_def_pc=770 mem_off=0 dependent_load_depth=0"
+    },
+    {
+      "pc": 795,
+      "reg": 0,
+      "action": "prefetch",
+      "policy": "corpus-generated-map-value-top12",
+      "horizon": 1,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "generated from prefetch diagnostics candidate: source=map-value ptr_root_pc=793 ptr_def_pc=793 mem_off=0 dependent_load_depth=0"
+    }
+  ]
+}

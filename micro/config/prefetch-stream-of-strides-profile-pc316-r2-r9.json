@@ -1,6 +1,24 @@
 {
-  "map_value_prefetch_points": [
-    { "pc": 316, "reg": 2 },
-    { "pc": 316, "reg": 9 }
+  "map_value_policy_points": [
+    {
+      "pc": 316,
+      "reg": 2,
+      "action": "prefetch",
+      "policy": "stream-of-strides",
+      "horizon": 2,
+      "degree": 2,
+      "hint": "pldl1keep",
+      "reason": "future pointer for stream A"
+    },
+    {
+      "pc": 316,
+      "reg": 9,
+      "action": "prefetch",
+      "policy": "stream-of-strides",
+      "horizon": 2,
+      "degree": 2,
+      "hint": "pldl1keep",
+      "reason": "future pointer for stream B"
+    }
   ]
 }

@@ -1,0 +1,14 @@
+{
+  "map_value_policy_points": [
+    {
+      "pc": 24,
+      "reg": 9,
+      "action": "prefetch",
+      "policy": "stream-of-strides-high-miss-degree1",
+      "horizon": 4,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "single-stream subset of the high-miss stream-of-strides candidate; keeps only the PC 24 / r9 site to test whether degree=1 avoids the overhead observed with the two-site profile"
+    }
+  ]
+}

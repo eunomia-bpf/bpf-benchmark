@@ -370,6 +370,26 @@ benchmarks:
     runtimes: [kernel]
     tags: [memory, prefetch, map-working-set, multi-level-offset, synthetic-control, pf-llm-inspired, new-2026-06-03, kernel-only]
 
+  - name: prefetch_first_deref_page_stride
+    base_name: prefetch_upper_bound
+    program_name: prefetch_first_deref_page_stride_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 2504926429313870969
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, first-deref, page-stride, synthetic-control, performance-attribution, pf-llm-inspired, new-2026-06-04, kernel-only]
+
+  - name: prefetch_future_first_deref_window
+    base_name: prefetch_upper_bound
+    program_name: prefetch_future_first_deref_window_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 8156651803109599079
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, first-deref, page-stride, synthetic-control, performance-attribution, pf-llm-inspired, future-window, new-2026-06-05, kernel-only]
+
   - name: prefetch_degree123_page_stride
     base_name: prefetch_upper_bound
     program_name: prefetch_degree123_page_stride_xdp
@@ -399,6 +419,26 @@ benchmarks:
     expected_result: 2202534365130024933
     runtimes: [kernel]
     tags: [memory, prefetch, map-working-set, stream-of-strides, multi-stream, synthetic-control, pf-llm-inspired, new-2026-06-04, kernel-only]
+
+  - name: prefetch_stream_of_strides_degree1_high_miss
+    base_name: prefetch_upper_bound
+    program_name: prefetch_stream_of_strides_degree1_high_miss_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 13095409086813630390
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, stream-of-strides, multi-stream, high-miss, degree-1, synthetic-control, performance-attribution, pf-llm-inspired, new-2026-06-05, kernel-only]
+
+  - name: prefetch_stream_of_strides_high_miss
+    base_name: prefetch_upper_bound
+    program_name: prefetch_stream_of_strides_high_miss_xdp
+    io_mode: map
+    kernel_input_size: 1048576
+    input_generator: prefetch_upper_bound
+    expected_result: 14319676821014525204
+    runtimes: [kernel]
+    tags: [memory, prefetch, map-working-set, stream-of-strides, multi-stream, high-miss, synthetic-control, performance-attribution, pf-llm-inspired, new-2026-06-04, kernel-only]
 
   - name: prefetch_hot_l1_load
     base_name: prefetch_research

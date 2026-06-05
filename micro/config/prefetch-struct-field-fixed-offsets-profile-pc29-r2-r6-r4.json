@@ -1,7 +1,31 @@
 {
-  "map_value_prefetch_points": [
-    { "pc": 29, "reg": 2 },
-    { "pc": 29, "reg": 6 },
-    { "pc": 29, "reg": 4 }
+  "map_value_policy_points": [
+    {
+      "pc": 29,
+      "reg": 2,
+      "action": "prefetch",
+      "policy": "fixed-offset-struct-field",
+      "degree": 3,
+      "hint": "pldl1keep",
+      "reason": "future field 0 in the next record-like access group"
+    },
+    {
+      "pc": 29,
+      "reg": 6,
+      "action": "prefetch",
+      "policy": "fixed-offset-struct-field",
+      "degree": 3,
+      "hint": "pldl1keep",
+      "reason": "future field 64 in the next record-like access group"
+    },
+    {
+      "pc": 29,
+      "reg": 4,
+      "action": "prefetch",
+      "policy": "fixed-offset-struct-field",
+      "degree": 3,
+      "hint": "pldl1keep",
+      "reason": "future field 128 in the next record-like access group"
+    }
   ]
 }

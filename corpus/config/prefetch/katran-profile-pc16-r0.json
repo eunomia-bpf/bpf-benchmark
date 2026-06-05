@@ -1,0 +1,14 @@
+{
+  "map_value_policy_points": [
+    {
+      "pc": 16,
+      "reg": 0,
+      "action": "prefetch",
+      "policy": "corpus-profile-fed-smoke",
+      "horizon": 1,
+      "degree": 1,
+      "hint": "pldl1keep",
+      "reason": "first real katran map-value candidate from candidate diagnostics census; used only to verify profile-fed corpus insertion path"
+    }
+  ]
+}
