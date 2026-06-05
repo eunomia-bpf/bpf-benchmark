@@ -254,8 +254,8 @@ differences.
 ## Per-App Tuned Result
 
 After the full-kinsn corpus run, the best workload-oriented policy among the
-tested full versus no-bulk configurations was to keep the umbrella `kinsn`
-pass but disable `bulk_memory` for Cilium, Katran, and Tracee only:
+tested full versus no-bulk configurations kept the umbrella `kinsn` pass but
+disabled `bulk_memory` for Cilium, Katran, and Tracee only:
 
 ```sh
 bpfopt --pass kinsn ... -- \
@@ -307,6 +307,14 @@ hash-based pairing confirms this is not an occurrence-index pairing artifact.
 The useful claim from the tuned dataset is therefore workload-level for
 Cilium/Katran/Tracee, plus a BPF-counter win for Katran.
 
+A later Cilium LLVM-only follow-up was diagnostic, not better. It disabled
+bytecode recovery for Cilium while keeping the narrow LLVM bulk selector, then
+reran Cilium/Katran/Tracee with `SAMPLES=3 WORKLOAD_DURATION=30` in
+`corpus/results/x86_kvm_corpus_20260605_032129_844272`. That result was lower
+than the no-bulk tuned run: Cilium `1.027x` workload / `0.941x` BPF, Katran
+`1.036x` / `0.953x`, and Tracee `1.001x` / `1.005x`. It should be treated as
+a failed selector-tuning attempt and not used as the reported tuned policy.
+
 ## Discussion
 
 The important corrective result is coverage, not headline speedup. Earlier
@@ -326,6 +334,16 @@ x86 selector default is `movbe-load=disable` in the umbrella mode; this does
 not disable the observed endian `movbe-be` path. `prefetch=0` should be read
 as "enabled but no matched corpus shape," not as a corpus gate.
 
+A default-name coverage audit gives the same answer. The x86/arm64 target list
+contains `49` kinsn names; the authoritative x86 full-corpus reports applied
+`17` x86 names. The x86 names that are enabled but zero in this corpus are
+`bpf_x86_blsiq`, `bpf_x86_blsrq`, `bpf_x86_andl`, `bpf_x86_movbe16`,
+`bpf_x86_movbe64`, `bpf_x86_rolq`, `bpf_x86_popcntq`,
+`bpf_x86_prefetcht0`, `bpf_x86_shldl`, `bpf_x86_shldq`,
+`bpf_x86_shrdl`, and `bpf_x86_shrq`. These are not disabled by benchmark
+policy; the current corpus either has no profitable matched shape for them or
+needs a new selector/dataflow proof before they are worth forcing.
+
 A follow-up no-bulk ablation was used only to guide selector tuning. It added
 a controlled way to disable `bulk_memory` while keeping the single umbrella
 kinsn pass, and it confirmed that `bulk_memory` can dominate regressions in
@@ -338,11 +356,12 @@ regressed. This is not a replacement default policy; it motivates per-app or
 per-program tuning with full-kinsn as the fallback.
 
 The later per-app tuned rerun above keeps that fallback model: full-kinsn stays
-the default, while Cilium, Katran, and Tracee use an app-specific no-bulk
-override because it is the best workload policy among the tested full versus
-no-bulk configurations. The BPF-counter repeatability is weaker than the
-workload signal for Cilium and Tracee, so those apps should be reported as
-workload wins, not BPF-counter wins.
+the default, while Cilium, Katran, and Tracee use app-specific no-bulk
+overrides because that is the best workload policy among the tested full,
+no-bulk, LLVM-only, and scalar-only configurations. The BPF-counter
+repeatability is weaker than the workload signal for Cilium and Tracee, so
+those apps should be reported as workload wins, not BPF-counter wins. The
+LLVM-only follow-up is retained only as a negative tuning result.
 
 The BPF counter result should be read with the tail-call accounting caveat from
 `AGENTS.md`: many tail-called programs report zero own runtime counters, so
@@ -381,6 +400,14 @@ Per-app tuned artifacts:
 | Scope | stats-on artifact | stats-off artifact |
 | --- | --- | --- |
 | `cilium,katran,tracee` no-bulk overrides | `corpus/results/x86_kvm_corpus_20260604_232313_992341` | `corpus/results/x86_kvm_corpus_20260605_004607_636479` |
+
+Negative/diagnostic selector-tuning artifacts:
+
+| Scope | artifact | Notes |
+| --- | --- | --- |
+| `cilium,tracee` LLVM-only exploratory | `corpus/results/x86_kvm_corpus_20260605_030733_001837` | SAMPLES=1, bytecode recovery disabled for both apps |
+| `bcc,cilium,katran,tetragon,tracee` scalar-only exploratory | `corpus/results/x86_kvm_corpus_20260605_024544_394150` | SAMPLES=1, Tetragon failed EINVAL |
+| `cilium,katran,tracee` LLVM-only Cilium repeat | `corpus/results/x86_kvm_corpus_20260605_032129_844272` | SAMPLES=3, 30s; worse than the no-bulk tuned policy |
 
 ## Previous Results
 
