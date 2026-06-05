@@ -145,6 +145,9 @@ struct KinsnPassOptions {
 
 bool bytecode_kinsn_family_enabled(std::string_view pass, std::string_view family,
 				   const BytecodeKinsnPolicy &policy);
+bool target_has_kinsn(const KinsnTargetMap &targets, std::string_view name);
+bool target_is_x86_kinsn_set(const KinsnTargetMap &targets);
+bool target_is_arm64_kinsn_set(const KinsnTargetMap &targets);
 
 std::string llvm_error_string(llvm::Error err)
 {
@@ -544,7 +547,8 @@ std::optional<std::string> default_kinsn_mode_for_pass(std::string_view pass)
 
 std::vector<std::string>
 configure_llvm_kinsn_select(std::string_view pass,
-			    const std::vector<std::string> &llvm_args)
+			    const std::vector<std::string> &llvm_args,
+			    const KinsnTargetMap &kinsn_targets)
 {
 	bool has_kinsn_mode = false;
 	for (const auto &arg : llvm_args) {
@@ -556,7 +560,15 @@ configure_llvm_kinsn_select(std::string_view pass,
 
 	std::vector<std::string> args{ "bpfopt", "-bpf-enable-kinsn-select",
 				       "-bpf-stack-size=4096" };
-	if (!has_kinsn_mode) {
+	const bool arm64_only = target_is_arm64_kinsn_set(kinsn_targets) &&
+				!target_is_x86_kinsn_set(kinsn_targets);
+	if (arm64_only) {
+		if (has_kinsn_mode) {
+			throw std::runtime_error(
+				"explicit LLVM kinsn mode is unsupported for arm64 targets");
+		}
+		args.push_back("-bpf-kinsn-mode=all=disable");
+	} else if (!has_kinsn_mode) {
 		if (const auto mode = default_kinsn_mode_for_pass(pass)) {
 			args.push_back("-bpf-kinsn-mode=" + *mode);
 		} else {
@@ -2226,6 +2238,73 @@ int64_t preserve_shifted_offset_bound_after_guard(std::vector<uint8_t> &bytes)
 
 #include "bpf_kinsn_bytecode.hpp"
 
+std::optional<uint8_t>
+rolw_imm8_dst_at(const std::vector<uint8_t> &bytes, size_t pc,
+		 const std::map<KinsnCallKey, std::string> &kinsn_names)
+{
+	if (pc + 1 >= bytes.size() / INSN_SIZE || !is_kinsn_sidecar(bytes, pc) ||
+	    !is_kinsn_call(bytes, pc + 1)) {
+		return std::nullopt;
+	}
+	const KinsnCallKey key{ read_off(bytes, pc + 1),
+				read_imm(bytes, pc + 1) };
+	const auto name = kinsn_names.find(key);
+	if (name == kinsn_names.end() || name->second != "bpf_x86_rolw") {
+		return std::nullopt;
+	}
+	const uint64_t payload =
+		decode_kinsn_payload(read_kinsn_sidecar_payload(bytes, pc));
+	if ((payload & 0xf) != X86_FORM_IMM || ((payload >> 8) & 0xff) != 8 ||
+	    payload >> 16) {
+		return std::nullopt;
+	}
+	return static_cast<uint8_t>((payload >> 4) & 0xf);
+}
+
+int64_t apply_movbe16_after_low16_load(std::vector<uint8_t> &bytes,
+				       const KinsnTargetMap &kinsn_targets)
+{
+	if (!target_has_kinsn(kinsn_targets, "bpf_x86_movbe16")) {
+		return 0;
+	}
+	const auto kinsn_names = kinsn_target_name_by_call_key(kinsn_targets);
+	int64_t changed = 0;
+	size_t pc = 0;
+	while (true) {
+		const size_t insn_count = bytes.size() / INSN_SIZE;
+		if (pc >= insn_count) {
+			break;
+		}
+		const auto low_load = low16_load_source_at(bytes, pc, kinsn_names);
+		if (!low_load) {
+			pc++;
+			continue;
+		}
+		const size_t rolw_pc = pc + low_load->len;
+		const auto rolw_dst = rolw_imm8_dst_at(bytes, rolw_pc, kinsn_names);
+		const size_t old_len = low_load->len + 2;
+		if (!rolw_dst || *rolw_dst != low_load->dst ||
+		    !range_is_replaceable(bytes, pc, old_len)) {
+			pc++;
+			continue;
+		}
+
+		std::vector<uint8_t> replacement;
+		const auto zero_dst = make_bpf_insn(BPF_MOV64_K, low_load->dst, 0,
+						    0, 0);
+		replacement.insert(replacement.end(), zero_dst.begin(),
+				   zero_dst.end());
+		append_kinsn_pair(replacement, kinsn_targets, "bpf_x86_movbe16",
+				  pack_x86_mem_payload(low_load->dst,
+						       low_load->base,
+						       low_load->off));
+		replace_insn_range(bytes, pc, old_len, replacement);
+		changed++;
+		pc += replacement.size() / INSN_SIZE;
+	}
+	return changed;
+}
+
 void canonicalize_map_refs(Cli &cli)
 {
 	if (cli.pass) {
@@ -2448,7 +2527,8 @@ void run_pass(Cli &cli)
 		kinsn_options = parse_kinsn_pass_args(*cli.pass, cli.pass_args);
 		kinsn_options.effective_llvm_args =
 			configure_llvm_kinsn_select(*cli.pass,
-						    kinsn_options.llvm_args);
+						    kinsn_options.llvm_args,
+						    kinsn_targets);
 	} else if (*cli.pass != "map_inline" && !cli.pass_args.empty()) {
 		throw std::runtime_error("--pass " + *cli.pass +
 					 " does not accept pass-local args");
@@ -2478,6 +2558,7 @@ void run_pass(Cli &cli)
 				preserve_low16_bound_after_composite_u32_check(output,
 									       kinsn_targets);
 				preserve_shifted_offset_bound_after_guard(output);
+				apply_movbe16_after_low16_load(output, kinsn_targets);
 				compact_unreachable_insns(output);
 				remap_out_of_range_stack_spills(output, true);
 			}

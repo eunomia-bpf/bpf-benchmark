@@ -315,6 +315,118 @@ than the no-bulk tuned run: Cilium `1.027x` workload / `0.941x` BPF, Katran
 `1.036x` / `0.953x`, and Tracee `1.001x` / `1.005x`. It should be treated as
 a failed selector-tuning attempt and not used as the reported tuned policy.
 
+## 2026-06-05 Selector Follow-Up
+
+This follow-up is narrower than the main x86 KVM result above. It was run to
+answer two implementation questions: whether any additional x86 kinsn names can
+be reached by real corpus bytecode, and whether the arm64 target can apply
+real corpus kinsn sites before spending AWS time. These runs used
+`SAMPLES=1` or `WORKLOAD_DURATION=30` smoke settings except for the AWS arm64
+performance run, so they do not replace the authoritative x86 tables above.
+
+### x86 movbe16 recovery
+
+The x86 selector follow-up added a bytecode recovery shape for 16-bit endian
+loads that appear as low-16 load plus `rolw 8`. The recovery emits
+`bpf_x86_movbe16` after zero-initializing the destination, preserving the
+existing x86 no-bulk app overrides for Cilium, Katran, and Tracee.
+
+Artifact:
+`corpus/results/x86_kvm_corpus_20260605_040502_276228`
+(`SAMPLES=1`, `WORKLOAD_DURATION=30`, all six apps).
+
+Result: all six apps completed `status=ok`. The new `bpf_x86_movbe16` selector
+applied `268` sites: Cilium `44`, Tetragon `220`, and Tracee `4`. Total kinsn
+coverage in this smoke run was `31,799` sites:
+
+| App | sites applied | Notable families/names |
+| --- | ---: | --- |
+| `bcc/set` | 77 | LEA `66`, bulk_memory `11` |
+| `cilium/agent` | 3512 | LEA `2359`, cond_select `385`, endian_fusion `766`, extract `2`, including `44` `bpf_x86_movbe16` |
+| `katran` | 71 | rotate `20`, endian_fusion `11`, extract `1`, LEA `39` |
+| `otelcol-ebpf-profiler/profiling` | 1475 | LEA `983`, cond_select `166`, endian_fusion `99`, bulk_memory `182`, extract `45` |
+| `tetragon/observer` | 18766 | LEA `14453`, bulk_memory `3591`, cond_select `414`, endian_fusion `220`, extract `44`, rotate `44`, including `220` `bpf_x86_movbe16` |
+| `tracee/monitor` | 7898 | LEA `7859`, cond_select `23`, endian_fusion `16`, including `4` `bpf_x86_movbe16` |
+
+The remaining enabled-but-zero x86 names in this smoke artifact are still
+selector/proof gaps or absent corpus shapes: `bpf_x86_blsiq`,
+`bpf_x86_blsrq`, `bpf_x86_andl`, `bpf_x86_movbe64`, `bpf_x86_rolq`,
+`bpf_x86_popcntq`, `bpf_x86_prefetcht0`, `bpf_x86_shldl`,
+`bpf_x86_shldq`, `bpf_x86_shrdl`, and `bpf_x86_shrq`.
+
+### arm64 QEMU smoke
+
+The arm64 target initially exposed a real policy/selector bug: the LLVM
+selector was still allowed to emit x86 pseudo-kinsns such as `bpf_x86_leaq`
+when the target JSON contained only arm64 kinsns. The fix disables LLVM kinsn
+selection for arm64-only targets and uses arm64 bytecode recovery for rotate,
+extract, and endian operations. The x86 per-app no-bulk overrides are also
+guarded by `RUN_TARGET_ARCH`, so arm64 uses the full default command.
+
+QEMU smoke command:
+
+```sh
+PLATFORM=qemu ARCH=arm64 SAMPLES=1 WORKLOAD_DURATION=30 \
+  BPFREJIT_BENCH_PASSES=kinsn \
+  BPFREJIT_CORPUS_APPS="katran,cilium/agent,tracee/monitor" \
+  make corpus
+```
+
+Artifact:
+`corpus/results/arm64_qemu_corpus_19700101_000005_560691`.
+
+Result: Cilium and Katran completed `status=ok`; Tracee reached loadtime
+reports but failed post startup under QEMU. The smoke confirmed real arm64
+apply:
+
+| App | status | sites applied | arm64 kinsns |
+| --- | --- | ---: | --- |
+| `cilium/agent` | ok | 364 | `bpf_arm64_rev16_w` 318, `bpf_arm64_rev_w` 22, `bpf_arm64_rev_x` 22, `bpf_arm64_ubfm_x` 2 |
+| `katran` | ok | 30 | `bpf_arm64_extr_w` 20, `bpf_arm64_rev16_w` 5, `bpf_arm64_rev_w` 4, `bpf_arm64_ubfm_x` 1 |
+| `tracee/monitor` | error | 1 | `bpf_arm64_rev16_w` 1 |
+
+### arm64 AWS performance run
+
+AWS arm64 was run only after QEMU confirmed non-zero arm64 apply.
+
+Command:
+
+```sh
+PLATFORM=aws ARCH=arm64 SAMPLES=3 WORKLOAD_DURATION=30 \
+  BPFREJIT_BENCH_PASSES=kinsn \
+  make corpus
+```
+
+Artifact:
+`corpus/results/aws_arm64_corpus_20260605_053223_453376`
+(`t4g.small`, all six corpus apps).
+
+The suite status is `error` because three apps failed naturally during
+post-ReJIT startup or event handling. No app was filtered out:
+
+| App | status | sites applied | Notes |
+| --- | --- | ---: | --- |
+| `bcc/set` | ok | 0 | no arm64 kinsn coverage in this run |
+| `cilium/agent` | ok | 768 | endian_fusion `766`, extract `2` |
+| `katran` | ok | 30 | rotate `20`, endian_fusion `9`, extract `1` |
+| `otelcol-ebpf-profiler/profiling` | error | 0 | post failed loading `perf_unwind_native` |
+| `tetragon/observer` | error | 0 | post failed loading `generic_kprobe_filter_arg` |
+| `tracee/monitor` | error | 16 | Tracee buffer decode/event-loss failure after post startup |
+
+For the three apps that completed, workload and BPF-counter results were mixed:
+
+| App | workload ratio | BPF cost ratio | Interpretation |
+| --- | ---: | ---: | --- |
+| `bcc/set` | 0.979x | 0.942x | no kinsn applied, so this is noise/control rather than kinsn evidence |
+| `cilium/agent` | 0.974x | 1.003x over 2 retained rows | high arm64 endian coverage, but no performance win in this run |
+| `katran` | 1.020x | 0.987x over 1 retained row | positive arm64 signal on the hot XDP program |
+
+The useful arm64 conclusion is therefore coverage plus a Katran signal, not a
+broad arm64 performance claim. Cilium proves that real arm64 endian/extract
+sites are reachable in a large corpus app, but the current call overhead/site
+mix was not profitable at the workload level. Tracee also proves arm64 endian
+coverage, but the app did not produce a valid post-ReJIT measurement.
+
 ## Discussion
 
 The important corrective result is coverage, not headline speedup. Earlier
@@ -337,12 +449,15 @@ as "enabled but no matched corpus shape," not as a corpus gate.
 A default-name coverage audit gives the same answer. The x86/arm64 target list
 contains `49` kinsn names; the authoritative x86 full-corpus reports applied
 `17` x86 names. The x86 names that are enabled but zero in this corpus are
-`bpf_x86_blsiq`, `bpf_x86_blsrq`, `bpf_x86_andl`, `bpf_x86_movbe16`,
+`bpf_x86_blsiq`, `bpf_x86_blsrq`, `bpf_x86_andl`,
 `bpf_x86_movbe64`, `bpf_x86_rolq`, `bpf_x86_popcntq`,
 `bpf_x86_prefetcht0`, `bpf_x86_shldl`, `bpf_x86_shldq`,
-`bpf_x86_shrdl`, and `bpf_x86_shrq`. These are not disabled by benchmark
-policy; the current corpus either has no profitable matched shape for them or
-needs a new selector/dataflow proof before they are worth forcing.
+`bpf_x86_shrdl`, and `bpf_x86_shrq`. In the authoritative run,
+`bpf_x86_movbe16` was also zero; the 2026-06-05 selector follow-up above added
+that recovery shape and observed `268` real corpus sites. The remaining zero
+names are not disabled by benchmark policy; the current corpus either has no
+profitable matched shape for them or needs a new selector/dataflow proof before
+they are worth forcing.
 
 A follow-up no-bulk ablation was used only to guide selector tuning. It added
 a controlled way to disable `bulk_memory` while keeping the single umbrella
@@ -408,6 +523,9 @@ Negative/diagnostic selector-tuning artifacts:
 | `cilium,tracee` LLVM-only exploratory | `corpus/results/x86_kvm_corpus_20260605_030733_001837` | SAMPLES=1, bytecode recovery disabled for both apps |
 | `bcc,cilium,katran,tetragon,tracee` scalar-only exploratory | `corpus/results/x86_kvm_corpus_20260605_024544_394150` | SAMPLES=1, Tetragon failed EINVAL |
 | `cilium,katran,tracee` LLVM-only Cilium repeat | `corpus/results/x86_kvm_corpus_20260605_032129_844272` | SAMPLES=3, 30s; worse than the no-bulk tuned policy |
+| `x86 movbe16 selector smoke` | `corpus/results/x86_kvm_corpus_20260605_040502_276228` | SAMPLES=1, 30s; all six apps ok; `bpf_x86_movbe16` applied 268 sites |
+| `arm64 QEMU apply smoke` | `corpus/results/arm64_qemu_corpus_19700101_000005_560691` | SAMPLES=1, 30s; Cilium/Katran ok; confirmed arm64 `rev`/`extr`/`ubfm` apply |
+| `arm64 AWS corpus follow-up` | `corpus/results/aws_arm64_corpus_20260605_053223_453376` | SAMPLES=3, 30s; BCC/Cilium/Katran ok; OTel/Tetragon/Tracee failed naturally |
 
 ## Previous Results
 

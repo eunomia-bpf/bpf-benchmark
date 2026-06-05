@@ -41,6 +41,13 @@ bool target_is_x86_kinsn_set(const KinsnTargetMap &targets)
 	       target_has_kinsn(targets, "bpf_x86_movbe32");
 }
 
+bool target_is_arm64_kinsn_set(const KinsnTargetMap &targets)
+{
+	return target_has_kinsn(targets, "bpf_arm64_extr_x") ||
+	       target_has_kinsn(targets, "bpf_arm64_rev_x") ||
+	       target_has_kinsn(targets, "bpf_arm64_ubfm_x");
+}
+
 uint64_t pack_u4(uint64_t value, unsigned shift)
 {
 	if (value > 0xf) {
@@ -115,6 +122,19 @@ uint64_t pack_x86_store_imm_payload(uint8_t base, int16_t off, uint32_t imm)
 uint64_t pack_x86_bextr_payload(uint8_t dst, uint8_t src, uint8_t ctl)
 {
 	return pack_u4(dst, 0) | pack_u4(src, 4) | pack_u4(ctl, 8);
+}
+
+uint64_t pack_arm64_rotate_payload(uint8_t dst, uint8_t src, uint8_t tmp,
+				   uint8_t shift)
+{
+	return pack_u4(dst, 0) | pack_u4(src, 4) | pack_u8(shift, 8) |
+	       pack_u4(tmp, 16);
+}
+
+uint64_t pack_arm64_extract_payload(uint8_t dst, uint8_t start,
+				    uint8_t bit_len)
+{
+	return pack_u4(dst, 0) | pack_u8(start, 8) | pack_u8(bit_len, 16);
 }
 
 void append_kinsn_pair(std::vector<uint8_t> &out, const KinsnTargetMap &targets,
@@ -817,13 +837,28 @@ uint8_t rotate_proof_scratch(const RotateSite &site)
 }
 
 std::vector<uint8_t> emit_rotate_replacement(const KinsnTargetMap &targets,
-					     const RotateSite &site)
+					    const RotateSite &site)
 {
 	std::vector<uint8_t> out;
-	if (site.preinit_proof_scratch) {
-		const auto init = make_bpf_insn(BPF_MOV64_K,
-						rotate_proof_scratch(site), 0,
-						0, 0);
+	const bool arm64_only = target_is_arm64_kinsn_set(targets) &&
+				!target_is_x86_kinsn_set(targets);
+	if (arm64_only) {
+		const char *name = site.width == RotateWidth::W64 ?
+					   "bpf_arm64_extr_x" :
+					   "bpf_arm64_extr_w";
+		if (!target_has_kinsn(targets, name)) {
+			return out;
+		}
+		append_kinsn_pair(out, targets, name,
+				  pack_arm64_rotate_payload(
+					  site.dst, site.val, site.tmp,
+					  static_cast<uint8_t>(site.shift)));
+		return out;
+	}
+	if (target_is_x86_kinsn_set(targets) && site.preinit_proof_scratch) {
+		const auto init =
+			make_bpf_insn(BPF_MOV64_K, rotate_proof_scratch(site), 0,
+				      0, 0);
 		out.insert(out.end(), init.begin(), init.end());
 	}
 	if (site.width == RotateWidth::W64) {
@@ -918,11 +953,16 @@ int64_t apply_rotate_bytecode_kinsns(std::vector<uint8_t> &bytes,
 		sites.push_back(*site);
 		pc = site->start + site->old_len;
 	}
+	int64_t applied = 0;
 	for (auto it = sites.rbegin(); it != sites.rend(); ++it) {
 		const auto replacement = emit_rotate_replacement(targets, *it);
+		if (replacement.empty()) {
+			continue;
+		}
 		replace_insn_range(bytes, it->start, it->old_len, replacement);
+		applied++;
 	}
-	return static_cast<int64_t>(sites.size());
+	return applied;
 }
 
 std::optional<unsigned> low_mask_width(uint64_t mask)
@@ -982,20 +1022,37 @@ int64_t apply_extract_bytecode_kinsns(std::vector<uint8_t> &bytes,
 		}
 		std::vector<uint8_t> replacement;
 		const uint8_t dst = dst_reg(bytes, pc);
-		const auto ctl_reg =
-			find_dead_scratch_reg_after(bytes, pc + 2, { dst });
-		if (!ctl_reg) {
-			pc++;
-			continue;
+		const bool arm64_only = target_is_arm64_kinsn_set(targets) &&
+					!target_is_x86_kinsn_set(targets);
+		if (arm64_only) {
+			if (!target_has_kinsn(targets, "bpf_arm64_ubfm_x")) {
+				pc++;
+				continue;
+			}
+			append_kinsn_pair(replacement, targets, "bpf_arm64_ubfm_x",
+					  pack_arm64_extract_payload(
+						  dst,
+						  static_cast<uint8_t>(shift_imm),
+						  static_cast<uint8_t>(*bit_len)));
+		} else {
+			const auto ctl_reg =
+				find_dead_scratch_reg_after(bytes, pc + 2, { dst });
+			if (!ctl_reg) {
+				pc++;
+				continue;
+			}
+			const uint32_t ctl =
+				static_cast<uint32_t>(shift_imm) |
+				(static_cast<uint32_t>(*bit_len) << 8);
+			const auto ctl_mov =
+				make_bpf_insn(BPF_MOV64_K, *ctl_reg, 0, 0,
+					      static_cast<int32_t>(ctl));
+			replacement.insert(replacement.end(), ctl_mov.begin(),
+					   ctl_mov.end());
+			append_kinsn_pair(replacement, targets, "bpf_x86_bextrq",
+					  pack_x86_bextr_payload(dst, dst,
+								 *ctl_reg));
 		}
-		const uint32_t ctl =
-			static_cast<uint32_t>(shift_imm) |
-			(static_cast<uint32_t>(*bit_len) << 8);
-		const auto ctl_mov = make_bpf_insn(BPF_MOV64_K, *ctl_reg, 0, 0,
-						   static_cast<int32_t>(ctl));
-		replacement.insert(replacement.end(), ctl_mov.begin(), ctl_mov.end());
-		append_kinsn_pair(replacement, targets, "bpf_x86_bextrq",
-				  pack_x86_bextr_payload(dst, dst, *ctl_reg));
 		replace_insn_range(bytes, pc, 2, replacement);
 		applied++;
 		pc += replacement.size() / INSN_SIZE;
@@ -1034,6 +1091,20 @@ std::string_view movbe_target_for_size(int bytes)
 		return "bpf_x86_movbe64";
 	default:
 		throw std::runtime_error("unsupported MOVBE width");
+	}
+}
+
+std::string_view arm64_rev_target_for_size(int bytes)
+{
+	switch (bytes) {
+	case 2:
+		return "bpf_arm64_rev16_w";
+	case 4:
+		return "bpf_arm64_rev_w";
+	case 8:
+		return "bpf_arm64_rev_x";
+	default:
+		throw std::runtime_error("unsupported REV width");
 	}
 }
 
@@ -1097,9 +1168,40 @@ std::optional<EndianSite> match_endian_site(const std::vector<uint8_t> &bytes,
 	return std::nullopt;
 }
 
+int64_t apply_arm64_endian_bytecode_kinsns(std::vector<uint8_t> &bytes,
+					   const KinsnTargetMap &targets)
+{
+	int64_t applied = 0;
+	size_t pc = 0;
+	while (pc < bytes.size() / INSN_SIZE) {
+		const auto endian_bytes = endian_size_bytes(bytes, pc);
+		if (!endian_bytes || !range_is_replaceable(bytes, pc, 1)) {
+			pc++;
+			continue;
+		}
+		const auto name = arm64_rev_target_for_size(*endian_bytes);
+		if (!target_has_kinsn(targets, name)) {
+			pc++;
+			continue;
+		}
+		std::vector<uint8_t> replacement;
+		append_kinsn_pair(replacement, targets, name,
+				  pack_u4(dst_reg(bytes, pc), 0));
+		replace_insn_range(bytes, pc, 1, replacement);
+		applied++;
+		pc += replacement.size() / INSN_SIZE;
+	}
+	return applied;
+}
+
 int64_t apply_endian_bytecode_kinsns(std::vector<uint8_t> &bytes,
 				     const KinsnTargetMap &targets)
 {
+	const bool arm64_only = target_is_arm64_kinsn_set(targets) &&
+				!target_is_x86_kinsn_set(targets);
+	if (arm64_only) {
+		return apply_arm64_endian_bytecode_kinsns(bytes, targets);
+	}
 	int64_t applied = 0;
 	size_t pc = 0;
 	while (pc < bytes.size() / INSN_SIZE) {
@@ -1608,24 +1710,38 @@ int64_t apply_bytecode_kinsn_recovery(std::vector<uint8_t> &bytes,
 				      const KinsnTargetMap &targets,
 				      std::vector<std::string> &diagnostics)
 {
-	if (!target_is_x86_kinsn_set(targets)) {
+	const bool is_x86 = target_is_x86_kinsn_set(targets);
+	const bool is_arm64 = target_is_arm64_kinsn_set(targets);
+	if (!is_x86 && !is_arm64) {
 		return 0;
 	}
 	const int64_t before = count_kinsn_calls(bytes);
-	if (bytecode_kinsn_family_enabled(pass, "rotate", policy)) {
-		apply_rotate_bytecode_kinsns(bytes, targets);
-	}
-	if (bytecode_kinsn_family_enabled(pass, "extract", policy)) {
-		apply_extract_bytecode_kinsns(bytes, targets);
-	}
-	if (bytecode_kinsn_family_enabled(pass, "endian_fusion", policy)) {
-		apply_endian_bytecode_kinsns(bytes, targets);
-	}
-	if (bytecode_kinsn_family_enabled(pass, "bulk_memory", policy)) {
-		apply_bulk_memory_bytecode_kinsns(bytes, targets);
-	}
-	if (bytecode_kinsn_family_enabled(pass, "prefetch", policy)) {
-		apply_prefetch_bytecode_kinsns(bytes, targets);
+	if (is_arm64 && !is_x86) {
+		if (bytecode_kinsn_family_enabled(pass, "rotate", policy)) {
+			apply_rotate_bytecode_kinsns(bytes, targets);
+		}
+		if (bytecode_kinsn_family_enabled(pass, "extract", policy)) {
+			apply_extract_bytecode_kinsns(bytes, targets);
+		}
+		if (bytecode_kinsn_family_enabled(pass, "endian_fusion", policy)) {
+			apply_endian_bytecode_kinsns(bytes, targets);
+		}
+	} else {
+		if (bytecode_kinsn_family_enabled(pass, "rotate", policy)) {
+			apply_rotate_bytecode_kinsns(bytes, targets);
+		}
+		if (bytecode_kinsn_family_enabled(pass, "extract", policy)) {
+			apply_extract_bytecode_kinsns(bytes, targets);
+		}
+		if (bytecode_kinsn_family_enabled(pass, "endian_fusion", policy)) {
+			apply_endian_bytecode_kinsns(bytes, targets);
+		}
+		if (bytecode_kinsn_family_enabled(pass, "bulk_memory", policy)) {
+			apply_bulk_memory_bytecode_kinsns(bytes, targets);
+		}
+		if (bytecode_kinsn_family_enabled(pass, "prefetch", policy)) {
+			apply_prefetch_bytecode_kinsns(bytes, targets);
+		}
 	}
 	const int64_t after = count_kinsn_calls(bytes);
 	if (after > before) {
