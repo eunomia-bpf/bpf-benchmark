@@ -322,6 +322,24 @@ static void prog_insert(struct prog_entry *e) {
     e->next = prog_table[b];
     prog_table[b] = e;
 }
+
+/* Move an existing prog_entry to the bucket matching its current fd. Caller
+ * holds state_mutex and has already updated e->fd. */
+static void prog_rebucket_locked(struct prog_entry *e, int old_fd) {
+    if (!e)
+        return;
+    struct prog_entry **prev = &prog_table[fd_bucket(old_fd)];
+    while (*prev) {
+        if (*prev == e) {
+            *prev = e->next;
+            break;
+        }
+        prev = &(*prev)->next;
+    }
+    e->next = prog_table[fd_bucket(e->fd)];
+    prog_table[fd_bucket(e->fd)] = e;
+}
+
 static void prog_remove(int fd) {
     if (fd < 0) return;
     struct prog_entry **prev = &prog_table[fd_bucket(fd)];

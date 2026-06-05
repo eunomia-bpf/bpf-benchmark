@@ -1,0 +1,110 @@
+{
+  "benchmarks": [
+    {
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-arm64-llvmbpf/micro_exec test-run --wait-signal --program /artifacts/user/micro-programs/arm64/siphash_rotate64_mixer.bpf.o --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/siphash_rotate64_mixer.mem --io-mode staged --input-size 64 --inner-repeat 100000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/aws_arm64_micro_20260605_205930_919634/details/jit_dumps/siphash_rotate64_mixer__kernel_rejit__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/aws_arm64_micro_20260605_205930_919634/details/jit_dumps/siphash_rotate64_mixer__kernel_rejit__sample00.xlated.bin\nbpf_prog_test_run_opts failed: Unknown error 524",
+      "expected_result": 2666935177028490406,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/siphash_rotate64_mixer.mem",
+      "io_mode": "staged",
+      "name": "siphash_rotate64_mixer",
+      "runs": [
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 7936,
+                "native_code_bytes": 4112
+              },
+              "compile_ns": 5977990,
+              "exec_ns": 159,
+              "jited_prog_len": 4112,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 2305,
+                "memory_prepare_ns": 89508,
+                "object_load_ns": 1586149,
+                "object_open_ns": 4391841,
+                "prog_run_wall_ns": 29982464,
+                "result_extract_ns": 862
+              },
+              "result": 2666935177028490406,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 7936
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "compute",
+        "rotate",
+        "hash",
+        "pure-jit"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-arm64-llvmbpf/micro_exec"
+  },
+  "defaults": {
+    "inner_repeat": 100000,
+    "perf_counters": false,
+    "runtime_order_seed": 0,
+    "samples": 3,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "details_dir": "details",
+  "error_message": "siphash_rotate64_mixer: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-arm64-llvmbpf/micro_exec test-run --wait-signal --program /artifacts/user/micro-programs/arm64/siphash_rotate64_mixer.bpf.o --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/siphash_rotate64_mixer.mem --io-mode staged --input-size 64 --inner-repeat 100000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/aws_arm64_micro_20260605_205930_919634/details/jit_dumps/siphash_rotate64_mixer__kernel_rejit__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/aws_arm64_micro_20260605_205930_919634/details/jit_dumps/siphash_rotate64_mixer__kernel_rejit__sample00.xlated.bin\nbpf_prog_test_run_opts failed: Unknown error 524",
+  "generated_at": "2026-06-05T20:59:30.919634+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "ip-172-31-65-155.ec2.internal",
+    "kernel_cmdline": "BOOT_IMAGE=(hd0,gpt1)/boot/vmlinuz-7.0.0-rc2+ root=UUID=7e75db7b-0182-40fc-8f7e-c1f405fd374d ro console=tty0 console=ttyS0,115200n8 nvme_core.io_timeout=4294967295 rd.emergency=poweroff rd.shell=0 selinux=1 security=selinux quiet numa_cma=1:64M",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-aarch64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "last_updated_at": "2026-06-05T20:59:34.201377+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "progress": {
+    "completed_benchmarks": 1,
+    "current_benchmark": null,
+    "current_benchmark_index": null,
+    "total_benchmarks": 1
+  },
+  "provenance": {
+    "cpu_model": "aarch64",
+    "environment": "bare-metal",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 100000,
+      "perf_counters": false,
+      "samples": 3,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-06-05T20:59:30.924750+00:00"
+  },
+  "run_type": "aws_arm64_micro",
+  "started_at": "2026-06-05T20:59:30.919634+00:00",
+  "status": "error",
+  "suite": "micro_staged_codegen"
+}

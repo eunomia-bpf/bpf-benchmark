@@ -763,19 +763,40 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
     if (out_rejit_ms) *out_rejit_ms = (t1.tv_sec - t0.tv_sec) * 1000ULL
                                       + (t1.tv_nsec - t0.tv_nsec) / 1000000;
 
-    /* Resolve the new kernel id and commit the swap into prog_entry. The
-     * old fd is closed so the kernel can release the old prog when no
-     * link/perf_event still references it (after BPF_LINK_UPDATE, no link
-     * should). */
-    uint32_t new_kid = resolve_kernel_id((int)new_pfd);
+    /* Preserve the loader-visible program fd number when possible. Attached
+     * corpus workloads dispatch through kernel attach objects, but micro's
+     * kernel_rejit path keeps the original fd in micro_exec and issues
+     * BPF_PROG_TEST_RUN on it after the shim reloads. Move the new program
+     * back onto that fd so both paths observe the optimized bytecode. */
+    int final_prog_fd = (int)new_pfd;
+    if (old_prog_fd >= 0 && old_prog_fd != (int)new_pfd) {
+        long dup_ret = real_syscall(SYS_dup3, (int)new_pfd, old_prog_fd,
+                                    O_CLOEXEC);
+        if (dup_ret >= 0) {
+            final_prog_fd = old_prog_fd;
+            real_close((int)new_pfd);
+            log_line("reload_and_reattach: preserved loader prog fd=%d "
+                     "with new kid pending", old_prog_fd);
+        } else {
+            int dup_errno = errno;
+            log_line("reload_and_reattach: failed to preserve loader prog "
+                     "fd old=%d new=%ld errno=%d; continuing with new fd",
+                     old_prog_fd, new_pfd, dup_errno);
+            real_close(old_prog_fd);
+        }
+    }
+
+    /* Resolve the new kernel id and commit the swap into prog_entry. */
+    uint32_t new_kid = resolve_kernel_id(final_prog_fd);
     pthread_mutex_lock(&state_mutex);
     /* Reload p in case state was swapped under us (shouldn't happen during a
      * single execute_plan, but cheap to defensively re-lookup). */
-    p->fd = (int)new_pfd;
+    int previous_fd = p->fd;
+    p->fd = final_prog_fd;
     if (new_kid) p->kernel_prog_id = new_kid;
+    if (p->fd != previous_fd)
+        prog_rebucket_locked(p, previous_fd);
     pthread_mutex_unlock(&state_mutex);
-    if (old_prog_fd >= 0 && old_prog_fd != (int)new_pfd)
-        real_close(old_prog_fd);
 
     free(owned_log);
     return partial ? RELOAD_PARTIAL_ATTACH : RELOAD_OK;

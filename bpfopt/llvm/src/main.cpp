@@ -132,6 +132,12 @@ struct KinsnTarget {
 
 using KinsnTargetMap = std::map<std::string, KinsnTarget>;
 
+enum class KinsnTargetArch {
+	Unknown,
+	X86,
+	Arm64,
+};
+
 struct BytecodeKinsnPolicy {
 	std::optional<bool> all_enabled;
 	std::map<std::string, bool> family_enabled;
@@ -148,6 +154,10 @@ bool bytecode_kinsn_family_enabled(std::string_view pass, std::string_view famil
 bool target_has_kinsn(const KinsnTargetMap &targets, std::string_view name);
 bool target_is_x86_kinsn_set(const KinsnTargetMap &targets);
 bool target_is_arm64_kinsn_set(const KinsnTargetMap &targets);
+bool kinsn_target_arch_is_x86(KinsnTargetArch arch,
+			      const KinsnTargetMap &targets);
+bool kinsn_target_arch_is_arm64(KinsnTargetArch arch,
+				const KinsnTargetMap &targets);
 
 std::string llvm_error_string(llvm::Error err)
 {
@@ -352,6 +362,67 @@ KinsnTargetMap read_kinsn_targets(const std::filesystem::path &path)
 	return out;
 }
 
+KinsnTargetArch parse_kinsn_target_arch(std::string_view arch)
+{
+	std::string value;
+	value.reserve(arch.size());
+	for (const char ch : arch) {
+		if (!std::isspace(static_cast<unsigned char>(ch))) {
+			value.push_back(static_cast<char>(
+				std::tolower(static_cast<unsigned char>(ch))));
+		}
+	}
+	if (value.empty()) {
+		return KinsnTargetArch::Unknown;
+	}
+	if (value == "x86" || value == "x86_64" || value == "amd64") {
+		return KinsnTargetArch::X86;
+	}
+	if (value == "arm64" || value == "aarch64") {
+		return KinsnTargetArch::Arm64;
+	}
+	throw std::runtime_error("unsupported target.json arch: " + value);
+}
+
+KinsnTargetArch read_kinsn_target_arch(const std::filesystem::path &path)
+{
+	auto value = expected_or_throw(llvm::json::parse(read_text(path)));
+	auto *root = value.getAsObject();
+	if (!root) {
+		throw std::runtime_error("--target JSON root is not an object");
+	}
+	const auto arch = root->getString("arch");
+	if (!arch) {
+		return KinsnTargetArch::Unknown;
+	}
+	return parse_kinsn_target_arch(arch->str());
+}
+
+bool kinsn_target_arch_is_x86(KinsnTargetArch arch,
+			      const KinsnTargetMap &targets)
+{
+	if (arch == KinsnTargetArch::X86) {
+		return true;
+	}
+	if (arch == KinsnTargetArch::Arm64) {
+		return false;
+	}
+	return target_is_x86_kinsn_set(targets);
+}
+
+bool kinsn_target_arch_is_arm64(KinsnTargetArch arch,
+				const KinsnTargetMap &targets)
+{
+	if (arch == KinsnTargetArch::Arm64) {
+		return true;
+	}
+	if (arch == KinsnTargetArch::X86) {
+		return false;
+	}
+	return target_is_arm64_kinsn_set(targets) &&
+	       !target_is_x86_kinsn_set(targets);
+}
+
 bool is_kinsn_pass(std::string_view pass)
 {
 	static constexpr std::string_view passes[] = {
@@ -548,7 +619,8 @@ std::optional<std::string> default_kinsn_mode_for_pass(std::string_view pass)
 std::vector<std::string>
 configure_llvm_kinsn_select(std::string_view pass,
 			    const std::vector<std::string> &llvm_args,
-			    const KinsnTargetMap &kinsn_targets)
+			    const KinsnTargetMap &kinsn_targets,
+			    KinsnTargetArch target_arch)
 {
 	bool has_kinsn_mode = false;
 	for (const auto &arg : llvm_args) {
@@ -560,9 +632,9 @@ configure_llvm_kinsn_select(std::string_view pass,
 
 	std::vector<std::string> args{ "bpfopt", "-bpf-enable-kinsn-select",
 				       "-bpf-stack-size=4096" };
-	const bool arm64_only = target_is_arm64_kinsn_set(kinsn_targets) &&
-				!target_is_x86_kinsn_set(kinsn_targets);
-	if (arm64_only) {
+	const bool arm64_target =
+		kinsn_target_arch_is_arm64(target_arch, kinsn_targets);
+	if (arm64_target) {
 		if (has_kinsn_mode) {
 			throw std::runtime_error(
 				"explicit LLVM kinsn mode is unsupported for arm64 targets");
@@ -591,11 +663,13 @@ configure_llvm_kinsn_select(std::string_view pass,
 
 void apply_target_bytecode_policy_defaults(std::string_view pass,
 					   const KinsnTargetMap &kinsn_targets,
+					   KinsnTargetArch target_arch,
 					   KinsnPassOptions &options)
 {
-	const bool arm64_only = target_is_arm64_kinsn_set(kinsn_targets) &&
-				!target_is_x86_kinsn_set(kinsn_targets);
-	if (!arm64_only || pass != "kinsn" || options.bytecode_policy.all_enabled) {
+	const bool arm64_target =
+		kinsn_target_arch_is_arm64(target_arch, kinsn_targets);
+	if (!arm64_target || pass != "kinsn" ||
+	    options.bytecode_policy.all_enabled) {
 		return;
 	}
 	static constexpr std::string_view disabled_by_default[] = {
@@ -2546,20 +2620,24 @@ void run_pass(Cli &cli)
 	}
 	const bool kinsn_pass = is_kinsn_pass(*cli.pass);
 	KinsnTargetMap kinsn_targets;
+	KinsnTargetArch kinsn_target_arch = KinsnTargetArch::Unknown;
 	KinsnPassOptions kinsn_options;
 	if (kinsn_pass) {
 		if (!cli.target) {
 			throw std::runtime_error("--pass " + *cli.pass +
 						 " requires --target");
 		}
+		kinsn_target_arch = read_kinsn_target_arch(*cli.target);
 		kinsn_targets = read_kinsn_targets(*cli.target);
 		kinsn_options = parse_kinsn_pass_args(*cli.pass, cli.pass_args);
 		apply_target_bytecode_policy_defaults(*cli.pass, kinsn_targets,
+						      kinsn_target_arch,
 						      kinsn_options);
 		kinsn_options.effective_llvm_args =
 			configure_llvm_kinsn_select(*cli.pass,
 						    kinsn_options.llvm_args,
-						    kinsn_targets);
+						    kinsn_targets,
+						    kinsn_target_arch);
 	} else if (*cli.pass != "map_inline" && !cli.pass_args.empty()) {
 		throw std::runtime_error("--pass " + *cli.pass +
 					 " does not accept pass-local args");
@@ -2595,7 +2673,7 @@ void run_pass(Cli &cli)
 			}
 			apply_bytecode_kinsn_recovery(
 				output, *cli.pass, kinsn_options.bytecode_policy,
-				kinsn_targets, diagnostics);
+				kinsn_targets, kinsn_target_arch, diagnostics);
 			const int64_t output_kinsn_calls = count_kinsn_calls(output);
 			if (output_kinsn_calls < input_kinsn_calls) {
 				throw std::runtime_error(

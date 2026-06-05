@@ -142,7 +142,8 @@ def _run_micro_suite(workspace: Path, args: argparse.Namespace) -> None:
     env["BPFREJIT_MICRO_RUNNER_BINARY"] = str(runner_binary)
     env["BPFREJIT_MICRO_PROOF_DIR"] = str(sim_proof_root(workspace, args.target_arch))
 
-    if "native_kernel" in _selected_runtimes(args):
+    selected_runtimes = _selected_runtimes(args)
+    if "kernel_rejit" in selected_runtimes or "native_kernel" in selected_runtimes:
         module_dir = kinsn_module_dir(workspace, args.target_arch)
         if not module_dir.is_dir():
             _die(f"kinsn module artifact root is missing: {module_dir}")
@@ -151,7 +152,7 @@ def _run_micro_suite(workspace: Path, args: argparse.Namespace) -> None:
             _die(f"no kinsn modules found under {module_dir}")
         load_kinsn_modules(expected, module_dir=module_dir)
 
-    if "native_proof" in _selected_runtimes(args):
+    if "native_proof" in selected_runtimes:
         proof_dir = sim_proof_root(workspace, args.target_arch)
         if not proof_dir.is_dir():
             _die(f"native proof artifact root is missing: {proof_dir}")
