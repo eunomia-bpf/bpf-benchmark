@@ -132,6 +132,20 @@ struct KinsnTarget {
 
 using KinsnTargetMap = std::map<std::string, KinsnTarget>;
 
+struct BytecodeKinsnPolicy {
+	std::optional<bool> all_enabled;
+	std::map<std::string, bool> family_enabled;
+};
+
+struct KinsnPassOptions {
+	std::vector<std::string> llvm_args;
+	std::vector<std::string> effective_llvm_args;
+	BytecodeKinsnPolicy bytecode_policy;
+};
+
+bool bytecode_kinsn_family_enabled(std::string_view pass, std::string_view family,
+				   const BytecodeKinsnPolicy &policy);
+
 std::string llvm_error_string(llvm::Error err)
 {
 	std::string message;
@@ -407,17 +421,76 @@ void validate_kinsn_mode_arg(std::string_view value)
 	}
 }
 
-std::vector<std::string> parse_kinsn_llvm_args(std::string_view pass,
-					       const std::vector<std::string> &args)
+bool is_bytecode_kinsn_family(std::string_view family)
 {
-	std::vector<std::string> llvm_args;
+	static constexpr std::string_view families[] = {
+		"all", "rotate", "extract", "endian_fusion", "bulk_memory",
+		"prefetch",
+	};
+	return std::find(std::begin(families), std::end(families), family) !=
+	       std::end(families);
+}
+
+void apply_bytecode_kinsn_mode_arg(BytecodeKinsnPolicy &policy,
+				   std::string_view value)
+{
+	size_t start = 0;
+	while (start <= value.size()) {
+		const size_t comma = value.find(',', start);
+		const auto end = comma == std::string_view::npos ? value.size() :
+								 comma;
+		const std::string spec = trim_copy(value.substr(start, end - start));
+		if (spec.empty()) {
+			throw std::runtime_error("empty --bytecode-kinsn-mode entry");
+		}
+		const size_t eq = spec.find('=');
+		if (eq == std::string::npos || eq == 0 || eq + 1 >= spec.size() ||
+		    spec.find('=', eq + 1) != std::string::npos) {
+			throw std::runtime_error(
+				"invalid --bytecode-kinsn-mode entry: " + spec);
+		}
+		const std::string family = trim_copy(
+			std::string_view(spec).substr(0, eq));
+		const std::string mode = trim_copy(
+			std::string_view(spec).substr(eq + 1));
+		if (!is_bytecode_kinsn_family(family)) {
+			throw std::runtime_error(
+				"invalid --bytecode-kinsn-mode family: " + family);
+		}
+		if (mode != "disable" && mode != "force") {
+			throw std::runtime_error(
+				"invalid --bytecode-kinsn-mode value: " + mode);
+		}
+		const bool enabled = mode == "force";
+		if (family == "all") {
+			policy.all_enabled = enabled;
+		} else {
+			policy.family_enabled[family] = enabled;
+		}
+		if (comma == std::string_view::npos) {
+			break;
+		}
+		start = comma + 1;
+	}
+}
+
+KinsnPassOptions parse_kinsn_pass_args(std::string_view pass,
+				       const std::vector<std::string> &args)
+{
+	KinsnPassOptions options;
 	for (size_t i = 0; i < args.size(); i++) {
 		const auto &arg = args[i];
 		if (arg == "--kinsn-mode" || arg.starts_with("--kinsn-mode=")) {
 			const std::string value =
 				pass_arg_value(args, i, "--kinsn-mode");
 			validate_kinsn_mode_arg(value);
-			llvm_args.push_back("-bpf-kinsn-mode=" + value);
+			options.llvm_args.push_back("-bpf-kinsn-mode=" + value);
+		} else if (arg == "--bytecode-kinsn-mode" ||
+			   arg.starts_with("--bytecode-kinsn-mode=")) {
+			const std::string value =
+				pass_arg_value(args, i, "--bytecode-kinsn-mode");
+			apply_bytecode_kinsn_mode_arg(options.bytecode_policy,
+						      value);
 		} else if (arg == "--llvm-arg" ||
 			   arg.starts_with("--llvm-arg=")) {
 			std::string value = pass_arg_value(args, i, "--llvm-arg");
@@ -431,13 +504,13 @@ std::vector<std::string> parse_kinsn_llvm_args(std::string_view pass,
 				throw std::runtime_error(
 					"kinsn --llvm-arg only accepts BPF kinsn policy options");
 			}
-			llvm_args.push_back(std::move(value));
+			options.llvm_args.push_back(std::move(value));
 		} else {
 			throw std::runtime_error("kinsn pass " + std::string(pass) +
 						 " unknown pass-local arg: " + arg);
 		}
 	}
-	return llvm_args;
+	return options;
 }
 
 std::optional<std::string> default_kinsn_mode_for_pass(std::string_view pass)
@@ -469,8 +542,9 @@ std::optional<std::string> default_kinsn_mode_for_pass(std::string_view pass)
 	return std::nullopt;
 }
 
-void configure_llvm_kinsn_select(std::string_view pass,
-				 const std::vector<std::string> &llvm_args)
+std::vector<std::string>
+configure_llvm_kinsn_select(std::string_view pass,
+			    const std::vector<std::string> &llvm_args)
 {
 	bool has_kinsn_mode = false;
 	for (const auto &arg : llvm_args) {
@@ -500,6 +574,7 @@ void configure_llvm_kinsn_select(std::string_view pass,
 	}
 	llvm::cl::ParseCommandLineOptions(static_cast<int>(argv.size()),
 					  argv.data(), "bpfopt LLVM kinsn\n");
+	return args;
 }
 
 int64_t count_kinsn_calls(const std::vector<uint8_t> &bytes)
@@ -727,6 +802,15 @@ llvm::json::Object counter_json(const std::map<std::string, int64_t> &counts)
 	return out;
 }
 
+llvm::json::Array string_array_json(const std::vector<std::string> &values)
+{
+	llvm::json::Array out;
+	for (const auto &value : values) {
+		out.emplace_back(value);
+	}
+	return out;
+}
+
 std::map<std::string, int64_t>
 counter_delta(std::map<std::string, int64_t> after,
 	      const std::map<std::string, int64_t> &before)
@@ -752,6 +836,44 @@ kinsn_call_family_counts(const std::map<std::string, int64_t> &by_name)
 		by_family[kinsn_family_for_name(name)] += count;
 	}
 	return by_family;
+}
+
+llvm::json::Object
+bytecode_kinsn_family_policy_json(std::string_view pass,
+				  const BytecodeKinsnPolicy &policy)
+{
+	static constexpr std::string_view families[] = {
+		"rotate", "extract", "endian_fusion", "bulk_memory", "prefetch",
+	};
+
+	llvm::json::Object out;
+	for (const auto family : families) {
+		out[std::string(family)] =
+			bytecode_kinsn_family_enabled(pass, family, policy);
+	}
+	return out;
+}
+
+llvm::json::Object kinsn_policy_json(const Cli &cli,
+				     const KinsnPassOptions &options)
+{
+	llvm::json::Object policy{
+		{ "pass_args", string_array_json(cli.pass_args) },
+		{ "llvm_args", string_array_json(options.effective_llvm_args) },
+		{ "bytecode_families",
+		  bytecode_kinsn_family_policy_json(*cli.pass,
+						    options.bytecode_policy) },
+	};
+	if (options.bytecode_policy.all_enabled) {
+		policy["bytecode_all_override"] =
+			*options.bytecode_policy.all_enabled;
+	}
+	llvm::json::Object family_overrides;
+	for (const auto &[family, enabled] : options.bytecode_policy.family_enabled) {
+		family_overrides[family] = enabled;
+	}
+	policy["bytecode_family_overrides"] = std::move(family_overrides);
+	return policy;
 }
 
 bool load_zero_extends_within_mask(uint8_t opcode, uint64_t mask)
@@ -2226,7 +2348,8 @@ void write_report(const Cli &cli, const std::vector<uint8_t> &input,
 		  const std::vector<InlineRecord> &inlined = {},
 		  std::optional<int64_t> sites_applied_override = std::nullopt,
 		  const std::vector<std::string> &diagnostics = {},
-		  const KinsnTargetMap *kinsn_targets = nullptr)
+		  const KinsnTargetMap *kinsn_targets = nullptr,
+		  const KinsnPassOptions *kinsn_options = nullptr)
 {
 	if (!cli.report) {
 		return;
@@ -2264,6 +2387,9 @@ void write_report(const Cli &cli, const std::vector<uint8_t> &input,
 		{ "inlined_map_entries", std::move(inlined_entries) },
 	};
 	if (kinsn_targets) {
+		if (kinsn_options) {
+			report["kinsn_policy"] = kinsn_policy_json(cli, *kinsn_options);
+		}
 		auto by_name = counter_delta(
 			count_kinsn_calls_by_name(output, *kinsn_targets),
 			count_kinsn_calls_by_name(input, *kinsn_targets));
@@ -2312,15 +2438,17 @@ void run_pass(Cli &cli)
 	}
 	const bool kinsn_pass = is_kinsn_pass(*cli.pass);
 	KinsnTargetMap kinsn_targets;
+	KinsnPassOptions kinsn_options;
 	if (kinsn_pass) {
 		if (!cli.target) {
 			throw std::runtime_error("--pass " + *cli.pass +
 						 " requires --target");
 		}
 		kinsn_targets = read_kinsn_targets(*cli.target);
-		configure_llvm_kinsn_select(
-			*cli.pass,
-			parse_kinsn_llvm_args(*cli.pass, cli.pass_args));
+		kinsn_options = parse_kinsn_pass_args(*cli.pass, cli.pass_args);
+		kinsn_options.effective_llvm_args =
+			configure_llvm_kinsn_select(*cli.pass,
+						    kinsn_options.llvm_args);
 	} else if (*cli.pass != "map_inline" && !cli.pass_args.empty()) {
 		throw std::runtime_error("--pass " + *cli.pass +
 					 " does not accept pass-local args");
@@ -2353,8 +2481,9 @@ void run_pass(Cli &cli)
 				compact_unreachable_insns(output);
 				remap_out_of_range_stack_spills(output, true);
 			}
-			apply_bytecode_kinsn_recovery(output, *cli.pass,
-						      kinsn_targets, diagnostics);
+			apply_bytecode_kinsn_recovery(
+				output, *cli.pass, kinsn_options.bytecode_policy,
+				kinsn_targets, diagnostics);
 			const int64_t output_kinsn_calls = count_kinsn_calls(output);
 			if (output_kinsn_calls < input_kinsn_calls) {
 				throw std::runtime_error(
@@ -2370,7 +2499,8 @@ void run_pass(Cli &cli)
 	}
 	write_all(cli.output, output);
 	write_report(cli, input, output, inlined, sites_applied, diagnostics,
-		     kinsn_pass ? &kinsn_targets : nullptr);
+		     kinsn_pass ? &kinsn_targets : nullptr,
+		     kinsn_pass ? &kinsn_options : nullptr);
 }
 
 std::string next_value(int &i, int argc, char **argv, std::string_view opt)

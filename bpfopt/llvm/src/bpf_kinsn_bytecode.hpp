@@ -1588,13 +1588,23 @@ int64_t apply_prefetch_bytecode_kinsns(std::vector<uint8_t> &bytes,
 	return applied;
 }
 
-bool bytecode_kinsn_family_enabled(std::string_view pass, std::string_view family)
+bool bytecode_kinsn_family_enabled(std::string_view pass, std::string_view family,
+				   const BytecodeKinsnPolicy &policy)
 {
-	return pass == "kinsn" || pass == family;
+	bool enabled = pass == "kinsn" || pass == family;
+	if (policy.all_enabled) {
+		enabled = *policy.all_enabled;
+	}
+	const auto it = policy.family_enabled.find(std::string(family));
+	if (it != policy.family_enabled.end()) {
+		enabled = it->second;
+	}
+	return enabled;
 }
 
 int64_t apply_bytecode_kinsn_recovery(std::vector<uint8_t> &bytes,
 				      std::string_view pass,
+				      const BytecodeKinsnPolicy &policy,
 				      const KinsnTargetMap &targets,
 				      std::vector<std::string> &diagnostics)
 {
@@ -1602,19 +1612,19 @@ int64_t apply_bytecode_kinsn_recovery(std::vector<uint8_t> &bytes,
 		return 0;
 	}
 	const int64_t before = count_kinsn_calls(bytes);
-	if (bytecode_kinsn_family_enabled(pass, "rotate")) {
+	if (bytecode_kinsn_family_enabled(pass, "rotate", policy)) {
 		apply_rotate_bytecode_kinsns(bytes, targets);
 	}
-	if (bytecode_kinsn_family_enabled(pass, "extract")) {
+	if (bytecode_kinsn_family_enabled(pass, "extract", policy)) {
 		apply_extract_bytecode_kinsns(bytes, targets);
 	}
-	if (bytecode_kinsn_family_enabled(pass, "endian_fusion")) {
+	if (bytecode_kinsn_family_enabled(pass, "endian_fusion", policy)) {
 		apply_endian_bytecode_kinsns(bytes, targets);
 	}
-	if (bytecode_kinsn_family_enabled(pass, "bulk_memory")) {
+	if (bytecode_kinsn_family_enabled(pass, "bulk_memory", policy)) {
 		apply_bulk_memory_bytecode_kinsns(bytes, targets);
 	}
-	if (bytecode_kinsn_family_enabled(pass, "prefetch")) {
+	if (bytecode_kinsn_family_enabled(pass, "prefetch", policy)) {
 		apply_prefetch_bytecode_kinsns(bytes, targets);
 	}
 	const int64_t after = count_kinsn_calls(bytes);
