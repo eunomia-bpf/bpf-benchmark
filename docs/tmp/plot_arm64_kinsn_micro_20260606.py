@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Post-hoc arm64 kinsn microbenchmark analysis for the 2026-06-06 artifact."""
+"""Post-hoc arm64 kinsn microbenchmark analysis for the 2026-06-06 artifacts."""
 
 from __future__ import annotations
 
@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 FIG = ROOT / "docs" / "figures"
 SUMMARY = ROOT / "docs" / "tmp" / "arm64_kinsn_micro_20260606_summary.md"
 PURE = ROOT / "micro/results/aws_arm64_micro_20260606_001225_821028/details/result.json"
+HELPERS = ROOT / "micro/results/aws_arm64_micro_20260606_160621_594885/details/result.json"
 
 SHORT_NAMES = {
     "simple": "simple",
@@ -135,17 +136,17 @@ def format_counter(counter: Counter[str]) -> str:
     return ", ".join(f"{name}={count}" for name, count in counter.most_common()) or "-"
 
 
-def write_summary(data: dict, rows: list[dict]) -> dict:
+def summarize(data: dict, rows: list[dict]) -> dict:
     speedups = [row["speedup"] for row in rows]
     code_ratios = [row["code_ratio"] for row in rows]
     kinsn_speedups = [row["speedup"] for row in rows if row["applied_median"]]
     names = sum((row["names"] for row in rows), Counter())
-    summary = {
+    return {
         "generated_at": data["generated_at"],
         "benchmarks": len(rows),
         "mismatches": correctness_mismatches(data),
         "geomean": geomean(speedups),
-        "kinsn_geomean": geomean(kinsn_speedups),
+        "kinsn_geomean": geomean(kinsn_speedups) if kinsn_speedups else None,
         "kinsn_benchmarks": len(kinsn_speedups),
         "wins": sum(value > 1.02 for value in speedups),
         "losses": sum(value < 0.98 for value in speedups),
@@ -158,6 +159,20 @@ def write_summary(data: dict, rows: list[dict]) -> dict:
         "names": names,
     }
 
+
+def write_summary(pure_data: dict, pure_rows: list[dict], helper_data: dict, helper_rows: list[dict]) -> dict:
+    summary = summarize(pure_data, pure_rows)
+    helper_summary = summarize(helper_data, helper_rows)
+    kinsn_geomean = (
+        f"{summary['kinsn_geomean']:.3f}x over {summary['kinsn_benchmarks']} benchmarks"
+        if summary["kinsn_geomean"] is not None
+        else "N/A"
+    )
+    helper_kinsn_geomean = (
+        f"{helper_summary['kinsn_geomean']:.3f}x over {helper_summary['kinsn_benchmarks']} benchmarks"
+        if helper_summary["kinsn_geomean"] is not None
+        else "N/A"
+    )
     lines = [
         "# arm64 kinsn micro 2026-06-06",
         "",
@@ -166,19 +181,33 @@ def write_summary(data: dict, rows: list[dict]) -> dict:
         f"- Benchmarks: {summary['benchmarks']}",
         f"- Mismatches: {summary['mismatches']}",
         f"- Speedup geomean: {summary['geomean']:.3f}x",
-        f"- Kinsn-bearing geomean: {summary['kinsn_geomean']:.3f}x over {summary['kinsn_benchmarks']} benchmarks",
+        f"- Kinsn-bearing geomean: {kinsn_geomean}",
         f"- Wins / losses / ties: {summary['wins']} / {summary['losses']} / {summary['ties']}",
         f"- Matched/applied sites, median sample: {summary['matched_median']} / {summary['applied_median']}",
         f"- Matched/applied calls, all samples: {summary['matched_raw']} / {summary['applied_raw']}",
         f"- Code-size ratio geomean: {summary['code_geomean']:.3f}x",
-        f"- Kinsn calls by name, all samples: {format_counter(names)}",
+        f"- Kinsn calls by name, all samples: {format_counter(summary['names'])}",
+        "",
+        "## Helpers/maps rerun",
+        "",
+        f"- Artifact: `{HELPERS.relative_to(ROOT)}`",
+        f"- Generated at: {helper_summary['generated_at']}",
+        f"- Benchmarks: {helper_summary['benchmarks']}",
+        f"- Mismatches: {helper_summary['mismatches']}",
+        f"- Speedup geomean: {helper_summary['geomean']:.3f}x",
+        f"- Kinsn-bearing geomean: {helper_kinsn_geomean}",
+        f"- Wins / losses / ties: {helper_summary['wins']} / {helper_summary['losses']} / {helper_summary['ties']}",
+        f"- Matched/applied sites, median sample: {helper_summary['matched_median']} / {helper_summary['applied_median']}",
+        f"- Matched/applied calls, all samples: {helper_summary['matched_raw']} / {helper_summary['applied_raw']}",
+        f"- Code-size ratio geomean: {helper_summary['code_geomean']:.3f}x",
+        f"- Kinsn calls by name, all samples: {format_counter(helper_summary['names'])}",
         "",
         "## Per-case results",
         "",
         "| Case | Kernel ns | Kernel ReJIT ns | Speedup | Applied median sample | Kinsn calls by name, all samples |",
         "|---|---:|---:|---:|---:|---|",
     ]
-    for row in rows:
+    for row in pure_rows:
         lines.append(
             f"| `{row['name']}` | {row['kernel_ns']:.0f} | {row['rejit_ns']:.0f} | "
             f"{row['speedup']:.3f}x | {row['applied_median']} | {format_counter(row['names'])} |"
@@ -238,8 +267,11 @@ def draw(rows: list[dict], summary: dict) -> None:
 def main() -> None:
     if not PURE.exists():
         raise SystemExit(f"missing artifact: {PURE}")
+    if not HELPERS.exists():
+        raise SystemExit(f"missing artifact: {HELPERS}")
     data, rows = load_rows(PURE)
-    summary = write_summary(data, rows)
+    helper_data, helper_rows = load_rows(HELPERS)
+    summary = write_summary(data, rows, helper_data, helper_rows)
     draw(rows, summary)
     print(
         f"arm64 pure bytecode 29: geomean={summary['geomean']:.3f}x "

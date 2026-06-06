@@ -22,26 +22,27 @@ The current research questions are:
 
 - **RQ1 Correctness:** do all tested execution configurations preserve the
   expected result and retval on the microbenchmark suites?
-- **RQ2 Four-way execution cost:** on x86 KVM, how do userspace eBPF,
-  userspace native, kernel eBPF, and kernel native compare on pure
-  instruction-path workloads?
+- **RQ2 Four-way execution cost:** on x86 KVM and arm64 AWS pure bytecode, how
+  do userspace eBPF, userspace native, kernel eBPF, and kernel native compare
+  on pure instruction-path workloads?
 - **RQ3 Helper/map boundary cost:** on x86 KVM, does kernel native still improve
   helper/map-heavy programs when evaluated against the real kernel helper/map
   ABI?
-- **RQ4 Kernel-native portability:** does the kernel-native result also hold on
-  arm64 when compared against arm64 kernel eBPF?
+- **RQ4 arm64 portability:** does the native result also hold on arm64 when
+  compared against arm64 kernel eBPF?
 - **RQ5 Machine-code footprint:** how does generated machine-code size compare
   against kernel eBPF JIT output?
 - **RQ6 kinsn opportunity and coverage:** what speedups are visible in the best
   local full-suite LLVM-kinsn candidate, and do matched arm64 kinsn ReJIT runs
   apply sites on the full micro suites?
 
-The full four-way comparison is available in the latest x86 KVM artifacts:
-`llvmbpf` is userspace eBPF, `native` is userspace native, `kernel` is kernel
-eBPF, and `native_kernel` is kernel native. The with-helpers/maps suite excludes
-userspace runtimes from the main comparison because their helper/map paths are
-runner-local emulation, not the kernel helper/map ABI. The arm64 AWS artifacts
-are a two-way portability check for kernel eBPF versus kernel native.
+The full pure-bytecode four-way comparison is available in the latest x86 KVM
+artifact and in the latest arm64 AWS pure-bytecode artifact: `llvmbpf` is
+userspace eBPF, `native` is userspace native, `kernel` is kernel eBPF, and
+`native_kernel` is kernel native. The with-helpers/maps raw artifacts also
+record all four runtimes, but the main helper/map comparison excludes userspace
+runtimes because their helper/map paths are runner-local emulation, not the
+kernel helper/map ABI.
 
 ## Experimental Setup
 
@@ -51,6 +52,13 @@ The authoritative micro runs use:
 SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 make micro
 
 PLATFORM=aws ARCH=arm64 SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 make micro
+
+PLATFORM=aws ARCH=arm64 SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 \
+  RUNTIMES="kernel llvmbpf native native_kernel" make micro
+
+PLATFORM=aws ARCH=arm64 SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 \
+  SUITE=micro/config/micro_stage2.yaml \
+  RUNTIMES="kernel llvmbpf native native_kernel" make micro
 
 PLATFORM=aws ARCH=arm64 SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 \
   RUNTIMES="kernel kernel_rejit" BPFREJIT_BENCH_PASSES=kinsn make micro
@@ -74,10 +82,10 @@ The measured runtimes are:
 - **kernel:** baseline kernel eBPF JIT.
 - **native_kernel:** native object linked and loaded into the kernel native
   execution path.
-- **native:** userspace native runtime, available in the latest x86 KVM
-  four-way run.
+- **native:** userspace native runtime, available in the latest x86 KVM and
+  arm64 AWS four-way raw artifacts.
 - **llvmbpf:** userspace eBPF through the LLVM-BPF runtime, available in the
-  latest x86 KVM four-way run.
+  latest x86 KVM and arm64 AWS four-way raw artifacts.
 - **kernel_rejit:** kernel eBPF after the requested ReJIT pass list. It is used
   only for the arm64 kinsn follow-up in Appendix D.
 
@@ -118,8 +126,8 @@ Latest representative full runs:
 |---|---|---|---|---:|---:|
 | x86 KVM | pure bytecode 29 | `micro/results/x86_kvm_micro_20260526_210952_650695` | kernel, llvmbpf, native, native_kernel | 348 | 0 |
 | x86 KVM | with helpers/maps 13 | `micro/results/x86_kvm_micro_20260526_210434_440390` | kernel, llvmbpf, native, native_kernel | 156 | 0 |
-| arm64 AWS | pure bytecode 29 | `micro/results/aws_arm64_micro_20260523_091516_610343` | kernel, native_kernel | 174 | 0 |
-| arm64 AWS | with helpers/maps 13 | `micro/results/aws_arm64_micro_20260523_092823_183684` | kernel, native_kernel | 78 | 0 |
+| arm64 AWS | pure bytecode 29 | `micro/results/aws_arm64_micro_20260606_063319_954947` | kernel, llvmbpf, native, native_kernel | 348 | 0 |
+| arm64 AWS | with helpers/maps 13 | `micro/results/aws_arm64_micro_20260606_084130_711782` | kernel, llvmbpf, native, native_kernel | 156 | 0 |
 
 Aggregate runtime ratios:
 
@@ -129,45 +137,56 @@ Aggregate runtime ratios:
 | x86 KVM | pure bytecode 29 | LLVM-BPF userspace | 0.650 | 1.538x | 27 / 1 / 1 |
 | x86 KVM | pure bytecode 29 | native kernel | 0.678 | 1.474x | 24 / 2 / 3 |
 | x86 KVM | with helpers/maps 13 | native kernel | 0.710 | 1.409x | 9 / 0 / 4 |
-| arm64 AWS | pure bytecode 29 | native kernel | 0.556 | 1.800x | 28 / 0 / 1 |
-| arm64 AWS | with helpers/maps 13 | native kernel | 0.855 | 1.170x | 9 / 0 / 4 |
+| arm64 AWS | pure bytecode 29 | native userspace | 0.467 | 2.141x | 29 / 0 / 0 |
+| arm64 AWS | pure bytecode 29 | LLVM-BPF userspace | 0.512 | 1.952x | 29 / 0 / 0 |
+| arm64 AWS | pure bytecode 29 | native kernel | 0.563 | 1.777x | 27 / 0 / 2 |
+| arm64 AWS | with helpers/maps 13 | native kernel | 0.869 | 1.151x | 6 / 0 / 7 |
 
-![Aggregate runtime speedup over kernel eBPF](figures/micro-characterization-runtime-aggregate-20260527.png)
+![Aggregate runtime speedup over kernel eBPF](figures/micro-characterization-runtime-aggregate-20260606.png)
 
 *Figure 1: Aggregate microbenchmark speedup over kernel eBPF JIT for the
-authoritative pure-bytecode and with-helpers/maps artifacts. x86 KVM pure
-bytecode includes kernel native, userspace eBPF, and userspace native; x86 KVM
-with helpers/maps reports kernel native only. arm64 AWS reports kernel native
-only because the current authoritative arm64 artifacts contain kernel eBPF and
+authoritative pure-bytecode and with-helpers/maps artifacts. x86 KVM and arm64
+AWS pure bytecode include kernel native, userspace eBPF, and userspace native;
+with helpers/maps reports kernel native only. Higher is better; the dashed line
+is parity.*
+
+![x86 KVM pure-bytecode per-case runtime comparison](figures/micro-characterization-x86-pure-bytecode-percase-20260606.png)
+
+*Figure 2a: x86 KVM pure-bytecode per-case runtime comparison normalized to
+kernel eBPF JIT. The figure reports userspace eBPF, userspace native, and
 kernel native. Higher is better; the dashed line is parity.*
 
-![x86 KVM per-case runtime comparison](figures/micro-characterization-x86-four-way-percase-vertical-20260527.png)
+![x86 KVM helpers/maps per-case runtime comparison](figures/micro-characterization-x86-helpers-maps-percase-20260606.png)
 
-*Figure 2: x86 KVM per-case runtime comparison normalized to kernel eBPF JIT.
-Pure bytecode includes userspace eBPF, userspace native, and kernel native.
-With helpers/maps only reports kernel native because helper/map-heavy programs
-must be evaluated against the real kernel helper/map ABI; userspace helper/map
-models are not comparable for this RQ.*
+*Figure 2b: x86 KVM with-helpers/maps per-case runtime comparison. It reports
+kernel native only because helper/map-heavy programs must be evaluated against
+the real kernel helper/map ABI; userspace helper/map models are not comparable
+for this RQ.*
 
-![arm64 AWS per-case kernel-native comparison](figures/micro-characterization-arm64-kernel-native-percase-vertical-20260527.png)
+![arm64 AWS pure-bytecode per-case runtime comparison](figures/micro-characterization-arm64-pure-bytecode-percase-20260606.png)
 
-*Figure 3: arm64 AWS per-case kernel-native portability result. Bars report
-kernel native speedup over arm64 kernel eBPF JIT, using the same pure-bytecode
-and with-helpers/maps case structure as Figure 2. Higher is better; the dashed
-line is parity.*
+*Figure 3a: arm64 AWS pure-bytecode per-case runtime comparison normalized to
+arm64 kernel eBPF JIT. The figure reports userspace eBPF, userspace native, and
+kernel native. Higher is better; the dashed line is parity.*
+
+![arm64 AWS helpers/maps per-case runtime comparison](figures/micro-characterization-arm64-helpers-maps-percase-20260606.png)
+
+*Figure 3b: arm64 AWS with-helpers/maps per-case runtime comparison. It reports
+kernel native only, using the same helper/map comparison scope as Figure 2b.*
 
 ## RQ Answers
 
 **RQ1 Correctness.** All current full micro artifacts have zero expected-result
 or retval mismatches. On x86 KVM this covers all four execution configurations
 over 29/29 pure-bytecode benchmarks and 13/13 with-helpers/maps benchmarks. On
-arm64 AWS this covers kernel eBPF and kernel native over the same suites.
+arm64 AWS this covers all four execution configurations over both the 29/29
+pure-bytecode benchmarks and the 13/13 with-helpers/maps benchmarks.
 
 **RQ2 Four-way execution cost.** On x86 KVM pure bytecode, all non-kernel-eBPF
 execution configurations are faster than kernel eBPF: userspace native is
-1.716x, userspace eBPF is 1.538x, and kernel native is 1.474x. This shows that
-the pure instruction path benefits from native code even after paying the
-kernel-native execution path.
+1.716x, userspace eBPF is 1.538x, and kernel native is 1.474x. On arm64 AWS
+pure bytecode, the same four-way pattern holds and is stronger: userspace native
+is 2.141x, userspace eBPF is 1.952x, and kernel native is 1.777x.
 
 **RQ3 Helper/map boundary cost.** On x86 KVM with helpers/maps, kernel native
 remains faster than kernel eBPF at 1.409x. This suite only reports kernel native
@@ -175,16 +194,20 @@ because helper/map-heavy programs must be evaluated against the real kernel
 helper/map ABI. Userspace runtimes use runner-local helper/map models, so they
 are not comparable for this RQ.
 
-**RQ4 Kernel-native portability.** On arm64 AWS, kernel native is also faster
-than arm64 kernel eBPF: 1.800x on pure bytecode and 1.170x with helpers/maps.
-The helper/map gain is smaller than the pure-bytecode gain, consistent with
+**RQ4 arm64 portability.** On arm64 AWS, native execution is also faster than
+arm64 kernel eBPF. The pure-bytecode four-way run reaches 2.141x for userspace
+native, 1.952x for userspace eBPF, and 1.777x for kernel native. The
+with-helpers/maps kernel-native result remains positive at 1.151x. The
+helper/map gain is smaller than the pure-bytecode gain, consistent with
 helper/map boundary costs.
 
 **RQ5 Machine-code footprint.** The generated machine code is consistently
 smaller than kernel eBPF JIT output. On x86 KVM pure bytecode, code-size ratios
 are 0.541x for kernel native, 0.565x for userspace eBPF, and 0.539x for
 userspace native. Kernel native is also smaller on x86 with helpers/maps
-(0.610x), arm64 pure bytecode (0.495x), and arm64 with helpers/maps (0.724x).
+(0.610x) and arm64 with helpers/maps (0.724x). On arm64 pure bytecode, code-size
+ratios are 0.495x for kernel native, 0.460x for userspace eBPF, and 0.471x for
+userspace native.
 
 **RQ6 kinsn opportunity and coverage.** The best local raw LLVM-kinsn candidate
 shows a 1.216x all-29 geomean speedup over the latest stock-kernel baseline,
@@ -194,18 +217,22 @@ compiler-control run. The selector-fixed matched arm64 AWS pure-bytecode kinsn
 ReJIT full-suite run is now an actual coverage/performance datapoint: it
 applies 308/308 matched sites in the median sample, 924/924 raw calls across
 three samples, and reports a 1.208x geomean speedup with zero correctness
-mismatches. The with-helpers/maps kinsn run listed below is still the
-pre-selector-fix artifact and remains a parity/noise check until rerun.
+mismatches. The post-selector-fix with-helpers/maps kinsn rerun still has
+0/0 matched/applied sites and a 1.009x geomean speedup, so it remains a
+parity/noise check rather than a kinsn performance claim.
 
 The concise paper claim supported by these data is:
 
 - x86 KVM pure bytecode remains strong at 1.474x and with helpers/maps is
   positive at 1.409x.
-- arm64 AWS is positive on both suites, with a larger pure-bytecode gain.
-- Generated machine-code size is 0.49-0.72x of kernel eBPF JIT size across the
-  measured authoritative kernel-native suites.
+- arm64 AWS pure bytecode now has the same four-way coverage as x86 KVM, with
+  the strongest aggregate at 2.141x for userspace native.
+- arm64 AWS with helpers/maps remains positive in the kernel-helper/map-path
+  comparison at 1.151x for kernel native.
+- Generated machine-code size is 0.46-0.72x of kernel eBPF JIT size across the
+  measured main-comparison runtimes.
 - Matched arm64 kinsn ReJIT now has full-suite pure-bytecode coverage and
-  speedup, but helper/map kinsn coverage still needs a post-selector-fix rerun.
+  speedup; the post-selector-fix helper/map kinsn rerun remains zero-apply.
 
 ## Threats To Validity
 
@@ -214,9 +241,9 @@ The concise paper claim supported by these data is:
 - AWS CPU governor and turbo state are recorded as unknown in the artifacts.
   Cross-platform comparisons should therefore focus on ratios within the same
   platform, not absolute nanoseconds across platforms.
-- AWS full authoritative artifacts currently cover `kernel` and
-  `native_kernel`; userspace native and LLVM-BPF baselines are only available in
-  the latest x86 KVM full run.
+- AWS arm64 pure-bytecode and with-helpers/maps raw artifacts now cover all
+  four runtimes. The with-helpers/maps main comparison still uses only `kernel`
+  and `native_kernel`.
 - Userspace runtime data for the with-helpers/maps suite exists in the raw
   artifact but is not a kernel-helper/map-path comparison, so it is
   intentionally excluded from the main helper/map claim.
@@ -237,8 +264,8 @@ The concise paper claim supported by these data is:
 |---|---|---|---|
 | x86 KVM | pure bytecode 29 | 2026-05-26T21:09:52Z | `micro/results/x86_kvm_micro_20260526_210952_650695/details/result.json` |
 | x86 KVM | with helpers/maps 13 | 2026-05-26T21:04:34Z | `micro/results/x86_kvm_micro_20260526_210434_440390/details/result.json` |
-| arm64 AWS | pure bytecode 29 | 2026-05-23T09:15:16Z | `micro/results/aws_arm64_micro_20260523_091516_610343/details/result.json` |
-| arm64 AWS | with helpers/maps 13 | 2026-05-23T09:28:23Z | `micro/results/aws_arm64_micro_20260523_092823_183684/details/result.json` |
+| arm64 AWS | pure bytecode 29 | 2026-06-06T06:33:19Z | `micro/results/aws_arm64_micro_20260606_063319_954947/details/result.json` |
+| arm64 AWS | with helpers/maps 13 | 2026-06-06T08:41:30Z | `micro/results/aws_arm64_micro_20260606_084130_711782/details/result.json` |
 
 ## Appendix B: Native Kernel Helper/Map Detail
 
@@ -262,18 +289,18 @@ workload. Values are median `exec_ns`; speedup is
 | x86 KVM | `packet_5tuple_classify` | 40 | 41 | 1.025x |
 | x86 KVM | `stats_mixed_helpers` | 60 | 59 | 0.983x |
 | arm64 AWS | `helper_only_uid_gid` | 30 | 32 | 1.067x |
-| arm64 AWS | `helper_chain_simple` | 242 | 247 | 1.021x |
-| arm64 AWS | `map_array_lookup` | 17 | 28 | 1.647x |
-| arm64 AWS | `map_array_index_packet` | 18 | 29 | 1.611x |
-| arm64 AWS | `map_hash_lookup` | 96 | 100 | 1.042x |
-| arm64 AWS | `map_hash_str_key` | 107 | 109 | 1.019x |
-| arm64 AWS | `map_percpu_array` | 19 | 31 | 1.632x |
-| arm64 AWS | `map_lru_hash_counter` | 215 | 220 | 1.023x |
-| arm64 AWS | `map_percpu_hash_counter` | 90 | 91 | 1.011x |
+| arm64 AWS | `helper_chain_simple` | 246 | 247 | 1.004x |
+| arm64 AWS | `map_array_lookup` | 18 | 28 | 1.556x |
+| arm64 AWS | `map_array_index_packet` | 19 | 29 | 1.526x |
+| arm64 AWS | `map_hash_lookup` | 98 | 100 | 1.020x |
+| arm64 AWS | `map_hash_str_key` | 109 | 109 | 1.000x |
+| arm64 AWS | `map_percpu_array` | 20 | 31 | 1.550x |
+| arm64 AWS | `map_lru_hash_counter` | 220 | 221 | 1.005x |
+| arm64 AWS | `map_percpu_hash_counter` | 91 | 92 | 1.011x |
 | arm64 AWS | `combined_helper_map` | 37 | 46 | 1.243x |
-| arm64 AWS | `multi_map_policy` | 108 | 125 | 1.157x |
-| arm64 AWS | `packet_5tuple_classify` | 107 | 109 | 1.019x |
-| arm64 AWS | `stats_mixed_helpers` | 188 | 190 | 1.011x |
+| arm64 AWS | `multi_map_policy` | 111 | 136 | 1.225x |
+| arm64 AWS | `packet_5tuple_classify` | 110 | 110 | 1.000x |
+| arm64 AWS | `stats_mixed_helpers` | 191 | 190 | 0.995x |
 
 ## Appendix C: Code Size
 
@@ -283,13 +310,13 @@ The ratio is runtime machine-code bytes divided by kernel eBPF JIT machine-code
 bytes, so lower means the generated image is smaller than the kernel eBPF JIT
 image.
 
-![Microbenchmark machine-code size ratio](figures/micro-characterization-code-size-20260527.png)
+![Microbenchmark machine-code size ratio](figures/micro-characterization-code-size-20260606.png)
 
 *Figure 4: Machine-code size relative to kernel eBPF JIT code size for the same
 pure-bytecode and with-helpers/maps artifacts used in the runtime figures. x86
-KVM pure bytecode includes kernel native, userspace eBPF, and userspace native;
-with helpers/maps and arm64 report kernel native only to match the runtime
-comparison scope. Lower is smaller; the dashed line is parity.*
+KVM and arm64 AWS pure bytecode include kernel native, userspace eBPF, and
+userspace native; with helpers/maps reports kernel native only to match the
+runtime comparison scope. Lower is smaller; the dashed line is parity.*
 
 | Platform | Suite | Runtime | runtime/kernel code-size geomean |
 |---|---|---|---:|
@@ -298,6 +325,8 @@ comparison scope. Lower is smaller; the dashed line is parity.*
 | x86 KVM | pure bytecode 29 | userspace native | 0.539 |
 | x86 KVM | with helpers/maps 13 | kernel native | 0.610 |
 | arm64 AWS | pure bytecode 29 | kernel native | 0.495 |
+| arm64 AWS | pure bytecode 29 | userspace eBPF | 0.460 |
+| arm64 AWS | pure bytecode 29 | userspace native | 0.471 |
 | arm64 AWS | with helpers/maps 13 | kernel native | 0.724 |
 
 ## Appendix D: LLVM Kinsn Micro
@@ -352,7 +381,7 @@ kinsn-bearing geomean is 1.222x over 27 benchmarks.*
 | Suite | Result source | Benchmarks | Expected-result mismatches | Speedup geomean | Kinsn-bearing geomean | Wins / losses / ties | Matched/applied sites | Code-size ratio |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
 | arm64 AWS pure bytecode 29, selector-fixed | `micro/results/aws_arm64_micro_20260606_001225_821028/details/result.json` | 29 | 0 | 1.208x | 1.222x over 27 | 24 / 2 / 3 | 308 / 308 median sample; 924 / 924 raw | 0.879x |
-| arm64 AWS with helpers/maps 13, pre-selector-fix | `micro/results/aws_arm64_micro_20260605_201826_257732/details/result.json` | 13 | 0 | 1.000x | N/A | 2 / 2 / 9 | 0 / 0 | 1.000x |
+| arm64 AWS with helpers/maps 13, selector-fixed | `micro/results/aws_arm64_micro_20260606_160621_594885/details/result.json` | 13 | 0 | 1.009x | N/A | 3 / 0 / 10 | 0 / 0 median sample; 0 / 0 raw | 1.000x |
 
 The newly applied arm64 sites are not only rotates. Across the three samples,
 the pass reports `bpf_arm64_extr_x=387`, `bpf_arm64_ldr_w=198`,
@@ -392,12 +421,14 @@ The LLVM-kinsn upper-bound figures use these raw artifacts:
 | Stock-kernel baseline | `micro/results/x86_kvm_micro_20260526_210351_224315` | 2026-05-26T21:03:51Z | kernel, llvmbpf, native, native_kernel | 29 | 348 | 0 |
 
 The arm64 matched kinsn ReJIT figure uses the selector-fixed pure-bytecode raw
-artifact. The older pre-selector-fix artifacts are kept here as provenance for
-the zero-apply diagnosis and for the still-unrerun helpers/maps suite.
+artifact. The selector-fixed helpers/maps rerun is listed separately because it
+still has zero kinsn matches. The older pre-selector-fix artifacts are kept here
+as provenance for the zero-apply diagnosis.
 
 | Role | Result source | Generated at | Runtimes | Benchmarks | Samples | Expected-result mismatches |
 |---|---|---|---|---:|---:|---:|
 | arm64 kinsn ReJIT pure bytecode, selector-fixed | `micro/results/aws_arm64_micro_20260606_001225_821028` | 2026-06-06T00:12:25Z | kernel, kernel_rejit | 29 | 174 | 0 |
+| arm64 kinsn ReJIT with helpers/maps, selector-fixed | `micro/results/aws_arm64_micro_20260606_160621_594885` | 2026-06-06T16:06:21Z | kernel, kernel_rejit | 13 | 78 | 0 |
 | arm64 kinsn ReJIT pure bytecode, pre-selector-fix | `micro/results/aws_arm64_micro_20260605_195615_598255` | 2026-06-05T19:56:15Z | kernel, kernel_rejit | 29 | 174 | 0 |
 | arm64 kinsn ReJIT with helpers/maps, pre-selector-fix | `micro/results/aws_arm64_micro_20260605_201826_257732` | 2026-06-05T20:18:26Z | kernel, kernel_rejit | 13 | 78 | 0 |
 
@@ -406,10 +437,10 @@ CV of the three `exec_ns` samples; runtime aggregates use the median sample.
 
 | Platform | Suite | Benchmark/runtime pairs | Median CV | p95 CV | Max CV | Pairs within 2% of median |
 |---|---|---:|---:|---:|---:|---:|
-| x86 KVM | pure bytecode 29 | 116 | 0.57% | 19.54% | 28.37% | 75 / 116 |
-| x86 KVM | with helpers/maps 13 | 26 | 0.40% | 60.91% | 61.02% | 16 / 26 |
-| arm64 AWS | pure bytecode 29 | 58 | 1.55% | 8.86% | 23.40% | 26 / 58 |
-| arm64 AWS | with helpers/maps 13 | 26 | 0.54% | 4.03% | 6.13% | 17 / 26 |
+| x86 KVM | pure bytecode 29 | 116 | 0.57% | 17.69% | 28.37% | 75 / 116 |
+| x86 KVM | with helpers/maps 13 | 26 | 0.40% | 60.39% | 61.02% | 16 / 26 |
+| arm64 AWS | pure bytecode 29 | 116 | 0.50% | 9.96% | 17.15% | 73 / 116 |
+| arm64 AWS | with helpers/maps 13 | 26 | 0.40% | 4.64% | 12.38% | 17 / 26 |
 
 The high x86 helper/map p95/max CV comes from tiny absolute-time kernel
 baselines with one outlier sample, for example `map_lru_hash_counter` kernel
@@ -419,13 +450,14 @@ letting these one-sample outliers dominate per-case ratios.
 
 ## Appendix F: Figure Generation
 
-The plotting script for Figures 1-4 is
-`docs/tmp/plot_micro_characterization_20260527.py`. It is an analysis-side
+The plotting script for Figures 1, 2a, 2b, 3a, 3b, and 4 is
+`docs/tmp/plot_micro_characterization_20260606.py`. It is an analysis-side
 script that reads the raw `result.json` artifacts listed in Appendix A and
-writes the PNG files under `docs/figures`.
+writes the PNG files under `docs/figures`. It also writes the detailed
+post-hoc table at `docs/tmp/micro_characterization_20260606_summary.md`.
 
 ```sh
-python3 docs/tmp/plot_micro_characterization_20260527.py
+python3 docs/tmp/plot_micro_characterization_20260606.py
 ```
 
 The plotting script for Figures 5-6 is

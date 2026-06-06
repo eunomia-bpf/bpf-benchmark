@@ -12,6 +12,20 @@
 - Code-size ratio geomean: 0.879x
 - Kinsn calls by name, all samples: bpf_arm64_extr_x=387, bpf_arm64_ldr_w=198, bpf_arm64_ubfm_x=144, bpf_arm64_ldrh=114, bpf_arm64_rev16_w=39, bpf_arm64_stp_x=21, bpf_arm64_rev_w=15, bpf_arm64_ldp_x=6
 
+## Helpers/maps rerun
+
+- Artifact: `micro/results/aws_arm64_micro_20260606_160621_594885/details/result.json`
+- Generated at: 2026-06-06T16:06:21.594885+00:00
+- Benchmarks: 13
+- Mismatches: 0
+- Speedup geomean: 1.009x
+- Kinsn-bearing geomean: N/A
+- Wins / losses / ties: 3 / 0 / 10
+- Matched/applied sites, median sample: 0 / 0
+- Matched/applied calls, all samples: 0 / 0
+- Code-size ratio geomean: 1.000x
+- Kinsn calls by name, all samples: -
+
 ## Per-case results
 
 | Case | Kernel ns | Kernel ReJIT ns | Speedup | Applied median sample | Kinsn calls by name, all samples |
