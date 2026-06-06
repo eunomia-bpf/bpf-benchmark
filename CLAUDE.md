@@ -79,8 +79,20 @@ Do not produce `git revert` commits or "Restore X" commits to undo previous chan
 ### Preserve Documentation History
 Do not rewrite long-lived design notes, experiment logs, benchmark reports, or status documents wholesale unless the user explicitly asks for a full rewrite. Prefer minimal, additive edits that preserve existing data, failed experiments, artifact paths, and rationale. When simplifying stale documentation, first compare against the current diff and keep every still-relevant measurement, caveat, and lesson learned; summarize only duplicated or obsolete narrative.
 
-### No Unauthorized Git Mutations
-Assistants (Claude or codex) must NOT run git commands that modify state: `commit`, `commit --amend`, `checkout -- <files>`, `checkout HEAD -- <files>`, `reset`, `reset --hard`, `restore`, `stash`, `stash pop`, `branch -D`, `push`, `push -f`, `rebase`, `cherry-pick`, `revert`. The only allowed git state mutation is `git add`, and only when the user explicitly asks to stage files. Other allowed git commands are read-only: `status`, `diff`, `log`, `blame`, `show`, `fsck`, `stash list`, `reflog`.
+### Explicitly Authorized Git Mutations Only
+Assistants (Claude or codex) must NOT run git commands that modify state unless
+the user explicitly asks for that operation. When explicitly requested by the
+user, the allowed state-mutating git commands are `git pull`, `git add`,
+`git commit`, and `git push`, scoped to the requested work. Before running any
+of them, inspect `git status`/`git diff` and avoid overwriting unrelated
+uncommitted work.
+
+Destructive or history-rewriting git commands remain forbidden unless a future
+explicit instruction updates this policy: `commit --amend`, `checkout -- <files>`,
+`checkout HEAD -- <files>`, `reset`, `reset --hard`, `restore`, `stash`,
+`stash pop`, `branch -D`, `push -f`, `rebase`, `cherry-pick`, `revert`.
+Other allowed git commands are read-only: `status`, `diff`, `log`, `blame`,
+`show`, `fsck`, `stash list`, `reflog`.
 
 Uncommitted working-tree modifications may be the user's or a concurrent agent's WIP. Even when the build is broken (e.g., 82 compile errors from a half-done refactor), do NOT `git checkout` to "fix" it — report the situation to the user and wait for direction. Lost WIP is not recoverable through `git reflog` because reflog only tracks committed states.
 
