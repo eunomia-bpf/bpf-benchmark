@@ -23,6 +23,11 @@ constexpr uint8_t BPF_JEQ32_K = 0x16;
 constexpr uint8_t BPF_JNE32_K = 0x56;
 constexpr uint8_t BPF_END_BE = 0xdc;
 constexpr uint8_t BPF_END_LE = 0xd4;
+constexpr uint8_t BPF_SRC_X = 0x08;
+constexpr uint8_t BPF_OP_MASK = 0xf0;
+constexpr uint8_t BPF_NEG_OP = 0x80;
+constexpr uint8_t BPF_MOV_OP = 0xb0;
+constexpr uint8_t BPF_END_OP = 0xd0;
 constexpr int32_t BPF_FUNC_map_lookup_elem = 1;
 constexpr uint8_t X86_FORM_RR = 1;
 constexpr uint8_t X86_FORM_IMM = 2;
@@ -156,6 +161,12 @@ uint64_t pack_arm64_pair_payload(uint8_t lane0, uint8_t lane1, uint8_t base,
 {
 	return pack_u4(lane0, 0) | pack_u4(lane1, 4) | pack_u4(base, 8) |
 	       pack_u16(static_cast<uint16_t>(off), 12);
+}
+
+uint64_t pack_arm64_mem_payload(uint8_t reg, uint8_t base, int16_t off)
+{
+	return pack_u4(reg, 0) | pack_u4(base, 4) |
+	       pack_u16(static_cast<uint16_t>(off), 8);
 }
 
 uint64_t pack_arm64_csel_payload(uint8_t dst, uint8_t true_reg,
@@ -430,18 +441,28 @@ bool insn_uses_reg(const std::vector<uint8_t> &bytes, size_t pc, uint8_t reg)
 	if (klass == BPF_ST_CLASS) {
 		return dst == reg;
 	}
-	if (klass == BPF_ALU_CLASS || klass == BPF_ALU64_CLASS ||
-	    klass == BPF_JMP_CLASS || klass == BPF_JMP32_CLASS) {
-		if ((opcode & 0x08) && src == reg) {
-			return true;
-		}
-	}
 	if ((opcode == BPF_CALL || opcode == BPF_CALLX) &&
 	    src_reg(bytes, pc) != BPF_PSEUDO_CALL) {
 		return reg >= 1 && reg <= 5;
 	}
 	if (opcode == BPF_EXIT) {
 		return reg == 0;
+	}
+	if (klass == BPF_ALU_CLASS || klass == BPF_ALU64_CLASS) {
+		const uint8_t op = opcode & BPF_OP_MASK;
+		if (op == BPF_MOV_OP) {
+			return (opcode & BPF_SRC_X) && src == reg;
+		}
+		if (op == BPF_NEG_OP || op == BPF_END_OP) {
+			return dst == reg;
+		}
+		return dst == reg || ((opcode & BPF_SRC_X) && src == reg);
+	}
+	if (klass == BPF_JMP_CLASS || klass == BPF_JMP32_CLASS) {
+		if (opcode == BPF_JA) {
+			return false;
+		}
+		return dst == reg || ((opcode & BPF_SRC_X) && src == reg);
 	}
 	return false;
 }
@@ -1457,6 +1478,27 @@ struct EndianSite {
 	int bytes = 0;
 };
 
+struct ByteLoadComponent {
+	int16_t off = 0;
+	uint8_t shift = 0;
+};
+
+struct ByteLoadExpr {
+	uint8_t base = 0;
+	std::vector<ByteLoadComponent> components;
+};
+
+struct Arm64ByteLoadFusionSite {
+	size_t start = 0;
+	size_t old_len = 0;
+	uint8_t dst = 0;
+	uint8_t base = 0;
+	int16_t off = 0;
+	int width = 0;
+	bool big_endian = false;
+	std::vector<uint8_t> clobbered;
+};
+
 std::optional<EndianSite> match_endian_site(const std::vector<uint8_t> &bytes,
 					    size_t pc)
 {
@@ -1507,10 +1549,267 @@ std::optional<EndianSite> match_endian_site(const std::vector<uint8_t> &bytes,
 	return std::nullopt;
 }
 
+std::string_view arm64_load_target_for_width(int bytes)
+{
+	switch (bytes) {
+	case 2:
+		return "bpf_arm64_ldrh";
+	case 4:
+		return "bpf_arm64_ldr_w";
+	default:
+		throw std::runtime_error("unsupported ARM64 byte-load width");
+	}
+}
+
+bool byte_load_expr_merge(ByteLoadExpr &dst, const ByteLoadExpr &src)
+{
+	if (dst.base != src.base) {
+		return false;
+	}
+	for (const auto &incoming : src.components) {
+		for (const auto &existing : dst.components) {
+			if (existing.off == incoming.off ||
+			    existing.shift == incoming.shift) {
+				return false;
+			}
+		}
+		dst.components.push_back(incoming);
+	}
+	return true;
+}
+
+std::optional<std::pair<int16_t, bool>>
+classify_byte_load_expr(const ByteLoadExpr &expr, int width)
+{
+	if (static_cast<int>(expr.components.size()) != width) {
+		return std::nullopt;
+	}
+	auto components = expr.components;
+	std::sort(components.begin(), components.end(),
+		  [](const ByteLoadComponent &lhs, const ByteLoadComponent &rhs) {
+			  return lhs.off < rhs.off;
+		  });
+	const int16_t base_off = components.front().off;
+	for (int i = 0; i < width; i++) {
+		if (components[i].off != base_off + i) {
+			return std::nullopt;
+		}
+	}
+
+	bool little_endian = true;
+	bool big_endian = true;
+	for (int i = 0; i < width; i++) {
+		const uint8_t le_shift = static_cast<uint8_t>(8 * i);
+		const uint8_t be_shift = static_cast<uint8_t>(8 * (width - 1 - i));
+		little_endian &= components[i].shift == le_shift;
+		big_endian &= components[i].shift == be_shift;
+	}
+	if (little_endian) {
+		return std::pair<int16_t, bool>{ base_off, false };
+	}
+	if (big_endian) {
+		return std::pair<int16_t, bool>{ base_off, true };
+	}
+	return std::nullopt;
+}
+
+size_t extend_byte_load_cleanup(const std::vector<uint8_t> &bytes, size_t end,
+				uint8_t dst, int width)
+{
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	if (width == 4 && end + 1 < insn_count &&
+	    bytes[end * INSN_SIZE] == BPF_LSH64_K &&
+	    bytes[(end + 1) * INSN_SIZE] == BPF_RSH64_K &&
+	    dst_reg(bytes, end) == dst && dst_reg(bytes, end + 1) == dst &&
+	    read_imm(bytes, end) == 32 && read_imm(bytes, end + 1) == 32) {
+		return end + 2;
+	}
+	if (end < insn_count && dst_reg(bytes, end) == dst) {
+		const uint8_t opcode = bytes[end * INSN_SIZE];
+		const int32_t imm = read_imm(bytes, end);
+		if (width == 2 &&
+		    (opcode == BPF_AND64_K || opcode == BPF_AND32_K) &&
+		    imm == 0xffff) {
+			return end + 1;
+		}
+		if (width == 4 && opcode == BPF_AND32_K && imm == -1) {
+			return end + 1;
+		}
+	}
+	return end;
+}
+
+std::optional<Arm64ByteLoadFusionSite>
+match_arm64_byte_load_fusion_site(const std::vector<uint8_t> &bytes, size_t pc)
+{
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	if (pc >= insn_count || bytes[pc * INSN_SIZE] != BPF_LDXB) {
+		return std::nullopt;
+	}
+
+	std::array<std::optional<ByteLoadExpr>, 11> exprs;
+	std::vector<uint8_t> written;
+	std::optional<Arm64ByteLoadFusionSite> best;
+	std::optional<uint8_t> base;
+	bool base_clobbered = false;
+	const size_t scan_end = std::min(insn_count, pc + 14);
+
+	for (size_t scan = pc; scan < scan_end; scan++) {
+		const uint8_t opcode = bytes[scan * INSN_SIZE];
+		const uint8_t dst = dst_reg(bytes, scan);
+		const uint8_t src = src_reg(bytes, scan);
+
+		if (opcode == BPF_LDXB) {
+			if (!base) {
+				base = src;
+			}
+			if (src != *base || base_clobbered) {
+				break;
+			}
+			if (dst >= exprs.size()) {
+				break;
+			}
+			exprs[dst] = ByteLoadExpr{
+				*base,
+				std::vector<ByteLoadComponent>{
+					ByteLoadComponent{ read_off(bytes, scan), 0 },
+				},
+			};
+		} else if (opcode == BPF_LSH64_K || opcode == BPF_LSH32_K) {
+			if (dst >= exprs.size() || !exprs[dst]) {
+				break;
+			}
+			const int32_t amount = read_imm(bytes, scan);
+			if (amount < 0 || amount >= 64) {
+				break;
+			}
+			for (auto &component : exprs[dst]->components) {
+				const int shifted =
+					static_cast<int>(component.shift) + amount;
+				if (shifted >= 64) {
+					return std::nullopt;
+				}
+				component.shift = static_cast<uint8_t>(shifted);
+			}
+		} else if (opcode == BPF_OR64_X || opcode == BPF_OR32_X) {
+			if (dst >= exprs.size() || src >= exprs.size() ||
+			    !exprs[dst] || !exprs[src]) {
+				break;
+			}
+			if (!byte_load_expr_merge(*exprs[dst], *exprs[src])) {
+				break;
+			}
+		} else {
+			break;
+		}
+
+		if (std::find(written.begin(), written.end(), dst) == written.end()) {
+			written.push_back(dst);
+		}
+		if (base && dst == *base) {
+			base_clobbered = true;
+		}
+
+		if (dst < exprs.size() && exprs[dst]) {
+			for (int width : { 4, 2 }) {
+				const auto classified =
+					classify_byte_load_expr(*exprs[dst], width);
+				if (!classified) {
+					continue;
+				}
+				const size_t end =
+					extend_byte_load_cleanup(bytes, scan + 1,
+								 dst, width);
+				Arm64ByteLoadFusionSite site{
+					pc, end - pc, dst, exprs[dst]->base,
+					classified->first, width,
+					classified->second, {}
+				};
+				for (uint8_t reg : written) {
+					if (reg != dst &&
+					    std::find(site.clobbered.begin(),
+						      site.clobbered.end(),
+						      reg) == site.clobbered.end()) {
+						site.clobbered.push_back(reg);
+					}
+				}
+				if (!best || site.width > best->width ||
+				    (site.width == best->width &&
+				     site.old_len > best->old_len)) {
+					best = std::move(site);
+				}
+			}
+		}
+	}
+	return best;
+}
+
+std::vector<uint8_t>
+emit_arm64_byte_load_fusion(const KinsnTargetMap &targets,
+			    const Arm64ByteLoadFusionSite &site)
+{
+	std::vector<uint8_t> replacement;
+	const auto load_name = arm64_load_target_for_width(site.width);
+	if (!target_has_kinsn(targets, load_name)) {
+		return replacement;
+	}
+	append_kinsn_pair(replacement, targets, load_name,
+			  pack_arm64_mem_payload(site.dst, site.base, site.off));
+	if (!site.big_endian) {
+		return replacement;
+	}
+	const auto rev_name = arm64_rev_target_for_size(site.width);
+	if (!target_has_kinsn(targets, rev_name)) {
+		replacement.clear();
+		return replacement;
+	}
+	append_kinsn_pair(replacement, targets, rev_name, pack_u4(site.dst, 0));
+	return replacement;
+}
+
+int64_t apply_arm64_byte_load_fusion_kinsns(std::vector<uint8_t> &bytes,
+					    const KinsnTargetMap &targets,
+					    bool big_endian)
+{
+	int64_t applied = 0;
+	size_t pc = 0;
+	while (pc < bytes.size() / INSN_SIZE) {
+		const auto site = match_arm64_byte_load_fusion_site(bytes, pc);
+		if (!site || site->big_endian != big_endian ||
+		    !range_is_replaceable(bytes, site->start, site->old_len)) {
+			pc++;
+			continue;
+		}
+		bool clobbers_live_reg = false;
+		for (uint8_t reg : site->clobbered) {
+			if (reg_read_before_write_on_any_path_after(
+				    bytes, site->start + site->old_len, reg)) {
+				clobbers_live_reg = true;
+				break;
+			}
+		}
+		if (clobbers_live_reg) {
+			pc++;
+			continue;
+		}
+		const auto replacement = emit_arm64_byte_load_fusion(targets, *site);
+		if (replacement.empty()) {
+			pc++;
+			continue;
+		}
+		replace_insn_range(bytes, site->start, site->old_len,
+				   replacement);
+		applied++;
+		pc = site->start + replacement.size() / INSN_SIZE;
+	}
+	return applied;
+}
+
 int64_t apply_arm64_endian_bytecode_kinsns(std::vector<uint8_t> &bytes,
 					   const KinsnTargetMap &targets)
 {
-	int64_t applied = 0;
+	int64_t applied = apply_arm64_byte_load_fusion_kinsns(bytes, targets,
+							      true);
 	size_t pc = 0;
 	while (pc < bytes.size() / INSN_SIZE) {
 		const auto endian_bytes = endian_size_bytes(bytes, pc);
@@ -2041,7 +2340,8 @@ int64_t apply_arm64_pair_memory_bytecode_kinsns(std::vector<uint8_t> &bytes,
 		return 0;
 	}
 
-	int64_t applied = 0;
+	int64_t applied = apply_arm64_byte_load_fusion_kinsns(bytes, targets,
+							      false);
 	size_t pc = 0;
 	while (pc + 1 < bytes.size() / INSN_SIZE) {
 		std::vector<uint8_t> replacement;

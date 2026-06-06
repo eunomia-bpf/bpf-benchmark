@@ -1,0 +1,2200 @@
+{
+  "benchmarks": [
+    {
+      "expected_result": 0,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_checksum_fold.mem",
+      "io_mode": "staged",
+      "name": "packet_checksum_fold",
+      "runs": [
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 784,
+                "native_code_bytes": 480
+              },
+              "compile_ns": 93609925,
+              "exec_ns": 39533,
+              "jited_prog_len": 480,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 4005,
+                "memory_prepare_ns": 78837,
+                "object_load_ns": 90135991,
+                "object_open_ns": 3473934,
+                "prog_run_wall_ns": 3990020210,
+                "result_extract_ns": 689
+              },
+              "result": 0,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 784
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel_rejit",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 784,
+                "native_code_bytes": 480
+              },
+              "compile_ns": 90512026,
+              "exec_ns": 39540,
+              "jited_prog_len": 480,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 3381,
+                "memory_prepare_ns": 54877,
+                "object_load_ns": 90350022,
+                "object_open_ns": 162004,
+                "prog_run_wall_ns": 3970026994,
+                "result_extract_ns": 820
+              },
+              "rejit_result": {
+                "per_program": {
+                  "80": {
+                    "error_message": "prog_id 80 not tracked by shim pid=2811",
+                    "passes": [],
+                    "prog_id": 80,
+                    "program": {
+                      "final_insn_count": 0,
+                      "orig_insn_count": 0,
+                      "prog_id": 80,
+                      "prog_name": "",
+                      "prog_type": 0
+                    },
+                    "status": "error"
+                  },
+                  "81": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 167,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 2,
+                          "insn_count_before": 2,
+                          "insn_delta": 0,
+                          "kinsn_calls_by_family": {},
+                          "kinsn_calls_by_name": {},
+                          "kinsn_payload_shapes": {},
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 0,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 81,
+                    "program": {
+                      "final_insn_count": 2,
+                      "orig_insn_count": 2,
+                      "prog_id": 86,
+                      "prog_name": "",
+                      "prog_type": 1
+                    },
+                    "status": "ok"
+                  },
+                  "82": {
+                    "error_message": "prog_id 82 not tracked by shim pid=2811",
+                    "passes": [],
+                    "prog_id": 82,
+                    "program": {
+                      "final_insn_count": 0,
+                      "orig_insn_count": 0,
+                      "prog_id": 82,
+                      "prog_name": "",
+                      "prog_type": 0
+                    },
+                    "status": "error"
+                  },
+                  "83": {
+                    "error_message": "prog_id 83 not tracked by shim pid=2811",
+                    "passes": [],
+                    "prog_id": 83,
+                    "program": {
+                      "final_insn_count": 0,
+                      "orig_insn_count": 0,
+                      "prog_id": 83,
+                      "prog_name": "",
+                      "prog_type": 0
+                    },
+                    "status": "error"
+                  },
+                  "84": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 8,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 2,
+                          "insn_count_before": 2,
+                          "insn_delta": 0,
+                          "kinsn_calls_by_family": {},
+                          "kinsn_calls_by_name": {},
+                          "kinsn_payload_shapes": {},
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 0,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 84,
+                    "program": {
+                      "final_insn_count": 2,
+                      "orig_insn_count": 2,
+                      "prog_id": 88,
+                      "prog_name": "",
+                      "prog_type": 9
+                    },
+                    "status": "ok"
+                  },
+                  "85": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 46,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 98,
+                          "insn_count_before": 98,
+                          "insn_delta": 0,
+                          "kinsn_calls_by_family": {},
+                          "kinsn_calls_by_name": {},
+                          "kinsn_payload_shapes": {},
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 89,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 85,
+                    "program": {
+                      "final_insn_count": 98,
+                      "orig_insn_count": 98,
+                      "prog_id": 87,
+                      "prog_name": "packet_checksum",
+                      "prog_type": 6
+                    },
+                    "status": "ok"
+                  }
+                },
+                "status": "ok"
+              },
+              "result": 0,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 784
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "alu",
+        "memory",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 0,
+      "expected_retval": 0,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_checksum_fold.mem",
+      "io_mode": "staged",
+      "name": "tc_packet_checksum_fold",
+      "runs": [
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 672,
+                "native_code_bytes": 432
+              },
+              "compile_ns": 90161997,
+              "exec_ns": 39540,
+              "jited_prog_len": 432,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 3413,
+                "memory_prepare_ns": 59283,
+                "object_load_ns": 89414637,
+                "object_open_ns": 747360,
+                "prog_run_wall_ns": 3954086974,
+                "result_extract_ns": 197
+              },
+              "result": 0,
+              "retval": 0,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 672
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel_rejit",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 672,
+                "native_code_bytes": 432
+              },
+              "compile_ns": 90456311,
+              "exec_ns": 39529,
+              "jited_prog_len": 432,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 3134,
+                "memory_prepare_ns": 63624,
+                "object_load_ns": 90287939,
+                "object_open_ns": 168372,
+                "prog_run_wall_ns": 3953077450,
+                "result_extract_ns": 206
+              },
+              "rejit_result": {
+                "per_program": {
+                  "94": {
+                    "error_message": "prog_id 94 not tracked by shim pid=3041",
+                    "passes": [],
+                    "prog_id": 94,
+                    "program": {
+                      "final_insn_count": 0,
+                      "orig_insn_count": 0,
+                      "prog_id": 94,
+                      "prog_name": "",
+                      "prog_type": 0
+                    },
+                    "status": "error"
+                  },
+                  "95": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 9,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 2,
+                          "insn_count_before": 2,
+                          "insn_delta": 0,
+                          "kinsn_calls_by_family": {},
+                          "kinsn_calls_by_name": {},
+                          "kinsn_payload_shapes": {},
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 0,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 95,
+                    "program": {
+                      "final_insn_count": 2,
+                      "orig_insn_count": 2,
+                      "prog_id": 99,
+                      "prog_name": "",
+                      "prog_type": 1
+                    },
+                    "status": "ok"
+                  },
+                  "96": {
+                    "error_message": "prog_id 96 not tracked by shim pid=3041",
+                    "passes": [],
+                    "prog_id": 96,
+                    "program": {
+                      "final_insn_count": 0,
+                      "orig_insn_count": 0,
+                      "prog_id": 96,
+                      "prog_name": "",
+                      "prog_type": 0
+                    },
+                    "status": "error"
+                  },
+                  "97": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 10,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 4,
+                          "insn_count_before": 4,
+                          "insn_delta": 0,
+                          "kinsn_calls_by_family": {},
+                          "kinsn_calls_by_name": {},
+                          "kinsn_payload_shapes": {},
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 0,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 97,
+                    "program": {
+                      "final_insn_count": 4,
+                      "orig_insn_count": 4,
+                      "prog_id": 101,
+                      "prog_name": "det_arg_ctx",
+                      "prog_type": 2
+                    },
+                    "status": "ok"
+                  },
+                  "98": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 17,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 84,
+                          "insn_count_before": 84,
+                          "insn_delta": 0,
+                          "kinsn_calls_by_family": {},
+                          "kinsn_calls_by_name": {},
+                          "kinsn_payload_shapes": {},
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 89,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 98,
+                    "program": {
+                      "final_insn_count": 84,
+                      "orig_insn_count": 84,
+                      "prog_id": 100,
+                      "prog_name": "tc_packet_check",
+                      "prog_type": 3
+                    },
+                    "status": "ok"
+                  }
+                },
+                "status": "ok"
+              },
+              "result": 0,
+              "retval": 0,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 672
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "tc",
+        "pure-jit",
+        "non-xdp",
+        "kernel-only"
+      ]
+    },
+    {
+      "expected_result": 15111065535037762995,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bpftrace_string_search_prefix_scan.mem",
+      "io_mode": "staged",
+      "name": "bpftrace_string_search_prefix_scan",
+      "runs": [
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1624,
+                "native_code_bytes": 1032
+              },
+              "compile_ns": 14952495,
+              "exec_ns": 642,
+              "jited_prog_len": 1032,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 1961,
+                "memory_prepare_ns": 65675,
+                "object_load_ns": 14150348,
+                "object_open_ns": 802147,
+                "prog_run_wall_ns": 80031895,
+                "result_extract_ns": 755
+              },
+              "result": 15111065535037762995,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1624
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel_rejit",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2344,
+                "native_code_bytes": 1512
+              },
+              "compile_ns": 14934755,
+              "exec_ns": 413,
+              "jited_prog_len": 1512,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 1609,
+                "memory_prepare_ns": 55583,
+                "object_load_ns": 14768640,
+                "object_open_ns": 166115,
+                "prog_run_wall_ns": 60015094,
+                "result_extract_ns": 657
+              },
+              "rejit_result": {
+                "per_program": {
+                  "108": {
+                    "error_message": "prog_id 108 not tracked by shim pid=3182",
+                    "passes": [],
+                    "prog_id": 108,
+                    "program": {
+                      "final_insn_count": 0,
+                      "orig_insn_count": 0,
+                      "prog_id": 108,
+                      "prog_name": "",
+                      "prog_type": 0
+                    },
+                    "status": "error"
+                  },
+                  "109": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 8,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 2,
+                          "insn_count_before": 2,
+                          "insn_delta": 0,
+                          "kinsn_calls_by_family": {},
+                          "kinsn_calls_by_name": {},
+                          "kinsn_payload_shapes": {},
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 0,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 109,
+                    "program": {
+                      "final_insn_count": 2,
+                      "orig_insn_count": 2,
+                      "prog_id": 115,
+                      "prog_name": "",
+                      "prog_type": 1
+                    },
+                    "status": "ok"
+                  },
+                  "110": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 8,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 2,
+                          "insn_count_before": 2,
+                          "insn_delta": 0,
+                          "kinsn_calls_by_family": {},
+                          "kinsn_calls_by_name": {},
+                          "kinsn_payload_shapes": {},
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 0,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 110,
+                    "program": {
+                      "final_insn_count": 2,
+                      "orig_insn_count": 2,
+                      "prog_id": 114,
+                      "prog_name": "libbpf_nametest",
+                      "prog_type": 1
+                    },
+                    "status": "ok"
+                  },
+                  "111": {
+                    "error_message": "prog_id 111 not tracked by shim pid=3182",
+                    "passes": [],
+                    "prog_id": 111,
+                    "program": {
+                      "final_insn_count": 0,
+                      "orig_insn_count": 0,
+                      "prog_id": 111,
+                      "prog_name": "",
+                      "prog_type": 0
+                    },
+                    "status": "error"
+                  },
+                  "112": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 9,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 2,
+                          "insn_count_before": 2,
+                          "insn_delta": 0,
+                          "kinsn_calls_by_family": {},
+                          "kinsn_calls_by_name": {},
+                          "kinsn_payload_shapes": {},
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 0,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 112,
+                    "program": {
+                      "final_insn_count": 2,
+                      "orig_insn_count": 2,
+                      "prog_id": 117,
+                      "prog_name": "",
+                      "prog_type": 9
+                    },
+                    "status": "ok"
+                  },
+                  "113": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 39,
+                        "bpfopt_summary": {
+                          "diagnostics": [
+                            "bytecode_kinsn_recovery_applied=1"
+                          ],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 293,
+                          "insn_count_before": 203,
+                          "insn_delta": 90,
+                          "kinsn_calls_by_family": {
+                            "rotate": 1
+                          },
+                          "kinsn_calls_by_name": {
+                            "bpf_arm64_extr_x": 1
+                          },
+                          "kinsn_payload_shapes": {
+                            "bpf_arm64_extr_x|payload=0x10300": 1
+                          },
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 1,
+                          "sites_matched": 1,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 178,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 113,
+                    "program": {
+                      "final_insn_count": 293,
+                      "orig_insn_count": 203,
+                      "prog_id": 116,
+                      "prog_name": "bpftrace_string",
+                      "prog_type": 6
+                    },
+                    "status": "ok"
+                  }
+                },
+                "status": "ok"
+              },
+              "result": 15111065535037762995,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 2344
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "bpftrace",
+        "string",
+        "compare",
+        "loop",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 2666935177028490406,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/siphash_rotate64_mixer.mem",
+      "io_mode": "staged",
+      "name": "siphash_rotate64_mixer",
+      "runs": [
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 7936,
+                "native_code_bytes": 4112
+              },
+              "compile_ns": 3768071,
+              "exec_ns": 159,
+              "jited_prog_len": 4112,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 1698,
+                "memory_prepare_ns": 67332,
+                "object_load_ns": 1410485,
+                "object_open_ns": 2357586,
+                "prog_run_wall_ns": 29990275,
+                "result_extract_ns": 853
+              },
+              "result": 2666935177028490406,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 7936
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel_rejit",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 5808,
+                "native_code_bytes": 2584
+              },
+              "compile_ns": 2478277,
+              "exec_ns": 105,
+              "jited_prog_len": 2584,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 1428,
+                "memory_prepare_ns": 51546,
+                "object_load_ns": 2268723,
+                "object_open_ns": 209554,
+                "prog_run_wall_ns": 30038054,
+                "result_extract_ns": 689
+              },
+              "rejit_result": {
+                "per_program": {
+                  "124": {
+                    "error_message": "prog_id 124 not tracked by shim pid=3198",
+                    "passes": [],
+                    "prog_id": 124,
+                    "program": {
+                      "final_insn_count": 0,
+                      "orig_insn_count": 0,
+                      "prog_id": 124,
+                      "prog_name": "",
+                      "prog_type": 0
+                    },
+                    "status": "error"
+                  },
+                  "125": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 8,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 2,
+                          "insn_count_before": 2,
+                          "insn_delta": 0,
+                          "kinsn_calls_by_family": {},
+                          "kinsn_calls_by_name": {},
+                          "kinsn_payload_shapes": {},
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 0,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 125,
+                    "program": {
+                      "final_insn_count": 2,
+                      "orig_insn_count": 2,
+                      "prog_id": 130,
+                      "prog_name": "",
+                      "prog_type": 1
+                    },
+                    "status": "ok"
+                  },
+                  "126": {
+                    "error_message": "prog_id 126 not tracked by shim pid=3198",
+                    "passes": [],
+                    "prog_id": 126,
+                    "program": {
+                      "final_insn_count": 0,
+                      "orig_insn_count": 0,
+                      "prog_id": 126,
+                      "prog_name": "",
+                      "prog_type": 0
+                    },
+                    "status": "error"
+                  },
+                  "127": {
+                    "error_message": "prog_id 127 not tracked by shim pid=3198",
+                    "passes": [],
+                    "prog_id": 127,
+                    "program": {
+                      "final_insn_count": 0,
+                      "orig_insn_count": 0,
+                      "prog_id": 127,
+                      "prog_name": "",
+                      "prog_type": 0
+                    },
+                    "status": "error"
+                  },
+                  "128": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 11,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 2,
+                          "insn_count_before": 2,
+                          "insn_delta": 0,
+                          "kinsn_calls_by_family": {},
+                          "kinsn_calls_by_name": {},
+                          "kinsn_payload_shapes": {},
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 0,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 128,
+                    "program": {
+                      "final_insn_count": 2,
+                      "orig_insn_count": 2,
+                      "prog_id": 132,
+                      "prog_name": "",
+                      "prog_type": 9
+                    },
+                    "status": "ok"
+                  },
+                  "129": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 86,
+                        "bpfopt_summary": {
+                          "diagnostics": [
+                            "bytecode_kinsn_recovery_applied=116"
+                          ],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 726,
+                          "insn_count_before": 992,
+                          "insn_delta": -266,
+                          "kinsn_calls_by_family": {
+                            "rotate": 116
+                          },
+                          "kinsn_calls_by_name": {
+                            "bpf_arm64_extr_x": 116
+                          },
+                          "kinsn_payload_shapes": {
+                            "bpf_arm64_extr_x|payload=0x1033": 1,
+                            "bpf_arm64_extr_x|payload=0x10d07": 1,
+                            "bpf_arm64_extr_x|payload=0x10d48": 2,
+                            "bpf_arm64_extr_x|payload=0x10d50": 1,
+                            "bpf_arm64_extr_x|payload=0x10d56": 1,
+                            "bpf_arm64_extr_x|payload=0x10d57": 1,
+                            "bpf_arm64_extr_x|payload=0x10d63": 1,
+                            "bpf_arm64_extr_x|payload=0x11022": 4,
+                            "bpf_arm64_extr_x|payload=0x11033": 1,
+                            "bpf_arm64_extr_x|payload=0x11146": 1,
+                            "bpf_arm64_extr_x|payload=0x11150": 1,
+                            "bpf_arm64_extr_x|payload=0x11544": 1,
+                            "bpf_arm64_extr_x|payload=0x12022": 2,
+                            "bpf_arm64_extr_x|payload=0x12033": 1,
+                            "bpf_arm64_extr_x|payload=0x12077": 1,
+                            "bpf_arm64_extr_x|payload=0x1515": 1,
+                            "bpf_arm64_extr_x|payload=0x1521": 2,
+                            "bpf_arm64_extr_x|payload=0x1532": 1,
+                            "bpf_arm64_extr_x|payload=0x2011": 1,
+                            "bpf_arm64_extr_x|payload=0x2033": 3,
+                            "bpf_arm64_extr_x|payload=0x2044": 1,
+                            "bpf_arm64_extr_x|payload=0x20d14": 1,
+                            "bpf_arm64_extr_x|payload=0x20d61": 1,
+                            "bpf_arm64_extr_x|payload=0x21011": 1,
+                            "bpf_arm64_extr_x|payload=0x21033": 1,
+                            "bpf_arm64_extr_x|payload=0x21078": 1,
+                            "bpf_arm64_extr_x|payload=0x21107": 1,
+                            "bpf_arm64_extr_x|payload=0x21111": 1,
+                            "bpf_arm64_extr_x|payload=0x21145": 1,
+                            "bpf_arm64_extr_x|payload=0x21156": 1,
+                            "bpf_arm64_extr_x|payload=0x21171": 1,
+                            "bpf_arm64_extr_x|payload=0x21178": 1,
+                            "bpf_arm64_extr_x|payload=0x21189": 1,
+                            "bpf_arm64_extr_x|payload=0x21500": 1,
+                            "bpf_arm64_extr_x|payload=0x21533": 2,
+                            "bpf_arm64_extr_x|payload=0x21566": 3,
+                            "bpf_arm64_extr_x|payload=0x22000": 1,
+                            "bpf_arm64_extr_x|payload=0x22011": 4,
+                            "bpf_arm64_extr_x|payload=0x22045": 1,
+                            "bpf_arm64_extr_x|payload=0x22055": 1,
+                            "bpf_arm64_extr_x|payload=0x22077": 1,
+                            "bpf_arm64_extr_x|payload=0x30d24": 1,
+                            "bpf_arm64_extr_x|payload=0x30d25": 1,
+                            "bpf_arm64_extr_x|payload=0x30d76": 1,
+                            "bpf_arm64_extr_x|payload=0x30d85": 1,
+                            "bpf_arm64_extr_x|payload=0x30d95": 1,
+                            "bpf_arm64_extr_x|payload=0x31010": 1,
+                            "bpf_arm64_extr_x|payload=0x31016": 2,
+                            "bpf_arm64_extr_x|payload=0x31050": 1,
+                            "bpf_arm64_extr_x|payload=0x31116": 1,
+                            "bpf_arm64_extr_x|payload=0x31120": 1,
+                            "bpf_arm64_extr_x|payload=0x31162": 1,
+                            "bpf_arm64_extr_x|payload=0x31167": 1,
+                            "bpf_arm64_extr_x|payload=0x31178": 1,
+                            "bpf_arm64_extr_x|payload=0x31189": 1,
+                            "bpf_arm64_extr_x|payload=0x31555": 1,
+                            "bpf_arm64_extr_x|payload=0x31599": 1,
+                            "bpf_arm64_extr_x|payload=0x32011": 2,
+                            "bpf_arm64_extr_x|payload=0x32022": 3,
+                            "bpf_arm64_extr_x|payload=0x32044": 3,
+                            "bpf_arm64_extr_x|payload=0x32077": 1,
+                            "bpf_arm64_extr_x|payload=0x32088": 1,
+                            "bpf_arm64_extr_x|payload=0x32099": 1,
+                            "bpf_arm64_extr_x|payload=0x40d30": 1,
+                            "bpf_arm64_extr_x|payload=0x40d96": 1,
+                            "bpf_arm64_extr_x|payload=0x41016": 1,
+                            "bpf_arm64_extr_x|payload=0x41033": 1,
+                            "bpf_arm64_extr_x|payload=0x41089": 1,
+                            "bpf_arm64_extr_x|payload=0x41099": 1,
+                            "bpf_arm64_extr_x|payload=0x41110": 1,
+                            "bpf_arm64_extr_x|payload=0x41182": 1,
+                            "bpf_arm64_extr_x|payload=0x41533": 1,
+                            "bpf_arm64_extr_x|payload=0x41588": 1,
+                            "bpf_arm64_extr_x|payload=0x42022": 2,
+                            "bpf_arm64_extr_x|payload=0x42033": 1,
+                            "bpf_arm64_extr_x|payload=0x42055": 1,
+                            "bpf_arm64_extr_x|payload=0x50d26": 1,
+                            "bpf_arm64_extr_x|payload=0x51103": 1,
+                            "bpf_arm64_extr_x|payload=0x51521": 1,
+                            "bpf_arm64_extr_x|payload=0x51591": 1,
+                            "bpf_arm64_extr_x|payload=0x52022": 1,
+                            "bpf_arm64_extr_x|payload=0x52033": 1,
+                            "bpf_arm64_extr_x|payload=0x60d01": 1,
+                            "bpf_arm64_extr_x|payload=0x61015": 1,
+                            "bpf_arm64_extr_x|payload=0x61024": 1,
+                            "bpf_arm64_extr_x|payload=0x61033": 1,
+                            "bpf_arm64_extr_x|payload=0x61120": 1,
+                            "bpf_arm64_extr_x|payload=0x61503": 1,
+                            "bpf_arm64_extr_x|payload=0x61521": 1,
+                            "bpf_arm64_extr_x|payload=0x61533": 1,
+                            "bpf_arm64_extr_x|payload=0x62033": 1,
+                            "bpf_arm64_extr_x|payload=0x62044": 2,
+                            "bpf_arm64_extr_x|payload=0x62055": 1,
+                            "bpf_arm64_extr_x|payload=0xd52": 1
+                          },
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 116,
+                          "sites_matched": 116,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 2,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 129,
+                    "program": {
+                      "final_insn_count": 726,
+                      "orig_insn_count": 992,
+                      "prog_id": 131,
+                      "prog_name": "siphash_rotate6",
+                      "prog_type": 6
+                    },
+                    "status": "ok"
+                  }
+                },
+                "status": "ok"
+              },
+              "result": 2666935177028490406,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 5808
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "compute",
+        "rotate",
+        "hash",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 12211926182125163441,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packed_header_bitfield_decode.mem",
+      "io_mode": "staged",
+      "name": "packed_header_bitfield_decode",
+      "runs": [
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1976,
+                "native_code_bytes": 1200
+              },
+              "compile_ns": 3839695,
+              "exec_ns": 857,
+              "jited_prog_len": 1200,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 1707,
+                "memory_prepare_ns": 62984,
+                "object_load_ns": 2058931,
+                "object_open_ns": 1780764,
+                "prog_run_wall_ns": 100013175,
+                "result_extract_ns": 197
+              },
+              "result": 12211926182125163441,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1976
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel_rejit",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1888,
+                "native_code_bytes": 1120
+              },
+              "compile_ns": 2757543,
+              "exec_ns": 757,
+              "jited_prog_len": 1120,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 1731,
+                "memory_prepare_ns": 59357,
+                "object_load_ns": 2587629,
+                "object_open_ns": 169914,
+                "prog_run_wall_ns": 89995737,
+                "result_extract_ns": 222
+              },
+              "rejit_result": {
+                "per_program": {
+                  "139": {
+                    "error_message": "prog_id 139 not tracked by shim pid=3211",
+                    "passes": [],
+                    "prog_id": 139,
+                    "program": {
+                      "final_insn_count": 0,
+                      "orig_insn_count": 0,
+                      "prog_id": 139,
+                      "prog_name": "",
+                      "prog_type": 0
+                    },
+                    "status": "error"
+                  },
+                  "140": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 8,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 2,
+                          "insn_count_before": 2,
+                          "insn_delta": 0,
+                          "kinsn_calls_by_family": {},
+                          "kinsn_calls_by_name": {},
+                          "kinsn_payload_shapes": {},
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 0,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 140,
+                    "program": {
+                      "final_insn_count": 2,
+                      "orig_insn_count": 2,
+                      "prog_id": 147,
+                      "prog_name": "",
+                      "prog_type": 1
+                    },
+                    "status": "ok"
+                  },
+                  "141": {
+                    "error_message": "prog_id 141 not tracked by shim pid=3211",
+                    "passes": [],
+                    "prog_id": 141,
+                    "program": {
+                      "final_insn_count": 0,
+                      "orig_insn_count": 0,
+                      "prog_id": 141,
+                      "prog_name": "",
+                      "prog_type": 0
+                    },
+                    "status": "error"
+                  },
+                  "142": {
+                    "error_message": "prog_id 142 not tracked by shim pid=3211",
+                    "passes": [],
+                    "prog_id": 142,
+                    "program": {
+                      "final_insn_count": 0,
+                      "orig_insn_count": 0,
+                      "prog_id": 142,
+                      "prog_name": "",
+                      "prog_type": 0
+                    },
+                    "status": "error"
+                  },
+                  "143": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 8,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 2,
+                          "insn_count_before": 2,
+                          "insn_delta": 0,
+                          "kinsn_calls_by_family": {},
+                          "kinsn_calls_by_name": {},
+                          "kinsn_payload_shapes": {},
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 0,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 143,
+                    "program": {
+                      "final_insn_count": 2,
+                      "orig_insn_count": 2,
+                      "prog_id": 146,
+                      "prog_name": "",
+                      "prog_type": 9
+                    },
+                    "status": "ok"
+                  },
+                  "144": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 27,
+                        "bpfopt_summary": {
+                          "diagnostics": [
+                            "bytecode_kinsn_recovery_applied=10"
+                          ],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 236,
+                          "insn_count_before": 247,
+                          "insn_delta": -11,
+                          "kinsn_calls_by_family": {
+                            "bulk_memory": 1,
+                            "extract": 9
+                          },
+                          "kinsn_calls_by_name": {
+                            "bpf_arm64_stp_x": 1,
+                            "bpf_arm64_ubfm_x": 9
+                          },
+                          "kinsn_payload_shapes": {
+                            "bpf_arm64_stp_x|payload=0xffd0a05": 1,
+                            "bpf_arm64_ubfm_x|payload=0x101801": 1,
+                            "bpf_arm64_ubfm_x|payload=0x50104": 1,
+                            "bpf_arm64_ubfm_x|payload=0x50601": 1,
+                            "bpf_arm64_ubfm_x|payload=0x72601": 1,
+                            "bpf_arm64_ubfm_x|payload=0x80402": 1,
+                            "bpf_arm64_ubfm_x|payload=0x81606": 1,
+                            "bpf_arm64_ubfm_x|payload=0xa2c01": 1,
+                            "bpf_arm64_ubfm_x|payload=0xb0b01": 1,
+                            "bpf_arm64_ubfm_x|payload=0xe1e03": 1
+                          },
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 10,
+                          "sites_matched": 10,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 1,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 144,
+                    "program": {
+                      "final_insn_count": 236,
+                      "orig_insn_count": 247,
+                      "prog_id": 145,
+                      "prog_name": "packed_header_b",
+                      "prog_type": 6
+                    },
+                    "status": "ok"
+                  }
+                },
+                "status": "ok"
+              },
+              "result": 12211926182125163441,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1888
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "memory",
+        "fields",
+        "bitfield",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 14199193300769829204,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cilium_ct_nat_tuple_rewrite.mem",
+      "io_mode": "staged",
+      "name": "cilium_ct_nat_tuple_rewrite",
+      "runs": [
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1808,
+                "native_code_bytes": 1072
+              },
+              "compile_ns": 4836971,
+              "exec_ns": 495,
+              "jited_prog_len": 1072,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 2740,
+                "memory_prepare_ns": 67767,
+                "object_load_ns": 3906272,
+                "object_open_ns": 930699,
+                "prog_run_wall_ns": 60015997,
+                "result_extract_ns": 296
+              },
+              "result": 14199193300769829204,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1808
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel_rejit",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1704,
+                "native_code_bytes": 1024
+              },
+              "compile_ns": 4656538,
+              "exec_ns": 466,
+              "jited_prog_len": 1024,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 2651,
+                "memory_prepare_ns": 60620,
+                "object_load_ns": 4485975,
+                "object_open_ns": 170563,
+                "prog_run_wall_ns": 60012817,
+                "result_extract_ns": 213
+              },
+              "rejit_result": {
+                "per_program": {
+                  "154": {
+                    "error_message": "prog_id 154 not tracked by shim pid=3224",
+                    "passes": [],
+                    "prog_id": 154,
+                    "program": {
+                      "final_insn_count": 0,
+                      "orig_insn_count": 0,
+                      "prog_id": 154,
+                      "prog_name": "",
+                      "prog_type": 0
+                    },
+                    "status": "error"
+                  },
+                  "155": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 8,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 2,
+                          "insn_count_before": 2,
+                          "insn_delta": 0,
+                          "kinsn_calls_by_family": {},
+                          "kinsn_calls_by_name": {},
+                          "kinsn_payload_shapes": {},
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 0,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 155,
+                    "program": {
+                      "final_insn_count": 2,
+                      "orig_insn_count": 2,
+                      "prog_id": 162,
+                      "prog_name": "",
+                      "prog_type": 1
+                    },
+                    "status": "ok"
+                  },
+                  "156": {
+                    "error_message": "prog_id 156 not tracked by shim pid=3224",
+                    "passes": [],
+                    "prog_id": 156,
+                    "program": {
+                      "final_insn_count": 0,
+                      "orig_insn_count": 0,
+                      "prog_id": 156,
+                      "prog_name": "",
+                      "prog_type": 0
+                    },
+                    "status": "error"
+                  },
+                  "157": {
+                    "error_message": "prog_id 157 not tracked by shim pid=3224",
+                    "passes": [],
+                    "prog_id": 157,
+                    "program": {
+                      "final_insn_count": 0,
+                      "orig_insn_count": 0,
+                      "prog_id": 157,
+                      "prog_name": "",
+                      "prog_type": 0
+                    },
+                    "status": "error"
+                  },
+                  "158": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 9,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 2,
+                          "insn_count_before": 2,
+                          "insn_delta": 0,
+                          "kinsn_calls_by_family": {},
+                          "kinsn_calls_by_name": {},
+                          "kinsn_payload_shapes": {},
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 0,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 158,
+                    "program": {
+                      "final_insn_count": 2,
+                      "orig_insn_count": 2,
+                      "prog_id": 161,
+                      "prog_name": "",
+                      "prog_type": 9
+                    },
+                    "status": "ok"
+                  },
+                  "159": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 25,
+                        "bpfopt_summary": {
+                          "diagnostics": [
+                            "bytecode_kinsn_recovery_applied=1"
+                          ],
+                          "inlined_map_entries": [],
+                          "insn_count_after": 213,
+                          "insn_count_before": 226,
+                          "insn_delta": -13,
+                          "kinsn_calls_by_family": {
+                            "bulk_memory": 1
+                          },
+                          "kinsn_calls_by_name": {
+                            "bpf_arm64_stp_x": 1
+                          },
+                          "kinsn_payload_shapes": {
+                            "bpf_arm64_stp_x|payload=0xfff0a10": 1
+                          },
+                          "kinsn_policy": {
+                            "bytecode_families": {
+                              "bitops": true,
+                              "bulk_memory": true,
+                              "ccmp": true,
+                              "cond_select": true,
+                              "endian_fusion": true,
+                              "extract": true,
+                              "prefetch": false,
+                              "rotate": true
+                            },
+                            "bytecode_family_overrides": {
+                              "prefetch": false
+                            },
+                            "llvm_args": [
+                              "bpfopt",
+                              "-bpf-enable-kinsn-select",
+                              "-bpf-stack-size=4096",
+                              "-bpf-kinsn-mode=all=disable"
+                            ],
+                            "pass_args": [
+                              "--bytecode-kinsn-mode",
+                              "prefetch=disable"
+                            ]
+                          },
+                          "pass": "kinsn",
+                          "sites_applied": 1,
+                          "sites_matched": 1,
+                          "sites_skipped": 0,
+                          "skip_reasons": {},
+                          "skipped_sites": []
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 4,
+                        "status": "ok",
+                        "step": {
+                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "log_level": 1,
+                          "name": "kinsn"
+                        }
+                      }
+                    ],
+                    "prog_id": 159,
+                    "program": {
+                      "final_insn_count": 213,
+                      "orig_insn_count": 226,
+                      "prog_id": 160,
+                      "prog_name": "cilium_ct_nat_t",
+                      "prog_type": 6
+                    },
+                    "status": "ok"
+                  }
+                },
+                "status": "ok"
+              },
+              "result": 14199193300769829204,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1704
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "cilium",
+        "conntrack",
+        "nat",
+        "tuple",
+        "pure-jit"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-arm64-llvmbpf/micro_exec"
+  },
+  "defaults": {
+    "inner_repeat": 100000,
+    "perf_counters": false,
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "generated_at": "2026-06-05T22:32:16.186404+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "ip-172-31-69-91.ec2.internal",
+    "kernel_cmdline": "BOOT_IMAGE=(hd0,gpt1)/boot/vmlinuz-7.0.0-rc2+ root=UUID=7e75db7b-0182-40fc-8f7e-c1f405fd374d ro console=tty0 console=ttyS0,115200n8 nvme_core.io_timeout=4294967295 rd.emergency=poweroff rd.shell=0 selinux=1 security=selinux quiet numa_cma=1:64M",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-aarch64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "provenance": {
+    "cpu_model": "aarch64",
+    "environment": "bare-metal",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 100000,
+      "perf_counters": false,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-06-05T22:32:16.191226+00:00"
+  },
+  "suite": "micro_staged_codegen"
+}

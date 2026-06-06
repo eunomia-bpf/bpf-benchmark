@@ -673,8 +673,6 @@ void apply_target_bytecode_policy_defaults(std::string_view pass,
 		return;
 	}
 	static constexpr std::string_view disabled_by_default[] = {
-		"endian_fusion",
-		"bulk_memory",
 		"prefetch",
 	};
 	for (std::string_view family : disabled_by_default) {
