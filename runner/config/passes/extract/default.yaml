@@ -57,6 +57,12 @@ kinsns:
   - name: bpf_x86_shldq
   - name: bpf_x86_shrdl
   - name: bpf_x86_shrdq
+  - name: bpf_x86_shlxl
+  - name: bpf_x86_shlxq
   - name: bpf_x86_shrq
+  - name: bpf_x86_shrxl
+  - name: bpf_x86_shrxq
+  - name: bpf_x86_bzhil
+  - name: bpf_x86_bzhiq
 command: |
   bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}

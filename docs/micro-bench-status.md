@@ -1,6 +1,6 @@
 # Micro Benchmark Status
 
-Last updated: 2026-06-06
+Last updated: 2026-06-07
 
 This is the current paper-facing status page for microbenchmark data. The
 previous long evaluation note is archived at
@@ -359,6 +359,19 @@ relative to the latest stock kernel eBPF baseline. Values use median `exec_ns`
 across three samples with `INNER_REPEAT=100000`. The geomean speedup is 1.216x
 over 29 cases with zero correctness mismatches, but this is not a matched
 compiler-control comparison.*
+
+### x86 Focused Bitops ReJIT
+
+The 2026-06-07 focused x86 bitops probes are matched `kernel` versus
+`kernel_rejit` checks for newly exposed kinsn selectors. They are not full-suite
+paper aggregates; they are used to keep micro coverage for individual opcode
+paths that may or may not apply in the app corpus.
+
+| Case | Result source | Samples | Expected-result mismatches | Kernel ns | Kernel ReJIT ns | Speedup | Applied hot-program sites |
+|---|---|---:|---:|---:|---:|---:|---|
+| `bitmap_popcount_scan` | `micro/results/x86_kvm_micro_20260607_065311_731192` | 3 | 0 | 1113 median | 497 median | 2.24x | `bpf_x86_popcntq=1`, plus LEA/MOV |
+| `packet_toeplitz_rss_hash` | `micro/results/x86_kvm_micro_20260607_072937_370032` | 3 | 0 | 257 median | 209 median | 1.230x | BMI2 shift sites |
+| `packed_header_bitfield_decode` | `micro/results/x86_kvm_micro_20260607_072937_370032` | 3 | 0 | 277 median | 242 median | 1.145x | BMI2 shift sites |
 
 ### arm64 AWS Matched Kinsn ReJIT
 

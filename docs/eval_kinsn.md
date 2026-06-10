@@ -1,6 +1,6 @@
 # Kinsn ReJIT Corpus Evaluation
 
-Last updated: 2026-06-05
+Last updated: 2026-06-07
 
 This is the paper-facing evaluation note for kinsn-based ReJIT on the x86 KVM
 corpus. The benchmark framework records raw counters and workload payloads
@@ -79,11 +79,10 @@ Policy/gate status:
 
 - `corpus/config/benchmark_config.yaml` maps `kinsn` to the single kinsn
   umbrella pass and keeps the kinsn-class pass names in the `full-x86` list.
-- `runner/config/passes/kinsn/default.yaml` is the default full-kinsn
-  entrypoint. It invokes `bpfopt --pass kinsn` without pass-local selector
-  overrides, so the effective policy comes from the bpfopt umbrella default.
-  The authoritative artifacts in this note did not use app-specific kinsn YAML
-  disables or per-program overrides.
+- `runner/config/passes/kinsn/default.yaml` is the default kinsn entrypoint.
+  The authoritative x86 artifacts in this note used the then-current umbrella
+  default and did not use app-specific kinsn YAML disables or per-program
+  overrides. Later follow-up YAMLs make the pass-local policy explicit.
 - `bpfopt/llvm/src/main.cpp` treats `kinsn`, `rotate`, `cond_select`,
   `extract`, `endian_fusion`, `bulk_memory`, `lea`, `prefetch`, and `ccmp` as
   kinsn passes. The `kinsn` umbrella default is
@@ -99,11 +98,18 @@ Policy/gate status:
 - Current post-evaluation tooling also supports a pass-local
   `--bytecode-kinsn-mode` override for controlled ablations, and new
   per-program kinsn reports include a `kinsn_policy` provenance block with the
-  effective LLVM selector arguments and bytecode-family enables. This is
-  provenance/tuning infrastructure; it does not change the `kinsn` default.
-  The older authoritative artifacts above predate `kinsn_policy`, so their
-  effective policy is reconstructed from `loadtime-plans/*.json` plus the
-  bpfopt default described here.
+  effective LLVM selector arguments and bytecode-family enables. The older
+  authoritative artifacts above predate `kinsn_policy`, so their effective
+  policy is reconstructed from `loadtime-plans/*.json` plus the bpfopt default
+  described here.
+- The current runner YAML is now explicitly policy-bearing for follow-up
+  experiments. On x86, `prefetch` is disabled in the default `kinsn` command
+  after the prefetch smoke regressions, and Cilium/Katran/Tracee keep their
+  app-specific no-bulk/no-prefetch overrides. On arm64, the default and the
+  Cilium/Katran/Tracee app overrides disable `bulk_memory`, `endian_fusion`,
+  and `prefetch`, preserving the rotate/extract path that produced the best
+  current arm64 app signal. This is benchmark policy, not an LLVM selector
+  gate.
 
 ## Methodology
 
@@ -265,8 +271,7 @@ bpfopt --pass kinsn ... -- \
 
 This is implemented as app-specific pass config under
 `runner/config/passes/kinsn/{cilium,katran,tracee}.yaml`; the default
-`runner/config/passes/kinsn/default.yaml` remains full-kinsn and is not changed
-into no-bulk.
+`runner/config/passes/kinsn/default.yaml` is not changed into no-bulk.
 
 The tuned run used the same setup as the authoritative corpus runs:
 `SAMPLES=3`, `WORKLOAD_DURATION=180`, `WARMUPS=1`,
@@ -389,13 +394,81 @@ Tetragon load failure while showing only the existing Tetragon LEA/prefetch/
 bulk/cond_select mix before failure, so the new `roll`/`shrdq`/BMI1 recovery
 is not the obvious cause.
 
-The remaining enabled-but-zero x86 names after these smokes are still
-`bpf_x86_blsiq`, `bpf_x86_blsrq`, `bpf_x86_andl`, `bpf_x86_movbe64`,
-`bpf_x86_rolq`, `bpf_x86_popcntq`, `bpf_x86_shldl`, `bpf_x86_shldq`,
-`bpf_x86_shrdl`, and `bpf_x86_shrq`. The low-risk missed opportunity is
-mostly proof quality: the corpus has many ordinary ALU/load/store operations,
-but converting scalar one-instruction BPF operations into kfunc calls is not a
-useful performance default without a stronger cost model.
+After these 2026-06-05 smokes, and before the 2026-06-07 popcnt/BMI2 follow-up
+below, the remaining enabled-but-zero x86 names were `bpf_x86_blsiq`,
+`bpf_x86_blsrq`, `bpf_x86_andl`, `bpf_x86_movbe64`, `bpf_x86_rolq`,
+`bpf_x86_popcntq`, `bpf_x86_shldl`, `bpf_x86_shldq`, `bpf_x86_shrdl`, and
+`bpf_x86_shrq`. The low-risk missed opportunity is mostly proof quality: the
+corpus has many ordinary ALU/load/store operations, but converting scalar
+one-instruction BPF operations into kfunc calls is not a useful performance
+default without a stronger cost model.
+
+### x86 BMI2 variable-shift, BZHI, and popcnt follow-up
+
+The 2026-06-07 follow-up keeps the synthetic x86 `popcntq` bytecode recovery
+selector and adds new BMI2 bit-operation module coverage. The first addition is
+the variable-shift selector:
+`bpf_x86_shlxl`, `bpf_x86_shlxq`, `bpf_x86_shrxl`, and `bpf_x86_shrxq`.
+These are enabled under the existing `bitops` bytecode family rather than as a
+new benchmark policy gate.
+
+The retained `bitmap_popcount_scan` micro case proves the `popcntq` selector is
+live: `micro/results/x86_kvm_micro_20260607_065311_731192` reports median
+`kernel=1113 ns`, `kernel_rejit=497 ns`, or `2.24x`, with
+`bpf_x86_popcntq=1`, `bpf_x86_leaq=3`, and `bpf_x86_movl=2` applied on the hot
+program in every sample. This is micro coverage evidence, not a Cilium/Katran
+app win, because the selected Cilium/Katran BPF objects did not contain the
+matching SWAR popcount constants.
+
+The new BMI2 shift selector was then checked on three focused x86 KVM micro
+cases:
+
+Artifact:
+`micro/results/x86_kvm_micro_20260607_072937_370032`
+(`SAMPLES=3`, `INNER_REPEAT=100000`, `kernel` vs `kernel_rejit`).
+
+| Micro case | kernel median ns | ReJIT median ns | speedup | BMI2 shift sites/sample |
+| --- | ---: | ---: | ---: | ---: |
+| `packet_toeplitz_rss_hash` | 257 | 209 | `1.230x` | 5 |
+| `bpftrace_comm_key_fnv_hash` | 435 | 441 | `0.986x` | 4 |
+| `packed_header_bitfield_decode` | 277 | 242 | `1.145x` | 4 |
+
+The three-case geomean is `1.116x`; all samples matched. This proves the new
+kinsn names and selector path apply. It is still not pure machine-code novelty:
+the stock kernel JIT already emits BMI2 `shlx`/`shrx` for some variable-shift
+BPF operations, so this result is selector/kfunc coverage evidence first.
+
+A current Cilium/Katran x86 KVM smoke with the same code also completed:
+`corpus/results/x86_kvm_corpus_20260607_073922_108307`
+(`SAMPLES=1`, `WORKLOAD_DURATION=10`, `BPFREJIT_BENCH_PASSES=kinsn`,
+`BPFREJIT_CORPUS_APPS="cilium/agent,katran"`). Both apps finished `status=ok`.
+Cilium applied `102` new BMI2 shift sites (`bpf_x86_shlxl=84`,
+`bpf_x86_shrxl=18`) on top of the existing LEA/endian/cond-select/extract mix,
+mostly in `sched_cls` paths such as `tail_handle_ipv`, `cil_to_container`,
+`cil_to_host`, and `cil_to_netdev`. Katran did not hit the new BMI2 selector in
+that smoke and kept its existing LEA/rotate/endian/extract mix. The raw
+workload pps ratio was `1.110x` for Cilium and `1.049x` for Katran in this
+10-second smoke, so it is useful coverage/performance signal but not a
+replacement for the authoritative SAMPLES=3 runs.
+
+The next x86 native-backed candidate was `bzhi`: the Cilium native census had
+`26` `bzhi` instructions, and the BPF round-trip contains bounded mask-build
+forms. The follow-up adds `bpf_x86_bzhil`/`bpf_x86_bzhiq` to the same BMI2
+module and keeps the selector narrow: it only replaces all-ones mask builders
+where the count is proven below the operand width by an exact constant or an
+`AND` bound. This avoids app-wide gates or unsafe range assumptions.
+
+The code was checked in a Cilium/Katran app smoke:
+`corpus/results/x86_kvm_corpus_20260607_210624_356236`
+(`SAMPLES=1`, `WORKLOAD_DURATION=10`). Both apps finished `status=ok`.
+Cilium applied `8` `bpf_x86_bzhil` sites on real `sched_cls` programs
+(`cil_to_netdev`, `tail_handle_ipv`, and `cil_to_containe*`) in addition to
+the existing LEA/endian/cond-select/extract/BMI2-shift mix. Katran had no BZHI
+hits and kept its existing rotate/endian/extract/LEA mix. The short-run raw
+workload ratios were `1.156x` for Cilium and `1.028x` for Katran; retained BPF
+counter geomeans were `0.696x` over two Cilium rows and `0.948x` over the one
+Katran row. These are follow-up smoke numbers, not replacements for the
+SAMPLES=3 authoritative corpus, but they prove BZHI is no longer micro-only.
 
 ### arm64 QEMU smoke
 
@@ -470,6 +543,50 @@ broad arm64 performance claim. Cilium proves that real arm64 endian/extract
 sites are reachable in a large corpus app, but the current call overhead/site
 mix was not profitable at the workload level. Tracee also proves arm64 endian
 coverage, but the app did not produce a valid post-ReJIT measurement.
+
+### 2026-06-07 arm64 policy follow-up
+
+The arm64 follow-up separates two claims that should not be mixed. Full arm64
+selector coverage is useful for microbenchmarks, but the best current
+application policy is conservative: disable `bulk_memory`, `endian_fusion`,
+and `prefetch`, while keeping rotate/extract enabled.
+
+The AWS arm64 policy evidence is:
+
+| Artifact | Policy shape | Cilium workload | Katran workload | Applied families | Interpretation |
+| --- | --- | ---: | ---: | --- | --- |
+| `corpus/results/aws_arm64_corpus_20260605_053223_453376` | prefetch disabled only | `0.974x` | `1.020x` | endian `791`, extract `3`, rotate `20` | coverage, weak Katran win, Cilium regression |
+| `corpus/results/aws_arm64_corpus_20260605_080836_924256` | no bulk/endian/prefetch | `0.983x` | `1.073x` | extract `4`, rotate `20` | best arm64 app result so far |
+| `corpus/results/aws_arm64_corpus_20260605_094729_221231` | coverage-max with bulk/prefetch/endian | `0.978x` | `0.995x` | bulk `8685`, prefetch `1810`, endian `791`, extract `3`, rotate `20` | more coverage but worse performance |
+
+That comparison is why the current arm64 runner config explicitly passes
+`--bytecode-kinsn-mode bulk_memory=disable,endian_fusion=disable,prefetch=disable`
+for the default `kinsn` command and for the Cilium/Katran/Tracee app configs.
+The choice is per-benchmark policy: the selectors remain available for micro
+coverage and explicit ablations, but they are not used in the arm64 app
+performance policy.
+
+The full arm64 micro result remains positive and should be reported as a
+separate selector-capability result. Artifact
+`micro/results/aws_arm64_micro_20260606_001225_821028` has all-29 geomean
+`1.208x` and kinsn-bearing geomean `1.222x` over 27 benchmarks. It applied
+`bpf_arm64_extr_x=387`, `bpf_arm64_ldr_w=198`, `bpf_arm64_ubfm_x=144`,
+`bpf_arm64_ldrh=114`, `bpf_arm64_rev16_w=39`, `bpf_arm64_stp_x=21`,
+`bpf_arm64_rev_w=15`, and `bpf_arm64_ldp_x=6`. The negative micro cases also
+explain the app policy: `bpftrace_comm_key_fnv_hash` regressed to `0.862x`
+with `ldr_w/stp_x` sites, and `bitmap_popcount_scan` was `0.966x` with
+`ldr_w` sites, so high-count load/store lowering is not yet a safe arm64 app
+default.
+
+A 2026-06-07 local arm64 QEMU smoke was run to check the validation path:
+`corpus/results/arm64_qemu_corpus_19700101_000005_357787`
+(`SAMPLES=1`, `WORKLOAD_DURATION=10`, Cilium/Katran). Both apps completed
+`status=ok`, with raw workload ratios `1.003x` for Cilium and `1.017x` for
+Katran. The loadtime reports show this smoke used a stale extracted QEMU
+rootfs/runtime image: `kinsn_policy.pass_args` was empty and only `prefetch`
+was disabled, so it is not counted as validation of the new conservative
+arm64 YAML. The result is retained only as a QEMU smoke/path check; the arm64
+performance conclusion above remains based on the AWS artifacts.
 
 ### arm64 selector expansion and AWS coverage-max
 
@@ -577,28 +694,36 @@ why Cilium and Katran expose endian-fusion patterns, and why bulk-memory
 
 This run also clarifies policy versus selector behavior. There is no
 benchmark-level policy filter preventing these pass names from running under
-`kinsn`. On x86, the default kinsn pass remains full-kinsn. On arm64, the
-umbrella default is deliberately more conservative after the follow-up because
-forced endian/bulk/prefetch coverage was not profitable. The remaining
-explicit x86 selector default is `movbe-load=disable` in the umbrella mode;
-this does not disable the observed endian `movbe-be` path. The main
-authoritative x86 run had `prefetch=0`; the later selector follow-up reached
-`3024` `bpf_x86_prefetcht0` sites, so the old zero was a selector/dataflow gap,
-not a corpus gate.
+`kinsn`. On x86, the current default is still not a no-bulk policy, but it
+does disable `prefetch` after the prefetch smoke regressions; Cilium, Katran,
+and Tracee additionally use app-specific no-bulk/no-prefetch overrides. On
+arm64, the umbrella runner policy is deliberately more conservative after the
+follow-up because forced endian/bulk/prefetch coverage was not profitable. The
+remaining explicit x86 selector default is `movbe-load=disable` in the
+umbrella mode; this does not disable the observed endian `movbe-be` path. The
+main authoritative x86 run had `prefetch=0`; the later selector follow-up
+reached `3024` `bpf_x86_prefetcht0` sites, so the old zero was a
+selector/dataflow gap, not a corpus gate.
 
-A default-name coverage audit gives the same answer. The x86/arm64 target list
-contains `49` kinsn names; the authoritative x86 full-corpus reports applied
-`17` x86 names. The x86 names that are enabled but zero in this corpus are
-`bpf_x86_blsiq`, `bpf_x86_blsrq`, `bpf_x86_andl`,
+A default-name coverage audit gives the same answer. The default target YAML
+now contains `61` kinsn names after the BMI2 shift and BZHI follow-ups; the
+authoritative x86 full-corpus reports applied `17` x86 names because it predates
+those follow-ups. The x86 names that are enabled but still zero in the
+authoritative corpus are `bpf_x86_blsiq`, `bpf_x86_blsrq`, `bpf_x86_andl`,
 `bpf_x86_movbe64`, `bpf_x86_rolq`, `bpf_x86_popcntq`,
 `bpf_x86_shldl`, `bpf_x86_shldq`, `bpf_x86_shrdl`, and
 `bpf_x86_shrq`. In the authoritative run, `bpf_x86_movbe16` and
 `bpf_x86_prefetcht0` were also zero; the 2026-06-05 selector follow-ups above
 added those recovery shapes and observed `268` and `3024` real corpus sites.
-The later `roll` follow-up also observed `20` `bpf_x86_roll` sites. The
+The later `roll` follow-up observed `20` `bpf_x86_roll` sites, and the
+2026-06-07 BMI2 shift follow-up observed `102` Cilium app sites plus focused
+micro coverage for `bpf_x86_shlxl`, `bpf_x86_shlxq`, `bpf_x86_shrxl`, and
+`bpf_x86_shrxq`. The BZHI follow-up observed `8` Cilium app
+`bpf_x86_bzhil` sites. The retained popcnt selector observed `1` hot-site
+`bpf_x86_popcntq` in the existing `bitmap_popcount_scan` micro case. The
 remaining zero names are not disabled by benchmark policy; the current corpus
-either has no profitable matched shape for them or needs a new
-selector/dataflow proof before they are worth forcing.
+either has no profitable matched shape for them or needs a new selector/dataflow
+proof before they are worth forcing.
 
 A follow-up no-bulk ablation was used only to guide selector tuning. It added
 a controlled way to disable `bulk_memory` while keeping the single umbrella
@@ -611,10 +736,10 @@ However, Tetragon failed under no-bulk with a load-time `EINVAL`, and BCC/OTEL
 regressed. This is not a replacement default policy; it motivates per-app or
 per-program tuning with full-kinsn as the fallback.
 
-The later per-app tuned rerun above keeps that fallback model: full-kinsn stays
-the default, while Cilium, Katran, and Tracee use app-specific no-bulk
-overrides because that is the best workload policy among the tested full,
-no-bulk, LLVM-only, and scalar-only configurations. The BPF-counter
+The later per-app tuned rerun above keeps that fallback model: the default
+stays broader than no-bulk, while Cilium, Katran, and Tracee use app-specific
+no-bulk overrides because that is the best workload policy among the tested
+full, no-bulk, LLVM-only, and scalar-only configurations. The BPF-counter
 repeatability is weaker than the workload signal for Cilium and Tracee, so
 those apps should be reported as workload wins, not BPF-counter wins. The
 LLVM-only follow-up is retained only as a negative tuning result.
@@ -629,6 +754,12 @@ The next performance work is therefore site selection and cost modeling, not
 more benchmark policy. The selector can now find real corpus sites; the
 question is which site families should be forced by default, which should be
 profile- or cost-gated, and which kfunc bodies need lower call/setup overhead.
+The next native-backed opcode candidates are x86 `bzhi` and arm64
+`bfi`/`bfxil`: a focused Cilium/Katran native census found `26` Cilium x86
+`bzhi` sites, plus arm64 `bfi/bfxil` hits in Cilium (`49`/`19`) and Katran
+(`1`/`0`). By contrast, the previously considered x86 bit-scan
+`tzcnt/lzcnt/bsf/bsr` and arm64 `rbit/clz/ctz` shapes still have no
+Cilium/Katran native evidence.
 
 ## Artifacts
 
@@ -678,6 +809,7 @@ Negative/diagnostic selector-tuning artifacts:
 | `arm64 AWS conservative follow-up` | `corpus/results/aws_arm64_corpus_20260605_080836_924256` | SAMPLES=3, 30s; BCC/Cilium/Katran/OTel/Tracee ok; Katran positive; Tetragon failed naturally |
 | `arm64 AWS coverage-max without ccmp` | `corpus/results/aws_arm64_corpus_20260605_085337_334187` | SAMPLES=3, 30s; forced rotate/extract/endian/bulk/prefetch/cond_select; 11,339 sites |
 | `arm64 AWS coverage-max with ccmp` | `corpus/results/aws_arm64_corpus_20260605_094729_221231` | SAMPLES=3, 30s; forced rotate/extract/endian/bulk/prefetch/cond_select/ccmp; 11,309 sites; ccmp matched 0 |
+| `x86 BZHI Cilium/Katran smoke` | `corpus/results/x86_kvm_corpus_20260607_210624_356236` | SAMPLES=1, 10s; Cilium `bpf_x86_bzhil=8`; Cilium/Katran status ok |
 
 ## Previous Results
 
@@ -714,3 +846,25 @@ x86 `cond_select` coverage (`320` sites across `82` programs) and a
 direct-self-applied BPF geomean of `0.944x`. The all-qualified BPF geomean was
 `1.010x`, so it was a correctness and targeted-direct-row result rather than
 a broad corpus speedup.
+
+**2026-06-07 per-app native-guided tuning note.** Two Cilium/Katran-only x86
+KVM trials (`x86_kvm_corpus_20260607_001205_754492`,
+`x86_kvm_corpus_20260607_003024_382618`) did not beat the existing best
+configurations; the explicit all-LLVM-selector path failed Cilium verifier
+startup, so the per-app YAML was returned to the conservative
+no-bulk/no-prefetch form.
+
+**2026-06-07 new-kinsn census note.** Native/codegen census found no support
+for adding x86 `tzcnt/lzcnt/bsf/bsr` or arm64 `rbit/clz/ctz` for the current
+Cilium/Katran-focused kinsn evaluation. The synthetic `bitmap_popcount_scan`
+selector is retained because it applies `bpf_x86_popcntq` and gives `2.24x`
+micro speedup, but it remains micro-only evidence because Katran/Cilium BPF
+objects did not contain the matching SWAR popcount shape. The same follow-up
+added x86 BMI2 variable-shift kinsns; focused micro applies `shlxq/shrxq`, and
+the Cilium/Katran smoke applies `102` `shlxl/shrxl` Cilium sites while Katran
+continues to use its existing rotate/endian/extract/LEA mix. A later focused
+native census made x86 `bzhi` and arm64 `bfi`/`bfxil` the next plausible new
+opcode targets. The x86 BZHI path is now implemented and has Cilium app
+coverage; arm64 `bfi`/`bfxil` remains a candidate because the native hits are
+bitfield pack/unpack shapes that need a new module and a strict insert-mask
+proof before they should be enabled.

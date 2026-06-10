@@ -766,6 +766,9 @@ std::string kinsn_family_for_name(std::string_view name)
 	}
 	if (name.starts_with("bpf_x86_blsi") ||
 	    name.starts_with("bpf_x86_blsr") ||
+	    name.starts_with("bpf_x86_bzhi") ||
+	    name.starts_with("bpf_x86_shlx") ||
+	    name.starts_with("bpf_x86_shrx") ||
 	    name.starts_with("bpf_x86_popcnt") ||
 	    name.starts_with("bpf_x86_and") ||
 	    name.starts_with("bpf_x86_not") ||

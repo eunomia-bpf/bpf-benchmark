@@ -53,8 +53,10 @@ const DEFAULT_KINSN_NAMES: &[&str] = &[
     "bpf_x86_movbe16", "bpf_x86_movbe32", "bpf_x86_movbe64",
     "bpf_x86_movl", "bpf_x86_movq", "bpf_x86_roll", "bpf_x86_rolq",
     "bpf_x86_rolw", "bpf_x86_rorxl", "bpf_x86_movzbl", "bpf_x86_movzwl",
-    "bpf_x86_popcntq", "bpf_x86_prefetcht0", "bpf_x86_shldl",
-    "bpf_x86_shldq", "bpf_x86_shrdl", "bpf_x86_shrdq", "bpf_x86_shrq",
+    "bpf_x86_popcntq", "bpf_x86_prefetcht0", "bpf_x86_bzhil",
+    "bpf_x86_bzhiq", "bpf_x86_shldl",
+    "bpf_x86_shldq", "bpf_x86_shrdl", "bpf_x86_shrdq", "bpf_x86_shlxl",
+    "bpf_x86_shlxq", "bpf_x86_shrq", "bpf_x86_shrxl", "bpf_x86_shrxq",
 ];
 
 #[derive(Serialize)]
