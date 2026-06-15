@@ -1,6 +1,6 @@
 # Native Kernel Execution Evaluation
 
-Last updated: 2026-05-29
+Last updated: 2026-06-14
 
 This is the paper-facing evaluation note for the native-in-kernel execution
 path. The benchmark framework records raw counters and workload payloads only;
@@ -31,20 +31,25 @@ The current research questions are:
 Headline result: **on x86 KVM, kernel-native execution improves workload
 throughput by `1.35x` unweighted geomean over eBPF JIT across six real-app
 workloads, with four clear wins, one neutral result, and one slight
-regression.** It also reduces aggregate BPF `ns/run` in five of the six
-retained counter populations.
+regression.** On arm64 AWS, the same app-level whole-program native replacement
+matrix is now complete and gives a mixed `1.06x` workload geomean: Cilium is a
+large win, Tetragon/Katran/BCC are positive to neutral, OTEL is near neutral,
+and Tracee is a large regression.
 
-The narrow claim supported by the current x86 KVM data is: native kernel
-execution is consistently positive on controlled microbenchmarks, and it fixes
-the previous Tetragon native-path slowdown at the BPF counter level. The
-end-to-end workload result is app-dependent because BPF instruction execution
-is only one part of tracing/security/networking application cost.
+The narrow claim supported by the current data is: native kernel execution is
+consistently positive on controlled x86 microbenchmarks, completes real
+whole-program corpus replacement on both x86 and arm64, and fixes the previous
+Tetragon native-path slowdown at the BPF counter level. The end-to-end workload
+result remains app- and architecture-dependent because BPF instruction
+execution is only one part of tracing/security/networking application cost.
 
 ## Experimental Setup
 
-All runs in this note use the repository `make` entrypoints on x86 KVM. The
-kernel/runtime image is the repository default build used by `make micro` and
-`make corpus`.
+All runs in this note use the repository `make` entrypoints. Micro and the
+original corpus matrix use x86 KVM. The 2026-06-14 portability refresh uses
+arm64 AWS (`PLATFORM=aws ARCH=arm64`) on the repository default `t4g.small`
+target. The kernel/runtime image is the repository default build used by
+`make micro` and `make corpus`.
 
 Micro runs use `SAMPLES=3`, `WARMUPS=0`, and `INNER_REPEAT=100000`. The
 pure-bytecode suite tests `kernel` (kernel eBPF JIT), `native_kernel` (native
@@ -52,7 +57,7 @@ object loaded into the kernel native path), `llvmbpf` (userspace eBPF), and
 `native` (userspace native). The helper/map suite tests `kernel` and
 `native_kernel`.
 
-Corpus runs cover six real applications: `bcc/set`,
+Corpus runs cover six real applications on x86 KVM and arm64 AWS: `bcc/set`,
 `otelcol-ebpf-profiler/profiling`, `cilium/agent`, `tetragon/observer`,
 `katran`, and `tracee/monitor`. Each corpus workload uses `SAMPLES=3` and
 `WORKLOAD_DURATION=180`. The default corpus warmup is one uncounted workload
@@ -115,9 +120,10 @@ that every retained BPF program improved.
 ## Main Results
 
 Latest authoritative datasets are all complete: pure-bytecode micro,
-helper/map micro, six corpus apps with BPF stats enabled, six corpus apps with
-BPF stats disabled, and six no-eBPF workload-only baselines. Corpus artifacts
-were collected one app at a time.
+helper/map micro, x86 KVM corpus apps with BPF stats enabled, x86 KVM corpus
+apps with BPF stats disabled, x86 KVM no-eBPF workload-only baselines, and the
+same three corpus modes for all six apps on arm64 AWS. Corpus artifacts were
+collected one app at a time.
 
 ![Corpus workload and BPF per-run cost](figures/eval-native-corpus-20260529.png)
 
@@ -137,6 +143,12 @@ helper/map panel only reports kernel native because the authoritative helper
 artifact intentionally compares against the real kernel helper/map ABI rather
 than userspace emulation.*
 
+![x86 and arm64 corpus workload and BPF per-run cost](figures/eval-native-corpus-20260614.png)
+
+*Figure 3: Combined x86 KVM and arm64 AWS corpus results. The x86 data is the
+2026-05-29 matrix; the arm64 data is the 2026-06-14 matrix. The plotted
+quantities match Figure 1.*
+
 Micro runtime result:
 
 | Suite | userspace native | userspace eBPF | kernel native | kernel eBPF |
@@ -155,6 +167,18 @@ geomean across the six per-app ratios (`1.35x`):
 | `tetragon` | 1542246 | 0.233x | 0.308x | 1.323x |
 | `katran` | 8434635 | 0.348x | 0.383x | 1.102x |
 | `tracee` | 3325831 | 0.136x | 0.130x | 0.958x |
+
+Arm64 AWS corpus workload throughput. The `native/eBPF` headline is the
+unweighted geomean across the six per-app ratios (`1.06x`):
+
+| App | no-eBPF throughput | eBPF/no-eBPF | native/no-eBPF | native/eBPF |
+| --- | ---: | ---: | ---: | ---: |
+| `bcc` | 291947 | 0.332x | 0.334x | 1.005x |
+| `otel` | 12745658 | 0.987x | 0.976x | 0.989x |
+| `cilium` | 1068569 | 0.378x | 1.537x | 4.060x |
+| `tetragon` | 145023 | 0.291x | 0.339x | 1.164x |
+| `katran` | 1057860 | 0.911x | 0.984x | 1.081x |
+| `tracee` | 368241 | 0.083x | 0.023x | 0.273x |
 
 Native/eBPF workload sample spread:
 
@@ -179,6 +203,17 @@ retained records:
 | `katran` | 178.3 | 142.4 | 0.80x | 1.25x | 1/1 |
 | `tracee` | 324.5 | 330.9 | 1.02x | 0.98x | 41/41 |
 
+Arm64 AWS BPF per-run counters:
+
+| App | eBPF ns/run | native ns/run | native/eBPF cost | speedup | retained eBPF/native |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `bcc` | 186.8 | 195.0 | 1.04x | 0.96x | 15/15 |
+| `otel` | 2555.6 | 2518.9 | 0.99x | 1.02x | 2/2 |
+| `cilium` | 2738.8 | 577.2 | 0.21x | 4.75x | 2/2 |
+| `tetragon` | 1181.9 | 901.1 | 0.76x | 1.31x | 29/29 |
+| `katran` | 403.9 | 367.0 | 0.91x | 1.10x | 1/1 |
+| `tracee` | 931.8 | 3435.0 | 3.69x | 0.27x | 70/70 |
+
 ## RQ Answers
 
 **RQ1 Correctness.** The authoritative micro artifacts have zero expected
@@ -194,17 +229,21 @@ eBPF (`0.665x`) are also faster than kernel eBPF. The helper/map suite only
 reports kernel native because helper/map-heavy programs must be evaluated
 against the real kernel helper/map ABI.
 
-**RQ3 BPF per-run cost in real apps.** Native reduces run-weighted aggregate
-BPF `ns/run` on five of six retained counter populations and is
+**RQ3 BPF per-run cost in real apps.** On x86 KVM, native reduces run-weighted
+aggregate BPF `ns/run` on five of six retained counter populations and is
 neutral/slightly slower on Tracee. Tetragon's previous native slowdown is
 fixed: aggregate BPF per-run cost is now `311.8 ns/run` versus `695.2 ns/run`
-for eBPF (`0.45x` cost, `2.23x` speedup).
+for eBPF (`0.45x` cost, `2.23x` speedup). On arm64 AWS, native reduces
+aggregate BPF `ns/run` for Cilium, Tetragon, Katran, and slightly for OTEL, is
+slightly slower for BCC, and is substantially slower for Tracee.
 
-**RQ4 End-to-end workload impact.** Native improves workload throughput by
-`1.35x` unweighted geomean across the six app workloads. It improves over eBPF
-on OTEL (`1.82x`), steady-state Cilium datapath (`2.36x`), Tetragon (`1.32x`),
-and Katran (`1.10x`), is neutral on BCC (`1.005x`), and is slightly lower on
-Tracee (`0.958x`). The no-eBPF baseline remains much faster for several
+**RQ4 End-to-end workload impact.** On x86 KVM, native improves workload
+throughput by `1.35x` unweighted geomean across the six app workloads. It
+improves over eBPF on OTEL (`1.82x`), steady-state Cilium datapath (`2.36x`),
+Tetragon (`1.32x`), and Katran (`1.10x`), is neutral on BCC (`1.005x`), and is
+slightly lower on Tracee (`0.958x`). On arm64 AWS, native improves workload
+throughput by `1.06x` geomean, dominated by Cilium (`4.06x`) and offset by
+Tracee (`0.273x`). The no-eBPF baseline remains much faster for several
 tracing/security workloads, showing that hook frequency, event construction,
 map traffic, perf/ring-buffer traffic, and application-side processing remain
 major costs outside BPF instruction execution.
@@ -260,6 +299,14 @@ Tracee's workload path also includes event construction, tail-call dispatch,
 map traffic, and userspace event processing, so a near-neutral BPF `ns/run`
 result can still appear as a small workload throughput loss.
 
+On arm64 AWS, Tracee is no longer near-neutral: the BPF-stats-on artifact shows
+aggregate native cost of `3435.0 ns/run` versus `931.8 ns/run` for eBPF, and
+the BPF-stats-off workload artifact shows `0.273x` native/eBPF throughput. The
+first arm64 stats-off attempt failed during baseline after Tracee emitted many
+`net_packet_raw` decode errors and exited; an exact retry completed and is the
+authoritative artifact. The failed attempt is kept in the manifest as a
+non-authoritative debugging artifact rather than filtered out.
+
 Cilium also needs careful interpretation. The measured result is steady-state
 datapath throughput after endpoint setup. The runner disables drift checker,
 dynamic config, dynamic lifecycle manager, endpoint BPF watchdog, and endpoint
@@ -271,8 +318,12 @@ and native-loader matching bugs, not as a missing autoreload flag.
 
 ## Threats To Validity
 
-- Corpus results here are x86 KVM only; arm64 corpus remains a separate
-  portability question.
+- Micro results here are x86 KVM only. The arm64 refresh covers the six-app
+  corpus matrix, not micro.
+- Arm64 corpus results use AWS `t4g.small`, so CPU credit behavior and cloud
+  placement variance are additional threats relative to x86 KVM. The run
+  remains within the benchmark's cost-conscious AWS policy; it was not upsized
+  to hide variance.
 - Workload throughput units differ by app. Cross-app absolute throughput is
   not a single physical unit; compare no-eBPF, eBPF, and native only within the
   same app.
@@ -288,10 +339,12 @@ and native-loader matching bugs, not as a missing autoreload flag.
   tree.
 - Workload throughput uses the BPF-stats-off artifacts to avoid stats overhead;
   BPF per-run uses the BPF-stats-on artifact. These answer different questions
-  and should not be mixed as a single run. The artifacts were collected one
-  app at a time on the same x86 KVM setup and kernel image during the
-  2026-05-29 evaluation window, so time drift remains a possible
-  source of variance even though the three-sample workload CVs are small.
+  and should not be mixed as a single run. The x86 artifacts were collected
+  one app at a time on the same x86 KVM setup and kernel image during the
+  2026-05-29 evaluation window. The arm64 artifacts were collected one app at
+  a time on AWS `t4g.small` during the 2026-06-14 evaluation window. Time
+  drift remains a possible source of variance even though the three-sample
+  workload CVs are small.
 - `SAMPLES=3` is sufficient for the current benchmark contract but is not a
   substitute for a full confidence-interval study over independent machine
   restarts. The table reports sample spread to make this limitation explicit.
@@ -320,6 +373,30 @@ and native-loader matching bugs, not as a missing autoreload flag.
 | `tracee/monitor`, BPF stats on | complete | 2026-05-29T07:58:33 | stats on | `corpus/results/x86_kvm_corpus_20260529_073309_993570/metadata.json` |
 | `tracee/monitor`, BPF stats off | complete | 2026-05-29T08:29:31 | stats off | `corpus/results/x86_kvm_corpus_20260529_080408_588450/metadata.json` |
 | `tracee/monitor`, no-eBPF | complete | 2026-05-29T08:48:07 | workload-only | `corpus/results/x86_kvm_corpus_20260529_083605_206833/metadata.json` |
+| arm64 AWS `bcc/set`, BPF stats on | complete | 2026-06-14T03:03:20 | stats on | `corpus/results/aws_arm64_corpus_20260614_023819_952378/metadata.json` |
+| arm64 AWS `bcc/set`, BPF stats off | complete | 2026-06-14T03:42:29 | stats off | `corpus/results/aws_arm64_corpus_20260614_031732_059541/metadata.json` |
+| arm64 AWS `bcc/set`, no-eBPF | complete | 2026-06-14T04:05:25 | workload-only | `corpus/results/aws_arm64_corpus_20260614_035318_089504/metadata.json` |
+| arm64 AWS `otelcol-ebpf-profiler/profiling`, BPF stats on | complete | 2026-06-14T04:42:38 | stats on | `corpus/results/aws_arm64_corpus_20260614_041820_542790/metadata.json` |
+| arm64 AWS `otelcol-ebpf-profiler/profiling`, BPF stats off | complete | 2026-06-14T05:19:31 | stats off | `corpus/results/aws_arm64_corpus_20260614_045513_431087/metadata.json` |
+| arm64 AWS `otelcol-ebpf-profiler/profiling`, no-eBPF | complete | 2026-06-14T05:43:17 | workload-only | `corpus/results/aws_arm64_corpus_20260614_053111_825457/metadata.json` |
+| arm64 AWS `cilium/agent`, BPF stats on | complete | 2026-06-14T06:19:54 | stats on | `corpus/results/aws_arm64_corpus_20260614_055518_602472/metadata.json` |
+| arm64 AWS `cilium/agent`, BPF stats off | complete | 2026-06-14T06:56:50 | stats off | `corpus/results/aws_arm64_corpus_20260614_063218_115994/metadata.json` |
+| arm64 AWS `cilium/agent`, no-eBPF | complete | 2026-06-14T07:20:20 | workload-only | `corpus/results/aws_arm64_corpus_20260614_070813_221543/metadata.json` |
+| arm64 AWS `tetragon/observer`, BPF stats on | complete | 2026-06-14T07:57:12 | stats on | `corpus/results/aws_arm64_corpus_20260614_073219_040724/metadata.json` |
+| arm64 AWS `tetragon/observer`, BPF stats off | complete | 2026-06-14T08:34:12 | stats off | `corpus/results/aws_arm64_corpus_20260614_080917_564524/metadata.json` |
+| arm64 AWS `tetragon/observer`, no-eBPF | complete | 2026-06-14T08:57:27 | workload-only | `corpus/results/aws_arm64_corpus_20260614_084524_401395/metadata.json` |
+| arm64 AWS `katran`, BPF stats on | complete | 2026-06-14T09:32:49 | stats on | `corpus/results/aws_arm64_corpus_20260614_090824_742980/metadata.json` |
+| arm64 AWS `katran`, BPF stats off | complete | 2026-06-14T10:09:38 | stats off | `corpus/results/aws_arm64_corpus_20260614_094513_587379/metadata.json` |
+| arm64 AWS `katran`, no-eBPF | complete | 2026-06-14T18:47:43 | workload-only | `corpus/results/aws_arm64_corpus_20260614_183519_766267/metadata.json` |
+| arm64 AWS `tracee/monitor`, BPF stats on | complete | 2026-06-14T19:24:51 | stats on | `corpus/results/aws_arm64_corpus_20260614_185921_546771/metadata.json` |
+| arm64 AWS `tracee/monitor`, BPF stats off | complete | 2026-06-14T20:19:52 | stats off | `corpus/results/aws_arm64_corpus_20260614_195421_306838/metadata.json` |
+| arm64 AWS `tracee/monitor`, no-eBPF | complete | 2026-06-14T20:43:30 | workload-only | `corpus/results/aws_arm64_corpus_20260614_203128_076343/metadata.json` |
+
+Non-authoritative arm64 debugging artifact:
+
+| Dataset | Status | Generated at (UTC) | Mode | Artifact |
+| --- | --- | --- | --- | --- |
+| arm64 AWS `tracee/monitor`, first BPF-stats-off attempt | failed | 2026-06-14T19:36:25 | stats off | `corpus/results/aws_arm64_corpus_20260614_193625_357345/metadata.json` |
 
 ## Appendix B: Reproduction Commands
 
@@ -357,6 +434,9 @@ All corpus modes were collected one app at a time so any loader/startup or
 workload failure would surface with a small artifact and could be fixed before
 moving to the next app.
 
+For the arm64 AWS corpus matrix, use the same corpus commands with
+`PLATFORM=aws ARCH=arm64` before `make corpus`.
+
 Corpus native with BPF runtime counters disabled:
 
 ```sh
@@ -383,6 +463,7 @@ Post-hoc table/figure generator:
 
 ```sh
 python3 docs/tmp/native_eval_20260529.py
+python3 docs/tmp/native_eval_20260614.py
 ```
 
 ## Appendix C: Implementation Fixes In This Evaluation
@@ -404,6 +485,18 @@ python3 docs/tmp/native_eval_20260529.py
 
 ## Appendix D: Progress Log
 
+- 2026-06-14: Completed the arm64 AWS app-level whole-program native
+  replacement corpus matrix for all six apps, one app at a time, using
+  `PLATFORM=aws ARCH=arm64`, `SAMPLES=3`, `WORKLOAD_DURATION=180`, and
+  `WARMUPS=1`. The matrix includes BPF-stats-on, BPF-stats-off, and no-eBPF
+  workload-only artifacts. The authoritative arm64 workload geomean is
+  `1.06x` native/eBPF, with a large Cilium win (`4.06x`) and a large Tracee
+  regression (`0.273x`). The first Tracee stats-off attempt failed during
+  baseline with a shim socket disconnect after Tracee exited; an exact retry
+  completed successfully and is the authoritative stats-off artifact. Added
+  `docs/tmp/native_eval_20260614.py`,
+  `docs/tmp/native_eval_20260614_summary.md`, and
+  `docs/figures/eval-native-corpus-20260614.png`.
 - 2026-05-29: Re-ran the authoritative x86 KVM native evaluation one app at a
   time for all six corpus apps, collecting BPF-stats-on, BPF-stats-off, and
   no-eBPF workload-only artifacts with `SAMPLES=3` and
