@@ -100,6 +100,7 @@ def generate_source(config_path: Path, proof_dir: Path, source_dir: Path, proof:
         str(proof_dir),
         "--output-dir",
         str(source_dir),
+        "--compact",
         "--only",
         proof.name,
     ])
@@ -116,6 +117,7 @@ def compile_source(source: Path, build_dir: Path) -> tuple[bool, str]:
         "clang",
         "-g",
         "-O2",
+        "-mcpu=v4",
         "-target",
         "bpf",
         "-mllvm",

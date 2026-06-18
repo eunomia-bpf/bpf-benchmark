@@ -128,6 +128,22 @@ class Encoded:
     imm: str = "0"
 
 
+@dataclass(frozen=True)
+class CompactStep:
+    kind: str
+    op: str = "ARM64_OP_NOP"
+    dst: str = "ARM64_REG_NONE"
+    src: str = "ARM64_REG_NONE"
+    src2: str = "ARM64_REG_NONE"
+    src3: str = "ARM64_REG_NONE"
+    width: str = "ARM64_WIDTH_64"
+    aux: str = "0"
+    imm: str = "0"
+    target: int = 0
+    cond: str = "0"
+    helper: str = "0"
+
+
 def rodata_bytes(obj: Path) -> bytes:
     result = subprocess.run(
         ["aarch64-linux-gnu-objdump", "-s", "-j", ".native_link_rodata", str(obj)],
@@ -522,8 +538,8 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
         mem = parse_mem(ops, 1)
         return Encoded("ARM64_OP_STORE_D0", dst=mem.base, src2=mem.index,
                        aux=mem_aux(mem), imm=c_u64(mem.offset))
-    if op in {"str", "stur", "strb", "strh", "sturh"}:
-        width = 1 if op == "strb" else 2 if op in {"strh", "sturh"} else reg_width(ops[0])
+    if op in {"str", "stur", "strb", "sturb", "strh", "sturh"}:
+        width = 1 if op in {"strb", "sturb"} else 2 if op in {"strh", "sturh"} else reg_width(ops[0])
         mem = parse_mem(ops, 1)
         return Encoded("ARM64_OP_STORE", mem.base, reg_const(ops[0]), mem.index,
                        width=width_const(width), aux=mem_aux(mem), imm=c_u64(mem.offset))
@@ -756,6 +772,278 @@ def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
     )
 
 
+def compact_step(insn: NativeInsn,
+                 all_addrs: set[int],
+                 addr_to_index: dict[int, int],
+                 helper_call: str | None,
+                 rodata_idents: dict[str, str],
+                 reloc_idents: dict[str, str]) -> CompactStep:
+    op = insn.mnemonic
+    if op.startswith("b."):
+        target = branch_target(insn.operands[0])
+        return CompactStep("JCC", target=addr_to_index[target],
+                           cond=COND[op.split(".", 1)[1]])
+    if op == "b":
+        target = branch_target(insn.operands[0])
+        return CompactStep("JMP", target=addr_to_index[target])
+    if op in {"cbz", "cbnz"}:
+        target = branch_target(insn.operands[1])
+        return CompactStep(
+            "CBZ" if op == "cbz" else "CBNZ",
+            src=reg_const(insn.operands[0]),
+            width=width_const(reg_width(insn.operands[0])),
+            target=addr_to_index[target],
+        )
+    if op in {"tbz", "tbnz"}:
+        target = branch_target(insn.operands[2])
+        return CompactStep(
+            "TBZ" if op == "tbz" else "TBNZ",
+            src=reg_const(insn.operands[0]),
+            imm=c_u64(parse_imm(insn.operands[1])),
+            target=addr_to_index[target],
+        )
+    if op == "bl":
+        if is_helper_symbol(insn.reloc_symbol):
+            return CompactStep("HELPER", helper=f"ARM64_SIM_C_HELPER_{insn.reloc_symbol}")
+        target = branch_target(insn.operands[0])
+        if target not in all_addrs:
+            raise ValueError(f"unsupported call target in {insn.raw}")
+        return CompactStep("CALL", target=addr_to_index[target])
+    if op == "blr":
+        if helper_call is not None:
+            return CompactStep("HELPER", helper=f"ARM64_SIM_C_HELPER_{helper_call}")
+        raise ValueError(f"unsupported indirect call target in {insn.raw}")
+    if op == "ret":
+        return CompactStep("RET")
+    enc = encode(insn, rodata_idents, reloc_idents)
+    return CompactStep("OP", enc.op, enc.dst, enc.src, enc.src2, enc.src3,
+                       enc.width, enc.aux, enc.imm)
+
+
+def compact_helper_defines(helper_names: set[str]) -> list[str]:
+    lines: list[str] = []
+    for index, helper in enumerate(sorted(helper_names), start=1):
+        lines.append(f"#define ARM64_SIM_C_HELPER_{helper} {index}U")
+    if lines:
+        lines.append("")
+    return lines
+
+
+def append_compact_helper_switch(lines: list[str], helper_names: set[str]) -> None:
+    lines.extend([
+        "#define ARM64_SIM_C_CALL_HELPER(ID) \\",
+        "\tdo { \\",
+        "\t\tswitch (ID) { \\",
+    ])
+    for helper in sorted(helper_names):
+        lines.append(
+            f"\t\tcase ARM64_SIM_C_HELPER_{helper}: "
+            f"ARM64_SIM_BPF_CALL_{helper}(); break; \\"
+        )
+    lines.extend([
+        "\t\tdefault: ARM64_SIM_L_UNSUPPORTED_OPCODE(); break; \\",
+        "\t\t} \\",
+        "\t} while (0)",
+        "",
+    ])
+
+
+def render_program_compact(name: str, symbol: str, functions: OrderedDict[str, list[NativeInsn]],
+                           kind: str, prelude: str = "",
+                           rodata16: dict[str, tuple[int, int]] | None = None,
+                           linked_exit: bool = False) -> str:
+    rodata16 = rodata16 or {}
+    all_insns = [insn for fn in functions.values() for insn in fn]
+    all_addrs = {insn.addr for insn in all_insns}
+    addr_to_index = {insn.addr: index for index, insn in enumerate(all_insns)}
+    helper_by_addr = {
+        addr: helper
+        for insns in functions.values()
+        for addr, helper in helper_calls_by_addr(insns).items()
+    }
+    uses_stack = any("[sp" in insn.raw.lower() for insn in all_insns)
+    section, ctx, entry = {
+        "xdp": ('SEC("xdp")', "struct xdp_md *", "ARM64_SIM_ENTRY_XDP(ctx);"),
+        "tc": ('SEC("tc")', "struct __sk_buff *", "ARM64_SIM_ENTRY_SKB(ctx);"),
+        "cgroup_skb": ('SEC("cgroup_skb/egress")', "struct __sk_buff *", "ARM64_SIM_ENTRY_SKB(ctx);"),
+    }[kind]
+    rodata_idents = rodata_ident_map(rodata16)
+    map_symbols = sorted({
+        insn.reloc_symbol
+        for insn in all_insns
+        if insn.reloc_symbol
+        and insn.reloc_symbol not in rodata_idents
+        and not is_helper_symbol(insn.reloc_symbol)
+    })
+    reloc_idents = {
+        reloc_symbol: c_ident("__arm64_reloc", reloc_symbol, index)
+        for index, reloc_symbol in enumerate(map_symbols)
+    }
+    steps = [
+        compact_step(insn, all_addrs, addr_to_index, helper_by_addr.get(insn.addr),
+                     rodata_idents, reloc_idents)
+        for insn in all_insns
+    ]
+    helper_names = {
+        step.helper.removeprefix("ARM64_SIM_C_HELPER_")
+        for step in steps
+        if step.kind == "HELPER"
+    }
+    used_ops = sorted({step.op for step in steps if step.kind == "OP"})
+
+    lines: list[str] = []
+    if uses_stack:
+        lines.append("#define ARM64_SIM_ENABLE_STACK 1")
+    lines.extend([
+        "#define ARM64_SIM_C_OP 1U",
+        "#define ARM64_SIM_C_JMP 2U",
+        "#define ARM64_SIM_C_JCC 3U",
+        "#define ARM64_SIM_C_CBZ 4U",
+        "#define ARM64_SIM_C_CBNZ 5U",
+        "#define ARM64_SIM_C_TBZ 6U",
+        "#define ARM64_SIM_C_TBNZ 7U",
+        "#define ARM64_SIM_C_CALL 8U",
+        "#define ARM64_SIM_C_RET 9U",
+        "#define ARM64_SIM_C_HELPER 10U",
+        "",
+    ])
+    lines.extend(compact_helper_defines(helper_names))
+    lines.extend([
+        '#include "../arm64_sim_local_bpf.h"',
+        "",
+    ])
+    append_compact_helper_switch(lines, helper_names)
+    if prelude:
+        lines.append(prelude.rstrip())
+        lines.append("")
+    for rodata_symbol, ident in rodata_idents.items():
+        lo, hi = rodata16[rodata_symbol]
+        lines.append(f"static const __u64 {ident}[2] = {{{c_u64(lo)}, {c_u64(hi)}}};")
+    if rodata_idents:
+        lines.append("")
+    for map_symbol in map_symbols:
+        map_ident = reloc_idents[map_symbol]
+        lines.extend([
+            "struct {",
+            "\t__uint(type, BPF_MAP_TYPE_ARRAY);",
+            "\t__uint(max_entries, 1);",
+            "\t__type(key, __u32);",
+            "\t__type(value, __u64);",
+            f"}} {map_ident} SEC(\".maps\");",
+            "",
+        ])
+    step_ident = f"__arm64_sim_steps_{name}"
+    lines.extend([
+        "struct arm64_sim_compact_step {",
+        "\t__u8 kind;",
+        "\t__u8 op;",
+        "\t__u8 dst;",
+        "\t__u8 src;",
+        "\t__u8 src2;",
+        "\t__u8 src3;",
+        "\t__u8 width;",
+        "\t__u32 aux;",
+        "\t__u64 imm;",
+        "\t__u32 target;",
+        "\t__u8 cond;",
+        "\t__u8 helper;",
+        "};",
+        "",
+        f"static const struct arm64_sim_compact_step {step_ident}[] = {{",
+    ])
+    for step in steps:
+        lines.append(
+            f"\t{{ ARM64_SIM_C_{step.kind}, {step.op}, {step.dst}, {step.src}, "
+            f"{step.src2}, {step.src3}, {step.width}, {step.aux}, {step.imm}, "
+            f"{step.target}U, {step.cond}, {step.helper} }},"
+        )
+    lines.extend([
+        "};",
+        "",
+    ])
+    lines.extend([
+        section,
+        f"int {name}_arm64_sim_xdp({ctx}ctx)",
+        "{",
+        f"\t{entry}",
+        "\t__u32 __a64_c_pc = 0;",
+        f"\t__u32 __a64_c_guard_limit = {max(len(steps) * 8, len(steps) + 1)}U;",
+        "\t#pragma clang loop unroll(disable)",
+        "\tfor (__u32 __a64_c_guard = 0; __a64_c_guard < __a64_c_guard_limit; __a64_c_guard++) {",
+        f"\t\tif (__a64_c_pc >= {len(steps)}U)",
+        "\t\t\tbreak;",
+        f"\t\tconst struct arm64_sim_compact_step *__a64_c_step = &{step_ident}[__a64_c_pc];",
+        "\t\t__u8 __a64_c_kind = __a64_c_step->kind;",
+        "\t\t__u8 __a64_c_op = __a64_c_step->op;",
+        "\t\t__u8 __a64_c_dst = __a64_c_step->dst;",
+        "\t\t__u8 __a64_c_src = __a64_c_step->src;",
+        "\t\t__u8 __a64_c_src2 = __a64_c_step->src2;",
+        "\t\t__u8 __a64_c_src3 = __a64_c_step->src3;",
+        "\t\t__u8 __a64_c_width = __a64_c_step->width;",
+        "\t\t__u32 __a64_c_aux = __a64_c_step->aux;",
+        "\t\t__u64 __a64_c_imm = __a64_c_step->imm;",
+        "\t\t__u32 __a64_c_target = __a64_c_step->target;",
+        "\t\t__u8 __a64_c_cond = __a64_c_step->cond;",
+        "\t\t__u8 __a64_c_helper = __a64_c_step->helper;",
+    ])
+    lines.extend([
+        "\t\tif (__a64_c_kind == ARM64_SIM_C_OP) {",
+        "\t\t\tswitch (__a64_c_op) {",
+    ])
+    for op in used_ops:
+        lines.extend([
+            f"\t\t\tcase {op}:",
+            f"\t\t\t\tARM64_SIM_L_EXEC({op}, __a64_c_dst, __a64_c_src, __a64_c_src2, __a64_c_src3, __a64_c_width, __a64_c_aux, __a64_c_imm);",
+            "\t\t\t\tbreak;",
+        ])
+    lines.extend([
+        "\t\t\tdefault:",
+        "\t\t\t\tARM64_SIM_L_UNSUPPORTED_OPCODE();",
+        "\t\t\t\tbreak;",
+        "\t\t\t}",
+        "\t\t\t__a64_c_pc++;",
+        "\t\t} else if (__a64_c_kind == ARM64_SIM_C_JMP) {",
+        "\t\t\t__a64_c_pc = __a64_c_target;",
+        "\t\t} else if (__a64_c_kind == ARM64_SIM_C_JCC) {",
+        "\t\t\t__a64_c_pc = ARM64_SIM_L_EVAL_COND(__a64_c_cond) ? __a64_c_target : __a64_c_pc + 1;",
+        "\t\t} else if (__a64_c_kind == ARM64_SIM_C_CBZ || __a64_c_kind == ARM64_SIM_C_CBNZ) {",
+        "\t\t\t__u64 __a64_c_value = arm64_apply_width(ARM64_SIM_L_READ_REG(__a64_c_src), __a64_c_width);",
+        "\t\t\t__u8 __a64_c_take = (__a64_c_value == 0) == (__a64_c_kind == ARM64_SIM_C_CBZ);",
+        "\t\t\t__a64_c_pc = __a64_c_take ? __a64_c_target : __a64_c_pc + 1;",
+        "\t\t} else if (__a64_c_kind == ARM64_SIM_C_TBZ || __a64_c_kind == ARM64_SIM_C_TBNZ) {",
+        "\t\t\t__u64 __a64_c_value = (ARM64_SIM_L_READ_REG(__a64_c_src) >> (__a64_c_imm & 63ULL)) & 1ULL;",
+        "\t\t\t__u8 __a64_c_take = (__a64_c_value == 0) == (__a64_c_kind == ARM64_SIM_C_TBZ);",
+        "\t\t\t__a64_c_pc = __a64_c_take ? __a64_c_target : __a64_c_pc + 1;",
+        "\t\t} else if (__a64_c_kind == ARM64_SIM_C_CALL) {",
+        "\t\t\t__a64_lr = __a64_c_pc + 1;",
+        "\t\t\t__a64_x30.x = __a64_lr;",
+        "\t\t\t__a64_c_pc = __a64_c_target;",
+        "\t\t} else if (__a64_c_kind == ARM64_SIM_C_RET) {",
+        "\t\t\tif (__a64_lr) {",
+        "\t\t\t\t__a64_c_pc = (__u32)__a64_lr;",
+        "\t\t\t\t__a64_lr = 0;",
+        "\t\t\t\tcontinue;",
+        "\t\t\t}",
+        "\t\t\tARM64_SIM_RET();",
+        "\t\t} else if (__a64_c_kind == ARM64_SIM_C_HELPER) {",
+        "\t\t\tARM64_SIM_C_CALL_HELPER(__a64_c_helper);",
+        "\t\t\t__a64_c_pc++;",
+        "\t\t} else {",
+        "\t\t\tARM64_SIM_L_UNSUPPORTED_OPCODE();",
+        "\t\t}",
+        "\t}",
+    ])
+    if linked_exit:
+        lines.extend([
+            "\tARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, ARM64_SIM_L_READ_REG(ARM64_X7), ARM64_WIDTH_64);",
+            "\tARM64_SIM_RET();",
+        ])
+    else:
+        lines.append("\treturn 0;")
+    lines.extend(["}", "", "ARM64_SIM_LICENSE();", ""])
+    return "\n".join(lines)
+
+
 def render_program(name: str, symbol: str, functions: OrderedDict[str, list[NativeInsn]],
                    kind: str, prelude: str = "",
                    rodata16: dict[str, tuple[int, int]] | None = None,
@@ -848,14 +1136,17 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
     return "\n".join(lines)
 
 
-def generate_one(bench: Bench, source_dir: Path, output_dir: Path, proof_object_dir: Path) -> Path:
+def generate_one(bench: Bench, source_dir: Path, output_dir: Path,
+                 proof_object_dir: Path, compact: bool = False) -> Path:
     selected, rodata16 = parse_native_linked_program(bench, proof_object_dir)
     output = output_dir / f"{bench.name}.bpf.c"
     source = source_dir / f"{bench.name}.bpf.c"
     prelude = source_prelude(source) if source_dir == STAGE2_PROGRAMS else ""
     output.write_text(
-        render_program(bench.name, bench.symbol, selected, bench.kind,
-                       prelude=prelude, rodata16=rodata16, linked_exit=True),
+        (
+            render_program_compact if compact else render_program
+        )(bench.name, bench.symbol, selected, bench.kind,
+          prelude=prelude, rodata16=rodata16, linked_exit=True),
         encoding="utf-8",
     )
     return output
@@ -868,6 +1159,8 @@ def main() -> int:
     parser.add_argument("--proof-object-dir", type=Path, default=PROOF_OBJECT_DIR)
     parser.add_argument("--config", type=Path, default=CONFIG)
     parser.add_argument("--only", nargs="*", help="optional micro benchmark stem list")
+    parser.add_argument("--compact", action="store_true",
+                        help="emit pc-switch interpreter sources for large app proofs")
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
     source_dir = args.micro_programs
@@ -875,7 +1168,8 @@ def main() -> int:
         source_dir = STAGE2_PROGRAMS
     only = set(args.only or [])
     written = [
-        generate_one(bench, source_dir, args.output_dir, args.proof_object_dir)
+        generate_one(bench, source_dir, args.output_dir, args.proof_object_dir,
+                     compact=args.compact)
         for bench in load_benches(args.config)
         if not only or bench.name in only
     ]
