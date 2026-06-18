@@ -16,7 +16,15 @@ statfunc proc_info_t *init_proc_info(u32, u32);
 statfunc void init_task_info_scratch(u32, scratch_t *);
 statfunc task_info_t *init_task_info(u32, u32);
 statfunc event_config_t *get_event_config(u32, u16);
+statfunc int init_program_data_common(program_data_t *, void *, u32, struct task_struct *, int);
 statfunc int init_program_data(program_data_t *, void *, u32);
+#ifdef MICRO_NATIVE_DIRECT_CORE_READ
+statfunc int init_program_data_with_task_syscall(program_data_t *,
+                                                 void *,
+                                                 u32,
+                                                 struct task_struct *,
+                                                 int);
+#endif
 statfunc int init_tailcall_program_data(program_data_t *, void *);
 statfunc bool reset_event(event_data_t *, u32);
 statfunc void reset_event_args_buf(event_data_t *);
@@ -71,7 +79,11 @@ statfunc int init_task_context(task_context_t *tsk_ctx, struct task_struct *task
 
 statfunc void init_proc_info_scratch(u32 pid, scratch_t *scratch)
 {
+#ifdef MICRO_NATIVE
+    __builtin_memset_inline(&scratch->proc_info, 0, sizeof(proc_info_t));
+#else
     __builtin_memset(&scratch->proc_info, 0, sizeof(proc_info_t));
+#endif
     bpf_map_update_elem(&proc_info_map, &pid, &scratch->proc_info, BPF_NOEXIST);
 }
 
@@ -114,7 +126,11 @@ statfunc event_config_t *get_event_config(u32 event_id, u16 policies_version)
 }
 
 // clang-format off
-statfunc int init_program_data(program_data_t *p, void *ctx, u32 event_id)
+statfunc int init_program_data_common(program_data_t *p,
+                                      void *ctx,
+                                      u32 event_id,
+                                      struct task_struct *task,
+                                      int syscall_id)
 {
     int zero = 0;
 
@@ -133,7 +149,7 @@ statfunc int init_program_data(program_data_t *p, void *ctx, u32 event_id)
 
     reset_event_args_buf(p->event);
 
-    p->event->task = (struct task_struct *) bpf_get_current_task();
+    p->event->task = task;
 
     __builtin_memset(&p->event->context.task, 0, sizeof(p->event->context.task));
 
@@ -145,7 +161,7 @@ statfunc int init_program_data(program_data_t *p, void *ctx, u32 event_id)
     p->event->context.eventid = event_id;
     p->event->context.ts = get_current_time_in_ns();
     p->event->context.processor_id = (u16) bpf_get_smp_processor_id();
-    p->event->context.syscall = get_current_task_syscall_id();
+    p->event->context.syscall = syscall_id;
 
     u32 host_pid = p->event->context.task.host_pid;
     p->proc_info = bpf_map_lookup_elem(&proc_info_map, &host_pid);
@@ -210,6 +226,23 @@ statfunc int init_program_data(program_data_t *p, void *ctx, u32 event_id)
 
     return 1;
 }
+
+statfunc int init_program_data(program_data_t *p, void *ctx, u32 event_id)
+{
+    struct task_struct *task = (struct task_struct *) bpf_get_current_task();
+    return init_program_data_common(p, ctx, event_id, task, get_current_task_syscall_id());
+}
+
+#ifdef MICRO_NATIVE_DIRECT_CORE_READ
+statfunc int init_program_data_with_task_syscall(program_data_t *p,
+                                                 void *ctx,
+                                                 u32 event_id,
+                                                 struct task_struct *task,
+                                                 int syscall_id)
+{
+    return init_program_data_common(p, ctx, event_id, task, syscall_id);
+}
+#endif
 // clang-format on
 
 statfunc int init_tailcall_program_data(program_data_t *p, void *ctx)

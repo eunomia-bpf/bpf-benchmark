@@ -169,7 +169,7 @@ int sys_enter_submit(struct bpf_raw_tracepoint_args *ctx)
 
     if (sys->id != SYSCALL_RT_SIGRETURN && !p.task_info->syscall_traced) {
         save_to_submit_buf(&p.event->args_buf, (void *) &(sys->args.args[0]), sizeof(int), 0);
-        events_perf_submit(&p);
+        events_perf_submit_hot_path(&p);
     }
 
 out:
@@ -289,7 +289,7 @@ int sys_exit_submit(struct bpf_raw_tracepoint_args *ctx)
 
     u8 ret_index = get_num_fields(p.event->config.field_types);
     save_to_submit_buf(&p.event->args_buf, (void *) &ret, sizeof(long), ret_index);
-    events_perf_submit(&p);
+    events_perf_submit_hot_path(&p);
 
 out:
     bpf_tail_call(ctx, &sys_exit_tails, sys->id);
@@ -306,13 +306,25 @@ SEC("raw_tracepoint/trace_sys_enter")
 int trace_sys_enter(struct bpf_raw_tracepoint_args *ctx)
 {
     program_data_t p = {};
+#ifdef MICRO_NATIVE_DIRECT_CORE_READ
+    int id = ctx->args[1];
+    struct task_struct *task = (struct task_struct *) bpf_get_current_task();
+    id = translate_syscall_id_for_task(task, id);
+    if (id == NO_SYSCALL)
+        return 0;
+
+    if (!init_program_data_with_task_syscall(&p, ctx, RAW_SYS_ENTER, task, id))
+        return 0;
+#else
     if (!init_program_data(&p, ctx, RAW_SYS_ENTER))
         return 0;
+#endif
 
     if (!evaluate_scope_filters(&p))
         return 0;
 
     // always submit since this won't be attached otherwise
+#ifndef MICRO_NATIVE_DIRECT_CORE_READ
     int id = ctx->args[1];
     struct task_struct *task = (struct task_struct *) bpf_get_current_task();
     if (is_compat(task)) {
@@ -323,8 +335,13 @@ int trace_sys_enter(struct bpf_raw_tracepoint_args *ctx)
 
         id = *id_64;
     }
+#endif
     save_to_submit_buf(&p.event->args_buf, (void *) &id, sizeof(int), 0);
+#ifdef MICRO_NATIVE_DIRECT_CORE_READ
+    events_perf_submit_hot_path(&p);
+#else
     events_perf_submit(&p);
+#endif
     return 0;
 }
 
@@ -333,13 +350,26 @@ SEC("raw_tracepoint/trace_sys_exit")
 int trace_sys_exit(struct bpf_raw_tracepoint_args *ctx)
 {
     program_data_t p = {};
+#ifdef MICRO_NATIVE_DIRECT_CORE_READ
+    struct pt_regs *regs = (struct pt_regs *) ctx->args[0];
+    int id = get_syscall_id_from_regs(regs);
+    struct task_struct *task = (struct task_struct *) bpf_get_current_task();
+    id = translate_syscall_id_for_task(task, id);
+    if (id == NO_SYSCALL)
+        return 0;
+
+    if (!init_program_data_with_task_syscall(&p, ctx, RAW_SYS_EXIT, task, id))
+        return 0;
+#else
     if (!init_program_data(&p, ctx, RAW_SYS_EXIT))
         return 0;
+#endif
 
     if (!evaluate_scope_filters(&p))
         return 0;
 
     // always submit since this won't be attached otherwise
+#ifndef MICRO_NATIVE_DIRECT_CORE_READ
     struct pt_regs *regs = (struct pt_regs *) ctx->args[0];
     int id = get_syscall_id_from_regs(regs);
     struct task_struct *task = (struct task_struct *) bpf_get_current_task();
@@ -351,8 +381,13 @@ int trace_sys_exit(struct bpf_raw_tracepoint_args *ctx)
 
         id = *id_64;
     }
+#endif
     save_to_submit_buf(&p.event->args_buf, (void *) &id, sizeof(int), 0);
+#ifdef MICRO_NATIVE_DIRECT_CORE_READ
+    events_perf_submit_hot_path(&p);
+#else
     events_perf_submit(&p);
+#endif
     return 0;
 }
 
@@ -2357,7 +2392,7 @@ int BPF_KPROBE(trace_security_file_open)
     save_str_to_buf(&p.event->args_buf, syscall_pathname, 5);
 
     if (evaluate_data_filters(&p, 0))
-        events_perf_submit(&p);
+        events_perf_submit_hot_path(&p);
 
 out:
 #ifdef EXTENDED_BUILD
@@ -2502,7 +2537,7 @@ int BPF_KPROBE(trace_commit_creds)
         (old_slim.cap_bset != new_slim.cap_bset)                ||
         (old_slim.cap_ambient != new_slim.cap_ambient)
     ) {
-        events_perf_submit(&p);
+        events_perf_submit_hot_path(&p);
     }
     // clang-format on
 
@@ -2577,7 +2612,7 @@ int BPF_KPROBE(trace_cap_capable)
 
     save_to_submit_buf(&p.event->args_buf, (void *) &cap, sizeof(int), 0);
 
-    return events_perf_submit(&p);
+    return events_perf_submit_hot_path(&p);
 }
 
 SEC("kprobe/security_socket_create")
@@ -3211,7 +3246,7 @@ do_file_io_operation(struct pt_regs *ctx, u32 event_id, u32 tail_call_id, bool i
     // Submit io event
     long ret = PT_REGS_RC(ctx);
     save_to_submit_buf(&p.event->args_buf, (void *) &ret, sizeof(long), 5);
-    events_perf_submit(&p);
+    events_perf_submit_hot_path(&p);
 
 tail:
     bpf_tail_call(ctx, &prog_array, tail_call_id);
@@ -5302,7 +5337,7 @@ int BPF_KPROBE(trace_security_task_setrlimit)
     save_to_submit_buf(&p.event->args_buf, &new_rlim_cur, sizeof(u64), 2);
     save_to_submit_buf(&p.event->args_buf, &new_rlim_max, sizeof(u64), 3);
 
-    return events_perf_submit(&p);
+    return events_perf_submit_hot_path(&p);
 }
 
 SEC("kprobe/security_settime64")
@@ -5598,7 +5633,7 @@ int BPF_KPROBE(trace_security_task_prctl)
         save_to_submit_buf(&p.event->args_buf, &old_securebits, sizeof(old_securebits), 40);
     }
 
-    return events_perf_submit(&p);
+    return events_perf_submit_hot_path(&p);
 }
 
 //

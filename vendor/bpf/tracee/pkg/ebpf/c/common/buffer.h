@@ -25,6 +25,12 @@ statfunc int save_args_str_arr_to_buf(args_buffer_t *, const char *, const char 
 statfunc int save_sockaddr_to_buf(args_buffer_t *, struct socket *, bool, u8);
 statfunc int save_args_to_submit_buf(event_data_t *, args_t *);
 statfunc int events_perf_submit(program_data_t *);
+#ifdef MICRO_NATIVE
+statfunc int events_perf_submit_cached_task_context(program_data_t *);
+#define events_perf_submit_hot_path(p) events_perf_submit_cached_task_context(p)
+#else
+#define events_perf_submit_hot_path(p) events_perf_submit(p)
+#endif
 statfunc int signal_perf_submit(void *, controlplane_signal_t *);
 
 // FUNCTIONS
@@ -740,6 +746,46 @@ statfunc int events_perf_submit(program_data_t *p)
 
     return perf_ret;
 }
+
+#ifdef MICRO_NATIVE
+// Native preserves Tracee's task_info cache but avoids re-reading the full
+// task context on hot-path event submission.
+statfunc int events_perf_submit_cached_task_context(program_data_t *p)
+{
+    u32 host_pid = p->event->context.task.host_pid;
+    u32 host_tid = p->event->context.task.host_tid;
+    u64 cgroup_id = p->event->context.task.cgroup_id;
+    u32 flags = p->event->context.task.flags;
+
+    __builtin_memcpy_inline(
+        &p->event->context.task, &p->task_info->context, sizeof(task_context_t));
+    p->event->context.task.host_pid = host_pid;
+    p->event->context.task.host_tid = host_tid;
+    p->event->context.task.cgroup_id = cgroup_id;
+    p->event->context.task.flags |= flags & CONTAINER_STARTED_FLAG;
+    __builtin_memcpy_inline(
+        &p->task_info->context, &p->event->context.task, sizeof(task_context_t));
+
+    // Get Stack trace
+    if (p->config->options & OPT_CAPTURE_STACK_TRACES) {
+        int stack_id = bpf_get_stackid(p->ctx, &stack_addresses, BPF_F_USER_STACK);
+        if (stack_id >= 0) {
+            p->event->context.stack_id = stack_id;
+        }
+    }
+
+    // context + argnum + arg buffer size
+    u32 size = sizeof(event_context_t) + sizeof(u8) + p->event->args_buf.offset;
+    if (size > MAX_EVENT_SIZE)
+        size = MAX_EVENT_SIZE;
+
+    long perf_ret = bpf_perf_event_output(p->ctx, &events, BPF_F_CURRENT_CPU, p->event, size);
+
+    update_event_stats(p->event->context.eventid, perf_ret);
+
+    return perf_ret;
+}
+#endif
 
 statfunc int signal_perf_submit(void *ctx, controlplane_signal_t *sig)
 {
