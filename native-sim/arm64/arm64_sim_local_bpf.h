@@ -773,9 +773,10 @@ struct arm64_sim_skb_abi {
 			__u64 __a64_l_result = __a64_l_lhs - __a64_l_rhs;  \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 			ARM64_SIM_L_SET_SUB_FLAGS(__a64_l_lhs, __a64_l_rhs, __a64_l_width);\
-		} else if ((OP) == ARM64_OP_ADDS_IMM) {                      \
+		} else if ((OP) == ARM64_OP_ADDS_IMM || (OP) == ARM64_OP_ADDS_REG) {\
 			__u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC);      \
-			__u64 __a64_l_rhs = (__u64)(IMM);                  \
+			__u64 __a64_l_rhs = (OP) == ARM64_OP_ADDS_IMM ? (__u64)(IMM) :\
+				ARM64_SIM_L_MOD_VALUE((SRC2), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_l_width);\
 			__u64 __a64_l_result = __a64_l_lhs + __a64_l_rhs;  \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 			ARM64_SIM_L_SET_ADD_FLAGS(__a64_l_lhs, __a64_l_rhs, __a64_l_width);\
@@ -789,6 +790,10 @@ struct arm64_sim_skb_abi {
 			ARM64_SIM_L_SET_LOGIC_FLAGS(ARM64_SIM_L_READ_REG(DST) & ((OP) == ARM64_OP_TST_IMM ? (__u64)(IMM) : ARM64_SIM_L_MOD_VALUE((SRC), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_l_width)), __a64_l_width);\
 		} else if ((OP) == ARM64_OP_TST_BIC_REG) {                 \
 			ARM64_SIM_L_SET_LOGIC_FLAGS(ARM64_SIM_L_READ_REG(DST) & ~ARM64_SIM_L_MOD_VALUE((SRC), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_l_width), __a64_l_width);\
+		} else if ((OP) == ARM64_OP_BICS_REG) {                    \
+			__u64 __a64_l_value = ARM64_SIM_L_READ_REG(SRC) & ~ARM64_SIM_L_MOD_VALUE((SRC2), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_l_width);\
+			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
+			ARM64_SIM_L_SET_LOGIC_FLAGS(__a64_l_value, __a64_l_width);\
 		} else if ((OP) == ARM64_OP_ANDS_REG || (OP) == ARM64_OP_ANDS_IMM) {\
 			__u64 __a64_l_value = ARM64_SIM_L_READ_REG(SRC) & ((OP) == ARM64_OP_ANDS_IMM ? (__u64)(IMM) : ARM64_SIM_L_MOD_VALUE((SRC2), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_l_width));\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
@@ -1089,6 +1094,87 @@ struct arm64_sim_skb_abi {
 	} while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_trace_printk()                               \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_skb_store_bytes()                            \
+	do {                                                               \
+		long __a64_bpf_ret = bpf_skb_store_bytes(                \
+			ARM64_SIM_L_READ_REG_PTR(ARM64_X0),               \
+			ARM64_SIM_L_READ_REG(ARM64_X1),                   \
+			ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2),             \
+			ARM64_SIM_L_READ_REG(ARM64_X3),                   \
+			ARM64_SIM_L_READ_REG(ARM64_X4));                  \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, (__u64)__a64_bpf_ret,\
+					    ARM64_WIDTH_64);              \
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_l3_csum_replace()                            \
+	do {                                                               \
+		long __a64_bpf_ret = bpf_l3_csum_replace(                \
+			ARM64_SIM_L_READ_REG_PTR(ARM64_X0),               \
+			ARM64_SIM_L_READ_REG(ARM64_X1),                   \
+			ARM64_SIM_L_READ_REG(ARM64_X2),                   \
+			ARM64_SIM_L_READ_REG(ARM64_X3),                   \
+			ARM64_SIM_L_READ_REG(ARM64_X4));                  \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, (__u64)__a64_bpf_ret,\
+					    ARM64_WIDTH_64);              \
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_l4_csum_replace()                            \
+	do {                                                               \
+		long __a64_bpf_ret = bpf_l4_csum_replace(                \
+			ARM64_SIM_L_READ_REG_PTR(ARM64_X0),               \
+			ARM64_SIM_L_READ_REG(ARM64_X1),                   \
+			ARM64_SIM_L_READ_REG(ARM64_X2),                   \
+			ARM64_SIM_L_READ_REG(ARM64_X3),                   \
+			ARM64_SIM_L_READ_REG(ARM64_X4));                  \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, (__u64)__a64_bpf_ret,\
+					    ARM64_WIDTH_64);              \
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_redirect()                                   \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_clone_redirect()                             \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_csum_diff()                                  \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_skb_under_cgroup()                           \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_skb_change_proto()                           \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_skb_change_type()                            \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_skb_adjust_room()                            \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_fib_lookup()                                 \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_redirect_neigh()                             \
 	do {                                                               \
 		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
 	} while (0)

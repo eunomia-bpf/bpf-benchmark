@@ -44,18 +44,29 @@ HELPER_IDENTS = {
     4: "bpf_probe_read",
     6: "bpf_trace_printk",
     8: "bpf_get_smp_processor_id",
+    9: "bpf_skb_store_bytes",
+    10: "bpf_l3_csum_replace",
+    11: "bpf_l4_csum_replace",
     12: "bpf_tail_call",
     14: "bpf_get_current_pid_tgid",
     15: "bpf_get_current_uid_gid",
     16: "bpf_get_current_comm",
+    21: "bpf_redirect",
+    23: "bpf_clone_redirect",
     25: "bpf_perf_event_output",
     26: "bpf_skb_load_bytes",
     27: "bpf_get_stackid",
+    28: "bpf_csum_diff",
     35: "bpf_get_current_task",
     37: "bpf_current_task_under_cgroup",
+    38: "bpf_skb_under_cgroup",
+    43: "bpf_skb_change_proto",
+    44: "bpf_skb_change_type",
     45: "bpf_probe_read_str",
+    50: "bpf_skb_adjust_room",
     67: "bpf_get_stack",
     68: "bpf_skb_load_bytes_relative",
+    69: "bpf_fib_lookup",
     80: "bpf_get_current_cgroup_id",
     95: "bpf_sk_fullsock",
     112: "bpf_probe_read_user",
@@ -63,6 +74,7 @@ HELPER_IDENTS = {
     114: "bpf_probe_read_user_str",
     115: "bpf_probe_read_kernel_str",
     125: "bpf_ktime_get_boot_ns",
+    152: "bpf_redirect_neigh",
     158: "bpf_get_current_task_btf",
     175: "bpf_task_pt_regs",
 }
@@ -510,8 +522,8 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
         mem = parse_mem(ops, 1)
         return Encoded("ARM64_OP_STORE_D0", dst=mem.base, src2=mem.index,
                        aux=mem_aux(mem), imm=c_u64(mem.offset))
-    if op in {"str", "stur", "strb", "strh"}:
-        width = 1 if op == "strb" else 2 if op == "strh" else reg_width(ops[0])
+    if op in {"str", "stur", "strb", "strh", "sturh"}:
+        width = 1 if op == "strb" else 2 if op in {"strh", "sturh"} else reg_width(ops[0])
         mem = parse_mem(ops, 1)
         return Encoded("ARM64_OP_STORE", mem.base, reg_const(ops[0]), mem.index,
                        width=width_const(width), aux=mem_aux(mem), imm=c_u64(mem.offset))
@@ -556,10 +568,20 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
         return Encoded("ARM64_OP_ADDS_IMM", reg_const(ops[0]), reg_const(ops[1]),
                        width=width_const(reg_width(ops[0])),
                        imm=c_u64(parse_shifted_imm(ops, 2)))
+    if op == "adds":
+        mod, shift = parse_modifier(ops, 3)
+        return Encoded("ARM64_OP_ADDS_REG", reg_const(ops[0]), reg_const(ops[1]), reg_const(ops[2]),
+                       width=width_const(reg_width(ops[0])),
+                       aux=f"ARM64_AUX_ALU(0, {mod}, {shift})")
     if op == "bics" and ops[0] in {"wzr", "xzr"}:
         mod, shift = parse_modifier(ops, 3)
         return Encoded("ARM64_OP_TST_BIC_REG", reg_const(ops[1]), reg_const(ops[2]),
                        width=width_const(reg_width(ops[1])),
+                       aux=f"ARM64_AUX_ALU(0, {mod}, {shift})")
+    if op == "bics":
+        mod, shift = parse_modifier(ops, 3)
+        return Encoded("ARM64_OP_BICS_REG", reg_const(ops[0]), reg_const(ops[1]), reg_const(ops[2]),
+                       width=width_const(reg_width(ops[0])),
                        aux=f"ARM64_AUX_ALU(0, {mod}, {shift})")
     if op == "ands":
         if ops[2].startswith("#"):

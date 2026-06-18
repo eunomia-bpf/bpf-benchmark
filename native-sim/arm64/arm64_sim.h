@@ -67,6 +67,8 @@
 #define ARM64_OP_LDRSH 0x3fU
 #define ARM64_OP_SMADDL 0x40U
 #define ARM64_OP_CNEG 0x41U
+#define ARM64_OP_ADDS_REG 0x42U
+#define ARM64_OP_BICS_REG 0x43U
 #define ARM64_OP_RET 0xffU
 
 #define ARM64_ALU_ADD 0U
