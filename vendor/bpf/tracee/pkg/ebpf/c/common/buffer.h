@@ -25,12 +25,8 @@ statfunc int save_args_str_arr_to_buf(args_buffer_t *, const char *, const char 
 statfunc int save_sockaddr_to_buf(args_buffer_t *, struct socket *, bool, u8);
 statfunc int save_args_to_submit_buf(event_data_t *, args_t *);
 statfunc int events_perf_submit(program_data_t *);
-#ifdef MICRO_NATIVE
 statfunc int events_perf_submit_cached_task_context(program_data_t *);
 #define events_perf_submit_hot_path(p) events_perf_submit_cached_task_context(p)
-#else
-#define events_perf_submit_hot_path(p) events_perf_submit(p)
-#endif
 statfunc int signal_perf_submit(void *, controlplane_signal_t *);
 
 // FUNCTIONS
@@ -747,9 +743,8 @@ statfunc int events_perf_submit(program_data_t *p)
     return perf_ret;
 }
 
-#ifdef MICRO_NATIVE
-// Native preserves Tracee's task_info cache but avoids re-reading the full
-// task context on hot-path event submission.
+// Preserve Tracee's task_info cache while avoiding a second full task-context
+// read on hot-path event submission.
 statfunc int events_perf_submit_cached_task_context(program_data_t *p)
 {
     u32 host_pid = p->event->context.task.host_pid;
@@ -776,8 +771,16 @@ statfunc int events_perf_submit_cached_task_context(program_data_t *p)
 
     // context + argnum + arg buffer size
     u32 size = sizeof(event_context_t) + sizeof(u8) + p->event->args_buf.offset;
+#ifdef MICRO_NATIVE
     if (size > MAX_EVENT_SIZE)
         size = MAX_EVENT_SIZE;
+#else
+    // inline bounds check to force compiler to use the register of size
+    asm volatile("if %[size] < %[max_size] goto +1;\n"
+                 "%[size] = %[max_size];\n"
+                 :
+                 : [size] "r"(size), [max_size] "i"(MAX_EVENT_SIZE));
+#endif
 
     long perf_ret = bpf_perf_event_output(p->ctx, &events, BPF_F_CURRENT_CPU, p->event, size);
 
@@ -785,7 +788,6 @@ statfunc int events_perf_submit_cached_task_context(program_data_t *p)
 
     return perf_ret;
 }
-#endif
 
 statfunc int signal_perf_submit(void *ctx, controlplane_signal_t *sig)
 {

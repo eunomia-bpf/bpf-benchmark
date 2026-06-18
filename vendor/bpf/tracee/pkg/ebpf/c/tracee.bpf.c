@@ -306,7 +306,6 @@ SEC("raw_tracepoint/trace_sys_enter")
 int trace_sys_enter(struct bpf_raw_tracepoint_args *ctx)
 {
     program_data_t p = {};
-#ifdef MICRO_NATIVE_DIRECT_CORE_READ
     int id = ctx->args[1];
     struct task_struct *task = (struct task_struct *) bpf_get_current_task();
     id = translate_syscall_id_for_task(task, id);
@@ -315,33 +314,13 @@ int trace_sys_enter(struct bpf_raw_tracepoint_args *ctx)
 
     if (!init_program_data_with_task_syscall(&p, ctx, RAW_SYS_ENTER, task, id))
         return 0;
-#else
-    if (!init_program_data(&p, ctx, RAW_SYS_ENTER))
-        return 0;
-#endif
 
     if (!evaluate_scope_filters(&p))
         return 0;
 
     // always submit since this won't be attached otherwise
-#ifndef MICRO_NATIVE_DIRECT_CORE_READ
-    int id = ctx->args[1];
-    struct task_struct *task = (struct task_struct *) bpf_get_current_task();
-    if (is_compat(task)) {
-        // Translate 32bit syscalls to 64bit syscalls, so we can send to the correct handler
-        u32 *id_64 = bpf_map_lookup_elem(&sys_32_to_64_map, &id);
-        if (id_64 == 0)
-            return 0;
-
-        id = *id_64;
-    }
-#endif
     save_to_submit_buf(&p.event->args_buf, (void *) &id, sizeof(int), 0);
-#ifdef MICRO_NATIVE_DIRECT_CORE_READ
     events_perf_submit_hot_path(&p);
-#else
-    events_perf_submit(&p);
-#endif
     return 0;
 }
 
@@ -350,7 +329,6 @@ SEC("raw_tracepoint/trace_sys_exit")
 int trace_sys_exit(struct bpf_raw_tracepoint_args *ctx)
 {
     program_data_t p = {};
-#ifdef MICRO_NATIVE_DIRECT_CORE_READ
     struct pt_regs *regs = (struct pt_regs *) ctx->args[0];
     int id = get_syscall_id_from_regs(regs);
     struct task_struct *task = (struct task_struct *) bpf_get_current_task();
@@ -360,34 +338,13 @@ int trace_sys_exit(struct bpf_raw_tracepoint_args *ctx)
 
     if (!init_program_data_with_task_syscall(&p, ctx, RAW_SYS_EXIT, task, id))
         return 0;
-#else
-    if (!init_program_data(&p, ctx, RAW_SYS_EXIT))
-        return 0;
-#endif
 
     if (!evaluate_scope_filters(&p))
         return 0;
 
     // always submit since this won't be attached otherwise
-#ifndef MICRO_NATIVE_DIRECT_CORE_READ
-    struct pt_regs *regs = (struct pt_regs *) ctx->args[0];
-    int id = get_syscall_id_from_regs(regs);
-    struct task_struct *task = (struct task_struct *) bpf_get_current_task();
-    if (is_compat(task)) {
-        // Translate 32bit syscalls to 64bit syscalls, so we can send to the correct handler
-        u32 *id_64 = bpf_map_lookup_elem(&sys_32_to_64_map, &id);
-        if (id_64 == 0)
-            return 0;
-
-        id = *id_64;
-    }
-#endif
     save_to_submit_buf(&p.event->args_buf, (void *) &id, sizeof(int), 0);
-#ifdef MICRO_NATIVE_DIRECT_CORE_READ
     events_perf_submit_hot_path(&p);
-#else
-    events_perf_submit(&p);
-#endif
     return 0;
 }
 

@@ -18,13 +18,11 @@ statfunc task_info_t *init_task_info(u32, u32);
 statfunc event_config_t *get_event_config(u32, u16);
 statfunc int init_program_data_common(program_data_t *, void *, u32, struct task_struct *, int);
 statfunc int init_program_data(program_data_t *, void *, u32);
-#ifdef MICRO_NATIVE_DIRECT_CORE_READ
 statfunc int init_program_data_with_task_syscall(program_data_t *,
                                                  void *,
                                                  u32,
                                                  struct task_struct *,
                                                  int);
-#endif
 statfunc int init_tailcall_program_data(program_data_t *, void *);
 statfunc bool reset_event(event_data_t *, u32);
 statfunc void reset_event_args_buf(event_data_t *);
@@ -233,7 +231,6 @@ statfunc int init_program_data(program_data_t *p, void *ctx, u32 event_id)
     return init_program_data_common(p, ctx, event_id, task, get_current_task_syscall_id());
 }
 
-#ifdef MICRO_NATIVE_DIRECT_CORE_READ
 statfunc int init_program_data_with_task_syscall(program_data_t *p,
                                                  void *ctx,
                                                  u32 event_id,
@@ -242,7 +239,6 @@ statfunc int init_program_data_with_task_syscall(program_data_t *p,
 {
     return init_program_data_common(p, ctx, event_id, task, syscall_id);
 }
-#endif
 // clang-format on
 
 statfunc int init_tailcall_program_data(program_data_t *p, void *ctx)
