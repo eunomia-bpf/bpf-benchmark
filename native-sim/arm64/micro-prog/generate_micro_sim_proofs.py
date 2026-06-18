@@ -45,14 +45,21 @@ HELPER_IDENTS = {
     8: "bpf_get_smp_processor_id",
     12: "bpf_tail_call",
     14: "bpf_get_current_pid_tgid",
+    15: "bpf_get_current_uid_gid",
+    16: "bpf_get_current_comm",
     25: "bpf_perf_event_output",
     26: "bpf_skb_load_bytes",
+    27: "bpf_get_stackid",
     35: "bpf_get_current_task",
+    37: "bpf_current_task_under_cgroup",
     45: "bpf_probe_read_str",
+    67: "bpf_get_stack",
     68: "bpf_skb_load_bytes_relative",
     80: "bpf_get_current_cgroup_id",
     95: "bpf_sk_fullsock",
     113: "bpf_probe_read_kernel",
+    114: "bpf_probe_read_user_str",
+    115: "bpf_probe_read_kernel_str",
     125: "bpf_ktime_get_boot_ns",
     158: "bpf_get_current_task_btf",
     175: "bpf_task_pt_regs",
@@ -63,8 +70,9 @@ GPR_WRITE_OPS = {
     "mov", "movk", "lsl", "lsr", "asr", "ror",
     "madd", "msub", "mul", "umull", "umulh", "udiv",
     "mvn", "neg", "extr", "ubfx", "sbfx", "ubfiz", "bfxil", "bfi",
-    "rev", "rev16", "sxth", "sxtw", "ldr", "ldur", "ldrb", "ldurb", "ldrh", "ldurh", "ldrsb",
-    "ldp", "csel", "cinc", "cinv", "cset", "fmov",
+    "rev", "rev16", "sxth", "sxtw", "ldr", "ldur", "ldaxr", "ldxr", "ldrb", "ldurb", "ldrh", "ldurh",
+    "ldrsb", "ldrsw",
+    "ldp", "stlxr", "stxr", "csel", "cinc", "cinv", "cset", "fmov",
 }
 
 
@@ -461,7 +469,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
         mem = parse_mem(ops, 1)
         return Encoded("ARM64_OP_LOAD_D0", src=mem.base, src2=mem.index,
                        aux=mem_aux(mem), imm=c_u64(mem.offset))
-    if op in {"ldr", "ldur", "ldrb", "ldurb", "ldrh", "ldurh"}:
+    if op in {"ldr", "ldur", "ldaxr", "ldxr", "ldrb", "ldurb", "ldrh", "ldurh"}:
         width = 1 if op in {"ldrb", "ldurb"} else 2 if op in {"ldrh", "ldurh"} else reg_width(ops[0])
         mem = parse_mem(ops, 1)
         return Encoded("ARM64_OP_LOAD", reg_const(ops[0]), mem.base, mem.index,
@@ -469,6 +477,10 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
     if op == "ldrsb":
         mem = parse_mem(ops, 1)
         return Encoded("ARM64_OP_LDRSB", reg_const(ops[0]), mem.base, mem.index,
+                       width=width_const(reg_width(ops[0])), aux=mem_aux(mem), imm=c_u64(mem.offset))
+    if op == "ldrsw":
+        mem = parse_mem(ops, 1)
+        return Encoded("ARM64_OP_LDRSW", reg_const(ops[0]), mem.base, mem.index,
                        width=width_const(reg_width(ops[0])), aux=mem_aux(mem), imm=c_u64(mem.offset))
     if op == "ldp":
         mem = parse_mem(ops, 2)
@@ -493,6 +505,11 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
         width = reg_width(ops[0])
         return Encoded("ARM64_OP_STP", mem.base, reg_const(ops[0]), reg_const(ops[1]), mem.index,
                        width=width_const(width), aux=mem_aux(mem), imm=c_u64(mem.offset))
+    if op in {"stlxr", "stxr"}:
+        mem = parse_mem(ops, 2)
+        width = reg_width(ops[1])
+        return Encoded("ARM64_OP_STLXR", reg_const(ops[0]), reg_const(ops[1]), mem.base,
+                       width=width_const(width), aux=mem_aux(mem))
     if op in {"cmp", "tst"}:
         width = width_const(reg_width(ops[0]))
         imm = ops[1].startswith("#")
@@ -506,6 +523,11 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
         return Encoded("ARM64_OP_CMN_IMM", reg_const(ops[0]),
                        width=width_const(reg_width(ops[0])),
                        imm=c_u64(parse_shifted_imm(ops, 1)))
+    if op == "cmn":
+        mod, shift = parse_modifier(ops, 2)
+        return Encoded("ARM64_OP_CMN_REG", reg_const(ops[0]), reg_const(ops[1]),
+                       width=width_const(reg_width(ops[0])),
+                       aux=f"ARM64_AUX_ALU(0, {mod}, {shift})")
     if op == "subs" and ops[2].startswith("#"):
         return Encoded("ARM64_OP_SUBS_IMM", reg_const(ops[0]), reg_const(ops[1]),
                        width=width_const(reg_width(ops[0])),

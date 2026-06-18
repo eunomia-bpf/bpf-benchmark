@@ -57,6 +57,9 @@
 #define ARM64_OP_ORN_REG 0x35U
 #define ARM64_OP_LDRSB 0x36U
 #define ARM64_OP_ANDS_IMM 0x37U
+#define ARM64_OP_STLXR 0x38U
+#define ARM64_OP_LDRSW 0x39U
+#define ARM64_OP_CMN_REG 0x3aU
 #define ARM64_OP_RET 0xffU
 
 #define ARM64_ALU_ADD 0U
