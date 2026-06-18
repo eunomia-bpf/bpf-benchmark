@@ -43,6 +43,7 @@ HELPER_IDENTS = {
     3: "bpf_map_delete_elem",
     4: "bpf_probe_read",
     8: "bpf_get_smp_processor_id",
+    12: "bpf_tail_call",
     14: "bpf_get_current_pid_tgid",
     25: "bpf_perf_event_output",
     26: "bpf_skb_load_bytes",
@@ -57,12 +58,13 @@ HELPER_IDENTS = {
     175: "bpf_task_pt_regs",
 }
 GPR_WRITE_OPS = {
-    "add", "sub", "and", "bic", "eor", "orr",
+    "add", "sub", "and", "bic", "eor", "orr", "orn",
+    "adds", "subs",
     "mov", "movk", "lsl", "lsr", "asr", "ror",
-    "madd", "msub", "mul", "umull", "udiv",
+    "madd", "msub", "mul", "umull", "umulh", "udiv",
     "mvn", "neg", "extr", "ubfx", "sbfx", "ubfiz", "bfxil", "bfi",
-    "rev", "rev16", "sxth", "ldr", "ldur", "ldrb", "ldurb", "ldrh", "ldurh",
-    "ldp", "csel", "cinc", "cset", "fmov",
+    "rev", "rev16", "sxth", "sxtw", "ldr", "ldur", "ldrb", "ldurb", "ldrh", "ldurh", "ldrsb",
+    "ldp", "csel", "cinc", "cinv", "cset", "fmov",
 }
 
 
@@ -368,7 +370,15 @@ def rodata_ident_map(rodata16: dict[str, tuple[int, int]]) -> dict[str, str]:
     return {symbol: f"__arm64_rodata_{index}" for index, symbol in enumerate(rodata16)}
 
 
-def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> Encoded:
+def c_ident(prefix: str, value: str, index: int) -> str:
+    ident = re.sub(r"[^A-Za-z0-9_]", "_", value)
+    ident = re.sub(r"_+", "_", ident).strip("_")
+    if not ident or ident[0].isdigit():
+        ident = f"{prefix}_{ident}"
+    return f"{ident}_{index}"
+
+
+def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[str, str]) -> Encoded:
     op = insn.mnemonic
     ops = insn.operands
     if op == "nop":
@@ -384,8 +394,9 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> Encoded:
             )
         if is_helper_symbol(insn.reloc_symbol):
             raise ValueError(f"unsupported adrp helper relocation: {insn.raw}")
+        reloc_ident = reloc_idents.get(insn.reloc_symbol, insn.reloc_symbol)
         return Encoded("ARM64_OP_ADRP_GOT", reg_const(ops[0]),
-                       imm=c_ptr_u64(f"&{insn.reloc_symbol}"))
+                       imm=c_ptr_u64(f"&{reloc_ident}"))
     if op == "mov":
         dst, src = ops[0], ops[1]
         if src.startswith("#"):
@@ -427,6 +438,11 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> Encoded:
     if op in {"mvn", "neg"}:
         return Encoded("ARM64_OP_MVN" if op == "mvn" else "ARM64_OP_NEG",
                        reg_const(ops[0]), reg_const(ops[1]), width=width_const(reg_width(ops[0])))
+    if op == "orn":
+        mod, shift = parse_modifier(ops, 3)
+        return Encoded("ARM64_OP_ORN_REG", reg_const(ops[0]), reg_const(ops[1]), reg_const(ops[2]),
+                       width=width_const(reg_width(ops[0])),
+                       aux=f"ARM64_AUX_ALU(0, {mod}, {shift})")
     if op == "extr":
         return Encoded("ARM64_OP_EXTR", reg_const(ops[0]), reg_const(ops[1]), reg_const(ops[2]),
                        width=width_const(reg_width(ops[0])), imm=c_u64(parse_imm(ops[3])))
@@ -450,6 +466,10 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> Encoded:
         mem = parse_mem(ops, 1)
         return Encoded("ARM64_OP_LOAD", reg_const(ops[0]), mem.base, mem.index,
                        width=width_const(width), aux=mem_aux(mem), imm=c_u64(mem.offset))
+    if op == "ldrsb":
+        mem = parse_mem(ops, 1)
+        return Encoded("ARM64_OP_LDRSB", reg_const(ops[0]), mem.base, mem.index,
+                       width=width_const(reg_width(ops[0])), aux=mem_aux(mem), imm=c_u64(mem.offset))
     if op == "ldp":
         mem = parse_mem(ops, 2)
         width = reg_width(ops[0])
@@ -482,10 +502,19 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> Encoded:
                    ("ARM64_OP_TST_IMM" if imm else "ARM64_OP_TST_REG")
         return Encoded(op_const, reg_const(ops[0]), "ARM64_REG_NONE" if imm else reg_const(ops[1]),
                        width=width, aux=aux, imm=c_u64(parse_shifted_imm(ops, 1)) if imm else "0")
+    if op == "cmn" and ops[1].startswith("#"):
+        return Encoded("ARM64_OP_CMN_IMM", reg_const(ops[0]),
+                       width=width_const(reg_width(ops[0])),
+                       imm=c_u64(parse_shifted_imm(ops, 1)))
     if op == "subs" and ops[2].startswith("#"):
         return Encoded("ARM64_OP_SUBS_IMM", reg_const(ops[0]), reg_const(ops[1]),
                        width=width_const(reg_width(ops[0])),
                        imm=c_u64(parse_shifted_imm(ops, 2)))
+    if op == "subs":
+        mod, shift = parse_modifier(ops, 3)
+        return Encoded("ARM64_OP_SUBS_REG", reg_const(ops[0]), reg_const(ops[1]), reg_const(ops[2]),
+                       width=width_const(reg_width(ops[0])),
+                       aux=f"ARM64_AUX_ALU(0, {mod}, {shift})")
     if op == "adds" and ops[2].startswith("#"):
         return Encoded("ARM64_OP_ADDS_IMM", reg_const(ops[0]), reg_const(ops[1]),
                        width=width_const(reg_width(ops[0])),
@@ -496,6 +525,10 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> Encoded:
                        width=width_const(reg_width(ops[1])),
                        aux=f"ARM64_AUX_ALU(0, {mod}, {shift})")
     if op == "ands":
+        if ops[2].startswith("#"):
+            return Encoded("ARM64_OP_ANDS_IMM", reg_const(ops[0]), reg_const(ops[1]),
+                           width=width_const(reg_width(ops[0])),
+                           imm=c_u64(parse_shifted_imm(ops, 2)))
         mod, shift = parse_modifier(ops, 3)
         return Encoded("ARM64_OP_ANDS_REG", reg_const(ops[0]), reg_const(ops[1]), reg_const(ops[2]),
                        width=width_const(reg_width(ops[0])),
@@ -514,6 +547,9 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> Encoded:
         src2 = reg_const(ops[2]) if op == "csel" else "ARM64_REG_NONE"
         return Encoded(op_const, reg_const(ops[0]), reg_const(ops[1]), src2,
                        width=width_const(reg_width(ops[0])), aux=COND[ops[-1]])
+    if op == "cinv":
+        return Encoded("ARM64_OP_CINV", reg_const(ops[0]), reg_const(ops[1]),
+                       width=width_const(reg_width(ops[0])), aux=COND[ops[2]])
     if op == "fmov":
         dst, src = ops
         if dst.startswith("d") and src.startswith("x"):
@@ -558,10 +594,21 @@ def written_gpr(insn: NativeInsn) -> str | None:
 def mov_immediate(insn: NativeInsn) -> int | None:
     if insn.mnemonic != "mov" or len(insn.operands) != 2:
         return None
+    if not insn.operands[1].startswith("#"):
+        return None
     try:
         return parse_imm(insn.operands[1])
     except ValueError:
         return None
+
+
+def mov_source_gpr(insn: NativeInsn) -> str | None:
+    if insn.mnemonic != "mov" or len(insn.operands) != 2:
+        return None
+    src = insn.operands[1]
+    if re.fullmatch(r"[wx]([0-9]+)", src):
+        return src[1:]
+    return None
 
 
 def helper_calls_by_addr(insns: list[NativeInsn]) -> dict[int, str]:
@@ -581,19 +628,26 @@ def helper_calls_by_addr(insns: list[NativeInsn]) -> dict[int, str]:
         if dst is None:
             continue
         imm = mov_immediate(insn)
-        if imm is None:
-            reg_imms.pop(dst, None)
-        else:
+        if imm is not None:
             reg_imms[dst] = imm
             if imm in HELPER_IDENTS:
                 last_helper_imms[dst] = imm
+            continue
+        src = mov_source_gpr(insn)
+        if src is not None and src in reg_imms:
+            reg_imms[dst] = reg_imms[src]
+            if reg_imms[src] in HELPER_IDENTS:
+                last_helper_imms[dst] = reg_imms[src]
+            continue
+        reg_imms.pop(dst, None)
     return helpers
 
 
 def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
                 next_addr: int | None,
                 helper_call: str | None,
-                rodata_idents: dict[str, str]) -> None:
+                rodata_idents: dict[str, str],
+                reloc_idents: dict[str, str]) -> None:
     lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
     op = insn.mnemonic
     if op.startswith("b."):
@@ -630,7 +684,7 @@ def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
     if op == "ret":
         lines.append("\tARM64_SIM_A64_RET();")
         return
-    enc = encode(insn, rodata_idents)
+    enc = encode(insn, rodata_idents, reloc_idents)
     lines.append(
         f"\tARM64_SIM_RUN_OP3({enc.op}, {enc.dst}, {enc.src}, {enc.src2}, {enc.src3}, "
         f"{enc.width}, {enc.aux}, {enc.imm});"
@@ -689,14 +743,19 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         and insn.reloc_symbol not in rodata_idents
         and not is_helper_symbol(insn.reloc_symbol)
     })
+    reloc_idents = {
+        symbol: c_ident("__arm64_reloc", symbol, index)
+        for index, symbol in enumerate(map_symbols)
+    }
     for map_symbol in map_symbols:
+        map_ident = reloc_idents[map_symbol]
         lines.extend([
             "struct {",
             "\t__uint(type, BPF_MAP_TYPE_ARRAY);",
             "\t__uint(max_entries, 1);",
             "\t__type(key, __u32);",
             "\t__type(value, __u64);",
-            f"}} {map_symbol} SEC(\".maps\");",
+            f"}} {map_ident} SEC(\".maps\");",
             "",
         ])
     lines.extend([
@@ -712,7 +771,7 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
             lines.append(f"{label(insn.addr)}:")
             append_insn(lines, insn, all_addrs, next_by_addr.get(insn.addr),
                         helper_by_addr.get(insn.addr),
-                        rodata_idents)
+                        rodata_idents, reloc_idents)
     if linked_exit:
         lines.extend([
             "\tARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, ARM64_SIM_L_READ_REG(ARM64_X7), ARM64_WIDTH_64);",
