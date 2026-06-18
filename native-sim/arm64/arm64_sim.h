@@ -47,6 +47,10 @@
 #define ARM64_OP_STORE_Q0 0x2bU
 #define ARM64_OP_TST_BIC_REG 0x2cU
 #define ARM64_OP_ANDS_REG 0x2dU
+#define ARM64_OP_UMULH 0x2eU
+#define ARM64_OP_SXTW 0x2fU
+#define ARM64_OP_SUBS_IMM 0x30U
+#define ARM64_OP_ADDS_IMM 0x31U
 #define ARM64_OP_RET 0xffU
 
 #define ARM64_ALU_ADD 0U
@@ -215,6 +219,21 @@ static __always_inline __u64 arm64_sign_extend(__u64 value, __u8 bits)
 	sign = 1ULL << (bits >= 64 ? 63U : bits - 1U);
 	value &= mask;
 	return (value ^ sign) - sign;
+}
+
+static __always_inline __u64 arm64_umulh(__u64 lhs, __u64 rhs)
+{
+	__u64 lhs_lo = (__u32)lhs;
+	__u64 lhs_hi = lhs >> 32;
+	__u64 rhs_lo = (__u32)rhs;
+	__u64 rhs_hi = rhs >> 32;
+	__u64 lo = lhs_lo * rhs_lo;
+	__u64 mid1 = lhs_hi * rhs_lo;
+	__u64 mid2 = lhs_lo * rhs_hi;
+	__u64 hi = lhs_hi * rhs_hi;
+	__u64 carry = ((lo >> 32) + (__u32)mid1 + (__u32)mid2) >> 32;
+
+	return hi + (mid1 >> 32) + (mid2 >> 32) + carry;
 }
 
 static __always_inline __u64 arm64_ror64(__u64 value, __u8 amount)

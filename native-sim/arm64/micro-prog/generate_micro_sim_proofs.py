@@ -420,8 +420,8 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> Encoded:
         return Encoded("ARM64_OP_MADD" if op == "madd" else "ARM64_OP_MSUB",
                        reg_const(ops[0]), reg_const(ops[1]), reg_const(ops[2]), reg_const(ops[3]),
                        width=width_const(reg_width(ops[0])))
-    if op in {"mul", "umull", "udiv"}:
-        op_const = {"mul": "ARM64_OP_MUL", "umull": "ARM64_OP_UMULL", "udiv": "ARM64_OP_UDIV"}[op]
+    if op in {"mul", "umull", "umulh", "udiv"}:
+        op_const = {"mul": "ARM64_OP_MUL", "umull": "ARM64_OP_UMULL", "umulh": "ARM64_OP_UMULH", "udiv": "ARM64_OP_UDIV"}[op]
         return Encoded(op_const, reg_const(ops[0]), reg_const(ops[1]), reg_const(ops[2]),
                        width=width_const(reg_width(ops[0])))
     if op in {"mvn", "neg"}:
@@ -434,8 +434,8 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> Encoded:
         return Encoded("ARM64_OP_BITFIELD", reg_const(ops[0]), reg_const(ops[1]),
                        width=width_const(reg_width(ops[0])),
                        aux=f"ARM64_AUX_BITFIELD({BITFIELD[op]}, {parse_imm(ops[2])}, {parse_imm(ops[3])})")
-    if op in {"rev", "rev16", "sxth"}:
-        op_const = {"rev": "ARM64_OP_REV", "rev16": "ARM64_OP_REV16", "sxth": "ARM64_OP_SXTH"}[op]
+    if op in {"rev", "rev16", "sxth", "sxtw"}:
+        op_const = {"rev": "ARM64_OP_REV", "rev16": "ARM64_OP_REV16", "sxth": "ARM64_OP_SXTH", "sxtw": "ARM64_OP_SXTW"}[op]
         return Encoded(op_const, reg_const(ops[0]), reg_const(ops[1]), width=width_const(reg_width(ops[0])))
     if op == "ldr" and ops[0].lower() == "q0":
         mem = parse_mem(ops, 1)
@@ -482,6 +482,14 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> Encoded:
                    ("ARM64_OP_TST_IMM" if imm else "ARM64_OP_TST_REG")
         return Encoded(op_const, reg_const(ops[0]), "ARM64_REG_NONE" if imm else reg_const(ops[1]),
                        width=width, aux=aux, imm=c_u64(parse_shifted_imm(ops, 1)) if imm else "0")
+    if op == "subs" and ops[2].startswith("#"):
+        return Encoded("ARM64_OP_SUBS_IMM", reg_const(ops[0]), reg_const(ops[1]),
+                       width=width_const(reg_width(ops[0])),
+                       imm=c_u64(parse_shifted_imm(ops, 2)))
+    if op == "adds" and ops[2].startswith("#"):
+        return Encoded("ARM64_OP_ADDS_IMM", reg_const(ops[0]), reg_const(ops[1]),
+                       width=width_const(reg_width(ops[0])),
+                       imm=c_u64(parse_shifted_imm(ops, 2)))
     if op == "bics" and ops[0] in {"wzr", "xzr"}:
         mod, shift = parse_modifier(ops, 3)
         return Encoded("ARM64_OP_TST_BIC_REG", reg_const(ops[1]), reg_const(ops[2]),
