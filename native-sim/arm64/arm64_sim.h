@@ -60,6 +60,13 @@
 #define ARM64_OP_STLXR 0x38U
 #define ARM64_OP_LDRSW 0x39U
 #define ARM64_OP_CMN_REG 0x3aU
+#define ARM64_OP_UMADDL 0x3bU
+#define ARM64_OP_SXTB 0x3cU
+#define ARM64_OP_CSINV 0x3dU
+#define ARM64_OP_CSINC 0x3eU
+#define ARM64_OP_LDRSH 0x3fU
+#define ARM64_OP_SMADDL 0x40U
+#define ARM64_OP_CNEG 0x41U
 #define ARM64_OP_RET 0xffU
 
 #define ARM64_ALU_ADD 0U
