@@ -741,6 +741,12 @@ struct arm64_sim_skb_abi {
 			ARM64_SIM_L_SET_SUB_FLAGS(ARM64_SIM_L_READ_REG(DST), (OP) == ARM64_OP_CMP_IMM ? (__u64)(IMM) : ARM64_SIM_L_MOD_VALUE((SRC), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_l_width), __a64_l_width);\
 		} else if ((OP) == ARM64_OP_TST_IMM || (OP) == ARM64_OP_TST_REG) {\
 			ARM64_SIM_L_SET_LOGIC_FLAGS(ARM64_SIM_L_READ_REG(DST) & ((OP) == ARM64_OP_TST_IMM ? (__u64)(IMM) : ARM64_SIM_L_MOD_VALUE((SRC), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_l_width)), __a64_l_width);\
+		} else if ((OP) == ARM64_OP_TST_BIC_REG) {                 \
+			ARM64_SIM_L_SET_LOGIC_FLAGS(ARM64_SIM_L_READ_REG(DST) & ~ARM64_SIM_L_MOD_VALUE((SRC), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_l_width), __a64_l_width);\
+		} else if ((OP) == ARM64_OP_ANDS_REG) {                    \
+			__u64 __a64_l_value = ARM64_SIM_L_READ_REG(SRC) & ARM64_SIM_L_MOD_VALUE((SRC2), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_l_width);\
+			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
+			ARM64_SIM_L_SET_LOGIC_FLAGS(__a64_l_value, __a64_l_width);\
 		} else if ((OP) == ARM64_OP_CCMP_IMM || (OP) == ARM64_OP_CCMP_REG) {\
 			if (ARM64_SIM_L_EVAL_COND((AUX) & 0xffU)) {          \
 				ARM64_SIM_L_SET_SUB_FLAGS(ARM64_SIM_L_READ_REG(DST), (OP) == ARM64_OP_CCMP_IMM ? (__u64)(IMM) : ARM64_SIM_L_READ_REG(SRC), __a64_l_width);\
@@ -884,15 +890,112 @@ struct arm64_sim_skb_abi {
 		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
 	} while (0)
 
+#define ARM64_SIM_BPF_CALL_bpf_get_current_task()                           \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_X0, 0,                \
+					      ARM64_SIM_TAG_SCALAR);      \
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_get_current_task_btf()                       \
+	ARM64_SIM_BPF_CALL_bpf_get_current_task()
+
+#define ARM64_SIM_BPF_CALL_bpf_task_pt_regs()                               \
+	ARM64_SIM_BPF_CALL_bpf_get_current_task()
+
 #define ARM64_SIM_BPF_CALL_bpf_get_smp_processor_id()                       \
 	do {                                                               \
 		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_32);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_get_current_cgroup_id()                      \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
 	} while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_ktime_get_ns()                               \
 	do {                                                               \
 		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, bpf_ktime_get_ns(), \
 					    ARM64_WIDTH_64);              \
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_probe_read_kernel()                          \
+	do {                                                               \
+		long __a64_bpf_ret = bpf_probe_read_kernel(              \
+			ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0),             \
+			ARM64_SIM_L_READ_REG(ARM64_X1),                   \
+			ARM64_SIM_L_READ_REG_PTR(ARM64_X2));              \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, (__u64)__a64_bpf_ret,\
+					    ARM64_WIDTH_64);              \
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_probe_read()                                 \
+	do {                                                               \
+		long __a64_bpf_ret = bpf_probe_read(                     \
+			ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0),             \
+			ARM64_SIM_L_READ_REG(ARM64_X1),                   \
+			ARM64_SIM_L_READ_REG_PTR(ARM64_X2));              \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, (__u64)__a64_bpf_ret,\
+					    ARM64_WIDTH_64);              \
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_probe_read_str()                             \
+	do {                                                               \
+		long __a64_bpf_ret = bpf_probe_read_str(                 \
+			ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0),             \
+			ARM64_SIM_L_READ_REG(ARM64_X1),                   \
+			ARM64_SIM_L_READ_REG_PTR(ARM64_X2));              \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, (__u64)__a64_bpf_ret,\
+					    ARM64_WIDTH_64);              \
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_ktime_get_boot_ns()                          \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0,                    \
+					    bpf_ktime_get_boot_ns(),     \
+					    ARM64_WIDTH_64);             \
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_perf_event_output()                          \
+	do {                                                               \
+		long __a64_bpf_ret = bpf_perf_event_output(               \
+			ARM64_SIM_L_READ_REG_PTR(ARM64_X0),               \
+			ARM64_SIM_L_READ_REG_PTR(ARM64_X1),               \
+			ARM64_SIM_L_READ_REG(ARM64_X2),                   \
+			ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X3),             \
+			ARM64_SIM_L_READ_REG(ARM64_X4));                  \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, (__u64)__a64_bpf_ret,\
+					    ARM64_WIDTH_64);              \
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_skb_load_bytes()                             \
+	do {                                                               \
+		long __a64_bpf_ret = bpf_skb_load_bytes(                  \
+			ARM64_SIM_L_READ_REG_PTR(ARM64_X0),               \
+			ARM64_SIM_L_READ_REG(ARM64_X1),                   \
+			ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2),             \
+			ARM64_SIM_L_READ_REG(ARM64_X3));                  \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, (__u64)__a64_bpf_ret,\
+					    ARM64_WIDTH_64);              \
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_skb_load_bytes_relative()                    \
+	do {                                                               \
+		long __a64_bpf_ret = bpf_skb_load_bytes_relative(         \
+			ARM64_SIM_L_READ_REG_PTR(ARM64_X0),               \
+			ARM64_SIM_L_READ_REG(ARM64_X1),                   \
+			ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2),             \
+			ARM64_SIM_L_READ_REG(ARM64_X3),                   \
+			ARM64_SIM_L_READ_REG(ARM64_X4));                  \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, (__u64)__a64_bpf_ret,\
+					    ARM64_WIDTH_64);              \
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_sk_fullsock()                                \
+	do {                                                               \
+		struct bpf_sock *__a64_bpf_ret = bpf_sk_fullsock(          \
+			ARM64_SIM_L_READ_REG_PTR(ARM64_X0));              \
+		ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_X0, __a64_bpf_ret,   \
+					      ARM64_SIM_TAG_SCALAR);      \
 	} while (0)
 
 #define ARM64_SIM_RET()                                                     \

@@ -45,6 +45,8 @@
 #define ARM64_OP_STORE_D0 0x29U
 #define ARM64_OP_LOAD_Q0 0x2aU
 #define ARM64_OP_STORE_Q0 0x2bU
+#define ARM64_OP_TST_BIC_REG 0x2cU
+#define ARM64_OP_ANDS_REG 0x2dU
 #define ARM64_OP_RET 0xffU
 
 #define ARM64_ALU_ADD 0U

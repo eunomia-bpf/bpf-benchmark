@@ -37,6 +37,33 @@ COND = {"eq": "ARM64_COND_EQ", "ne": "ARM64_COND_NE", "cs": "ARM64_COND_CS",
 BITFIELD = {"ubfx": "ARM64_BITFIELD_UBFX", "sbfx": "ARM64_BITFIELD_SBFX",
             "ubfiz": "ARM64_BITFIELD_UBFIZ", "bfxil": "ARM64_BITFIELD_BFXIL",
             "bfi": "ARM64_BITFIELD_BFI"}
+HELPER_IDENTS = {
+    1: "bpf_map_lookup_elem",
+    2: "bpf_map_update_elem",
+    3: "bpf_map_delete_elem",
+    4: "bpf_probe_read",
+    8: "bpf_get_smp_processor_id",
+    14: "bpf_get_current_pid_tgid",
+    25: "bpf_perf_event_output",
+    26: "bpf_skb_load_bytes",
+    35: "bpf_get_current_task",
+    45: "bpf_probe_read_str",
+    68: "bpf_skb_load_bytes_relative",
+    80: "bpf_get_current_cgroup_id",
+    95: "bpf_sk_fullsock",
+    113: "bpf_probe_read_kernel",
+    125: "bpf_ktime_get_boot_ns",
+    158: "bpf_get_current_task_btf",
+    175: "bpf_task_pt_regs",
+}
+GPR_WRITE_OPS = {
+    "add", "sub", "and", "bic", "eor", "orr",
+    "mov", "movk", "lsl", "lsr", "asr", "ror",
+    "madd", "msub", "mul", "umull", "udiv",
+    "mvn", "neg", "extr", "ubfx", "sbfx", "ubfiz", "bfxil", "bfi",
+    "rev", "rev16", "sxth", "ldr", "ldur", "ldrb", "ldurb", "ldrh", "ldurh",
+    "ldp", "csel", "cinc", "cset", "fmov",
+}
 
 
 @dataclass(frozen=True)
@@ -455,6 +482,16 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> Encoded:
                    ("ARM64_OP_TST_IMM" if imm else "ARM64_OP_TST_REG")
         return Encoded(op_const, reg_const(ops[0]), "ARM64_REG_NONE" if imm else reg_const(ops[1]),
                        width=width, aux=aux, imm=c_u64(parse_shifted_imm(ops, 1)) if imm else "0")
+    if op == "bics" and ops[0] in {"wzr", "xzr"}:
+        mod, shift = parse_modifier(ops, 3)
+        return Encoded("ARM64_OP_TST_BIC_REG", reg_const(ops[1]), reg_const(ops[2]),
+                       width=width_const(reg_width(ops[1])),
+                       aux=f"ARM64_AUX_ALU(0, {mod}, {shift})")
+    if op == "ands":
+        mod, shift = parse_modifier(ops, 3)
+        return Encoded("ARM64_OP_ANDS_REG", reg_const(ops[0]), reg_const(ops[1]), reg_const(ops[2]),
+                       width=width_const(reg_width(ops[0])),
+                       aux=f"ARM64_AUX_ALU(0, {mod}, {shift})")
     if op == "ccmp":
         imm = ops[1].startswith("#")
         op_const = "ARM64_OP_CCMP_IMM" if imm else "ARM64_OP_CCMP_REG"
@@ -490,8 +527,59 @@ def label(addr: int) -> str:
     return f"arm64_l_{addr:x}"
 
 
+def blr_target_reg(insn: NativeInsn) -> str | None:
+    if insn.mnemonic != "blr" or len(insn.operands) != 1:
+        return None
+    target = insn.operands[0]
+    if not re.fullmatch(r"x([0-9]+)", target):
+        return None
+    return target[1:]
+
+
+def written_gpr(insn: NativeInsn) -> str | None:
+    if insn.mnemonic not in GPR_WRITE_OPS:
+        return None
+    if not insn.operands:
+        return None
+    dst = insn.operands[0]
+    if re.fullmatch(r"[wx]([0-9]+)", dst):
+        return dst[1:]
+    return None
+
+
+def mov_immediate(insn: NativeInsn) -> int | None:
+    if insn.mnemonic != "mov" or len(insn.operands) != 2:
+        return None
+    try:
+        return parse_imm(insn.operands[1])
+    except ValueError:
+        return None
+
+
+def helper_calls_by_addr(insns: list[NativeInsn]) -> dict[int, str]:
+    reg_imms: dict[str, int] = {}
+    helpers: dict[int, str] = {}
+    for insn in insns:
+        target = blr_target_reg(insn)
+        if target is not None:
+            helper = HELPER_IDENTS.get(reg_imms.get(target, -1))
+            if helper is not None:
+                helpers[insn.addr] = helper
+
+        dst = written_gpr(insn)
+        if dst is None:
+            continue
+        imm = mov_immediate(insn)
+        if imm is None:
+            reg_imms.pop(dst, None)
+        else:
+            reg_imms[dst] = imm
+    return helpers
+
+
 def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
                 next_addr: int | None,
+                helper_call: str | None,
                 rodata_idents: dict[str, str]) -> None:
     lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
     op = insn.mnemonic
@@ -522,6 +610,10 @@ def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
             raise ValueError(f"unsupported call target in {insn.raw}")
         lines.append(f"\tARM64_SIM_A64_CALL({label(target)}, 0x{next_addr:x}ULL);")
         return
+    if op == "blr":
+        if helper_call is not None:
+            lines.append(f"\tARM64_SIM_BPF_CALL_{helper_call}();")
+            return
     if op == "ret":
         lines.append("\tARM64_SIM_A64_RET();")
         return
@@ -543,6 +635,11 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         insns[index].addr: insns[index + 1].addr
         for insns in functions.values()
         for index in range(len(insns) - 1)
+    }
+    helper_by_addr = {
+        addr: helper
+        for insns in functions.values()
+        for addr, helper in helper_calls_by_addr(insns).items()
     }
     return_addrs = sorted(next_by_addr[insn.addr] for insn in all_insns if insn.mnemonic == "bl")
     uses_stack = bool(return_addrs) or any("[sp" in insn.raw.lower() for insn in all_insns)
@@ -572,6 +669,23 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         lines.append(f"static const __u64 {ident}[2] = {{{c_u64(lo)}, {c_u64(hi)}}};")
     if rodata_idents:
         lines.append("")
+    map_symbols = sorted({
+        insn.reloc_symbol
+        for insn in all_insns
+        if insn.reloc_symbol
+        and insn.reloc_symbol not in rodata_idents
+        and not is_helper_symbol(insn.reloc_symbol)
+    })
+    for map_symbol in map_symbols:
+        lines.extend([
+            "struct {",
+            "\t__uint(type, BPF_MAP_TYPE_ARRAY);",
+            "\t__uint(max_entries, 1);",
+            "\t__type(key, __u32);",
+            "\t__type(value, __u64);",
+            f"}} {map_symbol} SEC(\".maps\");",
+            "",
+        ])
     lines.extend([
         section,
         f"int {name}_arm64_sim_xdp({ctx}ctx)",
@@ -584,6 +698,7 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
         for insn in insns:
             lines.append(f"{label(insn.addr)}:")
             append_insn(lines, insn, all_addrs, next_by_addr.get(insn.addr),
+                        helper_by_addr.get(insn.addr),
                         rodata_idents)
     if linked_exit:
         lines.extend([
