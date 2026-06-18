@@ -558,11 +558,14 @@ def mov_immediate(insn: NativeInsn) -> int | None:
 
 def helper_calls_by_addr(insns: list[NativeInsn]) -> dict[int, str]:
     reg_imms: dict[str, int] = {}
+    last_helper_imms: dict[str, int] = {}
     helpers: dict[int, str] = {}
     for insn in insns:
         target = blr_target_reg(insn)
         if target is not None:
             helper = HELPER_IDENTS.get(reg_imms.get(target, -1))
+            if helper is None:
+                helper = HELPER_IDENTS.get(last_helper_imms.get(target, -1))
             if helper is not None:
                 helpers[insn.addr] = helper
 
@@ -574,6 +577,8 @@ def helper_calls_by_addr(insns: list[NativeInsn]) -> dict[int, str]:
             reg_imms.pop(dst, None)
         else:
             reg_imms[dst] = imm
+            if imm in HELPER_IDENTS:
+                last_helper_imms[dst] = imm
     return helpers
 
 
