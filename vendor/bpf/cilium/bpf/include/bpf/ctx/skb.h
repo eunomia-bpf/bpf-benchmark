@@ -193,3 +193,19 @@ ctx_get_ingress_ifindex(const struct __sk_buff *ctx)
 {
 	return ctx->ingress_ifindex;
 }
+
+static __always_inline __maybe_unused bool
+ctx_has_vlan(const struct __sk_buff *ctx)
+{
+#ifdef MICRO_NATIVE
+	return ctx->vlan_all != 0;
+#else
+	return ctx->vlan_present != 0;
+#endif
+}
+
+static __always_inline __maybe_unused __u32
+ctx_get_vlan_tci(const struct __sk_buff *ctx)
+{
+	return ctx->vlan_tci;
+}
