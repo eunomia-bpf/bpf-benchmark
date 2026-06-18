@@ -705,7 +705,7 @@ FUNC_INLINE __u32
 read_exe(struct task_struct *task, struct heap_exe *exe)
 {
 	struct file *file = BPF_CORE_READ(task, mm, exe_file);
-	struct path *path = __builtin_preserve_access_index(&file->f_path);
+	const struct path *path = __builtin_preserve_access_index(&file->f_path);
 	__u64 offset = 0;
 	__u64 revlen = STRING_POSTFIX_MAX_LENGTH - 1;
 
