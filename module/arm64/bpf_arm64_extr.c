@@ -149,14 +149,20 @@ static int emit_rotate_arm64(u32 *image, int *idx, bool emit,
 }
 
 static int emit_rotate64_arm64(u32 *image, int *idx, bool emit,
-			       u64 payload, const struct bpf_prog *prog)
+			       u64 payload, const struct bpf_prog *prog,
+			       const u32 *final_ip)
 {
+	(void)final_ip;
+
 	return emit_rotate_arm64(image, idx, emit, payload, prog, true);
 }
 
 static int emit_rotate32_arm64(u32 *image, int *idx, bool emit,
-			       u64 payload, const struct bpf_prog *prog)
+			       u64 payload, const struct bpf_prog *prog,
+			       const u32 *final_ip)
 {
+	(void)final_ip;
+
 	return emit_rotate_arm64(image, idx, emit, payload, prog, false);
 }
 

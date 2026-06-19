@@ -94,13 +94,15 @@ static inline u32 a64_csel(u8 rd, u8 rn, u8 rm, u8 cond)
 }
 
 static int emit_tst_arm64(u32 *image, int *idx, bool emit,
-			     u64 payload, const struct bpf_prog *prog)
+			     u64 payload, const struct bpf_prog *prog,
+			     const u32 *final_ip)
 {
 	u8 reg;
 	u32 insn;
 	int err;
 
 	(void)prog;
+	(void)final_ip;
 
 	err = decode_tst_payload(payload, &reg);
 	if (err)
@@ -115,13 +117,15 @@ static int emit_tst_arm64(u32 *image, int *idx, bool emit,
 }
 
 static int emit_csel_ne_arm64(u32 *image, int *idx, bool emit,
-				  u64 payload, const struct bpf_prog *prog)
+				  u64 payload, const struct bpf_prog *prog,
+				  const u32 *final_ip)
 {
 	u8 dst_reg, true_reg, false_reg, cond_reg;
 	u32 insn;
 	int err;
 
 	(void)prog;
+	(void)final_ip;
 
 	err = decode_csel_payload(payload, &dst_reg, &true_reg, &false_reg,
 				  &cond_reg);

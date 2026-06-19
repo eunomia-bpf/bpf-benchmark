@@ -107,20 +107,29 @@ static int emit_rev_arm64(u32 *image, int *idx, bool emit, u64 payload,
 }
 
 static int emit_rev16_w_arm64(u32 *image, int *idx, bool emit, u64 payload,
-			      const struct bpf_prog *prog)
+			      const struct bpf_prog *prog,
+			      const u32 *final_ip)
 {
+	(void)final_ip;
+
 	return emit_rev_arm64(image, idx, emit, payload, prog, 16);
 }
 
 static int emit_rev_w_arm64(u32 *image, int *idx, bool emit, u64 payload,
-			    const struct bpf_prog *prog)
+			    const struct bpf_prog *prog,
+			    const u32 *final_ip)
 {
+	(void)final_ip;
+
 	return emit_rev_arm64(image, idx, emit, payload, prog, 32);
 }
 
 static int emit_rev_x_arm64(u32 *image, int *idx, bool emit, u64 payload,
-			    const struct bpf_prog *prog)
+			    const struct bpf_prog *prog,
+			    const u32 *final_ip)
 {
+	(void)final_ip;
+
 	return emit_rev_arm64(image, idx, emit, payload, prog, 64);
 }
 

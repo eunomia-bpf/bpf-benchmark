@@ -236,7 +236,7 @@ static int emit_ccmp_arm64(u32 *image, int *idx, bool emit, u64 payload,
 }
 
 static int emit_cset_arm64(u32 *image, int *idx, bool emit, u64 payload,
-			   const struct bpf_prog *prog)
+			   const struct bpf_prog *prog, const u32 *final_ip)
 {
 	struct ccmp_payload decoded;
 	u8 dst_reg, continue_cond, poison_nzcv;
@@ -244,6 +244,7 @@ static int emit_cset_arm64(u32 *image, int *idx, bool emit, u64 payload,
 	int err;
 
 	(void)prog;
+	(void)final_ip;
 
 	err = decode_cset_payload(payload, &decoded);
 	if (err)
@@ -260,26 +261,38 @@ static int emit_cset_arm64(u32 *image, int *idx, bool emit, u64 payload,
 }
 
 static int emit_cmp_x_arm64(u32 *image, int *idx, bool emit,
-				 u64 payload, const struct bpf_prog *prog)
+				 u64 payload, const struct bpf_prog *prog,
+				 const u32 *final_ip)
 {
+	(void)final_ip;
+
 	return emit_cmp_arm64(image, idx, emit, payload, prog, false);
 }
 
 static int emit_cmp_w_arm64(u32 *image, int *idx, bool emit,
-				 u64 payload, const struct bpf_prog *prog)
+				 u64 payload, const struct bpf_prog *prog,
+				 const u32 *final_ip)
 {
+	(void)final_ip;
+
 	return emit_cmp_arm64(image, idx, emit, payload, prog, true);
 }
 
 static int emit_ccmp_x_arm64(u32 *image, int *idx, bool emit,
-				  u64 payload, const struct bpf_prog *prog)
+				  u64 payload, const struct bpf_prog *prog,
+				  const u32 *final_ip)
 {
+	(void)final_ip;
+
 	return emit_ccmp_arm64(image, idx, emit, payload, prog, false);
 }
 
 static int emit_ccmp_w_arm64(u32 *image, int *idx, bool emit,
-				  u64 payload, const struct bpf_prog *prog)
+				  u64 payload, const struct bpf_prog *prog,
+				  const u32 *final_ip)
 {
+	(void)final_ip;
+
 	return emit_ccmp_arm64(image, idx, emit, payload, prog, true);
 }
 

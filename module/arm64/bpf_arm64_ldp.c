@@ -123,7 +123,8 @@ static int instantiate_stp(u64 payload, struct bpf_insn *insn_buf)
 }
 
 static int emit_ldp_arm64(u32 *image, int *idx, bool emit,
-			  u64 payload, const struct bpf_prog *prog)
+			  u64 payload, const struct bpf_prog *prog,
+			  const u32 *final_ip)
 {
 	u8 dst_lo_reg, dst_hi_reg, base_reg;
 	u32 insn;
@@ -131,6 +132,7 @@ static int emit_ldp_arm64(u32 *image, int *idx, bool emit,
 	int err;
 
 	(void)prog;
+	(void)final_ip;
 
 	err = decode_ldp_payload(payload, &dst_lo_reg, &dst_hi_reg,
 				 &base_reg, &offset);
@@ -148,7 +150,8 @@ static int emit_ldp_arm64(u32 *image, int *idx, bool emit,
 }
 
 static int emit_stp_arm64(u32 *image, int *idx, bool emit,
-			  u64 payload, const struct bpf_prog *prog)
+			  u64 payload, const struct bpf_prog *prog,
+			  const u32 *final_ip)
 {
 	u8 src_lo_reg, src_hi_reg, base_reg;
 	u32 insn;
@@ -156,6 +159,7 @@ static int emit_stp_arm64(u32 *image, int *idx, bool emit,
 	int err;
 
 	(void)prog;
+	(void)final_ip;
 
 	err = decode_stp_payload(payload, &src_lo_reg, &src_hi_reg,
 				 &base_reg, &offset);

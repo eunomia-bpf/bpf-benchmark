@@ -46,13 +46,15 @@ static inline u32 a64_mov_x(u8 rd, u8 rm)
 }
 
 static int emit_mov_x_arm64(u32 *image, int *idx, bool emit,
-			       u64 payload, const struct bpf_prog *prog)
+			       u64 payload, const struct bpf_prog *prog,
+			       const u32 *final_ip)
 {
 	u8 dst_reg, src_reg;
 	u32 insn;
 	int err;
 
 	(void)prog;
+	(void)final_ip;
 
 	err = decode_mov_payload(payload, &dst_reg, &src_reg);
 	if (err)

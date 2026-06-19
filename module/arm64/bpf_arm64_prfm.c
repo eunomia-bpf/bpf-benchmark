@@ -48,13 +48,15 @@ static __always_inline u32 a64_prfm_pldl1keep(u8 rn)
 }
 
 static int emit_prfm_pldl1keep_arm64(u32 *image, int *idx, bool emit,
-			       u64 payload, const struct bpf_prog *prog)
+			       u64 payload, const struct bpf_prog *prog,
+			       const u32 *final_ip)
 {
 	u8 ptr_reg;
 	u32 insn;
 	int err;
 
 	(void)prog;
+	(void)final_ip;
 
 	err = decode_prfm_pldl1keep_payload(payload, &ptr_reg);
 	if (err)

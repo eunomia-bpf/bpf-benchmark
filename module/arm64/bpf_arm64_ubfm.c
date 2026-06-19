@@ -62,13 +62,15 @@ static inline u32 a64_ubfm_x(u8 rd, u8 rn, u8 immr, u8 imms)
 }
 
 static int emit_ubfm_x_arm64(u32 *image, int *idx, bool emit,
-			      u64 payload, const struct bpf_prog *prog)
+			      u64 payload, const struct bpf_prog *prog,
+			      const u32 *final_ip)
 {
 	u8 dst_reg, start, bit_len;
 	u32 insn;
 	int err;
 
 	(void)prog;
+	(void)final_ip;
 
 	err = decode_extract_payload(payload, &dst_reg, &start, &bit_len);
 	if (err)

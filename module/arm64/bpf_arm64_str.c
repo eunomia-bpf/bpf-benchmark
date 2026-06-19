@@ -221,28 +221,40 @@ static int emit_strb_fixed_arm64(u32 *image, int *idx, bool emit, u64 payload,
 				 const struct bpf_prog *prog, u8 src_reg);
 
 static int emit_strb_arm64(u32 *image, int *idx, bool emit,
-			   u64 payload, const struct bpf_prog *prog)
+			   u64 payload, const struct bpf_prog *prog,
+			   const u32 *final_ip)
 {
+	(void)final_ip;
+
 	if ((kinsn_payload_decode(payload) & 0xf) == ARM64_STR_FORM_ZERO)
 		return emit_strb_fixed_arm64(image, idx, emit, payload, prog, 31);
 	return emit_store_reg_arm64(image, idx, emit, payload, prog, BPF_B);
 }
 
 static int emit_strh_arm64(u32 *image, int *idx, bool emit,
-				   u64 payload, const struct bpf_prog *prog)
+				   u64 payload, const struct bpf_prog *prog,
+				   const u32 *final_ip)
 {
+	(void)final_ip;
+
 	return emit_store_reg_arm64(image, idx, emit, payload, prog, BPF_H);
 }
 
 static int emit_str_w_arm64(u32 *image, int *idx, bool emit,
-				    u64 payload, const struct bpf_prog *prog)
+				    u64 payload, const struct bpf_prog *prog,
+				    const u32 *final_ip)
 {
+	(void)final_ip;
+
 	return emit_store_reg_arm64(image, idx, emit, payload, prog, BPF_W);
 }
 
 static int emit_str_x_arm64(u32 *image, int *idx, bool emit,
-				    u64 payload, const struct bpf_prog *prog)
+				    u64 payload, const struct bpf_prog *prog,
+				    const u32 *final_ip)
 {
+	(void)final_ip;
+
 	return emit_store_reg_arm64(image, idx, emit, payload, prog, BPF_DW);
 }
 

@@ -160,26 +160,38 @@ static int emit_ldr_arm64(u32 *image, int *idx, bool emit, u64 payload,
 }
 
 static int emit_ldrh_mem_arm64(u32 *image, int *idx, bool emit, u64 payload,
-			       const struct bpf_prog *prog)
+			       const struct bpf_prog *prog,
+			       const u32 *final_ip)
 {
+	(void)final_ip;
+
 	return emit_ldr_arm64(image, idx, emit, payload, prog, BPF_H);
 }
 
 static int emit_ldrb_mem_arm64(u32 *image, int *idx, bool emit, u64 payload,
-			       const struct bpf_prog *prog)
+			       const struct bpf_prog *prog,
+			       const u32 *final_ip)
 {
+	(void)final_ip;
+
 	return emit_ldr_arm64(image, idx, emit, payload, prog, BPF_B);
 }
 
 static int emit_ldr_w_mem_arm64(u32 *image, int *idx, bool emit, u64 payload,
-				const struct bpf_prog *prog)
+				const struct bpf_prog *prog,
+				const u32 *final_ip)
 {
+	(void)final_ip;
+
 	return emit_ldr_arm64(image, idx, emit, payload, prog, BPF_W);
 }
 
 static int emit_ldr_x_mem_arm64(u32 *image, int *idx, bool emit, u64 payload,
-				const struct bpf_prog *prog)
+				const struct bpf_prog *prog,
+				const u32 *final_ip)
 {
+	(void)final_ip;
+
 	return emit_ldr_arm64(image, idx, emit, payload, prog, BPF_DW);
 }
 
