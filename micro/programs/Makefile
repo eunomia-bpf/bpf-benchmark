@@ -77,7 +77,15 @@ $(KERNEL_OFFSETS): $(KERNEL_BTF_INPUT) Makefile | $(OUTPUT_DIR)
 	    pahole -C bpf_map '$(KERNEL_BTF_INPUT)' 2>/dev/null | \
 	        awk '/u32\s+max_entries;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_MAP_MAX_ENTRIES_OFFSET %du\n", a[1] }'; \
 	    pahole -C bpf_prog '$(KERNEL_BTF_INPUT)' 2>/dev/null | \
-	        awk '/\\(\\*bpf_func\\)/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_PROG_BPF_FUNC_OFFSET %du\n", a[1] }'; \
+	        awk '/bpf_func/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_PROG_BPF_FUNC_OFFSET %du\n", a[1] }'; \
+	    cfg_path='$(dir $(KERNEL_BTF_INPUT)).config'; \
+	    if [ -f "$$cfg_path" ] && grep -q '^CONFIG_ARM64=y' "$$cfg_path"; then \
+	        bti=0; \
+	        pac=0; \
+	        grep -q '^CONFIG_ARM64_BTI_KERNEL=y' "$$cfg_path" && bti=1; \
+	        grep -q '^CONFIG_ARM64_PTR_AUTH_KERNEL=y' "$$cfg_path" && pac=1; \
+	        printf "#define K_ARM64_BPF_TAIL_CALL_OFFSET %du\n" "$$(( (bti + 2 + pac + 4) * 4 ))"; \
+	    fi; \
 	    pahole -C htab_elem '$(KERNEL_BTF_INPUT)' 2>/dev/null | \
 	        awk '/struct bpf_lru_node\s+lru_node;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_HTAB_ELEM_LRU_NODE_OFFSET %du\n", a[1] } \
 	             /char\s+key\[\]/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_HTAB_ELEM_KEY_OFFSET %du\n", a[1] }'; \
