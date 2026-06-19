@@ -88,6 +88,42 @@ CILIUM_MAP_RULES = [
              object_scoped=True, native_symbol="cilium_calls"),
 ]
 
+MAX_FILTER_VERSION = 64
+MAX_EVENT_ID = 794
+
+TRACEE_VERSIONED_FILTER_MAP_RULES = [
+    map_rule("exact", "events_map_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
+             MAX_FILTER_VERSION, True,
+             inner=(BPF_MAP_TYPE_HASH, 4, 64, MAX_EVENT_ID)),
+    map_rule("exact", "uid_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
+             MAX_FILTER_VERSION, True,
+             inner=(BPF_MAP_TYPE_HASH, 4, 16, 256)),
+    map_rule("exact", "pid_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
+             MAX_FILTER_VERSION, True,
+             inner=(BPF_MAP_TYPE_HASH, 4, 16, 256)),
+    map_rule("exact", "mnt_ns_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
+             MAX_FILTER_VERSION, True,
+             inner=(BPF_MAP_TYPE_HASH, 4, 16, 256)),
+    map_rule("exact", "pid_ns_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
+             MAX_FILTER_VERSION, True,
+             inner=(BPF_MAP_TYPE_HASH, 4, 16, 256)),
+    map_rule("exact", "uts_ns_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
+             MAX_FILTER_VERSION, True,
+             inner=(BPF_MAP_TYPE_HASH, 16, 16, 256)),
+    map_rule("exact", "comm_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
+             MAX_FILTER_VERSION, True,
+             inner=(BPF_MAP_TYPE_HASH, 16, 16, 256)),
+    map_rule("exact", "cgroup_id_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2,
+             4, MAX_FILTER_VERSION, True,
+             inner=(BPF_MAP_TYPE_HASH, 4, 16, 256)),
+    map_rule("exact", "process_tree_map_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2,
+             4, MAX_FILTER_VERSION, True,
+             inner=(BPF_MAP_TYPE_HASH, 4, 16, 10240)),
+    map_rule("exact", "binary_filter_version", BPF_MAP_TYPE_HASH_OF_MAPS, 2, 4,
+             MAX_FILTER_VERSION, True,
+             inner=(BPF_MAP_TYPE_HASH, 260, 16, 256)),
+]
+
 TRACEE_TETRAGON_MAP_RULES = [
     map_rule("exact", "execve_calls", BPF_MAP_TYPE_PROG_ARRAY, 4, 4, 2, True),
     map_rule("exact", "tcpmon_map", BPF_MAP_TYPE_PERF_EVENT_ARRAY, 4, 4, 8, True),
@@ -146,6 +182,7 @@ TRACEE_TETRAGON_MAP_RULES = [
     map_rule("exact", "config_map", BPF_MAP_TYPE_ARRAY, 4, 736, 1, True),
     map_rule("exact", "write_offload", BPF_MAP_TYPE_HASH, 8, 16, 1, True),
     map_rule("exact", "argfilter_maps", BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4, 8, True),
+    *TRACEE_VERSIONED_FILTER_MAP_RULES,
     map_rule("exact", "policy_filter_maps", BPF_MAP_TYPE_HASH_OF_MAPS, 4, 4, 128, True,
              inner=(BPF_MAP_TYPE_HASH, 8, 1, 1)),
     map_rule("exact", "policy_filter_cgroup_maps", BPF_MAP_TYPE_HASH_OF_MAPS, 8, 4, 1024, True,

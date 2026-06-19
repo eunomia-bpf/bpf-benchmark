@@ -46,7 +46,9 @@ TETRAGON_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/tetragon
 TRACEE_LSM_SUPPORT_SRCS := kprobe_check lsm_check
 NATIVE_TARGET_FLAGS := $(if $(filter arm64 aarch64,$(ARCH)),--target=aarch64-linux-gnu)
 NATIVE_ARCH_CFLAGS := $(if $(filter x86,$(ARCH)),-march=native -mno-red-zone -mgeneral-regs-only) \
-	$(if $(filter arm64 aarch64,$(ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only -mno-outline-atomics)
+	$(if $(filter arm64 aarch64,$(ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only -mno-outline-atomics \
+		-ffixed-x18 -ffixed-x26 -ffixed-x27 \
+		-ffixed-x28)
 NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
 	-D$(TARGET_ARCH_DEFINE) \
 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
@@ -73,11 +75,14 @@ OTEL_NATIVE_UNIT_OBJS := $(patsubst $(OTEL_EBPF_DIR)/%.ebpf.c,$(NATIVE_OUT)/otel
 OTEL_NATIVE_OBJECT := $(NATIVE_OUT)/otel/otelcol-ebpf-profiler.native.o
 OTEL_NATIVE_PROOF_MARKER := $(NATIVE_OUT)/otel/otelcol-ebpf-profiler.proof.ok
 TRACEE_NATIVE_OBJECT := $(NATIVE_OUT)/tracee/tracee.native.o
+TRACEE_DIRECT_CORE_NATIVE_OBJECT := $(NATIVE_OUT)/tracee/tracee_direct_core.native.o
+TRACEE_DIRECT_CORE_SYMBOLS := trace_sys_enter trace_sys_exit
 TRACEE_LSM_SUPPORT_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/tracee/lsm_support/%.native.o,$(TRACEE_LSM_SUPPORT_SRCS))
-TRACEE_NATIVE_OBJS := $(TRACEE_NATIVE_OBJECT) $(TRACEE_LSM_SUPPORT_NATIVE_OBJS)
+TRACEE_NATIVE_OBJS := $(TRACEE_NATIVE_OBJECT) $(TRACEE_DIRECT_CORE_NATIVE_OBJECT) $(TRACEE_LSM_SUPPORT_NATIVE_OBJS)
 TRACEE_NATIVE_PROOF_MARKER := $(NATIVE_OUT)/tracee/tracee.proof.ok
+TRACEE_DIRECT_CORE_NATIVE_PROOF_MARKER := $(NATIVE_OUT)/tracee/tracee_direct_core.proof.ok
 TRACEE_LSM_SUPPORT_NATIVE_PROOF_MARKERS := $(patsubst %,$(NATIVE_OUT)/tracee/lsm_support/%.proof.ok,$(TRACEE_LSM_SUPPORT_SRCS))
-TRACEE_NATIVE_PROOF_MARKERS := $(TRACEE_NATIVE_PROOF_MARKER) $(TRACEE_LSM_SUPPORT_NATIVE_PROOF_MARKERS)
+TRACEE_NATIVE_PROOF_MARKERS := $(TRACEE_NATIVE_PROOF_MARKER) $(TRACEE_DIRECT_CORE_NATIVE_PROOF_MARKER) $(TRACEE_LSM_SUPPORT_NATIVE_PROOF_MARKERS)
 
 CILIUM_MAX_BASE_OPTIONS := -DSKIP_DEBUG=1 -DENABLE_IPV4=1 \
 	-DENABLE_ROUTING=1 -DPOLICY_VERDICT_NOTIFY=1 \
@@ -184,14 +189,14 @@ tracee:
 			-o "$(OUT)/tracee/lsm_support/$${src}.bpf.o"; \
 	done
 
-$(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c
+$(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(KATRAN_NATIVE_CFLAGS) \
 		-I"$(CURDIR)/katran" -I"$(CURDIR)/katran/katran/lib/linux_includes" \
 		$(NATIVE_SYS_INCLUDE_FLAGS) \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c $(BCC_VMLINUX_H) native_compat.h
+$(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c $(BCC_VMLINUX_H) native_compat.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" \
 		-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/$(BPF_TARGET_ARCH)" \
@@ -207,7 +212,7 @@ $(NATIVE_OUT)/cilium/bpf_wireguard.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_M
 $(NATIVE_OUT)/cilium/bpf_xdp.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_XDP_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_alignchecker.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_SIMPLE_OPTIONS)
 
-$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h
+$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(CILIUM_NATIVE_OPTIONS) $(NATIVE_CFLAGS) \
 		-include "$(CURDIR)/native_compat.h" \
@@ -218,7 +223,7 @@ $(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h
 		$(NATIVE_SYS_INCLUDE_FLAGS) \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/cilium/cilium_placeholders.native.o: cilium_placeholders.c native_compat.h
+$(NATIVE_OUT)/cilium/cilium_placeholders.native.o: cilium_placeholders.c native_compat.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) \
 		-include "$(CURDIR)/native_compat.h" \
@@ -228,7 +233,7 @@ $(NATIVE_OUT)/cilium/cilium_placeholders.native.o: cilium_placeholders.c native_
 $(OTEL_EBPF_DIR)/errors.h: otel/tools/errors-codegen/errors.json otel/tools/errors-codegen/main.go
 	$(MAKE) -C "$(CURDIR)/$(OTEL_EBPF_DIR)" errors.h
 
-$(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h
+$(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) \
 		-Wno-unused-function -Wno-unused-variable \
@@ -239,7 +244,7 @@ $(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS)
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_TARGET_FLAGS) -r -o "$@" $(OTEL_NATIVE_UNIT_OBJS)
 
-$(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h
+$(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS \
 		-include "$(CURDIR)/native_compat.h" \
@@ -248,7 +253,17 @@ $(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinu
 		$(NATIVE_SYS_INCLUDE_FLAGS) \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h
+$(TRACEE_DIRECT_CORE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h Makefile
+	install -d "$(dir $@)"
+	"$(CLANG)" $(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS \
+		-DMICRO_NATIVE_DIRECT_CORE_READ \
+		-include "$(CURDIR)/native_compat.h" \
+		-D$(TARGET_ARCH_DEFINE) -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
+		-I"$(CURDIR)/tracee/pkg/ebpf/c" \
+		$(NATIVE_SYS_INCLUDE_FLAGS) \
+		-o "$@" "$<"
+
+$(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS \
 		-include "$(CURDIR)/native_compat.h" \
@@ -261,7 +276,7 @@ $(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.
 $(NATIVE_LINK):
 	cargo build --release --manifest-path "$(ROOT)/native-sim/x86/native_lab/native_link/Cargo.toml"
 
-$(NATIVE_OUT)/katran/%.proof.ok: $(NATIVE_OUT)/katran/%.native.o $(NATIVE_LINK)
+$(NATIVE_OUT)/katran/%.proof.ok: $(NATIVE_OUT)/katran/%.native.o $(NATIVE_LINK) Makefile
 	install -d "$(dir $@)"
 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
 	if [[ -z "$${symbols}" ]]; then \
@@ -291,7 +306,7 @@ native-katran: $(KATRAN_NATIVE_OBJS) $(KATRAN_NATIVE_PROOF_MARKERS)
 		--object "$(KATRAN_NATIVE_STAGE_OUT)/healthchecking_ipip.native.o" \
 		--object "$(KATRAN_NATIVE_STAGE_OUT)/xdp_root.native.o"
 
-$(NATIVE_OUT)/bcc/%.proof.ok: $(NATIVE_OUT)/bcc/%.native.o $(NATIVE_LINK)
+$(NATIVE_OUT)/bcc/%.proof.ok: $(NATIVE_OUT)/bcc/%.native.o $(NATIVE_LINK) Makefile
 	install -d "$(dir $@)"
 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
 	if [[ -z "$${symbols}" ]]; then \
@@ -317,7 +332,7 @@ native-bcc: $(BCC_VMLINUX_H) $(BCC_NATIVE_OBJS) $(BCC_NATIVE_PROOF_MARKERS)
 		--output "$(BCC_NATIVE_STAGE_OUT)/manifest.json" \
 		$(foreach tool,$(BCC_TOOLS),--object "$(BCC_NATIVE_STAGE_OUT)/$(tool).native.o")
 
-$(NATIVE_OUT)/cilium/%.proof.ok: $(NATIVE_OUT)/cilium/%.native.o $(NATIVE_LINK)
+$(NATIVE_OUT)/cilium/%.proof.ok: $(NATIVE_OUT)/cilium/%.native.o $(NATIVE_LINK) Makefile
 	install -d "$(dir $@)"
 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ && $$1 !~ /^__check_/ {print $$1}')"; \
 	if [[ -z "$${symbols}" ]]; then \
@@ -358,7 +373,7 @@ native-cilium: $(CILIUM_NATIVE_OBJS) $(CILIUM_NATIVE_PROOF_MARKERS)
 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_xdp.native.o,prog_type=6" \
 		--object "$(CILIUM_NATIVE_STAGE_OUT)/cilium_placeholders.native.o"
 
-$(OTEL_NATIVE_PROOF_MARKER): $(OTEL_NATIVE_OBJECT) $(NATIVE_LINK)
+$(OTEL_NATIVE_PROOF_MARKER): $(OTEL_NATIVE_OBJECT) $(NATIVE_LINK) Makefile
 	install -d "$(dir $@)"
 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
 	if [[ -z "$${symbols}" ]]; then \
@@ -396,7 +411,7 @@ native-otel: $(OTEL_NATIVE_OBJECT) $(OTEL_NATIVE_PROOF_MARKER)
 		"$${stage_data_args[@]}" \
 		--object "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o"
 
-$(TRACEE_NATIVE_PROOF_MARKER): $(TRACEE_NATIVE_OBJECT) $(NATIVE_LINK)
+$(TRACEE_NATIVE_PROOF_MARKER): $(TRACEE_NATIVE_OBJECT) $(NATIVE_LINK) Makefile
 	install -d "$(dir $@)"
 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
 	if [[ -z "$${symbols}" ]]; then \
@@ -409,7 +424,19 @@ $(TRACEE_NATIVE_PROOF_MARKER): $(TRACEE_NATIVE_OBJECT) $(NATIVE_LINK)
 	done; \
 	printf 'ok\n' > "$@"
 
-$(NATIVE_OUT)/tracee/lsm_support/%.proof.ok: $(NATIVE_OUT)/tracee/lsm_support/%.native.o $(NATIVE_LINK)
+$(TRACEE_DIRECT_CORE_NATIVE_PROOF_MARKER): $(TRACEE_DIRECT_CORE_NATIVE_OBJECT) $(NATIVE_LINK) Makefile
+	install -d "$(dir $@)"
+	for sym in $(TRACEE_DIRECT_CORE_SYMBOLS); do \
+		if ! "$(LLVM_NM)" --defined-only --format=posix "$<" | awk -v sym="$${sym}" '$$1 == sym && $$2 ~ /^[Tt]$$/ { found=1 } END { exit !found }'; then \
+			echo "missing direct-core native text symbol $${sym} in $<" >&2; \
+			exit 1; \
+		fi; \
+		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
+			--output "$(NATIVE_OUT)/tracee/tracee_direct_core.$${sym}.proof.o" --mode proof; \
+	done; \
+	printf 'ok\n' > "$@"
+
+$(NATIVE_OUT)/tracee/lsm_support/%.proof.ok: $(NATIVE_OUT)/tracee/lsm_support/%.native.o $(NATIVE_LINK) Makefile
 	install -d "$(dir $@)"
 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
 	if [[ -z "$${symbols}" ]]; then \
@@ -431,12 +458,18 @@ native-tracee: $(TRACEE_NATIVE_OBJS) $(TRACEE_NATIVE_PROOF_MARKERS)
 	install -m 0644 "$(NATIVE_OUT)/tracee"/*.proof.o "$(TRACEE_NATIVE_STAGE_OUT)"
 	install -m 0644 "$(NATIVE_OUT)/tracee/lsm_support"/*.proof.o "$(TRACEE_NATIVE_STAGE_OUT)"
 	python3 "$(CURDIR)/write_native_manifest.py" --app tracee --llvm-nm "$(LLVM_NM)" \
+		--dedupe-program last \
 		--output "$(NATIVE_OUT)/tracee/manifest.json" \
 		--object "$(TRACEE_NATIVE_OBJECT)" \
+		--object "$(TRACEE_DIRECT_CORE_NATIVE_OBJECT),symbol=trace_sys_enter" \
+		--object "$(TRACEE_DIRECT_CORE_NATIVE_OBJECT),symbol=trace_sys_exit" \
 		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(NATIVE_OUT)/tracee/lsm_support/$(src).native.o")
 	python3 "$(CURDIR)/write_native_manifest.py" --app tracee --llvm-nm "$(LLVM_NM)" \
+		--dedupe-program last \
 		--output "$(TRACEE_NATIVE_STAGE_OUT)/manifest.json" \
 		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee.native.o" \
+		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee_direct_core.native.o,symbol=trace_sys_enter" \
+		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee_direct_core.native.o,symbol=trace_sys_exit" \
 		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(TRACEE_NATIVE_STAGE_OUT)/$(src).native.o")
 
 native-tetragon: $(TETRAGON_VMLINUX_H) native_compat.h $(NATIVE_LINK)

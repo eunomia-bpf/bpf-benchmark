@@ -116,25 +116,65 @@
 #define PT_REGS_RC(x) __PT_RC(x)
 #define PT_REGS_SP(x) __PT_SP(x)
 #define PT_REGS_IP(x) __PT_IP(x)
-#define PT_REGS_RET_CORE(x) PT_REGS_RET(x)
-#define PT_REGS_FP_CORE(x) PT_REGS_FP(x)
-#define PT_REGS_RC_CORE(x) PT_REGS_RC(x)
-#define PT_REGS_SP_CORE(x) PT_REGS_SP(x)
-#define PT_REGS_IP_CORE(x) PT_REGS_IP(x)
-#define PT_REGS_PARM1_CORE(x) PT_REGS_PARM1(x)
-#define PT_REGS_PARM2_CORE(x) PT_REGS_PARM2(x)
-#define PT_REGS_PARM3_CORE(x) PT_REGS_PARM3(x)
-#define PT_REGS_PARM4_CORE(x) PT_REGS_PARM4(x)
-#define PT_REGS_PARM5_CORE(x) PT_REGS_PARM5(x)
-#define PT_REGS_PARM6_CORE(x) PT_REGS_PARM6(x)
+
+#if defined(__TARGET_ARCH_arm64)
+#define __PT_PARM1_REG regs[0]
+#define __PT_PARM2_REG regs[1]
+#define __PT_PARM3_REG regs[2]
+#define __PT_PARM4_REG regs[3]
+#define __PT_PARM5_REG regs[4]
+#define __PT_PARM6_REG regs[5]
+#define __PT_PARM1_SYSCALL_REG orig_x0
+#define __PT_PARM2_SYSCALL_REG __PT_PARM2_REG
+#define __PT_PARM3_SYSCALL_REG __PT_PARM3_REG
+#define __PT_PARM4_SYSCALL_REG __PT_PARM4_REG
+#define __PT_PARM5_SYSCALL_REG __PT_PARM5_REG
+#define __PT_PARM6_SYSCALL_REG __PT_PARM6_REG
+#define __PT_RET_REG regs[30]
+#define __PT_FP_REG regs[29]
+#define __PT_RC_REG regs[0]
+#define __PT_SP_REG sp
+#define __PT_IP_REG pc
+#else
+#define __PT_PARM1_REG di
+#define __PT_PARM2_REG si
+#define __PT_PARM3_REG dx
+#define __PT_PARM4_REG cx
+#define __PT_PARM5_REG r8
+#define __PT_PARM6_REG r9
+#define __PT_PARM1_SYSCALL_REG __PT_PARM1_REG
+#define __PT_PARM2_SYSCALL_REG __PT_PARM2_REG
+#define __PT_PARM3_SYSCALL_REG __PT_PARM3_REG
+#define __PT_PARM4_SYSCALL_REG r10
+#define __PT_PARM5_SYSCALL_REG __PT_PARM5_REG
+#define __PT_PARM6_SYSCALL_REG __PT_PARM6_REG
+#define __PT_RET_REG sp
+#define __PT_FP_REG bp
+#define __PT_RC_REG ax
+#define __PT_SP_REG sp
+#define __PT_IP_REG ip
+#endif
+
+#define __PT_CORE_READ(x, reg) (__PT_REGS_CAST(x)->reg)
+#define PT_REGS_RET_CORE(x) __PT_CORE_READ(x, __PT_RET_REG)
+#define PT_REGS_FP_CORE(x) __PT_CORE_READ(x, __PT_FP_REG)
+#define PT_REGS_RC_CORE(x) __PT_CORE_READ(x, __PT_RC_REG)
+#define PT_REGS_SP_CORE(x) __PT_CORE_READ(x, __PT_SP_REG)
+#define PT_REGS_IP_CORE(x) __PT_CORE_READ(x, __PT_IP_REG)
+#define PT_REGS_PARM1_CORE(x) __PT_CORE_READ(x, __PT_PARM1_REG)
+#define PT_REGS_PARM2_CORE(x) __PT_CORE_READ(x, __PT_PARM2_REG)
+#define PT_REGS_PARM3_CORE(x) __PT_CORE_READ(x, __PT_PARM3_REG)
+#define PT_REGS_PARM4_CORE(x) __PT_CORE_READ(x, __PT_PARM4_REG)
+#define PT_REGS_PARM5_CORE(x) __PT_CORE_READ(x, __PT_PARM5_REG)
+#define PT_REGS_PARM6_CORE(x) __PT_CORE_READ(x, __PT_PARM6_REG)
 #define PT_REGS_PARM7_CORE(x) 0
 #define PT_REGS_PARM8_CORE(x) 0
-#define PT_REGS_PARM1_CORE_SYSCALL(x) PT_REGS_PARM1(x)
-#define PT_REGS_PARM2_CORE_SYSCALL(x) PT_REGS_PARM2(x)
-#define PT_REGS_PARM3_CORE_SYSCALL(x) PT_REGS_PARM3(x)
-#define PT_REGS_PARM4_CORE_SYSCALL(x) PT_REGS_PARM4(x)
-#define PT_REGS_PARM5_CORE_SYSCALL(x) PT_REGS_PARM5(x)
-#define PT_REGS_PARM6_CORE_SYSCALL(x) PT_REGS_PARM6(x)
+#define PT_REGS_PARM1_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM1_SYSCALL_REG)
+#define PT_REGS_PARM2_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM2_SYSCALL_REG)
+#define PT_REGS_PARM3_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM3_SYSCALL_REG)
+#define PT_REGS_PARM4_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM4_SYSCALL_REG)
+#define PT_REGS_PARM5_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM5_SYSCALL_REG)
+#define PT_REGS_PARM6_CORE_SYSCALL(x) __PT_CORE_READ(x, __PT_PARM6_SYSCALL_REG)
 #define PT_REGS_PARM7_CORE_SYSCALL(x) 0
 #define PT_REGS_SYSCALL_REGS(x) (x)
 
@@ -303,6 +343,31 @@ ____##name(struct pt_regs *ctx, ##args)
                        __native_core_read_into_2, \
                        __native_core_read_into_1)(fn, dst, src, args)
 
+#define __native_core_read_expr_1(src, a) ((src)->a)
+#define __native_core_read_expr_2(src, a, b) (__native_core_read_expr_1(src, a)->b)
+#define __native_core_read_expr_3(src, a, b, c) (__native_core_read_expr_2(src, a, b)->c)
+#define __native_core_read_expr_4(src, a, b, c, d) (__native_core_read_expr_3(src, a, b, c)->d)
+#define __native_core_read_expr_5(src, a, b, c, d, e) (__native_core_read_expr_4(src, a, b, c, d)->e)
+#define __native_core_read_expr_6(src, a, b, c, d, e, f) (__native_core_read_expr_5(src, a, b, c, d, e)->f)
+#define __native_core_read_expr(src, args...) \
+    __native_core_pick(args, \
+                       __native_core_read_expr_6, \
+                       __native_core_read_expr_5, \
+                       __native_core_read_expr_4, \
+                       __native_core_read_expr_3, \
+                       __native_core_read_expr_2, \
+                       __native_core_read_expr_1)(src, args)
+#ifdef MICRO_NATIVE_DIRECT_CORE_READ
+/*
+ * Explicit opt-in for native C reads whose source layout is known to match the
+ * runtime ABI without libbpf CO-RE relocation. Do not route generic
+ * BPF_CORE_READ through this: Tracee task/ns/file chains need probe-read
+ * safety and target-kernel CO-RE offsets.
+ */
+#define BPFREJIT_NATIVE_DIRECT_READ(src, args...) \
+    __native_core_read_expr((src), args)
+#endif
+
 #ifndef bpf_core_field_exists
 #ifdef MICRO_NATIVE_TETRAGON
 /*
@@ -422,7 +487,8 @@ static __always_inline unsigned long native_helper_id0(unsigned long id)
 static __always_inline unsigned long native_helper_id1(unsigned long id,
                                                        unsigned long a0)
 {
-    asm volatile("" : "+r"(id) : "r"(a0) : "memory");
+    (void)a0;
+    asm volatile("" : "+r"(id) : : "memory");
     return id;
 }
 
@@ -430,7 +496,9 @@ static __always_inline unsigned long native_helper_id2(unsigned long id,
                                                        unsigned long a0,
                                                        unsigned long a1)
 {
-    asm volatile("" : "+r"(id) : "r"(a0), "r"(a1) : "memory");
+    (void)a0;
+    (void)a1;
+    asm volatile("" : "+r"(id) : : "memory");
     return id;
 }
 
@@ -439,7 +507,10 @@ static __always_inline unsigned long native_helper_id3(unsigned long id,
                                                        unsigned long a1,
                                                        unsigned long a2)
 {
-    asm volatile("" : "+r"(id) : "r"(a0), "r"(a1), "r"(a2) : "memory");
+    (void)a0;
+    (void)a1;
+    (void)a2;
+    asm volatile("" : "+r"(id) : : "memory");
     return id;
 }
 
@@ -449,8 +520,11 @@ static __always_inline unsigned long native_helper_id4(unsigned long id,
                                                        unsigned long a2,
                                                        unsigned long a3)
 {
-    asm volatile("" : "+r"(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3)
-                 : "memory");
+    (void)a0;
+    (void)a1;
+    (void)a2;
+    (void)a3;
+    asm volatile("" : "+r"(id) : : "memory");
     return id;
 }
 
@@ -461,9 +535,12 @@ static __always_inline unsigned long native_helper_id5(unsigned long id,
                                                        unsigned long a3,
                                                        unsigned long a4)
 {
-    asm volatile("" : "+r"(id)
-                 : "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(a4)
-                 : "memory");
+    (void)a0;
+    (void)a1;
+    (void)a2;
+    (void)a3;
+    (void)a4;
+    asm volatile("" : "+r"(id) : : "memory");
     return id;
 }
 

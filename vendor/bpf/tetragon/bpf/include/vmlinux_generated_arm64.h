@@ -40119,7 +40119,7 @@ struct bpf_kinsn {
 	u16 max_emit_bytes;
 	int (*instantiate_insn)(u64, struct bpf_insn *);
 	int (*emit_x86)(u8 *, u32 *, bool, u64, const struct bpf_prog *, const u8 *);
-	int (*emit_arm64)(u32 *, int *, bool, u64, const struct bpf_prog *);
+	int (*emit_arm64)(u32 *, int *, bool, u64, const struct bpf_prog *, const u32 *);
 };
 
 struct bpf_kinsn_region {
