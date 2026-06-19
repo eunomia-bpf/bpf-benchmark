@@ -8,10 +8,10 @@ import signal
 import shutil
 import sys
 import time
-from contextlib import contextmanager, nullcontext
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Mapping, Sequence
+from typing import Callable, Mapping, Sequence
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -25,7 +25,6 @@ from runner.libs.benchmark_catalog import (
 from runner.libs.app_runners import get_app_runner
 from runner.libs.app_runners.base import AppRunner
 from runner.libs.app_suite_schema import AppSpec, AppSuite, load_app_suite_from_yaml
-from runner.libs.bpf_stats import enable_bpf_stats
 from runner.libs.case_common import (
     LifecycleRunResult,
     wait_for_suite_quiescence,
@@ -64,9 +63,20 @@ DEFAULT_MACRO_APPS_YAML = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
 _CORPUS_APPS_ENV = "BPFREJIT_CORPUS_APPS"
 _CORPUS_APP_TIMEOUT_ENV = "BPFREJIT_CORPUS_APP_TIMEOUT"
 _CORPUS_REJIT_TIMEOUT_ENV = "BPFREJIT_CORPUS_REJIT_TIMEOUT"
+_CORPUS_NATIVE_LOADER_POST_ONLY_ENV = "BPFREJIT_CORPUS_NATIVE_LOADER_POST_ONLY"
 _DEFAULT_CORPUS_APP_TIMEOUT_S = 1800.0
 _DEFAULT_CORPUS_REJIT_TIMEOUT_S = 900.0
 _TIMEOUT_STACK: list[tuple[float, str, float]] = []
+_NATIVE_LOADER_ENV_NAMES = (
+    "BPFREJIT_SHIM_NATIVE_LOADER",
+    "BPFREJIT_SHIM_NATIVE_MANIFEST",
+    "BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT",
+    "BPFREJIT_SHIM_NATIVE_KMSG_PROGRESS",
+    "BPFREJIT_NATIVE_LOADER_SO",
+    "BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF",
+    "BPFREJIT_NATIVE_LINK_BINARY",
+    "BPFREJIT_NATIVE_DISABLE_MAP_LOWERING",
+)
 
 
 class _AppLifecycleComplete(Exception):
@@ -141,6 +151,13 @@ def _env_bool(name: str, default: bool = False) -> bool:
 
 
 def _native_loader_post_only_enabled() -> bool:
+    mode = _env_str(_CORPUS_NATIVE_LOADER_POST_ONLY_ENV).lower()
+    if mode in {"1", "true", "yes", "on", "post", "post_only", "post-only", "post_rejit"}:
+        return True
+    if mode not in {"", "0", "false", "no", "off"}:
+        raise SystemExit(
+            f"{_CORPUS_NATIVE_LOADER_POST_ONLY_ENV} must be boolean or post-only mode"
+        )
     raw = _env_str("BPFREJIT_SHIM_NATIVE_LOADER").lower()
     if not raw or raw in {"0", "false", "no", "off", "1", "true", "yes", "on"}:
         return False
@@ -149,6 +166,49 @@ def _native_loader_post_only_enabled() -> bool:
     raise SystemExit(
         "BPFREJIT_SHIM_NATIVE_LOADER must be empty, 0/1, true/false, or post"
     )
+
+
+def _validate_native_loader_skip_rejit(
+    *,
+    skip_rejit: bool,
+    native_loader_post_only: bool,
+) -> None:
+    if not (skip_rejit and native_loader_post_only):
+        return
+    raise SystemExit(
+        "native-loader post-only mode is incompatible with SKIP_REJIT; "
+        "unset SKIP_REJIT to benchmark native replacement, or unset "
+        f"{_CORPUS_NATIVE_LOADER_POST_ONLY_ENV}/BPFREJIT_SHIM_NATIVE_LOADER=post "
+        "to run a no-ReJIT diagnostic"
+    )
+
+
+def _current_native_loader_env() -> dict[str, str]:
+    return {
+        name: value
+        for name in _NATIVE_LOADER_ENV_NAMES
+        if (value := os.environ.get(name)) is not None
+    }
+
+
+def _active_native_loader_env_keys(*, include_control_env: bool = True) -> list[str]:
+    names = _NATIVE_LOADER_ENV_NAMES
+    if include_control_env:
+        names = (*names, _CORPUS_NATIVE_LOADER_POST_ONLY_ENV)
+    return sorted(name for name in names if os.environ.get(name) is not None)
+
+
+def _enable_native_loader_env(saved_env: Mapping[str, str]) -> dict[str, str | None]:
+    updates: dict[str, str | None] = {name: None for name in _NATIVE_LOADER_ENV_NAMES}
+    updates.update(saved_env)
+    updates["BPFREJIT_SHIM_NATIVE_LOADER"] = "1"
+    return updates
+
+
+def _disable_native_loader_env() -> dict[str, str | None]:
+    updates: dict[str, str | None] = {name: None for name in _NATIVE_LOADER_ENV_NAMES}
+    updates[_CORPUS_NATIVE_LOADER_POST_ONLY_ENV] = None
+    return updates
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -174,6 +234,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ):
         if not value:
             raise SystemExit(f"{name} is required; run corpus through Make")
+    skip_rejit = _skip_rejit_enabled()
+    native_loader_post_only = _native_loader_post_only_enabled()
+    _validate_native_loader_skip_rejit(
+        skip_rejit=skip_rejit,
+        native_loader_post_only=native_loader_post_only,
+    )
     ns = argparse.Namespace(
         workspace=str(ROOT_DIR),
         target_arch=target_arch,
@@ -190,7 +256,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         warmups=_env_int("WARMUPS", 1),
         app_timeout_s=_env_float(_CORPUS_APP_TIMEOUT_ENV, _DEFAULT_CORPUS_APP_TIMEOUT_S),
         rejit_timeout_s=_env_float(_CORPUS_REJIT_TIMEOUT_ENV, _DEFAULT_CORPUS_REJIT_TIMEOUT_S),
-        skip_rejit=_skip_rejit_enabled(),
+        skip_rejit=skip_rejit,
         keep_failure_artifacts=_keep_workdirs_enabled(),
         workload_only=_env_bool("BPFREJIT_CORPUS_WORKLOAD_ONLY"),
         collect_bpf_stats=_env_bool("BPFREJIT_CORPUS_BPF_STATS", True),
@@ -365,18 +431,21 @@ def _sanitize_app_filename(app_name: str) -> str:
 
 
 @contextmanager
-def _temporary_env(updates: Mapping[str, str]):
+def _temporary_env(updates: Mapping[str, str | None]):
     previous: dict[str, str | None] = {key: os.environ.get(key) for key in updates}
     try:
-        for key, value in updates.items():
-            os.environ[key] = str(value)
+        _apply_env_updates(updates)
         yield
     finally:
-        for key, value in previous.items():
-            if value is None:
-                os.environ.pop(key, None)
-            else:
-                os.environ[key] = value
+        _apply_env_updates(previous)
+
+
+def _apply_env_updates(updates: Mapping[str, str | None]) -> None:
+    for key, value in updates.items():
+        if value is None:
+            os.environ.pop(key, None)
+        else:
+            os.environ[key] = str(value)
 
 
 def _arm_timeout_timer() -> None:
@@ -549,6 +618,44 @@ def _write_incremental_app_result(
         metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n")
 
 
+def _measure_app_phase_with_stats(
+    *,
+    workspace: Path,
+    collect_bpf_stats: bool,
+    app_pids: Sequence[int],
+    runner: AppRunner,
+    workload_seconds: float,
+    samples: int,
+    warmups: int,
+) -> dict[str, object]:
+    def die(message: str) -> None:
+        raise RuntimeError(message)
+
+    if collect_bpf_stats:
+        _set_bpf_stats_enabled(workspace, True, die=die)
+    try:
+        return measure_app_phase(
+            app_pids=app_pids,
+            runner=runner,
+            workload_seconds=workload_seconds,
+            samples=samples,
+            warmups=warmups,
+        )
+    finally:
+        if collect_bpf_stats:
+            _set_bpf_stats_enabled(workspace, False, die=die)
+
+
+def _disable_bpf_stats_after_stop(workspace: Path, collect_bpf_stats: bool) -> None:
+    if not collect_bpf_stats:
+        return
+
+    def die(message: str) -> None:
+        raise RuntimeError(message)
+
+    _set_bpf_stats_enabled(workspace, False, die=die)
+
+
 def run_suite(
     args: argparse.Namespace,
     suite: AppSuite,
@@ -556,6 +663,7 @@ def run_suite(
     artifact_session: "ArtifactSession | None" = None,
     partial_results: "dict[str, dict[str, object]] | None" = None,
 ) -> dict[str, object]:
+    workspace = ROOT_DIR
     suite_path = suite.manifest_path.resolve()
     workload_seconds = _workload_seconds(args)
     samples = _sample_count(args)
@@ -564,6 +672,19 @@ def run_suite(
     workload_only = bool(getattr(args, "workload_only", False))
     collect_bpf_stats = bool(getattr(args, "collect_bpf_stats", True))
     native_loader_post_only = _native_loader_post_only_enabled()
+    _validate_native_loader_skip_rejit(
+        skip_rejit=skip_rejit,
+        native_loader_post_only=native_loader_post_only,
+    )
+    post_only_native_env = _current_native_loader_env()
+    if native_loader_post_only:
+        _apply_env_updates(_disable_native_loader_env())
+    _print_progress(
+        "native_loader_mode",
+        post_only=native_loader_post_only,
+        saved_env_keys=sorted(post_only_native_env),
+        active_env_keys=_active_native_loader_env_keys(),
+    )
     results_by_name: dict[str, dict[str, object]] = {}
     completed_apps: set[str] = set()
     total_apps = len(suite.apps)
@@ -575,9 +696,7 @@ def run_suite(
     # rotate/cond_select/endian_fusion/lea pass-emitted kfunc calls land on
     # btf_ids the kernel can't resolve (EACCES / EINVAL during PROG_LOAD).
     kinsn_module_metadata = {} if workload_only else prepare_kinsn_modules()
-    stats_context = enable_bpf_stats() if collect_bpf_stats else nullcontext({"mode": "disabled"})
-    with stats_context:
-        for app in suite.apps:
+    for app in suite.apps:
             _print_progress("app_start", app=app.name, runner=app.runner, workload=app.workload_for("corpus"))
             runner: AppRunner | None = None
             lifecycle: LifecycleRunResult | None = None
@@ -628,14 +747,28 @@ def run_suite(
                         workload=app.workload_for("corpus"),
                     )
                     runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
-                    with _temporary_env({
+                    baseline_env: dict[str, str | None] = {
                         "BPFREJIT_SHIM_LOADTIME_PLAN": "",
                         "BPFREJIT_SHIM_LOG": str(_shim_log_path(
                             app,
                             "baseline",
                             artifact_session=artifact_session,
                         )),
-                    }):
+                    }
+                    _print_progress(
+                        "native_loader_phase_env",
+                        app=app.name,
+                        runner=app.runner,
+                        phase=phase,
+                        active_env_keys=_active_native_loader_env_keys(),
+                        temporary_set_keys=sorted(
+                            key for key, value in baseline_env.items() if value is not None
+                        ),
+                        temporary_unset_keys=sorted(
+                            key for key, value in baseline_env.items() if value is None
+                        ),
+                    )
+                    with _temporary_env(baseline_env):
                         runner.start()
                     _print_progress(
                         "phase_done",
@@ -662,7 +795,9 @@ def run_suite(
                         workload=workload_name,
                         samples=samples,
                     )
-                    lifecycle.baseline = measure_app_phase(
+                    lifecycle.baseline = _measure_app_phase_with_stats(
+                        workspace=workspace,
+                        collect_bpf_stats=collect_bpf_stats,
                         app_pids=app_pids,
                         runner=runner,
                         workload_seconds=workload_seconds,
@@ -702,14 +837,56 @@ def run_suite(
 
                     phase = "baseline_stop"
                     try:
+                        _print_progress(
+                            "phase_start",
+                            app=app.name,
+                            runner=app.runner,
+                            phase=phase,
+                        )
                         runner.stop()
+                        _print_progress(
+                            "phase_step",
+                            app=app.name,
+                            runner=app.runner,
+                            phase=phase,
+                            step="runner_stop_done",
+                        )
                         runner = None
+                        _print_progress(
+                            "phase_step",
+                            app=app.name,
+                            runner=app.runner,
+                            phase=phase,
+                            step="quiesce_start",
+                        )
                         wait_for_suite_quiescence()
+                        _print_progress(
+                            "phase_step",
+                            app=app.name,
+                            runner=app.runner,
+                            phase=phase,
+                            step="quiesce_done",
+                        )
+                        _disable_bpf_stats_after_stop(workspace, collect_bpf_stats)
+                        _print_progress(
+                            "phase_step",
+                            app=app.name,
+                            runner=app.runner,
+                            phase=phase,
+                            step="bpf_stats_disabled",
+                        )
+                        _print_progress(
+                            "phase_done",
+                            app=app.name,
+                            runner=app.runner,
+                            phase=phase,
+                            status="ok",
+                        )
                     except Exception as stop_exc:
                         raise RuntimeError(f"baseline app stop failed: {stop_exc}") from stop_exc
 
                     phase = "loadtime_plan"
-                    loadtime_env: dict[str, str] = {
+                    loadtime_env: dict[str, str | None] = {
                         "BPFREJIT_SHIM_LOADTIME_PLAN": "",
                         "BPFREJIT_SHIM_LOG": str(_shim_log_path(
                             app,
@@ -718,7 +895,20 @@ def run_suite(
                         )),
                     }
                     if native_loader_post_only:
-                        loadtime_env["BPFREJIT_SHIM_NATIVE_LOADER"] = "1"
+                        loadtime_env.update(_enable_native_loader_env(post_only_native_env))
+                    _print_progress(
+                        "native_loader_phase_env",
+                        app=app.name,
+                        runner=app.runner,
+                        phase="post_rejit_start",
+                        active_env_keys=_active_native_loader_env_keys(),
+                        temporary_set_keys=sorted(
+                            key for key, value in loadtime_env.items() if value is not None
+                        ),
+                        temporary_unset_keys=sorted(
+                            key for key, value in loadtime_env.items() if value is None
+                        ),
+                    )
                     if skip_rejit:
                         _print_progress("rejit_skipped", app=app.name, runner=app.runner)
                         lifecycle.rejit_result = {"status": "skipped", "mode": "loadtime"}
@@ -788,7 +978,9 @@ def run_suite(
                         workload=workload_name,
                         samples=samples,
                     )
-                    lifecycle.post_rejit = measure_app_phase(
+                    lifecycle.post_rejit = _measure_app_phase_with_stats(
+                        workspace=workspace,
+                        collect_bpf_stats=collect_bpf_stats,
                         app_pids=app_pids,
                         runner=runner,
                         workload_seconds=workload_seconds,
@@ -805,9 +997,51 @@ def run_suite(
 
                     phase = "post_rejit_stop"
                     try:
+                        _print_progress(
+                            "phase_start",
+                            app=app.name,
+                            runner=app.runner,
+                            phase=phase,
+                        )
                         runner.stop()
+                        _print_progress(
+                            "phase_step",
+                            app=app.name,
+                            runner=app.runner,
+                            phase=phase,
+                            step="runner_stop_done",
+                        )
                         runner = None
+                        _print_progress(
+                            "phase_step",
+                            app=app.name,
+                            runner=app.runner,
+                            phase=phase,
+                            step="quiesce_start",
+                        )
                         wait_for_suite_quiescence()
+                        _print_progress(
+                            "phase_step",
+                            app=app.name,
+                            runner=app.runner,
+                            phase=phase,
+                            step="quiesce_done",
+                        )
+                        _disable_bpf_stats_after_stop(workspace, collect_bpf_stats)
+                        _print_progress(
+                            "phase_step",
+                            app=app.name,
+                            runner=app.runner,
+                            phase=phase,
+                            step="bpf_stats_disabled",
+                        )
+                        _print_progress(
+                            "phase_done",
+                            app=app.name,
+                            runner=app.runner,
+                            phase=phase,
+                            status="ok",
+                        )
                     except Exception as stop_exc:
                         raise RuntimeError(f"post app stop failed: {stop_exc}") from stop_exc
             except _AppLifecycleComplete:
@@ -849,6 +1083,14 @@ def run_suite(
                         wait_for_suite_quiescence()
                     except Exception as quiesce_exc:
                         quiesce_error = str(quiesce_exc)
+                    if not stop_error:
+                        try:
+                            _disable_bpf_stats_after_stop(workspace, collect_bpf_stats)
+                        except Exception as stats_exc:
+                            quiesce_error = (
+                                f"{quiesce_error}; bpf stats disable failed: {stats_exc}"
+                                if quiesce_error else f"bpf stats disable failed: {stats_exc}"
+                            )
                 if lifecycle is not None:
                     lifecycle.stop_error = stop_error
                     if quiesce_error:
@@ -980,8 +1222,9 @@ def _setup_runtime_env(args: argparse.Namespace) -> Path:
         run_checked(["ip", "link", "set", "lo", "up"], cwd=workspace, env=env, die=_setup_die)
     if bool(getattr(args, "collect_bpf_stats", True)):
         ensure_bpf_stats_enabled(workspace, _setup_die)
+        _set_bpf_stats_enabled(workspace, False)
     else:
-        _disable_bpf_stats(workspace)
+        _set_bpf_stats_enabled(workspace, False)
     runtime_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
     ensure_katran_artifacts(workspace, args.target_arch, args.native_repos, _setup_die)
     # Apply runtime env to current process (PATH, LD_LIBRARY_PATH, BPFREJIT_*, etc.)
@@ -992,25 +1235,34 @@ def _setup_runtime_env(args: argparse.Namespace) -> Path:
     return workspace
 
 
-def _disable_bpf_stats(workspace: Path) -> None:
+def _set_bpf_stats_enabled(
+    workspace: Path,
+    enabled: bool,
+    *,
+    die: Callable[[str], object] | None = None,
+) -> None:
+    if die is None:
+        die = _setup_die
     sysctl_bin = shutil.which("sysctl")
+    value = "1" if enabled else "0"
     if sysctl_bin:
         run_checked(
-            [sysctl_bin, "-q", "-w", "kernel.bpf_stats_enabled=0"],
+            [sysctl_bin, "-q", "-w", f"kernel.bpf_stats_enabled={value}"],
             cwd=workspace,
             env={"PATH": os.environ.get("PATH", "") or "/usr/sbin:/usr/bin:/sbin:/bin"},
-            die=_setup_die,
+            die=die,
         )
     else:
         run_checked(
-            ["sh", "-c", "printf '0\\n' > /proc/sys/kernel/bpf_stats_enabled"],
+            ["sh", "-c", f"printf '{value}\\n' > /proc/sys/kernel/bpf_stats_enabled"],
             cwd=workspace,
             env=os.environ.copy(),
-            die=_setup_die,
+            die=die,
         )
     stats_path = Path("/proc/sys/kernel/bpf_stats_enabled")
-    if stats_path.read_text(encoding="utf-8").strip() != "0":
-        _setup_die("failed to disable kernel.bpf_stats_enabled=0")
+    if stats_path.read_text(encoding="utf-8").strip() != value:
+        action = "enable" if enabled else "disable"
+        die(f"failed to {action} kernel.bpf_stats_enabled={value}")
 
 
 def _setup_die(message: str) -> None:

@@ -4,7 +4,7 @@ import os
 import signal
 import subprocess
 import time
-from typing import Callable, Sequence
+from typing import Callable, Mapping, Sequence
 
 from . import ROOT_DIR, resolve_bpftool_binary, run_json_command
 from .rejit import skip_rejit_disables_shim
@@ -12,6 +12,17 @@ from .rejit import skip_rejit_disables_shim
 
 _SHIM_PATH = "/usr/local/lib/bpfrejit/libbpfrejit_shim.so"
 _SHIM_SOCK_DIR = "/var/run/bpfrejit"
+_NATIVE_LOADER_ENV_NAMES = (
+    "BPFREJIT_CORPUS_NATIVE_LOADER_POST_ONLY",
+    "BPFREJIT_SHIM_NATIVE_LOADER",
+    "BPFREJIT_SHIM_NATIVE_MANIFEST",
+    "BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT",
+    "BPFREJIT_SHIM_NATIVE_KMSG_PROGRESS",
+    "BPFREJIT_NATIVE_LOADER_SO",
+    "BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF",
+    "BPFREJIT_NATIVE_LINK_BINARY",
+    "BPFREJIT_NATIVE_DISABLE_MAP_LOWERING",
+)
 
 
 def _shim_env_for(binary: str) -> dict[str, str]:
@@ -29,15 +40,36 @@ def _shim_env_for(binary: str) -> dict[str, str]:
     return {"LD_PRELOAD": _SHIM_PATH, "BPFREJIT_SHIM_SOCK_DIR": _SHIM_SOCK_DIR}
 
 
+def _native_loader_enabled(env: Mapping[str, str]) -> bool:
+    return env.get("BPFREJIT_SHIM_NATIVE_LOADER", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
+def _scrub_disabled_native_loader_env(env: dict[str, str]) -> None:
+    if _native_loader_enabled(env):
+        return
+    for name in _NATIVE_LOADER_ENV_NAMES:
+        env.pop(name, None)
+
+
 def start_agent(
     binary: str,
     args: Sequence[str] = (),
-    env: dict[str, str] | None = None,
+    env: Mapping[str, str | None] | None = None,
 ) -> subprocess.Popen[str]:
     merged_env = os.environ.copy()
     merged_env.update(_shim_env_for(binary))
     if env:
-        merged_env.update(env)
+        for key, value in env.items():
+            if value is None:
+                merged_env.pop(key, None)
+            else:
+                merged_env[key] = value
+    _scrub_disabled_native_loader_env(merged_env)
     os.makedirs(_SHIM_SOCK_DIR, exist_ok=True)
     return subprocess.Popen(
         [binary, *args],

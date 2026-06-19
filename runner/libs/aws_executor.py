@@ -522,6 +522,29 @@ def _capture_remote_failure_diagnostics(
     local_diag_dir: Path,
 ) -> None:
     local_diag_dir.mkdir(parents=True, exist_ok=True)
+    state = aws_common._load_instance_state(ctx)
+    instance_id = state.get("STATE_INSTANCE_ID", "").strip()
+    if instance_id:
+        console = aws_common._aws_cmd(
+            ctx,
+            "ec2",
+            "get-console-output",
+            "--instance-id",
+            instance_id,
+            "--latest",
+            "--output",
+            "json",
+            capture_output=True,
+        )
+        (local_diag_dir / "console-output.json").write_text(
+            f"rc={console.returncode}\n{console.stdout}",
+            encoding="utf-8",
+        )
+        if console.stderr:
+            (local_diag_dir / "console-output.stderr.log").write_text(
+                console.stderr,
+                encoding="utf-8",
+            )
     quoted_run_dir = shlex.quote(remote_run_dir)
     script = f"""
 set +e

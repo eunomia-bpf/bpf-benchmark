@@ -8,6 +8,9 @@ Bug-detection purpose:
     with partial results and calls SystemExit(130).
   - _finalize_partial: verify that apps not yet reached get an error entry and
     partial=True is set in the payload.
+  - native-loader config validation: reject SKIP_REJIT plus post-only native
+    loader before it can accidentally run native replacement in a no-ReJIT
+    diagnostic.
 """
 from __future__ import annotations
 
@@ -74,6 +77,26 @@ def _make_artifact_session(tmp_path: Path) -> ArtifactSession:
     )
     session.write(status="running", progress_payload={"status": "running"})
     return session
+
+
+# ---------------------------------------------------------------------------
+# Tests: native-loader config validation
+# ---------------------------------------------------------------------------
+
+class TestNativeLoaderConfigValidation(unittest.TestCase):
+    def test_post_only_native_loader_rejects_skip_rejit(self) -> None:
+        env = {
+            "RUN_TARGET_ARCH": "arm64",
+            "RUN_EXECUTOR": "aws",
+            "RUN_TOKEN": "unit",
+            "RUN_REMOTE_PYTHON_BIN": "python3",
+            "RUN_BPFTOOL_BIN": "bpftool",
+            "BPFREJIT_CORPUS_NATIVE_LOADER_POST_ONLY": "1",
+            "SKIP_REJIT": "norejit",
+        }
+        with mock.patch.dict(os.environ, env, clear=True):
+            with self.assertRaisesRegex(SystemExit, "incompatible with SKIP_REJIT"):
+                driver.parse_args()
 
 
 # ---------------------------------------------------------------------------

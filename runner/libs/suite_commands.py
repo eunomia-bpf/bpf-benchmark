@@ -28,12 +28,21 @@ _SUITE_ENV_NAMES = (
     "PERF_COUNTERS", "BPFREJIT_CORPUS_APP_TIMEOUT",
     "BPFREJIT_CORPUS_REJIT_TIMEOUT", "BPFREJIT_CORPUS_WORKLOAD_ONLY",
     "BPFREJIT_CORPUS_BPF_STATS", "BPFREJIT_KEEP_ALL_WORKDIRS",
+    "BPFREJIT_CORPUS_NATIVE_LOADER_POST_ONLY",
     "BPFREJIT_SHIM_NATIVE_LOADER", "BPFREJIT_SHIM_NATIVE_MANIFEST",
     "BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT",
+    "BPFREJIT_SHIM_NATIVE_KMSG_PROGRESS",
     "BPFREJIT_NATIVE_LOADER_SO",
     "BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF",
     "BPFREJIT_NATIVE_LINK_BINARY",
+    "BPFREJIT_NATIVE_DISABLE_MAP_LOWERING",
+    "BPFREJIT_FTRACE_FUNCTION_PROFILE", "BPFREJIT_FTRACE_FUNCTIONS",
+    "BPFREJIT_KPROBE_FUNCTION_COUNTS", "BPFREJIT_KPROBE_FUNCTIONS",
+    "BPFREJIT_TRACEE_STOP_MODE", "BPFREJIT_TRACEE_EVENTS",
 )
+_NATIVE_LOADER_POST_ONLY_VALUES = frozenset({
+    "post", "post_only", "post-only", "post_rejit",
+})
 
 
 def _required(value: str, name: str, die: Any) -> str:
@@ -117,6 +126,10 @@ def build_runtime_container_command(
     for name in _SUITE_ENV_NAMES:
         if value := os.environ.get(name, "").strip():
             runtime_env[name] = value
+    native_loader_mode = runtime_env.get("BPFREJIT_SHIM_NATIVE_LOADER", "").strip().lower()
+    if suite_name == "corpus" and native_loader_mode in _NATIVE_LOADER_POST_ONLY_VALUES:
+        runtime_env.pop("BPFREJIT_SHIM_NATIVE_LOADER", None)
+        runtime_env["BPFREJIT_CORPUS_NATIVE_LOADER_POST_ONLY"] = "1"
     for name, value in sorted(runtime_env.items()):
         if name in _HOST_ENV_BLOCKLIST or not value.strip():
             continue
@@ -129,6 +142,7 @@ def build_runtime_container_command(
         ("/sys", "/sys", False),
         ("/sys/fs/bpf", "/sys/fs/bpf", False),
         ("/sys/kernel/debug", "/sys/kernel/debug", False),
+        ("/sys/kernel/tracing", "/sys/kernel/tracing", False),
         ("/lib/modules", "/lib/modules", True),
         ("/boot", "/boot", True),
     ):
