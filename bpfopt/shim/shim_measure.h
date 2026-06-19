@@ -3,27 +3,35 @@
 
 static uint32_t current_measure_generation;
 
-static int query_prog_info(struct prog_entry *p, struct bpf_prog_info *info) {
+static int query_prog_info_fd(int fd, struct bpf_prog_info *info) {
+    if (fd < 0)
+        return -1;
     memset(info, 0, sizeof(*info));
-    int fd = p->fd;
-    int close_fd = 0;
-    if (p->kernel_prog_id) {
-        union bpf_attr ga = {0};
-        ga.prog_id = p->kernel_prog_id;
-        fd = (int)real_syscall(SYS_bpf, BPF_PROG_GET_FD_BY_ID, &ga,
-                               sizeof(ga));
-        if (fd < 0)
-            return -1;
-        close_fd = 1;
-    }
     union bpf_attr ia = {0};
     ia.info.bpf_fd = (uint32_t)fd;
     ia.info.info_len = sizeof(*info);
     ia.info.info = (uintptr_t)info;
     long rc = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia));
-    if (close_fd)
-        real_close(fd);
     return rc < 0 ? -1 : 0;
+}
+
+static int query_prog_info(struct prog_entry *p, struct bpf_prog_info *info) {
+    if (query_prog_info_fd(p->fd, info) == 0 &&
+        (!p->kernel_prog_id || info->id == p->kernel_prog_id))
+        return 0;
+
+    if (!p->kernel_prog_id)
+        return -1;
+
+    union bpf_attr ga = {0};
+    ga.prog_id = p->kernel_prog_id;
+    int fd = (int)real_syscall(SYS_bpf, BPF_PROG_GET_FD_BY_ID, &ga,
+                               sizeof(ga));
+    if (fd < 0)
+        return -1;
+    int rc = query_prog_info_fd(fd, info);
+    real_close(fd);
+    return rc;
 }
 
 static void emit_has_programs(int cli) {

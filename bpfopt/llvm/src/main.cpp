@@ -2685,6 +2685,11 @@ void run_pass(Cli &cli)
 				output = input;
 			}
 		} else {
+			eliminate_entry_ctx_null_branches(output);
+			propagate_masked_range_to_fallthrough_source(output);
+			propagate_masked_range_to_fallthrough_copies(output);
+			retarget_masked_range_branches(output);
+			compact_unreachable_insns(output);
 			remap_out_of_range_stack_spills(output, false);
 		}
 	}

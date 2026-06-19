@@ -402,6 +402,56 @@ static void log_line(const char *fmt, ...) {
     pthread_mutex_unlock(&log_mutex);
 }
 
+static int shim_env_truthy(const char *name) {
+    const char *e = getenv(name);
+    return e && e[0] && strcmp(e, "0") != 0 && strcmp(e, "false") != 0 &&
+           strcmp(e, "False") != 0 && strcmp(e, "FALSE") != 0;
+}
+
+static void kmsg_line(const char *fmt, ...) {
+    if (!shim_env_truthy("BPFREJIT_SHIM_NATIVE_KMSG_PROGRESS"))
+        return;
+
+    ensure_syms_resolved();
+    if (!real_syscall)
+        return;
+
+    char buf[1024];
+    int n = snprintf(buf, sizeof(buf), "bpfrejit-shim[%d]: ", getpid());
+    if (n < 0)
+        return;
+    size_t off = (size_t)n < sizeof(buf) ? (size_t)n : sizeof(buf) - 1;
+
+    va_list ap;
+    va_start(ap, fmt);
+    int body = vsnprintf(buf + off, sizeof(buf) - off, fmt, ap);
+    va_end(ap);
+    if (body < 0)
+        return;
+
+    size_t len = off + (size_t)body;
+    if (len >= sizeof(buf))
+        len = sizeof(buf) - 1;
+    if (len == 0 || buf[len - 1] != '\n') {
+        if (len < sizeof(buf) - 1)
+            buf[len++] = '\n';
+        else
+            buf[sizeof(buf) - 2] = '\n';
+    }
+
+    int saved_errno = errno;
+    int old_in_shim = in_shim;
+    in_shim = 1;
+    long fd = real_syscall(SYS_openat, AT_FDCWD, "/dev/kmsg",
+                           O_WRONLY | O_CLOEXEC, 0);
+    if (fd >= 0) {
+        (void)real_syscall(SYS_write, fd, buf, len);
+        (void)real_syscall(SYS_close, fd);
+    }
+    in_shim = old_in_shim;
+    errno = saved_errno;
+}
+
 /* Map BPF_PROG_TYPE_* enum to bpfopt's --prog-type short name. Used in log
  * lines and as the ${PROG_TYPE} variable when substituting runner-supplied
  * command templates. */
@@ -997,43 +1047,8 @@ static void discover_proc_bpf_fds(void) {
     in_shim = saved_in_shim;
 }
 
-static void discover_kernel_bpf_progs(void) {
-    int saved_in_shim = in_shim;
-    in_shim = 1;
-    uint32_t id = 0;
-    for (uint32_t iter = 0; iter < 1000000; iter++) {
-        union bpf_attr next = {0};
-        next.start_id = id;
-        if (real_syscall(SYS_bpf, BPF_PROG_GET_NEXT_ID, &next,
-                         sizeof(next)) < 0)
-            break;
-        id = next.next_id;
-        if (id == 0 || prog_id_is_tracked(id))
-            continue;
-        union bpf_attr get = {0};
-        get.prog_id = id;
-        long fd = real_syscall(SYS_bpf, BPF_PROG_GET_FD_BY_ID, &get,
-                               sizeof(get));
-        if (fd < 0)
-            continue;
-        struct prog_entry *e = discover_prog_from_fd((int)fd);
-        real_close((int)fd);
-        if (!e)
-            continue;
-        e->fd = -(int)e->kernel_prog_id;
-        pthread_mutex_lock(&state_mutex);
-        if (prog_find_by_kernel_id(e->kernel_prog_id))
-            prog_free(e);
-        else
-            prog_insert(e);
-        pthread_mutex_unlock(&state_mutex);
-    }
-    in_shim = saved_in_shim;
-}
-
 static void discover_bpf_programs(void) {
     discover_proc_bpf_fds();
-    discover_kernel_bpf_progs();
 }
 
 #endif /* BPFREJIT_SHIM_STATE_H */

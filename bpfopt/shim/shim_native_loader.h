@@ -19,15 +19,30 @@ struct native_loader_c_result {
     uint64_t map_patch_ns;
     uint64_t upload_ns;
     uint64_t prog_load_ns;
+    uint64_t native_blob_fnv64;
+    uint64_t native_first_reloc_target;
+    uint64_t native_last_reloc_target;
+    uint32_t native_reloc_count;
+    uint32_t native_chunk_count;
+    uint32_t native_callee_saved_mask;
+    uint32_t native_first_reloc_offset;
+    uint32_t native_first_reloc_kind;
+    uint32_t native_last_reloc_offset;
+    uint32_t native_last_reloc_kind;
+    char native_link_summary[4096];
     char error[65536];
 };
 
-typedef int (*native_loader_load_from_fd_with_manifest_path_and_attach_fn)(
+typedef int (*native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn)(
     int original_prog_fd,
     const char *manifest_path,
     const char *source_bpf_path,
     const int *source_fd_array,
     uint32_t source_fd_array_count,
+    uint32_t source_btf_id,
+    const void *source_func_info,
+    uint32_t source_func_info_count,
+    uint32_t source_func_info_rec_size,
     uint32_t expected_attach_type,
     uint32_t attach_btf_id,
     uint32_t attach_btf_obj_id,
@@ -36,7 +51,7 @@ typedef int (*native_loader_load_from_fd_with_manifest_path_and_attach_fn)(
 
 static void *shim_native_loader_handle;
 static char *shim_native_loader_handle_path;
-static native_loader_load_from_fd_with_manifest_path_and_attach_fn
+static native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn
     shim_native_loader_load_fn;
 static pthread_mutex_t shim_native_loader_handle_lock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -50,7 +65,7 @@ static void shim_native_loader_fatal(void) {
     _exit(97);
 }
 
-static native_loader_load_from_fd_with_manifest_path_and_attach_fn
+static native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn
 shim_native_loader_resolve_load_fn(const char *so_path) {
     pthread_mutex_lock(&shim_native_loader_handle_lock);
     if (shim_native_loader_load_fn) {
@@ -60,7 +75,7 @@ shim_native_loader_resolve_load_fn(const char *so_path) {
             pthread_mutex_unlock(&shim_native_loader_handle_lock);
             shim_native_loader_fatal();
         }
-        native_loader_load_from_fd_with_manifest_path_and_attach_fn load =
+        native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn load =
             shim_native_loader_load_fn;
         pthread_mutex_unlock(&shim_native_loader_handle_lock);
         return load;
@@ -74,9 +89,9 @@ shim_native_loader_resolve_load_fn(const char *so_path) {
     }
 
     dlerror();
-    native_loader_load_from_fd_with_manifest_path_and_attach_fn load =
-        (native_loader_load_from_fd_with_manifest_path_and_attach_fn)dlsym(
-            handle, "native_loader_load_from_fd_with_manifest_path_and_attach");
+    native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn load =
+        (native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn)dlsym(
+            handle, "native_loader_load_from_fd_with_manifest_path_btf_and_attach");
     const char *sym_err = dlerror();
     if (sym_err || !load) {
         log_line("native-loader dlsym failed: %s", sym_err ? sym_err : "null");
@@ -239,6 +254,8 @@ static void shim_native_loader_log_jit_info(const char *label, int fd) {
     if (r < 0) {
         log_line("native-loader jit-info %s fd=%d errno=%d",
                  label ? label : "", fd, errno);
+        kmsg_line("native jit-info-failed label=%s fd=%d errno=%d",
+                  label ? label : "", fd, errno);
         return;
     }
 
@@ -255,6 +272,12 @@ static void shim_native_loader_log_jit_info(const char *label, int fd) {
              info.nr_jited_ksyms,
              (unsigned long long)ksyms[0],
              (unsigned long long)ksyms[1]);
+    kmsg_line("native jit-info label=%s fd=%d id=%u type=%u name=%s "
+              "jited_len=%u xlated_len=%u nr_ksyms=%u ksym0=0x%llx",
+              label ? label : "", fd, info.id, info.type, info.name,
+              info.jited_prog_len, info.xlated_prog_len,
+              info.nr_jited_ksyms,
+              (unsigned long long)ksyms[0]);
 }
 
 static size_t shim_native_loader_jit_dump_limit(void) {
@@ -354,72 +377,118 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     const char *prog_name = prog ? prog->name : "";
     if (!shim_native_loader_enabled())
         return original_fd;
+    kmsg_line("native consider name=%s type=%u insns=%u hash=%016llx fd=%ld",
+              prog_name ? prog_name : "", prog ? prog->prog_type : 0,
+              prog ? prog->insn_cnt : 0,
+              (unsigned long long)(prog ? prog->hash : 0), original_fd);
     if (original_fd < 0) {
+        kmsg_line("native invalid-original name=%s fd=%ld",
+                  prog_name ? prog_name : "", original_fd);
         errno = EINVAL;
         return -1;
     }
     if (shim_native_loader_is_libbpf_probe(prog)) {
         log_line("native-loader skipped feature probe program name=%s insn_cnt=%u",
                  prog_name ? prog_name : "", prog ? prog->insn_cnt : 0);
+        kmsg_line("native skip-feature-probe name=%s fd=%ld",
+                  prog_name ? prog_name : "", original_fd);
         return original_fd;
     }
     if (shim_native_loader_is_internal_prog(prog)) {
         log_line("native-loader skipped internal program name=%s insn_cnt=%u",
                  prog_name ? prog_name : "", prog ? prog->insn_cnt : 0);
+        kmsg_line("native skip-internal name=%s fd=%ld",
+                  prog_name ? prog_name : "", original_fd);
         return original_fd;
     }
     if (!prog || !prog->bytecode_path[0]) {
         log_line("native-loader missing captured source bytecode for prog=%s",
                  prog_name ? prog_name : "");
+        kmsg_line("native fatal-missing-bytecode name=%s",
+                  prog_name ? prog_name : "");
         shim_native_loader_fatal();
     }
     if (access(prog->bytecode_path, R_OK) != 0) {
         log_line("native-loader source bytecode unreadable prog=%s path=%s errno=%d",
                  prog_name ? prog_name : "", prog->bytecode_path, errno);
+        kmsg_line("native fatal-unreadable-bytecode name=%s path=%s errno=%d",
+                  prog_name ? prog_name : "", prog->bytecode_path, errno);
         shim_native_loader_fatal();
     }
     const char *manifest = getenv("BPFREJIT_SHIM_NATIVE_MANIFEST");
     if (!manifest || !manifest[0]) {
         log_line("native-loader missing BPFREJIT_SHIM_NATIVE_MANIFEST for prog=%s",
                  prog_name ? prog_name : "");
+        kmsg_line("native fatal-missing-manifest name=%s",
+                  prog_name ? prog_name : "");
         shim_native_loader_fatal();
     }
     if (shim_native_loader_is_runtime_helper(prog, manifest)) {
         log_line("native-loader skipped runtime helper program name=%s insn_cnt=%u",
                  prog_name ? prog_name : "", prog ? prog->insn_cnt : 0);
+        kmsg_line("native skip-runtime-helper name=%s fd=%ld",
+                  prog_name ? prog_name : "", original_fd);
         return original_fd;
     }
 
     const char *so_path = getenv("BPFREJIT_NATIVE_LOADER_SO");
     if (!so_path || !so_path[0])
         so_path = "libnative_loader.so";
-    native_loader_load_from_fd_with_manifest_path_and_attach_fn load =
+    native_loader_load_from_fd_with_manifest_path_btf_and_attach_fn load =
         shim_native_loader_resolve_load_fn(so_path);
 
     struct native_loader_c_result result;
     memset(&result, 0, sizeof(result));
     result.prog_fd = -1;
+    kmsg_line("native load-begin name=%s fd=%ld manifest=%s source=%s",
+              prog_name ? prog_name : "", original_fd, manifest,
+              prog->bytecode_path);
     if (load((int)original_fd, manifest, prog->bytecode_path,
              prog->fd_array_snapshot, prog->fd_array_snapshot_n,
+             prog->prog_btf_kid, prog->func_info_buf,
+             prog->func_info_cnt, prog->func_info_rec_size,
              prog->expected_attach_type, prog->attach_btf_id,
              prog->attach_btf_obj_kid, prog->attach_prog_kid,
              &result) != 0) {
         log_line("native-loader failed prog=%s manifest=%s source=%s error=%s",
                  prog_name ? prog_name : "", manifest,
                  prog->bytecode_path, result.error);
+        kmsg_line("native load-failed name=%s fd=%ld error=%s",
+                  prog_name ? prog_name : "", original_fd, result.error);
         shim_native_loader_fatal();
     }
+    kmsg_line("native load-done name=%s fd=%ld replaced=%d native_fd=%d "
+              "cache_hit=%d native_bytes=%llu link_exec_ns=%llu "
+              "blob_fnv=%016llx relocs=%u chunks=%u callee_saved=%u "
+              "first_reloc=%u:%u:0x%016llx last_reloc=%u:%u:0x%016llx",
+              prog_name ? prog_name : "", original_fd, result.replaced,
+              result.prog_fd, result.cache_hit,
+              (unsigned long long)result.native_code_bytes,
+              (unsigned long long)result.native_link_exec_ns,
+              (unsigned long long)result.native_blob_fnv64,
+              result.native_reloc_count, result.native_chunk_count,
+              result.native_callee_saved_mask,
+              result.native_first_reloc_offset,
+              result.native_first_reloc_kind,
+              (unsigned long long)result.native_first_reloc_target,
+              result.native_last_reloc_offset,
+              result.native_last_reloc_kind,
+              (unsigned long long)result.native_last_reloc_target);
     if (!result.replaced) {
         if (result.prog_fd >= 0)
             real_close(result.prog_fd);
         log_line("native-loader no manifest match pass-through for prog=%s "
                  "manifest=%s source=%s",
                  prog_name ? prog_name : "", manifest, prog->bytecode_path);
+        kmsg_line("native pass-through name=%s fd=%ld",
+                  prog_name ? prog_name : "", original_fd);
         return original_fd;
     }
     if (result.prog_fd < 0) {
         log_line("native-loader returned invalid fd for prog=%s",
                  prog_name ? prog_name : "");
+        kmsg_line("native invalid-native-fd name=%s fd=%ld native_fd=%d",
+                  prog_name ? prog_name : "", original_fd, result.prog_fd);
         shim_native_loader_fatal();
     }
 
@@ -449,6 +518,10 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
              (unsigned long long)result.map_patch_ns,
              (unsigned long long)result.upload_ns,
              (unsigned long long)result.prog_load_ns);
+    if (result.native_link_summary[0]) {
+        log_line("native-loader link-plan prog=%s %s",
+                 prog_name ? prog_name : "", result.native_link_summary);
+    }
 
     int shadow_original_fd = fcntl((int)original_fd, F_DUPFD_CLOEXEC, 3);
     if (shadow_original_fd < 0) {
@@ -464,6 +537,8 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     if (real_close((int)original_fd) != 0) {
         log_line("native-loader failed to close replaced original fd=%ld errno=%d",
                  original_fd, errno);
+        kmsg_line("native close-original-failed name=%s fd=%ld errno=%d",
+                  prog_name ? prog_name : "", original_fd, errno);
         real_close(result.prog_fd);
         real_close(shadow_original_fd);
         prog->native_loader_original_fd = -1;
@@ -473,6 +548,8 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
              "manifest=%s source=%s",
              prog_name ? prog_name : "", original_fd, result.prog_fd,
              manifest, prog->bytecode_path);
+    kmsg_line("native replaced name=%s original_fd=%ld native_fd=%d",
+              prog_name ? prog_name : "", original_fd, result.prog_fd);
     return result.prog_fd;
 }
 

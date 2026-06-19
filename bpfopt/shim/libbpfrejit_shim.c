@@ -282,15 +282,42 @@ static void log_prog_array_update(const union bpf_attr *attr, long ret,
     uint32_t map_type = 0;
     uint32_t key_size = 0;
     uint32_t value_size = 0;
+    uint32_t map_id = 0;
     pthread_mutex_lock(&state_mutex);
     struct map_entry *map = map_find((int)attr->map_fd);
     if (map) {
         map_type = map->map_type;
         key_size = map->key_size;
         value_size = map->value_size;
+        map_id = map->kernel_map_id;
         memcpy(map_name, map->name, sizeof(map_name) - 1);
     }
     pthread_mutex_unlock(&state_mutex);
+
+    if (map_type != BPF_MAP_TYPE_PROG_ARRAY ||
+        key_size != sizeof(uint32_t) || value_size != sizeof(uint32_t)) {
+        ensure_syms_resolved();
+        if (!real_syscall)
+            return;
+
+        struct bpf_map_info info;
+        memset(&info, 0, sizeof(info));
+        union bpf_attr info_attr = {0};
+        info_attr.info.bpf_fd = attr->map_fd;
+        info_attr.info.info_len = sizeof(info);
+        info_attr.info.info = (uintptr_t)&info;
+        long info_ret = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD,
+                                     &info_attr, sizeof(info_attr));
+        if (info_ret < 0)
+            return;
+
+        map_type = info.type;
+        key_size = info.key_size;
+        value_size = info.value_size;
+        map_id = info.id;
+        memset(map_name, 0, sizeof(map_name));
+        memcpy(map_name, info.name, sizeof(map_name) - 1);
+    }
 
     if (map_type != BPF_MAP_TYPE_PROG_ARRAY || key_size != sizeof(uint32_t) ||
         value_size != sizeof(uint32_t) || attr->key == 0 || attr->value == 0) {
@@ -308,12 +335,19 @@ static void log_prog_array_update(const union bpf_attr *attr, long ret,
     if (prog)
         prog_id = prog->kernel_prog_id;
     pthread_mutex_unlock(&state_mutex);
+    if (prog_id == 0)
+        prog_id = resolve_kernel_id((int)prog_fd);
 
-    log_line("BPF_MAP_UPDATE_ELEM prog_array name=%s map_fd=%u key=%u "
+    log_line("BPF_MAP_UPDATE_ELEM prog_array name=%s map_fd=%u map_id=%u key=%u "
              "prog_fd=%u prog_id=%u flags=%llu ret=%ld errno=%d",
-             map_name, attr->map_fd, key, prog_fd, prog_id,
+             map_name, attr->map_fd, map_id, key, prog_fd, prog_id,
              (unsigned long long)attr->flags, ret,
              ret < 0 ? saved_errno : 0);
+    kmsg_line("BPF_MAP_UPDATE_ELEM prog_array name=%s map_fd=%u map_id=%u key=%u "
+              "prog_fd=%u prog_id=%u flags=%llu ret=%ld errno=%d",
+              map_name, attr->map_fd, map_id, key, prog_fd, prog_id,
+              (unsigned long long)attr->flags, ret,
+              ret < 0 ? saved_errno : 0);
     if (ret >= 0)
         shim_native_loader_log_jit_info("prog_array-target", (int)prog_fd);
 }
@@ -338,6 +372,7 @@ __attribute__((constructor)) static void shim_init(void) {
         ssize_t n = readlink("/proc/self/exe", exe, sizeof(exe) - 1);
         if (n > 0) exe[n] = 0;
         log_line("shim_init pid=%d exe=%s", getpid(), exe);
+        kmsg_line("shim-init exe=%s", exe);
     }
 
     /* Probe the kernel BTF for all available kinsn kfunc targets and write
@@ -464,6 +499,15 @@ long syscall(long number, ...) {
                      pa ? (unsigned long long)pa->config2 : 0, pid, cpu,
                      group_fd, flags, perf_extra, ret,
                      ret < 0 ? saved_errno : 0);
+            kmsg_line("perf-open type=%u config=%llu config1=%llu "
+                      "config2=%llu pid=%d cpu=%d group_fd=%d flags=%lu%s "
+                      "ret=%ld errno=%d",
+                      pa ? pa->type : 0,
+                      pa ? (unsigned long long)pa->config : 0,
+                      pa ? (unsigned long long)pa->config1 : 0,
+                      pa ? (unsigned long long)pa->config2 : 0, pid, cpu,
+                      group_fd, flags, perf_extra, ret,
+                      ret < 0 ? saved_errno : 0);
             errno = saved_errno;
             return ret;
         }
@@ -537,6 +581,11 @@ long syscall(long number, ...) {
                      "flags=%u",
                      attr->link_create.prog_fd, attr->link_create.target_fd,
                      attr->link_create.attach_type, attr->link_create.flags);
+            kmsg_line("attach link-create begin prog_fd=%u target_fd=%u "
+                      "attach_type=%u flags=%u",
+                      attr->link_create.prog_fd, attr->link_create.target_fd,
+                      attr->link_create.attach_type,
+                      attr->link_create.flags);
             break;
         case BPF_LINK_UPDATE:
             on_link_update(attr);
@@ -546,6 +595,9 @@ long syscall(long number, ...) {
             break;
         case BPF_RAW_TRACEPOINT_OPEN:
             pending_raw_tp = capture_raw_tp_open(attr);
+            if (pending_raw_tp)
+                kmsg_line("attach raw-tp begin name=%s prog_fd=%u",
+                          pending_raw_tp->name, pending_raw_tp->prog_fd);
             break;
         default:
             break;
@@ -682,6 +734,7 @@ long syscall(long number, ...) {
             pthread_mutex_unlock(&state_mutex);
         } else {
             free(pending_prog);
+            pending_prog = NULL;
         }
     }
     if (pending_map) {
@@ -763,24 +816,48 @@ long syscall(long number, ...) {
     if (loadtime_active)
         loadtime_result_free(&loadtime);
 
-    if (cmd == BPF_PROG_LOAD)
+    if (cmd == BPF_PROG_LOAD) {
         log_line("  PROG_LOAD -> fd=%ld errno=%d kernel_prog_id=%u", ret,
                  ret < 0 ? saved_errno : 0, resolved_id);
-    else if (cmd == BPF_LINK_CREATE)
+        if (pending_prog)
+            kmsg_line("prog-load done name=%s ret=%ld errno=%d kid=%u",
+                      pending_prog->name, ret, ret < 0 ? saved_errno : 0,
+                      resolved_id);
+    } else if (cmd == BPF_LINK_CREATE) {
         log_line("  LINK_CREATE -> fd=%ld errno=%d kernel_link_id=%u", ret,
                  ret < 0 ? saved_errno : 0, resolved_id);
-    else if (cmd == BPF_LINK_UPDATE)
+        if (attr)
+            kmsg_line("attach link-create done prog_fd=%u target_fd=%u "
+                      "attach_type=%u ret=%ld errno=%d kid=%u",
+                      attr->link_create.prog_fd, attr->link_create.target_fd,
+                      attr->link_create.attach_type, ret,
+                      ret < 0 ? saved_errno : 0, resolved_id);
+    } else if (cmd == BPF_LINK_UPDATE) {
         log_line("  LINK_UPDATE -> ret=%ld errno=%d", ret,
                  ret < 0 ? saved_errno : 0);
-    else if (cmd == BPF_MAP_CREATE)
+    } else if (cmd == BPF_MAP_CREATE) {
         log_line("  MAP_CREATE -> fd=%ld errno=%d kernel_map_id=%u", ret,
                  ret < 0 ? saved_errno : 0, resolved_id);
-    else if (cmd == BPF_PROG_ATTACH)
+    } else if (cmd == BPF_PROG_ATTACH) {
         log_line("  PROG_ATTACH -> ret=%ld errno=%d", ret,
                  ret < 0 ? saved_errno : 0);
-    else if (cmd == BPF_RAW_TRACEPOINT_OPEN)
+        if (attr)
+            kmsg_line("attach prog-attach done target_fd=%u prog_fd=%u "
+                      "attach_type=%u ret=%ld errno=%d",
+                      attr->target_fd, attr->attach_bpf_fd,
+                      attr->attach_type, ret, ret < 0 ? saved_errno : 0);
+    } else if (cmd == BPF_RAW_TRACEPOINT_OPEN) {
         log_line("  RAW_TRACEPOINT_OPEN -> fd=%ld errno=%d", ret,
                  ret < 0 ? saved_errno : 0);
+        if (attr) {
+            const char *name = attr->raw_tracepoint.name
+                                   ? (const char *)(uintptr_t)attr->raw_tracepoint.name
+                                   : "";
+            kmsg_line("attach raw-tp done name=%.*s prog_fd=%u ret=%ld errno=%d",
+                      80, name, attr->raw_tracepoint.prog_fd, ret,
+                      ret < 0 ? saved_errno : 0);
+        }
+    }
 
     errno = saved_errno;
     return ret;
@@ -800,6 +877,8 @@ int ioctl(int fd, unsigned long request, ...) {
             int prog_fd = (int)(intptr_t)arg;
             log_line("PERF_EVENT_IOC_SET_BPF event_fd=%d prog_fd=%d", fd,
                      prog_fd);
+            kmsg_line("attach perf-set-bpf begin event_fd=%d prog_fd=%d",
+                      fd, prog_fd);
         } else if (request == PERF_EVENT_IOC_ENABLE) {
             log_line("PERF_EVENT_IOC_ENABLE event_fd=%d", fd);
         } else if (request == PERF_EVENT_IOC_DISABLE) {
@@ -877,6 +956,9 @@ int ioctl(int fd, unsigned long request, ...) {
         }
         log_line("  PERF_EVENT_IOC_SET_BPF -> ret=%d errno=%d", ret,
                  ret < 0 ? saved_errno : 0);
+        kmsg_line("attach perf-set-bpf done event_fd=%d prog_fd=%d ret=%d "
+                  "errno=%d",
+                  fd, (int)(intptr_t)arg, ret, ret < 0 ? saved_errno : 0);
     }
 
     errno = saved_errno;

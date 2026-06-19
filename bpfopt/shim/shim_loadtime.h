@@ -1,12 +1,30 @@
 #ifndef BPFREJIT_SHIM_LOADTIME_H
 #define BPFREJIT_SHIM_LOADTIME_H
 
+#ifndef BPF_PSEUDO_FUNC
+#define BPF_PSEUDO_FUNC 4
+#endif
+
+#ifndef BPF_PSEUDO_CALL
+#define BPF_PSEUDO_CALL 1
+#endif
+
+#define LOADTIME_ATTR_HAS_FIELD(ATTR_SIZE, FIELD) \
+    ((ATTR_SIZE) >= (offsetof(union bpf_attr, FIELD) + sizeof(((union bpf_attr *)0)->FIELD)))
+
+struct loadtime_func_info {
+    void *data;
+    uint32_t cnt;
+    uint32_t rec_size;
+};
+
 struct loadtime_result {
     union bpf_attr attr;
     char attr_buf[256];
     struct bpf_insn *insns;
     int *fd_array;
     uint32_t fd_array_n;
+    struct loadtime_func_info func_info;
     unsigned int attr_size;
 };
 
@@ -94,6 +112,161 @@ static struct bpf_insn *loadtime_read_bytecode(const char *path,
     real_close(fd);
     *insn_cnt_out = (uint32_t)(bytes / sizeof(struct bpf_insn));
     return insns;
+}
+
+static void loadtime_func_info_clear(struct loadtime_func_info *info) {
+    if (!info) return;
+    free(info->data);
+    memset(info, 0, sizeof(*info));
+}
+
+static int loadtime_is_ldimm64(const struct bpf_insn *insn) {
+    return insn->code == (BPF_LD | BPF_DW | BPF_IMM);
+}
+
+static int loadtime_contains_pseudo_func(const struct bpf_insn *insns,
+                                         uint32_t insn_cnt) {
+    for (uint32_t pc = 0; pc < insn_cnt; pc++) {
+        const struct bpf_insn *insn = &insns[pc];
+        if (loadtime_is_ldimm64(insn) && insn->src_reg == BPF_PSEUDO_FUNC)
+            return 1;
+        if (loadtime_is_ldimm64(insn) && pc + 1 < insn_cnt)
+            pc++;
+    }
+    return 0;
+}
+
+static int loadtime_subprog_start(const struct bpf_insn *insns,
+                                  uint32_t insn_cnt,
+                                  int *found_out,
+                                  uint32_t *start_out,
+                                  char *err, size_t err_sz) {
+    int found = 0;
+    uint32_t start = 0;
+    for (uint32_t pc = 0; pc < insn_cnt; pc++) {
+        const struct bpf_insn *insn = &insns[pc];
+        int has_target = 0;
+        int64_t target = 0;
+        if ((insn->code == (BPF_JMP | BPF_CALL) ||
+             insn->code == (BPF_JMP32 | BPF_CALL)) &&
+            insn->src_reg == BPF_PSEUDO_CALL) {
+            has_target = 1;
+            target = (int64_t)pc + 1 + (int64_t)insn->imm;
+        } else if (loadtime_is_ldimm64(insn) &&
+                   insn->src_reg == BPF_PSEUDO_FUNC) {
+            has_target = 1;
+            target = (int64_t)pc + 1 + (int64_t)insn->imm;
+        }
+        if (has_target) {
+            if (target < 0 || target >= (int64_t)insn_cnt) {
+                snprintf(err, err_sz,
+                         "subprogram target out of range pc=%u target=%lld insn_cnt=%u",
+                         pc, (long long)target, insn_cnt);
+                errno = EINVAL;
+                return -1;
+            }
+            uint32_t t = (uint32_t)target;
+            if (!found || t < start)
+                start = t;
+            found = 1;
+        }
+        if (loadtime_is_ldimm64(insn) && pc + 1 < insn_cnt)
+            pc++;
+    }
+    *found_out = found;
+    *start_out = start;
+    return 0;
+}
+
+static int loadtime_prepare_func_info_for_candidate(
+    const union bpf_attr *orig_attr,
+    unsigned int attr_size,
+    const struct bpf_insn *candidate,
+    uint32_t candidate_cnt,
+    struct loadtime_func_info *out,
+    char *err, size_t err_sz) {
+    memset(out, 0, sizeof(*out));
+    if (!loadtime_contains_pseudo_func(candidate, candidate_cnt))
+        return 0;
+
+    if (!LOADTIME_ATTR_HAS_FIELD(attr_size, prog_btf_fd) ||
+        !LOADTIME_ATTR_HAS_FIELD(attr_size, func_info) ||
+        !LOADTIME_ATTR_HAS_FIELD(attr_size, func_info_cnt) ||
+        !LOADTIME_ATTR_HAS_FIELD(attr_size, func_info_rec_size) ||
+        orig_attr->prog_btf_fd == 0 || orig_attr->func_info == 0 ||
+        orig_attr->func_info_cnt == 0 ||
+        orig_attr->func_info_rec_size < sizeof(struct bpf_func_info)) {
+        snprintf(err, err_sz,
+                 "candidate uses BPF_PSEUDO_FUNC but original load attr lacks BTF func_info");
+        errno = EINVAL;
+        return -1;
+    }
+
+    const struct bpf_insn *original =
+        (const struct bpf_insn *)(uintptr_t)orig_attr->insns;
+    if (!original || orig_attr->insn_cnt == 0) {
+        snprintf(err, err_sz,
+                 "candidate uses BPF_PSEUDO_FUNC but original bytecode is unavailable");
+        errno = EINVAL;
+        return -1;
+    }
+
+    size_t rec_size = orig_attr->func_info_rec_size;
+    size_t cnt = orig_attr->func_info_cnt;
+    if (rec_size != 0 && cnt > SIZE_MAX / rec_size) {
+        snprintf(err, err_sz, "func_info byte size overflow");
+        errno = EOVERFLOW;
+        return -1;
+    }
+    size_t bytes = rec_size * cnt;
+    void *buf = malloc(bytes);
+    if (!buf) {
+        snprintf(err, err_sz, "oom copying func_info");
+        errno = ENOMEM;
+        return -1;
+    }
+    memcpy(buf, (void *)(uintptr_t)orig_attr->func_info, bytes);
+
+    int old_found = 0, new_found = 0;
+    uint32_t old_start = 0, new_start = 0;
+    if (loadtime_subprog_start(original, orig_attr->insn_cnt,
+                               &old_found, &old_start, err, err_sz) != 0 ||
+        loadtime_subprog_start(candidate, candidate_cnt,
+                               &new_found, &new_start, err, err_sz) != 0) {
+        free(buf);
+        return -1;
+    }
+    if (old_found && !new_found) {
+        snprintf(err, err_sz,
+                 "candidate bytecode lost BPF_PSEUDO_FUNC target");
+        free(buf);
+        errno = EINVAL;
+        return -1;
+    }
+    if (old_found) {
+        for (size_t i = 0; i < cnt; i++) {
+            uint8_t *record = (uint8_t *)buf + i * rec_size;
+            struct bpf_func_info info;
+            memcpy(&info, record, sizeof(info));
+            if (info.insn_off >= old_start) {
+                uint64_t updated = (uint64_t)new_start +
+                    (uint64_t)(info.insn_off - old_start);
+                if (updated > UINT32_MAX) {
+                    snprintf(err, err_sz, "func_info insn_off overflow");
+                    free(buf);
+                    errno = EOVERFLOW;
+                    return -1;
+                }
+                info.insn_off = (uint32_t)updated;
+                memcpy(record, &info, sizeof(info));
+            }
+        }
+    }
+
+    out->data = buf;
+    out->cnt = (uint32_t)cnt;
+    out->rec_size = (uint32_t)rec_size;
+    return 0;
 }
 
 static int loadtime_read_text_file(const char *path, char **out) {
@@ -630,6 +803,28 @@ static int loadtime_probe_bytecode_acceptance(const union bpf_attr *orig_attr,
     a->core_relos = 0;
     a->core_relo_cnt = 0;
     a->core_relo_rec_size = 0;
+    struct loadtime_func_info func_info = {0};
+    char meta_err[256] = {0};
+    if (loadtime_prepare_func_info_for_candidate(
+            orig_attr, attr_size, insns, insn_cnt, &func_info,
+            meta_err, sizeof(meta_err)) != 0) {
+        int saved_errno = errno;
+        int lfd = open(log_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        if (lfd >= 0) {
+            (void)!write(lfd, meta_err, strnlen(meta_err, sizeof(meta_err)));
+            real_close(lfd);
+        }
+        free_full_fd_array(fd_array, fd_array_n);
+        free(insns);
+        errno = saved_errno;
+        return -1;
+    }
+    if (func_info.data) {
+        a->prog_btf_fd = orig_attr->prog_btf_fd;
+        a->func_info = (uintptr_t)func_info.data;
+        a->func_info_cnt = func_info.cnt;
+        a->func_info_rec_size = func_info.rec_size;
+    }
 
     long pfd = real_syscall(SYS_bpf, BPF_PROG_LOAD, attr_buf,
                             sizeof(attr_buf));
@@ -666,6 +861,7 @@ static int loadtime_probe_bytecode_acceptance(const union bpf_attr *orig_attr,
     }
     if (pfd >= 0)
         real_close((int)pfd);
+    loadtime_func_info_clear(&func_info);
     free_full_fd_array(fd_array, fd_array_n);
     free(insns);
     errno = saved_errno;
@@ -1064,6 +1260,23 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     a->core_relos = 0;
     a->core_relo_cnt = 0;
     a->core_relo_rec_size = 0;
+    if (loadtime_prepare_func_info_for_candidate(
+            attr, attr_size, optimized, out_insn_cnt, &out->func_info,
+            err, err_sz) != 0) {
+        free_full_fd_array(fd_array, fd_array_n);
+        free(optimized);
+        free(map_refs);
+        free(map_ids);
+        free(map_types);
+        free(plan_json);
+        return -1;
+    }
+    if (out->func_info.data) {
+        a->prog_btf_fd = attr->prog_btf_fd;
+        a->func_info = (uintptr_t)out->func_info.data;
+        a->func_info_cnt = out->func_info.cnt;
+        a->func_info_rec_size = out->func_info.rec_size;
+    }
 
     out->insns = optimized;
     out->fd_array = fd_array;
@@ -1081,6 +1294,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
 static void loadtime_result_free(struct loadtime_result *result) {
     if (!result) return;
     free_full_fd_array(result->fd_array, result->fd_array_n);
+    loadtime_func_info_clear(&result->func_info);
     free(result->insns);
     memset(result, 0, sizeof(*result));
 }
