@@ -131,10 +131,14 @@ inline std::filesystem::path write_native_link_plan(
         fail("open native-link plan " + path.string());
     }
     out << "{\"version\":1";
+    out << ",\"arm64_helper_call_slot\":";
+    write_json_string(out, link_args.arm64_helper_call_slot);
     out << ",\"helpers\":";
     write_json_array(out, link_args.helpers, write_json_name_addr);
     out << ",\"maps\":";
     write_json_array(out, link_args.maps, write_json_name_addr);
+    out << ",\"tail_call_maps\":";
+    write_json_array(out, link_args.tail_call_maps, write_json_string);
     out << ",\"lookup_sites\":";
     write_json_array(out, link_args.lookup_sites, write_json_lookup_site);
     out << ",\"lookup_maps\":";

@@ -85,9 +85,14 @@ HELPER_IDENTS = {
     118: "bpf_jiffies64",
     122: "bpf_get_netns_cookie",
     125: "bpf_ktime_get_boot_ns",
+    148: "bpf_copy_from_user",
     152: "bpf_redirect_neigh",
     158: "bpf_get_current_task_btf",
     175: "bpf_task_pt_regs",
+    183: "bpf_get_func_arg",
+    184: "bpf_get_func_ret",
+    185: "bpf_get_func_arg_cnt",
+    186: "bpf_get_retval",
 }
 GPR_WRITE_OPS = {
     "add", "sub", "and", "bic", "eor", "orr", "orn",
@@ -626,9 +631,11 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
                        width=width_const(reg_width(ops[0])),
                        aux=f"ARM64_AUX_CCMP({COND[ops[3]]}, {parse_imm(ops[2])})",
                        imm=c_u64(parse_imm(ops[1])) if imm else "0")
-    if op in {"csel", "cinc", "cset"}:
+    if op in {"csel", "cinc", "cset", "csetm"}:
         if op == "cset":
             return Encoded("ARM64_OP_CSET", reg_const(ops[0]), width=width_const(reg_width(ops[0])), aux=COND[ops[1]])
+        if op == "csetm":
+            return Encoded("ARM64_OP_CSETM", reg_const(ops[0]), width=width_const(reg_width(ops[0])), aux=COND[ops[1]])
         op_const = "ARM64_OP_CSEL" if op == "csel" else "ARM64_OP_CINC"
         src2 = reg_const(ops[2]) if op == "csel" else "ARM64_REG_NONE"
         return Encoded(op_const, reg_const(ops[0]), reg_const(ops[1]), src2,

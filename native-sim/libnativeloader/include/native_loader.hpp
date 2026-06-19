@@ -30,6 +30,17 @@ struct LoadedProgram {
     bool prebuilt_proof = false;
     uint64_t bpf_bytecode_bytes = 0;
     uint64_t native_code_bytes = 0;
+    uint64_t native_blob_fnv64 = 0;
+    uint64_t native_first_reloc_target = 0;
+    uint64_t native_last_reloc_target = 0;
+    uint32_t native_reloc_count = 0;
+    uint32_t native_chunk_count = 0;
+    uint32_t native_callee_saved_mask = 0;
+    uint32_t native_first_reloc_offset = 0;
+    uint32_t native_first_reloc_kind = 0;
+    uint32_t native_last_reloc_offset = 0;
+    uint32_t native_last_reloc_kind = 0;
+    std::string native_link_summary;
     LoadTimings timings;
 };
 
@@ -42,6 +53,9 @@ struct FdLoadOptions {
     std::vector<bpf_insn> source_insns;
     std::vector<int> source_fd_array;
     std::filesystem::path native_link_path;
+    uint32_t source_btf_id = 0;
+    std::vector<uint8_t> source_func_info;
+    uint32_t source_func_info_rec_size = 0;
     uint32_t expected_attach_type = 0;
     uint32_t attach_btf_id = 0;
     uint32_t attach_btf_obj_id = 0;
@@ -73,6 +87,17 @@ struct native_loader_c_result {
     uint64_t map_patch_ns;
     uint64_t upload_ns;
     uint64_t prog_load_ns;
+    uint64_t native_blob_fnv64;
+    uint64_t native_first_reloc_target;
+    uint64_t native_last_reloc_target;
+    uint32_t native_reloc_count;
+    uint32_t native_chunk_count;
+    uint32_t native_callee_saved_mask;
+    uint32_t native_first_reloc_offset;
+    uint32_t native_first_reloc_kind;
+    uint32_t native_last_reloc_offset;
+    uint32_t native_last_reloc_kind;
+    char native_link_summary[4096];
     char error[65536];
 };
 
@@ -82,6 +107,22 @@ int native_loader_load_from_fd_with_manifest_path_and_attach(
     const char *source_bpf_path,
     const int *source_fd_array,
     uint32_t source_fd_array_count,
+    uint32_t expected_attach_type,
+    uint32_t attach_btf_id,
+    uint32_t attach_btf_obj_id,
+    uint32_t attach_prog_id,
+    struct native_loader_c_result *out);
+
+int native_loader_load_from_fd_with_manifest_path_btf_and_attach(
+    int original_prog_fd,
+    const char *manifest_path,
+    const char *source_bpf_path,
+    const int *source_fd_array,
+    uint32_t source_fd_array_count,
+    uint32_t source_btf_id,
+    const void *source_func_info,
+    uint32_t source_func_info_count,
+    uint32_t source_func_info_rec_size,
     uint32_t expected_attach_type,
     uint32_t attach_btf_id,
     uint32_t attach_btf_obj_id,

@@ -56,8 +56,9 @@ def safe_name(app: str, proof: Path) -> str:
     return name
 
 
-def discover(proof_root: Path, apps: set[str], only: set[str], limit: int | None) -> list[AppProof]:
+def discover(proof_root: Path, apps: set[str], only: set[str], offset: int, limit: int | None) -> list[AppProof]:
     proofs: list[AppProof] = []
+    skipped = 0
     for app_dir in sorted(path for path in proof_root.iterdir() if path.is_dir()):
         app = app_dir.name
         if apps and app not in apps:
@@ -65,6 +66,9 @@ def discover(proof_root: Path, apps: set[str], only: set[str], limit: int | None
         for proof in sorted(app_dir.glob("*.proof.o")):
             name = safe_name(app, proof)
             if only and name not in only and proof.name.removesuffix(".proof.o") not in only:
+                continue
+            if skipped < offset:
+                skipped += 1
                 continue
             proofs.append(AppProof(name, proof))
             if limit is not None and len(proofs) >= limit:
@@ -152,10 +156,13 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--build-dir", type=Path, default=DEFAULT_BUILD_DIR)
     parser.add_argument("--app", action="append", default=[])
     parser.add_argument("--only", action="append", default=[])
+    parser.add_argument("--offset", type=int, default=0)
     parser.add_argument("--limit", type=int)
     parser.add_argument("--keep-going", action="store_true")
     args = parser.parse_args(argv)
 
+    if args.offset < 0:
+        raise SystemExit("--offset must be >= 0")
     if args.limit is not None and args.limit < 1:
         raise SystemExit("--limit must be >= 1")
 
@@ -165,7 +172,7 @@ def main(argv: list[str]) -> int:
     source_dir = run_dir
     config_path = run_dir / "app_proofs.yaml"
     build_dir = args.build_dir.resolve() / f"run-{os.getpid()}"
-    proofs = discover(args.proof_root.resolve(), set(args.app), set(args.only), args.limit)
+    proofs = discover(args.proof_root.resolve(), set(args.app), set(args.only), args.offset, args.limit)
     if not proofs:
         raise SystemExit("no selected app proof objects")
 

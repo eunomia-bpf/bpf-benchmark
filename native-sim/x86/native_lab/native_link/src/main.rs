@@ -67,7 +67,15 @@ const ARM64_BPF_ARRAY_PTRS_OFFSET_KEY: &str = "__native_arm64_bpf_array_ptrs_off
 const ARM64_BPF_PROG_BPF_FUNC_OFFSET_KEY: &str = "__native_arm64_bpf_prog_bpf_func_offset";
 const ARM64_TAIL_CALL_OFFSET_KEY: &str = "__native_arm64_tail_call_offset";
 const ARM64_RETURN_TRAMPOLINE_SYMBOL: &str = "__native_link_arm64_ret_trampoline";
+const ARM64_NATIVE_LAB_STACK_RESERVE_BYTES: u32 = 512;
+const NATIVE_LAB_RELOC_HELPER_CALL_ARM64: u32 = 2;
+const NATIVE_LAB_RELOC_HELPER_CALL_ARM64_BL26: u32 = 3;
+const NATIVE_LAB_RELOC_ARM64_PERCPU_MRS: u32 = 4;
 const A64_NOP: u32 = 0xd503_201f;
+const A64_BL_IMM26_PLACEHOLDER: u32 = 0x9400_0000;
+const A64_BLR_X10: u32 = 0xd63f_0140;
+const A64_MRS_X10_TPIDR_EL1: u32 = 0xd538_d08a;
+const A64_MOV_X7_X0: u32 = 0xaa00_03e7;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -159,6 +167,19 @@ enum UpdateKind {
     PerCpuArray,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Arm64HelperCallSlot {
+    FarSafe,
+    DirectOrFar,
+    Bl26,
+}
+
+#[derive(Clone, Copy, Debug)]
+struct Arm64HelperLiteralLoad {
+    word_index: usize,
+    target: u64,
+}
+
 #[derive(Clone, Copy, Debug)]
 struct UpdateSiteSpec {
     kind: UpdateKind,
@@ -174,18 +195,24 @@ struct UpdateSiteSpec {
 struct LinkSideInputs {
     helper_addrs: HashMap<String, u64>,
     map_addrs: HashMap<String, u64>,
+    tail_call_maps: HashSet<String>,
     lookup_sites: Vec<LookupSiteSpec>,
     lookup_maps: HashMap<String, LookupSiteSpec>,
     update_sites: Vec<UpdateSiteSpec>,
+    arm64_helper_call_slot: Arm64HelperCallSlot,
 }
 
 #[derive(Deserialize)]
 struct LinkPlan {
     version: u32,
     #[serde(default)]
+    arm64_helper_call_slot: Option<String>,
+    #[serde(default)]
     helpers: Vec<LinkPlanNameAddr>,
     #[serde(default)]
     maps: Vec<LinkPlanNameAddr>,
+    #[serde(default)]
+    tail_call_maps: Vec<String>,
     #[serde(default)]
     lookup_sites: Vec<LinkPlanLookupSite>,
     #[serde(default)]
@@ -245,6 +272,19 @@ fn name_addr_vec_to_map(items: Vec<LinkPlanNameAddr>, label: &str) -> Result<Has
         }
         if out.insert(item.name.clone(), item.addr).is_some() {
             bail!("duplicate link-plan {label} entry {:?}", item.name);
+        }
+    }
+    Ok(out)
+}
+
+fn string_vec_to_set(items: Vec<String>, label: &str) -> Result<HashSet<String>> {
+    let mut out = HashSet::new();
+    for item in items {
+        if item.is_empty() {
+            bail!("link-plan {label} entry has empty name");
+        }
+        if !out.insert(item.clone()) {
+            bail!("duplicate link-plan {label} entry {item:?}");
         }
     }
     Ok(out)
@@ -314,6 +354,7 @@ fn load_link_plan(path: &PathBuf) -> Result<LinkSideInputs> {
     Ok(LinkSideInputs {
         helper_addrs: name_addr_vec_to_map(plan.helpers, "helpers")?,
         map_addrs: name_addr_vec_to_map(plan.maps, "maps")?,
+        tail_call_maps: string_vec_to_set(plan.tail_call_maps, "tail_call_maps")?,
         lookup_sites: plan
             .lookup_sites
             .into_iter()
@@ -325,6 +366,7 @@ fn load_link_plan(path: &PathBuf) -> Result<LinkSideInputs> {
             .into_iter()
             .map(update_site_from_plan)
             .collect::<Result<Vec<_>>>()?,
+        arm64_helper_call_slot: parse_arm64_helper_call_slot(plan.arm64_helper_call_slot)?,
     })
 }
 
@@ -335,9 +377,11 @@ fn load_link_side_inputs(args: &Args) -> Result<LinkSideInputs> {
     Ok(LinkSideInputs {
         helper_addrs: HashMap::new(),
         map_addrs: HashMap::new(),
+        tail_call_maps: HashSet::new(),
         lookup_sites: Vec::new(),
         lookup_maps: HashMap::new(),
         update_sites: Vec::new(),
+        arm64_helper_call_slot: Arm64HelperCallSlot::FarSafe,
     })
 }
 
@@ -360,6 +404,15 @@ fn parse_update_kind(s: &str) -> Result<UpdateKind> {
         "array" => Ok(UpdateKind::Array),
         "percpu_array" => Ok(UpdateKind::PerCpuArray),
         _ => bail!("unknown update kind {s:?}"),
+    }
+}
+
+fn parse_arm64_helper_call_slot(s: Option<String>) -> Result<Arm64HelperCallSlot> {
+    match s.as_deref().unwrap_or("far_safe") {
+        "far_safe" => Ok(Arm64HelperCallSlot::FarSafe),
+        "direct_or_far" => Ok(Arm64HelperCallSlot::DirectOrFar),
+        "bl26" => Ok(Arm64HelperCallSlot::Bl26),
+        other => bail!("unknown arm64 helper call slot strategy {other:?}"),
     }
 }
 
@@ -434,9 +487,11 @@ fn main() -> Result<()> {
     let LinkSideInputs {
         helper_addrs,
         map_addrs,
+        tail_call_maps,
         lookup_sites,
         lookup_maps,
         update_sites,
+        arm64_helper_call_slot,
     } = load_link_side_inputs(&args)?;
     let RewriteResult {
         blob,
@@ -511,9 +566,11 @@ fn main() -> Result<()> {
                 &included,
                 &helper_addrs,
                 &map_addrs,
+                &tail_call_maps,
                 &lookup_sites,
                 &lookup_maps,
                 &update_sites,
+                arm64_helper_call_slot,
                 proof_mode,
                 args.show,
             )?
@@ -972,6 +1029,52 @@ fn a64_patch_tbz_tbnz(insn: u32, word_index: usize, target_index: usize) -> Resu
     Ok((insn & !(0x3fff << 5)) | (((disp as u32) & 0x3fff) << 5))
 }
 
+fn a64_invert_tbz_tbnz(insn: u32) -> u32 {
+    insn ^ (1 << 24)
+}
+
+fn a64_patch_tbz_tbnz_or_long(
+    blob: &mut [u8],
+    insn: u32,
+    word_index: usize,
+    target_index: usize,
+) -> Result<u32> {
+    match a64_patch_tbz_tbnz(insn, word_index, target_index) {
+        Ok(patched) => return Ok(patched),
+        Err(short_err) => {
+            let branch_word = word_index
+                .checked_add(1)
+                .ok_or_else(|| anyhow!("arm64 TBZ/TBNZ long branch slot index overflow"))?;
+            let skip_word = word_index
+                .checked_add(2)
+                .ok_or_else(|| anyhow!("arm64 TBZ/TBNZ long branch skip index overflow"))?;
+            let branch_off = branch_word
+                .checked_mul(4)
+                .ok_or_else(|| anyhow!("arm64 TBZ/TBNZ long branch byte offset overflow"))?;
+            let branch_bytes = blob.get_mut(branch_off..branch_off + 4).ok_or_else(|| {
+                anyhow!("arm64 TBZ/TBNZ long branch slot missing after word {word_index}")
+            })?;
+            let existing = u32::from_le_bytes(branch_bytes.try_into().unwrap());
+            if existing != A64_NOP {
+                return Err(short_err).with_context(|| {
+                    format!(
+                        "arm64 TBZ/TBNZ long branch slot after word {word_index} is occupied by {existing:#010x}"
+                    )
+                });
+            }
+            let inverted = a64_patch_tbz_tbnz(a64_invert_tbz_tbnz(insn), word_index, skip_word)
+                .with_context(|| {
+                    format!("arm64 TBZ/TBNZ long branch skip patch failed at word {word_index}")
+                })?;
+            let branch = a64_patch_b(branch_word, target_index).with_context(|| {
+                format!("arm64 TBZ/TBNZ long branch target patch failed at word {word_index}")
+            })?;
+            branch_bytes.copy_from_slice(&branch.to_le_bytes());
+            Ok(inverted)
+        }
+    }
+}
+
 fn a64_cbz64(rt: u32) -> Result<u32> {
     if rt >= 32 {
         bail!("arm64 CBZ register out of range: x{rt}");
@@ -984,6 +1087,24 @@ fn a64_cbnz64(rt: u32) -> Result<u32> {
         bail!("arm64 CBNZ register out of range: x{rt}");
     }
     Ok(0xb500_0000 | rt)
+}
+
+fn a64_tbz64(rt: u32, bit: u32) -> Result<u32> {
+    if rt >= 32 {
+        bail!("arm64 TBZ register out of range: x{rt}");
+    }
+    if bit >= 64 {
+        bail!("arm64 TBZ bit out of range: {bit}");
+    }
+    Ok(0x3600_0000 | ((bit & 0x20) << 26) | ((bit & 0x1f) << 19) | rt)
+}
+
+fn a64_is_tbz64_bit(insn: u32, rt: u32, bit: u32) -> bool {
+    if rt >= 32 || bit >= 64 {
+        return false;
+    }
+    let expected = 0x3600_0000 | ((bit & 0x20) << 26) | ((bit & 0x1f) << 19) | rt;
+    (insn & 0xfff8_001f) == (expected & 0xfff8_001f)
 }
 
 fn a64_br(reg: u32) -> Result<u32> {
@@ -1093,11 +1214,24 @@ fn a64_ldr_lit64(rt: u32, word_index: usize, target_byte_offset: usize) -> Resul
     Ok(0x5800_0000 | (((imm19 as u32) & 0x7ffff) << 5) | rt)
 }
 
-fn a64_blr(reg: u32) -> Result<u32> {
-    if reg >= 32 {
-        bail!("arm64 BLR register out of range: x{reg}");
+fn a64_ldr_lit64_target(blob: &[u8], word_index: usize, insn: u32, rt: u32) -> Option<u64> {
+    if rt >= 32 || (insn & 0xff00_001f) != (0x5800_0000 | rt) {
+        return None;
     }
-    Ok(0xd63f_0000 | (reg << 5))
+    let imm19 = (insn >> 5) & 0x7ffff;
+    let disp = a64_sign_extend(imm19, 19) << 2;
+    let source = word_index.checked_mul(4)? as i64;
+    let target = source.checked_add(disp)?;
+    if target < 0 {
+        return None;
+    }
+    let target = target as usize;
+    if target.checked_add(8)? > blob.len() {
+        return None;
+    }
+    Some(u64::from_le_bytes(
+        blob[target..target + 8].try_into().ok()?,
+    ))
 }
 
 fn a64_blr_reg(insn: u32) -> Option<usize> {
@@ -1105,6 +1239,98 @@ fn a64_blr_reg(insn: u32) -> Option<usize> {
         return None;
     }
     Some(((insn >> 5) & 0x1f) as usize)
+}
+
+fn a64_br_reg(insn: u32) -> Option<usize> {
+    if (insn & 0xffff_fc1f) != 0xd61f_0000 {
+        return None;
+    }
+    Some(((insn >> 5) & 0x1f) as usize)
+}
+
+fn arm64_br_x10_has_kernel_guard(blob: &[u8], word_index: usize) -> bool {
+    for prior_word_index in (0..word_index).rev() {
+        let off = prior_word_index * 4;
+        let insn = u32::from_le_bytes(blob[off..off + 4].try_into().unwrap());
+        if a64_is_tbz64_bit(insn, 10, 63) {
+            return true;
+        }
+        if a64_written_gprs(insn)
+            .into_iter()
+            .flatten()
+            .any(|reg| reg == 10)
+        {
+            return false;
+        }
+        if a64_blr_reg(insn).is_some() || a64_br_reg(insn).is_some() || a64_is_ret(insn) {
+            return false;
+        }
+    }
+    false
+}
+
+fn validate_arm64_kernel_blob_control_flow(
+    blob: &[u8],
+    code_word_count: usize,
+    ret_trampoline_word: usize,
+) -> Result<()> {
+    if blob.len() % 4 != 0 {
+        bail!("arm64 kernel blob size is not 4-byte aligned");
+    }
+    let total_words = blob.len() / 4;
+    if code_word_count > total_words {
+        bail!(
+            "arm64 kernel blob code range {code_word_count} words exceeds total {total_words} words"
+        );
+    }
+    if ret_trampoline_word >= total_words {
+        bail!(
+            "arm64 kernel blob return trampoline word {ret_trampoline_word} exceeds total {total_words} words"
+        );
+    }
+
+    for word_index in 0..total_words {
+        if word_index >= code_word_count && word_index != ret_trampoline_word {
+            continue;
+        }
+        let off = word_index * 4;
+        let insn = u32::from_le_bytes(blob[off..off + 4].try_into().unwrap());
+        if let Some(reg) = a64_blr_reg(insn) {
+            if reg == 10 && arm64_blr_x10_has_kernel_literal(blob, word_index) {
+                continue;
+            }
+            bail!(
+                "arm64 kernel blob still contains unsupported register-indirect call blr x{reg} at word index {word_index}; helper calls must be rewritten"
+            );
+        }
+        if let Some(reg) = a64_br_reg(insn) {
+            if reg != 10 {
+                bail!(
+                    "arm64 kernel blob contains unsupported register-indirect branch br x{reg} at word index {word_index}"
+                );
+            }
+            if !arm64_br_x10_has_kernel_guard(blob, word_index) {
+                bail!(
+                    "arm64 kernel blob contains tail-call branch br x10 at word index {word_index} without a dominating kernel-address guard"
+                );
+            }
+        }
+    }
+
+    Ok(())
+}
+
+fn arm64_blr_x10_has_kernel_literal(blob: &[u8], word_index: usize) -> bool {
+    if word_index == 0 {
+        return false;
+    }
+    let ldr_word_index = word_index - 1;
+    let off = ldr_word_index * 4;
+    let ldr = u32::from_le_bytes(blob[off..off + 4].try_into().unwrap());
+    let Some(target) = a64_ldr_lit64_target(blob, ldr_word_index, ldr, 10) else {
+        return false;
+    };
+    target & (1u64 << 63) != 0
 }
 
 fn a64_movz_imm_to_reg(insn: u32) -> Option<(usize, u64)> {
@@ -1127,17 +1353,153 @@ fn a64_known_helper_id_load(insn: u32) -> Option<(usize, u64)> {
     Some((reg, helper_id))
 }
 
-fn a64_written_gpr(insn: u32) -> Option<usize> {
+fn a64_written_gprs_from(regs: &[u32]) -> [Option<usize>; 3] {
+    let mut out = [None; 3];
+    let mut out_idx = 0usize;
+    for &reg in regs {
+        if reg >= 31 {
+            continue;
+        }
+        let reg = reg as usize;
+        if out[..out_idx].contains(&Some(reg)) {
+            continue;
+        }
+        out[out_idx] = Some(reg);
+        out_idx += 1;
+        if out_idx == out.len() {
+            break;
+        }
+    }
+    out
+}
+
+fn a64_one_written_gpr(reg: u32) -> [Option<usize>; 3] {
+    a64_written_gprs_from(&[reg])
+}
+
+fn a64_written_gprs(insn: u32) -> [Option<usize>; 3] {
     if matches!(insn & 0x7f80_0000, 0x1280_0000 | 0x5280_0000 | 0x7280_0000) {
-        return Some((insn & 0x1f) as usize);
+        return a64_one_written_gpr(insn & 0x1f);
     }
     if (insn & 0x1f00_0000) == 0x1100_0000 {
-        return Some((insn & 0x1f) as usize);
+        return a64_one_written_gpr(insn & 0x1f);
+    }
+    if (insn & 0x1f80_0000) == 0x1200_0000 {
+        return a64_one_written_gpr(insn & 0x1f);
+    }
+    if (insn & 0x1f80_0000) == 0x1300_0000 {
+        return a64_one_written_gpr(insn & 0x1f);
+    }
+    if (insn & 0x1fa0_0000) == 0x1380_0000 {
+        return a64_one_written_gpr(insn & 0x1f);
+    }
+    if (insn & 0x1f00_0000) == 0x0a00_0000 {
+        return a64_one_written_gpr(insn & 0x1f);
+    }
+    if (insn & 0x1f00_0000) == 0x0b00_0000 {
+        return a64_one_written_gpr(insn & 0x1f);
+    }
+    if (insn & 0x1fe0_0000) == 0x1a80_0000 {
+        return a64_one_written_gpr(insn & 0x1f);
+    }
+    if (insn & 0x1fe0_0000) == 0x1ac0_0000 {
+        return a64_one_written_gpr(insn & 0x1f);
+    }
+    if (insn & 0x1f00_0000) == 0x1b00_0000 {
+        return a64_one_written_gpr(insn & 0x1f);
     }
     if let Some((dst, _)) = a64_mov_reg64(insn) {
-        return Some(dst);
+        return a64_one_written_gpr(dst as u32);
     }
-    None
+    if (insn & 0x3b00_0000) == 0x3800_0000 {
+        let is_load = (insn & 0x0040_0000) != 0;
+        let has_writeback = matches!((insn >> 10) & 0x3, 0x1 | 0x3);
+        let rt = insn & 0x1f;
+        let rn = (insn >> 5) & 0x1f;
+        return match (is_load, has_writeback) {
+            (true, true) => a64_written_gprs_from(&[rt, rn]),
+            (true, false) => a64_one_written_gpr(rt),
+            (false, true) => a64_one_written_gpr(rn),
+            (false, false) => [None, None, None],
+        };
+    }
+    if (insn & 0x3b00_0000) == 0x3900_0000 && (insn & 0x0040_0000) != 0 {
+        return a64_one_written_gpr(insn & 0x1f);
+    }
+    if matches!(insn & 0x3a40_0000, 0x2800_0000 | 0x2840_0000) {
+        let is_load = (insn & 0x0040_0000) != 0;
+        let has_writeback = matches!((insn >> 23) & 0x3, 0x1 | 0x3);
+        let rt = insn & 0x1f;
+        let rt2 = (insn >> 10) & 0x1f;
+        let rn = (insn >> 5) & 0x1f;
+        return match (is_load, has_writeback) {
+            (true, true) => a64_written_gprs_from(&[rt, rt2, rn]),
+            (true, false) => a64_written_gprs_from(&[rt, rt2]),
+            (false, true) => a64_one_written_gpr(rn),
+            (false, false) => [None, None, None],
+        };
+    }
+    if (insn & 0xfff0_0000) == 0xd530_0000 {
+        return a64_one_written_gpr(insn & 0x1f);
+    }
+    [None, None, None]
+}
+
+fn a64_maybe_reads_gpr(insn: u32, reg: usize) -> bool {
+    if reg >= 31 || a64_is_ret(insn) || a64_is_bl(insn) || a64_blr_reg(insn).is_some() {
+        return false;
+    }
+    if a64_known_helper_id_load(insn).is_some_and(|(dst, _)| dst == reg) {
+        return false;
+    }
+
+    if let Some((dst, src)) = a64_mov_reg64(insn) {
+        return src == reg && dst != reg;
+    }
+
+    if (insn & 0x1f00_0000) == 0x1100_0000 {
+        let rn = ((insn >> 5) & 0x1f) as usize;
+        return rn == reg;
+    }
+
+    if (insn & 0x3b00_0000) == 0x3900_0000 {
+        let rt = (insn & 0x1f) as usize;
+        let rn = ((insn >> 5) & 0x1f) as usize;
+        let is_load = (insn & 0x0040_0000) != 0;
+        return rn == reg || (!is_load && rt == reg);
+    }
+
+    if (insn & 0x7e00_0000) == 0x3400_0000 || (insn & 0x7e00_0000) == 0x3600_0000 {
+        return (insn & 0x1f) as usize == reg;
+    }
+
+    false
+}
+
+fn clear_arm64_helper_imm_register(
+    helper_imm_registers: &mut [Option<u64>; 32],
+    helper_imm_word_indices: &mut [Option<usize>; 32],
+    helper_imm_read_since_load: &mut [bool; 32],
+    reg: usize,
+) {
+    helper_imm_registers[reg] = None;
+    helper_imm_word_indices[reg] = None;
+    helper_imm_read_since_load[reg] = false;
+}
+
+fn clear_arm64_call_clobbered_helper_imm_registers(
+    helper_imm_registers: &mut [Option<u64>; 32],
+    helper_imm_word_indices: &mut [Option<usize>; 32],
+    helper_imm_read_since_load: &mut [bool; 32],
+) {
+    for reg in 0..19 {
+        clear_arm64_helper_imm_register(
+            helper_imm_registers,
+            helper_imm_word_indices,
+            helper_imm_read_since_load,
+            reg,
+        );
+    }
 }
 
 fn a64_add_imm64(rd: u32, rn: u32, imm: u32) -> Result<u32> {
@@ -1389,12 +1751,49 @@ fn arm64_mov_imm64_sequence(reg: u32, value: u64) -> Result<Vec<u32>> {
     Ok(words)
 }
 
-fn arm64_helper_call_sequence(helper_addr: u64) -> Result<Vec<u32>> {
-    const A64_X10: u32 = 10;
+fn arm64_helper_call_sequence(slot: Arm64HelperCallSlot) -> Result<(Vec<u32>, usize)> {
+    match slot {
+        Arm64HelperCallSlot::FarSafe => {
+            bail!("arm64 far_safe helper calls must use literal-pool loads")
+        }
+        Arm64HelperCallSlot::DirectOrFar => {
+            Ok((vec![A64_BL_IMM26_PLACEHOLDER, A64_NOP, A64_NOP, A64_NOP], 0))
+        }
+        Arm64HelperCallSlot::Bl26 => Ok((vec![A64_BL_IMM26_PLACEHOLDER], 0)),
+    }
+}
 
-    let mut words = arm64_mov_imm64_sequence(A64_X10, helper_addr)?;
-    words.push(a64_blr(A64_X10)?);
-    Ok(words)
+fn arm64_helper_call_reloc_kind(slot: Arm64HelperCallSlot) -> Result<u32> {
+    match slot {
+        Arm64HelperCallSlot::FarSafe => {
+            bail!("arm64 far_safe helper calls must not emit helper relocations")
+        }
+        Arm64HelperCallSlot::DirectOrFar => Ok(NATIVE_LAB_RELOC_HELPER_CALL_ARM64),
+        Arm64HelperCallSlot::Bl26 => Ok(NATIVE_LAB_RELOC_HELPER_CALL_ARM64_BL26),
+    }
+}
+
+fn record_arm64_percpu_mrs_relocs(
+    words: &[u32],
+    emit_byte_offset: usize,
+    native_relocs: &mut Vec<RelocRecord>,
+) -> Result<()> {
+    for (word_index, word) in words.iter().copied().enumerate() {
+        if word != A64_MRS_X10_TPIDR_EL1 {
+            continue;
+        }
+        let reloc_offset = emit_byte_offset
+            .checked_add(word_index * 4)
+            .ok_or_else(|| anyhow!("arm64 percpu MRS reloc offset overflow"))?;
+        let offset = u32::try_from(reloc_offset)
+            .map_err(|_| anyhow!("arm64 percpu MRS reloc offset exceeds u32"))?;
+        native_relocs.push(RelocRecord {
+            offset,
+            kind: NATIVE_LAB_RELOC_ARM64_PERCPU_MRS,
+            target: 0,
+        });
+    }
+    Ok(())
 }
 
 fn arm64_required_u32_helper_arg(
@@ -1425,6 +1824,12 @@ fn build_arm64_get_smp_processor_id_inline(
     ]))
 }
 
+fn build_arm64_get_current_task_inline() -> Result<Vec<u32>> {
+    const X0: u32 = 0;
+
+    Ok(vec![a64_mrs_sp_el0(X0)?])
+}
+
 fn build_arm64_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
     const X0: u32 = 0;
     const X1: u32 = 1;
@@ -1432,7 +1837,6 @@ fn build_arm64_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
     const X9: u32 = 9;
     const X10: u32 = 10;
     const A64_MOV_X0_XZR: u32 = 0xaa1f_03e0;
-    const A64_MRS_X10_TPIDR_EL1: u32 = 0xd538_d08a;
 
     if spec.max_entries == 0 {
         bail!("arm64 array lookup max_entries must be non-zero");
@@ -1482,7 +1886,6 @@ fn build_arm64_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<u32>
     const X0: u32 = 0;
     const X8: u32 = 8;
     const X10: u32 = 10;
-    const A64_MRS_X10_TPIDR_EL1: u32 = 0xd538_d08a;
 
     if matches!(
         spec.kind,
@@ -1529,7 +1932,7 @@ fn append_arm64_stub_callee_pop(words: &mut Vec<u32>, callee_saved_mask: u8) -> 
     if callee_saved_mask > 0xf {
         bail!("arm64 tail_call callee-saved mask exceeds 4 bits");
     }
-    let regs: Vec<u32> = [19u32, 20, 21, 22]
+    let mut regs: Vec<u32> = [19u32, 20, 21, 22]
         .iter()
         .enumerate()
         .filter_map(|(idx, reg)| {
@@ -1540,9 +1943,10 @@ fn append_arm64_stub_callee_pop(words: &mut Vec<u32>, callee_saved_mask: u8) -> 
             }
         })
         .collect();
-    if regs.is_empty() {
-        return Ok(());
-    }
+    // The native_lab proof emits a BPF_FP stack store to reserve 512 bytes, so
+    // the arm64 BPF JIT saves x25 even though it is not encoded in the sidecar
+    // ABI mask. Tail-call success must pop it before the sidecar-requested regs.
+    regs.push(25);
     let mut idx = regs.len();
     if idx % 2 != 0 {
         idx -= 1;
@@ -1596,6 +2000,8 @@ fn build_arm64_tail_call_inline(
     }
 
     let mut words = Vec::new();
+    let map_kernel_branch = words.len();
+    words.push(a64_tbz64(X1, 63)?);
     words.push(a64_ldr_u32(X8, X1, map_max_entries)?);
     words.push(a64_mov_reg32(X2, X2)?);
     words.push(a64_cmp_reg32(X2, X8)?);
@@ -1617,19 +2023,31 @@ fn build_arm64_tail_call_inline(
     words.push(a64_ldr_u64(X11, X8, 0)?);
     let null_branch = words.len();
     words.push(a64_cbz64(X11)?);
+    let prog_kernel_branch = words.len();
+    words.push(a64_tbz64(X11, 63)?);
+
+    words.push(a64_ldr_u64(X10, X11, prog_bpf_func)?);
+    words.push(a64_add_imm64(X10, X10, tail_call_offset)?);
+    let target_kernel_branch = words.len();
+    words.push(a64_tbz64(X10, 63)?);
 
     words.push(a64_add_imm64(X12, X12, 1)?);
     words.push(a64_str_u64(X12, X9, 0)?);
     words.extend_from_slice(native_cleanup_words);
+    words.push(a64_add_imm64(31, 31, ARM64_NATIVE_LAB_STACK_RESERVE_BYTES)?);
     append_arm64_stub_callee_pop(&mut words, callee_saved_mask)?;
-    words.push(a64_ldr_u64(X10, X11, prog_bpf_func)?);
-    words.push(a64_add_imm64(X10, X10, tail_call_offset)?);
     words.push(a64_br(X10)?);
 
     let out = words.len();
+    words[map_kernel_branch] =
+        a64_patch_tbz_tbnz(words[map_kernel_branch], map_kernel_branch, out)?;
     words[bounds_branch] = a64_patch_b_cond(0x5400_0002, bounds_branch, out)?;
     words[limit_branch] = a64_patch_b_cond(0x5400_0002, limit_branch, out)?;
     words[null_branch] = a64_patch_cbz_cbnz(words[null_branch], null_branch, out)?;
+    words[prog_kernel_branch] =
+        a64_patch_tbz_tbnz(words[prog_kernel_branch], prog_kernel_branch, out)?;
+    words[target_kernel_branch] =
+        a64_patch_tbz_tbnz(words[target_kernel_branch], target_kernel_branch, out)?;
     if words.len() > 64 {
         bail!(
             "arm64 bpf_tail_call lowering produced {} instructions, exceeding native_lab per-chunk limit",
@@ -1712,7 +2130,6 @@ fn build_arm64_array_update(spec: &UpdateSiteSpec) -> Result<Vec<u32>> {
     const X9: u32 = 9;
     const X10: u32 = 10;
     const A64_MOV_X0_XZR: u32 = 0xaa1f_03e0;
-    const A64_MRS_X10_TPIDR_EL1: u32 = 0xd538_d08a;
 
     if !matches!(spec.kind, UpdateKind::Array | UpdateKind::PerCpuArray) {
         bail!(
@@ -2120,6 +2537,8 @@ fn plan_arm64_entry_abi_strip(bytes: &[u8]) -> Result<Arm64EntryAbiStrip> {
     let mut out = Arm64EntryAbiStrip::default();
     let mut save_offsets: [Option<i32>; 4] = [None; 4];
     let mut restore_counts = [0i32; 4];
+    let mut lr_save_offset: Option<i32> = None;
+    let mut lr_restore_count = 0i32;
     out.tail_call_cnt_ptr_stack_offset = arm64_saved_reg_stack_offset(bytes, 26);
 
     for (word_index, word) in bytes.chunks_exact(4).enumerate() {
@@ -2127,52 +2546,102 @@ fn plan_arm64_entry_abi_strip(bytes: &[u8]) -> Result<Arm64EntryAbiStrip> {
         if word_index == 0 && arm64_is_sp_sub_imm(insn) {
             continue;
         }
-        let Some((is_load, offset, rt, rt2)) = arm64_stp_ldp_pair(insn) else {
-            break;
-        };
-        if is_load {
-            break;
-        }
-        if arm64_entry_pair_is_strippable(rt, rt2) {
-            out.nop_word_indices.insert(word_index);
-        }
-        for reg in [rt, rt2] {
-            let Some(bit_index) = arm64_callee_saved_bit_index(reg) else {
+        if let Some((is_load, offset, rt, rt2)) = arm64_stp_ldp_pair(insn) {
+            if is_load {
+                break;
+            }
+            if arm64_entry_pair_is_frame_record(rt, rt2) {
                 continue;
-            };
-            if save_offsets[bit_index].replace(offset).is_some() {
-                bail!(
-                    "arm64 entry ABI strip found multiple prologue save sites for x{}",
-                    19 + bit_index
-                );
+            }
+            if arm64_entry_pair_is_strippable(rt, rt2) {
+                out.nop_word_indices.insert(word_index);
+                for reg in [rt, rt2] {
+                    arm64_record_entry_save(&mut save_offsets, &mut lr_save_offset, offset, reg)?;
+                }
+                continue;
+            }
+            arm64_reject_unsupported_entry_save(rt)?;
+            arm64_reject_unsupported_entry_save(rt2)?;
+            if arm64_entry_pair_is_preserved_by_native(rt, rt2) {
+                continue;
+            }
+            if arm64_entry_pair_is_frame_record(rt, rt2) {
+                continue;
+            }
+            break;
+        }
+        if let Some((is_load, offset, rt)) = arm64_ldr_str_unsigned64_sp(insn) {
+            if is_load {
+                break;
+            }
+            let offset = i32::try_from(offset).context("arm64 entry save offset exceeds i32")?;
+            if arm64_entry_reg_is_strippable(rt) {
+                out.nop_word_indices.insert(word_index);
+                arm64_record_entry_save(&mut save_offsets, &mut lr_save_offset, offset, rt)?;
+                continue;
+            }
+            arm64_reject_unsupported_entry_save(rt)?;
+            if arm64_entry_reg_is_preserved_by_native(rt) {
+                continue;
             }
         }
+        break;
     }
 
     for (word_index, word) in bytes.chunks_exact(4).enumerate() {
         let insn = u32::from_le_bytes(word.try_into().unwrap());
-        let Some((is_load, offset, rt, rt2)) = arm64_stp_ldp_pair(insn) else {
-            continue;
-        };
-        if !is_load || !arm64_entry_pair_is_strippable(rt, rt2) {
+        if let Some((is_load, offset, rt, rt2)) = arm64_stp_ldp_pair(insn) {
+            if !is_load {
+                continue;
+            }
+            if arm64_entry_pair_is_frame_record(rt, rt2) {
+                continue;
+            }
+            if !arm64_entry_pair_is_strippable(rt, rt2) {
+                continue;
+            }
+
+            let mut matches_saved_slot = false;
+            for reg in [rt, rt2] {
+                matches_saved_slot |= arm64_record_entry_restore(
+                    &mut restore_counts,
+                    &mut lr_restore_count,
+                    &save_offsets,
+                    lr_save_offset,
+                    offset,
+                    reg,
+                );
+            }
+            if matches_saved_slot {
+                out.nop_word_indices.insert(word_index);
+            }
             continue;
         }
 
-        let mut matches_saved_slot = false;
-        for reg in [rt, rt2] {
-            let Some(bit_index) = arm64_callee_saved_bit_index(reg) else {
+        if let Some((is_load, offset, rt)) = arm64_ldr_str_unsigned64_sp(insn) {
+            if !is_load || !arm64_entry_reg_is_strippable(rt) {
                 continue;
-            };
-            if save_offsets[bit_index] == Some(offset) {
-                restore_counts[bit_index] += 1;
-                matches_saved_slot = true;
             }
-        }
-        if matches_saved_slot {
-            out.nop_word_indices.insert(word_index);
+            let offset = i32::try_from(offset).context("arm64 entry restore offset exceeds i32")?;
+            if arm64_record_entry_restore(
+                &mut restore_counts,
+                &mut lr_restore_count,
+                &save_offsets,
+                lr_save_offset,
+                offset,
+                rt,
+            ) {
+                out.nop_word_indices.insert(word_index);
+            }
         }
     }
 
+    if lr_save_offset.is_some() && lr_restore_count == 0 {
+        bail!(
+            "arm64 entry ABI strip found unbalanced save/restore for x30: saves=1, restores={}",
+            lr_restore_count
+        );
+    }
     for (idx, save_offset) in save_offsets.iter().enumerate() {
         let Some(_offset) = save_offset else {
             continue;
@@ -2188,6 +2657,54 @@ fn plan_arm64_entry_abi_strip(bytes: &[u8]) -> Result<Arm64EntryAbiStrip> {
     }
 
     Ok(out)
+}
+
+fn arm64_record_entry_save(
+    save_offsets: &mut [Option<i32>; 4],
+    lr_save_offset: &mut Option<i32>,
+    offset: i32,
+    reg: u32,
+) -> Result<()> {
+    if reg == 30 {
+        if lr_save_offset.replace(offset).is_some() {
+            bail!("arm64 entry ABI strip found multiple prologue save sites for x30");
+        }
+        return Ok(());
+    }
+    let Some(bit_index) = arm64_callee_saved_bit_index(reg) else {
+        return Ok(());
+    };
+    if save_offsets[bit_index].replace(offset).is_some() {
+        bail!(
+            "arm64 entry ABI strip found multiple prologue save sites for x{}",
+            19 + bit_index
+        );
+    }
+    Ok(())
+}
+
+fn arm64_record_entry_restore(
+    restore_counts: &mut [i32; 4],
+    lr_restore_count: &mut i32,
+    save_offsets: &[Option<i32>; 4],
+    lr_save_offset: Option<i32>,
+    offset: i32,
+    reg: u32,
+) -> bool {
+    if reg == 30 {
+        if lr_save_offset == Some(offset) {
+            *lr_restore_count += 1;
+            return true;
+        }
+        return false;
+    }
+    if let Some(bit_index) = arm64_callee_saved_bit_index(reg) {
+        if save_offsets[bit_index] == Some(offset) {
+            restore_counts[bit_index] += 1;
+            return true;
+        }
+    }
+    false
 }
 
 fn plan_arm64_tail_call_cleanup(
@@ -2243,7 +2760,7 @@ fn arm64_symbol_has_tail_call(
                 *slot = None;
             }
         }
-        if let Some(reg) = a64_written_gpr(insn) {
+        for reg in a64_written_gprs(insn).into_iter().flatten() {
             if helper_imm_load_reg != Some(reg) {
                 helper_imm_registers[reg] = None;
             }
@@ -2264,20 +2781,20 @@ fn arm64_reloc_written_gpr(reloc: &Arm64RelocInfo, insn: u32) -> Option<usize> {
 
 fn arm64_word_at(bytes: &[u8], word_index: usize) -> Option<u32> {
     let start = word_index.checked_mul(4)?;
-    Some(u32::from_le_bytes(bytes.get(start..start + 4)?.try_into().ok()?))
+    Some(u32::from_le_bytes(
+        bytes.get(start..start + 4)?.try_into().ok()?,
+    ))
 }
 
-fn arm64_insn_writes_reg(
-    insn: u32,
-    reloc: Option<&Arm64RelocInfo>,
-    reg: usize,
-) -> bool {
-    if a64_written_gpr(insn) == Some(reg) {
+fn arm64_insn_writes_reg(insn: u32, reloc: Option<&Arm64RelocInfo>, reg: usize) -> bool {
+    if a64_written_gprs(insn)
+        .into_iter()
+        .flatten()
+        .any(|r| r == reg)
+    {
         return true;
     }
-    reloc
-        .and_then(|reloc| arm64_reloc_written_gpr(reloc, insn))
-        == Some(reg)
+    reloc.and_then(|reloc| arm64_reloc_written_gpr(reloc, insn)) == Some(reg)
 }
 
 fn arm64_branch_word_target(sym: &SymInfo, word_index: usize, insn: u32) -> Option<usize> {
@@ -2367,19 +2884,12 @@ fn arm64_reachable_helper_id_for_blr(
                 continue;
             }
             let insn = arm64_word_at(bytes, word_index)?;
-            let reloc = relocs.get(&(
-                (sym.section_index, sym.address),
-                (word_index * 4) as u64,
-            ));
+            let reloc = relocs.get(&((sym.section_index, sym.address), (word_index * 4) as u64));
             if arm64_insn_writes_reg(insn, reloc, reg) {
                 continue;
             }
             stack.extend(arm64_successors_for_helper_reachability(
-                sym,
-                word_count,
-                word_index,
-                insn,
-                reg,
+                sym, word_count, word_index, insn, reg,
             ));
         }
     }
@@ -2394,15 +2904,21 @@ fn plan_arm64_tail_call_cleanup_from_terminators(
     let mut selected: Option<Vec<u32>> = None;
     for &terminator in terminators {
         let mut start = terminator;
+        let mut saw_cleanup = false;
         while start > 0 {
             let prev = start - 1;
             let word = u32::from_le_bytes(bytes[prev * 4..prev * 4 + 4].try_into().unwrap());
-            if !arm64_tail_cleanup_word(word, nop_word_indices.contains(&prev)) {
+            if arm64_tail_cleanup_word(word, nop_word_indices.contains(&prev)) {
+                saw_cleanup = true;
+                start = prev;
+                continue;
+            }
+            if !arm64_tail_cleanup_skip_word(word) {
                 break;
             }
             start = prev;
         }
-        if start == terminator {
+        if !saw_cleanup {
             continue;
         }
         let mut candidate = Vec::new();
@@ -2410,9 +2926,15 @@ fn plan_arm64_tail_call_cleanup_from_terminators(
             let word = u32::from_le_bytes(bytes[idx * 4..idx * 4 + 4].try_into().unwrap());
             if nop_word_indices.contains(&idx) {
                 continue;
-            } else {
-                candidate.push(word);
             }
+            if arm64_tail_cleanup_skip_word(word) {
+                continue;
+            }
+            if arm64_tail_cleanup_word(word, false) {
+                candidate.push(word);
+                continue;
+            }
+            bail!("arm64 tail-call cleanup scan crossed non-cleanup word {word:#010x}");
         }
         if let Some(previous) = &selected {
             if previous != &candidate {
@@ -2425,6 +2947,19 @@ fn plan_arm64_tail_call_cleanup_from_terminators(
     Ok(selected.unwrap_or_default())
 }
 
+fn arm64_tail_cleanup_skip_word(insn: u32) -> bool {
+    if insn == A64_NOP {
+        return true;
+    }
+    if a64_mov_reg64(insn).is_some_and(|(dst, _)| dst == 0) {
+        return true;
+    }
+    if a64_mov_reg32_word(insn).is_some_and(|(dst, _)| dst == 0) {
+        return true;
+    }
+    a64_movz_imm_to_reg(insn).is_some_and(|(dst, _)| dst == 0)
+}
+
 fn arm64_tail_cleanup_word(insn: u32, is_stripped: bool) -> bool {
     if is_stripped {
         return true;
@@ -2433,6 +2968,7 @@ fn arm64_tail_cleanup_word(insn: u32, is_stripped: bool) -> bool {
         return is_load;
     }
     arm64_ldr_str_unsigned64_sp(insn).is_some_and(|(is_load, _, _)| is_load)
+        || arm64_ldr_str_post64_sp(insn).is_some_and(|(is_load, _, _)| is_load)
         || arm64_is_add_sp_imm(insn)
 }
 
@@ -2478,6 +3014,23 @@ fn arm64_ldr_str_unsigned64_sp(insn: u32) -> Option<(bool, u32, u32)> {
     Some((is_load, byte_off, insn & 0x1f))
 }
 
+fn arm64_ldr_str_post64_sp(insn: u32) -> Option<(bool, i32, u32)> {
+    let is_load = match insn & 0xffe0_0c00 {
+        0xf840_0400 => true,
+        0xf800_0400 => false,
+        _ => return None,
+    };
+    let rn = (insn >> 5) & 0x1f;
+    if rn != 31 {
+        return None;
+    }
+    let mut byte_off = ((insn >> 12) & 0x1ff) as i32;
+    if (byte_off & 0x100) != 0 {
+        byte_off -= 0x200;
+    }
+    Some((is_load, byte_off, insn & 0x1f))
+}
+
 fn arm64_saved_reg_stack_offset(bytes: &[u8], wanted_reg: u32) -> Option<u32> {
     for (word_index, word) in bytes.chunks_exact(4).enumerate() {
         let insn = u32::from_le_bytes(word.try_into().ok()?);
@@ -2508,12 +3061,38 @@ fn arm64_saved_reg_stack_offset(bytes: &[u8], wanted_reg: u32) -> Option<u32> {
 }
 
 fn arm64_entry_pair_is_strippable(rt: u32, rt2: u32) -> bool {
-    let regs = [rt, rt2];
-    regs.iter()
-        .all(|reg| arm64_callee_saved_bit_index(*reg).is_some() || *reg == 30)
-        && regs
-            .iter()
-            .any(|reg| arm64_callee_saved_bit_index(*reg).is_some())
+    let mut has_bpf_callee_saved = false;
+    [rt, rt2].iter().all(|reg| {
+        if arm64_callee_saved_bit_index(*reg).is_some() {
+            has_bpf_callee_saved = true;
+        }
+        arm64_entry_reg_is_strippable(*reg)
+    }) && has_bpf_callee_saved
+}
+
+fn arm64_entry_reg_is_strippable(reg: u32) -> bool {
+    reg == 30 || arm64_callee_saved_bit_index(reg).is_some()
+}
+
+fn arm64_entry_pair_is_frame_record(rt: u32, rt2: u32) -> bool {
+    rt == 29 && rt2 == 30
+}
+
+fn arm64_entry_reg_is_preserved_by_native(reg: u32) -> bool {
+    matches!(reg, 23..=25)
+}
+
+fn arm64_entry_pair_is_preserved_by_native(rt: u32, rt2: u32) -> bool {
+    arm64_entry_reg_is_preserved_by_native(rt) && arm64_entry_reg_is_preserved_by_native(rt2)
+}
+
+fn arm64_reject_unsupported_entry_save(reg: u32) -> Result<()> {
+    if matches!(reg, 26..=28) {
+        bail!(
+            "arm64 entry ABI uses unsupported callee-saved x{reg}; compile native objects with -ffixed-x26 through -ffixed-x28"
+        );
+    }
+    Ok(())
 }
 
 fn arm64_callee_saved_bit_index(reg: u32) -> Option<usize> {
@@ -2547,6 +3126,15 @@ fn arm64_branch_target_word(
 
 fn a64_mov_reg64(insn: u32) -> Option<(usize, usize)> {
     if (insn & 0xffe0_ffe0) != 0xaa00_03e0 {
+        return None;
+    }
+    let dst = (insn & 0x1f) as usize;
+    let src = ((insn >> 16) & 0x1f) as usize;
+    Some((dst, src))
+}
+
+fn a64_mov_reg32_word(insn: u32) -> Option<(usize, usize)> {
+    if (insn & 0xffe0_ffe0) != 0x2a00_03e0 {
         return None;
     }
     let dst = (insn & 0x1f) as usize;
@@ -2682,8 +3270,10 @@ fn build_arm64_helper_call(
     helper_name: &str,
     sym_name: &str,
     off: usize,
+    emit_byte_offset: usize,
     is_entry: bool,
     helper_addrs: &HashMap<String, u64>,
+    tail_call_maps: &HashSet<String>,
     lookup_sites: &[LookupSiteSpec],
     lookup_maps: &HashMap<String, LookupSiteSpec>,
     update_sites: &[UpdateSiteSpec],
@@ -2695,10 +3285,23 @@ fn build_arm64_helper_call(
     reg_map_names: &mut [Option<String>; 32],
     lookup_site_used: &mut [bool],
     update_site_by_map: &mut HashMap<String, usize>,
+    helper_literal_loads: &mut Vec<Arm64HelperLiteralLoad>,
+    native_relocs: &mut Vec<RelocRecord>,
+    helper_call_slot: Arm64HelperCallSlot,
 ) -> Result<Vec<u32>> {
     if helper_name == "bpf_tail_call" {
         if !is_entry {
             bail!("arm64 bpf_tail_call in non-entry symbol {sym_name} at byte offset {off:#x} is unsupported");
+        }
+        let map_name = reg_map_names[1].as_deref().ok_or_else(|| {
+            anyhow!(
+                "arm64 bpf_tail_call in {sym_name} at byte offset {off:#x} has no tracked x1 prog-array map"
+            )
+        })?;
+        if !tail_call_maps.contains(map_name) {
+            bail!(
+                "arm64 bpf_tail_call in {sym_name} at byte offset {off:#x} uses map {map_name:?}, which is not a link-plan tail_call_maps entry"
+            );
         }
         arm64_call_clobber_map_regs(reg_map_names);
         return build_arm64_tail_call_inline(
@@ -2713,6 +3316,9 @@ fn build_arm64_helper_call(
         if let Some(inline) = build_arm64_get_smp_processor_id_inline(helper_addrs)? {
             return Ok(inline);
         }
+    }
+    if helper_name == "bpf_get_current_task" || helper_name == "bpf_get_current_task_btf" {
+        return build_arm64_get_current_task_inline();
     }
 
     let mut helper_addr = helper_addrs.get(helper_name).copied();
@@ -2734,6 +3340,7 @@ fn build_arm64_helper_call(
         match spec.kind {
             LookupKind::Array | LookupKind::PerCpuArray => {
                 let words = build_arm64_array_lookup(&spec)?;
+                record_arm64_percpu_mrs_relocs(&words, emit_byte_offset, native_relocs)?;
                 arm64_call_clobber_map_regs(reg_map_names);
                 return Ok(words);
             }
@@ -2762,6 +3369,7 @@ fn build_arm64_helper_call(
             match spec.kind {
                 UpdateKind::Array | UpdateKind::PerCpuArray => {
                     let words = build_arm64_array_update(spec)?;
+                    record_arm64_percpu_mrs_relocs(&words, emit_byte_offset, native_relocs)?;
                     arm64_call_clobber_map_regs(reg_map_names);
                     return Ok(words);
                 }
@@ -2788,10 +3396,43 @@ fn build_arm64_helper_call(
             &format!("arm64 helper call {helper_name}"),
         )?
     };
-    let mut words = arm64_helper_call_sequence(helper_addr)?;
+    if helper_call_slot == Arm64HelperCallSlot::FarSafe {
+        if emit_byte_offset % 4 != 0 {
+            bail!("arm64 helper call byte offset {emit_byte_offset:#x} is not word-aligned");
+        }
+        if helper_addr & (1u64 << 63) == 0 {
+            bail!(
+                "arm64 helper call {helper_name} in {sym_name} at byte offset {off:#x} resolved to non-kernel target {helper_addr:#x}"
+            );
+        }
+        helper_literal_loads.push(Arm64HelperLiteralLoad {
+            word_index: emit_byte_offset / 4,
+            target: helper_addr,
+        });
+        let mut words = vec![A64_NOP, A64_BLR_X10];
+        if let Some(spec) = lookup_postprocess {
+            words.extend(build_arm64_lookup_call_postprocess(&spec)?);
+        }
+        record_arm64_percpu_mrs_relocs(&words, emit_byte_offset, native_relocs)?;
+        arm64_call_clobber_map_regs(reg_map_names);
+        return Ok(words);
+    }
+
+    let (mut words, call_word_offset) = arm64_helper_call_sequence(helper_call_slot)?;
+    let reloc_offset = emit_byte_offset
+        .checked_add(call_word_offset * 4)
+        .ok_or_else(|| anyhow!("arm64 helper call reloc offset overflow"))?;
+    let offset = u32::try_from(reloc_offset)
+        .map_err(|_| anyhow!("arm64 helper call reloc offset exceeds u32"))?;
+    native_relocs.push(RelocRecord {
+        offset,
+        kind: arm64_helper_call_reloc_kind(helper_call_slot)?,
+        target: helper_addr,
+    });
     if let Some(spec) = lookup_postprocess {
         words.extend(build_arm64_lookup_call_postprocess(&spec)?);
     }
+    record_arm64_percpu_mrs_relocs(&words, emit_byte_offset, native_relocs)?;
     arm64_call_clobber_map_regs(reg_map_names);
     Ok(words)
 }
@@ -2802,9 +3443,11 @@ fn rewrite_arm64(
     included: &[SymInfo],
     helper_addrs: &HashMap<String, u64>,
     map_addrs: &HashMap<String, u64>,
+    tail_call_maps: &HashSet<String>,
     lookup_sites: &[LookupSiteSpec],
     lookup_maps: &HashMap<String, LookupSiteSpec>,
     update_sites: &[UpdateSiteSpec],
+    helper_call_slot: Arm64HelperCallSlot,
     proof_mode: bool,
     show: bool,
 ) -> Result<RewriteResult> {
@@ -2814,6 +3457,8 @@ fn rewrite_arm64(
     let mut addr_word_offset: HashMap<Arm64AddressKey, usize> = HashMap::new();
     let mut patches: Vec<Arm64Patch> = Vec::new();
     let relocs = arm64_text_relocations(elf, included)?;
+    let mut native_relocs: Vec<RelocRecord> = Vec::new();
+    let mut helper_literal_loads: Vec<Arm64HelperLiteralLoad> = Vec::new();
     let mut lookup_call_counter: usize = 0;
     let mut update_call_counter: usize = 0;
     let mut proof_relocs: Vec<ProofReloc> = Vec::new();
@@ -2823,7 +3468,6 @@ fn rewrite_arm64(
         read_proof_abi(elf)?
     };
     let mut callee_saved_mask = arm64_effective_callee_saved_mask(proof_callee_saved_mask, 0);
-    const A64_MOV_X7_X0: u32 = 0xaa00_03e7;
     let mut reg_map_names: [Option<String>; 32] = std::array::from_fn(|_| None);
     let mut lookup_site_used = vec![false; lookup_sites.len()];
     let mut update_site_by_map: HashMap<String, usize> = HashMap::new();
@@ -2839,6 +3483,8 @@ fn rewrite_arm64(
             );
         }
         let mut helper_imm_registers: [Option<u64>; 32] = std::array::from_fn(|_| None);
+        let mut helper_imm_word_indices: [Option<usize>; 32] = std::array::from_fn(|_| None);
+        let mut helper_imm_read_since_load: [bool; 32] = [false; 32];
         let mut entry_abi_strip = if is_entry {
             plan_arm64_entry_abi_strip(&bytes)?
         } else {
@@ -2877,9 +3523,16 @@ fn rewrite_arm64(
                 continue;
             }
             let reloc = relocs.get(&((sym.section_index, sym.address), off as u64));
+            for reg in 0..32 {
+                if helper_imm_word_indices[reg].is_some() && a64_maybe_reads_gpr(insn, reg) {
+                    helper_imm_read_since_load[reg] = true;
+                }
+            }
             let mut helper_imm_load_reg = None;
             if let Some((reg, helper_id)) = a64_known_helper_id_load(insn) {
                 helper_imm_registers[reg] = Some(helper_id);
+                helper_imm_word_indices[reg] = Some(emit_word_index);
+                helper_imm_read_since_load[reg] = false;
                 helper_imm_load_reg = Some(reg);
                 let next_is_call = bytes.get(off + 4..off + 8).and_then(|next| {
                     let next = u32::from_le_bytes(next.try_into().ok()?);
@@ -2887,11 +3540,14 @@ fn rewrite_arm64(
                 }) == Some(reg);
                 if !proof_mode && next_is_call {
                     insn = A64_NOP;
+                    helper_imm_word_indices[reg] = None;
                 }
             }
+            let mut map_name_write_handled = false;
             if !proof_mode {
                 if let Some((dst, src)) = a64_mov_reg64(insn) {
                     reg_map_names[dst] = reg_map_names[src].clone();
+                    map_name_write_handled = true;
                 }
             }
 
@@ -2983,8 +3639,10 @@ fn rewrite_arm64(
                             &reloc.target_name,
                             &sym.name,
                             off,
+                            blob.len(),
                             is_entry,
                             helper_addrs,
+                            tail_call_maps,
                             lookup_sites,
                             lookup_maps,
                             update_sites,
@@ -2996,6 +3654,9 @@ fn rewrite_arm64(
                             &mut reg_map_names,
                             &mut lookup_site_used,
                             &mut update_site_by_map,
+                            &mut helper_literal_loads,
+                            &mut native_relocs,
+                            helper_call_slot,
                         )? {
                             append_u32(&mut blob, word);
                         }
@@ -3054,7 +3715,12 @@ fn rewrite_arm64(
                         });
                         let rt = (insn & 0x1f) as usize;
                         reg_map_names[rt] = Some(reloc.target_name.clone());
-                        helper_imm_registers[rt] = None;
+                        clear_arm64_helper_imm_register(
+                            &mut helper_imm_registers,
+                            &mut helper_imm_word_indices,
+                            &mut helper_imm_read_since_load,
+                            rt,
+                        );
                         blob.extend_from_slice(&insn.to_le_bytes());
                         continue;
                     }
@@ -3063,14 +3729,9 @@ fn rewrite_arm64(
             }
 
             if let Some(reg) = a64_blr_reg(insn) {
-                let helper_id = helper_imm_registers[reg].or_else(|| {
-                    arm64_reachable_helper_id_for_blr(
-                        &bytes,
-                        sym,
-                        &relocs,
-                        local_word_index,
-                        reg,
-                    )
+                let direct_helper_id = helper_imm_registers[reg];
+                let helper_id = direct_helper_id.or_else(|| {
+                    arm64_reachable_helper_id_for_blr(&bytes, sym, &relocs, local_word_index, reg)
                 });
                 let Some(helper_id) = helper_id else {
                     if !proof_mode {
@@ -3089,19 +3750,36 @@ fn rewrite_arm64(
                         sym.name
                     )
                 })?;
-                for slot in helper_imm_registers.iter_mut().take(19) {
-                    *slot = None;
-                }
                 if proof_mode {
+                    clear_arm64_call_clobbered_helper_imm_registers(
+                        &mut helper_imm_registers,
+                        &mut helper_imm_word_indices,
+                        &mut helper_imm_read_since_load,
+                    );
                     blob.extend_from_slice(&insn.to_le_bytes());
                     continue;
                 }
+                if direct_helper_id.is_some() && !helper_imm_read_since_load[reg] {
+                    if let Some(word_index) = helper_imm_word_indices[reg] {
+                        patches.push(Arm64Patch {
+                            word_index,
+                            kind: Arm64PatchKind::Nop,
+                        });
+                    }
+                }
+                clear_arm64_call_clobbered_helper_imm_registers(
+                    &mut helper_imm_registers,
+                    &mut helper_imm_word_indices,
+                    &mut helper_imm_read_since_load,
+                );
                 for word in build_arm64_helper_call(
                     helper_name,
                     &sym.name,
                     off,
+                    blob.len(),
                     is_entry,
                     helper_addrs,
+                    tail_call_maps,
                     lookup_sites,
                     lookup_maps,
                     update_sites,
@@ -3113,6 +3791,9 @@ fn rewrite_arm64(
                     &mut reg_map_names,
                     &mut lookup_site_used,
                     &mut update_site_by_map,
+                    &mut helper_literal_loads,
+                    &mut native_relocs,
+                    helper_call_slot,
                 )? {
                     append_u32(&mut blob, word);
                 }
@@ -3151,6 +3832,7 @@ fn rewrite_arm64(
                 continue;
             }
 
+            let mut reserve_tbz_tbnz_long_slot = false;
             if let Some(target) = a64_branch_target(sym.address, local_word_index, insn) {
                 if !proof_mode && is_entry && arm64_is_return_trampoline_target(elf, target)? {
                     if !a64_is_uncond_b(insn) {
@@ -3206,6 +3888,8 @@ fn rewrite_arm64(
                         sym.name
                     );
                 };
+                reserve_tbz_tbnz_long_slot =
+                    !proof_mode && matches!(kind, Arm64PatchKind::TbzTbnz { .. });
                 patches.push(Arm64Patch {
                     word_index: emit_word_index,
                     kind,
@@ -3220,16 +3904,28 @@ fn rewrite_arm64(
                 blob.extend_from_slice(&0u32.to_le_bytes());
             } else {
                 blob.extend_from_slice(&insn.to_le_bytes());
+                if reserve_tbz_tbnz_long_slot {
+                    append_u32(&mut blob, A64_NOP);
+                }
             }
-            if let Some(reg) = a64_written_gpr(insn) {
+            for reg in a64_written_gprs(insn).into_iter().flatten() {
                 if helper_imm_load_reg != Some(reg) {
-                    helper_imm_registers[reg] = None;
+                    clear_arm64_helper_imm_register(
+                        &mut helper_imm_registers,
+                        &mut helper_imm_word_indices,
+                        &mut helper_imm_read_since_load,
+                        reg,
+                    );
+                }
+                if !proof_mode && !map_name_write_handled {
+                    reg_map_names[reg] = None;
                 }
             }
         }
         sym_end_word_offset.insert(sym_key, blob.len() / 4);
     }
 
+    let code_word_count = blob.len() / 4;
     let mut map_literals: HashMap<String, usize> = HashMap::new();
     let mut map_patches = Vec::new();
     let mut local_data: HashMap<object::SectionIndex, usize> = HashMap::new();
@@ -3293,6 +3989,20 @@ fn rewrite_arm64(
             Arm64PatchKind::Nop => 0xd503_201f,
             _ => continue,
         };
+        blob[off..off + 4].copy_from_slice(&patched.to_le_bytes());
+    }
+
+    let mut helper_literals: HashMap<u64, usize> = HashMap::new();
+    for patch in &helper_literal_loads {
+        let literal_offset = if let Some(&offset) = helper_literals.get(&patch.target) {
+            offset
+        } else {
+            let offset = arm64_append_literal(&mut blob, patch.target);
+            helper_literals.insert(patch.target, offset);
+            offset
+        };
+        let patched = a64_ldr_lit64(10, patch.word_index, literal_offset)?;
+        let off = patch.word_index * 4;
         blob[off..off + 4].copy_from_slice(&patched.to_le_bytes());
     }
 
@@ -3378,12 +4088,16 @@ fn rewrite_arm64(
                     target_is_symbol_end,
                     target_address,
                 )?;
-                a64_patch_tbz_tbnz(insn, patch.word_index, target_word)?
+                a64_patch_tbz_tbnz_or_long(&mut blob, insn, patch.word_index, target_word)?
             }
             _ => continue,
         };
         let off = patch.word_index * 4;
         blob[off..off + 4].copy_from_slice(&patched.to_le_bytes());
+    }
+
+    if !proof_mode {
+        validate_arm64_kernel_blob_control_flow(&blob, code_word_count, ret_trampoline_word)?;
     }
 
     if show {
@@ -3402,7 +4116,7 @@ fn rewrite_arm64(
     proof_relocs.sort_by_key(|reloc| reloc.offset);
     Ok(RewriteResult {
         blob,
-        relocs: Vec::new(),
+        relocs: native_relocs,
         map_patches,
         callee_saved_mask,
         proof_relocs,
@@ -3481,9 +4195,28 @@ mod tests {
     fn arm64_entry_abi_strip_allows_multiple_epilogues() {
         let mut bytes = Vec::new();
         for word in [
+            0xa9024ff4, // stp x20, x19, [sp, #32]
+            0xd503201f, // nop
+            0xa9424ff4, // ldp x20, x19, [sp, #32]
+            0xa9424ff4, // ldp x20, x19, [sp, #32]
+        ] {
+            bytes.extend_from_slice(&u32::to_le_bytes(word));
+        }
+
+        let strip = plan_arm64_entry_abi_strip(&bytes).unwrap();
+        assert_eq!(strip.callee_saved_mask, 0x3);
+        assert!(strip.nop_word_indices.contains(&0));
+        assert!(strip.nop_word_indices.contains(&2));
+        assert!(strip.nop_word_indices.contains(&3));
+        assert_eq!(strip.nop_word_indices.len(), 3);
+    }
+
+    #[test]
+    fn arm64_entry_abi_strip_strips_lr_callee_saved_pairs() {
+        let mut bytes = Vec::new();
+        for word in [
             0xa9024ffe, // stp x30, x19, [sp, #32]
             0xd503201f, // nop
-            0xa9424ffe, // ldp x30, x19, [sp, #32]
             0xa9424ffe, // ldp x30, x19, [sp, #32]
         ] {
             bytes.extend_from_slice(&u32::to_le_bytes(word));
@@ -3493,8 +4226,111 @@ mod tests {
         assert_eq!(strip.callee_saved_mask, 0x1);
         assert!(strip.nop_word_indices.contains(&0));
         assert!(strip.nop_word_indices.contains(&2));
-        assert!(strip.nop_word_indices.contains(&3));
-        assert_eq!(strip.nop_word_indices.len(), 3);
+        assert_eq!(strip.nop_word_indices.len(), 2);
+    }
+
+    #[test]
+    fn arm64_entry_abi_strip_strips_standalone_lr_save_restore() {
+        let mut bytes = Vec::new();
+        for word in [
+            0xd10183ff, // sub sp, sp, #0x60
+            0xf90013fe, // str x30, [sp, #0x20]
+            0xa90457f6, // stp x22, x21, [sp, #0x40]
+            0xa9054ff4, // stp x20, x19, [sp, #0x50]
+            0xd503201f, // body nop
+            0xa9454ff4, // ldp x20, x19, [sp, #0x50]
+            0xf94013fe, // ldr x30, [sp, #0x20]
+            0xa94457f6, // ldp x22, x21, [sp, #0x40]
+        ] {
+            bytes.extend_from_slice(&u32::to_le_bytes(word));
+        }
+
+        let strip = plan_arm64_entry_abi_strip(&bytes).unwrap();
+        assert_eq!(strip.callee_saved_mask, 0xf);
+        for idx in [1, 2, 3, 5, 6, 7] {
+            assert!(strip.nop_word_indices.contains(&idx));
+        }
+        assert_eq!(strip.nop_word_indices.len(), 6);
+    }
+
+    #[test]
+    fn arm64_entry_abi_strip_preserves_native_saved_x23_x24() {
+        let mut bytes = Vec::new();
+        for word in [
+            0xd10183ff, // sub sp, sp, #0x60
+            0xa9035ff8, // stp x24, x23, [sp, #0x30]
+            0xa9054ff4, // stp x20, x19, [sp, #0x50]
+            0xd503201f, // body nop
+            0xa9454ff4, // ldp x20, x19, [sp, #0x50]
+            0xa9435ff8, // ldp x24, x23, [sp, #0x30]
+        ] {
+            bytes.extend_from_slice(&u32::to_le_bytes(word));
+        }
+
+        let strip = plan_arm64_entry_abi_strip(&bytes).unwrap();
+        assert_eq!(strip.callee_saved_mask, 0x3);
+        assert!(strip.nop_word_indices.contains(&2));
+        assert!(strip.nop_word_indices.contains(&4));
+        assert_eq!(strip.nop_word_indices.len(), 2);
+    }
+
+    #[test]
+    fn arm64_entry_abi_strip_rejects_unsupported_native_callee_saved_regs() {
+        let mut bytes = Vec::new();
+        for word in [
+            0xd10183ff, // sub sp, sp, #0x60
+            0xa90367fa, // stp x26, x25, [sp, #0x30]
+            0xd503201f, // body nop
+            0xa94367fa, // ldp x26, x25, [sp, #0x30]
+        ] {
+            bytes.extend_from_slice(&u32::to_le_bytes(word));
+        }
+
+        let err = match plan_arm64_entry_abi_strip(&bytes) {
+            Ok(_) => panic!("unsupported x26 entry save unexpectedly passed"),
+            Err(err) => err,
+        };
+        assert!(err.to_string().contains("unsupported callee-saved x26"));
+    }
+
+    #[test]
+    fn arm64_entry_abi_strip_preserves_frame_record_pairs() {
+        let mut bytes = Vec::new();
+        for word in [
+            0xa9be7bfd, // stp x29, x30, [sp, #-32]!
+            0xd503201f, // nop
+            0xa8c27bfd, // ldp x29, x30, [sp], #32
+        ] {
+            bytes.extend_from_slice(&u32::to_le_bytes(word));
+        }
+
+        let strip = plan_arm64_entry_abi_strip(&bytes).unwrap();
+        assert_eq!(strip.callee_saved_mask, 0);
+        assert!(strip.nop_word_indices.is_empty());
+    }
+
+    #[test]
+    fn arm64_entry_abi_strip_scans_past_frame_record_pairs() {
+        let mut bytes = Vec::new();
+        for word in [
+            0xd10183ff, // sub sp, sp, #0x60
+            0xa9037bfd, // stp x29, x30, [sp, #0x30]
+            0xa90457f6, // stp x22, x21, [sp, #0x40]
+            0xa9054ff4, // stp x20, x19, [sp, #0x50]
+            0xd503201f, // body nop
+            0xa9454ff4, // ldp x20, x19, [sp, #0x50]
+            0xa94457f6, // ldp x22, x21, [sp, #0x40]
+            0xa9437bfd, // ldp x29, x30, [sp, #0x30]
+        ] {
+            bytes.extend_from_slice(&u32::to_le_bytes(word));
+        }
+
+        let strip = plan_arm64_entry_abi_strip(&bytes).unwrap();
+        assert_eq!(strip.callee_saved_mask, 0xf);
+        for idx in [2, 3, 5, 6] {
+            assert!(strip.nop_word_indices.contains(&idx));
+        }
+        assert_eq!(strip.nop_word_indices.len(), 4);
     }
 
     #[test]
@@ -3528,15 +4364,15 @@ mod tests {
     fn arm64_entry_abi_strip_matches_writeback_push_pop() {
         let mut bytes = Vec::new();
         for word in [
-            0xa9bf4ffe, // stp x30, x19, [sp, #-0x10]!
+            0xa9bf4ff4, // stp x20, x19, [sp, #-0x10]!
             0xd503201f, // nop
-            0xa8c14ffe, // ldp x30, x19, [sp], #0x10
+            0xa8c14ff4, // ldp x20, x19, [sp], #0x10
         ] {
             bytes.extend_from_slice(&u32::to_le_bytes(word));
         }
 
         let strip = plan_arm64_entry_abi_strip(&bytes).unwrap();
-        assert_eq!(strip.callee_saved_mask, 0x1);
+        assert_eq!(strip.callee_saved_mask, 0x3);
         assert!(strip.nop_word_indices.contains(&0));
         assert!(strip.nop_word_indices.contains(&2));
         assert_eq!(strip.nop_word_indices.len(), 2);
@@ -3549,7 +4385,361 @@ mod tests {
         assert_eq!(a64_known_helper_id_load(0x5280_1008), None);
         assert_eq!(a64_blr_reg(0xd63f_0100), Some(8));
         assert_eq!(a64_blr_reg(0xd63f_0120), Some(9));
+        assert_eq!(a64_br_reg(0xd61f_0140), Some(10));
         assert_eq!(a64_blr_reg(A64_NOP), None);
+        assert_eq!(a64_br_reg(A64_NOP), None);
+    }
+
+    #[test]
+    fn arm64_kernel_blob_control_flow_allows_tail_call_br_x10_and_ignores_data() {
+        let mut blob = Vec::new();
+        for word in [
+            a64_tbz64(10, 63).unwrap(),
+            A64_NOP,
+            a64_br(10).unwrap(),
+            0xd63f_0100, // data word that decodes as blr x8
+            A64_MOV_X7_X0,
+        ] {
+            blob.extend_from_slice(&word.to_le_bytes());
+        }
+
+        validate_arm64_kernel_blob_control_flow(&blob, 3, 4).unwrap();
+    }
+
+    #[test]
+    fn arm64_kernel_blob_control_flow_rejects_unguarded_tail_call_br() {
+        let mut blob = Vec::new();
+        for word in [A64_NOP, a64_br(10).unwrap(), A64_MOV_X7_X0] {
+            blob.extend_from_slice(&word.to_le_bytes());
+        }
+
+        let err = validate_arm64_kernel_blob_control_flow(&blob, 2, 2).unwrap_err();
+        assert!(err
+            .to_string()
+            .contains("without a dominating kernel-address guard"));
+    }
+
+    #[test]
+    fn arm64_kernel_blob_control_flow_rejects_residual_blr() {
+        let mut blob = Vec::new();
+        for word in [A64_NOP, 0xd63f_0100, A64_MOV_X7_X0] {
+            blob.extend_from_slice(&word.to_le_bytes());
+        }
+
+        let err = validate_arm64_kernel_blob_control_flow(&blob, 2, 2).unwrap_err();
+        assert!(err.to_string().contains("register-indirect call blr x8"));
+    }
+
+    #[test]
+    fn arm64_kernel_blob_control_flow_allows_helper_blr_x10_literal() {
+        let mut blob = Vec::new();
+        append_u32(&mut blob, A64_NOP);
+        append_u32(&mut blob, A64_BLR_X10);
+        let literal_offset = arm64_append_literal(&mut blob, 0xffff_0000_1234_5000);
+        let ret_trampoline_word = blob.len() / 4;
+        append_u32(&mut blob, A64_MOV_X7_X0);
+        let ldr = a64_ldr_lit64(10, 0, literal_offset).unwrap();
+        blob[0..4].copy_from_slice(&ldr.to_le_bytes());
+
+        validate_arm64_kernel_blob_control_flow(&blob, 2, ret_trampoline_word).unwrap();
+    }
+
+    #[test]
+    fn arm64_kernel_blob_control_flow_rejects_helper_blr_x10_user_literal() {
+        let mut blob = Vec::new();
+        append_u32(&mut blob, A64_NOP);
+        append_u32(&mut blob, A64_BLR_X10);
+        let literal_offset = arm64_append_literal(&mut blob, 0x1234_5000);
+        let ret_trampoline_word = blob.len() / 4;
+        append_u32(&mut blob, A64_MOV_X7_X0);
+        let ldr = a64_ldr_lit64(10, 0, literal_offset).unwrap();
+        blob[0..4].copy_from_slice(&ldr.to_le_bytes());
+
+        let err =
+            validate_arm64_kernel_blob_control_flow(&blob, 2, ret_trampoline_word).unwrap_err();
+        assert!(err.to_string().contains("register-indirect call blr x10"));
+    }
+
+    #[test]
+    fn arm64_kernel_blob_control_flow_rejects_non_tail_br() {
+        let mut blob = Vec::new();
+        for word in [A64_NOP, a64_br(0).unwrap(), A64_MOV_X7_X0] {
+            blob.extend_from_slice(&word.to_le_bytes());
+        }
+
+        let err = validate_arm64_kernel_blob_control_flow(&blob, 2, 2).unwrap_err();
+        assert!(err.to_string().contains("branch br x0"));
+    }
+
+    #[test]
+    fn arm64_helper_id_dead_load_read_tracking_is_conservative() {
+        let helper_load = a64_movz(8, 1, 0).unwrap();
+        assert_eq!(a64_known_helper_id_load(helper_load), Some((8, 1)));
+        assert!(!a64_maybe_reads_gpr(helper_load, 8));
+        assert!(!a64_maybe_reads_gpr(0xd63f_0100, 8));
+        assert!(!a64_maybe_reads_gpr(a64_mov_reg64_word(8, 0).unwrap(), 8));
+        assert!(a64_maybe_reads_gpr(a64_add_imm64(0, 8, 8).unwrap(), 8));
+        assert!(a64_maybe_reads_gpr(a64_str_u64(8, 31, 0).unwrap(), 8));
+    }
+
+    #[test]
+    fn arm64_written_gpr_covers_common_map_pointer_clobbers() {
+        assert_eq!(a64_written_gprs(0xf940_27e8)[0], Some(8)); // ldr x8, [sp, #72]
+        assert_eq!(a64_written_gprs(0xf85e_83a8)[0], Some(8)); // ldur x8, [x29, #-24]
+        assert_eq!(a64_written_gprs(0xd538_4100)[0], Some(0)); // mrs x0, sp_el0
+        assert_eq!(a64_written_gprs(0x9101_23e0)[0], Some(0)); // add x0, sp, #0x48
+        assert_eq!(a64_written_gprs(0x8b16_0288)[0], Some(8)); // add x8, x20, x22
+        assert_eq!(a64_written_gprs(0x5308_7ec8)[0], Some(8)); // lsr w8, w22, #8
+        assert_eq!(a64_written_gprs(0x9240_3908)[0], Some(8)); // and x8, x8, #0x7fff
+        assert_eq!(a64_written_gprs(0xaa00_03f7)[0], Some(23)); // mov x23, x0
+        assert_eq!(a64_written_gprs(0xa97d_a7a8), [Some(8), Some(9), None]); // ldp x8, x9, [x29, #-48]
+        assert_eq!(a64_written_gprs(0xb802_4d28)[0], Some(9)); // str w8, [x9, #0x24]!
+        assert_eq!(a64_written_gprs(0xb843_4e69), [Some(9), Some(19), None]); // ldr w9, [x19, #0x34]!
+        assert_eq!(a64_written_gprs(0x3848_8d2a), [Some(10), Some(9), None]); // ldrb w10, [x9, #0x88]!
+        assert_eq!(a64_written_gprs(0xb81e_03bf), [None, None, None]); // stur wzr, [x29, #-0x20]
+    }
+
+    #[test]
+    fn arm64_helper_call_uses_arm64_reloc_placeholder() {
+        let mut helper_addrs = HashMap::new();
+        helper_addrs.insert("bpf_ktime_get_ns".to_string(), 0xffff_0000_1234_5000);
+        let mut lookup_call_counter = 0;
+        let mut update_call_counter = 0;
+        let mut reg_map_names: [Option<String>; 32] = std::array::from_fn(|_| None);
+        let mut lookup_site_used = Vec::new();
+        let mut update_site_by_map = HashMap::new();
+        let mut helper_literal_loads = Vec::new();
+        let mut native_relocs = Vec::new();
+
+        let words = build_arm64_helper_call(
+            "bpf_ktime_get_ns",
+            "hot_path",
+            0x20,
+            0x40,
+            true,
+            &helper_addrs,
+            &HashSet::new(),
+            &[],
+            &HashMap::new(),
+            &[],
+            0,
+            &[],
+            None,
+            &mut lookup_call_counter,
+            &mut update_call_counter,
+            &mut reg_map_names,
+            &mut lookup_site_used,
+            &mut update_site_by_map,
+            &mut helper_literal_loads,
+            &mut native_relocs,
+            Arm64HelperCallSlot::Bl26,
+        )
+        .unwrap();
+
+        assert_eq!(words, vec![A64_BL_IMM26_PLACEHOLDER]);
+        assert_eq!(native_relocs.len(), 1);
+        assert_eq!(native_relocs[0].offset, 0x40);
+        assert_eq!(
+            native_relocs[0].kind,
+            NATIVE_LAB_RELOC_HELPER_CALL_ARM64_BL26
+        );
+        assert_eq!(native_relocs[0].target, 0xffff_0000_1234_5000);
+        assert!(helper_literal_loads.is_empty());
+    }
+
+    #[test]
+    fn arm64_helper_call_uses_direct_or_far_reloc_placeholder() {
+        let mut helper_addrs = HashMap::new();
+        helper_addrs.insert("bpf_ktime_get_ns".to_string(), 0xffff_0000_1234_5000);
+        let mut lookup_call_counter = 0;
+        let mut update_call_counter = 0;
+        let mut reg_map_names: [Option<String>; 32] = std::array::from_fn(|_| None);
+        let mut lookup_site_used = Vec::new();
+        let mut update_site_by_map = HashMap::new();
+        let mut helper_literal_loads = Vec::new();
+        let mut native_relocs = Vec::new();
+
+        let words = build_arm64_helper_call(
+            "bpf_ktime_get_ns",
+            "hot_path",
+            0x20,
+            0x40,
+            true,
+            &helper_addrs,
+            &HashSet::new(),
+            &[],
+            &HashMap::new(),
+            &[],
+            0,
+            &[],
+            None,
+            &mut lookup_call_counter,
+            &mut update_call_counter,
+            &mut reg_map_names,
+            &mut lookup_site_used,
+            &mut update_site_by_map,
+            &mut helper_literal_loads,
+            &mut native_relocs,
+            Arm64HelperCallSlot::DirectOrFar,
+        )
+        .unwrap();
+
+        assert_eq!(
+            words,
+            vec![A64_BL_IMM26_PLACEHOLDER, A64_NOP, A64_NOP, A64_NOP]
+        );
+        assert_eq!(native_relocs.len(), 1);
+        assert_eq!(native_relocs[0].offset, 0x40);
+        assert_eq!(native_relocs[0].kind, NATIVE_LAB_RELOC_HELPER_CALL_ARM64);
+        assert_eq!(native_relocs[0].target, 0xffff_0000_1234_5000);
+        assert!(helper_literal_loads.is_empty());
+    }
+
+    #[test]
+    fn arm64_helper_call_uses_literal_load_when_far_safe() {
+        let mut helper_addrs = HashMap::new();
+        helper_addrs.insert("bpf_ktime_get_ns".to_string(), 0xffff_0000_1234_5000);
+        let mut lookup_call_counter = 0;
+        let mut update_call_counter = 0;
+        let mut reg_map_names: [Option<String>; 32] = std::array::from_fn(|_| None);
+        let mut lookup_site_used = Vec::new();
+        let mut update_site_by_map = HashMap::new();
+        let mut helper_literal_loads = Vec::new();
+        let mut native_relocs = Vec::new();
+
+        let words = build_arm64_helper_call(
+            "bpf_ktime_get_ns",
+            "far_path",
+            0x20,
+            0x40,
+            true,
+            &helper_addrs,
+            &HashSet::new(),
+            &[],
+            &HashMap::new(),
+            &[],
+            0,
+            &[],
+            None,
+            &mut lookup_call_counter,
+            &mut update_call_counter,
+            &mut reg_map_names,
+            &mut lookup_site_used,
+            &mut update_site_by_map,
+            &mut helper_literal_loads,
+            &mut native_relocs,
+            Arm64HelperCallSlot::FarSafe,
+        )
+        .unwrap();
+
+        assert_eq!(words, vec![A64_NOP, A64_BLR_X10]);
+        assert!(native_relocs.is_empty());
+        assert_eq!(helper_literal_loads.len(), 1);
+        assert_eq!(helper_literal_loads[0].word_index, 0x40 / 4);
+        assert_eq!(helper_literal_loads[0].target, 0xffff_0000_1234_5000);
+    }
+
+    #[test]
+    fn arm64_percpu_array_lookup_records_mrs_reloc() {
+        let mut lookup_call_counter = 0;
+        let mut update_call_counter = 0;
+        let mut reg_map_names: [Option<String>; 32] = std::array::from_fn(|_| None);
+        reg_map_names[0] = Some("signal_data_map".to_string());
+        let mut lookup_site_used = Vec::new();
+        let mut update_site_by_map = HashMap::new();
+        let mut helper_literal_loads = Vec::new();
+        let mut native_relocs = Vec::new();
+        let lookup_maps = HashMap::from([(
+            "signal_data_map".to_string(),
+            LookupSiteSpec {
+                kind: LookupKind::PerCpuArray,
+                target_addr: 0,
+                key_offset: 0,
+                max_entries: 1,
+                elem_size: 8,
+                index_mask: 0,
+                value_offset: 304,
+                percpu_base_addr: 0,
+                map_name: Some("signal_data_map".to_string()),
+            },
+        )]);
+
+        let words = build_arm64_helper_call(
+            "bpf_map_lookup_elem",
+            "heartbeat_capture",
+            0x20,
+            0x80,
+            true,
+            &HashMap::new(),
+            &HashSet::new(),
+            &[],
+            &lookup_maps,
+            &[],
+            0,
+            &[],
+            None,
+            &mut lookup_call_counter,
+            &mut update_call_counter,
+            &mut reg_map_names,
+            &mut lookup_site_used,
+            &mut update_site_by_map,
+            &mut helper_literal_loads,
+            &mut native_relocs,
+            Arm64HelperCallSlot::FarSafe,
+        )
+        .unwrap();
+
+        let mrs_word = words
+            .iter()
+            .position(|word| *word == A64_MRS_X10_TPIDR_EL1)
+            .expect("per-CPU array lookup should read current CPU offset");
+        assert_eq!(native_relocs.len(), 1);
+        assert_eq!(native_relocs[0].offset, 0x80 + (mrs_word as u32 * 4));
+        assert_eq!(native_relocs[0].kind, NATIVE_LAB_RELOC_ARM64_PERCPU_MRS);
+        assert_eq!(native_relocs[0].target, 0);
+        assert!(helper_literal_loads.is_empty());
+    }
+
+    #[test]
+    fn arm64_get_current_task_helpers_inline_without_reloc() {
+        for helper_name in ["bpf_get_current_task", "bpf_get_current_task_btf"] {
+            let mut lookup_call_counter = 0;
+            let mut update_call_counter = 0;
+            let mut reg_map_names: [Option<String>; 32] = std::array::from_fn(|_| None);
+            let mut lookup_site_used = Vec::new();
+            let mut update_site_by_map = HashMap::new();
+            let mut helper_literal_loads = Vec::new();
+            let mut native_relocs = Vec::new();
+
+            let words = build_arm64_helper_call(
+                helper_name,
+                "hot_path",
+                0x20,
+                0x40,
+                true,
+                &HashMap::new(),
+                &HashSet::new(),
+                &[],
+                &HashMap::new(),
+                &[],
+                0,
+                &[],
+                None,
+                &mut lookup_call_counter,
+                &mut update_call_counter,
+                &mut reg_map_names,
+                &mut lookup_site_used,
+                &mut update_site_by_map,
+                &mut helper_literal_loads,
+                &mut native_relocs,
+                Arm64HelperCallSlot::Bl26,
+            )
+            .unwrap();
+
+            assert_eq!(words, vec![a64_mrs_sp_el0(0).unwrap()]);
+            assert!(native_relocs.is_empty());
+            assert!(helper_literal_loads.is_empty());
+        }
     }
 
     #[test]
@@ -3557,11 +4747,11 @@ mod tests {
         let branch_to_call = a64_patch_b_cond(0x5400_0000, 1, 4).unwrap();
         let mut bytes = Vec::new();
         for word in [
-            0x5280_0038,   // mov w24, #1
+            0x5280_0038,    // mov w24, #1
             branch_to_call, // b.eq call
-            0x9000_0018,   // adrp x24, map
-            0xf940_0318,   // ldr x24, [x24]
-            0xd63f_0300,   // blr x24
+            0x9000_0018,    // adrp x24, map
+            0xf940_0318,    // ldr x24, [x24]
+            0xd63f_0300,    // blr x24
         ] {
             bytes.extend_from_slice(&u32::to_le_bytes(word));
         }
@@ -3616,6 +4806,25 @@ mod tests {
     }
 
     #[test]
+    fn arm64_tbz_tbnz_long_branch_uses_reserved_slot() {
+        let tbnz_w0_bit0 = 0x3700_0000;
+        assert!(a64_is_tbz_tbnz(tbnz_w0_bit0));
+        assert!(a64_patch_tbz_tbnz(tbnz_w0_bit0, 0, 8263).is_err());
+
+        let mut blob = vec![0u8; 8264 * 4];
+        blob[4..8].copy_from_slice(&A64_NOP.to_le_bytes());
+        let patched = a64_patch_tbz_tbnz_or_long(&mut blob, tbnz_w0_bit0, 0, 8263).unwrap();
+
+        assert!(a64_is_tbz_tbnz(patched));
+        assert_eq!(patched & (1 << 24), 0);
+        assert_eq!(a64_branch_target(0, 0, patched), Some(8));
+
+        let branch = u32::from_le_bytes(blob[4..8].try_into().unwrap());
+        assert!(a64_is_uncond_b(branch));
+        assert_eq!(a64_branch_target(0, 1, branch), Some(8263 * 4));
+    }
+
+    #[test]
     fn arm64_tail_call_cleanup_uses_rewritten_epilogue() {
         let add_sp = a64_add_imm64(31, 31, 0x20).unwrap();
         let mut bytes = Vec::new();
@@ -3635,6 +4844,32 @@ mod tests {
                 .unwrap();
 
         assert_eq!(cleanup, vec![add_sp]);
+    }
+
+    #[test]
+    fn arm64_tail_call_cleanup_drops_frame_record_across_return_value_move() {
+        let restore_fp_lr = 0xa9417bfd; // ldp x29, x30, [sp, #16]
+        let mov_w0_wzr = 0x2a1f03e0; // mov w0, wzr
+        let add_sp = a64_add_imm64(31, 31, 0x30).unwrap();
+        let mut bytes = Vec::new();
+        for word in [
+            0xd100c3ff, // sub sp, sp, #0x30
+            0xa9017bfd, // stp x29, x30, [sp, #16]
+            0x910003fd, // mov x29, sp
+            restore_fp_lr,
+            mov_w0_wzr,
+            add_sp,
+            0xd65f03c0, // ret
+        ] {
+            bytes.extend_from_slice(&u32::to_le_bytes(word));
+        }
+
+        let strip = plan_arm64_entry_abi_strip(&bytes).unwrap();
+        let cleanup =
+            plan_arm64_tail_call_cleanup_from_terminators(&bytes, &[6], &strip.nop_word_indices)
+                .unwrap();
+
+        assert_eq!(cleanup, vec![restore_fp_lr, add_sp]);
     }
 
     #[test]
@@ -3664,6 +4899,46 @@ mod tests {
         .unwrap();
 
         assert_eq!(cleanup, vec![ldr_lr, add_sp]);
+    }
+
+    #[test]
+    fn arm64_tail_call_cleanup_accepts_postindexed_frame_restore() {
+        let mov_w0_wzr = 0x2a1f03e0; // mov w0, wzr
+        let add_sp = a64_add_imm64(31, 31, 0x1c0).unwrap();
+        let ldp_x20_x19 = 0xa9444ff4; // ldp x20, x19, [sp, #0x40]
+        let ldp_x22_x21 = 0xa94357f6; // ldp x22, x21, [sp, #0x30]
+        let ldp_x24_x23 = 0xa9425ff8; // ldp x24, x23, [sp, #0x20]
+        let ldp_x30_x25 = 0xa94167fe; // ldp x30, x25, [sp, #0x10]
+        let ldr_x29_post = 0xf84507fd; // ldr x29, [sp], #0x50
+        let mut bytes = Vec::new();
+        for word in [
+            0xd503201f, // body nop
+            mov_w0_wzr,
+            add_sp,
+            ldp_x20_x19,
+            ldp_x22_x21,
+            ldp_x24_x23,
+            ldp_x30_x25,
+            ldr_x29_post,
+            0x14000021, // b __native_link_arm64_ret_trampoline
+        ] {
+            bytes.extend_from_slice(&u32::to_le_bytes(word));
+        }
+
+        let cleanup =
+            plan_arm64_tail_call_cleanup_from_terminators(&bytes, &[8], &HashSet::new()).unwrap();
+
+        assert_eq!(
+            cleanup,
+            vec![
+                add_sp,
+                ldp_x20_x19,
+                ldp_x22_x21,
+                ldp_x24_x23,
+                ldp_x30_x25,
+                ldr_x29_post
+            ]
+        );
     }
 
     #[test]
@@ -3711,11 +4986,60 @@ mod tests {
         .unwrap();
         let out_target = Some((words.len() * 4) as u64);
 
-        assert_eq!(a64_branch_target(0, 3, words[3]), out_target);
-        assert_eq!(a64_branch_target(0, 7, words[7]), out_target);
-        assert_eq!(a64_branch_target(0, 11, words[11]), out_target);
+        assert_eq!(a64_branch_target(0, 0, words[0]), out_target);
+        assert_eq!(a64_branch_target(0, 4, words[4]), out_target);
+        assert_eq!(a64_branch_target(0, 8, words[8]), out_target);
+        assert_eq!(a64_branch_target(0, 12, words[12]), out_target);
+        assert_eq!(a64_branch_target(0, 13, words[13]), out_target);
+        assert_eq!(a64_branch_target(0, 16, words[16]), out_target);
         assert_eq!(*words.last().unwrap(), a64_br(10).unwrap());
         assert!(words.len() <= 64);
+    }
+
+    #[test]
+    fn arm64_tail_call_requires_tracked_prog_array_map() {
+        let helper_addrs = HashMap::from([
+            (ARM64_BPF_MAP_MAX_ENTRIES_OFFSET_KEY.to_string(), 68),
+            (ARM64_BPF_ARRAY_PTRS_OFFSET_KEY.to_string(), 272),
+            (ARM64_BPF_PROG_BPF_FUNC_OFFSET_KEY.to_string(), 72),
+            (ARM64_TAIL_CALL_OFFSET_KEY.to_string(), 28),
+        ]);
+        let mut lookup_call_counter = 0;
+        let mut update_call_counter = 0;
+        let mut reg_map_names: [Option<String>; 32] = std::array::from_fn(|_| None);
+        reg_map_names[1] = Some("events".to_string());
+        let mut lookup_site_used = Vec::new();
+        let mut update_site_by_map = HashMap::new();
+        let mut helper_literal_loads = Vec::new();
+        let mut native_relocs = Vec::new();
+        let err = build_arm64_helper_call(
+            "bpf_tail_call",
+            "tracepoint__sched",
+            0x20,
+            0x80,
+            true,
+            &helper_addrs,
+            &HashSet::from(["prog_array_tp".to_string()]),
+            &[],
+            &HashMap::new(),
+            &[],
+            0,
+            &[A64_NOP],
+            None,
+            &mut lookup_call_counter,
+            &mut update_call_counter,
+            &mut reg_map_names,
+            &mut lookup_site_used,
+            &mut update_site_by_map,
+            &mut helper_literal_loads,
+            &mut native_relocs,
+            Arm64HelperCallSlot::Bl26,
+        )
+        .unwrap_err();
+
+        assert!(err
+            .to_string()
+            .contains("not a link-plan tail_call_maps entry"));
     }
 
     #[test]
@@ -3783,9 +5107,38 @@ mod tests {
             .iter()
             .position(|word| *word == load_bpf_func)
             .unwrap();
+        assert_eq!(words[load_idx + 1], a64_add_imm64(10, 10, 28).unwrap());
+        assert_eq!(
+            a64_branch_target(0, load_idx + 2, words[load_idx + 2]),
+            Some((words.len() * 4) as u64)
+        );
+        let restore_bpf_stack =
+            a64_add_imm64(31, 31, ARM64_NATIVE_LAB_STACK_RESERVE_BYTES).unwrap();
 
-        assert!(words[..load_idx].contains(&a64_ldp_post64(21, 22, 16).unwrap()));
-        assert!(words[..load_idx].contains(&a64_ldp_post64(19, 20, 16).unwrap()));
+        let restore_idx = words
+            .iter()
+            .position(|word| *word == restore_bpf_stack)
+            .unwrap();
+        assert_eq!(words[restore_idx + 1], a64_ldp_post64(25, 31, 16).unwrap());
+        assert_eq!(words[restore_idx + 2], a64_ldp_post64(21, 22, 16).unwrap());
+        assert_eq!(words[restore_idx + 3], a64_ldp_post64(19, 20, 16).unwrap());
+        assert!(load_idx + 2 < restore_idx);
+
+        let sparse_words = build_arm64_tail_call_inline(
+            &helper_addrs,
+            0x1,
+            &[a64_add_imm64(31, 31, 0x20).unwrap()],
+            None,
+        )
+        .unwrap();
+        let sparse_restore_idx = sparse_words
+            .iter()
+            .position(|word| *word == restore_bpf_stack)
+            .unwrap();
+        assert_eq!(
+            sparse_words[sparse_restore_idx + 1],
+            a64_ldp_post64(19, 25, 16).unwrap()
+        );
     }
 
     #[test]

@@ -131,6 +131,9 @@ NativeLinkArgs build_native_link_args(
         }
     }
     static constexpr int kContextualHelperIds[] = {
+        BPF_FUNC_perf_event_output,
+        BPF_FUNC_get_stackid,
+        BPF_FUNC_get_stack,
         BPF_FUNC_get_prandom_u32,
         BPF_FUNC_fib_lookup,
         BPF_FUNC_redirect_map,
@@ -160,6 +163,20 @@ NativeLinkArgs build_native_link_args(
         add_name_addr(out.maps, kv.first, 0);
     }
 
+    std::unordered_set<uint32_t> source_tail_call_map_ids;
+    for (const MapMeta &meta : companion.source_tail_call_maps) {
+        source_tail_call_map_ids.insert(meta.kernel_id);
+    }
+    for (const auto &kv : companion.map_addr_ids) {
+        if (source_tail_call_map_ids.count(kv.second)) {
+            out.tail_call_maps.push_back(kv.first);
+        }
+    }
+    std::sort(out.tail_call_maps.begin(), out.tail_call_maps.end());
+    out.tail_call_maps.erase(
+        std::unique(out.tail_call_maps.begin(), out.tail_call_maps.end()),
+        out.tail_call_maps.end());
+
     for (size_t i = 0; i < companion.lookup_sites.size(); i++) {
         out.lookup_sites.push_back(make_link_lookup_site(companion.lookup_sites[i]));
     }
@@ -184,5 +201,15 @@ NativeLinkArgs build_native_link_args(
     for (size_t i = 0; i < companion.update_sites.size(); i++) {
         out.update_sites.push_back(make_link_update_site(companion.update_sites[i]));
     }
+#if defined(__aarch64__)
+    /*
+     * The final JIT address for a native_lab blob is only known during the
+     * kernel emit callback. Emit fixed-width helper-call slots and let the
+     * module patch each slot after the final RX address is known. In-range
+     * helper targets become direct BL26 calls; out-of-range targets use the
+     * same fixed-length far-call sequence as the arm64 BPF JIT.
+     */
+    out.arm64_helper_call_slot = "direct_or_far";
+#endif
     return out;
 }

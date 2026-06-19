@@ -11,6 +11,50 @@ struct SourceMapBinding {
     NativeMapShape dynamic_map_shape;
 };
 
+bool source_map_binding_has_value(const SourceMapBinding &binding)
+{
+    return binding.map_fd >= 0 || has_native_map_shape(binding.dynamic_map_shape);
+}
+
+size_t bpf_mem_access_size(uint8_t code)
+{
+    switch (BPF_SIZE(code)) {
+    case BPF_B:
+        return 1;
+    case BPF_H:
+        return 2;
+    case BPF_W:
+        return 4;
+    case BPF_DW:
+        return 8;
+    default:
+        return 0;
+    }
+}
+
+void clear_overlapping_stack_bindings(
+    std::unordered_map<int16_t, SourceMapBinding> &stack_map,
+    int16_t off,
+    size_t size)
+{
+    if (size == 0) {
+        stack_map.clear();
+        return;
+    }
+
+    const int start = off;
+    const int end = start + static_cast<int>(size);
+    for (auto it = stack_map.begin(); it != stack_map.end();) {
+        const int slot_start = it->first;
+        const int slot_end = slot_start + 8;
+        if (slot_start < end && start < slot_end) {
+            it = stack_map.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
 /* Walk a BPF program's original (pre-verifier) bytecode and identify every
  * helper call in source order, plus the map fd currently bound to that
  * helper's map argument register when the call occurs. map_fd is -1 when the
@@ -22,14 +66,16 @@ struct SourceMapBinding {
  * Tracking is intentionally minimal:
  *   - LD_IMM64 with src_reg=BPF_PSEUDO_MAP_FD binds dst_reg -> imm (map fd).
  *   - ALU64|MOV|X copies the binding from src_reg to dst_reg.
+ *   - 64-bit stack spill/reload through r10 preserves bindings; any
+ *     overlapping stack write clears the affected binding.
  *   - map-in-map lookup return in R0 carries a known inner-map shape when the
  *     outer map shape is recognized.
  *   - Any other write to a register clears that register's binding.
  *   - CALL clobbers r0..r5.
- * This matches the simple "load map fd into r1 just before the call"
- * pattern clang emits at -O2 for the test programs and most real
- * BPF code. Anything fancier (spill/reload via stack, conditional
- * map selection) falls through to fd=-1 -> no inline. */
+ * This matches the common "load map fd into r1 just before the call" pattern
+ * and the map-in-map pointer spill/reload shape clang emits in larger
+ * programs. Anything fancier (conditional map selection, non-stack memory
+ * transport) falls through to fd=-1 -> no inline. */
 std::vector<SourceHelperCall> collect_source_helper_calls(
     const struct bpf_insn *insns,
     size_t cnt,
@@ -38,6 +84,7 @@ std::vector<SourceHelperCall> collect_source_helper_calls(
 {
     std::vector<SourceHelperCall> sites;
     SourceMapBinding reg_map[11];
+    std::unordered_map<int16_t, SourceMapBinding> stack_map;
     for (size_t i = 0; i < cnt; i++) {
         const struct bpf_insn &in = insns[i];
         uint8_t code = in.code;
@@ -56,6 +103,36 @@ std::vector<SourceHelperCall> collect_source_helper_calls(
                 reg_map[in.dst_reg] = reg_map[in.src_reg];
             } else if (in.dst_reg < 11) {
                 reg_map[in.dst_reg] = SourceMapBinding{};
+            }
+            continue;
+        }
+        if (BPF_CLASS(code) == BPF_STX && BPF_MODE(code) == BPF_MEM) {
+            const size_t size = bpf_mem_access_size(code);
+            if (in.dst_reg == BPF_REG_10) {
+                clear_overlapping_stack_bindings(stack_map, in.off, size);
+                if (size == 8 && in.src_reg < 11 &&
+                    source_map_binding_has_value(reg_map[in.src_reg])) {
+                    stack_map[in.off] = reg_map[in.src_reg];
+                }
+            }
+            continue;
+        }
+        if (BPF_CLASS(code) == BPF_ST && BPF_MODE(code) == BPF_MEM) {
+            if (in.dst_reg == BPF_REG_10) {
+                clear_overlapping_stack_bindings(
+                    stack_map, in.off, bpf_mem_access_size(code));
+            }
+            continue;
+        }
+        if (BPF_CLASS(code) == BPF_LDX && BPF_MODE(code) == BPF_MEM) {
+            if (in.dst_reg < 11) {
+                if (BPF_SIZE(code) == BPF_DW && in.src_reg == BPF_REG_10) {
+                    auto it = stack_map.find(in.off);
+                    reg_map[in.dst_reg] =
+                        it == stack_map.end() ? SourceMapBinding{} : it->second;
+                } else {
+                    reg_map[in.dst_reg] = SourceMapBinding{};
+                }
             }
             continue;
         }
