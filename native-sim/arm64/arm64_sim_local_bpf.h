@@ -1098,6 +1098,11 @@ struct arm64_sim_skb_abi {
 		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
 	} while (0)
 
+#define ARM64_SIM_BPF_CALL_bpf_get_prandom_u32()                            \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_32);\
+	} while (0)
+
 #define ARM64_SIM_BPF_CALL_bpf_skb_store_bytes()                            \
 	do {                                                               \
 		long __a64_bpf_ret = bpf_skb_store_bytes(                \
@@ -1144,6 +1149,11 @@ struct arm64_sim_skb_abi {
 		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
 	} while (0)
 
+#define ARM64_SIM_BPF_CALL_bpf_skb_set_tunnel_key()                         \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
 #define ARM64_SIM_BPF_CALL_bpf_csum_diff()                                  \
 	do {                                                               \
 		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
@@ -1164,6 +1174,36 @@ struct arm64_sim_skb_abi {
 		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
 	} while (0)
 
+#define ARM64_SIM_BPF_CALL_bpf_skb_change_tail()                            \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_skb_pull_data()                              \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_skb_change_head()                            \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_xdp_adjust_head()                            \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_xdp_adjust_tail()                            \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_get_socket_cookie()                          \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
 #define ARM64_SIM_BPF_CALL_bpf_skb_adjust_room()                            \
 	do {                                                               \
 		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
@@ -1175,6 +1215,16 @@ struct arm64_sim_skb_abi {
 	} while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_redirect_neigh()                             \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_jiffies64()                                  \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_get_netns_cookie()                           \
 	do {                                                               \
 		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
 	} while (0)

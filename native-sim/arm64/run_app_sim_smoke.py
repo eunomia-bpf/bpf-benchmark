@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -18,8 +19,6 @@ GENERATOR = ARM64_SIM_DIR / "micro-prog" / "generate_micro_sim_proofs.py"
 DEFAULT_PROOF_ROOT = REPO_ROOT / "vendor" / "build" / "native-bpf" / "arm64" / "stage"
 DEFAULT_OUTPUT_DIR = ARM64_SIM_DIR / "app-prog"
 DEFAULT_BUILD_DIR = DEFAULT_OUTPUT_DIR / "build"
-DEFAULT_SOURCE_DIR = DEFAULT_OUTPUT_DIR / "src"
-DEFAULT_PROOF_DIR = DEFAULT_OUTPUT_DIR / "proof-objects"
 
 
 @dataclass(frozen=True)
@@ -91,6 +90,7 @@ def prepare_generator_inputs(proofs: list[AppProof], proof_dir: Path, config_pat
 
 def generate_source(config_path: Path, proof_dir: Path, source_dir: Path, proof: AppProof) -> tuple[bool, str]:
     source_dir.mkdir(parents=True, exist_ok=True)
+    source = source_dir / f"{proof.name}.bpf.c"
     result = run([
         "python3",
         str(GENERATOR),
@@ -106,6 +106,11 @@ def generate_source(config_path: Path, proof_dir: Path, source_dir: Path, proof:
     ])
     if result.returncode != 0:
         detail = "\n".join(part for part in [result.stdout, result.stderr] if part)
+        return False, compact(detail)
+    if not source.is_file():
+        detail = "\n".join(part for part in [result.stdout, result.stderr] if part)
+        if not detail:
+            detail = "generator did not write expected source"
         return False, compact(detail)
     return True, ""
 
@@ -155,17 +160,16 @@ def main(argv: list[str]) -> int:
         raise SystemExit("--limit must be >= 1")
 
     output_dir = args.output_dir.resolve()
-    proof_dir = output_dir / "proof-objects"
-    source_dir = output_dir
-    config_path = output_dir / "app_proofs.yaml"
+    run_dir = output_dir.with_name(f"{output_dir.name}-run-{os.getpid()}")
+    proof_dir = run_dir / "proof-objects"
+    source_dir = run_dir
+    config_path = run_dir / "app_proofs.yaml"
+    build_dir = args.build_dir.resolve() / f"run-{os.getpid()}"
     proofs = discover(args.proof_root.resolve(), set(args.app), set(args.only), args.limit)
     if not proofs:
         raise SystemExit("no selected app proof objects")
 
     prepare_generator_inputs(proofs, proof_dir, config_path)
-    source_dir.mkdir(parents=True, exist_ok=True)
-    for old in source_dir.glob("*.bpf.c"):
-        old.unlink()
 
     failures: list[str] = []
     for proof in proofs:
@@ -177,7 +181,7 @@ def main(argv: list[str]) -> int:
                 break
             continue
         source = source_dir / f"{proof.name}.bpf.c"
-        ok, note = compile_source(source, args.build_dir.resolve())
+        ok, note = compile_source(source, build_dir)
         if ok:
             print(f"ok {proof.name}")
             continue
