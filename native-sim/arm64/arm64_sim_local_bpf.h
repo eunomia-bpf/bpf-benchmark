@@ -1008,6 +1008,11 @@ struct arm64_sim_skb_abi {
 		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
 	} while (0)
 
+#define ARM64_SIM_BPF_CALL_bpf_get_attach_cookie()                          \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
 #define ARM64_SIM_BPF_CALL_bpf_get_func_ret()                               \
 	do {                                                               \
 		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
@@ -1080,6 +1085,16 @@ struct arm64_sim_skb_abi {
 	} while (0)
 
 #define ARM64_SIM_BPF_CALL_bpf_copy_from_user()                             \
+	do {                                                               \
+		long __a64_bpf_ret = bpf_probe_read_user(               \
+			ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0),             \
+			ARM64_SIM_L_READ_REG(ARM64_X1),                   \
+			ARM64_SIM_L_READ_REG_PTR(ARM64_X2));              \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, (__u64)__a64_bpf_ret,\
+					    ARM64_WIDTH_64);              \
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_copy_from_user_task()                        \
 	do {                                                               \
 		long __a64_bpf_ret = bpf_probe_read_user(               \
 			ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X0),             \

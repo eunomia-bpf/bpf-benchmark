@@ -89,11 +89,13 @@ HELPER_IDENTS = {
     152: "bpf_redirect_neigh",
     158: "bpf_get_current_task_btf",
     161: "bpf_ima_inode_hash",
+    174: "bpf_get_attach_cookie",
     175: "bpf_task_pt_regs",
     183: "bpf_get_func_arg",
     184: "bpf_get_func_ret",
     185: "bpf_get_func_arg_cnt",
     186: "bpf_get_retval",
+    191: "bpf_copy_from_user_task",
     193: "bpf_ima_file_hash",
 }
 GPR_WRITE_OPS = {
