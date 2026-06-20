@@ -85,6 +85,7 @@ HELPER_IDENTS = {
     118: "bpf_jiffies64",
     122: "bpf_get_netns_cookie",
     125: "bpf_ktime_get_boot_ns",
+    127: "bpf_seq_write",
     148: "bpf_copy_from_user",
     152: "bpf_redirect_neigh",
     158: "bpf_get_current_task_btf",
