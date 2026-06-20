@@ -1020,6 +1020,16 @@ struct arm64_sim_skb_abi {
 		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
 	} while (0)
 
+#define ARM64_SIM_BPF_CALL_bpf_ima_inode_hash()                             \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_ima_file_hash()                              \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
 #define ARM64_SIM_BPF_CALL_bpf_get_smp_processor_id()                       \
 	do {                                                               \
 		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_32);\
