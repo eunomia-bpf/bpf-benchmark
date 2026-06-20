@@ -651,6 +651,9 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
     if op == "csinc":
         return Encoded("ARM64_OP_CSINC", reg_const(ops[0]), reg_const(ops[1]), reg_const(ops[2]),
                        width=width_const(reg_width(ops[0])), aux=COND[ops[3]])
+    if op == "csneg":
+        return Encoded("ARM64_OP_CSNEG", reg_const(ops[0]), reg_const(ops[1]), reg_const(ops[2]),
+                       width=width_const(reg_width(ops[0])), aux=COND[ops[3]])
     if op == "fmov":
         dst, src = ops
         if dst.startswith("d") and src.startswith("x"):

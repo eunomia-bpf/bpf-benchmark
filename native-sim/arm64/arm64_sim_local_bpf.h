@@ -839,6 +839,9 @@ struct arm64_sim_skb_abi {
 		} else if ((OP) == ARM64_OP_CSINC) {                        \
 			__u64 __a64_l_value = ARM64_SIM_L_EVAL_COND(AUX) ? ARM64_SIM_L_READ_REG(SRC) : ARM64_SIM_L_READ_REG(SRC2) + 1;\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
+		} else if ((OP) == ARM64_OP_CSNEG) {                        \
+			__u64 __a64_l_value = ARM64_SIM_L_EVAL_COND(AUX) ? ARM64_SIM_L_READ_REG(SRC) : -ARM64_SIM_L_READ_REG(SRC2);\
+			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
 		} else if ((OP) == ARM64_OP_LOAD) {                            \
 			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM));              \
 			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, __a64_l_width);\
