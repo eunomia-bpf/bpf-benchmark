@@ -6084,7 +6084,11 @@ struct __sk_buff {
 	void *dev;
 	void *sk;
 	__u64 tstamp;
-	__u32 cb[12];
+	__u32 qdisc_pkt_len;
+	__u16 qdisc_pkt_segs;
+	__u16 tc_classid;
+	__u32 cb[5];
+	__u8 __native_qdisc_cb_tail[20];
 	__u8 __native_pad88[24];
 	__u32 len;
 	__u32 data_len;
@@ -6136,6 +6140,9 @@ struct __sk_buff {
 #define __native_skb_off(member) __builtin_offsetof(struct __sk_buff, member)
 _Static_assert(__native_skb_off(len) == 112, "native __sk_buff len offset");
 _Static_assert(__native_skb_off(data_len) == 116, "native __sk_buff data_len offset");
+_Static_assert(__native_skb_off(qdisc_pkt_len) == 40, "native __sk_buff qdisc pkt_len offset");
+_Static_assert(__native_skb_off(tc_classid) == 46, "native __sk_buff tc_classid offset");
+_Static_assert(__native_skb_off(cb) == 48, "native __sk_buff cb data offset");
 _Static_assert(__native_skb_off(queue_mapping) == 124, "native __sk_buff queue_mapping offset");
 _Static_assert(__native_skb_off(tc_index) == 134, "native __sk_buff tc_index offset");
 _Static_assert(__native_skb_off(priority) == 144, "native __sk_buff priority offset");

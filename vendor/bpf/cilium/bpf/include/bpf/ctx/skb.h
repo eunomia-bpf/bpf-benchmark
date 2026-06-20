@@ -143,7 +143,7 @@ static __always_inline __maybe_unused __u32
 ctx_wire_len(const struct __sk_buff *ctx)
 {
 #ifdef MICRO_NATIVE
-	return ctx->len;
+	return ctx->qdisc_pkt_len;
 #else
 	return ctx->wire_len;
 #endif
