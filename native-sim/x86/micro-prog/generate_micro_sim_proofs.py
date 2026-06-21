@@ -69,7 +69,9 @@ ALU_AUX = {
     "rol": "X86_ALU_ROL",
     "imul": "X86_ALU_IMUL",
     "inc": "X86_ALU_INC",
+    "dec": "X86_ALU_DEC",
     "not": "X86_ALU_NOT",
+    "neg": "X86_ALU_NEG",
     "sbb": "X86_ALU_SBB",
 }
 
@@ -316,6 +318,7 @@ def parse_native_linked_program(
         if insn.mnemonic == "call"
         and not is_helper_symbol(insn.reloc_symbol)
         and insn.operands
+        and (insn.reloc_target is not None or has_direct_branch_target(insn.operands[0]))
         and (insn.reloc_symbol is None or insn.reloc_target is not None)
         and (insn.reloc_target if insn.reloc_target is not None else branch_target(insn.operands[0])) in insn_addrs
     })
@@ -424,6 +427,10 @@ def mem_disp(operand: str) -> int:
 def branch_target(operand: str) -> int:
     match = re.match(r"(0x[0-9a-fA-F]+|[0-9a-fA-F]+)", operand.strip())
     return int(match.group(1), 16) if match is not None else 0
+
+
+def has_direct_branch_target(operand: str) -> bool:
+    return re.match(r"(0x[0-9a-fA-F]+|[0-9a-fA-F]+)", operand.strip()) is not None
 
 
 def enc(op: str, dst: str = "X86_REG_NONE", src: str = "X86_REG_NONE",
@@ -556,6 +563,12 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                        imm=c_u64(mem_disp(ops[1])))
         raise ValueError(f"cannot encode {insn.raw}")
 
+    if op == "cdqe":
+        if ops:
+            raise ValueError(f"cannot encode {insn.raw}")
+        return enc("X86_OP_MOVSX_REG", dst="X86_RAX", src="X86_RAX",
+                   flags="X86_WIDTH_64", aux="X86_WIDTH_32")
+
     if op == "lea":
         if len(ops) != 2:
             raise ValueError(f"cannot encode {insn.raw}")
@@ -606,7 +619,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
         raise ValueError(f"cannot encode {insn.raw}")
 
     if op in ALU_AUX:
-        if op in {"inc", "not"}:
+        if op in {"inc", "dec", "not", "neg"}:
             if len(ops) != 1:
                 raise ValueError(f"cannot encode {insn.raw}")
             dst_reg = reg_info(ops[0])
@@ -619,9 +632,10 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                            imm=c_u64(mem_disp(ops[0])))
             if dst_reg is None:
                 raise ValueError(f"cannot encode {insn.raw}")
+            imm = "1" if op in {"inc", "dec"} else "0"
             return enc("X86_OP_ALU_IMM", dst=dst_reg[0],
                        flags=WIDTH_CONST[dst_reg[1]], aux=ALU_AUX[op],
-                       imm="1" if op == "inc" else "0")
+                       imm=imm)
         if len(ops) != 2:
             raise ValueError(f"cannot encode {insn.raw}")
         dst_reg = reg_info(ops[0])
@@ -639,6 +653,13 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                        flags=WIDTH_CONST[dst_reg[1]],
                        aux=f"({mem_aux(ops[1], operand_width(ops[1], dst_reg[1]))} | X86_MEM_AUX_ALU_OP({ALU_AUX[op]}))",
                        imm=c_u64(mem_disp(ops[1])))
+        if is_mem(ops[0]) and src_reg:
+            width = operand_width(ops[0], src_reg[1])
+            return enc("X86_OP_ALU_MEM_REG",
+                       dst=mem_base_reg(ops[0]), src=src_reg[0],
+                       flags=WIDTH_CONST[width],
+                       aux=f"({mem_aux(ops[0], width)} | X86_MEM_AUX_ALU_OP({ALU_AUX[op]}))",
+                       imm=c_u64(mem_disp(ops[0])))
         if is_mem(ops[0]) and is_int(ops[1]):
             return enc("X86_OP_ALU_MEM_IMM",
                        dst=mem_base_reg(ops[0]),
@@ -647,6 +668,25 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                        imm=c_u64(parse_int(ops[1]) + (mem_disp(ops[0]) << 32)))
         if is_mem(ops[0]) or is_mem(ops[1]):
             raise ValueError(f"unsupported memory ALU form: {insn.raw}")
+        raise ValueError(f"cannot encode {insn.raw}")
+
+    if op == "bzhi":
+        if len(ops) != 3:
+            raise ValueError(f"cannot encode {insn.raw}")
+        dst = reg_info(ops[0])
+        src = reg_info(ops[1])
+        count = reg_info(ops[2])
+        if dst is None or count is None:
+            raise ValueError(f"cannot encode {insn.raw}")
+        if src is not None:
+            return enc("X86_OP_BZHI", dst=dst[0], src=src[0],
+                       flags=WIDTH_CONST[dst[1]], aux=count[0])
+        if is_mem(ops[1]):
+            width = operand_width(ops[0], operand_width(ops[1], dst[1]))
+            return enc("X86_OP_BZHI_MEM", dst=dst[0], src=mem_base_reg(ops[1]),
+                       flags=WIDTH_CONST[width],
+                       aux=f"({mem_aux(ops[1], width)} | X86_REG_AUX_SRC_SHIFT({count[0]}))",
+                       imm=c_u64(mem_disp(ops[1])))
         raise ValueError(f"cannot encode {insn.raw}")
 
     if op == "bswap":

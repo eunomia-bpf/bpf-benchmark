@@ -1268,12 +1268,7 @@ FUNC_INLINE int generic_retprobe(void *ctx, struct bpf_map_def *calls, unsigned 
 	 * 0x1000 should be maximum argument length, so masking
 	 * with 0x1fff is safe and verifier will be happy.
 	 */
-#ifdef MICRO_NATIVE
-	size &= 0x1fff;
-#else
-	asm volatile("%[size] &= 0x1fff;\n"
-		     : [size] "+r"(size));
-#endif
+	tetragon_mask(size, 0x1fff);
 
 	switch (do_copy) {
 	case char_buf:

@@ -10,8 +10,8 @@
 
 DECLARE_CONFIG(bool, hybrid_routing_enabled, "Enable hybrid mode routing based on subnet IDs")
 
-#ifdef MICRO_NATIVE_CILIUM_ROUTING_MODE_NATIVE
-#define CILIUM_HYBRID_ROUTING_ENABLED false
+#ifdef BPFBENCH_CILIUM_HYBRID_ROUTING_ENABLED
+#define CILIUM_HYBRID_ROUTING_ENABLED BPFBENCH_CILIUM_HYBRID_ROUTING_ENABLED
 #else
 #define CILIUM_HYBRID_ROUTING_ENABLED CONFIG(hybrid_routing_enabled)
 #endif

@@ -53,6 +53,9 @@
 #define X86_OP_STORE_XMM0 0x31U
 #define X86_OP_ALU_MEM_UNARY 0x32U
 #define X86_OP_ALU_MEM_IMM 0x33U
+#define X86_OP_BZHI 0x34U
+#define X86_OP_BZHI_MEM 0x35U
+#define X86_OP_ALU_MEM_REG 0x36U
 #define X86_OP_RET 0xffU
 
 #define X86_OP_MOV_IMM64 X86_OP_MOV_IMM
@@ -74,6 +77,8 @@
 #define X86_ALU_INC 10U
 #define X86_ALU_NOT 11U
 #define X86_ALU_SBB 12U
+#define X86_ALU_DEC 13U
+#define X86_ALU_NEG 14U
 
 #define X86_CC_O 0U
 #define X86_CC_NO 1U
@@ -289,8 +294,12 @@ static __always_inline __u64 x86_alu_result(__u64 lhs, __u64 rhs,
 		return lhs * rhs;
 	if (alu == X86_ALU_INC)
 		return lhs + 1;
+	if (alu == X86_ALU_DEC)
+		return lhs - 1;
 	if (alu == X86_ALU_NOT)
 		return ~lhs;
+	if (alu == X86_ALU_NEG)
+		return 0 - lhs;
 	return lhs;
 }
 

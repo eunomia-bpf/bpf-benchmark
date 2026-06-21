@@ -22,11 +22,7 @@ FUNC_INLINE int get_off(char *buffer, char *buf)
 
 FUNC_INLINE char *get_buf(char *buffer, int off)
 {
-#ifdef MICRO_NATIVE
-	off &= 0xfff;
-#else
-	asm volatile("%[off] &= 0xfff;\n" : [off] "+r"(off));
-#endif
+	tetragon_mask(off, 0xfff);
 	return buffer + off;
 }
 

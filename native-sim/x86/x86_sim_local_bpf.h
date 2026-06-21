@@ -68,6 +68,7 @@ union x86_sim_gpr {
 #define X86_SIM_HELPER_bpf_probe_read_kernel_str 14ULL
 #define X86_SIM_HELPER_bpf_probe_read_user_str 15ULL
 #define X86_SIM_HELPER_bpf_get_stack 16ULL
+#define X86_SIM_HELPER_bpf_copy_from_user_str 17ULL
 
 #define X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)                                    \
 	((WIDTH) ? (WIDTH) : X86_WIDTH_64)
@@ -529,10 +530,15 @@ union x86_sim_gpr {
 		else if ((ALU) == X86_ALU_INC) {                          \
 			X86_SIM_L_SET_ADD_FLAGS((LHS), 1, (RESULT), (WIDTH));\
 			__x86_cf = __x86_l_old_cf;                         \
+		} else if ((ALU) == X86_ALU_DEC) {                          \
+			X86_SIM_L_SET_SUB_FLAGS((LHS), 1, (RESULT), (WIDTH));\
+			__x86_cf = __x86_l_old_cf;                         \
 		} else if ((ALU) == X86_ALU_SUB)                          \
 			X86_SIM_L_SET_SUB_FLAGS((LHS), (RHS), (RESULT), (WIDTH));\
 		else if ((ALU) == X86_ALU_SBB)                            \
 			X86_SIM_L_SET_SBB_FLAGS((LHS), (RHS), 0, (RESULT), (WIDTH));\
+		else if ((ALU) == X86_ALU_NEG)                            \
+			X86_SIM_L_SET_SUB_FLAGS(0, (LHS), (RESULT), (WIDTH));\
 		else if ((ALU) == X86_ALU_NOT)                            \
 			(void)0;                                          \
 		else if ((ALU) == X86_ALU_SHL || (ALU) == X86_ALU_SHR ||  \
@@ -940,6 +946,76 @@ union x86_sim_gpr {
 		}                                                         \
 	} while (0)
 
+#define X86_SIM_L_EXEC_ALU_MEM_REG(DST, SRC, FLAGS, AUX, IMM)               \
+	do {                                                               \
+		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_alu = X86_MEM_AUX_GET_ALU_OP(AUX);           \
+		__u64 __x86_l_lhs = X86_SIM_L_READ_MEM_VALUE((DST), (AUX),\
+			(IMM), __x86_l_width, 0);                         \
+		__u64 __x86_l_rhs = X86_SIM_L_READ_REG(SRC);             \
+		__u64 __x86_l_result = x86_alu_result(__x86_l_lhs,       \
+			__x86_l_rhs, __x86_l_alu, __x86_l_width);         \
+		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
+			x86_simm(IMM));                                    \
+		void *__x86_l_base_ptr = (void *)0;                       \
+		X86_SIM_L_SET_ALU_FLAGS(__x86_l_lhs, __x86_l_rhs,         \
+					__x86_l_result, __x86_l_alu,    \
+					__x86_l_width);                  \
+		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                     \
+		if ((DST) != X86_REG_NONE)                                \
+			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(DST);    \
+		if ((DST) == X86_RSP)                                     \
+			X86_SIM_L_STACK_WRITE(                            \
+				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
+				__x86_l_width, __x86_l_result);          \
+		else {                                                    \
+			void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +   \
+					     __x86_l_disp;               \
+			X86_SIM_L_STORE_ADDR(__x86_l_addr,                \
+					     __x86_l_width, __x86_l_result);\
+		}                                                         \
+	} while (0)
+
+#define X86_SIM_L_EXEC_BZHI(DST, SRC, COUNT, FLAGS)                         \
+	do {                                                               \
+		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u32 __x86_l_bits = x86_width_bits(__x86_l_width);       \
+		__u64 __x86_l_src = X86_SIM_L_READ_REG(SRC);             \
+		__u64 __x86_l_count = X86_SIM_L_READ_REG(COUNT) & 0xff;  \
+		__u64 __x86_l_result = __x86_l_src;                      \
+		if (__x86_l_count < __x86_l_bits)                         \
+			__x86_l_result &= (1ULL << __x86_l_count) - 1;    \
+		__x86_l_result = x86_apply_width(__x86_l_result,          \
+						 __x86_l_width);        \
+		__x86_cf = __x86_l_count >= __x86_l_bits;                 \
+		__x86_of = 0;                                             \
+		__x86_sf = 0;                                             \
+		__x86_zf = __x86_l_result == 0;                           \
+		X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,          \
+					  __x86_l_width);                    \
+	} while (0)
+
+#define X86_SIM_L_EXEC_BZHI_MEM(DST, SRC, FLAGS, AUX, IMM)                  \
+	do {                                                               \
+		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u32 __x86_l_bits = x86_width_bits(__x86_l_width);       \
+		__u64 __x86_l_src = X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),\
+			(IMM), __x86_l_width, 0);                         \
+		__u64 __x86_l_count = X86_SIM_L_READ_REG(                 \
+			X86_REG_AUX_GET_SRC_SHIFT(AUX)) & 0xff;           \
+		__u64 __x86_l_result = __x86_l_src;                      \
+		if (__x86_l_count < __x86_l_bits)                         \
+			__x86_l_result &= (1ULL << __x86_l_count) - 1;    \
+		__x86_l_result = x86_apply_width(__x86_l_result,          \
+						 __x86_l_width);        \
+		__x86_cf = __x86_l_count >= __x86_l_bits;                 \
+		__x86_of = 0;                                             \
+		__x86_sf = 0;                                             \
+		__x86_zf = __x86_l_result == 0;                           \
+		X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,          \
+					  __x86_l_width);                    \
+	} while (0)
+
 #define X86_SIM_L_EXEC_CMP_MEM(OP, DST, SRC, FLAGS, AUX, IMM)               \
 	do {                                                               \
 		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
@@ -1042,6 +1118,8 @@ union x86_sim_gpr {
 			X86_SIM_L_EXEC_ALU_MEM_UNARY((DST), (FLAGS), (AUX), (IMM));\
 		} else if ((OP) == X86_OP_ALU_MEM_IMM) {                  \
 			X86_SIM_L_EXEC_ALU_MEM_IMM((DST), (FLAGS), (AUX), (IMM));\
+		} else if ((OP) == X86_OP_ALU_MEM_REG) {                  \
+			X86_SIM_L_EXEC_ALU_MEM_REG((DST), (SRC), (FLAGS), (AUX), (IMM));\
 		} else if ((OP) == X86_OP_CMP_IMM ||                      \
 			   (OP) == X86_OP_TEST_IMM) {                    \
 			__u64 __x86_l_lhs = X86_SIM_L_READ_REG(DST);      \
@@ -1129,6 +1207,10 @@ union x86_sim_gpr {
 					x86_ror(__x86_l_src, (__u8)(IMM),         \
 						__x86_l_width),                   \
 					__x86_l_width);                          \
+			} else if ((OP) == X86_OP_BZHI) {                         \
+				X86_SIM_L_EXEC_BZHI((DST), (SRC), (AUX), (FLAGS));\
+			} else if ((OP) == X86_OP_BZHI_MEM) {                     \
+				X86_SIM_L_EXEC_BZHI_MEM((DST), (SRC), (FLAGS), (AUX), (IMM));\
 			} else if ((OP) == X86_OP_XCHG) {                         \
 				if (__x86_l_width == X86_WIDTH_64) {              \
 					void *__x86_l_dst_ptr =                    \

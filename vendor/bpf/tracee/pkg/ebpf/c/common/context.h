@@ -64,7 +64,7 @@ statfunc int init_task_context(task_context_t *tsk_ctx, struct task_struct *task
     // the destination buffer is not padded with zeroes (see
     // https://github.com/torvalds/linux/commit/03b9c7fa3f15f51bcd07f3828c2a01311e7746c4 and
     // https://github.com/torvalds/linux/commit/f3f21349779776135349a8e6f114a1485b2476b7)
-    __builtin_memset(&tsk_ctx->comm, 0, sizeof(tsk_ctx->comm));
+    __builtin_memset_inline(&tsk_ctx->comm, 0, sizeof(tsk_ctx->comm));
     bpf_get_current_comm(&tsk_ctx->comm, sizeof(tsk_ctx->comm));
 
     // UTS Name
@@ -77,11 +77,7 @@ statfunc int init_task_context(task_context_t *tsk_ctx, struct task_struct *task
 
 statfunc void init_proc_info_scratch(u32 pid, scratch_t *scratch)
 {
-#ifdef MICRO_NATIVE
     __builtin_memset_inline(&scratch->proc_info, 0, sizeof(proc_info_t));
-#else
-    __builtin_memset(&scratch->proc_info, 0, sizeof(proc_info_t));
-#endif
     bpf_map_update_elem(&proc_info_map, &pid, &scratch->proc_info, BPF_NOEXIST);
 }
 
@@ -98,7 +94,7 @@ statfunc proc_info_t *init_proc_info(u32 pid, u32 scratch_idx)
 
 statfunc void init_task_info_scratch(u32 tid, scratch_t *scratch)
 {
-    __builtin_memset(&scratch->task_info, 0, sizeof(task_info_t));
+    __builtin_memset_inline(&scratch->task_info, 0, sizeof(task_info_t));
     bpf_map_update_elem(&task_info_map, &tid, &scratch->task_info, BPF_NOEXIST);
 }
 
@@ -149,7 +145,7 @@ statfunc int init_program_data_common(program_data_t *p,
 
     p->event->task = task;
 
-    __builtin_memset(&p->event->context.task, 0, sizeof(p->event->context.task));
+    __builtin_memset_inline(&p->event->context.task, 0, sizeof(p->event->context.task));
 
     // get the minimal context required at this stage
     // any other context will be initialized only if event is submitted
@@ -275,7 +271,8 @@ statfunc void reset_event_args_buf(event_data_t *event)
     event->args_buf.argnum = 0;
 
     // Mark all entries in args_offset as invalid (0xFF)
-    __builtin_memset(event->args_buf.args_offset, 0xFF, sizeof(event->args_buf.args_offset));
+    __builtin_memset_inline(
+        event->args_buf.args_offset, 0xFF, sizeof(event->args_buf.args_offset));
 }
 
 // use this function in programs that send more than one event

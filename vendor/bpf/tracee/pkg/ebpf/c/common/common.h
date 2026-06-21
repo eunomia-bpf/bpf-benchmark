@@ -11,11 +11,7 @@
 
 #define statfunc static __always_inline
 
-#ifdef MICRO_NATIVE
 #define sharedfunc static __attribute__((noinline))
-#else
-#define sharedfunc static __always_inline
-#endif
 
 // FUNCTIONS & MACROS
 

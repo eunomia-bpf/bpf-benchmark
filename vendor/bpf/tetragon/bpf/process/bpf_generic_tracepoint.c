@@ -203,60 +203,35 @@ generic_tracepoint_event(struct generic_tracepoint_event_arg *ctx)
 	msg->a0 = ({
 		unsigned long ctx_off = config->off[0];
 		int ty = config->arg[0];
-#ifdef MICRO_NATIVE
-		ctx_off &= 0xffff;
-#else
-		asm volatile("%[ctx_off] &= 0xffff;\n"
-			     : [ctx_off] "+r"(ctx_off));
-#endif
+		tetragon_mask(ctx_off, 0xffff);
 		get_ctx_ul((char *)ctx + ctx_off, ty);
 	});
 
 	msg->a1 = ({
 		unsigned long ctx_off = config->off[1];
 		int ty = config->arg[1];
-#ifdef MICRO_NATIVE
-		ctx_off &= 0xffff;
-#else
-		asm volatile("%[ctx_off] &= 0xffff;\n"
-			     : [ctx_off] "+r"(ctx_off));
-#endif
+		tetragon_mask(ctx_off, 0xffff);
 		get_ctx_ul((char *)ctx + ctx_off, ty);
 	});
 
 	msg->a2 = ({
 		unsigned long ctx_off = config->off[2];
 		int ty = config->arg[2];
-#ifdef MICRO_NATIVE
-		ctx_off &= 0xffff;
-#else
-		asm volatile("%[ctx_off] &= 0xffff;\n"
-			     : [ctx_off] "+r"(ctx_off));
-#endif
+		tetragon_mask(ctx_off, 0xffff);
 		get_ctx_ul((char *)ctx + ctx_off, ty);
 	});
 
 	msg->a3 = ({
 		unsigned long ctx_off = config->off[3];
 		int ty = config->arg[3];
-#ifdef MICRO_NATIVE
-		ctx_off &= 0xffff;
-#else
-		asm volatile("%[ctx_off] &= 0xffff;\n"
-			     : [ctx_off] "+r"(ctx_off));
-#endif
+		tetragon_mask(ctx_off, 0xffff);
 		get_ctx_ul((char *)ctx + ctx_off, ty);
 	});
 
 	msg->a4 = ({
 		unsigned long ctx_off = config->off[4];
 		int ty = config->arg[4];
-#ifdef MICRO_NATIVE
-		ctx_off &= 0xffff;
-#else
-		asm volatile("%[ctx_off] &= 0xffff;\n"
-			     : [ctx_off] "+r"(ctx_off));
-#endif
+		tetragon_mask(ctx_off, 0xffff);
 		get_ctx_ul((char *)ctx + ctx_off, ty);
 	});
 
