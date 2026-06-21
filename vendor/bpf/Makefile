@@ -215,6 +215,7 @@ $(NATIVE_OUT)/cilium/bpf_alignchecker.native.o: CILIUM_NATIVE_OPTIONS := $(CILIU
 $(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(CILIUM_NATIVE_OPTIONS) $(NATIVE_CFLAGS) \
+		-DMICRO_NATIVE_CILIUM_DISABLE_HYBRID_ROUTING \
 		-include "$(CURDIR)/native_compat.h" \
 		-I"$(CURDIR)/cilium/bpf" -I"$(CURDIR)/cilium/bpf/include" \
 		-I"$(CURDIR)/cilium/bpf/include/bpf" \

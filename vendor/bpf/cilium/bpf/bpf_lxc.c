@@ -871,7 +871,7 @@ static __always_inline int handle_ipv6_from_lxc(struct __ctx_buff *ctx, __u32 *d
 		const union v6addr *daddr = (union v6addr *)&ip6->daddr;
 		bool same_subnet_id = false;
 
-		if (CONFIG(hybrid_routing_enabled)) {
+		if (CILIUM_HYBRID_ROUTING_ENABLED) {
 			const union v6addr *saddr = (union v6addr *)&ip6->saddr;
 			__u32 src_subnet_id = lookup_ip6_subnet_id(saddr);
 			__u32 dst_subnet_id = lookup_ip6_subnet_id(daddr);
@@ -1457,7 +1457,7 @@ static __always_inline int handle_ipv4_from_lxc(struct __ctx_buff *ctx, __u32 *d
 
 	bool same_subnet_id = false;
 
-	if (CONFIG(hybrid_routing_enabled)) {
+	if (CILIUM_HYBRID_ROUTING_ENABLED) {
 		__u32 src_subnet_id = lookup_ip4_subnet_id(ip4->saddr);
 		__u32 dst_subnet_id = lookup_ip4_subnet_id(ip4->daddr);
 

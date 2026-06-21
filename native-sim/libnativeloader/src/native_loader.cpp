@@ -501,7 +501,7 @@ constexpr const char *kArm64BpfProgBpfFuncOffsetKey =
     "__native_arm64_bpf_prog_bpf_func_offset";
 constexpr const char *kArm64TailCallOffsetKey = "__native_arm64_tail_call_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v63";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v65";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
 constexpr const char *kNativeStubBtfCacheVersion = "native-stub-btf-cache-v1";
 constexpr size_t kInitialVerifierLogSize = 256 * 1024;
@@ -2613,6 +2613,7 @@ struct NativeLinkArgs {
         uint32_t value_size = 0;
         uint32_t value_offset = 0;
         uint64_t percpu_base_addr = 0;
+        std::string map_name;
     };
     std::vector<NameAddr> helpers;
     std::vector<NameAddr> maps;
@@ -2695,6 +2696,7 @@ struct CompanionLoad {
         uint32_t value_size;
         uint32_t value_offset;
         uint64_t percpu_base_addr;
+        std::string map_name;
     };
     std::vector<UpdateSite> update_sites;
 };
@@ -3412,14 +3414,17 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
                 close(fd);
                 fail("gelf_getsym " + native_object.string() + ": " + elf_errmsg(-1));
             }
-            if (GELF_ST_TYPE(sym.st_info) != STT_OBJECT ||
-                sym.st_size == 0 ||
-                sym.st_shndx == SHN_UNDEF ||
-                sym.st_shndx >= SHN_LORESERVE) {
-                continue;
-            }
             const char *name = elf_strptr(elf, shdr.sh_link, sym.st_name);
             if (!name || !name[0]) {
+                continue;
+            }
+            if (sym.st_shndx == SHN_UNDEF) {
+                add_native_map_symbol_alias(load, name);
+                continue;
+            }
+            if (GELF_ST_TYPE(sym.st_info) != STT_OBJECT ||
+                sym.st_size == 0 ||
+                sym.st_shndx >= SHN_LORESERVE) {
                 continue;
             }
             Elf_Scn *target_scn = elf_getscn(elf, sym.st_shndx);
@@ -3601,6 +3606,7 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
                 0,
             };
             if (map_it != meta_by_source_fd.end()) {
+                site.map_name = map_it->second.name;
                 configure_update_site_for_shape(site,
                                                 map_shape_from_meta(map_it->second),
                                                 map_it->second.fd,

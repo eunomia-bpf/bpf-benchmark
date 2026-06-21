@@ -183,6 +183,13 @@ def _validate_native_loader_skip_rejit(
     )
 
 
+def _effective_rejit_enabled_passes(*, native_loader_post_only: bool) -> list[str]:
+    enabled_passes = benchmark_rejit_enabled_passes()
+    if native_loader_post_only and "BPFREJIT_BENCH_PASSES" not in os.environ:
+        return []
+    return enabled_passes
+
+
 def _current_native_loader_env() -> dict[str, str]:
     return {
         name: value
@@ -688,7 +695,9 @@ def run_suite(
     results_by_name: dict[str, dict[str, object]] = {}
     completed_apps: set[str] = set()
     total_apps = len(suite.apps)
-    apply_enabled_passes = benchmark_rejit_enabled_passes()
+    apply_enabled_passes = _effective_rejit_enabled_passes(
+        native_loader_post_only=native_loader_post_only
+    )
 
     # Load all kinsn .ko modules into the running kernel before any app
     # starts. Stock-kernel BTF probing happens inside shim_init via
@@ -912,6 +921,18 @@ def run_suite(
                     if skip_rejit:
                         _print_progress("rejit_skipped", app=app.name, runner=app.runner)
                         lifecycle.rejit_result = {"status": "skipped", "mode": "loadtime"}
+                    elif native_loader_post_only and not apply_enabled_passes:
+                        lifecycle.rejit_result = {
+                            "status": "ok",
+                            "mode": "native_loader",
+                            "enabled_passes": [],
+                        }
+                        _print_progress(
+                            "loadtime_plan_done",
+                            app=app.name,
+                            runner=app.runner,
+                            status="native_loader_only",
+                        )
                     else:
                         _print_progress("loadtime_plan_start", app=app.name, runner=app.runner)
                         plan_path, _plan_payload = _write_loadtime_plan(
@@ -1156,6 +1177,7 @@ def build_run_metadata(
     *,
     resolved_samples: int,
     resolved_workload_seconds: float,
+    enabled_passes: Sequence[str] | None = None,
 ) -> dict[str, object]:
     metadata = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -1166,7 +1188,7 @@ def build_run_metadata(
         "workload_only": bool(getattr(args, "workload_only", False)),
         "bpf_stats": bool(getattr(args, "collect_bpf_stats", True)),
     }
-    metadata.update(benchmark_run_provenance())
+    metadata.update(benchmark_run_provenance(enabled_passes=enabled_passes))
     metadata.update(current_process_identity())
     return metadata
 
@@ -1276,6 +1298,10 @@ def main(argv: list[str] | None = None) -> int:
     suite = _filter_suite_apps(load_app_suite_from_yaml(Path(args.suite).resolve()))
     resolved_workload_seconds = _workload_seconds(args)
     resolved_samples = _sample_count(args)
+    native_loader_post_only = _native_loader_post_only_enabled()
+    effective_enabled_passes = _effective_rejit_enabled_passes(
+        native_loader_post_only=native_loader_post_only
+    )
     run_type = derive_run_type(output_json, "vm_corpus")
     started_at = datetime.now(timezone.utc).isoformat()
     progress_payload: dict[str, object] = {
@@ -1295,6 +1321,7 @@ def main(argv: list[str] | None = None) -> int:
             args,
             resolved_samples=resolved_samples,
             resolved_workload_seconds=resolved_workload_seconds,
+            enabled_passes=effective_enabled_passes,
         )
         metadata["status"] = status
         metadata["started_at"] = session_started_at

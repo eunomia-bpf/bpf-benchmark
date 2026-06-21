@@ -10,6 +10,12 @@
 
 DECLARE_CONFIG(bool, hybrid_routing_enabled, "Enable hybrid mode routing based on subnet IDs")
 
+#ifdef MICRO_NATIVE_CILIUM_DISABLE_HYBRID_ROUTING
+#define CILIUM_HYBRID_ROUTING_ENABLED false
+#else
+#define CILIUM_HYBRID_ROUTING_ENABLED CONFIG(hybrid_routing_enabled)
+#endif
+
 #define SUBNET_MAP_SIZE 1024
 
 struct subnet_key {

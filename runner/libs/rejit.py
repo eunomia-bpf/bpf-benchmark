@@ -19,6 +19,7 @@ from . import ROOT_DIR
 
 
 _BENCH_PASSES_ENV = "BPFREJIT_BENCH_PASSES"
+_NATIVE_LOADER_POST_ONLY_ENV = "BPFREJIT_CORPUS_NATIVE_LOADER_POST_ONLY"
 _SKIP_REJIT_ENV = "SKIP_REJIT"
 _BENCHMARK_CONFIG_PATH = ROOT_DIR / "corpus" / "config" / "benchmark_config.yaml"
 _DEFAULT_BENCHMARK_REPEAT = 200
@@ -201,12 +202,19 @@ def benchmark_rejit_enabled_passes() -> list[str]:
             return list(_cached_benchmark_config_enabled_passes())
         tokens = [token.strip() for token in text.split(",") if token.strip()]
         return _expand_groups(tokens, load_benchmark_config().get("policy") or {})
+    native_post_only = os.environ.get(_NATIVE_LOADER_POST_ONLY_ENV, "").strip().lower()
+    if native_post_only in {"1", "true", "yes", "on"}:
+        return []
     return list(_cached_benchmark_config_enabled_passes())
 
 
-def benchmark_run_provenance() -> dict[str, object]:
+def benchmark_run_provenance(
+    *,
+    enabled_passes: Sequence[str] | None = None,
+) -> dict[str, object]:
+    passes = list(benchmark_rejit_enabled_passes() if enabled_passes is None else enabled_passes)
     return {
-        "config": {"enabled_passes": benchmark_rejit_enabled_passes()},
+        "config": {"enabled_passes": passes},
     }
 
 _SHIM_SOCK_DIR = Path("/var/run/bpfrejit")

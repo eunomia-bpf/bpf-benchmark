@@ -375,7 +375,7 @@ handle_ipv6_cont(struct __ctx_buff *ctx, __u32 secctx, const bool from_host,
 	/* Check if the source and destination IP has same subnet ID. */
 	bool same_subnet_id = false;
 
-	if (CONFIG(hybrid_routing_enabled)) {
+	if (CILIUM_HYBRID_ROUTING_ENABLED) {
 		__u32 src_subnet_id = lookup_ip6_subnet_id((union v6addr *)&ip6->saddr);
 		__u32 dst_subnet_id = lookup_ip6_subnet_id((union v6addr *)&ip6->daddr);
 
@@ -820,7 +820,7 @@ handle_ipv4_cont(struct __ctx_buff *ctx, __u32 secctx, const bool from_host,
 	/* Check if the source and destination IP has same subnet ID. */
 	bool same_subnet_id = false;
 	/* Lookup the subnet IDs for the source and destination IPs in hybrid routing mode. */
-	if (CONFIG(hybrid_routing_enabled)) {
+	if (CILIUM_HYBRID_ROUTING_ENABLED) {
 		__u32 src_subnet_id = lookup_ip4_subnet_id(ip4->saddr);
 		__u32 dst_subnet_id = lookup_ip4_subnet_id(ip4->daddr);
 

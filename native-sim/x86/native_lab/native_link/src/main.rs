@@ -180,7 +180,7 @@ struct Arm64HelperLiteralLoad {
     target: u64,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 struct UpdateSiteSpec {
     kind: UpdateKind,
     target_addr: u64,
@@ -189,6 +189,7 @@ struct UpdateSiteSpec {
     value_size: u32,
     value_offset: u32,
     percpu_base_addr: u64,
+    map_name: Option<String>,
 }
 
 #[derive(Debug)]
@@ -262,6 +263,7 @@ struct LinkPlanUpdateSite {
     value_size: u32,
     value_offset: u32,
     percpu_base_addr: u64,
+    map_name: Option<String>,
 }
 
 fn name_addr_vec_to_map(items: Vec<LinkPlanNameAddr>, label: &str) -> Result<HashMap<String, u64>> {
@@ -334,6 +336,7 @@ fn update_site_from_plan(site: LinkPlanUpdateSite) -> Result<UpdateSiteSpec> {
         value_size: site.value_size,
         value_offset: site.value_offset,
         percpu_base_addr: site.percpu_base_addr,
+        map_name: site.map_name,
     })
 }
 

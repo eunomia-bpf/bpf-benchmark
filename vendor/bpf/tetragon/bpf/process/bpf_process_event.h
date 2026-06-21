@@ -188,52 +188,6 @@ get_current_subj_creds(struct msg_cred *info, struct task_struct *task)
 FUNC_INLINE void
 get_namespaces(struct msg_ns *msg, struct task_struct *task)
 {
-#ifdef MICRO_NATIVE_TETRAGON
-	struct nsproxy *nsp = task ? task->nsproxy : 0;
-	struct pid *p = task ? task->thread_pid : 0;
-	struct mm_struct *mm = task ? task->mm : 0;
-	struct user_namespace *user_ns = mm ? mm->user_ns : 0;
-
-	msg->uts_inum = 0;
-	msg->ipc_inum = 0;
-	msg->mnt_inum = 0;
-	msg->pid_inum = 0;
-	msg->pid_for_children_inum = 0;
-	msg->net_inum = 0;
-	msg->time_inum = 0;
-	msg->time_for_children_inum = 0;
-	msg->cgroup_inum = 0;
-	msg->user_inum = 0;
-
-	if (!nsp)
-		return;
-
-	if (nsp->uts_ns)
-		msg->uts_inum = nsp->uts_ns->ns.inum;
-	if (nsp->ipc_ns)
-		msg->ipc_inum = nsp->ipc_ns->ns.inum;
-	if (nsp->mnt_ns)
-		msg->mnt_inum = nsp->mnt_ns->ns.inum;
-	if (p) {
-		int level = p->level;
-
-		if (level >= 0 && p->numbers[level].ns)
-			msg->pid_inum = p->numbers[level].ns->ns.inum;
-	}
-	if (nsp->pid_ns_for_children)
-		msg->pid_for_children_inum = nsp->pid_ns_for_children->ns.inum;
-	if (nsp->net_ns)
-		msg->net_inum = nsp->net_ns->ns.inum;
-	if (nsp->time_ns)
-		msg->time_inum = nsp->time_ns->ns.inum;
-	if (nsp->time_ns_for_children)
-		msg->time_for_children_inum =
-			nsp->time_ns_for_children->ns.inum;
-	if (nsp->cgroup_ns)
-		msg->cgroup_inum = nsp->cgroup_ns->ns.inum;
-	if (user_ns)
-		msg->user_inum = user_ns->ns.inum;
-#else
 	struct nsproxy *nsproxy;
 	struct nsproxy nsp;
 
@@ -334,7 +288,6 @@ get_namespaces(struct msg_ns *msg, struct task_struct *task)
 			msg->user_inum = 0;
 		}
 	}
-#endif
 }
 
 /* Gather current task cgroup name */

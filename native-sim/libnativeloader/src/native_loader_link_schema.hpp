@@ -74,6 +74,7 @@ NativeLinkArgs::UpdateSite make_link_update_site(
         site.value_size,
         site.value_offset,
         site.percpu_base_addr,
+        site.map_name,
     };
 }
 

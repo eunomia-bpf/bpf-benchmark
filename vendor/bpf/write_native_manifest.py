@@ -190,10 +190,19 @@ TRACEE_TETRAGON_MAP_RULES = [
     map_rule("exact", "exit_heap_map", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 40, 1, True),
 ]
 
+OTEL_MAP_RULES = [
+    map_rule("exact", "pid_page_to_map", BPF_MAP_TYPE_LPM_TRIE, 16, 16,
+             native_symbol="pid_page_to_mapping_info"),
+    map_rule("exact", "interpreter_off", BPF_MAP_TYPE_HASH, 8, 40, 32,
+             native_symbol="interpreter_offsets"),
+]
+
 
 def map_rules_for_app(app: str) -> list[dict[str, object]]:
     if app == "cilium":
         return CILIUM_MAP_RULES
+    if app == "otelcol-ebpf-profiler":
+        return OTEL_MAP_RULES
     if app in {"tracee", "tetragon"}:
         return TRACEE_TETRAGON_MAP_RULES
     return []

@@ -40,6 +40,14 @@ fn lookup_site_matches_native_map(spec: &LookupSiteSpec, native_map_name: &str) 
         || truncate_bpf_obj_name(source_map_name) == truncate_bpf_obj_name(native_map_name)
 }
 
+fn update_site_matches_native_map(spec: &UpdateSiteSpec, native_map_name: &str) -> bool {
+    let Some(source_map_name) = spec.map_name.as_deref() else {
+        return false;
+    };
+    source_map_name == native_map_name
+        || truncate_bpf_obj_name(source_map_name) == truncate_bpf_obj_name(native_map_name)
+}
+
 fn lookup_map_spec(
     lookup_maps: &HashMap<String, LookupSiteSpec>,
     native_map_name: &str,
@@ -127,6 +135,38 @@ fn select_lookup_site(
     bail!(
         "x86 bpf_map_lookup_elem native call {native_call_index} in {sym_name} is missing link-plan lookup_sites metadata"
     );
+}
+
+fn select_update_site(
+    update_sites: &[UpdateSiteSpec],
+    used: &mut [bool],
+    native_call_index: usize,
+    native_map_name: Option<&str>,
+) -> Option<(String, usize)> {
+    if let Some(map_name) = native_map_name {
+        if let Some((idx, _)) = update_sites
+            .iter()
+            .enumerate()
+            .find(|(idx, spec)| !used[*idx] && update_site_matches_native_map(spec, map_name))
+        {
+            used[idx] = true;
+            return Some((idx.to_string(), idx));
+        }
+    }
+
+    if native_call_index < update_sites.len() && !used[native_call_index] {
+        used[native_call_index] = true;
+        return Some((native_call_index.to_string(), native_call_index));
+    }
+
+    update_sites
+        .iter()
+        .enumerate()
+        .find(|(idx, _)| !used[*idx])
+        .map(|(idx, _)| {
+            used[idx] = true;
+            (idx.to_string(), idx)
+        })
 }
 
 pub(super) fn bpf_helper_name_from_id(helper_id: u64) -> Option<&'static str> {
@@ -1078,6 +1118,7 @@ pub(super) fn rewrite_x86(
         .copied()
         .unwrap_or(0);
     let mut update_call_counter: usize = 0;
+    let mut update_site_used = vec![false; update_sites.len()];
     let mut resolved_helper_call_sites: HashSet<LocalSiteKey> = HashSet::new();
     let mut resolved_got_relocations: HashSet<LocalSiteKey> = HashSet::new();
 
@@ -1475,7 +1516,15 @@ pub(super) fn rewrite_x86(
                     if name == "bpf_map_update_elem" {
                         let ordinal = update_call_counter;
                         update_call_counter += 1;
-                        if let Some(spec) = update_sites.get(ordinal) {
+                        let native_map_name =
+                            map_symbol_registers.get(&Register::RDI).map(String::as_str);
+                        if let Some((site_label, site_index)) = select_update_site(
+                            update_sites,
+                            &mut update_site_used,
+                            ordinal,
+                            native_map_name,
+                        ) {
+                            let spec = &update_sites[site_index];
                             match spec.kind {
                                 UpdateKind::Array | UpdateKind::PerCpuArray => {
                                     for ib in build_x86_array_update(spec)? {
@@ -1494,7 +1543,7 @@ pub(super) fn rewrite_x86(
                                 UpdateKind::Call => {
                                     let helper_addr = require_call_target(
                                         spec.target_addr,
-                                        &format!("x86 update-site {ordinal}"),
+                                        &format!("x86 update-site {site_label}"),
                                     )?;
                                     push_x86_helper_call_reloc(
                                         &mut local,
@@ -3973,6 +4022,33 @@ mod tests {
             out.push(insn);
         }
         Ok(out)
+    }
+
+    fn test_update_site(map_name: &str, target_addr: u64) -> UpdateSiteSpec {
+        UpdateSiteSpec {
+            kind: UpdateKind::Call,
+            target_addr,
+            max_entries: 0,
+            elem_size: 0,
+            value_size: 0,
+            value_offset: 0,
+            percpu_base_addr: 0,
+            map_name: Some(map_name.to_string()),
+        }
+    }
+
+    #[test]
+    fn update_selection_prefers_native_map_over_ordinal_order() {
+        let sites = vec![
+            test_update_site("wrong_map", 0x1000),
+            test_update_site("target_map", 0x2000),
+        ];
+        let mut used = vec![false; sites.len()];
+
+        let selected = select_update_site(&sites, &mut used, 0, Some("target_map"));
+
+        assert_eq!(selected, Some(("1".to_string(), 1)));
+        assert_eq!(used, vec![false, true]);
     }
 
     #[test]
