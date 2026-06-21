@@ -266,6 +266,7 @@ $(NATIVE_LINK):
 
 $(NATIVE_OUT)/katran/%.proof.ok: $(NATIVE_OUT)/katran/%.native.o $(NATIVE_LINK) Makefile
 	install -d "$(dir $@)"
+	rm -f "$(NATIVE_OUT)/katran/$*."*.proof.o "$@"
 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
 	if [[ -z "$${symbols}" ]]; then \
 		echo "no native text symbols in $<" >&2; \
@@ -280,7 +281,7 @@ $(NATIVE_OUT)/katran/%.proof.ok: $(NATIVE_OUT)/katran/%.native.o $(NATIVE_LINK) 
 native-katran: $(KATRAN_NATIVE_OBJS) $(KATRAN_NATIVE_PROOF_MARKERS)
 	install -d "$(NATIVE_OUT)/katran"
 	install -d "$(KATRAN_NATIVE_STAGE_OUT)"
-	rm -f "$(KATRAN_NATIVE_STAGE_OUT)"/*.proof.o
+	rm -f "$(KATRAN_NATIVE_STAGE_OUT)"/*.native.o "$(KATRAN_NATIVE_STAGE_OUT)"/*.proof.o
 	install -m 0644 $(KATRAN_NATIVE_OBJS) "$(KATRAN_NATIVE_STAGE_OUT)"
 	install -m 0644 "$(NATIVE_OUT)/katran"/*.proof.o "$(KATRAN_NATIVE_STAGE_OUT)"
 	python3 "$(CURDIR)/write_native_manifest.py" --app katran --llvm-nm "$(LLVM_NM)" --skip-prefix jhash \
@@ -296,6 +297,7 @@ native-katran: $(KATRAN_NATIVE_OBJS) $(KATRAN_NATIVE_PROOF_MARKERS)
 
 $(NATIVE_OUT)/bcc/%.proof.ok: $(NATIVE_OUT)/bcc/%.native.o $(NATIVE_LINK) Makefile
 	install -d "$(dir $@)"
+	rm -f "$(NATIVE_OUT)/bcc/$*."*.proof.o "$@"
 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
 	if [[ -z "$${symbols}" ]]; then \
 		echo "no native text symbols in $<" >&2; \
@@ -310,7 +312,7 @@ $(NATIVE_OUT)/bcc/%.proof.ok: $(NATIVE_OUT)/bcc/%.native.o $(NATIVE_LINK) Makefi
 native-bcc: $(BCC_VMLINUX_H) $(BCC_NATIVE_OBJS) $(BCC_NATIVE_PROOF_MARKERS)
 	install -d "$(NATIVE_OUT)/bcc"
 	install -d "$(BCC_NATIVE_STAGE_OUT)"
-	rm -f "$(BCC_NATIVE_STAGE_OUT)"/*.proof.o
+	rm -f "$(BCC_NATIVE_STAGE_OUT)"/*.native.o "$(BCC_NATIVE_STAGE_OUT)"/*.proof.o
 	install -m 0644 $(BCC_NATIVE_OBJS) "$(BCC_NATIVE_STAGE_OUT)"
 	install -m 0644 "$(NATIVE_OUT)/bcc"/*.proof.o "$(BCC_NATIVE_STAGE_OUT)"
 	python3 "$(CURDIR)/write_native_manifest.py" --app bcc --llvm-nm "$(LLVM_NM)" \
@@ -322,6 +324,7 @@ native-bcc: $(BCC_VMLINUX_H) $(BCC_NATIVE_OBJS) $(BCC_NATIVE_PROOF_MARKERS)
 
 $(NATIVE_OUT)/cilium/%.proof.ok: $(NATIVE_OUT)/cilium/%.native.o $(NATIVE_LINK) Makefile
 	install -d "$(dir $@)"
+	rm -f "$(NATIVE_OUT)/cilium/$*."*.proof.o "$@"
 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ && $$1 !~ /^__check_/ {print $$1}')"; \
 	if [[ -z "$${symbols}" ]]; then \
 		echo "no native text symbols in $<" >&2; \
@@ -363,6 +366,7 @@ native-cilium: $(CILIUM_NATIVE_OBJS) $(CILIUM_NATIVE_PROOF_MARKERS)
 
 $(OTEL_NATIVE_PROOF_MARKER): $(OTEL_NATIVE_OBJECT) $(NATIVE_LINK) Makefile
 	install -d "$(dir $@)"
+	rm -f "$(NATIVE_OUT)/otel"/*.proof.o "$@"
 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
 	if [[ -z "$${symbols}" ]]; then \
 		echo "no native text symbols in $<" >&2; \
@@ -376,7 +380,7 @@ $(OTEL_NATIVE_PROOF_MARKER): $(OTEL_NATIVE_OBJECT) $(NATIVE_LINK) Makefile
 
 native-otel: $(OTEL_NATIVE_OBJECT) $(OTEL_NATIVE_PROOF_MARKER)
 	install -d "$(OTEL_NATIVE_STAGE_OUT)"
-	rm -f "$(OTEL_NATIVE_STAGE_OUT)"/*.proof.o
+	rm -f "$(OTEL_NATIVE_STAGE_OUT)"/*.native.o "$(OTEL_NATIVE_STAGE_OUT)"/*.proof.o
 	install -m 0644 "$(OTEL_NATIVE_OBJECT)" "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o"
 	for obj in $(OTEL_NATIVE_UNIT_OBJS); do \
 		install -m 0644 "$${obj}" "$(OTEL_NATIVE_STAGE_OUT)/$$(basename "$${obj}")"; \
