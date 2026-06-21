@@ -47,6 +47,14 @@ def compact(text: str, limit: int = 1200) -> str:
     return head + "\n...\n" + tail
 
 
+def command_failure(result: subprocess.CompletedProcess[str], cmd: list[str], fallback: str) -> str:
+    detail = "\n".join(part for part in [result.stdout, result.stderr] if part)
+    detail = compact(detail)
+    if detail:
+        return detail
+    return f"{fallback} rc={result.returncode}: {' '.join(cmd)}"
+
+
 def safe_name(app: str, proof: Path) -> str:
     stem = proof.name.removesuffix(".proof.o")
     name = f"{app}_{stem}"
@@ -95,7 +103,7 @@ def prepare_generator_inputs(proofs: list[AppProof], proof_dir: Path, config_pat
 def generate_source(config_path: Path, proof_dir: Path, source_dir: Path, proof: AppProof) -> tuple[bool, str]:
     source_dir.mkdir(parents=True, exist_ok=True)
     source = source_dir / f"{proof.name}.bpf.c"
-    result = run([
+    cmd = [
         "python3",
         str(GENERATOR),
         "--config",
@@ -107,10 +115,10 @@ def generate_source(config_path: Path, proof_dir: Path, source_dir: Path, proof:
         "--compact",
         "--only",
         proof.name,
-    ])
+    ]
+    result = run(cmd)
     if result.returncode != 0:
-        detail = "\n".join(part for part in [result.stdout, result.stderr] if part)
-        return False, compact(detail)
+        return False, command_failure(result, cmd, "generator failed")
     if not source.is_file():
         detail = "\n".join(part for part in [result.stdout, result.stderr] if part)
         if not detail:
@@ -146,7 +154,7 @@ def compile_source(source: Path, build_dir: Path) -> tuple[bool, str]:
     result = run(cmd)
     if result.returncode == 0:
         return True, ""
-    return False, compact(result.stderr or result.stdout or "clang failed")
+    return False, command_failure(result, cmd, "clang failed")
 
 
 def main(argv: list[str]) -> int:
