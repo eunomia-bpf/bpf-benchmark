@@ -28,7 +28,7 @@ inside the same `micro_exec` binary.
    ┌──────────────┐  link   ┌─────────────┐  upload  ┌─────────────────────┐
    │ .native.so   │ ──────▶ │ .native.bin │ ────────▶│ /sys/kernel/debug/  │
    │ (clang x86)  │ native- │ (≤128 B per │ debugfs  │ bpf_x86_native_lab/ │
-   └──────────────┘  link   │  chunk × N) │          │ blob{0..1023}       │
+   └──────────────┘  link   │  chunk × N) │          │ blob{0..63}         │
                             └─────────────┘          └─────────────────────┘
                                                                 │
    ┌──────────────────────────────────────┐                     │

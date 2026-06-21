@@ -11,6 +11,12 @@
 
 #define statfunc static __always_inline
 
+#ifdef MICRO_NATIVE
+    #define native_sharedfunc static __attribute__((noinline))
+#else
+    #define native_sharedfunc static __always_inline
+#endif
+
 // FUNCTIONS & MACROS
 
 statfunc const char *get_device_name(struct device *dev)

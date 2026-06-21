@@ -282,7 +282,6 @@ struct NativeLabTarget {
     const char *map_value_ptr_path;
     const char *map_update_elem_path;
     uint32_t chunk_bytes;
-    uint32_t max_blobs;
 };
 
 #if defined(__aarch64__)
@@ -297,7 +296,6 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .map_value_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_value_ptr",
     .map_update_elem_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_update_elem",
     .chunk_bytes = 16 * 1024,
-    .max_blobs = 512,
 };
 #else
 constexpr NativeLabTarget kNativeLabTarget = {
@@ -311,12 +309,12 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .map_value_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_value_ptr",
     .map_update_elem_path = "/sys/kernel/debug/bpf_x86_native_lab/map_update_elem",
     .chunk_bytes = 128,
-    .max_blobs = 1024,
 };
 #endif
 
 constexpr const char *kVmlinuxBtfPath = "/sys/kernel/btf/vmlinux";
 constexpr const char *kDebugfsDir = "/sys/kernel/debug";
+constexpr uint32_t kMaxBlobs = 512;
 
 bool native_lab_needs_tail_call_probe()
 {
@@ -893,10 +891,9 @@ std::vector<NativeBlobChunk> plan_blob_chunks(size_t blob_size,
         chunks.push_back(NativeBlobChunk{offset, end - offset});
         offset = end;
     }
-    if (chunks.size() > kNativeLabTarget.max_blobs) {
+    if (chunks.size() > kMaxBlobs) {
         fail("native blob requires " + std::to_string(chunks.size()) +
-             " chunks but module only supports " +
-             std::to_string(kNativeLabTarget.max_blobs));
+             " chunks but module only supports " + std::to_string(kMaxBlobs));
     }
     return chunks;
 }
