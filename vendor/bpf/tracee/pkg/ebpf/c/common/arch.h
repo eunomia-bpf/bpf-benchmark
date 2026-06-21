@@ -30,14 +30,7 @@ statfunc bool is_x86_compat(struct task_struct *task)
 
 statfunc bool is_arm64_compat(struct task_struct *task)
 {
-#if defined(MICRO_NATIVE_DIRECT_CORE_READ) && defined(bpf_target_arm64)
-    /*
-     * Tracee's slim arm64 vmlinux.h and the target arm64 task_struct both
-     * place thread_info.flags at task offset 0. Keep this direct read scoped:
-     * other task_struct fields still need CO-RE/helper reads.
-     */
-    return BPFREJIT_NATIVE_DIRECT_READ(task, thread_info.flags) & _TIF_32BIT;
-#elif defined(bpf_target_arm64)
+#if defined(bpf_target_arm64)
     return BPF_CORE_READ(task, thread_info.flags) & _TIF_32BIT;
 #else
     return false;
@@ -57,11 +50,7 @@ statfunc bool is_compat(struct task_struct *task)
 
 statfunc int get_syscall_id_from_regs(struct pt_regs *regs)
 {
-#if defined(MICRO_NATIVE_DIRECT_CORE_READ) && defined(bpf_target_x86)
-    int id = BPFREJIT_NATIVE_DIRECT_READ(regs, orig_ax);
-#elif defined(MICRO_NATIVE_DIRECT_CORE_READ) && defined(bpf_target_arm64)
-    int id = BPFREJIT_NATIVE_DIRECT_READ(regs, syscallno);
-#elif defined(bpf_target_x86)
+#if defined(bpf_target_x86)
     int id = BPF_CORE_READ(regs, orig_ax);
 #elif defined(bpf_target_arm64)
     int id = BPF_CORE_READ(regs, syscallno);

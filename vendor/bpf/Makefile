@@ -75,14 +75,11 @@ OTEL_NATIVE_UNIT_OBJS := $(patsubst $(OTEL_EBPF_DIR)/%.ebpf.c,$(NATIVE_OUT)/otel
 OTEL_NATIVE_OBJECT := $(NATIVE_OUT)/otel/otelcol-ebpf-profiler.native.o
 OTEL_NATIVE_PROOF_MARKER := $(NATIVE_OUT)/otel/otelcol-ebpf-profiler.proof.ok
 TRACEE_NATIVE_OBJECT := $(NATIVE_OUT)/tracee/tracee.native.o
-TRACEE_DIRECT_CORE_NATIVE_OBJECT := $(NATIVE_OUT)/tracee/tracee_direct_core.native.o
-TRACEE_DIRECT_CORE_SYMBOLS := trace_sys_enter trace_sys_exit
 TRACEE_LSM_SUPPORT_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/tracee/lsm_support/%.native.o,$(TRACEE_LSM_SUPPORT_SRCS))
-TRACEE_NATIVE_OBJS := $(TRACEE_NATIVE_OBJECT) $(TRACEE_DIRECT_CORE_NATIVE_OBJECT) $(TRACEE_LSM_SUPPORT_NATIVE_OBJS)
+TRACEE_NATIVE_OBJS := $(TRACEE_NATIVE_OBJECT) $(TRACEE_LSM_SUPPORT_NATIVE_OBJS)
 TRACEE_NATIVE_PROOF_MARKER := $(NATIVE_OUT)/tracee/tracee.proof.ok
-TRACEE_DIRECT_CORE_NATIVE_PROOF_MARKER := $(NATIVE_OUT)/tracee/tracee_direct_core.proof.ok
 TRACEE_LSM_SUPPORT_NATIVE_PROOF_MARKERS := $(patsubst %,$(NATIVE_OUT)/tracee/lsm_support/%.proof.ok,$(TRACEE_LSM_SUPPORT_SRCS))
-TRACEE_NATIVE_PROOF_MARKERS := $(TRACEE_NATIVE_PROOF_MARKER) $(TRACEE_DIRECT_CORE_NATIVE_PROOF_MARKER) $(TRACEE_LSM_SUPPORT_NATIVE_PROOF_MARKERS)
+TRACEE_NATIVE_PROOF_MARKERS := $(TRACEE_NATIVE_PROOF_MARKER) $(TRACEE_LSM_SUPPORT_NATIVE_PROOF_MARKERS)
 
 CILIUM_MAX_BASE_OPTIONS := -DSKIP_DEBUG=1 -DENABLE_IPV4=1 \
 	-DENABLE_ROUTING=1 -DPOLICY_VERDICT_NOTIFY=1 \
@@ -254,16 +251,6 @@ $(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinu
 		$(NATIVE_SYS_INCLUDE_FLAGS) \
 		-o "$@" "$<"
 
-$(TRACEE_DIRECT_CORE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h Makefile
-	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS \
-		-DMICRO_NATIVE_DIRECT_CORE_READ \
-		-include "$(CURDIR)/native_compat.h" \
-		-D$(TARGET_ARCH_DEFINE) -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
-		-I"$(CURDIR)/tracee/pkg/ebpf/c" \
-		$(NATIVE_SYS_INCLUDE_FLAGS) \
-		-o "$@" "$<"
-
 $(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS \
@@ -414,6 +401,7 @@ native-otel: $(OTEL_NATIVE_OBJECT) $(OTEL_NATIVE_PROOF_MARKER)
 
 $(TRACEE_NATIVE_PROOF_MARKER): $(TRACEE_NATIVE_OBJECT) $(NATIVE_LINK) Makefile
 	install -d "$(dir $@)"
+	rm -f "$(NATIVE_OUT)/tracee"/*.proof.o "$@"
 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
 	if [[ -z "$${symbols}" ]]; then \
 		echo "no native text symbols in $<" >&2; \
@@ -425,20 +413,9 @@ $(TRACEE_NATIVE_PROOF_MARKER): $(TRACEE_NATIVE_OBJECT) $(NATIVE_LINK) Makefile
 	done; \
 	printf 'ok\n' > "$@"
 
-$(TRACEE_DIRECT_CORE_NATIVE_PROOF_MARKER): $(TRACEE_DIRECT_CORE_NATIVE_OBJECT) $(NATIVE_LINK) Makefile
-	install -d "$(dir $@)"
-	for sym in $(TRACEE_DIRECT_CORE_SYMBOLS); do \
-		if ! "$(LLVM_NM)" --defined-only --format=posix "$<" | awk -v sym="$${sym}" '$$1 == sym && $$2 ~ /^[Tt]$$/ { found=1 } END { exit !found }'; then \
-			echo "missing direct-core native text symbol $${sym} in $<" >&2; \
-			exit 1; \
-		fi; \
-		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/tracee/tracee_direct_core.$${sym}.proof.o" --mode proof; \
-	done; \
-	printf 'ok\n' > "$@"
-
 $(NATIVE_OUT)/tracee/lsm_support/%.proof.ok: $(NATIVE_OUT)/tracee/lsm_support/%.native.o $(NATIVE_LINK) Makefile
 	install -d "$(dir $@)"
+	rm -f "$(NATIVE_OUT)/tracee/lsm_support/$*."*.proof.o "$@"
 	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
 	if [[ -z "$${symbols}" ]]; then \
 		echo "no native text symbols in $<" >&2; \
@@ -462,15 +439,11 @@ native-tracee: $(TRACEE_NATIVE_OBJS) $(TRACEE_NATIVE_PROOF_MARKERS)
 		--dedupe-program last \
 		--output "$(NATIVE_OUT)/tracee/manifest.json" \
 		--object "$(TRACEE_NATIVE_OBJECT)" \
-		--object "$(TRACEE_DIRECT_CORE_NATIVE_OBJECT),symbol=trace_sys_enter" \
-		--object "$(TRACEE_DIRECT_CORE_NATIVE_OBJECT),symbol=trace_sys_exit" \
 		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(NATIVE_OUT)/tracee/lsm_support/$(src).native.o")
 	python3 "$(CURDIR)/write_native_manifest.py" --app tracee --llvm-nm "$(LLVM_NM)" \
 		--dedupe-program last \
 		--output "$(TRACEE_NATIVE_STAGE_OUT)/manifest.json" \
 		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee.native.o" \
-		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee_direct_core.native.o,symbol=trace_sys_enter" \
-		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee_direct_core.native.o,symbol=trace_sys_exit" \
 		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(TRACEE_NATIVE_STAGE_OUT)/$(src).native.o")
 
 native-tetragon: $(TETRAGON_VMLINUX_H) native_compat.h $(NATIVE_LINK)

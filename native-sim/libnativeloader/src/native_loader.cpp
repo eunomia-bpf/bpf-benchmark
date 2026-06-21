@@ -4017,12 +4017,6 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
     const auto cache_lookup_start = std::chrono::steady_clock::now();
     NativeLinkArgs link_args =
         build_native_link_args(native_link_path, companion.map_addrs, companion);
-#if defined(__aarch64__)
-    if (elf_path.filename() == "tracee_direct_core.native.o" &&
-        (symbol_name == "trace_sys_enter" || symbol_name == "trace_sys_exit")) {
-        link_args.arm64_helper_call_slot = "bl26";
-    }
-#endif
     const std::filesystem::path cache_dir = kNativeLinkCacheDir;
     std::error_code ec;
     std::filesystem::create_directories(cache_dir, ec);

@@ -357,17 +357,6 @@ ____##name(struct pt_regs *ctx, ##args)
                        __native_core_read_expr_3, \
                        __native_core_read_expr_2, \
                        __native_core_read_expr_1)(src, args)
-#ifdef MICRO_NATIVE_DIRECT_CORE_READ
-/*
- * Explicit opt-in for native C reads whose source layout is known to match the
- * runtime ABI without libbpf CO-RE relocation. Do not route generic
- * BPF_CORE_READ through this: Tracee task/ns/file chains need probe-read
- * safety and target-kernel CO-RE offsets.
- */
-#define BPFREJIT_NATIVE_DIRECT_READ(src, args...) \
-    __native_core_read_expr((src), args)
-#endif
-
 #ifndef bpf_core_field_exists
 #ifdef MICRO_NATIVE_TETRAGON
 /*
