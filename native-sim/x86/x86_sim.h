@@ -56,6 +56,22 @@
 #define X86_OP_BZHI 0x34U
 #define X86_OP_BZHI_MEM 0x35U
 #define X86_OP_ALU_MEM_REG 0x36U
+#define X86_OP_BT 0x37U
+#define X86_OP_IMUL_IMM 0x38U
+#define X86_OP_MULX 0x39U
+#define X86_OP_REP_MOVS 0x3aU
+#define X86_OP_TEST_MEM_REG 0x3bU
+#define X86_OP_CALL_MEMSET 0x3cU
+#define X86_OP_ANDN 0x3dU
+#define X86_OP_SETCC_MEM 0x3eU
+#define X86_OP_CALL_MEMCPY 0x3fU
+#define X86_OP_CMOV_MEM 0x40U
+#define X86_OP_IMUL_MEM_IMM 0x41U
+#define X86_OP_BT_IMM 0x42U
+#define X86_OP_BT_MEM_IMM 0x43U
+#define X86_OP_ANDN_MEM 0x44U
+#define X86_OP_CALL_MEMSET_REG 0x45U
+#define X86_OP_CALL_MEMCPY_REG 0x46U
 #define X86_OP_RET 0xffU
 
 #define X86_OP_MOV_IMM64 X86_OP_MOV_IMM
@@ -79,6 +95,7 @@
 #define X86_ALU_SBB 12U
 #define X86_ALU_DEC 13U
 #define X86_ALU_NEG 14U
+#define X86_ALU_ADC 15U
 
 #define X86_CC_O 0U
 #define X86_CC_NO 1U
@@ -255,6 +272,8 @@ static __always_inline __u64 x86_alu_result(__u64 lhs, __u64 rhs,
 	__u64 amount = x86_shift_count(rhs, width);
 
 	if (alu == X86_ALU_ADD)
+		return lhs + rhs;
+	if (alu == X86_ALU_ADC)
 		return lhs + rhs;
 	if (alu == X86_ALU_SUB || alu == X86_ALU_SBB)
 		return lhs - rhs;

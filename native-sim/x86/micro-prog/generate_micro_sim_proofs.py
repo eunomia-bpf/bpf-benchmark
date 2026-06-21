@@ -19,6 +19,11 @@ STAGE2_PROGRAMS = REPO_ROOT / "native-sim" / "test"
 OUT_DIR = Path(__file__).resolve().parent
 CONFIG = REPO_ROOT / "micro" / "config" / "micro_pure_jit.yaml"
 PROOF_OBJECT_DIR = OUT_DIR / "build" / "native-link"
+MAX_REP_MOVS_COUNT = 64
+MAX_MEMSET_COUNT = 1024
+CHUNKED_PROOF_INSN_THRESHOLD = 2048
+CHUNKED_PROOF_CHUNK_INSNS = 384
+CHUNKED_PROOF_PC_DONE = "0xffffffffffffffffULL"
 
 PTR_WIDTH = {
     "BYTE": 8,
@@ -63,6 +68,7 @@ ALU_AUX = {
     "xor": "X86_ALU_XOR",
     "or": "X86_ALU_OR",
     "and": "X86_ALU_AND",
+    "adc": "X86_ALU_ADC",
     "shl": "X86_ALU_SHL",
     "shr": "X86_ALU_SHR",
     "sar": "X86_ALU_SAR",
@@ -88,14 +94,30 @@ CC_AUX = {
     "jle": "X86_CC_LE",
     "js": "X86_CC_S",
     "jns": "X86_CC_NS",
+    "cmova": "X86_CC_A",
     "cmovb": "X86_CC_B",
+    "cmovbe": "X86_CC_BE",
     "cmove": "X86_CC_E",
+    "cmovg": "X86_CC_G",
+    "cmovge": "X86_CC_GE",
+    "cmovae": "X86_CC_AE",
+    "cmovl": "X86_CC_L",
+    "cmovle": "X86_CC_LE",
     "cmovne": "X86_CC_NE",
+    "cmovns": "X86_CC_NS",
+    "cmovs": "X86_CC_S",
+    "seta": "X86_CC_A",
     "setae": "X86_CC_AE",
     "setb": "X86_CC_B",
+    "setbe": "X86_CC_BE",
     "sete": "X86_CC_E",
+    "setg": "X86_CC_G",
     "setge": "X86_CC_GE",
+    "setl": "X86_CC_L",
+    "setle": "X86_CC_LE",
     "setne": "X86_CC_NE",
+    "setns": "X86_CC_NS",
+    "sets": "X86_CC_S",
 }
 
 WIDTH_CONST = {
@@ -119,6 +141,7 @@ class NativeInsn:
     operands: tuple[str, ...]
     reloc_symbol: str | None = None
     reloc_target: int | None = None
+    sim_imm: int | None = None
 
 
 @dataclass(frozen=True)
@@ -129,6 +152,13 @@ class EncodedInsn:
     flags: str
     aux: str
     imm: str
+
+
+@dataclass(frozen=True)
+class ChunkInsn:
+    insn: NativeInsn
+    is_subroutine: bool
+    next_addr: int | None
 
 
 def split_operands(text: str) -> tuple[str, ...]:
@@ -302,6 +332,7 @@ def parse_native_linked_program(
     if not insns:
         return [], {}, blob_len, rodata16
 
+    entry_addr = insns[0].addr
     insn_addrs = {insn.addr for insn in insns}
     exit_addr = max(
         [blob_len, *[
@@ -321,6 +352,7 @@ def parse_native_linked_program(
         and (insn.reloc_target is not None or has_direct_branch_target(insn.operands[0]))
         and (insn.reloc_symbol is None or insn.reloc_target is not None)
         and (insn.reloc_target if insn.reloc_target is not None else branch_target(insn.operands[0])) in insn_addrs
+        and (insn.reloc_target if insn.reloc_target is not None else branch_target(insn.operands[0])) != entry_addr
     })
     if not sub_starts:
         return insns, {}, exit_addr, rodata16
@@ -462,6 +494,18 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
     if op == "call":
         if is_helper_symbol(insn.reloc_symbol):
             return enc("X86_OP_CALL_HELPER", imm=f"X86_SIM_HELPER_{insn.reloc_symbol}")
+        if insn.reloc_symbol == "memcpy":
+            if insn.sim_imm is None:
+                return enc("X86_OP_CALL_MEMCPY_REG", imm=c_u64(MAX_MEMSET_COUNT))
+            if insn.sim_imm < 0 or insn.sim_imm > MAX_MEMSET_COUNT:
+                raise ValueError(f"memcpy length {insn.sim_imm} exceeds simulator bound in {insn.raw}")
+            return enc("X86_OP_CALL_MEMCPY", imm=c_u64(insn.sim_imm))
+        if insn.reloc_symbol == "memset":
+            if insn.sim_imm is None:
+                return enc("X86_OP_CALL_MEMSET_REG", imm=c_u64(MAX_MEMSET_COUNT))
+            if insn.sim_imm < 0 or insn.sim_imm > MAX_MEMSET_COUNT:
+                raise ValueError(f"memset length {insn.sim_imm} exceeds simulator bound in {insn.raw}")
+            return enc("X86_OP_CALL_MEMSET", imm=c_u64(insn.sim_imm))
         if ops:
             call_reg = reg_info(ops[0])
             if call_reg is not None:
@@ -475,14 +519,25 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
         dst = reg_info(ops[0]) if ops else None
         return enc("X86_OP_POP", dst=dst[0] if dst else "X86_REG_NONE",
                    flags=WIDTH_CONST.get(dst[1], "X86_WIDTH_64") if dst else "X86_WIDTH_64")
-    if op in {"setae", "setb", "sete", "setge", "setne"}:
+    if op.startswith("set") and op in CC_AUX:
         dst = reg_info(ops[0]) if ops else None
         if dst is None:
+            if ops and is_mem(ops[0]):
+                return enc("X86_OP_SETCC_MEM", dst=mem_base_reg(ops[0]),
+                           aux=f"({mem_aux(ops[0], 8)} | X86_REG_AUX_SRC_SHIFT({CC_AUX[op]}))",
+                           imm=c_u64(mem_disp(ops[0])))
             raise ValueError(f"cannot encode {insn.raw}")
         return enc("X86_OP_SETCC", dst=dst[0], flags="X86_WIDTH_8", aux=CC_AUX[op])
-    if op in {"cmovb", "cmove", "cmovne"}:
+    if op.startswith("cmov") and op in CC_AUX:
         dst = reg_info(ops[0]) if len(ops) > 0 else None
         src = reg_info(ops[1]) if len(ops) > 1 else None
+        if dst is not None and len(ops) > 1 and is_mem(ops[1]):
+            width = operand_width(ops[1], dst[1])
+            return enc("X86_OP_CMOV_MEM", dst=dst[0],
+                       src=mem_base_reg(ops[1]),
+                       flags=WIDTH_CONST[dst[1]],
+                       aux=f"({mem_aux(ops[1], width)} | X86_REG_AUX_SRC_SHIFT({CC_AUX[op]}))",
+                       imm=c_u64(mem_disp(ops[1])))
         if dst is None or src is None:
             raise ValueError(f"cannot encode {insn.raw}")
         return enc("X86_OP_CMOV", dst=dst[0], src=src[0],
@@ -608,6 +663,12 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                        flags=WIDTH_CONST[operand_width(ops[0], src_reg[1])],
                        aux=mem_aux(ops[0]),
                        imm=c_u64(mem_disp(ops[0])))
+        if op == "test" and is_mem(ops[0]) and src_reg:
+            return enc("X86_OP_TEST_MEM_REG",
+                       dst=mem_base_reg(ops[0]), src=src_reg[0],
+                       flags=WIDTH_CONST[operand_width(ops[0], src_reg[1])],
+                       aux=mem_aux(ops[0]),
+                       imm=c_u64(mem_disp(ops[0])))
         if is_mem(ops[0]) and is_int(ops[1]):
             return enc("X86_OP_CMP_MEM_IMM" if op == "cmp" else "X86_OP_TEST_MEM_IMM",
                        dst=mem_base_reg(ops[0]),
@@ -636,6 +697,20 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
             return enc("X86_OP_ALU_IMM", dst=dst_reg[0],
                        flags=WIDTH_CONST[dst_reg[1]], aux=ALU_AUX[op],
                        imm=imm)
+        if op == "imul" and len(ops) == 3:
+            dst = reg_info(ops[0])
+            src = reg_info(ops[1])
+            if dst is not None and is_mem(ops[1]) and is_int(ops[2]):
+                width = operand_width(ops[1], dst[1])
+                return enc("X86_OP_IMUL_MEM_IMM", dst=dst[0],
+                           src=mem_base_reg(ops[1]),
+                           flags=WIDTH_CONST[dst[1]],
+                           aux=mem_aux(ops[1], width),
+                           imm=c_u64(parse_int(ops[2]) + (mem_disp(ops[1]) << 32)))
+            if dst is None or src is None or not is_int(ops[2]):
+                raise ValueError(f"cannot encode {insn.raw}")
+            return enc("X86_OP_IMUL_IMM", dst=dst[0], src=src[0],
+                       flags=WIDTH_CONST[dst[1]], imm=c_u64(parse_int(ops[2])))
         if len(ops) != 2:
             raise ValueError(f"cannot encode {insn.raw}")
         dst_reg = reg_info(ops[0])
@@ -669,6 +744,64 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
         if is_mem(ops[0]) or is_mem(ops[1]):
             raise ValueError(f"unsupported memory ALU form: {insn.raw}")
         raise ValueError(f"cannot encode {insn.raw}")
+
+    if op == "bt":
+        if len(ops) != 2:
+            raise ValueError(f"cannot encode {insn.raw}")
+        dst = reg_info(ops[0])
+        src = reg_info(ops[1])
+        if dst is not None and is_int(ops[1]):
+            return enc("X86_OP_BT_IMM", dst=dst[0],
+                       flags=WIDTH_CONST[dst[1]],
+                       imm=c_u64(parse_int(ops[1])))
+        if is_mem(ops[0]) and is_int(ops[1]):
+            width = operand_width(ops[0], 64)
+            return enc("X86_OP_BT_MEM_IMM", dst=mem_base_reg(ops[0]),
+                       flags=WIDTH_CONST[width],
+                       aux=mem_aux(ops[0], width),
+                       imm=c_u64(parse_int(ops[1]) + (mem_disp(ops[0]) << 32)))
+        if dst is None or src is None:
+            raise ValueError(f"cannot encode {insn.raw}")
+        return enc("X86_OP_BT", dst=dst[0], src=src[0],
+                   flags=WIDTH_CONST[dst[1]])
+
+    if op == "mulx":
+        if len(ops) != 3:
+            raise ValueError(f"cannot encode {insn.raw}")
+        lo = reg_info(ops[0])
+        hi = reg_info(ops[1])
+        src = reg_info(ops[2])
+        if lo is None or hi is None or src is None:
+            raise ValueError(f"cannot encode {insn.raw}")
+        return enc("X86_OP_MULX", dst=lo[0], src=src[0],
+                   flags=WIDTH_CONST[lo[1]], aux=hi[0])
+
+    if op == "andn":
+        if len(ops) != 3:
+            raise ValueError(f"cannot encode {insn.raw}")
+        dst = reg_info(ops[0])
+        src1 = reg_info(ops[1])
+        src2 = reg_info(ops[2])
+        if dst is not None and src1 is not None and is_mem(ops[2]):
+            width = operand_width(ops[2], dst[1])
+            return enc("X86_OP_ANDN_MEM", dst=dst[0], src=src1[0],
+                       flags=WIDTH_CONST[dst[1]],
+                       aux=f"({mem_aux(ops[2], width)} | X86_REG_AUX_SRC_SHIFT({mem_base_reg(ops[2])}))",
+                       imm=c_u64(mem_disp(ops[2])))
+        if dst is None or src1 is None or src2 is None:
+            raise ValueError(f"cannot encode {insn.raw}")
+        return enc("X86_OP_ANDN", dst=dst[0], src=src1[0],
+                   flags=WIDTH_CONST[dst[1]], aux=src2[0])
+
+    if op == "rep":
+        if len(ops) != 2 or not ops[0].startswith("movs ") or not is_mem(ops[0]) or not is_mem(ops[1]):
+            raise ValueError(f"cannot encode {insn.raw}")
+        if insn.sim_imm is None:
+            raise ValueError(f"cannot encode variable-length {insn.raw}")
+        if insn.sim_imm < 0 or insn.sim_imm > MAX_REP_MOVS_COUNT:
+            raise ValueError(f"rep movs count {insn.sim_imm} exceeds simulator bound in {insn.raw}")
+        return enc("X86_OP_REP_MOVS", flags=WIDTH_CONST[operand_width(ops[0])],
+                   imm=c_u64(insn.sim_imm))
 
     if op == "bzhi":
         if len(ops) != 3:
@@ -787,11 +920,134 @@ def c_comment(text: str) -> str:
     return text.replace("*/", "* /")
 
 
+DIRECT_STEP_MACROS = {
+    "X86_OP_MOV_LOAD_MAP_PTR": "X86_SIM_L_WRITE_REG_MAP_PTR({dst}, (void *)(long)({imm}))",
+    "X86_OP_MOV_LOAD_HELPER_ID": "X86_SIM_L_WRITE_REG_HELPER_ID({dst}, {imm})",
+    "X86_OP_CALL_HELPER": "X86_SIM_BPF_CALL_ID({imm})",
+    "X86_OP_CALL_MEMCPY": "X86_SIM_L_EXEC_CALL_MEMCPY({imm})",
+    "X86_OP_CALL_MEMSET": "X86_SIM_L_EXEC_CALL_MEMSET({imm})",
+    "X86_OP_CALL_MEMCPY_REG": "X86_SIM_L_EXEC_CALL_MEMCPY_REG({imm})",
+    "X86_OP_CALL_MEMSET_REG": "X86_SIM_L_EXEC_CALL_MEMSET_REG({imm})",
+    "X86_OP_CALL_REG": "X86_SIM_BPF_CALL_REG({src})",
+    "X86_OP_MOV_IMM": "X86_SIM_L_EXEC_MOV_IMM({dst}, {flags}, {imm})",
+    "X86_OP_MOV_REG": "X86_SIM_L_EXEC_MOV_REG({dst}, {src}, {flags})",
+    "X86_OP_MOVZX_REG": "X86_SIM_L_EXEC_MOVX_REG({op}, {dst}, {src}, {flags}, {aux})",
+    "X86_OP_MOVSX_REG": "X86_SIM_L_EXEC_MOVX_REG({op}, {dst}, {src}, {flags}, {aux})",
+    "X86_OP_MOV_LOAD": "X86_SIM_L_EXEC_MOV_LOAD({op}, {dst}, {src}, {flags}, {aux}, {imm})",
+    "X86_OP_MOV_LOAD_SCALAR": "X86_SIM_L_EXEC_MOV_LOAD({op}, {dst}, {src}, {flags}, {aux}, {imm})",
+    "X86_OP_MOVSX_LOAD": "X86_SIM_L_EXEC_MOV_LOAD({op}, {dst}, {src}, {flags}, {aux}, {imm})",
+    "X86_OP_MOV_STORE_IMM": "X86_SIM_L_EXEC_STORE({op}, {dst}, {src}, {flags}, {aux}, {imm})",
+    "X86_OP_MOV_STORE_REG": "X86_SIM_L_EXEC_STORE({op}, {dst}, {src}, {flags}, {aux}, {imm})",
+    "X86_OP_LEA": "X86_SIM_L_EXEC_LEA({dst}, {src}, {flags}, {aux}, {imm})",
+    "X86_OP_ALU_IMM": "X86_SIM_L_EXEC_ALU_IMM({dst}, {flags}, {aux}, {imm})",
+    "X86_OP_ADD_IMM": "X86_SIM_L_EXEC_ALU_IMM({dst}, {flags}, {aux}, {imm})",
+    "X86_OP_ALU_REG": "X86_SIM_L_EXEC_ALU_REG({dst}, {src}, {flags}, {aux})",
+    "X86_OP_ADD_REG": "X86_SIM_L_EXEC_ALU_REG({dst}, {src}, {flags}, {aux})",
+    "X86_OP_XOR_REG": "X86_SIM_L_EXEC_ALU_REG({dst}, {src}, {flags}, {aux})",
+    "X86_OP_ALU_MEM": "X86_SIM_L_EXEC_ALU_MEM({dst}, {src}, {flags}, {aux}, {imm})",
+    "X86_OP_ALU_MEM_UNARY": "X86_SIM_L_EXEC_ALU_MEM_UNARY({dst}, {flags}, {aux}, {imm})",
+    "X86_OP_ALU_MEM_IMM": "X86_SIM_L_EXEC_ALU_MEM_IMM({dst}, {flags}, {aux}, {imm})",
+    "X86_OP_ALU_MEM_REG": "X86_SIM_L_EXEC_ALU_MEM_REG({dst}, {src}, {flags}, {aux}, {imm})",
+    "X86_OP_CMP_IMM": "X86_SIM_L_EXEC_CMP_IMM_OP({op}, {dst}, {flags}, {imm})",
+    "X86_OP_TEST_IMM": "X86_SIM_L_EXEC_CMP_IMM_OP({op}, {dst}, {flags}, {imm})",
+    "X86_OP_CMP_REG": "X86_SIM_L_EXEC_CMP_REG_OP({op}, {dst}, {src}, {flags})",
+    "X86_OP_TEST_REG": "X86_SIM_L_EXEC_CMP_REG_OP({op}, {dst}, {src}, {flags})",
+    "X86_OP_CMP_MEM_IMM": "X86_SIM_L_EXEC_CMP_MEM({op}, {dst}, {src}, {flags}, {aux}, {imm})",
+    "X86_OP_TEST_MEM_IMM": "X86_SIM_L_EXEC_CMP_MEM({op}, {dst}, {src}, {flags}, {aux}, {imm})",
+    "X86_OP_CMP_MEM_REG": "X86_SIM_L_EXEC_CMP_MEM({op}, {dst}, {src}, {flags}, {aux}, {imm})",
+    "X86_OP_TEST_MEM_REG": "X86_SIM_L_EXEC_CMP_MEM({op}, {dst}, {src}, {flags}, {aux}, {imm})",
+    "X86_OP_CMP_REG_MEM": "X86_SIM_L_EXEC_CMP_REG_MEM({dst}, {src}, {flags}, {aux}, {imm})",
+    "X86_OP_CMOV": "X86_SIM_L_EXEC_CMOV({dst}, {src}, {flags}, {aux})",
+    "X86_OP_CMOV_MEM": "X86_SIM_L_EXEC_CMOV_MEM({dst}, {src}, {flags}, {aux}, {imm})",
+    "X86_OP_SETCC": "X86_SIM_L_EXEC_SETCC({dst}, {aux})",
+    "X86_OP_SETCC_MEM": "X86_SIM_L_EXEC_SETCC_MEM({dst}, {aux}, {imm})",
+    "X86_OP_BT": "X86_SIM_L_EXEC_BT({dst}, {src}, {flags})",
+    "X86_OP_BT_IMM": "X86_SIM_L_EXEC_BT_IMM({dst}, {flags}, {imm})",
+    "X86_OP_BT_MEM_IMM": "X86_SIM_L_EXEC_BT_MEM_IMM({dst}, {flags}, {aux}, {imm})",
+    "X86_OP_IMUL_IMM": "X86_SIM_L_EXEC_IMUL_IMM({dst}, {src}, {flags}, {imm})",
+    "X86_OP_IMUL_MEM_IMM": "X86_SIM_L_EXEC_IMUL_MEM_IMM({dst}, {src}, {flags}, {aux}, {imm})",
+    "X86_OP_MULX": "X86_SIM_L_EXEC_MULX({dst}, {src}, {aux}, {flags})",
+    "X86_OP_REP_MOVS": "X86_SIM_L_EXEC_REP_MOVS({flags}, {imm})",
+    "X86_OP_ANDN": "X86_SIM_L_EXEC_ANDN({dst}, {src}, {aux}, {flags})",
+    "X86_OP_ANDN_MEM": "X86_SIM_L_EXEC_ANDN_MEM({dst}, {src}, {flags}, {aux}, {imm})",
+    "X86_OP_PUSH": "X86_SIM_L_EXEC_PUSH({src})",
+    "X86_OP_POP": "X86_SIM_L_EXEC_POP({dst}, {flags})",
+}
+
+
+def direct_step_statement(encoded: EncodedInsn) -> str | None:
+    template = DIRECT_STEP_MACROS.get(encoded.op)
+    if template is None:
+        return None
+    return template.format(
+        op=encoded.op,
+        dst=encoded.dst,
+        src=encoded.src,
+        flags=encoded.flags,
+        aux=encoded.aux,
+        imm=encoded.imm,
+    )
+
+
+def canonical_reg(reg: str) -> str | None:
+    info = reg_info(reg)
+    return info[0] if info is not None else None
+
+
+def annotated_fixed_count_ops(insns: list[NativeInsn]) -> list[NativeInsn]:
+    values: dict[str, int] = {}
+    out: list[NativeInsn] = []
+    for insn in insns:
+        annotated = insn
+        if insn.mnemonic == "rep":
+            count = values.get("X86_RCX")
+            if count is not None:
+                annotated = replace(insn, sim_imm=count)
+        elif insn.mnemonic == "call" and insn.reloc_symbol in {"memcpy", "memset"}:
+            count = values.get("X86_RDX")
+            if count is not None:
+                annotated = replace(insn, sim_imm=count)
+        out.append(annotated)
+
+        if insn.mnemonic == "mov" and len(insn.operands) == 2:
+            dst = canonical_reg(insn.operands[0])
+            if dst is not None:
+                if is_int(insn.operands[1]):
+                    values[dst] = parse_int(insn.operands[1])
+                else:
+                    values.pop(dst, None)
+            continue
+        if insn.mnemonic == "xor" and len(insn.operands) == 2:
+            dst = canonical_reg(insn.operands[0])
+            src = canonical_reg(insn.operands[1])
+            if dst is not None:
+                if dst == src:
+                    values[dst] = 0
+                else:
+                    values.pop(dst, None)
+            continue
+        if insn.operands:
+            dst = canonical_reg(insn.operands[0])
+            if dst is not None:
+                values.pop(dst, None)
+    return out
+
+
 def append_step(lines: list[str], insn: NativeInsn, indent: str = "\t",
                 step_macro: str = "X86_SIM_RUN_OP",
                 rodata_idents: dict[str, str] | None = None) -> None:
     encoded = encode(insn, rodata_idents or {})
     lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+    append_encoded_step(lines, encoded, indent, step_macro)
+
+
+def append_encoded_step(lines: list[str], encoded: EncodedInsn,
+                        indent: str, step_macro: str) -> None:
+    if step_macro == "X86_SIM_RUN_OP":
+        direct = direct_step_statement(encoded)
+        if direct is not None:
+            lines.append(f"{indent}{direct};")
+            return
     lines.append(
         f"{indent}{step_macro}("
         f"{encoded.op}, {encoded.dst}, {encoded.src}, "
@@ -805,9 +1061,11 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
                          subroutine: bool = False,
                          step_macro: str = "X86_SIM_RUN_OP",
                          ret_statement: str = "X86_SIM_X86_RET();",
+                         return_targets: set[int] | None = None,
                          rodata_idents: dict[str, str] | None = None) -> None:
     branch_macro = "X86_SIM_X86_SUB_JCC" if subroutine else "X86_SIM_X86_JCC"
     jump_macro = "X86_SIM_X86_SUB_JMP" if subroutine else "X86_SIM_X86_JMP"
+    return_targets = return_targets or set()
     if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
         target = (
@@ -815,6 +1073,10 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
             if insn.reloc_target is not None
             else branch_target(insn.operands[0]) if insn.operands else 0
         )
+        if target in return_targets:
+            lines.append(f"{indent}if (X86_SIM_L_EVAL_CC({CC_AUX[insn.mnemonic]}))")
+            lines.append(f"{indent}\t{ret_statement}")
+            return
         if target in addrs:
             lines.append(
                 f"{indent}{branch_macro}({CC_AUX[insn.mnemonic]}, "
@@ -830,6 +1092,9 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
             if insn.reloc_target is not None
             else branch_target(insn.operands[0]) if insn.operands else 0
         )
+        if target in return_targets:
+            lines.append(f"{indent}{ret_statement}")
+            return
         if target in addrs:
             lines.append(
                 f"{indent}{jump_macro}(0x{insn.addr:x}, 0x{target:x}, "
@@ -840,23 +1105,15 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
         return
     if insn.mnemonic == "call":
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-        if is_helper_symbol(insn.reloc_symbol):
+        if is_helper_symbol(insn.reloc_symbol) or insn.reloc_symbol in {"memcpy", "memset"}:
             encoded = encode(insn, rodata_idents or {})
-            lines.append(
-                f"{indent}{step_macro}("
-                f"{encoded.op}, {encoded.dst}, {encoded.src}, "
-                f"{encoded.flags}, {encoded.aux}, {encoded.imm});"
-            )
+            append_encoded_step(lines, encoded, indent, step_macro)
             return
         if insn.operands:
             call_reg = reg_info(insn.operands[0])
             if call_reg is not None:
                 encoded = encode(insn, rodata_idents or {})
-                lines.append(
-                    f"{indent}{step_macro}("
-                    f"{encoded.op}, {encoded.dst}, {encoded.src}, "
-                    f"{encoded.flags}, {encoded.aux}, {encoded.imm});"
-                )
+                append_encoded_step(lines, encoded, indent, step_macro)
                 return
         target = (
             insn.reloc_target
@@ -915,6 +1172,7 @@ def proof_kind_for_source(bench: Bench, source: Path) -> str:
 def render_x86_subroutine(symbol: str, insns: list[NativeInsn],
                           call_functions: dict[int, str],
                           rodata_idents: dict[str, str] | None = None) -> str:
+    insns = annotated_fixed_count_ops(insns)
     addrs = {insn.addr for insn in insns}
     next_addrs = {
         insn.addr: insns[index + 1].addr
@@ -935,6 +1193,273 @@ def render_x86_subroutine(symbol: str, insns: list[NativeInsn],
     return "\n".join(lines)
 
 
+def flatten_chunk_insns(insns: list[NativeInsn],
+                        subfunctions: dict[str, list[NativeInsn]]) -> list[ChunkInsn]:
+    out: list[ChunkInsn] = []
+    sequences: list[tuple[bool, list[NativeInsn]]] = [(False, insns)]
+    sequences.extend((True, fn_insns) for fn_insns in subfunctions.values())
+    for is_subroutine, fn_insns in sequences:
+        for index, insn in enumerate(fn_insns):
+            next_addr = fn_insns[index + 1].addr if index + 1 < len(fn_insns) else None
+            out.append(ChunkInsn(insn, is_subroutine, next_addr))
+    return out
+
+
+def chunk_for_addr(chunks: list[list[ChunkInsn]], addr: int) -> int | None:
+    for index, chunk in enumerate(chunks):
+        if any(item.insn.addr == addr for item in chunk):
+            return index
+    return None
+
+
+def append_chunk_transfer(lines: list[str], target: int, current_chunk: set[int],
+                          indent: str = "\t") -> None:
+    if target in current_chunk:
+        lines.append(f"{indent}goto x86_l_{target:x};")
+    else:
+        lines.append(f"{indent}return {c_u64(target)};")
+
+
+def append_chunk_call(lines: list[str], target: int, return_addr: int,
+                      current_chunk: set[int], indent: str = "\t") -> None:
+    lines.append(f"{indent}__x86_rsp.ptr = (__u8 *)__x86_rsp.ptr - 8;")
+    lines.append(
+        f"{indent}X86_SIM_L_STACK_WRITE((__s64)(long)__x86_rsp.ptr, "
+        f"X86_WIDTH_64, {c_u64(return_addr)});"
+    )
+    lines.append(f"{indent}__x86_sim_call_depth++;")
+    append_chunk_transfer(lines, target, current_chunk, indent)
+
+
+def append_chunk_branch_or_ret(lines: list[str], item: ChunkInsn,
+                               addrs: set[int], current_chunk: set[int],
+                               call_targets: set[int],
+                               return_targets: set[int],
+                               rodata_idents: dict[str, str] | None = None) -> None:
+    insn = item.insn
+    indent = "\t"
+    if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
+        lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+        target = (
+            insn.reloc_target
+            if insn.reloc_target is not None
+            else branch_target(insn.operands[0]) if insn.operands else 0
+        )
+        if target in return_targets:
+            lines.append(f"{indent}if (X86_SIM_L_EVAL_CC({CC_AUX[insn.mnemonic]}))")
+            lines.append(f"{indent}\treturn {CHUNKED_PROOF_PC_DONE};")
+            return
+        if target not in addrs:
+            raise ValueError(f"unsupported external branch target in {insn.raw}")
+        lines.append(f"{indent}if (X86_SIM_L_EVAL_CC({CC_AUX[insn.mnemonic]})) {{")
+        append_chunk_transfer(lines, target, current_chunk, indent + "\t")
+        lines.append(f"{indent}}}")
+        return
+    if insn.mnemonic == "jmp":
+        lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+        target = (
+            insn.reloc_target
+            if insn.reloc_target is not None
+            else branch_target(insn.operands[0]) if insn.operands else 0
+        )
+        if target in return_targets:
+            lines.append(f"{indent}return {CHUNKED_PROOF_PC_DONE};")
+            return
+        if target not in addrs:
+            raise ValueError(f"unsupported external jump target in {insn.raw}")
+        append_chunk_transfer(lines, target, current_chunk, indent)
+        return
+    if insn.mnemonic == "call":
+        lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+        if is_helper_symbol(insn.reloc_symbol) or insn.reloc_symbol in {"memcpy", "memset"}:
+            encoded = encode(insn, rodata_idents or {})
+            append_encoded_step(lines, encoded, indent, "X86_SIM_RUN_OP")
+            return
+        if insn.operands:
+            call_reg = reg_info(insn.operands[0])
+            if call_reg is not None:
+                encoded = encode(insn, rodata_idents or {})
+                append_encoded_step(lines, encoded, indent, "X86_SIM_RUN_OP")
+                return
+        target = (
+            insn.reloc_target
+            if insn.reloc_target is not None
+            else branch_target(insn.operands[0]) if insn.operands else 0
+        )
+        if target in call_targets and item.next_addr is not None:
+            append_chunk_call(lines, target, item.next_addr, current_chunk, indent)
+            return
+        raise ValueError(f"unsupported unresolved call target in {insn.raw}")
+    if insn.mnemonic == "ret":
+        lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+        lines.append(f"{indent}if (__x86_sim_call_depth == 0)")
+        lines.append(f"{indent}\treturn {CHUNKED_PROOF_PC_DONE};")
+        lines.append(f"{indent}__x86_sim_call_depth--;")
+        lines.append(
+            f"{indent}__x86_sim_ret_addr = X86_SIM_L_STACK_READ("
+            f"(__s64)(long)__x86_rsp.ptr, X86_WIDTH_64);"
+        )
+        lines.append(f"{indent}__x86_rsp.ptr = (__u8 *)__x86_rsp.ptr + 8;")
+        lines.append(f"{indent}return __x86_sim_ret_addr;")
+        return
+    append_step(lines, insn, indent, "X86_SIM_RUN_OP", rodata_idents)
+
+
+def render_chunk_function(name: str, index: int, chunk: list[ChunkInsn],
+                          addrs: set[int], call_targets: set[int],
+                          return_targets: set[int],
+                          rodata_idents: dict[str, str]) -> str:
+    current_chunk = {item.insn.addr for item in chunk}
+    lines = [
+        f"static __noinline __u64 {name}_x86_chunk_{index}(",
+        "\tstruct x86_sim_state *__x86_state, __u64 __x86_pc)",
+        "{",
+        "\tswitch (__x86_pc) {",
+    ]
+    for item in chunk:
+        lines.append(f"\tcase {c_u64(item.insn.addr)}: goto x86_l_{item.insn.addr:x};")
+    lines.extend([
+        "\tdefault: return " + CHUNKED_PROOF_PC_DONE + ";",
+        "\t}",
+    ])
+    for item in chunk:
+        lines.append(f"x86_l_{item.insn.addr:x}:")
+        append_chunk_branch_or_ret(lines, item, addrs, current_chunk,
+                                   call_targets, return_targets, rodata_idents)
+    last_next = chunk[-1].next_addr
+    if last_next is None or last_next in return_targets:
+        lines.append(f"\treturn {CHUNKED_PROOF_PC_DONE};")
+    else:
+        lines.append(f"\treturn {c_u64(last_next)};")
+    lines.extend(["}", ""])
+    return "\n".join(lines)
+
+
+def render_chunked_program(name: str, insns: list[NativeInsn],
+                           subfunctions: dict[str, list[NativeInsn]],
+                           kind: str, exit_addr: int | None,
+                           source_prelude: str,
+                           rodata16: dict[str, tuple[int, int]]) -> str:
+    insns = annotated_fixed_count_ops(insns)
+    subfunctions = {
+        symbol: annotated_fixed_count_ops(fn_insns)
+        for symbol, fn_insns in subfunctions.items()
+    }
+    if kind == "tc":
+        section = 'SEC("tc")'
+        ctx_type = "struct __sk_buff *"
+        abi_define = "#define __x86_sim_abi (__x86_state->skb_abi)"
+        init_lines = [
+            "\t__x86_sim_abi.data_end = (void *)(long)ctx->data_end;",
+            "\t__x86_sim_abi.data = (void *)(long)ctx->data;",
+            "\t__x86_sim_skb_ctx = ctx;",
+        ]
+    elif kind == "cgroup_skb":
+        section = 'SEC("cgroup_skb/egress")'
+        ctx_type = "struct __sk_buff *"
+        abi_define = "#define __x86_sim_abi (__x86_state->skb_abi)"
+        init_lines = [
+            "\t__x86_sim_abi.data_end = (void *)(long)ctx->data_end;",
+            "\t__x86_sim_abi.data = (void *)(long)ctx->data;",
+            "\t__x86_sim_skb_ctx = ctx;",
+        ]
+    else:
+        section = 'SEC("xdp")'
+        ctx_type = "struct xdp_md *"
+        abi_define = "#define __x86_sim_abi (__x86_state->xdp_abi)"
+        init_lines = [
+            "\t__x86_sim_abi.data = (void *)(long)ctx->data;",
+            "\t__x86_sim_abi.data_end = (void *)(long)ctx->data_end;",
+            "\t__x86_sim_skb_ctx = (struct __sk_buff *)0;",
+        ]
+    flat = flatten_chunk_insns(insns, subfunctions)
+    chunks = [
+        flat[index:index + CHUNKED_PROOF_CHUNK_INSNS]
+        for index in range(0, len(flat), CHUNKED_PROOF_CHUNK_INSNS)
+    ]
+    addrs = {item.insn.addr for item in flat}
+    return_targets = {exit_addr} if exit_addr is not None else set()
+    call_targets = {
+        fn_insns[0].addr
+        for fn_insns in subfunctions.values()
+        if fn_insns
+    }
+    if flat:
+        call_targets.add(flat[0].insn.addr)
+    has_stack = any(
+        item.insn.mnemonic in {"push", "pop"} or
+        "[rsp" in item.insn.raw.lower() or
+        "[rbp" in item.insn.raw.lower()
+        for item in flat
+    ) or bool(subfunctions)
+    has_stack_memory = any(
+        "[rsp" in item.insn.raw.lower() or "[rbp" in item.insn.raw.lower()
+        for item in flat
+    )
+    rodata_idents = rodata_ident_map(rodata16)
+    lines: list[str] = []
+    if has_stack:
+        lines.append('#define X86_SIM_ENABLE_STACK 1')
+        if has_stack_memory:
+            lines.append('#define X86_SIM_ENABLE_STACK_DEEP 1')
+    lines.extend([
+        '#define X86_SIM_USE_STATE_STRUCT 1',
+        '#include "../x86_sim_local_bpf.h"',
+        abi_define,
+        "",
+    ])
+    if source_prelude:
+        lines.append(source_prelude.rstrip())
+        lines.append("")
+    for symbol, ident in rodata_idents.items():
+        lo, hi = rodata16[symbol]
+        lines.append(f"static const __u64 {ident}[2] = {{{c_u64(lo)}, {c_u64(hi)}}};")
+    if rodata_idents:
+        lines.append("")
+    for index, chunk in enumerate(chunks):
+        lines.append(render_chunk_function(name, index, chunk, addrs,
+                                           call_targets, return_targets,
+                                           rodata_idents))
+    first_addr = flat[0].insn.addr
+    max_steps = max(len(flat) * 4, len(flat) + 1024)
+    lines.extend([
+        section,
+        f"int {name}_x86_sim_xdp({ctx_type}ctx)",
+        "{",
+        "\tstruct x86_sim_state __x86_state_storage = {};",
+        "\tX86_SIM_L_BIND_COMMON_STATE(&__x86_state_storage);",
+        *init_lines,
+        "\t__x86_rdi.ptr = &__x86_sim_abi;",
+        "\t__x86_rdi_tag = X86_SIM_TAG_ABI;",
+        f"\t__u64 __x86_pc = {c_u64(first_addr)};",
+        f"\tfor (__u32 __x86_iter = 0; __x86_iter < {max_steps}U; __x86_iter++) {{",
+        f"\t\tif (__x86_pc == {CHUNKED_PROOF_PC_DONE})",
+        "\t\t\tbreak;",
+    ])
+    for index, chunk in enumerate(chunks):
+        min_addr = min(item.insn.addr for item in chunk)
+        max_addr = max(item.insn.addr for item in chunk)
+        prefix = "if" if index == 0 else "else if"
+        lines.append(
+            f"\t\t{prefix} (__x86_pc >= {c_u64(min_addr)} && "
+            f"__x86_pc <= {c_u64(max_addr)})"
+        )
+        lines.append(f"\t\t\t__x86_pc = {name}_x86_chunk_{index}(__x86_state, __x86_pc);")
+    lines.extend([
+        "\t\telse",
+        f"\t\t\t__x86_pc = {CHUNKED_PROOF_PC_DONE};",
+        "\t}",
+        f"\tif (__x86_pc != {CHUNKED_PROOF_PC_DONE})",
+        "\t\tX86_SIM_L_WRITE_REG_WIDTH(X86_RAX, 0, X86_WIDTH_64);",
+        "\tX86_SIM_X86_RET();",
+        "}",
+        "",
+        "X86_SIM_LICENSE();",
+        "",
+    ])
+    return "\n".join(lines)
+
+
 def render_program(name: str, insns: list[NativeInsn],
                    subfunctions: dict[str, list[NativeInsn]] | None = None,
                    kind: str = "xdp",
@@ -942,7 +1467,26 @@ def render_program(name: str, insns: list[NativeInsn],
                    source_prelude: str = "",
                    rodata16: dict[str, tuple[int, int]] | None = None) -> str:
     ret_statement = "X86_SIM_X86_RET();"
-    subfunctions = subfunctions or {}
+    insns = annotated_fixed_count_ops(insns)
+    subfunctions = {
+        symbol: annotated_fixed_count_ops(fn_insns)
+        for symbol, fn_insns in (subfunctions or {}).items()
+    }
+    total_insns = len(insns) + sum(len(fn_insns) for fn_insns in subfunctions.values())
+    entry_addr = insns[0].addr if insns else None
+    has_self_call = any(
+        item.mnemonic == "call"
+        and (
+            item.reloc_target == entry_addr or
+            (item.reloc_target is None and item.operands and
+             has_direct_branch_target(item.operands[0]) and
+             branch_target(item.operands[0]) == entry_addr)
+        )
+        for item in insns
+    )
+    if total_insns >= CHUNKED_PROOF_INSN_THRESHOLD or has_self_call:
+        return render_chunked_program(name, insns, subfunctions, kind,
+                                      exit_addr, source_prelude, rodata16 or {})
     if kind == "tc":
         section = 'SEC("tc")'
         ctx_type = "struct __sk_buff *"
@@ -956,6 +1500,7 @@ def render_program(name: str, insns: list[NativeInsn],
         ctx_type = "struct xdp_md *"
         declare = "X86_SIM_ENTRY_XDP(ctx);"
     addrs = {insn.addr for insn in insns}
+    return_targets = {exit_addr} if exit_addr is not None else set()
     if exit_addr is not None:
         addrs.add(exit_addr)
     subroutine_label_by_addr = {
@@ -1018,6 +1563,7 @@ def render_program(name: str, insns: list[NativeInsn],
                              next_addr=next_addrs.get(insn.addr),
                              call_functions=subroutine_label_by_addr,
                              ret_statement=ret_statement,
+                             return_targets=return_targets,
                              rodata_idents=rodata_idents)
     if exit_addr is not None:
         lines.append(f"x86_l_{exit_addr:x}:")

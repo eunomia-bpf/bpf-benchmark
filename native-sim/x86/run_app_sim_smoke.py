@@ -27,7 +27,8 @@ class AppProof:
     source: Path
 
 
-def run(cmd: list[str], *, cwd: Path = REPO_ROOT) -> subprocess.CompletedProcess[str]:
+def run(cmd: list[str], *, cwd: Path = REPO_ROOT,
+        timeout_s: int | None = None) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         cmd,
         cwd=cwd,
@@ -35,6 +36,7 @@ def run(cmd: list[str], *, cwd: Path = REPO_ROOT) -> subprocess.CompletedProcess
         text=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        timeout=timeout_s,
     )
 
 
@@ -103,7 +105,7 @@ def undefined_symbols(proof: Path) -> list[str]:
         if not fields:
             continue
         symbol = fields[0]
-        if symbol.startswith("bpf_"):
+        if symbol.startswith("bpf_") or symbol in {"memcpy", "memset"}:
             continue
         if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", symbol):
             symbols.append(symbol)
@@ -149,12 +151,11 @@ def generate_source(config_path: Path, proof_dir: Path, source_dir: Path, proof:
     return True, ""
 
 
-def compile_source(source: Path, build_dir: Path) -> tuple[bool, str]:
+def compile_source(source: Path, build_dir: Path, timeout_s: int) -> tuple[bool, str]:
     build_dir.mkdir(parents=True, exist_ok=True)
     obj = build_dir / source.with_suffix(".bpf.o").name
     cmd = [
         "clang",
-        "-g",
         "-O2",
         "-target",
         "bpf",
@@ -172,7 +173,18 @@ def compile_source(source: Path, build_dir: Path) -> tuple[bool, str]:
         "-o",
         str(obj),
     ]
-    result = run(cmd)
+    try:
+        result = run(cmd, timeout_s=timeout_s)
+    except subprocess.TimeoutExpired as err:
+        detail = f"clang timed out after {timeout_s}s compiling {source.name}"
+        timed_out_output = "\n".join(
+            part.decode(errors="replace") if isinstance(part, bytes) else part
+            for part in [err.stdout, err.stderr]
+            if part
+        )
+        if timed_out_output:
+            detail += "\n" + timed_out_output
+        return False, compact(detail)
     if result.returncode == 0:
         return True, ""
     return False, compact(result.stderr or result.stdout or "clang failed")
@@ -187,6 +199,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--only", action="append", default=[])
     parser.add_argument("--offset", type=int, default=0)
     parser.add_argument("--limit", type=int)
+    parser.add_argument("--compile-timeout-s", type=int, default=120)
     parser.add_argument("--keep-going", action="store_true")
     args = parser.parse_args(argv)
 
@@ -194,6 +207,8 @@ def main(argv: list[str]) -> int:
         raise SystemExit("--offset must be >= 0")
     if args.limit is not None and args.limit < 1:
         raise SystemExit("--limit must be >= 1")
+    if args.compile_timeout_s < 1:
+        raise SystemExit("--compile-timeout-s must be >= 1")
 
     output_dir = args.output_dir.resolve()
     run_dir = output_dir.with_name(f"{output_dir.name}-run-{os.getpid()}")
@@ -211,17 +226,17 @@ def main(argv: list[str]) -> int:
     for proof in proofs:
         ok, note = generate_source(config_path, proof_dir, source_dir, proof)
         if not ok:
-            print(f"fail {proof.name}: {note}")
+            print(f"fail {proof.name}: {note}", flush=True)
             failures.append(proof.name)
             if not args.keep_going:
                 break
             continue
         source = source_dir / f"{proof.name}.bpf.c"
-        ok, note = compile_source(source, build_dir)
+        ok, note = compile_source(source, build_dir, args.compile_timeout_s)
         if ok:
-            print(f"ok {proof.name}")
+            print(f"ok {proof.name}", flush=True)
             continue
-        print(f"fail {proof.name}: {note}")
+        print(f"fail {proof.name}: {note}", flush=True)
         failures.append(proof.name)
         if not args.keep_going:
             break
