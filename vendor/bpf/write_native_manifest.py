@@ -283,6 +283,8 @@ def parse_object_spec(raw: str) -> tuple[Path, dict[str, object]]:
             attrs["symbol"] = value
         elif key == "source_map_prefix":
             attrs.setdefault("source_map_prefixes", []).append(value)
+        elif key == "source_lacks_map_prefix":
+            attrs.setdefault("source_lacks_map_prefixes", []).append(value)
         else:
             raise SystemExit(f"unsupported --object attribute: {key}")
     return path, attrs
@@ -362,14 +364,18 @@ def main() -> None:
             for prefix in prefixes:
                 if args.dedupe_program == "last":
                     key = (program, attrs.get("prog_type"), prefix,
-                           attrs.get("source_xlated_len"), required, forbidden)
+                           attrs.get("source_xlated_len"),
+                           tuple(attrs.get("source_lacks_map_prefixes", ())),
+                           required, forbidden)
                     if key not in selected_by_program or selected_by_program[key][0] != rel:
                         selected_by_program[key] = (rel, set())
                         selected_helpers_by_program[key] = (required, forbidden)
                     selected_by_program[key][1].add(symbol)
                 else:
                     key = (program, rel, attrs.get("prog_type"), prefix,
-                           attrs.get("source_xlated_len"), required, forbidden)
+                           attrs.get("source_xlated_len"),
+                           tuple(attrs.get("source_lacks_map_prefixes", ())),
+                           required, forbidden)
                     native_object_by_key[key] = rel
                     helper_require_by_key[key] = required
                     helper_forbid_by_key[key] = forbidden
@@ -377,9 +383,9 @@ def main() -> None:
 
     if args.dedupe_program == "last":
         for key, (rel, symbols) in selected_by_program.items():
-            program, prog_type, prefix, source_xlated_len, required, forbidden = key
+            program, prog_type, prefix, source_xlated_len, lacks_prefixes, required, forbidden = key
             out_key = (program, rel, prog_type, prefix, source_xlated_len,
-                       required, forbidden)
+                       lacks_prefixes, required, forbidden)
             native_object_by_key[out_key] = rel
             helper_require_by_key[out_key] = selected_helpers_by_program[key][0]
             helper_forbid_by_key[out_key] = selected_helpers_by_program[key][1]
@@ -387,7 +393,7 @@ def main() -> None:
 
     objects: list[dict[str, object]] = []
     for key in sorted(entries_by_key, key=manifest_sort_key):
-        program, rel, prog_type, prefix, source_xlated_len, _required, _forbidden = key
+        program, rel, prog_type, prefix, source_xlated_len, lacks_prefixes, _required, _forbidden = key
         symbols = sorted(entries_by_key[key])
         entry: dict[str, object] = {
             "program": program,
@@ -401,6 +407,8 @@ def main() -> None:
             entry["source_xlated_len"] = source_xlated_len
         if prefix is not None:
             entry["source_map_prefix"] = prefix
+        if lacks_prefixes:
+            entry["source_lacks_map_prefix"] = list(lacks_prefixes)
         required = helper_require_by_key.get(key, ())
         forbidden = helper_forbid_by_key.get(key, ())
         if required:

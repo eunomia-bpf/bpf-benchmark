@@ -66,9 +66,8 @@ KATRAN_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/katran/%.native.o,$(KATRAN_OBJS
 KATRAN_NATIVE_PROOF_MARKERS := $(patsubst %,$(NATIVE_OUT)/katran/%.proof.ok,$(KATRAN_OBJS))
 BCC_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/bcc/%.native.o,$(BCC_TOOLS))
 BCC_NATIVE_PROOF_MARKERS := $(patsubst %,$(NATIVE_OUT)/bcc/%.proof.ok,$(BCC_TOOLS))
-CILIUM_NATIVE_PLACEHOLDER_OBJS := $(NATIVE_OUT)/cilium/cilium_placeholders.native.o
-CILIUM_NATIVE_OBJS := $(patsubst %.o,$(NATIVE_OUT)/cilium/%.native.o,$(CILIUM_OBJS)) $(CILIUM_NATIVE_PLACEHOLDER_OBJS)
-CILIUM_NATIVE_PROOF_MARKERS := $(patsubst %.o,$(NATIVE_OUT)/cilium/%.proof.ok,$(CILIUM_OBJS)) $(NATIVE_OUT)/cilium/cilium_placeholders.proof.ok
+CILIUM_NATIVE_OBJS := $(patsubst %.o,$(NATIVE_OUT)/cilium/%.native.o,$(CILIUM_OBJS))
+CILIUM_NATIVE_PROOF_MARKERS := $(patsubst %.o,$(NATIVE_OUT)/cilium/%.proof.ok,$(CILIUM_OBJS))
 OTEL_EBPF_DIR := otel/support/ebpf
 OTEL_NATIVE_UNIT_SRCS := $(wildcard $(OTEL_EBPF_DIR)/*.ebpf.c)
 OTEL_NATIVE_UNIT_OBJS := $(patsubst $(OTEL_EBPF_DIR)/%.ebpf.c,$(NATIVE_OUT)/otel/%.native.o,$(OTEL_NATIVE_UNIT_SRCS))
@@ -221,13 +220,6 @@ $(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h Makefile
 		$(NATIVE_SYS_INCLUDE_FLAGS) \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/cilium/cilium_placeholders.native.o: cilium_placeholders.c native_compat.h Makefile
-	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) \
-		-include "$(CURDIR)/native_compat.h" \
-		$(NATIVE_SYS_INCLUDE_FLAGS) \
-		-o "$@" "$<"
-
 $(OTEL_EBPF_DIR)/errors.h: otel/tools/errors-codegen/errors.json otel/tools/errors-codegen/main.go
 	$(MAKE) -C "$(CURDIR)/$(OTEL_EBPF_DIR)" errors.h
 
@@ -338,6 +330,7 @@ $(NATIVE_OUT)/cilium/%.proof.ok: $(NATIVE_OUT)/cilium/%.native.o $(NATIVE_LINK) 
 
 native-cilium: $(CILIUM_NATIVE_OBJS) $(CILIUM_NATIVE_PROOF_MARKERS)
 	install -d "$(CILIUM_NATIVE_STAGE_OUT)"
+	rm -f "$(NATIVE_OUT)/cilium/cilium_placeholders."*.proof.o "$(NATIVE_OUT)/cilium/cilium_placeholders.native.o" "$(NATIVE_OUT)/cilium/cilium_placeholders.proof.ok"
 	rm -f "$(CILIUM_NATIVE_STAGE_OUT)"/*.native.o "$(CILIUM_NATIVE_STAGE_OUT)"/*.proof.o
 	install -m 0644 $(CILIUM_NATIVE_OBJS) "$(CILIUM_NATIVE_STAGE_OUT)"
 	install -m 0644 "$(NATIVE_OUT)/cilium"/*.proof.o "$(CILIUM_NATIVE_STAGE_OUT)"
@@ -347,22 +340,24 @@ native-cilium: $(CILIUM_NATIVE_OBJS) $(CILIUM_NATIVE_PROOF_MARKERS)
 		--object "$(NATIVE_OUT)/cilium/bpf_overlay.native.o,source_map_prefix=cilium_calls_ov" \
 		--object "$(NATIVE_OUT)/cilium/bpf_sock.native.o" \
 		--object "$(NATIVE_OUT)/cilium/bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne" \
+		--object "$(NATIVE_OUT)/cilium/bpf_host.native.o,symbol=cil_host_policy,source_xlated_len=16,source_lacks_map_prefix=cilium_calls_ho,source_lacks_map_prefix=cilium_calls_ne" \
 		--object "$(NATIVE_OUT)/cilium/bpf_host.native.o,symbol=tail_drop_notify,source_xlated_len=752" \
+		--object "$(NATIVE_OUT)/cilium/bpf_lxc.native.o,symbol=cil_lxc_policy_egress,source_xlated_len=16,source_lacks_map_prefix=cilium_calls_0" \
 		--object "$(NATIVE_OUT)/cilium/bpf_lxc.native.o,symbol=tail_drop_notify,source_xlated_len=696" \
 		--object "$(NATIVE_OUT)/cilium/bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
-		--object "$(NATIVE_OUT)/cilium/bpf_xdp.native.o,prog_type=6" \
-		--object "$(NATIVE_OUT)/cilium/cilium_placeholders.native.o"
+		--object "$(NATIVE_OUT)/cilium/bpf_xdp.native.o,prog_type=6"
 	python3 "$(CURDIR)/write_native_manifest.py" --app cilium --llvm-nm "$(LLVM_NM)" \
 		--output "$(CILIUM_NATIVE_STAGE_OUT)/manifest.json" \
 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_lxc.native.o,source_map_prefix=cilium_calls_0" \
 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_overlay.native.o,source_map_prefix=cilium_calls_ov" \
 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_sock.native.o" \
 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne" \
+		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_host.native.o,symbol=cil_host_policy,source_xlated_len=16,source_lacks_map_prefix=cilium_calls_ho,source_lacks_map_prefix=cilium_calls_ne" \
 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_host.native.o,symbol=tail_drop_notify,source_xlated_len=752" \
+		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_lxc.native.o,symbol=cil_lxc_policy_egress,source_xlated_len=16,source_lacks_map_prefix=cilium_calls_0" \
 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_lxc.native.o,symbol=tail_drop_notify,source_xlated_len=696" \
 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
-		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_xdp.native.o,prog_type=6" \
-		--object "$(CILIUM_NATIVE_STAGE_OUT)/cilium_placeholders.native.o"
+		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_xdp.native.o,prog_type=6"
 
 $(OTEL_NATIVE_PROOF_MARKER): $(OTEL_NATIVE_OBJECT) $(NATIVE_LINK) Makefile
 	install -d "$(dir $@)"

@@ -347,6 +347,44 @@ inline std::optional<std::string> json_object_string(
     return json_parse_string_value(object, value_pos);
 }
 
+inline std::vector<std::string> json_object_string_list(
+    const std::string &object,
+    const std::string &key)
+{
+    std::optional<size_t> found = json_find_key_value(object, key);
+    if (!found) {
+        return {};
+    }
+    size_t pos = json_skip_ws(object, *found);
+    if (pos < object.size() && object[pos] == '"') {
+        return {json_parse_string_value(object, pos)};
+    }
+    if (pos >= object.size() || object[pos] != '[') {
+        json_fail("key " + key + " must be a string or string array");
+    }
+    pos++;
+    std::vector<std::string> out;
+    for (;;) {
+        pos = json_skip_ws(object, pos);
+        if (pos >= object.size()) {
+            json_fail("unterminated string array " + key);
+        }
+        if (object[pos] == ']') {
+            return out;
+        }
+        out.push_back(json_parse_string_value(object, pos));
+        pos = json_skip_ws(object, pos);
+        if (pos < object.size() && object[pos] == ',') {
+            pos++;
+            continue;
+        }
+        if (pos < object.size() && object[pos] == ']') {
+            return out;
+        }
+        json_fail("expected separator in string array " + key);
+    }
+}
+
 inline std::string json_required_string(const std::string &object,
                                         const std::string &key)
 {
@@ -645,6 +683,18 @@ std::optional<ManifestResolution> resolve_native_manifest(
             json_object_string(entry, "source_map_prefix");
         if (map_prefix && !map_prefix->empty() &&
             !source_has_map_prefix(source_insns, *map_prefix, load_map_info)) {
+            continue;
+        }
+        bool has_forbidden_map_prefix = false;
+        for (const std::string &forbidden_prefix :
+             json_object_string_list(entry, "source_lacks_map_prefix")) {
+            if (!forbidden_prefix.empty() &&
+                source_has_map_prefix(source_insns, forbidden_prefix, load_map_info)) {
+                has_forbidden_map_prefix = true;
+                break;
+            }
+        }
+        if (has_forbidden_map_prefix) {
             continue;
         }
         std::optional<uint64_t> required_helper =
