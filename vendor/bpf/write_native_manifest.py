@@ -79,6 +79,7 @@ CILIUM_MAP_RULES = [
     map_rule("exact", "cilium_l2_responder_v6", BPF_MAP_TYPE_HASH, 24, 8, 4096),
     map_rule("exact", "cilium_devices", BPF_MAP_TYPE_HASH, 4, 16, 512, True),
     map_rule("exact", "cilium_policy_v2", BPF_MAP_TYPE_LPM_TRIE, 12, 12, 16384, True),
+    map_rule("exact", "cilium_subnet_map", BPF_MAP_TYPE_LPM_TRIE, 24, 4, 1024),
     map_rule("exact", "cilium_nodeport_nat_buffer", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 18, 1, True),
     map_rule("exact", "cilium_nodeport_neigh4", BPF_MAP_TYPE_LRU_HASH, 4, 8, object_scoped=True),
     map_rule("exact", "cilium_nodeport_neigh6", BPF_MAP_TYPE_LRU_HASH, 16, 8, object_scoped=True),

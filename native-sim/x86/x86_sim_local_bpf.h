@@ -59,6 +59,15 @@ union x86_sim_gpr {
 #define X86_SIM_HELPER_bpf_get_current_pid_tgid 5ULL
 #define X86_SIM_HELPER_bpf_get_smp_processor_id 6ULL
 #define X86_SIM_HELPER_bpf_ktime_get_ns 7ULL
+#define X86_SIM_HELPER_bpf_current_task_under_cgroup 8ULL
+#define X86_SIM_HELPER_bpf_get_current_comm 9ULL
+#define X86_SIM_HELPER_bpf_get_current_cgroup_id 10ULL
+#define X86_SIM_HELPER_bpf_get_stackid 11ULL
+#define X86_SIM_HELPER_bpf_perf_event_output 12ULL
+#define X86_SIM_HELPER_bpf_probe_read_kernel 13ULL
+#define X86_SIM_HELPER_bpf_probe_read_kernel_str 14ULL
+#define X86_SIM_HELPER_bpf_probe_read_user_str 15ULL
+#define X86_SIM_HELPER_bpf_get_stack 16ULL
 
 #define X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)                                    \
 	((WIDTH) ? (WIDTH) : X86_WIDTH_64)
@@ -872,6 +881,65 @@ union x86_sim_gpr {
 					  __x86_l_width);                    \
 	} while (0)
 
+#define X86_SIM_L_EXEC_ALU_MEM_UNARY(DST, FLAGS, AUX, IMM)                  \
+	do {                                                               \
+		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_alu = X86_MEM_AUX_GET_ALU_OP(AUX);           \
+		__u64 __x86_l_lhs = X86_SIM_L_READ_MEM_VALUE((DST), (AUX),\
+			(IMM), __x86_l_width, 0);                         \
+		__u64 __x86_l_result = x86_alu_result(__x86_l_lhs, 1,     \
+			__x86_l_alu, __x86_l_width);                      \
+		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
+			x86_simm(IMM));                                    \
+		void *__x86_l_base_ptr = (void *)0;                       \
+		X86_SIM_L_SET_ALU_FLAGS(__x86_l_lhs, 1, __x86_l_result,   \
+					__x86_l_alu, __x86_l_width);     \
+		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                     \
+		if ((DST) != X86_REG_NONE)                                \
+			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(DST);    \
+		if ((DST) == X86_RSP)                                     \
+			X86_SIM_L_STACK_WRITE(                            \
+				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
+				__x86_l_width, __x86_l_result);          \
+		else {                                                    \
+			void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +   \
+					     __x86_l_disp;               \
+			X86_SIM_L_STORE_ADDR(__x86_l_addr,                \
+					     __x86_l_width, __x86_l_result);\
+		}                                                         \
+	} while (0)
+
+#define X86_SIM_L_EXEC_ALU_MEM_IMM(DST, FLAGS, AUX, IMM)                    \
+	do {                                                               \
+		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u8 __x86_l_alu = X86_MEM_AUX_GET_ALU_OP(AUX);           \
+		__u64 __x86_l_lhs = X86_SIM_L_READ_MEM_VALUE((DST), (AUX),\
+			(IMM), __x86_l_width, 1);                         \
+		__u64 __x86_l_rhs = x86_store_imm_value((IMM),            \
+			__x86_l_width);                                   \
+		__u64 __x86_l_result = x86_alu_result(__x86_l_lhs,        \
+			__x86_l_rhs, __x86_l_alu, __x86_l_width);         \
+		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
+			x86_store_imm_disp(IMM));                         \
+		void *__x86_l_base_ptr = (void *)0;                       \
+		X86_SIM_L_SET_ALU_FLAGS(__x86_l_lhs, __x86_l_rhs,         \
+					__x86_l_result, __x86_l_alu,    \
+					__x86_l_width);                  \
+		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                     \
+		if ((DST) != X86_REG_NONE)                                \
+			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(DST);    \
+		if ((DST) == X86_RSP)                                     \
+			X86_SIM_L_STACK_WRITE(                            \
+				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
+				__x86_l_width, __x86_l_result);          \
+		else {                                                    \
+			void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +   \
+					     __x86_l_disp;               \
+			X86_SIM_L_STORE_ADDR(__x86_l_addr,                \
+					     __x86_l_width, __x86_l_result);\
+		}                                                         \
+	} while (0)
+
 #define X86_SIM_L_EXEC_CMP_MEM(OP, DST, SRC, FLAGS, AUX, IMM)               \
 	do {                                                               \
 		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
@@ -970,6 +1038,10 @@ union x86_sim_gpr {
 			X86_SIM_L_EXEC_ALU_REG((DST), (SRC), (FLAGS), (AUX));\
 		} else if ((OP) == X86_OP_ALU_MEM) {                      \
 			X86_SIM_L_EXEC_ALU_MEM((DST), (SRC), (FLAGS), (AUX), (IMM));\
+		} else if ((OP) == X86_OP_ALU_MEM_UNARY) {                \
+			X86_SIM_L_EXEC_ALU_MEM_UNARY((DST), (FLAGS), (AUX), (IMM));\
+		} else if ((OP) == X86_OP_ALU_MEM_IMM) {                  \
+			X86_SIM_L_EXEC_ALU_MEM_IMM((DST), (FLAGS), (AUX), (IMM));\
 		} else if ((OP) == X86_OP_CMP_IMM ||                      \
 			   (OP) == X86_OP_TEST_IMM) {                    \
 			__u64 __x86_l_lhs = X86_SIM_L_READ_REG(DST);      \

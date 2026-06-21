@@ -847,7 +847,7 @@ bool hidden_old_mod_scan_done = false;
 #define MOD_HIDDEN                     1
 #define MOD_NOT_HIDDEN                 0
 
-void __always_inline lkm_seeker_send_to_userspace(struct module *mod, u32 *flags, program_data_t *p)
+sharedfunc void lkm_seeker_send_to_userspace(struct module *mod, u32 *flags, program_data_t *p)
 {
     // since this function can be called in a loop, we need to reset the buffer.
     // it is the responsibility of the caller, however, to set program_data to

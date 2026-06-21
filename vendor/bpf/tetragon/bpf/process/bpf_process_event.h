@@ -100,22 +100,9 @@ FUNC_INLINE void event_set_clone(struct msg_process *pid)
 FUNC_INLINE void
 __get_caps(struct msg_capabilities *msg, const struct cred *cred)
 {
-#ifdef MICRO_NATIVE_TETRAGON
-	if (!cred) {
-		msg->effective = 0;
-		msg->inheritable = 0;
-		msg->permitted = 0;
-		return;
-	}
-
-	msg->effective = cred->cap_effective.val;
-	msg->inheritable = cred->cap_inheritable.val;
-	msg->permitted = cred->cap_permitted.val;
-#else
 	probe_read(&msg->effective, sizeof(__u64), _(&cred->cap_effective));
 	probe_read(&msg->inheritable, sizeof(__u64), _(&cred->cap_inheritable));
 	probe_read(&msg->permitted, sizeof(__u64), _(&cred->cap_permitted));
-#endif
 }
 
 /* @get_current_subj_caps:
@@ -155,11 +142,7 @@ get_current_subj_caps(struct msg_capabilities *msg, struct task_struct *task)
 	const struct cred *cred;
 
 	/* Get the task's subjective creds */
-#ifdef MICRO_NATIVE_TETRAGON
-	cred = task ? task->cred : 0;
-#else
 	probe_read(&cred, sizeof(cred), _(&task->cred));
-#endif
 	__get_caps(msg, cred);
 }
 

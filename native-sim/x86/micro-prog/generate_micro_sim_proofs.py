@@ -89,6 +89,8 @@ CC_AUX = {
     "cmovb": "X86_CC_B",
     "cmove": "X86_CC_E",
     "cmovne": "X86_CC_NE",
+    "setae": "X86_CC_AE",
+    "setb": "X86_CC_B",
     "sete": "X86_CC_E",
     "setge": "X86_CC_GE",
     "setne": "X86_CC_NE",
@@ -114,6 +116,7 @@ class NativeInsn:
     mnemonic: str
     operands: tuple[str, ...]
     reloc_symbol: str | None = None
+    reloc_target: int | None = None
 
 
 @dataclass(frozen=True)
@@ -164,6 +167,8 @@ def parse_asm_text(text: str) -> list[NativeInsn]:
         asm = fields[-1].split("#", 1)[0].strip()
         if not asm or asm.startswith("<"):
             continue
+        if asm.startswith("lock "):
+            asm = asm.removeprefix("lock ").strip()
         match = re.match(r"(?P<mnemonic>[a-z][a-z0-9]*)\s*(?P<operands>.*)$", asm)
         if match is None:
             continue
@@ -225,6 +230,17 @@ def load_rodata16(obj: Path) -> dict[str, tuple[int, int]]:
     return out
 
 
+def text_symbol_addrs(obj: Path) -> dict[str, int]:
+    result = subprocess.run(["objdump", "-t", str(obj)], cwd=REPO_ROOT,
+                            check=True, text=True, stdout=subprocess.PIPE)
+    out: dict[str, int] = {}
+    for line in result.stdout.splitlines():
+        fields = line.split()
+        if len(fields) >= 6 and ".text" in fields:
+            out[fields[-1]] = int(fields[0], 16)
+    return out
+
+
 def parse_native_link_blob(
     name: str,
     proof_object_dir: Path,
@@ -236,7 +252,13 @@ def parse_native_link_blob(
     disasm = subprocess.run(
         ["objdump", "-dr", "-Mintel", str(proof_obj)], cwd=REPO_ROOT, check=True, text=True,
         stdout=subprocess.PIPE)
-    return parse_asm_text(disasm.stdout), section_size(proof_obj, ".text"), rodata16
+    symbols = text_symbol_addrs(proof_obj)
+    insns = [
+        replace(insn, reloc_target=symbols.get(insn.reloc_symbol))
+        if insn.reloc_symbol in symbols else insn
+        for insn in parse_asm_text(disasm.stdout)
+    ]
+    return insns, section_size(proof_obj, ".text"), rodata16
 
 
 def parse_proof_object_program(
@@ -289,12 +311,13 @@ def parse_native_linked_program(
         ]]
     )
     sub_starts = sorted({
-        branch_target(insn.operands[0])
+        insn.reloc_target if insn.reloc_target is not None else branch_target(insn.operands[0])
         for insn in insns
         if insn.mnemonic == "call"
+        and not is_helper_symbol(insn.reloc_symbol)
         and insn.operands
-        and branch_target(insn.operands[0]) != 0
-        and branch_target(insn.operands[0]) in insn_addrs
+        and (insn.reloc_symbol is None or insn.reloc_target is not None)
+        and (insn.reloc_target if insn.reloc_target is not None else branch_target(insn.operands[0])) in insn_addrs
     })
     if not sub_starts:
         return insns, {}, exit_addr, rodata16
@@ -445,7 +468,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
         dst = reg_info(ops[0]) if ops else None
         return enc("X86_OP_POP", dst=dst[0] if dst else "X86_REG_NONE",
                    flags=WIDTH_CONST.get(dst[1], "X86_WIDTH_64") if dst else "X86_WIDTH_64")
-    if op in {"sete", "setge", "setne"}:
+    if op in {"setae", "setb", "sete", "setge", "setne"}:
         dst = reg_info(ops[0]) if ops else None
         if dst is None:
             raise ValueError(f"cannot encode {insn.raw}")
@@ -587,8 +610,15 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
             if len(ops) != 1:
                 raise ValueError(f"cannot encode {insn.raw}")
             dst_reg = reg_info(ops[0])
+            if dst_reg is None and is_mem(ops[0]):
+                width = operand_width(ops[0], 64)
+                return enc("X86_OP_ALU_MEM_UNARY",
+                           dst=mem_base_reg(ops[0]),
+                           flags=WIDTH_CONST[width],
+                           aux=f"({mem_aux(ops[0], width)} | X86_MEM_AUX_ALU_OP({ALU_AUX[op]}))",
+                           imm=c_u64(mem_disp(ops[0])))
             if dst_reg is None:
-                raise ValueError(f"unsupported memory unary ALU form: {insn.raw}")
+                raise ValueError(f"cannot encode {insn.raw}")
             return enc("X86_OP_ALU_IMM", dst=dst_reg[0],
                        flags=WIDTH_CONST[dst_reg[1]], aux=ALU_AUX[op],
                        imm="1" if op == "inc" else "0")
@@ -609,6 +639,12 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                        flags=WIDTH_CONST[dst_reg[1]],
                        aux=f"({mem_aux(ops[1], operand_width(ops[1], dst_reg[1]))} | X86_MEM_AUX_ALU_OP({ALU_AUX[op]}))",
                        imm=c_u64(mem_disp(ops[1])))
+        if is_mem(ops[0]) and is_int(ops[1]):
+            return enc("X86_OP_ALU_MEM_IMM",
+                       dst=mem_base_reg(ops[0]),
+                       flags=WIDTH_CONST[operand_width(ops[0], 64)],
+                       aux=f"({mem_aux(ops[0])} | X86_MEM_AUX_ALU_OP({ALU_AUX[op]}))",
+                       imm=c_u64(parse_int(ops[1]) + (mem_disp(ops[0]) << 32)))
         if is_mem(ops[0]) or is_mem(ops[1]):
             raise ValueError(f"unsupported memory ALU form: {insn.raw}")
         raise ValueError(f"cannot encode {insn.raw}")
@@ -734,7 +770,11 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
     jump_macro = "X86_SIM_X86_SUB_JMP" if subroutine else "X86_SIM_X86_JMP"
     if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-        target = branch_target(insn.operands[0]) if insn.operands else 0
+        target = (
+            insn.reloc_target
+            if insn.reloc_target is not None
+            else branch_target(insn.operands[0]) if insn.operands else 0
+        )
         if target in addrs:
             lines.append(
                 f"{indent}{branch_macro}({CC_AUX[insn.mnemonic]}, "
@@ -745,7 +785,11 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
         return
     if insn.mnemonic == "jmp":
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-        target = branch_target(insn.operands[0]) if insn.operands else 0
+        target = (
+            insn.reloc_target
+            if insn.reloc_target is not None
+            else branch_target(insn.operands[0]) if insn.operands else 0
+        )
         if target in addrs:
             lines.append(
                 f"{indent}{jump_macro}(0x{insn.addr:x}, 0x{target:x}, "
@@ -774,7 +818,11 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
                     f"{encoded.flags}, {encoded.aux}, {encoded.imm});"
                 )
                 return
-        target = branch_target(insn.operands[0]) if insn.operands else 0
+        target = (
+            insn.reloc_target
+            if insn.reloc_target is not None
+            else branch_target(insn.operands[0]) if insn.operands else 0
+        )
         if call_functions and target in call_functions:
             if next_addr is None:
                 raise ValueError(f"cannot compute return address for {insn.raw}")
