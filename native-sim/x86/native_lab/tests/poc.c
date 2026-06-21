@@ -43,6 +43,7 @@
 #define DEBUGFS_BLOB_TPL		"/sys/kernel/debug/bpf_x86_native_lab/blob%u"
 #define MODULE_BTF_PATH			"/sys/kernel/btf/" MODULE_NAME
 #define VMLINUX_BTF_PATH		"/sys/kernel/btf/vmlinux"
+#define NATIVE_LAB_MAX_BLOBS		1024
 
 #ifndef BPF_PSEUDO_KINSN_SIDECAR
 #define BPF_PSEUDO_KINSN_SIDECAR	3
@@ -374,9 +375,9 @@ int main(int argc, char **argv)
 						  / NATIVE_LAB_CHUNK_BYTES);
 	if (chunk_count == 0)
 		chunk_count = 1;
-	if (chunk_count > 512) {
-		fprintf(stderr, "blob requires %u chunks; module supports 512\n",
-			chunk_count);
+	if (chunk_count > NATIVE_LAB_MAX_BLOBS) {
+		fprintf(stderr, "blob requires %u chunks; module supports %u\n",
+			chunk_count, NATIVE_LAB_MAX_BLOBS);
 		goto out_free;
 	}
 

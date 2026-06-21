@@ -122,10 +122,12 @@ vmlinux: $(VMLINUX_H) $(BCC_VMLINUX_H) $(TETRAGON_VMLINUX_H)
 
 $(VMLINUX_H): $(VMLINUX_BTF)
 	install -d "$(dir $@)"
-	test "$(BPF_TARGET_ARCH)" = x86 -o -s "$@"
-	test "$(BPF_TARGET_ARCH)" != x86 -o -r "$(VMLINUX_BTF)"
-	test "$(BPF_TARGET_ARCH)" != x86 -o \
-		"$(BPFTOOL)" btf dump file "$(VMLINUX_BTF)" format c > "$@"
+	if [ "$(BPF_TARGET_ARCH)" = x86 ]; then \
+		test -r "$(VMLINUX_BTF)"; \
+		"$(BPFTOOL)" btf dump file "$(VMLINUX_BTF)" format c > "$@"; \
+	else \
+		test -s "$@"; \
+	fi
 
 $(BCC_VMLINUX_H): $(VMLINUX_H)
 	install -D -m 0644 "$<" "$@"

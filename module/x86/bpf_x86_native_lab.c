@@ -46,7 +46,7 @@
 
 #include "kinsn_x86_emit.h"
 
-#define NATIVE_LAB_MAX_BLOBS	512
+#define NATIVE_LAB_MAX_BLOBS	1024
 /*
  * BPF_MAX_INSN_SIZE in arch/x86/net/bpf_jit_comp.c bounds a single kinsn
  * emit at 128 bytes. Userspace uploads longer programs as multiple
