@@ -115,13 +115,9 @@ fn select_lookup_site(
     generic_target_addr: u64,
 ) -> Result<(String, Option<usize>, LookupSiteSpec)> {
     if let Some(map_name) = native_map_name {
-        if let Some((idx, spec)) = lookup_sites
-            .iter()
-            .enumerate()
-            .find(|(idx, spec)| {
-                !used[*idx] && lookup_site_exactly_matches_native_map(spec, map_name)
-            })
-        {
+        if let Some((idx, spec)) = lookup_sites.iter().enumerate().find(|(idx, spec)| {
+            !used[*idx] && lookup_site_exactly_matches_native_map(spec, map_name)
+        }) {
             used[idx] = true;
             return Ok((idx.to_string(), Some(idx), spec.clone()));
         }
@@ -179,13 +175,9 @@ fn select_update_site(
     native_map_name: Option<&str>,
 ) -> Result<Option<(String, usize)>> {
     if let Some(map_name) = native_map_name {
-        if let Some((idx, _)) = update_sites
-            .iter()
-            .enumerate()
-            .find(|(idx, spec)| {
-                !used[*idx] && update_site_exactly_matches_native_map(spec, map_name)
-            })
-        {
+        if let Some((idx, _)) = update_sites.iter().enumerate().find(|(idx, spec)| {
+            !used[*idx] && update_site_exactly_matches_native_map(spec, map_name)
+        }) {
             used[idx] = true;
             return Ok(Some((idx.to_string(), idx)));
         }
@@ -3922,8 +3914,7 @@ fn build_x86_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<Instru
             append_x86_add_rax_imm(&mut body, spec.key_offset);
         }
         LookupKind::HashOfMaps => {
-            append_x86_add_rax_imm(&mut body, spec.key_offset);
-            body.extend_from_slice(&[0x48, 0x8B, 0x00]); // mov rax, [rax]
+            bail!("hash-of-maps lookup must use helper-level map lookup semantics");
         }
         LookupKind::LruHash => {
             append_x86_cmp_byte_rax_disp32_imm(&mut body, spec.value_offset, 0);
@@ -4272,6 +4263,20 @@ mod tests {
             Some((Register::R13, Register::RAX))
         );
         Ok(())
+    }
+
+    #[test]
+    fn hash_of_maps_lookup_postprocess_is_rejected() {
+        let mut spec = test_lookup_site("events_map_version", 0x1234);
+        spec.kind = LookupKind::HashOfMaps;
+        spec.key_offset = 0x38;
+
+        let err = build_x86_lookup_call_postprocess(&spec).unwrap_err();
+
+        assert!(
+            err.to_string().contains("helper-level map lookup"),
+            "unexpected error: {err}"
+        );
     }
 
     #[test]

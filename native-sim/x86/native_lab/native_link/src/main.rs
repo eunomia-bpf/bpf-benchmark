@@ -1906,8 +1906,7 @@ fn build_arm64_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<u32>
             words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
         }
         LookupKind::HashOfMaps => {
-            words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
-            words.push(a64_ldr_u64(X0, X0, 0)?);
+            bail!("hash-of-maps lookup must use helper-level map lookup semantics");
         }
         LookupKind::LruHash => {
             words.push(a64_ldr_u8(X8, X0, spec.value_offset)?);
@@ -5223,6 +5222,18 @@ mod tests {
         assert_eq!(site_index, None);
         assert!(matches!(spec.kind, LookupKind::PerCpuArray));
         assert_eq!(spec.max_entries, 4);
+    }
+
+    #[test]
+    fn arm64_hash_of_maps_lookup_postprocess_is_rejected() {
+        let spec = arm64_test_lookup_spec(LookupKind::HashOfMaps, "events_map_version");
+
+        let err = build_arm64_lookup_call_postprocess(&spec).unwrap_err();
+
+        assert!(
+            err.to_string().contains("helper-level map lookup"),
+            "unexpected error: {err}"
+        );
     }
 
     #[test]
