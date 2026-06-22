@@ -287,6 +287,22 @@ ____##name(struct pt_regs *ctx, ##args)
                        __native_core_type_2, \
                        __native_core_type_1)(src, args)
 
+static __always_inline int __native_core_is_null(const void *ptr)
+{
+    return ptr == NULL;
+}
+
+#define __native_core_is_pt_regs_ptr(src) \
+    (__builtin_types_compatible_p(typeof(src), struct pt_regs *) || \
+     __builtin_types_compatible_p(typeof(src), const struct pt_regs *))
+#define __native_core_direct_read(dst, src, a) ({ \
+    int __ret = -1; \
+    if (!__native_core_is_null(src)) { \
+        __builtin_memcpy((void *)(dst), (const void *)&((src)->a), sizeof(*(dst))); \
+        __ret = 0; \
+    } \
+    __ret; \
+})
 #define __native_core_read_into_1(fn, dst, src, a) \
     fn((dst), sizeof(*(dst)), &((src)->a))
 #define __native_core_read_into_2(fn, dst, src, a, b) ({ \
@@ -343,6 +359,29 @@ ____##name(struct pt_regs *ctx, ##args)
                        __native_core_read_into_2, \
                        __native_core_read_into_1)(fn, dst, src, args)
 
+#define __native_core_read_value_1(fn, dst, src, a) \
+    __builtin_choose_expr(__native_core_is_pt_regs_ptr(src), \
+                          __native_core_direct_read((dst), (src), a), \
+                          fn((dst), sizeof(*(dst)), &((src)->a)))
+#define __native_core_read_value_2(fn, dst, src, a, b) \
+    __native_core_read_into_2(fn, dst, src, a, b)
+#define __native_core_read_value_3(fn, dst, src, a, b, c) \
+    __native_core_read_into_3(fn, dst, src, a, b, c)
+#define __native_core_read_value_4(fn, dst, src, a, b, c, d) \
+    __native_core_read_into_4(fn, dst, src, a, b, c, d)
+#define __native_core_read_value_5(fn, dst, src, a, b, c, d, e) \
+    __native_core_read_into_5(fn, dst, src, a, b, c, d, e)
+#define __native_core_read_value_6(fn, dst, src, a, b, c, d, e, f) \
+    __native_core_read_into_6(fn, dst, src, a, b, c, d, e, f)
+#define __native_core_read_value(fn, dst, src, args...) \
+    __native_core_pick(args, \
+                       __native_core_read_value_6, \
+                       __native_core_read_value_5, \
+                       __native_core_read_value_4, \
+                       __native_core_read_value_3, \
+                       __native_core_read_value_2, \
+                       __native_core_read_value_1)(fn, dst, src, args)
+
 #define __native_core_read_expr_1(src, a) ((src)->a)
 #define __native_core_read_expr_2(src, a, b) (__native_core_read_expr_1(src, a)->b)
 #define __native_core_read_expr_3(src, a, b, c) (__native_core_read_expr_2(src, a, b)->c)
@@ -398,7 +437,7 @@ ____##name(struct pt_regs *ctx, ##args)
 #ifndef BPF_CORE_READ
 #define BPF_CORE_READ(src, args...) ({ \
     __native_core_type(src, args) __r; \
-    BPF_CORE_READ_INTO(&__r, (src), args); \
+    __native_core_read_value(bpf_probe_read_kernel, &__r, (src), args); \
     __r; \
 })
 #endif
