@@ -27,7 +27,8 @@ class AppProof:
     source: Path
 
 
-def run(cmd: list[str], *, cwd: Path = REPO_ROOT) -> subprocess.CompletedProcess[str]:
+def run(cmd: list[str], *, cwd: Path = REPO_ROOT,
+        timeout_s: int | None = None) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         cmd,
         cwd=cwd,
@@ -35,6 +36,7 @@ def run(cmd: list[str], *, cwd: Path = REPO_ROOT) -> subprocess.CompletedProcess
         text=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        timeout=timeout_s,
     )
 
 
@@ -59,7 +61,19 @@ def safe_name(app: str, proof: Path) -> str:
 def discover(proof_root: Path, apps: set[str], only: set[str], offset: int, limit: int | None) -> list[AppProof]:
     proofs: list[AppProof] = []
     skipped = 0
-    for app_dir in sorted(path for path in proof_root.iterdir() if path.is_dir()):
+    forbidden: list[Path] = []
+    app_dirs = sorted(path for path in proof_root.iterdir() if path.is_dir())
+    for app_dir in app_dirs:
+        app = app_dir.name
+        if apps and app not in apps:
+            continue
+        for proof in sorted(app_dir.glob("*.proof.o")):
+            if app == "cilium" and proof.name.startswith("cilium_placeholders."):
+                forbidden.append(proof)
+    if forbidden:
+        paths = "\n".join(str(path) for path in forbidden)
+        raise SystemExit(f"forbidden Cilium placeholder proof objects in proof root:\n{paths}")
+    for app_dir in app_dirs:
         app = app_dir.name
         if apps and app not in apps:
             continue
@@ -92,6 +106,33 @@ def prepare_generator_inputs(proofs: list[AppProof], proof_dir: Path, config_pat
     config_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def undefined_symbols(proof: Path) -> list[str]:
+    result = run(["llvm-nm-18", "--undefined-only", "--format=posix", str(proof)])
+    if result.returncode != 0:
+        detail = result.stderr or result.stdout or "llvm-nm-18 failed"
+        raise RuntimeError(compact(detail))
+    symbols: list[str] = []
+    for line in result.stdout.splitlines():
+        fields = line.split()
+        if not fields:
+            continue
+        symbol = fields[0]
+        if symbol.startswith("bpf_") or symbol in {"memcpy", "memset"}:
+            continue
+        if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", symbol):
+            symbols.append(symbol)
+    return sorted(set(symbols))
+
+
+def prepend_externs(source: Path, proof: Path) -> None:
+    symbols = undefined_symbols(proof)
+    if not symbols:
+        return
+    prelude = "".join(f"extern char {symbol};\n" for symbol in symbols)
+    text = source.read_text(encoding="utf-8")
+    source.write_text(prelude + text, encoding="utf-8")
+
+
 def generate_source(config_path: Path, proof_dir: Path, source_dir: Path, proof: AppProof) -> tuple[bool, str]:
     source_dir.mkdir(parents=True, exist_ok=True)
     source = source_dir / f"{proof.name}.bpf.c"
@@ -116,10 +157,14 @@ def generate_source(config_path: Path, proof_dir: Path, source_dir: Path, proof:
         if not detail:
             detail = "generator did not write expected source"
         return False, compact(detail)
+    try:
+        prepend_externs(source, proof.source)
+    except RuntimeError as err:
+        return False, str(err)
     return True, ""
 
 
-def compile_source(source: Path, build_dir: Path) -> tuple[bool, str]:
+def compile_source(source: Path, build_dir: Path, timeout_s: int) -> tuple[bool, str]:
     build_dir.mkdir(parents=True, exist_ok=True)
     obj = build_dir / source.with_suffix(".bpf.o").name
     cmd = [
@@ -143,7 +188,18 @@ def compile_source(source: Path, build_dir: Path) -> tuple[bool, str]:
         "-o",
         str(obj),
     ]
-    result = run(cmd)
+    try:
+        result = run(cmd, timeout_s=timeout_s)
+    except subprocess.TimeoutExpired as err:
+        detail = f"clang timed out after {timeout_s}s compiling {source.name}"
+        timed_out_output = "\n".join(
+            part.decode(errors="replace") if isinstance(part, bytes) else part
+            for part in [err.stdout, err.stderr]
+            if part
+        )
+        if timed_out_output:
+            detail += "\n" + timed_out_output
+        return False, compact(detail)
     if result.returncode == 0:
         return True, ""
     return False, compact(result.stderr or result.stdout or "clang failed")
@@ -158,6 +214,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--only", action="append", default=[])
     parser.add_argument("--offset", type=int, default=0)
     parser.add_argument("--limit", type=int)
+    parser.add_argument("--compile-timeout-s", type=int, default=120)
     parser.add_argument("--keep-going", action="store_true")
     args = parser.parse_args(argv)
 
@@ -165,6 +222,8 @@ def main(argv: list[str]) -> int:
         raise SystemExit("--offset must be >= 0")
     if args.limit is not None and args.limit < 1:
         raise SystemExit("--limit must be >= 1")
+    if args.compile_timeout_s < 1:
+        raise SystemExit("--compile-timeout-s must be >= 1")
 
     output_dir = args.output_dir.resolve()
     run_dir = output_dir.with_name(f"{output_dir.name}-run-{os.getpid()}")
@@ -182,17 +241,17 @@ def main(argv: list[str]) -> int:
     for proof in proofs:
         ok, note = generate_source(config_path, proof_dir, source_dir, proof)
         if not ok:
-            print(f"fail {proof.name}: {note}")
+            print(f"fail {proof.name}: {note}", flush=True)
             failures.append(proof.name)
             if not args.keep_going:
                 break
             continue
         source = source_dir / f"{proof.name}.bpf.c"
-        ok, note = compile_source(source, build_dir)
+        ok, note = compile_source(source, build_dir, args.compile_timeout_s)
         if ok:
-            print(f"ok {proof.name}")
+            print(f"ok {proof.name}", flush=True)
             continue
-        print(f"fail {proof.name}: {note}")
+        print(f"fail {proof.name}: {note}", flush=True)
         failures.append(proof.name)
         if not args.keep_going:
             break

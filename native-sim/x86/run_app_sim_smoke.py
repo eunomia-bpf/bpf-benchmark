@@ -61,7 +61,19 @@ def safe_name(app: str, proof: Path) -> str:
 def discover(proof_root: Path, apps: set[str], only: set[str], offset: int, limit: int | None) -> list[AppProof]:
     proofs: list[AppProof] = []
     skipped = 0
-    for app_dir in sorted(path for path in proof_root.iterdir() if path.is_dir()):
+    forbidden: list[Path] = []
+    app_dirs = sorted(path for path in proof_root.iterdir() if path.is_dir())
+    for app_dir in app_dirs:
+        app = app_dir.name
+        if apps and app not in apps:
+            continue
+        for proof in sorted(app_dir.glob("*.proof.o")):
+            if app == "cilium" and proof.name.startswith("cilium_placeholders."):
+                forbidden.append(proof)
+    if forbidden:
+        paths = "\n".join(str(path) for path in forbidden)
+        raise SystemExit(f"forbidden Cilium placeholder proof objects in proof root:\n{paths}")
+    for app_dir in app_dirs:
         app = app_dir.name
         if apps and app not in apps:
             continue
