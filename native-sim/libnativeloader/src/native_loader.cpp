@@ -501,7 +501,7 @@ constexpr const char *kArm64BpfProgBpfFuncOffsetKey =
     "__native_arm64_bpf_prog_bpf_func_offset";
 constexpr const char *kArm64TailCallOffsetKey = "__native_arm64_tail_call_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v65";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v66";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
 constexpr const char *kNativeStubBtfCacheVersion = "native-stub-btf-cache-v1";
 constexpr size_t kInitialVerifierLogSize = 256 * 1024;
@@ -3992,6 +3992,7 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
         proof_argv.push_back(out.proof.string());
         proof_argv.push_back("--mode");
         proof_argv.push_back("proof");
+        proof_argv.push_back("--preserve-entry-abi");
 
         const std::filesystem::path proof_stderr = base.string() + ".proof.stderr.txt";
         int proof_rc = run_subprocess(proof_argv, proof_stderr);

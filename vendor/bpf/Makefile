@@ -18,6 +18,7 @@ LLVM_STRIP ?= llvm-strip-18
 BPFTOOL ?= $(VENDOR)/build/x86/bpftool/bin/bpftool
 VMLINUX_BTF ?= /sys/kernel/btf/vmlinux
 NATIVE_LINK ?= $(ROOT)/native-sim/x86/native_lab/native_link/target/release/native-link
+NATIVE_LINK_PROOF_FLAGS ?= --preserve-entry-abi
 
 OUT := $(BUILD)/$(ARCH)/$(KERNEL_RELEASE)
 VMLINUX_H := targets/$(ARCH)/$(KERNEL_RELEASE)/vmlinux.h
@@ -266,7 +267,7 @@ $(NATIVE_OUT)/katran/%.proof.ok: $(NATIVE_OUT)/katran/%.native.o $(NATIVE_LINK) 
 	fi; \
 	for sym in $${symbols}; do \
 		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/katran/$*.$${sym}.proof.o" --mode proof; \
+			--output "$(NATIVE_OUT)/katran/$*.$${sym}.proof.o" --mode proof $(NATIVE_LINK_PROOF_FLAGS); \
 	done; \
 	printf 'ok\n' > "$@"
 
@@ -297,7 +298,7 @@ $(NATIVE_OUT)/bcc/%.proof.ok: $(NATIVE_OUT)/bcc/%.native.o $(NATIVE_LINK) Makefi
 	fi; \
 	for sym in $${symbols}; do \
 		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/bcc/$*.$${sym}.proof.o" --mode proof; \
+			--output "$(NATIVE_OUT)/bcc/$*.$${sym}.proof.o" --mode proof $(NATIVE_LINK_PROOF_FLAGS); \
 	done; \
 	printf 'ok\n' > "$@"
 
@@ -324,7 +325,7 @@ $(NATIVE_OUT)/cilium/%.proof.ok: $(NATIVE_OUT)/cilium/%.native.o $(NATIVE_LINK) 
 	fi; \
 	for sym in $${symbols}; do \
 		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/cilium/$*.$${sym}.proof.o" --mode proof; \
+			--output "$(NATIVE_OUT)/cilium/$*.$${sym}.proof.o" --mode proof $(NATIVE_LINK_PROOF_FLAGS); \
 	done; \
 	printf 'ok\n' > "$@"
 
@@ -369,7 +370,7 @@ $(OTEL_NATIVE_PROOF_MARKER): $(OTEL_NATIVE_OBJECT) $(NATIVE_LINK) Makefile
 	fi; \
 	for sym in $${symbols}; do \
 		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/otel/$${sym}.proof.o" --mode proof; \
+			--output "$(NATIVE_OUT)/otel/$${sym}.proof.o" --mode proof $(NATIVE_LINK_PROOF_FLAGS); \
 	done; \
 	printf 'ok\n' > "$@"
 
@@ -408,7 +409,7 @@ $(TRACEE_NATIVE_PROOF_MARKER): $(TRACEE_NATIVE_OBJECT) $(NATIVE_LINK) Makefile
 	fi; \
 	for sym in $${symbols}; do \
 		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/tracee/$${sym}.proof.o" --mode proof; \
+			--output "$(NATIVE_OUT)/tracee/$${sym}.proof.o" --mode proof $(NATIVE_LINK_PROOF_FLAGS); \
 	done; \
 	printf 'ok\n' > "$@"
 
@@ -422,7 +423,7 @@ $(NATIVE_OUT)/tracee/lsm_support/%.proof.ok: $(NATIVE_OUT)/tracee/lsm_support/%.
 	fi; \
 	for sym in $${symbols}; do \
 		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/tracee/lsm_support/$*.$${sym}.proof.o" --mode proof; \
+			--output "$(NATIVE_OUT)/tracee/lsm_support/$*.$${sym}.proof.o" --mode proof $(NATIVE_LINK_PROOF_FLAGS); \
 	done; \
 	printf 'ok\n' > "$@"
 
@@ -551,7 +552,7 @@ native-tetragon: $(TETRAGON_VMLINUX_H) native_compat.h $(NATIVE_LINK)
 		fi; \
 		for sym in $${symbols}; do \
 				"$(NATIVE_LINK)" --input "$${obj}" --symbol "$${sym}" \
-					--output "$${native_out}/$${base}.$${sym}.proof.o" --mode proof; \
+					--output "$${native_out}/$${base}.$${sym}.proof.o" --mode proof $(NATIVE_LINK_PROOF_FLAGS); \
 				done; \
 				printf 'ok\n' > "$${native_out}/$${base}.proof.ok"; \
 				install -m 0644 "$${obj}" "$${stage_out}/$${base}.native.o"; \

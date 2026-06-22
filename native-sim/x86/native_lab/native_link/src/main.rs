@@ -119,6 +119,11 @@ struct Args {
     #[arg(long)]
     show: bool,
 
+    /// Keep the compiler's entry-function ABI in proof mode instead of
+    /// moving callee-saved preservation into the BPF JIT wrapper.
+    #[arg(long)]
+    preserve_entry_abi: bool,
+
     /// Link mode. `proof` applies canonical ABI/link edits but leaves
     /// verifier-after helper/map lowering symbolic and emits a relocatable
     /// proof object for the eBPF simulator generator.
@@ -539,6 +544,7 @@ fn main() -> Result<()> {
                 &lookup_maps,
                 &update_sites,
                 proof_mode,
+                args.preserve_entry_abi,
                 args.show,
             )?
         }

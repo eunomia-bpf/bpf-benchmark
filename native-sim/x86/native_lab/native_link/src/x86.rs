@@ -1127,6 +1127,7 @@ pub(super) fn rewrite_x86(
     lookup_maps: &HashMap<String, LookupSiteSpec>,
     update_sites: &[UpdateSiteSpec],
     proof_mode: bool,
+    preserve_entry_abi: bool,
     show: bool,
 ) -> Result<RewriteResult> {
     let included_ranges: Vec<(u64, u64)> = included
@@ -1189,7 +1190,7 @@ pub(super) fn rewrite_x86(
                 sym.address,
                 entry_has_tail_call,
                 proof_return_jmp_target,
-                !proof_mode && proof_input,
+                (!proof_mode && proof_input) || (proof_mode && preserve_entry_abi),
             )?
         } else {
             X86EntryAbiStrip::default()
@@ -4277,6 +4278,28 @@ mod tests {
             err.to_string().contains("helper-level map lookup"),
             "unexpected error: {err}"
         );
+    }
+
+    #[test]
+    fn preserve_entry_abi_keeps_callee_saved_in_body() -> Result<()> {
+        let bytes = [
+            0x53, // push rbx
+            0x41, 0x54, // push r12
+            0x31, 0xc0, // xor eax, eax
+            0x41, 0x5c, // pop r12
+            0x5b, // pop rbx
+            0xc3, // ret
+        ];
+
+        let stripped = plan_x86_entry_abi_strip(&bytes, 0, false, None, false)?;
+        assert_eq!(stripped.callee_saved_mask, 0x3);
+        assert_eq!(stripped.drop_local_ips.len(), 4);
+
+        let preserved = plan_x86_entry_abi_strip(&bytes, 0, false, None, true)?;
+        assert_eq!(preserved.callee_saved_mask, 0);
+        assert!(preserved.drop_local_ips.is_empty());
+        assert!(preserved.register_renames.is_empty());
+        Ok(())
     }
 
     #[test]
