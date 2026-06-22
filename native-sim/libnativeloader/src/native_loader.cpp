@@ -3179,6 +3179,35 @@ NativeMapShape map_shape_from_meta(const MapMeta &meta)
     };
 }
 
+std::string source_map_name_from_manifest(const CompanionLoad &load,
+                                          const MapMeta &meta)
+{
+    std::string resolved;
+    for (const NativeMapRule &rule : load.map_rules) {
+        bool name_match = native_map_rule_matches(rule, meta.name);
+        if (!name_match &&
+            rule.match == NativeMapRuleMatch::Exact &&
+            starts_with(rule.pattern, meta.name)) {
+            name_match = true;
+        }
+        if (!name_match || !map_matches_shape(meta, rule.shape)) {
+            continue;
+        }
+
+        const std::string &candidate =
+            rule.native_symbol.empty() ? rule.pattern : rule.native_symbol;
+        if (candidate.empty()) {
+            continue;
+        }
+        if (!resolved.empty() && resolved != candidate) {
+            // Same truncated kernel name and shape: keep the runtime name instead of guessing.
+            return meta.name;
+        }
+        resolved = candidate;
+    }
+    return resolved.empty() ? meta.name : resolved;
+}
+
 NativeMapShape inner_map_shape_for_outer_map(
     const MapMeta &meta,
     const std::vector<NativeMapRule> &map_rules)
@@ -3590,7 +3619,7 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
                 0,
             };
             if (map_it != meta_by_source_fd.end()) {
-                site.map_name = map_it->second.name;
+                site.map_name = source_map_name_from_manifest(out, map_it->second);
                 configure_lookup_site_for_shape(site,
                                                 map_shape_from_meta(map_it->second),
                                                 array_offsets,
@@ -3615,7 +3644,7 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
                 0,
             };
             if (map_it != meta_by_source_fd.end()) {
-                site.map_name = map_it->second.name;
+                site.map_name = source_map_name_from_manifest(out, map_it->second);
                 configure_update_site_for_shape(site,
                                                 map_shape_from_meta(map_it->second),
                                                 map_it->second.fd,
