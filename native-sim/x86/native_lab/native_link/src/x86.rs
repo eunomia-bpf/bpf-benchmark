@@ -48,6 +48,16 @@ fn update_site_matches_native_map(spec: &UpdateSiteSpec, native_map_name: &str) 
         || truncate_bpf_obj_name(source_map_name) == truncate_bpf_obj_name(native_map_name)
 }
 
+fn tail_call_map_matches_native(tail_call_maps: &HashSet<String>, native_map_name: &str) -> bool {
+    if tail_call_maps.contains(native_map_name) {
+        return true;
+    }
+    let native_truncated = truncate_bpf_obj_name(native_map_name);
+    tail_call_maps
+        .iter()
+        .any(|name| truncate_bpf_obj_name(name) == native_truncated)
+}
+
 fn lookup_map_spec(
     lookup_maps: &HashMap<String, LookupSiteSpec>,
     native_map_name: &str,
@@ -1074,6 +1084,8 @@ pub(super) fn rewrite_x86(
     included: &[SymInfo],
     helper_addrs: &HashMap<String, u64>,
     map_addrs: &HashMap<String, u64>,
+    tail_call_maps: &HashSet<String>,
+    tail_call_sites: &[TailCallSiteSpec],
     lookup_sites: &[LookupSiteSpec],
     lookup_maps: &HashMap<String, LookupSiteSpec>,
     update_sites: &[UpdateSiteSpec],
@@ -1119,6 +1131,7 @@ pub(super) fn rewrite_x86(
         .unwrap_or(0);
     let mut update_call_counter: usize = 0;
     let mut update_site_used = vec![false; update_sites.len()];
+    let mut tail_call_counter: usize = 0;
     let mut resolved_helper_call_sites: HashSet<LocalSiteKey> = HashSet::new();
     let mut resolved_got_relocations: HashSet<LocalSiteKey> = HashSet::new();
 
@@ -1156,6 +1169,7 @@ pub(super) fn rewrite_x86(
         let mut helper_got_registers: HashMap<Register, String> = HashMap::new();
         let mut helper_imm_registers: HashMap<Register, u64> = HashMap::new();
         let mut map_symbol_registers: HashMap<Register, String> = HashMap::new();
+        let mut immediate_registers: HashMap<Register, u64> = HashMap::new();
 
         // Side table: per-entry patch kind, paired with each kept Instruction
         // in the symbol-local stream. `insn_local_ip` records the byte
@@ -1398,8 +1412,13 @@ pub(super) fn rewrite_x86(
                     }
                 }
                 if let Some(name) = helper_call_name {
+                    let x86_tail_call_index = immediate_registers
+                        .get(&Register::RDX)
+                        .copied()
+                        .and_then(|v| u32::try_from(v).ok());
                     clear_x86_call_clobbered_registers(&mut helper_imm_registers);
                     clear_x86_call_clobbered_registers(&mut helper_got_registers);
+                    clear_x86_call_clobbered_registers(&mut immediate_registers);
                     if proof_mode {
                         local.push(insn);
                         kinds.push(None);
@@ -1415,12 +1434,64 @@ pub(super) fn rewrite_x86(
                                 local_ip
                             );
                         }
+                        let map_name = map_symbol_registers.get(&Register::RSI).ok_or_else(|| {
+                            anyhow!(
+                                "x86 bpf_tail_call in {} at local offset {:#x} has no tracked rsi prog-array map",
+                                sym.name,
+                                local_ip
+                            )
+                        })?;
+                        let source_tail_call = tail_call_sites.get(tail_call_counter);
+                        if let Some(site) = source_tail_call {
+                            if let Some(source_map_name) = &site.map_name {
+                                if truncate_bpf_obj_name(source_map_name)
+                                    != truncate_bpf_obj_name(map_name)
+                                {
+                                    bail!(
+                                        "x86 bpf_tail_call native call {} in {} at local offset {:#x} uses map {:?}, but source link-plan tail_call_sites map is {:?}",
+                                        tail_call_counter,
+                                        sym.name,
+                                        local_ip,
+                                        map_name,
+                                        source_map_name
+                                    );
+                                }
+                            }
+                        }
+                        if !tail_call_map_matches_native(tail_call_maps, map_name) {
+                            bail!(
+                                "x86 bpf_tail_call in {} at local offset {:#x} uses map {:?}, which is not a link-plan tail_call_maps entry",
+                                sym.name,
+                                local_ip,
+                                map_name
+                            );
+                        }
+                        let source_tail_call_index = source_tail_call.and_then(|site| site.key);
+                        if x86_tail_call_index.is_some()
+                            && source_tail_call_index.is_some()
+                            && x86_tail_call_index != source_tail_call_index
+                        {
+                            bail!(
+                                "x86 bpf_tail_call native call {} in {} at local offset {:#x} has mismatched constant key: native={:?} source={:?}",
+                                tail_call_counter,
+                                sym.name,
+                                local_ip,
+                                x86_tail_call_index,
+                                source_tail_call_index
+                            );
+                        }
+                        let tail_call_index = source_tail_call_index.or(x86_tail_call_index);
+                        let tail_call_max_entries =
+                            source_tail_call.and_then(|site| site.max_entries);
+                        tail_call_counter += 1;
                         for ib in build_x86_tail_call_inline(
                             helper_addrs,
                             callee_saved_mask,
                             &entry_abi_strip.tail_call_cleanup_bytes,
                             entry_abi_strip.tail_call_bpf_rbp_rsp_offset,
                             entry_abi_strip.tail_call_bpf_rbp_is_live,
+                            tail_call_index,
+                            tail_call_max_entries,
                         )? {
                             push_x86_synthetic(
                                 &mut local,
@@ -1606,6 +1677,10 @@ pub(super) fn rewrite_x86(
                     .cloned()
                     .map(|name| (dst, name))
             });
+            let imm_reg_move = x86_mov_gpr64_to_gpr64(&insn).and_then(|(dst, src)| {
+                immediate_registers.get(&src).copied().map(|imm| (dst, imm))
+            });
+            let imm_reg_load = x86_mov_imm_to_gpr64(&insn);
             let written_reg = x86_written_gpr_family(&insn);
             local.push(insn);
             kinds.push(None);
@@ -1635,10 +1710,16 @@ pub(super) fn rewrite_x86(
                 clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                 clear_x86_call_clobbered_registers(&mut helper_got_registers);
                 clear_x86_call_clobbered_registers(&mut helper_imm_registers);
+                clear_x86_call_clobbered_registers(&mut immediate_registers);
             } else if let Some((dst, name)) = map_reg_move {
                 map_symbol_registers.insert(dst, name);
+            } else if let Some((dst, imm)) = imm_reg_move {
+                immediate_registers.insert(dst, imm);
+            } else if let Some((dst, imm)) = imm_reg_load {
+                immediate_registers.insert(dst, imm);
             } else if let Some(reg) = written_reg {
                 map_symbol_registers.remove(&reg);
+                immediate_registers.remove(&reg);
             }
             if let Some(reg) = written_reg {
                 if helper_got_load_reg != Some(reg) {
@@ -3607,6 +3688,8 @@ fn build_x86_tail_call_inline(
     native_cleanup: &[u8],
     saved_bpf_rbp_rsp_offset: Option<i32>,
     bpf_rbp_is_live: bool,
+    constant_index: Option<u32>,
+    constant_index_max_entries: Option<u32>,
 ) -> Result<Vec<Instruction>> {
     const MAX_TAIL_CALL_CNT: u8 = 33;
     let map_max_entries = x86_required_u32_helper_arg(
@@ -3634,10 +3717,24 @@ fn build_x86_tail_call_inline(
     }
 
     let mut bytes = Vec::new();
-    bytes.extend_from_slice(&[0x89, 0xD2]); // mov edx, edx
-    bytes.extend_from_slice(&[0x39, 0x96]); // cmp dword ptr [rsi + disp32], edx
-    bytes.extend_from_slice(&map_max_entries.to_le_bytes());
-    let jbe_out = append_x86_jcc_rel32(&mut bytes, 0x86);
+    let constant_index_in_bounds = match (constant_index, constant_index_max_entries) {
+        (Some(index), Some(max_entries)) if index >= max_entries => return Ok(Vec::new()),
+        (Some(_), Some(_)) => true,
+        _ => false,
+    };
+    let jbe_out = if constant_index_in_bounds {
+        None
+    } else if let Some(index) = constant_index {
+        bytes.extend_from_slice(&[0x81, 0xBE]); // cmp dword ptr [rsi + disp32], imm32
+        bytes.extend_from_slice(&map_max_entries.to_le_bytes());
+        bytes.extend_from_slice(&index.to_le_bytes());
+        Some(append_x86_jcc_rel32(&mut bytes, 0x86))
+    } else {
+        bytes.extend_from_slice(&[0x89, 0xD2]); // mov edx, edx
+        bytes.extend_from_slice(&[0x39, 0x96]); // cmp dword ptr [rsi + disp32], edx
+        bytes.extend_from_slice(&map_max_entries.to_le_bytes());
+        Some(append_x86_jcc_rel32(&mut bytes, 0x86))
+    };
 
     if let Some(offset) = saved_bpf_rbp_rsp_offset {
         bytes.extend_from_slice(&[0x48, 0x8B, 0x84, 0x24]); // mov rax, [rsp + disp32]
@@ -3652,22 +3749,34 @@ fn build_x86_tail_call_inline(
     bytes.extend_from_slice(&[0x48, 0x83, 0x38, MAX_TAIL_CALL_CNT]); // cmp qword [rax], 33
     let jae_out = append_x86_jcc_rel32(&mut bytes, 0x83);
 
-    bytes.extend_from_slice(&[0x48, 0x8B, 0x8C, 0xD6]); // mov rcx, [rsi + rdx*8 + disp32]
-    bytes.extend_from_slice(&array_ptrs.to_le_bytes());
+    if let Some(index) = constant_index {
+        let ptr_disp = array_ptrs
+            .checked_add(index.checked_mul(8).ok_or_else(|| {
+                anyhow!("x86 tail_call constant index byte offset overflow: {index}")
+            })?)
+            .ok_or_else(|| anyhow!("x86 tail_call array ptr displacement overflow"))?;
+        bytes.extend_from_slice(&[0x48, 0x8B, 0x8E]); // mov rcx, [rsi + disp32]
+        bytes.extend_from_slice(&ptr_disp.to_le_bytes());
+    } else {
+        bytes.extend_from_slice(&[0x48, 0x8B, 0x8C, 0xD6]); // mov rcx, [rsi + rdx*8 + disp32]
+        bytes.extend_from_slice(&array_ptrs.to_le_bytes());
+    }
     bytes.extend_from_slice(&[0x48, 0x85, 0xC9]); // test rcx, rcx
     let je_out = append_x86_jcc_rel32(&mut bytes, 0x84);
 
     bytes.extend_from_slice(&[0x48, 0x83, 0x00, 0x01]); // add qword ptr [rax], 1
     bytes.extend_from_slice(native_cleanup);
     append_x86_stub_callee_pop(&mut bytes, callee_saved_mask);
-    bytes.extend_from_slice(&[0x58, 0x58]); // pop tail_call_cnt_ptr; pop tail_call_cnt
+    bytes.extend_from_slice(&[0x48, 0x83, 0xC4, 0x10]); // drop tail_call_cnt_ptr/tail_call_cnt
     bytes.extend_from_slice(&[0x48, 0x8B, 0x89]); // mov rcx, [rcx + disp32]
     bytes.extend_from_slice(&prog_bpf_func.to_le_bytes());
     append_x86_add_rcx_imm(&mut bytes, tail_call_offset);
     bytes.extend_from_slice(&[0xFF, 0xE1]); // jmp rcx
 
     let out = bytes.len();
-    patch_x86_rel32(&mut bytes, jbe_out, out)?;
+    if let Some(jbe_out) = jbe_out {
+        patch_x86_rel32(&mut bytes, jbe_out, out)?;
+    }
     patch_x86_rel32(&mut bytes, jae_out, out)?;
     patch_x86_rel32(&mut bytes, je_out, out)?;
     declared_byte_chunks(&bytes)
@@ -4057,6 +4166,67 @@ mod tests {
         let encoded = encode_x86_local_block("helper_slot", 5, &[insn], &[0])?;
 
         assert_eq!(encoded.code_buffer, [0xE8, 0, 0, 0, 0]);
+        Ok(())
+    }
+
+    #[test]
+    fn tail_call_constant_index_uses_fixed_array_slot() -> Result<()> {
+        let helper_addrs = HashMap::from([
+            (X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY.to_string(), 0x10),
+            (X86_BPF_ARRAY_PTRS_OFFSET_KEY.to_string(), 0x20),
+            (X86_BPF_PROG_BPF_FUNC_OFFSET_KEY.to_string(), 0x30),
+            (X86_TAIL_CALL_OFFSET_KEY.to_string(), 0x0c),
+        ]);
+        let insns = build_x86_tail_call_inline(&helper_addrs, 0, &[], None, true, Some(3), None)?;
+        let local_ips: Vec<u64> = (0..insns.len() as u64).collect();
+        let encoded = encode_x86_local_block("tail_call_constant_index", 4096, &insns, &local_ips)?;
+        let bytes = encoded.code_buffer;
+
+        assert!(bytes
+            .windows(10)
+            .any(|w| w == [0x81, 0xbe, 0x10, 0, 0, 0, 3, 0, 0, 0]));
+        assert!(bytes
+            .windows(7)
+            .any(|w| w == [0x48, 0x8b, 0x8e, 0x38, 0, 0, 0]));
+        assert!(!bytes.windows(4).any(|w| w == [0x48, 0x8b, 0x8c, 0xd6]));
+        Ok(())
+    }
+
+    #[test]
+    fn tail_call_constant_index_with_known_bounds_omits_bounds_check() -> Result<()> {
+        let helper_addrs = HashMap::from([
+            (X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY.to_string(), 0x10),
+            (X86_BPF_ARRAY_PTRS_OFFSET_KEY.to_string(), 0x20),
+            (X86_BPF_PROG_BPF_FUNC_OFFSET_KEY.to_string(), 0x30),
+            (X86_TAIL_CALL_OFFSET_KEY.to_string(), 0x0c),
+        ]);
+        let insns =
+            build_x86_tail_call_inline(&helper_addrs, 0, &[], None, true, Some(3), Some(8))?;
+        let local_ips: Vec<u64> = (0..insns.len() as u64).collect();
+        let encoded = encode_x86_local_block("tail_call_known_bounds", 4096, &insns, &local_ips)?;
+        let bytes = encoded.code_buffer;
+
+        assert!(!bytes
+            .windows(10)
+            .any(|w| w == [0x81, 0xbe, 0x10, 0, 0, 0, 3, 0, 0, 0]));
+        assert!(bytes
+            .windows(7)
+            .any(|w| w == [0x48, 0x8b, 0x8e, 0x38, 0, 0, 0]));
+        Ok(())
+    }
+
+    #[test]
+    fn tail_call_constant_index_known_out_of_bounds_is_noop() -> Result<()> {
+        let helper_addrs = HashMap::from([
+            (X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY.to_string(), 0x10),
+            (X86_BPF_ARRAY_PTRS_OFFSET_KEY.to_string(), 0x20),
+            (X86_BPF_PROG_BPF_FUNC_OFFSET_KEY.to_string(), 0x30),
+            (X86_TAIL_CALL_OFFSET_KEY.to_string(), 0x0c),
+        ]);
+        let insns =
+            build_x86_tail_call_inline(&helper_addrs, 0, &[], None, true, Some(8), Some(8))?;
+
+        assert!(insns.is_empty());
         Ok(())
     }
 

@@ -4,6 +4,8 @@ struct SourceHelperCall {
     int helper_id;
     int map_fd;
     NativeMapShape dynamic_map_shape;
+    bool key_known;
+    uint32_t key;
 };
 
 struct SourceMapBinding {
@@ -84,13 +86,25 @@ std::vector<SourceHelperCall> collect_source_helper_calls(
 {
     std::vector<SourceHelperCall> sites;
     SourceMapBinding reg_map[11];
+    bool reg_imm_known[11] = {};
+    uint64_t reg_imm[11] = {};
     std::unordered_map<int16_t, SourceMapBinding> stack_map;
+    auto clear_reg = [&](uint8_t reg) {
+        if (reg < 11) {
+            reg_map[reg] = SourceMapBinding{};
+            reg_imm_known[reg] = false;
+            reg_imm[reg] = 0;
+        }
+    };
+    auto clear_call_clobbered = [&]() {
+        for (int r = 0; r <= 5; r++) clear_reg(r);
+    };
     for (size_t i = 0; i < cnt; i++) {
         const struct bpf_insn &in = insns[i];
         uint8_t code = in.code;
         if (code == (BPF_LD | BPF_DW | BPF_IMM)) {
             if (in.dst_reg < 11) {
-                reg_map[in.dst_reg] = SourceMapBinding{};
+                clear_reg(in.dst_reg);
                 if (in.src_reg == BPF_PSEUDO_MAP_FD) {
                     reg_map[in.dst_reg].map_fd = (int)in.imm;
                 }
@@ -101,8 +115,19 @@ std::vector<SourceHelperCall> collect_source_helper_calls(
         if (code == (BPF_ALU64 | BPF_MOV | BPF_X)) {
             if (in.dst_reg < 11 && in.src_reg < 11) {
                 reg_map[in.dst_reg] = reg_map[in.src_reg];
-            } else if (in.dst_reg < 11) {
+                reg_imm_known[in.dst_reg] = reg_imm_known[in.src_reg];
+                reg_imm[in.dst_reg] = reg_imm[in.src_reg];
+            } else {
+                clear_reg(in.dst_reg);
+            }
+            continue;
+        }
+        if (code == (BPF_ALU64 | BPF_MOV | BPF_K) ||
+            code == (BPF_ALU | BPF_MOV | BPF_K)) {
+            if (in.dst_reg < 11) {
                 reg_map[in.dst_reg] = SourceMapBinding{};
+                reg_imm_known[in.dst_reg] = true;
+                reg_imm[in.dst_reg] = static_cast<uint32_t>(in.imm);
             }
             continue;
         }
@@ -130,8 +155,10 @@ std::vector<SourceHelperCall> collect_source_helper_calls(
                     auto it = stack_map.find(in.off);
                     reg_map[in.dst_reg] =
                         it == stack_map.end() ? SourceMapBinding{} : it->second;
+                    reg_imm_known[in.dst_reg] = false;
+                    reg_imm[in.dst_reg] = 0;
                 } else {
-                    reg_map[in.dst_reg] = SourceMapBinding{};
+                    clear_reg(in.dst_reg);
                 }
             }
             continue;
@@ -140,11 +167,11 @@ std::vector<SourceHelperCall> collect_source_helper_calls(
             if (in.src_reg == BPF_PSEUDO_CALL ||
                 in.src_reg == BPF_PSEUDO_KFUNC_CALL ||
                 in.src_reg == BPF_PSEUDO_KINSN_CALL) {
-                for (int r = 0; r <= 5; r++) reg_map[r] = SourceMapBinding{};
+                clear_call_clobbered();
                 continue;
             }
             if (in.src_reg == 0 && in.imm == kLibbpfCoreBadRelocPoison) {
-                for (int r = 0; r <= 5; r++) reg_map[r] = SourceMapBinding{};
+                clear_call_clobbered();
                 continue;
             }
             if (in.src_reg != 0) {
@@ -161,6 +188,8 @@ std::vector<SourceHelperCall> collect_source_helper_calls(
                 in.imm,
                 map_binding.map_fd,
                 map_binding.dynamic_map_shape,
+                reg_imm_known[BPF_REG_3],
+                static_cast<uint32_t>(reg_imm[BPF_REG_3]),
             });
 
             NativeMapShape return_shape;
@@ -175,7 +204,7 @@ std::vector<SourceHelperCall> collect_source_helper_calls(
                 }
             }
 
-            for (int r = 0; r <= 5; r++) reg_map[r] = SourceMapBinding{};
+            clear_call_clobbered();
             if (has_native_map_shape(return_shape)) {
                 reg_map[0].dynamic_map_shape = return_shape;
             }
@@ -186,7 +215,7 @@ std::vector<SourceHelperCall> collect_source_helper_calls(
          * dst_reg, conditional jumps don't either. */
         uint8_t cls = BPF_CLASS(code);
         if (cls == BPF_ALU || cls == BPF_ALU64 || cls == BPF_LDX) {
-            if (in.dst_reg < 11) reg_map[in.dst_reg] = SourceMapBinding{};
+            clear_reg(in.dst_reg);
         }
     }
     return sites;
