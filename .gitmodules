@@ -42,3 +42,6 @@
 [submodule "vendor/repos/deepflow"]
 	path = vendor/repos/deepflow
 	url = https://github.com/eunomia-bpf/deepflow-kinsn.git
+[submodule "docs/ebpf27-bpfoptbench"]
+	path = docs/ebpf27-bpfoptbench
+	url = https://github.com/yunwei37/ebpf27-bpfoptbench.git
