@@ -1,0 +1,165 @@
+benchmarks:
+  - name: cilium_bpf_alignchecker_tail_icmp6_handle_ns
+    tags: [app-proof]
+  - name: cilium_bpf_alignchecker_tail_icmp6_send_time_exceeded
+    tags: [app-proof]
+  - name: cilium_bpf_host_cil_from_host
+    tags: [app-proof]
+  - name: cilium_bpf_host_cil_from_netdev
+    tags: [app-proof]
+  - name: cilium_bpf_host_cil_host_policy
+    tags: [app-proof]
+  - name: cilium_bpf_host_cil_to_host
+    tags: [app-proof]
+  - name: cilium_bpf_host_cil_to_netdev
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_drop_notify
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_handle_ipv4_cont_from_host
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_handle_ipv4_cont_from_netdev
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_handle_ipv4_from_host
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_handle_ipv4_from_netdev
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_handle_nat_fwd_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_handle_snat_fwd_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_icmp6_handle_ns
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_icmp6_send_time_exceeded
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_no_service_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_nodeport_ipv4_dsr
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_nodeport_nat_egress_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_nodeport_nat_ingress_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_nodeport_rev_dnat_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_cil_from_container
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_cil_lxc_policy
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_cil_lxc_policy_egress
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_cil_to_container
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_drop_notify
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_handle_arp
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_handle_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_handle_ipv4_cont
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_icmp6_handle_ns
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_icmp6_send_time_exceeded
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_ipv4_ct_egress
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_ipv4_ct_ingress
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_ipv4_ct_ingress_policy_only
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_ipv4_policy
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_ipv4_to_endpoint
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_no_service_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_nodeport_ipv4_dsr
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_nodeport_nat_egress_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_nodeport_nat_ingress_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_nodeport_rev_dnat_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_lxc_tail_policy_denied_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_overlay_cil_from_overlay
+    tags: [app-proof]
+  - name: cilium_bpf_overlay_cil_to_overlay
+    tags: [app-proof]
+  - name: cilium_bpf_overlay_tail_drop_notify
+    tags: [app-proof]
+  - name: cilium_bpf_overlay_tail_handle_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_overlay_tail_handle_nat_fwd_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_overlay_tail_handle_snat_fwd_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_overlay_tail_icmp6_send_time_exceeded
+    tags: [app-proof]
+  - name: cilium_bpf_overlay_tail_no_service_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_overlay_tail_nodeport_ipv4_dsr
+    tags: [app-proof]
+  - name: cilium_bpf_overlay_tail_nodeport_nat_egress_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_overlay_tail_nodeport_nat_ingress_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_overlay_tail_nodeport_rev_dnat_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_sock_cil_sock4_connect
+    tags: [app-proof]
+  - name: cilium_bpf_sock_cil_sock4_post_bind
+    tags: [app-proof]
+  - name: cilium_bpf_sock_cil_sock4_recvmsg
+    tags: [app-proof]
+  - name: cilium_bpf_sock_cil_sock4_sendmsg
+    tags: [app-proof]
+  - name: cilium_bpf_sock_cil_sock6_connect
+    tags: [app-proof]
+  - name: cilium_bpf_sock_cil_sock6_post_bind
+    tags: [app-proof]
+  - name: cilium_bpf_sock_cil_sock6_recvmsg
+    tags: [app-proof]
+  - name: cilium_bpf_sock_cil_sock6_sendmsg
+    tags: [app-proof]
+  - name: cilium_bpf_sock_cil_sock_release
+    tags: [app-proof]
+  - name: cilium_bpf_wireguard_cil_from_wireguard
+    tags: [app-proof]
+  - name: cilium_bpf_wireguard_cil_to_wireguard
+    tags: [app-proof]
+  - name: cilium_bpf_wireguard_tail_drop_notify
+    tags: [app-proof]
+  - name: cilium_bpf_wireguard_tail_handle_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_wireguard_tail_handle_nat_fwd_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_wireguard_tail_handle_snat_fwd_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_wireguard_tail_icmp6_send_time_exceeded
+    tags: [app-proof]
+  - name: cilium_bpf_wireguard_tail_no_service_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_wireguard_tail_nodeport_ipv4_dsr
+    tags: [app-proof]
+  - name: cilium_bpf_wireguard_tail_nodeport_nat_egress_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_wireguard_tail_nodeport_nat_ingress_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_wireguard_tail_nodeport_rev_dnat_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_xdp_cil_xdp_entry
+    tags: [app-proof]
+  - name: cilium_bpf_xdp_tail_drop_notify
+    tags: [app-proof]
+  - name: cilium_bpf_xdp_tail_no_service_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_xdp_tail_nodeport_ipv4_dsr
+    tags: [app-proof]
+  - name: cilium_bpf_xdp_tail_nodeport_nat_egress_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_xdp_tail_nodeport_nat_ingress_ipv4
+    tags: [app-proof]
+  - name: cilium_bpf_xdp_tail_nodeport_rev_dnat_ipv4
+    tags: [app-proof]

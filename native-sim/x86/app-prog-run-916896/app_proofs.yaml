@@ -1,0 +1,9 @@
+benchmarks:
+  - name: cilium_bpf_host_cil_from_host
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_handle_ipv6_from_netdev
+    tags: [app-proof]
+  - name: cilium_bpf_sock_cil_sock4_connect
+    tags: [app-proof]
+  - name: otelcol_ebpf_profiler_kprobe_unwind_native
+    tags: [app-proof]

@@ -1,0 +1,13 @@
+benchmarks:
+  - name: katran_balancer_balancer_ingress
+    tags: [app-proof]
+  - name: katran_balancer_jhash
+    tags: [app-proof]
+  - name: katran_balancer_jhash_2words
+    tags: [app-proof]
+  - name: katran_healthchecking_healthcheck_encap
+    tags: [app-proof]
+  - name: katran_healthchecking_ipip_healthcheck_encap
+    tags: [app-proof]
+  - name: katran_xdp_root_xdp_root
+    tags: [app-proof]

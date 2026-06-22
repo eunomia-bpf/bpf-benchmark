@@ -1,0 +1,41 @@
+benchmarks:
+  - name: tetragon_bpf_generic_kprobe_generic_fmodret_override
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_generic_kprobe_actions
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_generic_kprobe_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_generic_kprobe_filter_arg
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_generic_kprobe_filter_arg_2
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_generic_kprobe_output
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_generic_kprobe_override
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_generic_kprobe_path
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_generic_kprobe_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_generic_kprobe_process_event_2
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_generic_kprobe_process_filter
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_generic_kprobe_setup_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_v511_generic_fmodret_override
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_v511_generic_kprobe_actions
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_v511_generic_kprobe_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_v511_generic_kprobe_filter_arg
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_v511_generic_kprobe_output
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_v511_generic_kprobe_override
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_v511_generic_kprobe_path
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_v511_generic_kprobe_process_event
+    tags: [app-proof]

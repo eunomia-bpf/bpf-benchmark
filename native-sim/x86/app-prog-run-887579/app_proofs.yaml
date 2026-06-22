@@ -1,0 +1,355 @@
+benchmarks:
+  - name: tracee_cgroup_bpf_run_filter_skb
+    tags: [app-proof]
+  - name: tracee_cgroup_mkdir_signal
+    tags: [app-proof]
+  - name: tracee_cgroup_rmdir_signal
+    tags: [app-proof]
+  - name: tracee_cgroup_skb_egress
+    tags: [app-proof]
+  - name: tracee_cgroup_skb_ingress
+    tags: [app-proof]
+  - name: tracee_empty_kprobe
+    tags: [app-proof]
+  - name: tracee_hash_task_id
+    tags: [app-proof]
+  - name: tracee_hash_u32_and_u64
+    tags: [app-proof]
+  - name: tracee_heartbeat_capture
+    tags: [app-proof]
+  - name: tracee_kernel_write_magic_enter
+    tags: [app-proof]
+  - name: tracee_kernel_write_magic_return
+    tags: [app-proof]
+  - name: tracee_kprobe_check_security_bpf_kprobe
+    tags: [app-proof]
+  - name: tracee_lkm_seeker_kset_tail
+    tags: [app-proof]
+  - name: tracee_lkm_seeker_mod_tree_tail
+    tags: [app-proof]
+  - name: tracee_lkm_seeker_modtree_loop
+    tags: [app-proof]
+  - name: tracee_lkm_seeker_new_mod_only_tail
+    tags: [app-proof]
+  - name: tracee_lkm_seeker_proc_tail
+    tags: [app-proof]
+  - name: tracee_lkm_seeker_send_to_userspace
+    tags: [app-proof]
+  - name: tracee_lsm_check_lsm_bpf_check
+    tags: [app-proof]
+  - name: tracee_lsm_file_open_test
+    tags: [app-proof]
+  - name: tracee_murmur32
+    tags: [app-proof]
+  - name: tracee_process_execute_failed_tail
+    tags: [app-proof]
+  - name: tracee_sched_process_exec_event_submit_tail
+    tags: [app-proof]
+  - name: tracee_sched_process_exec_signal
+    tags: [app-proof]
+  - name: tracee_sched_process_exit_signal
+    tags: [app-proof]
+  - name: tracee_sched_process_fork_signal
+    tags: [app-proof]
+  - name: tracee_send_bin
+    tags: [app-proof]
+  - name: tracee_send_bin_tp
+    tags: [app-proof]
+  - name: tracee_sys_dup_exit_tail
+    tags: [app-proof]
+  - name: tracee_sys_enter_init
+    tags: [app-proof]
+  - name: tracee_sys_enter_submit
+    tags: [app-proof]
+  - name: tracee_sys_exit_init
+    tags: [app-proof]
+  - name: tracee_sys_exit_submit
+    tags: [app-proof]
+  - name: tracee_syscall__accept4
+    tags: [app-proof]
+  - name: tracee_syscall__execve_enter
+    tags: [app-proof]
+  - name: tracee_syscall__execve_exit
+    tags: [app-proof]
+  - name: tracee_syscall__execveat_enter
+    tags: [app-proof]
+  - name: tracee_syscall__execveat_exit
+    tags: [app-proof]
+  - name: tracee_syscall__init_module
+    tags: [app-proof]
+  - name: tracee_syscall_checker
+    tags: [app-proof]
+  - name: tracee_trace___debugfs_create_file
+    tags: [app-proof]
+  - name: tracee_trace___register_chrdev
+    tags: [app-proof]
+  - name: tracee_trace_arch_prctl
+    tags: [app-proof]
+  - name: tracee_trace_bpf_check
+    tags: [app-proof]
+  - name: tracee_trace_call_usermodehelper
+    tags: [app-proof]
+  - name: tracee_trace_cap_capable
+    tags: [app-proof]
+  - name: tracee_trace_check_helper_call
+    tags: [app-proof]
+  - name: tracee_trace_check_map_func_compatibility
+    tags: [app-proof]
+  - name: tracee_trace_chmod_common
+    tags: [app-proof]
+  - name: tracee_trace_commit_creds
+    tags: [app-proof]
+  - name: tracee_trace_debugfs_create_dir
+    tags: [app-proof]
+  - name: tracee_trace_device_add
+    tags: [app-proof]
+  - name: tracee_trace_do_exit
+    tags: [app-proof]
+  - name: tracee_trace_do_init_module
+    tags: [app-proof]
+  - name: tracee_trace_do_mmap
+    tags: [app-proof]
+  - name: tracee_trace_do_sigaction
+    tags: [app-proof]
+  - name: tracee_trace_do_splice
+    tags: [app-proof]
+  - name: tracee_trace_do_truncate
+    tags: [app-proof]
+  - name: tracee_trace_dup
+    tags: [app-proof]
+  - name: tracee_trace_dup2
+    tags: [app-proof]
+  - name: tracee_trace_dup3
+    tags: [app-proof]
+  - name: tracee_trace_exec_binprm
+    tags: [app-proof]
+  - name: tracee_trace_execute_finished
+    tags: [app-proof]
+  - name: tracee_trace_fd_install
+    tags: [app-proof]
+  - name: tracee_trace_file_modified
+    tags: [app-proof]
+  - name: tracee_trace_file_update_time
+    tags: [app-proof]
+  - name: tracee_trace_filldir64
+    tags: [app-proof]
+  - name: tracee_trace_filp_close
+    tags: [app-proof]
+  - name: tracee_trace_inotify_find_inode
+    tags: [app-proof]
+  - name: tracee_trace_kallsyms_lookup_name
+    tags: [app-proof]
+  - name: tracee_trace_kernel_write
+    tags: [app-proof]
+  - name: tracee_trace_load_elf_phdrs
+    tags: [app-proof]
+  - name: tracee_trace_mmap_alert
+    tags: [app-proof]
+  - name: tracee_trace_proc_create
+    tags: [app-proof]
+  - name: tracee_trace_process_vm_writev
+    tags: [app-proof]
+  - name: tracee_trace_ptrace
+    tags: [app-proof]
+  - name: tracee_trace_register_kprobe
+    tags: [app-proof]
+  - name: tracee_trace_ret__register_chrdev
+    tags: [app-proof]
+  - name: tracee_trace_ret_arch_prctl
+    tags: [app-proof]
+  - name: tracee_trace_ret_do_init_module
+    tags: [app-proof]
+  - name: tracee_trace_ret_do_mmap
+    tags: [app-proof]
+  - name: tracee_trace_ret_do_splice
+    tags: [app-proof]
+  - name: tracee_trace_ret_dup
+    tags: [app-proof]
+  - name: tracee_trace_ret_dup2
+    tags: [app-proof]
+  - name: tracee_trace_ret_dup3
+    tags: [app-proof]
+  - name: tracee_trace_ret_file_modified
+    tags: [app-proof]
+  - name: tracee_trace_ret_file_update_time
+    tags: [app-proof]
+  - name: tracee_trace_ret_inotify_find_inode
+    tags: [app-proof]
+  - name: tracee_trace_ret_kallsyms_lookup_name
+    tags: [app-proof]
+  - name: tracee_trace_ret_kernel_write
+    tags: [app-proof]
+  - name: tracee_trace_ret_kernel_write_tail
+    tags: [app-proof]
+  - name: tracee_trace_ret_process_vm_writev
+    tags: [app-proof]
+  - name: tracee_trace_ret_ptrace
+    tags: [app-proof]
+  - name: tracee_trace_ret_register_kprobe
+    tags: [app-proof]
+  - name: tracee_trace_ret_sock_alloc_file
+    tags: [app-proof]
+  - name: tracee_trace_ret_vfs_read
+    tags: [app-proof]
+  - name: tracee_trace_ret_vfs_read_tail
+    tags: [app-proof]
+  - name: tracee_trace_ret_vfs_readv
+    tags: [app-proof]
+  - name: tracee_trace_ret_vfs_readv_tail
+    tags: [app-proof]
+  - name: tracee_trace_ret_vfs_write
+    tags: [app-proof]
+  - name: tracee_trace_ret_vfs_write_tail
+    tags: [app-proof]
+  - name: tracee_trace_ret_vfs_writev
+    tags: [app-proof]
+  - name: tracee_trace_ret_vfs_writev_tail
+    tags: [app-proof]
+  - name: tracee_trace_security_bpf
+    tags: [app-proof]
+  - name: tracee_trace_security_bpf_map
+    tags: [app-proof]
+  - name: tracee_trace_security_bpf_prog
+    tags: [app-proof]
+  - name: tracee_trace_security_bprm_check
+    tags: [app-proof]
+  - name: tracee_trace_security_bprm_creds_for_exec
+    tags: [app-proof]
+  - name: tracee_trace_security_file_ioctl
+    tags: [app-proof]
+  - name: tracee_trace_security_file_mprotect
+    tags: [app-proof]
+  - name: tracee_trace_security_file_open
+    tags: [app-proof]
+  - name: tracee_trace_security_file_permission
+    tags: [app-proof]
+  - name: tracee_trace_security_inode_mknod
+    tags: [app-proof]
+  - name: tracee_trace_security_inode_rename
+    tags: [app-proof]
+  - name: tracee_trace_security_inode_symlink
+    tags: [app-proof]
+  - name: tracee_trace_security_inode_unlink
+    tags: [app-proof]
+  - name: tracee_trace_security_kernel_post_read_file
+    tags: [app-proof]
+  - name: tracee_trace_security_kernel_read_file
+    tags: [app-proof]
+  - name: tracee_trace_security_mmap_file
+    tags: [app-proof]
+  - name: tracee_trace_security_path_notify
+    tags: [app-proof]
+  - name: tracee_trace_security_sb_mount
+    tags: [app-proof]
+  - name: tracee_trace_security_sb_umount
+    tags: [app-proof]
+  - name: tracee_trace_security_settime64
+    tags: [app-proof]
+  - name: tracee_trace_security_sk_clone
+    tags: [app-proof]
+  - name: tracee_trace_security_socket_accept
+    tags: [app-proof]
+  - name: tracee_trace_security_socket_bind
+    tags: [app-proof]
+  - name: tracee_trace_security_socket_connect
+    tags: [app-proof]
+  - name: tracee_trace_security_socket_create
+    tags: [app-proof]
+  - name: tracee_trace_security_socket_listen
+    tags: [app-proof]
+  - name: tracee_trace_security_socket_recvmsg
+    tags: [app-proof]
+  - name: tracee_trace_security_socket_sendmsg
+    tags: [app-proof]
+  - name: tracee_trace_security_socket_setsockopt
+    tags: [app-proof]
+  - name: tracee_trace_security_task_prctl
+    tags: [app-proof]
+  - name: tracee_trace_security_task_setrlimit
+    tags: [app-proof]
+  - name: tracee_trace_set_fs_pwd
+    tags: [app-proof]
+  - name: tracee_trace_sock_alloc_file
+    tags: [app-proof]
+  - name: tracee_trace_switch_task_namespaces
+    tags: [app-proof]
+  - name: tracee_trace_sys_enter
+    tags: [app-proof]
+  - name: tracee_trace_sys_exit
+    tags: [app-proof]
+  - name: tracee_trace_tracepoint_probe_register_prio_may_exist
+    tags: [app-proof]
+  - name: tracee_trace_utimes_common
+    tags: [app-proof]
+  - name: tracee_trace_vfs_read
+    tags: [app-proof]
+  - name: tracee_trace_vfs_readv
+    tags: [app-proof]
+  - name: tracee_trace_vfs_utimes
+    tags: [app-proof]
+  - name: tracee_trace_vfs_write
+    tags: [app-proof]
+  - name: tracee_trace_vfs_writev
+    tags: [app-proof]
+  - name: tracee_tracee_direct_core_trace_sys_enter
+    tags: [app-proof]
+  - name: tracee_tracee_direct_core_trace_sys_exit
+    tags: [app-proof]
+  - name: tracee_tracepoint__cgroup__cgroup_attach_task
+    tags: [app-proof]
+  - name: tracee_tracepoint__cgroup__cgroup_mkdir
+    tags: [app-proof]
+  - name: tracee_tracepoint__cgroup__cgroup_rmdir
+    tags: [app-proof]
+  - name: tracee_tracepoint__exec_test
+    tags: [app-proof]
+  - name: tracee_tracepoint__module__module_free
+    tags: [app-proof]
+  - name: tracee_tracepoint__module__module_load
+    tags: [app-proof]
+  - name: tracee_tracepoint__raw_syscalls__sys_enter
+    tags: [app-proof]
+  - name: tracee_tracepoint__raw_syscalls__sys_exit
+    tags: [app-proof]
+  - name: tracee_tracepoint__sched__sched_process_exec
+    tags: [app-proof]
+  - name: tracee_tracepoint__sched__sched_process_exit
+    tags: [app-proof]
+  - name: tracee_tracepoint__sched__sched_process_fork
+    tags: [app-proof]
+  - name: tracee_tracepoint__sched__sched_process_free
+    tags: [app-proof]
+  - name: tracee_tracepoint__sched__sched_switch
+    tags: [app-proof]
+  - name: tracee_tracepoint__task__task_rename
+    tags: [app-proof]
+  - name: tracee_uprobe__features_fallback_arena
+    tags: [app-proof]
+  - name: tracee_uprobe__features_fallback_arena_tailcall
+    tags: [app-proof]
+  - name: tracee_uprobe__features_fallback_helper
+    tags: [app-proof]
+  - name: tracee_uprobe__features_fallback_helper_tailcall
+    tags: [app-proof]
+  - name: tracee_uprobe__features_fallback_minimal
+    tags: [app-proof]
+  - name: tracee_uprobe__features_fallback_minimal_tailcall
+    tags: [app-proof]
+  - name: tracee_uprobe_lkm_seeker
+    tags: [app-proof]
+  - name: tracee_uprobe_lkm_seeker_submitter
+    tags: [app-proof]
+  - name: tracee_uprobe_mem_dump_trigger
+    tags: [app-proof]
+  - name: tracee_uprobe_seq_ops_trigger
+    tags: [app-proof]
+  - name: tracee_uprobe_syscall_table_check
+    tags: [app-proof]
+  - name: tracee_vfs_write_magic_enter
+    tags: [app-proof]
+  - name: tracee_vfs_write_magic_return
+    tags: [app-proof]
+  - name: tracee_vfs_writev_magic_enter
+    tags: [app-proof]
+  - name: tracee_vfs_writev_magic_return
+    tags: [app-proof]

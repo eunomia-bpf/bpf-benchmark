@@ -1,0 +1,21 @@
+benchmarks:
+  - name: otelcol_ebpf_profiler_custom__generic
+    tags: [app-proof]
+  - name: otelcol_ebpf_profiler_finish_task_switch
+    tags: [app-proof]
+  - name: otelcol_ebpf_profiler_kprobe__dummy
+    tags: [app-proof]
+  - name: otelcol_ebpf_profiler_kprobe_go_labels
+    tags: [app-proof]
+  - name: otelcol_ebpf_profiler_kprobe_unwind_dotnet
+    tags: [app-proof]
+  - name: otelcol_ebpf_profiler_kprobe_unwind_hotspot
+    tags: [app-proof]
+  - name: otelcol_ebpf_profiler_kprobe_unwind_native
+    tags: [app-proof]
+  - name: otelcol_ebpf_profiler_kprobe_unwind_perl
+    tags: [app-proof]
+  - name: otelcol_ebpf_profiler_kprobe_unwind_php
+    tags: [app-proof]
+  - name: otelcol_ebpf_profiler_kprobe_unwind_python
+    tags: [app-proof]

@@ -1,0 +1,21 @@
+benchmarks:
+  - name: tracee_cgroup_bpf_run_filter_skb
+    tags: [app-proof]
+  - name: tracee_cgroup_mkdir_signal
+    tags: [app-proof]
+  - name: tracee_cgroup_rmdir_signal
+    tags: [app-proof]
+  - name: tracee_cgroup_skb_egress
+    tags: [app-proof]
+  - name: tracee_cgroup_skb_ingress
+    tags: [app-proof]
+  - name: tracee_empty_kprobe
+    tags: [app-proof]
+  - name: tracee_hash_task_id
+    tags: [app-proof]
+  - name: tracee_hash_u32_and_u64
+    tags: [app-proof]
+  - name: tracee_heartbeat_capture
+    tags: [app-proof]
+  - name: tracee_kernel_write_magic_enter
+    tags: [app-proof]

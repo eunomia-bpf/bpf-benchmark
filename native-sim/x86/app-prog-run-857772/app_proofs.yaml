@@ -1,0 +1,11 @@
+benchmarks:
+  - name: tracee_trace_ret_kernel_write_tail
+    tags: [app-proof]
+  - name: tracee_trace_ret_vfs_read_tail
+    tags: [app-proof]
+  - name: tracee_trace_ret_vfs_readv_tail
+    tags: [app-proof]
+  - name: tracee_trace_ret_vfs_write_tail
+    tags: [app-proof]
+  - name: tracee_trace_ret_vfs_writev_tail
+    tags: [app-proof]

@@ -1,0 +1,201 @@
+benchmarks:
+  - name: tetragon_bpf_generic_rawtp_v511_generic_rawtp_actions
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v511_generic_rawtp_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v511_generic_rawtp_filter_arg
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v511_generic_rawtp_output
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v511_generic_rawtp_path
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v511_generic_rawtp_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v511_generic_rawtp_process_filter
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v511_generic_rawtp_setup_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v511_native_bpf_strncasestr
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v53_generic_rawtp_actions
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v53_generic_rawtp_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v53_generic_rawtp_filter_arg
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v53_generic_rawtp_output
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v53_generic_rawtp_path
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v53_generic_rawtp_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v53_generic_rawtp_process_filter
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v53_generic_rawtp_setup_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v53_native_bpf_strncasestr
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61___do_bytes
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_cwd_read_v61
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_data_event_bytes
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_do_action
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_do_bytes
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_extract_arg_depth
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_16ty
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_16ty_map
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_16ty_range
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_16ty_selector_val
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_32ty
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_32ty_map
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_32ty_range
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_32ty_selector_val
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_64ty
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_64ty_map
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_64ty_range
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_64ty_selector_val
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_8ty
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_8ty_map
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_8ty_range
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_8ty_selector_val
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_char_buf
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_char_buf_equal
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_char_buf_postfix
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_char_buf_prefix
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_char_substring
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_file_buf
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_file_type
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_inet
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_filter_sockaddr_un
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_generic_rawtp_actions
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_generic_rawtp_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_generic_rawtp_filter_arg
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_generic_rawtp_output
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_generic_rawtp_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_generic_rawtp_process_filter
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_rawtp_v61_generic_rawtp_setup_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_generic_retkprobe_actions
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_generic_retkprobe_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_generic_retkprobe_filter_arg
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_generic_retkprobe_filter_arg_2
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_generic_retkprobe_output
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v511_generic_retkprobe_actions
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v511_generic_retkprobe_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v511_generic_retkprobe_filter_arg
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v511_generic_retkprobe_output
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v511_native_bpf_strncasestr
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v53_generic_retkprobe_actions
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v53_generic_retkprobe_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v53_generic_retkprobe_filter_arg
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v53_generic_retkprobe_output
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v53_native_bpf_strncasestr
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_cwd_read_v61
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_do_action
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_16ty
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_16ty_map
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_16ty_range
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_16ty_selector_val
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_32ty
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_32ty_map
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_32ty_range
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_32ty_selector_val
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_64ty
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_64ty_map
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_64ty_range
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_64ty_selector_val
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_8ty
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_8ty_map
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_8ty_range
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_8ty_selector_val
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_char_buf
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_char_buf_equal
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_char_buf_postfix
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_char_buf_prefix
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_char_substring
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_file_buf
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_file_type
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_inet
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_filter_sockaddr_un
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_generic_retkprobe_actions
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_retkprobe_v61_generic_retkprobe_event
+    tags: [app-proof]

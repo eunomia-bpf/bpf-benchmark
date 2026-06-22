@@ -1,0 +1,23 @@
+{
+  "bpf_stats": true,
+  "config": {
+    "enabled_passes": [
+      "noop"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "corpus suite reported errors",
+  "generated_at": "2026-06-21T05:49:06.307497+00:00",
+  "last_updated_at": "2026-06-21T05:49:06.307493+00:00",
+  "launcher_boot_id": "3b8d07ee-aaac-43b5-960c-aa7b052e33e4",
+  "launcher_pid": 1842,
+  "launcher_start_ticks": 7764,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "run_type": "x86_kvm_corpus",
+  "samples": 1,
+  "started_at": "2026-06-21T05:48:16.973134+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_only": false,
+  "workload_seconds": 5.0
+}

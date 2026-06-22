@@ -1,0 +1,21 @@
+benchmarks:
+  - name: cilium_bpf_alignchecker_tail_icmp6_handle_ns
+    tags: [app-proof]
+  - name: cilium_bpf_alignchecker_tail_icmp6_send_time_exceeded
+    tags: [app-proof]
+  - name: cilium_bpf_host_cil_from_host
+    tags: [app-proof]
+  - name: cilium_bpf_host_cil_from_netdev
+    tags: [app-proof]
+  - name: cilium_bpf_host_cil_host_policy
+    tags: [app-proof]
+  - name: cilium_bpf_host_cil_to_host
+    tags: [app-proof]
+  - name: cilium_bpf_host_cil_to_netdev
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_drop_notify
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_handle_ipv4_cont_from_host
+    tags: [app-proof]
+  - name: cilium_bpf_host_tail_handle_ipv4_cont_from_netdev
+    tags: [app-proof]

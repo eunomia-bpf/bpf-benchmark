@@ -1,0 +1,29 @@
+benchmarks:
+  - name: tetragon_bpf_execve_bprm_commit_creds_tg_kp_bprm_committing_creds
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_generic_kprobe_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_generic_kprobe_process_event_2
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_v511_generic_kprobe_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_v53_generic_kprobe_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_v61_generic_kprobe_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_tracepoint_generic_tracepoint_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_tracepoint_generic_tracepoint_process_event_2
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_tracepoint_v511_generic_tracepoint_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_tracepoint_v53_generic_tracepoint_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_tracepoint_v61_generic_tracepoint_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_multi_kprobe_v511_generic_kprobe_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_multi_kprobe_v53_generic_kprobe_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_multi_kprobe_v61_generic_kprobe_process_event
+    tags: [app-proof]

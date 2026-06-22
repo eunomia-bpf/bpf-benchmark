@@ -1,0 +1,69 @@
+benchmarks:
+  - name: bcc_biosnoop_blk_account_io_merge_bio
+    tags: [app-proof]
+  - name: bcc_biosnoop_block_rq_complete
+    tags: [app-proof]
+  - name: bcc_biosnoop_block_rq_insert
+    tags: [app-proof]
+  - name: bcc_biosnoop_block_rq_issue
+    tags: [app-proof]
+  - name: bcc_capable_kprobe__cap_capable_entry
+    tags: [app-proof]
+  - name: bcc_capable_kprobe__cap_capable_exit
+    tags: [app-proof]
+  - name: bcc_opensnoop_tracepoint__syscalls__sys_enter_open
+    tags: [app-proof]
+  - name: bcc_opensnoop_tracepoint__syscalls__sys_enter_openat
+    tags: [app-proof]
+  - name: bcc_opensnoop_tracepoint__syscalls__sys_exit_open
+    tags: [app-proof]
+  - name: bcc_opensnoop_tracepoint__syscalls__sys_exit_openat
+    tags: [app-proof]
+  - name: bcc_runqlat_handle_sched_switch
+    tags: [app-proof]
+  - name: bcc_runqlat_handle_sched_wakeup
+    tags: [app-proof]
+  - name: bcc_runqlat_handle_sched_wakeup_new
+    tags: [app-proof]
+  - name: bcc_runqlat_handle_switch
+    tags: [app-proof]
+  - name: bcc_runqlat_sched_switch
+    tags: [app-proof]
+  - name: bcc_runqlat_sched_wakeup
+    tags: [app-proof]
+  - name: bcc_runqlat_sched_wakeup_new
+    tags: [app-proof]
+  - name: bcc_syscount_sys_enter
+    tags: [app-proof]
+  - name: bcc_syscount_sys_exit
+    tags: [app-proof]
+  - name: bcc_tcpconnect_tcp_v4_connect
+    tags: [app-proof]
+  - name: bcc_tcpconnect_tcp_v4_connect_ret
+    tags: [app-proof]
+  - name: bcc_tcpconnect_tcp_v6_connect
+    tags: [app-proof]
+  - name: bcc_tcpconnect_tcp_v6_connect_ret
+    tags: [app-proof]
+  - name: bcc_tcplife_inet_sock_set_state
+    tags: [app-proof]
+  - name: bcc_vfsstat_fentry_vfs_create
+    tags: [app-proof]
+  - name: bcc_vfsstat_fentry_vfs_fsync
+    tags: [app-proof]
+  - name: bcc_vfsstat_fentry_vfs_open
+    tags: [app-proof]
+  - name: bcc_vfsstat_fentry_vfs_read
+    tags: [app-proof]
+  - name: bcc_vfsstat_fentry_vfs_write
+    tags: [app-proof]
+  - name: bcc_vfsstat_kprobe_vfs_create
+    tags: [app-proof]
+  - name: bcc_vfsstat_kprobe_vfs_fsync
+    tags: [app-proof]
+  - name: bcc_vfsstat_kprobe_vfs_open
+    tags: [app-proof]
+  - name: bcc_vfsstat_kprobe_vfs_read
+    tags: [app-proof]
+  - name: bcc_vfsstat_kprobe_vfs_write
+    tags: [app-proof]

@@ -1,0 +1,5 @@
+benchmarks:
+  - name: tracee_trace_sys_enter
+    tags: [app-proof]
+  - name: tracee_trace_sys_exit
+    tags: [app-proof]

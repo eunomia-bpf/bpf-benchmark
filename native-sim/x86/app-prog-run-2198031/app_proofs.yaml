@@ -1,0 +1,13 @@
+benchmarks:
+  - name: tetragon_bpf_generic_fentry_v61_generic_fentry_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_v61_generic_kprobe_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_v61_generic_kprobe_process_filter
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_kprobe_v61_read_reg
+    tags: [app-proof]
+  - name: tetragon_bpf_generic_lsm_core_v61_generic_lsm_process_event
+    tags: [app-proof]
+  - name: tetragon_bpf_multi_usdt_v61_try_preload_arg
+    tags: [app-proof]
