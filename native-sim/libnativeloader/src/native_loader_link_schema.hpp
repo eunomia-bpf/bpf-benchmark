@@ -108,7 +108,8 @@ NativeLinkArgs build_native_link_args(
                       K_BPF_ARRAY_PTRS_OFFSET);
         add_name_addr(out.helpers, kX86BpfProgBpfFuncOffsetKey,
                       K_BPF_PROG_BPF_FUNC_OFFSET);
-        add_name_addr(out.helpers, kX86TailCallOffsetKey, 12);
+        add_name_addr(out.helpers, kX86TailCallOffsetKey,
+                      K_X86_BPF_TAIL_CALL_OFFSET);
     }
 #elif defined(__aarch64__)
     {

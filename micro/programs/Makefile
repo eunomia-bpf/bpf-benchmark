@@ -85,6 +85,10 @@ $(KERNEL_OFFSETS): $(KERNEL_BTF_INPUT) Makefile | $(OUTPUT_DIR)
 	        grep -q '^CONFIG_ARM64_BTI_KERNEL=y' "$$cfg_path" && bti=1; \
 	        grep -q '^CONFIG_ARM64_PTR_AUTH_KERNEL=y' "$$cfg_path" && pac=1; \
 	        printf "#define K_ARM64_BPF_TAIL_CALL_OFFSET %du\n" "$$(( (bti + 2 + pac + 4) * 4 ))"; \
+	    elif [ -f "$$cfg_path" ] && grep -q '^CONFIG_X86_64=y' "$$cfg_path"; then \
+	        endbr=0; \
+	        grep -q '^CONFIG_X86_KERNEL_IBT=y' "$$cfg_path" && endbr=4; \
+	        printf "#define K_X86_BPF_TAIL_CALL_OFFSET %du\n" "$$((12 + endbr))"; \
 	    fi; \
 	    pahole -C htab_elem '$(KERNEL_BTF_INPUT)' 2>/dev/null | \
 	        awk '/struct bpf_lru_node\s+lru_node;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_HTAB_ELEM_LRU_NODE_OFFSET %du\n", a[1] } \

@@ -534,6 +534,11 @@ constexpr int kLibbpfCoreBadRelocPoison = 195896080; // 0xbad2310
 #ifndef K_BPF_PROG_BPF_FUNC_OFFSET
 #error "kernel_offsets.h must define K_BPF_PROG_BPF_FUNC_OFFSET"
 #endif
+#if defined(__x86_64__)
+#ifndef K_X86_BPF_TAIL_CALL_OFFSET
+#error "kernel_offsets.h must define K_X86_BPF_TAIL_CALL_OFFSET"
+#endif
+#endif
 #ifndef K_HTAB_ELEM_KEY_OFFSET
 #error "kernel_offsets.h must define K_HTAB_ELEM_KEY_OFFSET"
 #endif
@@ -4434,6 +4439,8 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         native_object_path,
         symbol_name,
         companion);
+    out.selected_native_object = native_object_path.string();
+    out.selected_symbol = symbol_name;
 
     StubLoadAttrs stub_attrs{};
     stub_attrs.expected_attach_type = options.expected_attach_type;
@@ -4465,6 +4472,8 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
 
     out.prog_fd = loaded_stub.prog_fd;
     out.replaced = true;
+    out.original_prog_id = prog_info.id;
+    out.native_prog_id = load_prog_info(loaded_stub.prog_fd).id;
     out.cache_hit = linked.cache_hit;
     out.prebuilt_proof = linked.prebuilt_proof;
     out.bpf_bytecode_bytes = companion.source_bytecode_bytes;
@@ -4535,6 +4544,16 @@ void transfer_loaded_program_to_c_result(native_loader::LoadedProgram &loaded,
     out->native_first_reloc_kind = loaded.native_first_reloc_kind;
     out->native_last_reloc_offset = loaded.native_last_reloc_offset;
     out->native_last_reloc_kind = loaded.native_last_reloc_kind;
+    out->original_prog_id = loaded.original_prog_id;
+    out->native_prog_id = loaded.native_prog_id;
+    std::snprintf(out->selected_native_object,
+                  sizeof(out->selected_native_object),
+                  "%s",
+                  loaded.selected_native_object.c_str());
+    std::snprintf(out->selected_symbol,
+                  sizeof(out->selected_symbol),
+                  "%s",
+                  loaded.selected_symbol.c_str());
     std::snprintf(out->native_link_summary,
                   sizeof(out->native_link_summary),
                   "%s",

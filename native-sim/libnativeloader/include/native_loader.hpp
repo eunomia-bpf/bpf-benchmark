@@ -40,6 +40,10 @@ struct LoadedProgram {
     uint32_t native_first_reloc_kind = 0;
     uint32_t native_last_reloc_offset = 0;
     uint32_t native_last_reloc_kind = 0;
+    uint32_t original_prog_id = 0;
+    uint32_t native_prog_id = 0;
+    std::string selected_native_object;
+    std::string selected_symbol;
     std::string native_link_summary;
     LoadTimings timings;
 };
@@ -97,6 +101,10 @@ struct native_loader_c_result {
     uint32_t native_first_reloc_kind;
     uint32_t native_last_reloc_offset;
     uint32_t native_last_reloc_kind;
+    uint32_t original_prog_id;
+    uint32_t native_prog_id;
+    char selected_native_object[4096];
+    char selected_symbol[256];
     char native_link_summary[4096];
     char error[65536];
 };

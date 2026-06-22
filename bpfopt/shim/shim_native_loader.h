@@ -29,6 +29,10 @@ struct native_loader_c_result {
     uint32_t native_first_reloc_kind;
     uint32_t native_last_reloc_offset;
     uint32_t native_last_reloc_kind;
+    uint32_t original_prog_id;
+    uint32_t native_prog_id;
+    char selected_native_object[4096];
+    char selected_symbol[256];
     char native_link_summary[4096];
     char error[65536];
 };
@@ -497,6 +501,7 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     shim_native_loader_log_jit_dump("original", (int)original_fd);
     shim_native_loader_log_jit_dump("native", result.prog_fd);
     log_line("native-loader timings prog=%s cache_hit=%d prebuilt_proof=%d "
+             "original_id=%u native_id=%u symbol=%s native_object=%s "
              "bpf_bytes=%llu native_bytes=%llu "
              "total_ns=%llu manifest_resolve_ns=%llu native_data_symbols_ns=%llu "
              "companion_map_ptr_ns=%llu companion_lookup_spec_ns=%llu "
@@ -505,6 +510,8 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
              "upload_ns=%llu prog_load_ns=%llu",
              prog_name ? prog_name : "", result.cache_hit,
              result.prebuilt_proof,
+             result.original_prog_id, result.native_prog_id,
+             result.selected_symbol, result.selected_native_object,
              (unsigned long long)result.bpf_bytecode_bytes,
              (unsigned long long)result.native_code_bytes,
              (unsigned long long)result.total_ns,
@@ -519,8 +526,11 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
              (unsigned long long)result.upload_ns,
              (unsigned long long)result.prog_load_ns);
     if (result.native_link_summary[0]) {
-        log_line("native-loader link-plan prog=%s %s",
-                 prog_name ? prog_name : "", result.native_link_summary);
+        log_line("native-loader link-plan prog=%s original_id=%u native_id=%u "
+                 "symbol=%s native_object=%s %s",
+                 prog_name ? prog_name : "", result.original_prog_id,
+                 result.native_prog_id, result.selected_symbol,
+                 result.selected_native_object, result.native_link_summary);
     }
 
     int shadow_original_fd = fcntl((int)original_fd, F_DUPFD_CLOEXEC, 3);
@@ -545,8 +555,11 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
         shim_native_loader_fatal();
     }
     log_line("native-loader replaced prog=%s original_fd=%ld native_fd=%d "
+             "original_id=%u native_id=%u symbol=%s native_object=%s "
              "manifest=%s source=%s",
              prog_name ? prog_name : "", original_fd, result.prog_fd,
+             result.original_prog_id, result.native_prog_id,
+             result.selected_symbol, result.selected_native_object,
              manifest, prog->bytecode_path);
     kmsg_line("native replaced name=%s original_fd=%ld native_fd=%d",
               prog_name ? prog_name : "", original_fd, result.prog_fd);

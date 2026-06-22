@@ -679,6 +679,12 @@ std::optional<ManifestResolution> resolve_native_manifest(
         if (source_xlated_len && *source_xlated_len != prog_info.xlated_prog_len) {
             continue;
         }
+        std::optional<uint64_t> source_bytecode_len =
+            json_object_u64(entry, "source_bytecode_len");
+        if (source_bytecode_len &&
+            *source_bytecode_len != source_insns.size() * sizeof(bpf_insn)) {
+            continue;
+        }
         std::optional<std::string> map_prefix =
             json_object_string(entry, "source_map_prefix");
         if (map_prefix && !map_prefix->empty() &&

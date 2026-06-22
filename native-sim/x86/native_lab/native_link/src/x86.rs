@@ -32,20 +32,34 @@ fn truncate_bpf_obj_name(name: &str) -> String {
     name.bytes().take(15).map(char::from).collect()
 }
 
-fn lookup_site_matches_native_map(spec: &LookupSiteSpec, native_map_name: &str) -> bool {
+fn lookup_site_exactly_matches_native_map(spec: &LookupSiteSpec, native_map_name: &str) -> bool {
     let Some(source_map_name) = spec.map_name.as_deref() else {
         return false;
     };
     source_map_name == native_map_name
-        || truncate_bpf_obj_name(source_map_name) == truncate_bpf_obj_name(native_map_name)
 }
 
-fn update_site_matches_native_map(spec: &UpdateSiteSpec, native_map_name: &str) -> bool {
+fn lookup_site_trunc_matches_native_map(spec: &LookupSiteSpec, native_map_name: &str) -> bool {
+    let Some(source_map_name) = spec.map_name.as_deref() else {
+        return false;
+    };
+    source_map_name != native_map_name
+        && truncate_bpf_obj_name(source_map_name) == truncate_bpf_obj_name(native_map_name)
+}
+
+fn update_site_exactly_matches_native_map(spec: &UpdateSiteSpec, native_map_name: &str) -> bool {
     let Some(source_map_name) = spec.map_name.as_deref() else {
         return false;
     };
     source_map_name == native_map_name
-        || truncate_bpf_obj_name(source_map_name) == truncate_bpf_obj_name(native_map_name)
+}
+
+fn update_site_trunc_matches_native_map(spec: &UpdateSiteSpec, native_map_name: &str) -> bool {
+    let Some(source_map_name) = spec.map_name.as_deref() else {
+        return false;
+    };
+    source_map_name != native_map_name
+        && truncate_bpf_obj_name(source_map_name) == truncate_bpf_obj_name(native_map_name)
 }
 
 fn lookup_map_spec(
@@ -104,7 +118,9 @@ fn select_lookup_site(
         if let Some((idx, spec)) = lookup_sites
             .iter()
             .enumerate()
-            .find(|(idx, spec)| !used[*idx] && lookup_site_matches_native_map(spec, map_name))
+            .find(|(idx, spec)| {
+                !used[*idx] && lookup_site_exactly_matches_native_map(spec, map_name)
+            })
         {
             used[idx] = true;
             return Ok((idx.to_string(), Some(idx), spec.clone()));
@@ -112,6 +128,25 @@ fn select_lookup_site(
 
         if let Some(spec) = lookup_map_spec(lookup_maps, map_name)? {
             return Ok((format!("map:{map_name}"), None, spec));
+        }
+
+        let mut trunc_match: Option<(usize, &LookupSiteSpec)> = None;
+        for (idx, spec) in lookup_sites.iter().enumerate() {
+            if used[idx] || !lookup_site_trunc_matches_native_map(spec, map_name) {
+                continue;
+            }
+            if let Some((existing_idx, existing)) = trunc_match {
+                bail!(
+                    "x86 bpf_map_lookup_elem native call {native_call_index} in {sym_name} uses map {map_name:?}, which truncation-matches multiple lookup_sites entries: {existing_idx} ({:?}) and {idx} ({:?})",
+                    existing.map_name,
+                    spec.map_name
+                );
+            }
+            trunc_match = Some((idx, spec));
+        }
+        if let Some((idx, spec)) = trunc_match {
+            used[idx] = true;
+            return Ok((idx.to_string(), Some(idx), spec.clone()));
         }
 
         if let Some(spec) = generic_lookup_site(generic_target_addr, Some(map_name)) {
@@ -142,31 +177,52 @@ fn select_update_site(
     used: &mut [bool],
     native_call_index: usize,
     native_map_name: Option<&str>,
-) -> Option<(String, usize)> {
+) -> Result<Option<(String, usize)>> {
     if let Some(map_name) = native_map_name {
         if let Some((idx, _)) = update_sites
             .iter()
             .enumerate()
-            .find(|(idx, spec)| !used[*idx] && update_site_matches_native_map(spec, map_name))
+            .find(|(idx, spec)| {
+                !used[*idx] && update_site_exactly_matches_native_map(spec, map_name)
+            })
         {
             used[idx] = true;
-            return Some((idx.to_string(), idx));
+            return Ok(Some((idx.to_string(), idx)));
         }
     }
 
     if native_call_index < update_sites.len() && !used[native_call_index] {
         used[native_call_index] = true;
-        return Some((native_call_index.to_string(), native_call_index));
+        return Ok(Some((native_call_index.to_string(), native_call_index)));
     }
 
-    update_sites
+    if let Some(map_name) = native_map_name {
+        let mut trunc_match: Option<(String, usize)> = None;
+        for (idx, spec) in update_sites.iter().enumerate() {
+            if used[idx] || !update_site_trunc_matches_native_map(spec, map_name) {
+                continue;
+            }
+            if trunc_match.is_some() {
+                bail!(
+                    "x86 bpf_map_update_elem native call {native_call_index} uses map {map_name:?}, which truncation-matches multiple update_sites entries"
+                );
+            }
+            trunc_match = Some((idx.to_string(), idx));
+        }
+        if let Some(selected) = trunc_match {
+            used[selected.1] = true;
+            return Ok(Some(selected));
+        }
+    }
+
+    Ok(update_sites
         .iter()
         .enumerate()
         .find(|(idx, _)| !used[*idx])
         .map(|(idx, _)| {
             used[idx] = true;
             (idx.to_string(), idx)
-        })
+        }))
 }
 
 pub(super) fn bpf_helper_name_from_id(helper_id: u64) -> Option<&'static str> {
@@ -1539,7 +1595,7 @@ pub(super) fn rewrite_x86(
                             &mut update_site_used,
                             ordinal,
                             native_map_name,
-                        ) {
+                        )? {
                             let spec = &update_sites[site_index];
                             match spec.kind {
                                 UpdateKind::Array | UpdateKind::PerCpuArray => {
@@ -4061,10 +4117,102 @@ mod tests {
         ];
         let mut used = vec![false; sites.len()];
 
-        let selected = select_update_site(&sites, &mut used, 0, Some("target_map"));
+        let selected = select_update_site(&sites, &mut used, 0, Some("target_map")).unwrap();
 
         assert_eq!(selected, Some(("1".to_string(), 1)));
         assert_eq!(used, vec![false, true]);
+    }
+
+    fn test_lookup_site(map_name: &str, target_addr: u64) -> LookupSiteSpec {
+        LookupSiteSpec {
+            kind: LookupKind::Call,
+            target_addr,
+            key_offset: 0,
+            max_entries: 0,
+            elem_size: 0,
+            index_mask: 0,
+            value_offset: 0,
+            percpu_base_addr: 0,
+            map_name: Some(map_name.to_string()),
+        }
+    }
+
+    #[test]
+    fn lookup_selection_prefers_exact_match_over_truncated_match() -> Result<()> {
+        let sites = vec![
+            test_lookup_site("policy_filter_mumble", 0x1000),
+            test_lookup_site("policy_filter_maps", 0x2000),
+        ];
+        let mut used = vec![false; sites.len()];
+
+        let selected = select_lookup_site(
+            &sites,
+            &HashMap::new(),
+            &mut used,
+            0,
+            Some("policy_filter_maps"),
+            "entry",
+            0,
+        )?;
+
+        assert_eq!(selected.0, "1");
+        assert_eq!(selected.1, Some(1));
+        assert_eq!(selected.2.target_addr, 0x2000);
+        assert_eq!(used, vec![false, true]);
+        Ok(())
+    }
+
+    #[test]
+    fn lookup_selection_rejects_ambiguous_truncated_matches() {
+        let sites = vec![
+            test_lookup_site("policy_filter_mumble", 0x1000),
+            test_lookup_site("policy_filter_maps", 0x2000),
+        ];
+        let mut used = vec![false; sites.len()];
+
+        let err = select_lookup_site(
+            &sites,
+            &HashMap::new(),
+            &mut used,
+            0,
+            Some("policy_filter_miss"),
+            "entry",
+            0,
+        )
+        .unwrap_err();
+
+        assert!(err.to_string().contains("truncation-matches multiple"));
+        assert_eq!(used, vec![false, false]);
+    }
+
+    #[test]
+    fn lookup_selection_uses_lookup_map_before_truncated_sites() -> Result<()> {
+        let sites = vec![
+            test_lookup_site("execve_map_stat", 0x1000),
+            test_lookup_site("execve_map_stat", 0x2000),
+        ];
+        let mut lookup_maps = HashMap::new();
+        lookup_maps.insert(
+            "execve_map_stats".to_string(),
+            test_lookup_site("execve_map_stats", 0x3000),
+        );
+        let mut used = vec![false; sites.len()];
+
+        let selected = select_lookup_site(
+            &sites,
+            &lookup_maps,
+            &mut used,
+            5,
+            Some("execve_map_stats"),
+            "event_exit_acct_process",
+            0,
+        )?;
+
+        assert_eq!(selected.0, "map:execve_map_stats");
+        assert_eq!(selected.1, None);
+        assert_eq!(selected.2.target_addr, 0x3000);
+        assert_eq!(used, vec![false, false]);
+        Ok(())
     }
 
     #[test]

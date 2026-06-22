@@ -307,23 +307,23 @@ static __always_inline int __native_core_is_null(const void *ptr)
     fn((dst), sizeof(*(dst)), &((src)->a))
 #define __native_core_read_into_2(fn, dst, src, a, b) ({ \
     typeof((src)->a) __t1; \
-    bpf_probe_read_kernel(&__t1, sizeof(__t1), &((src)->a)); \
+    fn(&__t1, sizeof(__t1), &((src)->a)); \
     fn((dst), sizeof(*(dst)), &(__t1->b)); \
 })
 #define __native_core_read_into_3(fn, dst, src, a, b, c) ({ \
     typeof((src)->a) __t1; \
     typeof(__t1->b) __t2; \
-    bpf_probe_read_kernel(&__t1, sizeof(__t1), &((src)->a)); \
-    bpf_probe_read_kernel(&__t2, sizeof(__t2), &(__t1->b)); \
+    fn(&__t1, sizeof(__t1), &((src)->a)); \
+    fn(&__t2, sizeof(__t2), &(__t1->b)); \
     fn((dst), sizeof(*(dst)), &(__t2->c)); \
 })
 #define __native_core_read_into_4(fn, dst, src, a, b, c, d) ({ \
     typeof((src)->a) __t1; \
     typeof(__t1->b) __t2; \
     typeof(__t2->c) __t3; \
-    bpf_probe_read_kernel(&__t1, sizeof(__t1), &((src)->a)); \
-    bpf_probe_read_kernel(&__t2, sizeof(__t2), &(__t1->b)); \
-    bpf_probe_read_kernel(&__t3, sizeof(__t3), &(__t2->c)); \
+    fn(&__t1, sizeof(__t1), &((src)->a)); \
+    fn(&__t2, sizeof(__t2), &(__t1->b)); \
+    fn(&__t3, sizeof(__t3), &(__t2->c)); \
     fn((dst), sizeof(*(dst)), &(__t3->d)); \
 })
 #define __native_core_read_into_5(fn, dst, src, a, b, c, d, e) ({ \
@@ -331,10 +331,10 @@ static __always_inline int __native_core_is_null(const void *ptr)
     typeof(__t1->b) __t2; \
     typeof(__t2->c) __t3; \
     typeof(__t3->d) __t4; \
-    bpf_probe_read_kernel(&__t1, sizeof(__t1), &((src)->a)); \
-    bpf_probe_read_kernel(&__t2, sizeof(__t2), &(__t1->b)); \
-    bpf_probe_read_kernel(&__t3, sizeof(__t3), &(__t2->c)); \
-    bpf_probe_read_kernel(&__t4, sizeof(__t4), &(__t3->d)); \
+    fn(&__t1, sizeof(__t1), &((src)->a)); \
+    fn(&__t2, sizeof(__t2), &(__t1->b)); \
+    fn(&__t3, sizeof(__t3), &(__t2->c)); \
+    fn(&__t4, sizeof(__t4), &(__t3->d)); \
     fn((dst), sizeof(*(dst)), &(__t4->e)); \
 })
 #define __native_core_read_into_6(fn, dst, src, a, b, c, d, e, f) ({ \
@@ -343,11 +343,11 @@ static __always_inline int __native_core_is_null(const void *ptr)
     typeof(__t2->c) __t3; \
     typeof(__t3->d) __t4; \
     typeof(__t4->e) __t5; \
-    bpf_probe_read_kernel(&__t1, sizeof(__t1), &((src)->a)); \
-    bpf_probe_read_kernel(&__t2, sizeof(__t2), &(__t1->b)); \
-    bpf_probe_read_kernel(&__t3, sizeof(__t3), &(__t2->c)); \
-    bpf_probe_read_kernel(&__t4, sizeof(__t4), &(__t3->d)); \
-    bpf_probe_read_kernel(&__t5, sizeof(__t5), &(__t4->e)); \
+    fn(&__t1, sizeof(__t1), &((src)->a)); \
+    fn(&__t2, sizeof(__t2), &(__t1->b)); \
+    fn(&__t3, sizeof(__t3), &(__t2->c)); \
+    fn(&__t4, sizeof(__t4), &(__t3->d)); \
+    fn(&__t5, sizeof(__t5), &(__t4->e)); \
     fn((dst), sizeof(*(dst)), &(__t5->f)); \
 })
 #define __native_core_read_into(fn, dst, src, args...) \
@@ -431,23 +431,30 @@ static __always_inline int __native_core_is_null(const void *ptr)
 #ifndef bpf_core_enum_value
 #define bpf_core_enum_value(type, value) (value)
 #endif
+#ifdef MICRO_NATIVE_TETRAGON
+#define __native_core_probe_read bpf_probe_read
+#define __native_core_probe_read_str bpf_probe_read_str
+#else
+#define __native_core_probe_read bpf_probe_read_kernel
+#define __native_core_probe_read_str bpf_probe_read_kernel_str
+#endif
 #ifndef bpf_core_read
-#define bpf_core_read(dst, sz, src) bpf_probe_read_kernel((dst), (sz), (src))
+#define bpf_core_read(dst, sz, src) __native_core_probe_read((dst), (sz), (src))
 #endif
 #ifndef BPF_CORE_READ
 #define BPF_CORE_READ(src, args...) ({ \
     __native_core_type(src, args) __r; \
-    __native_core_read_value(bpf_probe_read_kernel, &__r, (src), args); \
+    __native_core_read_value(__native_core_probe_read, &__r, (src), args); \
     __r; \
 })
 #endif
 #ifndef BPF_CORE_READ_INTO
 #define BPF_CORE_READ_INTO(dst, src, args...) \
-    __native_core_read_into(bpf_probe_read_kernel, (dst), (src), args)
+    __native_core_read_into(__native_core_probe_read, (dst), (src), args)
 #endif
 #ifndef BPF_CORE_READ_STR_INTO
 #define BPF_CORE_READ_STR_INTO(dst, src, args...) \
-    __native_core_read_into(bpf_probe_read_kernel_str, (dst), (src), args)
+    __native_core_read_into(__native_core_probe_read_str, (dst), (src), args)
 #endif
 #ifndef bpf_core_read_user
 #define bpf_core_read_user(dst, sz, src) bpf_probe_read_user((dst), (sz), (src))

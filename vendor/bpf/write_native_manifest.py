@@ -6,7 +6,7 @@ import json
 import subprocess
 from collections import defaultdict
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, NamedTuple
 
 
 BPF_LD_IMM64 = 0x18
@@ -170,6 +170,7 @@ TRACEE_TETRAGON_MAP_RULES = [
     map_rule("exact", "ratelimit_map", BPF_MAP_TYPE_LRU_HASH, 224, 8, object_scoped=True),
     map_rule("exact", "ratelimit_heap", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 352, 1, True),
     map_rule("exact", "retprobe_map", BPF_MAP_TYPE_HASH, 16, 24, 1024, True),
+    map_rule("exact", "socktrack_map", BPF_MAP_TYPE_LRU_HASH, 8, 16, 1, True),
     map_rule("exact", "fdinstall_map", BPF_MAP_TYPE_LRU_HASH, 16, 4104, object_scoped=True),
     map_rule("exact", "stack_trace_map", BPF_MAP_TYPE_STACK_TRACE, 4, 1016, object_scoped=True),
     map_rule("exact", "sleepable_preload", BPF_MAP_TYPE_HASH, 8, 4100, object_scoped=True),
@@ -216,13 +217,18 @@ def source_object_for_native(root: Path, native_obj: Path) -> Path:
     return root / f"{name[:-len('.native.o')]}.o"
 
 
-def scan_bpf_source_helpers(source_obj: Path) -> dict[str, set[int]]:
+class SourceProgramMeta(NamedTuple):
+    bytecode_len: int
+    helpers: set[int]
+
+
+def scan_bpf_source_programs(source_obj: Path) -> dict[str, SourceProgramMeta]:
     try:
         from elftools.elf.elffile import ELFFile
     except ImportError as exc:
         raise SystemExit("pyelftools is required for --source-object-root") from exc
 
-    by_program: dict[str, set[int]] = defaultdict(set)
+    by_symbol: dict[str, SourceProgramMeta] = {}
     with source_obj.open("rb") as f:
         elf = ELFFile(f)
         symtab = elf.get_section_by_name(".symtab")
@@ -245,7 +251,7 @@ def scan_bpf_source_helpers(source_obj: Path) -> dict[str, set[int]]:
             end = start + size
             if start < 0 or end > len(data) or size % 8 != 0:
                 raise SystemExit(f"invalid BPF function bounds for {sym.name} in {source_obj}")
-            helpers = by_program[sym.name[:15]]
+            helpers: set[int] = set()
             body = data[start:end]
             for off in range(0, len(body), 8):
                 insn = body[off:off + 8]
@@ -254,7 +260,8 @@ def scan_bpf_source_helpers(source_obj: Path) -> dict[str, set[int]]:
                 elif insn[0] == BPF_LD_IMM64:
                     # Skip the second half of an ldimm64 pair.
                     continue
-    return by_program
+            by_symbol[sym.name] = SourceProgramMeta(bytecode_len=size, helpers=helpers)
+    return by_symbol
 
 
 def helper_signature(helpers: set[int] | None, ids: Iterable[int]) -> tuple[tuple[int, ...], tuple[int, ...]]:
@@ -279,6 +286,8 @@ def parse_object_spec(raw: str) -> tuple[Path, dict[str, object]]:
             attrs["prog_type"] = int(value, 0)
         elif key == "source_xlated_len":
             attrs["source_xlated_len"] = int(value, 0)
+        elif key == "source_bytecode_len":
+            attrs["source_bytecode_len"] = int(value, 0)
         elif key == "symbol":
             attrs["symbol"] = value
         elif key == "source_map_prefix":
@@ -342,29 +351,34 @@ def main() -> None:
     helper_forbid_by_key: dict[tuple[object, ...], tuple[int, ...]] = {}
     selected_by_program: dict[tuple[object, ...], tuple[str, set[str]]] = {}
     selected_helpers_by_program: dict[tuple[object, ...], tuple[tuple[int, ...], tuple[int, ...]]] = {}
-    source_helpers_cache: dict[Path, dict[str, set[int]]] = {}
+    source_meta_cache: dict[Path, dict[str, SourceProgramMeta]] = {}
     for raw in args.object:
         obj, attrs = parse_object_spec(raw)
         rel = rel_object(output, obj)
-        source_helpers: dict[str, set[int]] | None = None
+        source_meta: dict[str, SourceProgramMeta] | None = None
         if args.source_object_root:
             source_obj = source_object_for_native(args.source_object_root, obj)
             if not source_obj.is_file():
                 raise SystemExit(f"source BPF object not found for {obj}: {source_obj}")
-            source_helpers = source_helpers_cache.setdefault(
-                source_obj, scan_bpf_source_helpers(source_obj))
+            source_meta = source_meta_cache.setdefault(
+                source_obj, scan_bpf_source_programs(source_obj))
         prefixes = attrs.get("source_map_prefixes") or [None]
         for symbol in text_symbols(args.llvm_nm, obj, tuple(args.skip_prefix)):
             if attrs.get("symbol") and symbol != attrs["symbol"]:
                 continue
             program = symbol[:15]
+            meta = None if source_meta is None else source_meta.get(symbol)
+            source_xlated_len = attrs.get("source_xlated_len")
+            source_bytecode_len = attrs.get("source_bytecode_len")
+            if source_bytecode_len is None and meta is not None:
+                source_bytecode_len = meta.bytecode_len
             required, forbidden = helper_signature(
-                None if source_helpers is None else source_helpers.get(program),
+                None if meta is None else meta.helpers,
                 args.helper_disambiguate)
             for prefix in prefixes:
                 if args.dedupe_program == "last":
                     key = (program, attrs.get("prog_type"), prefix,
-                           attrs.get("source_xlated_len"),
+                           source_xlated_len, source_bytecode_len,
                            tuple(attrs.get("source_lacks_map_prefixes", ())),
                            required, forbidden)
                     if key not in selected_by_program or selected_by_program[key][0] != rel:
@@ -373,7 +387,7 @@ def main() -> None:
                     selected_by_program[key][1].add(symbol)
                 else:
                     key = (program, rel, attrs.get("prog_type"), prefix,
-                           attrs.get("source_xlated_len"),
+                           source_xlated_len, source_bytecode_len,
                            tuple(attrs.get("source_lacks_map_prefixes", ())),
                            required, forbidden)
                     native_object_by_key[key] = rel
@@ -383,9 +397,10 @@ def main() -> None:
 
     if args.dedupe_program == "last":
         for key, (rel, symbols) in selected_by_program.items():
-            program, prog_type, prefix, source_xlated_len, lacks_prefixes, required, forbidden = key
+            (program, prog_type, prefix, source_xlated_len, source_bytecode_len,
+             lacks_prefixes, required, forbidden) = key
             out_key = (program, rel, prog_type, prefix, source_xlated_len,
-                       lacks_prefixes, required, forbidden)
+                       source_bytecode_len, lacks_prefixes, required, forbidden)
             native_object_by_key[out_key] = rel
             helper_require_by_key[out_key] = selected_helpers_by_program[key][0]
             helper_forbid_by_key[out_key] = selected_helpers_by_program[key][1]
@@ -393,7 +408,8 @@ def main() -> None:
 
     objects: list[dict[str, object]] = []
     for key in sorted(entries_by_key, key=manifest_sort_key):
-        program, rel, prog_type, prefix, source_xlated_len, lacks_prefixes, _required, _forbidden = key
+        (program, rel, prog_type, prefix, source_xlated_len,
+         source_bytecode_len, lacks_prefixes, _required, _forbidden) = key
         symbols = sorted(entries_by_key[key])
         entry: dict[str, object] = {
             "program": program,
@@ -405,6 +421,8 @@ def main() -> None:
             entry["prog_type"] = prog_type
         if source_xlated_len is not None:
             entry["source_xlated_len"] = source_xlated_len
+        if source_bytecode_len is not None:
+            entry["source_bytecode_len"] = source_bytecode_len
         if prefix is not None:
             entry["source_map_prefix"] = prefix
         if lacks_prefixes:
