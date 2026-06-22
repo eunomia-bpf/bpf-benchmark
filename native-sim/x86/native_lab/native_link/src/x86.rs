@@ -1672,8 +1672,21 @@ pub(super) fn rewrite_x86(
             } else {
                 None
             };
-            let map_reg_move = x86_mov_gpr64_to_gpr64(&insn).and_then(|(dst, src)| {
+            let reg_move = x86_mov_gpr64_to_gpr64(&insn);
+            let map_reg_move = reg_move.and_then(|(dst, src)| {
                 map_symbol_registers
+                    .get(&src)
+                    .cloned()
+                    .map(|name| (dst, name))
+            });
+            let helper_imm_reg_move = reg_move.and_then(|(dst, src)| {
+                helper_imm_registers
+                    .get(&src)
+                    .copied()
+                    .map(|helper_id| (dst, helper_id))
+            });
+            let helper_got_reg_move = reg_move.and_then(|(dst, src)| {
+                helper_got_registers
                     .get(&src)
                     .cloned()
                     .map(|name| (dst, name))
@@ -1713,10 +1726,14 @@ pub(super) fn rewrite_x86(
                 map_symbol_registers.remove(&reg);
             }
             if let Some(reg) = written_reg {
-                if helper_got_load_reg != Some(reg) {
+                if let Some((dst, name)) = helper_got_reg_move {
+                    helper_got_registers.insert(dst, name);
+                } else if helper_got_load_reg != Some(reg) {
                     helper_got_registers.remove(&reg);
                 }
-                if helper_imm_load_reg != Some(reg) {
+                if let Some((dst, helper_id)) = helper_imm_reg_move {
+                    helper_imm_registers.insert(dst, helper_id);
+                } else if helper_imm_load_reg != Some(reg) {
                     helper_imm_registers.remove(&reg);
                 }
             }
@@ -4221,6 +4238,39 @@ mod tests {
         let encoded = encode_x86_local_block("helper_slot", 5, &[insn], &[0])?;
 
         assert_eq!(encoded.code_buffer, [0xE8, 0, 0, 0, 0]);
+        Ok(())
+    }
+
+    #[test]
+    fn helper_id_load_accepts_32bit_register_write() -> Result<()> {
+        let insns = decode_x86(&[
+            0xbb, 0x70, 0x00, 0x00, 0x00, // mov ebx, 112
+            0xff, 0xd3, // call rbx
+        ])?;
+
+        assert_eq!(
+            x86_known_helper_id_load(&insns[0]),
+            Some((Register::RBX, 112))
+        );
+        assert_eq!(x86_indirect_call_register(&insns[1]), Some(Register::RBX));
+        Ok(())
+    }
+
+    #[test]
+    fn helper_id_register_move_preserves_register_family() -> Result<()> {
+        let insns = decode_x86(&[
+            0xb8, 0x2d, 0x00, 0x00, 0x00, // mov eax, 45
+            0x49, 0x89, 0xc5, // mov r13, rax
+        ])?;
+
+        assert_eq!(
+            x86_known_helper_id_load(&insns[0]),
+            Some((Register::RAX, 45))
+        );
+        assert_eq!(
+            x86_mov_gpr64_to_gpr64(&insns[1]),
+            Some((Register::R13, Register::RAX))
+        );
         Ok(())
     }
 

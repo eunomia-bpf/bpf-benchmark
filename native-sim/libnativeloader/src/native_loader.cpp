@@ -3282,10 +3282,14 @@ bool configure_lookup_site_for_shape(CompanionLoad::LookupSite &site,
         return true;
     }
     if (t == BPF_MAP_TYPE_HASH_OF_MAPS) {
-        uint32_t rounded = (shape.key_size + 7) & ~7u;
-        site.kind = CompanionLoad::LookupSite::Kind::HashOfMaps;
-        site.target_addr = htab_lookup_elem_kernel_addr();
-        site.key_offset = htab_offsets.key + rounded;
+        /*
+         * map-in-map lookups must preserve helper-level semantics. The
+         * internal htab lookup returns the raw outer value, while
+         * bpf_map_lookup_elem() returns the live inner map pointer that BPF
+         * programs pass to the next lookup.
+         */
+        site.kind = CompanionLoad::LookupSite::Kind::Call;
+        site.target_addr = helper_kernel_addr(BPF_FUNC_map_lookup_elem);
         return true;
     }
     if (t == BPF_MAP_TYPE_ARRAY_OF_MAPS) {

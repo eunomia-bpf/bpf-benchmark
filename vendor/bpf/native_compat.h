@@ -297,58 +297,125 @@ static __always_inline int __native_core_is_null(const void *ptr)
      __builtin_types_compatible_p(typeof(src), const struct pt_regs *))
 #define __native_core_direct_read(dst, src, a) ({ \
     int __ret = -1; \
+    __builtin_memset_inline((void *)(dst), 0, sizeof(*(dst))); \
     if (!__native_core_is_null(src)) { \
         __builtin_memcpy((void *)(dst), (const void *)&((src)->a), sizeof(*(dst))); \
         __ret = 0; \
     } \
     __ret; \
 })
-#define __native_core_read_into_1(fn, dst, src, a) \
-    fn((dst), sizeof(*(dst)), &((src)->a))
+#define __native_core_read_ok(ret) ((ret) >= 0)
+#define __native_core_read_failed(dst, ret) ({ \
+    int __ret = (ret); \
+    __builtin_memset_inline((void *)(dst), 0, sizeof(*(dst))); \
+    if (__native_core_read_ok(__ret)) \
+        __ret = -1; \
+    __ret; \
+})
+#define __native_core_read_into_1(fn, dst, src, a) ({ \
+    int __ret = -1; \
+    __builtin_memset_inline((void *)(dst), 0, sizeof(*(dst))); \
+    if (!__native_core_is_null(src)) { \
+        __ret = fn((dst), sizeof(*(dst)), &((src)->a)); \
+        if (!__native_core_read_ok(__ret)) \
+            __builtin_memset_inline((void *)(dst), 0, sizeof(*(dst))); \
+    } \
+    __ret; \
+})
 #define __native_core_read_into_2(fn, dst, src, a, b) ({ \
-    typeof((src)->a) __t1; \
-    fn(&__t1, sizeof(__t1), &((src)->a)); \
-    fn((dst), sizeof(*(dst)), &(__t1->b)); \
+    typeof((src)->a) __t1 = 0; \
+    int __ret = __native_core_read_into_1(__native_core_probe_read, &__t1, (src), a); \
+    if (__native_core_read_ok(__ret) && !__native_core_is_null(__t1)) \
+        __ret = __native_core_read_into_1(fn, (dst), __t1, b); \
+    else \
+        __ret = __native_core_read_failed((dst), __ret); \
+    __ret; \
 })
 #define __native_core_read_into_3(fn, dst, src, a, b, c) ({ \
-    typeof((src)->a) __t1; \
-    typeof(__t1->b) __t2; \
-    fn(&__t1, sizeof(__t1), &((src)->a)); \
-    fn(&__t2, sizeof(__t2), &(__t1->b)); \
-    fn((dst), sizeof(*(dst)), &(__t2->c)); \
+    typeof((src)->a) __t1 = 0; \
+    typeof(__t1->b) __t2 = 0; \
+    int __ret = __native_core_read_into_1(__native_core_probe_read, &__t1, (src), a); \
+    if (__native_core_read_ok(__ret) && !__native_core_is_null(__t1)) \
+        __ret = __native_core_read_into_1(__native_core_probe_read, &__t2, __t1, b); \
+    else \
+        __ret = __native_core_read_failed((dst), __ret); \
+    if (__native_core_read_ok(__ret) && !__native_core_is_null(__t2)) \
+        __ret = __native_core_read_into_1(fn, (dst), __t2, c); \
+    else \
+        __ret = __native_core_read_failed((dst), __ret); \
+    __ret; \
 })
 #define __native_core_read_into_4(fn, dst, src, a, b, c, d) ({ \
-    typeof((src)->a) __t1; \
-    typeof(__t1->b) __t2; \
-    typeof(__t2->c) __t3; \
-    fn(&__t1, sizeof(__t1), &((src)->a)); \
-    fn(&__t2, sizeof(__t2), &(__t1->b)); \
-    fn(&__t3, sizeof(__t3), &(__t2->c)); \
-    fn((dst), sizeof(*(dst)), &(__t3->d)); \
+    typeof((src)->a) __t1 = 0; \
+    typeof(__t1->b) __t2 = 0; \
+    typeof(__t2->c) __t3 = 0; \
+    int __ret = __native_core_read_into_1(__native_core_probe_read, &__t1, (src), a); \
+    if (__native_core_read_ok(__ret) && !__native_core_is_null(__t1)) \
+        __ret = __native_core_read_into_1(__native_core_probe_read, &__t2, __t1, b); \
+    else \
+        __ret = __native_core_read_failed((dst), __ret); \
+    if (__native_core_read_ok(__ret) && !__native_core_is_null(__t2)) \
+        __ret = __native_core_read_into_1(__native_core_probe_read, &__t3, __t2, c); \
+    else \
+        __ret = __native_core_read_failed((dst), __ret); \
+    if (__native_core_read_ok(__ret) && !__native_core_is_null(__t3)) \
+        __ret = __native_core_read_into_1(fn, (dst), __t3, d); \
+    else \
+        __ret = __native_core_read_failed((dst), __ret); \
+    __ret; \
 })
 #define __native_core_read_into_5(fn, dst, src, a, b, c, d, e) ({ \
-    typeof((src)->a) __t1; \
-    typeof(__t1->b) __t2; \
-    typeof(__t2->c) __t3; \
-    typeof(__t3->d) __t4; \
-    fn(&__t1, sizeof(__t1), &((src)->a)); \
-    fn(&__t2, sizeof(__t2), &(__t1->b)); \
-    fn(&__t3, sizeof(__t3), &(__t2->c)); \
-    fn(&__t4, sizeof(__t4), &(__t3->d)); \
-    fn((dst), sizeof(*(dst)), &(__t4->e)); \
+    typeof((src)->a) __t1 = 0; \
+    typeof(__t1->b) __t2 = 0; \
+    typeof(__t2->c) __t3 = 0; \
+    typeof(__t3->d) __t4 = 0; \
+    int __ret = __native_core_read_into_1(__native_core_probe_read, &__t1, (src), a); \
+    if (__native_core_read_ok(__ret) && !__native_core_is_null(__t1)) \
+        __ret = __native_core_read_into_1(__native_core_probe_read, &__t2, __t1, b); \
+    else \
+        __ret = __native_core_read_failed((dst), __ret); \
+    if (__native_core_read_ok(__ret) && !__native_core_is_null(__t2)) \
+        __ret = __native_core_read_into_1(__native_core_probe_read, &__t3, __t2, c); \
+    else \
+        __ret = __native_core_read_failed((dst), __ret); \
+    if (__native_core_read_ok(__ret) && !__native_core_is_null(__t3)) \
+        __ret = __native_core_read_into_1(__native_core_probe_read, &__t4, __t3, d); \
+    else \
+        __ret = __native_core_read_failed((dst), __ret); \
+    if (__native_core_read_ok(__ret) && !__native_core_is_null(__t4)) \
+        __ret = __native_core_read_into_1(fn, (dst), __t4, e); \
+    else \
+        __ret = __native_core_read_failed((dst), __ret); \
+    __ret; \
 })
 #define __native_core_read_into_6(fn, dst, src, a, b, c, d, e, f) ({ \
-    typeof((src)->a) __t1; \
-    typeof(__t1->b) __t2; \
-    typeof(__t2->c) __t3; \
-    typeof(__t3->d) __t4; \
-    typeof(__t4->e) __t5; \
-    fn(&__t1, sizeof(__t1), &((src)->a)); \
-    fn(&__t2, sizeof(__t2), &(__t1->b)); \
-    fn(&__t3, sizeof(__t3), &(__t2->c)); \
-    fn(&__t4, sizeof(__t4), &(__t3->d)); \
-    fn(&__t5, sizeof(__t5), &(__t4->e)); \
-    fn((dst), sizeof(*(dst)), &(__t5->f)); \
+    typeof((src)->a) __t1 = 0; \
+    typeof(__t1->b) __t2 = 0; \
+    typeof(__t2->c) __t3 = 0; \
+    typeof(__t3->d) __t4 = 0; \
+    typeof(__t4->e) __t5 = 0; \
+    int __ret = __native_core_read_into_1(__native_core_probe_read, &__t1, (src), a); \
+    if (__native_core_read_ok(__ret) && !__native_core_is_null(__t1)) \
+        __ret = __native_core_read_into_1(__native_core_probe_read, &__t2, __t1, b); \
+    else \
+        __ret = __native_core_read_failed((dst), __ret); \
+    if (__native_core_read_ok(__ret) && !__native_core_is_null(__t2)) \
+        __ret = __native_core_read_into_1(__native_core_probe_read, &__t3, __t2, c); \
+    else \
+        __ret = __native_core_read_failed((dst), __ret); \
+    if (__native_core_read_ok(__ret) && !__native_core_is_null(__t3)) \
+        __ret = __native_core_read_into_1(__native_core_probe_read, &__t4, __t3, d); \
+    else \
+        __ret = __native_core_read_failed((dst), __ret); \
+    if (__native_core_read_ok(__ret) && !__native_core_is_null(__t4)) \
+        __ret = __native_core_read_into_1(__native_core_probe_read, &__t5, __t4, e); \
+    else \
+        __ret = __native_core_read_failed((dst), __ret); \
+    if (__native_core_read_ok(__ret) && !__native_core_is_null(__t5)) \
+        __ret = __native_core_read_into_1(fn, (dst), __t5, f); \
+    else \
+        __ret = __native_core_read_failed((dst), __ret); \
+    __ret; \
 })
 #define __native_core_read_into(fn, dst, src, args...) \
     __native_core_pick(args, \
@@ -438,12 +505,20 @@ static __always_inline int __native_core_is_null(const void *ptr)
 #define __native_core_probe_read bpf_probe_read_kernel
 #define __native_core_probe_read_str bpf_probe_read_kernel_str
 #endif
+#define __native_core_read_raw(fn, dst, sz, src) ({ \
+    void *__dst = (void *)(dst); \
+    unsigned int __sz = (unsigned int)(sz); \
+    if (__dst != NULL && __sz != 0) \
+        __builtin_memset(__dst, 0, __sz); \
+    fn(__dst, __sz, (src)); \
+})
 #ifndef bpf_core_read
-#define bpf_core_read(dst, sz, src) __native_core_probe_read((dst), (sz), (src))
+#define bpf_core_read(dst, sz, src) \
+    __native_core_read_raw(__native_core_probe_read, (dst), (sz), (src))
 #endif
 #ifndef BPF_CORE_READ
 #define BPF_CORE_READ(src, args...) ({ \
-    __native_core_type(src, args) __r; \
+    __native_core_type(src, args) __r = {}; \
     __native_core_read_value(__native_core_probe_read, &__r, (src), args); \
     __r; \
 })
@@ -457,11 +532,12 @@ static __always_inline int __native_core_is_null(const void *ptr)
     __native_core_read_into(__native_core_probe_read_str, (dst), (src), args)
 #endif
 #ifndef bpf_core_read_user
-#define bpf_core_read_user(dst, sz, src) bpf_probe_read_user((dst), (sz), (src))
+#define bpf_core_read_user(dst, sz, src) \
+    __native_core_read_raw(bpf_probe_read_user, (dst), (sz), (src))
 #endif
 #ifndef BPF_CORE_READ_USER
 #define BPF_CORE_READ_USER(src, args...) ({ \
-    __native_core_type(src, args) __r; \
+    __native_core_type(src, args) __r = {}; \
     __native_core_read_into(bpf_probe_read_user, &__r, (src), args); \
     __r; \
 })
@@ -515,15 +591,14 @@ extern long bpf_skb_load_bytes_relative(void *skb, unsigned int offset,
 #ifdef MICRO_NATIVE_HELPER_MACROS
 static __always_inline unsigned long native_helper_id0(unsigned long id)
 {
-    asm volatile("" : "+r"(id) : : "memory");
+    asm volatile("" : "+a"(id) : : "memory");
     return id;
 }
 
 static __always_inline unsigned long native_helper_id1(unsigned long id,
                                                        unsigned long a0)
 {
-    (void)a0;
-    asm volatile("" : "+r"(id) : : "memory");
+    asm volatile("" : "+a"(id) : "r"(a0) : "memory");
     return id;
 }
 
@@ -531,9 +606,7 @@ static __always_inline unsigned long native_helper_id2(unsigned long id,
                                                        unsigned long a0,
                                                        unsigned long a1)
 {
-    (void)a0;
-    (void)a1;
-    asm volatile("" : "+r"(id) : : "memory");
+    asm volatile("" : "+a"(id) : "r"(a0), "r"(a1) : "memory");
     return id;
 }
 
@@ -542,10 +615,7 @@ static __always_inline unsigned long native_helper_id3(unsigned long id,
                                                        unsigned long a1,
                                                        unsigned long a2)
 {
-    (void)a0;
-    (void)a1;
-    (void)a2;
-    asm volatile("" : "+r"(id) : : "memory");
+    asm volatile("" : "+a"(id) : "r"(a0), "r"(a1), "r"(a2) : "memory");
     return id;
 }
 
@@ -555,11 +625,7 @@ static __always_inline unsigned long native_helper_id4(unsigned long id,
                                                        unsigned long a2,
                                                        unsigned long a3)
 {
-    (void)a0;
-    (void)a1;
-    (void)a2;
-    (void)a3;
-    asm volatile("" : "+r"(id) : : "memory");
+    asm volatile("" : "+a"(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3) : "memory");
     return id;
 }
 
@@ -570,12 +636,7 @@ static __always_inline unsigned long native_helper_id5(unsigned long id,
                                                        unsigned long a3,
                                                        unsigned long a4)
 {
-    (void)a0;
-    (void)a1;
-    (void)a2;
-    (void)a3;
-    (void)a4;
-    asm volatile("" : "+r"(id) : : "memory");
+    asm volatile("" : "+a"(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(a4) : "memory");
     return id;
 }
 
