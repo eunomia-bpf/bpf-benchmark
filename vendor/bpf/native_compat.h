@@ -663,43 +663,51 @@ static __always_inline unsigned long native_helper_id5(unsigned long id,
 #undef bpf_probe_read
 #define bpf_probe_read(dst, size, unsafe_ptr) \
     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
-                       NATIVE_BPF_FUNC_probe_read, (dst), (size), (unsafe_ptr))( \
-        (dst), (size), (unsafe_ptr))
+                       NATIVE_BPF_FUNC_probe_read, (void *)(dst), (size), \
+                       (const void *)(unsafe_ptr))( \
+        (void *)(dst), (size), (const void *)(unsafe_ptr))
 #undef bpf_probe_read_kernel
 #define bpf_probe_read_kernel(dst, size, unsafe_ptr) \
     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
-                       NATIVE_BPF_FUNC_probe_read_kernel, (dst), (size), (unsafe_ptr))( \
-        (dst), (size), (unsafe_ptr))
+                       NATIVE_BPF_FUNC_probe_read_kernel, (void *)(dst), (size), \
+                       (const void *)(unsafe_ptr))( \
+        (void *)(dst), (size), (const void *)(unsafe_ptr))
 #undef bpf_probe_read_user
 #define bpf_probe_read_user(dst, size, unsafe_ptr) \
     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
-                       NATIVE_BPF_FUNC_probe_read_user, (dst), (size), (unsafe_ptr))( \
-        (dst), (size), (unsafe_ptr))
+                       NATIVE_BPF_FUNC_probe_read_user, (void *)(dst), (size), \
+                       (const void *)(unsafe_ptr))( \
+        (void *)(dst), (size), (const void *)(unsafe_ptr))
 #undef bpf_probe_write_user
 #define bpf_probe_write_user(dst, src, len) \
     native_bpf_helper3(long (*)(void *, const void *, unsigned int), \
-                       NATIVE_BPF_FUNC_probe_write_user, (dst), (src), (len))( \
-        (dst), (src), (len))
+                       NATIVE_BPF_FUNC_probe_write_user, (void *)(dst), \
+                       (const void *)(src), (len))( \
+        (void *)(dst), (const void *)(src), (len))
 #undef bpf_copy_from_user
 #define bpf_copy_from_user(dst, size, unsafe_ptr) \
     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
-                       NATIVE_BPF_FUNC_copy_from_user, (dst), (size), (unsafe_ptr))( \
-        (dst), (size), (unsafe_ptr))
+                       NATIVE_BPF_FUNC_copy_from_user, (void *)(dst), (size), \
+                       (const void *)(unsafe_ptr))( \
+        (void *)(dst), (size), (const void *)(unsafe_ptr))
 #undef bpf_probe_read_kernel_str
 #define bpf_probe_read_kernel_str(dst, size, unsafe_ptr) \
     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
-                       NATIVE_BPF_FUNC_probe_read_kernel_str, (dst), (size), (unsafe_ptr))( \
-        (dst), (size), (unsafe_ptr))
+                       NATIVE_BPF_FUNC_probe_read_kernel_str, (void *)(dst), (size), \
+                       (const void *)(unsafe_ptr))( \
+        (void *)(dst), (size), (const void *)(unsafe_ptr))
 #undef bpf_probe_read_user_str
 #define bpf_probe_read_user_str(dst, size, unsafe_ptr) \
     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
-                       NATIVE_BPF_FUNC_probe_read_user_str, (dst), (size), (unsafe_ptr))( \
-        (dst), (size), (unsafe_ptr))
+                       NATIVE_BPF_FUNC_probe_read_user_str, (void *)(dst), (size), \
+                       (const void *)(unsafe_ptr))( \
+        (void *)(dst), (size), (const void *)(unsafe_ptr))
 #undef bpf_probe_read_str
 #define bpf_probe_read_str(dst, size, unsafe_ptr) \
     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
-                       NATIVE_BPF_FUNC_probe_read_str, (dst), (size), (unsafe_ptr))( \
-        (dst), (size), (unsafe_ptr))
+                       NATIVE_BPF_FUNC_probe_read_str, (void *)(dst), (size), \
+                       (const void *)(unsafe_ptr))( \
+        (void *)(dst), (size), (const void *)(unsafe_ptr))
 #undef bpf_get_current_pid_tgid
 #define bpf_get_current_pid_tgid() \
     native_bpf_helper0(unsigned long long (*)(void), NATIVE_BPF_FUNC_get_current_pid_tgid)()
