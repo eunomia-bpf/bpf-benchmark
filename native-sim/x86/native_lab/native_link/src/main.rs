@@ -197,7 +197,6 @@ struct LinkSideInputs {
     helper_addrs: HashMap<String, u64>,
     map_addrs: HashMap<String, u64>,
     tail_call_maps: HashSet<String>,
-    tail_call_sites: Vec<TailCallSiteSpec>,
     lookup_sites: Vec<LookupSiteSpec>,
     lookup_maps: HashMap<String, LookupSiteSpec>,
     update_sites: Vec<UpdateSiteSpec>,
@@ -216,8 +215,6 @@ struct LinkPlan {
     #[serde(default)]
     tail_call_maps: Vec<String>,
     #[serde(default)]
-    tail_call_sites: Vec<LinkPlanTailCallSite>,
-    #[serde(default)]
     lookup_sites: Vec<LinkPlanLookupSite>,
     #[serde(default)]
     lookup_maps: Vec<LinkPlanLookupMap>,
@@ -225,28 +222,10 @@ struct LinkPlan {
     update_sites: Vec<LinkPlanUpdateSite>,
 }
 
-#[derive(Clone, Debug)]
-pub(crate) struct TailCallSiteSpec {
-    pub(crate) map_name: Option<String>,
-    pub(crate) key: Option<u32>,
-    pub(crate) max_entries: Option<u32>,
-}
-
 #[derive(Deserialize)]
 struct LinkPlanNameAddr {
     name: String,
     addr: u64,
-}
-
-#[derive(Deserialize)]
-struct LinkPlanTailCallSite {
-    map_name: Option<String>,
-    #[serde(default)]
-    key_known: bool,
-    #[serde(default)]
-    key: u32,
-    #[serde(default)]
-    max_entries: u32,
 }
 
 #[derive(Deserialize)]
@@ -361,14 +340,6 @@ fn update_site_from_plan(site: LinkPlanUpdateSite) -> Result<UpdateSiteSpec> {
     })
 }
 
-fn tail_call_site_from_plan(site: LinkPlanTailCallSite) -> Result<TailCallSiteSpec> {
-    Ok(TailCallSiteSpec {
-        map_name: site.map_name.filter(|name| !name.is_empty()),
-        key: if site.key_known { Some(site.key) } else { None },
-        max_entries: (site.max_entries != 0).then_some(site.max_entries),
-    })
-}
-
 fn load_link_plan(path: &PathBuf) -> Result<LinkSideInputs> {
     let bytes = fs::read(path).with_context(|| format!("read {}", path.display()))?;
     let plan: LinkPlan = serde_json::from_slice(&bytes)
@@ -387,11 +358,6 @@ fn load_link_plan(path: &PathBuf) -> Result<LinkSideInputs> {
         helper_addrs: name_addr_vec_to_map(plan.helpers, "helpers")?,
         map_addrs: name_addr_vec_to_map(plan.maps, "maps")?,
         tail_call_maps: string_vec_to_set(plan.tail_call_maps, "tail_call_maps")?,
-        tail_call_sites: plan
-            .tail_call_sites
-            .into_iter()
-            .map(tail_call_site_from_plan)
-            .collect::<Result<Vec<_>>>()?,
         lookup_sites: plan
             .lookup_sites
             .into_iter()
@@ -415,7 +381,6 @@ fn load_link_side_inputs(args: &Args) -> Result<LinkSideInputs> {
         helper_addrs: HashMap::new(),
         map_addrs: HashMap::new(),
         tail_call_maps: HashSet::new(),
-        tail_call_sites: Vec::new(),
         lookup_sites: Vec::new(),
         lookup_maps: HashMap::new(),
         update_sites: Vec::new(),
@@ -526,7 +491,6 @@ fn main() -> Result<()> {
         helper_addrs,
         map_addrs,
         tail_call_maps,
-        tail_call_sites,
         lookup_sites,
         lookup_maps,
         update_sites,
@@ -571,7 +535,6 @@ fn main() -> Result<()> {
                 &helper_addrs,
                 &map_addrs,
                 &tail_call_maps,
-                &tail_call_sites,
                 &lookup_sites,
                 &lookup_maps,
                 &update_sites,

@@ -92,17 +92,6 @@ inline void write_json_lookup_map(std::ostream &out,
     out << "}";
 }
 
-inline void write_json_tail_call_site(
-    std::ostream &out,
-    const NativeLinkArgs::TailCallSite &site)
-{
-    out << "{\"map_name\":";
-    write_json_string(out, site.map_name);
-    out << ",\"key_known\":" << (site.key_known ? "true" : "false")
-        << ",\"key\":" << site.key
-        << ",\"max_entries\":" << site.max_entries << "}";
-}
-
 inline void write_json_update_site(std::ostream &out,
                                    const NativeLinkArgs::UpdateSite &site)
 {
@@ -154,8 +143,6 @@ inline std::filesystem::path write_native_link_plan(
     write_json_array(out, link_args.maps, write_json_name_addr);
     out << ",\"tail_call_maps\":";
     write_json_array(out, link_args.tail_call_maps, write_json_string);
-    out << ",\"tail_call_sites\":";
-    write_json_array(out, link_args.tail_call_sites, write_json_tail_call_site);
     out << ",\"lookup_sites\":";
     write_json_array(out, link_args.lookup_sites, write_json_lookup_site);
     out << ",\"lookup_maps\":";

@@ -177,14 +177,6 @@ NativeLinkArgs build_native_link_args(
     out.tail_call_maps.erase(
         std::unique(out.tail_call_maps.begin(), out.tail_call_maps.end()),
         out.tail_call_maps.end());
-    for (const CompanionLoad::TailCallSite &site : companion.tail_call_sites) {
-        out.tail_call_sites.push_back(NativeLinkArgs::TailCallSite{
-            site.map_name,
-            site.key_known,
-            site.key,
-            site.max_entries,
-        });
-    }
 
     for (size_t i = 0; i < companion.lookup_sites.size(); i++) {
         out.lookup_sites.push_back(make_link_lookup_site(companion.lookup_sites[i]));

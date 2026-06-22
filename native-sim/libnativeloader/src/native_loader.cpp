@@ -2605,12 +2605,6 @@ struct NativeLinkArgs {
         std::string name;
         LookupSite site;
     };
-    struct TailCallSite {
-        std::string map_name;
-        bool key_known = false;
-        uint32_t key = 0;
-        uint32_t max_entries = 0;
-    };
     struct UpdateSite {
         std::string kind;
         uint64_t target_addr = 0;
@@ -2624,7 +2618,6 @@ struct NativeLinkArgs {
     std::vector<NameAddr> helpers;
     std::vector<NameAddr> maps;
     std::vector<std::string> tail_call_maps;
-    std::vector<TailCallSite> tail_call_sites;
     std::vector<LookupSite> lookup_sites;
     std::vector<LookupMap> lookup_maps;
     std::vector<UpdateSite> update_sites;
@@ -2659,13 +2652,6 @@ struct CompanionLoad {
     std::vector<MapMeta> maps;
     std::vector<NativeMapRule> map_rules;
     std::vector<MapMeta> source_tail_call_maps;
-    struct TailCallSite {
-        std::string map_name;
-        bool key_known;
-        uint32_t key;
-        uint32_t max_entries;
-    };
-    std::vector<TailCallSite> tail_call_sites;
     /* Per-call-site spec for every `bpf_map_lookup_elem` invocation in
      * the entry program, listed in BPF-source order. Each entry is a
      * (target_kernel_address, key_offset) pair. native-link routes the
@@ -3580,19 +3566,6 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
             out.has_tail_call = true;
             if (map_it != meta_by_source_fd.end()) {
                 add_source_tail_call_map(out, map_it->second);
-                out.tail_call_sites.push_back(CompanionLoad::TailCallSite{
-                    map_it->second.name,
-                    call.key_known,
-                    call.key,
-                    map_it->second.max_entries,
-                });
-            } else {
-                out.tail_call_sites.push_back(CompanionLoad::TailCallSite{
-                    "",
-                    call.key_known,
-                    call.key,
-                    0,
-                });
             }
             continue;
         }
@@ -3682,13 +3655,6 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
     for (const std::string &arg : link_args.tail_call_maps) {
         hash.add_string("tail_call_map");
         hash.add_string(arg);
-    }
-    for (const NativeLinkArgs::TailCallSite &arg : link_args.tail_call_sites) {
-        hash.add_string("tail_call_site");
-        hash.add_string(arg.map_name);
-        hash.add_u64(arg.key_known ? 1 : 0);
-        hash.add_u64(arg.key);
-        hash.add_u64(arg.max_entries);
     }
     for (const NativeLinkArgs::LookupSite &arg : link_args.lookup_sites) {
         hash.add_string("lookup");
@@ -3834,7 +3800,6 @@ std::string native_link_plan_summary(const NativeLinkArgs &link_args,
         << " helpers=" << link_args.helpers.size()
         << " maps=" << link_args.maps.size()
         << " tail_call_maps=" << link_args.tail_call_maps.size()
-        << " tail_call_sites=" << link_args.tail_call_sites.size()
         << " lookup_sites=" << link_args.lookup_sites.size()
         << " lookup_call=" << lookup_call
         << " lookup_hash=" << lookup_hash
