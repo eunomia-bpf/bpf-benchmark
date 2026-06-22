@@ -90,12 +90,41 @@ FUNC_INLINE void event_set_clone(struct msg_process *pid)
 	pid->flags |= EVENT_CLONE;
 }
 
+#ifdef MICRO_NATIVE
+#define native_current_read(dst, size, src)                  \
+	({                                                   \
+		const void *__src = (const void *)(src);     \
+		int __ret = -1;                              \
+		if (__src) {                                 \
+			__builtin_memcpy((dst), __src, (size)); \
+			__ret = 0;                          \
+		}                                            \
+		__ret;                                       \
+	})
+#else
+#define native_current_read(dst, size, src) probe_read((dst), (size), (src))
+#endif
+
+#ifdef MICRO_NATIVE
+#define native_kernel_read(dst, size, src) bpf_probe_read_kernel((dst), (size), (src))
+#else
+#define native_kernel_read(dst, size, src) probe_read((dst), (size), (src))
+#endif
+
 FUNC_INLINE void
 __get_caps(struct msg_capabilities *msg, const struct cred *cred)
 {
 	probe_read(&msg->effective, sizeof(__u64), _(&cred->cap_effective));
 	probe_read(&msg->inheritable, sizeof(__u64), _(&cred->cap_inheritable));
 	probe_read(&msg->permitted, sizeof(__u64), _(&cred->cap_permitted));
+}
+
+FUNC_INLINE void
+__get_current_caps(struct msg_capabilities *msg, const struct cred *cred)
+{
+	native_current_read(&msg->effective, sizeof(__u64), _(&cred->cap_effective));
+	native_current_read(&msg->inheritable, sizeof(__u64), _(&cred->cap_inheritable));
+	native_current_read(&msg->permitted, sizeof(__u64), _(&cred->cap_permitted));
 }
 
 /* @get_current_subj_caps:
@@ -135,8 +164,8 @@ get_current_subj_caps(struct msg_capabilities *msg, struct task_struct *task)
 	const struct cred *cred;
 
 	/* Get the task's subjective creds */
-	probe_read(&cred, sizeof(cred), _(&task->cred));
-	__get_caps(msg, cred);
+	native_current_read(&cred, sizeof(cred), _(&task->cred));
+	__get_current_caps(msg, cred);
 }
 
 FUNC_INLINE void
@@ -167,86 +196,86 @@ get_namespaces(struct msg_ns *msg, struct task_struct *task)
 	struct nsproxy *nsproxy;
 	struct nsproxy nsp;
 
-	probe_read(&nsproxy, sizeof(nsproxy), _(&task->nsproxy));
-	probe_read(&nsp, sizeof(nsp), _(nsproxy));
+	native_kernel_read(&nsproxy, sizeof(nsproxy), _(&task->nsproxy));
+	native_kernel_read(&nsp, sizeof(nsp), _(nsproxy));
 
 	if (bpf_core_field_exists(nsproxy->uts_ns->ns)) {
-		probe_read(&msg->uts_inum, sizeof(msg->uts_inum),
-			   _(&nsp.uts_ns->ns.inum));
+		native_kernel_read(&msg->uts_inum, sizeof(msg->uts_inum),
+				   _(&nsp.uts_ns->ns.inum));
 	} else {
 		struct uts_namespace___rhel7 *ns = (struct uts_namespace___rhel7 *)_(nsp.uts_ns);
 
-		probe_read(&msg->uts_inum, sizeof(msg->uts_inum),
-			   _(&ns->proc_inum));
+		native_kernel_read(&msg->uts_inum, sizeof(msg->uts_inum),
+				   _(&ns->proc_inum));
 	}
 
 	if (bpf_core_field_exists(nsproxy->ipc_ns->ns)) {
-		probe_read(&msg->ipc_inum, sizeof(msg->ipc_inum),
-			   _(&nsp.ipc_ns->ns.inum));
+		native_kernel_read(&msg->ipc_inum, sizeof(msg->ipc_inum),
+				   _(&nsp.ipc_ns->ns.inum));
 	} else {
 		struct ipc_namespace___rhel7 *ns = (struct ipc_namespace___rhel7 *)_(nsp.ipc_ns);
 
-		probe_read(&msg->ipc_inum, sizeof(msg->ipc_inum),
-			   _(&ns->proc_inum));
+		native_kernel_read(&msg->ipc_inum, sizeof(msg->ipc_inum),
+				   _(&ns->proc_inum));
 	}
 
 	if (bpf_core_field_exists(nsproxy->mnt_ns->ns)) {
-		probe_read(&msg->mnt_inum, sizeof(msg->mnt_inum),
-			   _(&nsp.mnt_ns->ns.inum));
+		native_kernel_read(&msg->mnt_inum, sizeof(msg->mnt_inum),
+				   _(&nsp.mnt_ns->ns.inum));
 	} else {
 		struct mnt_namespace___rhel7 *ns = (struct mnt_namespace___rhel7 *)_(nsp.mnt_ns);
 
-		probe_read(&msg->mnt_inum, sizeof(msg->mnt_inum),
-			   _(&ns->proc_inum));
+		native_kernel_read(&msg->mnt_inum, sizeof(msg->mnt_inum),
+				   _(&ns->proc_inum));
 	}
 
 	// TODO rhel7 pid namespace support
 	if (bpf_core_field_exists(task->thread_pid)) {
 		struct pid *p = 0;
 
-		probe_read(&p, sizeof(p), _(&task->thread_pid));
+		native_kernel_read(&p, sizeof(p), _(&task->thread_pid));
 		if (p) {
 			int level = 0;
 			struct upid up;
 
-			probe_read(&level, sizeof(level), _(&p->level));
-			probe_read(&up, sizeof(up), _(&p->numbers[level]));
-			probe_read(&msg->pid_inum, sizeof(msg->pid_inum),
-				   _(&up.ns->ns.inum));
+			native_kernel_read(&level, sizeof(level), _(&p->level));
+			native_kernel_read(&up, sizeof(up), _(&p->numbers[level]));
+			native_kernel_read(&msg->pid_inum, sizeof(msg->pid_inum),
+					   _(&up.ns->ns.inum));
 		} else
 			msg->pid_inum = 0;
 	}
 
 	if (bpf_core_field_exists(nsproxy->pid_ns_for_children)) {
-		probe_read(&msg->pid_for_children_inum,
-			   sizeof(msg->pid_for_children_inum),
-			   _(&nsp.pid_ns_for_children->ns.inum));
+		native_kernel_read(&msg->pid_for_children_inum,
+				   sizeof(msg->pid_for_children_inum),
+				   _(&nsp.pid_ns_for_children->ns.inum));
 	} else {
 		msg->pid_for_children_inum = 0;
 	}
 
 	if (bpf_core_field_exists(nsproxy->net_ns->ns)) {
-		probe_read(&msg->net_inum, sizeof(msg->net_inum),
-			   _(&nsp.net_ns->ns.inum));
+		native_kernel_read(&msg->net_inum, sizeof(msg->net_inum),
+				   _(&nsp.net_ns->ns.inum));
 	} else {
 		struct net___rhel7 *ns = (struct net___rhel7 *)_(nsp.net_ns);
 
-		probe_read(&msg->net_inum, sizeof(msg->net_inum),
-			   _(&ns->proc_inum));
+		native_kernel_read(&msg->net_inum, sizeof(msg->net_inum),
+				   _(&ns->proc_inum));
 	}
 
 	// this also includes time_ns_for_children
 	if (bpf_core_field_exists(nsproxy->time_ns)) {
-		probe_read(&msg->time_inum, sizeof(msg->time_inum),
-			   _(&nsp.time_ns->ns.inum));
-		probe_read(&msg->time_for_children_inum,
-			   sizeof(msg->time_for_children_inum),
-			   _(&nsp.time_ns_for_children->ns.inum));
+		native_kernel_read(&msg->time_inum, sizeof(msg->time_inum),
+				   _(&nsp.time_ns->ns.inum));
+		native_kernel_read(&msg->time_for_children_inum,
+				   sizeof(msg->time_for_children_inum),
+				   _(&nsp.time_ns_for_children->ns.inum));
 	}
 
 	if (bpf_core_field_exists(nsproxy->cgroup_ns)) {
-		probe_read(&msg->cgroup_inum, sizeof(msg->cgroup_inum),
-			   _(&nsp.cgroup_ns->ns.inum));
+		native_kernel_read(&msg->cgroup_inum, sizeof(msg->cgroup_inum),
+				   _(&nsp.cgroup_ns->ns.inum));
 	} else {
 		msg->cgroup_inum = 0;
 	}
@@ -256,10 +285,10 @@ get_namespaces(struct msg_ns *msg, struct task_struct *task)
 		struct user_namespace *user_ns;
 
 		if (bpf_core_field_exists(mm->user_ns)) {
-			probe_read(&mm, sizeof(mm), _(&task->mm));
-			probe_read(&user_ns, sizeof(user_ns), _(&mm->user_ns));
-			probe_read(&msg->user_inum, sizeof(msg->user_inum),
-				   _(&user_ns->ns.inum));
+			native_kernel_read(&mm, sizeof(mm), _(&task->mm));
+			native_kernel_read(&user_ns, sizeof(user_ns), _(&mm->user_ns));
+			native_kernel_read(&msg->user_inum, sizeof(msg->user_inum),
+					   _(&user_ns->ns.inum));
 		} else {
 			msg->user_inum = 0;
 		}
