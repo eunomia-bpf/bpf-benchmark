@@ -85,14 +85,20 @@ HELPER_IDENTS = {
     118: "bpf_jiffies64",
     122: "bpf_get_netns_cookie",
     125: "bpf_ktime_get_boot_ns",
+    127: "bpf_seq_write",
     148: "bpf_copy_from_user",
     152: "bpf_redirect_neigh",
     158: "bpf_get_current_task_btf",
+    161: "bpf_ima_inode_hash",
+    174: "bpf_get_attach_cookie",
     175: "bpf_task_pt_regs",
     183: "bpf_get_func_arg",
     184: "bpf_get_func_ret",
     185: "bpf_get_func_arg_cnt",
     186: "bpf_get_retval",
+    191: "bpf_copy_from_user_task",
+    193: "bpf_ima_file_hash",
+    195: "bpf_map_lookup_percpu_elem",
 }
 GPR_WRITE_OPS = {
     "add", "sub", "and", "bic", "eor", "orr", "orn",
@@ -102,7 +108,7 @@ GPR_WRITE_OPS = {
     "mvn", "neg", "cneg", "extr", "ubfx", "sbfx", "ubfiz", "bfxil", "bfi",
     "rev", "rev16", "sxtb", "sxth", "sxtw", "ldr", "ldur", "ldaxr", "ldxr", "ldrb", "ldurb", "ldrh", "ldurh",
     "ldrsb", "ldrsh", "ldrsw",
-    "ldp", "stlxr", "stxr", "csel", "cinc", "cinv", "csinc", "csinv", "cset", "fmov",
+    "ldp", "stlxr", "stxr", "csel", "cinc", "cinv", "csinc", "csinv", "csneg", "cset", "fmov",
 }
 
 
@@ -648,6 +654,9 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str], reloc_idents: dict[s
                        width=width_const(reg_width(ops[0])), aux=COND[ops[3]])
     if op == "csinc":
         return Encoded("ARM64_OP_CSINC", reg_const(ops[0]), reg_const(ops[1]), reg_const(ops[2]),
+                       width=width_const(reg_width(ops[0])), aux=COND[ops[3]])
+    if op == "csneg":
+        return Encoded("ARM64_OP_CSNEG", reg_const(ops[0]), reg_const(ops[1]), reg_const(ops[2]),
                        width=width_const(reg_width(ops[0])), aux=COND[ops[3]])
     if op == "fmov":
         dst, src = ops
