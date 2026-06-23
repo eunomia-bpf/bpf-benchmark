@@ -1,9 +1,0 @@
-benchmarks:
-  - name: tetragon_bpf_generic_kprobe_v61_generic_kprobe_event
-    tags: [app-proof]
-  - name: tetragon_bpf_generic_tracepoint_v61_generic_tracepoint_event
-    tags: [app-proof]
-  - name: tetragon_bpf_generic_tracepoint_v61_generic_tracepoint_output
-    tags: [app-proof]
-  - name: tetragon_bpf_multi_kprobe_v61_generic_kprobe_output
-    tags: [app-proof]

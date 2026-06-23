@@ -1,9 +1,0 @@
-benchmarks:
-  - name: tetragon_bpf_generic_lsm_ima_bprm_v511_ima_bprm
-    tags: [app-proof]
-  - name: tetragon_bpf_generic_uprobe_generic_uprobe_actions
-    tags: [app-proof]
-  - name: tetragon_bpf_multi_uprobe_v511_generic_sleepable_preload
-    tags: [app-proof]
-  - name: tetragon_bpf_prog_iter_iter
-    tags: [app-proof]

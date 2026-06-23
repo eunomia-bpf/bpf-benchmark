@@ -1,9 +1,0 @@
-benchmarks:
-  - name: tracee_cgroup_bpf_run_filter_skb
-    tags: [app-proof]
-  - name: tracee_hash_task_id
-    tags: [app-proof]
-  - name: tracee_hash_u32_and_u64
-    tags: [app-proof]
-  - name: tracee_kernel_write_magic_return
-    tags: [app-proof]

@@ -1,7 +1,0 @@
-benchmarks:
-  - name: tracee_lkm_seeker_new_mod_only_tail
-    tags: [app-proof]
-  - name: tracee_lkm_seeker_send_to_userspace
-    tags: [app-proof]
-  - name: tracee_uprobe_lkm_seeker_submitter
-    tags: [app-proof]

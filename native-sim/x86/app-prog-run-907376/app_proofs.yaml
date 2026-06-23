@@ -1,9 +1,0 @@
-benchmarks:
-  - name: bcc_syscount_sys_exit
-    tags: [app-proof]
-  - name: cilium_bpf_xdp_tail_lb_ipv6
-    tags: [app-proof]
-  - name: katran_balancer_balancer_ingress
-    tags: [app-proof]
-  - name: otelcol_ebpf_profiler_custom__generic
-    tags: [app-proof]

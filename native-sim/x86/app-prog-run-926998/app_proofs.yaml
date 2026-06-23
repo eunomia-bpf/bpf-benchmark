@@ -1,7 +1,0 @@
-benchmarks:
-  - name: tetragon_bpf_execve_bprm_commit_creds_tg_kp_bprm_committing_creds
-    tags: [app-proof]
-  - name: tetragon_bpf_execve_event_event_execve
-    tags: [app-proof]
-  - name: tetragon_bpf_execve_event_v511_event_execve
-    tags: [app-proof]

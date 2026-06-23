@@ -1,7 +1,0 @@
-benchmarks:
-  - name: cilium_bpf_xdp_tail_lb_ipv6
-    tags: [app-proof]
-  - name: tetragon_bpf_generic_uprobe_v61_try_preload_arg
-    tags: [app-proof]
-  - name: tracee_lkm_seeker_kset_tail
-    tags: [app-proof]
