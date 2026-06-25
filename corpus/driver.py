@@ -704,7 +704,7 @@ def run_suite(
     # kinsnprober; that probe needs the modules already resident, otherwise
     # rotate/cond_select/endian_fusion/lea pass-emitted kfunc calls land on
     # btf_ids the kernel can't resolve (EACCES / EINVAL during PROG_LOAD).
-    kinsn_module_metadata = {} if workload_only else prepare_kinsn_modules()
+    kinsn_module_metadata = {} if workload_only or skip_rejit_disables_shim() else prepare_kinsn_modules()
     for app in suite.apps:
             _print_progress("app_start", app=app.name, runner=app.runner, workload=app.workload_for("corpus"))
             runner: AppRunner | None = None
@@ -893,6 +893,10 @@ def run_suite(
                         )
                     except Exception as stop_exc:
                         raise RuntimeError(f"baseline app stop failed: {stop_exc}") from stop_exc
+
+                    if skip_rejit_disables_shim():
+                        lifecycle.rejit_result = {"status": "skipped", "mode": "skip_rejit_all"}
+                        raise _AppLifecycleComplete
 
                     phase = "loadtime_plan"
                     loadtime_env: dict[str, str | None] = {
