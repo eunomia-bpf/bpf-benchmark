@@ -1,0 +1,24 @@
+diff --git a/vendor/repos/bcc/libbpf-tools/tcpconnect.bpf.c b/vendor/repos/bcc/libbpf-tools/tcpconnect.bpf.c
+index 8a0a1520..482e6d79 100644
+--- a/vendor/repos/bcc/libbpf-tools/tcpconnect.bpf.c
++++ b/vendor/repos/bcc/libbpf-tools/tcpconnect.bpf.c
+@@ -69,14 +69,15 @@ enter_tcp_connect(struct pt_regs *ctx, struct sock *sk)
+ 	__u64 pid_tgid = bpf_get_current_pid_tgid();
+ 	__u32 pid = pid_tgid >> 32;
+ 	__u32 tid = pid_tgid;
+-	__u32 uid;
+ 
+ 	if (filter_pid && pid != filter_pid)
+ 		return 0;
+ 
+-	uid = bpf_get_current_uid_gid();
+-	if (filter_uid != (uid_t) -1 && uid != filter_uid)
+-		return 0;
++	if (filter_uid != (uid_t) -1) {
++		__u32 uid = bpf_get_current_uid_gid();
++		if (uid != filter_uid)
++			return 0;
++	}
+ 
+ 	bpf_map_update_elem(&sockets, &tid, &sk, 0);
+ 	return 0;

@@ -1,0 +1,22 @@
+diff --git a/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c b/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c
+index 14a3b8102..1a5e60123 100644
+--- a/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c
++++ b/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c
+@@ -274,8 +274,6 @@ int sys_exit_submit(struct bpf_raw_tracepoint_args *ctx)
+     if (!reset_event(p.event, sys->id))
+         return 0;
+ 
+-    long ret = ctx->args[1];
+-
+     if (!evaluate_scope_filters(&p))
+         goto out;
+ 
+@@ -288,7 +286,7 @@ int sys_exit_submit(struct bpf_raw_tracepoint_args *ctx)
+     p.event->context.ts = sys->ts;
+ 
+     u8 ret_index = get_num_fields(p.event->config.field_types);
+-    save_to_submit_buf(&p.event->args_buf, (void *) &ret, sizeof(long), ret_index);
++    save_to_submit_buf(&p.event->args_buf, (void *) &sys->ret, sizeof(long), ret_index);
+     events_perf_submit(&p);
+ 
+ out:

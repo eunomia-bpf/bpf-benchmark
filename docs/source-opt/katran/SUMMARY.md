@@ -2,7 +2,7 @@
 
 App: `katran`
 
-Status: in-progress
+Status: complete
 
 Start state:
 
@@ -25,15 +25,15 @@ Attempts:
 
 | Attempt | Status | Result path | Notes |
 | --- | --- | --- | --- |
-| 1 | planned | | |
-| 2 | planned | | |
-| 3 | planned | | |
-| 4 | planned | | |
-| 5 | planned | | |
+| 1 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260625_084248_406394` | `udp-parse-first`; source restored |
+| 2 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260625_090323_284447` | `icmp-protocol-refresh`; source restored |
+| 3 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260625_092311_749645` | `calc-offset-fastpath`; source restored |
+| 4 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260625_094328_513110` | `quic-connid-no-null-check`; source restored |
+| 5 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260625_100305_598103` | `stable-rt-header-early-return`; source restored |
 
 Completion gate:
 
 - [x] Clean-source baseline result recorded.
-- [ ] Five independent source optimization attempts recorded.
-- [ ] Every accepted attempt has `source.diff`, command, result path, and correctness notes.
-- [ ] katran source tree returned to attempt-start state after each attempt.
+- [x] Five independent source optimization attempts recorded.
+- [x] Every accepted attempt has `source.diff`, command, result path, and correctness notes.
+- [x] katran source tree returned to attempt-start state after each attempt.

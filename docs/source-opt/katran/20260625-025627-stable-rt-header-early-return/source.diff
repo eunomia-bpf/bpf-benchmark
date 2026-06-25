@@ -1,0 +1,30 @@
+diff --git a/vendor/repos/katran/katran/lib/bpf/pckt_parsing.h b/vendor/repos/katran/katran/lib/bpf/pckt_parsing.h
+index 7ea09eed..453554a7 100644
+--- a/vendor/repos/katran/katran/lib/bpf/pckt_parsing.h
++++ b/vendor/repos/katran/katran/lib/bpf/pckt_parsing.h
+@@ -434,18 +434,16 @@ parse_udp_stable_rt_hdr(
+ 
+   __u8* udp_data = data + off + sizeof(struct udphdr);
+   __u8* pkt_type = udp_data;
+-  __u8* connId = NULL;
+-  if ((*pkt_type) == STABLE_ROUTING_HEADER) {
+-    // packet with stable routing header
+-    if (udp_data + sizeof(struct stable_routing_header) > data_end) {
+-      return result;
+-    }
+-    connId = ((struct stable_routing_header*)udp_data)->connection_id;
+-    result.is_stable_rt_pkt = true;
++  if ((*pkt_type) != STABLE_ROUTING_HEADER) {
++    return result;
+   }
+-  if (!connId) {
++
++  // packet with stable routing header
++  if (udp_data + sizeof(struct stable_routing_header) > data_end) {
+     return result;
+   }
++  __u8* connId = ((struct stable_routing_header*)udp_data)->connection_id;
++  result.is_stable_rt_pkt = true;
+ 
+   // same as QUIC connId v2 schema
+   result.server_id = (connId[1] << 16) | (connId[2] << 8) | (connId[3]);

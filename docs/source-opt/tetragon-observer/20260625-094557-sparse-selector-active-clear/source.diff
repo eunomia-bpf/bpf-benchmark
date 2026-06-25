@@ -1,0 +1,30 @@
+diff --git a/bpf/process/bpf_generic_tracepoint.c b/bpf/process/bpf_generic_tracepoint.c
+index 6b51109bb..f1e5b9b3b 100644
+--- a/bpf/process/bpf_generic_tracepoint.c
++++ b/bpf/process/bpf_generic_tracepoint.c
+@@ -247,8 +247,9 @@ generic_tracepoint_event(struct generic_tracepoint_event_arg *ctx)
+ 	msg->tailcall_index_process = 0;
+ 	msg->tailcall_index_selector = 0;
+ #pragma unroll
+-	for (i = 0; i < MAX_CONFIGURED_SELECTORS; i++)
++	for (i = 0; i <= MAX_SELECTORS; i++)
+ 		msg->sel.active[i] = 0;
++	msg->sel.active[SELECTORS_ACTIVE] = 0;
+ 	msg->sel.pass = false;
+ 	task = (struct task_struct *)get_current_task();
+ 	/* Initialize namespaces to apply filters on them */
+diff --git a/bpf/process/generic_calls.h b/bpf/process/generic_calls.h
+index 932f170fc..0f83a4852 100644
+--- a/bpf/process/generic_calls.h
++++ b/bpf/process/generic_calls.h
+@@ -51,8 +51,9 @@ generic_start_process_filter(void *ctx, struct bpf_map_def *calls)
+ 	/* Initialize selector index to 0 */
+ 	msg->sel.curr = 0;
+ #pragma unroll
+-	for (i = 0; i < MAX_CONFIGURED_SELECTORS; i++)
++	for (i = 0; i <= MAX_SELECTORS; i++)
+ 		msg->sel.active[i] = 0;
++	msg->sel.active[SELECTORS_ACTIVE] = 0;
+ 	/* Initialize accept field to reject */
+ 	msg->sel.pass = false;
+ 	msg->tailcall_index_process = 0;

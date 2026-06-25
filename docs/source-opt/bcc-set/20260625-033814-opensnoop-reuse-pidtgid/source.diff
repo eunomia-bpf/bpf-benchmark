@@ -1,0 +1,24 @@
+diff --git a/vendor/repos/bcc/libbpf-tools/opensnoop.bpf.c b/vendor/repos/bcc/libbpf-tools/opensnoop.bpf.c
+index 607fc8da..8ff4610c 100644
+--- a/vendor/repos/bcc/libbpf-tools/opensnoop.bpf.c
++++ b/vendor/repos/bcc/libbpf-tools/opensnoop.bpf.c
+@@ -88,8 +88,9 @@ int trace_exit(struct trace_event_raw_sys_exit* ctx)
+ 	struct event event = {};
+ 	struct args_t *ap;
+ 	uintptr_t stack[3];
++	u64 id = bpf_get_current_pid_tgid();
+ 	int ret;
+-	u32 pid = bpf_get_current_pid_tgid();
++	u32 pid = id;
+ 
+ 	ap = bpf_map_lookup_elem(&start, &pid);
+ 	if (!ap)
+@@ -99,7 +100,7 @@ int trace_exit(struct trace_event_raw_sys_exit* ctx)
+ 		goto cleanup;	/* want failed only */
+ 
+ 	/* event data */
+-	event.pid = bpf_get_current_pid_tgid() >> 32;
++	event.pid = id >> 32;
+ 	event.uid = bpf_get_current_uid_gid();
+ 	bpf_get_current_comm(&event.comm, sizeof(event.comm));
+ 	bpf_probe_read_user_str(&event.fname, sizeof(event.fname), ap->fname);

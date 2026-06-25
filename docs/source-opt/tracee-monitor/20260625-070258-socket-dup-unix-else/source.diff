@@ -1,0 +1,13 @@
+diff --git a/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c b/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c
+index 14a3b8102..d8c0ac61c 100644
+--- a/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c
++++ b/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c
+@@ -528,7 +528,7 @@ statfunc int send_socket_dup(program_data_t *p, u64 oldfd, u64 newfd)
+ 
+         // NOTE: for stack allocated, use sizeof instead of bpf_core_type_size
+         save_to_submit_buf(&(p->event->args_buf), &remote, sizeof(remote), 2);
+-    } else if (family == AF_UNIX) {
++    } else {
+         struct unix_sock *unix_sk = (struct unix_sock *) sk;
+         struct sockaddr_un sockaddr = get_unix_sock_addr(unix_sk);
+ 

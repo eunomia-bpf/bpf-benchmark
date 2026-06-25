@@ -1,0 +1,21 @@
+diff --git a/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c b/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c
+index 14a3b8102..d564b53cd 100644
+--- a/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c
++++ b/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c
+@@ -232,7 +232,6 @@ int sys_exit_init(struct bpf_raw_tracepoint_args *ctx)
+ 
+     syscall_data_t *sys = &task_info->syscall_data;
+ 
+-    long ret = ctx->args[1];
+     struct pt_regs *regs = (struct pt_regs *) ctx->args[0];
+     int id = get_syscall_id_from_regs(regs);
+ 
+@@ -249,7 +248,7 @@ int sys_exit_init(struct bpf_raw_tracepoint_args *ctx)
+     if (sys->id != id)
+         return 0;
+ 
+-    sys->ret = ret;
++    sys->ret = ctx->args[1];
+ 
+     // move to submit tail call if needed
+     bpf_tail_call(ctx, &sys_exit_submit_tail, id);

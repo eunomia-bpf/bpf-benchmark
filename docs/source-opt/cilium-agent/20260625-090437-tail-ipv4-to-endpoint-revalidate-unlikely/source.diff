@@ -1,0 +1,22 @@
+diff --git a/bpf/bpf_lxc.c b/bpf/bpf_lxc.c
+index 02fdeaddc2..da4f242975 100644
+--- a/bpf/bpf_lxc.c
++++ b/bpf/bpf_lxc.c
+@@ -2407,7 +2407,7 @@ int tail_ipv4_to_endpoint(struct __ctx_buff *ctx)
+ 	__s8 ext_err = 0;
+ 	int ret;
+ 
+-	if (!revalidate_data(ctx, &data, &data_end, &ip4)) {
++	if (unlikely(!revalidate_data(ctx, &data, &data_end, &ip4))) {
+ 		ret = DROP_INVALID;
+ 		goto out;
+ 	}
+@@ -2445,7 +2445,7 @@ int tail_ipv4_to_endpoint(struct __ctx_buff *ctx)
+ 			  &proxy_port, false);
+ 	switch (ret) {
+ 	case POLICY_ACT_PROXY_REDIRECT:
+-		if (!revalidate_data(ctx, &data, &data_end, &ip4)) {
++		if (unlikely(!revalidate_data(ctx, &data, &data_end, &ip4))) {
+ 			ret = DROP_INVALID;
+ 			goto out;
+ 		}

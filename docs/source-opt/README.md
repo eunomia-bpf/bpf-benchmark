@@ -62,6 +62,68 @@ vs.
 optimized source attempt result.json
 ```
 
+## 性能记录
+
+本节是 docs 侧 post-hoc 记录，不改变 runner 或 `result.json` schema。`samples`
+列是 3 次 workload sample 的原始吞吐量派生值；`vs baseline` 是同一 app 内
+attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 workload
+使用 pktgen stdout 中的每 sample total pps；stress-ng workload 使用 stdout 中
+各 stressor real-time `bogo ops/s` 的 sample 内求和。数值越高越好。
+
+### `katran`
+
+| Run | Primary metric | Samples | vs baseline | Result |
+| --- | ---: | --- | ---: | --- |
+| `baseline` | pktgen_total_pps mean=3061171; errors=986773942 | `3059743, 3085331, 3038438` | n/a | `corpus/results/x86_kvm_corpus_20260625_082123_391460` |
+| `20260625-013540-udp-parse-first` | pktgen_total_pps mean=3051836; errors=985181939 | `3067825, 3063624, 3024059` | -0.30% | `corpus/results/x86_kvm_corpus_20260625_084248_406394` |
+| `20260625-015559-icmp-protocol-refresh` | pktgen_total_pps mean=3045438; errors=976211084 | `3025440, 3035539, 3075335` | -0.51% | `corpus/results/x86_kvm_corpus_20260625_090323_284447` |
+| `20260625-021633-calc-offset-fastpath` | pktgen_total_pps mean=3053240; errors=844276210 | `3050340, 3051894, 3057485` | -0.26% | `corpus/results/x86_kvm_corpus_20260625_092311_749645` |
+| `20260625-023639-quic-connid-no-null-check` | pktgen_total_pps mean=3060385; errors=1034578362 | `3036690, 3053123, 3091341` | -0.03% | `corpus/results/x86_kvm_corpus_20260625_094328_513110` |
+| `20260625-025627-stable-rt-header-early-return` | pktgen_total_pps mean=3005981; errors=919785621 | `3001715, 2991963, 3024265` | -1.80% | `corpus/results/x86_kvm_corpus_20260625_100305_598103` |
+
+### `bcc/set`
+
+| Run | Primary metric | Samples | vs baseline | Result |
+| --- | ---: | --- | ---: | --- |
+| `baseline` | stress_ng_sum_bogo_ops_s mean=710465 | `712551, 710948, 707896` | n/a | `corpus/results/x86_kvm_corpus_20260625_102432_554290` |
+| `20260625-033814-opensnoop-reuse-pidtgid` | stress_ng_sum_bogo_ops_s mean=710090 | `708989, 711064, 710216` | -0.05% | `corpus/results/x86_kvm_corpus_20260625_104426_414018` |
+| `20260625-035755-tcpconnect-lazy-uid-filter` | stress_ng_sum_bogo_ops_s mean=704178 | `701784, 704943, 705807` | -0.88% | `corpus/results/x86_kvm_corpus_20260625_110418_916430` |
+| `20260625-041821-tcplife-cache-newstate` | stress_ng_sum_bogo_ops_s mean=704720 | `704690, 704389, 705081` | -0.81% | `corpus/results/x86_kvm_corpus_20260625_112427_430171` |
+| `20260625-043750-syscount-interrupt-fast-return` | stress_ng_sum_bogo_ops_s mean=711554 | `709915, 711686, 713061` | +0.15% | `corpus/results/x86_kvm_corpus_20260625_114437_519205` |
+| `20260625-045812-runqlat-skip-idle-tgid-read` | stress_ng_sum_bogo_ops_s mean=705171 | `704250, 704247, 707015` | -0.75% | `corpus/results/x86_kvm_corpus_20260625_120517_651286` |
+
+### `tracee/monitor`
+
+| Run | Primary metric | Samples | vs baseline | Result |
+| --- | ---: | --- | ---: | --- |
+| `baseline` | stress_ng_sum_bogo_ops_s mean=460865 | `462328, 456918, 463350` | n/a | `corpus/results/x86_kvm_corpus_20260625_122431_943915` |
+| `20260625-053834-sys-exit-reuse-saved-ret` | stress_ng_sum_bogo_ops_s mean=458984 | `458065, 459824, 459063` | -0.41% | `corpus/results/x86_kvm_corpus_20260625_124558_225233` |
+| `20260625-060003-cache-sys-enter-compat` | stress_ng_sum_bogo_ops_s mean=459817 | `461155, 459142, 459152` | -0.23% | `corpus/results/x86_kvm_corpus_20260625_130746_945964` |
+| `20260625-062113-defer-sys-exit-ret-read` | stress_ng_sum_bogo_ops_s mean=460218 | `458576, 460270, 461807` | -0.14% | `corpus/results/x86_kvm_corpus_20260625_132825_862375` |
+| `20260625-064212-socket-dup-late-args` | stress_ng_sum_bogo_ops_s mean=458474 | `460912, 456147, 458361` | -0.52% | `corpus/results/x86_kvm_corpus_20260625_134931_275984` |
+| `20260625-070258-socket-dup-unix-else` | stress_ng_sum_bogo_ops_s mean=454296 | `454215, 454954, 453718` | -1.43% | `corpus/results/x86_kvm_corpus_20260625_141005_857825` |
+
+### `cilium/agent`
+
+| Run | Primary metric | Samples | vs baseline | Result |
+| --- | ---: | --- | ---: | --- |
+| `baseline` | pktgen_total_pps mean=1488103 | `1491361, 1493893, 1479055` | n/a | `corpus/results/x86_kvm_corpus_20260625_143038_806522` |
+| `20260625-074510-local-delivery-redirect-peer` | pktgen_total_pps mean=1503521 | `1499183, 1511544, 1499836` | +1.04% | `corpus/results/x86_kvm_corpus_20260625_145141_817976` |
+| `20260625-080510-from-container-error-unlikely` | pktgen_total_pps mean=1494040 | `1492844, 1485606, 1503670` | +0.40% | `corpus/results/x86_kvm_corpus_20260625_151130_130358` |
+| `20260625-082528-cil-lxc-policy-error-unlikely` | pktgen_total_pps mean=1509617 | `1517661, 1501746, 1509443` | +1.45% | `corpus/results/x86_kvm_corpus_20260625_153206_021422` |
+| `20260625-084516-cil-to-container-error-unlikely` | pktgen_total_pps mean=1510065 | `1509682, 1507833, 1512679` | +1.48% | `corpus/results/x86_kvm_corpus_20260625_155126_330125` |
+| `20260625-090437-tail-ipv4-to-endpoint-revalidate-unlikely` | pktgen_total_pps mean=1672124 | `1668711, 1666812, 1680849` | +12.37% | `corpus/results/x86_kvm_corpus_20260625_161125_111575` |
+
+### `tetragon/observer`
+
+| Run | Primary metric | Samples | vs baseline | Result |
+| --- | ---: | --- | ---: | --- |
+| `baseline` | stress_ng_sum_bogo_ops_s mean=358681 | `362190, 355981, 357871` | n/a | `corpus/results/x86_kvm_corpus_20260625_163302_015551` |
+| `20260625-094557-sparse-selector-active-clear` | stress_ng_sum_bogo_ops_s mean=356619 | `362792, 351299, 355765` | -0.57% | `corpus/results/x86_kvm_corpus_20260625_165241_915913` |
+| `20260625-100649-filter-args-active-fastpath` | stress_ng_sum_bogo_ops_s mean=355810 | `358593, 353455, 355383` | -0.80% | `corpus/results/x86_kvm_corpus_20260625_171339_967034` |
+| `20260625-102800-lazy-ns-cap-selector-state` | stress_ng_sum_bogo_ops_s mean=387898 | `392895, 386207, 384593` | +8.15% | `corpus/results/x86_kvm_corpus_20260625_173550_665242` |
+| `20260625-105314-lazy-ns-cap-conditional-cap-sparse` | stress_ng_sum_bogo_ops_s mean=386271 | `391844, 381971, 384998` | +7.69% | `corpus/results/x86_kvm_corpus_20260625_175958_060141` |
+
 ## App 源码、构建和加载路径
 
 每次 attempt 必须先确认目标 app 的源码修改会经过真实 app loader。
@@ -228,14 +290,21 @@ attempt 文件含义：
 
 | 顺序 | App | 原因 | 完成条件 |
 | --- | --- | --- | --- |
-| 1 | `katran` | BPF 文件少，hot path 明确，pktgen workload 稳定 | clean baseline + 5 attempts + summary |
-| 2 | `bcc/set` | 多个 libbpf-tools 小程序，编译反馈快 | clean baseline + 5 attempts + summary |
+| 1 | `katran` | BPF 文件少，hot path 明确，pktgen workload 稳定 | complete: clean baseline + 5 attempts + summary |
+| 2 | `bcc/set` | 多个 libbpf-tools 小程序，编译反馈快 | complete: clean baseline + 5 attempts + summary |
 | 3 | `tracee/monitor` | workload 覆盖强，但 BPF 程序和事件语义较多 | clean baseline + 5 attempts + summary |
 | 4 | `cilium/agent` | datapath/tail-call/map 语义复杂，需谨慎 | clean baseline + 5 attempts + summary |
 | 5 | `tetragon/observer` | 程序数量多，policy/event 语义复杂 | clean baseline + 5 attempts + summary |
 | 6 | `otelcol-ebpf-profiler/profiling` | tail-call accounting 和 profiler 语义复杂 | clean baseline + 5 attempts + summary |
 
 总目标是至少 6 个 clean-source baseline runs 和 30 个源码优化 attempts。
+
+当前进度：
+
+- Completed apps: `katran`, `bcc/set`, `tracee/monitor`, `cilium/agent`
+- Baselines: 5 / 6
+- Source optimization attempts: 24 / 30
+- Next app: `tetragon/observer`
 
 ## Attempt README 模板
 

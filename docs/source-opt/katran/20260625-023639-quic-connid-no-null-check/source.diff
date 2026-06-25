@@ -1,0 +1,14 @@
+diff --git a/vendor/repos/katran/katran/lib/bpf/pckt_parsing.h b/vendor/repos/katran/katran/lib/bpf/pckt_parsing.h
+index 7ea09eed..39715454 100644
+--- a/vendor/repos/katran/katran/lib/bpf/pckt_parsing.h
++++ b/vendor/repos/katran/katran/lib/bpf/pckt_parsing.h
+@@ -393,9 +393,6 @@ parse_quic(
+     }
+     connId = ((struct quic_short_header*)quic_data)->connection_id;
+   }
+-  if (!connId) {
+-    return result;
+-  }
+   // connId schema: if first two bits contain the right version info
+   __u8 connIdVersion = (connId[0] >> 6);
+   result.cid_version = connIdVersion;

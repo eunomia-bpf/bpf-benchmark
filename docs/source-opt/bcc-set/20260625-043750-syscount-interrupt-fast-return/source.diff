@@ -1,0 +1,26 @@
+diff --git a/vendor/repos/bcc/libbpf-tools/syscount.bpf.c b/vendor/repos/bcc/libbpf-tools/syscount.bpf.c
+index 38f8f978..8aadda86 100644
+--- a/vendor/repos/bcc/libbpf-tools/syscount.bpf.c
++++ b/vendor/repos/bcc/libbpf-tools/syscount.bpf.c
+@@ -74,6 +74,10 @@ int sys_exit(struct trace_event_raw_sys_exit *args)
+ 	if (filter_cg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+ 		return 0;
+ 
++	/* this happens when there is an interrupt */
++	if (args->id == -1)
++		return 0;
++
+ 	u64 id = bpf_get_current_pid_tgid();
+ 	static const struct data_t zero;
+ 	pid_t pid = id >> 32;
+@@ -82,10 +86,6 @@ int sys_exit(struct trace_event_raw_sys_exit *args)
+ 	u32 tid = id;
+ 	u32 key;
+ 
+-	/* this happens when there is an interrupt */
+-	if (args->id == -1)
+-		return 0;
+-
+ 	if (filter_pid && pid != filter_pid)
+ 		return 0;
+ 	if (filter_failed && args->ret >= 0)

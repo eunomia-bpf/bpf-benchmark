@@ -1,0 +1,20 @@
+diff --git a/bpf/bpf_lxc.c b/bpf/bpf_lxc.c
+index 02fdeaddc2..843f5fd804 100644
+--- a/bpf/bpf_lxc.c
++++ b/bpf/bpf_lxc.c
+@@ -1813,13 +1813,13 @@ int cil_from_container(struct __ctx_buff *ctx)
+ 			  TRACE_EP_ID_UNKNOWN, TRACE_IFINDEX_UNKNOWN,
+ 			  TRACE_REASON_UNKNOWN, TRACE_PAYLOAD_LEN, proto);
+ 
+-	if (!valid_ethertype) {
++	if (unlikely(!valid_ethertype)) {
+ 		ret = DROP_UNSUPPORTED_L2;
+ 		goto out;
+ 	}
+ 
+ 	ret = pull_l3_hdr(ctx, proto);
+-	if (ret < 0)
++	if (unlikely(ret < 0))
+ 		goto out;
+ 
+ 	switch (proto) {

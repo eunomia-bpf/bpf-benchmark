@@ -1,0 +1,36 @@
+diff --git a/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c b/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c
+index 14a3b8102..faae0af82 100644
+--- a/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c
++++ b/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c
+@@ -90,25 +90,28 @@ int sys_enter_init(struct bpf_raw_tracepoint_args *ctx)
+ 
+     struct pt_regs *regs = (struct pt_regs *) ctx->args[0];
+ 
+-    if (is_x86_compat(task)) {
++    bool compat = is_compat(task);
+ #if defined(bpf_target_x86)
++    if (compat) {
+         sys->args.args[0] = BPF_CORE_READ(regs, bx);
+         sys->args.args[1] = BPF_CORE_READ(regs, cx);
+         sys->args.args[2] = BPF_CORE_READ(regs, dx);
+         sys->args.args[3] = BPF_CORE_READ(regs, si);
+         sys->args.args[4] = BPF_CORE_READ(regs, di);
+         sys->args.args[5] = BPF_CORE_READ(regs, bp);
+-#endif // bpf_target_x86
+     } else {
++#endif // bpf_target_x86
+         sys->args.args[0] = PT_REGS_PARM1_CORE_SYSCALL(regs);
+         sys->args.args[1] = PT_REGS_PARM2_CORE_SYSCALL(regs);
+         sys->args.args[2] = PT_REGS_PARM3_CORE_SYSCALL(regs);
+         sys->args.args[3] = PT_REGS_PARM4_CORE_SYSCALL(regs);
+         sys->args.args[4] = PT_REGS_PARM5_CORE_SYSCALL(regs);
+         sys->args.args[5] = PT_REGS_PARM6_CORE_SYSCALL(regs);
++#if defined(bpf_target_x86)
+     }
++#endif // bpf_target_x86
+ 
+-    if (is_compat(task)) {
++    if (compat) {
+         // Translate 32bit syscalls to 64bit syscalls, so we can send to the correct handler
+         u32 *id_64 = bpf_map_lookup_elem(&sys_32_to_64_map, &sys->id);
+         if (id_64 == 0)

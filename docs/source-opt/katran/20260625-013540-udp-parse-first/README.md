@@ -2,7 +2,7 @@
 
 - Time: 20260625-013540
 - App: `katran`
-- Status: planned
+- Status: accepted-for-analysis
 - Source files: `vendor/repos/katran/katran/lib/bpf/balancer.c`
 - Hypothesis: put the UDP protocol branch before TCP in `process_packet()`,
   matching the `xdp_pktgen` workload's UDP hot path while keeping TCP and
@@ -14,7 +14,8 @@
   for TCP packets; UDP parsing and GUE handling are unchanged.
 - Build command: `make corpus` via the recorded run command.
 - Run command: see `run-command.sh`.
-- Result path:
+- Result path: `corpus/results/x86_kvm_corpus_20260625_084248_406394`
 - Follow-up: restore katran source with
   `patch -p1 -R < docs/source-opt/katran/20260625-013540-udp-parse-first/source.diff`
-  after recording the result.
+  after recording the result. Completed; katran nested repo has no remaining
+  source diff.

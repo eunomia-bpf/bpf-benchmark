@@ -1,0 +1,33 @@
+diff --git a/bpf/lib/local_delivery.h b/bpf/lib/local_delivery.h
+index 8d20516051..bf703104ad 100644
+--- a/bpf/lib/local_delivery.h
++++ b/bpf/lib/local_delivery.h
+@@ -121,8 +121,6 @@ local_delivery(struct __ctx_buff *ctx, __u32 seclabel, __u32 magic,
+ 	       const struct endpoint_info *ep, __u8 direction, bool from_host,
+ 	       bool from_tunnel, __u32 cluster_id)
+ {
+-	bool use_redirect_peer;
+-
+ #ifdef LOCAL_DELIVERY_METRICS
+ 	/*
+ 	 * Special LXC case for updating egress forwarding metrics.
+@@ -147,8 +145,8 @@ local_delivery(struct __ctx_buff *ctx, __u32 seclabel, __u32 magic,
+ 	 * this case the skb is delivered directly to pod's namespace and the ingress
+ 	 * policy (the cil_to_container BPF program) is bypassed.
+ 	 */
+-	use_redirect_peer = should_redirect_peer(from_host);
+-	if (is_defined(USE_BPF_PROG_FOR_INGRESS_POLICY) && !use_redirect_peer &&
++	if (is_defined(USE_BPF_PROG_FOR_INGRESS_POLICY) &&
++	    (!is_defined(ENABLE_HOST_ROUTING) || from_host) &&
+ 	    /* We need to enforce policies at the source in case of netkit
+ 	     * devices because we can't redirect to proxy from bpf_lxc. That
+ 	     * needs a fix upstream.
+@@ -170,7 +168,7 @@ local_delivery(struct __ctx_buff *ctx, __u32 seclabel, __u32 magic,
+ 		}
+ # endif /* !ENABLE_NODEPORT */
+ 
+-		return redirect_ep(ctx, ep->ifindex, use_redirect_peer, from_tunnel);
++		return redirect_ep(ctx, ep->ifindex, false, from_tunnel);
+ 	}
+ 
+ 	/* Jumps to destination pod's BPF program to enforce ingress policies. */

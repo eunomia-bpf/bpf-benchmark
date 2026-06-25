@@ -1,0 +1,27 @@
+diff --git a/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c b/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c
+index 14a3b8102..4b5a4065f 100644
+--- a/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c
++++ b/vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c
+@@ -495,11 +495,6 @@ statfunc int send_socket_dup(program_data_t *p, u64 oldfd, u64 newfd)
+     if (f == NULL)
+         return -1;
+ 
+-    // this is a socket - submit the SOCKET_DUP event
+-
+-    save_to_submit_buf(&(p->event->args_buf), &oldfd, sizeof(u32), 0);
+-    save_to_submit_buf(&(p->event->args_buf), &newfd, sizeof(u32), 1);
+-
+     // get the address
+     struct socket *socket_from_file = (struct socket *) BPF_CORE_READ(f, private_data);
+     if (socket_from_file == NULL)
+@@ -510,6 +505,10 @@ statfunc int send_socket_dup(program_data_t *p, u64 oldfd, u64 newfd)
+     if ((family != AF_INET) && (family != AF_INET6) && (family != AF_UNIX))
+         return 0;
+ 
++    // this is a socket - submit the SOCKET_DUP event
++    save_to_submit_buf(&(p->event->args_buf), &oldfd, sizeof(u32), 0);
++    save_to_submit_buf(&(p->event->args_buf), &newfd, sizeof(u32), 1);
++
+     if (family == AF_INET) {
+         net_conn_v4_t net_details = {};
+         struct sockaddr_in remote;

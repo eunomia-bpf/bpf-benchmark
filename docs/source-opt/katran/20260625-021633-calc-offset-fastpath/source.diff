@@ -1,0 +1,30 @@
+diff --git a/vendor/repos/katran/katran/lib/bpf/pckt_parsing.h b/vendor/repos/katran/katran/lib/bpf/pckt_parsing.h
+index 7ea09eed..31a891ca 100644
+--- a/vendor/repos/katran/katran/lib/bpf/pckt_parsing.h
++++ b/vendor/repos/katran/katran/lib/bpf/pckt_parsing.h
+@@ -73,19 +73,15 @@ struct udp_stable_rt_result {
+ __attribute__((__always_inline__)) static inline __u64 calc_offset(
+     bool is_ipv6,
+     bool is_icmp) {
+-  __u64 off = sizeof(struct ethhdr);
++  if (!is_icmp) {
++    return sizeof(struct ethhdr) +
++        (is_ipv6 ? sizeof(struct ipv6hdr) : sizeof(struct iphdr));
++  }
+   if (is_ipv6) {
+-    off += sizeof(struct ipv6hdr);
+-    if (is_icmp) {
+-      off += (sizeof(struct icmp6hdr) + sizeof(struct ipv6hdr));
+-    }
++    return sizeof(struct ethhdr) + IPV6_PLUS_ICMP_HDR;
+   } else {
+-    off += sizeof(struct iphdr);
+-    if (is_icmp) {
+-      off += (sizeof(struct icmphdr) + sizeof(struct iphdr));
+-    }
++    return sizeof(struct ethhdr) + IPV4_PLUS_ICMP_HDR;
+   }
+-  return off;
+ }
+ 
+ __attribute__((__always_inline__)) static inline bool parse_udp(

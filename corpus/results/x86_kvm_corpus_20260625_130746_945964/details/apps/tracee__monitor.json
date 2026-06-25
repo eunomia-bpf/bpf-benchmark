@@ -1,0 +1,140 @@
+{
+  "app": "tracee/monitor",
+  "baseline": {
+    "bpf": {},
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sigfd",
+          "1",
+          "--eventfd",
+          "1",
+          "--kill",
+          "1",
+          "--futex",
+          "1",
+          "--prctl",
+          "1",
+          "--timeout",
+          "180s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/bb251580"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "set",
+            "sigfd",
+            "eventfd",
+            "kill",
+            "futex",
+            "prctl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 180.03277226799997,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [30028] setting to a 3 mins, 0 secs run per stressor\nstress-ng: info:  [30028] dispatching hogs: 1 cap, 1 set, 1 sigfd, 1 eventfd, 1 kill, 1 futex, 1 prctl\nstress-ng: info:  [30028] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [30028] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [30028]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [30028] cap            14896939    180.00      4.11    160.79     82760.77       90340.83\nstress-ng: metrc: [30028] set             1181316    180.00      3.26    162.88      6562.87        7110.28\nstress-ng: metrc: [30028] sigfd          36583219    180.00      5.17    240.22    203239.64      149079.10\nstress-ng: metrc: [30028] eventfd         8208178    180.00      4.99    164.80     45600.90       48341.53\nstress-ng: metrc: [30028] kill            6145566    180.00      5.43    176.73     34142.00       33737.20\nstress-ng: metrc: [30028] futex          31861404    360.00      7.14    251.17     88503.78      123342.59\nstress-ng: metrc: [30028] prctl             62110    180.00     41.52      9.13       345.05        1226.07\nstress-ng: info:  [30028] skipped: 0\nstress-ng: info:  [30028] passed: 7: cap (1) set (1) sigfd (1) eventfd (1) kill (1) futex (1) prctl (1)\nstress-ng: info:  [30028] failed: 0\nstress-ng: info:  [30028] metrics untrustworthy: 0\nstress-ng: info:  [30028] successful run completed in 3 mins, 0.02 secs",
+        "workload_name": "stress_ng_tracee_syscall_hot"
+      },
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sigfd",
+          "1",
+          "--eventfd",
+          "1",
+          "--kill",
+          "1",
+          "--futex",
+          "1",
+          "--prctl",
+          "1",
+          "--timeout",
+          "180s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/bb251580"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "set",
+            "sigfd",
+            "eventfd",
+            "kill",
+            "futex",
+            "prctl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 180.02237675700002,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [27439] setting to a 3 mins, 0 secs run per stressor\nstress-ng: info:  [27439] dispatching hogs: 1 cap, 1 set, 1 sigfd, 1 eventfd, 1 kill, 1 futex, 1 prctl\nstress-ng: info:  [27439] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [27439] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [27439]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [27439] cap            14557944    180.00      4.22    158.55     80877.47       89439.02\nstress-ng: metrc: [27439] set             1186409    180.00      3.13    162.52      6591.16        7162.07\nstress-ng: metrc: [27439] sigfd          36718337    180.00      5.05    241.48    203989.63      148942.56\nstress-ng: metrc: [27439] eventfd         8418048    180.00      5.13    168.26     46766.88       48550.03\nstress-ng: metrc: [27439] kill            6157888    180.00      5.29    175.88     34210.37       33989.93\nstress-ng: metrc: [27439] futex          31097586    360.00      6.10    254.91     86382.05      119146.46\nstress-ng: metrc: [27439] prctl             58482    180.00     39.45      8.41       324.90        1221.97\nstress-ng: info:  [27439] skipped: 0\nstress-ng: info:  [27439] passed: 7: cap (1) set (1) sigfd (1) eventfd (1) kill (1) futex (1) prctl (1)\nstress-ng: info:  [27439] failed: 0\nstress-ng: info:  [27439] metrics untrustworthy: 0\nstress-ng: info:  [27439] successful run completed in 3 mins, 0.01 secs",
+        "workload_name": "stress_ng_tracee_syscall_hot"
+      },
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sigfd",
+          "1",
+          "--eventfd",
+          "1",
+          "--kill",
+          "1",
+          "--futex",
+          "1",
+          "--prctl",
+          "1",
+          "--timeout",
+          "180s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/bb251580"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "set",
+            "sigfd",
+            "eventfd",
+            "kill",
+            "futex",
+            "prctl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 180.02630314599992,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [21217] setting to a 3 mins, 0 secs run per stressor\nstress-ng: info:  [21217] dispatching hogs: 1 cap, 1 set, 1 sigfd, 1 eventfd, 1 kill, 1 futex, 1 prctl\nstress-ng: info:  [21217] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [21217] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [21217]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [21217] cap            14584469    180.00      4.27    158.97     81024.82       89342.38\nstress-ng: metrc: [21217] set             1183451    180.00      3.17    163.05      6574.73        7119.73\nstress-ng: metrc: [21217] sigfd          36998067    180.00      5.05    242.42    205544.45      149509.48\nstress-ng: metrc: [21217] eventfd         8397633    180.00      5.61    167.21     46653.45       48592.04\nstress-ng: metrc: [21217] kill            6116069    180.00      5.61    175.88     33978.14       33699.64\nstress-ng: metrc: [21217] futex          30620302    360.00      6.48    253.66     85056.33      117708.13\nstress-ng: metrc: [21217] prctl             57683    180.00     38.94      8.44       320.46        1217.36\nstress-ng: info:  [21217] skipped: 0\nstress-ng: info:  [21217] passed: 7: cap (1) set (1) sigfd (1) eventfd (1) kill (1) futex (1) prctl (1)\nstress-ng: info:  [21217] failed: 0\nstress-ng: info:  [21217] metrics untrustworthy: 0\nstress-ng: info:  [21217] successful run completed in 3 mins, 0.01 secs",
+        "workload_name": "stress_ng_tracee_syscall_hot"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": null,
+  "rejit_result": {
+    "mode": "skip_rejit_all",
+    "status": "skipped"
+  },
+  "runner": "tracee",
+  "selected_workload": "stress_ng_tracee_syscall_hot",
+  "status": "ok"
+}

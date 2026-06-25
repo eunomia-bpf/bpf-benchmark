@@ -1,0 +1,24 @@
+diff --git a/bpf/process/generic_calls.h b/bpf/process/generic_calls.h
+index 932f170fc..1f5f0b30e 100644
+--- a/bpf/process/generic_calls.h
++++ b/bpf/process/generic_calls.h
+@@ -1395,15 +1395,15 @@ FUNC_INLINE int filter_args(void *ctx, struct bpf_map_def *tailcalls,
+ {
+ 	__u8 *f;
+ 
++	/* No selectors, accept by default */
++	if (!e->sel.active[SELECTORS_ACTIVE])
++		return 1;
++
+ 	/* No filters and no selectors so just accepts */
+ 	f = map_lookup_elem(&filter_map, &e->idx);
+ 	if (!f)
+ 		return 1;
+ 
+-	/* No selectors, accept by default */
+-	if (!e->sel.active[SELECTORS_ACTIVE])
+-		return 1;
+-
+ 	/* We ran process filters early as a prefilter to drop unrelated
+ 	 * events early. Now we need to ensure that active pid sselectors
+ 	 * have their arg filters run.

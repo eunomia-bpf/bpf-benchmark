@@ -1,0 +1,19 @@
+diff --git a/vendor/repos/bcc/libbpf-tools/runqlat.bpf.c b/vendor/repos/bcc/libbpf-tools/runqlat.bpf.c
+index 76e0553e..c9a3dbff 100644
+--- a/vendor/repos/bcc/libbpf-tools/runqlat.bpf.c
++++ b/vendor/repos/bcc/libbpf-tools/runqlat.bpf.c
+@@ -84,8 +84,12 @@ static int handle_switch(bool preempt, struct task_struct *prev, struct task_str
+ 	if (filter_cg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+ 		return 0;
+ 
+-	if (get_task_state(prev) == TASK_RUNNING)
+-		trace_enqueue(BPF_CORE_READ(prev, tgid), BPF_CORE_READ(prev, pid));
++	if (get_task_state(prev) == TASK_RUNNING) {
++		u32 prev_pid = BPF_CORE_READ(prev, pid);
++
++		if (prev_pid)
++			trace_enqueue(BPF_CORE_READ(prev, tgid), prev_pid);
++	}
+ 
+ 	pid = BPF_CORE_READ(next, pid);
+ 

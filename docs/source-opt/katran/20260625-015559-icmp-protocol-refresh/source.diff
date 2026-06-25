@@ -1,0 +1,15 @@
+diff --git a/vendor/repos/katran/katran/lib/bpf/balancer.c b/vendor/repos/katran/katran/lib/bpf/balancer.c
+index 6d16faad..f01d16b0 100644
+--- a/vendor/repos/katran/katran/lib/bpf/balancer.c
++++ b/vendor/repos/katran/katran/lib/bpf/balancer.c
+@@ -705,7 +705,9 @@ process_packet(struct xdp_md* xdp, __u64 nh_off, bool is_ipv6) {
+   if (action >= 0) {
+     return action;
+   }
+-  protocol = pckt.flow.proto;
++  if (pckt.flags & F_ICMP) {
++    protocol = pckt.flow.proto;
++  }
+ 
+ #ifdef INLINE_DECAP_IPIP
+   /* This is to workaround a verifier issue for 5.2.

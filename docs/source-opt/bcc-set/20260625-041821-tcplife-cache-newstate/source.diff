@@ -1,0 +1,38 @@
+diff --git a/vendor/repos/bcc/libbpf-tools/tcplife.bpf.c b/vendor/repos/bcc/libbpf-tools/tcplife.bpf.c
+index a05d1396..cf7ed295 100644
+--- a/vendor/repos/bcc/libbpf-tools/tcplife.bpf.c
++++ b/vendor/repos/bcc/libbpf-tools/tcplife.bpf.c
+@@ -48,7 +48,7 @@ int inet_sock_set_state(struct trace_event_raw_inet_sock_set_state *args)
+ 	struct sock *sk;
+ 	bool found;
+ 	__u32 pid;
+-	int i;
++	int i, newstate;
+ 
+ 	if (BPF_CORE_READ(args, protocol) != IPPROTO_TCP)
+ 		return 0;
+@@ -88,12 +88,13 @@ int inet_sock_set_state(struct trace_event_raw_inet_sock_set_state *args)
+ 	}
+ 
+ 	sk = (struct sock *)BPF_CORE_READ(args, skaddr);
+-	if (BPF_CORE_READ(args, newstate) < TCP_FIN_WAIT1) {
++	newstate = BPF_CORE_READ(args, newstate);
++	if (newstate < TCP_FIN_WAIT1) {
+ 		ts = bpf_ktime_get_ns();
+ 		bpf_map_update_elem(&birth, &sk, &ts, BPF_ANY);
+ 	}
+ 
+-	if (BPF_CORE_READ(args, newstate) == TCP_SYN_SENT || BPF_CORE_READ(args, newstate) == TCP_LAST_ACK) {
++	if (newstate == TCP_SYN_SENT || newstate == TCP_LAST_ACK) {
+ 		pid = bpf_get_current_pid_tgid() >> 32;
+ 		if (target_pid && pid != target_pid)
+ 			return 0;
+@@ -102,7 +103,7 @@ int inet_sock_set_state(struct trace_event_raw_inet_sock_set_state *args)
+ 		bpf_map_update_elem(&idents, &sk, &ident, BPF_ANY);
+ 	}
+ 
+-	if (BPF_CORE_READ(args, newstate) != TCP_CLOSE)
++	if (newstate != TCP_CLOSE)
+ 		return 0;
+ 
+ 	start = bpf_map_lookup_elem(&birth, &sk);
