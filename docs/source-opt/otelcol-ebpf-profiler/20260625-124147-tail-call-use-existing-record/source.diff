@@ -1,0 +1,166 @@
+diff --git a/support/ebpf/dotnet_tracer.ebpf.c b/support/ebpf/dotnet_tracer.ebpf.c
+index 69b1587..8e8945e 100644
+--- a/support/ebpf/dotnet_tracer.ebpf.c
++++ b/support/ebpf/dotnet_tracer.ebpf.c
+@@ -321,7 +321,7 @@ static EBPF_INLINE int unwind_dotnet(struct pt_regs *ctx)
+ 
+ exit:
+   record->state.unwind_error = error;
+-  tail_call(ctx, unwinder);
++  tail_call_record(ctx, record, unwinder);
+   DEBUG_PRINT("dotnet: tail call for next frame unwinder (%d) failed", unwinder);
+   return -1;
+ }
+diff --git a/support/ebpf/hotspot_tracer.ebpf.c b/support/ebpf/hotspot_tracer.ebpf.c
+index ad3ec8d..d041dd3 100644
+--- a/support/ebpf/hotspot_tracer.ebpf.c
++++ b/support/ebpf/hotspot_tracer.ebpf.c
+@@ -948,7 +948,7 @@ static EBPF_INLINE int unwind_hotspot(struct pt_regs *ctx)
+   }
+ 
+   record->state.unwind_error = error;
+-  tail_call(ctx, unwinder);
++  tail_call_record(ctx, record, unwinder);
+   DEBUG_PRINT("jvm: tail call for next frame unwinder (%d) failed", unwinder);
+   return -1;
+ }
+diff --git a/support/ebpf/interpreter_dispatcher.ebpf.c b/support/ebpf/interpreter_dispatcher.ebpf.c
+index 89ce023..9bd230c 100644
+--- a/support/ebpf/interpreter_dispatcher.ebpf.c
++++ b/support/ebpf/interpreter_dispatcher.ebpf.c
+@@ -192,7 +192,7 @@ static EBPF_INLINE void maybe_add_go_custom_labels(struct pt_regs *ctx, PerCPURe
+   increment_metric(metricID_UnwindGoLabelsAttempts);
+   // The Go label extraction code is too big to fit in the UNWIND_STOP program, so
+   // it is tail_call'd.
+-  tail_call(ctx, PROG_GO_LABELS);
++  tail_call_record(ctx, record, PROG_GO_LABELS);
+ }
+ 
+ static EBPF_INLINE void maybe_add_apm_info(Trace *trace)
+diff --git a/support/ebpf/native_stack_trace.ebpf.c b/support/ebpf/native_stack_trace.ebpf.c
+index 29e650a..bef2528 100644
+--- a/support/ebpf/native_stack_trace.ebpf.c
++++ b/support/ebpf/native_stack_trace.ebpf.c
+@@ -657,7 +657,7 @@ static EBPF_INLINE int unwind_native(struct pt_regs *ctx)
+   // Tail call needed for recursion, switching to interpreter unwinder, or reporting
+   // trace due to end-of-trace or error. The unwinder program index is set accordingly.
+   record->state.unwind_error = error;
+-  tail_call(ctx, unwinder);
++  tail_call_record(ctx, record, unwinder);
+   DEBUG_PRINT("bpf_tail call failed for %d in unwind_native", unwinder);
+   return -1;
+ }
+diff --git a/support/ebpf/perl_tracer.ebpf.c b/support/ebpf/perl_tracer.ebpf.c
+index 21f98a9..b69d203 100644
+--- a/support/ebpf/perl_tracer.ebpf.c
++++ b/support/ebpf/perl_tracer.ebpf.c
+@@ -431,7 +431,7 @@ static EBPF_INLINE int unwind_perl(struct pt_regs *ctx)
+   unwinder = walk_perl_stack(record, perlinfo);
+ 
+ exit:
+-  tail_call(ctx, unwinder);
++  tail_call_record(ctx, record, unwinder);
+   return -1;
+ }
+ MULTI_USE_FUNC(unwind_perl)
+diff --git a/support/ebpf/php_tracer.ebpf.c b/support/ebpf/php_tracer.ebpf.c
+index 83c6998..1c9a98f 100644
+--- a/support/ebpf/php_tracer.ebpf.c
++++ b/support/ebpf/php_tracer.ebpf.c
+@@ -251,7 +251,7 @@ static EBPF_INLINE int unwind_php(struct pt_regs *ctx)
+   unwinder = walk_php_stack(record, phpinfo, is_jitted);
+ 
+ exit:
+-  tail_call(ctx, unwinder);
++  tail_call_record(ctx, record, unwinder);
+   return -1;
+ }
+ MULTI_USE_FUNC(unwind_php)
+diff --git a/support/ebpf/python_tracer.ebpf.c b/support/ebpf/python_tracer.ebpf.c
+index c082603..ab4271c 100644
+--- a/support/ebpf/python_tracer.ebpf.c
++++ b/support/ebpf/python_tracer.ebpf.c
+@@ -310,7 +310,7 @@ static EBPF_INLINE int unwind_python(struct pt_regs *ctx)
+ 
+ exit:
+   record->state.unwind_error = error;
+-  tail_call(ctx, unwinder);
++  tail_call_record(ctx, record, unwinder);
+   return -1;
+ }
+ MULTI_USE_FUNC(unwind_python)
+diff --git a/support/ebpf/ruby_tracer.ebpf.c b/support/ebpf/ruby_tracer.ebpf.c
+index bdbeae9..28115d7 100644
+--- a/support/ebpf/ruby_tracer.ebpf.c
++++ b/support/ebpf/ruby_tracer.ebpf.c
+@@ -302,7 +302,7 @@ static EBPF_INLINE int unwind_ruby(struct pt_regs *ctx)
+ 
+ exit:
+   record->state.unwind_error = error;
+-  tail_call(ctx, unwinder);
++  tail_call_record(ctx, record, unwinder);
+   return -1;
+ }
+ MULTI_USE_FUNC(unwind_ruby)
+diff --git a/support/ebpf/tracemgmt.h b/support/ebpf/tracemgmt.h
+index 7a30122..864b25e 100644
+--- a/support/ebpf/tracemgmt.h
++++ b/support/ebpf/tracemgmt.h
+@@ -527,11 +527,10 @@ static inline EBPF_INLINE int get_next_unwinder_after_interpreter()
+   return PROG_UNWIND_NATIVE;
+ }
+ 
+-// tail_call is a wrapper around bpf_tail_call() and ensures that the number of tail calls is not
+-// reached while unwinding the stack.
+-static inline EBPF_INLINE void tail_call(void *ctx, int next)
++// tail_call_record is a wrapper around bpf_tail_call() and ensures that the number of tail calls is
++// not reached while unwinding the stack.
++static inline EBPF_INLINE void tail_call_record(void *ctx, PerCPURecord *record, int next)
+ {
+-  PerCPURecord *record = get_per_cpu_record();
+   if (!record) {
+     bpf_tail_call(ctx, &perf_progs, PROG_UNWIND_STOP);
+     // In theory bpf_tail_call() should never return. But due to instruction reordering by the
+@@ -554,6 +553,11 @@ static inline EBPF_INLINE void tail_call(void *ctx, int next)
+   bpf_tail_call(ctx, &perf_progs, next);
+ }
+ 
++static inline EBPF_INLINE void tail_call(void *ctx, int next)
++{
++  tail_call_record(ctx, get_per_cpu_record(), next);
++}
++
+ #ifndef __USER32_CS
+   // defined in arch/x86/include/asm/segment.h
+   #define GDT_ENTRY_DEFAULT_USER32_CS 4
+@@ -748,7 +752,7 @@ static inline EBPF_INLINE int collect_trace(
+   DEBUG_PRINT("kernel stack id = %d", trace->kernel_stack_id);
+ 
+   if (pid == 0) {
+-    tail_call(ctx, PROG_UNWIND_STOP);
++    tail_call_record(ctx, record, PROG_UNWIND_STOP);
+     return 0;
+   }
+ 
+@@ -771,7 +775,7 @@ static inline EBPF_INLINE int collect_trace(
+ 
+ exit:
+   record->state.unwind_error = error;
+-  tail_call(ctx, unwinder);
++  tail_call_record(ctx, record, unwinder);
+   DEBUG_PRINT("bpf_tail call failed for %d in native_tracer_entry", unwinder);
+   return -1;
+ }
+diff --git a/support/ebpf/v8_tracer.ebpf.c b/support/ebpf/v8_tracer.ebpf.c
+index 867f2a6..90eb73d 100644
+--- a/support/ebpf/v8_tracer.ebpf.c
++++ b/support/ebpf/v8_tracer.ebpf.c
+@@ -340,7 +340,7 @@ static EBPF_INLINE int unwind_v8(struct pt_regs *ctx)
+ 
+ exit:
+   record->state.unwind_error = error;
+-  tail_call(ctx, unwinder);
++  tail_call_record(ctx, record, unwinder);
+   DEBUG_PRINT("v8: tail call for next frame unwinder (%d) failed", unwinder);
+   return -1;
+ }

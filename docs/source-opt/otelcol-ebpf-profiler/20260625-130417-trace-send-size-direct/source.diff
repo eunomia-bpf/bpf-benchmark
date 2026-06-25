@@ -1,0 +1,15 @@
+diff --git a/support/ebpf/tracemgmt.h b/support/ebpf/tracemgmt.h
+index 7a30122..b717cfb 100644
+--- a/support/ebpf/tracemgmt.h
++++ b/support/ebpf/tracemgmt.h
+@@ -377,8 +377,8 @@ static inline EBPF_INLINE ErrorCode push_error(Trace *trace, ErrorCode error)
+ // Send a trace to user-land via the `trace_events` perf event buffer.
+ static inline EBPF_INLINE void send_trace(void *ctx, Trace *trace)
+ {
+-  const u64 num_empty_frames = (MAX_FRAME_UNWINDS - trace->stack_len);
+-  const u64 send_size        = sizeof(Trace) - sizeof(Frame) * num_empty_frames;
++  const u64 send_size =
++    sizeof(Trace) - sizeof(Frame) * MAX_FRAME_UNWINDS + sizeof(Frame) * trace->stack_len;
+ 
+   if (send_size > sizeof(Trace)) {
+     return; // unreachable

@@ -1,0 +1,36 @@
+diff --git a/support/ebpf/tracemgmt.h b/support/ebpf/tracemgmt.h
+index 7a30122..8f1875b 100644
+--- a/support/ebpf/tracemgmt.h
++++ b/support/ebpf/tracemgmt.h
+@@ -743,11 +743,9 @@ static inline EBPF_INLINE int collect_trace(
+     increment_metric(metricID_ErrBPFCurrentComm);
+   }
+ 
+-  // Get the kernel mode stack trace first
+-  trace->kernel_stack_id = bpf_get_stackid(ctx, &kernel_stackmap, BPF_F_REUSE_STACKID);
+-  DEBUG_PRINT("kernel stack id = %d", trace->kernel_stack_id);
+-
+   if (pid == 0) {
++    trace->kernel_stack_id = bpf_get_stackid(ctx, &kernel_stackmap, BPF_F_REUSE_STACKID);
++    DEBUG_PRINT("kernel stack id = %d", trace->kernel_stack_id);
+     tail_call(ctx, PROG_UNWIND_STOP);
+     return 0;
+   }
+@@ -757,6 +755,8 @@ static inline EBPF_INLINE int collect_trace(
+   bool has_usermode_regs = false;
+   ErrorCode error        = get_usermode_regs(ctx, &record->state, &has_usermode_regs);
+   if (error || !has_usermode_regs) {
++    trace->kernel_stack_id = bpf_get_stackid(ctx, &kernel_stackmap, BPF_F_REUSE_STACKID);
++    DEBUG_PRINT("kernel stack id = %d", trace->kernel_stack_id);
+     goto exit;
+   }
+ 
+@@ -767,6 +767,8 @@ static inline EBPF_INLINE int collect_trace(
+     }
+     return 0;
+   }
++  trace->kernel_stack_id = bpf_get_stackid(ctx, &kernel_stackmap, BPF_F_REUSE_STACKID);
++  DEBUG_PRINT("kernel stack id = %d", trace->kernel_stack_id);
+   error = get_next_unwinder_after_native_frame(record, &unwinder);
+ 
+ exit:

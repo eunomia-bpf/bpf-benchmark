@@ -1,0 +1,32 @@
+diff --git a/support/ebpf/tracemgmt.h b/support/ebpf/tracemgmt.h
+index 7a30122..e60a5e3 100644
+--- a/support/ebpf/tracemgmt.h
++++ b/support/ebpf/tracemgmt.h
+@@ -246,6 +246,8 @@ static inline EBPF_INLINE PerCPURecord *get_pristine_per_cpu_record()
+   record->unwindersDone                    = 0;
+   record->tailCalls                        = 0;
+   record->ratelimitAction                  = RATELIMIT_ACTION_DEFAULT;
++  bool clear_custom_labels                  = record->customLabelsState.go_m_ptr != NULL ||
++                                             record->trace.custom_labels.len != 0;
+   record->customLabelsState.go_m_ptr       = NULL;
+ 
+   Trace *trace           = &record->trace;
+@@ -259,12 +261,12 @@ static inline EBPF_INLINE PerCPURecord *get_pristine_per_cpu_record()
+   trace->apm_transaction_id.as_int = 0;
+ 
+   trace->custom_labels.len = 0;
+-  u64 *labels_space        = (u64 *)&trace->custom_labels.labels;
+-  // I'm not sure this is necessary since we only increment len after
+-  // we successfully write the label.
+-  UNROLL for (int i = 0; i < sizeof(CustomLabel) * MAX_CUSTOM_LABELS / 8; i++)
+-  {
+-    labels_space[i] = 0;
++  if (clear_custom_labels) {
++    u64 *labels_space = (u64 *)&trace->custom_labels.labels;
++    UNROLL for (int i = 0; i < sizeof(CustomLabel) * MAX_CUSTOM_LABELS / 8; i++)
++    {
++      labels_space[i] = 0;
++    }
+   }
+ 
+   return record;

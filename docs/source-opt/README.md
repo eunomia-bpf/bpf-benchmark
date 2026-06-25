@@ -27,9 +27,9 @@ workload throughput。
 
 | ID | Claim | 证据 | 状态 |
 | --- | --- | --- | --- |
-| C1 | 源码重写不破坏真实 app 启动和 BPF 加载 | app `status=ok`，`error=""`，workload returncode 为 0 | planned |
-| C2 | 源码重写保持 app-visible 语义 | event/map/tail-call/payload ABI 无变化；必要时用 app 日志或 raw payload 佐证 | planned |
-| C3 | 源码重写带来可解释性能信号 | clean-source baseline run 与 optimized-source run 的 raw workload payload 可配对做外部分析 | planned |
+| C1 | 源码重写不破坏真实 app 启动和 BPF 加载 | app `status=ok`，`error=""`，workload returncode 为 0 | complete |
+| C2 | 源码重写保持 app-visible 语义 | event/map/tail-call/payload ABI 无变化；每个 attempt 的 `correctness.md` 记录 gate | complete |
+| C3 | 源码重写带来可解释性能信号 | clean-source baseline run 与 optimized-source run 的 raw workload payload 已按 app 记录 | complete |
 
 ## 强制边界
 
@@ -123,6 +123,19 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `20260625-100649-filter-args-active-fastpath` | stress_ng_sum_bogo_ops_s mean=355810 | `358593, 353455, 355383` | -0.80% | `corpus/results/x86_kvm_corpus_20260625_171339_967034` |
 | `20260625-102800-lazy-ns-cap-selector-state` | stress_ng_sum_bogo_ops_s mean=387898 | `392895, 386207, 384593` | +8.15% | `corpus/results/x86_kvm_corpus_20260625_173550_665242` |
 | `20260625-105314-lazy-ns-cap-conditional-cap-sparse` | stress_ng_sum_bogo_ops_s mean=386271 | `391844, 381971, 384998` | +7.69% | `corpus/results/x86_kvm_corpus_20260625_175958_060141` |
+| `20260625-111613-lazy-ns-cap-skip-empty-namespace-loop` | stress_ng_sum_bogo_ops_s mean=389565 | `391278, 386987, 390431` | +8.61% | `corpus/results/x86_kvm_corpus_20260625_182312_224669` |
+
+### `otelcol-ebpf-profiler/profiling`
+
+| Run | Primary metric | Samples | vs baseline | Result |
+| --- | ---: | --- | ---: | --- |
+| `baseline` | language_ops_total mean=19644780415 | `19476891866, 19704797451, 19752651928` | n/a | `corpus/results/x86_kvm_corpus_20260625_184535_486633` |
+| `20260625-120059-defer-kernel-stackid-unmapped-pid` | language_ops_total mean=19631015807; rejected-correctness: artifact provenance failed | `19482699802, 19832870505, 19577477114` | -0.07% | `corpus/results/x86_kvm_corpus_20260625_190706_743922` |
+| `20260625-122046-defer-kernel-stackid-unmapped-pid-rebuilt-ebpf` | language_ops_total mean=19644068683; rejected-no-signal | `19898566747, 19709048452, 19324590849` | -0.00% | `corpus/results/x86_kvm_corpus_20260625_192715_058308` |
+| `20260625-124147-tail-call-use-existing-record` | language_ops_total mean=19358366012; rejected-no-signal | `19402588695, 19278089079, 19394420261` | -1.46% | `corpus/results/x86_kvm_corpus_20260625_194845_959410` |
+| `20260625-130417-trace-send-size-direct` | language_ops_total mean=19634728466; rejected-no-signal | `19889012769, 19180704492, 19834468137` | -0.05% | `corpus/results/x86_kvm_corpus_20260625_201102_658698` |
+| `20260625-132530-native-frames-per-program-5` | language_ops_total mean=19611239252; rejected-no-signal | `19226116826, 20279757143, 19327843786` | -0.17% | `corpus/results/x86_kvm_corpus_20260625_203203_222972` |
+| `20260625-134604-lazy-clear-custom-labels` | language_ops_total mean=19480337627; rejected-no-signal | `19345351817, 19739934685, 19355726380` | -0.84% | `corpus/results/x86_kvm_corpus_20260625_205249_386525` |
 
 ## App 源码、构建和加载路径
 
@@ -135,7 +148,7 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `tracee/monitor` | `vendor/repos/tracee/pkg/ebpf/c/*.bpf.c` 和 `lsmsupport/*.bpf.c` | `make -C vendor tracee-x86` 或 `make corpus` 依赖 | BPF artifacts embedded/packaged 到真实 `tracee` binary path | 改 event payload 前必须证明 ABI 不变 |
 | `cilium/agent` | `vendor/repos/cilium/bpf/**/*.c` 和 `*.h` | `make -C vendor cilium-x86` 或 `make corpus` 依赖 | runtime image 复制 `vendor/repos/cilium/bpf/` 到 `/var/lib/cilium/bpf/`，真实 `cilium-agent` 使用该 datapath | tail-call/map/policy 语义复杂，后置执行 |
 | `tetragon/observer` | `vendor/repos/tetragon/bpf/**/*.c` 和 `*.h` | `make -C vendor tetragon-x86` 或 `make corpus` 依赖 | `vendor/build/x86/tetragon/*` -> `/artifacts/tetragon/`，runner 用 `--bpf-lib` 指向该目录 | 程序多，先做单一 policy/hot helper 级别改动 |
-| `otelcol-ebpf-profiler/profiling` | `vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/*.ebpf.c` | `make -C vendor otel-x86` 或 `make corpus` 依赖 | `otelcol-ebpf-profiler` binary/artifacts 由 OCB 构建，真实 collector 加载 profiler BPF | tail-called programs 自身 `run_cnt=0`，不要用它判断未执行 |
+| `otelcol-ebpf-profiler/profiling` | `vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/*.ebpf.c` | 先 `make -C vendor/repos/opentelemetry-ebpf-profiler/support/ebpf TARGET_ARCH=amd64` 重建 embedded BPF，再用 `make corpus` 正式运行 | `otelcol-ebpf-profiler` binary/artifacts 由 OCB 构建，真实 collector 加载 profiler BPF | tail-called programs 自身 `run_cnt=0`；仅改源文件但不重建 `tracer.ebpf.amd64` 不能算有效 attempt |
 
 ## 标准命令
 
@@ -301,10 +314,11 @@ attempt 文件含义：
 
 当前进度：
 
-- Completed apps: `katran`, `bcc/set`, `tracee/monitor`, `cilium/agent`
-- Baselines: 5 / 6
-- Source optimization attempts: 24 / 30
-- Next app: `tetragon/observer`
+- Completed apps: `katran`, `bcc/set`, `tracee/monitor`, `cilium/agent`, `tetragon/observer`, `otelcol-ebpf-profiler/profiling`
+- Baselines: 6 / 6
+- Source optimization attempts: 30 / 30
+- Current app: none; required source-opt sweep complete
+- Rejected pre-attempts: otel `20260625-120059-defer-kernel-stackid-unmapped-pid` did not prove the edited eBPF source entered the embedded artifact, so it is recorded but not counted in the 30 valid attempts.
 
 ## Attempt README 模板
 
