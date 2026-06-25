@@ -1,0 +1,28 @@
+diff --git a/vendor/repos/katran/katran/lib/bpf/balancer.c b/vendor/repos/katran/katran/lib/bpf/balancer.c
+index 6d16faad..1d0ec252 100644
+--- a/vendor/repos/katran/katran/lib/bpf/balancer.c
++++ b/vendor/repos/katran/katran/lib/bpf/balancer.c
+@@ -752,11 +752,7 @@ process_packet(struct xdp_md* xdp, __u64 nh_off, bool is_ipv6) {
+   }
+ #endif // INLINE_DECAP_IPIP
+ 
+-  if (protocol == IPPROTO_TCP) {
+-    if (!parse_tcp(data, data_end, is_ipv6, &pckt)) {
+-      return XDP_DROP;
+-    }
+-  } else if (protocol == IPPROTO_UDP) {
++  if (protocol == IPPROTO_UDP) {
+     if (!parse_udp(data, data_end, is_ipv6, &pckt)) {
+       return XDP_DROP;
+     }
+@@ -771,6 +767,10 @@ process_packet(struct xdp_md* xdp, __u64 nh_off, bool is_ipv6) {
+           &data, &data_end, xdp, nh_off, is_ipv6, pass);
+     }
+ #endif // of INLINE_DECAP_GUE
++  } else if (protocol == IPPROTO_TCP) {
++    if (!parse_tcp(data, data_end, is_ipv6, &pckt)) {
++      return XDP_DROP;
++    }
+   } else {
+     // send to tcp/ip stack
+     return XDP_PASS;

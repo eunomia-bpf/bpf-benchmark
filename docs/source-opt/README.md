@@ -2,27 +2,87 @@
 
 Last updated: 2026-06-25
 
-本文档定义一个只修改应用 eBPF 源码的探索流程。目标是评估“人工重写 upstream app 的 eBPF C 源码”是否能在真实应用加载路径下改善 benchmark workload 表现。该流程不使用 `kinsn`、`bpfopt`、ReJIT、shim、LD_PRELOAD、native-loader，且不产生 commit 或 push。
+本文档是 `docs/source-opt/` 的执行手册。目标是系统性探索：在不使用
+`kinsn`、`bpfopt`、ReJIT、shim、LD_PRELOAD 或 native-loader 的前提下，
+只重写真实应用的 eBPF 源码，观察真实 app loader 加载优化后 BPF 程序时
+workload 是否改善。
 
-## 边界
+## 核心结论先行
 
-- 只允许修改 app 自己的 eBPF 源码或其直接 eBPF 头文件。
+- 这是源码优化实验，不是 workload 改写实验。
+- 每次只调一个 app，不一次性跑全量 6 app。
+- 每个 app 至少完成 1 个 clean-source baseline run 和 5 个独立源码优化
+  attempt。
+- 每个 attempt 结束后，app 源码必须回到 attempt 前状态；只保留
+  `docs/source-opt/<app-slug>/YYYYMMDD-HHMMSS-<attempt-slug>/` 下的 patch、
+  记录和结果路径。
+- agent 不运行 `git add`、`git commit`、`git push`。除只读状态检查外，不用
+  git 命令修改工作区。
+
+## 实验问题
+
+**Thesis:** 手工重写真实 app 的 eBPF C 源码，可以在保持 app 功能、加载路径、
+map/event ABI 和 workload 不变的情况下，降低 BPF hot path 代价或提高 app
+workload throughput。
+
+| ID | Claim | 证据 | 状态 |
+| --- | --- | --- | --- |
+| C1 | 源码重写不破坏真实 app 启动和 BPF 加载 | app `status=ok`，`error=""`，workload returncode 为 0 | planned |
+| C2 | 源码重写保持 app-visible 语义 | event/map/tail-call/payload ABI 无变化；必要时用 app 日志或 raw payload 佐证 | planned |
+| C3 | 源码重写带来可解释性能信号 | clean-source baseline run 与 optimized-source run 的 raw workload payload 可配对做外部分析 | planned |
+
+## 强制边界
+
+- 只允许修改 app 自己的 eBPF 源码或直接 eBPF 头文件。
 - 真实 app binary 仍按现有 runner 启动，并由 app 自己加载 BPF 程序。
 - 不直接用 framework、bpftool、libbpf 小工具或自定义 loader 加载 `.bpf.o`。
-- 不使用 `BPF_PROG_REJIT`、`bpfopt --pass ...`、`runner/config/passes/*`、shim socket、LD_PRELOAD 或 native-loader。
-- framework 仍只保留 raw workload payload；任何 ratio、平均值、geomean、wins/losses、summary 都在外部分析脚本中计算。
-- 不运行 `git add`、`git commit`、`git push`。只允许读状态的 git 命令，例如 `git status`、`git diff`、`git show`。
-- 不使用 `git restore`、`git reset`、`git checkout --`、`git stash`、`git revert` 等会破坏或隐藏工作区状态的命令。
+- 不使用 `BPF_PROG_REJIT`、`bpfopt --pass ...`、`runner/config/passes/*`、
+  shim socket、LD_PRELOAD、native-loader 或 kinsn module path。
+- framework 只保留 raw workload payload；任何 ratio、平均值、geomean、
+  wins/losses、summary 都在外部分析脚本中计算。
+- 不降低 app 功能覆盖，不删除被加载 BPF program，不绕开 policy/security check。
+- 不运行 `git add`、`git commit`、`git push`。
+- 不使用 `git restore`、`git reset`、`git checkout --`、`git stash`、
+  `git revert` 等会破坏或隐藏工作区状态的命令。
 
-## 运行模式
+## 当前运行语义
 
-源码优化评估使用 `SKIP_REJIT=all`。该模式会跳过 ReJIT，并阻止 shim/LD_PRELOAD 注入；corpus 只运行 baseline measurement，不再启动 post_rejit phase。
+源码优化评估使用 `SKIP_REJIT=all`。该模式在当前代码中有三个关键效果：
 
-参考 `docs/eval_kinsn.md`，正式 attempt 使用接近 kinsn evaluation 的参数：
+- 不注入 shim/LD_PRELOAD。
+- 不加载 kinsn modules。
+- corpus 只运行 baseline measurement；baseline stop 后直接结束 app lifecycle，
+  `post_rejit` 为 `null`，`rejit_result.mode` 为 `skip_rejit_all`。
+
+这意味着源码优化的比较单位不是同一个 result 内的 baseline/post pair，而是：
+
+```text
+clean upstream source result.json
+vs.
+optimized source attempt result.json
+```
+
+## App 源码、构建和加载路径
+
+每次 attempt 必须先确认目标 app 的源码修改会经过真实 app loader。
+
+| App | 主要 eBPF 源码 | 现有构建入口 | runtime artifact/load path | 注意 |
+| --- | --- | --- | --- | --- |
+| `katran` | `vendor/repos/katran/katran/lib/bpf/*.c` | `make -C vendor katran-x86` 或 `make corpus` 依赖 | `vendor/build/x86/katran/bpf/*.bpf.o` -> `/artifacts/user/repo-artifacts/x86_64/katran/bpf/`；runner 将 object 交给真实 katran server | 优先从 `balancer.c` hot path 开始 |
+| `bcc/set` | `vendor/repos/bcc/libbpf-tools/*.bpf.c` | `make -C vendor bcc-x86` 或 `make corpus` 依赖 | `vendor/build/x86/bcc/bin/*` -> `/usr/local/bin/`；真实 libbpf-tools 自加载 BPF | 每个 tool 是独立 app 子进程，避免一次改多个 tool |
+| `tracee/monitor` | `vendor/repos/tracee/pkg/ebpf/c/*.bpf.c` 和 `lsmsupport/*.bpf.c` | `make -C vendor tracee-x86` 或 `make corpus` 依赖 | BPF artifacts embedded/packaged 到真实 `tracee` binary path | 改 event payload 前必须证明 ABI 不变 |
+| `cilium/agent` | `vendor/repos/cilium/bpf/**/*.c` 和 `*.h` | `make -C vendor cilium-x86` 或 `make corpus` 依赖 | runtime image 复制 `vendor/repos/cilium/bpf/` 到 `/var/lib/cilium/bpf/`，真实 `cilium-agent` 使用该 datapath | tail-call/map/policy 语义复杂，后置执行 |
+| `tetragon/observer` | `vendor/repos/tetragon/bpf/**/*.c` 和 `*.h` | `make -C vendor tetragon-x86` 或 `make corpus` 依赖 | `vendor/build/x86/tetragon/*` -> `/artifacts/tetragon/`，runner 用 `--bpf-lib` 指向该目录 | 程序多，先做单一 policy/hot helper 级别改动 |
+| `otelcol-ebpf-profiler/profiling` | `vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/*.ebpf.c` | `make -C vendor otel-x86` 或 `make corpus` 依赖 | `otelcol-ebpf-profiler` binary/artifacts 由 OCB 构建，真实 collector 加载 profiler BPF | tail-called programs 自身 `run_cnt=0`，不要用它判断未执行 |
+
+## 标准命令
+
+正式 run 参数对齐 `docs/eval_kinsn.md` 的 app-by-app corpus 设置，但禁用 ReJIT
+和 shim：
 
 ```sh
 SKIP_REJIT=all \
-BPFREJIT_CORPUS_APPS='<app>' \
+BPFREJIT_CORPUS_APPS='<single-app>' \
 BPFREJIT_CORPUS_BPF_STATS=0 \
 SAMPLES=3 WORKLOAD_DURATION=180 WARMUPS=1 \
 BPFREJIT_CORPUS_APP_TIMEOUT=3600 \
@@ -31,11 +91,22 @@ TIMEOUT=7200 KEEP_WORKDIRS=1 \
 make corpus
 ```
 
-如需快速验证编译或启动，可以先运行 smoke，但 smoke 结果不能作为正式结论：
+`<single-app>` 必须是一个 app 名，不能是 CSV 列表。允许值：
+
+```text
+bcc/set
+otelcol-ebpf-profiler/profiling
+cilium/agent
+tetragon/observer
+katran
+tracee/monitor
+```
+
+快速 smoke 只用于编译、启动和 loader sanity，不作为正式结论：
 
 ```sh
 SKIP_REJIT=all \
-BPFREJIT_CORPUS_APPS='<app>' \
+BPFREJIT_CORPUS_APPS='<single-app>' \
 BPFREJIT_CORPUS_BPF_STATS=0 \
 SAMPLES=1 WORKLOAD_DURATION=30 WARMUPS=0 \
 BPFREJIT_CORPUS_APP_TIMEOUT=1800 \
@@ -43,118 +114,203 @@ TIMEOUT=3600 KEEP_WORKDIRS=1 \
 make corpus
 ```
 
-## Attempt 目录
+## 目录结构
 
-每次优化尝试创建一个时间戳目录：
+每个 app 有一个汇总目录，每次源码优化有独立 attempt 目录：
 
 ```text
-docs/source-opt/YYYYMMDD-HHMMSS-<app>-<slug>/
+docs/source-opt/
   README.md
-  source.diff
-  build.log
-  run-command.sh
-  result-paths.txt
-  correctness.md
+  <app-slug>/
+    SUMMARY.md
+    baseline/
+      run-command.sh
+      result-paths.txt
+      notes.md
+    YYYYMMDD-HHMMSS-<attempt-slug>/
+      README.md
+      source.diff
+      build.log
+      run-command.sh
+      result-paths.txt
+      correctness.md
 ```
 
-字段含义：
+`<app-slug>` 使用 `katran`、`bcc-set`、`tracee-monitor`、
+`cilium-agent`、`tetragon-observer`、`otelcol-ebpf-profiler`。
 
-- `README.md`：中文记录本次尝试的假设、修改位置、预期影响、风险和最终结论。
-- `source.diff`：本次源码修改的完整 patch。patch 必须能从 attempt 前源码状态重新应用。
-- `build.log`：构建命令输出摘要或日志路径。
-- `run-command.sh`：实际运行的 `make corpus` 命令；只作为记录，不要求可执行。
+attempt 文件含义：
+
+- `README.md`：假设、修改位置、预期影响、风险、最终状态。
+- `source.diff`：本次源码修改的完整 patch，只包含 app 源码相关文件。
+- `build.log`：构建摘要或完整日志路径。
+- `run-command.sh`：实际运行的 `make corpus` 命令，作为记录即可。
 - `result-paths.txt`：本次 run 的 `corpus/results/...` 路径。
-- `correctness.md`：正确性检查清单、失败原因和保守结论。
+- `correctness.md`：正确性 gate 逐项结果。
 
-## 每次尝试流程
+## 单个 app 的完整流程
 
-1. 记录起点：
+每个 app 必须按顺序完成以下步骤。当前 app 未完成前，不进入下一个 app。
+
+1. 起点检查：
    - 运行 `git status --short`。
-   - 运行 `df -h . /var/lib/docker 2>/dev/null || df -h .` 检查磁盘空间。
-   - 若存在无关未提交改动，先记录并避免触碰这些文件；如果影响目标 app，停止等待人工确认。
-2. 建立 attempt 目录：
-   - 目录名使用本地时间戳和 app 名，例如 `20260625-143000-katran-mod-hash`。
-3. 选择一个 app 和一个很小的源码假设：
+   - 运行 `df -h . /var/lib/docker 2>/dev/null || df -h .`。
+   - 如果有无关未提交改动，记录并避免触碰；如果影响目标 app，停止等待人工确认。
+2. 建立 app 汇总目录：
+   - 创建 `docs/source-opt/<app-slug>/SUMMARY.md`。
+   - 记录目标 app、起点状态、baseline result、5 个 attempt 的状态。
+3. 跑 clean-source baseline：
+   - 不改源码。
+   - 使用正式 run 命令，且 `BPFREJIT_CORPUS_APPS` 只包含当前 app。
+   - 将命令和 result path 写入 `baseline/`。
+4. 设计 attempt：
+   - 每次只验证一个源码优化假设。
    - 每次只改一个 app。
-   - 每次只验证一个优化点，避免把多个机制混在同一个 patch 中。
-4. 修改 eBPF 源码：
-   - 优先改 `vendor/repos/<app>/...` 中真实 upstream source。
-   - 不修改 runner、pass yaml、shim、daemon、bpfopt 或 workload。
-5. 生成并保存 patch：
-   - 将本次源码变更写入 `source.diff`。
-   - patch 中不包含 result 文件、cache、build artifact 或无关文档。
-6. 构建真实 app artifact：
-   - 通过 `make corpus` 的依赖或 `make -C vendor apps-<arch>` 触发现有 app build。
-   - 不手写 loader，不绕过 upstream binary。
-7. 正确性 gate：
-   - app 必须成功启动。
-   - workload return code 必须为 0。
-   - app result `status` 必须为 `ok`，`error` 必须为空。
-   - 如果 verifier、CO-RE、libbpf load、map layout、tail-call key 或 app 语义失败，本次 attempt 判定为失败。
+   - 优先小 patch，避免把多个机制混在一起。
+5. 修改源码：
+   - 只改目标 app 的 eBPF 源码/直接头文件。
+   - 不改 runner、Makefile、Dockerfile、workload、bpfopt、shim、pass config。
+6. 保存 patch：
+   - 使用只读 diff 输出保存 `source.diff`。
+   - patch 不包含 build output、cache、result 或无关文档。
+7. 构建和 smoke：
+   - 通过 `make corpus` 的现有依赖或 `make -C vendor <app>-x86` 构建。
+   - 如果构建失败，记录为 `rejected-correctness`，保存 patch 和 build log，然后回到 attempt 前源码状态。
 8. 正式 run：
-   - 使用 `SKIP_REJIT=all` 和上面的正式参数。
-   - 每个 app 至少完成 5 个独立源码优化 attempt；每个 attempt 单独跑目标 app。
-   - 一次只调优一个 app；不要一次性跑全量 6 app。每个 run 必须设置单个 `BPFREJIT_CORPUS_APPS='<app>'`。
-9. 记录结果：
-   - 写入 result 路径和 raw workload payload 位置。
-   - 不在 framework 内计算比较指标；外部脚本可后处理 baseline 源码 run 与优化源码 run。
+   - 使用正式 run 命令。
+   - 检查 result 中 app `status=ok`、`error=""`、`post_rejit=null`、`rejit_result.mode="skip_rejit_all"`。
+9. 正确性判定：
+   - 见下方 gate。
+   - 如果 gate 不通过，保留 patch 和失败记录，但该 attempt 不进入性能分析。
 10. 回到 attempt 前源码状态：
-    - 保存 patch 后，撤回本次 app 源码修改，只保留 `docs/source-opt/...` 记录目录。
-    - 不使用 `git restore/reset/stash`。若需要回滚，用保存的 patch 做人工反向检查后只撤回本次 attempt 修改。
-11. 磁盘清理：
-    - 每个 attempt 结束后再次检查 `df -h . /var/lib/docker 2>/dev/null || df -h .`。
-    - 如果 Docker 或 workspace 可用空间接近耗尽，先记录当前 result 路径，再删除无关旧 runtime image、dangling image 或旧临时构建缓存；不要删除本次 attempt 的 `docs/source-opt/...` 目录和仍需分析的 `corpus/results/...`。
+    - 保存 patch 后撤回本次 app 源码修改。
+    - 不使用 git restore/reset/stash/checkout。需要反向应用时，用普通 `patch -p1 -R < source.diff` 这类非 git 方法，并人工检查 `git diff`。
+11. 磁盘检查：
+    - 再次运行 `df -h . /var/lib/docker 2>/dev/null || df -h .`。
+    - 如果空间接近耗尽，先记录本次 result path，再清理无关旧 Docker image/cache；不要删除本次 attempt 目录和仍需分析的 `corpus/results/...`。
+12. 更新 app `SUMMARY.md`：
+    - attempt 状态只能是 `accepted-for-analysis`、`rejected-correctness` 或 `rejected-no-signal`。
+    - 5 个 attempt 完成并写完小结后，才进入下一个 app。
 
-## App 顺序与目标进展
+## 正确性 gate
 
-按实现风险从低到高逐个推进：
+一个 attempt 必须同时通过以下 gate 才能进入性能分析：
 
-| 顺序 | App | 原因 | 最低进展 |
-| --- | --- | --- | --- |
-| 1 | `katran` | BPF 文件少，hot path 明确，pktgen workload 稳定 | 5 个独立源码优化 attempt |
-| 2 | `bcc/set` | 多个 libbpf-tools 小程序，编译反馈快 | 5 个独立源码优化 attempt |
-| 3 | `tracee/monitor` | workload 覆盖强，但 BPF 程序和事件语义较多 | 5 个独立源码优化 attempt |
-| 4 | `cilium/agent` | datapath/tail-call/map 语义复杂，需谨慎 | 5 个独立源码优化 attempt |
-| 5 | `tetragon/observer` | 程序数量多，policy/event 语义复杂 | 5 个独立源码优化 attempt |
-| 6 | `otelcol-ebpf-profiler/profiling` | tail-call accounting 和 profiler 语义复杂 | 5 个独立源码优化 attempt |
+| Gate | 通过条件 | 失败处理 |
+| --- | --- | --- |
+| Build | app artifact 构建成功，目标源码确实进入 artifact | `rejected-correctness` |
+| Load | 真实 app 启动成功并自己加载 BPF | `rejected-correctness` |
+| Workload | 所有 workload sample returncode 为 0 | `rejected-correctness` |
+| Result schema | `status=ok`，`error=""`，`baseline.workloads[]` 存在，`post_rejit=null` | `rejected-correctness` |
+| ABI | map key/value、event payload、tail-call key、attach point 未改变 | `rejected-correctness` |
+| Coverage | 没有关闭程序、减少功能覆盖或跳过 security/policy check | `rejected-correctness` |
+| Provenance | `source.diff`、命令、result path、correctness notes 完整 | 补齐后再判定 |
 
-总目标是至少 30 个源码优化 attempt。必须一个 app 一个 app 地推进：当前 app 的 5 个 attempt 和小结完成后，才进入下一个 app。
+允许的优化：
 
-## 正确性原则
-
-源码重写必须保持语义等价。允许的优化包括：
-
-- 删除真实不可达的冗余分支，但必须证明条件来自已有配置或 verifier-known invariant。
-- 将重复 bounds check 合并为等价检查。
+- 删除真实不可达的冗余分支，但必须证明条件来自现有配置或 verifier-known invariant。
+- 合并等价 bounds check。
 - 保持 map key/value layout 不变的局部计算重排。
 - 保持 helper 调用顺序语义不变的局部数据准备优化。
 - 保持 packet bounds、tail-call key、event payload ABI、ringbuf/perfbuf payload layout 不变的控制流整理。
 
-禁止的优化包括：
+禁止的优化：
 
 - 跳过安全检查、policy check、verifier-required bounds check 或 error handling。
 - 改变 map layout、event ABI、tail-call dispatch key、program attach point 或 app-visible payload。
-- 用 benchmark-only 常量替代真实 app 配置，除非 upstream app 在该 benchmark 配置下本来就是常量，且记录了证明。
+- 用 benchmark-only 常量替代真实 app 配置，除非 upstream app 在该 benchmark 配置下本来就是常量，且记录证明。
 - 为了跑分降低功能覆盖、关闭程序、删除事件、减少被加载 BPF program。
 - 引入 framework-side loader、shim、ReJIT、bpfopt 或 kinsn 依赖。
 
-## Baseline 公平性
+## App 顺序和最低进展
 
-每个 app 的源码优化 attempt 必须与同一 app 的原始源码 run 比较。两边保持：
+按实现风险从低到高推进：
 
-- 同一 commit 起点。
-- 同一 kernel/runtime image 配置。
-- 同一 app workload。
-- 同一 `SAMPLES=3 WORKLOAD_DURATION=180 WARMUPS=1`。
-- 同一 `SKIP_REJIT=all`，不使用 shim/LD_PRELOAD。
-- 同一平台，优先 x86 KVM；需要跨架构证据时再做 AWS arm64 smoke 或正式 run。
+| 顺序 | App | 原因 | 完成条件 |
+| --- | --- | --- | --- |
+| 1 | `katran` | BPF 文件少，hot path 明确，pktgen workload 稳定 | clean baseline + 5 attempts + summary |
+| 2 | `bcc/set` | 多个 libbpf-tools 小程序，编译反馈快 | clean baseline + 5 attempts + summary |
+| 3 | `tracee/monitor` | workload 覆盖强，但 BPF 程序和事件语义较多 | clean baseline + 5 attempts + summary |
+| 4 | `cilium/agent` | datapath/tail-call/map 语义复杂，需谨慎 | clean baseline + 5 attempts + summary |
+| 5 | `tetragon/observer` | 程序数量多，policy/event 语义复杂 | clean baseline + 5 attempts + summary |
+| 6 | `otelcol-ebpf-profiler/profiling` | tail-call accounting 和 profiler 语义复杂 | clean baseline + 5 attempts + summary |
 
-## 结果判定
+总目标是至少 6 个 clean-source baseline runs 和 30 个源码优化 attempts。
 
-每个 attempt 只给出三类结论：
+## Attempt README 模板
 
-- `accepted-for-analysis`：构建、启动、workload、正确性 gate 全部通过，结果路径完整。
-- `rejected-correctness`：源码改变可能破坏语义、ABI、加载、verifier 或 workload 行为。
-- `rejected-no-signal`：正确但 raw workload 没有可解释改善，或结果噪声太大。
+每个 attempt 的 `README.md` 使用以下结构：
 
-是否构成论文 claim，必须等外部分析完成后再判断。
+```markdown
+# <app> source-opt attempt: <slug>
+
+- Time:
+- App:
+- Status: planned / accepted-for-analysis / rejected-correctness / rejected-no-signal
+- Source files:
+- Hypothesis:
+- Expected hot path:
+- Correctness argument:
+- Build command:
+- Run command:
+- Result path:
+- Follow-up:
+```
+
+`correctness.md` 使用以下结构：
+
+```markdown
+# Correctness
+
+| Gate | Evidence | Verdict |
+| --- | --- | --- |
+| Build | | pass/fail |
+| Load | | pass/fail |
+| Workload | | pass/fail |
+| Result schema | | pass/fail |
+| ABI | | pass/fail |
+| Coverage | | pass/fail |
+| Provenance | | pass/fail |
+```
+
+## 外部分析约定
+
+framework 内不写任何比较 summary。外部分析可以从 raw payload 计算：
+
+- 每个 app 的 workload throughput ratio：optimized-source / clean-source。
+- 每个 attempt 的 sample 分布。
+- 失败率和正确性失败类别。
+- 若后续需要 BPF counter 证据，应单独设计一个允许 shim/BPF stats 的实验；这不属于本文档定义的 no-shim source-opt workflow。
+
+分析时不能跨 app 混合单位。`stress-ng` bogo ops、pktgen pps、OTEL language loop ops
+只能在同一个 app、同一 workload、同一参数下做 ratio。
+
+## 磁盘清理策略
+
+每次 attempt 前后都检查：
+
+```sh
+df -h . /var/lib/docker 2>/dev/null || df -h .
+docker system df 2>/dev/null || true
+```
+
+如果空间接近耗尽，按以下顺序处理：
+
+1. 记录当前 attempt 的 result path 和文档路径。
+2. 用 `docker image ls` 找旧 runtime image。
+3. 删除确认不再需要的旧 image 或 dangling image，例如 `docker image prune -f`。
+4. 清理明显无关的旧临时构建缓存。
+5. 不删除当前 attempt 目录、当前 app baseline、仍需分析的 `corpus/results/...`。
+
+不要为了省空间删除唯一能证明某个 attempt 的 raw result。
+
+## 完成定义
+
+本文档目标完成时应满足：
+
+- `docs/source-opt/README.md` 本身定义了可执行流程、命令、目录、gate、app 顺序和清理策略。
+- 每个 app 都有明确 baseline + 5 attempts 的完成条件。
+- 所有 run 都是单 app run。
+- 文档明确 `SKIP_REJIT=all` 下无 post phase、无 shim、无 kinsn module preload。
+- 文档明确不 commit/push、不使用 git 命令回滚源码。
+- 后续 agent 可以仅按本文档推进，不需要重新解释实验边界。
