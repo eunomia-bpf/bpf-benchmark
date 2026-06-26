@@ -2,7 +2,7 @@
 
 App: `bcc/set`
 
-Status: phase2-in-progress
+Status: phase2-complete
 
 Start state:
 
@@ -48,8 +48,16 @@ Phase2 attempts:
 | Attempt | Status | Result path | Primary metric | Notes |
 | --- | --- | --- | ---: | --- |
 | 1 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_020646_300498` | `stress_ng_sum_bogo_ops_s` mean=718235, samples `719939, 713743, 721022`, +1.09% vs clean baseline | Stacks first-round `syscount` early return with `capable` fexit rewrite; gate passed; source restored after run. |
+| 2 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_023049_621850` | `stress_ng_sum_bogo_ops_s` mean=717722, samples `716964, 718507, 717694`, +1.02% vs clean baseline | Stacks attempt 1 base with `tcpconnect` fexit rewrite; gate passed; source restored after run; not selected as the next stacked base because it is below attempt 1. |
+| 3 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_025631_917158` | `stress_ng_sum_bogo_ops_s` mean=724628, samples `727466, 720947, 725471`, +1.99% vs clean baseline | Stacks attempt 1 base and rewrites `syscount` from formatted tracepoints to raw tracepoints; gate passed; source restored after run; selected as the next stacked base. |
+| 4 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_031853_909472` | `stress_ng_sum_bogo_ops_s` mean=715349, samples `713487, 715830, 716731`, +0.69% vs clean baseline | Stacks attempt 3 base and specializes the `syscount -L` exit path with a dedicated `raw_tracepoint/sys_exit` program; gate passed; source restored after run; not selected as the next stacked base because it is below attempt 3. |
+| 5 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_034309_094312` | `stress_ng_sum_bogo_ops_s` mean=729628, samples `729898, 726762, 732224`, +2.70% vs clean baseline | Stacks attempt 3 base with the `tcpconnect` fexit rewrite; gate passed; source restored after run; selected as bcc/set phase2 best. |
 
 Phase2 gate:
 
-- [ ] Five phase2 attempts recorded.
+- [x] Five phase2 attempts recorded.
 - [x] Phase2 attempt 1 source tree returned to clean state after run.
+- [x] Phase2 attempt 2 source tree returned to clean state after run.
+- [x] Phase2 attempt 3 source tree returned to clean state after run.
+- [x] Phase2 attempt 4 source tree returned to clean state after run.
+- [x] Phase2 attempt 5 source tree returned to clean state after run.

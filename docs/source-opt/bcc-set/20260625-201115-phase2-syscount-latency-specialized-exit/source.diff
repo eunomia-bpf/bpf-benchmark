@@ -1,0 +1,240 @@
+diff --git a/libbpf-tools/capable.bpf.c b/libbpf-tools/capable.bpf.c
+index 6673f786..a993c1e8 100644
+--- a/libbpf-tools/capable.bpf.c
++++ b/libbpf-tools/capable.bpf.c
+@@ -21,24 +21,12 @@ const volatile bool user_stack = false;
+ const volatile bool filter_cg = false;
+ const volatile pid_t targ_pid = -1;
+ 
+-struct args_t {
+-	int cap;
+-	int cap_opt;
+-};
+-
+ struct unique_key {
+ 	int cap;
+ 	u32 tgid;
+ 	u64 cgroupid;
+ };
+ 
+-struct {
+-	__uint(type, BPF_MAP_TYPE_HASH);
+-	__uint(max_entries, 10240);
+-	__type(key, u64);
+-	__type(value, struct args_t);
+-} start SEC(".maps");
+-
+ struct {
+ 	__uint(type, BPF_MAP_TYPE_CGROUP_ARRAY);
+ 	__type(key, u32);
+@@ -71,11 +59,12 @@ struct {
+ 	__type(value, u64);
+ } seen SEC(".maps");
+ 
+-SEC("kprobe/cap_capable")
+-int BPF_KPROBE(kprobe__cap_capable_entry, const struct cred *cred, struct user_namespace *targ_ns, int cap, int cap_opt)
++SEC("fexit/cap_capable")
++int BPF_PROG(cap_capable_exit, const struct cred *cred,
++	     struct user_namespace *targ_ns, int cap, int cap_opt, int ret)
+ {
+-	__u32 pid;
+ 	__u64 pid_tgid;
++	__u32 pid;
+ 
+ 	if (filter_cg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+ 		return 0;
+@@ -89,47 +78,26 @@ int BPF_KPROBE(kprobe__cap_capable_entry, const struct cred *cred, struct user_n
+ 	if (targ_pid != -1 && targ_pid != pid)
+ 		return 0;
+ 
+-	struct args_t args = {};
+-	args.cap = cap;
+-	args.cap_opt = cap_opt;
+-	bpf_map_update_elem(&start, &pid_tgid, &args, 0);
+-
+-	return 0;
+-}
+-
+-SEC("kretprobe/cap_capable")
+-int BPF_KRETPROBE(kprobe__cap_capable_exit)
+-{
+-	__u64 pid_tgid;
+-	struct args_t *ap;
+ 	struct key_t i_key;
+-
+-	pid_tgid = bpf_get_current_pid_tgid();
+-	ap = bpf_map_lookup_elem(&start, &pid_tgid);
+-	if (!ap)
+-		return 0;   /* missed entry */
+-
+-	bpf_map_delete_elem(&start, &pid_tgid);
+-
+ 	struct cap_event event = {};
+-	event.pid = pid_tgid >> 32;
++	event.pid = pid;
+ 	event.tgid = pid_tgid;
+-	event.cap = ap->cap;
++	event.cap = cap;
+ 	event.uid = bpf_get_current_uid_gid();
+ 	bpf_get_current_comm(&event.task, sizeof(event.task));
+-	event.ret = PT_REGS_RC(ctx);
++	event.ret = ret;
+ 
+ 	if (LINUX_KERNEL_VERSION >= KERNEL_VERSION(5, 1, 0)) {
+ 		/* @opts: Bitmask of options defined in include/linux/security.h */
+-		event.audit = (ap->cap_opt & 0b10) == 0;
+-		event.insetid = (ap->cap_opt & 0b100) != 0;
++		event.audit = (cap_opt & 0b10) == 0;
++		event.insetid = (cap_opt & 0b100) != 0;
+ 	} else {
+-		event.audit = ap->cap_opt;
++		event.audit = cap_opt;
+ 		event.insetid = -1;
+ 	}
+ 
+ 	if (unique_type) {
+-		struct unique_key key = {.cap = ap->cap};
++		struct unique_key key = {.cap = cap};
+ 		if (unique_type == UNQ_CGROUP)
+ 			key.cgroupid = bpf_get_current_cgroup_id();
+ 		else
+diff --git a/libbpf-tools/syscount.bpf.c b/libbpf-tools/syscount.bpf.c
+index 38f8f978..c598b76f 100644
+--- a/libbpf-tools/syscount.bpf.c
++++ b/libbpf-tools/syscount.bpf.c
+@@ -49,8 +49,20 @@ void save_proc_name(struct data_t *val)
+ 	BPF_CORE_READ_STR_INTO(&val->comm, current, group_leader, comm);
+ }
+ 
+-SEC("tracepoint/raw_syscalls/sys_enter")
+-int sys_enter(struct trace_event_raw_sys_enter *args)
++static __always_inline
++long syscall_id_from_regs(struct pt_regs *regs)
++{
++#if defined(__TARGET_ARCH_x86)
++	return BPF_CORE_READ(regs, orig_ax);
++#elif defined(__TARGET_ARCH_arm64)
++	return BPF_CORE_READ(regs, syscallno);
++#else
++	return -1;
++#endif
++}
++
++SEC("raw_tracepoint/sys_enter")
++int sys_enter(struct bpf_raw_tracepoint_args *ctx)
+ {
+ 	u64 id = bpf_get_current_pid_tgid();
+ 	pid_t pid = id >> 32;
+@@ -68,12 +80,20 @@ int sys_enter(struct trace_event_raw_sys_enter *args)
+ 	return 0;
+ }
+ 
+-SEC("tracepoint/raw_syscalls/sys_exit")
+-int sys_exit(struct trace_event_raw_sys_exit *args)
++static __always_inline
++int handle_sys_exit(struct bpf_raw_tracepoint_args *ctx, bool latency)
+ {
+ 	if (filter_cg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+ 		return 0;
+ 
++	struct pt_regs *regs = (struct pt_regs *)ctx->args[0];
++	long sys_id = syscall_id_from_regs(regs);
++	long ret = ctx->args[1];
++
++	/* this happens when there is an interrupt */
++	if (sys_id == -1)
++		return 0;
++
+ 	u64 id = bpf_get_current_pid_tgid();
+ 	static const struct data_t zero;
+ 	pid_t pid = id >> 32;
+@@ -82,34 +102,42 @@ int sys_exit(struct trace_event_raw_sys_exit *args)
+ 	u32 tid = id;
+ 	u32 key;
+ 
+-	/* this happens when there is an interrupt */
+-	if (args->id == -1)
+-		return 0;
+-
+ 	if (filter_pid && pid != filter_pid)
+ 		return 0;
+-	if (filter_failed && args->ret >= 0)
++	if (filter_failed && ret >= 0)
+ 		return 0;
+-	if (filter_errno && args->ret != -filter_errno)
++	if (filter_errno && ret != -filter_errno)
+ 		return 0;
+ 
+-	if (measure_latency) {
++	if (latency) {
+ 		start_ts = bpf_map_lookup_elem(&start, &tid);
+ 		if (!start_ts)
+ 			return 0;
+ 		lat = bpf_ktime_get_ns() - *start_ts;
+ 	}
+ 
+-	key = (count_by_process) ? pid : args->id;
++	key = (count_by_process) ? pid : sys_id;
+ 	val = bpf_map_lookup_or_try_init(&data, &key, &zero);
+ 	if (val) {
+ 		__sync_fetch_and_add(&val->count, 1);
+ 		if (count_by_process)
+ 			save_proc_name(val);
+-		if (measure_latency)
++		if (latency)
+ 			__sync_fetch_and_add(&val->total_ns, lat);
+ 	}
+ 	return 0;
+ }
+ 
++SEC("raw_tracepoint/sys_exit")
++int sys_exit(struct bpf_raw_tracepoint_args *ctx)
++{
++	return handle_sys_exit(ctx, false);
++}
++
++SEC("raw_tracepoint/sys_exit")
++int sys_exit_latency(struct bpf_raw_tracepoint_args *ctx)
++{
++	return handle_sys_exit(ctx, true);
++}
++
+ char LICENSE[] SEC("license") = "GPL";
+diff --git a/libbpf-tools/syscount.c b/libbpf-tools/syscount.c
+index 432d9673..a5674b19 100644
+--- a/libbpf-tools/syscount.c
++++ b/libbpf-tools/syscount.c
+@@ -453,13 +453,13 @@ int main(int argc, char **argv)
+ 		}
+ 	}
+ 
+-	obj->links.sys_exit = bpf_program__attach(obj->progs.sys_exit);
+-	if (!obj->links.sys_exit) {
+-		err = -errno;
+-		warn("failed to attach sys_exit program: %s\n", strerror(-err));
+-		goto cleanup_obj;
+-	}
+ 	if (env.latency) {
++		obj->links.sys_exit_latency = bpf_program__attach(obj->progs.sys_exit_latency);
++		if (!obj->links.sys_exit_latency) {
++			err = -errno;
++			warn("failed to attach sys_exit_latency program: %s\n", strerror(-err));
++			goto cleanup_obj;
++		}
+ 		obj->links.sys_enter = bpf_program__attach(obj->progs.sys_enter);
+ 		if (!obj->links.sys_enter) {
+ 			err = -errno;
+@@ -467,6 +467,13 @@ int main(int argc, char **argv)
+ 			     strerror(-err));
+ 			goto cleanup_obj;
+ 		}
++	} else {
++		obj->links.sys_exit = bpf_program__attach(obj->progs.sys_exit);
++		if (!obj->links.sys_exit) {
++			err = -errno;
++			warn("failed to attach sys_exit program: %s\n", strerror(-err));
++			goto cleanup_obj;
++		}
+ 	}
+ 
+ 	if (signal(SIGINT, sig_int) == SIG_ERR) {

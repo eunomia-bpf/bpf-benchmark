@@ -2,7 +2,7 @@
 
 - Time: 2026-06-25 19:22
 - App: `bcc/set`
-- Status: planned
+- Status: accepted-for-analysis; not selected as the next stacked base
 - Source files:
   - `vendor/repos/bcc/libbpf-tools/capable.bpf.c`
   - `vendor/repos/bcc/libbpf-tools/syscount.bpf.c`
@@ -22,6 +22,10 @@
   still produce no event, matching the existing kretprobe path.
 - Build command: `make -C vendor bcc-x86`
 - Run command: see `run-command.sh`
-- Result path: TBD
-- Follow-up: run the formal single-app corpus command and keep this stacked
-  patch only if the app loads and throughput improves.
+- Result path: `corpus/results/x86_kvm_corpus_20260626_023049_621850`
+- Performance: `stress_ng_sum_bogo_ops_s` mean=717722, samples
+  `716964, 718507, 717694`, +1.02% vs clean baseline.
+- Follow-up: do not stack the `tcpconnect` fexit rewrite. It is correct and
+  slightly positive versus clean source, but it is below phase2 attempt 1
+  (`718235`, +1.09%). The next attempt should retarget the bcc/set hot
+  workload paths instead of adding more tcpconnect-specific changes.

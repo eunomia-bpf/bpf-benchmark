@@ -29,3 +29,11 @@ Expected performance mechanism:
 - The patch keeps all tcpconnect output maps and event payloads unchanged.
   UID filtering is still supported, but `bpf_get_current_uid_gid()` is only
   called when `filter_uid` is configured.
+
+Observed performance:
+
+- Correctness gate passed.
+- `stress_ng_sum_bogo_ops_s` mean=717722, samples
+  `716964, 718507, 717694`, +1.02% vs clean baseline.
+- This is slightly below phase2 attempt 1 (mean=718235, +1.09%), so the
+  `tcpconnect` fexit rewrite is not selected as the next stacked base.

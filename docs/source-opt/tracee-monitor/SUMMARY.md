@@ -2,7 +2,7 @@
 
 App: `tracee/monitor`
 
-Status: complete
+Status: phase2-in-progress
 
 Start state:
 
@@ -36,9 +36,21 @@ Attempts:
 | 4 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260625_134931_275984` | `send_socket_dup()` writes `oldfd`/`newfd` only after confirming a supported socket family. |
 | 5 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260625_141005_857825` | `send_socket_dup()` turns the final `family == AF_UNIX` test into `else` after the existing family guard proves only UNIX remains. |
 
-Completion gate:
+First-round completion gate:
 
 - [x] Clean-source baseline result recorded.
 - [x] Five independent source optimization attempts recorded. 5 / 5 accepted.
 - [x] Every accepted attempt has `source.diff`, command, result path, and correctness notes.
 - [x] tracee source tree returned to attempt-start state after each attempt.
+
+Phase2 attempts:
+
+| Attempt | Status | Result path | Notes |
+| --- | --- | --- | --- |
+| phase2/20260625-205820-cap-capable-fentry | rejected-correctness | `corpus/results/x86_kvm_corpus_20260626_040613_380312` | Converted `trace_cap_capable` from kprobe to fentry, but Tracee failed BPF load because the fentry program returned the unknown `events_perf_submit()` helper result instead of 0. No performance samples. |
+
+Phase2 gate:
+
+- [x] 1 / 5 phase2 attempts recorded.
+- [ ] At least one phase2 tracee attempt accepted for performance analysis.
+- [x] tracee source tree returned to attempt-start state after phase2 attempt 1.

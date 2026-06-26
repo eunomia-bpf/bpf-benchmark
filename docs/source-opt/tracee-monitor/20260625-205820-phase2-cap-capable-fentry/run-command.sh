@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd /home/yunwei37/workspace/bpf-benchmark
+
+SKIP_REJIT=all \
+BPFREJIT_CORPUS_APPS='tracee/monitor' \
+BPFREJIT_CORPUS_BPF_STATS=0 \
+SAMPLES=3 WORKLOAD_DURATION=180 WARMUPS=1 \
+BPFREJIT_CORPUS_APP_TIMEOUT=3600 \
+BPFREJIT_CORPUS_REJIT_TIMEOUT=1200 \
+TIMEOUT=7200 KEEP_WORKDIRS=1 \
+make corpus

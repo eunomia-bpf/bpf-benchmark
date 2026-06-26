@@ -97,6 +97,10 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `20260625-043750-syscount-interrupt-fast-return` | stress_ng_sum_bogo_ops_s mean=711554 | `709915, 711686, 713061` | +0.15% | `corpus/results/x86_kvm_corpus_20260625_114437_519205` |
 | `20260625-045812-runqlat-skip-idle-tgid-read` | stress_ng_sum_bogo_ops_s mean=705171 | `704250, 704247, 707015` | -0.75% | `corpus/results/x86_kvm_corpus_20260625_120517_651286` |
 | `phase2/20260625-185708-capable-fexit-syscount-base` | stress_ng_sum_bogo_ops_s mean=718235; accepted-for-analysis | `719939, 713743, 721022` | +1.09% | `corpus/results/x86_kvm_corpus_20260626_020646_300498` |
+| `phase2/20260625-192229-tcpconnect-fexit-stack` | stress_ng_sum_bogo_ops_s mean=717722; accepted-for-analysis; not selected as next base | `716964, 718507, 717694` | +1.02% | `corpus/results/x86_kvm_corpus_20260626_023049_621850` |
+| `phase2/20260625-194654-syscount-raw-tracepoint` | stress_ng_sum_bogo_ops_s mean=724628; accepted-for-analysis; selected as next base | `727466, 720947, 725471` | +1.99% | `corpus/results/x86_kvm_corpus_20260626_025631_917158` |
+| `phase2/20260625-201115-syscount-latency-specialized-exit` | stress_ng_sum_bogo_ops_s mean=715349; accepted-for-analysis; not selected as next base | `713487, 715830, 716731` | +0.69% | `corpus/results/x86_kvm_corpus_20260626_031853_909472` |
+| `phase2/20260625-203413-raw-syscount-tcpconnect-fexit` | stress_ng_sum_bogo_ops_s mean=729628; accepted-for-analysis; selected as bcc/set phase2 best | `729898, 726762, 732224` | +2.70% | `corpus/results/x86_kvm_corpus_20260626_034309_094312` |
 
 ### `tracee/monitor`
 
@@ -108,6 +112,7 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `20260625-062113-defer-sys-exit-ret-read` | stress_ng_sum_bogo_ops_s mean=460218 | `458576, 460270, 461807` | -0.14% | `corpus/results/x86_kvm_corpus_20260625_132825_862375` |
 | `20260625-064212-socket-dup-late-args` | stress_ng_sum_bogo_ops_s mean=458474 | `460912, 456147, 458361` | -0.52% | `corpus/results/x86_kvm_corpus_20260625_134931_275984` |
 | `20260625-070258-socket-dup-unix-else` | stress_ng_sum_bogo_ops_s mean=454296 | `454215, 454954, 453718` | -1.43% | `corpus/results/x86_kvm_corpus_20260625_141005_857825` |
+| `phase2/20260625-205820-cap-capable-fentry` | rejected-correctness: Tracee failed BPF load; fentry program returned unknown helper result instead of 0 | `N/A` | N/A | `corpus/results/x86_kvm_corpus_20260626_040613_380312` |
 
 ### `cilium/agent`
 
@@ -259,11 +264,14 @@ attempt 文件含义：
 
 第二轮当前进度：
 
-- Completed phase2 apps: `katran`
-- Phase2 source optimization attempts: 6 / 30
-- Current phase2 app: `bcc/set`
-- Current phase2 target: retain the first-round `cilium/agent` +12.37% result as
-  the floor, and try to push the best single-app source-only result toward 15-20%.
+- Completed phase2 apps: `katran`, `bcc/set`
+- Phase2 source optimization attempts: 11 / 30
+- Current phase2 app: `tracee/monitor`
+- Current phase2 target: repair the `cap_capable` fentry conversion by forcing
+  `R0=0` on exit, then decide whether to keep this attach-point optimization or
+  switch to earlier hot-event filtering. bcc/set phase2 best is +2.70%, while
+  the current single-app floor to beat remains first-round `cilium/agent` at
+  +12.37%.
 
 ## 单个 app 的完整流程
 
