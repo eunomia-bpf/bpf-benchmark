@@ -2,7 +2,7 @@
 
 App: `bcc/set`
 
-Status: complete
+Status: phase2-in-progress
 
 Start state:
 
@@ -42,3 +42,14 @@ Completion gate:
 - [x] Five independent source optimization attempts recorded.
 - [x] Every accepted attempt has `source.diff`, command, result path, and correctness notes.
 - [x] bcc source tree returned to attempt-start state after each attempt.
+
+Phase2 attempts:
+
+| Attempt | Status | Result path | Primary metric | Notes |
+| --- | --- | --- | ---: | --- |
+| 1 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_020646_300498` | `stress_ng_sum_bogo_ops_s` mean=718235, samples `719939, 713743, 721022`, +1.09% vs clean baseline | Stacks first-round `syscount` early return with `capable` fexit rewrite; gate passed; source restored after run. |
+
+Phase2 gate:
+
+- [ ] Five phase2 attempts recorded.
+- [x] Phase2 attempt 1 source tree returned to clean state after run.

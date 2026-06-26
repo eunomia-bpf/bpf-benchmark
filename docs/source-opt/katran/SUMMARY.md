@@ -31,6 +31,16 @@ Attempts:
 | 4 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260625_094328_513110` | `quic-connid-no-null-check`; source restored |
 | 5 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260625_100305_598103` | `stable-rt-header-early-return`; source restored |
 
+Phase2 attempts:
+
+| Attempt | Status | Result path | Primary metric | vs baseline | Notes |
+| --- | --- | --- | ---: | ---: | --- |
+| 1 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260625_235638_664542` | pktgen_total_pps mean=3305186; samples `3299495, 3294334, 3321729` | +7.97% | `udp-flow-migration-require-dst`; positive signal, stack future katran phase2 attempts |
+| 2 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_002120_778242` | pktgen_total_pps mean=3288342; samples `3267504, 3316271, 3281251` | +7.42% | `lru-miss-proto-compare`; correctness passed, but -0.51% vs phase2 attempt 1, so do not stack |
+| 3 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_004646_185930` | pktgen_total_pps mean=3348905; samples `3390361, 3336180, 3320175` | +9.40% | `cache-vip-metadata`; correctness passed, +1.32% vs phase2 attempt 1, stack as current katran best base |
+| 4 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_011245_701549` | pktgen_total_pps mean=3275764; samples `3272779, 3268211, 3286301` | +7.01% | `cache-vip-plus-lru-proto-compare`; correctness passed, but -2.18% vs phase2 attempt 3, so do not stack |
+| 5 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_013906_982440` | pktgen_total_pps mean=3301431; samples `3317221, 3295753, 3291320` | +7.85% | `nonnull-lru-map`; correctness passed, but -1.42% vs phase2 attempt 3, so do not stack |
+
 Completion gate:
 
 - [x] Clean-source baseline result recorded.

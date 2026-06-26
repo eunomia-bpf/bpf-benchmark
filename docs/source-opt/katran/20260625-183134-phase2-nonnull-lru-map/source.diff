@@ -1,0 +1,178 @@
+diff --git a/katran/lib/bpf/balancer.c b/katran/lib/bpf/balancer.c
+index 6d16faad..a5c751c8 100644
+--- a/katran/lib/bpf/balancer.c
++++ b/katran/lib/bpf/balancer.c
+@@ -87,7 +87,8 @@ increment_ch_drop_real_0() {
+ __attribute__((__always_inline__)) static inline bool get_packet_dst(
+     struct real_definition** real,
+     struct packet_description* pckt,
+-    struct vip_meta* vip_info,
++    __u32 vip_flags,
++    __u32 vip_num,
+     bool is_ipv6,
+     void* lru_map) {
+   // to update lru w/ new connection
+@@ -102,7 +103,7 @@ __attribute__((__always_inline__)) static inline bool get_packet_dst(
+   under_flood = is_under_flood(&cur_time);
+ 
+ #ifdef LPM_SRC_LOOKUP
+-  if ((vip_info->flags & F_SRC_ROUTING) && !under_flood) {
++  if ((vip_flags & F_SRC_ROUTING) && !under_flood) {
+     __u32* lpm_val;
+     if (is_ipv6) {
+       struct v6_lpm_key lpm_key_v6 = {};
+@@ -133,7 +134,7 @@ __attribute__((__always_inline__)) static inline bool get_packet_dst(
+   if (!src_found) {
+     bool hash_16bytes = is_ipv6;
+ 
+-    if (vip_info->flags & F_HASH_DPORT_ONLY) {
++    if (vip_flags & F_HASH_DPORT_ONLY) {
+       // service which only use dst port for hash calculation
+       // e.g. if packets has same dst port -> they will go to the same real.
+       // usually VoIP related services.
+@@ -141,7 +142,7 @@ __attribute__((__always_inline__)) static inline bool get_packet_dst(
+       memset(pckt->flow.srcv6, 0, 16);
+     }
+     hash = get_packet_hash(pckt, hash_16bytes) % RING_SIZE;
+-    key = RING_SIZE * (vip_info->vip_num) + hash;
++    key = RING_SIZE * vip_num + hash;
+ 
+     real_pos = bpf_map_lookup_elem(&ch_rings, &key);
+     if (!real_pos) {
+@@ -163,7 +164,7 @@ __attribute__((__always_inline__)) static inline bool get_packet_dst(
+     increment_ch_drop_no_real();
+     return false;
+   }
+-  if (lru_map && !(vip_info->flags & F_LRU_BYPASS) && !under_flood &&
++  if (!(vip_flags & F_LRU_BYPASS) && !under_flood &&
+       !(pckt->flags & F_RST_SET)) {
+     if (pckt->flow.proto == IPPROTO_UDP) {
+       new_dst_lru.atime = cur_time;
+@@ -267,9 +268,7 @@ check_decap_dst(struct packet_description* pckt, bool is_ipv6, bool* pass) {
+ __attribute__((__always_inline__)) static inline int perform_global_lru_lookup(
+     struct real_definition** dst,
+     struct packet_description* pckt,
+-    __u32 cpu_num,
+-    struct vip_meta* vip_info,
+-    bool is_ipv6) {
++    __u32 cpu_num) {
+   // lookup in the global cache
+   void* g_lru_map = bpf_map_lookup_elem(&global_lru_maps, &cpu_num);
+   __u32 global_lru_stats_key = MAX_VIPS + GLOBAL_LRU_CNTR;
+@@ -580,7 +579,6 @@ increment_quic_cid_version_stats(
+ __attribute__((__always_inline__)) static inline int update_vip_lru_miss_stats(
+     struct vip_definition* vip,
+     struct packet_description* pckt,
+-    struct vip_meta* vip_info,
+     bool is_ipv6) {
+   // track the lru miss counter of vip in vip_miss_stats
+   __u32 vip_miss_stats_key = 0;
+@@ -653,11 +651,11 @@ incr_server_id_routing_stats(__u32 vip_num, bool newConn, bool misMatchInLRU) {
+ __attribute__((__always_inline__)) static inline int check_udp_flow_migration(
+     struct real_definition** dst,
+     struct packet_description* pckt,
+-    struct vip_meta* vip_info,
++    __u32 vip_flags,
+     struct vip_definition* vip) {
+   __u64 cur_time;
+-  if (dst && pckt->flow.proto == IPPROTO_UDP &&
+-      vip_info->flags & F_UDP_FLOW_MIGRATION && !is_under_flood(&cur_time)) {
++  if (*dst && pckt->flow.proto == IPPROTO_UDP &&
++      vip_flags & F_UDP_FLOW_MIGRATION && !is_under_flood(&cur_time)) {
+     // Check if the real is down using the vip_to_down_reals_map
+     void* down_reals_map = bpf_map_lookup_elem(&vip_to_down_reals_map, vip);
+     if (down_reals_map) {
+@@ -800,6 +798,7 @@ process_packet(struct xdp_md* xdp, __u64 nh_off, bool is_ipv6) {
+     }
+   }
+ 
++  __u32 vip_flags = vip_info->flags;
+   if (data_end - data > MAX_PCKT_SIZE) {
+     REPORT_PACKET_TOOBIG(xdp, data, data_end - data, false);
+ #ifdef ICMP_TOOBIG_GENERATION
+@@ -828,7 +827,7 @@ process_packet(struct xdp_md* xdp, __u64 nh_off, bool is_ipv6) {
+   // total packets
+   data_stats->v1 += 1;
+ 
+-  if ((vip_info->flags & F_HASH_NO_SRC_PORT)) {
++  if ((vip_flags & F_HASH_NO_SRC_PORT)) {
+     // service, where diff src port, but same ip must go to the same real,
+     // e.g. gfs
+     pckt.flow.port16[0] = 0;
+@@ -851,7 +850,7 @@ process_packet(struct xdp_md* xdp, __u64 nh_off, bool is_ipv6) {
+   }
+ 
+   // Lookup dst based on id in packet
+-  if ((vip_info->flags & F_QUIC_VIP)) {
++  if ((vip_flags & F_QUIC_VIP)) {
+     bool is_icmp = (pckt.flags & F_ICMP);
+     if (is_icmp) {
+       // as per rfc792, the "Destination Unreachable Message" has the internet
+@@ -934,7 +933,7 @@ process_packet(struct xdp_md* xdp, __u64 nh_off, bool is_ipv6) {
+   }
+ #ifdef UDP_STABLE_ROUTING
+   if (pckt.flow.proto == IPPROTO_UDP &&
+-      vip_info->flags & F_UDP_STABLE_ROUTING_VIP) {
++      vip_flags & F_UDP_STABLE_ROUTING_VIP) {
+     process_udp_stable_routing(data, data_end, &dst, &pckt, is_ipv6);
+   }
+ #endif // UDP_STABLE_ROUTING
+@@ -964,7 +963,7 @@ process_packet(struct xdp_md* xdp, __u64 nh_off, bool is_ipv6) {
+           tpr_packets_stats->ch_routed += 1;
+         } else {
+           // update this routing decision in the lru_map as well
+-          if (lru_map && !(vip_info->flags & F_LRU_BYPASS)) {
++          if (!(vip_flags & F_LRU_BYPASS)) {
+             int res = check_and_update_real_index_in_lru(&pckt, lru_map);
+             if (res == DST_MISMATCH_IN_LRU) {
+               tpr_packets_stats->dst_mismatch_in_lru += 1;
+@@ -980,21 +979,21 @@ process_packet(struct xdp_md* xdp, __u64 nh_off, bool is_ipv6) {
+ 
+     // Next, try to lookup dst in the lru_cache
+     if (!dst && !(pckt.flags & F_SYN_SET) &&
+-        !(vip_info->flags & F_LRU_BYPASS)) {
++        !(vip_flags & F_LRU_BYPASS)) {
+       connection_table_lookup(&dst, &pckt, lru_map, /*isGlobalLru=*/false);
+     }
+ 
+ #ifdef GLOBAL_LRU_LOOKUP
+-    if (!dst && !(pckt.flags & F_SYN_SET) && vip_info->flags & F_GLOBAL_LRU) {
++    if (!dst && !(pckt.flags & F_SYN_SET) && vip_flags & F_GLOBAL_LRU) {
+       int global_lru_lookup_result =
+-          perform_global_lru_lookup(&dst, &pckt, cpu_num, vip_info, is_ipv6);
++          perform_global_lru_lookup(&dst, &pckt, cpu_num);
+       if (global_lru_lookup_result >= 0) {
+         return global_lru_lookup_result;
+       }
+     }
+ #endif // GLOBAL_LRU_LOOKUP
+ 
+-    check_udp_flow_migration(&dst, &pckt, vip_info, &vip);
++    check_udp_flow_migration(&dst, &pckt, vip_flags, &vip);
+ 
+     // if dst is not found, route via consistent-hashing of the flow.
+     if (!dst) {
+@@ -1016,12 +1015,12 @@ process_packet(struct xdp_md* xdp, __u64 nh_off, bool is_ipv6) {
+           lru_stats->v2 += 1;
+         }
+       }
+-      if (!get_packet_dst(&dst, &pckt, vip_info, is_ipv6, lru_map)) {
++      if (!get_packet_dst(&dst, &pckt, vip_flags, vip_num, is_ipv6, lru_map)) {
+         return XDP_DROP;
+       }
+ 
+       // track the lru miss counter of vip in vip_miss_stats
+-      if (update_vip_lru_miss_stats(&vip, &pckt, vip_info, is_ipv6) >= 0) {
++      if (update_vip_lru_miss_stats(&vip, &pckt, is_ipv6) >= 0) {
+         return XDP_DROP;
+       }
+ 
+@@ -1051,7 +1050,7 @@ process_packet(struct xdp_md* xdp, __u64 nh_off, bool is_ipv6) {
+   data_stats->v1 += 1;
+   data_stats->v2 += pkt_bytes;
+ #ifdef LOCAL_DELIVERY_OPTIMIZATION
+-  if ((vip_info->flags & F_LOCAL_VIP) && (dst->flags & F_LOCAL_REAL)) {
++  if ((vip_flags & F_LOCAL_VIP) && (dst->flags & F_LOCAL_REAL)) {
+     return XDP_PASS;
+   }
+ #endif

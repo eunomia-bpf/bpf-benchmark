@@ -1,0 +1,4 @@
+ libbpf-tools/capable.bpf.c    | 54 +++++++-------------------------
+ libbpf-tools/syscount.bpf.c   |  8 ++---
+ libbpf-tools/tcpconnect.bpf.c | 73 ++++++++++---------------------------------
+ 3 files changed, 32 insertions(+), 103 deletions(-)

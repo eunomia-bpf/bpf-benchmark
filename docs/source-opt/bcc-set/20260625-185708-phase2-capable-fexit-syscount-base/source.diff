@@ -1,0 +1,126 @@
+diff --git a/libbpf-tools/capable.bpf.c b/libbpf-tools/capable.bpf.c
+index 6673f786..a993c1e8 100644
+--- a/libbpf-tools/capable.bpf.c
++++ b/libbpf-tools/capable.bpf.c
+@@ -21,24 +21,12 @@ const volatile bool user_stack = false;
+ const volatile bool filter_cg = false;
+ const volatile pid_t targ_pid = -1;
+ 
+-struct args_t {
+-	int cap;
+-	int cap_opt;
+-};
+-
+ struct unique_key {
+ 	int cap;
+ 	u32 tgid;
+ 	u64 cgroupid;
+ };
+ 
+-struct {
+-	__uint(type, BPF_MAP_TYPE_HASH);
+-	__uint(max_entries, 10240);
+-	__type(key, u64);
+-	__type(value, struct args_t);
+-} start SEC(".maps");
+-
+ struct {
+ 	__uint(type, BPF_MAP_TYPE_CGROUP_ARRAY);
+ 	__type(key, u32);
+@@ -71,11 +59,12 @@ struct {
+ 	__type(value, u64);
+ } seen SEC(".maps");
+ 
+-SEC("kprobe/cap_capable")
+-int BPF_KPROBE(kprobe__cap_capable_entry, const struct cred *cred, struct user_namespace *targ_ns, int cap, int cap_opt)
++SEC("fexit/cap_capable")
++int BPF_PROG(cap_capable_exit, const struct cred *cred,
++	     struct user_namespace *targ_ns, int cap, int cap_opt, int ret)
+ {
+-	__u32 pid;
+ 	__u64 pid_tgid;
++	__u32 pid;
+ 
+ 	if (filter_cg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+ 		return 0;
+@@ -89,47 +78,26 @@ int BPF_KPROBE(kprobe__cap_capable_entry, const struct cred *cred, struct user_n
+ 	if (targ_pid != -1 && targ_pid != pid)
+ 		return 0;
+ 
+-	struct args_t args = {};
+-	args.cap = cap;
+-	args.cap_opt = cap_opt;
+-	bpf_map_update_elem(&start, &pid_tgid, &args, 0);
+-
+-	return 0;
+-}
+-
+-SEC("kretprobe/cap_capable")
+-int BPF_KRETPROBE(kprobe__cap_capable_exit)
+-{
+-	__u64 pid_tgid;
+-	struct args_t *ap;
+ 	struct key_t i_key;
+-
+-	pid_tgid = bpf_get_current_pid_tgid();
+-	ap = bpf_map_lookup_elem(&start, &pid_tgid);
+-	if (!ap)
+-		return 0;   /* missed entry */
+-
+-	bpf_map_delete_elem(&start, &pid_tgid);
+-
+ 	struct cap_event event = {};
+-	event.pid = pid_tgid >> 32;
++	event.pid = pid;
+ 	event.tgid = pid_tgid;
+-	event.cap = ap->cap;
++	event.cap = cap;
+ 	event.uid = bpf_get_current_uid_gid();
+ 	bpf_get_current_comm(&event.task, sizeof(event.task));
+-	event.ret = PT_REGS_RC(ctx);
++	event.ret = ret;
+ 
+ 	if (LINUX_KERNEL_VERSION >= KERNEL_VERSION(5, 1, 0)) {
+ 		/* @opts: Bitmask of options defined in include/linux/security.h */
+-		event.audit = (ap->cap_opt & 0b10) == 0;
+-		event.insetid = (ap->cap_opt & 0b100) != 0;
++		event.audit = (cap_opt & 0b10) == 0;
++		event.insetid = (cap_opt & 0b100) != 0;
+ 	} else {
+-		event.audit = ap->cap_opt;
++		event.audit = cap_opt;
+ 		event.insetid = -1;
+ 	}
+ 
+ 	if (unique_type) {
+-		struct unique_key key = {.cap = ap->cap};
++		struct unique_key key = {.cap = cap};
+ 		if (unique_type == UNQ_CGROUP)
+ 			key.cgroupid = bpf_get_current_cgroup_id();
+ 		else
+diff --git a/libbpf-tools/syscount.bpf.c b/libbpf-tools/syscount.bpf.c
+index 38f8f978..8aadda86 100644
+--- a/libbpf-tools/syscount.bpf.c
++++ b/libbpf-tools/syscount.bpf.c
+@@ -74,6 +74,10 @@ int sys_exit(struct trace_event_raw_sys_exit *args)
+ 	if (filter_cg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+ 		return 0;
+ 
++	/* this happens when there is an interrupt */
++	if (args->id == -1)
++		return 0;
++
+ 	u64 id = bpf_get_current_pid_tgid();
+ 	static const struct data_t zero;
+ 	pid_t pid = id >> 32;
+@@ -82,10 +86,6 @@ int sys_exit(struct trace_event_raw_sys_exit *args)
+ 	u32 tid = id;
+ 	u32 key;
+ 
+-	/* this happens when there is an interrupt */
+-	if (args->id == -1)
+-		return 0;
+-
+ 	if (filter_pid && pid != filter_pid)
+ 		return 0;
+ 	if (filter_failed && args->ret >= 0)

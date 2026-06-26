@@ -80,6 +80,11 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `20260625-021633-calc-offset-fastpath` | pktgen_total_pps mean=3053240; errors=844276210 | `3050340, 3051894, 3057485` | -0.26% | `corpus/results/x86_kvm_corpus_20260625_092311_749645` |
 | `20260625-023639-quic-connid-no-null-check` | pktgen_total_pps mean=3060385; errors=1034578362 | `3036690, 3053123, 3091341` | -0.03% | `corpus/results/x86_kvm_corpus_20260625_094328_513110` |
 | `20260625-025627-stable-rt-header-early-return` | pktgen_total_pps mean=3005981; errors=919785621 | `3001715, 2991963, 3024265` | -1.80% | `corpus/results/x86_kvm_corpus_20260625_100305_598103` |
+| `phase2/20260625-164917-udp-flow-migration-require-dst` | pktgen_total_pps mean=3305186; errors=648715246; accepted-for-analysis | `3299495, 3294334, 3321729` | +7.97% | `corpus/results/x86_kvm_corpus_20260625_235638_664542` |
+| `phase2/20260625-172006-lru-miss-proto-compare` | pktgen_total_pps mean=3288342; errors=1647406492; completed-not-stacked | `3267504, 3316271, 3281251` | +7.42% | `corpus/results/x86_kvm_corpus_20260626_002120_778242` |
+| `phase2/20260625-182615-cache-vip-metadata` | pktgen_total_pps mean=3348905; errors=1008452024; accepted-for-analysis | `3390361, 3336180, 3320175` | +9.40% | `corpus/results/x86_kvm_corpus_20260626_004646_185930` |
+| `phase2/20260625-180602-cache-vip-plus-lru-proto-compare` | pktgen_total_pps mean=3275764; errors=1659713484; completed-not-stacked | `3272779, 3268211, 3286301` | +7.01% | `corpus/results/x86_kvm_corpus_20260626_011245_701549` |
+| `phase2/20260625-183134-nonnull-lru-map` | pktgen_total_pps mean=3301431; errors=1600708022; completed-not-stacked | `3317221, 3295753, 3291320` | +7.85% | `corpus/results/x86_kvm_corpus_20260626_013906_982440` |
 
 ### `bcc/set`
 
@@ -91,6 +96,7 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `20260625-041821-tcplife-cache-newstate` | stress_ng_sum_bogo_ops_s mean=704720 | `704690, 704389, 705081` | -0.81% | `corpus/results/x86_kvm_corpus_20260625_112427_430171` |
 | `20260625-043750-syscount-interrupt-fast-return` | stress_ng_sum_bogo_ops_s mean=711554 | `709915, 711686, 713061` | +0.15% | `corpus/results/x86_kvm_corpus_20260625_114437_519205` |
 | `20260625-045812-runqlat-skip-idle-tgid-read` | stress_ng_sum_bogo_ops_s mean=705171 | `704250, 704247, 707015` | -0.75% | `corpus/results/x86_kvm_corpus_20260625_120517_651286` |
+| `phase2/20260625-185708-capable-fexit-syscount-base` | stress_ng_sum_bogo_ops_s mean=718235; accepted-for-analysis | `719939, 713743, 721022` | +1.09% | `corpus/results/x86_kvm_corpus_20260626_020646_300498` |
 
 ### `tracee/monitor`
 
@@ -222,6 +228,42 @@ attempt 文件含义：
 - `run-command.sh`：实际运行的 `make corpus` 命令，作为记录即可。
 - `result-paths.txt`：本次 run 的 `corpus/results/...` 路径。
 - `correctness.md`：正确性 gate 逐项结果。
+- `diagnostics.md`：第二轮起每次 attempt 记录修改前后的关键 BPF instruction count、
+  objdump/分支布局观察、map/helper hot path 依据；诊断只辅助选点，不写入
+  framework summary。
+
+## 第二轮 stacked tuning
+
+第一轮完成后继续第二轮，每个 app 再做 5 次源码优化 attempt，总计再增加
+30 次。第二轮目标是把单 app 最佳提升推到 10-20%，允许在同一 app 内叠加
+此前 correctness 通过且有正向性能信号的源码优化；没有正向信号的 patch
+不得作为叠加 base。
+
+第二轮执行规则：
+
+- 仍然一次只跑一个 app，按 `katran`、`bcc/set`、`tracee/monitor`、
+  `cilium/agent`、`tetragon/observer`、`otelcol-ebpf-profiler/profiling`
+  顺序推进。
+- 每个 app 做 5 次 phase2 attempt；当前 app 未完成前不进入下一个 app。
+- attempt 可以是 stacked patch，但 `source.diff` 必须保存本次正式 run 使用的
+  完整源码差异。
+- 每次 attempt 前先做诊断：对当前 base 和候选 patch 看关键 BPF program 的
+  instruction count、objdump 分支布局、map lookup/helper 调用位置。
+- 诊断可以使用 `llvm-objdump`、`bpftool` 的离线 object 检查或构建日志，但
+  正式性能仍只来自 `SKIP_REJIT=all ... make corpus` 的 raw result。
+- 仍然禁止修改 workload、runner、framework、pass config、shim、LD_PRELOAD、
+  ReJIT、bpfopt 或 kinsn 路径。
+- 每次 run 后仍然恢复 app 源码和生成 artifact 到 attempt 前状态。
+- 如果 30 次 phase2 全部完成但没有达到 10-20% 目标，继续从 `katran` 开始下一轮
+  30 次，直到目标达成或明确记录阻塞原因。
+
+第二轮当前进度：
+
+- Completed phase2 apps: `katran`
+- Phase2 source optimization attempts: 6 / 30
+- Current phase2 app: `bcc/set`
+- Current phase2 target: retain the first-round `cilium/agent` +12.37% result as
+  the floor, and try to push the best single-app source-only result toward 15-20%.
 
 ## 单个 app 的完整流程
 
