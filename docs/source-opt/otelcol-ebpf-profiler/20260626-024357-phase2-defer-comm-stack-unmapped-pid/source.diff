@@ -1,0 +1,60 @@
+diff --git a/support/ebpf/tracemgmt.h b/support/ebpf/tracemgmt.h
+index 7a30122..6eff2f2 100644
+--- a/support/ebpf/tracemgmt.h
++++ b/support/ebpf/tracemgmt.h
+@@ -739,37 +739,31 @@ static inline EBPF_INLINE int collect_trace(
+   trace->tid     = tid;
+   trace->ktime   = trace_timestamp;
+   trace->context_value = off_cpu_time;
+-  if (bpf_get_current_comm(&(trace->comm), sizeof(trace->comm)) < 0) {
+-    increment_metric(metricID_ErrBPFCurrentComm);
+-  }
+-
+-  // Get the kernel mode stack trace first
+-  trace->kernel_stack_id = bpf_get_stackid(ctx, &kernel_stackmap, BPF_F_REUSE_STACKID);
+-  DEBUG_PRINT("kernel stack id = %d", trace->kernel_stack_id);
+-
+-  if (pid == 0) {
+-    tail_call(ctx, PROG_UNWIND_STOP);
+-    return 0;
+-  }
+ 
+   // Recursive unwind frames
+   int unwinder           = PROG_UNWIND_STOP;
+-  bool has_usermode_regs = false;
+-  ErrorCode error        = get_usermode_regs(ctx, &record->state, &has_usermode_regs);
+-  if (error || !has_usermode_regs) {
+-    goto exit;
++  ErrorCode error        = ERR_OK;
++  if (pid != 0) {
++    bool has_usermode_regs = false;
++    error                  = get_usermode_regs(ctx, &record->state, &has_usermode_regs);
++    if (!error && has_usermode_regs) {
++      if (!pid_information_exists(pid)) {
++        u64 pid_tgid = (u64)pid << 32 | tid;
++        if (report_pid(ctx, pid_tgid, RATELIMIT_ACTION_DEFAULT)) {
++          increment_metric(metricID_NumProcNew);
++        }
++        return 0;
++      }
++      error = get_next_unwinder_after_native_frame(record, &unwinder);
++    }
+   }
+ 
+-  if (!pid_information_exists(pid)) {
+-    u64 pid_tgid = (u64)pid << 32 | tid;
+-    if (report_pid(ctx, pid_tgid, RATELIMIT_ACTION_DEFAULT)) {
+-      increment_metric(metricID_NumProcNew);
+-    }
+-    return 0;
++  if (bpf_get_current_comm(&(trace->comm), sizeof(trace->comm)) < 0) {
++    increment_metric(metricID_ErrBPFCurrentComm);
+   }
+-  error = get_next_unwinder_after_native_frame(record, &unwinder);
++  trace->kernel_stack_id = bpf_get_stackid(ctx, &kernel_stackmap, BPF_F_REUSE_STACKID);
++  DEBUG_PRINT("kernel stack id = %d", trace->kernel_stack_id);
+ 
+-exit:
+   record->state.unwind_error = error;
+   tail_call(ctx, unwinder);
+   DEBUG_PRINT("bpf_tail call failed for %d in native_tracer_entry", unwinder);

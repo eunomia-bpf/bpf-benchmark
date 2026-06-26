@@ -1,0 +1,22 @@
+# Diagnostics
+
+- Candidate base: phase2 attempt 1, `20260626-004351-phase2-tracepoint-nop-arg-fastpath`.
+- New change:
+  - Add `generic_tracepoint_no_selector_filter()` in `bpf_generic_tracepoint.c`.
+  - In `generic_tracepoint_event()`, detect a no-selector filter entry and tail-call directly to `TAIL_CALL_PROCESS`.
+  - Keep the original `TAIL_CALL_FILTER` path for selector-enabled events and no-selector cases where process context preparation does not succeed in the entry program.
+- Policy basis: `runner/assets/tetragon_policies/raw_syscalls.yaml` has no configured selectors, so the raw-syscalls hot path should often be eligible for no-selector filtering.
+- Build sanity: local Tetragon BPF build completed with clang-18 before the formal run.
+- Patched object symbol observations before the formal run:
+  - `bpf_generic_tracepoint_v511.o` `generic_tracepoint_event`: `0x21a80`.
+  - `bpf_generic_tracepoint_v511.o` `generic_tracepoint_filter`: `0x20a30`.
+  - `bpf_generic_tracepoint_v511.o` `generic_tracepoint_arg`: `0x79c8`.
+  - `bpf_generic_tracepoint_v53.o` `generic_tracepoint_event`: `0x21630`.
+  - `bpf_generic_tracepoint_v53.o` `generic_tracepoint_filter`: `0x20810`.
+  - `bpf_generic_tracepoint_v53.o` `generic_tracepoint_arg`: `0x6b38`.
+  - `bpf_generic_tracepoint_v61.o` `generic_tracepoint_event`: `0x8320`.
+  - `bpf_generic_tracepoint_v61.o` `generic_tracepoint_filter`: `0x72d0`.
+  - `bpf_generic_tracepoint_v61.o` `generic_tracepoint_arg`: `0x0b68`.
+  - `bpf_generic_kprobe_v511.o` `generic_kprobe_event`: `0x0650`.
+  - `bpf_generic_rawtp_v511.o` `generic_rawtp_event`: `0x0650`.
+- Result: correctness passed, but workload throughput was `388975`, below phase2 attempt 1's `391151`. The wider tracepoint entry likely added enough code and helper work to offset skipping the filter tail call. This patch is not selected for stacking.

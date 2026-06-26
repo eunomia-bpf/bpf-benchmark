@@ -146,6 +146,9 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `20260625-111613-lazy-ns-cap-skip-empty-namespace-loop` | stress_ng_sum_bogo_ops_s mean=389565 | `391278, 386987, 390431` | +8.61% | `corpus/results/x86_kvm_corpus_20260625_182312_224669` |
 | `phase2/20260626-004351-phase2-tracepoint-nop-arg-fastpath` | stress_ng_sum_bogo_ops_s mean=391151; accepted-for-analysis; selected as current tetragon phase2 best | `399794, 385719, 387940` | +9.05% | `corpus/results/x86_kvm_corpus_20260626_075102_935489` |
 | `phase2/20260626-010736-phase2-defer-selector-active-clear` | stress_ng_sum_bogo_ops_s mean=390959; accepted-for-analysis; not selected as next base | `391940, 385567, 395369` | +9.00% | `corpus/results/x86_kvm_corpus_20260626_081407_505208` |
+| `phase2/20260626-012946-phase2-filter-args-no-selector-fastpath` | stress_ng_sum_bogo_ops_s mean=390359; accepted-for-analysis; not selected as next base | `397404, 388898, 384775` | +8.83% | `corpus/results/x86_kvm_corpus_20260626_083643_226335` |
+| `phase2/20260626-015135-phase2-tracepoint-no-selector-filter-bypass` | stress_ng_sum_bogo_ops_s mean=388975; accepted-for-analysis; not selected as next base | `390527, 390759, 385637` | +8.45% | `corpus/results/x86_kvm_corpus_20260626_085918_851913` |
+| `phase2/20260626-021402-phase2-tracepoint-curr-only-no-selector-bypass` | stress_ng_sum_bogo_ops_s mean=391962; accepted-for-analysis; selected as tetragon phase2 best | `393846, 395075, 386967` | +9.28% | `corpus/results/x86_kvm_corpus_20260626_092152_089522` |
 
 ### `otelcol-ebpf-profiler/profiling`
 
@@ -276,16 +279,14 @@ attempt 文件含义：
 第二轮当前进度：
 
 - Completed phase2 apps: `katran`, `bcc/set`, `tracee/monitor`,
-  `cilium/agent`
-- Phase2 source optimization attempts: 22 / 30
-- Current phase2 app: `tetragon/observer`
-- Current phase2 target: Tetragon phase2 attempt 1 improved the first-round
-  best from `+8.61%` to `+9.05%` by combining lazy selector state with a
-  raw-tracepoint `nop_ty` argument fast path. Phase2 attempt 2 reduced entry
-  object size further but measured `+9.00%`, slightly below attempt 1, so it is
-  not stacked. Continue Tetragon attempts 3-5 from the phase2 attempt 1 base;
-  target the remaining gap to 10% with additional raw tracepoint/filter
-  hot-path reductions.
+  `cilium/agent`, `tetragon/observer`
+- Phase2 source optimization attempts: 25 / 30
+- Current phase2 app: `otelcol-ebpf-profiler/profiling`
+- Current phase2 target: Tetragon phase2 completed with best `+9.28%`, short of
+  the 10% target. Continue with OTEL phase2 next; first priority is strict
+  artifact provenance for embedded eBPF source rebuilds, because the first-round
+  `defer-kernel-stackid-unmapped-pid` attempt was rejected when the edited
+  source was not proven to enter the runtime artifact.
 
 ## 单个 app 的完整流程
 

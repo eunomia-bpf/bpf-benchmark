@@ -1,7 +1,7 @@
 # tetragon/observer source-opt summary
 
 - App: `tetragon/observer`
-- Status: phase2-in-progress
+- Status: phase2-complete
 - Start date: 2026-06-25
 - Source tree at start: `vendor/repos/tetragon` had no local diff.
 - Baseline: `corpus/results/x86_kvm_corpus_20260625_163302_015551`
@@ -16,6 +16,9 @@
 | attempt 5 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260625_182312_224669` | attempt 3 plus skip empty namespace-section loop; stress_ng_sum_bogo_ops_s mean=389565 (+8.61% vs baseline, +0.43% vs attempt 3); current tetragon best |
 | phase2 attempt 1 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_075102_935489` | first-round best plus tracepoint `nop_ty` arg fast path and conditional capability namespace load; stress_ng_sum_bogo_ops_s mean=391151 (+9.05% vs baseline, +0.41% vs first-round best); current tetragon phase2 best |
 | phase2 attempt 2 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_081407_505208` | phase2 attempt 1 plus deferred selector-specific active clear; stress_ng_sum_bogo_ops_s mean=390959 (+9.00% vs baseline, -0.05% vs phase2 attempt 1); not selected as next base |
+| phase2 attempt 3 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_083643_226335` | phase2 attempt 1 plus args-stage no-selector fast path before `filter_map` lookup; stress_ng_sum_bogo_ops_s mean=390359 (+8.83% vs baseline, -0.20% vs phase2 attempt 1); not selected as next base |
+| phase2 attempt 4 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_085918_851913` | phase2 attempt 1 plus tracepoint-entry no-selector filter bypass; stress_ng_sum_bogo_ops_s mean=388975 (+8.45% vs baseline, -0.56% vs phase2 attempt 1); not selected as next base |
+| phase2 attempt 5 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_092152_089522` | phase2 attempt 1 plus curr-only tracepoint no-selector bypass; stress_ng_sum_bogo_ops_s mean=391962 (+9.28% vs baseline, +0.21% vs phase2 attempt 1); selected as tetragon phase2 best but below 10% target |
 
 ## Completion Gates
 
@@ -31,6 +34,11 @@
 - [x] App source restored after phase2 attempt 1.
 - [x] Phase2 attempt 2 recorded with `source.diff`, command, result path, diagnostics, and correctness notes.
 - [x] App source restored after phase2 attempt 2.
-- [x] Root `docs/source-opt/README.md` performance table updated through phase2 attempt 2.
-- [ ] Five phase2 attempts recorded.
-- [ ] Root `docs/source-opt/README.md` performance table updated through phase2 attempt 5.
+- [x] Phase2 attempt 3 recorded with `source.diff`, command, result path, diagnostics, and correctness notes.
+- [x] App source restored after phase2 attempt 3.
+- [x] Phase2 attempt 4 recorded with `source.diff`, command, result path, diagnostics, and correctness notes.
+- [x] App source restored after phase2 attempt 4.
+- [x] Phase2 attempt 5 recorded with `source.diff`, command, result path, diagnostics, and correctness notes.
+- [x] App source restored after phase2 attempt 5.
+- [x] Five phase2 attempts recorded.
+- [x] Root `docs/source-opt/README.md` performance table updated through phase2 attempt 5.

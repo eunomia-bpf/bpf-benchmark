@@ -1,0 +1,26 @@
+# Diagnostics
+
+- Candidate base: phase2 attempt 1, `20260626-004351-phase2-tracepoint-nop-arg-fastpath`.
+- New change:
+  - Add `generic_tracepoint_curr_no_selector_filter()` in `bpf_generic_tracepoint.c`.
+  - In `generic_tracepoint_event()`, bypass `TAIL_CALL_FILTER` only when `filter_map[0] == 0` and `event_find_curr()` succeeds.
+  - Do not inline `event_find_curr_probe()` into the tracepoint entry program; fallback remains in `generic_process_filter()`.
+- Policy basis: `runner/assets/tetragon_policies/raw_syscalls.yaml` has no configured selectors, so the raw-syscalls hot path should often be eligible for the no-selector accept branch.
+- Build sanity: local Tetragon BPF build completed with clang-18 before the formal run.
+- Patched object symbol observations before the formal run:
+  - `bpf_generic_tracepoint_v511.o` `generic_tracepoint_event`: `0x65d8`.
+  - `bpf_generic_tracepoint_v511.o` `generic_tracepoint_filter`: `0x20a30`.
+  - `bpf_generic_tracepoint_v511.o` `generic_tracepoint_arg`: `0x79c8`.
+  - `bpf_generic_tracepoint_v53.o` `generic_tracepoint_event`: `0x65d8`.
+  - `bpf_generic_tracepoint_v53.o` `generic_tracepoint_filter`: `0x20810`.
+  - `bpf_generic_tracepoint_v53.o` `generic_tracepoint_arg`: `0x6b38`.
+  - `bpf_generic_tracepoint_v61.o` `generic_tracepoint_event`: `0x65d8`.
+  - `bpf_generic_tracepoint_v61.o` `generic_tracepoint_filter`: `0x72d0`.
+  - `bpf_generic_tracepoint_v61.o` `generic_tracepoint_arg`: `0x0b68`.
+  - `bpf_generic_kprobe_v511.o` `generic_kprobe_event`: `0x0650`.
+  - `bpf_generic_rawtp_v511.o` `generic_rawtp_event`: `0x0650`.
+- Comparison:
+  - Phase2 attempt 1 `generic_tracepoint_event`: `0x6250`.
+  - Phase2 attempt 4 `generic_tracepoint_event`: `0x21a80`.
+  - This attempt `generic_tracepoint_event`: `0x65d8`, so the narrow bypass avoids attempt 4's large entry expansion.
+- Result: correctness passed and workload throughput was `391962`, above phase2 attempt 1's `391151`. This patch is selected as the Tetragon phase2 best, but the app remains short of the 10% target.
