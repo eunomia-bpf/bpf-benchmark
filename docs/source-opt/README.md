@@ -1,6 +1,6 @@
 # eBPF 源码优化探索计划
 
-Last updated: 2026-06-25
+Last updated: 2026-06-26
 
 本文档是 `docs/source-opt/` 的执行手册。目标是系统性探索：在不使用
 `kinsn`、`bpfopt`、ReJIT、shim、LD_PRELOAD 或 native-loader 的前提下，
@@ -113,6 +113,9 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `20260625-064212-socket-dup-late-args` | stress_ng_sum_bogo_ops_s mean=458474 | `460912, 456147, 458361` | -0.52% | `corpus/results/x86_kvm_corpus_20260625_134931_275984` |
 | `20260625-070258-socket-dup-unix-else` | stress_ng_sum_bogo_ops_s mean=454296 | `454215, 454954, 453718` | -1.43% | `corpus/results/x86_kvm_corpus_20260625_141005_857825` |
 | `phase2/20260625-205820-cap-capable-fentry` | rejected-correctness: Tracee failed BPF load; fentry program returned unknown helper result instead of 0 | `N/A` | N/A | `corpus/results/x86_kvm_corpus_20260626_040613_380312` |
+| `phase2/20260625-210832-cap-capable-fentry-return0` | stress_ng_sum_bogo_ops_s mean=462359; accepted-for-analysis | `466968, 460401, 459707` | +0.32% | `corpus/results/x86_kvm_corpus_20260626_041555_482043` |
+| `phase2/20260625-213013-phase2-cap-fentry-early-noaudit` | stress_ng_sum_bogo_ops_s mean=453930; rejected-no-signal; not selected as next base | `453680, 454459, 453651` | -1.50% | `corpus/results/x86_kvm_corpus_20260626_043813_884875` |
+| `phase2/20260625-215524-phase2-simple-value-args-fastpath` | rejected-correctness: Tracee failed BPF load; verifier rejected `sys_exit_submit` after simple-value arg fast path | `N/A` | N/A | `corpus/results/x86_kvm_corpus_20260626_050351_616916` |
 
 ### `cilium/agent`
 
@@ -265,13 +268,15 @@ attempt 文件含义：
 第二轮当前进度：
 
 - Completed phase2 apps: `katran`, `bcc/set`
-- Phase2 source optimization attempts: 11 / 30
+- Phase2 source optimization attempts: 14 / 30
 - Current phase2 app: `tracee/monitor`
-- Current phase2 target: repair the `cap_capable` fentry conversion by forcing
-  `R0=0` on exit, then decide whether to keep this attach-point optimization or
-  switch to earlier hot-event filtering. bcc/set phase2 best is +2.70%, while
-  the current single-app floor to beat remains first-round `cilium/agent` at
-  +12.37%.
+- Current phase2 target: pivot away from `cap_capable` micro-tuning. The
+  corrected fentry conversion is only +0.32%, and moving the `CAP_OPT_NOAUDIT`
+  drop before event setup regressed by -1.50%. A global simple-value
+  `save_args_to_submit_buf()` fast path failed verifier load, so the final
+  tracee phase2 attempt should be narrower and verifier-obvious. bcc/set phase2
+  best is +2.70%, while the current single-app floor to beat remains
+  first-round `cilium/agent` at +12.37%.
 
 ## 单个 app 的完整流程
 

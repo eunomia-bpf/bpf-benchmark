@@ -48,9 +48,12 @@ Phase2 attempts:
 | Attempt | Status | Result path | Notes |
 | --- | --- | --- | --- |
 | phase2/20260625-205820-cap-capable-fentry | rejected-correctness | `corpus/results/x86_kvm_corpus_20260626_040613_380312` | Converted `trace_cap_capable` from kprobe to fentry, but Tracee failed BPF load because the fentry program returned the unknown `events_perf_submit()` helper result instead of 0. No performance samples. |
+| phase2/20260625-210832-cap-capable-fentry-return0 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_041555_482043` | Corrected fentry return value; `stress_ng_sum_bogo_ops_s mean=462359`, samples `466968, 460401, 459707`, +0.32% vs baseline. |
+| phase2/20260625-213013-phase2-cap-fentry-early-noaudit | rejected-no-signal | `corpus/results/x86_kvm_corpus_20260626_043813_884875` | Stacked corrected fentry with an earlier `CAP_OPT_NOAUDIT` return before event setup; correctness passed, but `stress_ng_sum_bogo_ops_s mean=453930`, samples `453680, 454459, 453651`, -1.50% vs baseline. Not selected as next base. |
+| phase2/20260625-215524-phase2-simple-value-args-fastpath | rejected-correctness | `corpus/results/x86_kvm_corpus_20260626_050351_616916` | Added a simple-value fast path to `save_args_to_submit_buf()`, but Tracee failed BPF load: verifier rejected `sys_exit_submit` with `invalid access to map value` on the fallback type table path. No performance samples. |
 
 Phase2 gate:
 
-- [x] 1 / 5 phase2 attempts recorded.
-- [ ] At least one phase2 tracee attempt accepted for performance analysis.
-- [x] tracee source tree returned to attempt-start state after phase2 attempt 1.
+- [x] 4 / 5 phase2 attempts recorded.
+- [x] At least one phase2 tracee attempt accepted for performance analysis.
+- [x] tracee source tree returned to attempt-start state after phase2 attempt 4.

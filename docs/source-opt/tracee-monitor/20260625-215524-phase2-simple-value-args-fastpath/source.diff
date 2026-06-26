@@ -1,0 +1,97 @@
+diff --git a/pkg/ebpf/c/common/buffer.h b/pkg/ebpf/c/common/buffer.h
+index 6cff96388..300c295b7 100644
+--- a/pkg/ebpf/c/common/buffer.h
++++ b/pkg/ebpf/c/common/buffer.h
+@@ -564,6 +564,10 @@ statfunc u8 get_num_fields(u64 field_types)
+      (u64) 1 << U16_T | (u64) 1 << U8_T | (u64) 1 << UINT64_ARR_T | (u64) 1 << POINTER_T |         \
+      (u64) 1 << BYTES_T | (u64) 1 << STR_ARR_T | (u64) 1 << U8_T)
+ 
++#define BITMASK_SIMPLE_VALUE_TYPES                                                                 \
++    ((u64) 1 << INT_T | (u64) 1 << UINT_T | (u64) 1 << LONG_T | (u64) 1 << ULONG_T |               \
++     (u64) 1 << POINTER_T)
++
+ // Ensure that only values that can be held by an u32 are assigned to sizes.
+ // If the size is greater than 255, assign 0 (making it evident) and handle it as a special case.
+ static u32 type_size_table[ARG_TYPE_MAX_ARRAY + 1] = {
+@@ -585,6 +589,62 @@ static u32 type_size_table[ARG_TYPE_MAX_ARRAY + 1] = {
+     [TIMESPEC_T] = 0,
+ };
+ 
++statfunc bool field_types_are_simple_values(u64 field_types)
++{
++#pragma unroll
++    for (u8 i = 0; i < 6; i++) {
++        u8 type = DEC_ARG(i, field_types);
++        if (type == NONE_T)
++            continue;
++        if (unlikely(type > ARG_TYPE_MAX_ARRAY))
++            return false;
++        if (!(((u64) 1 << type) & BITMASK_SIMPLE_VALUE_TYPES))
++            return false;
++    }
++
++    return true;
++}
++
++statfunc int save_simple_value_args_to_submit_buf(event_data_t *event, args_t *args)
++{
++    u32 rc = 0;
++    u32 arg_num = 0;
++    u32 size = 0;
++
++#pragma unroll
++    for (u8 i = 0; i < 6; i++) {
++        switch (DEC_ARG(i, event->config.field_types)) {
++            case NONE_T:
++                continue;
++            case INT_T:
++                size = sizeof(int);
++                break;
++            case UINT_T:
++                size = sizeof(uint);
++                break;
++            case LONG_T:
++                size = sizeof(long);
++                break;
++            case ULONG_T:
++                size = sizeof(unsigned long);
++                break;
++            case POINTER_T:
++                size = sizeof(void *);
++                break;
++            default:
++                return -1;
++        }
++
++        rc = save_to_submit_buf(&(event->args_buf), &args->args[i], size, i);
++        if (rc > 0) {
++            arg_num++;
++            rc = 0;
++        }
++    }
++
++    return arg_num;
++}
++
+ statfunc int save_args_to_submit_buf(event_data_t *event, args_t *args)
+ {
+     u8 i;
+@@ -595,13 +655,16 @@ statfunc int save_args_to_submit_buf(event_data_t *event, args_t *args)
+     u32 size;
+     void *arg;
+     short family;
++    u64 field_types = event->config.field_types;
+ 
+-    if (unlikely(event->config.field_types == 0))
++    if (unlikely(field_types == 0))
+         return 0;
++    if (field_types_are_simple_values(field_types))
++        return save_simple_value_args_to_submit_buf(event, args);
+ 
+ #pragma unroll
+     for (i = 0; i < 6; i++) {
+-        type = DEC_ARG(i, event->config.field_types);
++        type = DEC_ARG(i, field_types);
+ 
+         // bounds check for the verifier
+         if (unlikely(type > ARG_TYPE_MAX_ARRAY))

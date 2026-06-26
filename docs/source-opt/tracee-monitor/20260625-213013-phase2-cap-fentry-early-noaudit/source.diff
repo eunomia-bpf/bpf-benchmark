@@ -1,0 +1,38 @@
+diff --git a/pkg/ebpf/c/tracee.bpf.c b/pkg/ebpf/c/tracee.bpf.c
+index 14a3b8102..defd5bdfc 100644
+--- a/pkg/ebpf/c/tracee.bpf.c
++++ b/pkg/ebpf/c/tracee.bpf.c
+@@ -2559,9 +2559,13 @@ int BPF_KPROBE(trace_switch_task_namespaces)
+     return 0;
+ }
+ 
+-SEC("kprobe/cap_capable")
+-int BPF_KPROBE(trace_cap_capable)
++SEC("fentry/cap_capable")
++int BPF_PROG(trace_cap_capable, const struct cred *cred, struct user_namespace *targ_ns,
++             int cap, int cap_opt)
+ {
++    if (cap_opt & CAP_OPT_NOAUDIT)
++        return 0;
++
+     program_data_t p = {};
+     if (!init_program_data(&p, ctx, CAP_CAPABLE))
+         return 0;
+@@ -2569,15 +2573,10 @@ int BPF_KPROBE(trace_cap_capable)
+     if (!evaluate_scope_filters(&p))
+         return 0;
+ 
+-    int cap = PT_REGS_PARM3(ctx);
+-    int cap_opt = PT_REGS_PARM4(ctx);
+-
+-    if (cap_opt & CAP_OPT_NOAUDIT)
+-        return 0;
+-
+     save_to_submit_buf(&p.event->args_buf, (void *) &cap, sizeof(int), 0);
+ 
+-    return events_perf_submit(&p);
++    events_perf_submit(&p);
++    return 0;
+ }
+ 
+ SEC("kprobe/security_socket_create")

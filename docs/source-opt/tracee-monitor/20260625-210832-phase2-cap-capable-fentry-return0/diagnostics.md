@@ -34,3 +34,13 @@ Expected performance mechanism:
   capability hook.
 - The program body remains large; expected gain is from lower attach/dispatch
   overhead, not from reducing Tracee's generic event setup.
+
+Observed performance:
+
+| Metric | Samples | Mean | vs baseline |
+| --- | --- | ---: | ---: |
+| `stress_ng_sum_bogo_ops_s` | `466968, 460401, 459707` | `462359` | +0.32% |
+
+Interpretation: the attach-point conversion is valid and slightly positive, but
+the improvement is far below the 10% target. The remaining overhead is likely
+Tracee's generic event setup and perf-event submit path, not kprobe dispatch.

@@ -1,0 +1,115 @@
+diff --git a/pkg/ebpf/c/tracee.bpf.c b/pkg/ebpf/c/tracee.bpf.c
+index 14a3b8102..d01df1429 100644
+--- a/pkg/ebpf/c/tracee.bpf.c
++++ b/pkg/ebpf/c/tracee.bpf.c
+@@ -64,6 +64,38 @@ int tracepoint__raw_syscalls__sys_enter(struct bpf_raw_tracepoint_args *ctx)
+ // can move to one of:
+ // 1. sys_enter_submit, general event submit logic from sys_enter
+ // 2. directly to syscall tail hanler in sys_enter_tails
++#if defined(bpf_target_x86)
++statfunc u8 tracee_hot_syscall_arg_count(int id)
++{
++    switch (id) {
++        case 62:  // kill
++        case 113: // setreuid
++        case 114: // setregid
++        case 125: // capget
++        case 126: // capset
++        case 200: // tkill
++        case 290: // eventfd2
++            return 2;
++        case 105: // setuid
++        case 106: // setgid
++        case 122: // setfsuid
++        case 123: // setfsgid
++        case 284: // eventfd
++            return 1;
++        case 117: // setresuid
++        case 119: // setresgid
++        case 234: // tgkill
++        case 282: // signalfd
++            return 3;
++        case 289: // signalfd4
++            return 4;
++        case 157: // prctl
++            return 5;
++    }
++    return 6;
++}
++#endif
++
+ SEC("raw_tracepoint/sys_enter_init")
+ int sys_enter_init(struct bpf_raw_tracepoint_args *ctx)
+ {
+@@ -88,26 +120,6 @@ int sys_enter_init(struct bpf_raw_tracepoint_args *ctx)
+     syscall_data_t *sys = &(task_info->syscall_data);
+     sys->id = ctx->args[1];
+ 
+-    struct pt_regs *regs = (struct pt_regs *) ctx->args[0];
+-
+-    if (is_x86_compat(task)) {
+-#if defined(bpf_target_x86)
+-        sys->args.args[0] = BPF_CORE_READ(regs, bx);
+-        sys->args.args[1] = BPF_CORE_READ(regs, cx);
+-        sys->args.args[2] = BPF_CORE_READ(regs, dx);
+-        sys->args.args[3] = BPF_CORE_READ(regs, si);
+-        sys->args.args[4] = BPF_CORE_READ(regs, di);
+-        sys->args.args[5] = BPF_CORE_READ(regs, bp);
+-#endif // bpf_target_x86
+-    } else {
+-        sys->args.args[0] = PT_REGS_PARM1_CORE_SYSCALL(regs);
+-        sys->args.args[1] = PT_REGS_PARM2_CORE_SYSCALL(regs);
+-        sys->args.args[2] = PT_REGS_PARM3_CORE_SYSCALL(regs);
+-        sys->args.args[3] = PT_REGS_PARM4_CORE_SYSCALL(regs);
+-        sys->args.args[4] = PT_REGS_PARM5_CORE_SYSCALL(regs);
+-        sys->args.args[5] = PT_REGS_PARM6_CORE_SYSCALL(regs);
+-    }
+-
+     if (is_compat(task)) {
+         // Translate 32bit syscalls to 64bit syscalls, so we can send to the correct handler
+         u32 *id_64 = bpf_map_lookup_elem(&sys_32_to_64_map, &sys->id);
+@@ -117,6 +129,44 @@ int sys_enter_init(struct bpf_raw_tracepoint_args *ctx)
+         sys->id = *id_64;
+     }
+ 
++#if defined(bpf_target_x86)
++    u8 arg_count = tracee_hot_syscall_arg_count(sys->id);
++#else
++    u8 arg_count = 6;
++#endif
++
++    struct pt_regs *regs = (struct pt_regs *) ctx->args[0];
++
++    if (is_x86_compat(task)) {
++#if defined(bpf_target_x86)
++        if (arg_count > 0)
++            sys->args.args[0] = BPF_CORE_READ(regs, bx);
++        if (arg_count > 1)
++            sys->args.args[1] = BPF_CORE_READ(regs, cx);
++        if (arg_count > 2)
++            sys->args.args[2] = BPF_CORE_READ(regs, dx);
++        if (arg_count > 3)
++            sys->args.args[3] = BPF_CORE_READ(regs, si);
++        if (arg_count > 4)
++            sys->args.args[4] = BPF_CORE_READ(regs, di);
++        if (arg_count > 5)
++            sys->args.args[5] = BPF_CORE_READ(regs, bp);
++#endif // bpf_target_x86
++    } else {
++        if (arg_count > 0)
++            sys->args.args[0] = PT_REGS_PARM1_CORE_SYSCALL(regs);
++        if (arg_count > 1)
++            sys->args.args[1] = PT_REGS_PARM2_CORE_SYSCALL(regs);
++        if (arg_count > 2)
++            sys->args.args[2] = PT_REGS_PARM3_CORE_SYSCALL(regs);
++        if (arg_count > 3)
++            sys->args.args[3] = PT_REGS_PARM4_CORE_SYSCALL(regs);
++        if (arg_count > 4)
++            sys->args.args[4] = PT_REGS_PARM5_CORE_SYSCALL(regs);
++        if (arg_count > 5)
++            sys->args.args[5] = PT_REGS_PARM6_CORE_SYSCALL(regs);
++    }
++
+     // exit, exit_group and rt_sigreturn syscalls don't return
+     if (sys->id != SYSCALL_EXIT && sys->id != SYSCALL_EXIT_GROUP &&
+         sys->id != SYSCALL_RT_SIGRETURN) {

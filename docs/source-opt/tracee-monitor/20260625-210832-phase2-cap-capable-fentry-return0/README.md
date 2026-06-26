@@ -2,7 +2,7 @@
 
 - Time: 2026-06-25 21:08
 - App: `tracee/monitor`
-- Status: planned
+- Status: accepted-for-analysis
 - Source file:
   - `vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c`
 - Hypothesis: keep the `cap_capable` fentry conversion from the previous
@@ -17,6 +17,10 @@
   Tracee's app-visible event ABI.
 - Build command: `make -C vendor tracee-x86`
 - Run command: see `run-command.sh`
-- Result path: TBD
-- Follow-up: if this loads and improves throughput, keep fentry as the tracee
-  phase2 base; otherwise pivot to reducing work in the hot event-submit path.
+- Result path: `corpus/results/x86_kvm_corpus_20260626_041555_482043`
+- Result: `stress_ng_sum_bogo_ops_s mean=462359`, samples
+  `466968, 460401, 459707`, +0.32% vs clean-source tracee baseline
+  `460865`.
+- Follow-up: this proves the fentry direction is load-correct and slightly
+  positive, but the gain is too small for the 10% target. Next attempt should
+  pivot to reducing work in the hot event-submit path.
