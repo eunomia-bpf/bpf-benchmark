@@ -51,26 +51,27 @@ packet 专用指令。这种极简让内核 verifier 可处理、JIT 也小,但�
 
 每条 kinsn 都是一个**双语义原语**:
 
-- **Verifier 语义**:一个声明式 effect(`bpf_kinsn_effect`),描述该操作的 clobber
-  mask、结果 range、tnum、sub-register 定义和内存访问。内核 verifier 把这个 effect
-  施加到抽象状态上,再用它现有的规则检查结果。
-- **执行语义**:一个按架构区分的 `emit_x86()` / `emit_arm64()` 回调,在 JIT 期间
-  emit 出 native 指令序列。
+- **Verifier 语义**:模块提供 `instantiate_insn(payload, insn_buf)`,把该
+  kinsn 展开成 verifier 已经理解的普通 BPF proof sequence。内核 verifier
+  临时验证这个 proof object,而不是消费一套 module-private effect DSL。
+- **执行语义**:同一个 descriptor 提供按架构区分的 `emit_x86()` /
+  `emit_arm64()` 回调,在 JIT 期间 emit 出 native 指令序列。
 
-kinsn 以现有 kfunc 机制的特化形式实现:新增一个 `KF_KINSN` flag 和一张挂接的
-`bpf_kinsn_ops` 表。verifier 对每条 kinsn 的情形零改动地复用 `check_kfunc_call()`;
-JIT 在 CALL-emit 时检查 `KF_KINSN`,分派到模块提供的 emit 回调,而不是生成一个函数调用。
+kinsn 以现有 kfunc BTF 发现机制承载身份,但不再通过 `KF_KINSN` 绑在 kfunc
+flag 上。当前实现把 kfunc BTF id 映射到 `struct bpf_kinsn` descriptor;verifier
+用 `instantiate_insn()` 做 proof lowering,JIT 在 CALL-emit 时识别 kinsn pseudo
+call 并分派到 descriptor 的 native emit 回调。
 
-新优化 = 在一个小内核模块里定义一条新 kinsn + 一个用户态模式识别器(在 `bpfopt` 里),
-把匹配的 BPF 字节码重写成调用该 kinsn。**每个新优化对核心内核 verifier、JIT 或 BPF ISA
-的改动为零。**
+新优化 = 在一个小内核模块里定义一条新 kinsn descriptor + 一个用户态模式识别器
+(在 `bpfopt` 里),把匹配的 BPF 字节码重写成调用该 kinsn。**每个新优化对核心内核
+verifier、JIT 或 BPF ISA 的改动为零。**
 
 ## 3. 为什么这是一个新抽象,而不是又一个 peephole
 
 三条性质把 kinsn 与内核内 peephole 优化区分开:
 
-1. **策略与机制分离**。内核模块提供机制(指令做什么、verifier 该如何建模它、JIT 该如何
-   emit 它)。用户态 `bpfopt` 提供策略(重写哪些模式、用什么 cost model、何时值得插入
+1. **策略与机制分离**。内核模块提供机制(指令做什么、verifier 该验证哪个 proof object、
+   JIT 该如何 emit 它)。用户态 `bpfopt` 提供策略(重写哪些模式、用什么 cost model、何时值得插入
    一条 kinsn)。机制小而固定;策略丰富而可迭代。
 
 2. **每个优化不打核心内核 patch**。核心内核 JIT 和 verifier 不动。加一条新 kinsn 是一次
@@ -88,16 +89,17 @@ eBPF 指令扩展面**。
 
 详细机制设计见 `docs/tmp/kinsn-design.md`。这里是简短速写:
 
-- `struct bpf_kinsn_ops` 持有模块回调:
-  - `model_call(call, effect)`:产出一个声明式 `bpf_kinsn_effect`,供 verifier
-    施加到抽象状态上。
-  - `decode_call(call)` / `validate_call(call)`:解码编码后的操作数并检查良构性。
-  - `emit_x86(call, ctx)` / `emit_arm64(call, ctx)`:在 JIT 期 emit native 代码。
-- `KF_KINSN` 是一个新的 kfunc flag(与 KF_ACQUIRE / KF_RELEASE / KF_SLEEPABLE
-  互斥)。
+- `struct bpf_kinsn` 是每条 kinsn 的 descriptor:
+  - `instantiate_insn(payload, insn_buf)`:产出 canonical BPF-visible proof sequence。
+  - `emit_x86(image, off, emit, payload, prog, final_ip)` / `emit_arm64(image, idx,
+    emit, payload, prog, final_ip)`:在 JIT 期 emit native 代码。
+  - `max_insn_cnt` / `max_emit_bytes`:约束 proof sequence 和 native emit 上界。
+- kfunc BTF id 仍用于发现和重定位,但 kinsn 身份来自注册时附加到
+  `btf_kfunc_id_set` 的 descriptor 数组,而不是一个新的 `KF_KINSN` flag。
 - 打包编码:一条紧邻在 kinsn `BPF_CALL` 之前的 sidecar 伪指令
-  (`BPF_PSEUDO_KINSN_SIDECAR`)携带操作数位。verifier 在施加建模 effect 之前先解码
-  sidecar。零参数 setup,N→1 指令替换。
+  (`BPF_PSEUDO_KINSN_SIDECAR`)携带操作数位。verifier 先把
+  `sidecar + BPF_PSEUDO_KINSN_CALL` 临时 lower 成 proof sequence 做普通 BPF
+  验证,再恢复原始两条指令交给 JIT。
 - 模块生命周期:标准 Linux 模块 load/unload。当一个 kinsn 模块未加载时,verifier 拒绝
   引用它 kfunc 的程序,JIT 也永远看不到它们。在程序已加载之后再卸载,在飞的程序继续
   执行已经 emit 出的 native 代码。
@@ -113,12 +115,12 @@ eBPF 指令扩展面**。
 
 | 文件 | 职责 |
 |------|------|
-| `include/linux/bpf.h` | `bpf_kinsn_ops` / `bpf_kinsn_effect` / `bpf_kinsn_call`结构体、注册 API |
+| `include/linux/bpf.h` | `struct bpf_kinsn` descriptor、sidecar payload helpers、JIT lookup API |
 | `include/linux/bpf_verifier.h` | kinsn verifier 辅助结构体 |
-| `include/linux/btf.h` | `KF_KINSN` flag |
+| `include/linux/btf.h` | `btf_kfunc_id_set.kinsn_descs` descriptor hook |
 | `include/uapi/linux/bpf.h` + `tools/include/uapi/linux/bpf.h` | `BPF_PSEUDO_KINSN_SIDECAR` + `BPF_PSEUDO_KINSN_CALL` enum 扩展 |
 | `kernel/bpf/btf.c` | kinsn BTF id 解析 |
-| `kernel/bpf/verifier.c` | kinsn 注册 / 查找、`model_call` verifier 流程、sidecar 解码 |
+| `kernel/bpf/verifier.c` | kinsn proof lowering / restore、descriptor 查找、sidecar 解码 |
 | `kernel/bpf/disasm.c` | kinsn 反汇编支持 |
 | `arch/x86/net/bpf_jit_comp.c` | x86 JIT CALL-case kinsn 内联 dispatch |
 | `arch/arm64/net/bpf_jit_comp.c` | arm64 JIT kinsn 内联 dispatch |
@@ -170,7 +172,7 @@ kinsn 暴露面是刻意有界的。覆盖决策由 corpus 证据驱动:只有�
 
 决策规则:一条新 kinsn 必须具备非平凡的受支持 corpus site 数量(粗略下限:数百个)、
 在插入点处有可隔离出来的、大于插入带来的 I-cache 与 verifier 重跑成本的性能收益,以及
-一个对 verifier 友好的声明式 effect。三者缺一,该提案就留在"不做"的桶里。
+一个对 verifier 友好的 proof sequence。三者缺一,该提案就留在"不做"的桶里。
 
 ### 5.1 LEA / 地址生成的收窄决定(2026-05-13)
 
@@ -241,11 +243,11 @@ Kinsn: A Hardware-Aware Instruction Extension Surface for eBPF
 ```text
 Kinsn introduces a new kernel abstraction that lets eBPF programs use
 platform-specific hardware instructions safely. The verifier checks each
-kinsn through a declarative effect supplied by a kernel module; the JIT
-emits the native instruction sequence via the same module. New instructions
-are added without modifying the core verifier, the core JIT, or the eBPF
-ISA, and a userspace optimizer chooses insertion sites based on workload
-profile data.
+kinsn through a BPF-visible proof sequence supplied by a kernel module; the
+JIT emits the native instruction sequence via the same module descriptor. New
+instructions are added without modifying the core verifier, the core JIT, or
+the eBPF ISA, and a userspace optimizer chooses insertion sites based on
+workload profile data.
 ```
 
 一份有分量的评测需要展示:
@@ -262,13 +264,14 @@ profile data.
 
 ## 8. 相关工作定位
 
-- **kfuncs(现有上游)**:kinsn 以 kfunc 的特化形式实现(KF_KINSN)。贡献点是双语义
-  emit 路径,而非 BTF 或注册机制。
+- **kfuncs(现有上游)**:kinsn 复用 kfunc BTF id 发现和重定位,但把目标身份映射到
+  `struct bpf_kinsn` descriptor。贡献点是 proof-lowering verifier 路径和双语义
+  native emit 路径,而非 BTF 本身。
 - **JIT peephole**:核心 JIT 里按架构区分的 peephole(例如上游 arm64 LDP fusion)。
   kinsn 把同样的能力推到一个模块边界之后,使得新增不触碰核心 JIT。
 - **JVM intrinsics**:HotSpot intrinsic 把标准库调用替换成由 JIT 挑选的手写 native
-  序列。kinsn 是把同一思路用到 eBPF 上,并让 verifier 以声明式方式建模该 intrinsic 的
-  effect。
+  序列。kinsn 是把同一思路用到 eBPF 上,并让 verifier 通过 proof-lowered BPF
+  sequence 检查该 intrinsic 的 BPF-visible 语义。
 - **K2 / Merlin / EPSO**:在 load 前对源 `.bpf.o` 操作的 BPF 字节码优化器。它们不扩展
   BPF ISA,也无法 emit 标准 JIT 词汇表之外的 native 指令。kinsn 通过拓宽 emit 词汇表来
   与它们互补。
@@ -276,23 +279,24 @@ profile data.
   prior work。Program Warping 用 peephole 把一串 eBPF 指令替换成**优化过的硬件实现**,
   hXDP 给 eBPF 扩 ISA 以在 FPGA NIC 上执行。这正是 kinsn 的核心("识别一段 BPF 模式,
   emit 成更接近硬件的单条原语,拓宽 emit vocabulary"),区别在于它们的 target 是 FPGA
-  overlay,而 kinsn 在 stock host x86/arm64 JIT 上做、走模块边界、verifier 见声明式
-  effect。
+  overlay,而 kinsn 在 stock host x86/arm64 JIT 上做、走模块边界、verifier 见
+  proof-lowered BPF。
 - **经验证的 JIT / translation validation(Jitterbug OSDI 2020、Synthesizing JIT
-  Compilers for In-Kernel DSLs CAV 2020)**:kinsn 的 soundness 论证(§9:声明式 effect
-  必须忠实建模 native emit)本质上是"JIT emit 正确性"问题。verified JIT 与 translation
-  validation 是这一缓解手段的既有方法论范式。
+  Compilers for In-Kernel DSLs CAV 2020)**:kinsn 的 soundness 论证(§9:
+  `instantiate_insn()` 定义的 BPF-visible proof sequence 必须与 native emit 等价)
+  本质上是"JIT emit 正确性"问题。verified JIT 与 translation validation 是这一缓解手段的
+  既有方法论范式。
 - **peephole / 超优化的正确性谱系(kinsn soundness 的直接方法论来源)**:kinsn 的
-  "声明式 effect ≡ native emit" 等价,正是 peephole 正确性 / superoptimization 的核心
+  "proof sequence ≡ native emit" 等价,正是 peephole 正确性 / superoptimization 的核心
   问题,应正面对标这条线:
   - **Alive(PLDI 2015)** + **Alive2(PLDI 2021)**:用 DSL + SMT **证明 peephole 等价**
-    / 对 LLVM 做有界 translation validation —— 几乎就是验证 "kinsn effect ↔ emit" 该用
-    的方法。
+    / 对 LLVM 做有界 translation validation —— 几乎就是验证
+    "`instantiate_insn()` proof ↔ emit" 该用的方法。
   - **STOKE(ASPLOS 2013)** / **Souper(LLVM superoptimizer)** / **Minotaur(OOPSLA
     2024,SIMD)** / **Hydra(OOPSLA 2024,泛化 peephole)**:随机 / 合成式超优化发现并
     **形式化验证** native(含 SIMD)指令序列 —— 自定义指令生成 + 等价验证的谱系。
   - kinsn 与它们的区别:它们离线发现 / 验证一条 host 指令序列;kinsn 把这种"更接近硬件
-    的单条原语"放到**内核模块 + verifier 声明式 effect**之后,在线由 bytecode pass 插入。
+    的单条原语"放到**内核模块 + verifier proof lowering**之后,在线由 bytecode pass 插入。
 - **ePASS(in-kernel eBPF 编译框架,2025)**:把 SSA IR 与 verifier 协同放进内核做分析 /
   变换,与 kinsn 的"内核模块 + verifier 协同"架构可直接对比(也与 idea #1 相关)。
 - **BeeBox / MOAT / Hive(USENIX Security 2024)**:给 eBPF 加硬件或 SFI 隔离的对照组
@@ -301,9 +305,9 @@ profile data.
 
 ## 9. 主要风险
 
-- 每条新 kinsn 都增加一小块内核暴露面(模块回调、声明式 effect、JIT emit)。总暴露面随
+- 每条新 kinsn 都增加一小块内核暴露面(模块 proof generator、JIT emit)。总暴露面随
   kinsn 数量增长,审计成本随之累积。
-- 一个不忠实建模 native emit 的声明式 effect,会对任何使用该 kinsn 的程序静默违反 verifier
+- 一个与 native emit 不等价的 proof sequence,会对任何使用该 kinsn 的程序静默违反 verifier
   soundness。每条 kinsn 的形式化语义文档与 translation-validation 工作
   (`docs/tmp/kinsn-formal-semantics.md`)是缓解办法。
 - 随 workload 自适应的插入需要可靠的 per-site profile 数据。idea #1 的 `bpfprof
@@ -317,7 +321,7 @@ profile data.
 
 - 机制设计:`docs/tmp/kinsn-design.md`
 - 形式化语义与 translation validation:`docs/tmp/kinsn-formal-semantics.md`
-- `bpf_kinsn_ops` 详细设计:`docs/tmp/20260323/kinsn_ops_design_20260323.md`
+- proof lowering 设计:`docs/tmp/20260323/kinsn_v2_instantiate_design_20260323.md`
 - 实现审计:`docs/tmp/20260323/kinsn_implementation_review_20260323.md`
 - 每条 kinsn 的调研与决策:`docs/tmp/*kinsn*`(rotate、cond_select、extract、endian、
   prefetch、ccmp、lea、bls、andn、setcc_cset、simd_fpu、bulk_memory、ldp_stp、

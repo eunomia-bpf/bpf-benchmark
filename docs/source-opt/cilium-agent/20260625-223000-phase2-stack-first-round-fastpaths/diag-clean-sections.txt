@@ -1,0 +1,39 @@
+
+vendor/repos/cilium/bpf/bpf_lxc.o:	file format elf64-bpf
+
+Sections:
+Idx Name                   Size     VMA              Type
+  0                        00000000 0000000000000000 
+  1 .strtab                0000a40b 0000000000000000 
+  2 .text                  00006be8 0000000000000000 TEXT
+  3 .rel.text              00000860 0000000000000000 
+  4 tc/tail                0005de00 0000000000000000 TEXT
+  5 .reltc/tail            00009210 0000000000000000 
+  6 tc/entry               000026c8 0000000000000000 TEXT
+  7 .reltc/entry           000004f0 0000000000000000 
+  8 .rodata.config         00000101 0000000000000000 DATA
+  9 .maps                  00000c50 0000000000000000 DATA
+ 10 .data.aux              000000ae 0000000000000000 DATA
+ 11 .rodata.aux            00000010 0000000000000000 DATA
+ 12 license                0000000d 0000000000000000 DATA
+ 13 .debug_loclists        00058257 0000000000000000 DEBUG
+ 14 .debug_abbrev          0000066b 0000000000000000 DEBUG
+ 15 .debug_info            0003aa6b 0000000000000000 DEBUG
+ 16 .rel.debug_info        00000060 0000000000000000 
+ 17 .debug_rnglists        0000a0ff 0000000000000000 DEBUG
+ 18 .debug_str_offsets     00001c48 0000000000000000 DEBUG
+ 19 .rel.debug_str_offsets 00007100 0000000000000000 
+ 20 .debug_str             0000728b 0000000000000000 DEBUG
+ 21 .debug_addr            00008570 0000000000000000 DEBUG
+ 22 .rel.debug_addr        00010ad0 0000000000000000 
+ 23 .BTF                   00019651 0000000000000000 
+ 24 .rel.BTF               00000890 0000000000000000 
+ 25 .BTF.ext               000545c0 0000000000000000 
+ 26 .rel.BTF.ext           000546a0 0000000000000000 
+ 27 .debug_frame           000003b8 0000000000000000 DEBUG
+ 28 .rel.debug_frame       000004e0 0000000000000000 
+ 29 .debug_line            000207ab 0000000000000000 DEBUG
+ 30 .rel.debug_line        00000650 0000000000000000 
+ 31 .debug_line_str        0000039a 0000000000000000 DEBUG
+ 32 .llvm_addrsig          00000158 0000000000000000 
+ 33 .symtab                00017fb8 0000000000000000 

@@ -2,7 +2,7 @@
 
 App: `tracee/monitor`
 
-Status: phase2-in-progress
+Status: phase2-complete
 
 Start state:
 
@@ -51,9 +51,13 @@ Phase2 attempts:
 | phase2/20260625-210832-cap-capable-fentry-return0 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_041555_482043` | Corrected fentry return value; `stress_ng_sum_bogo_ops_s mean=462359`, samples `466968, 460401, 459707`, +0.32% vs baseline. |
 | phase2/20260625-213013-phase2-cap-fentry-early-noaudit | rejected-no-signal | `corpus/results/x86_kvm_corpus_20260626_043813_884875` | Stacked corrected fentry with an earlier `CAP_OPT_NOAUDIT` return before event setup; correctness passed, but `stress_ng_sum_bogo_ops_s mean=453930`, samples `453680, 454459, 453651`, -1.50% vs baseline. Not selected as next base. |
 | phase2/20260625-215524-phase2-simple-value-args-fastpath | rejected-correctness | `corpus/results/x86_kvm_corpus_20260626_050351_616916` | Added a simple-value fast path to `save_args_to_submit_buf()`, but Tracee failed BPF load: verifier rejected `sys_exit_submit` with `invalid access to map value` on the fallback type table path. No performance samples. |
+| phase2/20260625-220744-phase2-hot-syscall-arg-count | rejected-no-signal | `corpus/results/x86_kvm_corpus_20260626_051548_824007` | Reduced x86 hot syscall argument reads in `sys_enter_init()`; correctness passed, but `stress_ng_sum_bogo_ops_s mean=456957`, samples `453757, 460873, 456241`, -0.85% vs baseline. Not selected as next base. |
 
 Phase2 gate:
 
-- [x] 4 / 5 phase2 attempts recorded.
+- [x] 5 / 5 phase2 attempts recorded.
 - [x] At least one phase2 tracee attempt accepted for performance analysis.
-- [x] tracee source tree returned to attempt-start state after phase2 attempt 4.
+- [x] tracee source tree returned to attempt-start state after phase2 attempt 5.
+- [x] Best tracee phase2 result remains
+  `phase2/20260625-210832-cap-capable-fentry-return0` at +0.32%; tracee
+  did not reach the 10% target.

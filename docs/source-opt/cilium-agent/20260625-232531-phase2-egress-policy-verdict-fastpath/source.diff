@@ -1,0 +1,49 @@
+diff --git a/bpf/bpf_lxc.c b/bpf/bpf_lxc.c
+index 02fdeaddc2..69d27859a4 100644
+--- a/bpf/bpf_lxc.c
++++ b/bpf/bpf_lxc.c
+@@ -1524,7 +1524,7 @@ static __always_inline int handle_ipv4_from_lxc(struct __ctx_buff *ctx, __u32 *d
+ 					     *dst_sec_identity, &policy_match_type, &audited,
+ 					     ext_err, &proxy_port, &cookie);
+ 
+-		if (verdict == DROP_POLICY_AUTH_REQUIRED) {
++		if (unlikely(verdict == DROP_POLICY_AUTH_REQUIRED)) {
+ 			__u32 tunnel_endpoint = 0;
+ 
+ 			auth_type = (__u8)*ext_err;
+@@ -1543,7 +1543,7 @@ static __always_inline int handle_ipv4_from_lxc(struct __ctx_buff *ctx, __u32 *d
+ 						   auth_type, cookie);
+ 		}
+ 
+-		if (verdict != CTX_ACT_OK) {
++		if (unlikely(verdict != CTX_ACT_OK)) {
+ 			/* If policy_deny_response_enabled is set and the packet has been denied,
+ 			 * respond with an ICMPv4 "Destination Unreachable"
+ 			 */
+@@ -1562,7 +1562,7 @@ static __always_inline int handle_ipv4_from_lxc(struct __ctx_buff *ctx, __u32 *d
+ 		/* Skip policy enforcement for return traffic. */
+ 
+ 		/* Check if this is return traffic to an ingress proxy. */
+-		if (ct_state->proxy_redirect) {
++		if (unlikely(ct_state->proxy_redirect)) {
+ 			send_trace_notify(ctx, TRACE_TO_PROXY, SECLABEL_IPV4,
+ 					  UNKNOWN_ID, TRACE_EP_ID_UNKNOWN,
+ 					  TRACE_IFINDEX_UNKNOWN, trace.reason,
+@@ -2407,7 +2407,7 @@ int tail_ipv4_to_endpoint(struct __ctx_buff *ctx)
+ 	__s8 ext_err = 0;
+ 	int ret;
+ 
+-	if (!revalidate_data(ctx, &data, &data_end, &ip4)) {
++	if (unlikely(!revalidate_data(ctx, &data, &data_end, &ip4))) {
+ 		ret = DROP_INVALID;
+ 		goto out;
+ 	}
+@@ -2445,7 +2445,7 @@ int tail_ipv4_to_endpoint(struct __ctx_buff *ctx)
+ 			  &proxy_port, false);
+ 	switch (ret) {
+ 	case POLICY_ACT_PROXY_REDIRECT:
+-		if (!revalidate_data(ctx, &data, &data_end, &ip4)) {
++		if (unlikely(!revalidate_data(ctx, &data, &data_end, &ip4))) {
+ 			ret = DROP_INVALID;
+ 			goto out;
+ 		}

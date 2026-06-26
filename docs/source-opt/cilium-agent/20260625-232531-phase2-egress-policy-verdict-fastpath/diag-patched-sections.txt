@@ -1,0 +1,43 @@
+There are 34 section headers, starting at offset 0x23ecf8:
+
+Section Headers:
+  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+  [ 1] .strtab           STRTAB          0000000000000000 234900 00a3f8 00      0   0  1
+  [ 2] .text             PROGBITS        0000000000000000 000040 006be8 00  AX  0   0  8
+  [ 3] .rel.text         REL             0000000000000000 1bd1c8 000860 10   I 33   2  8
+  [ 4] tc/tail           PROGBITS        0000000000000000 006c28 05de28 00  AX  0   0  8
+  [ 5] .reltc/tail       REL             0000000000000000 1bda28 009210 10   I 33   4  8
+  [ 6] tc/entry          PROGBITS        0000000000000000 064a50 0026c8 00  AX  0   0  8
+  [ 7] .reltc/entry      REL             0000000000000000 1c6c38 0004f0 10   I 33   6  8
+  [ 8] .rodata.config    PROGBITS        0000000000000000 067118 000101 00   A  0   0  8
+  [ 9] .maps             PROGBITS        0000000000000000 067220 000c50 00  WA  0   0  8
+  [10] .data.aux         PROGBITS        0000000000000000 067e70 0000ae 00  WA  0   0  8
+  [11] .rodata.aux       PROGBITS        0000000000000000 067f20 000010 00   A  0   0  8
+  [12] license           PROGBITS        0000000000000000 067f30 00000d 00  WA  0   0  1
+  [13] .debug_loclists   PROGBITS        0000000000000000 067f3d 0581b2 00      0   0  1
+  [14] .debug_abbrev     PROGBITS        0000000000000000 0c00ef 00066b 00      0   0  1
+  [15] .debug_info       PROGBITS        0000000000000000 0c075a 03aa6c 00      0   0  1
+  [16] .rel.debug_info   REL             0000000000000000 1c7128 000060 10   I 33  15  8
+  [17] .debug_rnglists   PROGBITS        0000000000000000 0fb1c6 00a0f8 00      0   0  1
+  [18] .debug_str_offsets PROGBITS       0000000000000000 1052be 001c48 00      0   0  1
+  [19] .rel.debug_str_offsets REL        0000000000000000 1c7188 007100 10   I 33  18  8
+  [20] .debug_str        PROGBITS        0000000000000000 106f06 00728b 01  MS  0   0  1
+  [21] .debug_addr       PROGBITS        0000000000000000 10e191 008570 00      0   0  1
+  [22] .rel.debug_addr   REL             0000000000000000 1ce288 010ad0 10   I 33  21  8
+  [23] .BTF              PROGBITS        0000000000000000 116704 0196a6 00      0   0  4
+  [24] .rel.BTF          REL             0000000000000000 1ded58 000890 10   I 33  23  8
+  [25] .BTF.ext          PROGBITS        0000000000000000 12fdac 0545b0 00      0   0  4
+  [26] .rel.BTF.ext      REL             0000000000000000 1df5e8 054690 10   I 33  25  8
+  [27] .debug_frame      PROGBITS        0000000000000000 184360 0003b8 00      0   0  8
+  [28] .rel.debug_frame  REL             0000000000000000 233c78 0004e0 10   I 33  27  8
+  [29] .debug_line       PROGBITS        0000000000000000 184718 02078a 00      0   0  1
+  [30] .rel.debug_line   REL             0000000000000000 234158 000650 10   I 33  29  8
+  [31] .debug_line_str   PROGBITS        0000000000000000 1a4ea2 00039a 01  MS  0   0  1
+  [32] .llvm_addrsig     LLVM_ADDRSIG    0000000000000000 2347a8 000158 00   E 33   0  1
+  [33] .symtab           SYMTAB          0000000000000000 1a5240 017f88 18      1 3932  8
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  R (retain), p (processor specific)

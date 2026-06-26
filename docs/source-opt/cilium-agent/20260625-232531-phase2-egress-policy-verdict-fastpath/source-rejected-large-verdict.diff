@@ -1,0 +1,50 @@
+diff --git a/bpf/bpf_lxc.c b/bpf/bpf_lxc.c
+index 02fdeaddc2..e05a9e7a57 100644
+--- a/bpf/bpf_lxc.c
++++ b/bpf/bpf_lxc.c
+@@ -1534,16 +1534,23 @@ static __always_inline int handle_ipv4_from_lxc(struct __ctx_buff *ctx, __u32 *d
+ 					      tunnel_endpoint, auth_type);
+ 		}
+ 
+-		/* Emit verdict if drop or if allow for CT_NEW. */
+-		if (verdict != CTX_ACT_OK || ct_status != CT_ESTABLISHED) {
++		if (likely(verdict == CTX_ACT_OK)) {
++			/* Emit verdict if allow for CT_NEW. */
++			if (ct_status != CT_ESTABLISHED) {
++				send_policy_verdict_notify(ctx, *dst_sec_identity, tuple->dport,
++							   tuple->nexthdr, POLICY_EGRESS, 0,
++							   verdict, proxy_port,
++							   policy_match_type, audited,
++							   auth_type, cookie);
++			}
++		} else {
++			/* Emit verdict for drop. */
+ 			send_policy_verdict_notify(ctx, *dst_sec_identity, tuple->dport,
+ 						   tuple->nexthdr, POLICY_EGRESS, 0,
+ 						   verdict, proxy_port,
+ 						   policy_match_type, audited,
+ 						   auth_type, cookie);
+-		}
+ 
+-		if (verdict != CTX_ACT_OK) {
+ 			/* If policy_deny_response_enabled is set and the packet has been denied,
+ 			 * respond with an ICMPv4 "Destination Unreachable"
+ 			 */
+@@ -2407,7 +2414,7 @@ int tail_ipv4_to_endpoint(struct __ctx_buff *ctx)
+ 	__s8 ext_err = 0;
+ 	int ret;
+ 
+-	if (!revalidate_data(ctx, &data, &data_end, &ip4)) {
++	if (unlikely(!revalidate_data(ctx, &data, &data_end, &ip4))) {
+ 		ret = DROP_INVALID;
+ 		goto out;
+ 	}
+@@ -2445,7 +2452,7 @@ int tail_ipv4_to_endpoint(struct __ctx_buff *ctx)
+ 			  &proxy_port, false);
+ 	switch (ret) {
+ 	case POLICY_ACT_PROXY_REDIRECT:
+-		if (!revalidate_data(ctx, &data, &data_end, &ip4)) {
++		if (unlikely(!revalidate_data(ctx, &data, &data_end, &ip4))) {
+ 			ret = DROP_INVALID;
+ 			goto out;
+ 		}

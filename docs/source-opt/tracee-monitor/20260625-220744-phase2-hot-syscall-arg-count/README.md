@@ -2,7 +2,7 @@
 
 - Time: 2026-06-25 22:07
 - App: `tracee/monitor`
-- Status: planned
+- Status: rejected-no-signal
 - Source file:
   - `vendor/repos/tracee/pkg/ebpf/c/tracee.bpf.c`
 - Hypothesis: `sys_enter_init()` currently reads six syscall arguments for
@@ -17,6 +17,8 @@
   Unknown or unlisted syscall IDs keep the original six-argument read path.
 - Build command: `make -C vendor tracee-x86`
 - Run command: see `run-command.sh`
-- Result path: TBD
-- Follow-up: this is the final planned tracee phase2 attempt. Keep only if it
-  passes correctness and improves over the clean baseline.
+- Result path: `corpus/results/x86_kvm_corpus_20260626_051548_824007`
+- Performance: `stress_ng_sum_bogo_ops_s mean=456957.04`, samples
+  `453757.34, 460873.01, 456240.77`, -0.85% vs clean baseline.
+- Follow-up: correctness passed, but the added syscall-id branching did not
+  pay for itself on this workload. Do not use this patch as a stacked base.

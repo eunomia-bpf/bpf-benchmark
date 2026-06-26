@@ -1,0 +1,105 @@
+diff --git a/bpf/bpf_lxc.c b/bpf/bpf_lxc.c
+index 02fdeaddc2..e8cea046c4 100644
+--- a/bpf/bpf_lxc.c
++++ b/bpf/bpf_lxc.c
+@@ -1813,13 +1813,13 @@ int cil_from_container(struct __ctx_buff *ctx)
+ 			  TRACE_EP_ID_UNKNOWN, TRACE_IFINDEX_UNKNOWN,
+ 			  TRACE_REASON_UNKNOWN, TRACE_PAYLOAD_LEN, proto);
+ 
+-	if (!valid_ethertype) {
++	if (unlikely(!valid_ethertype)) {
+ 		ret = DROP_UNSUPPORTED_L2;
+ 		goto out;
+ 	}
+ 
+ 	ret = pull_l3_hdr(ctx, proto);
+-	if (ret < 0)
++	if (unlikely(ret < 0))
+ 		goto out;
+ 
+ 	switch (proto) {
+@@ -2407,7 +2407,7 @@ int tail_ipv4_to_endpoint(struct __ctx_buff *ctx)
+ 	__s8 ext_err = 0;
+ 	int ret;
+ 
+-	if (!revalidate_data(ctx, &data, &data_end, &ip4)) {
++	if (unlikely(!revalidate_data(ctx, &data, &data_end, &ip4))) {
+ 		ret = DROP_INVALID;
+ 		goto out;
+ 	}
+@@ -2445,7 +2445,7 @@ int tail_ipv4_to_endpoint(struct __ctx_buff *ctx)
+ 			  &proxy_port, false);
+ 	switch (ret) {
+ 	case POLICY_ACT_PROXY_REDIRECT:
+-		if (!revalidate_data(ctx, &data, &data_end, &ip4)) {
++		if (unlikely(!revalidate_data(ctx, &data, &data_end, &ip4))) {
+ 			ret = DROP_INVALID;
+ 			goto out;
+ 		}
+@@ -2495,13 +2495,13 @@ int cil_lxc_policy(struct __ctx_buff *ctx)
+ 	__be16 proto;
+ 	int ret;
+ 
+-	if (!validate_ethertype(ctx, &proto)) {
++	if (unlikely(!validate_ethertype(ctx, &proto))) {
+ 		ret = DROP_UNSUPPORTED_L2;
+ 		goto out;
+ 	}
+ 
+ 	ret = pull_l3_hdr(ctx, proto);
+-	if (ret < 0)
++	if (unlikely(ret < 0))
+ 		goto out;
+ 
+ 	switch (proto) {
+@@ -2554,7 +2554,7 @@ int cil_lxc_policy_egress(struct __ctx_buff *ctx __maybe_unused)
+ 	__u32 sec_label = SECLABEL;
+ 	__s8 ext_err = 0;
+ 
+-	if (!validate_ethertype(ctx, &proto)) {
++	if (unlikely(!validate_ethertype(ctx, &proto))) {
+ 		ret = DROP_UNSUPPORTED_L2;
+ 		goto out;
+ 	}
+@@ -2567,7 +2567,7 @@ int cil_lxc_policy_egress(struct __ctx_buff *ctx __maybe_unused)
+ 			  TRACE_REASON_UNKNOWN, TRACE_PAYLOAD_LEN, proto);
+ 
+ 	ret = pull_l3_hdr(ctx, proto);
+-	if (ret < 0)
++	if (unlikely(ret < 0))
+ 		goto out;
+ 
+ 	switch (proto) {
+diff --git a/bpf/lib/local_delivery.h b/bpf/lib/local_delivery.h
+index 8d20516051..bf703104ad 100644
+--- a/bpf/lib/local_delivery.h
++++ b/bpf/lib/local_delivery.h
+@@ -121,8 +121,6 @@ local_delivery(struct __ctx_buff *ctx, __u32 seclabel, __u32 magic,
+ 	       const struct endpoint_info *ep, __u8 direction, bool from_host,
+ 	       bool from_tunnel, __u32 cluster_id)
+ {
+-	bool use_redirect_peer;
+-
+ #ifdef LOCAL_DELIVERY_METRICS
+ 	/*
+ 	 * Special LXC case for updating egress forwarding metrics.
+@@ -147,8 +145,8 @@ local_delivery(struct __ctx_buff *ctx, __u32 seclabel, __u32 magic,
+ 	 * this case the skb is delivered directly to pod's namespace and the ingress
+ 	 * policy (the cil_to_container BPF program) is bypassed.
+ 	 */
+-	use_redirect_peer = should_redirect_peer(from_host);
+-	if (is_defined(USE_BPF_PROG_FOR_INGRESS_POLICY) && !use_redirect_peer &&
++	if (is_defined(USE_BPF_PROG_FOR_INGRESS_POLICY) &&
++	    (!is_defined(ENABLE_HOST_ROUTING) || from_host) &&
+ 	    /* We need to enforce policies at the source in case of netkit
+ 	     * devices because we can't redirect to proxy from bpf_lxc. That
+ 	     * needs a fix upstream.
+@@ -170,7 +168,7 @@ local_delivery(struct __ctx_buff *ctx, __u32 seclabel, __u32 magic,
+ 		}
+ # endif /* !ENABLE_NODEPORT */
+ 
+-		return redirect_ep(ctx, ep->ifindex, use_redirect_peer, from_tunnel);
++		return redirect_ep(ctx, ep->ifindex, false, from_tunnel);
+ 	}
+ 
+ 	/* Jumps to destination pod's BPF program to enforce ingress policies. */

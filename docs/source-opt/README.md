@@ -116,6 +116,7 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `phase2/20260625-210832-cap-capable-fentry-return0` | stress_ng_sum_bogo_ops_s mean=462359; accepted-for-analysis | `466968, 460401, 459707` | +0.32% | `corpus/results/x86_kvm_corpus_20260626_041555_482043` |
 | `phase2/20260625-213013-phase2-cap-fentry-early-noaudit` | stress_ng_sum_bogo_ops_s mean=453930; rejected-no-signal; not selected as next base | `453680, 454459, 453651` | -1.50% | `corpus/results/x86_kvm_corpus_20260626_043813_884875` |
 | `phase2/20260625-215524-phase2-simple-value-args-fastpath` | rejected-correctness: Tracee failed BPF load; verifier rejected `sys_exit_submit` after simple-value arg fast path | `N/A` | N/A | `corpus/results/x86_kvm_corpus_20260626_050351_616916` |
+| `phase2/20260625-220744-phase2-hot-syscall-arg-count` | stress_ng_sum_bogo_ops_s mean=456957; rejected-no-signal; not selected as next base | `453757, 460873, 456241` | -0.85% | `corpus/results/x86_kvm_corpus_20260626_051548_824007` |
 
 ### `cilium/agent`
 
@@ -127,6 +128,11 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `20260625-082528-cil-lxc-policy-error-unlikely` | pktgen_total_pps mean=1509617 | `1517661, 1501746, 1509443` | +1.45% | `corpus/results/x86_kvm_corpus_20260625_153206_021422` |
 | `20260625-084516-cil-to-container-error-unlikely` | pktgen_total_pps mean=1510065 | `1509682, 1507833, 1512679` | +1.48% | `corpus/results/x86_kvm_corpus_20260625_155126_330125` |
 | `20260625-090437-tail-ipv4-to-endpoint-revalidate-unlikely` | pktgen_total_pps mean=1672124 | `1668711, 1666812, 1680849` | +12.37% | `corpus/results/x86_kvm_corpus_20260625_161125_111575` |
+| `phase2/20260625-223000-phase2-stack-first-round-fastpaths` | pktgen_total_pps mean=1617479; errors=0; accepted-for-analysis; not selected as next base | `1595444, 1626858, 1630134` | +8.69% | `corpus/results/x86_kvm_corpus_20260626_054657_483125` |
+| `phase2/20260625-230230-phase2-tail-ipv4-policy-ok-fastpath` | pktgen_total_pps mean=1609694; errors=0; accepted-for-analysis; not selected as next base | `1635252, 1608005, 1585824` | +8.17% | `corpus/results/x86_kvm_corpus_20260626_061027_069307` |
+| `phase2/20260625-232531-phase2-egress-policy-verdict-fastpath` | pktgen_total_pps mean=1476514; errors=0; accepted-for-analysis; rejected-no-signal; not selected as next base | `1473623, 1488389, 1467531` | -0.78% | `corpus/results/x86_kvm_corpus_20260626_063507_838342` |
+| `phase2/20260625-235119-phase2-lazy-ingress-fraginfo` | pktgen_total_pps mean=1456652; errors=0; accepted-for-analysis; rejected-no-signal; not selected as next base | `1460702, 1462853, 1446400` | -2.11% | `corpus/results/x86_kvm_corpus_20260626_065929_399049` |
+| `phase2/20260626-001346-phase2-best-plus-local-delivery` | pktgen_total_pps mean=1528055; errors=0; accepted-for-analysis; not selected as next base | `1534942, 1516759, 1532465` | +2.68% | `corpus/results/x86_kvm_corpus_20260626_072138_036296` |
 
 ### `tetragon/observer`
 
@@ -138,6 +144,8 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `20260625-102800-lazy-ns-cap-selector-state` | stress_ng_sum_bogo_ops_s mean=387898 | `392895, 386207, 384593` | +8.15% | `corpus/results/x86_kvm_corpus_20260625_173550_665242` |
 | `20260625-105314-lazy-ns-cap-conditional-cap-sparse` | stress_ng_sum_bogo_ops_s mean=386271 | `391844, 381971, 384998` | +7.69% | `corpus/results/x86_kvm_corpus_20260625_175958_060141` |
 | `20260625-111613-lazy-ns-cap-skip-empty-namespace-loop` | stress_ng_sum_bogo_ops_s mean=389565 | `391278, 386987, 390431` | +8.61% | `corpus/results/x86_kvm_corpus_20260625_182312_224669` |
+| `phase2/20260626-004351-phase2-tracepoint-nop-arg-fastpath` | stress_ng_sum_bogo_ops_s mean=391151; accepted-for-analysis; selected as current tetragon phase2 best | `399794, 385719, 387940` | +9.05% | `corpus/results/x86_kvm_corpus_20260626_075102_935489` |
+| `phase2/20260626-010736-phase2-defer-selector-active-clear` | stress_ng_sum_bogo_ops_s mean=390959; accepted-for-analysis; not selected as next base | `391940, 385567, 395369` | +9.00% | `corpus/results/x86_kvm_corpus_20260626_081407_505208` |
 
 ### `otelcol-ebpf-profiler/profiling`
 
@@ -267,16 +275,17 @@ attempt 文件含义：
 
 第二轮当前进度：
 
-- Completed phase2 apps: `katran`, `bcc/set`
-- Phase2 source optimization attempts: 14 / 30
-- Current phase2 app: `tracee/monitor`
-- Current phase2 target: pivot away from `cap_capable` micro-tuning. The
-  corrected fentry conversion is only +0.32%, and moving the `CAP_OPT_NOAUDIT`
-  drop before event setup regressed by -1.50%. A global simple-value
-  `save_args_to_submit_buf()` fast path failed verifier load, so the final
-  tracee phase2 attempt should be narrower and verifier-obvious. bcc/set phase2
-  best is +2.70%, while the current single-app floor to beat remains
-  first-round `cilium/agent` at +12.37%.
+- Completed phase2 apps: `katran`, `bcc/set`, `tracee/monitor`,
+  `cilium/agent`
+- Phase2 source optimization attempts: 22 / 30
+- Current phase2 app: `tetragon/observer`
+- Current phase2 target: Tetragon phase2 attempt 1 improved the first-round
+  best from `+8.61%` to `+9.05%` by combining lazy selector state with a
+  raw-tracepoint `nop_ty` argument fast path. Phase2 attempt 2 reduced entry
+  object size further but measured `+9.00%`, slightly below attempt 1, so it is
+  not stacked. Continue Tetragon attempts 3-5 from the phase2 attempt 1 base;
+  target the remaining gap to 10% with additional raw tracepoint/filter
+  hot-path reductions.
 
 ## 单个 app 的完整流程
 

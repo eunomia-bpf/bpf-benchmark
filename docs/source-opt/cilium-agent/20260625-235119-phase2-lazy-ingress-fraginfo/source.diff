@@ -1,0 +1,62 @@
+diff --git a/bpf/bpf_lxc.c b/bpf/bpf_lxc.c
+index 02fdeaddc2..e23120495d 100644
+--- a/bpf/bpf_lxc.c
++++ b/bpf/bpf_lxc.c
+@@ -2163,8 +2163,8 @@ ipv4_policy(struct __ctx_buff *ctx, struct iphdr *ip4, __u32 src_label,
+ 	struct ct_state *ct_state, ct_state_new = {};
+ 	int ifindex = CONFIG(interface_ifindex);
+ 	struct ipv4_ct_tuple *tuple;
+-	fraginfo_t fraginfo;
+-	bool is_untracked_fragment;
++	fraginfo_t fraginfo = 0;
++	bool is_untracked_fragment = false;
+ 	struct ct_buffer4 *ct_buffer;
+ 	struct trace_ctx trace;
+ 	int ret, verdict, l4_off;
+@@ -2175,14 +2175,15 @@ ipv4_policy(struct __ctx_buff *ctx, struct iphdr *ip4, __u32 src_label,
+ 	__u32 cookie = 0;
+ 	__u32 zero = 0;
+ 
+-	fraginfo = ipfrag_encode_ipv4(ip4);
+-
+ 	orig_sip = ip4->saddr;
+ 
+ 	/* Indicate that this is a datagram fragment for which we cannot
+ 	 * retrieve L4 ports. Do not set flag if we support fragmentation.
+ 	 */
+-	is_untracked_fragment = !CONFIG(enable_ipv4_fragments) && ipfrag_is_fragment(fraginfo);
++	if (!CONFIG(enable_ipv4_fragments)) {
++		fraginfo = ipfrag_encode_ipv4(ip4);
++		is_untracked_fragment = ipfrag_is_fragment(fraginfo);
++	}
+ 
+ 	ct_buffer = map_lookup_elem(&cilium_tail_call_buffer4, &zero);
+ 	if (!ct_buffer)
+@@ -2220,6 +2221,9 @@ ipv4_policy(struct __ctx_buff *ctx, struct iphdr *ip4, __u32 src_label,
+ 		if (unlikely(ct_state->rev_nat_index || ct_state->nat_port)) {
+ 			int ret2;
+ 
++			if (CONFIG(enable_ipv4_fragments))
++				fraginfo = ipfrag_encode_ipv4(ip4);
++
+ 			ret2 = lb4_rev_nat(ctx, ETH_HLEN, l4_off,
+ 					   ct_state->rev_nat_index,
+ 					   ct_state->nat_addr.p4, ct_state->nat_port,
+@@ -2407,7 +2411,7 @@ int tail_ipv4_to_endpoint(struct __ctx_buff *ctx)
+ 	__s8 ext_err = 0;
+ 	int ret;
+ 
+-	if (!revalidate_data(ctx, &data, &data_end, &ip4)) {
++	if (unlikely(!revalidate_data(ctx, &data, &data_end, &ip4))) {
+ 		ret = DROP_INVALID;
+ 		goto out;
+ 	}
+@@ -2445,7 +2449,7 @@ int tail_ipv4_to_endpoint(struct __ctx_buff *ctx)
+ 			  &proxy_port, false);
+ 	switch (ret) {
+ 	case POLICY_ACT_PROXY_REDIRECT:
+-		if (!revalidate_data(ctx, &data, &data_end, &ip4)) {
++		if (unlikely(!revalidate_data(ctx, &data, &data_end, &ip4))) {
+ 			ret = DROP_INVALID;
+ 			goto out;
+ 		}
