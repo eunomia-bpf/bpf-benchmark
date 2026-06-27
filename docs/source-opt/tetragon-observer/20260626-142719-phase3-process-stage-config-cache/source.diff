@@ -1,0 +1,405 @@
+diff --git a/bpf/process/bpf_generic_tracepoint.c b/bpf/process/bpf_generic_tracepoint.c
+index 6b51109bb..fab0af12c 100644
+--- a/bpf/process/bpf_generic_tracepoint.c
++++ b/bpf/process/bpf_generic_tracepoint.c
+@@ -175,11 +175,44 @@ FUNC_INLINE unsigned long get_ctx_ul(void *src, int type)
+ 	}
+ }
+ 
++FUNC_INLINE unsigned long
++get_configured_ctx_arg(struct generic_tracepoint_event_arg *ctx,
++		       struct event_config *config, int arg)
++{
++	unsigned long ctx_off;
++	int ty = config->arg[arg];
++
++	if (ty == nop_ty)
++		return 0;
++	ctx_off = config->off[arg];
++	asm volatile("%[ctx_off] &= 0xffff;\n"
++		     : [ctx_off] "+r"(ctx_off));
++	return get_ctx_ul((char *)ctx + ctx_off, ty);
++}
++
++FUNC_INLINE bool
++generic_tracepoint_curr_no_selector_filter(struct msg_generic_kprobe *msg,
++					   struct event_config *config)
++{
++	struct execve_map_value *enter;
++	__u32 ppid;
++	bool walker = 0;
++
++	if (!(config->flags & EVENT_CONFIG_FLAG_NO_SELECTORS))
++		return false;
++	enter = event_find_curr(&ppid, &walker);
++	if (!enter)
++		return false;
++	msg->current.pid = enter->key.pid;
++	msg->current.ktime = enter->key.ktime;
++	msg->sel.pass = true;
++	return true;
++}
++
+ __attribute__((section("tracepoint/generic_tracepoint"), used)) int
+ generic_tracepoint_event(struct generic_tracepoint_event_arg *ctx)
+ {
+ 	struct msg_generic_kprobe *msg;
+-	struct task_struct *task;
+ 	struct event_config *config;
+ 	int zero = 0, i;
+ 
+@@ -200,45 +233,11 @@ generic_tracepoint_event(struct generic_tracepoint_event_arg *ctx)
+ 	msg->func_id = config->func_id;
+ 	msg->retprobe_id = 0;
+ 
+-	msg->a0 = ({
+-		unsigned long ctx_off = config->off[0];
+-		int ty = config->arg[0];
+-		asm volatile("%[ctx_off] &= 0xffff;\n"
+-			     : [ctx_off] "+r"(ctx_off));
+-		get_ctx_ul((char *)ctx + ctx_off, ty);
+-	});
+-
+-	msg->a1 = ({
+-		unsigned long ctx_off = config->off[1];
+-		int ty = config->arg[1];
+-		asm volatile("%[ctx_off] &= 0xffff;\n"
+-			     : [ctx_off] "+r"(ctx_off));
+-		get_ctx_ul((char *)ctx + ctx_off, ty);
+-	});
+-
+-	msg->a2 = ({
+-		unsigned long ctx_off = config->off[2];
+-		int ty = config->arg[2];
+-		asm volatile("%[ctx_off] &= 0xffff;\n"
+-			     : [ctx_off] "+r"(ctx_off));
+-		get_ctx_ul((char *)ctx + ctx_off, ty);
+-	});
+-
+-	msg->a3 = ({
+-		unsigned long ctx_off = config->off[3];
+-		int ty = config->arg[3];
+-		asm volatile("%[ctx_off] &= 0xffff;\n"
+-			     : [ctx_off] "+r"(ctx_off));
+-		get_ctx_ul((char *)ctx + ctx_off, ty);
+-	});
+-
+-	msg->a4 = ({
+-		unsigned long ctx_off = config->off[4];
+-		int ty = config->arg[4];
+-		asm volatile("%[ctx_off] &= 0xffff;\n"
+-			     : [ctx_off] "+r"(ctx_off));
+-		get_ctx_ul((char *)ctx + ctx_off, ty);
+-	});
++	msg->a0 = get_configured_ctx_arg(ctx, config, 0);
++	msg->a1 = get_configured_ctx_arg(ctx, config, 1);
++	msg->a2 = get_configured_ctx_arg(ctx, config, 2);
++	msg->a3 = get_configured_ctx_arg(ctx, config, 3);
++	msg->a4 = get_configured_ctx_arg(ctx, config, 4);
+ 
+ 	generic_process_init(msg, MSG_OP_GENERIC_TRACEPOINT);
+ 
+@@ -246,15 +245,8 @@ generic_tracepoint_event(struct generic_tracepoint_event_arg *ctx)
+ 	msg->sel.curr = 0;
+ 	msg->tailcall_index_process = 0;
+ 	msg->tailcall_index_selector = 0;
+-#pragma unroll
+-	for (i = 0; i < MAX_CONFIGURED_SELECTORS; i++)
+-		msg->sel.active[i] = 0;
+ 	msg->sel.pass = false;
+-	task = (struct task_struct *)get_current_task();
+-	/* Initialize namespaces to apply filters on them */
+-	get_namespaces(&msg->ns, task);
+-	/* Initialize capabilities to apply filters on them */
+-	get_current_subj_caps(&msg->caps, task);
++	msg->sel.active[SELECTORS_ACTIVE] = 0;
+ #ifdef __NS_CHANGES_FILTER
+ 	msg->sel.match_ns = 0;
+ #endif
+@@ -262,6 +254,13 @@ generic_tracepoint_event(struct generic_tracepoint_event_arg *ctx)
+ 	msg->sel.match_cap = 0;
+ #endif
+ 	msg->common.flags = 0;
++	if (generic_tracepoint_curr_no_selector_filter(msg, config)) {
++		tail_call(ctx, &tp_calls, TAIL_CALL_PROCESS);
++		return 0;
++	}
++#pragma unroll
++	for (i = 0; i < MAX_CONFIGURED_SELECTORS; i++)
++		msg->sel.active[i] = 0;
+ 	tail_call(ctx, &tp_calls, TAIL_CALL_FILTER);
+ 	return 0;
+ }
+diff --git a/bpf/process/event_config.h b/bpf/process/event_config.h
+index 77129f048..8c1965656 100644
+--- a/bpf/process/event_config.h
++++ b/bpf/process/event_config.h
+@@ -55,6 +55,8 @@ _Static_assert(EVENT_CONFIG_MAX_USDT_ARG - 1 <= EVENT_CONFIG_MAX_USDT_ARG_MASK,
+ #define EVENT_CONFIG_MAX_REG_ARG_MASK 0x7
+ _Static_assert(EVENT_CONFIG_MAX_REG_ARG - 1 <= EVENT_CONFIG_MAX_REG_ARG_MASK, "Need to update EVENT_CONFIG_MAX_REG_ARG_MASK");
+ 
++#define EVENT_CONFIG_FLAG_NO_SELECTORS (1U << 0)
++
+ struct event_config {
+ 	__u32 func_id;
+ 	__s32 arg[MAX_POSSIBLE_ARGS];
+diff --git a/bpf/process/generic_calls.h b/bpf/process/generic_calls.h
+index 932f170fc..2e5cadce0 100644
+--- a/bpf/process/generic_calls.h
++++ b/bpf/process/generic_calls.h
+@@ -31,7 +31,6 @@ generic_start_process_filter(void *ctx, struct bpf_map_def *calls)
+ {
+ 	struct msg_generic_kprobe *msg;
+ 	struct event_config *config;
+-	struct task_struct *task;
+ 	int i, zero = 0;
+ 
+ 	msg = map_lookup_elem(&process_call_heap, &zero);
+@@ -58,11 +57,6 @@ generic_start_process_filter(void *ctx, struct bpf_map_def *calls)
+ 	msg->tailcall_index_process = 0;
+ 	msg->tailcall_index_selector = 0;
+ 	generic_path_init(msg);
+-	task = (struct task_struct *)get_current_task();
+-	/* Initialize namespaces to apply filters on them */
+-	get_namespaces(&msg->ns, task);
+-	/* Initialize capabilities to apply filters on them */
+-	get_current_subj_caps(&msg->caps, task);
+ #ifdef __NS_CHANGES_FILTER
+ 	msg->sel.match_ns = 0;
+ #endif
+@@ -576,22 +570,13 @@ FUNC_INLINE long get_preload_arg(struct pt_regs *ctx, long ty, arg_status_t *sta
+ #endif
+ 
+ FUNC_INLINE long generic_read_arg(void *ctx, int index, long off, struct bpf_map_def *tailcals,
+-				  int process)
++				  int process, struct msg_generic_kprobe *e,
++				  struct event_config *config)
+ {
+-	struct msg_generic_kprobe *e;
+-	struct event_config *config;
+-	int am, zero = 0, arg_index __maybe_unused;
++	int am, arg_index __maybe_unused;
+ 	unsigned long a;
+ 	long ty;
+ 
+-	e = map_lookup_elem(&process_call_heap, &zero);
+-	if (!e)
+-		return 0;
+-
+-	config = map_lookup_elem(&config_map, &e->idx);
+-	if (!config)
+-		return 0;
+-
+ 	if (index >= MAX_POSSIBLE_ARGS)
+ 		return 0;
+ 
+@@ -658,12 +643,16 @@ FUNC_INLINE int
+ generic_process_event(void *ctx, struct bpf_map_def *tailcals, int process)
+ {
+ 	struct msg_generic_kprobe *e;
+-	int index, zero = 0;
++	struct event_config *config;
++	int index, next, zero = 0;
+ 	long total;
+ 
+ 	e = map_lookup_elem(&process_call_heap, &zero);
+ 	if (!e)
+ 		return 0;
++	config = map_lookup_elem(&config_map, &e->idx);
++	if (!config)
++		return 0;
+ 
+ 	index = e->tailcall_index_process;
+ 	total = e->common.size;
+@@ -672,13 +661,17 @@ generic_process_event(void *ctx, struct bpf_map_def *tailcals, int process)
+ 	if (total < MAX_TOTAL) {
+ 		long errv;
+ 
+-		errv = generic_read_arg(ctx, index, total, tailcals, process);
++		errv = generic_read_arg(ctx, index, total, tailcals, process, e, config);
+ 		if (errv > 0)
+ 			total += errv;
+ 	}
+ 	e->common.size = total;
+ 	/* Continue to process other arguments. */
+-	if (index < 4 && arg_idx(index + 1) != -1) {
++	next = index + 1;
++	asm volatile("%[next] &= %1;\n"
++		     : [next] "+r"(next)
++		     : "i"(MAX_POSSIBLE_ARGS_MASK));
++	if (index < 4 && config->idx[next] != -1) {
+ 		e->tailcall_index_process = index + 1;
+ 		tail_call(ctx, tailcals, TAIL_CALL_PROCESS);
+ 	}
+diff --git a/bpf/process/pfilter.h b/bpf/process/pfilter.h
+index 8ff9e0145..e4c3a7ff2 100644
+--- a/bpf/process/pfilter.h
++++ b/bpf/process/pfilter.h
+@@ -413,6 +413,20 @@ struct nc_filter {
+  */
+ #define NUM_NS_FILTERS_SMALL 4
+ 
++FUNC_INLINE void selector_load_namespaces(struct msg_generic_kprobe *msg)
++{
++	struct task_struct *task = (struct task_struct *)get_current_task();
++
++	get_namespaces(&msg->ns, task);
++}
++
++FUNC_INLINE void selector_load_capabilities(struct msg_generic_kprobe *msg)
++{
++	struct task_struct *task = (struct task_struct *)get_current_task();
++
++	get_current_subj_caps(&msg->caps, task);
++}
++
+ FUNC_INLINE int
+ selector_process_filter(__u32 *f, __u32 index, struct execve_map_value *enter,
+ 			struct msg_generic_kprobe *msg)
+@@ -426,6 +440,7 @@ selector_process_filter(__u32 *f, __u32 index, struct execve_map_value *enter,
+ 	struct caps_filter *caps;
+ 	__u32 len;
+ 	__u64 i;
++	bool ns_ready = false, caps_ready = false;
+ 
+ 	/* Do binary and parent filter first for selector index */
+ 	if (!match_binaries(index, enter, &enter->bin))
+@@ -483,32 +498,36 @@ selector_process_filter(__u32 *f, __u32 index, struct execve_map_value *enter,
+ 	len = *(__u32 *)((__u64)f + (index & INDEX_MASK));
+ 	index += 4; /* 4: ns header */
+ 	len -= 4;
++	if (len > 0) {
++		selector_load_namespaces(msg);
++		ns_ready = true;
+ 
+ #ifdef __LARGE_BPF_PROG
+-	for (i = 0; i < ns_max_types; i++) {
++		for (i = 0; i < ns_max_types; i++) {
+ #else
+ #pragma unroll
+ 	/* with more than 4 iterations it results in too big programs */
+-	for (i = 0; i < NUM_NS_FILTERS_SMALL; i++) {
++		for (i = 0; i < NUM_NS_FILTERS_SMALL; i++) {
+ #endif
+-		if (len > 0) {
+-			ns = (struct ns_filter *)((u64)f + (index & INDEX_MASK));
+-			/* 12: namespace, op, length */
+-			index += sizeof(struct ns_filter);
+-			struct selector_filter sel = {
+-				.index = index,
+-				.ty = ns->op,
+-				.flags = ns->ty,
+-				.len = ns->len,
+-			};
+-			res = selector_match(f, &sel, enter, msg,
+-					     &process_filter_namespace);
+-			/* now index points at the end of namespace filter */
+-			index += ((ns->len * sizeof(ns->val[0])) & VALUES_MASK);
+-			len -= (sizeof(struct ns_filter) + (ns->len * sizeof(ns->val[0])));
++			if (len > 0) {
++				ns = (struct ns_filter *)((u64)f + (index & INDEX_MASK));
++				/* 12: namespace, op, length */
++				index += sizeof(struct ns_filter);
++				struct selector_filter sel = {
++					.index = index,
++					.ty = ns->op,
++					.flags = ns->ty,
++					.len = ns->len,
++				};
++				res = selector_match(f, &sel, enter, msg,
++						     &process_filter_namespace);
++				/* now index points at the end of namespace filter */
++				index += ((ns->len * sizeof(ns->val[0])) & VALUES_MASK);
++				len -= (sizeof(struct ns_filter) + (ns->len * sizeof(ns->val[0])));
++			}
++			if (res == PFILTER_REJECT)
++				return res;
+ 		}
+-		if (res == PFILTER_REJECT)
+-			return res;
+ 	}
+ 
+ 	/* matchCapabilities */
+@@ -520,6 +539,14 @@ selector_process_filter(__u32 *f, __u32 index, struct execve_map_value *enter,
+ 	if (len > 0) {
+ 		caps = (struct caps_filter *)((u64)f + (index & INDEX_MASK));
+ 		index += sizeof(struct caps_filter); /* 20: ty, op, ns, val */
++		if (caps->ns != 0 && !ns_ready) {
++			selector_load_namespaces(msg);
++			ns_ready = true;
++		}
++		if (!caps_ready) {
++			selector_load_capabilities(msg);
++			caps_ready = true;
++		}
+ 		res = process_filter_capabilities(caps->ty, caps->op, caps->ns,
+ 						  caps->val, &msg->ns, &msg->caps);
+ 	}
+@@ -536,6 +563,10 @@ selector_process_filter(__u32 *f, __u32 index, struct execve_map_value *enter,
+ 	if (len > 0) {
+ 		nc = (struct nc_filter *)((u64)f + (index & INDEX_MASK));
+ 		index += sizeof(struct nc_filter); /* 8: op, val */
++		if (!ns_ready) {
++			selector_load_namespaces(msg);
++			ns_ready = true;
++		}
+ 		res = process_filter_namespace_change(nc->op, nc->value, enter,
+ 						      &msg->ns, &msg->caps, &msg->sel);
+ 		/* now index points at the end of namespace change filter */
+@@ -555,6 +586,14 @@ selector_process_filter(__u32 *f, __u32 index, struct execve_map_value *enter,
+ 	if (len > 0) {
+ 		caps = (struct caps_filter *)((u64)f + (index & INDEX_MASK));
+ 		index += sizeof(struct caps_filter); /* 20: ty, op, ns, val */
++		if (caps->ns != 0 && !ns_ready) {
++			selector_load_namespaces(msg);
++			ns_ready = true;
++		}
++		if (!caps_ready) {
++			selector_load_capabilities(msg);
++			caps_ready = true;
++		}
+ 		res = process_filter_capability_change(
+ 			caps->ty, caps->op, caps->ns, caps->val, &msg->ns, &msg->caps, &msg->sel);
+ 	}
+diff --git a/pkg/api/tracingapi/client_kprobe.go b/pkg/api/tracingapi/client_kprobe.go
+index fd638fbe4..a71c40b6a 100644
+--- a/pkg/api/tracingapi/client_kprobe.go
++++ b/pkg/api/tracingapi/client_kprobe.go
+@@ -685,6 +685,8 @@ const (
+ 	EventConfigMaxUsdtArgs = 8
+ 	EventConfigMaxRegArgs  = 8
+ 	MaxBTFArgDepth         = 10 // Artificial value for compilation, may be extended
++
++	EventConfigFlagNoSelectors uint32 = 1 << 0
+ )
+ 
+ type EventConfig struct {
+diff --git a/pkg/sensors/tracing/generictracepoint.go b/pkg/sensors/tracing/generictracepoint.go
+index c28cf6751..7496d412d 100644
+--- a/pkg/sensors/tracing/generictracepoint.go
++++ b/pkg/sensors/tracing/generictracepoint.go
+@@ -755,6 +755,9 @@ func (tp *genericTracepoint) EventConfig() (*tracingapi.EventConfig, error) {
+ 	config := initEventConfig()
+ 	config.PolicyID = uint32(tp.policyID)
+ 	config.FuncId = uint32(tp.tableId.ID)
++	if selectorsCount(tp.selectors) == 0 {
++		config.Flags |= tracingapi.EventConfigFlagNoSelectors
++	}
+ 
+ 	if tp.raw {
+ 		return tp.eventConfigRaw(config)
+@@ -762,6 +765,14 @@ func (tp *genericTracepoint) EventConfig() (*tracingapi.EventConfig, error) {
+ 	return tp.eventConfig(config)
+ }
+ 
++func selectorsCount(state *selectors.KernelSelectorState) uint32 {
++	if state == nil {
++		return 0
++	}
++	buf := state.Buffer()
++	return binary.LittleEndian.Uint32(buf[:4])
++}
++
+ func (tp *genericTracepoint) eventConfigRaw(config *tracingapi.EventConfig) (*tracingapi.EventConfig, error) {
+ 
+ 	// iterate over output arguments

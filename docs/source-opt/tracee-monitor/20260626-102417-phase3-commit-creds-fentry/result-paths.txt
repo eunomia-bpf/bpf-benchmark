@@ -1,0 +1,10 @@
+Formal run:
+
+- Result dir: `corpus/results/x86_kvm_corpus_20260626_173247_019570`
+- App result: `corpus/results/x86_kvm_corpus_20260626_173247_019570/details/apps/tracee__monitor.json`
+- Metadata: `corpus/results/x86_kvm_corpus_20260626_173247_019570/metadata.json`
+
+Restore:
+
+- Reverse patch: `patch -d vendor/repos/tracee -p1 -R < docs/source-opt/tracee-monitor/20260626-102417-phase3-commit-creds-fentry/source.diff`
+- Restore build log: `docs/source-opt/tracee-monitor/20260626-102417-phase3-commit-creds-fentry/restore-build.log`

@@ -131,6 +131,7 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `phase3/20260626-090841-phase3-prctl-fentry` | stress_ng_sum_bogo_ops_s mean=464810; accepted-for-analysis; selected as current tracee phase3 base | `462950, 465355, 466125` | +0.86% | `corpus/results/x86_kvm_corpus_20260626_161621_526914` |
 | `phase3/20260626-093333-phase3-hot-syscall-arg-serializer` | stress_ng_sum_bogo_ops_s mean=457589; completed-not-stacked | `458895, 456475, 457398` | -0.71% | `corpus/results/x86_kvm_corpus_20260626_164248_792753` |
 | `phase3/20260626-095936-phase3-value-args-first` | stress_ng_sum_bogo_ops_s mean=450374; completed-not-stacked | `450246, 448766, 452111` | -2.28% | `corpus/results/x86_kvm_corpus_20260626_170733_776031` |
+| `phase3/20260626-102417-phase3-commit-creds-fentry` | stress_ng_sum_bogo_ops_s mean=461933; completed-not-stacked | `460381, 463013, 462406` | +0.23% | `corpus/results/x86_kvm_corpus_20260626_173247_019570` |
 
 ### `cilium/agent`
 
@@ -147,6 +148,11 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `phase2/20260625-232531-phase2-egress-policy-verdict-fastpath` | pktgen_total_pps mean=1476514; errors=0; accepted-for-analysis; rejected-no-signal; not selected as next base | `1473623, 1488389, 1467531` | -0.78% | `corpus/results/x86_kvm_corpus_20260626_063507_838342` |
 | `phase2/20260625-235119-phase2-lazy-ingress-fraginfo` | pktgen_total_pps mean=1456652; errors=0; accepted-for-analysis; rejected-no-signal; not selected as next base | `1460702, 1462853, 1446400` | -2.11% | `corpus/results/x86_kvm_corpus_20260626_065929_399049` |
 | `phase2/20260626-001346-phase2-best-plus-local-delivery` | pktgen_total_pps mean=1528055; errors=0; accepted-for-analysis; not selected as next base | `1534942, 1516759, 1532465` | +2.68% | `corpus/results/x86_kvm_corpus_20260626_072138_036296` |
+| `phase3/20260626-105321-phase3-reserved-identity-cold` | pktgen_total_pps mean=1672664; errors=0; accepted-for-analysis; selected as current cilium phase3 base; marginal +0.03% vs previous best | `1683410, 1662935, 1671646` | +12.40% | `corpus/results/x86_kvm_corpus_20260626_180150_613607` |
+| `phase3/20260626-111706-phase3-lazy-policy-verdict-payload` | pktgen_total_pps mean=1572938; errors=0; completed-not-stacked | `1554963, 1566899, 1596952` | +5.70% | `corpus/results/x86_kvm_corpus_20260626_182603_784560` |
+| `phase3/20260626-114554-phase3-policy-established-fastpath` | pktgen_total_pps mean=1569838; errors=0; completed-not-stacked | `1579206, 1566724, 1563584` | +5.49% | `corpus/results/x86_kvm_corpus_20260626_185324_568478` |
+| `phase3/20260626-120930-phase3-cil-to-container-error-unlikely-stack` | pktgen_total_pps mean=1686212; errors=0; accepted-for-analysis; selected as current cilium phase3 base; +0.81% vs prior Cilium phase3 base | `1688102, 1686224, 1684311` | +13.31% | `corpus/results/x86_kvm_corpus_20260626_191637_695574` |
+| `phase3/20260626-123126-phase3-policy-error-unlikely-stack` | pktgen_total_pps mean=1714120; errors=0; accepted-for-analysis; selected as current cilium phase3 best; +1.66% vs prior Cilium phase3 base | `1713045, 1718508, 1710806` | +15.19% | `corpus/results/x86_kvm_corpus_20260626_193753_200824` |
 
 ### `tetragon/observer`
 
@@ -163,6 +169,11 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `phase2/20260626-012946-phase2-filter-args-no-selector-fastpath` | stress_ng_sum_bogo_ops_s mean=390359; accepted-for-analysis; not selected as next base | `397404, 388898, 384775` | +8.83% | `corpus/results/x86_kvm_corpus_20260626_083643_226335` |
 | `phase2/20260626-015135-phase2-tracepoint-no-selector-filter-bypass` | stress_ng_sum_bogo_ops_s mean=388975; accepted-for-analysis; not selected as next base | `390527, 390759, 385637` | +8.45% | `corpus/results/x86_kvm_corpus_20260626_085918_851913` |
 | `phase2/20260626-021402-phase2-tracepoint-curr-only-no-selector-bypass` | stress_ng_sum_bogo_ops_s mean=391962; accepted-for-analysis; selected as tetragon phase2 best | `393846, 395075, 386967` | +9.28% | `corpus/results/x86_kvm_corpus_20260626_092152_089522` |
+| `phase3/20260626-125641-phase3-tracepoint-sparse-active-clear` | stress_ng_sum_bogo_ops_s mean=393050; accepted-for-analysis; selected as current tetragon phase3 base; +0.28% vs phase2 best | `394428, 393844, 390877` | +9.58% | `corpus/results/x86_kvm_corpus_20260626_200430_726187` |
+| `phase3/20260626-132055-phase3-tracepoint-no-selector-config-flag` | stress_ng_sum_bogo_ops_s mean=400249; accepted-for-analysis; selected as current tetragon phase3 base; +1.83% vs prior phase3 base | `403732, 400561, 396453` | +11.59% | `corpus/results/x86_kvm_corpus_20260626_202805_644441` |
+| `phase3/20260626-134335-phase3-tracepoint-defer-pass-init` | stress_ng_sum_bogo_ops_s mean=392557; accepted-for-analysis; completed-not-stacked; -1.92% vs attempt 2 | `400953, 388615, 388104` | +9.44% | `corpus/results/x86_kvm_corpus_20260626_205027_125596` |
+| `phase3/20260626-140504-phase3-tracepoint-fallback-state-split` | stress_ng_sum_bogo_ops_s mean=387226; accepted-for-analysis; completed-not-stacked; -3.25% vs attempt 2 | `391814, 382985, 386879` | +7.96% | `corpus/results/x86_kvm_corpus_20260626_211133_416524` |
+| `phase3/20260626-142719-phase3-process-stage-config-cache` | stress_ng_sum_bogo_ops_s mean=398133; accepted-for-analysis; completed-not-stacked; -0.53% vs attempt 2 | `401171, 397862, 395365` | +11.00% | `corpus/results/x86_kvm_corpus_20260626_213400_944958` |
 
 ### `otelcol-ebpf-profiler/profiling`
 
@@ -180,6 +191,8 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `phase2/20260626-032939-phase2-native-frames-per-program-8` | language_ops_total mean=19526940261; rejected-no-signal | `19705666680, 19244754469, 19630399634` | -0.60% | `corpus/results/x86_kvm_corpus_20260626_103605_569628` |
 | `phase2/20260626-035305-phase2-single-delta-reuse` | language_ops_total mean=19575112832; rejected-no-signal | `19658284979, 19486494323, 19580559194` | -0.35% | `corpus/results/x86_kvm_corpus_20260626_110000_678727` |
 | `phase2/20260626-041515-phase2-batch-php-frame-metric` | language_ops_total mean=19508075671; rejected-no-signal | `19462147885, 19814623616, 19247455513` | -0.70% | `corpus/results/x86_kvm_corpus_20260626_112227_995529` |
+| `phase3/20260626-145000-phase3-native-unwind-error-unlikely` | language_ops_total mean=19365498890; rejected-no-signal; branch hints shrank `unwind_native` by 12 instructions but regressed throughput | `19583174016, 19234194165, 19279128490` | -1.42% | `corpus/results/x86_kvm_corpus_20260626_215832_429743` |
+| `phase3/20260626-151552-phase3-defer-pid-exists-lpm-lookup` | language_ops_total mean=19481636379; rejected-no-signal; deferred dummy PID LPM lookup until mapping failure but throughput still regressed | `19585524873, 19436580480, 19422803783` | -0.83% | `corpus/results/x86_kvm_corpus_20260626_222221_639047` |
 
 ## App 源码、构建和加载路径
 
@@ -327,10 +340,25 @@ attempt 文件含义：
 
 第三轮当前进度：
 
-- Completed phase3 apps: `katran`, `bcc/set`
-- Phase3 source optimization attempts: 14 / 30
-- Current phase3 app: `tracee/monitor`
-- Current phase3 result: bcc/set attempt 4
+- Completed phase3 apps: `katran`, `bcc/set`, `tracee/monitor`,
+  `cilium/agent`, `tetragon/observer`
+- Phase3 source optimization attempts: 27 / 30
+- Current phase3 app: `otelcol-ebpf-profiler/profiling` (paused after attempt 2)
+- Current phase3 result: tetragon/observer attempt 2
+  (`phase3-tracepoint-no-selector-config-flag`) passed correctness and measured
+  `400249` stress_ng_sum_bogo_ops_s (`+11.59%` vs clean, `+1.83%` vs previous
+  phase3 base). Attempt 3 passed correctness at `392557` (`+9.44%` vs clean,
+  `-1.92%` vs attempt 2), despite shrinking `generic_tracepoint_event` from
+  `0x66b8` to `0x65f8`; do not stack it. Attempt 4 passed correctness at
+  `387226` (`+7.96%` vs clean, `-3.25%` vs attempt 2), despite keeping
+  `generic_tracepoint_event` smaller than attempt 2 at `0x6600`; do not stack
+  it. Attempt 5 passed correctness at `398133` (`+11.00%` vs clean,
+  `-0.53%` vs attempt 2); process-stage config pointer reuse shrank
+  `generic_tracepoint_process_event` from `0x67c8` to `0x66d0` but did not
+  beat attempt 2, so do not stack it. Attempt 2 reaches the 10% target for
+  Tetragon by moving the no-selector decision from a per-event `filter_map`
+  lookup into load-time `event_config.flags`; Tetragon phase3 is complete and
+  best remains attempt 2. Earlier bcc/set attempt 4
   (`phase3-syscount-key-width-cleanup`) passed correctness and measured
   `794393` stress_ng_sum_bogo_ops_s (`+11.81%` vs clean, `+8.36%` vs bcc/set
   phase3 attempt 2). This reaches the 10% target for bcc/set. Attempt 5 passed
@@ -344,11 +372,37 @@ attempt 文件含义：
   serializer expanded `sys_exit_submit` from `0x4fc8` to `0x60a0`, so do not
   stack it. Tracee phase3 attempt 4 passed correctness at `450374`
   (`-2.28%` vs clean, `-3.11%` vs attempt 2); even the small value-arg branch
-  reorder in `save_args_to_submit_buf()` regressed, so do not stack it.
-- Current phase3 target: continue `tracee/monitor` attempt 5 from the attempt 2
-  `cap_capable + security_task_prctl` fentry base. Avoid syscall argument
-  serializer changes; prefer a different mechanism such as another narrow
-  kprobe-to-fentry conversion or a directly measured hot hook.
+  reorder in `save_args_to_submit_buf()` regressed, so do not stack it. Tracee
+  phase3 attempt 5 passed correctness at `461933` (`+0.23%` vs clean, `-0.62%`
+  vs attempt 2); `commit_creds` fentry is functionally safe but not hot enough,
+  so do not stack it. Tracee phase3 is complete; best tracee phase3 result
+  remains attempt 2 at `464810` (`+0.86%` vs clean). Cilium phase3 attempt 1
+  passed correctness at `1672664` pktgen_total_pps (`+12.40%` vs clean,
+  `+0.03%` vs previous Cilium best) and becomes the current Cilium phase3 base,
+  but the margin is tiny. Cilium phase3 attempt 2 passed correctness at
+  `1572938` (`+5.70%` vs clean, `-5.96%` vs current Cilium base); lazy policy
+  verdict payload setup reduced offline `tc/tail` section size but hurt
+  workload throughput, so do not stack it. Cilium phase3 attempt 3 passed
+  correctness at `1569838` (`+5.49%` vs clean, `-6.15%` vs current Cilium
+  base); explicit established+allow policy fast path also regressed, so do not
+  stack it. Cilium phase3 attempt 4 passed correctness at `1686212` (`+13.31%`
+  vs clean, `+0.81%` vs prior Cilium phase3 base); stacking the first-round
+  positive `cil_to_container()` error-path hints with the reserved-identity base
+  composes, so it becomes the current Cilium phase3 base. Cilium phase3 attempt
+  5 passed correctness at `1714120` (`+15.19%` vs clean, `+1.66%` vs attempt
+  4); stacking the first-round positive `cil_lxc_policy()` error-path hints
+  composes again. Cilium phase3 is complete; best Cilium source-opt result is
+  `20260626-123126-phase3-policy-error-unlikely-stack`. OTEL phase3 attempt 1
+  passed correctness at `19365498890` language_ops_total (`-1.42%` vs clean);
+  native-unwind branch hints shrank `unwind_native` by 12 instructions but
+  regressed throughput, so do not stack it. OTEL phase3 attempt 2 passed
+  correctness at `19481636379` language_ops_total (`-0.83%` vs clean);
+  deferring the dummy PID LPM lookup until mapping failure reduced
+  `native_tracer_entry` from 1322 to 1318 instructions and total artifact
+  size from 123833 to 123813 instructions, but still regressed workload
+  throughput, so do not stack it.
+- Current phase3 target: stopped after OTEL phase3 attempt 2 per user request.
+  Do not start attempts 3-5 or any new benchmark run unless explicitly resumed.
 
 ## 单个 app 的完整流程
 

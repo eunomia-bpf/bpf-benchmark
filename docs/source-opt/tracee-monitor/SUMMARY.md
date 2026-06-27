@@ -2,7 +2,7 @@
 
 App: `tracee/monitor`
 
-Status: phase3-in-progress
+Status: phase3-complete
 
 Start state:
 
@@ -70,6 +70,7 @@ Phase3 attempts:
 | 2 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_161621_526914` | `stress_ng_sum_bogo_ops_s` mean=464810, samples `462950, 465355, 466125`, +0.86% vs clean baseline | Stacks phase2 best and converts `trace_security_task_prctl` from kprobe to typed fentry. Real loader accepted the fentry attach; this is the current tracee phase3 base, but prctl is a tiny workload contributor so next attempt should pivot to hotter shared syscall/cap/futex/sigfd paths. |
 | 3 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_164248_792753` | `stress_ng_sum_bogo_ops_s` mean=457589, samples `458895, 456475, 457398`, -0.71% vs clean baseline | Stacks attempt 2 and adds direct hot syscall argument serialization for setuid/setgid/kill/tkill/tgkill/eventfd/signalfd/futex. Correctness passed, but `sys_exit_submit` grew from `0x4fc8` to `0x60a0` and throughput regressed by 1.55% vs attempt 2, so do not stack. |
 | 4 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_170733_776031` | `stress_ng_sum_bogo_ops_s` mean=450374, samples `450246, 448766, 452111`, -2.28% vs clean baseline | Stacks attempt 2 and reorders `save_args_to_submit_buf()` to handle value arg types before pointer-type dispatch. Correctness passed, but throughput regressed by 3.11% vs attempt 2; do not stack and pivot away from serializer layout tweaks. |
+| 5 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_173247_019570` | `stress_ng_sum_bogo_ops_s` mean=461933, samples `460381, 463013, 462406`, +0.23% vs clean baseline | Stacks attempt 2 and converts `trace_commit_creds` from kprobe to typed fentry. Correctness passed and `sys_exit_submit` stayed `0x4fc8`, but throughput regressed by 0.62% vs attempt 2; do not stack. |
 
 Phase3 gate:
 
@@ -81,4 +82,7 @@ Phase3 gate:
 - [x] Phase3 attempt 3 source tree returned to clean state after run.
 - [x] Phase3 attempt 4 recorded.
 - [x] Phase3 attempt 4 source tree returned to clean state after run.
-- [ ] Phase3 attempts complete: 4 / 5.
+- [x] Phase3 attempt 5 recorded.
+- [x] Phase3 attempt 5 source tree returned to clean state after run.
+- [x] Phase3 attempts complete: 5 / 5.
+- [x] Best tracee phase3 result remains attempt 2 at +0.86% vs clean baseline.

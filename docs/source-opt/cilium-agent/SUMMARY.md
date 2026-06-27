@@ -2,7 +2,7 @@
 
 App: `cilium/agent`
 
-Status: phase2-complete
+Status: phase3-in-progress
 
 Start state:
 
@@ -60,3 +60,22 @@ Phase2 gate:
 - [x] No phase2 Cilium base improved over first-round best; keep
   `20260625-090437-tail-ipv4-to-endpoint-revalidate-unlikely` as Cilium best
   (`+12.37%` vs clean baseline).
+
+Phase3 attempts:
+
+| Attempt | Status | Result path | Performance | Notes |
+| --- | --- | --- | --- | --- |
+| 1 | accepted-for-analysis; selected as current Cilium phase3 base | `corpus/results/x86_kvm_corpus_20260626_180150_613607` | pktgen_total_pps mean `1672664`; samples `1683410, 1662935, 1671646`; `+12.40%` vs clean baseline, `+0.03%` vs previous Cilium best | Started from the first-round best revalidate patch, then marked the IPv4 `identity_is_reserved(src_sec_identity)` branch in `tail_ipv4_to_endpoint()` as cold. Correctness passed; the result is positive but tiny, so attempts 2-5 should move to larger hot-path work reduction instead of more branch hints. |
+| 2 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_182603_784560` | pktgen_total_pps mean `1572938`; samples `1554963, 1566899, 1596952`; `+5.70%` vs clean baseline, `-5.96%` vs current Cilium phase3 base | Started from the phase3 attempt 1 base, then deferred policy verdict payload length and rate-limit setup until after the event filter in `send_policy_verdict_notify()`. Correctness passed and offline `tc/tail` section size shrank by `0x50`, but workload throughput regressed, so do not stack it. |
+| 3 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_185324_568478` | pktgen_total_pps mean `1569838`; samples `1579206, 1566724, 1563584`; `+5.49%` vs clean baseline, `-6.15%` vs current Cilium phase3 base | Started from the phase3 attempt 1 base, then made established+allow policy traffic the explicit fast path around IPv4 ingress/egress policy verdict notification. Correctness passed, but the full-port-range pktgen workload likely keeps CT_NEW/policy verdict work hot enough that this branch reshaping regressed throughput; do not stack it. |
+| 4 | accepted-for-analysis; selected as current Cilium phase3 base | `corpus/results/x86_kvm_corpus_20260626_191637_695574` | pktgen_total_pps mean `1686212`; samples `1688102, 1686224, 1684311`; `+13.31%` vs clean baseline, `+0.81%` vs prior Cilium phase3 base | Started from the phase3 attempt 1 base, then stacked the first-round positive `cil_to_container()` invalid-ethertype and failed-L3-pull `unlikely()` hints. Correctness passed and this composition improves over both the clean baseline and prior Cilium best, so attempt 5 should start from this base. |
+| 5 | accepted-for-analysis; selected as Cilium phase3 best | `corpus/results/x86_kvm_corpus_20260626_193753_200824` | pktgen_total_pps mean `1714120`; samples `1713045, 1718508, 1710806`; `+15.19%` vs clean baseline, `+1.66%` vs prior Cilium phase3 base | Started from the phase3 attempt 4 base, then stacked the first-round positive `cil_lxc_policy()` invalid-ethertype and failed-L3-pull `unlikely()` hints. Correctness passed and this becomes the best Cilium source-opt result so far. |
+
+Phase3 gate:
+
+- [x] Phase3 attempts 1-5 / 5 recorded.
+- [x] Attempts 1-5 source tree restored after run.
+- [x] Cilium phase3 complete.
+- [x] Current Cilium phase3 base is
+  `20260626-123126-phase3-policy-error-unlikely-stack` with mean `1714120`
+  (`+15.19%` vs clean baseline, `+1.66%` vs prior Cilium phase3 base).

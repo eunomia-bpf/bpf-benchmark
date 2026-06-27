@@ -1,0 +1,21 @@
+# tetragon/observer source-opt attempt: phase3-tracepoint-defer-pass-init
+
+- Time: 2026-06-26 13:43:35
+- App: `tetragon/observer`
+- Status: accepted-for-analysis; completed-not-stacked
+- Source files:
+  - `vendor/repos/tetragon/bpf/process/bpf_generic_tracepoint.c`
+  - `vendor/repos/tetragon/bpf/process/event_config.h`
+  - `vendor/repos/tetragon/bpf/process/generic_calls.h`
+  - `vendor/repos/tetragon/bpf/process/pfilter.h`
+  - `vendor/repos/tetragon/pkg/api/tracingapi/client_kprobe.go`
+  - `vendor/repos/tetragon/pkg/sensors/tracing/generictracepoint.go`
+- Base: phase3 attempt 2 `20260626-132055-phase3-tracepoint-no-selector-config-flag`.
+- Hypothesis: after the no-selector decision moved into `event_config.flags`, the no-selector hot path can avoid two redundant state writes: `generic_process_init()` already writes `common.op`, and `sel.pass=false` is unnecessary before a successful no-selector fast path immediately sets `sel.pass=true`.
+- Expected hot path: `generic_tracepoint_event()` for the raw-syscalls policy in `stress_ng_tetragon_policy_hot`.
+- Correctness argument: fallback/filter paths still initialize `sel.pass=false` before tail-calling `TAIL_CALL_FILTER`. Successful no-selector fast paths still set `sel.pass=true` before tail-calling `TAIL_CALL_PROCESS`. `common.op` remains initialized by `generic_process_init(msg, MSG_OP_GENERIC_TRACEPOINT)`.
+- Build command: `make -C vendor tetragon-x86`
+- Run command: included in `run-command.sh`.
+- Result path: `corpus/results/x86_kvm_corpus_20260626_205027_125596`
+- Performance: stress_ng_sum_bogo_ops_s samples `400953, 388615, 388104`; mean `392557`; baseline mean `358681`; `+9.44%` vs baseline; `-1.92%` vs phase3 attempt 2.
+- Follow-up: do not stack this change. Continue phase3 attempts 4-5 from attempt 2, not from this attempt.

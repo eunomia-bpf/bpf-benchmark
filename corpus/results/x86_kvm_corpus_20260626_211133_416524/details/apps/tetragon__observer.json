@@ -1,0 +1,149 @@
+{
+  "app": "tetragon/observer",
+  "baseline": {
+    "bpf": {},
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--eventfd",
+          "1",
+          "--mmap",
+          "1",
+          "--mmap-bytes",
+          "16M",
+          "--udp",
+          "1",
+          "--sock",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockpair",
+          "1",
+          "--sock-port",
+          "14649",
+          "--sockfd-port",
+          "14749",
+          "--timeout",
+          "180s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/c0a07fa2"
+        ],
+        "config": {
+          "stressors": [
+            "eventfd",
+            "mmap",
+            "udp",
+            "sock",
+            "sockfd",
+            "sockpair"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 180.067375964,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1897] setting to a 3 mins, 0 secs run per stressor\nstress-ng: info:  [1897] dispatching hogs: 1 eventfd, 1 mmap, 1 udp, 1 sock, 1 sockfd, 1 sockpair\nstress-ng: info:  [1897] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [1897] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1897]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1897] eventfd        14399108    180.00      7.45    165.66     79994.92       83179.92\nstress-ng: metrc: [1897] mmap               5018    180.00      1.22    158.36        27.88          31.44\nstress-ng: metrc: [1897] udp            22440054    180.00      5.83    174.01    124666.75      124780.52\nstress-ng: metrc: [1897] sock              63318    180.00      3.54    172.16       351.77         360.38\nstress-ng: metrc: [1897] sockfd         24847236    180.00      9.57    165.11    138037.69      142242.30\nstress-ng: metrc: [1897] sockpair        8774808    180.05      3.61    176.17     48735.22       48810.10\nstress-ng: info:  [1897] skipped: 0\nstress-ng: info:  [1897] passed: 6: eventfd (1) mmap (1) udp (1) sock (1) sockfd (1) sockpair (1)\nstress-ng: info:  [1897] failed: 0\nstress-ng: info:  [1897] metrics untrustworthy: 0\nstress-ng: info:  [1897] successful run completed in 3 mins, 0.05 secs",
+        "workload_name": "stress_ng_tetragon_policy_hot"
+      },
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--eventfd",
+          "1",
+          "--mmap",
+          "1",
+          "--mmap-bytes",
+          "16M",
+          "--udp",
+          "1",
+          "--sock",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockpair",
+          "1",
+          "--sock-port",
+          "15161",
+          "--sockfd-port",
+          "15261",
+          "--timeout",
+          "180s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/c0a07fa2"
+        ],
+        "config": {
+          "stressors": [
+            "eventfd",
+            "mmap",
+            "udp",
+            "sock",
+            "sockfd",
+            "sockpair"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 180.052370504,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1913] setting to a 3 mins, 0 secs run per stressor\nstress-ng: info:  [1913] dispatching hogs: 1 eventfd, 1 mmap, 1 udp, 1 sock, 1 sockfd, 1 sockpair\nstress-ng: info:  [1913] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [1913] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1913]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1913] eventfd        13957579    180.00      7.93    160.17     77542.01       83034.97\nstress-ng: metrc: [1913] mmap               5034    180.00      1.03    158.90        27.97          31.48\nstress-ng: metrc: [1913] udp            21882237    180.00      5.21    170.89    121565.54      124261.45\nstress-ng: metrc: [1913] sock              63368    180.00      3.89    172.55       352.04         359.15\nstress-ng: metrc: [1913] sockfd         24615155    180.00      9.32    163.55    136748.93      142388.10\nstress-ng: metrc: [1913] sockpair        8416485    180.04      3.91    170.48     46748.84       48262.90\nstress-ng: info:  [1913] skipped: 0\nstress-ng: info:  [1913] passed: 6: eventfd (1) mmap (1) udp (1) sock (1) sockfd (1) sockpair (1)\nstress-ng: info:  [1913] failed: 0\nstress-ng: info:  [1913] metrics untrustworthy: 0\nstress-ng: info:  [1913] successful run completed in 3 mins, 0.04 secs",
+        "workload_name": "stress_ng_tetragon_policy_hot"
+      },
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--eventfd",
+          "1",
+          "--mmap",
+          "1",
+          "--mmap-bytes",
+          "16M",
+          "--udp",
+          "1",
+          "--sock",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockpair",
+          "1",
+          "--sock-port",
+          "15673",
+          "--sockfd-port",
+          "15773",
+          "--timeout",
+          "180s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/c0a07fa2"
+        ],
+        "config": {
+          "stressors": [
+            "eventfd",
+            "mmap",
+            "udp",
+            "sock",
+            "sockfd",
+            "sockpair"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 180.075341342,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1927] setting to a 3 mins, 0 secs run per stressor\nstress-ng: info:  [1927] dispatching hogs: 1 eventfd, 1 mmap, 1 udp, 1 sock, 1 sockfd, 1 sockpair\nstress-ng: info:  [1927] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [1927] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1927]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1927] eventfd        14232272    180.00      7.22    162.64     79068.08       83790.30\nstress-ng: metrc: [1927] mmap               4936    180.00      0.85    156.15        27.42          31.44\nstress-ng: metrc: [1927] udp            22440764    180.00      5.34    174.76    124670.64      124601.91\nstress-ng: metrc: [1927] sock              63585    180.00      3.44    169.07       353.25         368.59\nstress-ng: metrc: [1927] sockfd         24467962    180.00      9.30    161.46    135932.47      143290.08\nstress-ng: metrc: [1927] sockpair        8431695    180.06      3.65    169.17     46827.39       48789.31\nstress-ng: info:  [1927] skipped: 0\nstress-ng: info:  [1927] passed: 6: eventfd (1) mmap (1) udp (1) sock (1) sockfd (1) sockpair (1)\nstress-ng: info:  [1927] failed: 0\nstress-ng: info:  [1927] metrics untrustworthy: 0\nstress-ng: info:  [1927] successful run completed in 3 mins, 0.06 secs",
+        "workload_name": "stress_ng_tetragon_policy_hot"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": null,
+  "rejit_result": {
+    "mode": "skip_rejit_all",
+    "status": "skipped"
+  },
+  "runner": "tetragon",
+  "selected_workload": "stress_ng_tetragon_policy_hot",
+  "status": "ok"
+}

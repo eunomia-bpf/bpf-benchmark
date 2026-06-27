@@ -1,0 +1,10 @@
+Formal run:
+
+- Result dir: `corpus/results/x86_kvm_corpus_20260626_182603_784560`
+- App result: `corpus/results/x86_kvm_corpus_20260626_182603_784560/details/apps/cilium__agent.json`
+- Metadata: `corpus/results/x86_kvm_corpus_20260626_182603_784560/metadata.json`
+
+Restore:
+
+- Reverse patch: `patch -d vendor/repos/cilium -p1 -R < docs/source-opt/cilium-agent/20260626-111706-phase3-lazy-policy-verdict-payload/source.diff`
+- Restore build log: `docs/source-opt/cilium-agent/20260626-111706-phase3-lazy-policy-verdict-payload/restore-build.log`

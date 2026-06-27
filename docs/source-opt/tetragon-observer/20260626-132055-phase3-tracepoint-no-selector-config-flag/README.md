@@ -1,0 +1,21 @@
+# tetragon/observer source-opt attempt: phase3-tracepoint-no-selector-config-flag
+
+- Time: 2026-06-26 13:20:55
+- App: `tetragon/observer`
+- Status: accepted-for-analysis; selected as current tetragon phase3 base
+- Source files:
+  - `vendor/repos/tetragon/bpf/process/bpf_generic_tracepoint.c`
+  - `vendor/repos/tetragon/bpf/process/event_config.h`
+  - `vendor/repos/tetragon/bpf/process/generic_calls.h`
+  - `vendor/repos/tetragon/bpf/process/pfilter.h`
+  - `vendor/repos/tetragon/pkg/api/tracingapi/client_kprobe.go`
+  - `vendor/repos/tetragon/pkg/sensors/tracing/generictracepoint.go`
+- Base: phase3 attempt 1 `20260626-125641-phase3-tracepoint-sparse-active-clear`.
+- Hypothesis: the previous no-selector fast path still paid a per-event `filter_map` lookup to discover that selector count was zero. This attempt derives a no-selector bit from the same selector buffer at policy load time, stores it in `event_config.flags`, and lets the tracepoint hot path branch directly on the already-loaded `event_config`.
+- Expected hot path: `generic_tracepoint_event()` for the raw-syscalls policy in `stress_ng_tetragon_policy_hot`.
+- Correctness argument: the new flag is set only when the policy selector buffer reports zero selectors, which is the same source used to populate `filter_map`. Nonzero-selector policies still take the original filter path. For no-selector policies, behavior matches the previous validated fast path: current exec state is copied with `event_find_curr()`, `sel.pass` is set, and execution tail-calls to process.
+- Build command: `make -C vendor tetragon-x86`
+- Run command: included in `run-command.sh`.
+- Result path: `corpus/results/x86_kvm_corpus_20260626_202805_644441`
+- Performance: stress_ng_sum_bogo_ops_s samples `403732, 400561, 396453`; mean `400249`; baseline mean `358681`; `+11.59%` vs baseline; `+1.83%` vs previous phase3 base.
+- Follow-up: continue phase3 attempts 3-5 from this base, focusing on improvements that preserve the load-time no-selector flag and avoid increasing the tracepoint program body unnecessarily.

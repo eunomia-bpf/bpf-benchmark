@@ -3,7 +3,7 @@
 - App: `otelcol-ebpf-profiler/profiling`
 - Source root: `vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/`
 - Workload: `otel_mixed_workload`
-- Status: phase2-complete
+- Status: phase3-paused-after-attempt2
 
 ## Baseline
 
@@ -32,6 +32,13 @@
 | phase2-4 | rejected-no-signal | `corpus/results/x86_kvm_corpus_20260626_110000_678727` | language_ops_total mean=19575112832; samples `19658284979, 19486494323, 19580559194` | -0.35% | single-delta stack page lookup reuse kept instruction growth small but did not improve throughput; do not stack |
 | phase2-5 | rejected-no-signal | `corpus/results/x86_kvm_corpus_20260626_112227_995529` | language_ops_total mean=19508075671; samples `19462147885, 19814623616, 19247455513` | -0.70% | batching PHP successful-frame metric updates cut `unwind_php` from 6899 to 3358 instructions but did not improve workload throughput; do not stack |
 
+## Phase 3 Attempts
+
+| Attempt | Status | Result | Primary metric | vs baseline | Notes |
+| --- | --- | --- | ---: | ---: | --- |
+| phase3-1 | rejected-no-signal | `corpus/results/x86_kvm_corpus_20260626_215832_429743` | language_ops_total mean=19365498890; samples `19583174016, 19234194165, 19279128490` | -1.42% | native-unwind error branch hints preserved correctness and shrank `unwind_native` by 12 instructions, but total artifact size grew by 65 instructions and workload throughput regressed; do not stack |
+| phase3-2 | rejected-no-signal | `corpus/results/x86_kvm_corpus_20260626_222221_639047` | language_ops_total mean=19481636379; samples `19585524873, 19436580480, 19422803783` | -0.83% | deferring the dummy PID LPM lookup until current-PC mapping failure preserved correctness and reduced total artifact size by 20 instructions, but throughput still regressed; do not stack |
+
 ## Notes
 
 - Use `SKIP_REJIT=all`; `post_rejit` must stay `null`.
@@ -40,3 +47,5 @@
 - Baseline gate passed: app `status=ok`, `error=""`, three composite workload samples, all 33 components returned 0, `post_rejit=null`, `rejit_result.mode=skip_rejit_all`.
 - For otel, a source edit under `support/ebpf/` must be followed by an explicit eBPF artifact rebuild before the formal `make corpus` run, otherwise the collector may reuse the previous embedded `tracer.ebpf.amd64`.
 - Phase2 completed with no positive OTEL throughput signal; keep the clean source as the next base.
+- Phase3 attempt 1 also produced no positive signal; continue OTEL from clean source and switch to structural hot-path changes rather than more branch-layout hints.
+- Phase3 attempt 2 also produced no positive signal despite a structural LPM lookup change. Per user request, stop after this run and do not launch attempt 3 unless explicitly resumed.

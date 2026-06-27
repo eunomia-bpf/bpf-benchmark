@@ -1,0 +1,21 @@
+# tetragon/observer source-opt attempt: phase3-process-stage-config-cache
+
+- Time: 2026-06-26 14:27:19
+- App: `tetragon/observer`
+- Status: accepted-for-analysis; completed-not-stacked
+- Source files:
+  - `vendor/repos/tetragon/bpf/process/bpf_generic_tracepoint.c`
+  - `vendor/repos/tetragon/bpf/process/event_config.h`
+  - `vendor/repos/tetragon/bpf/process/generic_calls.h`
+  - `vendor/repos/tetragon/bpf/process/pfilter.h`
+  - `vendor/repos/tetragon/pkg/api/tracingapi/client_kprobe.go`
+  - `vendor/repos/tetragon/pkg/sensors/tracing/generictracepoint.go`
+- Base: phase3 attempt 2 `20260626-132055-phase3-tracepoint-no-selector-config-flag`.
+- Hypothesis: the process-stage tracepoint helper can reuse the already available event and `event_config` pointers instead of re-reading `process_call_heap` and `config_map` inside `generic_read_arg()` for each argument.
+- Expected hot path: `generic_tracepoint_process_event()` while processing the raw-syscalls policy in `stress_ng_tetragon_policy_hot`.
+- Correctness argument: argument decoding still uses the same `event_config.idx[]` order, `tailcall_index_process` progression, and event payload fields. The change only moves existing map lookups to the caller and passes the same pointers into the helper; no selector, map, payload, attach point, or tail-call key ABI changes.
+- Build command: `make -C vendor tetragon-x86`
+- Run command: included in `run-command.sh`.
+- Result path: `corpus/results/x86_kvm_corpus_20260626_213400_944958`
+- Performance: stress_ng_sum_bogo_ops_s samples `401171, 397862, 395365`; mean `398133`; baseline mean `358681`; `+11.00%` vs baseline; `+1.57%` vs phase2 best; `-0.53%` vs phase3 attempt 2.
+- Follow-up: do not stack this change. Tetragon phase3 remains best at attempt 2; move the phase3 sweep to `otelcol-ebpf-profiler/profiling`.

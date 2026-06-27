@@ -1,0 +1,21 @@
+# tetragon/observer source-opt attempt: phase3-tracepoint-fallback-state-split
+
+- Time: 2026-06-26 14:05:04
+- App: `tetragon/observer`
+- Status: accepted-for-analysis; completed-not-stacked
+- Source files:
+  - `vendor/repos/tetragon/bpf/process/bpf_generic_tracepoint.c`
+  - `vendor/repos/tetragon/bpf/process/event_config.h`
+  - `vendor/repos/tetragon/bpf/process/generic_calls.h`
+  - `vendor/repos/tetragon/bpf/process/pfilter.h`
+  - `vendor/repos/tetragon/pkg/api/tracingapi/client_kprobe.go`
+  - `vendor/repos/tetragon/pkg/sensors/tracing/generictracepoint.go`
+- Base: phase3 attempt 2 `20260626-132055-phase3-tracepoint-no-selector-config-flag`.
+- Hypothesis: after the load-time no-selector flag removes the per-event `filter_map` lookup, the hot no-selector path can skip fallback-only selector state initialization (`sel.curr`, `tailcall_index_selector`, `sel.pass`, namespace/cap match bits, and the full active-selector clear) until the no-selector fast path fails.
+- Expected hot path: `generic_tracepoint_event()` for the raw-syscalls policy in `stress_ng_tetragon_policy_hot`.
+- Correctness argument: process-path state still remains initialized before the fast path (`tailcall_index_process`, `common.flags`, and `sel.active[SELECTORS_ACTIVE]`). Fallback selector paths still initialize selector state before tail-calling `TAIL_CALL_FILTER`; no selector, map, payload, attach point, or tail-call key ABI changes.
+- Build command: `make -C vendor tetragon-x86`
+- Run command: included in `run-command.sh`.
+- Result path: `corpus/results/x86_kvm_corpus_20260626_211133_416524`
+- Performance: stress_ng_sum_bogo_ops_s samples `391814, 382985, 386879`; mean `387226`; baseline mean `358681`; `+7.96%` vs baseline; `-1.21%` vs phase2 best; `-3.25%` vs phase3 attempt 2.
+- Follow-up: do not stack this change. Continue phase3 attempt 5 from attempt 2, not from this attempt.
