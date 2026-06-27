@@ -1,0 +1,88 @@
+diff --git a/pkg/ebpf/c/tracee.bpf.c b/pkg/ebpf/c/tracee.bpf.c
+index 14a3b8102..3fdbb6021 100644
+--- a/pkg/ebpf/c/tracee.bpf.c
++++ b/pkg/ebpf/c/tracee.bpf.c
+@@ -2426,8 +2426,8 @@ int BPF_KPROBE(trace_security_inode_unlink)
+     return events_perf_submit(&p);
+ }
+ 
+-SEC("kprobe/commit_creds")
+-int BPF_KPROBE(trace_commit_creds)
++SEC("fentry/commit_creds")
++int BPF_PROG(trace_commit_creds, struct cred *new_cred)
+ {
+     program_data_t p = {};
+     if (!init_program_data(&p, ctx, COMMIT_CREDS))
+@@ -2436,7 +2436,6 @@ int BPF_KPROBE(trace_commit_creds)
+     if (!evaluate_scope_filters(&p))
+         return 0;
+ 
+-    struct cred *new_cred = (struct cred *) PT_REGS_PARM1(ctx);
+     struct cred *old_cred = (struct cred *) get_task_real_cred(p.event->task);
+ 
+     slim_cred_t old_slim = {0};
+@@ -2559,8 +2558,9 @@ int BPF_KPROBE(trace_switch_task_namespaces)
+     return 0;
+ }
+ 
+-SEC("kprobe/cap_capable")
+-int BPF_KPROBE(trace_cap_capable)
++SEC("fentry/cap_capable")
++int BPF_PROG(trace_cap_capable, const struct cred *cred, struct user_namespace *targ_ns,
++             int cap, int cap_opt)
+ {
+     program_data_t p = {};
+     if (!init_program_data(&p, ctx, CAP_CAPABLE))
+@@ -2569,15 +2569,13 @@ int BPF_KPROBE(trace_cap_capable)
+     if (!evaluate_scope_filters(&p))
+         return 0;
+ 
+-    int cap = PT_REGS_PARM3(ctx);
+-    int cap_opt = PT_REGS_PARM4(ctx);
+-
+     if (cap_opt & CAP_OPT_NOAUDIT)
+         return 0;
+ 
+     save_to_submit_buf(&p.event->args_buf, (void *) &cap, sizeof(int), 0);
+ 
+-    return events_perf_submit(&p);
++    events_perf_submit(&p);
++    return 0;
+ }
+ 
+ SEC("kprobe/security_socket_create")
+@@ -5356,8 +5354,9 @@ int BPF_KPROBE(trace_chmod_common)
+     return events_perf_submit(&p);
+ }
+ 
+-SEC("kprobe/security_task_prctl")
+-int BPF_KPROBE(trace_security_task_prctl)
++SEC("fentry/security_task_prctl")
++int BPF_PROG(trace_security_task_prctl, int option, unsigned long arg2, unsigned long arg3,
++             unsigned long arg4, unsigned long arg5)
+ {
+     program_data_t p = {};
+     if (!init_program_data(&p, ctx, SECURITY_TASK_PRCTL))
+@@ -5366,12 +5365,6 @@ int BPF_KPROBE(trace_security_task_prctl)
+     if (!evaluate_scope_filters(&p))
+         return 0;
+ 
+-    // Save raw args
+-    int option = PT_REGS_PARM1(ctx);
+-    unsigned long arg2 = PT_REGS_PARM2(ctx);
+-    unsigned long arg3 = PT_REGS_PARM3(ctx);
+-    unsigned long arg4 = PT_REGS_PARM4(ctx);
+-    unsigned long arg5 = PT_REGS_PARM5(ctx);
+     save_to_submit_buf(&p.event->args_buf, &option, sizeof(option), 0);
+     save_to_submit_buf(&p.event->args_buf, &arg2, sizeof(arg2), 1);
+     save_to_submit_buf(&p.event->args_buf, &arg3, sizeof(arg3), 2);
+@@ -5598,7 +5591,8 @@ int BPF_KPROBE(trace_security_task_prctl)
+         save_to_submit_buf(&p.event->args_buf, &old_securebits, sizeof(old_securebits), 40);
+     }
+ 
+-    return events_perf_submit(&p);
++    events_perf_submit(&p);
++    return 0;
+ }
+ 
+ //

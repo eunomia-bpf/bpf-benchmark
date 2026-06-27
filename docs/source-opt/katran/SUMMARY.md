@@ -2,7 +2,7 @@
 
 App: `katran`
 
-Status: complete
+Status: phase3-in-progress
 
 Start state:
 
@@ -40,6 +40,16 @@ Phase2 attempts:
 | 3 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_004646_185930` | pktgen_total_pps mean=3348905; samples `3390361, 3336180, 3320175` | +9.40% | `cache-vip-metadata`; correctness passed, +1.32% vs phase2 attempt 1, stack as current katran best base |
 | 4 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_011245_701549` | pktgen_total_pps mean=3275764; samples `3272779, 3268211, 3286301` | +7.01% | `cache-vip-plus-lru-proto-compare`; correctness passed, but -2.18% vs phase2 attempt 3, so do not stack |
 | 5 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_013906_982440` | pktgen_total_pps mean=3301431; samples `3317221, 3295753, 3291320` | +7.85% | `nonnull-lru-map`; correctness passed, but -1.42% vs phase2 attempt 3, so do not stack |
+
+Phase3 attempts:
+
+| Attempt | Status | Result path | Primary metric | vs baseline | Notes |
+| --- | --- | --- | ---: | ---: | --- |
+| 1 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_114838_879478` | pktgen_total_pps mean=3338745; samples `3337569, 3357814, 3320853` | +9.07% | `phase3-thoff-parser-reuse`; correctness passed and static xdp size shrank to `0x4760`, but result was -0.30% vs phase2 best, so do not stack |
+| 2 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_121345_246104` | pktgen_total_pps mean=3320793; samples `3276898, 3371790, 3313690` | +8.48% | `phase3-quic-v0-cid-fast-reject`; correctness passed, but result was -0.84% vs phase2 best, so do not stack; next attempt should target conn-rate/LRU/stats overhead |
+| 3 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_123820_861697` | pktgen_total_pps mean=3349874; samples `3379459, 3355767, 3314396` | +9.43% | `phase3-unlikely-hot-map-misses`; correctness passed, +0.03% vs phase2 best, stack as current katran best base even though static xdp size grew to `0x4858` |
+| 4 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_130130_983141` | pktgen_total_pps mean=3414266; samples `3406881, 3418862, 3417054` | +11.53% | `phase3-vip-flag-branch-layout`; correctness passed, +1.92% vs phase3 attempt 3 and clears the 10% target; stack as current katran best base despite static xdp size growing to `0x4890` |
+| 5 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_132449_671728` | pktgen_total_pps mean=3277602; samples `3275164, 3299603, 3258040` | +7.07% | `phase3-quic-hot-branch-layout`; correctness passed, but regressed -4.00% vs phase3 attempt 4, so do not stack parser fallback hints |
 
 Completion gate:
 

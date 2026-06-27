@@ -1,0 +1,40 @@
+## capable
+  3 kprobe/cap_capable        00000130 0000000000000000 TEXT
+  4 .relkprobe/cap_capable    00000050 0000000000000000 
+  5 kretprobe/cap_capable     00000470 0000000000000000 TEXT
+  6 .relkretprobe/cap_capable 000000e0 0000000000000000 
+  9 .maps                     000000a8 0000000000000000 DATA
+insn_lines=157
+## syscount
+  3 tracepoint/raw_syscalls/sys_enter     000000f8 0000000000000000 TEXT
+  4 .reltracepoint/raw_syscalls/sys_enter 00000040 0000000000000000 
+  5 tracepoint/raw_syscalls/sys_exit      000003a0 0000000000000000 TEXT
+  6 .reltracepoint/raw_syscalls/sys_exit  000000e0 0000000000000000 
+  8 .maps                                 00000060 0000000000000000 DATA
+insn_lines=129
+## tcpconnect
+  3 kprobe/tcp_v4_connect        00000100 0000000000000000 TEXT
+  4 .relkprobe/tcp_v4_connect    00000030 0000000000000000 
+  5 kretprobe/tcp_v4_connect     00000538 0000000000000000 TEXT
+  6 .relkretprobe/tcp_v4_connect 000000c0 0000000000000000 
+  7 kprobe/tcp_v6_connect        00000100 0000000000000000 TEXT
+  8 .relkprobe/tcp_v6_connect    00000030 0000000000000000 
+  9 kretprobe/tcp_v6_connect     00000550 0000000000000000 TEXT
+ 10 .relkretprobe/tcp_v6_connect 000000c0 0000000000000000 
+ 13 .maps                        00000078 0000000000000000 DATA
+insn_lines=367
+## runqlat
+  4 tp_btf/sched_wakeup         00000100 0000000000000000 TEXT
+  5 .reltp_btf/sched_wakeup     00000040 0000000000000000 
+  6 tp_btf/sched_wakeup_new     00000100 0000000000000000 TEXT
+  7 .reltp_btf/sched_wakeup_new 00000040 0000000000000000 
+  8 tp_btf/sched_switch         00000028 0000000000000000 TEXT
+  9 .reltp_btf/sched_switch     00000010 0000000000000000 
+ 10 raw_tp/sched_wakeup         00000170 0000000000000000 TEXT
+ 11 .relraw_tp/sched_wakeup     00000040 0000000000000000 
+ 12 raw_tp/sched_wakeup_new     00000170 0000000000000000 TEXT
+ 13 .relraw_tp/sched_wakeup_new 00000040 0000000000000000 
+ 14 raw_tp/sched_switch         00000028 0000000000000000 TEXT
+ 15 .relraw_tp/sched_switch     00000010 0000000000000000 
+ 18 .maps                       00000060 0000000000000000 DATA
+insn_lines=387

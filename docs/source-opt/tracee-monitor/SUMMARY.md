@@ -2,7 +2,7 @@
 
 App: `tracee/monitor`
 
-Status: phase2-complete
+Status: phase3-in-progress
 
 Start state:
 
@@ -61,3 +61,24 @@ Phase2 gate:
 - [x] Best tracee phase2 result remains
   `phase2/20260625-210832-cap-capable-fentry-return0` at +0.32%; tracee
   did not reach the 10% target.
+
+Phase3 attempts:
+
+| Attempt | Status | Result path | Primary metric | Notes |
+| --- | --- | --- | ---: | --- |
+| 1 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_155038_747634` | `stress_ng_sum_bogo_ops_s` mean=462517, samples `461582, 464345, 461625`, +0.36% vs clean baseline | Stacks phase2 best and adds a no-scope-filter fast path to `evaluate_scope_filters()`; gate passed, but improvement over phase2 best is only +0.03% while hot sections grew, so do not stack. |
+| 2 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_161621_526914` | `stress_ng_sum_bogo_ops_s` mean=464810, samples `462950, 465355, 466125`, +0.86% vs clean baseline | Stacks phase2 best and converts `trace_security_task_prctl` from kprobe to typed fentry. Real loader accepted the fentry attach; this is the current tracee phase3 base, but prctl is a tiny workload contributor so next attempt should pivot to hotter shared syscall/cap/futex/sigfd paths. |
+| 3 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_164248_792753` | `stress_ng_sum_bogo_ops_s` mean=457589, samples `458895, 456475, 457398`, -0.71% vs clean baseline | Stacks attempt 2 and adds direct hot syscall argument serialization for setuid/setgid/kill/tkill/tgkill/eventfd/signalfd/futex. Correctness passed, but `sys_exit_submit` grew from `0x4fc8` to `0x60a0` and throughput regressed by 1.55% vs attempt 2, so do not stack. |
+| 4 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_170733_776031` | `stress_ng_sum_bogo_ops_s` mean=450374, samples `450246, 448766, 452111`, -2.28% vs clean baseline | Stacks attempt 2 and reorders `save_args_to_submit_buf()` to handle value arg types before pointer-type dispatch. Correctness passed, but throughput regressed by 3.11% vs attempt 2; do not stack and pivot away from serializer layout tweaks. |
+
+Phase3 gate:
+
+- [x] Phase3 attempt 1 recorded.
+- [x] Phase3 attempt 1 source tree returned to clean state after run.
+- [x] Phase3 attempt 2 recorded.
+- [x] Phase3 attempt 2 source tree returned to clean state after run.
+- [x] Phase3 attempt 3 recorded.
+- [x] Phase3 attempt 3 source tree returned to clean state after run.
+- [x] Phase3 attempt 4 recorded.
+- [x] Phase3 attempt 4 source tree returned to clean state after run.
+- [ ] Phase3 attempts complete: 4 / 5.

@@ -2,7 +2,7 @@
 
 App: `bcc/set`
 
-Status: phase2-complete
+Status: phase3-complete; current best is phase3 attempt 4
 
 Start state:
 
@@ -61,3 +61,33 @@ Phase2 gate:
 - [x] Phase2 attempt 3 source tree returned to clean state after run.
 - [x] Phase2 attempt 4 source tree returned to clean state after run.
 - [x] Phase2 attempt 5 source tree returned to clean state after run.
+
+Phase3 attempts:
+
+| Attempt | Status | Result path | Primary metric | Notes |
+| --- | --- | --- | ---: | --- |
+| 1 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_135003_717963` | `stress_ng_sum_bogo_ops_s` mean=730977, samples `730828, 727856, 734246`, +2.89% vs clean baseline | Stacks phase2 best and adds unlikely branch layout hints to default-cold `tcpconnect` filter/count branches; gate passed; selected as current bcc/set phase3 base. |
+| 2 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_141358_076518` | `stress_ng_sum_bogo_ops_s` mean=733113, samples `733995, 732654, 732689`, +3.19% vs clean baseline | Stacks phase3 attempt 1 and adds a no-filter `syscount` enter fast path plus exit branch-layout hints; gate passed; selected as current bcc/set phase3 base. |
+| 3 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_143534_405266` | `stress_ng_sum_bogo_ops_s` mean=727184, samples `725965, 726577, 729010`, +2.35% vs clean baseline | Stacks phase3 attempt 2 and adds `capable` default-cold branch layout hints; gate passed but regressed vs attempt 2, so do not stack. |
+| 4 | accepted-for-analysis | `corpus/results/x86_kvm_corpus_20260626_150154_266900` | `stress_ng_sum_bogo_ops_s` mean=794393, samples `794399, 794426, 794353`, +11.81% vs clean baseline | Stacks phase3 attempt 2 and changes `syscount`'s private latency `start` map from tid hash to task local storage; gate passed; selected as current bcc/set phase3 base. |
+| 5 | completed-not-stacked | `corpus/results/x86_kvm_corpus_20260626_152354_967827` | `stress_ng_sum_bogo_ops_s` mean=789683, samples `790657, 788288, 790104`, +11.15% vs clean baseline | Stacks phase3 attempt 4 and adds a default-event fast path to `tcpconnect`; gate passed but regressed by 0.59% vs attempt 4, so do not stack. |
+
+Phase3 gate:
+
+- [x] Phase3 attempt 1 recorded.
+- [x] Phase3 attempt 1 source tree returned to clean state after run.
+- [x] Phase3 attempt 2 recorded.
+- [x] Phase3 attempt 2 source tree returned to clean state after run.
+- [x] Phase3 attempt 3 recorded.
+- [x] Phase3 attempt 3 source tree returned to clean state after run.
+- [x] Phase3 attempt 4 recorded.
+- [x] Phase3 attempt 4 source tree returned to clean state after run.
+- [x] Phase3 attempt 5 recorded.
+- [x] Phase3 attempt 5 source tree returned to clean state after run.
+
+Phase3 outcome:
+
+- Best bcc/set phase3 result remains attempt 4:
+  `stress_ng_sum_bogo_ops_s` mean=`794393`, `+11.81%` vs clean baseline.
+- Attempt 5 confirmed that duplicating the default `tcpconnect` event path is
+  not worth stacking on top of the task-storage `syscount` base.

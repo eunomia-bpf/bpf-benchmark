@@ -1,0 +1,400 @@
+diff --git a/libbpf-tools/capable.bpf.c b/libbpf-tools/capable.bpf.c
+index 6673f786..e628c868 100644
+--- a/libbpf-tools/capable.bpf.c
++++ b/libbpf-tools/capable.bpf.c
+@@ -21,24 +21,12 @@ const volatile bool user_stack = false;
+ const volatile bool filter_cg = false;
+ const volatile pid_t targ_pid = -1;
+ 
+-struct args_t {
+-	int cap;
+-	int cap_opt;
+-};
+-
+ struct unique_key {
+ 	int cap;
+ 	u32 tgid;
+ 	u64 cgroupid;
+ };
+ 
+-struct {
+-	__uint(type, BPF_MAP_TYPE_HASH);
+-	__uint(max_entries, 10240);
+-	__type(key, u64);
+-	__type(value, struct args_t);
+-} start SEC(".maps");
+-
+ struct {
+ 	__uint(type, BPF_MAP_TYPE_CGROUP_ARRAY);
+ 	__type(key, u32);
+@@ -71,66 +59,45 @@ struct {
+ 	__type(value, u64);
+ } seen SEC(".maps");
+ 
+-SEC("kprobe/cap_capable")
+-int BPF_KPROBE(kprobe__cap_capable_entry, const struct cred *cred, struct user_namespace *targ_ns, int cap, int cap_opt)
++SEC("fexit/cap_capable")
++int BPF_PROG(cap_capable_exit, const struct cred *cred,
++	     struct user_namespace *targ_ns, int cap, int cap_opt, int ret)
+ {
+-	__u32 pid;
+ 	__u64 pid_tgid;
++	__u32 pid;
+ 
+-	if (filter_cg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
++	if (__builtin_expect(filter_cg && !bpf_current_task_under_cgroup(&cgroup_map, 0), 0))
+ 		return 0;
+ 
+ 	pid_tgid = bpf_get_current_pid_tgid();
+ 	pid = pid_tgid >> 32;
+ 
+-	if (pid == my_pid)
++	if (__builtin_expect(pid == my_pid, 0))
+ 		return 0;
+ 
+-	if (targ_pid != -1 && targ_pid != pid)
++	if (__builtin_expect(targ_pid != -1 && targ_pid != pid, 0))
+ 		return 0;
+ 
+-	struct args_t args = {};
+-	args.cap = cap;
+-	args.cap_opt = cap_opt;
+-	bpf_map_update_elem(&start, &pid_tgid, &args, 0);
+-
+-	return 0;
+-}
+-
+-SEC("kretprobe/cap_capable")
+-int BPF_KRETPROBE(kprobe__cap_capable_exit)
+-{
+-	__u64 pid_tgid;
+-	struct args_t *ap;
+-	struct key_t i_key;
+-
+-	pid_tgid = bpf_get_current_pid_tgid();
+-	ap = bpf_map_lookup_elem(&start, &pid_tgid);
+-	if (!ap)
+-		return 0;   /* missed entry */
+-
+-	bpf_map_delete_elem(&start, &pid_tgid);
+-
+ 	struct cap_event event = {};
+-	event.pid = pid_tgid >> 32;
++	event.pid = pid;
+ 	event.tgid = pid_tgid;
+-	event.cap = ap->cap;
++	event.cap = cap;
+ 	event.uid = bpf_get_current_uid_gid();
+ 	bpf_get_current_comm(&event.task, sizeof(event.task));
+-	event.ret = PT_REGS_RC(ctx);
++	event.ret = ret;
+ 
+-	if (LINUX_KERNEL_VERSION >= KERNEL_VERSION(5, 1, 0)) {
++	if (__builtin_expect(LINUX_KERNEL_VERSION >= KERNEL_VERSION(5, 1, 0), 1)) {
+ 		/* @opts: Bitmask of options defined in include/linux/security.h */
+-		event.audit = (ap->cap_opt & 0b10) == 0;
+-		event.insetid = (ap->cap_opt & 0b100) != 0;
++		event.audit = (cap_opt & 0b10) == 0;
++		event.insetid = (cap_opt & 0b100) != 0;
+ 	} else {
+-		event.audit = ap->cap_opt;
++		event.audit = cap_opt;
+ 		event.insetid = -1;
+ 	}
+ 
+-	if (unique_type) {
+-		struct unique_key key = {.cap = ap->cap};
+-		if (unique_type == UNQ_CGROUP)
++	if (__builtin_expect(unique_type, 0)) {
++		struct unique_key key = {.cap = cap};
++		if (__builtin_expect(unique_type == UNQ_CGROUP, 0))
+ 			key.cgroupid = bpf_get_current_cgroup_id();
+ 		else
+ 			key.tgid = pid_tgid;
+@@ -142,14 +109,16 @@ int BPF_KRETPROBE(kprobe__cap_capable_exit)
+ 		bpf_map_update_elem(&seen, &key, &zero, 0);
+ 	}
+ 
+-	if (kernel_stack || user_stack) {
++	if (__builtin_expect(kernel_stack || user_stack, 0)) {
++		struct key_t i_key;
++
+ 		i_key.pid = pid_tgid >> 32;
+ 		i_key.tgid = pid_tgid;
+ 
+ 		i_key.kern_stack_id = i_key.user_stack_id = -1;
+-		if (user_stack)
++		if (__builtin_expect(user_stack, 0))
+ 			i_key.user_stack_id = bpf_get_stackid(ctx, &stackmap, BPF_F_USER_STACK);
+-		if (kernel_stack)
++		if (__builtin_expect(kernel_stack, 0))
+ 			i_key.kern_stack_id = bpf_get_stackid(ctx, &stackmap, 0);
+ 
+ 		bpf_map_update_elem(&info, &i_key, &event, BPF_NOEXIST);
+diff --git a/libbpf-tools/syscount.bpf.c b/libbpf-tools/syscount.bpf.c
+index 38f8f978..b1dd268b 100644
+--- a/libbpf-tools/syscount.bpf.c
++++ b/libbpf-tools/syscount.bpf.c
+@@ -49,64 +49,88 @@ void save_proc_name(struct data_t *val)
+ 	BPF_CORE_READ_STR_INTO(&val->comm, current, group_leader, comm);
+ }
+ 
+-SEC("tracepoint/raw_syscalls/sys_enter")
+-int sys_enter(struct trace_event_raw_sys_enter *args)
++static __always_inline
++long syscall_id_from_regs(struct pt_regs *regs)
+ {
+-	u64 id = bpf_get_current_pid_tgid();
+-	pid_t pid = id >> 32;
+-	u32 tid = id;
++#if defined(__TARGET_ARCH_x86)
++	return BPF_CORE_READ(regs, orig_ax);
++#elif defined(__TARGET_ARCH_arm64)
++	return BPF_CORE_READ(regs, syscallno);
++#else
++	return -1;
++#endif
++}
++
++SEC("raw_tracepoint/sys_enter")
++int sys_enter(struct bpf_raw_tracepoint_args *ctx)
++{
++	u64 id;
+ 	u64 ts;
+ 
+-	if (filter_cg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
++	if (__builtin_expect(!filter_cg && !filter_pid, 1)) {
++		id = bpf_get_current_pid_tgid();
++		u32 tid = id;
++		ts = bpf_ktime_get_ns();
++		bpf_map_update_elem(&start, &tid, &ts, 0);
+ 		return 0;
++	}
+ 
+-	if (filter_pid && pid != filter_pid)
++	if (__builtin_expect(filter_cg && !bpf_current_task_under_cgroup(&cgroup_map, 0), 0))
++		return 0;
++
++	id = bpf_get_current_pid_tgid();
++	pid_t pid = id >> 32;
++	if (__builtin_expect(filter_pid && pid != filter_pid, 0))
+ 		return 0;
+ 
+ 	ts = bpf_ktime_get_ns();
+-	bpf_map_update_elem(&start, &tid, &ts, 0);
++	bpf_map_update_elem(&start, &id, &ts, 0);
+ 	return 0;
+ }
+ 
+-SEC("tracepoint/raw_syscalls/sys_exit")
+-int sys_exit(struct trace_event_raw_sys_exit *args)
++SEC("raw_tracepoint/sys_exit")
++int sys_exit(struct bpf_raw_tracepoint_args *ctx)
+ {
+-	if (filter_cg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
++	if (__builtin_expect(filter_cg && !bpf_current_task_under_cgroup(&cgroup_map, 0), 0))
+ 		return 0;
+ 
+-	u64 id = bpf_get_current_pid_tgid();
++	struct pt_regs *regs = (struct pt_regs *)ctx->args[0];
++	long sys_id = syscall_id_from_regs(regs);
++	long ret = ctx->args[1];
+ 	static const struct data_t zero;
+-	pid_t pid = id >> 32;
++
++	/* this happens when there is an interrupt */
++	if (__builtin_expect(sys_id == -1, 0))
++		return 0;
++
++	u64 id = bpf_get_current_pid_tgid();
+ 	struct data_t *val;
+ 	u64 *start_ts, lat = 0;
+ 	u32 tid = id;
+ 	u32 key;
++	pid_t pid = id >> 32;
+ 
+-	/* this happens when there is an interrupt */
+-	if (args->id == -1)
+-		return 0;
+-
+-	if (filter_pid && pid != filter_pid)
++	if (__builtin_expect(filter_pid && pid != filter_pid, 0))
+ 		return 0;
+-	if (filter_failed && args->ret >= 0)
++	if (__builtin_expect(filter_failed && ret >= 0, 0))
+ 		return 0;
+-	if (filter_errno && args->ret != -filter_errno)
++	if (__builtin_expect(filter_errno && ret != -filter_errno, 0))
+ 		return 0;
+ 
+-	if (measure_latency) {
++	if (__builtin_expect(measure_latency, 1)) {
+ 		start_ts = bpf_map_lookup_elem(&start, &tid);
+ 		if (!start_ts)
+ 			return 0;
+ 		lat = bpf_ktime_get_ns() - *start_ts;
+ 	}
+ 
+-	key = (count_by_process) ? pid : args->id;
++	key = (count_by_process) ? pid : sys_id;
+ 	val = bpf_map_lookup_or_try_init(&data, &key, &zero);
+ 	if (val) {
+ 		__sync_fetch_and_add(&val->count, 1);
+-		if (count_by_process)
++		if (__builtin_expect(count_by_process, 0))
+ 			save_proc_name(val);
+-		if (measure_latency)
++		if (__builtin_expect(measure_latency, 1))
+ 			__sync_fetch_and_add(&val->total_ns, lat);
+ 	}
+ 	return 0;
+diff --git a/libbpf-tools/tcpconnect.bpf.c b/libbpf-tools/tcpconnect.bpf.c
+index 8a0a1520..59628516 100644
+--- a/libbpf-tools/tcpconnect.bpf.c
++++ b/libbpf-tools/tcpconnect.bpf.c
+@@ -22,13 +22,6 @@ const volatile bool source_port = 0;
+ #define AF_INET		2
+ #define AF_INET6	10
+ 
+-struct {
+-	__uint(type, BPF_MAP_TYPE_HASH);
+-	__uint(max_entries, MAX_ENTRIES);
+-	__type(key, u32);
+-	__type(value, struct sock *);
+-} sockets SEC(".maps");
+-
+ struct {
+ 	__uint(type, BPF_MAP_TYPE_HASH);
+ 	__uint(max_entries, MAX_ENTRIES);
+@@ -63,25 +56,6 @@ static __always_inline bool filter_port(__u16 port)
+ 	return true;
+ }
+ 
+-static __always_inline int
+-enter_tcp_connect(struct pt_regs *ctx, struct sock *sk)
+-{
+-	__u64 pid_tgid = bpf_get_current_pid_tgid();
+-	__u32 pid = pid_tgid >> 32;
+-	__u32 tid = pid_tgid;
+-	__u32 uid;
+-
+-	if (filter_pid && pid != filter_pid)
+-		return 0;
+-
+-	uid = bpf_get_current_uid_gid();
+-	if (filter_uid != (uid_t) -1 && uid != filter_uid)
+-		return 0;
+-
+-	bpf_map_update_elem(&sockets, &tid, &sk, 0);
+-	return 0;
+-}
+-
+ static  __always_inline void count_v4(struct sock *sk, __u16 sport, __u16 dport)
+ {
+ 	struct ipv4_flow_key key = {};
+@@ -116,7 +90,7 @@ static __always_inline void count_v6(struct sock *sk, __u16 sport, __u16 dport)
+ }
+ 
+ static __always_inline void
+-trace_v4(struct pt_regs *ctx, pid_t pid, struct sock *sk, __u16 sport, __u16 dport)
++trace_v4(void *ctx, pid_t pid, struct sock *sk, __u16 sport, __u16 dport)
+ {
+ 	struct event event = {};
+ 
+@@ -135,7 +109,7 @@ trace_v4(struct pt_regs *ctx, pid_t pid, struct sock *sk, __u16 sport, __u16 dpo
+ }
+ 
+ static __always_inline void
+-trace_v6(struct pt_regs *ctx, pid_t pid, struct sock *sk, __u16 sport, __u16 dport)
++trace_v6(void *ctx, pid_t pid, struct sock *sk, __u16 sport, __u16 dport)
+ {
+ 	struct event event = {};
+ 
+@@ -156,33 +130,34 @@ trace_v6(struct pt_regs *ctx, pid_t pid, struct sock *sk, __u16 sport, __u16 dpo
+ }
+ 
+ static __always_inline int
+-exit_tcp_connect(struct pt_regs *ctx, int ret, int ip_ver)
++exit_tcp_connect(void *ctx, struct sock *sk, int ret, int ip_ver)
+ {
+ 	__u64 pid_tgid = bpf_get_current_pid_tgid();
+ 	__u32 pid = pid_tgid >> 32;
+-	__u32 tid = pid_tgid;
+-	struct sock **skpp;
+-	struct sock *sk;
+ 	__u16 sport = 0;
+ 	__u16 dport;
++	__u32 uid;
+ 
+-	skpp = bpf_map_lookup_elem(&sockets, &tid);
+-	if (!skpp)
++	if (__builtin_expect(filter_pid && pid != filter_pid, 0))
+ 		return 0;
+ 
+-	if (ret)
+-		goto end;
++	if (__builtin_expect(ret, 0))
++		return 0;
+ 
+-	sk = *skpp;
++	if (__builtin_expect(filter_uid != (uid_t)-1, 0)) {
++		uid = bpf_get_current_uid_gid();
++		if (uid != filter_uid)
++			return 0;
++	}
+ 
+-	if (source_port)
++	if (__builtin_expect(source_port, 0))
+ 		BPF_CORE_READ_INTO(&sport, sk, __sk_common.skc_num);
+ 	BPF_CORE_READ_INTO(&dport, sk, __sk_common.skc_dport);
+ 
+-	if (filter_port(dport))
+-		goto end;
++	if (__builtin_expect(filter_port(dport), 0))
++		return 0;
+ 
+-	if (do_count) {
++	if (__builtin_expect(do_count, 0)) {
+ 		if (ip_ver == 4)
+ 			count_v4(sk, sport, dport);
+ 		else
+@@ -194,33 +169,19 @@ exit_tcp_connect(struct pt_regs *ctx, int ret, int ip_ver)
+ 			trace_v6(ctx, pid, sk, sport, dport);
+ 	}
+ 
+-end:
+-	bpf_map_delete_elem(&sockets, &tid);
+ 	return 0;
+ }
+ 
+-SEC("kprobe/tcp_v4_connect")
+-int BPF_KPROBE(tcp_v4_connect, struct sock *sk)
+-{
+-	return enter_tcp_connect(ctx, sk);
+-}
+-
+-SEC("kretprobe/tcp_v4_connect")
+-int BPF_KRETPROBE(tcp_v4_connect_ret, int ret)
+-{
+-	return exit_tcp_connect(ctx, ret, 4);
+-}
+-
+-SEC("kprobe/tcp_v6_connect")
+-int BPF_KPROBE(tcp_v6_connect, struct sock *sk)
++SEC("fexit/tcp_v4_connect")
++int BPF_PROG(tcp_v4_connect_exit, struct sock *sk, int ret)
+ {
+-	return enter_tcp_connect(ctx, sk);
++	return exit_tcp_connect(ctx, sk, ret, 4);
+ }
+ 
+-SEC("kretprobe/tcp_v6_connect")
+-int BPF_KRETPROBE(tcp_v6_connect_ret, int ret)
++SEC("fexit/tcp_v6_connect")
++int BPF_PROG(tcp_v6_connect_exit, struct sock *sk, int ret)
+ {
+-	return exit_tcp_connect(ctx, ret, 6);
++	return exit_tcp_connect(ctx, sk, ret, 6);
+ }
+ 
+ char LICENSE[] SEC("license") = "GPL";

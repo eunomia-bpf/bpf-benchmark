@@ -3,7 +3,7 @@
 - App: `otelcol-ebpf-profiler/profiling`
 - Source root: `vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/`
 - Workload: `otel_mixed_workload`
-- Status: complete
+- Status: phase2-complete
 
 ## Baseline
 
@@ -22,6 +22,16 @@
 | 4 | rejected-no-signal | `corpus/results/x86_kvm_corpus_20260625_203203_222972` | language_ops_total mean=19611239252; samples `19226116826, 20279757143, 19327843786` | -0.17% | correctness passed, but larger native unwinder body did not improve throughput; do not stack |
 | 5 | rejected-no-signal | `corpus/results/x86_kvm_corpus_20260625_205249_386525` | language_ops_total mean=19480337627; samples `19345351817, 19739934685, 19355726380` | -0.84% | correctness passed, but lazy custom-label clearing regressed throughput; do not stack |
 
+## Phase 2 Attempts
+
+| Attempt | Status | Result | Primary metric | vs baseline | Notes |
+| --- | --- | --- | ---: | ---: | --- |
+| phase2-1 | rejected-no-signal | `corpus/results/x86_kvm_corpus_20260626_095211_287090` | language_ops_total mean=19481366793; samples `19676128056, 19509969254, 19258003069` | -0.83% | deferring `comm`/kernel stack helper work on the unmapped-PID path reduced `native_tracer_entry` instructions but did not improve workload throughput; do not stack |
+| phase2-2 | rejected-no-signal | `corpus/results/x86_kvm_corpus_20260626_101543_422474` | language_ops_total mean=19582008878; samples `19879363031, 19331939856, 19534723746` | -0.32% | early drop of empty-stack error-only traces preserved correctness but did not improve throughput; do not stack |
+| phase2-3 | rejected-no-signal | `corpus/results/x86_kvm_corpus_20260626_103605_569628` | language_ops_total mean=19526940261; samples `19705666680, 19244754469, 19630399634` | -0.60% | raising `NATIVE_FRAMES_PER_PROGRAM` to 8 doubled `unwind_native` body and reduced tail-call recursion, but did not improve throughput; do not stack |
+| phase2-4 | rejected-no-signal | `corpus/results/x86_kvm_corpus_20260626_110000_678727` | language_ops_total mean=19575112832; samples `19658284979, 19486494323, 19580559194` | -0.35% | single-delta stack page lookup reuse kept instruction growth small but did not improve throughput; do not stack |
+| phase2-5 | rejected-no-signal | `corpus/results/x86_kvm_corpus_20260626_112227_995529` | language_ops_total mean=19508075671; samples `19462147885, 19814623616, 19247455513` | -0.70% | batching PHP successful-frame metric updates cut `unwind_php` from 6899 to 3358 instructions but did not improve workload throughput; do not stack |
+
 ## Notes
 
 - Use `SKIP_REJIT=all`; `post_rejit` must stay `null`.
@@ -29,3 +39,4 @@
 - Attempts may stack on the best previous source patch when the earlier result improves throughput and keeps the correctness gate passing.
 - Baseline gate passed: app `status=ok`, `error=""`, three composite workload samples, all 33 components returned 0, `post_rejit=null`, `rejit_result.mode=skip_rejit_all`.
 - For otel, a source edit under `support/ebpf/` must be followed by an explicit eBPF artifact rebuild before the formal `make corpus` run, otherwise the collector may reuse the previous embedded `tracer.ebpf.amd64`.
+- Phase2 completed with no positive OTEL throughput signal; keep the clean source as the next base.

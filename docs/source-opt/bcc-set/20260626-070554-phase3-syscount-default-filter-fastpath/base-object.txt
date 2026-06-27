@@ -1,0 +1,23 @@
+## capable
+  3 fexit/cap_capable     000004c0 0000000000000000 TEXT
+  7 .maps                 00000088 0000000000000000 DATA
+insn_lines=144
+## syscount
+  3 raw_tracepoint/sys_enter     000000f8 0000000000000000 TEXT
+  5 raw_tracepoint/sys_exit      000003c8 0000000000000000 TEXT
+  8 .maps                        00000060 0000000000000000 DATA
+insn_lines=151
+## tcpconnect
+  3 fexit/tcp_v4_connect     00000568 0000000000000000 TEXT
+  5 fexit/tcp_v6_connect     00000598 0000000000000000 TEXT
+  9 .maps                    00000058 0000000000000000 DATA
+insn_lines=347
+## runqlat
+  4 tp_btf/sched_wakeup         00000100 0000000000000000 TEXT
+  6 tp_btf/sched_wakeup_new     00000100 0000000000000000 TEXT
+  8 tp_btf/sched_switch         00000028 0000000000000000 TEXT
+ 10 raw_tp/sched_wakeup         00000170 0000000000000000 TEXT
+ 12 raw_tp/sched_wakeup_new     00000170 0000000000000000 TEXT
+ 14 raw_tp/sched_switch         00000028 0000000000000000 TEXT
+ 18 .maps                       00000060 0000000000000000 DATA
+insn_lines=426

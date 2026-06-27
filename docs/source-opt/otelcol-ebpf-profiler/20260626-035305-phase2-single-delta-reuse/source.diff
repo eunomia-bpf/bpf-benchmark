@@ -1,0 +1,37 @@
+diff --git a/support/ebpf/native_stack_trace.ebpf.c b/support/ebpf/native_stack_trace.ebpf.c
+index 29e650a..9c55d51 100644
+--- a/support/ebpf/native_stack_trace.ebpf.c
++++ b/support/ebpf/native_stack_trace.ebpf.c
+@@ -200,7 +200,17 @@ static EBPF_INLINE ErrorCode get_stack_delta(UnwindState *state, int *addrDiff,
+   // Preinitialize the idx for the index to use for page without any deltas.
+   u32 idx         = info->firstDelta;
+   u16 page_offset = state->text_section_offset & STACK_DELTA_PAGE_MASK;
+-  if (info->numDeltas) {
++  StackDelta *delta = NULL;
++  if (info->numDeltas == 1) {
++    delta = bpf_map_lookup_elem(inner_map, &idx);
++    if (!delta) {
++      state->error_metric = metricID_UnwindNativeErrLookupIterations;
++      return ERR_NATIVE_EXCEEDED_DELTA_LOOKUP_ITERATIONS;
++    }
++    if (page_offset < delta->addrLow) {
++      delta = NULL;
++    }
++  } else if (info->numDeltas) {
+     // Page has deltas, so find the correct one to use using binary search.
+     u32 lo = info->firstDelta;
+     u32 hi = lo + info->numDeltas;
+@@ -233,9 +243,10 @@ static EBPF_INLINE ErrorCode get_stack_delta(UnwindState *state, int *addrDiff,
+   // so it needs to be decremented by one to get the entry with equal-or-less.
+   // This makes also the logic work cross-pages: if the first entry in within
+   // the page is too large, this actually gets the entry from the previous page.
+-  idx--;
+-
+-  StackDelta *delta = bpf_map_lookup_elem(inner_map, &idx);
++  if (!delta) {
++    idx--;
++    delta = bpf_map_lookup_elem(inner_map, &idx);
++  }
+   if (!delta) {
+     state->error_metric = metricID_UnwindNativeErrLookupRange;
+     return ERR_NATIVE_LOOKUP_RANGE;

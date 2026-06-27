@@ -1,0 +1,60 @@
+diff --git a/support/ebpf/interpreter_dispatcher.ebpf.c b/support/ebpf/interpreter_dispatcher.ebpf.c
+index 89ce023..06ae557 100644
+--- a/support/ebpf/interpreter_dispatcher.ebpf.c
++++ b/support/ebpf/interpreter_dispatcher.ebpf.c
+@@ -253,8 +253,6 @@ static EBPF_INLINE int unwind_stop(struct pt_regs *ctx)
+   Trace *trace       = &record->trace;
+   UnwindState *state = &record->state;
+ 
+-  maybe_add_apm_info(trace);
+-
+   // If the stack is otherwise empty, push an error for that: we should
+   // never encounter empty stacks for successful unwinding.
+   if (trace->stack_len == 0 && trace->kernel_stack_id < 0) {
+@@ -265,12 +263,6 @@ static EBPF_INLINE int unwind_stop(struct pt_regs *ctx)
+     }
+   }
+ 
+-  // If unwinding was aborted due to a critical error, push an error frame.
+-  if (state->unwind_error) {
+-    DEBUG_PRINT("Aborting further unwinding due to error code %d", state->unwind_error);
+-    push_error(&record->trace, state->unwind_error);
+-  }
+-
+   switch (state->error_metric) {
+   case -1:
+     // No Error
+@@ -284,22 +276,18 @@ static EBPF_INLINE int unwind_stop(struct pt_regs *ctx)
+   default: increment_metric(state->error_metric);
+   }
+ 
+-  // TEMPORARY HACK
+-  //
+-  // If we ended up with a trace that consists of only a single error frame, drop it.
+-  // This is required as long as the process manager provides the option to filter out
+-  // error frames, to prevent empty traces from being sent. While it might seem that this
+-  // filtering should belong into the HA code that does the filtering, it is actually
+-  // surprisingly hard to implement that way: since traces and their counts are reported
+-  // through different data structures, we'd have to keep a list of known empty traces to
+-  // also prevent the corresponding trace counts to be sent out. OTOH, if we do it here,
+-  // this is trivial.
+-  if (trace->stack_len == 1 && trace->kernel_stack_id < 0 && state->unwind_error) {
+-    if (filter_error_frames) {
+-      return 0;
+-    }
++  if (trace->stack_len == 0 && trace->kernel_stack_id < 0 && state->unwind_error &&
++      filter_error_frames) {
++    return 0;
+   }
+-  // TEMPORARY HACK END
++
++  // If unwinding was aborted due to a critical error, push an error frame.
++  if (state->unwind_error) {
++    DEBUG_PRINT("Aborting further unwinding due to error code %d", state->unwind_error);
++    push_error(&record->trace, state->unwind_error);
++  }
++
++  maybe_add_apm_info(trace);
+ 
+   // Must be last since it may not return (it will call send_trace).
+   maybe_add_go_custom_labels(ctx, record);

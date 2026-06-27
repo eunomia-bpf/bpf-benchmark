@@ -1,0 +1,60 @@
+diff --git a/support/ebpf/php_tracer.ebpf.c b/support/ebpf/php_tracer.ebpf.c
+index 83c6998..0d8d239 100644
+--- a/support/ebpf/php_tracer.ebpf.c
++++ b/support/ebpf/php_tracer.ebpf.c
+@@ -130,14 +130,19 @@ static EBPF_INLINE int walk_php_stack(PerCPURecord *record, PHPProcInfo *phpinfo
+ 
+   int unwinder  = PROG_UNWIND_PHP;
+   u32 type_info = 0;
++  u32 php_frames = 0;
++  bool php_done = false;
+   UNROLL for (u32 i = 0; i < FRAMES_PER_WALK_PHP_STACK; ++i)
+   {
+     int metric = process_php_frame(record, phpinfo, is_jitted, execute_data, &type_info);
+-    if (metric >= 0) {
+-      increment_metric(metric);
+-    }
+-    if (metric != metricID_UnwindPHPFrames) {
+-      goto err;
++    if (metric == metricID_UnwindPHPFrames) {
++      php_frames++;
++    } else {
++      if (metric >= 0) {
++        increment_metric(metric);
++      }
++      php_done = true;
++      goto finish;
+     }
+ 
+     // Get current_execute_data->prev_execute_data
+@@ -149,7 +154,8 @@ static EBPF_INLINE int walk_php_stack(PerCPURecord *record, PHPProcInfo *phpinfo
+         "Failed to read current_execute_data->prev_execute_data (0x%lx)",
+         (unsigned long)execute_data);
+       increment_metric(metricID_UnwindPHPErrBadZendExecuteData);
+-      goto err;
++      php_done = true;
++      goto finish;
+     }
+ 
+     // Check end-of-stack and end of current interpreter loop stack conditions
+@@ -185,7 +191,19 @@ static EBPF_INLINE int walk_php_stack(PerCPURecord *record, PHPProcInfo *phpinfo
+   }
+ 
+   if (!execute_data) {
+-  err:
++    php_done = true;
++  }
++finish:
++  if (php_frames) {
++    u32 metric_id = metricID_UnwindPHPFrames;
++    u64 *count    = bpf_map_lookup_elem(&metrics, &metric_id);
++    if (count) {
++      *count += php_frames;
++    } else {
++      DEBUG_PRINT("Failed to lookup metrics map for metricID %d", metric_id);
++    }
++  }
++  if (php_done) {
+     unwinder_mark_done(record, PROG_UNWIND_PHP);
+   }
+   record->phpUnwindState.zend_execute_data = execute_data;

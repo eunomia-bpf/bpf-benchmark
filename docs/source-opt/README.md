@@ -85,6 +85,11 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `phase2/20260625-182615-cache-vip-metadata` | pktgen_total_pps mean=3348905; errors=1008452024; accepted-for-analysis | `3390361, 3336180, 3320175` | +9.40% | `corpus/results/x86_kvm_corpus_20260626_004646_185930` |
 | `phase2/20260625-180602-cache-vip-plus-lru-proto-compare` | pktgen_total_pps mean=3275764; errors=1659713484; completed-not-stacked | `3272779, 3268211, 3286301` | +7.01% | `corpus/results/x86_kvm_corpus_20260626_011245_701549` |
 | `phase2/20260625-183134-nonnull-lru-map` | pktgen_total_pps mean=3301431; errors=1600708022; completed-not-stacked | `3317221, 3295753, 3291320` | +7.85% | `corpus/results/x86_kvm_corpus_20260626_013906_982440` |
+| `phase3/20260626-043917-phase3-thoff-parser-reuse` | pktgen_total_pps mean=3338745; errors=893490992; completed-not-stacked | `3337569, 3357814, 3320853` | +9.07% | `corpus/results/x86_kvm_corpus_20260626_114838_879478` |
+| `phase3/20260626-050412-phase3-quic-v0-cid-fast-reject` | pktgen_total_pps mean=3320793; errors=716551110; completed-not-stacked | `3276898, 3371790, 3313690` | +8.48% | `corpus/results/x86_kvm_corpus_20260626_121345_246104` |
+| `phase3/20260626-052931-phase3-unlikely-hot-map-misses` | pktgen_total_pps mean=3349874; errors=643973416; accepted-for-analysis | `3379459, 3355767, 3314396` | +9.43% | `corpus/results/x86_kvm_corpus_20260626_123820_861697` |
+| `phase3/20260626-055442-phase3-vip-flag-branch-layout` | pktgen_total_pps mean=3414266; errors=794306103; accepted-for-analysis | `3406881, 3418862, 3417054` | +11.53% | `corpus/results/x86_kvm_corpus_20260626_130130_983141` |
+| `phase3/20260626-061622-phase3-quic-hot-branch-layout` | pktgen_total_pps mean=3277602; errors=670177168; completed-not-stacked | `3275164, 3299603, 3258040` | +7.07% | `corpus/results/x86_kvm_corpus_20260626_132449_671728` |
 
 ### `bcc/set`
 
@@ -101,6 +106,11 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `phase2/20260625-194654-syscount-raw-tracepoint` | stress_ng_sum_bogo_ops_s mean=724628; accepted-for-analysis; selected as next base | `727466, 720947, 725471` | +1.99% | `corpus/results/x86_kvm_corpus_20260626_025631_917158` |
 | `phase2/20260625-201115-syscount-latency-specialized-exit` | stress_ng_sum_bogo_ops_s mean=715349; accepted-for-analysis; not selected as next base | `713487, 715830, 716731` | +0.69% | `corpus/results/x86_kvm_corpus_20260626_031853_909472` |
 | `phase2/20260625-203413-raw-syscount-tcpconnect-fexit` | stress_ng_sum_bogo_ops_s mean=729628; accepted-for-analysis; selected as bcc/set phase2 best | `729898, 726762, 732224` | +2.70% | `corpus/results/x86_kvm_corpus_20260626_034309_094312` |
+| `phase3/20260626-064041-phase3-tcpconnect-default-fastpath` | stress_ng_sum_bogo_ops_s mean=730977; accepted-for-analysis; selected as current bcc/set phase3 base | `730828, 727856, 734246` | +2.89% | `corpus/results/x86_kvm_corpus_20260626_135003_717963` |
+| `phase3/20260626-070554-phase3-syscount-default-filter-fastpath` | stress_ng_sum_bogo_ops_s mean=733113; accepted-for-analysis; selected as current bcc/set phase3 base | `733995, 732654, 732689` | +3.19% | `corpus/results/x86_kvm_corpus_20260626_141358_076518` |
+| `phase3/20260626-072828-phase3-capable-default-branch-layout` | stress_ng_sum_bogo_ops_s mean=727184; completed-not-stacked | `725965, 726577, 729010` | +2.35% | `corpus/results/x86_kvm_corpus_20260626_143534_405266` |
+| `phase3/20260626-075220-phase3-syscount-key-width-cleanup` | stress_ng_sum_bogo_ops_s mean=794393; accepted-for-analysis; selected as current bcc/set phase3 base | `794399, 794426, 794353` | +11.81% | `corpus/results/x86_kvm_corpus_20260626_150154_266900` |
+| `phase3/20260626-081655-phase3-tcpconnect-default-event-fastpath` | stress_ng_sum_bogo_ops_s mean=789683; completed-not-stacked | `790657, 788288, 790104` | +11.15% | `corpus/results/x86_kvm_corpus_20260626_152354_967827` |
 
 ### `tracee/monitor`
 
@@ -117,6 +127,10 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `phase2/20260625-213013-phase2-cap-fentry-early-noaudit` | stress_ng_sum_bogo_ops_s mean=453930; rejected-no-signal; not selected as next base | `453680, 454459, 453651` | -1.50% | `corpus/results/x86_kvm_corpus_20260626_043813_884875` |
 | `phase2/20260625-215524-phase2-simple-value-args-fastpath` | rejected-correctness: Tracee failed BPF load; verifier rejected `sys_exit_submit` after simple-value arg fast path | `N/A` | N/A | `corpus/results/x86_kvm_corpus_20260626_050351_616916` |
 | `phase2/20260625-220744-phase2-hot-syscall-arg-count` | stress_ng_sum_bogo_ops_s mean=456957; rejected-no-signal; not selected as next base | `453757, 460873, 456241` | -0.85% | `corpus/results/x86_kvm_corpus_20260626_051548_824007` |
+| `phase3/20260626-084029-phase3-no-scope-filter-fastpath` | stress_ng_sum_bogo_ops_s mean=462517; completed-not-stacked | `461582, 464345, 461625` | +0.36% | `corpus/results/x86_kvm_corpus_20260626_155038_747634` |
+| `phase3/20260626-090841-phase3-prctl-fentry` | stress_ng_sum_bogo_ops_s mean=464810; accepted-for-analysis; selected as current tracee phase3 base | `462950, 465355, 466125` | +0.86% | `corpus/results/x86_kvm_corpus_20260626_161621_526914` |
+| `phase3/20260626-093333-phase3-hot-syscall-arg-serializer` | stress_ng_sum_bogo_ops_s mean=457589; completed-not-stacked | `458895, 456475, 457398` | -0.71% | `corpus/results/x86_kvm_corpus_20260626_164248_792753` |
+| `phase3/20260626-095936-phase3-value-args-first` | stress_ng_sum_bogo_ops_s mean=450374; completed-not-stacked | `450246, 448766, 452111` | -2.28% | `corpus/results/x86_kvm_corpus_20260626_170733_776031` |
 
 ### `cilium/agent`
 
@@ -161,6 +175,11 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 | `20260625-130417-trace-send-size-direct` | language_ops_total mean=19634728466; rejected-no-signal | `19889012769, 19180704492, 19834468137` | -0.05% | `corpus/results/x86_kvm_corpus_20260625_201102_658698` |
 | `20260625-132530-native-frames-per-program-5` | language_ops_total mean=19611239252; rejected-no-signal | `19226116826, 20279757143, 19327843786` | -0.17% | `corpus/results/x86_kvm_corpus_20260625_203203_222972` |
 | `20260625-134604-lazy-clear-custom-labels` | language_ops_total mean=19480337627; rejected-no-signal | `19345351817, 19739934685, 19355726380` | -0.84% | `corpus/results/x86_kvm_corpus_20260625_205249_386525` |
+| `phase2/20260626-024357-phase2-defer-comm-stack-unmapped-pid` | language_ops_total mean=19481366793; rejected-no-signal | `19676128056, 19509969254, 19258003069` | -0.83% | `corpus/results/x86_kvm_corpus_20260626_095211_287090` |
+| `phase2/20260626-030730-phase2-early-drop-error-only` | language_ops_total mean=19582008878; rejected-no-signal | `19879363031, 19331939856, 19534723746` | -0.32% | `corpus/results/x86_kvm_corpus_20260626_101543_422474` |
+| `phase2/20260626-032939-phase2-native-frames-per-program-8` | language_ops_total mean=19526940261; rejected-no-signal | `19705666680, 19244754469, 19630399634` | -0.60% | `corpus/results/x86_kvm_corpus_20260626_103605_569628` |
+| `phase2/20260626-035305-phase2-single-delta-reuse` | language_ops_total mean=19575112832; rejected-no-signal | `19658284979, 19486494323, 19580559194` | -0.35% | `corpus/results/x86_kvm_corpus_20260626_110000_678727` |
+| `phase2/20260626-041515-phase2-batch-php-frame-metric` | language_ops_total mean=19508075671; rejected-no-signal | `19462147885, 19814623616, 19247455513` | -0.70% | `corpus/results/x86_kvm_corpus_20260626_112227_995529` |
 
 ## App 源码、构建和加载路径
 
@@ -279,14 +298,57 @@ attempt 文件含义：
 第二轮当前进度：
 
 - Completed phase2 apps: `katran`, `bcc/set`, `tracee/monitor`,
-  `cilium/agent`, `tetragon/observer`
-- Phase2 source optimization attempts: 25 / 30
-- Current phase2 app: `otelcol-ebpf-profiler/profiling`
-- Current phase2 target: Tetragon phase2 completed with best `+9.28%`, short of
-  the 10% target. Continue with OTEL phase2 next; first priority is strict
-  artifact provenance for embedded eBPF source rebuilds, because the first-round
-  `defer-kernel-stackid-unmapped-pid` attempt was rejected when the edited
-  source was not proven to enter the runtime artifact.
+  `cilium/agent`, `tetragon/observer`, `otelcol-ebpf-profiler/profiling`
+- Phase2 source optimization attempts: 30 / 30
+- Current phase2 app: none; required phase2 sweep complete
+- Current phase2 result: OTEL phase2 attempts 1-5 all passed correctness but
+  regressed throughput (`-0.83%`, `-0.32%`, `-0.60%`, `-0.35%`, `-0.70%`).
+  Do not stack them. The best overall source-opt signal remains
+  `cilium/agent` first-round `tail-ipv4-to-endpoint-revalidate-unlikely`
+  at `+12.37%`; strongest phase2 signals were `katran` `+9.40%` and
+  `tetragon/observer` `+9.28%`.
+
+## 第三轮 stacked tuning
+
+第三轮继续增加 30 次源码优化 attempt：每个 app 再做 5 次。目标仍是把
+单 app 最佳提升推到 10-20%，但不能只集中在已有高收益 app；必须按同样顺序
+覆盖全部 6 个 app。第三轮允许从每个 app 已有最佳 correctness-passing patch
+作为 base 继续叠加，前提是新的 `source.diff` 保存正式 run 使用的完整源码差异。
+
+第三轮选点要求：
+
+- 先诊断再改源码；每个 attempt 的 `diagnostics.md` 记录当前 base、候选 patch
+  的 instruction count、关键程序 objdump 或 map/helper 调用观察。
+- 优先关注 map lookup、helper 调用、per-packet stats 更新、分支布局和 hot-path
+  数据重用，而不是继续只做冷路径微调。
+- 仍然一次只跑一个 app，当前 app 的 5 次 phase3 attempt 完成前不进入下一个 app。
+- 正式性能仍只来自 `SKIP_REJIT=all ... make corpus`，不写 framework-side summary。
+- 每次 run 后恢复 app 源码和生成 artifact 到 attempt 前状态。
+
+第三轮当前进度：
+
+- Completed phase3 apps: `katran`, `bcc/set`
+- Phase3 source optimization attempts: 14 / 30
+- Current phase3 app: `tracee/monitor`
+- Current phase3 result: bcc/set attempt 4
+  (`phase3-syscount-key-width-cleanup`) passed correctness and measured
+  `794393` stress_ng_sum_bogo_ops_s (`+11.81%` vs clean, `+8.36%` vs bcc/set
+  phase3 attempt 2). This reaches the 10% target for bcc/set. Attempt 5 passed
+  correctness at `789683` (`+11.15%` vs clean) but regressed by `0.59%` vs
+  attempt 4, so do not stack it. Tracee phase3 attempt 1 passed correctness at
+  `462517` (`+0.36%` vs clean, `+0.03%` vs phase2 best) but is effectively
+  flat and should not be stacked. Tracee phase3 attempt 2 passed correctness at
+  `464810` (`+0.86%` vs clean, `+0.53%` vs phase2 best) and remains the current
+  tracee phase3 base. Tracee phase3 attempt 3 passed correctness at `457589`
+  (`-0.71%` vs clean, `-1.55%` vs attempt 2), but the large hot syscall
+  serializer expanded `sys_exit_submit` from `0x4fc8` to `0x60a0`, so do not
+  stack it. Tracee phase3 attempt 4 passed correctness at `450374`
+  (`-2.28%` vs clean, `-3.11%` vs attempt 2); even the small value-arg branch
+  reorder in `save_args_to_submit_buf()` regressed, so do not stack it.
+- Current phase3 target: continue `tracee/monitor` attempt 5 from the attempt 2
+  `cap_capable + security_task_prctl` fentry base. Avoid syscall argument
+  serializer changes; prefer a different mechanism such as another narrow
+  kprobe-to-fentry conversion or a directly measured hot hook.
 
 ## 单个 app 的完整流程
 
@@ -377,7 +439,7 @@ attempt 文件含义：
 
 总目标是至少 6 个 clean-source baseline runs 和 30 个源码优化 attempts。
 
-当前进度：
+第一轮当前进度：
 
 - Completed apps: `katran`, `bcc/set`, `tracee/monitor`, `cilium/agent`, `tetragon/observer`, `otelcol-ebpf-profiler/profiling`
 - Baselines: 6 / 6

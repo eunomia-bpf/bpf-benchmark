@@ -1,0 +1,193 @@
+
+vendor/build/.bcc-libbpf/x86/output/syscount.bpf.o:	file format elf64-bpf
+
+Disassembly of section raw_tracepoint/sys_enter:
+
+0000000000000000 <sys_enter>:
+       0:	call 0xe
+       1:	r6 = r0
+       2:	*(u32 *)(r10 - 0x4) = r6
+       3:	r1 = 0x0 ll
+		0000000000000018:  R_BPF_64_64	filter_cg
+       5:	r1 = *(u8 *)(r1 + 0x0)
+       6:	if r1 == 0x0 goto +0x5 <LBB0_2>
+       7:	r1 = 0x0 ll
+		0000000000000038:  R_BPF_64_64	cgroup_map
+       9:	r2 = 0x0
+      10:	call 0x25
+      11:	if r0 == 0x0 goto +0x11 <LBB0_5>
+
+0000000000000060 <LBB0_2>:
+      12:	r1 = 0x0 ll
+		0000000000000060:  R_BPF_64_64	filter_pid
+      14:	r2 = *(u32 *)(r1 + 0x0)
+      15:	if r2 == 0x0 goto +0x3 <LBB0_4>
+      16:	r6 >>= 0x20
+      17:	r1 = *(u32 *)(r1 + 0x0)
+      18:	if r1 != r6 goto +0xa <LBB0_5>
+
+0000000000000098 <LBB0_4>:
+      19:	call 0x5
+      20:	*(u64 *)(r10 - 0x10) = r0
+      21:	r2 = r10
+      22:	r2 += -0x4
+      23:	r3 = r10
+      24:	r3 += -0x10
+      25:	r1 = 0x0 ll
+		00000000000000c8:  R_BPF_64_64	start
+      27:	r4 = 0x0
+      28:	call 0x2
+
+00000000000000e8 <LBB0_5>:
+      29:	r0 = 0x0
+      30:	exit
+
+Disassembly of section raw_tracepoint/sys_exit:
+
+0000000000000000 <sys_exit>:
+       0:	r6 = r1
+       1:	r1 = 0x0 ll
+		0000000000000008:  R_BPF_64_64	filter_cg
+       3:	r1 = *(u8 *)(r1 + 0x0)
+       4:	if r1 == 0x0 goto +0x5 <LBB1_2>
+       5:	r1 = 0x0 ll
+		0000000000000028:  R_BPF_64_64	cgroup_map
+       7:	r2 = 0x0
+       8:	call 0x25
+       9:	if r0 == 0x0 goto +0x6d <LBB1_22>
+
+0000000000000050 <LBB1_2>:
+      10:	r3 = *(u64 *)(r6 + 0x0)
+		0000000000000050:  CO-RE <byte_off> [28] struct bpf_raw_tracepoint_args::args[0] (0:0:0)
+      11:	r1 = 0x78
+		0000000000000058:  CO-RE <byte_off> [34] struct pt_regs::orig_ax (0:15)
+      12:	r3 += r1
+      13:	r1 = r10
+      14:	r1 += -0x8
+      15:	r2 = 0x8
+      16:	call 0x71
+      17:	r8 = *(u64 *)(r10 - 0x8)
+      18:	r6 = *(u64 *)(r6 + 0x8)
+		0000000000000090:  CO-RE <byte_off> [28] struct bpf_raw_tracepoint_args::args[1] (0:0:1)
+      19:	if r8 == -0x1 goto +0x63 <LBB1_22>
+      20:	call 0xe
+      21:	*(u32 *)(r10 - 0xc) = r0
+      22:	r1 = 0x0 ll
+		00000000000000b0:  R_BPF_64_64	filter_pid
+      24:	r2 = *(u32 *)(r1 + 0x0)
+      25:	if r2 == 0x0 goto +0x4 <LBB1_5>
+      26:	r1 = *(u32 *)(r1 + 0x0)
+      27:	r2 = r0
+      28:	r2 >>= 0x20
+      29:	if r1 != r2 goto +0x59 <LBB1_22>
+
+00000000000000f0 <LBB1_5>:
+      30:	r1 = 0x0 ll
+		00000000000000f0:  R_BPF_64_64	filter_failed
+      32:	r1 = *(u8 *)(r1 + 0x0)
+      33:	if r1 == 0x0 goto +0x1 <LBB1_7>
+      34:	if r6 s> -0x1 goto +0x54 <LBB1_22>
+
+0000000000000118 <LBB1_7>:
+      35:	r1 = 0x0 ll
+		0000000000000118:  R_BPF_64_64	filter_errno
+      37:	r2 = *(u32 *)(r1 + 0x0)
+      38:	if r2 == 0x0 goto +0x5 <LBB1_9>
+      39:	r1 = *(u32 *)(r1 + 0x0)
+      40:	r1 = -r1
+      41:	r1 <<= 0x20
+      42:	r1 s>>= 0x20
+      43:	if r6 != r1 goto +0x4b <LBB1_22>
+
+0000000000000160 <LBB1_9>:
+      44:	r6 = 0x0
+      45:	r1 = 0x0 ll
+		0000000000000168:  R_BPF_64_64	measure_latency
+      47:	r1 = *(u8 *)(r1 + 0x0)
+      48:	if r1 == 0x0 goto +0xd <LBB1_12>
+      49:	r2 = r10
+      50:	r2 += -0xc
+      51:	r1 = 0x0 ll
+		0000000000000198:  R_BPF_64_64	start
+      53:	r9 = r0
+      54:	call 0x1
+      55:	r7 = r0
+      56:	if r7 == 0x0 goto +0x3e <LBB1_22>
+      57:	call 0x5
+      58:	r6 = r0
+      59:	r0 = r9
+      60:	r1 = *(u64 *)(r7 + 0x0)
+      61:	r6 -= r1
+
+00000000000001f0 <LBB1_12>:
+      62:	r1 = 0x0 ll
+		00000000000001f0:  R_BPF_64_64	count_by_process
+      64:	r1 = *(u8 *)(r1 + 0x0)
+      65:	if r1 == 0x0 goto +0x2 <LBB1_14>
+      66:	r0 >>= 0x20
+      67:	r8 = r0
+
+0000000000000220 <LBB1_14>:
+      68:	*(u32 *)(r10 - 0x10) = r8
+      69:	r2 = r10
+      70:	r2 += -0x10
+      71:	r1 = 0x0 ll
+		0000000000000238:  R_BPF_64_64	data
+      73:	call 0x1
+      74:	r7 = r0
+      75:	if r7 != 0x0 goto +0x11 <LBB1_18>
+      76:	r2 = r10
+      77:	r2 += -0x10
+      78:	r1 = 0x0 ll
+		0000000000000270:  R_BPF_64_64	data
+      80:	r3 = 0x10 ll
+		0000000000000280:  R_BPF_64_64	.rodata
+      82:	r4 = 0x1
+      83:	call 0x2
+      84:	if r0 == 0x0 goto +0x1 <LBB1_17>
+      85:	if r0 != -0x11 goto +0x21 <LBB1_22>
+
+00000000000002b0 <LBB1_17>:
+      86:	r2 = r10
+      87:	r2 += -0x10
+      88:	r1 = 0x0 ll
+		00000000000002c0:  R_BPF_64_64	data
+      90:	call 0x1
+      91:	r7 = r0
+      92:	if r7 == 0x0 goto +0x1a <LBB1_22>
+
+00000000000002e8 <LBB1_18>:
+      93:	r1 = 0x1
+      94:	lock *(u64 *)(r7 + 0x0) += r1
+      95:	r1 = 0x0 ll
+		00000000000002f8:  R_BPF_64_64	count_by_process
+      97:	r1 = *(u8 *)(r1 + 0x0)
+      98:	if r1 == 0x0 goto +0xf <LBB1_20>
+      99:	call 0x23
+     100:	r1 = 0xa00
+		0000000000000320:  CO-RE <byte_off> [36] struct task_struct::group_leader (0:92)
+     101:	r0 += r1
+     102:	r1 = r10
+     103:	r1 += -0x8
+     104:	r2 = 0x8
+     105:	r3 = r0
+     106:	call 0x71
+     107:	r1 = 0xb98
+		0000000000000358:  CO-RE <byte_off> [36] struct task_struct::comm (0:119)
+     108:	r3 = *(u64 *)(r10 - 0x8)
+     109:	r3 += r1
+     110:	r1 = r7
+     111:	r1 += 0x10
+     112:	r2 = 0x10
+     113:	call 0x73
+
+0000000000000390 <LBB1_20>:
+     114:	r1 = 0x0 ll
+		0000000000000390:  R_BPF_64_64	measure_latency
+     116:	r1 = *(u8 *)(r1 + 0x0)
+     117:	if r1 == 0x0 goto +0x1 <LBB1_22>
+     118:	lock *(u64 *)(r7 + 0x8) += r6
+
+00000000000003b8 <LBB1_22>:
+     119:	r0 = 0x0
+     120:	exit

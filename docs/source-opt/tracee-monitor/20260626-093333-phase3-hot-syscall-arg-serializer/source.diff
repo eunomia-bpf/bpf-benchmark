@@ -1,0 +1,207 @@
+diff --git a/pkg/ebpf/c/common/arch.h b/pkg/ebpf/c/common/arch.h
+index 0a6fe1979..7708d4b75 100644
+--- a/pkg/ebpf/c/common/arch.h
++++ b/pkg/ebpf/c/common/arch.h
+@@ -128,6 +128,7 @@ statfunc struct pt_regs *get_current_task_pt_regs(void)
+     #define SYSCALL_GETSOCKOPT             55
+     #define SYSCALL_EXECVE                 59
+     #define SYSCALL_EXIT                   60
++    #define SYSCALL_KILL                   62
+     #define SYSCALL_FCNTL                  72
+     #define SYSCALL_FLOCK                  73
+     #define SYSCALL_FSYNC                  74
+@@ -139,6 +140,8 @@ statfunc struct pt_regs *get_current_task_pt_regs(void)
+     #define SYSCALL_FCHMOD                 91
+     #define SYSCALL_FCHOWN                 93
+     #define SYSCALL_PTRACE                 101
++    #define SYSCALL_SETUID                 105
++    #define SYSCALL_SETGID                 106
+     #define SYSCALL_FSTATFS                138
+     #define SYSCALL_ARCH_PRCTL             158
+     #define SYSCALL_READAHEAD              187
+@@ -146,11 +149,14 @@ statfunc struct pt_regs *get_current_task_pt_regs(void)
+     #define SYSCALL_FGETXATTR              193
+     #define SYSCALL_FLISTXATTR             196
+     #define SYSCALL_FREMOVEXATTR           199
++    #define SYSCALL_TKILL                  200
++    #define SYSCALL_FUTEX                  202
+     #define SYSCALL_GETDENTS64             217
+     #define SYSCALL_FADVISE64              221
+     #define SYSCALL_EXIT_GROUP             231
+     #define SYSCALL_EPOLL_WAIT             232
+     #define SYSCALL_EPOLL_CTL              233
++    #define SYSCALL_TGKILL                 234
+     #define SYSCALL_INOTIFY_ADD_WATCH      254
+     #define SYSCALL_INOTIFY_RM_WATCH       255
+     #define SYSCALL_OPENAT                 257
+@@ -169,11 +175,13 @@ statfunc struct pt_regs *get_current_task_pt_regs(void)
+     #define SYSCALL_UTIMENSAT              280
+     #define SYSCALL_EPOLL_PWAIT            281
+     #define SYSCALL_SIGNALFD               282
++    #define SYSCALL_EVENTFD                284
+     #define SYSCALL_FALLOCATE              285
+     #define SYSCALL_TIMERFD_SETTIME        286
+     #define SYSCALL_TIMERFD_GETTIME        287
+     #define SYSCALL_ACCEPT4                288
+     #define SYSCALL_SIGNALFD4              289
++    #define SYSCALL_EVENTFD2               290
+     #define SYSCALL_DUP3                   292
+     #define SYSCALL_PREADV                 295
+     #define SYSCALL_PWRITEV                296
+@@ -214,6 +222,7 @@ statfunc struct pt_regs *get_current_task_pt_regs(void)
+     #define SYSCALL_FGETXATTR              10
+     #define SYSCALL_FLISTXATTR             13
+     #define SYSCALL_FREMOVEXATTR           16
++    #define SYSCALL_EVENTFD2               19
+     #define SYSCALL_EPOLL_CTL              21
+     #define SYSCALL_EPOLL_PWAIT            22
+     #define SYSCALL_DUP                    23
+@@ -261,8 +270,14 @@ statfunc struct pt_regs *get_current_task_pt_regs(void)
+     #define SYSCALL_UTIMENSAT              88
+     #define SYSCALL_EXIT                   93
+     #define SYSCALL_EXIT_GROUP             94
++    #define SYSCALL_FUTEX                  98
+     #define SYSCALL_PTRACE                 117
++    #define SYSCALL_KILL                   129
++    #define SYSCALL_TKILL                  130
++    #define SYSCALL_TGKILL                 131
+     #define SYSCALL_RT_SIGRETURN           139
++    #define SYSCALL_SETGID                 144
++    #define SYSCALL_SETUID                 146
+     #define SYSCALL_SOCKET                 198
+     #define SYSCALL_BIND                   200
+     #define SYSCALL_LISTEN                 201
+diff --git a/pkg/ebpf/c/common/buffer.h b/pkg/ebpf/c/common/buffer.h
+index 6cff96388..35333667a 100644
+--- a/pkg/ebpf/c/common/buffer.h
++++ b/pkg/ebpf/c/common/buffer.h
+@@ -585,6 +585,49 @@ static u32 type_size_table[ARG_TYPE_MAX_ARRAY + 1] = {
+     [TIMESPEC_T] = 0,
+ };
+ 
++statfunc int save_hot_syscall_args_to_submit_buf(event_data_t *event, args_t *args)
++{
++    switch (event->context.eventid) {
++        case SYSCALL_SETUID:
++        case SYSCALL_SETGID:
++            return save_to_submit_buf(&event->args_buf, &args->args[0], sizeof(int), 0);
++        case SYSCALL_KILL:
++        case SYSCALL_TKILL:
++            return save_to_submit_buf(&event->args_buf, &args->args[0], sizeof(int), 0) +
++                   save_to_submit_buf(&event->args_buf, &args->args[1], sizeof(int), 1);
++        case SYSCALL_TGKILL:
++            return save_to_submit_buf(&event->args_buf, &args->args[0], sizeof(int), 0) +
++                   save_to_submit_buf(&event->args_buf, &args->args[1], sizeof(int), 1) +
++                   save_to_submit_buf(&event->args_buf, &args->args[2], sizeof(int), 2);
++        case SYSCALL_EVENTFD2:
++            return save_to_submit_buf(&event->args_buf, &args->args[0], sizeof(uint), 0) +
++                   save_to_submit_buf(&event->args_buf, &args->args[1], sizeof(int), 1);
++        case SYSCALL_SIGNALFD4:
++            return save_to_submit_buf(&event->args_buf, &args->args[0], sizeof(int), 0) +
++                   save_to_submit_buf(&event->args_buf, &args->args[1], sizeof(void *), 1) +
++                   save_to_submit_buf(&event->args_buf, &args->args[2], sizeof(unsigned long), 2) +
++                   save_to_submit_buf(&event->args_buf, &args->args[3], sizeof(int), 3);
++#if defined(bpf_target_x86)
++        case SYSCALL_EVENTFD:
++            return save_to_submit_buf(&event->args_buf, &args->args[0], sizeof(uint), 0);
++        case SYSCALL_SIGNALFD:
++            return save_to_submit_buf(&event->args_buf, &args->args[0], sizeof(int), 0) +
++                   save_to_submit_buf(&event->args_buf, &args->args[1], sizeof(void *), 1) +
++                   save_to_submit_buf(&event->args_buf, &args->args[2], sizeof(int), 2);
++#endif
++        case SYSCALL_FUTEX:
++            return save_to_submit_buf(&event->args_buf, &args->args[0], sizeof(void *), 0) +
++                   save_to_submit_buf(&event->args_buf, &args->args[1], sizeof(int), 1) +
++                   save_to_submit_buf(&event->args_buf, &args->args[2], sizeof(int), 2) +
++                   save_to_submit_buf(&event->args_buf, (void *) args->args[3],
++                                      bpf_core_type_size(struct __kernel_timespec), 3) +
++                   save_to_submit_buf(&event->args_buf, &args->args[4], sizeof(void *), 4) +
++                   save_to_submit_buf(&event->args_buf, &args->args[5], sizeof(int), 5);
++    }
++
++    return -1;
++}
++
+ statfunc int save_args_to_submit_buf(event_data_t *event, args_t *args)
+ {
+     u8 i;
+@@ -599,6 +642,10 @@ statfunc int save_args_to_submit_buf(event_data_t *event, args_t *args)
+     if (unlikely(event->config.field_types == 0))
+         return 0;
+ 
++    int hot_arg_num = save_hot_syscall_args_to_submit_buf(event, args);
++    if (hot_arg_num >= 0)
++        return hot_arg_num;
++
+ #pragma unroll
+     for (i = 0; i < 6; i++) {
+         type = DEC_ARG(i, event->config.field_types);
+diff --git a/pkg/ebpf/c/tracee.bpf.c b/pkg/ebpf/c/tracee.bpf.c
+index 14a3b8102..7e1133d84 100644
+--- a/pkg/ebpf/c/tracee.bpf.c
++++ b/pkg/ebpf/c/tracee.bpf.c
+@@ -2559,8 +2559,9 @@ int BPF_KPROBE(trace_switch_task_namespaces)
+     return 0;
+ }
+ 
+-SEC("kprobe/cap_capable")
+-int BPF_KPROBE(trace_cap_capable)
++SEC("fentry/cap_capable")
++int BPF_PROG(trace_cap_capable, const struct cred *cred, struct user_namespace *targ_ns,
++             int cap, int cap_opt)
+ {
+     program_data_t p = {};
+     if (!init_program_data(&p, ctx, CAP_CAPABLE))
+@@ -2569,15 +2570,13 @@ int BPF_KPROBE(trace_cap_capable)
+     if (!evaluate_scope_filters(&p))
+         return 0;
+ 
+-    int cap = PT_REGS_PARM3(ctx);
+-    int cap_opt = PT_REGS_PARM4(ctx);
+-
+     if (cap_opt & CAP_OPT_NOAUDIT)
+         return 0;
+ 
+     save_to_submit_buf(&p.event->args_buf, (void *) &cap, sizeof(int), 0);
+ 
+-    return events_perf_submit(&p);
++    events_perf_submit(&p);
++    return 0;
+ }
+ 
+ SEC("kprobe/security_socket_create")
+@@ -5356,8 +5355,9 @@ int BPF_KPROBE(trace_chmod_common)
+     return events_perf_submit(&p);
+ }
+ 
+-SEC("kprobe/security_task_prctl")
+-int BPF_KPROBE(trace_security_task_prctl)
++SEC("fentry/security_task_prctl")
++int BPF_PROG(trace_security_task_prctl, int option, unsigned long arg2, unsigned long arg3,
++             unsigned long arg4, unsigned long arg5)
+ {
+     program_data_t p = {};
+     if (!init_program_data(&p, ctx, SECURITY_TASK_PRCTL))
+@@ -5366,12 +5366,6 @@ int BPF_KPROBE(trace_security_task_prctl)
+     if (!evaluate_scope_filters(&p))
+         return 0;
+ 
+-    // Save raw args
+-    int option = PT_REGS_PARM1(ctx);
+-    unsigned long arg2 = PT_REGS_PARM2(ctx);
+-    unsigned long arg3 = PT_REGS_PARM3(ctx);
+-    unsigned long arg4 = PT_REGS_PARM4(ctx);
+-    unsigned long arg5 = PT_REGS_PARM5(ctx);
+     save_to_submit_buf(&p.event->args_buf, &option, sizeof(option), 0);
+     save_to_submit_buf(&p.event->args_buf, &arg2, sizeof(arg2), 1);
+     save_to_submit_buf(&p.event->args_buf, &arg3, sizeof(arg3), 2);
+@@ -5598,7 +5592,8 @@ int BPF_KPROBE(trace_security_task_prctl)
+         save_to_submit_buf(&p.event->args_buf, &old_securebits, sizeof(old_securebits), 40);
+     }
+ 
+-    return events_perf_submit(&p);
++    events_perf_submit(&p);
++    return 0;
+ }
+ 
+ //

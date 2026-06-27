@@ -1,0 +1,26 @@
+diff --git a/pkg/ebpf/c/common/filtering.h b/pkg/ebpf/c/common/filtering.h
+index 740be8530..4d4c547e9 100644
+--- a/pkg/ebpf/c/common/filtering.h
++++ b/pkg/ebpf/c/common/filtering.h
+@@ -456,6 +456,21 @@ statfunc u64 match_data_filters(program_data_t *p, u8 index)
+ 
+ statfunc bool evaluate_scope_filters(program_data_t *p)
+ {
++    policies_config_t *policies_cfg = &p->event->policies_config;
++    u64 filters = policies_cfg->uid_filter_enabled | policies_cfg->pid_filter_enabled |
++                  policies_cfg->mnt_ns_filter_enabled | policies_cfg->pid_ns_filter_enabled |
++                  policies_cfg->uts_ns_filter_enabled | policies_cfg->comm_filter_enabled |
++                  policies_cfg->cgroup_id_filter_enabled | policies_cfg->cont_filter_enabled |
++                  policies_cfg->new_cont_filter_enabled | policies_cfg->cont_started_filter_enabled |
++                  policies_cfg->new_pid_filter_enabled | policies_cfg->proc_tree_filter_enabled |
++                  policies_cfg->bin_path_filter_enabled | policies_cfg->follow_filter_enabled;
++    if (likely(!filters)) {
++        if (p->config->tracee_pid == p->event->context.task.host_pid)
++            return false;
++        p->event->context.matched_policies &= policies_cfg->enabled_policies;
++        return p->event->context.matched_policies != 0;
++    }
++
+     u64 matched_policies = match_scope_filters(p);
+     p->event->context.matched_policies &= matched_policies;
+     return p->event->context.matched_policies != 0;
