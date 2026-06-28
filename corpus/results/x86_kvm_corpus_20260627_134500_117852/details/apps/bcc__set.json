@@ -1,0 +1,545 @@
+{
+  "app": "bcc/set",
+  "baseline": {
+    "bpf": {
+      "31": {
+        "bytes_jited": 106,
+        "bytes_xlated": 184,
+        "id": 31,
+        "name": "tcp_v4_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "37": {
+        "bytes_jited": 137,
+        "bytes_xlated": 240,
+        "id": 37,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "38": {
+        "bytes_jited": 489,
+        "bytes_xlated": 752,
+        "id": 38,
+        "name": "tcp_v4_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "39": {
+        "bytes_jited": 1497,
+        "bytes_xlated": 2240,
+        "id": 39,
+        "name": "inet_sock_set_s",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "41": {
+        "bytes_jited": 106,
+        "bytes_xlated": 184,
+        "id": 41,
+        "name": "tcp_v6_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "42": {
+        "bytes_jited": 137,
+        "bytes_xlated": 240,
+        "id": 42,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 1120514,
+        "run_time_ns_delta": 68136948,
+        "type": "tracepoint"
+      },
+      "44": {
+        "bytes_jited": 492,
+        "bytes_xlated": 752,
+        "id": 44,
+        "name": "tcp_v6_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "45": {
+        "bytes_jited": 598,
+        "bytes_xlated": 792,
+        "id": 45,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "46": {
+        "bytes_jited": 598,
+        "bytes_xlated": 792,
+        "id": 46,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 1120514,
+        "run_time_ns_delta": 1386523253,
+        "type": "tracepoint"
+      },
+      "49": {
+        "bytes_jited": 139,
+        "bytes_xlated": 232,
+        "id": 49,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 1327896,
+        "run_time_ns_delta": 82781432,
+        "type": "kprobe"
+      },
+      "56": {
+        "bytes_jited": 117,
+        "bytes_xlated": 200,
+        "id": 56,
+        "name": "blk_account_io_",
+        "run_cnt_delta": 41,
+        "run_time_ns_delta": 6053,
+        "type": "kprobe"
+      },
+      "58": {
+        "bytes_jited": 379,
+        "bytes_xlated": 616,
+        "id": 58,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 1327893,
+        "run_time_ns_delta": 409756259,
+        "type": "kprobe"
+      },
+      "62": {
+        "bytes_jited": 350,
+        "bytes_xlated": 648,
+        "id": 62,
+        "name": "block_rq_insert",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "63": {
+        "bytes_jited": 436,
+        "bytes_xlated": 824,
+        "id": 63,
+        "name": "block_rq_issue",
+        "run_cnt_delta": 50,
+        "run_time_ns_delta": 27425,
+        "type": "tracing"
+      },
+      "64": {
+        "bytes_jited": 36,
+        "bytes_xlated": 48,
+        "id": 64,
+        "name": "fentry_vfs_read",
+        "run_cnt_delta": 22172,
+        "run_time_ns_delta": 1702086,
+        "type": "tracing"
+      },
+      "66": {
+        "bytes_jited": 104,
+        "bytes_xlated": 168,
+        "id": 66,
+        "name": "sys_enter",
+        "run_cnt_delta": 32469849,
+        "run_time_ns_delta": 2677384415,
+        "type": "tracepoint"
+      },
+      "67": {
+        "bytes_jited": 433,
+        "bytes_xlated": 712,
+        "id": 67,
+        "name": "block_rq_comple",
+        "run_cnt_delta": 57,
+        "run_time_ns_delta": 93024,
+        "type": "tracing"
+      },
+      "69": {
+        "bytes_jited": 36,
+        "bytes_xlated": 48,
+        "id": 69,
+        "name": "fentry_vfs_writ",
+        "run_cnt_delta": 21447,
+        "run_time_ns_delta": 1524042,
+        "type": "tracing"
+      },
+      "70": {
+        "bytes_jited": 402,
+        "bytes_xlated": 656,
+        "id": 70,
+        "name": "sys_exit",
+        "run_cnt_delta": 32469851,
+        "run_time_ns_delta": 2798970174,
+        "type": "tracepoint"
+      },
+      "71": {
+        "bytes_jited": 36,
+        "bytes_xlated": 48,
+        "id": 71,
+        "name": "fentry_vfs_fsyn",
+        "run_cnt_delta": 12,
+        "run_time_ns_delta": 849,
+        "type": "tracing"
+      },
+      "73": {
+        "bytes_jited": 36,
+        "bytes_xlated": 48,
+        "id": 73,
+        "name": "fentry_vfs_open",
+        "run_cnt_delta": 1121140,
+        "run_time_ns_delta": 41094808,
+        "type": "tracing"
+      },
+      "74": {
+        "bytes_jited": 36,
+        "bytes_xlated": 48,
+        "id": 74,
+        "name": "fentry_vfs_crea",
+        "run_cnt_delta": 231,
+        "run_time_ns_delta": 15363,
+        "type": "tracing"
+      },
+      "78": {
+        "bytes_jited": 117,
+        "bytes_xlated": 184,
+        "id": 78,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 1042098,
+        "run_time_ns_delta": 99178079,
+        "type": "tracing"
+      },
+      "80": {
+        "bytes_jited": 117,
+        "bytes_xlated": 184,
+        "id": 80,
+        "name": "sched_wakeup_ne",
+        "run_cnt_delta": 39,
+        "run_time_ns_delta": 11058,
+        "type": "tracing"
+      },
+      "81": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1632,
+        "id": 81,
+        "name": "sched_switch",
+        "run_cnt_delta": 2082031,
+        "run_time_ns_delta": 235070337,
+        "type": "tracing"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--syscall",
+          "1",
+          "--syscall-method",
+          "fast75",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockfd-port",
+          "14748",
+          "--timeout",
+          "5s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/be9733c4"
+        ],
+        "config": {
+          "stressors": [
+            "syscall",
+            "cap",
+            "set",
+            "sockfd"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 5.015847336999997,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1981] setting to a 5 secs run per stressor\nstress-ng: info:  [1981] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [1981] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [1982] syscall: using method 'fast75'\nstress-ng: info:  [1982] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [1982] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [1982] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [1982] syscall:                      time       51.6         29\nstress-ng: info:  [1982] syscall:                  pkey_set       57.1         51\nstress-ng: info:  [1982] syscall:              gettimeofday       78.4         54\nstress-ng: info:  [1982] syscall:                  pkey_get       87.8         28\nstress-ng: info:  [1982] syscall:                    getcpu       97.6         58\nstress-ng: info:  [1982] syscall:                 pkey_free      419.9        370\nstress-ng: info:  [1982] syscall:          timer_getoverrun      458.0        382\nstress-ng: info:  [1982] syscall:           set_robust_list      460.7        398\nstress-ng: info:  [1982] syscall:                     umask      470.6        418\nstress-ng: info:  [1982] syscall:                mq_getattr      483.2        410\nstress-ng: metrc: [1981] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1981]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1981] syscall            8434      5.00      0.02      0.03      1686.26      162718.01\nstress-ng: metrc: [1981] cap             1494876      5.00      0.40      4.60    298976.73      299060.85\nstress-ng: metrc: [1981] set              119358      5.00      0.39      4.56     23871.51       24121.28\nstress-ng: metrc: [1981] sockfd          1109764      5.00      0.28      7.33    221921.18      145719.08\nstress-ng: info:  [1981] skipped: 0\nstress-ng: info:  [1981] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [1981] failed: 0\nstress-ng: info:  [1981] metrics untrustworthy: 0\nstress-ng: info:  [1981] successful run completed in 5.00 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "113": {
+        "bytes_jited": 106,
+        "bytes_xlated": 184,
+        "id": 113,
+        "name": "tcp_v4_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "114": {
+        "bytes_jited": 1497,
+        "bytes_xlated": 2240,
+        "id": 114,
+        "name": "inet_sock_set_s",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "116": {
+        "bytes_jited": 139,
+        "bytes_xlated": 232,
+        "id": 116,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 1314548,
+        "run_time_ns_delta": 82033386,
+        "type": "kprobe"
+      },
+      "119": {
+        "bytes_jited": 137,
+        "bytes_xlated": 240,
+        "id": 119,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "120": {
+        "bytes_jited": 489,
+        "bytes_xlated": 752,
+        "id": 120,
+        "name": "tcp_v4_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "122": {
+        "bytes_jited": 106,
+        "bytes_xlated": 184,
+        "id": 122,
+        "name": "tcp_v6_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "125": {
+        "bytes_jited": 492,
+        "bytes_xlated": 752,
+        "id": 125,
+        "name": "tcp_v6_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "126": {
+        "bytes_jited": 379,
+        "bytes_xlated": 616,
+        "id": 126,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 1314547,
+        "run_time_ns_delta": 412583087,
+        "type": "kprobe"
+      },
+      "127": {
+        "bytes_jited": 137,
+        "bytes_xlated": 240,
+        "id": 127,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 1132938,
+        "run_time_ns_delta": 68791061,
+        "type": "tracepoint"
+      },
+      "128": {
+        "bytes_jited": 598,
+        "bytes_xlated": 792,
+        "id": 128,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "129": {
+        "bytes_jited": 598,
+        "bytes_xlated": 792,
+        "id": 129,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 1132938,
+        "run_time_ns_delta": 1344094277,
+        "type": "tracepoint"
+      },
+      "132": {
+        "bytes_jited": 117,
+        "bytes_xlated": 200,
+        "id": 132,
+        "name": "blk_account_io_",
+        "run_cnt_delta": 42,
+        "run_time_ns_delta": 6685,
+        "type": "kprobe"
+      },
+      "137": {
+        "bytes_jited": 350,
+        "bytes_xlated": 648,
+        "id": 137,
+        "name": "block_rq_insert",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "140": {
+        "bytes_jited": 436,
+        "bytes_xlated": 824,
+        "id": 140,
+        "name": "block_rq_issue",
+        "run_cnt_delta": 52,
+        "run_time_ns_delta": 33030,
+        "type": "tracing"
+      },
+      "141": {
+        "bytes_jited": 36,
+        "bytes_xlated": 48,
+        "id": 141,
+        "name": "fentry_vfs_read",
+        "run_cnt_delta": 22053,
+        "run_time_ns_delta": 1735692,
+        "type": "tracing"
+      },
+      "142": {
+        "bytes_jited": 433,
+        "bytes_xlated": 712,
+        "id": 142,
+        "name": "block_rq_comple",
+        "run_cnt_delta": 59,
+        "run_time_ns_delta": 96400,
+        "type": "tracing"
+      },
+      "144": {
+        "bytes_jited": 36,
+        "bytes_xlated": 48,
+        "id": 144,
+        "name": "fentry_vfs_writ",
+        "run_cnt_delta": 21367,
+        "run_time_ns_delta": 1553149,
+        "type": "tracing"
+      },
+      "146": {
+        "bytes_jited": 36,
+        "bytes_xlated": 48,
+        "id": 146,
+        "name": "fentry_vfs_fsyn",
+        "run_cnt_delta": 12,
+        "run_time_ns_delta": 950,
+        "type": "tracing"
+      },
+      "147": {
+        "bytes_jited": 36,
+        "bytes_xlated": 48,
+        "id": 147,
+        "name": "fentry_vfs_open",
+        "run_cnt_delta": 1133096,
+        "run_time_ns_delta": 41628628,
+        "type": "tracing"
+      },
+      "148": {
+        "bytes_jited": 36,
+        "bytes_xlated": 48,
+        "id": 148,
+        "name": "fentry_vfs_crea",
+        "run_cnt_delta": 15,
+        "run_time_ns_delta": 1350,
+        "type": "tracing"
+      },
+      "150": {
+        "bytes_jited": 104,
+        "bytes_xlated": 168,
+        "id": 150,
+        "name": "sys_enter",
+        "run_cnt_delta": 32632730,
+        "run_time_ns_delta": 2579295551,
+        "type": "tracepoint"
+      },
+      "152": {
+        "bytes_jited": 402,
+        "bytes_xlated": 656,
+        "id": 152,
+        "name": "sys_exit",
+        "run_cnt_delta": 32632735,
+        "run_time_ns_delta": 2793711207,
+        "type": "tracepoint"
+      },
+      "155": {
+        "bytes_jited": 117,
+        "bytes_xlated": 184,
+        "id": 155,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 1034488,
+        "run_time_ns_delta": 96141123,
+        "type": "tracing"
+      },
+      "157": {
+        "bytes_jited": 117,
+        "bytes_xlated": 184,
+        "id": 157,
+        "name": "sched_wakeup_ne",
+        "run_cnt_delta": 40,
+        "run_time_ns_delta": 12635,
+        "type": "tracing"
+      },
+      "158": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1632,
+        "id": 158,
+        "name": "sched_switch",
+        "run_cnt_delta": 2066191,
+        "run_time_ns_delta": 228340563,
+        "type": "tracing"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--syscall",
+          "1",
+          "--syscall-method",
+          "fast75",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockfd-port",
+          "15772",
+          "--timeout",
+          "5s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/be9733c4"
+        ],
+        "config": {
+          "stressors": [
+            "syscall",
+            "cap",
+            "set",
+            "sockfd"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 5.018480909000004,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [2122] setting to a 5 secs run per stressor\nstress-ng: info:  [2122] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [2122] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [2123] syscall: using method 'fast75'\nstress-ng: info:  [2123] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [2123] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [2123] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [2123] syscall:                  pkey_get       71.0         65\nstress-ng: info:  [2123] syscall:                  pkey_set       88.5         86\nstress-ng: info:  [2123] syscall:                      time       92.0         81\nstress-ng: info:  [2123] syscall:              gettimeofday      101.0         80\nstress-ng: info:  [2123] syscall:                    getcpu      222.5        212\nstress-ng: info:  [2123] syscall:                 pkey_free      511.5        503\nstress-ng: info:  [2123] syscall:                    getgid      575.5        501\nstress-ng: info:  [2123] syscall:                    getpid      580.5        497\nstress-ng: info:  [2123] syscall:                epoll_wait      604.0        470\nstress-ng: info:  [2123] syscall:                    getuid      613.5        511\nstress-ng: metrc: [2122] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2122]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2122] syscall             514      5.00      0.01      0.01       102.79       21262.51\nstress-ng: metrc: [2122] cap             1517192      5.00      0.36      4.64    303438.89      303539.78\nstress-ng: metrc: [2122] set              118327      5.00      0.28      4.66     23665.33       23951.19\nstress-ng: metrc: [2122] sockfd          1122286      5.00      0.18      7.53    224425.22      145656.32\nstress-ng: info:  [2122] skipped: 0\nstress-ng: info:  [2122] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [2122] failed: 0\nstress-ng: info:  [2122] metrics untrustworthy: 0\nstress-ng: info:  [2122] successful run completed in 5.01 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      }
+    ]
+  },
+  "rejit_result": {
+    "mode": "loadtime",
+    "status": "skipped"
+  },
+  "runner": "bcc_set",
+  "selected_workload": "stress_ng_bcc_hook_hot",
+  "status": "ok"
+}

@@ -58,6 +58,7 @@ RUN apt-get update \
         libssl3t64 \
         libunwind8 \
         libyaml-cpp0.8 \
+        llvm-18 \
         libzstd1 \
         lz4 \
         nftables \
@@ -171,10 +172,15 @@ COPY --link --chmod=0755 \
     ${KINSNPROBER_HOST_BIN} \
     ${NATIVE_LINK_HOST_BIN} \
     /usr/local/bin/
+COPY --link vendor/merlin_bpf_clang.py /usr/local/lib/bpfrejit/merlin/merlin_bpf_clang.py
+COPY --link --from=runner-runtime-host-merlin / /usr/local/lib/bpfrejit/merlin/
+COPY --chmod=0755 runner/scripts/merlin-bpf-clang /usr/local/bin/merlin-bpf-clang
 
 RUN set -eux; \
     mkdir -p /opt; \
     ln -sfn /artifacts/user /opt/bpf-benchmark; \
+    ln -sfn /usr/local/bin/merlin-bpf-clang /usr/local/bin/clang; \
+    ln -sfn /usr/local/bin/merlin-bpf-clang /usr/local/bin/clang-18; \
     ldconfig
 
 COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn

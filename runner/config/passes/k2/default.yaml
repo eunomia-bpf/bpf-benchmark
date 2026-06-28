@@ -1,0 +1,8 @@
+# K2 load-time pass adapter.
+#
+# The shim provides raw canonicalized BPF bytecode plus map metadata. The wrapper
+# converts those inputs into K2's file format, runs the upstream K2 binary, and
+# converts K2's textual output back to raw struct bpf_insn[].
+log_level: 1
+command: |
+  python3 "${BPFREJIT_REPO_ROOT:?BPFREJIT_REPO_ROOT is required}/runner/config/passes/k2/k2_loadtime.py" --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --workdir ${WORKDIR} --prog-type ${PROG_TYPE} --prog-id ${PROG_ID} --target ${TARGET} --map-ids "${MAP_IDS}" --map-values "${MAP_VALUES}"

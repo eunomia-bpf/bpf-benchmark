@@ -900,6 +900,7 @@ def run_suite(
 
                     phase = "loadtime_plan"
                     loadtime_env: dict[str, str | None] = {
+                        "BPFREJIT_REPO_ROOT": str(REPO_ROOT),
                         "BPFREJIT_SHIM_LOADTIME_PLAN": "",
                         "BPFREJIT_SHIM_LOG": str(_shim_log_path(
                             app,

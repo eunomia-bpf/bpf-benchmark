@@ -8,6 +8,7 @@ is the analysis-side tool.
 Usage:
     python analysis/corpus_analyze.py <result_dir|metadata.json|result.json>
         [--threshold N]    Filter min(b_runs, p_runs) >= N (default: 100)
+        [--pair-by id|name-type|stable]
         [--per-app]        Print per-app breakdown (rich table sorted by Method B)
         [--per-pass]       Add per-pass apply-count columns to the per-app table
         [--verbose]        Print every retained per-program ratio
@@ -50,7 +51,55 @@ def _prog_apply_count(per_prog_entry: dict) -> int:
     return total
 
 
-def collect_per_program(payload: dict, min_runs: int, applied_only: bool = False) -> list[dict]:
+def _pairing_key(rec: dict, pair_by: str) -> tuple:
+    if pair_by == "name-type":
+        return (rec.get("name") or "", rec.get("type") or "")
+    if pair_by == "stable":
+        return (
+            rec.get("name") or "",
+            rec.get("type") or "",
+            int(rec.get("bytes_xlated") or 0),
+            int(rec.get("bytes_jited") or 0),
+        )
+    raise ValueError(f"unsupported pair_by={pair_by}")
+
+
+def _run_sort_key(rec: dict) -> tuple[int, int, str]:
+    return (
+        int(rec.get("run_cnt_delta") or 0),
+        int(rec.get("run_time_ns_delta") or 0),
+        str(rec.get("id") or ""),
+    )
+
+
+def _paired_records(baseline: dict, post: dict, pair_by: str) -> list[tuple[str, dict, dict]]:
+    if pair_by == "id":
+        return [(str(pid), baseline[pid], post[pid]) for pid in sorted(set(baseline) & set(post))]
+
+    from collections import defaultdict
+
+    base_groups: dict[tuple, list[dict]] = defaultdict(list)
+    post_groups: dict[tuple, list[dict]] = defaultdict(list)
+    for rec in baseline.values():
+        base_groups[_pairing_key(rec, pair_by)].append(rec)
+    for rec in post.values():
+        post_groups[_pairing_key(rec, pair_by)].append(rec)
+
+    pairs: list[tuple[str, dict, dict]] = []
+    for key in sorted(set(base_groups) & set(post_groups)):
+        base_recs = sorted(base_groups[key], key=_run_sort_key, reverse=True)
+        post_recs = sorted(post_groups[key], key=_run_sort_key, reverse=True)
+        for idx, (b_rec, p_rec) in enumerate(zip(base_recs, post_recs)):
+            pairs.append((f"{key}:{idx}", b_rec, p_rec))
+    return pairs
+
+
+def collect_per_program(
+    payload: dict,
+    min_runs: int,
+    applied_only: bool = False,
+    pair_by: str = "id",
+) -> list[dict]:
     """Build per-program ratio records from raw counter deltas.
 
     applied_only: when True, drop programs with zero sites_applied across all passes.
@@ -61,10 +110,9 @@ def collect_per_program(payload: dict, min_runs: int, applied_only: bool = False
         baseline = (app.get("baseline") or {}).get("bpf") or {}
         post = (app.get("post_rejit") or {}).get("bpf") or {}
         per_prog = (app.get("rejit_result") or {}).get("per_program") or {}
-        for pid in set(baseline) & set(post):
+        for pid, b, p in _paired_records(baseline, post, pair_by):
             if applied_only and _prog_apply_count(per_prog.get(pid) or per_prog.get(str(pid)) or {}) == 0:
                 continue
-            b, p = baseline[pid], post[pid]
             b_runs = int(b.get("run_cnt_delta") or 0)
             p_runs = int(p.get("run_cnt_delta") or 0)
             if b_runs <= 0 or p_runs <= 0:
@@ -80,9 +128,10 @@ def collect_per_program(payload: dict, min_runs: int, applied_only: bool = False
             min_r = min(b_runs, p_runs)
             if min_r < min_runs:
                 continue
+            prog_id = p.get("id") or b.get("id") or pid
             out.append({
                 "app": app["app"],
-                "prog_id": int(pid),
+                "prog_id": prog_id,
                 "name": p.get("name") or b.get("name") or f"id-{pid}",
                 "type": p.get("type") or b.get("type") or "",
                 "min_runs": min_r,
@@ -240,19 +289,28 @@ def _hydrate_results_from_apps_dir(payload: dict, result_json_path: Path) -> dic
     return payload
 
 
-def report(path: Path, threshold: int, per_app: bool, verbose: bool, per_pass: bool = False, applied_only: bool = False) -> int:
+def report(
+    path: Path,
+    threshold: int,
+    per_app: bool,
+    verbose: bool,
+    per_pass: bool = False,
+    applied_only: bool = False,
+    pair_by: str = "id",
+) -> int:
     payload = json.loads(Path(path).read_text())
     payload = _hydrate_results_from_apps_dir(payload, Path(path))
     suite_status = payload.get("status", "?")
     samples = payload.get("samples", "?")
     duration = payload.get("workload_seconds", "?")
-    progs = collect_per_program(payload, threshold, applied_only=applied_only)
+    progs = collect_per_program(payload, threshold, applied_only=applied_only, pair_by=pair_by)
 
     print(f"# Corpus analysis: {path}")
     print(f"  suite status:    {suite_status}")
     print(f"  samples:         {samples}")
     print(f"  workload_secs:   {duration}")
     print(f"  threshold:       min(b_runs, p_runs) >= {threshold}")
+    print(f"  pair_by:         {pair_by}")
     print(f"  applied-only:    {applied_only}")
     print(f"  retained progs:  {len(progs)}")
 
@@ -282,9 +340,9 @@ def report(path: Path, threshold: int, per_app: bool, verbose: bool, per_pass: b
     if verbose:
         print(f"\n## Per-program detail")
         progs_sorted = sorted(progs, key=lambda p: p["ratio"])
-        print(f"{'App':<35} {'PID':<5} {'Name':<35} {'min_runs':<10} {'b_avg(ns)':<12} {'p_avg(ns)':<12} {'ratio':<8}")
+        print(f"{'App':<35} {'PID':<8} {'Name':<35} {'min_runs':<10} {'b_avg(ns)':<12} {'p_avg(ns)':<12} {'ratio':<8}")
         for p in progs_sorted:
-            print(f"{p['app']:<35} {p['prog_id']:<5} {p['name']:<35} {p['min_runs']:<10} {p['b_avg_ns']:<12.2f} {p['p_avg_ns']:<12.2f} {p['ratio']:<8.4f}")
+            print(f"{p['app']:<35} {str(p['prog_id']):<8} {p['name']:<35} {p['min_runs']:<10} {p['b_avg_ns']:<12.2f} {p['p_avg_ns']:<12.2f} {p['ratio']:<8.4f}")
 
     return 0
 
@@ -298,6 +356,8 @@ def main() -> int:
     ap.add_argument("--per-app", action="store_true", help="print per-app breakdown (sorted by Method B)")
     ap.add_argument("--per-pass", action="store_true",
                     help="add per-pass apply-count columns to the per-app table")
+    ap.add_argument("--pair-by", choices=("id", "name-type", "stable"), default="id",
+                    help="pair baseline/post programs by id, (name,type), or (name,type,bytes_xlated,bytes_jited)")
     ap.add_argument("--verbose", action="store_true",
                     help="print every retained per-program ratio")
     ap.add_argument("--applied-only", action="store_true",
@@ -308,7 +368,15 @@ def main() -> int:
     except FileNotFoundError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
-    return report(result_json, args.threshold, args.per_app, args.verbose, args.per_pass, args.applied_only)
+    return report(
+        result_json,
+        args.threshold,
+        args.per_app,
+        args.verbose,
+        args.per_pass,
+        args.applied_only,
+        args.pair_by,
+    )
 
 
 if __name__ == "__main__":

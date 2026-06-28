@@ -1,0 +1,10 @@
+# Merlin load-time artifact pass.
+#
+# Merlin v0.01 is an LLVM IR optimizer plugin (AtomicBPF/AlignBPF), while the
+# corpus shim invokes passes on canonicalized raw BPF bytecode. For programs
+# with a host-prepared exact runtime raw artifact, this adapter applies that
+# artifact; unmatched programs are preserved unchanged with a diagnostic report.
+# Use MERLIN_ARTIFACT_MODE=atomic|align|both to select the prepared artifact.
+log_level: 1
+command: |
+  python3 "${BPFREJIT_REPO_ROOT:?BPFREJIT_REPO_ROOT is required}/runner/config/passes/merlin/merlin_loadtime.py" --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --prog-id ${PROG_ID} --target ${TARGET} --mode "${MERLIN_ARTIFACT_MODE:-atomic}"

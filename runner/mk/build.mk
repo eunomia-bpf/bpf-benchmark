@@ -45,6 +45,7 @@ RUNNER_RUNTIME_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/runner-runtime.Dockerfil
 BPFOPT_SHIM_DIR := $(ROOT_DIR)/bpfopt/shim
 BPFOPT_SHIM_BUILD_X86 := $(BPFOPT_SHIM_DIR)/build-x86
 BPFOPT_SHIM_BUILD_ARM64 := $(BPFOPT_SHIM_DIR)/build-arm64
+MERLIN_RUNTIME_CONTEXT := $(VENDOR_BUILD_DIR)/merlin-runtime-context
 
 X86_RUNNER_RUNTIME_IMAGE := bpf-benchmark/runner-runtime:x86_64
 ARM64_RUNNER_RUNTIME_IMAGE := bpf-benchmark/runner-runtime:arm64
@@ -75,16 +76,21 @@ HOST_KERNEL_MODULES_ORDER_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/modules.order
 	host-runner-x86 host-runner-arm64 host-micro-programs-x86 host-micro-programs-arm64 \
 		host-stage2-programs-x86 host-stage2-programs-arm64 host-x86-sim-proofs host-arm64-sim-proofs \
 		host-native-bpf-x86 host-native-bpf-arm64 \
-	apps host-source-apps host-source-apps-x86 host-source-apps-arm64 \
+	apps host-source-apps host-source-apps-x86 host-source-apps-arm64 host-merlin-runtime-context \
 	aarch64-sysroot runtime-kernel-image \
 	x86-runner-runtime-image-tar arm64-runner-runtime-image-tar image-runner-runtime-image-tar
 
 apps: host-source-apps
 host-source-apps: host-source-apps-x86 host-source-apps-arm64
 host-source-apps-x86:
-	$(MAKE) -C "$(ROOT_DIR)/vendor" apps-x86 GO="$(HOST_GO)" JOBS="$(JOBS)"
+	$(MAKE) -C "$(ROOT_DIR)/vendor" apps-x86 GO="$(HOST_GO)" JOBS="$(JOBS)" MERLIN_COMPILETIME_MODE="$(MERLIN_COMPILETIME_MODE)" MERLIN_BUILD_DIR="$(MERLIN_BUILD_DIR)"
 host-source-apps-arm64:
-	$(MAKE) -C "$(ROOT_DIR)/vendor" apps-arm64 GO="$(HOST_GO)" JOBS="$(JOBS)"
+	$(MAKE) -C "$(ROOT_DIR)/vendor" apps-arm64 GO="$(HOST_GO)" JOBS="$(JOBS)" MERLIN_COMPILETIME_MODE="$(MERLIN_COMPILETIME_MODE)" MERLIN_BUILD_DIR="$(MERLIN_BUILD_DIR)"
+
+host-merlin-runtime-context:
+	install -d "$(MERLIN_RUNTIME_CONTEXT)/lib"
+	test ! -f "$(MERLIN_BUILD_DIR)/lib/libAtomicBPF.so" || install -m 0644 "$(MERLIN_BUILD_DIR)/lib/libAtomicBPF.so" "$(MERLIN_RUNTIME_CONTEXT)/lib/libAtomicBPF.so"
+	test ! -f "$(MERLIN_BUILD_DIR)/lib/libAlignBPF.so" || install -m 0644 "$(MERLIN_BUILD_DIR)/lib/libAlignBPF.so" "$(MERLIN_RUNTIME_CONTEXT)/lib/libAlignBPF.so"
 
 $(HOST_KERNEL_BUILD_DIR_X86)/.config: $(DEFCONFIG_SRC)
 	install -d "$(HOST_KERNEL_BUILD_DIR_X86)"
@@ -225,7 +231,7 @@ host-x86-sim-proofs: host-micro-programs-x86
 host-arm64-sim-proofs: host-micro-programs-arm64
 	$(MAKE) -C "$(ARM64_SIM_PROOF_DIR)" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/arm64_sim_proofs" MICRO_CONFIG="$(MICRO_PROOF_CONFIG)" micro-proofs-build
 
-x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86 host-x86-sim-proofs host-bpfopt-llvm-x86 host-native-bpf-x86
+x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86 host-x86-sim-proofs host-bpfopt-llvm-x86 host-native-bpf-x86 host-merlin-runtime-context
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	install -d "$(HOST_KERNEL_CONFIG_CONTEXT_X86)"
 	cp "$(HOST_KERNEL_BUILD_DIR_X86)/.config" "$(HOST_KERNEL_CONFIG_CONTEXT_X86)/config"
@@ -244,6 +250,7 @@ x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-
 			--build-context runner-runtime-host-kinsn-artifacts="$(HOST_KINSN_DIR_X86)" \
 			--build-context runner-runtime-host-shim="$(BPFOPT_SHIM_BUILD_X86)" \
 			--build-context runner-runtime-host-native-bpf="$(NATIVE_BPF_ARTIFACTS_X86)" \
+			--build-context runner-runtime-host-merlin="$(MERLIN_RUNTIME_CONTEXT)" \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg RUN_TARGET_ARCH=x86_64 \
 		--build-arg VENDOR_BUILD_ARCH=x86 \
@@ -255,7 +262,7 @@ x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-
 	docker save -o "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"
 	mv -f "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE_TAR)"
 
-arm64-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) host-kinsn-arm64 host-rust-arm64 host-shim-arm64 host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64 host-arm64-sim-proofs host-bpfopt-llvm-arm64 host-native-bpf-arm64
+arm64-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) host-kinsn-arm64 host-rust-arm64 host-shim-arm64 host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64 host-arm64-sim-proofs host-bpfopt-llvm-arm64 host-native-bpf-arm64 host-merlin-runtime-context
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	install -d "$(HOST_KERNEL_CONFIG_CONTEXT_ARM64)"
 	cp "$(HOST_KERNEL_BUILD_DIR_ARM64)/.config" "$(HOST_KERNEL_CONFIG_CONTEXT_ARM64)/config"
@@ -274,6 +281,7 @@ arm64-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM
 			--build-context runner-runtime-host-kinsn-artifacts="$(HOST_KINSN_DIR_ARM64)" \
 			--build-context runner-runtime-host-shim="$(BPFOPT_SHIM_BUILD_ARM64)" \
 			--build-context runner-runtime-host-native-bpf="$(NATIVE_BPF_ARTIFACTS_ARM64)" \
+			--build-context runner-runtime-host-merlin="$(MERLIN_RUNTIME_CONTEXT)" \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg RUN_TARGET_ARCH=arm64 \
 		--build-arg VENDOR_BUILD_ARCH=arm64 \

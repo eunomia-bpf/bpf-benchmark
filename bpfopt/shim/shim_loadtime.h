@@ -1174,14 +1174,14 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         }
         if (loadtime_probe_bytecode_acceptance(attr, attr_size, nxt, target_json,
                                                map_ids, map_n, verifier_log) != 0) {
-            snprintf(err, err_sz,
-                     "loadtime verifier probe failed after step %s errno=%d log=%s",
+            log_line("loadtime verifier probe rejected candidate after step %s "
+                     "errno=%d log=%s; passing original BPF_PROG_LOAD through",
                      name[0] ? name : "<unnamed>", errno, verifier_log);
             free(map_refs);
             free(map_ids);
             free(map_types);
             free(plan_json);
-            return -1;
+            return 0;
         }
         if (loadtime_append_step_report(prog_name, prog_type_name,
                                         name[0] ? name : "<unnamed>",

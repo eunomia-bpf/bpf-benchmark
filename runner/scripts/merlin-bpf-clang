@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+
+exec python3 /usr/local/lib/bpfrejit/merlin/merlin_bpf_clang.py \
+    --clang /usr/bin/clang \
+    --llc /usr/bin/llc-18 \
+    --opt /usr/bin/opt-18 \
+    --mode "${MERLIN_COMPILETIME_MODE:-none}" \
+    --atomic-plugin /usr/local/lib/bpfrejit/merlin/lib/libAtomicBPF.so \
+    --align-plugin /usr/local/lib/bpfrejit/merlin/lib/libAlignBPF.so \
+    "$@"
