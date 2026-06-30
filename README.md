@@ -1,170 +1,217 @@
-# BPF Benchmark
+# bpf-bench
 
-eBPF benchmarking suite for the BpfReJIT paper — comparing llvmbpf (userspace LLVM JIT) against kernel eBPF with and without ReJIT.
+Auto-research framework and benchmark for agentic OS kernel extension
+optimization.
 
-Active benchmarking pipeline:
+`bpf-bench` frames eBPF optimization as a closed-loop search problem for LLM
+agents. Agents choose optimization actions, the framework executes those actions
+against real applications and workloads in isolated Docker/KVM/AWS environments,
+and each iteration returns verifier, JIT, workload, and performance feedback for
+the next decision.
 
-- `micro/`: isolated micro-benchmarks driven by `bpf_prog_test_run_opts`
-- `corpus/`: real-world program collection, measurement, and analysis
+This repository is the execution substrate and artifact workspace for the
+`bpf-bench` paper draft in
+[`docs/ebpf27-bpfoptbench/`](docs/ebpf27-bpfoptbench/). It also provides the
+artifact and evaluation harness for the Kops paper,
+[`Kops: Safely Extending the eBPF Compilation Pipeline with Native Operations`](docs/paper/main.tex).
+The current `bpf-bench` instantiation covers six production eBPF applications,
+146 comparable BPF program measurements, and 42 microbenchmark tasks, with
+correctness and integrity checks designed to prevent reward hacking.
 
-The historical multi-runtime userspace benchmark layer has been removed; the active tree is `micro/`, `corpus/`, `runner/`, and `daemon/`.
+## What It Benchmarks
 
-Execution architecture for the runner image, runtime containers, and
-host-kernel boundaries lives in
-[`docs/benchmark-runtime-architecture.md`](docs/benchmark-runtime-architecture.md).
+eBPF optimization is difficult because the useful action depends on verifier
+constraints, kernel version, architecture, runtime state, workload behavior, and
+application semantics. A pass that improves one program can regress another, and
+static rewrite counts do not reliably predict speedup.
+
+`bpf-bench` evaluates whether agents can make better optimization decisions
+under the real oracle:
+
+- verifier acceptance and rejection logs
+- JIT output size and emitted-code changes
+- application lifecycle success or failure
+- workload correctness and raw workload metrics
+- per-program BPF run counters before and after optimization
+- cross-iteration history for adaptive exploration
+
+The benchmark action space spans multiple layers:
+
+- source-level application/eBPF changes
+- LLVM and BPF bytecode transformations
+- post-load bytecode policy selection through `bpfopt`
+- kernel JIT and Kops-backed native-operation choices
+- suite-wide, per-app, and per-program policy selection
+
+`bpfopt` and Kops-backed native operations are action backends in this
+repository, but the `bpf-bench` contribution is broader: a benchmark and
+auto-research framework for agentic eBPF optimization under real verifier, JIT,
+application, and workload feedback.
+
+## Benchmark Corpus
+
+The production corpus uses real application loaders. The framework does not
+replace upstream binaries with simplified loaders and does not load `.bpf.o`
+files directly for corpus apps.
+
+Supported corpus applications:
+
+- `bcc/set`
+- `otelcol-ebpf-profiler/profiling`
+- `cilium/agent`
+- `tetragon/observer`
+- `katran`
+- `tracee/monitor`
+
+Microbenchmarks isolate pure-bytecode execution, helpers, maps, packet parsing,
+branch behavior, and architecture-sensitive lowering under
+`BPF_PROG_TEST_RUN`.
 
 ## Repository Layout
 
 ```text
 bpf-benchmark/
-├── runner/                # Target/suite contracts, executors, shared libs, and micro_exec
-├── micro/                 # Isolated micro-benchmark suites, drivers, and inputs
-├── corpus/                # Real-world corpus, fetch/build, and measurement
-├── daemon/                # Userspace BPF daemon (bpfrejit-daemon CLI)
-├── config/                # YAML benchmark suite manifests (micro_pure_jit.yaml etc.)
-├── tests/                 # Userspace/kernel self-tests
-├── docs/                  # Research plans, reports, and temporary experiment notes
-└── vendor/                # Vendored kernel (linux-framework) + tooling dependencies
+├── docs/ebpf27-bpfoptbench/  # bpf-bench paper draft, figures, and analyses
+├── runner/                   # Make-backed suites, executors, images, libs
+├── corpus/                   # Production app corpus, workloads, results
+├── micro/                    # Microbenchmark programs, configs, results
+├── bpfopt/                   # Bytecode optimizer, loader, target probing tools
+├── module/                   # Kops native-operation modules for x86 and arm64
+├── analysis/                 # Post-hoc analysis utilities
+├── tests/                    # Selftests and negative tests
+├── docs/                     # Design notes, reports, and paper material
+└── vendor/                   # Vendored kernel, libbpf, llvmbpf, app deps
 ```
+
+The low-level optimizer design notes are documented under [`docs/tmp/`](docs/tmp/).
+Runtime image layering and host/runtime boundaries are documented in
+[`runner/containers/README.md`](runner/containers/README.md).
 
 ## Prerequisites
 
-- Python 3 with PyYAML: `pip install pyyaml` (or use the workspace venv)
+- Python 3 with PyYAML: `pip install pyyaml`
 - `docker` for runner image builds and runtime containers
-- runnable `linux/amd64` and `linux/arm64` container userspace support when
-  building both target architectures
-- `sudo -n` (passwordless) required for kernel eBPF runtime
-- `vng` (virtme-ng) required for VM benchmark targets
+- `sudo -n` for privileged kernel eBPF runtime setup
+- `vng` (virtme-ng) for the default local x86 KVM target
+- AWS credentials only when using `PLATFORM=aws`
 
 ## Quick Start
 
 ```bash
 git submodule update --init --recursive
-source /home/yunwei37/workspace/.venv/bin/activate   # workspace venv (optional)
 
-# Local static validation
+# Static validation and tests through the supported Makefile entrypoint.
 make check
 
-# Local x86 KVM micro benchmark suite
+# Local x86 KVM micro benchmark suite.
 make micro
 ```
 
 ## Running Benchmarks
 
-**The root `Makefile` is the only supported entrypoint. Do not invoke
-`cargo run`, `docker run`, or any component binary directly. Every benchmark
-must go through `make <target>`.**
+The root `Makefile` is the only supported benchmark entrypoint. Run suites with
+`make <target>` so build dependencies, runtime images, KVM/AWS dispatch, and
+artifact paths stay consistent.
 
 ```bash
 make micro                           # local x86 KVM micro suite
 make micro BENCH="simple bitcount"
 make micro SAMPLES=1 WARMUPS=0 INNER_REPEAT=10
-make corpus                          # local x86 KVM corpus, all 6 supported apps
+
+make corpus                          # local x86 KVM corpus, all supported apps
 make corpus SAMPLES=3
+
 make selftest                        # kernel selftests
 make negative-test                   # negative tests
 make test                            # full test suite
 make all                             # test + micro + corpus
+make terminate                       # terminate managed remote instances
+
+PLATFORM=aws ARCH=x86 make test
 PLATFORM=aws ARCH=arm64 make test
 PLATFORM=aws ARCH=arm64 make micro
 PLATFORM=aws ARCH=arm64 make corpus
-PLATFORM=aws ARCH=x86 make test
 ```
 
-### Per-app filtering (corpus)
+Supported suite targets are `selftest`, `negative-test`, `test`, `micro`,
+`corpus`, `all`, and `terminate`. `PLATFORM=kvm` with `ARCH=x86` is the local
+default. AWS runs use `PLATFORM=aws` with `ARCH=x86` or `ARCH=arm64`.
 
-Restrict to a subset of the 6 supported apps (bcc/set, otelcol-ebpf-profiler,
-cilium/agent, tetragon/observer, katran, tracee/monitor):
+### Corpus App Selection
+
+Targeted corpus runs use the app names in
+[`corpus/config/macro_apps.yaml`](corpus/config/macro_apps.yaml). Keep targeted
+experiments routed through the root `Makefile` so app startup, workload setup,
+runtime image selection, and artifact paths stay consistent.
 
 ```bash
-# Single app
-BPFREJIT_CORPUS_APPS="tetragon/observer" make corpus
-
-# Multiple apps (comma- or space-separated)
-BPFREJIT_CORPUS_APPS="cilium/agent,tracee/monitor" make corpus
+# Full production corpus.
+make corpus
 ```
 
-### Per-pass override (corpus / micro)
+### Pass Selection
 
-Override which bpfopt passes run, comma-separated. Default is the policy in
-`corpus/config/benchmark_config.yaml`. Set to `"default"` to use the yaml
-explicitly.
+The default pass policy lives in
+[`corpus/config/benchmark_config.yaml`](corpus/config/benchmark_config.yaml).
+Targeted pass experiments should still go through the root `Makefile`; use the
+suite environment knobs defined there rather than invoking optimizer binaries
+directly.
 
 ```bash
-# Only noop + map_inline
-BPFREJIT_BENCH_PASSES="noop,map_inline" make corpus
-
-# Only kinsn-class passes
-BPFREJIT_BENCH_PASSES="wide_mem,rotate,cond_select,extract,endian_fusion,bulk_memory,prefetch" \
-    make corpus
-
-# Combine with per-app + sample count
-BPFREJIT_CORPUS_APPS="tetragon/observer" \
-BPFREJIT_BENCH_PASSES="noop,map_inline" \
-SAMPLES=3 \
-    make corpus
+make corpus SAMPLES=3
 ```
 
-Pass list reference (current `corpus/config/benchmark_config.yaml`):
-- **kinsn-class**: `wide_mem`, `rotate`, `cond_select`, `extract`,
-  `endian_fusion`, `bulk_memory`, `prefetch`
-- **bytecode rewriting**: `noop` (state producer), `map_inline`, `const_prop`,
+Pass families currently include:
+
+- Kops-backed native-operation passes: `kinsn`, `rotate`, `cond_select`,
+  `ccmp`, `extract`, `endian_fusion`, `bulk_memory`, `prefetch`
+- bytecode rewriting passes: `noop`, `wide_mem`, `map_inline`, `const_prop`,
   `dce`, `bounds_check_merge`, `skb_load_bytes_spec`
-- **profile-guided** (not in default policy): `branch_flip`
+- profile-guided opt-in pass: `branch_flip`
 
-### Workdir retention
+`branch_flip` requires real per-site PMU profile input and is not part of the
+default runner policy.
 
-Workdir tarballs are discarded by default to keep `result.json` small. Enable
-retention to inspect raw verifier logs and per-pass bytecode:
+### Workdir Retention
+
+Workdir tarballs are discarded by default. Enable retention to inspect raw
+verifier logs and per-pass bytecode for programs that hit real optimization
+failures:
 
 ```bash
-# Retain tarballs for programs that hit a real ReJIT failure
 KEEP_WORKDIRS=1 make corpus
-
-# To capture a successful pass, append `&& false` to that pass command in
-# runner/config/passes/<pass>/<app>.yaml so it becomes a controlled failure.
-
-# Tarballs land in: corpus/results/<run_dir>/details/failure-artifacts/<prog_id>.tar.gz
 ```
 
-AWS targets require explicit local configuration for:
-- `AWS_ARM64_KEY_NAME` / `AWS_X86_KEY_NAME`
-- `AWS_ARM64_KEY_PATH` / `AWS_X86_KEY_PATH`
-- `AWS_ARM64_SECURITY_GROUP_ID` / `AWS_X86_SECURITY_GROUP_ID`
-- `AWS_ARM64_SUBNET_ID` / `AWS_X86_SUBNET_ID`
-- `AWS_ARM64_PROFILE` / `AWS_X86_PROFILE`
+Tarballs are written under
+`corpus/results/<run_dir>/details/failure-artifacts/<prog_id>.tar.gz`.
 
-The canonical lookup source is:
-- process environment only
+## Result Contract
 
-Micro suite runner builds use the LLVM CMake package in the runner image by
-default. Override it for targeted debugging with:
-- `LLVM_DIR`, or
-- `RUN_LLVM_DIR`
+The benchmark framework writes raw measurements only. `result.json` preserves
+per-program baseline and post-optimization kernel counters such as
+`run_cnt_delta`, `run_time_ns_delta`, `id`, `name`, `type`, `bytes_jited`, and
+`bytes_xlated`, plus workload stdout/stderr, lifecycle events, app status, and
+error strings.
+
+Raw app-side workload fields may also be preserved under each phase's workload
+payload. Aggregation, ratios, averages, geomeans, confidence intervals, success
+scores, and markdown performance rollups belong in external analysis scripts,
+not in the benchmark runner.
 
 Results are written to:
-- `micro/results/` — authoritative micro benchmark results
-- `corpus/results/` — authoritative corpus benchmark results
-- `docs/tmp/` — analysis reports (.md only, never JSON results)
 
-Executor logs and transient staging state still live under `.cache/`, but those
+- `micro/results/`
+- `corpus/results/`
+- `docs/tmp/` for analysis reports only, not raw JSON results
+
+Executor logs and transient staging state live under `.cache/`; those
 directories are not benchmark result roots.
 
-The root `Makefile` surface is reserved for canonical run/validation entrypoints,
-plus a small developer helper surface for direct kernel/module lifecycle work.
-Active local prep/build flows through real Make targets resolved by the Python
-runner libraries. Kernel, module, app, runner, and BPF artifacts are host-built
-into the repository build roots; the runner Dockerfile copies those artifacts
-into the runtime image without compiling benchmark apps inside Docker.
-Benchmark execution loads and runs the same `runner-runtime` image with
-privileged suite containers.
+## Agent Integrity Model
 
-## Layer Notes
-
-`runner/` owns target/suite contracts under `runner/targets/` and `runner/suites/`, the shared `micro_exec` C++ runner, and Python executors/orchestrators under `runner/libs/`.
-
-`micro/` owns the isolated benchmark manifests (`micro/config/micro_pure_jit.yaml`), input generators, and the Python suite driver (`micro/driver.py`).
-
-`corpus/` owns the real-world corpus, fetch/build tooling, declarative app suites in `corpus/config/`, and the measurement entrypoint in `corpus/driver.py`.
-
-`daemon/` is the userspace front end for BpfReJIT: it scans live BPF programs via `BPF_PROG_GET_NEXT_ID`, identifies optimization sites, and triggers `BPF_PROG_REJIT`. See `daemon/README.md`.
+Paper experiments treat agents as untrusted optimizers. Agents should interact
+with the benchmark through `make` targets, not by editing workloads, shortening
+durations, filtering failed programs, bypassing application loaders, or
+fabricating result files. The framework records raw artifacts so external
+analysis can decide whether an action is accepted, correct, faster, noisy, or
+invalid.
