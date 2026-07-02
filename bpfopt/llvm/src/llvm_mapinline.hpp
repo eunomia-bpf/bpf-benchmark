@@ -990,6 +990,9 @@ std::vector<uint8_t> run_map_inline_roundtrip(const std::vector<uint8_t> &input,
 			module.print(llvm::errs(), nullptr);
 		}
 		records = fold_map_lookups_ir(module, args);
+		if (records.empty()) {
+			return input;
+		}
 		return extract_relocated_text(emit_bpf_object(module), input,
 					      nullptr);
 	});

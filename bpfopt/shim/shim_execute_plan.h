@@ -2,8 +2,9 @@
 #define BPFREJIT_SHIM_EXECUTE_PLAN_H
 
 /* Substitute ${VAR} occurrences in `in` to `out`. Vars known: PROG_ID,
- * PROG_TYPE, INPUT, OUTPUT, REPORT, WORKDIR, TARGET. Unknown vars stay as
- * literal ${VAR} (so /bin/sh's own expansion can still see them via env). */
+ * PROG_HASH, PROG_BRANCH_PROFILE_HASH, PROG_TYPE, INPUT, OUTPUT, REPORT,
+ * WORKDIR, TARGET. Unknown vars stay as literal ${VAR} (so /bin/sh's own
+ * expansion can still see them via env). */
 static void substitute_vars(char *out, size_t out_sz, const char *in,
                             const char *vars[][2], size_t n_vars) {
     size_t o = 0;
@@ -346,12 +347,14 @@ static char *read_report_json_or_null(const char *path, char *err,
  * `step_seq` on success and after successful reload_and_reattach. */
 static void run_step(struct prog_entry *pd,
                      const char *workdir, const char *prog_type_name,
-                     const char *prog_id_str, const char *target_json,
-                     const char *map_ids_csv, const char *map_values_dir,
-                     uint32_t *local_kernel_ids, uint32_t nr_maps,
-                     char *cur, const char *nxt, const char *report,
-                     int *step_seq, const char *step_name,
-                     const char *command, struct step_result *out) {
+                     const char *prog_id_str, const char *prog_hash_str,
+                     const char *prog_branch_profile_hash_str,
+                     const char *target_json, const char *map_ids_csv,
+                     const char *map_values_dir, uint32_t *local_kernel_ids,
+                     uint32_t nr_maps, char *cur, const char *nxt,
+                     const char *report, int *step_seq,
+                     const char *step_name, const char *command,
+                     struct step_result *out) {
     memset(out, 0, sizeof(*out));
     (void)step_name;
     snprintf(out->report_path, sizeof(out->report_path), "%s", report);
@@ -360,14 +363,16 @@ static void run_step(struct prog_entry *pd,
     unlink(nxt);
     unlink(report);
 
-    const char *vars[9][2] = {
-        {"PROG_ID", prog_id_str}, {"PROG_TYPE", prog_type_name},
+    const char *vars[11][2] = {
+        {"PROG_ID", prog_id_str}, {"PROG_HASH", prog_hash_str},
+        {"PROG_BRANCH_PROFILE_HASH", prog_branch_profile_hash_str},
+        {"PROG_TYPE", prog_type_name},
         {"INPUT", cur}, {"OUTPUT", nxt}, {"REPORT", report},
         {"WORKDIR", workdir}, {"TARGET", target_json},
         {"MAP_IDS", map_ids_csv}, {"MAP_VALUES", map_values_dir},
     };
     char resolved[4200];
-    substitute_vars(resolved, sizeof(resolved), command, vars, 9);
+    substitute_vars(resolved, sizeof(resolved), command, vars, 11);
 
     /* /bin/sh -c <resolved> with LD_PRELOAD stripped, stdout+stderr to log */
     char **clean_env = env_without_ld_preload();
@@ -690,32 +695,28 @@ static void emit_execute_plan(int cli, const char *json) {
         char prog_type_name[32] = "socket_filter";
         char prog_name[17] = {0};
         uint64_t prog_hash = 0;
+        uint64_t prog_branch_profile_hash = 0;
         char bytecode_path[256] = {0};
         uint32_t orig_insn_count = 0, prog_type_num = 0;
         if (pd) {
             snprintf(prog_type_name, sizeof(prog_type_name), "%s",
                      prog_type_short_name(pd->prog_type));
             memcpy(prog_name, pd->name, sizeof(prog_name));
-            prog_hash = pd->hash;
+            prog_hash = pd->policy_hash ? pd->policy_hash : pd->hash;
+            prog_branch_profile_hash = pd->branch_profile_hash;
             snprintf(bytecode_path, sizeof(bytecode_path), "%s",
                      pd->bytecode_path);
             prog_type_num = pd->prog_type;
             orig_insn_count = pd->insn_cnt;
         }
         pthread_mutex_unlock(&state_mutex);
-        if (bytecode_path[0]) {
-            struct bpf_insn *policy_insns = NULL;
-            uint32_t policy_insn_count = 0;
-            if (read_bytecode_file(bytecode_path, &policy_insns,
-                                   &policy_insn_count) == 0) {
-                prog_hash = normalized_prog_hash(policy_insns,
-                                                 policy_insn_count);
-                free(policy_insns);
-            } else {
-                log_line("execute_plan policy hash read failed path=%s",
-                         bytecode_path);
-            }
-        }
+        char prog_hash_str[17];
+        snprintf(prog_hash_str, sizeof(prog_hash_str), "%016llx",
+                 (unsigned long long)prog_hash);
+        char prog_branch_profile_hash_str[17];
+        snprintf(prog_branch_profile_hash_str,
+                 sizeof(prog_branch_profile_hash_str), "%016llx",
+                 (unsigned long long)prog_branch_profile_hash);
 
         if (buf_appendf(&resp, &cap, &len, "%s\"%u\":{",
                         first_prog ? "" : ",", want_id) != 0) {
@@ -814,9 +815,11 @@ static void emit_execute_plan(int cli, const char *json) {
             free(so);
 
             struct step_result sr;
-            run_step(pd, w.workdir, prog_type_name, prog_id_str, w.target_json,
-                     map_ids_csv, w.map_values_dir, local_ids, nr_maps,
-                     w.cur, w.nxt, w.report, &step_seq, name, cmdbuf, &sr);
+            run_step(pd, w.workdir, prog_type_name, prog_id_str,
+                     prog_hash_str, prog_branch_profile_hash_str,
+                     w.target_json, map_ids_csv,
+                     w.map_values_dir, local_ids, nr_maps, w.cur, w.nxt,
+                     w.report, &step_seq, name, cmdbuf, &sr);
             pthread_mutex_lock(&state_mutex);
             if (pd && pd->kernel_prog_id)
                 snprintf(prog_id_str, sizeof(prog_id_str), "%u",

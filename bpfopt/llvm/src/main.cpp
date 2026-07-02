@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <cmath>
 #include <cstdio>
 #include <cstdint>
 #include <cstring>
@@ -31,6 +32,7 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/LegacyPassManager.h"
+#include "llvm/IR/MDBuilder.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/MC/TargetRegistry.h"
@@ -77,6 +79,7 @@ constexpr uint8_t BPF_JGE32_K = 0x36;
 constexpr uint8_t BPF_JLT32_K = 0xa6;
 constexpr uint8_t BPF_JLE32_K = 0xb6;
 constexpr uint8_t BPF_JA = 0x05;
+constexpr uint8_t BPF_JA_IMM = 0x06;
 constexpr uint8_t BPF_JEQ64_K = 0x15;
 constexpr uint8_t BPF_CLASS_MASK = 0x07;
 constexpr uint8_t BPF_LD_CLASS = 0x00;
@@ -147,6 +150,35 @@ struct KinsnPassOptions {
 	std::vector<std::string> llvm_args;
 	std::vector<std::string> effective_llvm_args;
 	BytecodeKinsnPolicy bytecode_policy;
+};
+
+struct BranchFlipOptions {
+	std::optional<std::filesystem::path> profile;
+};
+
+struct BranchFlipProfileSite {
+	uint64_t branch_count = 0;
+	uint64_t branch_misses = 0;
+	double miss_rate = 0.0;
+	uint64_t taken = 0;
+	uint64_t not_taken = 0;
+};
+
+struct BranchFlipProfile {
+	std::map<size_t, BranchFlipProfileSite> per_site;
+};
+
+struct PassReportCounts {
+	std::optional<int64_t> sites_applied;
+	std::optional<int64_t> sites_matched;
+	std::optional<int64_t> sites_skipped;
+	std::map<std::string, int64_t> skip_reasons;
+	std::vector<std::pair<size_t, std::string>> skipped_sites;
+};
+
+struct BranchFlipIrSite {
+	size_t pc = 0;
+	size_t block_start_pc = 0;
 };
 
 bool bytecode_kinsn_family_enabled(std::string_view pass, std::string_view family,
@@ -461,6 +493,24 @@ std::string pass_arg_value(const std::vector<std::string> &args, size_t &i,
 		throw std::runtime_error(std::string(option) + " requires VALUE");
 	}
 	return args[i];
+}
+
+BranchFlipOptions parse_branch_flip_pass_args(const std::vector<std::string> &args)
+{
+	BranchFlipOptions options;
+	for (size_t i = 0; i < args.size(); i++) {
+		const auto &arg = args[i];
+		if (arg == "--profile" || arg.starts_with("--profile=")) {
+			options.profile = pass_arg_value(args, i, "--profile");
+		} else {
+			throw std::runtime_error(
+				"branch_flip unknown pass-local arg: " + arg);
+		}
+	}
+	if (!options.profile) {
+		throw std::runtime_error("branch_flip requires --profile");
+	}
+	return options;
 }
 
 void validate_kinsn_mode_arg(std::string_view value)
@@ -1358,7 +1408,7 @@ bool is_conditional_jump(uint8_t opcode)
 {
 	const uint8_t klass = opcode & BPF_CLASS_MASK;
 	return (klass == BPF_JMP_CLASS || klass == BPF_JMP32_CLASS) &&
-	       opcode != BPF_JA && opcode != BPF_CALL &&
+	       opcode != BPF_JA && opcode != BPF_JA_IMM && opcode != BPF_CALL &&
 	       opcode != BPF_CALLX && opcode != BPF_EXIT;
 }
 
@@ -1372,6 +1422,350 @@ std::array<uint8_t, INSN_SIZE> make_bpf_insn(uint8_t opcode, uint8_t dst,
 	std::memcpy(&insn[2], &off, sizeof(off));
 	std::memcpy(&insn[4], &imm, sizeof(imm));
 	return insn;
+}
+
+uint64_t branch_flip_u64_field(const llvm::json::Object &object,
+			       std::string_view key,
+			       std::string_view context)
+{
+	auto value = object.getInteger(key);
+	if (!value || *value < 0) {
+		throw std::runtime_error("profile " + std::string(context) +
+					 " missing u64 field " +
+					 std::string(key));
+	}
+	return static_cast<uint64_t>(*value);
+}
+
+double branch_flip_probability_field(const llvm::json::Object &object,
+				     std::string_view key,
+				     std::string_view context)
+{
+	auto value = object.getNumber(key);
+	if (!value || !std::isfinite(*value) || *value < 0.0 || *value > 1.0) {
+		throw std::runtime_error("profile " + std::string(context) +
+					 " field " + std::string(key) +
+					 " must be finite and within [0, 1]");
+	}
+	return *value;
+}
+
+size_t branch_flip_parse_pc_key(const std::string &key)
+{
+	if (key.empty()) {
+		throw std::runtime_error("invalid per_site pc key: " + key);
+	}
+	size_t consumed = 0;
+	const unsigned long long raw = std::stoull(key, &consumed, 10);
+	if (consumed != key.size() ||
+	    raw > std::numeric_limits<size_t>::max()) {
+		throw std::runtime_error("invalid per_site pc key: " + key);
+	}
+	return static_cast<size_t>(raw);
+}
+
+BranchFlipProfile read_branch_flip_profile(const std::filesystem::path &path)
+{
+	auto value = expected_or_throw(llvm::json::parse(read_text(path)));
+	const auto &root = json_object(value, path.string());
+
+	BranchFlipProfile profile;
+	auto *per_site = root.getObject("per_site");
+	if (!per_site) {
+		throw std::runtime_error(
+			"profile root missing per_site object");
+	}
+	for (const auto &entry : *per_site) {
+		const std::string pc_key = entry.getFirst().str();
+		const size_t pc = branch_flip_parse_pc_key(pc_key);
+		const auto &site_obj =
+			json_object(entry.getSecond(), "per_site[" + pc_key + "]");
+		BranchFlipProfileSite site;
+		site.branch_count = branch_flip_u64_field(
+			site_obj, "branch_count", "per_site[" + pc_key + "]");
+		site.branch_misses = branch_flip_u64_field(
+			site_obj, "branch_misses", "per_site[" + pc_key + "]");
+		if (site.branch_misses > site.branch_count) {
+			throw std::runtime_error(
+				"profile per_site[" + pc_key +
+				"] branch_misses exceeds branch_count");
+		}
+		site.miss_rate = branch_flip_probability_field(
+			site_obj, "miss_rate", "per_site[" + pc_key + "]");
+		const double computed_miss_rate =
+			site.branch_count == 0
+				? 0.0
+				: static_cast<double>(site.branch_misses) /
+					  static_cast<double>(site.branch_count);
+		if (std::fabs(site.miss_rate - computed_miss_rate) > 1e-6) {
+			throw std::runtime_error(
+				"profile per_site[" + pc_key +
+				"] miss_rate disagrees with branch_misses/branch_count");
+		}
+		site.taken = branch_flip_u64_field(
+			site_obj, "taken", "per_site[" + pc_key + "]");
+		site.not_taken = branch_flip_u64_field(
+			site_obj, "not_taken", "per_site[" + pc_key + "]");
+		if (site.taken > std::numeric_limits<uint64_t>::max() -
+					 site.not_taken) {
+			throw std::runtime_error("profile per_site[" + pc_key +
+						 "] direction counters overflow");
+		}
+		const uint64_t direction_total = site.taken + site.not_taken;
+		if (direction_total != site.branch_count) {
+			throw std::runtime_error(
+				"profile per_site[" + pc_key +
+				"] branch_count disagrees with taken/not_taken");
+		}
+		profile.per_site.emplace(pc, site);
+	}
+	return profile;
+}
+
+bool is_llvmbpf_jump_class(uint8_t opcode)
+{
+	const uint8_t klass = opcode & BPF_CLASS_MASK;
+	return klass == BPF_JMP_CLASS || klass == BPF_JMP32_CLASS;
+}
+
+int64_t checked_branch_flip_target(size_t pc, int64_t offset_or_imm,
+				   size_t insn_count, std::string_view kind)
+{
+	const int64_t target =
+		static_cast<int64_t>(pc) + 1 + offset_or_imm;
+	if (target < 0 || target >= static_cast<int64_t>(insn_count)) {
+		throw std::runtime_error("branch_flip " + std::string(kind) +
+					 " target out of range at pc " +
+					 std::to_string(pc));
+	}
+	return target;
+}
+
+void branch_flip_mark_block_begin(std::vector<bool> &block_begin,
+				  int64_t target)
+{
+	if (target >= 0 &&
+	    target < static_cast<int64_t>(block_begin.size())) {
+		block_begin[static_cast<size_t>(target)] = true;
+	}
+}
+
+std::vector<BranchFlipIrSite>
+branch_flip_lifted_conditional_sites(const std::vector<uint8_t> &bytes)
+{
+	if (bytes.empty() || bytes.size() % INSN_SIZE != 0) {
+		throw std::runtime_error(
+			"input bytecode length must be a non-empty multiple of 8");
+	}
+
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	const size_t codegen_end = subprog_start_pc(bytes).value_or(insn_count);
+	if (codegen_end == 0) {
+		return {};
+	}
+
+	std::vector<bool> block_begin(codegen_end, false);
+	block_begin[0] = true;
+	for (size_t pc = 0; pc < codegen_end; pc++) {
+		if (pc > 0 && is_llvmbpf_jump_class(bytes[(pc - 1) * INSN_SIZE])) {
+			block_begin[pc] = true;
+		}
+
+		const uint8_t opcode = bytes[pc * INSN_SIZE];
+		if (opcode == BPF_JA) {
+			const int64_t target = checked_branch_flip_target(
+				pc, read_off(bytes, pc), insn_count, "jump");
+			branch_flip_mark_block_begin(block_begin, target);
+		} else if (opcode == BPF_JA_IMM) {
+			const int64_t target = checked_branch_flip_target(
+				pc, read_imm(bytes, pc), insn_count, "jump");
+			branch_flip_mark_block_begin(block_begin, target);
+		} else if (is_conditional_jump(opcode)) {
+			const int64_t target = checked_branch_flip_target(
+				pc, read_off(bytes, pc), insn_count,
+				"conditional branch");
+			branch_flip_mark_block_begin(block_begin, target);
+		} else if ((opcode == BPF_CALL || opcode == BPF_CALLX) &&
+			   src_reg(bytes, pc) == BPF_PSEUDO_CALL) {
+			const int64_t target = checked_branch_flip_target(
+				pc, read_imm(bytes, pc), insn_count,
+				"local call");
+			branch_flip_mark_block_begin(block_begin, target);
+		}
+	}
+
+	std::vector<BranchFlipIrSite> sites;
+	size_t current_block_start = 0;
+	for (size_t pc = 0; pc < codegen_end; pc++) {
+		if (block_begin[pc]) {
+			current_block_start = pc;
+		}
+		if (is_conditional_jump(bytes[pc * INSN_SIZE])) {
+			sites.push_back(BranchFlipIrSite{ pc, current_block_start });
+		}
+	}
+	return sites;
+}
+
+llvm::BasicBlock *branch_flip_find_block(llvm::Function &function, size_t pc)
+{
+	const std::string name = "bb_inst_" + std::to_string(pc);
+	for (auto &block : function) {
+		if (block.getName() == name) {
+			return &block;
+		}
+	}
+	return nullptr;
+}
+
+uint32_t branch_flip_scale_weight(uint64_t value, uint64_t max_value)
+{
+	if (value == 0) {
+		return 0;
+	}
+	constexpr uint32_t max_weight =
+		std::numeric_limits<uint32_t>::max();
+	if (max_value <= max_weight) {
+		return static_cast<uint32_t>(value);
+	}
+	const long double scaled =
+		static_cast<long double>(value) *
+		static_cast<long double>(max_weight) /
+		static_cast<long double>(max_value);
+	const auto rounded = static_cast<uint64_t>(std::llround(scaled));
+	return static_cast<uint32_t>(
+		std::clamp<uint64_t>(rounded, 1, max_weight));
+}
+
+std::pair<uint32_t, uint32_t>
+branch_flip_weights(const BranchFlipProfileSite &site)
+{
+	const uint64_t max_count = std::max(site.taken, site.not_taken);
+	if (max_count == 0) {
+		throw std::runtime_error(
+			"branch_flip cannot weight a zero-count profile site");
+	}
+	return { branch_flip_scale_weight(site.taken, max_count),
+		 branch_flip_scale_weight(site.not_taken, max_count) };
+}
+
+int64_t annotate_branch_flip_ir(llvm::Module &module,
+				const std::vector<uint8_t> &input,
+				const BranchFlipProfile &profile,
+				PassReportCounts &report_counts)
+{
+	auto *function = module.getFunction("bpf_main");
+	if (!function) {
+		throw std::runtime_error("branch_flip could not find bpf_main");
+	}
+
+	const auto sites = branch_flip_lifted_conditional_sites(input);
+	std::map<size_t, BranchFlipIrSite> sites_by_pc;
+	for (const auto &site : sites) {
+		sites_by_pc.emplace(site.pc, site);
+	}
+	for (const auto &site : sites) {
+		if (!profile.per_site.contains(site.pc)) {
+			throw std::runtime_error(
+				"profile missing per_site[" +
+				std::to_string(site.pc) +
+				"] for lifted conditional branch");
+		}
+	}
+	for (const auto &[pc, _] : profile.per_site) {
+		if (!sites_by_pc.contains(pc)) {
+			throw std::runtime_error(
+				"profile per_site[" + std::to_string(pc) +
+				"] does not match a lifted conditional branch");
+		}
+	}
+
+	llvm::MDBuilder metadata(module.getContext());
+	int64_t annotated = 0;
+	int64_t skipped = 0;
+	constexpr const char *zero_count_reason = "zero_branch_count";
+	for (const auto &[pc, profile_site] : profile.per_site) {
+		if (profile_site.branch_count == 0) {
+			report_counts.skipped_sites.emplace_back(pc, zero_count_reason);
+			report_counts.skip_reasons[zero_count_reason]++;
+			skipped++;
+			continue;
+		}
+		const auto &site = sites_by_pc.at(pc);
+		auto *block = branch_flip_find_block(*function,
+						     site.block_start_pc);
+		if (!block) {
+			throw std::runtime_error(
+				"branch_flip could not find lifted block bb_inst_" +
+				std::to_string(site.block_start_pc));
+		}
+		auto *branch =
+			llvm::dyn_cast<llvm::CondBrInst>(block->getTerminator());
+		if (!branch) {
+			throw std::runtime_error(
+				"branch_flip lifted block bb_inst_" +
+				std::to_string(site.block_start_pc) +
+				" is not a conditional branch");
+		}
+
+		const auto &[taken_weight, not_taken_weight] =
+			branch_flip_weights(profile_site);
+		branch->setMetadata(
+			llvm::LLVMContext::MD_prof,
+			metadata.createBranchWeights(taken_weight,
+						     not_taken_weight));
+		annotated++;
+	}
+	report_counts.sites_applied = annotated;
+	report_counts.sites_matched =
+		static_cast<int64_t>(profile.per_site.size());
+	report_counts.sites_skipped = skipped;
+	return annotated;
+}
+
+std::vector<uint8_t> run_branch_flip_roundtrip(
+	const std::vector<uint8_t> &input, const BranchFlipOptions &options,
+	PassReportCounts &report_counts)
+{
+	if (!options.profile) {
+		throw std::runtime_error("branch_flip requires --profile");
+	}
+	BranchFlipProfile profile;
+	const auto sites = branch_flip_lifted_conditional_sites(input);
+	if (std::filesystem::exists(*options.profile)) {
+		profile = read_branch_flip_profile(*options.profile);
+	} else if (!sites.empty()) {
+		throw std::runtime_error("branch_flip profile missing for " +
+					 options.profile->string());
+	}
+	if (sites.empty()) {
+		if (!profile.per_site.empty()) {
+			throw std::runtime_error(
+				"branch_flip profile has per_site data but input has no lifted conditional branch");
+		}
+		report_counts.sites_applied = 0;
+		report_counts.sites_matched = 0;
+		report_counts.sites_skipped = 0;
+		return input;
+	}
+	if (profile.per_site.empty()) {
+		throw std::runtime_error(
+			"branch_flip profile contains no per_site data for lifted conditional branches");
+	}
+	auto module = generate_llvm_module(input);
+	return module.withModuleDo([&](llvm::Module &module) {
+		const int64_t sites_applied =
+			annotate_branch_flip_ir(module, input, profile,
+						report_counts);
+		if (sites_applied == 0) {
+			return input;
+		}
+		if (std::getenv("BPFOPT_DUMP_IR")) {
+			module.print(llvm::errs(), nullptr);
+		}
+		return extract_relocated_text(emit_bpf_object(module), input,
+					      nullptr);
+	});
 }
 
 size_t remap_insert_pc(size_t pc, size_t insert_pc)
@@ -2409,6 +2803,16 @@ int64_t apply_movbe16_after_low16_load(std::vector<uint8_t> &bytes,
 	return changed;
 }
 
+void apply_generic_llvm_roundtrip_repairs(std::vector<uint8_t> &bytes)
+{
+	eliminate_entry_ctx_null_branches(bytes);
+	propagate_masked_range_to_fallthrough_source(bytes);
+	propagate_masked_range_to_fallthrough_copies(bytes);
+	retarget_masked_range_branches(bytes);
+	compact_unreachable_insns(bytes);
+	remap_out_of_range_stack_spills(bytes, false);
+}
+
 void canonicalize_map_refs(Cli &cli)
 {
 	if (cli.pass) {
@@ -2529,7 +2933,7 @@ void canonicalize_map_refs(Cli &cli)
 void write_report(const Cli &cli, const std::vector<uint8_t> &input,
 		  const std::vector<uint8_t> &output,
 		  const std::vector<InlineRecord> &inlined = {},
-		  std::optional<int64_t> sites_applied_override = std::nullopt,
+		  const PassReportCounts *report_counts = nullptr,
 		  const std::vector<std::string> &diagnostics = {},
 		  const KinsnTargetMap *kinsn_targets = nullptr,
 		  const KinsnPassOptions *kinsn_options = nullptr)
@@ -2539,11 +2943,34 @@ void write_report(const Cli &cli, const std::vector<uint8_t> &input,
 	}
 	const bool changed = input != output;
 	const bool is_map_inline = cli.pass && *cli.pass == "map_inline";
-	const int64_t reported_sites = sites_applied_override.value_or(
-		is_map_inline ? static_cast<int64_t>(inlined.size()) :
-				(changed ? 1 : 0));
+	const int64_t reported_sites =
+		report_counts && report_counts->sites_applied
+			? *report_counts->sites_applied
+			: (is_map_inline ? static_cast<int64_t>(inlined.size()) :
+					   (changed ? 1 : 0));
+	const int64_t reported_matched =
+		report_counts && report_counts->sites_matched
+			? *report_counts->sites_matched
+			: reported_sites;
+	const int64_t reported_skipped =
+		report_counts && report_counts->sites_skipped
+			? *report_counts->sites_skipped
+			: 0;
+	if (reported_sites < 0 || reported_matched < 0 ||
+	    reported_skipped < 0) {
+		throw std::runtime_error("negative pass report site count");
+	}
+	if (reported_sites + reported_skipped != reported_matched) {
+		throw std::runtime_error(
+			"pass report site counts disagree: applied=" +
+			std::to_string(reported_sites) +
+			" skipped=" + std::to_string(reported_skipped) +
+			" matched=" + std::to_string(reported_matched));
+	}
 	llvm::json::Array inlined_entries;
 	llvm::json::Array diagnostic_entries;
+	llvm::json::Object skip_reasons;
+	llvm::json::Array skipped_sites;
 	for (const auto &record : inlined) {
 		inlined_entries.emplace_back(llvm::json::Object{
 			{ "map_id", static_cast<int64_t>(record.map_id) },
@@ -2554,13 +2981,24 @@ void write_report(const Cli &cli, const std::vector<uint8_t> &input,
 	for (const auto &diagnostic : diagnostics) {
 		diagnostic_entries.emplace_back(diagnostic);
 	}
+	if (report_counts) {
+		for (const auto &[reason, count] : report_counts->skip_reasons) {
+			skip_reasons[reason] = count;
+		}
+		for (const auto &[pc, reason] : report_counts->skipped_sites) {
+			skipped_sites.emplace_back(llvm::json::Object{
+				{ "pc", static_cast<int64_t>(pc) },
+				{ "reason", reason },
+			});
+		}
+	}
 	llvm::json::Object report{
 		{ "pass", *cli.pass },
 		{ "sites_applied", reported_sites },
-		{ "sites_matched", reported_sites },
-		{ "sites_skipped", 0 },
-		{ "skip_reasons", llvm::json::Object{} },
-		{ "skipped_sites", llvm::json::Array{} },
+		{ "sites_matched", reported_matched },
+		{ "sites_skipped", reported_skipped },
+		{ "skip_reasons", std::move(skip_reasons) },
+		{ "skipped_sites", std::move(skipped_sites) },
 		{ "diagnostics", std::move(diagnostic_entries) },
 		{ "insn_count_before", input.size() / INSN_SIZE },
 		{ "insn_count_after", output.size() / INSN_SIZE },
@@ -2620,9 +3058,11 @@ void run_pass(Cli &cli)
 			"--fd-to-id requires --canonicalize-map-refs");
 	}
 	const bool kinsn_pass = is_kinsn_pass(*cli.pass);
+	const bool branch_flip_pass = *cli.pass == "branch_flip";
 	KinsnTargetMap kinsn_targets;
 	KinsnTargetArch kinsn_target_arch = KinsnTargetArch::Unknown;
 	KinsnPassOptions kinsn_options;
+	BranchFlipOptions branch_flip_options;
 	if (kinsn_pass) {
 		if (!cli.target) {
 			throw std::runtime_error("--pass " + *cli.pass +
@@ -2639,6 +3079,8 @@ void run_pass(Cli &cli)
 						    kinsn_options.llvm_args,
 						    kinsn_targets,
 						    kinsn_target_arch);
+	} else if (branch_flip_pass) {
+		branch_flip_options = parse_branch_flip_pass_args(cli.pass_args);
 	} else if (*cli.pass != "map_inline" && !cli.pass_args.empty()) {
 		throw std::runtime_error("--pass " + *cli.pass +
 					 " does not accept pass-local args");
@@ -2649,8 +3091,12 @@ void run_pass(Cli &cli)
 	std::vector<InlineRecord> inlined;
 	std::vector<uint8_t> output;
 	std::optional<int64_t> sites_applied;
+	PassReportCounts pass_report_counts;
 	std::vector<std::string> diagnostics;
-	if (*cli.pass == "map_inline") {
+	if (branch_flip_pass) {
+		output = run_branch_flip_roundtrip(input, branch_flip_options,
+						   pass_report_counts);
+	} else if (*cli.pass == "map_inline") {
 		output = run_map_inline_roundtrip(input, cli, inlined);
 	} else {
 		if (kinsn_pass && count_kinsn_calls(input) > 0) {
@@ -2681,20 +3127,19 @@ void run_pass(Cli &cli)
 					"kinsn pass removed existing kinsn calls");
 			}
 			sites_applied = output_kinsn_calls - input_kinsn_calls;
+			pass_report_counts.sites_applied = sites_applied;
 			if (output_kinsn_calls == 0) {
 				output = input;
 			}
 		} else {
-			eliminate_entry_ctx_null_branches(output);
-			propagate_masked_range_to_fallthrough_source(output);
-			propagate_masked_range_to_fallthrough_copies(output);
-			retarget_masked_range_branches(output);
-			compact_unreachable_insns(output);
-			remap_out_of_range_stack_spills(output, false);
+			apply_generic_llvm_roundtrip_repairs(output);
 		}
 	}
 	write_all(cli.output, output);
-	write_report(cli, input, output, inlined, sites_applied, diagnostics,
+	const PassReportCounts *report_counts =
+		(branch_flip_pass || sites_applied) ? &pass_report_counts :
+						      nullptr;
+	write_report(cli, input, output, inlined, report_counts, diagnostics,
 		     kinsn_pass ? &kinsn_targets : nullptr,
 		     kinsn_pass ? &kinsn_options : nullptr);
 }

@@ -13,8 +13,7 @@
 static int map_type_needs_dump(uint32_t t) {
     return t == BPF_MAP_TYPE_HASH || t == BPF_MAP_TYPE_ARRAY ||
            t == BPF_MAP_TYPE_PERCPU_ARRAY || t == BPF_MAP_TYPE_LRU_HASH ||
-           t == BPF_MAP_TYPE_LPM_TRIE || t == BPF_MAP_TYPE_ARRAY_OF_MAPS ||
-           t == BPF_MAP_TYPE_HASH_OF_MAPS;
+           t == BPF_MAP_TYPE_LPM_TRIE;
 }
 
 /* Dedup an (fd, kid, type) snapshot into per-unique-kid arrays. The result
@@ -373,6 +372,55 @@ static int copy_file_path(const char *src, const char *dst) {
     return 0;
 }
 
+static ssize_t read_retry(int fd, void *buf, size_t count) {
+    for (;;) {
+        ssize_t n = read(fd, buf, count);
+        if (n < 0 && errno == EINTR)
+            continue;
+        return n;
+    }
+}
+
+static int files_equal_path(const char *a, const char *b) {
+    int afd = open(a, O_RDONLY);
+    if (afd < 0) return 0;
+    int bfd = open(b, O_RDONLY);
+    if (bfd < 0) {
+        real_close(afd);
+        return 0;
+    }
+    char abuf[4096], bbuf[4096];
+    int equal = 1;
+    for (;;) {
+        ssize_t an = read_retry(afd, abuf, sizeof(abuf));
+        ssize_t bn = read_retry(bfd, bbuf, sizeof(bbuf));
+        if (an < 0 || bn < 0 || an != bn) {
+            equal = 0;
+            break;
+        }
+        if (an == 0)
+            break;
+        if (memcmp(abuf, bbuf, (size_t)an) != 0) {
+            equal = 0;
+            break;
+        }
+    }
+    real_close(afd);
+    real_close(bfd);
+    return equal;
+}
+
+static int snapshot_file_is_skip_marker(const char *path) {
+    int fd = open(path, O_RDONLY);
+    if (fd < 0) return 0;
+    char buf[512];
+    ssize_t n = read_retry(fd, buf, sizeof(buf) - 1);
+    real_close(fd);
+    if (n <= 0) return 0;
+    buf[n] = 0;
+    return strstr(buf, "\"skipped\":true") != NULL;
+}
+
 static int find_single_snapshot_file(const char *dir, const char *suffix,
                                      char *out, size_t out_sz) {
     DIR *dp = opendir(dir);
@@ -389,30 +437,32 @@ static int find_single_snapshot_file(const char *dir, const char *suffix,
         if (strcmp(de->d_name + len - suffix_len, suffix) != 0)
             continue;
         if (found) {
-            closedir(dp);
-            return -1;
+            char candidate[1200];
+            snprintf(candidate, sizeof(candidate), "%s/%s", dir, de->d_name);
+            if (!files_equal_path(out, candidate) &&
+                !(snapshot_file_is_skip_marker(out) &&
+                  snapshot_file_is_skip_marker(candidate))) {
+                closedir(dp);
+                return -1;
+            }
+            continue;
         }
         snprintf(out, out_sz, "%s/%s", dir, de->d_name);
         found = 1;
     }
     closedir(dp);
-    return found ? 0 : -1;
+    return found ? 0 : SHIM_MAP_SNAPSHOT_UNAVAILABLE;
 }
+
+static int run_bpftool_to_file(char *const argv[], const char *out_path);
 
 static int write_current_map_show_json(const char *path,
                                        const struct shim_map_ref *ref) {
-    int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (fd < 0) return -1;
-    char name_json[80];
-    json_escape_into(ref->name, strlen(ref->name), name_json,
-                     sizeof(name_json));
-    dprintf(fd,
-            "{\"id\":%u,\"name\":\"%s\",\"type\":%u,"
-            "\"bytes_key\":%u,\"bytes_value\":%u,\"max_entries\":%u}\n",
-            ref->kernel_id, name_json, ref->map_type, ref->key_size,
-            ref->value_size, ref->max_entries);
-    real_close(fd);
-    return 0;
+    char id_str[16];
+    snprintf(id_str, sizeof(id_str), "%u", ref->kernel_id);
+    char *const show_argv[] = {"bpftool", "-j", "map", "show", "id",
+                               id_str, NULL};
+    return run_bpftool_to_file(show_argv, path);
 }
 
 static char **snapshot_env_without_ld_preload(void) {
@@ -449,109 +499,6 @@ static int run_bpftool_to_file(char *const argv[], const char *out_path) {
     int st = 0;
     waitpid(pid, &st, 0);
     return (WIFEXITED(st) && WEXITSTATUS(st) == 0) ? 0 : -1;
-}
-
-/* For map-in-map outers (ARRAY_OF_MAPS / HASH_OF_MAPS): walk the outer map
- * via BPF_MAP_GET_NEXT_KEY + BPF_MAP_LOOKUP_ELEM and write each slot's inner
- * map id to map-<outer_kid>.inner_map_ids.json. map_inline reads this file to
- * resolve inner refs during inlining. */
-static void write_inner_map_ids_supplement(const char *map_values_dir,
-                                           uint32_t outer_kid,
-                                           uint32_t outer_type) {
-    /* Reopen the outer map fresh — we don't keep its fd. */
-    union bpf_attr ga = {0};
-    ga.map_id = outer_kid;
-    long ofd = real_syscall(SYS_bpf, BPF_MAP_GET_FD_BY_ID, &ga, sizeof(ga));
-    if (ofd < 0) return;
-    struct bpf_map_info info;
-    memset(&info, 0, sizeof(info));
-    union bpf_attr ia = {0};
-    ia.info.bpf_fd = (uint32_t)ofd;
-    ia.info.info_len = sizeof(info);
-    ia.info.info = (uintptr_t)&info;
-    if (real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia)) < 0) {
-        real_close((int)ofd);
-        return;
-    }
-    if (info.key_size == 0) { real_close((int)ofd); return; }
-
-    char path[512];
-    snprintf(path, sizeof(path), "%s/map-%u.inner_map_ids.json",
-             map_values_dir, outer_kid);
-    FILE *f = fopen(path, "w");
-    if (!f) { real_close((int)ofd); return; }
-
-    fprintf(f, "{\n  \"%u\": {", outer_kid);
-    int first = 1;
-    uint8_t *key = (uint8_t *)calloc(1, info.key_size);
-    uint8_t *prev_key = NULL;
-    if (!key) { fprintf(f, "}\n}\n"); fclose(f); real_close((int)ofd); return; }
-
-    /* Hard cap iterations at MAP_SUPPLEMENT_MAX_ENTRIES. Katran-class outer
-     * maps (lru_mapping, lpm_src_v4/v6, global_lru_maps) can have millions
-     * of entries; without a cap the LOOKUP_ELEM / GET_NEXT_KEY loop hangs
-     * the shim for ages and stalls every reload pass. Daemon's equivalent
-     * guard is a 64 KB dump-size pre-check; we mirror that as an absolute
-     * iteration budget so even unbounded HASH_OF_MAPS walks terminate. */
-    const uint32_t MAP_SUPPLEMENT_MAX_ENTRIES = 4096;
-    uint32_t emitted = 0;
-    /* ARRAY_OF_MAPS: 4-byte u32 indices 0..max_entries-1. HASH_OF_MAPS: walk
-     * with BPF_MAP_GET_NEXT_KEY. */
-    if (outer_type == BPF_MAP_TYPE_ARRAY_OF_MAPS && info.key_size == 4) {
-        uint32_t limit = info.max_entries < MAP_SUPPLEMENT_MAX_ENTRIES
-                         ? info.max_entries : MAP_SUPPLEMENT_MAX_ENTRIES;
-        for (uint32_t k = 0; k < limit; k++) {
-            uint32_t inner_kid = 0;
-            *(uint32_t *)key = k;
-            union bpf_attr la = {0};
-            la.map_fd = (uint32_t)ofd;
-            la.key = (uintptr_t)key;
-            la.value = (uintptr_t)&inner_kid;
-            if (real_syscall(SYS_bpf, BPF_MAP_LOOKUP_ELEM, &la, sizeof(la)) < 0)
-                continue;
-            if (inner_kid == 0) continue;
-            fprintf(f, "%s\n    \"%02x%02x%02x%02x\": \"%u\"",
-                    first ? "" : ",",
-                    key[0], key[1], key[2], key[3], inner_kid);
-            first = 0;
-            if (++emitted >= MAP_SUPPLEMENT_MAX_ENTRIES) break;
-        }
-    } else if (outer_type == BPF_MAP_TYPE_HASH_OF_MAPS) {
-        uint8_t *cur = (uint8_t *)calloc(1, info.key_size);
-        uint32_t iters = 0;
-        if (cur) {
-            for (; iters < MAP_SUPPLEMENT_MAX_ENTRIES; iters++) {
-                union bpf_attr na = {0};
-                na.map_fd = (uint32_t)ofd;
-                na.key = prev_key ? (uintptr_t)prev_key : 0;
-                na.next_key = (uintptr_t)cur;
-                if (real_syscall(SYS_bpf, BPF_MAP_GET_NEXT_KEY, &na, sizeof(na)) < 0)
-                    break;
-                uint32_t inner_kid = 0;
-                union bpf_attr la = {0};
-                la.map_fd = (uint32_t)ofd;
-                la.key = (uintptr_t)cur;
-                la.value = (uintptr_t)&inner_kid;
-                if (real_syscall(SYS_bpf, BPF_MAP_LOOKUP_ELEM, &la, sizeof(la)) == 0
-                    && inner_kid != 0) {
-                    fprintf(f, "%s\n    \"", first ? "" : ",");
-                    for (uint32_t b = 0; b < info.key_size; b++)
-                        fprintf(f, "%02x", cur[b]);
-                    fprintf(f, "\": \"%u\"", inner_kid);
-                    first = 0;
-                }
-                if (!prev_key) prev_key = (uint8_t *)malloc(info.key_size);
-                if (prev_key) memcpy(prev_key, cur, info.key_size);
-                else break;
-            }
-            free(cur);
-        }
-    }
-    free(key);
-    free(prev_key);
-    fprintf(f, "\n  }\n}\n");
-    fclose(f);
-    real_close((int)ofd);
 }
 
 /* Write per-map snapshots into map_values_dir, keyed by kernel map id so the
@@ -641,16 +588,7 @@ static void write_map_snapshots(const char *map_values_dir,
             /* Skip inner_map_ids supplement when we've dropped the raw dump. */
             continue;
         }
-        if (types[i] == BPF_MAP_TYPE_ARRAY_OF_MAPS ||
-            types[i] == BPF_MAP_TYPE_HASH_OF_MAPS) {
-            write_inner_map_ids_supplement(map_values_dir, kernel_ids[i],
-                                           types[i]);
-        }
     }
-}
-
-static int map_type_is_map_in_map(uint32_t type) {
-    return type == BPF_MAP_TYPE_ARRAY_OF_MAPS || type == BPF_MAP_TYPE_HASH_OF_MAPS;
 }
 
 static int snapshot_name_has_suffix(const char *name, const char *suffix) {
@@ -753,24 +691,28 @@ static int remap_saved_map_snapshots(const char *map_values_dir,
         }
         if (!map_type_needs_dump(types[i]))
             continue;
-        if (map_type_is_map_in_map(types[i])) {
-            snprintf(err, err_sz,
-                     "prior-run snapshot remap does not support map-in-map id %u",
-                     kernel_ids[i]);
-            return SHIM_MAP_SNAPSHOT_UNAVAILABLE;
-        }
         char src_values[820], src_dump[900], dst_dump[512];
         int find_rc = find_snapshot_values_dir(src_values, sizeof(src_values),
                                                snapshot_root, prog_hash,
                                                prog_type, ref, err, err_sz);
+        if (find_rc == SHIM_MAP_SNAPSHOT_UNAVAILABLE) {
+            log_line("prior map snapshot unavailable for prog=%016llx pc=%u map=%s; leaving metadata-only map_inline input",
+                     (unsigned long long)prog_hash, ref->pc, ref->name);
+            continue;
+        }
         if (find_rc != 0)
             return find_rc;
-        if (find_single_snapshot_file(src_values, ".dump.json", src_dump,
-                                      sizeof(src_dump)) != 0) {
-            snprintf(err, err_sz,
-                     "missing prior map snapshot for prog=%016llx pc=%u map=%s",
+        int file_rc = find_single_snapshot_file(src_values, ".dump.json", src_dump,
+                                                sizeof(src_dump));
+        if (file_rc == SHIM_MAP_SNAPSHOT_UNAVAILABLE) {
+            log_line("prior map snapshot dump unavailable for prog=%016llx pc=%u map=%s; leaving metadata-only map_inline input",
                      (unsigned long long)prog_hash, ref->pc, ref->name);
-            return SHIM_MAP_SNAPSHOT_UNAVAILABLE;
+            continue;
+        }
+        if (file_rc != 0) {
+            log_line("prior map snapshot dumps inconsistent for prog=%016llx pc=%u map=%s; leaving metadata-only map_inline input",
+                     (unsigned long long)prog_hash, ref->pc, ref->name);
+            continue;
         }
         snprintf(dst_dump, sizeof(dst_dump), "%s/map-%u.dump.json",
                  map_values_dir, kernel_ids[i]);

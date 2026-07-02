@@ -77,9 +77,9 @@ The shim is a **dumb shell executor** for BPF apps launched under
 - the **runner** parses `runner/config/passes/<pass>/default.yaml` and ships
   pass steps to the shim over the socket
 - the **shim** substitutes shim-owned vars (`${INPUT}`, `${OUTPUT}`,
-  `${REPORT}`, `${PROG_ID}`, `${PROG_TYPE}`, `${WORKDIR}`, `${TARGET}`) and
-  runs `/bin/sh -c <command>` with `LD_PRELOAD` stripped from the subprocess
-  env (so bpfopt is not itself shimmed)
+  `${REPORT}`, `${PROG_ID}`, `${PROG_HASH}`, `${PROG_TYPE}`, `${WORKDIR}`,
+  `${TARGET}`) and runs `/bin/sh -c <command>` with `LD_PRELOAD` stripped
+  from the subprocess env (so bpfopt is not itself shimmed)
 
 The shim ships **no** auto-tick / hardcoded pass logic. Optimization is
 runner-driven over the socket; the shim is responsible only for interception

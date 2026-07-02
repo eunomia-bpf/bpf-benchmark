@@ -17,8 +17,9 @@ O3 回环的 pass label。verifier 失败就是 roundtrip 失败，不能悄悄�
 
 当前状态：
 
-- 每个 `--pass <name>` invocation 都走一次 lift -> O3 -> lower。当前只有
-  `map_inline` 在 O3 前做 pass-specific IR rewrite；其它 pass label 是 plain O3
+- 每个 `--pass <name>` invocation 都走一次 lift -> O3 -> lower。`map_inline`
+  在 O3 前做 pass-specific IR rewrite；`branch_flip` 校验真实 per-site profile
+  并在 O3 前写入 LLVM branch-weight metadata；其它 pass label 是 plain O3
   roundtrip。
 - post-lowering 不是 verifier repair 层。LLVM BPF backend 生成 object 后，
   这里只做 ELF relocation 和 raw instruction stream 恢复；不能插入 bounds check、

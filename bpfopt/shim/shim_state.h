@@ -14,6 +14,12 @@
  * ==================================================================== */
 
 #define BPF_STATE_BUCKETS 1024
+#ifndef BPF_PSEUDO_CALL
+#define BPF_PSEUDO_CALL 1
+#endif
+#ifndef BPF_PSEUDO_FUNC
+#define BPF_PSEUDO_FUNC 4
+#endif
 static pthread_mutex_t state_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static unsigned fd_bucket(int fd) {
@@ -23,11 +29,14 @@ static unsigned fd_bucket(int fd) {
 /* ---- prog table ---- */
 struct prog_entry {
     int fd;                       /* app-side fd at PROG_LOAD time */
+    int profile_hold_fd;          /* internal fd retained only during PGO profiling */
     struct prog_entry *next;
     uint32_t prog_type;
     char name[17];                /* BPF_OBJ_NAME_LEN+1 NUL-terminated */
     uint32_t insn_cnt;
     uint64_t hash;
+    uint64_t policy_hash;
+    uint64_t branch_profile_hash;
     char bytecode_path[256];      /* path to dumped raw bytecode on disk */
     uint32_t expected_attach_type;
     uint32_t attach_btf_id;
@@ -235,6 +244,8 @@ static struct prog_entry *prog_find_by_kernel_id(uint32_t kid) {
 static uint32_t resolve_kernel_id(int fd);
 
 static void prog_free(struct prog_entry *e) {
+    if (e->profile_hold_fd >= 0 && real_close)
+        real_close(e->profile_hold_fd);
     if (e->native_loader_original_fd >= 0 && real_close)
         real_close(e->native_loader_original_fd);
     free(e->snap_fds);
@@ -474,14 +485,132 @@ static const char *prog_type_short_name(uint32_t t) {
 }
 
 /* Lightweight non-cryptographic hash of the prog bytecode for cross-correlation. */
-static uint64_t fnv1a64(const void *data, size_t len) {
-    uint64_t h = 0xcbf29ce484222325ULL;
+static uint64_t fnv1a64_update_state(uint64_t h, const void *data, size_t len) {
     const uint8_t *p = (const uint8_t *)data;
     for (size_t i = 0; i < len; i++) {
         h ^= p[i];
         h *= 0x100000001b3ULL;
     }
     return h;
+}
+
+static uint64_t fnv1a64(const void *data, size_t len) {
+    return fnv1a64_update_state(0xcbf29ce484222325ULL, data, len);
+}
+
+static uint64_t normalized_load_hash(const struct bpf_insn *insns,
+                                     uint32_t insn_cnt) {
+    uint64_t h = 0xcbf29ce484222325ULL;
+    for (uint32_t pc = 0; pc < insn_cnt; pc++) {
+        struct bpf_insn copy = insns[pc];
+        if (copy.code == (BPF_LD | BPF_DW | BPF_IMM) &&
+            (copy.src_reg == BPF_PSEUDO_MAP_FD ||
+             copy.src_reg == BPF_PSEUDO_MAP_VALUE ||
+             copy.src_reg == BPF_PSEUDO_MAP_IDX ||
+             copy.src_reg == BPF_PSEUDO_MAP_IDX_VALUE)) {
+            copy.imm = 0;
+            h = fnv1a64_update_state(h, &copy, sizeof(copy));
+            if (pc + 1 < insn_cnt) {
+                struct bpf_insn next = insns[++pc];
+                next.imm = 0;
+                h = fnv1a64_update_state(h, &next, sizeof(next));
+            }
+            continue;
+        }
+        h = fnv1a64_update_state(h, &copy, sizeof(copy));
+    }
+    return h;
+}
+
+static uint64_t fnv1a64_update_u8(uint64_t h, uint8_t value) {
+    return fnv1a64_update_state(h, &value, sizeof(value));
+}
+
+static uint64_t fnv1a64_update_u16(uint64_t h, uint16_t value) {
+    uint8_t bytes[2] = {
+        (uint8_t)(value & 0xffu),
+        (uint8_t)((value >> 8) & 0xffu),
+    };
+    return fnv1a64_update_state(h, bytes, sizeof(bytes));
+}
+
+static uint64_t fnv1a64_update_u32(uint64_t h, uint32_t value) {
+    uint8_t bytes[4] = {
+        (uint8_t)(value & 0xffu),
+        (uint8_t)((value >> 8) & 0xffu),
+        (uint8_t)((value >> 16) & 0xffu),
+        (uint8_t)((value >> 24) & 0xffu),
+    };
+    return fnv1a64_update_state(h, bytes, sizeof(bytes));
+}
+
+static int branch_profile_is_conditional_jump(uint8_t opcode) {
+    uint8_t klass = opcode & 0x07;
+    if (klass != 0x05 && klass != 0x06)
+        return 0;
+    return opcode != 0x05 && opcode != 0x06 && opcode != 0x85 &&
+           opcode != 0x8d && opcode != 0x95;
+}
+
+static uint32_t branch_profile_codegen_end(const struct bpf_insn *insns,
+                                           uint32_t insn_cnt) {
+    uint32_t limit = insn_cnt;
+    for (uint32_t pc = 0; pc < insn_cnt; pc++) {
+        const struct bpf_insn *insn = &insns[pc];
+        int64_t target = -1;
+        if ((insn->code == 0x85 || insn->code == 0x8d) &&
+            insn->src_reg == BPF_PSEUDO_CALL) {
+            target = (int64_t)pc + 1 + (int64_t)insn->imm;
+        } else if (insn->code == (BPF_LD | BPF_DW | BPF_IMM) &&
+                   insn->src_reg == BPF_PSEUDO_FUNC) {
+            target = (int64_t)pc + 1 + (int64_t)insn->imm;
+            if (pc + 1 < insn_cnt)
+                pc++;
+        }
+        if (target >= 0 && target < (int64_t)limit)
+            limit = (uint32_t)target;
+    }
+    return limit;
+}
+
+static uint64_t branch_profile_layout_hash(const struct bpf_insn *insns,
+                                           uint32_t insn_cnt,
+                                           uint32_t prog_type,
+                                           const char name[17]) {
+    uint64_t h = 0xcbf29ce484222325ULL;
+    static const char tag[] = "branch-profile-v1";
+    h = fnv1a64_update_state(h, tag, sizeof(tag) - 1);
+    h = fnv1a64_update_u32(h, prog_type);
+    h = fnv1a64_update_u32(h, insn_cnt);
+    char fixed_name[16] = {0};
+    if (name)
+        memcpy(fixed_name, name, strnlen(name, sizeof(fixed_name)));
+    h = fnv1a64_update_state(h, fixed_name, sizeof(fixed_name));
+
+    uint32_t limit = branch_profile_codegen_end(insns, insn_cnt);
+    for (uint32_t pc = 0; pc < limit; pc++) {
+        const struct bpf_insn *insn = &insns[pc];
+        if (!branch_profile_is_conditional_jump(insn->code))
+            continue;
+        h = fnv1a64_update_u32(h, pc);
+        h = fnv1a64_update_u8(h, insn->code);
+        h = fnv1a64_update_u8(
+            h, (uint8_t)(((uint8_t)insn->dst_reg & 0x0f) |
+                         (((uint8_t)insn->src_reg & 0x0f) << 4)));
+        h = fnv1a64_update_u16(h, (uint16_t)insn->off);
+    }
+    return h;
+}
+
+static uint32_t branch_profile_site_count(const struct bpf_insn *insns,
+                                          uint32_t insn_cnt) {
+    uint32_t count = 0;
+    uint32_t limit = branch_profile_codegen_end(insns, insn_cnt);
+    for (uint32_t pc = 0; pc < limit; pc++) {
+        if (branch_profile_is_conditional_jump(insns[pc].code))
+            count++;
+    }
+    return count;
 }
 
 static void dump_bytecode(uint64_t hash, const struct bpf_insn *insns,
@@ -547,10 +676,15 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr,
     uint32_t insn_cnt = attr->insn_cnt;
     const struct bpf_insn *insns = (const struct bpf_insn *)(uintptr_t)attr->insns;
     uint64_t hash = 0;
+    uint64_t policy_hash = 0;
+    uint64_t branch_profile_hash = 0;
     char path[256] = {0};
     if (insns && insn_cnt > 0) {
         size_t bytes = (size_t)insn_cnt * sizeof(struct bpf_insn);
         hash = fnv1a64(insns, bytes);
+        policy_hash = normalized_load_hash(insns, insn_cnt);
+        branch_profile_hash =
+            branch_profile_layout_hash(insns, insn_cnt, attr->prog_type, name);
         dump_bytecode(hash, insns, insn_cnt);
         const char *dir = getenv("BPFREJIT_SHIM_DIR");
         if (!dir) dir = "/tmp";
@@ -565,11 +699,11 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr,
                  name);
         return NULL;
     }
-    log_line("BPF_PROG_LOAD type=%u (%s) name=%s insn_cnt=%u hash=%016lx "
+    log_line("BPF_PROG_LOAD type=%u (%s) name=%s insn_cnt=%u hash=%016lx policy_hash=%016lx branch_profile_hash=%016lx "
              "license=%s expected_attach=%u attach_btf_id=%u "
              "prog_btf_fd=%u attach_btf_obj_fd=%u attach_prog_fd=%u",
              attr->prog_type, prog_type_short_name(attr->prog_type), name,
-             insn_cnt, hash, (const char *)(uintptr_t)attr->license,
+             insn_cnt, hash, policy_hash, branch_profile_hash, (const char *)(uintptr_t)attr->license,
              attr->expected_attach_type, attr->attach_btf_id,
              attr->prog_btf_fd, attr->attach_btf_obj_fd, attr->attach_prog_fd);
     struct prog_entry *e = (struct prog_entry *)calloc(1, sizeof(*e));
@@ -579,7 +713,10 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr,
     e->name[16] = 0;
     e->insn_cnt = insn_cnt;
     e->hash = hash;
+    e->policy_hash = policy_hash;
+    e->branch_profile_hash = branch_profile_hash;
     e->fd_array_slots_needed = fd_array_slots_needed;
+    e->profile_hold_fd = -1;
     e->native_loader_original_fd = -1;
     e->expected_attach_type = ATTR_HAS_FIELD(attr_size, expected_attach_type)
                                   ? attr->expected_attach_type
@@ -982,6 +1119,7 @@ static struct prog_entry *discover_prog_from_fd(int fd) {
         return NULL;
     }
     e->fd = fd;
+    e->profile_hold_fd = -1;
     e->prog_type = fbase->type;
     memcpy(e->name, fbase->name, sizeof(e->name) - 1);
     e->name[sizeof(e->name) - 1] = 0;

@@ -30,8 +30,9 @@ roundtrip and is not byte-preserving. A verifier failure is a real roundtrip
 failure and must be fixed in the lift/lower path or surfaced to the caller.
 
 Every `--pass <name>` invocation runs exactly one O3 lift/optimize/lower cycle.
-`map_inline` is the only pass name that currently performs a pass-specific IR
-rewrite before O3; all other pass names use the same plain O3 roundtrip.
+`map_inline` performs a pass-specific IR rewrite before O3; `branch_flip`
+validates a real per-site profile and attaches LLVM branch-weight metadata
+before O3. All other pass names use the same plain O3 roundtrip.
 
 Post-lowering extraction is not a verifier repair stage. After LLVM's BPF
 backend emits the object, this tool only applies ELF relocations and restores

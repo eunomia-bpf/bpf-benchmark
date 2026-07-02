@@ -26,6 +26,7 @@
 #include <fcntl.h>
 #include <linux/bpf.h>
 #include <linux/perf_event.h>
+#include <limits.h>
 #include <pthread.h>
 #include <sys/prctl.h>
 #include <signal.h>
@@ -141,6 +142,70 @@ static __thread int in_shim;
 #include "shim_loadtime.h"
 #include "shim_native_loader.h"
 
+static int capture_prog_load_exact_map_refs(struct prog_entry *prog,
+                                            const union bpf_attr *attr) {
+    if (!prog || !attr || !attr->insns || attr->insn_cnt == 0)
+        return 0;
+
+    struct shim_map_ref *refs = NULL;
+    uint32_t ref_n = 0;
+    const struct bpf_insn *insns =
+        (const struct bpf_insn *)(uintptr_t)attr->insns;
+    if (collect_current_map_refs(insns, attr->insn_cnt, &refs, &ref_n) != 0)
+        return -1;
+    if (ref_n == 0) {
+        free(refs);
+        return 0;
+    }
+
+    uint32_t *fds = (uint32_t *)calloc(ref_n, sizeof(uint32_t));
+    uint32_t *kids = (uint32_t *)calloc(ref_n, sizeof(uint32_t));
+    uint32_t *types = (uint32_t *)calloc(ref_n, sizeof(uint32_t));
+    if (!fds || !kids || !types) {
+        free(fds);
+        free(kids);
+        free(types);
+        free(refs);
+        return -1;
+    }
+
+    uint32_t n = 0;
+    for (uint32_t r = 0; r < ref_n; r++) {
+        if (refs[r].loader_fd < 0 || refs[r].kernel_id == 0)
+            continue;
+        int dup = 0;
+        for (uint32_t i = 0; i < n; i++) {
+            if (fds[i] == (uint32_t)refs[r].loader_fd) {
+                dup = 1;
+                break;
+            }
+        }
+        if (dup)
+            continue;
+        fds[n] = (uint32_t)refs[r].loader_fd;
+        kids[n] = refs[r].kernel_id;
+        types[n] = refs[r].map_type;
+        n++;
+    }
+    free(refs);
+
+    if (n == 0) {
+        free(fds);
+        free(kids);
+        free(types);
+        return 0;
+    }
+
+    free(prog->snap_fds);
+    free(prog->snap_kids);
+    free(prog->snap_types);
+    prog->snap_fds = fds;
+    prog->snap_kids = kids;
+    prog->snap_types = types;
+    prog->snap_n = n;
+    return 0;
+}
+
 static void *worker_thread(void *arg);  /* forward decl */
 static void *socket_thread(void *arg);  /* forward decl */
 
@@ -161,6 +226,44 @@ static int read_perf_pmu_type(const char *name, int *cache) {
     fclose(f);
     *cache = value;
     return *cache;
+}
+
+static const char *empty_kinsn_target_json(void) {
+#if defined(__aarch64__)
+    return "{\"arch\":\"aarch64\",\"kinsns\":{}}\n";
+#else
+    return "{\"arch\":\"x86_64\",\"kinsns\":{}}\n";
+#endif
+}
+
+static int empty_kinsn_target_enabled(void) {
+    const char *value = getenv("BPFREJIT_SHIM_EMPTY_TARGET");
+    return value && strcmp(value, "1") == 0;
+}
+
+static int write_empty_kinsn_target(const char *path) {
+    const char *json = empty_kinsn_target_json();
+    int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd < 0)
+        return -1;
+    size_t off = 0;
+    size_t len = strlen(json);
+    while (off < len) {
+        ssize_t n = write(fd, json + off, len - off);
+        if (n < 0) {
+            if (errno == EINTR)
+                continue;
+            real_close(fd);
+            return -1;
+        }
+        if (n == 0) {
+            real_close(fd);
+            return -1;
+        }
+        off += (size_t)n;
+    }
+    real_close(fd);
+    return 0;
 }
 
 static void format_perf_event_extra(const struct perf_event_attr *pa,
@@ -224,8 +327,54 @@ static int fd_is_bpf_prog(int fd) {
     return strcmp(link_target, "anon_inode:bpf-prog") == 0;
 }
 
+static int shim_pgo_hold_prog_fds_enabled(void) {
+    return shim_env_truthy("BPFREJIT_SHIM_PGO_HOLD_PROG_FDS");
+}
+
+static int prog_profile_hold_fd_is_locked(int fd) {
+    if (fd < 0)
+        return 0;
+    for (int b = 0; b < BPF_STATE_BUCKETS; b++)
+        for (struct prog_entry *p = prog_table[b]; p; p = p->next)
+            if (p->profile_hold_fd == fd)
+                return 1;
+    return 0;
+}
+
+static int prog_profile_hold_fd_is(int fd) {
+    int ret;
+    pthread_mutex_lock(&state_mutex);
+    ret = prog_profile_hold_fd_is_locked(fd);
+    pthread_mutex_unlock(&state_mutex);
+    return ret;
+}
+
+static int prog_profile_hold_fd_in_range_locked(unsigned int first,
+                                                unsigned int last) {
+    for (int b = 0; b < BPF_STATE_BUCKETS; b++)
+        for (struct prog_entry *p = prog_table[b]; p; p = p->next)
+            if (p->profile_hold_fd >= 0 &&
+                (unsigned int)p->profile_hold_fd >= first &&
+                (unsigned int)p->profile_hold_fd <= last)
+                return 1;
+    return 0;
+}
+
+static int prog_profile_hold_fd_in_range(unsigned int first,
+                                         unsigned int last) {
+    int ret;
+    pthread_mutex_lock(&state_mutex);
+    ret = prog_profile_hold_fd_in_range_locked(first, last);
+    pthread_mutex_unlock(&state_mutex);
+    return ret;
+}
+
 static int shim_close_observed_fd(int fd) {
     ensure_syms_resolved();
+    if (shim_pgo_hold_prog_fds_enabled() && prog_profile_hold_fd_is(fd)) {
+        log_line("PGO hold fd close skipped fd=%d", fd);
+        return 0;
+    }
     if (fd >= 0) {
         pthread_mutex_lock(&state_mutex);
         prog_forget_loader_fd(fd);
@@ -242,6 +391,70 @@ static int shim_close_observed_fd(int fd) {
     in_shim = 0;
     errno = saved_errno;
     return ret;
+}
+
+static long shim_close_range_preserve_profile_holds(unsigned int first,
+                                                    unsigned int last,
+                                                    unsigned int flags) {
+    if (flags & CLOSE_RANGE_UNSHARE) {
+        long ur = real_syscall(SYS_unshare, CLONE_FILES);
+        if (ur < 0)
+            return -1;
+    }
+
+    DIR *fd_dir = opendir("/proc/self/fd");
+    if (!fd_dir)
+        return -1;
+    int dir_fd = dirfd(fd_dir);
+    int *fds = NULL;
+    size_t n = 0, cap = 0;
+    struct dirent *de;
+    while ((de = readdir(fd_dir)) != NULL) {
+        if (de->d_name[0] < '0' || de->d_name[0] > '9')
+            continue;
+        char *end = NULL;
+        errno = 0;
+        unsigned long raw = strtoul(de->d_name, &end, 10);
+        if (errno || !end || *end)
+            continue;
+        if (raw > INT_MAX)
+            continue;
+        int fd = (int)raw;
+        if (fd == dir_fd)
+            continue;
+        if ((unsigned int)fd < first || (unsigned int)fd > last)
+            continue;
+        if (prog_profile_hold_fd_is(fd))
+            continue;
+        if (n == cap) {
+            size_t next = cap ? cap * 2 : 64;
+            int *grown = (int *)realloc(fds, next * sizeof(*grown));
+            if (!grown) {
+                int saved = errno ? errno : ENOMEM;
+                free(fds);
+                closedir(fd_dir);
+                errno = saved;
+                return -1;
+            }
+            fds = grown;
+            cap = next;
+        }
+        fds[n++] = fd;
+    }
+    closedir(fd_dir);
+
+    for (size_t i = 0; i < n; i++) {
+        if (shim_close_observed_fd(fds[i]) != 0) {
+            int saved = errno;
+            free(fds);
+            errno = saved;
+            return -1;
+        }
+    }
+    free(fds);
+    log_line("PGO close_range preserved held prog fds first=%u last=%u flags=0x%x",
+             first, last, flags);
+    return 0;
 }
 
 static long shim_close_range(unsigned int first, unsigned int last,
@@ -264,6 +477,10 @@ static long shim_close_range(unsigned int first, unsigned int last,
         errno = saved_errno;
         return ret;
     }
+
+    if (shim_pgo_hold_prog_fds_enabled() &&
+        prog_profile_hold_fd_in_range(first, last))
+        return shim_close_range_preserve_profile_holds(first, last, flags);
 
     in_shim = 1;
     long ret = real_syscall(SYS_close_range, first, last, flags);
@@ -382,30 +599,36 @@ __attribute__((constructor)) static void shim_init(void) {
     char target_json_path[320];
     snprintf(target_json_path, sizeof(target_json_path), "%s/target.json", dir);
     if (access(target_json_path, F_OK) != 0) {
-        char *const argv[] = {"kinsnprober", "--out", target_json_path, NULL};
-        posix_spawn_file_actions_t fa;
-        int fa_inited = (posix_spawn_file_actions_init(&fa) == 0);
-        if (fa_inited) {
-            posix_spawn_file_actions_addopen(&fa, STDOUT_FILENO, "/dev/null", O_WRONLY, 0);
-            posix_spawn_file_actions_addopen(&fa, STDERR_FILENO, "/dev/null", O_WRONLY, 0);
-        }
-        /* Strip LD_PRELOAD so kinsnprober doesn't re-attach the shim. */
-        size_t n_env = 0; while (environ[n_env]) n_env++;
-        char **clean_env = (char **)calloc(n_env + 1, sizeof(char *));
-        size_t j = 0;
-        for (size_t i = 0; clean_env && i < n_env; i++)
-            if (strncmp(environ[i], "LD_PRELOAD=", 11) != 0)
-                clean_env[j++] = environ[i];
-        if (clean_env) clean_env[j] = NULL;
-        pid_t ppid;
-        int rc = posix_spawnp(&ppid, "kinsnprober", fa_inited ? &fa : NULL,
-                              NULL, argv, clean_env ? clean_env : environ);
-        free(clean_env);
-        if (fa_inited) posix_spawn_file_actions_destroy(&fa);
-        if (rc == 0) {
-            int st = 0; waitpid(ppid, &st, 0);
-            log_line("kinsnprober exit=%d target=%s",
-                     WIFEXITED(st) ? WEXITSTATUS(st) : -1, target_json_path);
+        if (empty_kinsn_target_enabled()) {
+            int rc = write_empty_kinsn_target(target_json_path);
+            log_line("empty kinsn target rc=%d target=%s", rc,
+                     target_json_path);
+        } else {
+            char *const argv[] = {"kinsnprober", "--out", target_json_path, NULL};
+            posix_spawn_file_actions_t fa;
+            int fa_inited = (posix_spawn_file_actions_init(&fa) == 0);
+            if (fa_inited) {
+                posix_spawn_file_actions_addopen(&fa, STDOUT_FILENO, "/dev/null", O_WRONLY, 0);
+                posix_spawn_file_actions_addopen(&fa, STDERR_FILENO, "/dev/null", O_WRONLY, 0);
+            }
+            /* Strip LD_PRELOAD so kinsnprober doesn't re-attach the shim. */
+            size_t n_env = 0; while (environ[n_env]) n_env++;
+            char **clean_env = (char **)calloc(n_env + 1, sizeof(char *));
+            size_t j = 0;
+            for (size_t i = 0; clean_env && i < n_env; i++)
+                if (strncmp(environ[i], "LD_PRELOAD=", 11) != 0)
+                    clean_env[j++] = environ[i];
+            if (clean_env) clean_env[j] = NULL;
+            pid_t ppid;
+            int rc = posix_spawnp(&ppid, "kinsnprober", fa_inited ? &fa : NULL,
+                                  NULL, argv, clean_env ? clean_env : environ);
+            free(clean_env);
+            if (fa_inited) posix_spawn_file_actions_destroy(&fa);
+            if (rc == 0) {
+                int st = 0; waitpid(ppid, &st, 0);
+                log_line("kinsnprober exit=%d target=%s",
+                         WIFEXITED(st) ? WEXITSTATUS(st) : -1, target_json_path);
+            }
         }
     }
 
@@ -603,9 +826,17 @@ long syscall(long number, ...) {
             break;
         }
         if (cmd == BPF_PROG_LOAD && pending_prog) {
+            if (capture_prog_load_exact_map_refs(pending_prog, attr) != 0) {
+                in_shim = 0;
+                log_line("failed to capture BPF_PROG_LOAD map refs");
+                prog_free(pending_prog);
+                errno = EINVAL;
+                return -1;
+            }
             char opt_err[512];
-            int opt_rc = loadtime_optimize_prog_load(attr, size, &loadtime,
-                                                     opt_err, sizeof(opt_err));
+            int opt_rc = loadtime_optimize_prog_load(
+                attr, size, pending_prog->policy_hash, &loadtime, opt_err,
+                sizeof(opt_err));
             if (opt_rc < 0) {
                 in_shim = 0;
                 log_line("loadtime optimization failed: %s", opt_err);
@@ -644,6 +875,22 @@ long syscall(long number, ...) {
             pending_prog->fd = (int)ret;
             resolved_id = resolve_kernel_id((int)ret);
             pending_prog->kernel_prog_id = resolved_id;
+            if (shim_pgo_hold_prog_fds_enabled()) {
+                int hold_fd = fcntl((int)ret, F_DUPFD_CLOEXEC, 3);
+                if (hold_fd < 0) {
+                    int hold_errno = errno;
+                    real_close((int)ret);
+                    prog_free(pending_prog);
+                    if (loadtime_active)
+                        loadtime_result_free(&loadtime);
+                    in_shim = 0;
+                    errno = hold_errno;
+                    return -1;
+                }
+                pending_prog->profile_hold_fd = hold_fd;
+                log_line("PGO hold fd retained app_fd=%ld hold_fd=%d kid=%u",
+                         ret, hold_fd, resolved_id);
+            }
             /* Capture only the maps THIS prog actually references. Earlier we
              * enumerated all of /proc/self/fd, but for a long-lived loader
              * (e.g. tracee with 158 progs) that snapshot accumulates every
@@ -673,57 +920,60 @@ long syscall(long number, ...) {
                     if (pmap_n > 64) pmap_n = 64;
                 }
             }
-            uint32_t cap = pmap_n ? pmap_n : 1, n = 0;
-            uint32_t *fds = (uint32_t *)calloc(cap, sizeof(uint32_t));
-            uint32_t *kids = (uint32_t *)calloc(cap, sizeof(uint32_t));
-            uint32_t *types = (uint32_t *)calloc(cap, sizeof(uint32_t));
-            DIR *fd_dir = pmap_n > 0 ? opendir("/proc/self/fd") : NULL;
-            if (fd_dir && fds && kids && types) {
-                struct dirent *de;
-                while ((de = readdir(fd_dir)) != NULL && n < pmap_n) {
-                    if (de->d_name[0] < '0' || de->d_name[0] > '9') continue;
-                    int probe_fd = atoi(de->d_name);
-                    if (probe_fd < 0) continue;
-                    char fdpath[64], link_target[64];
-                    snprintf(fdpath, sizeof(fdpath), "/proc/self/fd/%d", probe_fd);
-                    ssize_t lr = readlink(fdpath, link_target, sizeof(link_target) - 1);
-                    if (lr <= 0) continue;
-                    link_target[lr] = 0;
-                    if (strcmp(link_target, "anon_inode:bpf-map") != 0) continue;
-                    struct bpf_map_info mi;
-                    memset(&mi, 0, sizeof(mi));
-                    union bpf_attr ia = {0};
-                    ia.info.bpf_fd = (uint32_t)probe_fd;
-                    ia.info.info_len = sizeof(mi);
-                    ia.info.info = (uintptr_t)&mi;
-                    long r = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD,
-                                          &ia, sizeof(ia));
-                    if (r < 0 || mi.id == 0) continue;
-                    /* Only keep fds whose kernel map id is in this prog's
-                     * used_maps list. */
-                    int wanted = 0;
-                    for (uint32_t i = 0; i < pmap_n; i++)
-                        if (pmap_ids[i] == mi.id) { wanted = 1; break; }
-                    if (!wanted) continue;
-                    /* Skip duplicates — multiple loader fds may alias the
-                     * same kernel id; one representative is enough. */
-                    int dup = 0;
-                    for (uint32_t i = 0; i < n; i++)
-                        if (kids[i] == mi.id) { dup = 1; break; }
-                    if (dup) continue;
-                    fds[n] = (uint32_t)probe_fd;
-                    kids[n] = mi.id;
-                    types[n] = mi.type;
-                    n++;
+            if (pending_prog->snap_n == 0) {
+                uint32_t cap = pmap_n ? pmap_n : 1, n = 0;
+                uint32_t *fds = (uint32_t *)calloc(cap, sizeof(uint32_t));
+                uint32_t *kids = (uint32_t *)calloc(cap, sizeof(uint32_t));
+                uint32_t *types = (uint32_t *)calloc(cap, sizeof(uint32_t));
+                DIR *fd_dir = pmap_n > 0 ? opendir("/proc/self/fd") : NULL;
+                if (fd_dir && fds && kids && types) {
+                    struct dirent *de;
+                    while ((de = readdir(fd_dir)) != NULL && n < pmap_n) {
+                        if (de->d_name[0] < '0' || de->d_name[0] > '9') continue;
+                        int probe_fd = atoi(de->d_name);
+                        if (probe_fd < 0) continue;
+                        char fdpath[64], link_target[64];
+                        snprintf(fdpath, sizeof(fdpath), "/proc/self/fd/%d", probe_fd);
+                        ssize_t lr = readlink(fdpath, link_target, sizeof(link_target) - 1);
+                        if (lr <= 0) continue;
+                        link_target[lr] = 0;
+                        if (strcmp(link_target, "anon_inode:bpf-map") != 0) continue;
+                        struct bpf_map_info mi;
+                        memset(&mi, 0, sizeof(mi));
+                        union bpf_attr ia = {0};
+                        ia.info.bpf_fd = (uint32_t)probe_fd;
+                        ia.info.info_len = sizeof(mi);
+                        ia.info.info = (uintptr_t)&mi;
+                        long r = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD,
+                                              &ia, sizeof(ia));
+                        if (r < 0 || mi.id == 0) continue;
+                        /* Only keep fds whose kernel map id is in this prog's
+                         * used_maps list. */
+                        int wanted = 0;
+                        for (uint32_t i = 0; i < pmap_n; i++)
+                            if (pmap_ids[i] == mi.id) { wanted = 1; break; }
+                        if (!wanted) continue;
+                        /* Skip duplicates — multiple loader fds may alias the
+                         * same kernel id; one representative is enough for
+                         * non-fd-immediate discovery. */
+                        int dup = 0;
+                        for (uint32_t i = 0; i < n; i++)
+                            if (kids[i] == mi.id) { dup = 1; break; }
+                        if (dup) continue;
+                        fds[n] = (uint32_t)probe_fd;
+                        kids[n] = mi.id;
+                        types[n] = mi.type;
+                        n++;
+                    }
+                    pending_prog->snap_fds = fds;
+                    pending_prog->snap_kids = kids;
+                    pending_prog->snap_types = types;
+                    pending_prog->snap_n = n;
+                } else {
+                    free(fds); free(kids); free(types);
                 }
-                pending_prog->snap_fds = fds;
-                pending_prog->snap_kids = kids;
-                pending_prog->snap_types = types;
-                pending_prog->snap_n = n;
-            } else {
-                free(fds); free(kids); free(types);
+                if (fd_dir) closedir(fd_dir);
             }
-            if (fd_dir) closedir(fd_dir);
             pthread_mutex_lock(&state_mutex);
             prog_forget_loader_fd(pending_prog->fd);
             map_remove(pending_prog->fd);
@@ -1137,7 +1387,9 @@ static void dump_state_json(void) {
     if (!dir) dir = "/tmp";
     char path[512];
     snprintf(path, sizeof(path), "%s/state_%d.json", dir, getpid());
-    int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    char tmp_path[544];
+    snprintf(tmp_path, sizeof(tmp_path), "%s.tmp", path);
+    int fd = open(tmp_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (fd < 0) return;
     FILE *f = fdopen(fd, "w");
     if (!f) {
@@ -1150,11 +1402,14 @@ static void dump_state_json(void) {
     for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
         for (struct prog_entry *e = prog_table[b]; e; e = e->next) {
             fprintf(f, "%s\n    {\"fd\":%d,\"prog_type\":%u,\"name\":\"%s\","
-                       "\"insn_cnt\":%u,\"hash\":\"%016lx\","
+                       "\"insn_cnt\":%u,\"hash\":\"%016lx\",\"policy_hash\":\"%016lx\","
+                       "\"branch_profile_hash\":\"%016lx\","
                        "\"kernel_prog_id\":%u,\"bytecode_path\":\"%s\","
                        "\"expected_attach\":%u,\"attach_btf_id\":%u}",
                     first ? "" : ",", e->fd, e->prog_type, e->name,
-                    e->insn_cnt, e->hash, e->kernel_prog_id, e->bytecode_path,
+                    e->insn_cnt, e->hash, e->policy_hash,
+                    e->branch_profile_hash,
+                    e->kernel_prog_id, e->bytecode_path,
                     e->expected_attach_type, e->attach_btf_id);
             first = 0;
         }
@@ -1197,7 +1452,14 @@ static void dump_state_json(void) {
     }
     pthread_mutex_unlock(&state_mutex);
     fprintf(f, "\n  ]\n}\n");
-    fclose(f);
+    if (fclose(f) != 0) {
+        unlink(tmp_path);
+        return;
+    }
+    if (rename(tmp_path, path) != 0) {
+        unlink(tmp_path);
+        return;
+    }
     log_line("state dumped to %s", path);
 }
 
@@ -1270,9 +1532,13 @@ static void emit_list_progs(int cli) {
             len += snprintf(
                 buf + len, cap - len,
                 "%s{\"id\":%u,\"name\":\"%s\",\"type\":%u,\"insn_cnt\":%u,"
-                "\"hash\":\"%016lx\",\"bytecode_path\":\"%s\"}",
+                "\"hash\":\"%016lx\",\"policy_hash\":\"%016lx\","
+                "\"branch_profile_hash\":\"%016lx\","
+                "\"bytecode_path\":\"%s\"}",
                 first ? "" : ",", e->kernel_prog_id, e->name,
-                e->prog_type, e->insn_cnt, e->hash, e->bytecode_path);
+                e->prog_type, e->insn_cnt, e->hash, e->policy_hash,
+                e->branch_profile_hash,
+                e->bytecode_path);
             first = 0;
         }
     }

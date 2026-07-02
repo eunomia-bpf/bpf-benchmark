@@ -114,6 +114,58 @@ static struct bpf_insn *loadtime_read_bytecode(const char *path,
     return insns;
 }
 
+static int loadtime_files_equal(const char *a_path, const char *b_path) {
+    int afd = open(a_path, O_RDONLY);
+    if (afd < 0) return -1;
+    int bfd = open(b_path, O_RDONLY);
+    if (bfd < 0) {
+        real_close(afd);
+        return -1;
+    }
+    struct stat ast, bst;
+    if (fstat(afd, &ast) != 0 || fstat(bfd, &bst) != 0) {
+        real_close(afd);
+        real_close(bfd);
+        return -1;
+    }
+    if (ast.st_size != bst.st_size) {
+        real_close(afd);
+        real_close(bfd);
+        return 0;
+    }
+    char abuf[4096], bbuf[4096];
+    for (;;) {
+        ssize_t ar = read(afd, abuf, sizeof(abuf));
+        if (ar < 0 && errno == EINTR) continue;
+        if (ar < 0) {
+            real_close(afd);
+            real_close(bfd);
+            return -1;
+        }
+        size_t off = 0;
+        while (off < (size_t)ar) {
+            ssize_t br = read(bfd, bbuf + off, (size_t)ar - off);
+            if (br < 0 && errno == EINTR) continue;
+            if (br <= 0) {
+                real_close(afd);
+                real_close(bfd);
+                return br == 0 ? 0 : -1;
+            }
+            off += (size_t)br;
+        }
+        if (ar == 0) {
+            real_close(afd);
+            real_close(bfd);
+            return 1;
+        }
+        if (memcmp(abuf, bbuf, (size_t)ar) != 0) {
+            real_close(afd);
+            real_close(bfd);
+            return 0;
+        }
+    }
+}
+
 static void loadtime_func_info_clear(struct loadtime_func_info *info) {
     if (!info) return;
     free(info->data);
@@ -478,6 +530,30 @@ static void loadtime_command_key_for_hash(uint64_t prog_hash, char *out,
                                           size_t out_sz) {
     snprintf(out, out_sz, "command_hash_%016llx",
              (unsigned long long)prog_hash);
+}
+
+static int loadtime_plan_is_single_branch_flip(const char *steps,
+                                               const char *steps_end) {
+    const char *cur = steps;
+    const char *obj_start = NULL, *obj_end = NULL;
+    int count = 0;
+    int is_branch_flip = 0;
+    while (json_array_next_obj(&cur, steps_end, &obj_start, &obj_end)) {
+        count++;
+        if (count > 1)
+            return 0;
+        size_t len = (size_t)(obj_end - obj_start);
+        char *obj = (char *)malloc(len + 1);
+        if (!obj)
+            return 0;
+        memcpy(obj, obj_start, len);
+        obj[len] = 0;
+        char name[64] = {0};
+        is_branch_flip = json_get_str(obj, "name", name, sizeof(name)) &&
+                         strcmp(name, "branch_flip") == 0;
+        free(obj);
+    }
+    return count == 1 && is_branch_flip;
 }
 
 static int loadtime_run_shell(const char *command, const char *log_path,
@@ -870,6 +946,7 @@ static int loadtime_probe_bytecode_acceptance(const union bpf_attr *orig_attr,
 
 static int loadtime_optimize_prog_load(const union bpf_attr *attr,
                                        unsigned int attr_size,
+                                       uint64_t prog_policy_hash,
                                        struct loadtime_result *out,
                                        char *err, size_t err_sz) {
     memset(out, 0, sizeof(*out));
@@ -901,6 +978,18 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         snprintf(err, err_sz, "loadtime plan %s missing steps", plan_path);
         free(plan_json);
         return -1;
+    }
+    const int single_branch_flip =
+        loadtime_plan_is_single_branch_flip(steps, steps_end);
+
+    char prog_name[17] = {0};
+    memcpy(prog_name, attr->prog_name, 16);
+    if (single_branch_flip &&
+        branch_profile_site_count(input_insns, attr->insn_cnt) == 0) {
+        log_line("loadtime branch_flip prog=%s insn_cnt=%u has no conditional branch sites; passing original BPF_PROG_LOAD through",
+                 prog_name, attr->insn_cnt);
+        free(plan_json);
+        return 0;
     }
 
     char workdir_base[320];
@@ -947,7 +1036,11 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     }
 
     size_t input_bytes = (size_t)attr->insn_cnt * sizeof(struct bpf_insn);
-    uint64_t input_hash = normalized_prog_hash(input_insns, attr->insn_cnt);
+    uint64_t input_hash = prog_policy_hash
+                              ? prog_policy_hash
+                              : normalized_prog_hash(input_insns, attr->insn_cnt);
+    uint64_t branch_profile_hash = branch_profile_layout_hash(
+        input_insns, attr->insn_cnt, attr->prog_type, prog_name);
     if (loadtime_write_file(cur, input_insns, input_bytes) != 0) {
         snprintf(err, err_sz, "failed to write loadtime input %s errno=%d",
                  cur, errno);
@@ -1037,11 +1130,17 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     char prog_type_name[32];
     snprintf(prog_type_name, sizeof(prog_type_name), "%s",
              prog_type_short_name(attr->prog_type));
-    char prog_name[17] = {0};
-    memcpy(prog_name, attr->prog_name, 16);
-    log_line("loadtime policy prog=%s policy_hash=%016llx insn_cnt=%u",
-             prog_name, (unsigned long long)input_hash, attr->insn_cnt);
+    log_line("loadtime policy prog=%s policy_hash=%016llx branch_profile_hash=%016llx insn_cnt=%u",
+             prog_name, (unsigned long long)input_hash,
+             (unsigned long long)branch_profile_hash, attr->insn_cnt);
     char prog_id_str[] = "0";
+    char prog_hash_str[17];
+    snprintf(prog_hash_str, sizeof(prog_hash_str), "%016llx",
+             (unsigned long long)input_hash);
+    char prog_branch_profile_hash_str[17];
+    snprintf(prog_branch_profile_hash_str,
+             sizeof(prog_branch_profile_hash_str), "%016llx",
+             (unsigned long long)branch_profile_hash);
 
     char verifier_log[360];
     if (loadtime_join_path(verifier_log, sizeof(verifier_log), workdir,
@@ -1065,6 +1164,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     }
 
     int step_seq = 0;
+    int any_step_changed = 0;
     const char *scur = steps;
     const char *so_s, *so_e;
     while (json_array_next_obj(&scur, steps_end, &so_s, &so_e)) {
@@ -1133,14 +1233,16 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         unlink(nxt);
         unlink(report);
 
-        const char *vars[9][2] = {
-            {"PROG_ID", prog_id_str}, {"PROG_TYPE", prog_type_name},
+        const char *vars[11][2] = {
+            {"PROG_ID", prog_id_str}, {"PROG_HASH", prog_hash_str},
+            {"PROG_BRANCH_PROFILE_HASH", prog_branch_profile_hash_str},
+            {"PROG_TYPE", prog_type_name},
             {"INPUT", cur}, {"OUTPUT", nxt}, {"REPORT", report},
             {"WORKDIR", workdir}, {"TARGET", target_json},
             {"MAP_IDS", map_ids_csv}, {"MAP_VALUES", map_values_dir},
         };
         char resolved[4200];
-        loadtime_substitute_vars(resolved, sizeof(resolved), cmdbuf, vars, 9);
+        loadtime_substitute_vars(resolved, sizeof(resolved), cmdbuf, vars, 11);
         char step_log[360];
         snprintf(step_name_buf, sizeof(step_name_buf), "step%d.log", step_seq);
         if (loadtime_join_path(step_log, sizeof(step_log), workdir,
@@ -1183,6 +1285,19 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
             free(plan_json);
             return 0;
         }
+        int files_equal = loadtime_files_equal(cur, nxt);
+        if (files_equal < 0) {
+            snprintf(err, err_sz,
+                     "failed to compare loadtime input/output for step %s errno=%d",
+                     name[0] ? name : "<unnamed>", errno);
+            free(map_refs);
+            free(map_ids);
+            free(map_types);
+            free(plan_json);
+            return -1;
+        }
+        if (!files_equal)
+            any_step_changed = 1;
         if (loadtime_append_step_report(prog_name, prog_type_name,
                                         name[0] ? name : "<unnamed>",
                                         step_seq, elapsed_ms, workdir,
@@ -1197,10 +1312,29 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
             free(plan_json);
             return -1;
         }
-        rename(nxt, cur);
+        if (rename(nxt, cur) != 0) {
+            snprintf(err, err_sz,
+                     "failed to install loadtime output for step %s errno=%d",
+                     name[0] ? name : "<unnamed>", errno);
+            free(map_refs);
+            free(map_ids);
+            free(map_types);
+            free(plan_json);
+            return -1;
+        }
         log_line("loadtime step prog=%s step=%s elapsed_ms=%lu",
                  prog_name, name, (unsigned long)elapsed_ms);
         step_seq++;
+    }
+
+    if (!any_step_changed) {
+        log_line("loadtime prog=%s produced no bytecode changes; passing original BPF_PROG_LOAD through",
+                 prog_name);
+        free(map_refs);
+        free(map_ids);
+        free(map_types);
+        free(plan_json);
+        return 0;
     }
 
     uint32_t out_insn_cnt = 0;
