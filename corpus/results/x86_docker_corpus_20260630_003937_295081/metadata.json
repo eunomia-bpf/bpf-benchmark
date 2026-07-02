@@ -1,0 +1,23 @@
+{
+  "bpf_stats": true,
+  "config": {
+    "enabled_passes": [
+      "branch_flip"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "corpus suite reported errors",
+  "generated_at": "2026-06-30T00:44:42.419319+00:00",
+  "last_updated_at": "2026-06-30T00:44:42.419315+00:00",
+  "launcher_boot_id": "dae251a0-b500-4bd1-a5f4-549d64942b3d",
+  "launcher_pid": 2177526,
+  "launcher_start_ticks": 76359395,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "run_type": "x86_docker_corpus",
+  "samples": 1,
+  "started_at": "2026-06-30T00:39:37.295081+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_only": false,
+  "workload_seconds": 10.0
+}

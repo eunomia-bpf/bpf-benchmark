@@ -1,0 +1,1122 @@
+{
+  "app": "cilium/agent",
+  "baseline": {
+    "bpf": {
+      "930": {
+        "bytes_jited": 510,
+        "bytes_xlated": 880,
+        "id": 930,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "931": {
+        "bytes_jited": 8255,
+        "bytes_xlated": 14392,
+        "id": 931,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "932": {
+        "bytes_jited": 860,
+        "bytes_xlated": 1512,
+        "id": 932,
+        "name": "cil_to_host",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 1095,
+        "type": "sched_cls"
+      },
+      "933": {
+        "bytes_jited": 8882,
+        "bytes_xlated": 15112,
+        "id": 933,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "935": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 935,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "937": {
+        "bytes_jited": 406,
+        "bytes_xlated": 752,
+        "id": 937,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "938": {
+        "bytes_jited": 12955,
+        "bytes_xlated": 21584,
+        "id": 938,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "939": {
+        "bytes_jited": 1263,
+        "bytes_xlated": 2112,
+        "id": 939,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "940": {
+        "bytes_jited": 6567,
+        "bytes_xlated": 11024,
+        "id": 940,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "941": {
+        "bytes_jited": 3946,
+        "bytes_xlated": 7040,
+        "id": 941,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "942": {
+        "bytes_jited": 6567,
+        "bytes_xlated": 11024,
+        "id": 942,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "943": {
+        "bytes_jited": 860,
+        "bytes_xlated": 1512,
+        "id": 943,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "945": {
+        "bytes_jited": 1263,
+        "bytes_xlated": 2112,
+        "id": 945,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "946": {
+        "bytes_jited": 8243,
+        "bytes_xlated": 14312,
+        "id": 946,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "947": {
+        "bytes_jited": 8882,
+        "bytes_xlated": 15112,
+        "id": 947,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "949": {
+        "bytes_jited": 12982,
+        "bytes_xlated": 21632,
+        "id": 949,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "952": {
+        "bytes_jited": 406,
+        "bytes_xlated": 752,
+        "id": 952,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "953": {
+        "bytes_jited": 2793,
+        "bytes_xlated": 4952,
+        "id": 953,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "955": {
+        "bytes_jited": 6567,
+        "bytes_xlated": 11024,
+        "id": 955,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "956": {
+        "bytes_jited": 8243,
+        "bytes_xlated": 14312,
+        "id": 956,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "957": {
+        "bytes_jited": 8882,
+        "bytes_xlated": 15112,
+        "id": 957,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "958": {
+        "bytes_jited": 2793,
+        "bytes_xlated": 4952,
+        "id": 958,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "959": {
+        "bytes_jited": 12982,
+        "bytes_xlated": 21632,
+        "id": 959,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "960": {
+        "bytes_jited": 3387,
+        "bytes_xlated": 5936,
+        "id": 960,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "961": {
+        "bytes_jited": 406,
+        "bytes_xlated": 752,
+        "id": 961,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "962": {
+        "bytes_jited": 1263,
+        "bytes_xlated": 2112,
+        "id": 962,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "965": {
+        "bytes_jited": 5223,
+        "bytes_xlated": 8912,
+        "id": 965,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "967": {
+        "bytes_jited": 6399,
+        "bytes_xlated": 11104,
+        "id": 967,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "968": {
+        "bytes_jited": 5376,
+        "bytes_xlated": 9592,
+        "id": 968,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "969": {
+        "bytes_jited": 3623,
+        "bytes_xlated": 6368,
+        "id": 969,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "970": {
+        "bytes_jited": 928,
+        "bytes_xlated": 1616,
+        "id": 970,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "971": {
+        "bytes_jited": 5581,
+        "bytes_xlated": 9904,
+        "id": 971,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "972": {
+        "bytes_jited": 5803,
+        "bytes_xlated": 10368,
+        "id": 972,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "973": {
+        "bytes_jited": 6217,
+        "bytes_xlated": 10984,
+        "id": 973,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "974": {
+        "bytes_jited": 2775,
+        "bytes_xlated": 4920,
+        "id": 974,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "975": {
+        "bytes_jited": 5211,
+        "bytes_xlated": 9224,
+        "id": 975,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "976": {
+        "bytes_jited": 1090,
+        "bytes_xlated": 1720,
+        "id": 976,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 9135171,
+        "run_time_ns_delta": 4141099607,
+        "type": "sched_cls"
+      },
+      "977": {
+        "bytes_jited": 5761,
+        "bytes_xlated": 10104,
+        "id": 977,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "978": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 978,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "979": {
+        "bytes_jited": 383,
+        "bytes_xlated": 696,
+        "id": 979,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "980": {
+        "bytes_jited": 5581,
+        "bytes_xlated": 9904,
+        "id": 980,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "981": {
+        "bytes_jited": 6217,
+        "bytes_xlated": 10984,
+        "id": 981,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "982": {
+        "bytes_jited": 1090,
+        "bytes_xlated": 1720,
+        "id": 982,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 9138014,
+        "run_time_ns_delta": 4258279586,
+        "type": "sched_cls"
+      },
+      "983": {
+        "bytes_jited": 5761,
+        "bytes_xlated": 10104,
+        "id": 983,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "984": {
+        "bytes_jited": 383,
+        "bytes_xlated": 696,
+        "id": 984,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "985": {
+        "bytes_jited": 2775,
+        "bytes_xlated": 4920,
+        "id": 985,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "986": {
+        "bytes_jited": 6399,
+        "bytes_xlated": 11104,
+        "id": 986,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "987": {
+        "bytes_jited": 5211,
+        "bytes_xlated": 9224,
+        "id": 987,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "988": {
+        "bytes_jited": 5376,
+        "bytes_xlated": 9592,
+        "id": 988,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "990": {
+        "bytes_jited": 5803,
+        "bytes_xlated": 10368,
+        "id": 990,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "991": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 991,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "992": {
+        "bytes_jited": 928,
+        "bytes_xlated": 1616,
+        "id": 992,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "993": {
+        "bytes_jited": 3623,
+        "bytes_xlated": 6368,
+        "id": 993,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "components": [
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepa",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.200",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepa",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.198",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 10.009123178999971,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.200  dst_max: 10.244.0.200\n     src_min: 10.244.0.198  src_max: 10.244.0.198\n     src_mac: c2:76:5c:b4:c6:c8 dst_mac: 42:c4:f0:51:c9:e9\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 9135158  errors: 0\n     started: 1487454892us  stopped: 1497360786us idle: 2839us\n     seq_num: 9135159  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.198  cur_daddr: 10.244.0.200\n     cur_udp_dst: 25933  cur_udp_src: 25933\n     cur_queue_map: 0\n     flows: 4584081\nResult: OK: 9905894(c9903055+d2839) usec, 9135158 (64byte,-1frags)\n  922194pps 472Mb/sec (472163328bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_forward"
+          },
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepb",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.198",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepb",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.200",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 10.014043197000092,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.198  dst_max: 10.244.0.198\n     src_min: 10.244.0.200  src_max: 10.244.0.200\n     src_mac: 86:73:a3:8d:ab:e7 dst_mac: 0a:d0:51:e7:6b:2c\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 9138001  errors: 0\n     started: 1487462032us  stopped: 1497363967us idle: 2560us\n     seq_num: 9138002  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.200  cur_daddr: 10.244.0.198\n     cur_udp_dst: 28776  cur_udp_src: 28776\n     cur_queue_map: 0\n     flows: 4585394\nResult: OK: 9901935(c9899375+d2560) usec, 9138001 (64byte,-1frags)\n  922849pps 472Mb/sec (472498688bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_reverse"
+          }
+        ],
+        "config": {
+          "path": "bidirectional-endpoint-to-endpoint"
+        },
+        "workload_name": "cilium_endpoint_pktgen"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "1246": {
+        "bytes_jited": 548,
+        "bytes_xlated": 936,
+        "id": 1246,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "1249": {
+        "bytes_jited": 8487,
+        "bytes_xlated": 14400,
+        "id": 1249,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1250": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1250,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1253": {
+        "bytes_jited": 880,
+        "bytes_xlated": 1536,
+        "id": 1253,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1256": {
+        "bytes_jited": 13816,
+        "bytes_xlated": 22552,
+        "id": 1256,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1259": {
+        "bytes_jited": 3685,
+        "bytes_xlated": 6512,
+        "id": 1259,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1265": {
+        "bytes_jited": 1240,
+        "bytes_xlated": 2128,
+        "id": 1265,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1271": {
+        "bytes_jited": 6629,
+        "bytes_xlated": 10912,
+        "id": 1271,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1274": {
+        "bytes_jited": 424,
+        "bytes_xlated": 760,
+        "id": 1274,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1277": {
+        "bytes_jited": 9374,
+        "bytes_xlated": 16000,
+        "id": 1277,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1281": {
+        "bytes_jited": 13821,
+        "bytes_xlated": 22560,
+        "id": 1281,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1284": {
+        "bytes_jited": 2927,
+        "bytes_xlated": 5152,
+        "id": 1284,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1287": {
+        "bytes_jited": 880,
+        "bytes_xlated": 1536,
+        "id": 1287,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1290": {
+        "bytes_jited": 6629,
+        "bytes_xlated": 10912,
+        "id": 1290,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1293": {
+        "bytes_jited": 9374,
+        "bytes_xlated": 16000,
+        "id": 1293,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1296": {
+        "bytes_jited": 1240,
+        "bytes_xlated": 2128,
+        "id": 1296,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1299": {
+        "bytes_jited": 8462,
+        "bytes_xlated": 14288,
+        "id": 1299,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1302": {
+        "bytes_jited": 424,
+        "bytes_xlated": 760,
+        "id": 1302,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1314": {
+        "bytes_jited": 6629,
+        "bytes_xlated": 10912,
+        "id": 1314,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1317": {
+        "bytes_jited": 1240,
+        "bytes_xlated": 2128,
+        "id": 1317,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1320": {
+        "bytes_jited": 424,
+        "bytes_xlated": 760,
+        "id": 1320,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1323": {
+        "bytes_jited": 8462,
+        "bytes_xlated": 14288,
+        "id": 1323,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1326": {
+        "bytes_jited": 13821,
+        "bytes_xlated": 22560,
+        "id": 1326,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1329": {
+        "bytes_jited": 5178,
+        "bytes_xlated": 8616,
+        "id": 1329,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1333": {
+        "bytes_jited": 2927,
+        "bytes_xlated": 5152,
+        "id": 1333,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1342": {
+        "bytes_jited": 9374,
+        "bytes_xlated": 16000,
+        "id": 1342,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1345": {
+        "bytes_jited": 3223,
+        "bytes_xlated": 5672,
+        "id": 1345,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1348": {
+        "bytes_jited": 6266,
+        "bytes_xlated": 10928,
+        "id": 1348,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1349": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1349,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1352": {
+        "bytes_jited": 2909,
+        "bytes_xlated": 5120,
+        "id": 1352,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1355": {
+        "bytes_jited": 1038,
+        "bytes_xlated": 1840,
+        "id": 1355,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1358": {
+        "bytes_jited": 6021,
+        "bytes_xlated": 10464,
+        "id": 1358,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1361": {
+        "bytes_jited": 5231,
+        "bytes_xlated": 9672,
+        "id": 1361,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1364": {
+        "bytes_jited": 5637,
+        "bytes_xlated": 10280,
+        "id": 1364,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1367": {
+        "bytes_jited": 4025,
+        "bytes_xlated": 6928,
+        "id": 1367,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1370": {
+        "bytes_jited": 5892,
+        "bytes_xlated": 10240,
+        "id": 1370,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1373": {
+        "bytes_jited": 395,
+        "bytes_xlated": 704,
+        "id": 1373,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1376": {
+        "bytes_jited": 6556,
+        "bytes_xlated": 11096,
+        "id": 1376,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1379": {
+        "bytes_jited": 5018,
+        "bytes_xlated": 9328,
+        "id": 1379,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1385": {
+        "bytes_jited": 1126,
+        "bytes_xlated": 1792,
+        "id": 1385,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 9118927,
+        "run_time_ns_delta": 3906187491,
+        "type": "sched_cls"
+      },
+      "1388": {
+        "bytes_jited": 1126,
+        "bytes_xlated": 1792,
+        "id": 1388,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 9255186,
+        "run_time_ns_delta": 4009286172,
+        "type": "sched_cls"
+      },
+      "1391": {
+        "bytes_jited": 1038,
+        "bytes_xlated": 1840,
+        "id": 1391,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1394": {
+        "bytes_jited": 5231,
+        "bytes_xlated": 9672,
+        "id": 1394,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1400": {
+        "bytes_jited": 5637,
+        "bytes_xlated": 10280,
+        "id": 1400,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1403": {
+        "bytes_jited": 395,
+        "bytes_xlated": 704,
+        "id": 1403,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1406": {
+        "bytes_jited": 4025,
+        "bytes_xlated": 6928,
+        "id": 1406,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1409": {
+        "bytes_jited": 6021,
+        "bytes_xlated": 10464,
+        "id": 1409,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1412": {
+        "bytes_jited": 2909,
+        "bytes_xlated": 5120,
+        "id": 1412,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1415": {
+        "bytes_jited": 6266,
+        "bytes_xlated": 10928,
+        "id": 1415,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1418": {
+        "bytes_jited": 5018,
+        "bytes_xlated": 9328,
+        "id": 1418,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1421": {
+        "bytes_jited": 6556,
+        "bytes_xlated": 11096,
+        "id": 1421,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1424": {
+        "bytes_jited": 5892,
+        "bytes_xlated": 10240,
+        "id": 1424,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1425": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1425,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "components": [
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepa",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.59",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepa",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.103",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 10.00858926800015,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.59  dst_max: 10.244.0.59\n     src_min: 10.244.0.103  src_max: 10.244.0.103\n     src_mac: a6:2c:51:ba:4e:e5 dst_mac: 42:c4:f0:51:c9:e9\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 9118914  errors: 0\n     started: 1550518121us  stopped: 1560426196us idle: 3145us\n     seq_num: 9118915  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.103  cur_daddr: 10.244.0.59\n     cur_udp_dst: 9689  cur_udp_src: 9689\n     cur_queue_map: 0\n     flows: 4575767\nResult: OK: 9908075(c9904929+d3145) usec, 9118914 (64byte,-1frags)\n  920351pps 471Mb/sec (471219712bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_forward"
+          },
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepb",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.103",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepb",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.59",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 10.00942701100007,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.103  dst_max: 10.244.0.103\n     src_min: 10.244.0.59  src_max: 10.244.0.59\n     src_mac: 86:73:a3:8d:ab:e7 dst_mac: 0a:d0:51:e7:6b:2c\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 9255174  errors: 0\n     started: 1550518078us  stopped: 1560431480us idle: 2652us\n     seq_num: 9255175  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.59  cur_daddr: 10.244.0.103\n     cur_udp_dst: 14881  cur_udp_src: 14881\n     cur_queue_map: 0\n     flows: 4643986\nResult: OK: 9913402(c9910749+d2652) usec, 9255174 (64byte,-1frags)\n  933602pps 478Mb/sec (478004224bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_reverse"
+          }
+        ],
+        "config": {
+          "path": "bidirectional-endpoint-to-endpoint"
+        },
+        "workload_name": "cilium_endpoint_pktgen"
+      }
+    ]
+  },
+  "rejit_result": {
+    "enabled_passes": [
+      "branch_flip"
+    ],
+    "mode": "loadtime",
+    "plan_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260701_045418_756916/details/loadtime-plans/cilium__agent.json",
+    "report_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260701_045418_756916/details/loadtime-reports/cilium__agent.jsonl",
+    "status": "ok"
+  },
+  "runner": "cilium",
+  "selected_workload": "cilium_endpoint_pktgen",
+  "status": "ok"
+}

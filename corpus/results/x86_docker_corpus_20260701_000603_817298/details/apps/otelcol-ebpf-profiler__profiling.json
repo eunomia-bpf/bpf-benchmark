@@ -1,0 +1,385 @@
+{
+  "app": "otelcol-ebpf-profiler/profiling",
+  "baseline": {
+    "bpf": {
+      "1840": {
+        "bytes_jited": 3615,
+        "bytes_xlated": 6112,
+        "id": 1840,
+        "name": "perf_unwind_sto",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1841": {
+        "bytes_jited": 21863,
+        "bytes_xlated": 37024,
+        "id": 1841,
+        "name": "perf_unwind_nat",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1842": {
+        "bytes_jited": 18419,
+        "bytes_xlated": 28080,
+        "id": 1842,
+        "name": "perf_unwind_hot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1843": {
+        "bytes_jited": 18244,
+        "bytes_xlated": 29624,
+        "id": 1843,
+        "name": "perf_unwind_per",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1844": {
+        "bytes_jited": 14978,
+        "bytes_xlated": 24736,
+        "id": 1844,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1845": {
+        "bytes_jited": 19585,
+        "bytes_xlated": 33192,
+        "id": 1845,
+        "name": "perf_unwind_pyt",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1846": {
+        "bytes_jited": 17820,
+        "bytes_xlated": 30264,
+        "id": 1846,
+        "name": "perf_unwind_rub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1847": {
+        "bytes_jited": 20210,
+        "bytes_xlated": 33448,
+        "id": 1847,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1848": {
+        "bytes_jited": 22792,
+        "bytes_xlated": 37440,
+        "id": 1848,
+        "name": "perf_unwind_dot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1849": {
+        "bytes_jited": 1569,
+        "bytes_xlated": 2504,
+        "id": 1849,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1850": {
+        "bytes_jited": 789,
+        "bytes_xlated": 1320,
+        "id": 1850,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 161,
+        "run_time_ns_delta": 273850,
+        "type": "tracepoint"
+      },
+      "1851": {
+        "bytes_jited": 3795,
+        "bytes_xlated": 5888,
+        "id": 1851,
+        "name": "native_tracer_e",
+        "run_cnt_delta": 241295,
+        "run_time_ns_delta": 484567329,
+        "type": "perf_event"
+      },
+      "1852": {
+        "bytes_jited": 3659,
+        "bytes_xlated": 5696,
+        "id": 1852,
+        "name": "custom__generic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "components": [
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "10",
+              "0"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 10.007855087002099,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=113975298 elapsed_s=10.000004 worker=0 sink=4253651175",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "10",
+              "1"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 10.007918101000541,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=113003062 elapsed_s=10.000003 worker=1 sink=2947165964",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "10",
+              "0"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 10.03367629100103,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=305051649 elapsed_s=10.000004 worker=0 sink=2541512358",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "10",
+              "1"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 10.03374867200182,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=306587169 elapsed_s=10.000002 worker=1 sink=1563912947",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "10",
+              "0"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 10.053686186001869,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=194178814 elapsed_s=10.000197 worker=0 sink=3585343488",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "10",
+              "1"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 10.053754269996716,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=259659568 elapsed_s=10.000062 worker=1 sink=2146118656",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "10",
+              "0"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 10.053781798997079,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=131389582 elapsed_s=10.000000 worker=0 sink=1679759483",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "10",
+              "1"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 10.053806297000847,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=131136798 elapsed_s=10.000000 worker=1 sink=3801431108",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "10",
+              "0"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 10.053844246001972,
+            "returncode": 0,
+            "stderr": "php int_loop ops=659812351 elapsed_s=10.000001 worker=0 sink=1951425000",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "10",
+              "1"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 10.053878974998952,
+            "returncode": 0,
+            "stderr": "php int_loop ops=565544730 elapsed_s=10.000001 worker=1 sink=3647802520",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/stress-ng",
+              "--cpu",
+              "1",
+              "--timeout",
+              "10s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/dbdae263"
+            ],
+            "config": {
+              "stressors": [
+                "cpu"
+              ],
+              "tool": "stress-ng"
+            },
+            "duration_s": 10.053912885996397,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [362492] setting to a 10 secs run per stressor\nstress-ng: info:  [362492] dispatching hogs: 1 cpu\nstress-ng: info:  [362492] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [362492] note: 24 cpus have scaling governors set to powersave and this can impact on performance; setting /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor to 'performance' may improve performance\nstress-ng: metrc: [362492] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [362492]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [362492] cpu               23648     10.00     10.00      0.00      2364.74        2364.80\nstress-ng: info:  [362492] skipped: 0\nstress-ng: info:  [362492] passed: 1: cpu (1)\nstress-ng: info:  [362492] failed: 0\nstress-ng: info:  [362492] metrics untrustworthy: 0\nstress-ng: info:  [362492] successful run completed in 10.00 secs",
+            "workload_name": "otel_stress_ng_cpu"
+          }
+        ],
+        "workload_name": "otel_mixed_workload"
+      }
+    ]
+  },
+  "error": "bpfprof exited before workload profile window: open BPF program id 1839: BPF_PROG_GET_FD_BY_ID: No such file or directory (os error 2)\n",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "otelcol-ebpf-profiler",
+  "runner_details": {
+    "command_used": [
+      "/usr/local/bin/otelcol-ebpf-profiler",
+      "--feature-gates=+service.profilesSupport",
+      "--config",
+      "/var/tmp/bpfrejit-runtime/dbdae263/otelcol-ebpf-profiler-5u_wdbol/config.yaml"
+    ],
+    "process_output": {
+      "returncode": 0,
+      "stderr_tail": "2026-07-01T00:09:38.925Z\tinfo\totelconftelemetry/metrics.go:24\tInternal metrics telemetry disabled\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-07-01T00:09:38.925Z\tinfo\tbuilders/builders.go:26\tDevelopment component. May change in the future.\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\"}\n2026-07-01T00:09:38.926Z\tinfo\tservice@v0.139.0/service.go:222\tStarting otelcol-ebpf-profiler...\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"Version\": \"0.140.0\", \"NumCPU\": 24}\n2026-07-01T00:09:38.926Z\tinfo\textensions/extensions.go:40\tStarting extensions...\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-07-01T00:09:38.926Z\tinfo\tInterpreter tracers: perl,php,python,hotspot,ruby,v8,dotnet,go,labels\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-01T00:09:39.100Z\tinfo\tFound offsets: task stack 0x20, pt_regs 0x3f48, tpbase 0x25a8\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-01T00:09:39.256Z\tinfo\tLoaded custom__generic program (FD: 66)\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-01T00:09:39.256Z\tinfo\tSupports generic eBPF map batch operations\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-01T00:09:39.256Z\tinfo\tSupports LPM trie eBPF map batch operations\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-01T00:09:39.258Z\tinfo\teBPF tracer loaded\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-01T00:09:39.259Z\tinfo\tAttached tracer program\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-01T00:09:39.259Z\tinfo\tAttached sched monitor\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-01T00:09:39.288Z\tinfo\tservice@v0.139.0/service.go:245\tEverything is ready. Begin running and processing data.\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-07-01T00:09:41.337Z\twarn\tfailed to visit symbols: failed to read .symtab: section not present\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-01T00:09:41.340Z\terror\tFailed to load /usr/bin/node (0x53e6ab99af7214f6): unable to read '_ZN2v88internal7Version6major_E': symbol not found\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\ngo.opentelemetry.io/ebpf-profiler/internal/log.Errorf\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/internal/log/logging.go:66\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*executableInfoManagerState).detectAndLoadInterpData\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:333\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*ExecutableInfoManager).AddOrIncRef\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:229\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).handleNewMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:256\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).processNewExecMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:384\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).synchronizeMappings\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:511\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).SynchronizeProcess\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:648\ngo.opentelemetry.io/ebpf-profiler/tracer.(*Tracer).processPIDEvents\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/tracer/events.go:51\n2026-07-01T00:09:43.939Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 6, \"sample records\": 4574}\n2026-07-01T00:09:49.887Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 8266}\n2026-07-01T00:09:51.394Z\twarn\tfailed to visit symbols: failed to read .symtab: section not present\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-01T00:09:53.273Z\terror\tFailed to load /snap/snapd/26865/usr/lib/snapd/snapd (0xbf5142783b05e3ec): not a Go executable\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\ngo.opentelemetry.io/ebpf-profiler/internal/log.Errorf\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/internal/log/logging.go:66\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*executableInfoManagerState).detectAndLoadInterpData\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:333\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*ExecutableInfoManager).AddOrIncRef\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:229\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).handleNewMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:256\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).processNewExecMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:384\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).synchronizeMappings\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:511\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).SynchronizeProcess\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:648\ngo.opentelemetry.io/ebpf-profiler/tracer.(*Tracer).processPIDEvents\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/tracer/events.go:51\n2026-07-01T00:09:53.273Z\terror\tFailed to load /snap/snapd/26865/usr/lib/snapd/snapd (0xbf5142783b05e3ec): not a Go executable\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\ngo.opentelemetry.io/ebpf-profiler/internal/log.Errorf\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/internal/log/logging.go:66\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*executableInfoManagerState).detectAndLoadInterpData\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:333\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*ExecutableInfoManager).AddOrIncRef\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:229\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).handleNewMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:256\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).processNewExecMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:384\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).synchronizeMappings\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:511\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).SynchronizeProcess\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:648\ngo.opentelemetry.io/ebpf-profiler/tracer.(*Tracer).processPIDEvents\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/tracer/events.go:51\n2026-07-01T00:09:54.077Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 5820}\n2026-07-01T00:09:59.984Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"1954fa88-1ff1-4433-9f26-078b07393e15\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 6875}",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "otel_mixed_workload",
+  "status": "error"
+}

@@ -1,0 +1,10 @@
+{
+  "app": "katran",
+  "baseline": null,
+  "error": "repo kernel module tree is missing for the running kernel: /artifacts/lib/modules/6.15.11-061511-generic",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "katran",
+  "selected_workload": "xdp_pktgen",
+  "status": "error"
+}

@@ -1,0 +1,1614 @@
+{
+  "app": "tetragon/observer",
+  "baseline": {
+    "bpf": {
+      "4267": {
+        "bytes_jited": 17,
+        "bytes_xlated": 24,
+        "id": 4267,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4268": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 4268,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4269": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 4269,
+        "name": "probe_bpf_kprob",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4270": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 4270,
+        "name": "probe_upm_link",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4271": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 4271,
+        "name": "probe_fmod_ret",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "4272": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 4272,
+        "name": "probe_sys_fmod_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "4273": {
+        "bytes_jited": 22,
+        "bytes_xlated": 32,
+        "id": 4273,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4274": {
+        "bytes_jited": 20495,
+        "bytes_xlated": 32776,
+        "id": 4274,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "4275": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 4275,
+        "name": "probe_bpf_kprob",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4276": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 4276,
+        "name": "probe_bpf_perf_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4277": {
+        "bytes_jited": 17,
+        "bytes_xlated": 24,
+        "id": 4277,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "lsm"
+      },
+      "4278": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 4278,
+        "name": "probe_lsm_file_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "lsm"
+      },
+      "4279": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 4279,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "4280": {
+        "bytes_jited": 110,
+        "bytes_xlated": 88,
+        "id": 4280,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "4281": {
+        "bytes_jited": 17,
+        "bytes_xlated": 24,
+        "id": 4281,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "4282": {
+        "bytes_jited": 52,
+        "bytes_xlated": 80,
+        "id": 4282,
+        "name": "probe_get_func_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "4283": {
+        "bytes_jited": 1024,
+        "bytes_xlated": 1824,
+        "id": 4283,
+        "name": "event_exit_acct",
+        "run_cnt_delta": 125,
+        "run_time_ns_delta": 272376,
+        "type": "kprobe"
+      },
+      "4284": {
+        "bytes_jited": 1070,
+        "bytes_xlated": 1904,
+        "id": 4284,
+        "name": "event_exit_disa",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4285": {
+        "bytes_jited": 7336,
+        "bytes_xlated": 11312,
+        "id": 4285,
+        "name": "event_wake_up_n",
+        "run_cnt_delta": 122,
+        "run_time_ns_delta": 469838,
+        "type": "kprobe"
+      },
+      "4286": {
+        "bytes_jited": 5095,
+        "bytes_xlated": 8088,
+        "id": 4286,
+        "name": "execve_send",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "4287": {
+        "bytes_jited": 11695,
+        "bytes_xlated": 20360,
+        "id": 4287,
+        "name": "event_execve",
+        "run_cnt_delta": 89,
+        "run_time_ns_delta": 1096819,
+        "type": "tracepoint"
+      },
+      "4288": {
+        "bytes_jited": 1382,
+        "bytes_xlated": 2352,
+        "id": 4288,
+        "name": "execve_rate",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "4289": {
+        "bytes_jited": 1523,
+        "bytes_xlated": 2544,
+        "id": 4289,
+        "name": "tg_kp_bprm_comm",
+        "run_cnt_delta": 89,
+        "run_time_ns_delta": 116535,
+        "type": "kprobe"
+      },
+      "4290": {
+        "bytes_jited": 326,
+        "bytes_xlated": 544,
+        "id": 4290,
+        "name": "execve_map_upda",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "4291": {
+        "bytes_jited": 96,
+        "bytes_xlated": 176,
+        "id": 4291,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "4292": {
+        "bytes_jited": 17,
+        "bytes_xlated": 24,
+        "id": 4292,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "4293": {
+        "bytes_jited": 1314,
+        "bytes_xlated": 2240,
+        "id": 4293,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4294": {
+        "bytes_jited": 5688,
+        "bytes_xlated": 10168,
+        "id": 4294,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4295": {
+        "bytes_jited": 1856,
+        "bytes_xlated": 3128,
+        "id": 4295,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4296": {
+        "bytes_jited": 1884,
+        "bytes_xlated": 3328,
+        "id": 4296,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4297": {
+        "bytes_jited": 12163,
+        "bytes_xlated": 19896,
+        "id": 4297,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4298": {
+        "bytes_jited": 18567,
+        "bytes_xlated": 31440,
+        "id": 4298,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4299": {
+        "bytes_jited": 17936,
+        "bytes_xlated": 29328,
+        "id": 4299,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4300": {
+        "bytes_jited": 12163,
+        "bytes_xlated": 19896,
+        "id": 4300,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4301": {
+        "bytes_jited": 17936,
+        "bytes_xlated": 29328,
+        "id": 4301,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4302": {
+        "bytes_jited": 5688,
+        "bytes_xlated": 10168,
+        "id": 4302,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4303": {
+        "bytes_jited": 18567,
+        "bytes_xlated": 31440,
+        "id": 4303,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4304": {
+        "bytes_jited": 1856,
+        "bytes_xlated": 3128,
+        "id": 4304,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4305": {
+        "bytes_jited": 1314,
+        "bytes_xlated": 2240,
+        "id": 4305,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4306": {
+        "bytes_jited": 1884,
+        "bytes_xlated": 3328,
+        "id": 4306,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 2035038,
+        "run_time_ns_delta": 1378115322,
+        "type": "kprobe"
+      },
+      "4307": {
+        "bytes_jited": 15247,
+        "bytes_xlated": 26368,
+        "id": 4307,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 1017516,
+        "run_time_ns_delta": 16435831,
+        "type": "kprobe"
+      },
+      "4308": {
+        "bytes_jited": 17198,
+        "bytes_xlated": 28080,
+        "id": 4308,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4309": {
+        "bytes_jited": 4415,
+        "bytes_xlated": 7816,
+        "id": 4309,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4310": {
+        "bytes_jited": 800,
+        "bytes_xlated": 1360,
+        "id": 4310,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4311": {
+        "bytes_jited": 17936,
+        "bytes_xlated": 29328,
+        "id": 4311,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4312": {
+        "bytes_jited": 1856,
+        "bytes_xlated": 3128,
+        "id": 4312,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4313": {
+        "bytes_jited": 1884,
+        "bytes_xlated": 3328,
+        "id": 4313,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 8915395,
+        "run_time_ns_delta": 7300814630,
+        "type": "kprobe"
+      },
+      "4314": {
+        "bytes_jited": 18567,
+        "bytes_xlated": 31440,
+        "id": 4314,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4315": {
+        "bytes_jited": 1314,
+        "bytes_xlated": 2240,
+        "id": 4315,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4316": {
+        "bytes_jited": 12163,
+        "bytes_xlated": 19896,
+        "id": 4316,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4317": {
+        "bytes_jited": 5688,
+        "bytes_xlated": 10168,
+        "id": 4317,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4318": {
+        "bytes_jited": 4415,
+        "bytes_xlated": 7816,
+        "id": 4318,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4319": {
+        "bytes_jited": 15247,
+        "bytes_xlated": 26368,
+        "id": 4319,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 1017516,
+        "run_time_ns_delta": 16452164,
+        "type": "kprobe"
+      },
+      "4320": {
+        "bytes_jited": 800,
+        "bytes_xlated": 1360,
+        "id": 4320,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4321": {
+        "bytes_jited": 17198,
+        "bytes_xlated": 28080,
+        "id": 4321,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4322": {
+        "bytes_jited": 12163,
+        "bytes_xlated": 19896,
+        "id": 4322,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4323": {
+        "bytes_jited": 5688,
+        "bytes_xlated": 10168,
+        "id": 4323,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4324": {
+        "bytes_jited": 1856,
+        "bytes_xlated": 3128,
+        "id": 4324,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4325": {
+        "bytes_jited": 17936,
+        "bytes_xlated": 29328,
+        "id": 4325,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4326": {
+        "bytes_jited": 1314,
+        "bytes_xlated": 2240,
+        "id": 4326,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4327": {
+        "bytes_jited": 18567,
+        "bytes_xlated": 31440,
+        "id": 4327,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4328": {
+        "bytes_jited": 1884,
+        "bytes_xlated": 3328,
+        "id": 4328,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 4857993,
+        "run_time_ns_delta": 872853414,
+        "type": "kprobe"
+      },
+      "4329": {
+        "bytes_jited": 1884,
+        "bytes_xlated": 3328,
+        "id": 4329,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 8188659,
+        "run_time_ns_delta": 10577210700,
+        "type": "kprobe"
+      },
+      "4330": {
+        "bytes_jited": 18567,
+        "bytes_xlated": 31440,
+        "id": 4330,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4331": {
+        "bytes_jited": 12163,
+        "bytes_xlated": 19896,
+        "id": 4331,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4332": {
+        "bytes_jited": 17936,
+        "bytes_xlated": 29328,
+        "id": 4332,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4333": {
+        "bytes_jited": 1314,
+        "bytes_xlated": 2240,
+        "id": 4333,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4334": {
+        "bytes_jited": 5688,
+        "bytes_xlated": 10168,
+        "id": 4334,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4335": {
+        "bytes_jited": 1856,
+        "bytes_xlated": 3128,
+        "id": 4335,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4336": {
+        "bytes_jited": 800,
+        "bytes_xlated": 1360,
+        "id": 4336,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4337": {
+        "bytes_jited": 17198,
+        "bytes_xlated": 28080,
+        "id": 4337,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4338": {
+        "bytes_jited": 15247,
+        "bytes_xlated": 26368,
+        "id": 4338,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 8188662,
+        "run_time_ns_delta": 255206761,
+        "type": "kprobe"
+      },
+      "4339": {
+        "bytes_jited": 4415,
+        "bytes_xlated": 7816,
+        "id": 4339,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4340": {
+        "bytes_jited": 1314,
+        "bytes_xlated": 2240,
+        "id": 4340,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4341": {
+        "bytes_jited": 12163,
+        "bytes_xlated": 19896,
+        "id": 4341,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4342": {
+        "bytes_jited": 5688,
+        "bytes_xlated": 10168,
+        "id": 4342,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4343": {
+        "bytes_jited": 18567,
+        "bytes_xlated": 31440,
+        "id": 4343,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4344": {
+        "bytes_jited": 1884,
+        "bytes_xlated": 3328,
+        "id": 4344,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4345": {
+        "bytes_jited": 17936,
+        "bytes_xlated": 29328,
+        "id": 4345,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4346": {
+        "bytes_jited": 1856,
+        "bytes_xlated": 3128,
+        "id": 4346,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4347": {
+        "bytes_jited": 4415,
+        "bytes_xlated": 7816,
+        "id": 4347,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4348": {
+        "bytes_jited": 800,
+        "bytes_xlated": 1360,
+        "id": 4348,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4349": {
+        "bytes_jited": 15247,
+        "bytes_xlated": 26368,
+        "id": 4349,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4350": {
+        "bytes_jited": 17198,
+        "bytes_xlated": 28080,
+        "id": 4350,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4351": {
+        "bytes_jited": 12163,
+        "bytes_xlated": 19896,
+        "id": 4351,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4352": {
+        "bytes_jited": 5688,
+        "bytes_xlated": 10168,
+        "id": 4352,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4353": {
+        "bytes_jited": 1856,
+        "bytes_xlated": 3128,
+        "id": 4353,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4354": {
+        "bytes_jited": 1884,
+        "bytes_xlated": 3328,
+        "id": 4354,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 89,
+        "run_time_ns_delta": 577561,
+        "type": "kprobe"
+      },
+      "4355": {
+        "bytes_jited": 1314,
+        "bytes_xlated": 2240,
+        "id": 4355,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4356": {
+        "bytes_jited": 17936,
+        "bytes_xlated": 29328,
+        "id": 4356,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4357": {
+        "bytes_jited": 18567,
+        "bytes_xlated": 31440,
+        "id": 4357,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4358": {
+        "bytes_jited": 17293,
+        "bytes_xlated": 28280,
+        "id": 4358,
+        "name": "generic_tracepo",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "4359": {
+        "bytes_jited": 1856,
+        "bytes_xlated": 3128,
+        "id": 4359,
+        "name": "generic_tracepo",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "4360": {
+        "bytes_jited": 15685,
+        "bytes_xlated": 26904,
+        "id": 4360,
+        "name": "generic_tracepo",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "4361": {
+        "bytes_jited": 12166,
+        "bytes_xlated": 19896,
+        "id": 4361,
+        "name": "generic_tracepo",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "4362": {
+        "bytes_jited": 14889,
+        "bytes_xlated": 26536,
+        "id": 4362,
+        "name": "generic_tracepo",
+        "run_cnt_delta": 39266914,
+        "run_time_ns_delta": 36967824552,
+        "type": "tracepoint"
+      },
+      "4363": {
+        "bytes_jited": 5443,
+        "bytes_xlated": 9688,
+        "id": 4363,
+        "name": "generic_tracepo",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "4364": {
+        "bytes_jited": 12163,
+        "bytes_xlated": 19896,
+        "id": 4364,
+        "name": "generic_rawtp_p",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "4365": {
+        "bytes_jited": 4415,
+        "bytes_xlated": 7816,
+        "id": 4365,
+        "name": "generic_rawtp_a",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "4366": {
+        "bytes_jited": 742,
+        "bytes_xlated": 1176,
+        "id": 4366,
+        "name": "generic_rawtp_s",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "4367": {
+        "bytes_jited": 1856,
+        "bytes_xlated": 3128,
+        "id": 4367,
+        "name": "generic_rawtp_o",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "4368": {
+        "bytes_jited": 17827,
+        "bytes_xlated": 30448,
+        "id": 4368,
+        "name": "generic_rawtp_p",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "4369": {
+        "bytes_jited": 1846,
+        "bytes_xlated": 3272,
+        "id": 4369,
+        "name": "generic_rawtp_e",
+        "run_cnt_delta": 89,
+        "run_time_ns_delta": 464065,
+        "type": "raw_tracepoint"
+      },
+      "4370": {
+        "bytes_jited": 17293,
+        "bytes_xlated": 28280,
+        "id": 4370,
+        "name": "generic_rawtp_f",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "4371": {
+        "bytes_jited": 1314,
+        "bytes_xlated": 2240,
+        "id": 4371,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4372": {
+        "bytes_jited": 17936,
+        "bytes_xlated": 29328,
+        "id": 4372,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4373": {
+        "bytes_jited": 1856,
+        "bytes_xlated": 3128,
+        "id": 4373,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4374": {
+        "bytes_jited": 18567,
+        "bytes_xlated": 31440,
+        "id": 4374,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4375": {
+        "bytes_jited": 12163,
+        "bytes_xlated": 19896,
+        "id": 4375,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4376": {
+        "bytes_jited": 1884,
+        "bytes_xlated": 3328,
+        "id": 4376,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 45,
+        "run_time_ns_delta": 151378,
+        "type": "kprobe"
+      },
+      "4377": {
+        "bytes_jited": 5688,
+        "bytes_xlated": 10168,
+        "id": 4377,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4378": {
+        "bytes_jited": 12163,
+        "bytes_xlated": 19896,
+        "id": 4378,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4379": {
+        "bytes_jited": 5688,
+        "bytes_xlated": 10168,
+        "id": 4379,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4380": {
+        "bytes_jited": 18567,
+        "bytes_xlated": 31440,
+        "id": 4380,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4381": {
+        "bytes_jited": 1884,
+        "bytes_xlated": 3328,
+        "id": 4381,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 110630,
+        "run_time_ns_delta": 345111306,
+        "type": "kprobe"
+      },
+      "4382": {
+        "bytes_jited": 17936,
+        "bytes_xlated": 29328,
+        "id": 4382,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4383": {
+        "bytes_jited": 1856,
+        "bytes_xlated": 3128,
+        "id": 4383,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4384": {
+        "bytes_jited": 1314,
+        "bytes_xlated": 2240,
+        "id": 4384,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4385": {
+        "bytes_jited": 1314,
+        "bytes_xlated": 2240,
+        "id": 4385,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4386": {
+        "bytes_jited": 1884,
+        "bytes_xlated": 3328,
+        "id": 4386,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4387": {
+        "bytes_jited": 1856,
+        "bytes_xlated": 3128,
+        "id": 4387,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4388": {
+        "bytes_jited": 17936,
+        "bytes_xlated": 29328,
+        "id": 4388,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4389": {
+        "bytes_jited": 5688,
+        "bytes_xlated": 10168,
+        "id": 4389,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4390": {
+        "bytes_jited": 12163,
+        "bytes_xlated": 19896,
+        "id": 4390,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4391": {
+        "bytes_jited": 18567,
+        "bytes_xlated": 31440,
+        "id": 4391,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4392": {
+        "bytes_jited": 5688,
+        "bytes_xlated": 10168,
+        "id": 4392,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4393": {
+        "bytes_jited": 1884,
+        "bytes_xlated": 3328,
+        "id": 4393,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 2035098,
+        "run_time_ns_delta": 1413370776,
+        "type": "kprobe"
+      },
+      "4394": {
+        "bytes_jited": 1856,
+        "bytes_xlated": 3128,
+        "id": 4394,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4395": {
+        "bytes_jited": 1314,
+        "bytes_xlated": 2240,
+        "id": 4395,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4396": {
+        "bytes_jited": 12163,
+        "bytes_xlated": 19896,
+        "id": 4396,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4397": {
+        "bytes_jited": 17936,
+        "bytes_xlated": 29328,
+        "id": 4397,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4398": {
+        "bytes_jited": 18567,
+        "bytes_xlated": 31440,
+        "id": 4398,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4399": {
+        "bytes_jited": 15247,
+        "bytes_xlated": 26368,
+        "id": 4399,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 1017520,
+        "run_time_ns_delta": 22325919,
+        "type": "kprobe"
+      },
+      "4400": {
+        "bytes_jited": 17198,
+        "bytes_xlated": 28080,
+        "id": 4400,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4401": {
+        "bytes_jited": 800,
+        "bytes_xlated": 1360,
+        "id": 4401,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4402": {
+        "bytes_jited": 4415,
+        "bytes_xlated": 7816,
+        "id": 4402,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4403": {
+        "bytes_jited": 5688,
+        "bytes_xlated": 10168,
+        "id": 4403,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4404": {
+        "bytes_jited": 1884,
+        "bytes_xlated": 3328,
+        "id": 4404,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 3159299,
+        "run_time_ns_delta": 3389774095,
+        "type": "kprobe"
+      },
+      "4405": {
+        "bytes_jited": 17936,
+        "bytes_xlated": 29328,
+        "id": 4405,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4406": {
+        "bytes_jited": 1856,
+        "bytes_xlated": 3128,
+        "id": 4406,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4407": {
+        "bytes_jited": 1314,
+        "bytes_xlated": 2240,
+        "id": 4407,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4408": {
+        "bytes_jited": 18567,
+        "bytes_xlated": 31440,
+        "id": 4408,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4409": {
+        "bytes_jited": 12163,
+        "bytes_xlated": 19896,
+        "id": 4409,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4410": {
+        "bytes_jited": 12163,
+        "bytes_xlated": 19896,
+        "id": 4410,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4411": {
+        "bytes_jited": 17936,
+        "bytes_xlated": 29328,
+        "id": 4411,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4412": {
+        "bytes_jited": 1856,
+        "bytes_xlated": 3128,
+        "id": 4412,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4413": {
+        "bytes_jited": 1314,
+        "bytes_xlated": 2240,
+        "id": 4413,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4414": {
+        "bytes_jited": 1884,
+        "bytes_xlated": 3328,
+        "id": 4414,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4415": {
+        "bytes_jited": 18567,
+        "bytes_xlated": 31440,
+        "id": 4415,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4416": {
+        "bytes_jited": 5688,
+        "bytes_xlated": 10168,
+        "id": 4416,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--eventfd",
+          "1",
+          "--mmap",
+          "1",
+          "--mmap-bytes",
+          "16M",
+          "--udp",
+          "1",
+          "--sock",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockpair",
+          "1",
+          "--sock-port",
+          "42994",
+          "--sockfd-port",
+          "43094",
+          "--timeout",
+          "10s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/b081fdb5"
+        ],
+        "config": {
+          "stressors": [
+            "eventfd",
+            "mmap",
+            "udp",
+            "sock",
+            "sockfd",
+            "sockpair"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 11.023361602000477,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [177918] setting to a 10 secs run per stressor\nstress-ng: info:  [177918] dispatching hogs: 1 eventfd, 1 mmap, 1 udp, 1 sock, 1 sockfd, 1 sockpair\nstress-ng: info:  [177918] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [177918] note: 24 cpus have scaling governors set to powersave and this can impact on performance; setting /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor to 'performance' may improve performance\nstress-ng: metrc: [177918] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [177918]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [177918] eventfd          657952     10.00      0.46     11.89     65789.96       53244.28\nstress-ng: metrc: [177918] mmap                397     10.01      0.08      9.90        39.68          39.76\nstress-ng: metrc: [177918] udp             1987700     10.00      0.28     15.33    198762.71      127403.89\nstress-ng: metrc: [177918] sock               6181     10.00      0.19     16.31       617.99         374.46\nstress-ng: metrc: [177918] sockfd          1582571     10.01      0.50     14.62    158113.48      104632.07\nstress-ng: metrc: [177918] sockpair        1785490     10.99      0.34     17.76    162505.42       98653.16\nstress-ng: info:  [177918] skipped: 0\nstress-ng: info:  [177918] passed: 6: eventfd (1) mmap (1) udp (1) sock (1) sockfd (1) sockpair (1)\nstress-ng: info:  [177918] failed: 0\nstress-ng: info:  [177918] metrics untrustworthy: 0\nstress-ng: info:  [177918] successful run completed in 10.99 secs",
+        "workload_name": "stress_ng_tetragon_policy_hot"
+      }
+    ]
+  },
+  "error": "bpfprof discovery failed with exit code 1: read JIT PC map for BPF program id 4291: decode x86 JIT instruction at +0x5d: unsupported x86 opcode 0xc9 after 0 prefix bytes\n",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "tetragon",
+  "runner_details": {
+    "command_used": [
+      "/artifacts/tetragon/bin/tetragon",
+      "--server-address",
+      "127.0.0.1:55923",
+      "--health-server-address",
+      "127.0.0.1:53045",
+      "--tracing-policy-dir",
+      "/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies",
+      "--bpf-lib",
+      "/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon"
+    ],
+    "process_output": {
+      "stderr_tail": [],
+      "stdout_tail": [
+        "level=info msg=\"Starting tetragon\" version=v1.8.0-pre.0-79-g8ca052908",
+        "level=info msg=\"config settings\" config=\"map[bpf-dir:tetragon bpf-lib:/opt/bpf-benchmark/repo-artifacts/x86_64/tetragon btf: cgroup-rate: cluster-name: config-dir: cpuprofile: cri-endpoint: data-cache-size:1024 debug:false disable-kprobe-multi:false enable-ancestors:[] enable-cgidmap:false enable-cgidmap-debug:false enable-cgtrackerid:true enable-cri:false enable-deprecated-tracingpolicy-grpc:false enable-event-metrics:true enable-export-aggregation:false enable-k8s-api:false enable-msg-handling-latency:false enable-pid-set-filter:false enable-pod-annotations:false enable-pod-info:false enable-policy-filter:false enable-policy-filter-cgroup-map:false enable-policy-filter-debug:false enable-process-cred:false enable-process-environment-variables:false enable-process-ns:false enable-tracing-policy-crd:true event-cache-retries:15 event-cache-retry-delay:2 event-queue-size:10000 execve-map-entries:0 execve-map-size: export-aggregation-buffer-size:10000 export-aggregation-window-size:15s export-allowlist: export-denylist: export-file-compress:false export-file-max-backups:5 export-file-max-size-mb:10 export-file-perm:600 export-file-rotation-interval:0s export-filename: export-rate-limit:-1 expose-stack-addresses:false field-filters: filter-environment-variables:[] force-large-progs:false force-small-progs:false generate-docs:false gops-address: health-server-address:127.0.0.1:53045 health-server-interval:10 k8s-controlplane-retry:1 k8s-kubeconfig-path: keep-sensors-on-exit:false kernel: log-file: log-format:text log-level:info memprofile: metrics-label-filter:namespace,workload,pod,binary metrics-server: netns-dir:/var/run/docker/netns/ parents-map-enabled:false parents-map-entries:0 parents-map-size: pprof-address: process-cache-gc-interval:30s process-cache-size:65536 procfs:/proc/ rb-queue-size:65535 rb-size:0 rb-size-total:0 redaction-filters: release-pinned-bpf:true retprobes-cache-size:4096 server-address:127.0.0.1:55923 tracing-policy: tracing-policy-dir:/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies use-perf-ring-buffer:false username-metadata:disabled verbose:0]\"",
+        "level=info msg=\"Tetragon current security context\" SELinux=unconfined AppArmor=unconfined Smack=\"\" Lockdown=none",
+        "level=info msg=\"Tetragon pid file creation succeeded\" pid=177672 pidfile=/var/run/tetragon/tetragon.pid",
+        "level=warn msg=\"Unable to mount BPF filesystem\" error=\"multiple mount points detected at /sys/fs/bpf\"",
+        "level=info msg=\"BPF: successfully released pinned BPF programs and maps\" bpf-dir=/sys/fs/bpf/tetragon",
+        "level=info msg=\"BTF discovery: default kernel btf file found\" btf-file=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"BPF detected features: override_return: true, buildid: true, kprobe_multi: true, uprobe_multi: true, fmodret: true, fmodret_syscall: true, signal: true, large: true, link_pin: true, lsm: true, missed_stats_kprobe_multi: true, missed_stats_kprobe: true, batch_update: true, uprobe_refctroff: true, audit_loginuid: true, probe_write_user: true, uprobe_regs_change: false, mix_bpf_and_tail_calls: true, fentry: true, get_func_ret: true\"",
+        "level=info msg=\"Cgroup mode detection succeeded\" cgroup.fs=/sys/fs/cgroup cgroup.mode=\"Unified mode (Cgroupv2)\"",
+        "level=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/proc/1/root/sys/fs/cgroup cgroup.controllers=\"[cpuset cpu io memory hugetlb pids rdma misc dmem]\" cgroup.hierarchyID=0",
+        "level=info msg=\"Cgroupv2 supported controllers detected successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/sys/fs/cgroup/system.slice/docker-1e564b05f70da7f8f5ee47b4620ac4bda38b9e2ad68666249fd80175eec1d327.scope cgroup.controllers=\"[cpuset cpu io memory hugetlb pids rdma misc dmem]\" cgroup.hierarchyID=0",
+        "level=info msg=\"Cgroupv2 hierarchy validated successfully\" cgroup.fs=/sys/fs/cgroup cgroup.path=/sys/fs/cgroup/system.slice/docker-1e564b05f70da7f8f5ee47b4620ac4bda38b9e2ad68666249fd80175eec1d327.scope",
+        "level=info msg=\"Deployment mode detection succeeded\" cgroup.fs=/sys/fs/cgroup deployment.mode=Container",
+        "level=info msg=\"Updated TetragonConf map successfully\" confmap-update=tg_conf_map deployment.mode=Container log.level=0 cgroup.fs.magic=Cgroupv2 cgroup.hierarchyID=0 NSPID=177672",
+        "level=info msg=\"Disabling Kubernetes API\"",
+        "level=info msg=\"Configured redaction filters\" redactionFilters=\"\"",
+        "level=info msg=\"Exit probe on acct_process\"",
+        "level=info msg=\"Set execve_map entries 32768\" size=28M",
+        "level=info msg=\"BPF ring buffer size (bytes)\" total=2M",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=__base__",
+        "level=info msg=\"Loading kernel version 6.15.11\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=__base__",
+        "level=info msg=\"Available sensors\" sensors=__base__",
+        "level=info msg=\"Registered sensors (policy-handlers)\" policy-handlers=\"loader sensor, tracing, enforcer\"",
+        "level=info msg=\"Registered probe types\" types=\"generic_lsm, generic_uprobe, loader, execve, enforcer, generic_fentry, generic_tracepoint, generic_usdt, generic_kprobe\"",
+        "level=info msg=\"Creating new EventCache\" retries=15 delay=2s",
+        "level=info msg=\"Starting process manager\" enableK8s=false enableProcessCred=false enableProcessNs=false",
+        "level=info msg=\"Exporter configuration\" enabled=false fileName=\"\"",
+        "level=info msg=\"Successfully detected bpftool path\" bpftool=/usr/local/bin/bpftool",
+        "level=warn msg=\"failed to locate gops binary, on bugtool debugging ensure you have gops installed\"",
+        "level=info msg=\"BPF: found active BPF resources\" bpf-dir=/sys/fs/bpf/tetragon pinned-bpf=\"[__base__ execve_map execve_map_stats execve_map_update_data tcpmon_map tg_conf_map tg_errmetrics_map tg_execve_joined_info_map tg_execve_joined_info_map_stats tg_mbset_gen tg_mbset_map tg_rb_events tg_stats_map]\"",
+        "level=info msg=\"Starting gRPC server\" protocol=tcp address=127.0.0.1:55923",
+        "level=info msg=\"Starting gRPC health server\" address=127.0.0.1:53045 interval=10",
+        "level=info msg=\"Read ProcFS /proc/ appended 1076/1139 entries\"",
+        "level=info msg=\"Cgroup rate disabled (0/0s)\"",
+        "level=warn msg=\"Enforcement actions are not configured for this policy, forcing monitor_only mode\" policy=bpf",
+        "level=info msg=\"kprobe call ignored because it was not found\" policy=bpf sensor=generic_kprobe idx=0 call=security_bpf_map_alloc",
+        "level=info msg=\"Added kprobe\" return=false function=bpf_check override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=security_perf_event_alloc override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=security_bpf_map_create override=false enforcer=false",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_kprobe",
+        "level=info msg=\"Loading kernel version 6.15.11\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_kprobe_v61.o -> kprobe_multi (3 functions)\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_kprobe",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies/bpf.yaml metadata.namespace=\"\" metadata.name=bpf",
+        "level=warn msg=\"Enforcement actions are not configured for this policy, forcing monitor_only mode\" policy=datagram",
+        "level=info msg=\"Added kprobe\" return=true function=sk_alloc override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=__sk_free override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=__cgroup_bpf_run_filter_skb override=false enforcer=false",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_kprobe",
+        "level=info msg=\"Loading kernel version 6.15.11\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_kprobe_v61.o -> kprobe_multi (3 functions)\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_retkprobe_v61.o -> 3 retkprobes\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_kprobe",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies/datagram-with-sock-tracking.yaml metadata.namespace=\"\" metadata.name=datagram",
+        "level=warn msg=\"Enforcement actions are not configured for this policy, forcing monitor_only mode\" policy=datagram-518",
+        "level=info msg=\"Added kprobe\" return=true function=sk_alloc override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=__sk_free override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=sk_filter_trim_cap override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=ip_output override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=ip_mc_output override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=ip6_output override=false enforcer=false",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_kprobe",
+        "level=info msg=\"Loading kernel version 6.15.11\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_kprobe_v61.o -> kprobe_multi (6 functions)\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_retkprobe_v61.o -> 6 retkprobes\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_kprobe",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies/datagram_518.yaml metadata.namespace=\"\" metadata.name=datagram-518",
+        "level=warn msg=\"Enforcement actions are not configured for this policy, forcing monitor_only mode\" policy=fd-install",
+        "level=info msg=\"Added kprobe\" return=false function=fd_install override=false enforcer=false",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_kprobe",
+        "level=info msg=\"Loading kernel version 6.15.11\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_kprobe_v61.o -> kprobe_multi (1 functions)\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_kprobe",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies/fd_install_cap_changes.yaml metadata.namespace=\"\" metadata.name=fd-install",
+        "level=warn msg=\"Enforcement actions are not configured for this policy, forcing monitor_only mode\" policy=file-monitoring",
+        "level=warn msg=\"kprobe spec pre-validation issued a warning, but will continue with loading\" policy=file-monitoring sensor=generic_kprobe error=\"validation warning: type (long unsigned int) of argument 1 does not match spec type (uint32)\"",
+        "level=info msg=\"Added kprobe\" return=true function=security_file_permission override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=true function=security_mmap_file override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=true function=security_path_truncate override=false enforcer=false",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_kprobe",
+        "level=info msg=\"Loading kernel version 6.15.11\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_kprobe_v61.o -> kprobe_multi (3 functions)\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_retkprobe_v61.o -> 3 retkprobes\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_kprobe",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies/filename_monitoring.yaml metadata.namespace=\"\" metadata.name=file-monitoring",
+        "level=warn msg=\"Enforcement actions are not configured for this policy, forcing monitor_only mode\" policy=monitor-kernel-modules",
+        "level=info msg=\"Added kprobe\" return=true function=security_kernel_module_request override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=true function=security_kernel_read_file override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=do_init_module override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=free_module override=false enforcer=false",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_kprobe",
+        "level=info msg=\"Loading kernel version 6.15.11\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_kprobe_v61.o -> kprobe_multi (4 functions)\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_retkprobe_v61.o -> 4 retkprobes\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_kprobe",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies/host-changes/monitor-kernel-modules.yaml metadata.namespace=\"\" metadata.name=monitor-kernel-modules",
+        "level=warn msg=\"Enforcement actions are not configured for this policy, forcing monitor_only mode\" policy=process-exec-elf-begin",
+        "level=info msg=\"Added kprobe\" return=false function=security_bprm_creds_from_file override=false enforcer=false",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_kprobe",
+        "level=info msg=\"Loading kernel version 6.15.11\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_kprobe_v61.o -> kprobe_multi (1 functions)\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_kprobe",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies/process-exec/process-exec-elf-begin.yaml metadata.namespace=\"\" metadata.name=process-exec-elf-begin",
+        "level=warn msg=\"Enforcement actions are not configured for this policy, forcing monitor_only mode\" policy=raw-syscalls",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_tracepoint",
+        "level=info msg=\"Loading kernel version 6.15.11\"",
+        "level=info msg=\"Loaded generic tracepoint program: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_generic_tracepoint_v61.o -> raw_syscalls/sys_enter\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_tracepoint",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies/raw_syscalls.yaml metadata.namespace=\"\" metadata.name=raw-syscalls",
+        "level=warn msg=\"Enforcement actions are not configured for this policy, forcing monitor_only mode\" policy=rawtp",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_tracepoint",
+        "level=info msg=\"Loading kernel version 6.15.11\"",
+        "level=info msg=\"Loaded generic tracepoint program: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_generic_rawtp_v61.o -> sched/sched_process_exec\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_tracepoint",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies/rawtp.yaml metadata.namespace=\"\" metadata.name=rawtp",
+        "level=warn msg=\"Enforcement actions are not configured for this policy, forcing monitor_only mode\" policy=security-socket-connect",
+        "level=info msg=\"Added kprobe\" return=false function=security_socket_connect override=false enforcer=false",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_kprobe",
+        "level=info msg=\"Loading kernel version 6.15.11\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_kprobe_v61.o -> kprobe_multi (1 functions)\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_kprobe",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies/security-socket-connect.yaml metadata.namespace=\"\" metadata.name=security-socket-connect",
+        "level=warn msg=\"Enforcement actions are not configured for this policy, forcing monitor_only mode\" policy=follow-symlink",
+        "level=info msg=\"Added kprobe\" return=false function=security_inode_follow_link override=false enforcer=false",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_kprobe",
+        "level=info msg=\"Loading kernel version 6.15.11\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_kprobe_v61.o -> kprobe_multi (1 functions)\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_kprobe",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies/security_inode_follow_link.yaml metadata.namespace=\"\" metadata.name=follow-symlink",
+        "level=warn msg=\"Enforcement actions are not configured for this policy, forcing monitor_only mode\" policy=syscalls",
+        "level=info msg=\"Added kprobe\" return=false function=__x64_sys_mount override=false enforcer=false",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_kprobe",
+        "level=info msg=\"Loading kernel version 6.15.11\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_kprobe_v61.o -> kprobe_multi (1 functions)\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_kprobe",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies/sys_mount.yaml metadata.namespace=\"\" metadata.name=syscalls",
+        "level=warn msg=\"Enforcement actions are not configured for this policy, forcing monitor_only mode\" policy=accept",
+        "level=info msg=\"Added kprobe\" return=true function=sk_alloc override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=__sk_free override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=tcp_set_state override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=tcp_close override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=true function=tcp_create_openreq_child override=false enforcer=false",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_kprobe",
+        "level=info msg=\"Loading kernel version 6.15.11\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_kprobe_v61.o -> kprobe_multi (5 functions)\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_retkprobe_v61.o -> 5 retkprobes\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_kprobe",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies/tcp-accept.yaml metadata.namespace=\"\" metadata.name=accept",
+        "level=warn msg=\"Enforcement actions are not configured for this policy, forcing monitor_only mode\" policy=connect",
+        "level=warn msg=\"kprobe spec pre-validation issued a warning, but will continue with loading\" policy=connect sensor=generic_kprobe error=\"validation warning: type (size_t) of argument 2 does not match spec type (int)\"",
+        "level=info msg=\"Added kprobe\" return=false function=tcp_connect override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=tcp_close override=false enforcer=false",
+        "level=info msg=\"Added kprobe\" return=false function=tcp_sendmsg override=false enforcer=false",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_kprobe",
+        "level=info msg=\"Loading kernel version 6.15.11\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_kprobe_v61.o -> kprobe_multi (3 functions)\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_kprobe",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies/tcp-connect-with-selectors.yaml metadata.namespace=\"\" metadata.name=connect",
+        "level=warn msg=\"Enforcement actions are not configured for this policy, forcing monitor_only mode\" policy=tty",
+        "level=warn msg=\"kprobe spec pre-validation issued a warning, but will continue with loading\" policy=tty sensor=generic_kprobe error=\"validation warning: type (struct kiocb *) of argument 0 does not match spec type (kiocb)\"",
+        "level=warn msg=\"maxData flag is ignored (supported for char_buf type)\"",
+        "level=info msg=\"Added kprobe\" return=false function=tty_write override=false enforcer=false",
+        "level=info msg=\"BTF file: using metadata file\" metadata=/sys/kernel/btf/vmlinux",
+        "level=info msg=\"Loading sensor\" name=generic_kprobe",
+        "level=info msg=\"Loading kernel version 6.15.11\"",
+        "level=info msg=\"Loaded generic kprobe sensor: /opt/bpf-benchmark/repo-artifacts/x86_64/tetragon/bpf_multi_kprobe_v61.o -> kprobe_multi (1 functions)\"",
+        "level=info msg=\"Loaded sensor successfully\" sensor=generic_kprobe",
+        "level=info msg=\"Added TracingPolicy with success\" TracingPolicy=/home/yunwei37/workspace/bpf-benchmark/runner/assets/tetragon_policies/tty.yaml metadata.namespace=\"\" metadata.name=tty",
+        "level=info msg=\"Perf ring buffer size (bytes)\" percpu=68K total=1M",
+        "level=info msg=\"Events queue size (events)\" size=63K",
+        "level=info msg=\"Listening for events...\""
+      ]
+    }
+  },
+  "selected_workload": "stress_ng_tetragon_policy_hot",
+  "status": "error"
+}

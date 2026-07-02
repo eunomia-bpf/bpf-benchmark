@@ -1,0 +1,53 @@
+{
+  "prog_id": 80446,
+  "duration_ms": 300,
+  "run_cnt_delta": 68462,
+  "run_time_ns_delta": 85302607,
+  "branch_miss_rate": 0.006111875095498048,
+  "branch_misses": 440,
+  "branch_instructions": 71991,
+  "per_site": {
+    "28": {
+      "branch_count": 2,
+      "branch_misses": 2,
+      "miss_rate": 1.0,
+      "taken": 2,
+      "not_taken": 0
+    },
+    "31": {
+      "branch_count": 2,
+      "branch_misses": 2,
+      "miss_rate": 1.0,
+      "taken": 2,
+      "not_taken": 0
+    },
+    "4": {
+      "branch_count": 3,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "50": {
+      "branch_count": 35900,
+      "branch_misses": 433,
+      "miss_rate": 0.012061281337047354,
+      "taken": 35900,
+      "not_taken": 0
+    },
+    "7": {
+      "branch_count": 3,
+      "branch_misses": 3,
+      "miss_rate": 1.0,
+      "taken": 3,
+      "not_taken": 0
+    },
+    "81": {
+      "branch_count": 36081,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    }
+  }
+}

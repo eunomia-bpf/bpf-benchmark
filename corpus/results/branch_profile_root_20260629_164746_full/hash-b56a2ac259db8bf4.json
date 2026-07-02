@@ -1,0 +1,32 @@
+{
+  "prog_id": 84023,
+  "duration_ms": 300,
+  "run_cnt_delta": 490,
+  "run_time_ns_delta": 1748303,
+  "branch_miss_rate": 0.026743075453677174,
+  "branch_misses": 28,
+  "branch_instructions": 1047,
+  "per_site": {
+    "13": {
+      "branch_count": 349,
+      "branch_misses": 28,
+      "miss_rate": 0.08022922636103152,
+      "taken": 349,
+      "not_taken": 0
+    },
+    "17": {
+      "branch_count": 349,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 349,
+      "not_taken": 0
+    },
+    "4558": {
+      "branch_count": 349,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    }
+  }
+}

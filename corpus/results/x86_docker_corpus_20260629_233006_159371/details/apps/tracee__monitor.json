@@ -1,0 +1,58 @@
+{
+  "app": "tracee/monitor",
+  "baseline": {
+    "bpf": {},
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sigfd",
+          "1",
+          "--eventfd",
+          "1",
+          "--kill",
+          "1",
+          "--futex",
+          "1",
+          "--prctl",
+          "1",
+          "--timeout",
+          "10s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/9d49401a"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "set",
+            "sigfd",
+            "eventfd",
+            "kill",
+            "futex",
+            "prctl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 10.047092054970562,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [2005669] setting to a 10 secs run per stressor\nstress-ng: info:  [2005669] dispatching hogs: 1 cap, 1 set, 1 sigfd, 1 eventfd, 1 kill, 1 futex, 1 prctl\nstress-ng: info:  [2005669] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [2005669] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2005669]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2005669] cap              809029     10.00      0.31      9.69     80903.03       80908.13\nstress-ng: metrc: [2005669] set               45961     10.00      0.18      9.80      4596.05        4607.52\nstress-ng: metrc: [2005669] sigfd           2078591     10.00      0.39     17.45    207853.29      116496.60\nstress-ng: metrc: [2005669] eventfd          308246     10.00      0.40     12.56     30823.55       23784.41\nstress-ng: metrc: [2005669] kill              61611     10.00      0.07     10.59      6160.97        5781.28\nstress-ng: metrc: [2005669] futex           2357718     20.00      0.39     22.40    117883.27      103430.35\nstress-ng: metrc: [2005669] prctl              5908     10.00      0.32      9.57       590.79         597.49\nstress-ng: info:  [2005669] skipped: 0\nstress-ng: info:  [2005669] passed: 7: cap (1) set (1) sigfd (1) eventfd (1) kill (1) futex (1) prctl (1)\nstress-ng: info:  [2005669] failed: 0\nstress-ng: info:  [2005669] metrics untrustworthy: 0\nstress-ng: info:  [2005669] successful run completed in 10.00 secs",
+        "workload_name": "stress_ng_tracee_syscall_hot"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": null,
+  "rejit_result": {
+    "mode": "skip_rejit_all",
+    "status": "skipped"
+  },
+  "runner": "tracee",
+  "selected_workload": "stress_ng_tracee_syscall_hot",
+  "status": "ok"
+}
