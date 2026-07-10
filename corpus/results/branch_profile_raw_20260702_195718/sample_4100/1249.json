@@ -1,0 +1,781 @@
+{
+  "prog_id": 1249,
+  "duration_ms": 1000,
+  "run_cnt_delta": 2643008,
+  "run_time_ns_delta": 800219716,
+  "branch_miss_rate": 0.004259501965923985,
+  "branch_misses": 13,
+  "branch_instructions": 3052,
+  "per_site": {
+    "1002": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "104": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1053": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1058": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1069": {
+      "branch_count": 131,
+      "branch_misses": 2,
+      "miss_rate": 0.015267175572519083,
+      "taken": 131,
+      "not_taken": 0
+    },
+    "1112": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1117": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1128": {
+      "branch_count": 130,
+      "branch_misses": 1,
+      "miss_rate": 0.007692307692307693,
+      "taken": 130,
+      "not_taken": 0
+    },
+    "1148": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1153": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1164": {
+      "branch_count": 135,
+      "branch_misses": 1,
+      "miss_rate": 0.007407407407407408,
+      "taken": 135,
+      "not_taken": 0
+    },
+    "1180": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1185": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1196": {
+      "branch_count": 148,
+      "branch_misses": 1,
+      "miss_rate": 0.006756756756756757,
+      "taken": 148,
+      "not_taken": 0
+    },
+    "1210": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1215": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1226": {
+      "branch_count": 155,
+      "branch_misses": 1,
+      "miss_rate": 0.0064516129032258064,
+      "taken": 155,
+      "not_taken": 0
+    },
+    "1240": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1247": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1251": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "126": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1262": {
+      "branch_count": 156,
+      "branch_misses": 1,
+      "miss_rate": 0.00641025641025641,
+      "taken": 156,
+      "not_taken": 0
+    },
+    "1274": {
+      "branch_count": 3,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 3,
+      "not_taken": 0
+    },
+    "1294": {
+      "branch_count": 155,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 155,
+      "not_taken": 0
+    },
+    "1300": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1304": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1310": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1312": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1323": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "136": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1362": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1403": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1435": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "147": {
+      "branch_count": 126,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 126,
+      "not_taken": 0
+    },
+    "1474": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1512": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1514": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "157": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1576": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1578": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1594": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1596": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "16": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1612": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1614": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1637": {
+      "branch_count": 184,
+      "branch_misses": 1,
+      "miss_rate": 0.005434782608695652,
+      "taken": 0,
+      "not_taken": 184
+    },
+    "1686": {
+      "branch_count": 160,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 160,
+      "not_taken": 0
+    },
+    "1695": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "1699": {
+      "branch_count": 168,
+      "branch_misses": 1,
+      "miss_rate": 0.005952380952380952,
+      "taken": 168,
+      "not_taken": 0
+    },
+    "220": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "231": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "241": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "283": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "318": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "361": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "394": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "433": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "472": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "474": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "538": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "540": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "557": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "559": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "576": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "578": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "602": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "62": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "645": {
+      "branch_count": 123,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 123,
+      "not_taken": 0
+    },
+    "677": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "679": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "681": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "703": {
+      "branch_count": 23,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 23,
+      "not_taken": 0
+    },
+    "707": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "714": {
+      "branch_count": 145,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 145,
+      "not_taken": 0
+    },
+    "721": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "735": {
+      "branch_count": 111,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 111,
+      "not_taken": 0
+    },
+    "741": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "763": {
+      "branch_count": 3,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 3,
+      "not_taken": 0
+    },
+    "766": {
+      "branch_count": 120,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 120,
+      "not_taken": 0
+    },
+    "770": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "772": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "782": {
+      "branch_count": 121,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 121,
+      "not_taken": 0
+    },
+    "785": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "794": {
+      "branch_count": 120,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 120,
+      "not_taken": 0
+    },
+    "805": {
+      "branch_count": 120,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 120,
+      "not_taken": 0
+    },
+    "82": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "820": {
+      "branch_count": 126,
+      "branch_misses": 1,
+      "miss_rate": 0.007936507936507936,
+      "taken": 126,
+      "not_taken": 0
+    },
+    "841": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "846": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "85": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "853": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "855": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "857": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "866": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "874": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "88": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "881": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "883": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "885": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "895": {
+      "branch_count": 129,
+      "branch_misses": 1,
+      "miss_rate": 0.007751937984496124,
+      "taken": 129,
+      "not_taken": 0
+    },
+    "9": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "917": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "922": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "930": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "932": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "934": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "944": {
+      "branch_count": 128,
+      "branch_misses": 1,
+      "miss_rate": 0.0078125,
+      "taken": 128,
+      "not_taken": 0
+    },
+    "982": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "987": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "998": {
+      "branch_count": 132,
+      "branch_misses": 1,
+      "miss_rate": 0.007575757575757576,
+      "taken": 132,
+      "not_taken": 0
+    }
+  }
+}

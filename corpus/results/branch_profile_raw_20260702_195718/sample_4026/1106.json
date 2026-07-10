@@ -1,0 +1,95 @@
+{
+  "prog_id": 1106,
+  "duration_ms": 1000,
+  "run_cnt_delta": 0,
+  "run_time_ns_delta": 0,
+  "branch_miss_rate": 0.01,
+  "branch_misses": 4,
+  "branch_instructions": 400,
+  "per_site": {
+    "124": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "135": {
+      "branch_count": 100,
+      "branch_misses": 1,
+      "miss_rate": 0.01,
+      "taken": 100,
+      "not_taken": 0
+    },
+    "157": {
+      "branch_count": 87,
+      "branch_misses": 1,
+      "miss_rate": 0.011494252873563218,
+      "taken": 87,
+      "not_taken": 0
+    },
+    "16": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "178": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "194": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "216": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "222": {
+      "branch_count": 84,
+      "branch_misses": 1,
+      "miss_rate": 0.011904761904761904,
+      "taken": 84,
+      "not_taken": 0
+    },
+    "242": {
+      "branch_count": 88,
+      "branch_misses": 1,
+      "miss_rate": 0.011363636363636364,
+      "taken": 88,
+      "not_taken": 0
+    },
+    "27": {
+      "branch_count": 41,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 41,
+      "not_taken": 0
+    },
+    "29": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    },
+    "9": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    }
+  }
+}

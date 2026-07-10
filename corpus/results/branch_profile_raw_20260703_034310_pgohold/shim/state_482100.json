@@ -1,0 +1,29 @@
+{
+  "pid": 482100,
+  "progs": [
+    {"fd":17,"prog_type":26,"name":"sched_wakeup","insn_cnt":32,"hash":"eeb9f16bc07b63e4","policy_hash":"bc53f8388e44e72e","branch_profile_hash":"256c2e5d8e0d567e","kernel_prog_id":2811,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482100_eeb9f16bc07b63e4.bpf","expected_attach":23,"attach_btf_id":10611},
+    {"fd":-2810,"prog_type":5,"name":"","insn_cnt":6,"hash":"7e4864ff1af3e9d4","policy_hash":"7e4864ff1af3e9d4","branch_profile_hash":"2530ec7d038f421a","kernel_prog_id":2810,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482100_7e4864ff1af3e9d4.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2800,"prog_type":1,"name":"libbpf_nametest","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"9d7920482b168705","kernel_prog_id":2800,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482100_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2806,"prog_type":1,"name":"","insn_cnt":5,"hash":"63ab8f73793b8389","policy_hash":"048f9e0260e5b0fb","branch_profile_hash":"b9cb6abd276be64d","kernel_prog_id":2806,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482100_63ab8f73793b8389.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":20,"prog_type":26,"name":"sched_wakeup_ne","insn_cnt":32,"hash":"eeb9f16bc07b63e4","policy_hash":"bc53f8388e44e72e","branch_profile_hash":"56853fffce2bf832","kernel_prog_id":2813,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482100_eeb9f16bc07b63e4.bpf","expected_attach":23,"attach_btf_id":10613},
+    {"fd":-2771,"prog_type":1,"name":"","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"13453716aec57bda","kernel_prog_id":2771,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482100_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2769,"prog_type":26,"name":"","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"5ed165a784375ea1","kernel_prog_id":2769,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482100_58255400910d7827.bpf","expected_attach":23,"attach_btf_id":10611},
+    {"fd":-2767,"prog_type":1,"name":"","insn_cnt":2,"hash":"39f82ae52884c235","policy_hash":"39f82ae52884c235","branch_profile_hash":"13453716aec57bda","kernel_prog_id":2767,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482100_39f82ae52884c235.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":23,"prog_type":26,"name":"sched_switch","insn_cnt":257,"hash":"2b7738da7aa60051","policy_hash":"fc2dca25002ee6d9","branch_profile_hash":"a88c2cb7712c67f9","kernel_prog_id":2814,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482100_2b7738da7aa60051.bpf","expected_attach":23,"attach_btf_id":10615},
+    {"fd":-2812,"prog_type":1,"name":"","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"13453716aec57bda","kernel_prog_id":2812,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482100_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0}
+  ],
+  "maps": [
+    {"fd":12,"map_type":1,"name":"start","key_size":4,"value_size":8,"max_entries":10240,"kernel_map_id":10800},
+    {"fd":10,"map_type":8,"name":"cgroup_map","key_size":4,"value_size":4,"max_entries":1,"kernel_map_id":10799},
+    {"fd":15,"map_type":2,"name":"runqlat_.bss","key_size":4,"value_size":120,"max_entries":1,"kernel_map_id":10805},
+    {"fd":13,"map_type":1,"name":"hists","key_size":4,"value_size":120,"max_entries":10240,"kernel_map_id":10802},
+    {"fd":14,"map_type":2,"name":"runqlat_.rodata","key_size":4,"value_size":12,"max_entries":1,"kernel_map_id":10804}
+  ],
+  "links": [
+    {"fd":27,"prog_fd":23,"target_fd":0,"attach_type":23,"kernel_link_id":697},
+    {"fd":25,"prog_fd":17,"target_fd":0,"attach_type":23,"kernel_link_id":694},
+    {"fd":26,"prog_fd":20,"target_fd":0,"attach_type":23,"kernel_link_id":696}
+  ],
+  "perf_events": [
+  ]
+}

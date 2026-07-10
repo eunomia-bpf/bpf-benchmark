@@ -1,0 +1,18 @@
+{
+  "pid": 529914,
+  "progs": [
+    {"fd":-3632,"prog_type":1,"name":"libbpf_nametest","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"9d7920482b168705","kernel_prog_id":3632,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_529914_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-3631,"prog_type":1,"name":"","insn_cnt":2,"hash":"39f82ae52884c235","policy_hash":"39f82ae52884c235","branch_profile_hash":"13453716aec57bda","kernel_prog_id":3631,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_529914_39f82ae52884c235.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-3633,"prog_type":1,"name":"","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"13453716aec57bda","kernel_prog_id":3633,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_529914_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":34,"prog_type":6,"name":"balancer_ingres","insn_cnt":2542,"hash":"bd79759d5deb23b9","policy_hash":"d18d38307868f10d","branch_profile_hash":"e7852c63b43bc41b","kernel_prog_id":3636,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_529914_bd79759d5deb23b9.bpf","expected_attach":37,"attach_btf_id":0},
+    {"fd":-3635,"prog_type":9,"name":"","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"de07ed38c37628d2","kernel_prog_id":3635,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_529914_58255400910d7827.bpf","expected_attach":2,"attach_btf_id":0},
+    {"fd":-3634,"prog_type":2,"name":"det_arg_ctx","insn_cnt":4,"hash":"3ae725ddb7d69e19","policy_hash":"3ae725ddb7d69e19","branch_profile_hash":"3be13a826158503f","kernel_prog_id":3634,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_529914_3ae725ddb7d69e19.bpf","expected_attach":0,"attach_btf_id":0}
+  ],
+  "maps": [
+    {"fd":12,"map_type":9,"name":"katran_lru0","key_size":40,"value_size":16,"max_entries":1024,"kernel_map_id":17401}
+  ],
+  "links": [
+  ],
+  "perf_events": [
+  ]
+}

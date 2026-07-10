@@ -1,0 +1,25 @@
+{
+  "pid": 482076,
+  "progs": [
+    {"fd":17,"prog_type":5,"name":"tracepoint__sys","insn_cnt":46,"hash":"a2c517d2fb4cece1","policy_hash":"8169cb264c7288e0","branch_profile_hash":"fc58c43c0c2ee930","kernel_prog_id":2773,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482076_a2c517d2fb4cece1.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":22,"prog_type":5,"name":"tracepoint__sys","insn_cnt":102,"hash":"f9ff5a170d79eb0b","policy_hash":"debe2f7eaf8af3c0","branch_profile_hash":"46af79ec21899571","kernel_prog_id":2775,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482076_f9ff5a170d79eb0b.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":20,"prog_type":5,"name":"tracepoint__sys","insn_cnt":102,"hash":"f9ff5a170d79eb0b","policy_hash":"debe2f7eaf8af3c0","branch_profile_hash":"46af79ec21899571","kernel_prog_id":2774,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482076_f9ff5a170d79eb0b.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":13,"prog_type":5,"name":"tracepoint__sys","insn_cnt":46,"hash":"92b2a4ceb75725f1","policy_hash":"d5b20501d4592f50","branch_profile_hash":"fc58c43c0c2ee930","kernel_prog_id":2770,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482076_92b2a4ceb75725f1.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2768,"prog_type":5,"name":"","insn_cnt":6,"hash":"7e4864ff1af3e9d4","policy_hash":"7e4864ff1af3e9d4","branch_profile_hash":"2530ec7d038f421a","kernel_prog_id":2768,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482076_7e4864ff1af3e9d4.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2760,"prog_type":1,"name":"","insn_cnt":5,"hash":"312c4b0b6b41b817","policy_hash":"048f9e0260e5b0fb","branch_profile_hash":"b9cb6abd276be64d","kernel_prog_id":2760,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482076_312c4b0b6b41b817.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2785,"prog_type":5,"name":"","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"ade3dc05a46d255e","kernel_prog_id":2785,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482076_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2772,"prog_type":1,"name":"","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"13453716aec57bda","kernel_prog_id":2772,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482076_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2745,"prog_type":1,"name":"","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"13453716aec57bda","kernel_prog_id":2745,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482076_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2744,"prog_type":1,"name":"","insn_cnt":2,"hash":"39f82ae52884c235","policy_hash":"39f82ae52884c235","branch_profile_hash":"13453716aec57bda","kernel_prog_id":2744,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482076_39f82ae52884c235.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2756,"prog_type":1,"name":"libbpf_nametest","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"9d7920482b168705","kernel_prog_id":2756,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482076_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0}
+  ],
+  "maps": [
+    {"fd":12,"map_type":2,"name":"opensnoo.rodata","key_size":4,"value_size":13,"max_entries":1,"kernel_map_id":10770},
+    {"fd":11,"map_type":4,"name":"events","key_size":4,"value_size":4,"max_entries":24,"kernel_map_id":10768},
+    {"fd":9,"map_type":1,"name":"start","key_size":4,"value_size":16,"max_entries":10240,"kernel_map_id":10767}
+  ],
+  "links": [
+  ],
+  "perf_events": [
+  ]
+}

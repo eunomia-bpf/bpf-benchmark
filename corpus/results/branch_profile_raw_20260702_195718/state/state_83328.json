@@ -1,0 +1,26 @@
+{
+  "pid": 83328,
+  "progs": [
+    {"fd":12,"prog_type":26,"name":"fentry_vfs_crea","insn_cnt":6,"hash":"8656aae1a3bb4f12","policy_hash":"aeeb994e67fe2b99","branch_profile_hash":"dd94dd51e52de137","kernel_prog_id":510,"bytecode_path":"/tmp/bpfrejit_83328_8656aae1a3bb4f12.bpf","expected_attach":24,"attach_btf_id":142610},
+    {"fd":10,"prog_type":26,"name":"fentry_vfs_fsyn","insn_cnt":6,"hash":"cc6d44cf3357ea62","policy_hash":"e302712d2cc3eaa9","branch_profile_hash":"5af80ba5364c8d96","kernel_prog_id":507,"bytecode_path":"/tmp/bpfrejit_83328_cc6d44cf3357ea62.bpf","expected_attach":24,"attach_btf_id":142636},
+    {"fd":8,"prog_type":26,"name":"fentry_vfs_read","insn_cnt":6,"hash":"ca9822ef332acdf2","policy_hash":"eb9f3d374e028c39","branch_profile_hash":"58d68f3159c40362","kernel_prog_id":503,"bytecode_path":"/tmp/bpfrejit_83328_ca9822ef332acdf2.bpf","expected_attach":24,"attach_btf_id":142690},
+    {"fd":-500,"prog_type":1,"name":"","insn_cnt":5,"hash":"06ffeef05d7e610c","policy_hash":"048f9e0260e5b0fb","branch_profile_hash":"b9cb6abd276be64d","kernel_prog_id":500,"bytecode_path":"/tmp/bpfrejit_83328_06ffeef05d7e610c.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":11,"prog_type":26,"name":"fentry_vfs_open","insn_cnt":6,"hash":"c826085eb7cf6f2a","policy_hash":"eaad82b2b8d52871","branch_profile_hash":"7044eba30c0b459a","kernel_prog_id":509,"bytecode_path":"/tmp/bpfrejit_83328_c826085eb7cf6f2a.bpf","expected_attach":24,"attach_btf_id":142674},
+    {"fd":-459,"prog_type":1,"name":"","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"13453716aec57bda","kernel_prog_id":459,"bytecode_path":"/tmp/bpfrejit_83328_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-458,"prog_type":1,"name":"","insn_cnt":2,"hash":"39f82ae52884c235","policy_hash":"39f82ae52884c235","branch_profile_hash":"13453716aec57bda","kernel_prog_id":458,"bytecode_path":"/tmp/bpfrejit_83328_39f82ae52884c235.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":9,"prog_type":26,"name":"fentry_vfs_writ","insn_cnt":6,"hash":"d0c2d468d90e10ba","policy_hash":"ac8041a1ad2fc441","branch_profile_hash":"6919d3fd93d66932","kernel_prog_id":504,"bytecode_path":"/tmp/bpfrejit_83328_d0c2d468d90e10ba.bpf","expected_attach":24,"attach_btf_id":142721},
+    {"fd":-499,"prog_type":1,"name":"libbpf_nametest","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"9d7920482b168705","kernel_prog_id":499,"bytecode_path":"/tmp/bpfrejit_83328_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0}
+  ],
+  "maps": [
+    {"fd":7,"map_type":2,"name":"vfsstat_.bss","key_size":4,"value_size":40,"max_entries":1,"kernel_map_id":666}
+  ],
+  "links": [
+    {"fd":17,"prog_fd":12,"target_fd":0,"attach_type":24,"kernel_link_id":49},
+    {"fd":15,"prog_fd":10,"target_fd":0,"attach_type":24,"kernel_link_id":43},
+    {"fd":13,"prog_fd":8,"target_fd":0,"attach_type":24,"kernel_link_id":40},
+    {"fd":16,"prog_fd":11,"target_fd":0,"attach_type":24,"kernel_link_id":46},
+    {"fd":14,"prog_fd":9,"target_fd":0,"attach_type":24,"kernel_link_id":41}
+  ],
+  "perf_events": [
+  ]
+}

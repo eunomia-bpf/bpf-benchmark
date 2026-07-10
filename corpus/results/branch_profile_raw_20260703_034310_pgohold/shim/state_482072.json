@@ -1,0 +1,26 @@
+{
+  "pid": 482072,
+  "progs": [
+    {"fd":20,"prog_type":26,"name":"fentry_vfs_crea","insn_cnt":6,"hash":"15bfb2f4a25ebedc","policy_hash":"aeeb994e67fe2b99","branch_profile_hash":"dd94dd51e52de137","kernel_prog_id":2809,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482072_15bfb2f4a25ebedc.bpf","expected_attach":24,"attach_btf_id":142610},
+    {"fd":18,"prog_type":26,"name":"fentry_vfs_open","insn_cnt":6,"hash":"1ae22f6c90fb75c4","policy_hash":"eaad82b2b8d52871","branch_profile_hash":"7044eba30c0b459a","kernel_prog_id":2808,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482072_1ae22f6c90fb75c4.bpf","expected_attach":24,"attach_btf_id":142674},
+    {"fd":11,"prog_type":26,"name":"fentry_vfs_read","insn_cnt":6,"hash":"5a012b0231ce3dbc","policy_hash":"eb9f3d374e028c39","branch_profile_hash":"58d68f3159c40362","kernel_prog_id":2798,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482072_5a012b0231ce3dbc.bpf","expected_attach":24,"attach_btf_id":142690},
+    {"fd":-2796,"prog_type":1,"name":"","insn_cnt":5,"hash":"918b4f57cc8f3b1e","policy_hash":"048f9e0260e5b0fb","branch_profile_hash":"b9cb6abd276be64d","kernel_prog_id":2796,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482072_918b4f57cc8f3b1e.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2763,"prog_type":1,"name":"","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"13453716aec57bda","kernel_prog_id":2763,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482072_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2762,"prog_type":1,"name":"","insn_cnt":2,"hash":"39f82ae52884c235","policy_hash":"39f82ae52884c235","branch_profile_hash":"13453716aec57bda","kernel_prog_id":2762,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482072_39f82ae52884c235.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":16,"prog_type":26,"name":"fentry_vfs_fsyn","insn_cnt":6,"hash":"1dbe21de1110988c","policy_hash":"e302712d2cc3eaa9","branch_profile_hash":"5af80ba5364c8d96","kernel_prog_id":2805,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482072_1dbe21de1110988c.bpf","expected_attach":24,"attach_btf_id":142636},
+    {"fd":-2794,"prog_type":1,"name":"libbpf_nametest","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"9d7920482b168705","kernel_prog_id":2794,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482072_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":14,"prog_type":26,"name":"fentry_vfs_writ","insn_cnt":6,"hash":"590f707d9ca0d9f4","policy_hash":"ac8041a1ad2fc441","branch_profile_hash":"6919d3fd93d66932","kernel_prog_id":2799,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_482072_590f707d9ca0d9f4.bpf","expected_attach":24,"attach_btf_id":142721}
+  ],
+  "maps": [
+    {"fd":9,"map_type":2,"name":"vfsstat_.bss","key_size":4,"value_size":40,"max_entries":1,"kernel_map_id":10793}
+  ],
+  "links": [
+    {"fd":24,"prog_fd":16,"target_fd":0,"attach_type":24,"kernel_link_id":693},
+    {"fd":22,"prog_fd":11,"target_fd":0,"attach_type":24,"kernel_link_id":689},
+    {"fd":25,"prog_fd":18,"target_fd":0,"attach_type":24,"kernel_link_id":695},
+    {"fd":23,"prog_fd":14,"target_fd":0,"attach_type":24,"kernel_link_id":691},
+    {"fd":26,"prog_fd":20,"target_fd":0,"attach_type":24,"kernel_link_id":698}
+  ],
+  "perf_events": [
+  ]
+}

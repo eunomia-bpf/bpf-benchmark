@@ -1,0 +1,25 @@
+{
+  "prog_id": 1421,
+  "duration_ms": 1000,
+  "run_cnt_delta": 1169500,
+  "run_time_ns_delta": 580041681,
+  "branch_miss_rate": 0.01694915254237288,
+  "branch_misses": 1,
+  "branch_instructions": 59,
+  "per_site": {
+    "20": {
+      "branch_count": 59,
+      "branch_misses": 1,
+      "miss_rate": 0.01694915254237288,
+      "taken": 59,
+      "not_taken": 0
+    },
+    "26": {
+      "branch_count": 0,
+      "branch_misses": 0,
+      "miss_rate": 0.0,
+      "taken": 0,
+      "not_taken": 0
+    }
+  }
+}

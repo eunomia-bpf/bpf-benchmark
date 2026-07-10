@@ -1,0 +1,23 @@
+{
+  "pid": 487623,
+  "progs": [
+    {"fd":-2877,"prog_type":5,"name":"","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"ade3dc05a46d255e","kernel_prog_id":2877,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_487623_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2871,"prog_type":1,"name":"","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"13453716aec57bda","kernel_prog_id":2871,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_487623_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2838,"prog_type":1,"name":"","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"13453716aec57bda","kernel_prog_id":2838,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_487623_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2837,"prog_type":1,"name":"","insn_cnt":2,"hash":"39f82ae52884c235","policy_hash":"39f82ae52884c235","branch_profile_hash":"13453716aec57bda","kernel_prog_id":2837,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_487623_39f82ae52884c235.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2852,"prog_type":1,"name":"libbpf_nametest","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"9d7920482b168705","kernel_prog_id":2852,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_487623_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":14,"prog_type":5,"name":"inet_sock_set_s","insn_cnt":309,"hash":"fbc25c238b173230","policy_hash":"16f4b9f23a12e936","branch_profile_hash":"5926d0e6fdb745e8","kernel_prog_id":2870,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_487623_fbc25c238b173230.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2868,"prog_type":5,"name":"","insn_cnt":6,"hash":"7e4864ff1af3e9d4","policy_hash":"7e4864ff1af3e9d4","branch_profile_hash":"2530ec7d038f421a","kernel_prog_id":2868,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_487623_7e4864ff1af3e9d4.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-2856,"prog_type":1,"name":"","insn_cnt":5,"hash":"f24bde511ad423d2","policy_hash":"048f9e0260e5b0fb","branch_profile_hash":"b9cb6abd276be64d","kernel_prog_id":2856,"bytecode_path":"/home/yunwei37/workspace/bpf-benchmark/corpus/results/branch_profile_raw_20260703_034310_pgohold/shim/bpfrejit_487623_f24bde511ad423d2.bpf","expected_attach":0,"attach_btf_id":0}
+  ],
+  "maps": [
+    {"fd":12,"map_type":4,"name":"events","key_size":4,"value_size":4,"max_entries":24,"kernel_map_id":10838},
+    {"fd":13,"map_type":2,"name":"tcplife_.rodata","key_size":4,"value_size":4106,"max_entries":1,"kernel_map_id":10841},
+    {"fd":11,"map_type":1,"name":"idents","key_size":8,"value_size":20,"max_entries":10240,"kernel_map_id":10837},
+    {"fd":9,"map_type":1,"name":"birth","key_size":8,"value_size":8,"max_entries":10240,"kernel_map_id":10835}
+  ],
+  "links": [
+  ],
+  "perf_events": [
+  ]
+}

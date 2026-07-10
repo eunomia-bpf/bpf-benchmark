@@ -1,0 +1,9 @@
+test -r /sys/kernel/btf/vmlinux
+/etc/bash.bashrc: line 7: PS1: unbound variable
+/etc/bash.bashrc: line 7: PS1: unbound variable
+install -d "/home/yunwei37/workspace/bpf-benchmark/.cache/container-images/host-docker-x86/kernel-image" "/home/yunwei37/workspace/bpf-benchmark/.cache/container-images/host-docker-x86/kernel-config" "/home/yunwei37/workspace/bpf-benchmark/.cache/container-images/host-docker-x86/kernel-modules/lib/modules/$(uname -r)" "/home/yunwei37/workspace/bpf-benchmark/.cache/container-images/host-docker-x86/kernel-btf" "/home/yunwei37/workspace/bpf-benchmark/.cache/container-images/host-docker-x86/empty"
+/etc/bash.bashrc: line 7: PS1: unbound variable
+printf 'host Docker uses the host kernel\n' >"/home/yunwei37/workspace/bpf-benchmark/.cache/container-images/host-docker-x86/kernel-image/bzImage"
+/etc/bash.bashrc: line 7: PS1: unbound variable
+if test -f "/boot/config-$(uname -r)"; then cp "/boot/config-$(uname -r)" "/home/yunwei37/workspace/bpf-benchmark/.cache/container-images/host-docker-x86/kernel-config/config"; else printf '# host Docker kernel config unavailable\n' >"/home/yunwei37/workspace/bpf-benchmark/.cache/container-images/host-docker-x86/kernel-config/config"; fi
+/etc/bash.bashrc: line 7: PS1: unbound variable

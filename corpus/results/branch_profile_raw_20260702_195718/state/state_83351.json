@@ -1,0 +1,49 @@
+{
+  "pid": 83351,
+  "progs": [
+    {"fd":-493,"prog_type":5,"name":"","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"ade3dc05a46d255e","kernel_prog_id":493,"bytecode_path":"/tmp/bpfrejit_83351_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-485,"prog_type":1,"name":"","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"13453716aec57bda","kernel_prog_id":485,"bytecode_path":"/tmp/bpfrejit_83351_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-450,"prog_type":1,"name":"","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"13453716aec57bda","kernel_prog_id":450,"bytecode_path":"/tmp/bpfrejit_83351_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-449,"prog_type":1,"name":"","insn_cnt":2,"hash":"39f82ae52884c235","policy_hash":"39f82ae52884c235","branch_profile_hash":"13453716aec57bda","kernel_prog_id":449,"bytecode_path":"/tmp/bpfrejit_83351_39f82ae52884c235.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":11,"prog_type":5,"name":"inet_sock_set_s","insn_cnt":309,"hash":"beb5f7aa77258547","policy_hash":"16f4b9f23a12e936","branch_profile_hash":"5926d0e6fdb745e8","kernel_prog_id":482,"bytecode_path":"/tmp/bpfrejit_83351_beb5f7aa77258547.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-480,"prog_type":5,"name":"","insn_cnt":6,"hash":"7e4864ff1af3e9d4","policy_hash":"7e4864ff1af3e9d4","branch_profile_hash":"2530ec7d038f421a","kernel_prog_id":480,"bytecode_path":"/tmp/bpfrejit_83351_7e4864ff1af3e9d4.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-467,"prog_type":1,"name":"","insn_cnt":5,"hash":"f2f24c65389bee75","policy_hash":"048f9e0260e5b0fb","branch_profile_hash":"b9cb6abd276be64d","kernel_prog_id":467,"bytecode_path":"/tmp/bpfrejit_83351_f2f24c65389bee75.bpf","expected_attach":0,"attach_btf_id":0},
+    {"fd":-465,"prog_type":1,"name":"libbpf_nametest","insn_cnt":2,"hash":"58255400910d7827","policy_hash":"58255400910d7827","branch_profile_hash":"9d7920482b168705","kernel_prog_id":465,"bytecode_path":"/tmp/bpfrejit_83351_58255400910d7827.bpf","expected_attach":0,"attach_btf_id":0}
+  ],
+  "maps": [
+    {"fd":10,"map_type":2,"name":"tcplife_.rodata","key_size":4,"value_size":4106,"max_entries":1,"kernel_map_id":652},
+    {"fd":8,"map_type":1,"name":"idents","key_size":8,"value_size":20,"max_entries":10240,"kernel_map_id":649},
+    {"fd":9,"map_type":4,"name":"events","key_size":4,"value_size":4,"max_entries":24,"kernel_map_id":650},
+    {"fd":7,"map_type":1,"name":"birth","key_size":8,"value_size":8,"max_entries":10240,"kernel_map_id":646}
+  ],
+  "links": [
+    {"fd":13,"prog_fd":11,"target_fd":12,"attach_type":41,"kernel_link_id":35}
+  ],
+  "perf_events": [
+    {"fd":19,"type":1,"config":10,"pid":-1,"cpu":4,"attached_prog_fd":-1},
+    {"fd":38,"type":1,"config":10,"pid":-1,"cpu":23,"attached_prog_fd":-1},
+    {"fd":12,"type":2,"config":1724,"pid":-1,"cpu":0,"attached_prog_fd":-1},
+    {"fd":31,"type":1,"config":10,"pid":-1,"cpu":16,"attached_prog_fd":-1},
+    {"fd":24,"type":1,"config":10,"pid":-1,"cpu":9,"attached_prog_fd":-1},
+    {"fd":17,"type":1,"config":10,"pid":-1,"cpu":2,"attached_prog_fd":-1},
+    {"fd":36,"type":1,"config":10,"pid":-1,"cpu":21,"attached_prog_fd":-1},
+    {"fd":29,"type":1,"config":10,"pid":-1,"cpu":14,"attached_prog_fd":-1},
+    {"fd":22,"type":1,"config":10,"pid":-1,"cpu":7,"attached_prog_fd":-1},
+    {"fd":15,"type":1,"config":10,"pid":-1,"cpu":0,"attached_prog_fd":-1},
+    {"fd":34,"type":1,"config":10,"pid":-1,"cpu":19,"attached_prog_fd":-1},
+    {"fd":27,"type":1,"config":10,"pid":-1,"cpu":12,"attached_prog_fd":-1},
+    {"fd":20,"type":1,"config":10,"pid":-1,"cpu":5,"attached_prog_fd":-1},
+    {"fd":32,"type":1,"config":10,"pid":-1,"cpu":17,"attached_prog_fd":-1},
+    {"fd":25,"type":1,"config":10,"pid":-1,"cpu":10,"attached_prog_fd":-1},
+    {"fd":18,"type":1,"config":10,"pid":-1,"cpu":3,"attached_prog_fd":-1},
+    {"fd":37,"type":1,"config":10,"pid":-1,"cpu":22,"attached_prog_fd":-1},
+    {"fd":30,"type":1,"config":10,"pid":-1,"cpu":15,"attached_prog_fd":-1},
+    {"fd":23,"type":1,"config":10,"pid":-1,"cpu":8,"attached_prog_fd":-1},
+    {"fd":16,"type":1,"config":10,"pid":-1,"cpu":1,"attached_prog_fd":-1},
+    {"fd":35,"type":1,"config":10,"pid":-1,"cpu":20,"attached_prog_fd":-1},
+    {"fd":28,"type":1,"config":10,"pid":-1,"cpu":13,"attached_prog_fd":-1},
+    {"fd":21,"type":1,"config":10,"pid":-1,"cpu":6,"attached_prog_fd":-1},
+    {"fd":33,"type":1,"config":10,"pid":-1,"cpu":18,"attached_prog_fd":-1},
+    {"fd":26,"type":1,"config":10,"pid":-1,"cpu":11,"attached_prog_fd":-1}
+  ]
+}
