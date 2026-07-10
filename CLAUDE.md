@@ -1,5 +1,12 @@
 # BPF Benchmark Framework
 
+## Branch Discipline
+
+`master` is the only development branch for this experimental repository. Do
+not create task branches or switch away from `master`. If a session starts on
+any other branch, stop before editing and align with the user; completed work
+must land on `origin/master`.
+
 ## Design Rules
 
 ### No ReJIT Filtering

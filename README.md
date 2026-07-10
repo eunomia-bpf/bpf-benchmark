@@ -18,6 +18,11 @@ The current `bpf-bench` instantiation covers six production eBPF applications,
 146 comparable BPF program measurements, and 42 microbenchmark tasks, with
 correctness and integrity checks designed to prevent reward hacking.
 
+## Branch Discipline
+
+This experimental repository develops directly on `master`. Do not create or
+switch to task branches; completed work should land on `origin/master`.
+
 ## What It Benchmarks
 
 eBPF optimization is difficult because the useful action depends on verifier
