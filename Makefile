@@ -167,6 +167,7 @@ KEEP_WORKDIRS ?=
 SUITE_ENV_NAMES = SAMPLES WARMUPS INNER_REPEAT BENCH SUITE RUNTIMES FUZZ_ROUNDS TEST_MODE WORKLOAD_DURATION \
 	KEEP_WORKDIRS BPFREJIT_BENCH_PASSES BPFREJIT_CORPUS_APPS SKIP_REJIT CPU STRICT_ENV SHUFFLE_SEED \
 	REGENERATE_INPUTS LIST MICRO_RUNNER_BINARY PERF_COUNTERS \
+	BPFREJIT_BRANCH_PROFILE_ROOT \
 	MERLIN_ARTIFACT_MODE MERLIN_COMPILETIME_MODE \
 	BPFREJIT_CORPUS_APP_TIMEOUT BPFREJIT_CORPUS_REJIT_TIMEOUT \
 	BPFREJIT_CORPUS_WORKLOAD_ONLY BPFREJIT_CORPUS_BPF_STATS \
@@ -291,7 +292,9 @@ micro-qemu-arm64 corpus-qemu-arm64: $(ARM64_QEMU_ROOT_READY)
 	install -d "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)"
 	cp -a "$(ARM64_QEMU_WORKSPACE)/$(RUNTIME_RESULT_DIR)/." "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)/"
 
-micro-docker-x86 corpus-docker-x86: x86-runner-runtime-image-tar
+micro-docker-x86: x86-runner-runtime-image-tar
+corpus-docker-x86: x86-runner-runtime-host-docker-image-tar
+micro-docker-x86 corpus-docker-x86:
 	$(MAKE) __runtime-host-$(RUNTIME_SUITE) $(RUN_MAKE_VARS)
 
 micro-aws-x86 micro-aws-arm64: AWS_SUITE := micro
@@ -316,7 +319,7 @@ __runtime-host-micro:
 
 __runtime-host-corpus:
 	install -d "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)"
-	sudo "$(RUNNER_DIR)/scripts/bpfrejit-install" --image "$(RUNTIME_CONTAINER_IMAGE)" "$(RUNTIME_IMAGE_TAR)"
+	docker load -i "$(RUNTIME_IMAGE_TAR)" >/dev/null
 	$(RUNTIME_DOCKER_RUN)
 
 __runtime-vm-docker:

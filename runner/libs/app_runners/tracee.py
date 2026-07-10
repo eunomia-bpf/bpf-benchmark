@@ -89,6 +89,9 @@ TRACEE_EVENT_EXCLUSIONS = (
     "rcd_modification",
     "sched_debug_recon",
     "scheduled_task_mod",
+    # Tracee built with Go 1.26 currently exits during startup when this
+    # detector is enabled on the host-Docker target.
+    "stack_pivot",
     # The current arm64 test kernel hard-reboots while closing Tracee's BPF
     # self-monitoring kprobe links during teardown.
     "bpf_attach",

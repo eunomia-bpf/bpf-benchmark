@@ -556,6 +556,43 @@ static int loadtime_plan_is_single_branch_flip(const char *steps,
     return count == 1 && is_branch_flip;
 }
 
+static int loadtime_step_needs_target(const char *name) {
+    return strcmp(name, "kinsn") == 0 ||
+           strcmp(name, "rotate") == 0 ||
+           strcmp(name, "cond_select") == 0 ||
+           strcmp(name, "extract") == 0 ||
+           strcmp(name, "endian_fusion") == 0 ||
+           strcmp(name, "bulk_memory") == 0 ||
+           strcmp(name, "lea") == 0 ||
+           strcmp(name, "prefetch") == 0 ||
+           strcmp(name, "ccmp") == 0;
+}
+
+static int loadtime_plan_needs_target(const char *steps,
+                                      const char *steps_end) {
+    const char *cur = steps;
+    const char *obj_start = NULL, *obj_end = NULL;
+    while (json_array_next_obj(&cur, steps_end, &obj_start, &obj_end)) {
+        size_t len = (size_t)(obj_end - obj_start);
+        char *obj = (char *)malloc(len + 1);
+        if (!obj)
+            return 1;
+        memcpy(obj, obj_start, len);
+        obj[len] = 0;
+        char name[64] = {0};
+        char command[4096] = {0};
+        int needs = json_get_str(obj, "name", name, sizeof(name)) &&
+                    loadtime_step_needs_target(name);
+        if (!needs && json_get_str(obj, "command", command, sizeof(command)) &&
+            strstr(command, "${TARGET}") != NULL)
+            needs = 1;
+        free(obj);
+        if (needs)
+            return 1;
+    }
+    return 0;
+}
+
 static int loadtime_run_shell(const char *command, const char *log_path,
                               uint64_t *elapsed_ms) {
     if (elapsed_ms) *elapsed_ms = 0;
@@ -669,29 +706,73 @@ static int loadtime_join_path(char *out, size_t out_sz, const char *dir,
     return 0;
 }
 
+static int loadtime_ensure_shared_target(const char *dir, char *shared,
+                                         size_t shared_sz,
+                                         char *err, size_t err_sz) {
+    if (loadtime_join_path(shared, shared_sz, dir, "target.json",
+                           err, err_sz) != 0)
+        return -1;
+
+    struct stat st;
+    if (stat(shared, &st) == 0)
+        return 0;
+
+    char *const argv[] = {"kinsnprober", "--out", shared, NULL};
+    posix_spawn_file_actions_t fa;
+    int fa_inited = (posix_spawn_file_actions_init(&fa) == 0);
+    if (fa_inited) {
+        posix_spawn_file_actions_addopen(&fa, STDOUT_FILENO, "/dev/null",
+                                         O_WRONLY, 0);
+        posix_spawn_file_actions_addopen(&fa, STDERR_FILENO, "/dev/null",
+                                         O_WRONLY, 0);
+    }
+    char **clean_env = snapshot_env_without_ld_preload();
+    pid_t pid;
+    int rc = posix_spawnp(&pid, "kinsnprober", fa_inited ? &fa : NULL,
+                          NULL, argv, clean_env ? clean_env : environ);
+    if (fa_inited)
+        posix_spawn_file_actions_destroy(&fa);
+    free(clean_env);
+    if (rc != 0) {
+        snprintf(err, err_sz, "failed to spawn kinsnprober rc=%d", rc);
+        return -1;
+    }
+    int status = 0;
+    if (waitpid(pid, &status, 0) < 0) {
+        snprintf(err, err_sz, "failed to wait for kinsnprober errno=%d", errno);
+        return -1;
+    }
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+        snprintf(err, err_sz, "kinsnprober failed exit=%d",
+                 WIFEXITED(status) ? WEXITSTATUS(status) : -1);
+        return -1;
+    }
+    if (stat(shared, &st) != 0) {
+        snprintf(err, err_sz, "kinsnprober did not write target.json at %s",
+                 shared);
+        return -1;
+    }
+    log_line("kinsnprober wrote target=%s", shared);
+    return 0;
+}
+
 static int loadtime_prepare_target(const char *workdir, char *target_json,
                                    size_t target_json_sz,
                                    char *err, size_t err_sz) {
     const char *dir = getenv("BPFREJIT_SHIM_DIR");
     if (!dir) dir = "/tmp";
     char shared[320];
-    if (loadtime_join_path(shared, sizeof(shared), dir, "target.json",
-                           err, err_sz) != 0 ||
+    if (loadtime_ensure_shared_target(dir, shared, sizeof(shared), err, err_sz) != 0 ||
         loadtime_join_path(target_json, target_json_sz, workdir, "target.json",
                            err, err_sz) != 0)
         return -1;
-    struct stat st;
-    if (stat(shared, &st) == 0) {
-        char *target_payload = NULL;
-        if (loadtime_read_text_file(shared, &target_payload) != 0)
-            return -1;
-        int rc = loadtime_write_file(target_json, target_payload,
-                                     strlen(target_payload));
-        free(target_payload);
-        return rc;
-    }
-    snprintf(err, err_sz, "missing loadtime target.json at %s", shared);
-    return -1;
+    char *target_payload = NULL;
+    if (loadtime_read_text_file(shared, &target_payload) != 0)
+        return -1;
+    int rc = loadtime_write_file(target_json, target_payload,
+                                 strlen(target_payload));
+    free(target_payload);
+    return rc;
 }
 
 static int loadtime_contains_libbpf_map_poison(const struct bpf_insn *insns,
@@ -981,6 +1062,8 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     }
     const int single_branch_flip =
         loadtime_plan_is_single_branch_flip(steps, steps_end);
+    const int plan_needs_target =
+        loadtime_plan_needs_target(steps, steps_end);
 
     char prog_name[17] = {0};
     memcpy(prog_name, attr->prog_name, 16);
@@ -1017,6 +1100,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     }
 
     char cur[360], nxt[360], report[360], target_json[360], map_values_dir[360];
+    target_json[0] = 0;
     if (loadtime_join_path(cur, sizeof(cur), workdir, "input.bin",
                            err, err_sz) != 0 ||
         loadtime_join_path(nxt, sizeof(nxt), workdir, "output.next.bin",
@@ -1028,12 +1112,14 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         free(plan_json);
         return -1;
     }
-    if (loadtime_prepare_target(workdir, target_json, sizeof(target_json),
+    if (plan_needs_target &&
+        loadtime_prepare_target(workdir, target_json, sizeof(target_json),
                                 err, err_sz) != 0) {
         snprintf(err, err_sz, "failed to prepare target.json in %s", workdir);
         free(plan_json);
         return -1;
     }
+    const char *target_arg = plan_needs_target ? target_json : NULL;
 
     size_t input_bytes = (size_t)attr->insn_cnt * sizeof(struct bpf_insn);
     uint64_t input_hash = prog_policy_hash
@@ -1059,30 +1145,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         free(plan_json);
         return -1;
     }
-    const char *snapshot_root = getenv("BPFREJIT_SHIM_MAP_SNAPSHOT_ROOT");
-    if (snapshot_root && snapshot_root[0]) {
-        int remap_rc = remap_saved_map_snapshots(map_values_dir, snapshot_root,
-                                                 input_insns, attr->insn_cnt,
-                                                 attr->prog_type, map_refs,
-                                                 map_ref_n, map_ids, map_types,
-                                                 map_n, err, err_sz);
-        if (remap_rc == SHIM_MAP_SNAPSHOT_UNAVAILABLE) {
-            free(map_refs);
-            free(map_ids);
-            free(map_types);
-            free(plan_json);
-            return -1;
-        }
-        if (remap_rc != 0) {
-            free(map_refs);
-            free(map_ids);
-            free(map_types);
-            free(plan_json);
-            return -1;
-        }
-    } else {
-        write_map_snapshots(map_values_dir, map_ids, map_types, map_n);
-    }
+    write_map_snapshots(map_values_dir, map_ids, map_types, map_n);
 
     char fd_to_id_path[360], canon[360], canon_log[360];
     if (loadtime_join_path(fd_to_id_path, sizeof(fd_to_id_path), workdir,
@@ -1106,7 +1169,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         free(plan_json);
         return -1;
     }
-    if (run_canonicalize(cur, canon, target_json, map_ids_csv,
+    if (run_canonicalize(cur, canon, target_arg, map_ids_csv,
                          fd_to_id_path, canon_log) != 0) {
         char err_tail[1024] = {0};
         read_tail_escaped(canon_log, err_tail, sizeof(err_tail));
@@ -1151,7 +1214,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         free(plan_json);
         return -1;
     }
-    if (loadtime_probe_bytecode_acceptance(attr, attr_size, cur, target_json,
+    if (loadtime_probe_bytecode_acceptance(attr, attr_size, cur, target_arg,
                                            map_ids, map_n, verifier_log) != 0) {
         log_line("loadtime original bytecode rejected by verifier errno=%d "
                  "log=%s; passing original BPF_PROG_LOAD through",
@@ -1274,7 +1337,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
             free(plan_json);
             return -1;
         }
-        if (loadtime_probe_bytecode_acceptance(attr, attr_size, nxt, target_json,
+        if (loadtime_probe_bytecode_acceptance(attr, attr_size, nxt, target_arg,
                                                map_ids, map_n, verifier_log) != 0) {
             log_line("loadtime verifier probe rejected candidate after step %s "
                      "errno=%d log=%s; passing original BPF_PROG_LOAD through",
@@ -1353,7 +1416,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     uint32_t fd_array_n = 0;
     int needs_fd_array = loadtime_bytecode_needs_fd_array(optimized, out_insn_cnt);
     if (needs_fd_array) {
-        if (build_full_fd_array(target_json, map_ids, map_n,
+        if (build_full_fd_array(target_arg, map_ids, map_n,
                                 &fd_array, &fd_array_n) != 0) {
             snprintf(err, err_sz, "failed to build loadtime fd_array");
             free(optimized);

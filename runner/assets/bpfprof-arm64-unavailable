@@ -1,0 +1,3 @@
+#!/bin/sh
+echo "bpfprof per-site branch profiling requires x86 LBR support" >&2
+exit 1

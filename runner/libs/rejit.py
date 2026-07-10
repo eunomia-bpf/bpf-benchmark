@@ -421,30 +421,6 @@ def apply_app_rejit(
     return dict(responses[0]["response"]) if len(responses) == 1 else {"status": "ok", "shim_responses": responses}
 
 
-def snapshot_app_maps(
-    *,
-    app_pid: int | None = None,
-    app_pids: Sequence[int] | None = None,
-    output_dir: Path,
-) -> dict[str, object]:
-    pids = _normalize_app_pids(app_pid=app_pid, app_pids=app_pids)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    responses: list[dict[str, object]] = []
-    for pid in pids:
-        resp = _shim_request(
-            _shim_socket_for_pid(pid),
-            {"cmd": "snapshot_maps", "output_dir": str(output_dir)},
-        )
-        if not bool(resp.get("ok")):
-            raise RuntimeError(str(resp.get("error") or "map snapshot failed"))
-        responses.append({"pid": pid, "response": dict(resp), "output_dir": str(output_dir)})
-    return (
-        dict(responses[0]["response"])
-        if len(responses) == 1
-        else {"ok": True, "shim_responses": responses}
-    )
-
-
 def measure_app_phase(
     *,
     app_pid: int | None = None,

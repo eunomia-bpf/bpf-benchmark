@@ -52,6 +52,11 @@
 #include "llvm/Transforms/Scalar/SROA.h"
 #include "llvm/Transforms/Utils/Mem2Reg.h"
 
+extern "C" void LLVMInitializeBPFAsmPrinter();
+extern "C" void LLVMInitializeBPFTarget();
+extern "C" void LLVMInitializeBPFTargetInfo();
+extern "C" void LLVMInitializeBPFTargetMC();
+
 namespace {
 
 constexpr uint8_t BPF_LD_IMM64 = 0x18;
@@ -1607,6 +1612,22 @@ branch_flip_lifted_conditional_sites(const std::vector<uint8_t> &bytes)
 	return sites;
 }
 
+bool branch_flip_is_unlifted_tail_site(const std::vector<uint8_t> &bytes,
+				       size_t pc)
+{
+	if (bytes.empty() || bytes.size() % INSN_SIZE != 0) {
+		throw std::runtime_error(
+			"input bytecode length must be a non-empty multiple of 8");
+	}
+	const auto subprog_start = subprog_start_pc(bytes);
+	if (!subprog_start) {
+		return false;
+	}
+	const size_t insn_count = bytes.size() / INSN_SIZE;
+	return pc >= *subprog_start && pc < insn_count &&
+	       is_conditional_jump(bytes[pc * INSN_SIZE]);
+}
+
 llvm::BasicBlock *branch_flip_find_block(llvm::Function &function, size_t pc)
 {
 	const std::string name = "bb_inst_" + std::to_string(pc);
@@ -1673,7 +1694,8 @@ int64_t annotate_branch_flip_ir(llvm::Module &module,
 		}
 	}
 	for (const auto &[pc, _] : profile.per_site) {
-		if (!sites_by_pc.contains(pc)) {
+		if (!sites_by_pc.contains(pc) &&
+		    !branch_flip_is_unlifted_tail_site(input, pc)) {
 			throw std::runtime_error(
 				"profile per_site[" + std::to_string(pc) +
 				"] does not match a lifted conditional branch");
@@ -1684,7 +1706,14 @@ int64_t annotate_branch_flip_ir(llvm::Module &module,
 	int64_t annotated = 0;
 	int64_t skipped = 0;
 	constexpr const char *zero_count_reason = "zero_branch_count";
+	constexpr const char *tail_reason = "unsupported_subprog_tail";
 	for (const auto &[pc, profile_site] : profile.per_site) {
+		if (!sites_by_pc.contains(pc)) {
+			report_counts.skipped_sites.emplace_back(pc, tail_reason);
+			report_counts.skip_reasons[tail_reason]++;
+			skipped++;
+			continue;
+		}
 		if (profile_site.branch_count == 0) {
 			report_counts.skipped_sites.emplace_back(pc, zero_count_reason);
 			report_counts.skip_reasons[zero_count_reason]++;
@@ -1699,9 +1728,15 @@ int64_t annotate_branch_flip_ir(llvm::Module &module,
 				"branch_flip could not find lifted block bb_inst_" +
 				std::to_string(site.block_start_pc));
 		}
+#if LLVM_VERSION_MAJOR >= 19
 		auto *branch =
 			llvm::dyn_cast<llvm::CondBrInst>(block->getTerminator());
 		if (!branch) {
+#else
+		auto *branch =
+			llvm::dyn_cast<llvm::BranchInst>(block->getTerminator());
+		if (!branch || !branch->isConditional()) {
+#endif
 			throw std::runtime_error(
 				"branch_flip lifted block bb_inst_" +
 				std::to_string(site.block_start_pc) +
@@ -1740,8 +1775,26 @@ std::vector<uint8_t> run_branch_flip_roundtrip(
 	}
 	if (sites.empty()) {
 		if (!profile.per_site.empty()) {
-			throw std::runtime_error(
-				"branch_flip profile has per_site data but input has no lifted conditional branch");
+			constexpr const char *tail_reason =
+				"unsupported_subprog_tail";
+			int64_t skipped = 0;
+			for (const auto &[pc, _] : profile.per_site) {
+				if (!branch_flip_is_unlifted_tail_site(input, pc)) {
+					throw std::runtime_error(
+						"profile per_site[" +
+						std::to_string(pc) +
+						"] does not match a lifted conditional branch");
+				}
+				report_counts.skipped_sites.emplace_back(pc,
+								 tail_reason);
+				report_counts.skip_reasons[tail_reason]++;
+				skipped++;
+			}
+			report_counts.sites_applied = 0;
+			report_counts.sites_matched =
+				static_cast<int64_t>(profile.per_site.size());
+			report_counts.sites_skipped = skipped;
+			return input;
 		}
 		report_counts.sites_applied = 0;
 		report_counts.sites_matched = 0;

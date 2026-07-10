@@ -53,6 +53,7 @@ daemon/build-arm64/
 
 # Rust cargo build artifacts
 daemon/target/
+bpfperf/target/
 
 # Kernel module build artifacts
 module/x86/*.ko
@@ -93,6 +94,7 @@ tests/negative/build-arm64/
 tests/integration/
 native-sim/test/build-x86/
 native-sim/test/build-arm64/
+native-sim/test/build-*/
 
 # BPF build artifacts
 *.bpf.o

@@ -35,7 +35,6 @@ from runner.libs.rejit import (
     benchmark_rejit_enabled_passes,
     benchmark_run_provenance,
     measure_app_phase,
-    snapshot_app_maps,
     skip_rejit_disables_shim,
     skip_rejit_enabled,
 )
@@ -118,6 +117,19 @@ def _skip_rejit_enabled() -> bool:
         return skip_rejit_enabled(_env_str("SKIP_REJIT"))
     except ValueError as exc:
         raise SystemExit(str(exc)) from exc
+
+
+def _local_docker_executor(args: argparse.Namespace) -> bool:
+    return str(getattr(args, "executor", "")).strip() == "local-docker"
+
+
+def _wait_for_suite_quiescence(args: argparse.Namespace) -> None:
+    if _local_docker_executor(args):
+        # Host Docker shares the host-wide BPF program table with unrelated
+        # workloads, so the global count is not an isolation signal here.
+        time.sleep(2.0)
+        return
+    wait_for_suite_quiescence()
 
 
 def _keep_workdirs_enabled() -> bool:
@@ -528,20 +540,6 @@ def _loadtime_reports_path(
     return reports_dir / f"{_sanitize_app_filename(app.name)}.jsonl"
 
 
-def _map_snapshot_path(
-    app: AppSpec,
-    *,
-    artifact_session: ArtifactSession | None,
-) -> Path:
-    if artifact_session is not None:
-        snapshot_dir = artifact_session.run_dir / "details" / "map-snapshots"
-    else:
-        snapshot_dir = Path(os.environ.get("TMPDIR", "/tmp")) / "bpfrejit-map-snapshots"
-    path = snapshot_dir / _sanitize_app_filename(app.name)
-    path.mkdir(parents=True, exist_ok=True)
-    return path
-
-
 def _shim_log_path(
     app: AppSpec,
     phase: str,
@@ -699,12 +697,14 @@ def run_suite(
         native_loader_post_only=native_loader_post_only
     )
 
-    # Load all kinsn .ko modules into the running kernel before any app
-    # starts. Stock-kernel BTF probing happens inside shim_init via
-    # kinsnprober; that probe needs the modules already resident, otherwise
-    # rotate/cond_select/endian_fusion/lea pass-emitted kfunc calls land on
-    # btf_ids the kernel can't resolve (EACCES / EINVAL during PROG_LOAD).
-    kinsn_module_metadata = {} if workload_only or skip_rejit_disables_shim() else prepare_kinsn_modules()
+    # Kinsn modules are only valid on the benchmark kernel that built them.
+    # Host Docker runs on the host kernel and must not install image modules.
+    should_load_kinsn = (
+        not workload_only
+        and not skip_rejit_disables_shim()
+        and not _local_docker_executor(args)
+    )
+    kinsn_module_metadata = prepare_kinsn_modules() if should_load_kinsn else {}
     for app in suite.apps:
             _print_progress("app_start", app=app.name, runner=app.runner, workload=app.workload_for("corpus"))
             runner: AppRunner | None = None
@@ -744,7 +744,7 @@ def run_suite(
                             phase=phase,
                             status="ok",
                         )
-                        wait_for_suite_quiescence()
+                        _wait_for_suite_quiescence(args)
                         raise _AppLifecycleComplete
 
                     phase = "baseline_start"
@@ -821,29 +821,6 @@ def run_suite(
                         status="ok",
                     )
 
-                    baseline_map_snapshot_path: Path | None = None
-                    if not skip_rejit and "map_inline" in apply_enabled_passes:
-                        phase = "map_snapshot"
-                        baseline_map_snapshot_path = _map_snapshot_path(
-                            app,
-                            artifact_session=artifact_session,
-                        )
-                        _print_progress(
-                            "map_snapshot_start",
-                            app=app.name,
-                            runner=app.runner,
-                        )
-                        snapshot_app_maps(
-                            app_pids=app_pids,
-                            output_dir=baseline_map_snapshot_path,
-                        )
-                        _print_progress(
-                            "map_snapshot_done",
-                            app=app.name,
-                            runner=app.runner,
-                            status="ok",
-                        )
-
                     phase = "baseline_stop"
                     try:
                         _print_progress(
@@ -868,7 +845,7 @@ def run_suite(
                             phase=phase,
                             step="quiesce_start",
                         )
-                        wait_for_suite_quiescence()
+                        _wait_for_suite_quiescence(args)
                         _print_progress(
                             "phase_step",
                             app=app.name,
@@ -951,10 +928,6 @@ def run_suite(
                             artifact_session=artifact_session,
                         )
                         loadtime_env["BPFREJIT_SHIM_LOADTIME_REPORTS"] = str(reports_path)
-                        if baseline_map_snapshot_path is not None:
-                            loadtime_env["BPFREJIT_SHIM_MAP_SNAPSHOT_ROOT"] = str(
-                                baseline_map_snapshot_path
-                            )
                         lifecycle.rejit_result = {
                             "status": "ok",
                             "mode": "loadtime",
@@ -962,10 +935,6 @@ def run_suite(
                             "report_path": str(reports_path),
                             "enabled_passes": list(apply_enabled_passes),
                         }
-                        if baseline_map_snapshot_path is not None:
-                            lifecycle.rejit_result["map_snapshot_path"] = str(
-                                baseline_map_snapshot_path
-                            )
                         _print_progress(
                             "loadtime_plan_done",
                             app=app.name,
@@ -1045,7 +1014,7 @@ def run_suite(
                             phase=phase,
                             step="quiesce_start",
                         )
-                        wait_for_suite_quiescence()
+                        _wait_for_suite_quiescence(args)
                         _print_progress(
                             "phase_step",
                             app=app.name,
@@ -1078,7 +1047,7 @@ def run_suite(
                     startup_error = error_message
                 else:
                     lifecycle.error = error_message
-                    if phase in {"baseline_start", "map_snapshot", "loadtime_plan", "post_rejit_start", "baseline_stop", "post_rejit_stop"}:
+                    if phase in {"baseline_start", "loadtime_plan", "post_rejit_start", "baseline_stop", "post_rejit_stop"}:
                         _print_progress(
                             "phase_error",
                             app=app.name,
@@ -1106,7 +1075,7 @@ def run_suite(
                     if lifecycle is not None:
                         lifecycle.artifacts.update(_build_runner_artifacts(app, runner))
                     try:
-                        wait_for_suite_quiescence()
+                        _wait_for_suite_quiescence(args)
                     except Exception as quiesce_exc:
                         quiesce_error = str(quiesce_exc)
                     if not stop_error:
@@ -1217,15 +1186,39 @@ def _finalize_partial(
     }
     if fatal_error:
         payload["fatal_error"] = fatal_error
+    detail_payloads: dict[str, object] = {}
+    apps_done = 0
+    for app in getattr(suite, "apps", []):
+        app_name = str(getattr(app, "name", ""))
+        if not app_name:
+            continue
+        result = partial_results.get(app_name)
+        if result is None:
+            result = {
+                "app": app_name,
+                "status": "error",
+                "error": error_message,
+                "baseline": None,
+                "post_rejit": None,
+                "rejit_result": None,
+            }
+        elif str(result.get("status") or "error") == "ok":
+            apps_done += 1
+        detail_payloads[
+            f"apps/{_sanitize_app_filename(app_name)}.json"
+        ] = result
     session.write(
         status="error",
         progress_payload={
             "suite": "corpus",
             "status": "error",
+            "apps_done": apps_done,
+            "total_apps": len(getattr(suite, "apps", [])),
             "failed_at": datetime.now(timezone.utc).isoformat(),
             "error_message": error_message,
         },
         result_payload=payload,
+        detail_payloads=detail_payloads,
         error_message=error_message,
     )
     return payload

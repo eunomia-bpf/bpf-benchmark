@@ -1,6 +1,6 @@
 # Default per-pass step config for map_inline.
 # Read by runner/libs/pass_config.py at execute_plan build time.
-# Daemon substitutes ${...} vars; runner sends this command verbatim.
+# Shim substitutes ${...} vars; runner sends this command verbatim.
 log_level: 1
 command: |
-  bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}
+  bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}

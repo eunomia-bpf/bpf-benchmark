@@ -82,6 +82,8 @@ def kinsn_module_dir(workspace: Path, target_arch: str) -> Path:
 
 def kernel_modules_root(workspace: Path, target_arch: str, executor: str) -> Path:
     if inside_runtime_image():
+        if str(executor).strip() == "local-docker":
+            return Path("/")
         return Path("/artifacts")
     arch = str(target_arch).strip()
     if str(executor).strip() == "kvm":

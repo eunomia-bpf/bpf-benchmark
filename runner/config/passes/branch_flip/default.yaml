@@ -1,6 +1,8 @@
 # Default per-pass step config for branch_flip.
 # Read by runner/libs/pass_config.py at execute_plan build time.
-# Daemon substitutes ${...} vars; runner sends this command verbatim.
+# Shim substitutes ${...} vars; runner sends this command verbatim.
 log_level: 1
 command: |
-  bpfopt --pass branch_flip --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}
+  profile_root="${BPFREJIT_BRANCH_PROFILE_ROOT:?BPFREJIT_BRANCH_PROFILE_ROOT is required for branch_flip}";
+  profile="${profile_root}/hash-${PROG_BRANCH_PROFILE_HASH}.json";
+  bpfopt --pass branch_flip --input "${INPUT}" --output "${OUTPUT}" --report "${REPORT}" --prog-type "${PROG_TYPE}" -- --profile "${profile}"

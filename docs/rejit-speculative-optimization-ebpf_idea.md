@@ -46,7 +46,7 @@ eBPF is widely adopted in production for observability, networking, and customiz
 | eBPF research plan | `docs/tmp/ebpf-bench-research-plan.md` | research methodology + 项目目标 |
 | GHCR image cache | `docs/tmp/ghcr-image-cache.md` | base image strategy |
 | Docker build cache | `docs/tmp/docker-build-cache-gc.md` | local docker cache 生命周期 |
-| Paper writeup | `docs/paper/` (submodule) | paper LaTeX source |
+| Paper writeup | `docs/speculative-optimization/` (submodule) | speculative-optimization paper LaTeX source |
 | Ad-hoc reports | `docs/tmp/` | 临时调研/调试报告(按日期组织) |
 
 ---

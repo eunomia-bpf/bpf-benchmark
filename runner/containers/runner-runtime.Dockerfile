@@ -150,6 +150,7 @@ ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
 ARG BPFOPT_HOST_BIN=bpfopt/llvm/build-kinsn/bpfopt
 ARG KINSNPROBER_HOST_BIN=bpfopt/target/release/kinsnprober
+ARG BPFPROF_HOST_BIN=bpfperf/target/release/bpfprof
 ARG NATIVE_LINK_HOST_BIN=native-sim/x86/native_lab/native_link/target/release/native-link
 
 COPY --link --from=runner-runtime-artifacts /artifacts/tracee /artifacts/tracee
@@ -170,6 +171,7 @@ COPY --link tests ${IMAGE_WORKSPACE}/tests
 COPY --link --chmod=0755 ${BPFOPT_HOST_BIN} /usr/local/bin/bpfopt
 COPY --link --chmod=0755 \
     ${KINSNPROBER_HOST_BIN} \
+    ${BPFPROF_HOST_BIN} \
     ${NATIVE_LINK_HOST_BIN} \
     /usr/local/bin/
 COPY --link vendor/merlin_bpf_clang.py /usr/local/lib/bpfrejit/merlin/merlin_bpf_clang.py

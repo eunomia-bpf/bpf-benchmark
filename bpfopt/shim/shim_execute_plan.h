@@ -547,7 +547,11 @@ static int prog_workdir_init(struct prog_entry *pd, uint32_t want_id,
     struct stat tst;
     if (stat(w->target_json, &tst) != 0) {
         char shared[320];
-        snprintf(shared, sizeof(shared), "%s/target.json", dir);
+        if (loadtime_ensure_shared_target(dir, shared, sizeof(shared),
+                                          err_out, err_sz) != 0) {
+            free(fd2id_fds); free(fd2id_kids);
+            return -1;
+        }
         int sfd = open(shared, O_RDONLY);
         if (sfd < 0) {
             snprintf(err_out, err_sz, "missing shim target.json at %s", shared);

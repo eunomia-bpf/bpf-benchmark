@@ -46,23 +46,35 @@ extract_relocated_text(const std::vector<uint8_t> &object_bytes,
 std::unique_ptr<llvm::TargetMachine>
 create_bpf_target_machine(llvm::CodeGenOptLevel opt_level)
 {
-	llvm::InitializeAllTargetInfos();
-	llvm::InitializeAllTargets();
-	llvm::InitializeAllTargetMCs();
-	llvm::InitializeAllAsmPrinters();
+	LLVMInitializeBPFTargetInfo();
+	LLVMInitializeBPFTarget();
+	LLVMInitializeBPFTargetMC();
+	LLVMInitializeBPFAsmPrinter();
 
 	std::string error;
 	llvm::Triple triple("bpfel");
+#if LLVM_VERSION_MAJOR >= 19
 	const llvm::Target *target =
 		llvm::TargetRegistry::lookupTarget(triple, error);
+#else
+	const std::string triple_name = triple.str();
+	const llvm::Target *target =
+		llvm::TargetRegistry::lookupTarget(triple_name, error);
+#endif
 	if (!target) {
 		throw std::runtime_error("lookupTarget(bpfel) failed: " + error);
 	}
 	llvm::TargetOptions options;
 	auto machine = std::unique_ptr<llvm::TargetMachine>(
+#if LLVM_VERSION_MAJOR >= 19
 		target->createTargetMachine(triple, "v3", "", options,
 					    std::nullopt, std::nullopt,
 					    opt_level));
+#else
+		target->createTargetMachine(triple_name, "v3", "", options,
+					    std::nullopt, std::nullopt,
+					    opt_level));
+#endif
 	if (!machine) {
 		throw std::runtime_error("failed to create BPF target machine");
 	}
@@ -118,7 +130,11 @@ void promote_register_allocas(llvm::Module &module, llvm::TargetMachine &machine
 std::vector<uint8_t> emit_bpf_object(llvm::Module &module)
 {
 	auto machine = create_bpf_target_machine(llvm::CodeGenOptLevel::Aggressive);
+#if LLVM_VERSION_MAJOR >= 19
 	module.setTargetTriple(llvm::Triple("bpfel"));
+#else
+	module.setTargetTriple("bpfel");
+#endif
 	module.setDataLayout(machine->createDataLayout());
 	optimize_module(module, *machine);
 
@@ -981,7 +997,11 @@ std::vector<uint8_t> run_map_inline_roundtrip(const std::vector<uint8_t> &input,
 	return module.withModuleDo([&](llvm::Module &module) {
 		auto machine = create_bpf_target_machine(
 			llvm::CodeGenOptLevel::Aggressive);
+#if LLVM_VERSION_MAJOR >= 19
 		module.setTargetTriple(llvm::Triple("bpfel"));
+#else
+		module.setTargetTriple("bpfel");
+#endif
 		module.setDataLayout(machine->createDataLayout());
 		// Promote per-register allocas to SSA first so a lookup result
 		// flows directly to its uses (else it is stored to its alloca).

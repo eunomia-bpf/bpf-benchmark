@@ -1,8 +1,8 @@
 import subprocess
 import sys
-import time
 import unittest
 from http.client import HTTPConnection
+from types import SimpleNamespace
 from unittest import mock
 
 from runner.libs import workload
@@ -22,8 +22,9 @@ class _FakeHttpServer:
 
 def _workload_result() -> workload.WorkloadResult:
     return workload.WorkloadResult(
-        ops_total=1.0,
-        ops_per_sec=1.0,
+        workload_name="unit",
+        command=("true",),
+        returncode=0,
         duration_s=1.0,
         stdout="",
         stderr="",
@@ -48,7 +49,6 @@ class WorkloadContractTests(unittest.TestCase):
             workload._wait_for_stdout_marker(
                 process,
                 marker=workload._NAMESPACED_HTTP_READY_MARKER,
-                deadline=time.monotonic() + 2.0,
                 description="test process",
             )
         finally:
@@ -127,7 +127,7 @@ class WorkloadContractTests(unittest.TestCase):
             with self.subTest(runner=runner_name):
                 result = _workload_result()
                 runner = get_app_runner(runner_name, workload="network_lossy_multi")
-                runner.session = object()
+                runner.session = SimpleNamespace(process=None)
                 runner.device = workload.BENCHMARK_IFACE
                 with mock.patch.object(
                     runner_module,

@@ -1,0 +1,20 @@
+[workspace]
+members = [
+    "crates/kernel-sys",
+    "crates/bpfprof",
+]
+resolver = "2"
+
+[workspace.dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+libbpf-rs = "0.26.2"
+libbpf-sys = "1.7.0"
+libc = "0.2"
+humantime = "2"
+
+[profile.release]
+opt-level = 3
+lto = true

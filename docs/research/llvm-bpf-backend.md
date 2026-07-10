@@ -180,7 +180,7 @@ New Pass Manager callback：
 | `bounds_check_merge` | LLVM 可做普通 CFG/compare 简化，但 BPF backend 没有 packet bounds-check merge pass。 | 无；BPF 反而有 verifier-friendly guard barrier。 | 低。 | bpfopt 知道 BPF packet pointer、helper/program type、verifier range 语义，可合并 packet bounds-check ladder。 |
 | `skb_load_bytes_spec` | LLVM 只看到 helper call，不能把 `bpf_skb_load_bytes()` 语义特化成 direct packet access。 | 无。 | 无。 | bpfopt 根据 helper id、prog type、verifier 接受性做 helper specialization。 |
 | `wide_mem` | LLVM 有一般 memory combine/InstCombine，但 BPF backend 明确禁用 load-width reduction；不会可靠把 byte ladder 合成 verifier-safe wide load。 | `BPFISelLowering::shouldReduceLoadWidth(false)`，generic mem opt。 | 中低。 | bpfopt 在 bytecode 层识别 byte-ladder，并结合 CFG/liveness/branch-target 约束生成 wide `LDX_MEM`。 |
-| `branch_flip` | LLVM 有 PGO/block placement 能力，但 BPF backend 没有 per-site PMU profile 驱动的 branch flip。 | generic PGO/block placement，不是 BPF-specific。 | 低。 | bpfopt 使用外部 profiler 的真实 per-site `branch_count/misses/taken/not_taken`，在 post-load bytecode 层重排 biased diamond。 |
+| `branch_flip` | LLVM 有 PGO/block placement 能力，但 BPF backend 没有 post-load per-site PMU profile 输入。 | generic PGO/block placement，需要 profile metadata。 | 低。 | bpfopt 使用外部 profiler 的真实 per-site `branch_count/misses/taken/not_taken`，在 lift 后的 LLVM IR 上写入 branch-weight metadata，再走同一轮 O3 roundtrip。 |
 | `noop` | LLVM 无“产生 verifier state”的 noop pass 概念。 | 无。 | 无。 | bpfopt 的 `noop` 价值是触发 ReJIT/verifier log，给后续 verifier-state pass 提供 side input。 |
 
 ## 6. 上游贡献机会

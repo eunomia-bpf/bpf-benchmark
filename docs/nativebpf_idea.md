@@ -2,6 +2,8 @@
 
 状态:研究方向 · idea #3 的论文线 hub
 
+Paper writeup: `docs/kprog-simulator-in-ebpf/` (submodule).
+
 > **一句话**:内核扩展今天被"安全 × 高效"的三难逼着二选一 —— 内核模块快但不安全、
 > eBPF 安全但有 codegen 惩罚、Rust-for-Linux 快但安全靠信任编译器而非独立验证。NativeBPF
 > 占住缺失的那一角:**native 性能 + eBPF-verifier 级、对不可信作者也成立的独立安全**,

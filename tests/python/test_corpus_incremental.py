@@ -4,8 +4,8 @@ Tests for corpus/driver.py incremental per-app write and SIGTERM finalize.
 Bug-detection purpose:
   - _write_incremental_app_result: verify that per-app JSON, progress.json, and
     metadata.json are correctly written/updated after each app completes.
-  - SIGTERM handler: verify that _finalize_partial writes result.json
-    with partial results and calls SystemExit(130).
+  - SIGTERM handler: verify that _finalize_partial writes result.json and
+    per-app partial results, then calls SystemExit(130).
   - _finalize_partial: verify that apps not yet reached get an error entry and
     partial=True is set in the payload.
   - native-loader config validation: reject SKIP_REJIT plus post-only native
@@ -77,6 +77,16 @@ def _make_artifact_session(tmp_path: Path) -> ArtifactSession:
     )
     session.write(status="running", progress_payload={"status": "running"})
     return session
+
+
+def _read_app_result(session: ArtifactSession, app_name: str) -> dict:
+    app_path = (
+        session.run_dir
+        / "details"
+        / "apps"
+        / f"{driver._sanitize_app_filename(app_name)}.json"
+    )
+    return json.loads(app_path.read_text())
 
 
 # ---------------------------------------------------------------------------
@@ -198,7 +208,11 @@ class TestFinalizePartial(unittest.TestCase):
             "tracee": {"app": "tracee", "status": "ok", "error": "", "baseline": None, "post_rejit": None, "rejit_result": None},
         }
         payload = driver._finalize_partial(session, suite, partial, error_message="killed")
-        results = {r["app"]: r for r in payload["results"]}
+        self.assertNotIn("results", payload)
+        results = {
+            name: _read_app_result(session, name)
+            for name in ("tracee", "tetragon", "cilium")
+        }
         self.assertEqual(results["tracee"]["status"], "ok")
         self.assertEqual(results["tetragon"]["status"], "error")
         self.assertEqual(results["cilium"]["status"], "error")
@@ -270,7 +284,11 @@ class TestSigtermHandler(unittest.TestCase):
         self.assertTrue(result_json.exists(), "result.json must be written on SIGTERM")
 
         payload = json.loads(result_json.read_text())
-        results_by_app = {r["app"]: r for r in payload.get("results", [])}
+        self.assertNotIn("results", payload)
+        results_by_app = {
+            name: _read_app_result(session, name)
+            for name in ("tracee", "tetragon")
+        }
         self.assertEqual(results_by_app["tracee"]["status"], "ok")
         self.assertEqual(results_by_app["tetragon"]["status"], "error")
         self.assertTrue(payload.get("partial"))

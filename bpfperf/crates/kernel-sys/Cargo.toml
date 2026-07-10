@@ -1,0 +1,11 @@
+[package]
+name = "kernel-sys"
+version = "0.1.0"
+edition = "2021"
+description = "BPF kernel syscall wrappers — wraps libbpf-rs/libbpf-sys plus fork-custom commands"
+
+[dependencies]
+anyhow.workspace = true
+libbpf-rs.workspace = true
+libbpf-sys.workspace = true
+libc.workspace = true

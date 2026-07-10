@@ -7,8 +7,6 @@
 
 /* --- snapshot helpers (MAP_IDS / MAP_VALUES / canonicalize) --- */
 
-#define SHIM_MAP_SNAPSHOT_UNAVAILABLE (-2)
-
 /* Map types that can produce useful bpftool JSON snapshots for map_inline. */
 static int map_type_needs_dump(uint32_t t) {
     return t == BPF_MAP_TYPE_HASH || t == BPF_MAP_TYPE_ARRAY ||
@@ -97,43 +95,6 @@ static uint64_t normalized_prog_hash(const struct bpf_insn *insns,
     return h;
 }
 
-static int read_bytecode_file(const char *path, struct bpf_insn **insns_out,
-                              uint32_t *insn_cnt_out) {
-    *insns_out = NULL;
-    *insn_cnt_out = 0;
-    int fd = open(path, O_RDONLY);
-    if (fd < 0) return -1;
-    struct stat st;
-    if (fstat(fd, &st) != 0 || st.st_size <= 0 ||
-        (st.st_size % (off_t)sizeof(struct bpf_insn)) != 0) {
-        real_close(fd);
-        return -1;
-    }
-    size_t bytes = (size_t)st.st_size;
-    struct bpf_insn *insns = (struct bpf_insn *)malloc(bytes);
-    if (!insns) {
-        real_close(fd);
-        return -1;
-    }
-    size_t off = 0;
-    while (off < bytes) {
-        ssize_t n = read(fd, (char *)insns + off, bytes - off);
-        if (n > 0) {
-            off += (size_t)n;
-            continue;
-        }
-        if (n < 0 && errno == EINTR)
-            continue;
-        free(insns);
-        real_close(fd);
-        return -1;
-    }
-    real_close(fd);
-    *insns_out = insns;
-    *insn_cnt_out = (uint32_t)(bytes / sizeof(struct bpf_insn));
-    return 0;
-}
-
 static int query_map_info_by_fd(int fd, struct bpf_map_info *info) {
     memset(info, 0, sizeof(*info));
     union bpf_attr ia = {0};
@@ -143,16 +104,6 @@ static int query_map_info_by_fd(int fd, struct bpf_map_info *info) {
     return real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia)) < 0
                ? -1
                : 0;
-}
-
-static int query_map_info_by_id(uint32_t map_id, struct bpf_map_info *info) {
-    union bpf_attr ga = {0};
-    ga.map_id = map_id;
-    long fd = real_syscall(SYS_bpf, BPF_MAP_GET_FD_BY_ID, &ga, sizeof(ga));
-    if (fd < 0) return -1;
-    int rc = query_map_info_by_fd((int)fd, info);
-    real_close((int)fd);
-    return rc;
 }
 
 static void fill_map_ref_from_info(struct shim_map_ref *ref,
@@ -226,244 +177,13 @@ static int collect_current_map_refs(const struct bpf_insn *insns,
     return 0;
 }
 
-static int collect_saved_map_refs(const struct bpf_insn *insns,
-                                  uint32_t insn_cnt,
-                                  const uint32_t *fds,
-                                  const uint32_t *kids,
-                                  uint32_t fd_n,
-                                  struct shim_map_ref **refs_out,
-                                  uint32_t *n_out,
-                                  char *err,
-                                  size_t err_sz) {
-    *refs_out = NULL;
-    *n_out = 0;
-    uint32_t cap = 0;
-    struct shim_map_ref *refs = NULL;
-    for (uint32_t pc = 0; pc < insn_cnt; pc++) {
-        const struct bpf_insn *insn = &insns[pc];
-        if (insn->code != (BPF_LD | BPF_DW | BPF_IMM))
-            continue;
-        if (insn->src_reg != BPF_PSEUDO_MAP_FD &&
-            insn->src_reg != BPF_PSEUDO_MAP_VALUE &&
-            insn->src_reg != BPF_PSEUDO_MAP_IDX &&
-            insn->src_reg != BPF_PSEUDO_MAP_IDX_VALUE)
-            continue;
-        if (pc + 1 >= insn_cnt)
-            break;
-        uint32_t kid = 0;
-        uint32_t imm = (uint32_t)insn->imm;
-        for (uint32_t i = 0; i < fd_n; i++) {
-            if (fds[i] == imm) {
-                kid = kids[i];
-                break;
-            }
-        }
-        if (kid == 0) {
-            pc++;
-            continue;
-        }
-        struct bpf_map_info mi;
-        if (query_map_info_by_id(kid, &mi) != 0 || mi.id == 0) {
-            if (err && err_sz)
-                snprintf(err, err_sz,
-                         "saved map id resolution failed: id=%u errno=%d",
-                         kid, errno);
-            log_line("saved map id resolution failed: id=%u errno=%d",
-                     kid, errno);
-            free(refs);
-            return -1;
-        }
-        struct shim_map_ref ref;
-        fill_map_ref_from_info(&ref, pc, -1, &mi);
-        if (append_map_ref(&refs, n_out, &cap, &ref) != 0) {
-            free(refs);
-            return -1;
-        }
-        pc++;
-    }
-    *refs_out = refs;
-    return 0;
-}
-
-static void snapshot_safe_component(const char *in, char *out, size_t out_sz) {
-    size_t o = 0;
-    for (size_t i = 0; in && in[i] && o + 1 < out_sz; i++) {
-        char c = in[i];
-        out[o++] = ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-                    (c >= '0' && c <= '9') || c == '_' || c == '-' ||
-                    c == '.')
-                       ? c
-                       : '_';
-    }
-    if (o == 0 && out_sz > 1) {
-        memcpy(out, "noname", 6);
-        o = 6;
-    }
-    out[o < out_sz ? o : out_sz - 1] = 0;
-}
-
-static void snapshot_ref_dir(char *out, size_t out_sz, const char *root,
-                             uint64_t prog_hash, uint32_t prog_type,
-                             const struct shim_map_ref *ref) {
-    char safe_name[64];
-    snapshot_safe_component(ref->name, safe_name, sizeof(safe_name));
-    snprintf(out, out_sz,
-             "%s/prog-%016llx-type-%u-pc-%u-map-%s-t-%u-k-%u-v-%u-m-%u",
-             root, (unsigned long long)prog_hash, prog_type, ref->pc,
-             safe_name, ref->map_type, ref->key_size, ref->value_size,
-             ref->max_entries);
-}
-
-static void snapshot_ref_suffix(char *out, size_t out_sz, uint32_t prog_type,
-                                const struct shim_map_ref *ref) {
-    char safe_name[64];
-    snapshot_safe_component(ref->name, safe_name, sizeof(safe_name));
-    snprintf(out, out_sz, "-type-%u-pc-%u-map-%s-t-%u-k-%u-v-%u-m-%u",
-             prog_type, ref->pc, safe_name, ref->map_type, ref->key_size,
-             ref->value_size, ref->max_entries);
-}
-
 static int mkdir_one(const char *path) {
     if (mkdir(path, 0755) == 0 || errno == EEXIST)
         return 0;
     return -1;
 }
 
-static int copy_file_path(const char *src, const char *dst) {
-    int sfd = open(src, O_RDONLY);
-    if (sfd < 0) return -1;
-    int dfd = open(dst, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (dfd < 0) {
-        real_close(sfd);
-        return -1;
-    }
-    char buf[8192];
-    for (;;) {
-        ssize_t n = read(sfd, buf, sizeof(buf));
-        if (n > 0) {
-            size_t off = 0;
-            while (off < (size_t)n) {
-                ssize_t w = write(dfd, buf + off, (size_t)n - off);
-                if (w < 0) {
-                    if (errno == EINTR) continue;
-                    real_close(sfd);
-                    real_close(dfd);
-                    return -1;
-                }
-                if (w == 0) {
-                    real_close(sfd);
-                    real_close(dfd);
-                    return -1;
-                }
-                off += (size_t)w;
-            }
-            continue;
-        }
-        if (n == 0)
-            break;
-        if (errno == EINTR)
-            continue;
-        real_close(sfd);
-        real_close(dfd);
-        return -1;
-    }
-    real_close(sfd);
-    real_close(dfd);
-    return 0;
-}
-
-static ssize_t read_retry(int fd, void *buf, size_t count) {
-    for (;;) {
-        ssize_t n = read(fd, buf, count);
-        if (n < 0 && errno == EINTR)
-            continue;
-        return n;
-    }
-}
-
-static int files_equal_path(const char *a, const char *b) {
-    int afd = open(a, O_RDONLY);
-    if (afd < 0) return 0;
-    int bfd = open(b, O_RDONLY);
-    if (bfd < 0) {
-        real_close(afd);
-        return 0;
-    }
-    char abuf[4096], bbuf[4096];
-    int equal = 1;
-    for (;;) {
-        ssize_t an = read_retry(afd, abuf, sizeof(abuf));
-        ssize_t bn = read_retry(bfd, bbuf, sizeof(bbuf));
-        if (an < 0 || bn < 0 || an != bn) {
-            equal = 0;
-            break;
-        }
-        if (an == 0)
-            break;
-        if (memcmp(abuf, bbuf, (size_t)an) != 0) {
-            equal = 0;
-            break;
-        }
-    }
-    real_close(afd);
-    real_close(bfd);
-    return equal;
-}
-
-static int snapshot_file_is_skip_marker(const char *path) {
-    int fd = open(path, O_RDONLY);
-    if (fd < 0) return 0;
-    char buf[512];
-    ssize_t n = read_retry(fd, buf, sizeof(buf) - 1);
-    real_close(fd);
-    if (n <= 0) return 0;
-    buf[n] = 0;
-    return strstr(buf, "\"skipped\":true") != NULL;
-}
-
-static int find_single_snapshot_file(const char *dir, const char *suffix,
-                                     char *out, size_t out_sz) {
-    DIR *dp = opendir(dir);
-    if (!dp) return -1;
-    int found = 0;
-    size_t suffix_len = strlen(suffix);
-    struct dirent *de;
-    while ((de = readdir(dp)) != NULL) {
-        size_t len = strlen(de->d_name);
-        if (len <= suffix_len)
-            continue;
-        if (strncmp(de->d_name, "map-", 4) != 0)
-            continue;
-        if (strcmp(de->d_name + len - suffix_len, suffix) != 0)
-            continue;
-        if (found) {
-            char candidate[1200];
-            snprintf(candidate, sizeof(candidate), "%s/%s", dir, de->d_name);
-            if (!files_equal_path(out, candidate) &&
-                !(snapshot_file_is_skip_marker(out) &&
-                  snapshot_file_is_skip_marker(candidate))) {
-                closedir(dp);
-                return -1;
-            }
-            continue;
-        }
-        snprintf(out, out_sz, "%s/%s", dir, de->d_name);
-        found = 1;
-    }
-    closedir(dp);
-    return found ? 0 : SHIM_MAP_SNAPSHOT_UNAVAILABLE;
-}
-
 static int run_bpftool_to_file(char *const argv[], const char *out_path);
-
-static int write_current_map_show_json(const char *path,
-                                       const struct shim_map_ref *ref) {
-    char id_str[16];
-    snprintf(id_str, sizeof(id_str), "%u", ref->kernel_id);
-    char *const show_argv[] = {"bpftool", "-j", "map", "show", "id",
-                               id_str, NULL};
-    return run_bpftool_to_file(show_argv, path);
-}
 
 static char **snapshot_env_without_ld_preload(void) {
     size_t n_env = 0;
@@ -591,141 +311,6 @@ static void write_map_snapshots(const char *map_values_dir,
     }
 }
 
-static int snapshot_name_has_suffix(const char *name, const char *suffix) {
-    size_t name_len = strlen(name);
-    size_t suffix_len = strlen(suffix);
-    return name_len >= suffix_len &&
-           strcmp(name + name_len - suffix_len, suffix) == 0;
-}
-
-static int find_snapshot_values_dir(char *out, size_t out_sz,
-                                    const char *snapshot_root,
-                                    uint64_t prog_hash,
-                                    uint32_t prog_type,
-                                    const struct shim_map_ref *ref,
-                                    char *err,
-                                    size_t err_sz) {
-    char ref_dir[768];
-    snapshot_ref_dir(ref_dir, sizeof(ref_dir), snapshot_root, prog_hash,
-                     prog_type, ref);
-    snprintf(out, out_sz, "%s/map-values", ref_dir);
-    if (access(out, F_OK) == 0)
-        return 0;
-
-    char suffix[256];
-    snapshot_ref_suffix(suffix, sizeof(suffix), prog_type, ref);
-    DIR *dp = opendir(snapshot_root);
-    if (!dp) {
-        snprintf(err, err_sz, "failed to open map snapshot root %s errno=%d",
-                 snapshot_root, errno);
-        return -1;
-    }
-    int found = 0;
-    struct dirent *de;
-    while ((de = readdir(dp)) != NULL) {
-        if (strncmp(de->d_name, "prog-", 5) != 0)
-            continue;
-        if (!snapshot_name_has_suffix(de->d_name, suffix))
-            continue;
-        if (found) {
-            closedir(dp);
-            snprintf(err, err_sz,
-                     "ambiguous prior map snapshot for prog_type=%u pc=%u map=%s",
-                     prog_type, ref->pc, ref->name);
-            return SHIM_MAP_SNAPSHOT_UNAVAILABLE;
-        }
-        snprintf(out, out_sz, "%s/%s/map-values", snapshot_root, de->d_name);
-        found = 1;
-    }
-    closedir(dp);
-    if (!found) {
-        snprintf(err, err_sz,
-                 "missing prior map snapshot for prog=%016llx pc=%u map=%s",
-                 (unsigned long long)prog_hash, ref->pc, ref->name);
-        return SHIM_MAP_SNAPSHOT_UNAVAILABLE;
-    }
-    return 0;
-}
-
-static const struct shim_map_ref *find_ref_for_map_id(
-    const struct shim_map_ref *refs, uint32_t ref_n, uint32_t map_id) {
-    for (uint32_t i = 0; i < ref_n; i++)
-        if (refs[i].kernel_id == map_id)
-            return &refs[i];
-    return NULL;
-}
-
-static int remap_saved_map_snapshots(const char *map_values_dir,
-                                     const char *snapshot_root,
-                                     const struct bpf_insn *insns,
-                                     uint32_t insn_cnt,
-                                     uint32_t prog_type,
-                                     const struct shim_map_ref *refs,
-                                     uint32_t ref_n,
-                                     const uint32_t *kernel_ids,
-                                     const uint32_t *types,
-                                     uint32_t n,
-                                     char *err,
-                                     size_t err_sz) {
-    if (mkdir_one(map_values_dir) != 0) {
-        snprintf(err, err_sz, "failed to create map_values dir %s errno=%d",
-                 map_values_dir, errno);
-        return -1;
-    }
-    uint64_t prog_hash = normalized_prog_hash(insns, insn_cnt);
-    for (uint32_t i = 0; i < n; i++) {
-        const struct shim_map_ref *ref = find_ref_for_map_id(refs, ref_n,
-                                                             kernel_ids[i]);
-        if (!ref) {
-            snprintf(err, err_sz, "no current map ref for map id %u",
-                     kernel_ids[i]);
-            return -1;
-        }
-        char show_path[512];
-        snprintf(show_path, sizeof(show_path), "%s/map-%u.show.json",
-                 map_values_dir, kernel_ids[i]);
-        if (write_current_map_show_json(show_path, ref) != 0) {
-            snprintf(err, err_sz, "failed to write remapped map show for id %u",
-                     kernel_ids[i]);
-            return -1;
-        }
-        if (!map_type_needs_dump(types[i]))
-            continue;
-        char src_values[820], src_dump[900], dst_dump[512];
-        int find_rc = find_snapshot_values_dir(src_values, sizeof(src_values),
-                                               snapshot_root, prog_hash,
-                                               prog_type, ref, err, err_sz);
-        if (find_rc == SHIM_MAP_SNAPSHOT_UNAVAILABLE) {
-            log_line("prior map snapshot unavailable for prog=%016llx pc=%u map=%s; leaving metadata-only map_inline input",
-                     (unsigned long long)prog_hash, ref->pc, ref->name);
-            continue;
-        }
-        if (find_rc != 0)
-            return find_rc;
-        int file_rc = find_single_snapshot_file(src_values, ".dump.json", src_dump,
-                                                sizeof(src_dump));
-        if (file_rc == SHIM_MAP_SNAPSHOT_UNAVAILABLE) {
-            log_line("prior map snapshot dump unavailable for prog=%016llx pc=%u map=%s; leaving metadata-only map_inline input",
-                     (unsigned long long)prog_hash, ref->pc, ref->name);
-            continue;
-        }
-        if (file_rc != 0) {
-            log_line("prior map snapshot dumps inconsistent for prog=%016llx pc=%u map=%s; leaving metadata-only map_inline input",
-                     (unsigned long long)prog_hash, ref->pc, ref->name);
-            continue;
-        }
-        snprintf(dst_dump, sizeof(dst_dump), "%s/map-%u.dump.json",
-                 map_values_dir, kernel_ids[i]);
-        if (copy_file_path(src_dump, dst_dump) != 0) {
-            snprintf(err, err_sz,
-                     "failed to copy prior map snapshot for map id %u",
-                     kernel_ids[i]);
-            return -1;
-        }
-    }
-    return 0;
-}
-
 /* Write the loader-fd → kernel-map-id JSON for one prog's PROG_LOAD-time
  * snapshot (see prog_entry.snap_*). Canonicalize uses these to collapse
  * N-fds-pointing-to-same-kid into one fd_array slot. */
@@ -754,7 +339,7 @@ static int run_canonicalize(const char *input_path, const char *out_path,
                             const char *target_json, const char *map_ids_csv,
                             const char *fd_to_id_json,
                             const char *log_path) {
-    char *const argv_with_fd_to_id[] = {
+    char *const argv_with_fd_to_id_and_target[] = {
         "bpfopt", "--canonicalize-map-refs",
         "--input", (char *)input_path,
         "--output", (char *)out_path,
@@ -763,7 +348,14 @@ static int run_canonicalize(const char *input_path, const char *out_path,
         "--target-output", (char *)target_json,
         "--fd-to-id", (char *)fd_to_id_json,
         NULL};
-    char *const argv_kernel_ids[] = {
+    char *const argv_with_fd_to_id[] = {
+        "bpfopt", "--canonicalize-map-refs",
+        "--input", (char *)input_path,
+        "--output", (char *)out_path,
+        "--map-ids", (char *)map_ids_csv,
+        "--fd-to-id", (char *)fd_to_id_json,
+        NULL};
+    char *const argv_kernel_ids_and_target[] = {
         "bpfopt", "--canonicalize-map-refs",
         "--input", (char *)input_path,
         "--output", (char *)out_path,
@@ -771,7 +363,21 @@ static int run_canonicalize(const char *input_path, const char *out_path,
         "--target", (char *)target_json,
         "--target-output", (char *)target_json,
         NULL};
-    char *const *argv = fd_to_id_json ? argv_with_fd_to_id : argv_kernel_ids;
+    char *const argv_kernel_ids[] = {
+        "bpfopt", "--canonicalize-map-refs",
+        "--input", (char *)input_path,
+        "--output", (char *)out_path,
+        "--map-ids", (char *)map_ids_csv,
+        NULL};
+    char *const *argv = NULL;
+    if (fd_to_id_json && target_json)
+        argv = argv_with_fd_to_id_and_target;
+    else if (fd_to_id_json)
+        argv = argv_with_fd_to_id;
+    else if (target_json)
+        argv = argv_kernel_ids_and_target;
+    else
+        argv = argv_kernel_ids;
     /* Strip LD_PRELOAD so the bpfopt child doesn't re-attach the shim. */
     size_t n_env = 0;
     while (environ[n_env]) n_env++;
@@ -812,6 +418,8 @@ static int parse_target_btf_modules(const char *target_json_path,
                                     uint32_t **call_offsets_out,
                                     uint32_t *n_out) {
     *btf_ids_out = NULL; *call_offsets_out = NULL; *n_out = 0;
+    if (!target_json_path || !target_json_path[0])
+        return 0;
     int fd = open(target_json_path, O_RDONLY);
     if (fd < 0) return 0;
     struct stat st;
