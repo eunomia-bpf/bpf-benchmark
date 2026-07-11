@@ -43,15 +43,15 @@
 
 ## CRITICAL
 
-### 1. E2E 仍在每个 lifecycle 内部启动 daemon，并重复做 kinsn module loader
+### 1. E2E 仍在每个 lifecycle 内部启动 daemon，并重复做 kop module loader
 - 文件：`e2e/case_common.py:570-598`
 - 关联文件：`runner/Makefile:84,336,356`
 - 问题：
-  - `run_case_lifecycle()` 在 baseline 之后、scan/apply 之前直接调用 `_run_kinsn_module_loader()` 和 `DaemonSession.start()`。
+  - `run_case_lifecycle()` 在 baseline 之后、scan/apply 之前直接调用 `_run_kop_module_loader()` 和 `DaemonSession.start()`。
   - 这把 daemon 和 module lifecycle 绑到了单次 case lifecycle 上，而不是 benchmark session。
   - `runner/Makefile` 还通过 `VM_INIT` 给每次 VM 命令都隐式拼上 `module/load_all.sh`，进一步强化了“每次命令都重做一次环境初始化”的旧路径。
 - 修复建议：
-  - 把 daemon session 和 kinsn module 预热提升到 `e2e/run.py` 或统一 benchmark session 层。
+  - 把 daemon session 和 kop module 预热提升到 `e2e/run.py` 或统一 benchmark session 层。
   - `run_case_lifecycle()` 只接收已启动的 session handle，不再自己启动/关闭 daemon。
   - VM helper 不要给每条命令隐式拼 module loader。
 
@@ -187,7 +187,7 @@
 ### 12. `e2e/case_common.py` 已经演化成新的“中心大文件”，职责再次膨胀
 - 文件：`e2e/case_common.py:479-635`
 - 问题：
-  - 这个 helper 同时承载 lifecycle orchestration、daemon lifecycle、kinsn module 管理、skip policy、artifact metadata、map capture 挂载点。
+  - 这个 helper 同时承载 lifecycle orchestration、daemon lifecycle、kop module 管理、skip policy、artifact metadata、map capture 挂载点。
   - import cycle 是修掉了，但复杂度被整体搬到了 `case_common.py`。
 - 修复建议：
   - 至少拆成 `lifecycle.py`、`map_capture.py`、`daemon_benchmark_session.py` 三层。

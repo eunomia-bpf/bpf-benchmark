@@ -12,44 +12,44 @@
 
 ## 一、Codex 报告 CRITICAL/HIGH 问题裁决
 
-### Codex-1 [HIGH] `do_misc_fixups()` 对 kinsn proof sequence 使用固定 32 指令缓冲区，缺少上界检查
+### Codex-1 [HIGH] `do_misc_fixups()` 对 kop proof sequence 使用固定 32 指令缓冲区，缺少上界检查
 
 **裁决：✅ 确认存在**
 
 代码位置：`verifier.c:23767-23768`
 
 ```c
-cnt = kinsn->instantiate_insn(bpf_kinsn_sidecar_payload(insn),
+cnt = kop->instantiate_insn(bpf_kop_sidecar_payload(insn),
                               env->insn_buf);
 ```
 
-`env->insn_buf` 定义在 `bpf_verifier.h:27` 为 `struct bpf_insn insn_buf[INSN_BUF_SIZE]`，`INSN_BUF_SIZE = 32`。如果 kinsn 描述符的 `max_insn_cnt > 32`，`instantiate_insn()` 回调会越界写入 `env->insn_buf`。虽然 `validate_kinsn_proof_seq()` 在写入后检查 `cnt <= kinsn->max_insn_cnt`，但写入已经发生。
+`env->insn_buf` 定义在 `bpf_verifier.h:27` 为 `struct bpf_insn insn_buf[INSN_BUF_SIZE]`，`INSN_BUF_SIZE = 32`。如果 kop 描述符的 `max_insn_cnt > 32`，`instantiate_insn()` 回调会越界写入 `env->insn_buf`。虽然 `validate_kop_proof_seq()` 在写入后检查 `cnt <= kop->max_insn_cnt`，但写入已经发生。
 
-**修复方案**：在 `do_misc_fixups` 中 kinsn 分支入口添加：
+**修复方案**：在 `do_misc_fixups` 中 kop 分支入口添加：
 ```c
-if (kinsn->max_insn_cnt > INSN_BUF_SIZE)
+if (kop->max_insn_cnt > INSN_BUF_SIZE)
     return -E2BIG;
 ```
-或者改为使用 `lower_kinsn_proof_regions()` 中已有的 `kvcalloc(kinsn->max_insn_cnt, ...)` 模式进行动态分配。
+或者改为使用 `lower_kop_proof_regions()` 中已有的 `kvcalloc(kop->max_insn_cnt, ...)` 模式进行动态分配。
 
 ---
 
-### Codex-2 [HIGH] kinsn-only 程序不再强制 `jit_needed=true`，JIT 失败后可能错误回退到 interpreter
+### Codex-2 [HIGH] kop-only 程序不再强制 `jit_needed=true`，JIT 失败后可能错误回退到 interpreter
 
 **裁决：⚠️ 部分正确**
 
 代码位置：`core.c:2531-2533`, `verifier.c:23634-23644`, `verifier.c:23446-23453`
 
 分析：
-- `bpf_prog_has_kfunc_call()` 确实排除了 kinsn 描述符（只返回 `!tab->descs[i].kinsn` 的条目为 true）。
-- 因此 `bpf_prog_select_runtime()` 中 `jit_needed` 不会因 kinsn 而被置位。
-- 但是 `fixup_call_args()` 在 `#ifndef CONFIG_BPF_JIT_ALWAYS_ON` 路径中已经显式检查 `has_kinsn_call` 并拒绝。
+- `bpf_prog_has_kfunc_call()` 确实排除了 kop 描述符（只返回 `!tab->descs[i].kop` 的条目为 true）。
+- 因此 `bpf_prog_select_runtime()` 中 `jit_needed` 不会因 kop 而被置位。
+- 但是 `fixup_call_args()` 在 `#ifndef CONFIG_BPF_JIT_ALWAYS_ON` 路径中已经显式检查 `has_kop_call` 并拒绝。
 
 风险限定：
 - 对 `CONFIG_BPF_JIT_ALWAYS_ON=y` 的配置（现代发行版几乎全部如此），`jit_needed` 始终为 true，不受影响。
-- 对 `CONFIG_BPF_JIT_ALWAYS_ON=n` 的配置，`fixup_call_args()` 先于 `bpf_prog_select_runtime()` 运行，会拒绝带 kinsn 的非 JIT 程序。但对**多子程序**情况，如果 `jit_subprogs()` 先成功，单独的主程序 JIT 在 `bpf_prog_select_runtime()` 中失败，kinsn pseudo-insn 在 `do_misc_fixups` 中被保留（因为 `jit_requested && native_emit`），此时确实会回退到 interpreter 看到无法识别的指令。
+- 对 `CONFIG_BPF_JIT_ALWAYS_ON=n` 的配置，`fixup_call_args()` 先于 `bpf_prog_select_runtime()` 运行，会拒绝带 kop 的非 JIT 程序。但对**多子程序**情况，如果 `jit_subprogs()` 先成功，单独的主程序 JIT 在 `bpf_prog_select_runtime()` 中失败，kop pseudo-insn 在 `do_misc_fixups` 中被保留（因为 `jit_requested && native_emit`），此时确实会回退到 interpreter 看到无法识别的指令。
 
-**结论**：在 `!CONFIG_BPF_JIT_ALWAYS_ON` 配置下确实存在理论风险。修复方案：让 `bpf_prog_has_kfunc_call()` 或新函数 `bpf_prog_has_kinsn_call()` 也参与 `jit_needed` 判断。
+**结论**：在 `!CONFIG_BPF_JIT_ALWAYS_ON` 配置下确实存在理论风险。修复方案：让 `bpf_prog_has_kfunc_call()` 或新函数 `bpf_prog_has_kop_call()` 也参与 `jit_needed` 判断。
 
 ---
 
@@ -314,26 +314,26 @@ int bpf_arch_text_poke(void *ip, enum bpf_text_poke_type old_t,
 
 ---
 
-### Opus-9.1 [HIGH] `lower_kinsn_proof_regions` 在 verifier 探索之前修改指令流
+### Opus-9.1 [HIGH] `lower_kop_proof_regions` 在 verifier 探索之前修改指令流
 
 **裁决：⚠️ 部分正确，但设计是 intentional**
 
 代码位置：`verifier.c:3722-3879`（lower），`verifier.c:3836-3879`（restore）
 
 分析：
-- lower-verify-restore 模式的核心意图是：让 verifier 验证 proof sequence（kinsn 的等价 BPF 指令序列），而非验证不可识别的 kinsn pseudo-insn。
+- lower-verify-restore 模式的核心意图是：让 verifier 验证 proof sequence（kop 的等价 BPF 指令序列），而非验证不可识别的 kop pseudo-insn。
 - lower 从后往前遍历（`for (i = prog->len - 1; i >= 0; i--)`），避免前面的 patch 影响后面的索引。
 - restore 从前往后遍历，并在每次 patch 后更新后续 region 的 start 偏移。
 
 Opus 指出的 `aux[].jt` 清空问题：这是 intentional——proof region 内的 jump target 信息在 restore 后不再有意义（对应指令已被替换回 sidecar+call）。
 
-关于 `BPF_LD_IMM64` 的问题：`validate_kinsn_proof_seq` 确实没有处理 `BPF_LD_IMM64` 的双指令跳过。但 proof sequence 已禁止 `src_reg != 0` 的 `BPF_LD_IMM64`（即伪 ldimm64），只允许 `src_reg == 0` 的纯字面量加载。对纯字面量 `BPF_LD_IMM64`，第二条指令的 `code` 仍然满足 `BPF_CLASS = BPF_LD`，不会被误判为 JMP。但循环 `for (i = 0; i < cnt; i++)` 会对第二条 insn 做类型检查，这条 insn 的 class 是 `BPF_LD`，不会进入 JMP 分支。所以实际上是安全的。
+关于 `BPF_LD_IMM64` 的问题：`validate_kop_proof_seq` 确实没有处理 `BPF_LD_IMM64` 的双指令跳过。但 proof sequence 已禁止 `src_reg != 0` 的 `BPF_LD_IMM64`（即伪 ldimm64），只允许 `src_reg == 0` 的纯字面量加载。对纯字面量 `BPF_LD_IMM64`，第二条指令的 `code` 仍然满足 `BPF_CLASS = BPF_LD`，不会被误判为 JMP。但循环 `for (i = 0; i < cnt; i++)` 会对第二条 insn 做类型检查，这条 insn 的 class 是 `BPF_LD`，不会进入 JMP 分支。所以实际上是安全的。
 
 **结论**：设计是 intentional 的，但缺少清晰的注释和 assertion。建议添加。
 
 ---
 
-### Opus-9.2 [HIGH] `validate_kinsn_proof_seq` 的跳转验证不完整（BPF_LD_IMM64）
+### Opus-9.2 [HIGH] `validate_kop_proof_seq` 的跳转验证不完整（BPF_LD_IMM64）
 
 **裁决：❌ 误报**（见上条分析）
 
@@ -343,14 +343,14 @@ proof sequence 禁止了带 `src_reg != 0` 的 `BPF_LD_IMM64`。对 `src_reg == 
 
 ---
 
-### Opus-11.1 [HIGH] ARM64 `emit_kinsn_desc_call_arm64` 直接写入 `ctx->image`
+### Opus-11.1 [HIGH] ARM64 `emit_kop_desc_call_arm64` 直接写入 `ctx->image`
 
 **裁决：✅ 确认存在**
 
 代码位置：`arm64/net/bpf_jit_comp.c:1210`
 
 ```c
-n_insns = kinsn->emit_arm64(ctx->image, &ctx->idx, ctx->write,
+n_insns = kop->emit_arm64(ctx->image, &ctx->idx, ctx->write,
                             payload, bpf_prog);
 ```
 
@@ -368,8 +368,8 @@ n_insns = kinsn->emit_arm64(ctx->image, &ctx->idx, ctx->write,
 
 **裁决：⚠️ 部分正确**
 
-- `struct bpf_kinsn_region`：定义应在 `include/linux/bpf_verifier.h` 中，diff 不完整。
-- `env->kinsn_regions` 等字段：定义不在 diff 中。
+- `struct bpf_kop_region`：定义应在 `include/linux/bpf_verifier.h` 中，diff 不完整。
+- `env->kop_regions` 等字段：定义不在 diff 中。
 - `bpf_prog_refresh_xdp`：只有声明没有实现。
 
 这些不是 bug，而是 patch 不完整。对于 POC 评估来说可以理解，但 upstream submission 必须补全。
@@ -409,7 +409,7 @@ REJIT 要求 `CAP_BPF + CAP_SYS_ADMIN`，但使用 `GFP_USER` 而非 `GFP_KERNEL
 
 ### 必须修复的问题（阻塞合并）：
 
-1. **[HIGH] `do_misc_fixups` kinsn insn_buf 溢出**（Codex-1）：添加 `max_insn_cnt <= INSN_BUF_SIZE` 检查
+1. **[HIGH] `do_misc_fixups` kop insn_buf 溢出**（Codex-1）：添加 `max_insn_cnt <= INSN_BUF_SIZE` 检查
 2. **[HIGH] `has_callchain_buf` 未被 swap**（Codex-3）：添加到 SWAP_PROG_BITFIELD 列表
 3. **[HIGH] rollback poke_tab memcpy 无锁**（Codex-5）：复用正向路径的锁粒度
 4. **[HIGH] trampoline_users 反向索引在 unlink 失败时被删除**（Codex-8）：仅成功时删除
@@ -417,7 +417,7 @@ REJIT 要求 `CAP_BPF + CAP_SYS_ADMIN`，但使用 `GFP_USER` 而非 `GFP_KERNEL
 6. **[HIGH] ARM64 emit 回调无 scratch buffer**（Opus-11.1）：改为 scratch + memcpy
 7. **[HIGH] 删除所有 `rejit_scx_debug_prog` 调试代码**（Codex-7 / Opus-4.6）
 8. **[HIGH] patch 不完整**（Opus-14.x）：补全缺失定义和实现
-9. **[MEDIUM] `kinsn-only` 程序应设置 `jit_needed`**（Codex-2）：在 `bpf_prog_select_runtime` 中检查
+9. **[MEDIUM] `kop-only` 程序应设置 `jit_needed`**（Codex-2）：在 `bpf_prog_select_runtime` 中检查
 10. **[MEDIUM] `orig_insns` 全局分配**（Codex-6）：改为 lazy 或 opt-in
 
 ### 确认为误报的问题：
@@ -425,4 +425,4 @@ REJIT 要求 `CAP_BPF + CAP_SYS_ADMIN`，但使用 `GFP_USER` 而非 `GFP_KERNEL
 1. Opus-4.1：`memcpy(prog->insnsi, ...)` 越界——vmalloc 分配是页对齐的，检查正确
 2. Opus-7.4：`bpf_arch_text_poke` 参数错误——5 参数签名，两个 `BPF_MOD_CALL` 是正确的
 3. Opus-4.5：TRACING 类型未特殊处理——`trampoline_users` 机制已覆盖
-4. Opus-9.2：`validate_kinsn_proof_seq` 的 `BPF_LD_IMM64` 处理——class 检查避免了误判
+4. Opus-9.2：`validate_kop_proof_seq` 的 `BPF_LD_IMM64` 处理——class 检查避免了误判

@@ -40088,11 +40088,11 @@ struct bpf_kfunc_call_arg_meta {
 	u64 mem_size;
 };
 
-struct bpf_kinsn;
+struct bpf_kop;
 
 struct bpf_kfunc_desc {
 	struct btf_func_model func_model;
-	const struct bpf_kinsn *kinsn;
+	const struct bpf_kop *kop;
 	u32 func_id;
 	s32 imm;
 	u16 offset;
@@ -40107,13 +40107,13 @@ struct bpf_kfunc_desc_tab {
 struct bpf_kfunc_meta {
 	struct btf *btf;
 	const struct btf_type *proto;
-	const struct bpf_kinsn *kinsn;
+	const struct bpf_kop *kop;
 	const char *name;
 	const u32 *flags;
 	s32 id;
 };
 
-struct bpf_kinsn {
+struct bpf_kop {
 	struct module *owner;
 	u16 max_insn_cnt;
 	u16 max_emit_bytes;
@@ -40122,7 +40122,7 @@ struct bpf_kinsn {
 	int (*emit_arm64)(u32 *, int *, bool, u64, const struct bpf_prog *, const u32 *);
 };
 
-struct bpf_kinsn_region {
+struct bpf_kop_region {
 	u32 start;
 	u16 proof_len;
 	struct bpf_insn orig[2];
@@ -43495,10 +43495,10 @@ struct bpf_verifier_env {
 	u32 scc_cnt;
 	struct bpf_iarray *succ;
 	struct bpf_iarray *gotox_tmp_buf;
-	struct bpf_kinsn_region *kinsn_regions;
-	u32 kinsn_call_cnt;
-	u32 kinsn_region_cnt;
-	u32 kinsn_region_cap;
+	struct bpf_kop_region *kop_regions;
+	u32 kop_call_cnt;
+	u32 kop_region_cnt;
+	u32 kop_region_cap;
 };
 
 struct bpf_verifier_ops {
@@ -43986,22 +43986,22 @@ struct btf_kfunc_id_set {
 	struct module *owner;
 	struct btf_id_set8 *set;
 	btf_kfunc_filter_t filter;
-	const struct bpf_kinsn * const *kinsn_descs;
+	const struct bpf_kop * const *kop_descs;
 };
 
-struct btf_kfunc_kinsn_desc {
+struct btf_kfunc_kop_desc {
 	u32 id;
-	const struct bpf_kinsn *kinsn;
+	const struct bpf_kop *kop;
 };
 
-struct btf_kfunc_kinsn_set {
+struct btf_kfunc_kop_set {
 	u32 cnt;
-	struct btf_kfunc_kinsn_desc descs[0];
+	struct btf_kfunc_kop_desc descs[0];
 };
 
 struct btf_kfunc_set_tab {
 	struct btf_id_set8 *sets[14];
-	struct btf_kfunc_kinsn_set *kinsn_sets[14];
+	struct btf_kfunc_kop_set *kop_sets[14];
 	struct btf_kfunc_hook_filter hook_filters[14];
 };
 

@@ -25,7 +25,7 @@ rg --files bpfopt/crates/bpfopt/src | rg '\.rs$' | rg -v '(^|/)(.*tests\.rs|test
 - Moved `map_inline` pass-local CLI parsing and bpftool/compressed map JSON parsing into `crates/bpfopt/src/passes/map_inline/cli.rs`.
 - Added `bpfopt::passes::map_inline::attach_cli_side_input(common, ctx, pass_args)` as the CLI-facing pass entry.
 - Moved FD-to-IDX canonicalization and target module call-offset shifting into `crates/bpfopt/src/analysis/bbprogram_lift.rs`.
-- Moved shared `CommonArgs`, `TargetJson`, and `KinsnJson` into `pass.rs` so library pass code can accept the real common CLI args without a new side-input module.
+- Moved shared `CommonArgs`, `TargetJson`, and `KopJson` into `pass.rs` so library pass code can accept the real common CLI args without a new side-input module.
 
 ## Gates
 

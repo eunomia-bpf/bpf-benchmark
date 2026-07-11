@@ -2520,7 +2520,7 @@
     {
       "category": "memory-local",
       "description": "TC version of the packet checksum fold benchmark",
-      "error": "command failed (-11): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native --program /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_sib_ec_20260519_043546/tc_packet_checksum_fold.bpf.o --program-name tc_packet_checksum_fold_prog --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_checksum_fold.mem --io-mode staged --input-size 1032 --inner-repeat 100000\n",
+      "error": "command failed (-11): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native --program /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kop_programs_sib_ec_20260519_043546/tc_packet_checksum_fold.bpf.o --program-name tc_packet_checksum_fold_prog --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_checksum_fold.mem --io-mode staged --input-size 1032 --inner-repeat 100000\n",
       "expected_result": 0,
       "family": "reduction",
       "hypothesis": "Reuses the checksum reduction under a sched_cls hook with packet-fed staged input and skb-context result extraction",
@@ -2539,7 +2539,7 @@
     {
       "category": "alu-mix",
       "description": "cgroup_skb egress hash-chain reduction over generated u64 words",
-      "error": "command failed (-11): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native --program /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_sib_ec_20260519_043546/cgroup_skb_hash_chain.bpf.o --program-name cgroup_skb_hash_chain_prog --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cgroup_skb_hash_chain.mem --io-mode staged --input-size 72 --inner-repeat 100000\n",
+      "error": "command failed (-11): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native --program /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kop_programs_sib_ec_20260519_043546/cgroup_skb_hash_chain.bpf.o --program-name cgroup_skb_hash_chain_prog --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cgroup_skb_hash_chain.mem --io-mode staged --input-size 72 --inner-repeat 100000\n",
       "expected_result": 12027228624407116210,
       "family": "hash-chain",
       "hypothesis": "Exercises a non-XDP cgroup_skb hook with packet-fed staged input and skb-context result extraction",
@@ -2569,7 +2569,7 @@
     "warmups": 0
   },
   "details_dir": "details",
-  "error_message": "tc_packet_checksum_fold: command failed (-11): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native --program /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_sib_ec_20260519_043546/tc_packet_checksum_fold.bpf.o --program-name tc_packet_checksum_fold_prog --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_checksum_fold.mem --io-mode staged --input-size 1032 --inner-repeat 100000\n; cgroup_skb_hash_chain: command failed (-11): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native --program /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_sib_ec_20260519_043546/cgroup_skb_hash_chain.bpf.o --program-name cgroup_skb_hash_chain_prog --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cgroup_skb_hash_chain.mem --io-mode staged --input-size 72 --inner-repeat 100000\n",
+  "error_message": "tc_packet_checksum_fold: command failed (-11): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native --program /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kop_programs_sib_ec_20260519_043546/tc_packet_checksum_fold.bpf.o --program-name tc_packet_checksum_fold_prog --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_checksum_fold.mem --io-mode staged --input-size 1032 --inner-repeat 100000\n; cgroup_skb_hash_chain: command failed (-11): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native --program /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kop_programs_sib_ec_20260519_043546/cgroup_skb_hash_chain.bpf.o --program-name cgroup_skb_hash_chain_prog --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cgroup_skb_hash_chain.mem --io-mode staged --input-size 72 --inner-repeat 100000\n",
   "generated_at": "2026-05-19T12:20:43.563807+00:00",
   "host": {
     "cpu_affinity": null,

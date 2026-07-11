@@ -5,7 +5,7 @@
 - New narrowing matcher: `bpfopt/crates/bpfopt/src/passes/endian.rs:69`.
 - Narrowing acceptance: `endian.rs:92` through `:103` scans up to 32 straight-line instructions from `LDX{W,DW}` to a same-dst endian byte-swap and emits the fused site with `BPF_H`/`BPF_W` size.
 - Size policy: `endian.rs:142` through `:159` accepts exact sizes plus `(W,H)`, `(DW,H)`, and `(DW,W)`.
-- Rewrite mapping: `endian.rs:503` through `:524` emits the packed endian kinsn, copies safe intervening instructions, and remaps the deleted endian op to the end of the replacement window.
+- Rewrite mapping: `endian.rs:503` through `:524` emits the packed endian kop, copies safe intervening instructions, and remaps the deleted endian op to the end of the replacement window.
 
 ## Flow Analysis
 

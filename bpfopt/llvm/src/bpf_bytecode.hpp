@@ -277,26 +277,26 @@ bool patch_func_symbol(std::vector<uint8_t> &text, size_t pc,
 	return true;
 }
 
-bool patch_kinsn_symbol(std::vector<uint8_t> &text, size_t pc,
+bool patch_kop_symbol(std::vector<uint8_t> &text, size_t pc,
 			std::string_view name,
-			const KinsnTargetMap *kinsn_targets)
+			const KopTargetMap *kop_targets)
 {
 	if (!name.starts_with("bpf_")) {
 		return false;
 	}
-	if (!kinsn_targets) {
-		throw std::runtime_error("kinsn relocation requires --target: " +
+	if (!kop_targets) {
+		throw std::runtime_error("kop relocation requires --target: " +
 					 std::string(name));
 	}
-	const auto target = kinsn_targets->find(std::string(name));
-	if (target == kinsn_targets->end()) {
-		throw std::runtime_error("target.json has no kinsn entry for " +
+	const auto target = kop_targets->find(std::string(name));
+	if (target == kop_targets->end()) {
+		throw std::runtime_error("target.json has no kop entry for " +
 					 std::string(name));
 	}
 	if (text[pc * INSN_SIZE] != BPF_CALL) {
-		throw std::runtime_error("kinsn relocation does not target a call");
+		throw std::runtime_error("kop relocation does not target a call");
 	}
-	set_src_reg(text, pc, BPF_PSEUDO_KINSN_CALL);
+	set_src_reg(text, pc, BPF_PSEUDO_KOP_CALL);
 	write_off(text, pc, target->second.call_offset);
 	write_imm(text, pc, target->second.btf_func_id);
 	return true;
@@ -343,7 +343,7 @@ void apply_one_relocation(llvm::object::ObjectFile &object,
 			  std::optional<size_t> subprog_start,
 			  size_t generated_insns,
 			  const std::map<int32_t, uint8_t> &call_src_by_imm,
-			  const KinsnTargetMap *kinsn_targets)
+			  const KopTargetMap *kop_targets)
 {
 	const auto symbol = reloc.getSymbol();
 	if (symbol == object.symbol_end()) {
@@ -366,8 +366,8 @@ void apply_one_relocation(llvm::object::ObjectFile &object,
 					      generated_insns) &&
 			   !patch_func_symbol(text, pc, name, subprog_start,
 					      generated_insns) &&
-			   !patch_kinsn_symbol(text, pc, name,
-					       kinsn_targets)) {
+			   !patch_kop_symbol(text, pc, name,
+					       kop_targets)) {
 		throw std::runtime_error("unsupported relocation symbol " +
 					 name + " at offset " +
 					 std::to_string(reloc.getOffset()) +
@@ -380,7 +380,7 @@ void apply_text_relocations(llvm::object::ObjectFile &object,
 			    std::optional<size_t> subprog_start,
 			    size_t generated_insns,
 			    const std::map<int32_t, uint8_t> &call_src_by_imm,
-			    const KinsnTargetMap *kinsn_targets)
+			    const KopTargetMap *kop_targets)
 {
 	for (const auto &section : object.sections()) {
 		auto relocated = section.getRelocatedSection();
@@ -396,7 +396,7 @@ void apply_text_relocations(llvm::object::ObjectFile &object,
 			apply_one_relocation(object, reloc, text,
 					     subprog_start, generated_insns,
 					     call_src_by_imm,
-					     kinsn_targets);
+					     kop_targets);
 		}
 	}
 	for (size_t pc = 0; pc < text.size() / INSN_SIZE; pc++) {

@@ -2,7 +2,7 @@
   "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
   "fatal_error": "shim socket /var/run/bpfrejit/shim-2243.sock returned invalid JSON: Unterminated string starting at: line 14 column 3 (char 4083): {\"status\":\"ok\",\"per_program\":{\"12\":{\"prog_id\":12,\"passes\":[{\"step\":{\"name\":\"noop\",\"command\":\"if [ \\\"x$BPFREJIT_DUMP_LIVE_JIT\\\" = \\\"x1\\\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKD",
   "generated_at": "2026-05-20T07:07:16.633541+00:00",
-  "kinsn_modules": {
+  "kop_modules": {
     "captured_at": "2026-05-20T07:06:46.514206+00:00",
     "daemon_binary": "daemon/target/release/bpfrejit-daemon",
     "expected_modules": [
@@ -60,8 +60,8 @@
         "bpf_x86_shd",
         "bpf_x86_stack"
       ],
-      "loader": "runner.libs.kinsn.load_kinsn_modules",
-      "module_dir": "/artifacts/kinsn",
+      "loader": "runner.libs.kop.load_kop_modules",
+      "module_dir": "/artifacts/kop",
       "newly_loaded_modules": [],
       "snapshot_after": {
         "captured_at": "2026-05-20T07:06:46.514099+00:00",

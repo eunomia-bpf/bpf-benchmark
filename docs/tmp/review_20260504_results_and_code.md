@@ -196,7 +196,7 @@ struct RejitSummary {
 - **规则**：No Dead Code — 写出去没人读的文件
 - **建议**：删除 `write_json_file(&rejit_summary_json, &rejit_summary)` 调用、`rejit_summary_json` 变量定义、以及 `RejitSummary` struct（如果无其他 caller）
 
-### B.7 `daemon/src/commands.rs:1315-1330` — `missing_target_kinsns` 的别名处理多余
+### B.7 `daemon/src/commands.rs:1315-1330` — `missing_target_kops` 的别名处理多余
 
 ```rust
 "bulk_memory" => {

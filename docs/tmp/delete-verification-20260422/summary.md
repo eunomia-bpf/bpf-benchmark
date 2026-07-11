@@ -187,7 +187,7 @@
   - `./corpus/driver.py:1079`
 
     ```text
-     1077:     kinsn_recorded: bool = False
+     1077:     kop_recorded: bool = False
      1078: 
     >1079:     def requested_prog_ids(self) -> list[int]:
      1080:         return [int(value) for value in self.state.apply_prog_ids if int(value) > 0]
@@ -279,7 +279,7 @@
      1347:                             merged_rejit_result,
     >1348:                             session.requested_prog_ids(),
      1349:                         )
-     1350:                         if session.kinsn_metadata is not None:
+     1350:                         if session.kop_metadata is not None:
     ```
     判定：活代码残留；内部局部变量/形参仍使用 `requested_prog_ids`，不是 artifact metadata key。
 
@@ -444,7 +444,7 @@
      438:         requested_prog_ids = lifecycle_state.requested_prog_ids()
     >439:         if not requested_prog_ids:
      440:             raise RuntimeError("lifecycle did not provide any requested program ids")
-     441:         if bool(getattr(active_daemon_session, "load_kinsn", False)):
+     441:         if bool(getattr(active_daemon_session, "load_kop", False)):
     ```
     判定：活代码残留；内部局部变量/形参仍使用 `requested_prog_ids`，不是 artifact metadata key。
 
@@ -526,14 +526,14 @@
      1012: | 635 | 更多 app runner 实现 | ✅ | 6 个 runner（bcc/tracee/katran/tetragon/bpftrace/scx）。Commit `86bc953`。 |
     >1013: | **636** | 全面 benchmark 架构 review | ✅ | 5 CRITICAL + 14 HIGH + 10 MEDIUM + 2 LOW。核心：bpftool loadall 残留、corpus repeat 没跑、rejit.py prog_fds 丢弃、大量 object-centric 死代码、silent fallback。报告：`strict_final_review_20260329.md`。 |
      1014: | **637** | **新架构 corpus + E2E 端到端验证** | ✅ | corpus suite driver 重写完成（loader-instance lifecycle）。大规模清理 **-21462 行**（`579c081`）。import cycle 修复 5/5（`2dd43c8`）。新增 9 个 app runner。残留清理+Tracee重构（`3101592`）。**2026-04-02 本地 VM 重跑完成**：`make vm-corpus` **20/20 app ok**、applied-only / all-comparable geomean **1.033x**、applied sample **61**；`make vm-e2e` **6/6 ok**。新 YAML schema 已落到 `macro_apps.yaml`，object-centric 规划不再是主线。报告：`corpus_app_native_coverage_and_e2e_dedup`、`benchmark_framework_redesign`、`benchmark_yaml_redesign`、`corpus_e2e_deep_review`（均在 `docs/tmp/20260329/`）。 |
-     1015: | 638 | 新 kinsn 调研（6 组） | ✅ | 全部完成。结论：(1) POPCNT/CLZ/PDEP/PEXT/SHRX — **❌ 不做**（corpus 无 site）；(2) ARM64 CCMP — **✅ 值得做**（74 site），MADD/UBFX 低优先级；(3) Prefetch — **✅ 值得做**（17391 map_lookup site，需 PGO），NT store — ❌ 不做；(4) CRC32 — ⏸ 不做默认 pass（loxilb 2 site）；(5) RDTSC + ADC — 待评估；(6) PAUSE/YIELD — ❌ 不做（kernel 已有）。报告均在 `docs/tmp/20260329/`：`bit_ops_kinsn_research`、`arm64_kinsn_research`、`memory_hints_kinsn_research`、`crc32_kinsn_research`、`rdtsc_adc_kinsn_research`、`pause_yield_kinsn_research`。 |
+     1015: | 638 | 新 kop 调研（6 组） | ✅ | 全部完成。结论：(1) POPCNT/CLZ/PDEP/PEXT/SHRX — **❌ 不做**（corpus 无 site）；(2) ARM64 CCMP — **✅ 值得做**（74 site），MADD/UBFX 低优先级；(3) Prefetch — **✅ 值得做**（17391 map_lookup site，需 PGO），NT store — ❌ 不做；(4) CRC32 — ⏸ 不做默认 pass（loxilb 2 site）；(5) RDTSC + ADC — 待评估；(6) PAUSE/YIELD — ❌ 不做（kernel 已有）。报告均在 `docs/tmp/20260329/`：`bit_ops_kop_research`、`arm64_kop_research`、`memory_hints_kop_research`、`crc32_kop_research`、`rdtsc_adc_kop_research`、`pause_yield_kop_research`。 |
     ```
     判定：文档残留；历史问题记录。
 
   - `./docs/kernel-jit-optimization-plan.md:1017`
 
     ```text
-     1015: | 638 | 新 kinsn 调研（6 组） | ✅ | 全部完成。结论：(1) POPCNT/CLZ/PDEP/PEXT/SHRX — **❌ 不做**（corpus 无 site）；(2) ARM64 CCMP — **✅ 值得做**（74 site），MADD/UBFX 低优先级；(3) Prefetch — **✅ 值得做**（17391 map_lookup site，需 PGO），NT store — ❌ 不做；(4) CRC32 — ⏸ 不做默认 pass（loxilb 2 site）；(5) RDTSC + ADC — 待评估；(6) PAUSE/YIELD — ❌ 不做（kernel 已有）。报告均在 `docs/tmp/20260329/`：`bit_ops_kinsn_research`、`arm64_kinsn_research`、`memory_hints_kinsn_research`、`crc32_kinsn_research`、`rdtsc_adc_kinsn_research`、`pause_yield_kinsn_research`。 |
+     1015: | 638 | 新 kop 调研（6 组） | ✅ | 全部完成。结论：(1) POPCNT/CLZ/PDEP/PEXT/SHRX — **❌ 不做**（corpus 无 site）；(2) ARM64 CCMP — **✅ 值得做**（74 site），MADD/UBFX 低优先级；(3) Prefetch — **✅ 值得做**（17391 map_lookup site，需 PGO），NT store — ❌ 不做；(4) CRC32 — ⏸ 不做默认 pass（loxilb 2 site）；(5) RDTSC + ADC — 待评估；(6) PAUSE/YIELD — ❌ 不做（kernel 已有）。报告均在 `docs/tmp/20260329/`：`bit_ops_kop_research`、`arm64_kop_research`、`memory_hints_kop_research`、`crc32_kop_research`、`rdtsc_adc_kop_research`、`pause_yield_kop_research`。 |
      1016: | **639** | **PGO 方案设计 + LBR 验证** | ✅ | **Host-side LBR 对 guest BPF 尚未验证可用**（5s 窗口 IP/branch 命中数=0）。推荐 **Hybrid PGO**：(1) profiler.rs 保留为 hotness collector；(2) sampling 零侵入发现（IP ~+1.37%, LBR ~+1.83%）；(3) selective instrumentation 给 hot subset 补精确 per-branch 数据。优先 BranchFlipPass，PrefetchPass 等 SPE/precise memory。**AWS**: t4g 有 SPE 硬件但 Nitro 是否暴露需实测，t3 有 LBR 但 guest 是否可用需实测，bare metal 才无限制。报告：`bpf_pgo_design_20260329.md`。 |
     >1017: | **640** | **Strict review 修复（删除为主）** | ✅ | **-2865 行**。删除：x86/arm64 远端 benchmark 脚本（bpftool loadall）、catalog.py/object_discovery.py/commands.py（object-centric 死代码）、results.py object-centric 函数、过时测试（test_micro_driver/test_runner_results）。修复：corpus repeat 真跑、rejit.py prog_fds 保留、tracee_support fallback→fail-fast、scx_support ulimit fail-fast。二次 review 确认全部落地，无误删。pytest **71 passed**，daemon-tests **535 passed**。报告：`strict_review_fixes_20260329.md`、`strict_review_second_pass_20260329.md`。 |
      1018: | **641** | **llvmbpf E2BIG root cause 分析** | ✅ | **E2BIG 根因**：LLVM BPF backend lowering 不紧凑，净增 **9352 insns**（1.192x）。67.3% stack spill/reload（+6291）、38% helper marshaling（+3550）、22% scalarization（+2053）。opt -O2 反而比不优化小 ~2x，-Oz 无增量。真实 limit 是 `prog->pages` page-budget（非 1M insn limit）。**ENOSPC 根因**：verifier log buffer exhaustion（log_level=2 的 16MiB 不够），不是 code-size。报告：`llvmbpf_e2big_root_cause_20260329.md`。 |
@@ -767,7 +767,7 @@
      22: from runner.libs.app_suite_schema import AppSpec, AppWorkload, load_app_suite_from_yaml
     >23: from runner.libs.bpf_stats import enable_bpf_stats, sample_bpf_stats
      24: from runner.libs.case_common import (
-     25:     _append_pending_kinsn_metadata,
+     25:     _append_pending_kop_metadata,
     ```
     判定：合理保留；测量/telemetry 采样，不参与 target/apply program 选择。
 
@@ -811,7 +811,7 @@
      16: from runner.libs.app_runners.base import AppRunner
     >17: from runner.libs.bpf_stats import compute_delta, list_program_ids, sample_bpf_stats
      18: from runner.libs.rejit import DaemonSession
-     19: from runner.libs.kinsn import (
+     19: from runner.libs.kop import (
     ```
     判定：合理保留；测量/telemetry 采样，不参与 target/apply program 选择。
 
@@ -1166,22 +1166,22 @@
   - `./corpus/driver.py:1389`
 
     ```text
-     1387:                     if str(session.kinsn_metadata.get("status") or "").strip() == "":
-     1388:                         session.kinsn_metadata["status"] = "error" if fatal_error or session.error else "completed"
-    >1389:                     if session.error and str(session.kinsn_metadata.get("error") or "").strip() == "":
-     1390:                         session.kinsn_metadata["error"] = session.error
-     1391:                     if fatal_error and str(session.kinsn_metadata.get("error") or "").strip() == "":
+     1387:                     if str(session.kop_metadata.get("status") or "").strip() == "":
+     1388:                         session.kop_metadata["status"] = "error" if fatal_error or session.error else "completed"
+    >1389:                     if session.error and str(session.kop_metadata.get("error") or "").strip() == "":
+     1390:                         session.kop_metadata["error"] = session.error
+     1391:                     if fatal_error and str(session.kop_metadata.get("error") or "").strip() == "":
     ```
     判定：合理保留；runner/app-local `error` 字段读取，不是 daemon protocol fallback。
 
   - `./corpus/driver.py:1391`
 
     ```text
-     1389:                     if session.error and str(session.kinsn_metadata.get("error") or "").strip() == "":
-     1390:                         session.kinsn_metadata["error"] = session.error
-    >1391:                     if fatal_error and str(session.kinsn_metadata.get("error") or "").strip() == "":
-     1392:                         session.kinsn_metadata["error"] = fatal_error
-     1393:                     _append_pending_kinsn_metadata(session.kinsn_metadata)
+     1389:                     if session.error and str(session.kop_metadata.get("error") or "").strip() == "":
+     1390:                         session.kop_metadata["error"] = session.error
+    >1391:                     if fatal_error and str(session.kop_metadata.get("error") or "").strip() == "":
+     1392:                         session.kop_metadata["error"] = fatal_error
+     1393:                     _append_pending_kop_metadata(session.kop_metadata)
     ```
     判定：合理保留；runner/app-local `error` 字段读取，不是 daemon protocol fallback。
 

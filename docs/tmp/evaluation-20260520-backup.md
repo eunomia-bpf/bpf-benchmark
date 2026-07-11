@@ -10,9 +10,9 @@ TL'DR:
 - **What it does**: re-JIT already-loaded eBPF programs in place: re-generate the BPF bytecode and replace in place transparently and keep all safety model.
 - **Kernel**: forked Linux 7.0-rc2.
   - Two added syscall commands: `BPF_PROG_REJIT`, `BPF_PROG_GET_ORIGINAL`.
-  - Modify kernel to support kinsn.
+  - Modify kernel to support kop.
   - Modify kernel to support re-JIT and replace the hooks in place.
-- *kinsn* modules expose arch-specific code sequences (byte-swap `MOVBE`, `cmov`, prefetch, rotate, `BEXTR`, bulk `memcpy`/`memset`) as JIT inline-emit hooks invoked through kfunc calls.
+- *kop* modules expose arch-specific code sequences (byte-swap `MOVBE`, `cmov`, prefetch, rotate, `BEXTR`, bulk `memcpy`/`memset`) as JIT inline-emit hooks invoked through kfunc calls.
 
 ```
    runner ──socket──▶  bpfrejit-daemon  ──fork+exec──▶  bpfopt --pass <name>
@@ -44,7 +44,7 @@ TL'DR:
 Three classes; every benchmark run selects an explicit subset via
 `BPFREJIT_BENCH_PASSES`.
 
-### 2.1 kinsn-class — replace bytecode with a kfunc, lowered by an in-kernel kinsn module via `KFUNC_INLINE_EMIT`
+### 2.1 kop-class — replace bytecode with a kfunc, lowered by an in-kernel kop module via `KFUNC_INLINE_EMIT`
 
 - **`rotate`** — shift+or pair → native rotate (`bpf_rotate{32,64}`)
 - **`cond_select`** — branch+select → `cmov` (`bpf_select64`)
@@ -255,8 +255,8 @@ error, or pass-internal failure). Conditions match §6.2.1.
 | `noop` ReJIT | 7 | 542 | 408 | 134 | **75.3 %** | kernel `failed_rejit` ×134 (≈124 are tetragon tail-call subprograms) |
 | `noop` + `map_inline` | 7 | 542 | 396 | 146 | **73.1 %** | kernel `failed_rejit` ×146 |
 | `prefetch` isolated | 7 | 545 | 530 | 15 | **97.2 %** | kernel `failed_rejit` ×15 |
-| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 7 | 542 | 513 | 29 | **94.6 %** | kernel `failed_rejit` ×29 |
-| 6-pass kinsn + prefetch: above + `prefetch` | 7 | 542 | 510 | 32 | **94.1 %** | kernel `failed_rejit` ×32 |
+| 5-pass kop: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 7 | 542 | 513 | 29 | **94.6 %** | kernel `failed_rejit` ×29 |
+| 6-pass kop + prefetch: above + `prefetch` | 7 | 542 | 510 | 32 | **94.1 %** | kernel `failed_rejit` ×32 |
 | All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` *(partial — 4 / 7 apps)* | 4 | 44 | 0 | 44 | **0.0 %** | `bpfopt_failed[const_prop]` ×44 — bpfopt-level bug, kernel ReJIT not reached for that pass |
 
 Findings:
@@ -269,8 +269,8 @@ Findings:
   loaded) whose kernel re-verification fails even when the bytecode is
   unchanged. This sets a per-program success ceiling of ~75 % that is
   independent of which transform is run.
-- Optimization conditions with non-trivial transforms (5-pass kinsn,
-  6-pass kinsn + prefetch, prefetch) report **higher** all-passes-ok
+- Optimization conditions with non-trivial transforms (5-pass kop,
+  6-pass kop + prefetch, prefetch) report **higher** all-passes-ok
   rates (94–97 %) than the `noop` controls (75 %). The reason: when a
   transform pass returns `skipped_missing_states` (no candidate found
   / verifier state absent), that is counted as `ok`, which absorbs
@@ -356,8 +356,8 @@ pass coverage run produces.
 | `noop` SKIP_REJIT | 0.9836 | 1.0281 | 0.9783 | 0.9957 | 1.1023 | 0.9042 | 0.7888 | **0.8587** | 147 |
 | `noop` + `map_inline` | 1.0097 | 1.0118 | 0.9728 | 0.9915 | **0.6567** | 1.0256 | 0.8150 | 0.8943 | 148 |
 | `prefetch` | 1.0154 | 0.9895 | — (wrk timed out) | 0.9963 | **0.7186** | 1.0175 | 0.8112 | 0.8880 | 142 |
-| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.9896 | 1.0117 | 0.9951 | 0.9639 | 0.9891 | 1.0783 | 0.8171 | 0.9074 | 147 |
-| 6-pass kinsn + prefetch: above + `prefetch` | 1.0289 | 1.0165 | 1.0066 | 0.9423 | 1.0056 | 1.0468 | 0.8067 | 0.9009 | 147 |
+| 5-pass kop: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.9896 | 1.0117 | 0.9951 | 0.9639 | 0.9891 | 1.0783 | 0.8171 | 0.9074 | 147 |
+| 6-pass kop + prefetch: above + `prefetch` | 1.0289 | 1.0165 | 1.0066 | 0.9423 | 1.0056 | 1.0468 | 0.8067 | 0.9009 | 147 |
 | All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | 1.0659 | 1.0155 | 0.9813 | 0.9807 | **0.4713** | 1.0064 | 0.8115 | *pending* | 148 |
 
 ### Findings
@@ -420,8 +420,8 @@ Per-app throughput metric:
 | `noop` SKIP_REJIT | 1.043 | 1.040 | 1.071 | 1.001 | 0.992 | 1.268 | 0.919 |
 | `noop` + `map_inline` | 0.809 | 0.913 | 1.040 | 1.004 | 0.997 | 1.279 | 1.144 |
 | `prefetch` | 1.191 | 0.913 | — | 1.006 | 0.989 | 0.766 | 0.818 |
-| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.925 | 1.093 | 0.940 | 0.995 | 1.001 | 1.242 | 1.051 |
-| 6-pass kinsn + prefetch: above + `prefetch` | 1.126 | 1.058 | 0.969 | 1.013 | 1.001 | 0.977 | 1.139 |
+| 5-pass kop: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.925 | 1.093 | 0.940 | 0.995 | 1.001 | 1.242 | 1.051 |
+| 6-pass kop + prefetch: above + `prefetch` | 1.126 | 1.058 | 0.969 | 1.013 | 1.001 | 0.977 | 1.139 |
 | All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | 0.949 | 1.048 | 1.046 | 0.986 | 0.995 | 1.028 | 0.982 |
 
 How to read this:
@@ -447,7 +447,7 @@ How to read this:
 `bytes_xlated` (verifier-translated BPF bytecode) per program. We sum
 across all programs in each app and report `post / baseline`. `< 1.0`
 means ReJIT shrunk total program size; `> 1.0` means ReJIT added code
-(e.g., `prefetch` inserts extra `bpf_prefetch` calls; kinsn passes
+(e.g., `prefetch` inserts extra `bpf_prefetch` calls; kop passes
 replace inlined sequences with kfunc calls that are slightly larger
 in raw bytecode but lower at the machine-code level).
 
@@ -458,16 +458,16 @@ in raw bytecode but lower at the machine-code level).
 | `noop` ReJIT | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | `noop` + `map_inline` | 1.000 | 1.000 | 1.006 | 1.000 | 0.994 | 1.000 | 0.999 |
 | `prefetch` | 1.001 | 1.005 | — | 1.000 | 1.008 | 1.003 | 1.003 |
-| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 1.021 | 1.015 | 1.013 | 1.001 | 1.001 | 1.009 | 0.999 |
-| 6-pass kinsn + prefetch: above + `prefetch` | 1.022 | 1.020 | 1.018 | 1.001 | 1.008 | 1.011 | 1.002 |
+| 5-pass kop: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 1.021 | 1.015 | 1.013 | 1.001 | 1.001 | 1.009 | 0.999 |
+| 6-pass kop + prefetch: above + `prefetch` | 1.022 | 1.020 | 1.018 | 1.001 | 1.008 | 1.011 | 1.002 |
 | All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | 0.997 | 0.974 | 0.966 | 0.951 | 0.985 | 0.995 | 0.999 |
 
 Reading the table:
 
 - `noop` ReJIT: 1.000 everywhere by definition (no transform). Acts as
   the integrity check.
-- `prefetch` and kinsn rows sit slightly **above** 1.0: every applied
-  prefetch adds a `bpf_prefetch` call site; kinsn passes replace 2-4
+- `prefetch` and kop rows sit slightly **above** 1.0: every applied
+  prefetch adds a `bpf_prefetch` call site; kop passes replace 2-4
   inlined BPF instructions with one kfunc call (BTF-typed). The kfunc
   call is larger in `bytes_jited` even though the in-kernel emitter
   (`KFUNC_INLINE_EMIT`) lowers it back to a single x86 `MOVBE` /
@@ -488,7 +488,7 @@ Reading the table:
 
 - improve map inline to make it actaully inline more; fix the 0 % apply rate in 5 of 7 apps (e.g. katran). We can fix it by allowing user provide map content and does not require the map key is const.
 - check more details about otel and tracee's improvement. Is it benchmark framework issue or actual improvement?
-- Why kinsn does not work well? Need futher investigation.
+- Why kop does not work well? Need futher investigation.
    - analysis each prog, check source code and disasm.
 - Sometimes kernel panic still exists.
 

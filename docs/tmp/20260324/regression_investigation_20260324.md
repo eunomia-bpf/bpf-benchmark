@@ -85,7 +85,7 @@ It did the opposite:
 - native code: `488 -> 440`
 - offline pass replay: `rotate` itself is only `-2 insns`
 
-So the hypothesis "rotate kinsn replacement inflated code size" is falsified for `code_clone_2`.
+So the hypothesis "rotate kop replacement inflated code size" is falsified for `code_clone_2`.
 
 #### 4.2 This is not an I-cache regression
 
@@ -111,7 +111,7 @@ So branch prediction interference is not the explanation here.
 Current x86 lowering facts:
 
 - `module/x86/bpf_rotate.c` emits inline native code: `mov` + `rol imm`
-- `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c` calls `emit_kinsn_desc_call()`, which inlines `kinsn->emit_x86`
+- `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c` calls `emit_kop_desc_call()`, which inlines `kop->emit_x86`
 
 So the current x86 path is not paying a helper-style function call overhead for `rotate`.
 

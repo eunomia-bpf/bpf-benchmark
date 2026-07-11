@@ -79,7 +79,7 @@ There are `114` programs with at least one `cond_select` skip. Every skipful pro
 | target lacks `bpf_select64` | 0 | Pass-level skip exists at `cond_select.rs:95-103`; not hit in this run. |
 | mismatched alias regs | 0 | No current `cond_select` skip reason matched this bucket. |
 | frame mismatch | 0 | No current `cond_select` skip reason matched this bucket. |
-| wide ALU missing kinsn | 0 | Not a `cond_select` skip class in this result. |
+| wide ALU missing kop | 0 | Not a `cond_select` skip class in this result. |
 
 Baseline comparison from the documented-baseline run artifact:
 
@@ -127,7 +127,7 @@ Code path:
 - Temp allocation uses `choose_temp_reg()` at `cond_select.rs:573-585`; it avoids protected registers, already allocated temps, and registers live after the diamond unless the register is the destination.
 - If no such temp exists, `materialize_value()` returns the skip reason at `cond_select.rs:560-561`.
 
-Classification: correctness-load-bearing for the current lowering. `bpf_select64` takes register operands encoded in the kinsn payload (`cond_select.rs:9-16`, `cond_select.rs:144-148`). If an immediate or 32-bit source must be passed to the kfunc and all legal temps are live or protected, reusing one would clobber a live value before the join. This is not a prophylactic guard.
+Classification: correctness-load-bearing for the current lowering. `bpf_select64` takes register operands encoded in the kop payload (`cond_select.rs:9-16`, `cond_select.rs:144-148`). If an immediate or 32-bit source must be passed to the kfunc and all legal temps are live or protected, reusing one would clobber a live value before the join. This is not a prophylactic guard.
 
 Minimal coverage fix if this bucket becomes a target: add a real spill/restore lowering for a chosen live temp around the emitted `bpf_select64` call, with verifier-state handling for the stack slot. That is an algorithm extension, not a guard removal. No text diff is proposed here because this category is correctness-load-bearing and did not contribute to the 161-site regression.
 
@@ -144,7 +144,7 @@ cargo run -q --manifest-path bpfopt/Cargo.toml -p bpfopt -- \
   --pass cond_select \
   --input bpfopt/testbin/tetragon_observer/245_generic_kprobe_filter_arg/canonicalize_output.bin \
   --output /tmp/cond_select_scan_245_generic_kprobe_filter_arg.bin \
-  --kinsns bpf_select64:5555 \
+  --koperation bpf_select64:5555 \
   --report /tmp/cond_select_scan_245_generic_kprobe_filter_arg.json
 ```
 

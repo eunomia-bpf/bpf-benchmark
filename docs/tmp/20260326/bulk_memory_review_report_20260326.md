@@ -11,7 +11,7 @@ Date: 2026-03-26
 ## Code Quality Assessment
 
 - Pass ordering is correct: `bulk_memory` sits after `wide_mem` in the canonical pipeline.
-- The implementation reuses the existing packed-kinsn emission, BTF-fd slot, and branch-fixup helpers instead of duplicating rewrite machinery.
+- The implementation reuses the existing packed-kop emission, BTF-fd slot, and branch-fixup helpers instead of duplicating rewrite machinery.
 - After the review fixes below, the control flow is clear and there is no obvious dead code inside `bulk_memory.rs`.
 
 ## Issues Found And Fixed
@@ -29,7 +29,7 @@ Date: 2026-03-26
    - Regression test: `test_non_stack_base_memcpy_skipped_by_alias_gate`.
 
 4. `kfunc_discovery.rs` initialized the bulk-memory registry slots but never discovered the corresponding targets.
-   - Fix: added `bpf_memcpy_bulk` / `bpf_memset_bulk` to `KNOWN_KINSNS` and covered them with a unit guard.
+   - Fix: added `bpf_memcpy_bulk` / `bpf_memset_bulk` to `KNOWN_KOPS` and covered them with a unit guard.
 
 ## Test Results
 
@@ -46,4 +46,4 @@ Date: 2026-03-26
 
 ## Notes
 
-- `BULK_MEMORY_MODULE = "bpf_bulk_memory"` is an inferred family-module name chosen to match the existing multi-target naming pattern used by kinsn modules such as `bpf_endian`.
+- `BULK_MEMORY_MODULE = "bpf_bulk_memory"` is an inferred family-module name chosen to match the existing multi-target naming pattern used by kop modules such as `bpf_endian`.

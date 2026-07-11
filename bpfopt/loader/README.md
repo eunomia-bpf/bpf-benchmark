@@ -16,7 +16,7 @@ Run one pass against one program in a BPF object:
 bpfopt/target/debug/bpfopt-loader \
   --obj path/to/test.bpf.o \
   --pass noop \
-  --bpfopt bpfopt/llvm/build-kinsn/bpfopt \
+  --bpfopt bpfopt/llvm/build-kop/bpfopt \
   --workdir /tmp/bpfopt-loader-work
 ```
 
@@ -136,4 +136,4 @@ testcase.
 - It stays out of `runner/`, `corpus/`, and benchmark Make targets.
 - It uses host libbpf/BPF syscalls only for developer fixture preparation and
   optional host verifier/test-run checks.
-- Kinsn passes still require a host kernel with matching kfunc modules.
+- KOperation passes still require a host kernel with matching kfunc modules.

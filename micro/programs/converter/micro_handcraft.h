@@ -5,12 +5,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#ifndef BPF_PSEUDO_KINSN_SIDECAR
-#define BPF_PSEUDO_KINSN_SIDECAR 3
+#ifndef BPF_PSEUDO_KOP_SIDECAR
+#define BPF_PSEUDO_KOP_SIDECAR 3
 #endif
 
-#ifndef BPF_PSEUDO_KINSN_CALL
-#define BPF_PSEUDO_KINSN_CALL 4
+#ifndef BPF_PSEUDO_KOP_CALL
+#define BPF_PSEUDO_KOP_CALL 4
 #endif
 
 #define MICRO_HANDCRAFT_BPF_X86_ROLQ 1

@@ -108,7 +108,7 @@
 
 - `required_btf_fds` / `target_btf_fds`
   - `bpfopt-suite/crates/bpfopt-core/src/pass.rs:54-56` 的 `required_btf_fds` 注释写得很清楚：这是给 serve optimize path 构建 REJIT `fd_array` 用的。
-  - `bpfopt-suite/crates/bpfopt-core/src/pass.rs:478-580` 的 `KinsnRegistry` 还持有 BTF FD transport metadata。
+  - `bpfopt-suite/crates/bpfopt-core/src/pass.rs:478-580` 的 `KopRegistry` 还持有 BTF FD transport metadata。
   - 这不是“是否能优化”的抽象能力，而是“如何把结果送进 REJIT”的 transport 细节。
 
 - `elf_parser.rs` / `mock_maps.rs` / `test_utils.rs`
@@ -123,7 +123,7 @@
   - `bpfopt-suite/crates/bpfopt-core/src/pass.rs:70-89` 已经有 `map_values` / `map_metadata` 容器。
   - 这类 side-input 是“纯优化数据依赖”，不是 daemon 依赖。
 
-- kinsn/target capability 本身应该保留，但 transport 细节应抽掉。
+- kop/target capability 本身应该保留，但 transport 细节应抽掉。
   - pass 需要知道某个 lowering target 是否可用。
   - 但它不需要知道 REJIT `fd_array` 如何组装，也不需要知道 daemon 怎样保活这些 FD。
 
@@ -266,7 +266,7 @@ daemon 应该直接依赖 library API，而不是依赖 CLI。
   - `BPF_PROG_GET_ORIGINAL`
   - `BPF_PROG_LOAD` dry-run verify
   - `BPF_PROG_REJIT`
-  - kinsn discovery
+  - kop discovery
   - map snapshot 采集
   - profiling 采集
   - invalidation tracking
@@ -317,7 +317,7 @@ daemon 的执行流程应变成：
 - `PassVerifyResult` / `run_with_verifier()`
   - 从 core 移出，放回 daemon orchestration 层。
 - `required_btf_fds` / `target_btf_fds`
-  - 从 core 改成更抽象的 `required_kinsn_targets`。
+  - 从 core 改成更抽象的 `required_kop_targets`。
 - `elf_parser.rs` / `mock_maps.rs` / `test_utils.rs`
   - 挪到 `tests/support` 或 dev-only support crate。
 
@@ -336,7 +336,7 @@ daemon 的执行流程应变成：
 3. 纯化 `bpfopt-core`
    - 从 `pass.rs` 去掉 verify/rollback transport 逻辑。
    - 从 `BpfProgram` 去掉 `required_btf_fds`。
-   - 从 `KinsnRegistry` 去掉 `target_btf_fds` 这类 REJIT transport 字段。
+   - 从 `KopRegistry` 去掉 `target_btf_fds` 这类 REJIT transport 字段。
    - 把 `verifier_log.rs`、`elf_parser.rs`、`mock_maps.rs`、`test_utils.rs` 挪出 runtime library。
 
 4. 重命名 crate

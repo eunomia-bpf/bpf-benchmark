@@ -46,12 +46,12 @@ From `CLAUDE.md`:
 | `cond_select` | Implemented. | Requires CMOV, kfunc, packed ABI, and packed sites require register true/false operands (`cond_select.rs:130-178`, `cond_select.rs:220-225`). |
 | `extract` / bitfield extract | Implemented. | Pattern is only `RSH64_IMM` followed by `AND64_IMM` with a low contiguous mask (`extract.rs:12-27`). |
 | `branch_flip` | Implemented. | Benchmark config excludes it, as designed. Daemon/core default policy still includes it unless the client sends an explicit enabled list (`pass.rs:935-940`). Runtime behavior skips with no PMU data (`branch_flip.rs:85-97`) and uses heuristic fallback when per-site profiles are absent (`branch_flip.rs:153-173`). |
-| `endian_fusion` | Implemented. | Potential transport bug: pass can emit 16/32/64-bit endian kfuncs, but `KinsnRegistry::target_name_for_pass("endian_fusion")` maps only to `bpf_endian_load32` (`pass.rs:703-711`), and the pass resolves a single call offset before emitting all site sizes (`endian.rs:326-350`). If static call offsets or fd-array slots differ per endian target, 16/64-bit sites can use the wrong transport metadata. |
+| `endian_fusion` | Implemented. | Potential transport bug: pass can emit 16/32/64-bit endian kfuncs, but `KopRegistry::target_name_for_pass("endian_fusion")` maps only to `bpf_endian_load32` (`pass.rs:703-711`), and the pass resolves a single call offset before emitting all site sizes (`endian.rs:326-350`). If static call offsets or fd-array slots differ per endian target, 16/64-bit sites can use the wrong transport metadata. |
 | `map_inline` | Implemented with live map providers and invalidation. | Direct-value speculative inline no longer requires frozen maps (`map_info.rs:57-65`, `map_inline.rs:819-836`), but mutable map lookup sites are still skipped if the returned value has non-load uses (`map_inline.rs:901-914`), and pseudo-map-value constantization remains frozen-only (`map_inline.rs:1476-1510`). |
 | `const_prop` | Implemented. | Uses verifier exact constants only, not the full documented tnum/range oracle. The core oracle keeps `exact64`/`exact32` facts (`const_prop.rs:120-173`), so range-driven branch simplification is not implemented. |
 | `dce` | Implemented. | No major design gap observed. |
 | `bounds_check_merge` | Implemented. | It is explicitly limited to packet program types (`bounds_check_merge.rs:94-95`, `bounds_check_merge.rs:237-248`), which is consistent with the packet guard-window design but narrower than a generic bounds pass. |
-| `bulk_memory` | Implemented. | It handles memcpy/memset bulk kinsns with 32-byte minimum and 128-byte chunks (`bulk_memory.rs:14-17`); it is not the 128-bit adjacent load/store pass. |
+| `bulk_memory` | Implemented. | It handles memcpy/memset bulk koperation with 32-byte minimum and 128-byte chunks (`bulk_memory.rs:14-17`); it is not the 128-bit adjacent load/store pass. |
 | `128-bit LDP/STP` | Not implemented as a daemon/bpfopt-core pass. | No `ldp/stp` or `bpf_ldp128`/`bpf_stp128` pass exists in the active registry or source search. This is the clearest design-mentioned pass missing from the pass implementation. |
 | Helper call specialization | Implemented as `skb_load_bytes_spec`. | Design marks this as research-complete, but code includes it in the main registry and benchmark default (`passes/mod.rs:68-72`, `benchmark_config.yaml:12`, `benchmark_config.yaml:26`). Behavior is narrow: only SCHED_CLS/SCHED_ACT, constant offset, stack destination, and `len <= 8` (`skb_load_bytes.rs:106-114`, `skb_load_bytes.rs:160-179`). |
 
@@ -63,7 +63,7 @@ From `CLAUDE.md`:
 
 2. REJIT fd-array transport is in `bpfopt-core`.
 
-   `PassContext` includes `KinsnCallResolver` (`pass.rs:666-670`), `KinsnRegistry` includes `target_btf_fds` and `target_call_offsets` (`pass.rs:681-700`), and `FdArrayKinsnCallResolver` mutates `program.required_btf_fds` (`pass.rs:811-827`). This is useful for the daemon, but it contradicts the design boundary that REJIT transport state belongs in `daemon/`, not `bpfopt-core`.
+   `PassContext` includes `KopCallResolver` (`pass.rs:666-670`), `KopRegistry` includes `target_btf_fds` and `target_call_offsets` (`pass.rs:681-700`), and `FdArrayKopCallResolver` mutates `program.required_btf_fds` (`pass.rs:811-827`). This is useful for the daemon, but it contradicts the design boundary that REJIT transport state belongs in `daemon/`, not `bpfopt-core`.
 
 3. Docker/runtime build inputs were not updated for the new path dependency.
 

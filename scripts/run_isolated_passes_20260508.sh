@@ -1,7 +1,7 @@
 #!/bin/bash
 # Sequential isolated-pass 7-app SAMPLES=3 30s ablation.
-# 1) kinsn 5-pass  (rotate, cond_select, extract, endian_fusion, bulk_memory)
-# 2) kinsn 6-pass  (above + prefetch)
+# 1) kop 5-pass  (rotate, cond_select, extract, endian_fusion, bulk_memory)
+# 2) kop 6-pass  (above + prefetch)
 # 3) all-bytecode-rewriting (no map_inline): noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec
 # Note (3) includes wide_mem which has a known kernel-panic risk on tetragon (Q5);
 # KEEP_WORKDIRS=1 captures workdir tarballs if it triggers again.
@@ -23,10 +23,10 @@ run_one () {
   echo "==== END   ${label}  $(date -u +%FT%TZ) rc=$rc ====" >> "$LOG"
 }
 
-run_one "K5-kinsn-5pass-7app" \
+run_one "K5-kop-5pass-7app" \
         "rotate,cond_select,extract,endian_fusion,bulk_memory"
 
-run_one "K6-kinsn-with-prefetch-7app" \
+run_one "K6-kop-with-prefetch-7app" \
         "rotate,cond_select,extract,endian_fusion,bulk_memory,prefetch"
 
 run_one "BR-all-bytecode-rewriting-7app" \

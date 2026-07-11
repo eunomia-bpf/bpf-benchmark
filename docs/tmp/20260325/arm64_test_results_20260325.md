@@ -12,7 +12,7 @@
 ### Kernel Image
 - Pre-built at `vendor/linux-framework/build-arm64/arch/arm64/boot/Image`
 
-### Kinsn Modules (5/5 compiled)
+### KOperation Modules (5/5 compiled)
 - `bpf_rotate.ko` - EXTR-based 64-bit rotate
 - `bpf_select.ko` - conditional select (CSEL)
 - `bpf_extract.ko` - bitfield extraction (UBFX)
@@ -42,14 +42,14 @@ aarch64-linux-gnu-gcc -O2 -g -Wall -Wno-cpp -static \
 
 ### Module Loading: 5/5 OK
 
-All kinsn modules loaded successfully into the ARM64 kernel.
+All kop modules loaded successfully into the ARM64 kernel.
 
 ### Test Suite Results
 
 | Test | Result | Details |
 |------|--------|---------|
 | **rejit_poc** | **6/6 PASS** | same-length, different-length, fd_array, test_run correctness, info consistency, concurrent REJIT |
-| **rejit_kinsn** | **13 pass, 0 fail, 1 skip** | Discovery: 7 kfuncs found across 5 modules. Skip: `rotate_jit_emits_rol` (x86_64-only). All ARM64-relevant kinsn tests pass including rotate, select, endian, extract, barrier. |
+| **rejit_kop** | **13 pass, 0 fail, 1 skip** | Discovery: 7 kfuncs found across 5 modules. Skip: `rotate_jit_emits_rol` (x86_64-only). All ARM64-relevant kop tests pass including rotate, select, endian, extract, barrier. |
 | **rejit_safety_tests** | **20/20 PASS** | All 15 negative tests + 5 correctness tests pass |
 | **rejit_rollback_tests** | **0 pass, 0 fail, 1 skip** | T1 skipped: debugfs test hook unavailable (expected) |
 | **rejit_regression** | **5/5 PASS** | concurrent_rejit, latency (487us), rapid_kallsyms, xdp_test_run, concurrent_rejit_and_run |
@@ -74,8 +74,8 @@ All kinsn modules loaded successfully into the ARM64 kernel.
 
 BpfReJIT's core functionality is fully operational on ARM64:
 - REJIT syscall: same-length and different-length rewriting works
-- Kinsn modules: all 5 modules load and their kfuncs are discovered
-- Verifier integration: kinsn instantiation and validation works
+- KOperation modules: all 5 modules load and their kfuncs are discovered
+- Verifier integration: kop instantiation and validation works
 - Safety: all negative tests reject invalid programs as expected
 - Concurrency: multi-threaded REJIT is safe
 - Regression fixes: all b4bd737ef-era fixes verified on ARM64

@@ -31,9 +31,9 @@ Blocked:
 
 - `cargo test --manifest-path bpfopt/Cargo.toml -p bpfopt` currently fails in unrelated P89H-Root work:
   - `bpfopt/crates/bpfopt/src/passes/utils.rs`: `idx`/`count` type mismatch.
-  - `bpfopt/crates/bpfopt/src/pass_tests.rs`: missing new `KinsnRegistry` fields.
+  - `bpfopt/crates/bpfopt/src/pass_tests.rs`: missing new `KopRegistry` fields.
   - `bpfopt/crates/bpfopt/src/passes/branch_flip.rs`: missing new `ProfilingData` fields.
-- `BPFREJIT_DAEMON_KEEP_ALL_WORKDIRS=1 BPFREJIT_BENCH_PASSES=bulk_memory,rotate,cond_select,extract,endian_fusion make vm-corpus SAMPLES=1` failed during Docker image build before corpus execution. The kinsn layer built 6 modules including `bpf_prefetch.ko`, but the x86 image still expects 5 modules.
+- `BPFREJIT_DAEMON_KEEP_ALL_WORKDIRS=1 BPFREJIT_BENCH_PASSES=bulk_memory,rotate,cond_select,extract,endian_fusion make vm-corpus SAMPLES=1` failed during Docker image build before corpus execution. The kop layer built 6 modules including `bpf_prefetch.ko`, but the x86 image still expects 5 modules.
 
 Because the VM corpus build did not complete, no new P89H failure/debug workdirs were produced in this run.
 
@@ -42,7 +42,7 @@ Because the VM corpus build did not complete, no new P89H failure/debug workdirs
 - Default 11-pass host replay: not measured in this run because the new corpus snapshot could not be collected while P89H-Root module/pass changes are incomplete.
 - Host `bpfverify --dummy-map-fds` dryrun: not measured on the corpus for the same reason.
 
-The latest existing corpus remains `corpus/results/x86_kvm_p89_kinsn_corpus_20260430_131403_981524`, which predates these snapshot fixes and lacks the new artifacts.
+The latest existing corpus remains `corpus/results/x86_kvm_p89_kop_corpus_20260430_131403_981524`, which predates these snapshot fixes and lacks the new artifacts.
 
 ## Repository Checks
 

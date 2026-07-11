@@ -347,7 +347,7 @@
   },
   "rejit_result": {
     "enabled_passes": [
-      "kinsn"
+      "kop"
     ],
     "mode": "loadtime",
     "plan_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260607_210624_356236/details/loadtime-plans/katran.json",

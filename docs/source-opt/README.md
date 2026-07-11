@@ -3,7 +3,7 @@
 Last updated: 2026-06-26
 
 本文档是 `docs/source-opt/` 的执行手册。目标是系统性探索：在不使用
-`kinsn`、`bpfopt`、ReJIT、shim、LD_PRELOAD 或 native-loader 的前提下，
+`kop`、`bpfopt`、ReJIT、shim、LD_PRELOAD 或 native-loader 的前提下，
 只重写真实应用的 eBPF 源码，观察真实 app loader 加载优化后 BPF 程序时
 workload 是否改善。
 
@@ -37,7 +37,7 @@ workload throughput。
 - 真实 app binary 仍按现有 runner 启动，并由 app 自己加载 BPF 程序。
 - 不直接用 framework、bpftool、libbpf 小工具或自定义 loader 加载 `.bpf.o`。
 - 不使用 `BPF_PROG_REJIT`、`bpfopt --pass ...`、`runner/config/passes/*`、
-  shim socket、LD_PRELOAD、native-loader 或 kinsn module path。
+  shim socket、LD_PRELOAD、native-loader 或 kop module path。
 - framework 只保留 raw workload payload；任何 ratio、平均值、geomean、
   wins/losses、summary 都在外部分析脚本中计算。
 - 不降低 app 功能覆盖，不删除被加载 BPF program，不绕开 policy/security check。
@@ -50,7 +50,7 @@ workload throughput。
 源码优化评估使用 `SKIP_REJIT=all`。该模式在当前代码中有三个关键效果：
 
 - 不注入 shim/LD_PRELOAD。
-- 不加载 kinsn modules。
+- 不加载 kop modules。
 - corpus 只运行 baseline measurement；baseline stop 后直接结束 app lifecycle，
   `post_rejit` 为 `null`，`rejit_result.mode` 为 `skip_rejit_all`。
 
@@ -209,7 +209,7 @@ attempt mean 相对 clean-source baseline mean 的文档侧计算。网络类 wo
 
 ## 标准命令
 
-正式 run 参数对齐 `docs/eval_kinsn.md` 的 app-by-app corpus 设置，但禁用 ReJIT
+正式 run 参数对齐 `docs/eval_kop.md` 的 app-by-app corpus 设置，但禁用 ReJIT
 和 shim：
 
 ```sh
@@ -303,7 +303,7 @@ attempt 文件含义：
 - 诊断可以使用 `llvm-objdump`、`bpftool` 的离线 object 检查或构建日志，但
   正式性能仍只来自 `SKIP_REJIT=all ... make corpus` 的 raw result。
 - 仍然禁止修改 workload、runner、framework、pass config、shim、LD_PRELOAD、
-  ReJIT、bpfopt 或 kinsn 路径。
+  ReJIT、bpfopt 或 kop 路径。
 - 每次 run 后仍然恢复 app 源码和生成 artifact 到 attempt 前状态。
 - 如果 30 次 phase2 全部完成但没有达到 10-20% 目标，继续从 `katran` 开始下一轮
   30 次，直到目标达成或明确记录阻塞原因。
@@ -476,7 +476,7 @@ attempt 文件含义：
 - 改变 map layout、event ABI、tail-call dispatch key、program attach point 或 app-visible payload。
 - 用 benchmark-only 常量替代真实 app 配置，除非 upstream app 在该 benchmark 配置下本来就是常量，且记录证明。
 - 为了跑分降低功能覆盖、关闭程序、删除事件、减少被加载 BPF program。
-- 引入 framework-side loader、shim、ReJIT、bpfopt 或 kinsn 依赖。
+- 引入 framework-side loader、shim、ReJIT、bpfopt 或 kop 依赖。
 
 ## App 顺序和最低进展
 
@@ -575,6 +575,6 @@ docker system df 2>/dev/null || true
 - `docs/source-opt/README.md` 本身定义了可执行流程、命令、目录、gate、app 顺序和清理策略。
 - 每个 app 都有明确 baseline + 5 attempts 的完成条件。
 - 所有 run 都是单 app run。
-- 文档明确 `SKIP_REJIT=all` 下无 post phase、无 shim、无 kinsn module preload。
+- 文档明确 `SKIP_REJIT=all` 下无 post phase、无 shim、无 kop module preload。
 - 文档明确不 commit/push、不使用 git 命令回滚源码。
 - 后续 agent 可以仅按本文档推进，不需要重新解释实验边界。

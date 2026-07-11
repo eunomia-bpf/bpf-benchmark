@@ -4,7 +4,7 @@
 **审查标准**: BPF subsystem maintainer (Alexei/Daniel 级别)
 **分支**: `vendor/linux-framework` master..HEAD
 **Diff 规模**: 17 files changed, +1739/-99 lines
-**已排除项**: kinsn 双轨制验证 (instantiate_insn vs emit_x86/emit_arm64) 为有意设计，类似 kfunc trampoline，不对此提 NAK
+**已排除项**: kop 双轨制验证 (instantiate_insn vs emit_x86/emit_arm64) 为有意设计，类似 kfunc trampoline，不对此提 NAK
 
 ---
 
@@ -22,25 +22,25 @@
 
 ## 1. P0 安全问题
 
-### P0-1: `do_misc_fixups()` 中 `bpf_kinsn_has_native_emit()` 未定义 — 编译错误或死代码路径
+### P0-1: `do_misc_fixups()` 中 `bpf_kop_has_native_emit()` 未定义 — 编译错误或死代码路径
 
 **文件**: `kernel/bpf/verifier.c:23776`
 
 ```c
-if (prog->jit_requested && bpf_kinsn_has_native_emit(kinsn))
+if (prog->jit_requested && bpf_kop_has_native_emit(kop))
     goto next_insn;
 ```
 
-**问题**: `bpf_kinsn_has_native_emit()` 在整个内核源码树中没有定义。grep 确认只有这一处引用，没有函数定义、内联函数、或宏。
+**问题**: `bpf_kop_has_native_emit()` 在整个内核源码树中没有定义。grep 确认只有这一处引用，没有函数定义、内联函数、或宏。
 
 此外，该代码块存在**严重的缩进错误**：第 23776-23781 行的缩进比周围代码多了一层（三个 tab），但没有任何 `if/else/for` 包裹它们。这意味着：
-- 如果编译器将其视为有效代码（找到了某个头文件中的声明），这个 `goto next_insn` 会在 `validate_kinsn_proof_seq` 成功后无条件跳过后续的 `verifier_remove_insns` + `bpf_patch_insn_data`
+- 如果编译器将其视为有效代码（找到了某个头文件中的声明），这个 `goto next_insn` 会在 `validate_kop_proof_seq` 成功后无条件跳过后续的 `verifier_remove_insns` + `bpf_patch_insn_data`
 - 实际上缩进表明这里原本应该有一个 `if` 块，但代码被损坏了
 
-这不仅是编译错误，还暴露了 `do_misc_fixups` 中 kinsn fallback 路径的逻辑是不完整的。
+这不仅是编译错误，还暴露了 `do_misc_fixups` 中 kop fallback 路径的逻辑是不完整的。
 
-**触发条件**: 任何使用 kinsn 的程序在 non-JIT fallback 路径上
-**修复方案**: 定义 `bpf_kinsn_has_native_emit()` 或修复整个逻辑块的控制流
+**触发条件**: 任何使用 kop 的程序在 non-JIT fallback 路径上
+**修复方案**: 定义 `bpf_kop_has_native_emit()` 或修复整个逻辑块的控制流
 
 ---
 
@@ -286,13 +286,13 @@ prog->aux->orig_insns = kvmemdup(prog->insns, bpf_prog_insn_size(prog), GFP_USER
 
 ---
 
-### P1-7: `lower_kinsn_proof_regions()` 的 region start 调整逻辑
+### P1-7: `lower_kop_proof_regions()` 的 region start 调整逻辑
 
 **文件**: `kernel/bpf/verifier.c:3836-3851`
 
 ```c
-for (j = 0; j < env->kinsn_region_cnt - 1; j++) {
-    struct bpf_kinsn_region *prior = &env->kinsn_regions[j];
+for (j = 0; j < env->kop_region_cnt - 1; j++) {
+    struct bpf_kop_region *prior = &env->kop_regions[j];
     ...
     if (prior->start <= region->start)
         continue;
@@ -301,11 +301,11 @@ for (j = 0; j < env->kinsn_region_cnt - 1; j++) {
 }
 ```
 
-**问题**: `kinsn_regions` 的填充顺序是倒序（从 `env->prog->len - 1` 向 0 遍历）。所以 `kinsn_regions[0]` 是最高地址的 kinsn，`kinsn_regions[cnt-1]` 是最低地址的。
+**问题**: `kop_regions` 的填充顺序是倒序（从 `env->prog->len - 1` 向 0 遍历）。所以 `kop_regions[0]` 是最高地址的 kop，`kop_regions[cnt-1]` 是最低地址的。
 
-当处理 `kinsn_regions[k]`（当前 region）时，`j` 从 0 遍历到 `k-1`。由于 prior 索引 < k，且数组按倒序填充，prior 的原始地址 >= 当前地址。但 prior 的 start 已经被之前的 lowering 调整过了。
+当处理 `kop_regions[k]`（当前 region）时，`j` 从 0 遍历到 `k-1`。由于 prior 索引 < k，且数组按倒序填充，prior 的原始地址 >= 当前地址。但 prior 的 start 已经被之前的 lowering 调整过了。
 
-如果两个相邻的 kinsn region 的 proof 长度都不同于 2（即 `cnt != 2`），第二次调整时使用的是 prior 的已调整 start 值。调整公式 `prior->start + (cnt - 2)` 是基于当前 lowering 的偏移量。但 prior 的 start 已经被之前的偏移量调整过了，所以这个调整是**叠加的**。
+如果两个相邻的 kop region 的 proof 长度都不同于 2（即 `cnt != 2`），第二次调整时使用的是 prior 的已调整 start 值。调整公式 `prior->start + (cnt - 2)` 是基于当前 lowering 的偏移量。但 prior 的 start 已经被之前的偏移量调整过了，所以这个调整是**叠加的**。
 
 这实际上是正确的：每次 lowering 都增加/减少 `cnt - 2` 条指令，所有地址 > 当前 lowering 位置的 region 都需要偏移。由于是倒序处理（先处理高地址），低地址的 region 在被处理之前已经正确累积了所有来自高地址 lowering 的偏移量。
 
@@ -368,12 +368,12 @@ INIT_LIST_HEAD(&fp->aux->trampoline_users);
 
 ---
 
-### P2-6: `do_misc_fixups()` 中 kinsn fallback 路径使用 `env->insn_buf` 而非 `insn_buf`
+### P2-6: `do_misc_fixups()` 中 kop fallback 路径使用 `env->insn_buf` 而非 `insn_buf`
 
 **文件**: `kernel/bpf/verifier.c:23767, 23783`
 
 ```c
-cnt = kinsn->instantiate_insn(bpf_kinsn_sidecar_payload(insn),
+cnt = kop->instantiate_insn(bpf_kop_sidecar_payload(insn),
                               env->insn_buf);     // <-- env->insn_buf
 ...
 new_prog = bpf_patch_insn_data(env, i + delta, insn_buf, cnt);  // <-- insn_buf (not env->insn_buf)
@@ -389,18 +389,18 @@ new_prog = bpf_patch_insn_data(env, i + delta, insn_buf, cnt);  // <-- insn_buf 
 
 | # | 文件 | +/- | 判定 | 关键问题 |
 |---|------|-----|------|---------|
-| 1 | `include/uapi/linux/bpf.h` | +24 | **要求修改** | `BPF_PSEUDO_KINSN_SIDECAR` ISA 编码（不在本次 scope 但存在），`rejit` attr 结构可接受 |
+| 1 | `include/uapi/linux/bpf.h` | +24 | **要求修改** | `BPF_PSEUDO_KOP_SIDECAR` ISA 编码（不在本次 scope 但存在），`rejit` attr 结构可接受 |
 | 2 | `include/linux/bpf.h` | +54 | **要求修改** | `orig_insns` 应按需分配，`rejit_mutex` 应按需初始化 |
 | 3 | `include/linux/bpf_verifier.h` | +13 | **ACK** | |
 | 4 | `include/linux/btf.h` | +2 | **ACK** | |
 | 5 | `include/linux/filter.h` | +1 | **ACK** | |
-| 6 | `arch/x86/net/bpf_jit_comp.c` | +39 | **有条件 ACK** | kinsn emit 为有意设计（排除项） |
+| 6 | `arch/x86/net/bpf_jit_comp.c` | +39 | **有条件 ACK** | kop emit 为有意设计（排除项） |
 | 7 | `arch/arm64/net/bpf_jit_comp.c` | +38 | **有条件 ACK** | 同上 |
-| 8 | `kernel/bpf/verifier.c` | +574/-99 | **要求修改** | P0-1 (`bpf_kinsn_has_native_emit` 未定义)；kinsn 整合进 kfunc_desc 的重构是好的 |
+| 8 | `kernel/bpf/verifier.c` | +574/-99 | **要求修改** | P0-1 (`bpf_kop_has_native_emit` 未定义)；kop 整合进 kfunc_desc 的重构是好的 |
 | 9 | `kernel/bpf/syscall.c` | +699 | **要求修改** | P0-2 (smp_wmb), P0-3 (tail_call_reachable 遗漏), P1-1 (swap 遗漏字段), P1-6 (orig_insns) |
 | 10 | `kernel/bpf/trampoline.c` | +58 | **有条件 ACK** | 锁序文档化 |
 | 11 | `kernel/bpf/bpf_struct_ops.c` | +123 | **要求修改** | P1-3 (find_call_site 脆弱), P0-4 (部分成功不一致) |
-| 12 | `kernel/bpf/btf.c` | +156/-8 | **要求修改** | P2-1 (goto again 不必要改动)，kinsn_set 并行结构可接受但应��一 |
+| 12 | `kernel/bpf/btf.c` | +156/-8 | **要求修改** | P2-1 (goto again 不必要改动)，kop_set 并行结构可接受但应��一 |
 | 13 | `kernel/bpf/core.c` | +3 | **要求修改** | P1-5 (INIT_LIST_HEAD_RCU 在 synchronize_rcu 之前重用) |
 | 14 | `kernel/bpf/disasm.c` | +2 | **ACK** | |
 | 15 | `kernel/bpf/dispatcher.c` | +23/-1 | **ACK** | |
@@ -448,11 +448,11 @@ new_prog = bpf_patch_insn_data(env, i + delta, insn_buf, cnt);  // <-- insn_buf 
 
 ## 6. 总结
 
-### 真正的 P0 安全问题（排除 kinsn 双轨制后）
+### 真正的 P0 安全问题（排除 kop 双轨制后）
 
 | # | 问题 | 位置 | 状态 |
 |---|------|------|------|
-| P0-1 | `bpf_kinsn_has_native_emit()` 未定义，`do_misc_fixups` kinsn fallback 路径控制流损坏 | `verifier.c:23776` | **必须修复** |
+| P0-1 | `bpf_kop_has_native_emit()` 未定义，`do_misc_fixups` kop fallback 路径控制流损坏 | `verifier.c:23776` | **必须修复** |
 | P0-2 | `smp_wmb()` + `WRITE_ONCE` 在 ARM64 上不保证读端 metadata 可见性 | `syscall.c:3449` | **应修复** (x86 上安全但不规范) |
 | P0-3 | `tail_call_reachable` 未 swap | `syscall.c:bpf_prog_rejit_swap` | **必须修复** |
 
@@ -465,7 +465,7 @@ new_prog = bpf_patch_insn_data(env, i + delta, insn_buf, cnt);  // <-- insn_buf 
 | P1-4 | `bpf_prog_rejit_poke_target_phase` 遍历所有 map | `syscall.c:3288` |
 | P1-5 | `INIT_LIST_HEAD_RCU` 在 `synchronize_rcu` 之前重用 | `core.c:657` |
 | P1-6 | `orig_insns` 无条件分配 | `syscall.c:3025` |
-| P1-7 | `lower_kinsn_proof_regions` 调整逻辑需要注释 | `verifier.c:3836` |
+| P1-7 | `lower_kop_proof_regions` 调整逻辑需要注释 | `verifier.c:3836` |
 
 ### 前期报告中被降级的问题
 
@@ -480,7 +480,7 @@ new_prog = bpf_patch_insn_data(env, i + delta, insn_buf, cnt);  // <-- insn_buf 
 ### 整体评价
 
 1. REJIT 的 `load_attr` 构造比前期报告评估的**更安全** — `prog_flags` 的传递问题已在当前代码中修复，struct_ops 验证路径完整
-2. **最严重的问题**是 `do_misc_fixups` 中未定义的 `bpf_kinsn_has_native_emit()` — 这要么是编译错误，要么是控制流 bug
+2. **最严重的问题**是 `do_misc_fixups` 中未定义的 `bpf_kop_has_native_emit()` — 这要么是编译错误，要么是控制流 bug
 3. swap 遗漏 `tail_call_reachable` 是实际的安全问题
 4. 内存序问题（`smp_wmb`）在 ARM64 上有理论风险，在 x86 上安全
-5. kinsn 整合进 kfunc_desc 的重构方向是正确的（比前期报告描述的"完全平行基础设施"好很多）
+5. kop 整合进 kfunc_desc 的重构方向是正确的（比前期报告描述的"完全平行基础设施"好很多）

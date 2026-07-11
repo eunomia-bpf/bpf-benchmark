@@ -263,13 +263,13 @@ has tight timeouts.
 
 ---
 
-### MEDIUM (Risk 7): Verifier `lower_kinsn_proof_regions()` -- Program Mutation During Verification
+### MEDIUM (Risk 7): Verifier `lower_kop_proof_regions()` -- Program Mutation During Verification
 
 **File**: `kernel/bpf/verifier.c`
 
-**Code path**: `bpf_check()` -> `lower_kinsn_proof_regions()` (before
+**Code path**: `bpf_check()` -> `lower_kop_proof_regions()` (before
 main verification) -> `bpf_patch_insn_data()` to replace sidecar+call
-with proof sequence -> main verification -> `restore_kinsn_proof_regions()`
+with proof sequence -> main verification -> `restore_kop_proof_regions()`
 (after verification).
 
 **Crash scenario**: `bpf_patch_insn_data()` can reallocate the program.
@@ -278,7 +278,7 @@ which points to the most recent reallocation. Bug #9 in the bug log
 shows this was already found and fixed (stale region start values after
 earlier-site lowering changed program length).
 
-**Remaining risk**: The `adjust_prior_kinsn_region_starts()` function
+**Remaining risk**: The `adjust_prior_kop_region_starts()` function
 shifts all previously recorded region starts by the net delta. If the
 delta calculation is wrong (e.g., due to an edge case with ldimm64 two-
 instruction sequences), a subsequent restore could patch the wrong
@@ -329,11 +329,11 @@ but not a crash.
 **File**: `scripts/Makefile.btf`
 
 Adds `global_var` to pahole's `--btf_features` for external module
-BTF generation. This is needed so that kinsn module BTF includes
-`BTF_KIND_VAR` entries for the kinsn descriptors.
+BTF generation. This is needed so that kop module BTF includes
+`BTF_KIND_VAR` entries for the kop descriptors.
 
 **Risk**: None for crash. Could cause older pahole versions to fail
-to generate BTF for kinsn modules if they don't support `global_var`.
+to generate BTF for kop modules if they don't support `global_var`.
 
 ---
 
@@ -450,7 +450,7 @@ Change VM boot params from `loglevel=0` to `loglevel=7` and add
 ### Step 2: Reproduce Without REJIT
 
 Boot the modified kernel and run the benchmark suite WITHOUT loading
-kinsn modules and WITHOUT running the daemon. If the VM still crashes,
+kop modules and WITHOUT running the daemon. If the VM still crashes,
 the issue is in the non-REJIT code paths (the changes to `__bpf_prog_put_noref`,
 `bpf_prog_load` for `orig_insns`, etc.).
 

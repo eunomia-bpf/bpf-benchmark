@@ -2,10 +2,10 @@
   "benchmarks": [
     {
       "category": "baseline",
-      "description": "Native simple_xdp asm translated to x86 kinsns plus verifier-visible BPF",
+      "description": "Native simple_xdp asm translated to x86 koperation plus verifier-visible BPF",
       "expected_result": 12345678,
       "family": "baseline",
-      "hypothesis": "Checks full-function native-to-kinsn lowering for LEA and immediate stores",
+      "hypothesis": "Checks full-function native-to-kop lowering for LEA and immediate stores",
       "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/simple.mem",
       "io_mode": "staged",
       "level": "handcraft-native",
@@ -55,7 +55,7 @@
       ],
       "tags": [
         "baseline",
-        "handcraft-kinsn",
+        "handcraft-kop",
         "x86"
       ]
     }

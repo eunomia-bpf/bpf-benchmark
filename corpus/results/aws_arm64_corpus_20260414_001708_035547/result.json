@@ -3,14 +3,14 @@
   "daemon_socket": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
   "filters": [],
   "generated_at": "2026-04-14T00:19:28.436155+00:00",
-  "kinsn_modules": {
+  "kop_modules": {
     "captured_at": "2026-04-14T00:17:08.205910+00:00",
     "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-    "daemon_kinsn_discovery": {
+    "daemon_kop_discovery": {
       "captured_at": "2026-04-14T00:17:08.206077+00:00",
-      "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+      "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
       "status": "ok",
-      "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+      "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
       "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
       "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
       "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -43,7 +43,7 @@
         "bpf_rotate",
         "bpf_select"
       ],
-      "loader": "runner.libs.kinsn.load_kinsn_modules",
+      "loader": "runner.libs.kop.load_kop_modules",
       "module_dir": "module/arm64",
       "newly_loaded_modules": [
         "bpf_bulk_memory",
@@ -113,17 +113,17 @@
   },
   "manifest": "/var/tmp/bpf-benchmark-aws-arm64/corpus/run.aws-arm64.corpus.97666d69/corpus/config/macro_apps.yaml",
   "metadata": {
-    "kinsn_modules": {
+    "kop_modules": {
       "count": 17,
       "lifecycle_runs": [
         {
           "captured_at": "2026-04-14T00:17:09.537105+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -157,7 +157,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -232,11 +232,11 @@
         {
           "captured_at": "2026-04-14T00:17:10.899230+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -270,7 +270,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -345,11 +345,11 @@
         {
           "captured_at": "2026-04-14T00:17:12.219640+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -383,7 +383,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -460,11 +460,11 @@
         {
           "captured_at": "2026-04-14T00:17:13.539368+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -498,7 +498,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -574,11 +574,11 @@
         {
           "captured_at": "2026-04-14T00:17:14.898163+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -612,7 +612,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -693,11 +693,11 @@
         {
           "captured_at": "2026-04-14T00:17:16.229434+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -731,7 +731,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -808,11 +808,11 @@
         {
           "captured_at": "2026-04-14T00:17:17.568279+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -846,7 +846,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -921,11 +921,11 @@
         {
           "captured_at": "2026-04-14T00:17:18.921463+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -959,7 +959,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -1036,11 +1036,11 @@
         {
           "captured_at": "2026-04-14T00:17:20.282893+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -1074,7 +1074,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -1148,11 +1148,11 @@
         {
           "captured_at": "2026-04-14T00:17:21.632343+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -1186,7 +1186,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -1262,11 +1262,11 @@
         {
           "captured_at": "2026-04-14T00:17:22.484157+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -1300,7 +1300,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -1386,11 +1386,11 @@
         {
           "captured_at": "2026-04-14T00:17:40.583831+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -1424,7 +1424,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -1500,11 +1500,11 @@
         {
           "captured_at": "2026-04-14T00:17:42.426020+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -1538,7 +1538,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -1615,11 +1615,11 @@
         {
           "captured_at": "2026-04-14T00:17:44.784648+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -1653,7 +1653,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -1737,11 +1737,11 @@
         {
           "captured_at": "2026-04-14T00:17:46.641793+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -1775,7 +1775,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -1853,11 +1853,11 @@
         {
           "captured_at": "2026-04-14T00:17:49.000042+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -1891,7 +1891,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -1967,11 +1967,11 @@
         {
           "captured_at": "2026-04-14T00:17:51.355844+00:00",
           "daemon_binary": "daemon/target/aarch64-unknown-linux-gnu/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-14T00:17:08.206077+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2187896 type_cnt=121258 type_id_bias=121257\n  bpf_rotate64: module 'bpf_rotate' not loaded (no BTF at /sys/kernel/btf/bpf_rotate)\n  bpf_select64: module 'bpf_select' not loaded (no BTF at /sys/kernel/btf/bpf_select)\n  bpf_extract64: module 'bpf_extract' not loaded (no BTF at /sys/kernel/btf/bpf_extract)\n  bpf_memcpy_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_memset_bulk: module 'bpf_bulk_memory' not loaded (no BTF at /sys/kernel/btf/bpf_bulk_memory)\n  bpf_endian_load16: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load32: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\n  bpf_endian_load64: module 'bpf_endian' not loaded (no BTF at /sys/kernel/btf/bpf_endian)\nplatform: arch=Aarch64 bmi1=false bmi2=false cmov=true movbe=false rorx=false",
             "stderr_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stderr.log",
             "stdout": "serve: listening on /var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.sock",
             "stdout_path": "/var/tmp/bpfrejit-daemon/bd-45wk434w/daemon.stdout.log"
@@ -2005,7 +2005,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/arm64",
             "newly_loaded_modules": [
               "bpf_bulk_memory",

@@ -5,13 +5,13 @@ Date: 2026-05-10
 ## 1. Decisive root cause
 
 The reject is not caused by a local scalarizing instruction immediately before
-`r1 &= 1`. The first wrong deletion is earlier, at the `cond_select` kinsn
+`r1 &= 1`. The first wrong deletion is earlier, at the `cond_select` kop
 site:
 
 ```text
 input 0046: r6 = 0 (64)                  raw [b7 06 00 00 00 00 00 00]
 input 0047: r0 = 1 (64)                  raw [b7 00 00 00 01 00 00 00]
-input 0048: kinsn sidecar payload 0x1066 raw [b7 36 06 01 00 00 00 00]
+input 0048: kop sidecar payload 0x1066 raw [b7 36 06 01 00 00 00 00]
 input 0049: call bpf_select64            raw [85 40 0b 00 bf f6 01 00]
 ```
 
@@ -38,7 +38,7 @@ Relevant code:
 - `bpfopt/crates/bpfopt/src/passes/dce.rs:228-232`: treats any ALU/ALU64/LDX
   def, and non-pseudo-func `LD_IMM64`, as removable when `dst` is not live-out.
 - `bpfopt/crates/bpfopt/src/analysis/liveness.rs:75-110`: context-free
-  use/def model; it has no special case for kinsn sidecars or kinsn calls.
+  use/def model; it has no special case for kop sidecars or kop calls.
 
 ## 2. PC mapping and deleted instructions
 
@@ -70,7 +70,7 @@ Local input around the later failure:
 0102: r1 &= 1
 0103: r2 = 9          deleted
 0104: r0 = 2          deleted
-0105: kinsn sidecar   kept
+0105: kop sidecar   kept
 0106: call bpf_select64
 ```
 
@@ -83,7 +83,7 @@ Failing local output around the same area:
 0094: if r6 == 0 goto +6381
 0095: r1 = *(u64 *)(r10 -136)
 0096: r1 &= 1         verifier PC98
-0097: kinsn sidecar
+0097: kop sidecar
 0098: call bpf_select64
 ```
 
@@ -115,14 +115,14 @@ Later PC101/102 reloads that stack slot and applies `&= 1`.
 `LivenessAnalysis` computes standard backward live-in/live-out sets from
 `insn_use_def_set()` (`liveness.rs:34-65`).
 
-The use/def table is wrong for kinsn pseudo instructions:
+The use/def table is wrong for kop pseudo instructions:
 
 - `BPF_ALU64 | BPF_MOV | BPF_K` is treated as a normal immediate move that
   only defines `dst` (`liveness.rs:76-82`).
-- `BPF_PSEUDO_KINSN_SIDECAR` is encoded as exactly that kind of instruction
+- `BPF_PSEUDO_KOP_SIDECAR` is encoded as exactly that kind of instruction
   (`insn.rs:608-612`, `insn.rs:670-671`).
 - Generic calls are modeled as normal BPF helper ABI calls using `r1-r5` and
-  defining `r0-r5` (`liveness.rs:101-110`), but a kinsn call consumes operands
+  defining `r0-r5` (`liveness.rs:101-110`), but a kop call consumes operands
   from the packed sidecar payload.
 
 So the liveness result says PC46's `r6` and PC47's `r0` are dead, even though
@@ -131,7 +131,7 @@ the following `bpf_select64` sidecar/call needs them.
 ## 5. Reverse validation
 
 Temporary guard tested: do not delete a def if its destination register appears
-in any kinsn sidecar payload field (`dst`, `true`, `false`, `cond`). This is
+in any kop sidecar payload field (`dst`, `true`, `false`, `cond`). This is
 intentionally broad and is not the proposed fix.
 
 Result:
@@ -159,11 +159,11 @@ I could not produce a fresh kernel `accepted` verifier log on this host:
 Do not fix in this investigation commit. Recommended follow-up:
 
 - Fix the liveness model in `bpfopt/crates/bpfopt/src/analysis/liveness.rs`.
-  It needs kinsn-sidecar-aware use/def information. For `bpf_select64`, mark
+  It needs kop-sidecar-aware use/def information. For `bpf_select64`, mark
   sidecar payload regs `true`, `false`, and `cond` as uses and `dst` as the
   produced register.
 - Also harden `bpfopt/crates/bpfopt/src/passes/dce.rs:is_removable_dead_def`
-  so a `BPF_PSEUDO_KINSN_SIDECAR` is never treated as an ordinary removable
+  so a `BPF_PSEUDO_KOP_SIDECAR` is never treated as an ordinary removable
   immediate move.
 - The most direct regression should build a small `cond_select` sidecar/call
   program where the false operand is `r0` after a helper/map-value-producing

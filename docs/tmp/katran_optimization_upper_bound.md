@@ -234,9 +234,9 @@ tail-call：本分析的 May 8 `balancer_ingress` row 有非零 `run_cnt_delta`�
 
 helper boundary：map lookup/helper call 会强迫 `R1/R2` 准备、stack key、call、`R0` null check、live value reload。native/direct-map 形状常常只是 `lea + cmp/load`。
 
-## 8. 现有 kinsn 映射
+## 8. 现有 kop 映射
 
-| pass | kinsn | intended x86 | Katran status |
+| pass | kop | intended x86 | Katran status |
 |---|---|---|---|
 | `rotate` | `bpf_rotate64/32` | `RORX`/rotate | 0 sites |
 | `cond_select` | `bpf_select64` | `CMOVcc` | 7 sites |
@@ -246,13 +246,13 @@ helper boundary：map lookup/helper call 会强迫 `R1/R2` 准备、stack key、
 | `prefetch` | `bpf_prefetch` | `PREFETCHT0` | 42 offline, live fail |
 | `ccmp` | compare-combine | arm64-focused | not x86 Katran |
 
-## 9. 新 kinsn/pass 候选
+## 9. 新 kop/pass 候选
 
 ### 9.1 `jhash_rotate_canonicalize`
 
 Trigger：BPF bytecode 中 Jenkins hash 的 `(x << c) | (x >> (32-c))` 或反向 shift/or，夹在 add/sub/xor 之间。
 
-替换：`bpf_rotate32` kinsn 或 x86 JIT peephole，lower 到 `RORX`/`ROL`/`ROR`。
+替换：`bpf_rotate32` kop 或 x86 JIT peephole，lower 到 `RORX`/`ROL`/`ROR`。
 
 证据：native 有约 20 个 `rorx`；当前 `rotate` pass 对 Katran 是 0/0。
 
@@ -326,7 +326,7 @@ Katran SAMPLES=3 已跑两轮，方向一致为变慢：
 
 Trigger：branch materializes boolean 0/1，例如 init register、conditional branch、overwrite opposite value。
 
-替换：x86 `SETcc + zero extend`，或显式 `bpf_setcc64` kinsn。
+替换：x86 `SETcc + zero extend`，或显式 `bpf_setcc64` kop。
 
 证据：native 有 `sete/setne`；当前 `cond_select` 只覆盖 arbitrary select，不覆盖所有 bool materialization。
 
@@ -372,7 +372,7 @@ Trigger：有真实 per-site PMU：`branch_count`、`branch_misses`、`miss_rate
 
 ### 9.7 `selective_prefetch_budget`
 
-这不是新机器指令，而是现有 `prefetch` kinsn 的必要策略修复。
+这不是新机器指令，而是现有 `prefetch` kop 的必要策略修复。
 
 Trigger：map lookup result non-null 后，后续 block 会 dereference map value，且距离足够隐藏 latency。
 
@@ -573,7 +573,7 @@ benchmark 上界路线的决定性杠杆是固定 VIP、uniform `ch_rings`、dep
 
 | Phase | result_dir | sites_applied (map_inline) | per-prog geomean | 备注 |
 |---:|---|---:|---:|---|
-| baseline (kinsn 6-pass, no map_inline) | x86_kvm_corpus_20260508_041822_768126 | 0 | 0.9423 | 1.061x speedup,55 cycles |
+| baseline (kop 6-pass, no map_inline) | x86_kvm_corpus_20260508_041822_768126 | 0 | 0.9423 | 1.061x speedup,55 cycles |
 | Phase 1 (ctl_array×2 hint + map_inline) | x86_kvm_corpus_20260508_231402_301128 | 2/16 | 0.9715 | map_inline 排在 noop 后第 2 位避免 PC 漂移;skipped 14: 8 verifier-state miss / 2 fixed-offset miss / 4 map-in-map (待 Phase 3/4) |
 | Phase 2 (+ vip_map hard fold) | x86_kvm_corpus_20260509_013938_112049 / 015615_631003 | 6/23→73 | 0.8811 / **1.0099** | 两次 run 数据差异大(VM 噪声:baseline avg_ns 228→151)。applied=6 一致(ctl_array×2 + vip_map×4)。第二次跑用 #245 后代码,matched 涨到 73 是因为 size-skipped map 现在可见(ch_rings 2 + reals 6 + lru_miss_stats/reals_stats/etc.)。真实 phase 2 speedup 在 0.88-1.01 噪声窗内,需 paper-grade 多 run 平均才能确定 |
 

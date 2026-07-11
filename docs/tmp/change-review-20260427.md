@@ -10,11 +10,11 @@ Verification run:
 ## 1. runner/containers/runner-runtime.Dockerfile: PROBLEM
 
 OK:
-- Layer order mostly matches the intended frequency model: base OS and apt first; app artifact imports next; kernel and kinsn artifacts before native runner/micro/test builds; Rust daemon after native build; Python/config/corpus/e2e copied last.
+- Layer order mostly matches the intended frequency model: base OS and apt first; app artifact imports next; kernel and kop artifacts before native runner/micro/test builds; Rust daemon after native build; Python/config/corpus/e2e copied last.
 - `KATRAN_IMAGE` is used through `FROM ${KATRAN_IMAGE} AS runner-runtime-katran-upstream`, and `COPY --from=runner-runtime-katran-upstream /artifacts/katran /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran` matches the artifact image layout produced by `katran-artifacts.Dockerfile`.
 - After removing Katran source compilation from runtime, `bpftool` is still built in the final runtime native layer through `make runner-build-bpftool BPFTOOL_OUTPUT=...`.
 - `etcd-server` and `nftables` are in the unified base apt list, and the old later `apt-get install` block for those packages is gone.
-- Kernel artifact copy paths match the artifact producer: `/artifacts/kernel`, `/artifacts/modules`, `/artifacts/kinsn`, and `/artifacts/manifest.json`.
+- Kernel artifact copy paths match the artifact producer: `/artifacts/kernel`, `/artifacts/modules`, `/artifacts/kop`, and `/artifacts/manifest.json`.
 - `otelcol-ebpf-profiler` download remains in the app-artifacts stage.
 - Runtime Python, YAML/config, corpus, and e2e files are copied at the end of the Dockerfile.
 

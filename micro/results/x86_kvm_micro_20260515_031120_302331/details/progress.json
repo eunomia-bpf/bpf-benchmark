@@ -7,10 +7,10 @@
     "description": "Hand-written x86 movbe indexed loads over Toeplitz packet fields",
     "expected_result": 6141077764,
     "family": "rss-hash",
-    "hypothesis": "Tests direct movbe SIB kinsn lowering for packet endian loads",
+    "hypothesis": "Tests direct movbe SIB kop lowering for packet endian loads",
     "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_toeplitz_rss_hash.mem",
     "io_mode": "packet",
-    "level": "handcraft-kinsn",
+    "level": "handcraft-kop",
     "name": "packet_toeplitz_rss_hash_handcraft",
     "runs": [],
     "tags": [
@@ -18,7 +18,7 @@
       "hash",
       "toeplitz",
       "rss",
-      "handcraft-kinsn",
+      "handcraft-kop",
       "x86"
     ]
   },

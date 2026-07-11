@@ -35,7 +35,7 @@ The direct answers requested:
 - pure bytecode IR, instruction helpers, analyses, pass traits, `PassManager`, pass implementations, and verifier-log parsing support used by optimizers/verifier tooling;
 - no raw BPF syscalls, no live kernel discovery, no profiler, no REJIT, no Unix socket, no daemon session state;
 - `MapInlinePass` should consume explicit `map-values.json`, not live map syscalls;
-- kinsn availability should come from `target.json` / `--kinsns`, not daemon-owned fd-array transport.
+- kop availability should come from `target.json` / `--koperation`, not daemon-owned fd-array transport.
 
 `bpfopt` CLI responsibilities:
 
@@ -146,7 +146,7 @@ Current daemon still owns all of them:
 - `commands.rs` runs optimization and REJIT;
 - `pipeline.rs` does daemon-owned per-pass verify/rollback wrappers;
 - `profiler.rs` and `server.rs` implement profiling state and hotness ranking;
-- `kfunc_discovery.rs` discovers kinsn metadata at daemon startup;
+- `kfunc_discovery.rs` discovers kop metadata at daemon startup;
 - `commands.rs` parses verifier logs and seeds/refreshes verifier states.
 
 This matches the older daemon-centric architecture, not v3.
@@ -156,7 +156,7 @@ This matches the older daemon-centric architecture, not v3.
 `bpfopt-core` has no direct raw syscall dependency, which is good. However, its current abstractions are still designed for daemon in-process embedding:
 
 - `BpfProgram` has `map_info_provider` and `map_value_provider` with comments saying the daemon installs live raw-syscall providers.
-- `PassContext` has `KinsnCallResolver`; the daemon supplies an fd-array resolver in `daemon/src/pipeline.rs`.
+- `PassContext` has `KopCallResolver`; the daemon supplies an fd-array resolver in `daemon/src/pipeline.rs`.
 - `MapInlinePass` can run through provider traits instead of purely consuming `map-values.json`.
 
 These adapters are useful for the current implementation, but they are not the v3 file/CLI boundary. v3 wants bpfopt side-inputs to be JSON files and live map/syscall work to be in `bpfget` / daemon / runner, not in an embedded provider path.
@@ -221,11 +221,11 @@ There is also a mismatch between the plan and current code: the plan says pass/I
 
 This older design is not v3-conformant:
 
-- It designs a public-ish Rust library API, `optimize_with_validator`, `ValidationOracle`, `KinsnRequirement`, and C FFI direction.
+- It designs a public-ish Rust library API, `optimize_with_validator`, `ValidationOracle`, `KopRequirement`, and C FFI direction.
 - It keeps daemon as a kernel-facing driver that still calls `bpfopt::optimize_with_validator()`.
 - It says daemon should not build `PassManager`, but it still uses an embedded optimizer library model.
 
-v3 supersedes this with CLI/file boundaries and explicitly excludes public Rust API, `ValidationOracle`, C FFI, symbolic `KinsnRequirement`, and custom framing.
+v3 supersedes this with CLI/file boundaries and explicitly excludes public Rust API, `ValidationOracle`, C FFI, symbolic `KopRequirement`, and custom framing.
 
 ### `docs/tmp/bpfopt_design_v2.md`
 

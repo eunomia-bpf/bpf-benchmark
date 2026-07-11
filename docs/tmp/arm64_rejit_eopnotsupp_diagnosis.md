@@ -63,22 +63,22 @@ Primary evidence:
 
 - `vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c:1201-1235`
 
-  `emit_kinsn_desc_call_arm64()` is the only direct `-EOPNOTSUPP` return in the
-  ARM64 BPF JIT implementation. It handles `BPF_PSEUDO_KINSN_CALL` and returns
-  `-EOPNOTSUPP` if `bpf_jit_get_kinsn_payload()` returns no payload or the
+  `emit_kop_desc_call_arm64()` is the only direct `-EOPNOTSUPP` return in the
+  ARM64 BPF JIT implementation. It handles `BPF_PSEUDO_KOP_CALL` and returns
+  `-EOPNOTSUPP` if `bpf_jit_get_kop_payload()` returns no payload or the
   payload lacks an ARM64 emitter:
 
-  - `!kinsn`
-  - `!kinsn->emit_arm64`
+  - `!kop`
+  - `!kop->emit_arm64`
 
   This is a real REJIT-related ARM64 limitation, but it is not a good match for
-  Katran `noop`: the failing bootstrap pass feeds the original/non-kinsn
-  bytecode, and the verifier log does not show kinsn calls.
+  Katran `noop`: the failing bootstrap pass feeds the original/non-kop
+  bytecode, and the verifier log does not show kop calls.
 
 - `vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c:1643-1648`
 
-  `build_insn()` reaches `emit_kinsn_desc_call_arm64()` only for
-  `BPF_JMP | BPF_CALL` with `src_reg == BPF_PSEUDO_KINSN_CALL`.
+  `build_insn()` reaches `emit_kop_desc_call_arm64()` only for
+  `BPF_JMP | BPF_CALL` with `src_reg == BPF_PSEUDO_KOP_CALL`.
 
 - `vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c:2063-2306`
 
@@ -242,12 +242,12 @@ Helpers used:
 - `bpf_get_smp_processor_id#8`
 - `bpf_xdp_adjust_head#44`
 
-Kfuncs / kinsn calls:
+Kfuncs / kop calls:
 
 - No kfunc calls were identified in the failing verifier log.
-- No `BPF_PSEUDO_KINSN_CALL` evidence was identified in the failing verifier
+- No `BPF_PSEUDO_KOP_CALL` evidence was identified in the failing verifier
   log.
-- This makes the ARM64 `emit_kinsn_desc_call_arm64()` `-EOPNOTSUPP` path an
+- This makes the ARM64 `emit_kop_desc_call_arm64()` `-EOPNOTSUPP` path an
   unlikely direct cause for the bootstrap `noop` failure.
 
 Atomics:
@@ -295,7 +295,7 @@ Noop transform:
 - The pass record confirms `insn_count_before = 2544` and
   `insn_count_after = 2544`.
 - The failing bootstrap input is therefore an identity REJIT of the original
-  bytecode, not a kinsn-bearing rewrite.
+  bytecode, not a kop-bearing rewrite.
 
 ## 3. Comparison: `balancer_ingres` vs successful ARM64 `otel` programs
 
@@ -418,7 +418,7 @@ Evidence against:
 Tail-call handling remains important for later optimization passes, but it does
 not explain this bootstrap `noop` `EOPNOTSUPP`.
 
-### 4. Specific helper, kfunc, kinsn, or atomic unsupported on ARM64
+### 4. Specific helper, kfunc, kop, or atomic unsupported on ARM64
 
 Rank: weak.
 
@@ -428,8 +428,8 @@ Evidence against:
   `map_lookup_elem`, `map_update_elem`, `ktime_get_ns`,
   `get_smp_processor_id`, and `xdp_adjust_head`.
 - No kfunc calls were identified.
-- No kinsn calls exist in the bootstrap/noop input, so the ARM64
-  `emit_kinsn_desc_call_arm64()` `-EOPNOTSUPP` path does not fit.
+- No kop calls exist in the bootstrap/noop input, so the ARM64
+  `emit_kop_desc_call_arm64()` `-EOPNOTSUPP` path does not fit.
 - No atomics were identified in the failing log.
 
 ### 5. fd-array consistency or map-layout failure
@@ -477,7 +477,7 @@ Confidence:
   `syscall.c:3784`.
 - Medium confidence on the precise feature trigger: large multi-subprogram XDP,
   possibly with XDP packet mutation/`xdp_adjust_head`.
-- Low confidence for tail-call origin, kfunc, atomic, kinsn, and fd-array
+- Low confidence for tail-call origin, kfunc, atomic, kop, and fd-array
   hypotheses.
 
 ## 6. Fix dimensions
@@ -642,5 +642,5 @@ Paper impact:
 
 - Otel is useful as a control: ARM64 REJIT, target registration, and large
   program handling are not globally broken.
-- Otel's later skipped kinsn sites are a separate bpfopt policy/guard issue, not
+- Otel's later skipped kop sites are a separate bpfopt policy/guard issue, not
   this bootstrap `noop` kernel failure.

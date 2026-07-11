@@ -13,7 +13,7 @@ Do not put this into the default Paper A / near-term bpfopt pass queue yet. The 
 Revisit when either:
 
 - per-site profile shows the Cilium/BCC constant-divide sites execute at packet-rate or event-rate high enough to matter; or
-- bpfopt gets an acceptable multiply-high primitive/kinsn/native lowering story, instead of emulating 128-bit multiply with many bytecode instructions and temporary registers.
+- bpfopt gets an acceptable multiply-high primitive/kop/native lowering story, instead of emulating 128-bit multiply with many bytecode instructions and temporary registers.
 
 ## Stage 1: Corpus Census
 
@@ -174,4 +174,4 @@ Do not mark this as `不做`: the corpus has real constant-divisor sites and nei
 
 Do not mark this as `待实现` yet: the supported-app opportunity is dominated by the hard 64-bit case, not the simple 32-bit multiply/shift case.
 
-Recommended status: `⏸ 后续 phase`, with the next decision gated on per-site profile for Cilium/BCC constant-divide sites or a native multiply-high/kInsn design.
+Recommended status: `⏸ 后续 phase`, with the next decision gated on per-site profile for Cilium/BCC constant-divide sites or a native multiply-high/KOperation design.

@@ -1,6 +1,6 @@
 # 2026-05-20 shim audit round 2
 
-Scope: read-only audit of the LD_PRELOAD shim, the new XDP netlink intercept, bpfopt kinsn-pass interactions, and BCC compatibility failures. I did not run benchmark targets or mutate git state. The only write from this audit is this report.
+Scope: read-only audit of the LD_PRELOAD shim, the new XDP netlink intercept, bpfopt kop-pass interactions, and BCC compatibility failures. I did not run benchmark targets or mutate git state. The only write from this audit is this report.
 
 ## 1. 总览
 
@@ -20,20 +20,20 @@ Scope: read-only audit of the LD_PRELOAD shim, the new XDP netlink intercept, bp
 
 仍未解的 bug：
 
-- #34 不是 shim fd_array shift 的全局错误。证据指向 bpfopt/kfunc-kinsn 侧：`rotate` 是 kinsn callee 内部读未初始化 `R6`；`cond_select` / `endian_fusion` / `lea` 是特定 BTF module/kfunc target 在 attr 阶段被拒，0 verifier insns processed。
-- #35 是 bpfopt 内部 verifier-PC namespace 和当前 raw bytecode PC namespace 没有显式映射，kinsn pass 改写布局后下一轮 verifier state lift 可能把 PC 解释错。
-- bpftrace/set 的 12 个 step 失败大概率和 #34/#35 同源：`lea`、`cond_select`、`endian_fusion` 归入 kinsn target 问题，`const_prop` 更像 #35 PC remap 问题。
+- #34 不是 shim fd_array shift 的全局错误。证据指向 bpfopt/kfunc-kop 侧：`rotate` 是 kop callee 内部读未初始化 `R6`；`cond_select` / `endian_fusion` / `lea` 是特定 BTF module/kfunc target 在 attr 阶段被拒，0 verifier insns processed。
+- #35 是 bpfopt 内部 verifier-PC namespace 和当前 raw bytecode PC namespace 没有显式映射，kop pass 改写布局后下一轮 verifier state lift 可能把 PC 解释错。
+- bpftrace/set 的 12 个 step 失败大概率和 #34/#35 同源：`lea`、`cond_select`、`endian_fusion` 归入 kop target 问题，`const_prop` 更像 #35 PC remap 问题。
 - BCC `KeyError(b["events"])` 不像 shim map 污染；更像 BCC compat header/sitecustomize 影响了编译/加载输入，导致 BCC 没生成预期 table/program。
 
-Artifact note: prompt 中列的 `corpus/results/x86_kvm_corpus_20260519_155851_162854/details/shim-workdirs/work_9/` 仍带有上一轮 func_info/line_info 类旧症状，不是当前 #34 四个 kinsn pass 失败的最干净证据。当前最匹配描述的是 `corpus/results/x86_kvm_corpus_20260519_235235_032511/details/shim-workdirs/work_9/`：同一个 `target.json` shift 形态，`rotate` 为 `EACCES` 且 verifier 已跑 481 条，`cond_select` / `endian_fusion` / `lea` 为 `EINVAL` 且 0 insns processed。
+Artifact note: prompt 中列的 `corpus/results/x86_kvm_corpus_20260519_155851_162854/details/shim-workdirs/work_9/` 仍带有上一轮 func_info/line_info 类旧症状，不是当前 #34 四个 kop pass 失败的最干净证据。当前最匹配描述的是 `corpus/results/x86_kvm_corpus_20260519_235235_032511/details/shim-workdirs/work_9/`：同一个 `target.json` shift 形态，`rotate` 为 `EACCES` 且 verifier 已跑 481 条，`cond_select` / `endian_fusion` / `lea` 为 `EINVAL` 且 0 insns processed。
 
 ## 2. #34 真正根因
 
 ### 2.1 bpfopt pass output 和 `shift_target_module_call_offsets` 的联动
 
-`target.json` 中 kinsn entry 有两个不同概念：
+`target.json` 中 kop entry 有两个不同概念：
 
-- `btf_func_id`: kfunc/kmodule 内的函数 BTF id，写进 `BPF_PSEUDO_KINSN_CALL` 指令的 `imm`。
+- `btf_func_id`: kfunc/kmodule 内的函数 BTF id，写进 `BPF_PSEUDO_KOP_CALL` 指令的 `imm`。
 - `btf_id`: BTF object id，shim 用 `BPF_BTF_GET_FD_BY_ID` 打开 BTF fd，并放进 `fd_array[call_offset]`。
 - `call_offset`: fork verifier 用来从 `fd_array` 取 BTF fd 的槽位，写进 call 指令 `off`。
 
@@ -44,9 +44,9 @@ module_base = max(map_count, 1)
 shifted_call_offset = module_base + original_module_call_offset - 1
 ```
 
-katran 这个程序有 14 个 map，所以 kinsn module slots 被整体平移到 14..20：
+katran 这个程序有 14 个 map，所以 kop module slots 被整体平移到 14..20：
 
-| slot | btf_id | kinsn target |
+| slot | btf_id | kop target |
 | --- | ---: | --- |
 | 14 | 2 | `bpf_x86_andl`, `bpf_x86_shrq` |
 | 15 | 4 | `bpf_x86_bswapl`, `bpf_x86_rolw` |
@@ -56,26 +56,26 @@ katran 这个程序有 14 个 map，所以 kinsn module slots 被整体平移到
 | 19 | 13 | `bpf_x86_prefetcht0` |
 | 20 | 14 | `bpf_x86_rolq`, `bpf_x86_rorxl` |
 
-这个 shift 结果会进入 `KinsnRegistry`。各 pass 通过 registry 查 target name，再由 `emit_packed_kinsn_call_with_off()` 生成 kinsn call，call 指令里的 `off` 已经是 shifted slot。shim 侧 `build_full_fd_array()` 又读同一个 shifted `target.json`，把 BTF fd 放到相同 slot。因此 bpfopt 和 shim 对 call_offset 的协议本身是一致的。
+这个 shift 结果会进入 `KopRegistry`。各 pass 通过 registry 查 target name，再由 `emit_packed_kop_call_with_off()` 生成 kop call，call 指令里的 `off` 已经是 shifted slot。shim 侧 `build_full_fd_array()` 又读同一个 shifted `target.json`，把 BTF fd 放到相同 slot。因此 bpfopt 和 shim 对 call_offset 的协议本身是一致的。
 
 关键判断：如果这里是 shim shift 或 fd_array 全局错位，`extract`、`bulk_memory`、`prefetch` 不可能稳定成功，因为它们使用同一套 shifted call_offset/fd_array 机制。当前失败只集中在 slot 15/16/17/20 的特定 target，slot 14/18/19 成功，说明不是全局 fd_array prefix bug。
 
 ### 2.2 `rotate` 的根因
 
-`rotate` 失败不是 attr-stage，verifier 已进入候选程序并处理了 481 条指令，日志显示 kinsn callee 内部出现：
+`rotate` 失败不是 attr-stage，verifier 已进入候选程序并处理了 481 条指令，日志显示 kop callee 内部出现：
 
 ```text
 (7b) *(u64 *)(r10 -376) = r6
 R6 !read_ok
 ```
 
-这意味着 call target 被解析到了真实 kinsn callee；否则不会进到 callee 内部并报 `R6` read state。shim 已经把 `btf_id=14` 的 BTF fd 放到了 slot 20，`BPF_PSEUDO_KINSN_CALL` 至少完成了目标解析。
+这意味着 call target 被解析到了真实 kop callee；否则不会进到 callee 内部并报 `R6` read state。shim 已经把 `btf_id=14` 的 BTF fd 放到了 slot 20，`BPF_PSEUDO_KOP_CALL` 至少完成了目标解析。
 
-真正的问题在 bpfopt/kfunc-kinsn ABI 侧：`rotate.rs` 生成的 payload/descriptor 没有把 callee 实际读取的隐式寄存器 `R6` 初始化或声明为输入。`rotate_register_uses()` 只从 payload offset 8 收集 use，defs 只覆盖 offset 4；x86 W64 `rolq` 路径还会把 `call_dst` / `call_src` 都设成原 `dst_reg`。如果 kinsn module stub 或 lowered helper 需要 `R6` 作为 scratch/input，bpfopt 当前的 sidecar ABI 描述是不完整的。
+真正的问题在 bpfopt/kfunc-kop ABI 侧：`rotate.rs` 生成的 payload/descriptor 没有把 callee 实际读取的隐式寄存器 `R6` 初始化或声明为输入。`rotate_register_uses()` 只从 payload offset 8 收集 use，defs 只覆盖 offset 4；x86 W64 `rolq` 路径还会把 `call_dst` / `call_src` 都设成原 `dst_reg`。如果 kop module stub 或 lowered helper 需要 `R6` 作为 scratch/input，bpfopt 当前的 sidecar ABI 描述是不完整的。
 
 修复方向：
 
-- 对 `bpf_x86_rolq` / `bpf_x86_rorxl` 的 kinsn module ABI 做一次反查：callee 是否约定读取 `R6`，以及这个寄存器应由 payload、调用约定还是 module prologue 初始化。
+- 对 `bpf_x86_rolq` / `bpf_x86_rorxl` 的 kop module ABI 做一次反查：callee 是否约定读取 `R6`，以及这个寄存器应由 payload、调用约定还是 module prologue 初始化。
 - bpfopt pass 侧要么把隐式 register use/def 明确建模并在 replacement 前生成初始化，要么修正 target stub，不能让 callee 读未初始化 BPF register。
 - 给 `rotate` 加候选 bytecode preservation / verifier-load regression。当前 workdir 会覆盖 `output.next.bin`，失败候选没有被稳定保留下来，定位成本太高。
 
@@ -96,14 +96,14 @@ R6 !read_ok
 修复方向：
 
 - 对失败 target 的 call 指令逐条 dump：`imm=btf_func_id`、`off=shifted_call_offset`、payload 常量、前后寄存器状态。需要把每个失败 step 的 candidate bytecode 单独保存，例如 `candidate_stepN.bin`，不要只保留最后一次成功 `output.bin`。
-- 对 `btf_id=4/5/7/14` 的 module BTF fd 做启动时自检：打开 BTF fd 后，查 `btf_func_id` 是否在该 BTF 对象内、prototype 是否符合 kinsn verifier 预期。
-- 若 `BPF_PROG_LOAD/REJIT` 在 0 insns 阶段失败，shim 应把 kernel `errno`、pass name、candidate insn count、每条 kinsn call 的 `(pc, imm, off, target_name, btf_id)` 写入 workdir manifest。现在光看 `target.json` 和最后 `output.bin` 不够。
+- 对 `btf_id=4/5/7/14` 的 module BTF fd 做启动时自检：打开 BTF fd 后，查 `btf_func_id` 是否在该 BTF 对象内、prototype 是否符合 kop verifier 预期。
+- 若 `BPF_PROG_LOAD/REJIT` 在 0 insns 阶段失败，shim 应把 kernel `errno`、pass name、candidate insn count、每条 kop call 的 `(pc, imm, off, target_name, btf_id)` 写入 workdir manifest。现在光看 `target.json` 和最后 `output.bin` 不够。
 
 ### 2.4 shim 侧仍可改进的点
 
 `build_full_fd_array()` 的调用点用了 `(void)build_full_fd_array(...)`。如果 JSON parse、BTF fd 打开或 slot 构造失败，shim 可能继续用缺失 fd_array 的 attr 去 ReJIT，错误会变成下游 verifier/attr failure。这个不一定是 #34 的当前根因，但违反 fail-fast 原则。
 
-建议把 fd_array 构造失败改成 ReJIT step 的明确失败，并把失败原因写进 step log。不要让 “没有 fd_array” 和 “目标 kinsn 自己无效” 在同一个 `EINVAL` 里混在一起。
+建议把 fd_array 构造失败改成 ReJIT step 的明确失败，并把失败原因写进 step log。不要让 “没有 fd_array” 和 “目标 kop 自己无效” 在同一个 `EINVAL` 里混在一起。
 
 ## 3. #41 netlink XDP intercept code review
 
@@ -184,7 +184,7 @@ R6 !read_ok
 
 ## 4. #35 verifier-PC remapper 接口设计
 
-当前 `verifier_log.rs` 解析出的 `VerifierInsn.pc` 被 `bbprogram_lift.rs` 直接当成当前 raw bytecode PC。kinsn pass 改写 bytecode 后，这个假设不再稳定；下一轮 `const_prop` 等 pass 可能把 verifier PC 对到不存在的 CFG pc，于是报：
+当前 `verifier_log.rs` 解析出的 `VerifierInsn.pc` 被 `bbprogram_lift.rs` 直接当成当前 raw bytecode PC。kop pass 改写 bytecode 后，这个假设不再稳定；下一轮 `const_prop` 等 pass 可能把 verifier PC 对到不存在的 CFG pc，于是报：
 
 ```text
 verifier state pc N is not present in CFG
@@ -272,13 +272,13 @@ P0 / highest ROI:
 - 修 #41 replay ACK：blocking 读 ACK、解析 `NLMSG_ERROR`、失败返回并写 step log。否则 replay 实际失败会被报告成成功。
 - 修 #41 replay flags：保留 mode bits，去掉 `UPDATE_IF_NOEXIST`，使用 replace 语义；能记录 old fd 时加 `IFLA_XDP_EXPECTED_FD`。
 - 修 #41 状态正确性：detach 删除 attach 记录；observe 不要在 kernel attach 成功前 commit；消除 `prog_entry *` 解锁后使用的 race。
-- 给 shim 保存每个失败 step 的 candidate bytecode 和 kinsn call manifest。#34 没这个会反复卡在 “最后 output.bin 不是失败候选”。
+- 给 shim 保存每个失败 step 的 candidate bytecode 和 kop call manifest。#34 没这个会反复卡在 “最后 output.bin 不是失败候选”。
 
 P1:
 
-- `rotate` kinsn ABI 修复：明确 `R6` 是 callee bug、payload ABI bug，还是 pass register-use 描述缺失；加 verifier regression。
+- `rotate` kop ABI 修复：明确 `R6` 是 callee bug、payload ABI bug，还是 pass register-use 描述缺失；加 verifier regression。
 - `cond_select` / `endian_fusion` / `lea`：对 `btf_id=4/5/7` 做 BTF fd + func prototype 自检，确认是 module/kfunc metadata 还是 pass call encoding。
-- 实现 #35 PC remapper 接口，让 const_prop after kinsn 不再把 verifier pc 误当 raw pc。
+- 实现 #35 PC remapper 接口，让 const_prop after kop 不再把 verifier pc 误当 raw pc。
 - netlink observe 改为按 kernel prog id 校验，处理 fd reuse；补 `send()` 或 linearize split-iov `sendmsg`。
 
 P2:

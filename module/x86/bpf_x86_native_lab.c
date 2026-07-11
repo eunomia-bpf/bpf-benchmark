@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT x86 native-code lab kinsn.
+ * BpfReJIT x86 native-code lab kop.
  *
  * Test-only escape hatch: lets userspace upload an arbitrary x86-64 byte
  * sequence (a "native blob") and then have a BPF program splat those bytes
- * inline at JIT time via a kinsn. The verifier sees only a trivial proof
+ * inline at JIT time via a kop. The verifier sees only a trivial proof
  * (`r0 = blob_id`); the actual emitted x86 is whatever userspace handed in.
  *
  * Use cases:
  *  - Establish a hand-tuned "pure native" performance lower bound to compare
- *    against the production kinsn passes.
+ *    against the production kop passes.
  *  - Bring up new optimization ideas at the x86 level without going through
- *    bpfopt+kinsn+REJIT first.
+ *    bpfopt+kop+REJIT first.
  *
  * Safety: this module disables every verifier guarantee for any BPF program
  * that calls into it. Do NOT load on production kernels. Upload requires
@@ -44,11 +44,11 @@
 #include <linux/string.h>
 #include <linux/uaccess.h>
 
-#include "kinsn_x86_emit.h"
+#include "kop_x86_emit.h"
 
 #define NATIVE_LAB_MAX_BLOBS	512
 /*
- * BPF_MAX_INSN_SIZE in arch/x86/net/bpf_jit_comp.c bounds a single kinsn
+ * BPF_MAX_INSN_SIZE in arch/x86/net/bpf_jit_comp.c bounds a single kop
  * emit at 128 bytes. Userspace uploads longer programs as multiple
  * back-to-back sidecar/call pairs.
  */
@@ -98,7 +98,7 @@ static struct dentry *debugfs_root;
 __bpf_kfunc_start_defs();
 /*
  * The BPF stub. Verifier sees an empty void kfunc taking one u64; the JIT
- * never actually calls it because the kinsn descriptor below provides
+ * never actually calls it because the kop descriptor below provides
  * emit_x86. The argument exists so BPF code can stage a value into rdi
  * before the call, which the blob can then consume.
  */
@@ -114,7 +114,7 @@ BTF_KFUNCS_END(bpf_x86_native_lab_kfunc_ids)
 
 static int decode_native_lab_payload(u64 payload, u32 *blob_id, u32 *abi_mask)
 {
-	payload = kinsn_payload_decode(payload);
+	payload = kop_payload_decode(payload);
 
 	if (payload & 0xf)
 		return -EINVAL;
@@ -145,9 +145,9 @@ static void native_lab_emit_error(const char *reason, int err, u64 payload,
 }
 
 /*
- * Verifier-side proof. We claim the kinsn is equivalent to `r0 = 0`.
+ * Verifier-side proof. We claim the kop is equivalent to `r0 = 0`.
  * This is a deliberate lie: the blob can produce any value or side
- * effect. validate_kinsn_proof_seq() accepts single ALU64 writes, and
+ * effect. validate_kop_proof_seq() accepts single ALU64 writes, and
  * constant 0 is a valid return value for every BPF program type the
  * paper benchmark uses (XDP_ABORTED, TC_ACT_OK, CGROUP_SKB_DROP, plain
  * socket_filter retval, ...). The native blob's actual `rax` value at
@@ -310,7 +310,7 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	return snapshot_len;
 }
 
-const struct bpf_kinsn bpf_x86_native_lab_desc = {
+const struct bpf_kop bpf_x86_native_lab_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 5,
 	.max_emit_bytes = NATIVE_LAB_MAX_BLOB_BYTES,
@@ -318,7 +318,7 @@ const struct bpf_kinsn bpf_x86_native_lab_desc = {
 	.emit_x86 = emit_native_lab_x86,
 };
 
-static const struct bpf_kinsn * const bpf_x86_native_lab_kinsn_descs[] = {
+static const struct bpf_kop * const bpf_x86_native_lab_kop_descs[] = {
 	&bpf_x86_native_lab_desc,
 };
 
@@ -658,7 +658,7 @@ static void bpf_x86_native_lab_debugfs_exit(void)
 static const struct btf_kfunc_id_set bpf_x86_native_lab_kfunc_set = {
 	.owner = THIS_MODULE,
 	.set = &bpf_x86_native_lab_kfunc_ids,
-	.kinsn_descs = bpf_x86_native_lab_kinsn_descs,
+	.kop_descs = bpf_x86_native_lab_kop_descs,
 };
 
 static int __init bpf_x86_native_lab_init(void)
@@ -687,7 +687,7 @@ static void __exit bpf_x86_native_lab_exit(void)
 module_init(bpf_x86_native_lab_init);
 module_exit(bpf_x86_native_lab_exit);
 
-MODULE_DESCRIPTION("BpfReJIT x86 native-code lab kinsn (test only; bypasses verifier guarantees)");
+MODULE_DESCRIPTION("BpfReJIT x86 native-code lab kop (test only; bypasses verifier guarantees)");
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("BpfReJIT");
 MODULE_IMPORT_NS("BPF_INTERNAL");

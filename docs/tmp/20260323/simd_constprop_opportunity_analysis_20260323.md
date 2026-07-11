@@ -1,4 +1,4 @@
-# SIMD kinsn 与 Verifier-Assisted Constant Propagation 优化机会调研
+# SIMD kop 与 Verifier-Assisted Constant Propagation 优化机会调研
 
 日期: 2026-03-23
 
@@ -6,14 +6,14 @@
 
 结论先行:
 
-- `SIMD kinsn` 在真实 BPF workload 中**有机会，但主要集中在 XDP/TC 这类 packet fast path**，不是 tracing/kprobe。
+- `SIMD kop` 在真实 BPF workload 中**有机会，但主要集中在 XDP/TC 这类 packet fast path**，不是 tracing/kprobe。
 - 真实程序里**显式 `memcpy/memset` 并不多**: 在 `429` 个成功构建的 BPF 源文件中，只发现 `23` 个显式 builtin 调用点: `13` 个 `__builtin_memcpy`、`9` 个 `__builtin_memset`、`1` 个 `__builtin_memmove`。但这**不代表内存操作少**，因为大量 copy/zero-init 已经被 LLVM 展开成标量 load/store。
 - 当前 x86 BPF JIT **没有通用 `memcpy/memset` lowering**，也**没有 `rep movsb` / SSE / AVX 专门路径**；现状是按 BPF 指令逐条发射标量 load/store 或 helper call。
 - 内核中直接用 SIMD 受 `kernel_fpu_begin/end()`、`may_use_simd()`、IRQ/NMI 上下文限制，**做“每次小 copy 都开一次 FPU section”基本不划算**。如果要做，必须是**XDP/TC 热路径上的粗粒度、可摊销、短临界区**。
 - `verifier-assisted constant propagation` 的机会比 SIMD 更“稳”: 从归档 verifier log 的保守下界看，**约 23% 的已记录 state line 含有精确常量寄存器信息**；而在整个 `.bpf.o` corpus 中，`62.5%` 的条件分支都在和立即数比较，`8.05%` 的全部指令是 ALU-immediate，说明**dead branch / DCE / strength reduction** 的后续收益面很大。
 - 从落地优先级看，建议是:
   1. 先做 verifier-assisted const prop，用于 branch folding / DCE / strength reduction / helper-size specialization。
-  2. 再做面向 XDP/TC 的小规模 SIMD kinsn，优先固定长度 header copy/compare/hash/checksum。
+  2. 再做面向 XDP/TC 的小规模 SIMD kop，优先固定长度 header copy/compare/hash/checksum。
   3. tracing/kprobe 更适合做 const prop，不适合把 SIMD 作为第一优先级。
 
 ## 调研方法与口径
@@ -32,7 +32,7 @@
 - verifier 统计方面，仓库里**缺少全量成功加载程序的 `log_level=2` 日志**。因此下面关于常量信息的数字是**归档 failure log 的保守下界**，不是无偏 corpus-wide 平均值。
 - 本仓库的 `docs/reference/papers/08-merlin.pdf` 与 `09-epso.pdf` 是错配镜像；对 Merlin/EPSO 我使用了作者页面 / arXiv / ACM 元数据，而不是本地错配 PDF。
 
-## 1. SIMD kinsn 机会
+## 1. SIMD kop 机会
 
 ### 1.1 真实 workload 的类型分布
 
@@ -136,7 +136,7 @@
 
 但这里有一个关键区分:
 
-- `probe_read_kernel*` 在 tracing 程序里数量巨大，**不构成 SIMD kinsn 的主要收益点**，因为 JIT 无法把 helper 内部实现替换成向量化 fast path。
+- `probe_read_kernel*` 在 tracing 程序里数量巨大，**不构成 SIMD kop 的主要收益点**，因为 JIT 无法把 helper 内部实现替换成向量化 fast path。
 - 真正与 SIMD 更相关的是 `xdp_load_bytes` / `skb_load_bytes` / scalarized packet parsing/copy，它们虽然调用次数远少于 tracing helper，但更接近 hot packet path。
 
 ### 1.5 当前 BPF JIT 对 memcpy 的处理方式
@@ -145,13 +145,13 @@
 
 - `BPF_ST/BPF_STX` 直接发标量 store
 - `BPF_LDX` 直接发标量 load
-- `BPF_CALL` 直接发普通 helper/kfunc call，只有 kinsn 走 `emit_kinsn_call()`
+- `BPF_CALL` 直接发普通 helper/kfunc call，只有 kop 走 `emit_kop_call()`
 
 对应代码位置:
 
 - 标量 store: `arch/x86/net/bpf_jit_comp.c:2141-2177`
 - 标量 load: `arch/x86/net/bpf_jit_comp.c:2258-2308`
-- call/kinsn call: `arch/x86/net/bpf_jit_comp.c:2471-2497`
+- call/kop call: `arch/x86/net/bpf_jit_comp.c:2471-2497`
 
 因此现状不是:
 
@@ -166,7 +166,7 @@
 
 这意味着 SIMD 的切入点只能是:
 
-1. 新增 kinsn / peephole，在 JIT 前或 JIT 中重新识别 fixed-size block；
+1. 新增 kop / peephole，在 JIT 前或 JIT 中重新识别 fixed-size block；
 2. 或者引入 `rep movsb/stosb` / 宽 GPR / SSE2/AVX2 的专门 lowering。
 
 值得注意的是，`rep movsb`/`rep stosb` 不需要 XMM/YMM 状态，**它是一个比“直接上 SIMD”更保守的中间设计点**。
@@ -213,7 +213,7 @@
 
 - tracing program 常在更复杂的内核上下文触发，安全 envelope 更差；
 - XDP 多数运行在 NAPI/softirq 相关路径，理论上比 NMI/hardirq 宽松，但仍不适合每个 6B/16B copy 都包一层 `kernel_fpu_begin/end()`；
-- 如果未来通过 kinsn 把若干相邻 fixed-size ops 合并到一个 native sequence，中间才可能有摊销空间。
+- 如果未来通过 kop 把若干相邻 fixed-size ops 合并到一个 native sequence，中间才可能有摊销空间。
 
 ### 1.8 有没有 paper 讨论 BPF + SIMD
 
@@ -330,7 +330,7 @@
 2. `Strength reduction`
    - 尤其是 packet parsing 里的 mask/shift/endian/offset 计算链。
 3. `Helper / memcpy-size specialization`
-   - 已知固定 size 时，可以改走更紧凑的 kinsn/native path。
+   - 已知固定 size 时，可以改走更紧凑的 kop/native path。
 4. `Loop unrolling`
    - 有收益，但在 packet path 里**不是头号机会**。
 
@@ -437,7 +437,7 @@ Jitterbug 的重点是 BPF JIT correctness specification 和 verified JIT。它�
 
 它对本题的启发是:
 
-- 如果未来要把 SIMD kinsn 或 verifier-assisted const-prop 放到 JIT 路径里，**正确性与可验证性是实打实的工程约束**；
+- 如果未来要把 SIMD kop 或 verifier-assisted const-prop 放到 JIT 路径里，**正确性与可验证性是实打实的工程约束**；
 - 但论文本身不提供 SIMD 或 const-prop 机会评估。
 
 ### 3.6 hXDP (OSDI'20)
@@ -544,7 +544,7 @@ hXDP 的核心是:
 - checksum/hash/byteswap/parse 也集中在这里
 - 反汇编中已经能看到大量 scalarized copy/zeroing
 
-这是 **SIMD kinsn 最值得优先切入** 的程序类型。
+这是 **SIMD kop 最值得优先切入** 的程序类型。
 
 #### 第二梯队: `sock_ops` / `sk_skb` / `cgroup_sock*` / `netfilter`
 
@@ -574,8 +574,8 @@ hXDP 的核心是:
 1. `Verifier-assisted const prop` 应该先做
    - 它覆盖所有 program type
    - 对 dead branch / DCE / strength reduction 的收益更确定
-   - 对后续 SIMD/kinsn 选择还能提供 size/offset/path 条件
-2. `SIMD kinsn` 应该从最窄的目标集合起步
+   - 对后续 SIMD/kop 选择还能提供 size/offset/path 条件
+2. `SIMD kop` 应该从最窄的目标集合起步
    - 先只做 `xdp`/`tc`
    - 先只做固定长度 `16/32/40/64B` copy/compare/zero/hash/checksum
    - 优先考虑 `rep movsb/stosb` 或宽 GPR 方案，再考虑 XMM/YMM
@@ -589,7 +589,7 @@ hXDP 的核心是:
 
 ## 最终判断
 
-### SIMD kinsn
+### SIMD kop
 
 - **有价值，但要窄做**
 - 最值得做的是 XDP/TC 中的固定长度 header/tuple copy/compare/hash/checksum
@@ -608,7 +608,7 @@ hXDP 的核心是:
 
 1. `verifier-assisted const prop`
 2. `const-prop` 驱动的 size/offset specialization
-3. 面向 `xdp/tc` 的 fixed-size memcpy/hash/checksum kinsn
+3. 面向 `xdp/tc` 的 fixed-size memcpy/hash/checksum kop
 4. 只有在确认 FPU/context 约束可控后，再扩大到更宽的 SIMD lowering
 
 ## 参考资料

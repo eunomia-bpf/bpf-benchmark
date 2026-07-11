@@ -5,7 +5,7 @@
   "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
   "fatal_error": "cilium/agent: tracked BPF program ids disappeared before baseline: missing_ids=[98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 148, 151, 156, 157, 158, 160, 161, 164, 167], tracked_ids=[72, 73, 98, 99, 101, 102, 104, 106, 107, 108, 109, 110, 111, 112, 113, 115, 116, 118, 119, 120, 121, 122, 123, 125, 126, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167]",
   "generated_at": "2026-04-26T06:53:05.797436+00:00",
-  "kinsn_modules": {
+  "kop_modules": {
     "captured_at": "2026-04-26T06:44:50.335526+00:00",
     "daemon_binary": "daemon/target/release/bpfrejit-daemon",
     "expected_modules": [
@@ -33,8 +33,8 @@
         "bpf_rotate",
         "bpf_select"
       ],
-      "loader": "runner.libs.kinsn.load_kinsn_modules",
-      "module_dir": "/artifacts/kinsn",
+      "loader": "runner.libs.kop.load_kop_modules",
+      "module_dir": "/artifacts/kop",
       "newly_loaded_modules": [],
       "snapshot_after": {
         "captured_at": "2026-04-26T06:44:50.335460+00:00",

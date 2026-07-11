@@ -96,7 +96,7 @@ None deleted. The repeated pass scan/apply shapes are real pass logic and would 
 ## Considered But Kept
 
 - `passes/map_inline.rs`, `passes/map_inline/`, `pass.rs`, and test files: skipped because they are protected by concurrent codex ownership.
-- `SlotDistance`, `KinsnAdmissionWindow`, and other documented invariant types: kept because they enforce semantic boundaries.
+- `SlotDistance`, `KopAdmissionWindow`, and other documented invariant types: kept because they enforce semantic boundaries.
 - BBProgram transaction-style mutation methods (`delete_insn`, `replace_range_at`, etc.): kept because clone/mutate/commit behavior is intentional.
 - `PASS_ALIASES` and `cli_name_for_pass()`: kept because they encode CLI compatibility and are covered by CLI tests.
 - `run_on_bbprogram()` pass entry functions: kept because deleting them would require moving full pass bodies for minimal net reduction and would churn real pass entrypoints.

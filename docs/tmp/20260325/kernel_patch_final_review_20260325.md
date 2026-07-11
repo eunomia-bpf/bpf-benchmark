@@ -146,29 +146,29 @@ if (array->ptrs[key] != prog)
 
 ---
 
-### P0-6: kinsn `emit_x86`/`emit_arm64` 回调可生成任意 native code，绕过 verifier
+### P0-6: kop `emit_x86`/`emit_arm64` 回调可生成任意 native code，绕过 verifier
 
 **代码位置**:
-- `arch/x86/net/bpf_jit_comp.c`, `emit_kinsn_desc_call()`, 约 L580-610
-- `arch/arm64/net/bpf_jit_comp.c`, `emit_kinsn_desc_call_arm64()`, 约 L1195-1220
-- `include/linux/bpf.h`, `struct bpf_kinsn` 定义
+- `arch/x86/net/bpf_jit_comp.c`, `emit_kop_desc_call()`, 约 L580-610
+- `arch/arm64/net/bpf_jit_comp.c`, `emit_kop_desc_call_arm64()`, 约 L1195-1220
+- `include/linux/bpf.h`, `struct bpf_kop` 定义
 
-**问题**: `kinsn->emit_x86(scratch, &off, emit, payload, bpf_prog)` 是一个模块提供的回调，可以向 JIT 镜像中写入**任意 x86 机器代码**。唯一的限制是 `max_emit_bytes` 检查了输出长度，但完全不检查内容。
+**问题**: `kop->emit_x86(scratch, &off, emit, payload, bpf_prog)` 是一个模块提供的回调，可以向 JIT 镜像中写入**任意 x86 机器代码**。唯一的限制是 `max_emit_bytes` 检查了输出长度，但完全不检查内容。
 
-与此同时，`kinsn->instantiate_insn()` 生成的"proof sequence"是 verifier 实际验证的代码。但 JIT 执行的是 `emit_x86` 的输出。这意味着 **verifier 看到的代码（proof）和 JIT 执行的代码（native emit）不同** —— "双轨制"验证。
+与此同时，`kop->instantiate_insn()` 生成的"proof sequence"是 verifier 实际验证的代码。但 JIT 执行的是 `emit_x86` 的输出。这意味着 **verifier 看到的代码（proof）和 JIT 执行的代码（native emit）不同** —— "双轨制"验证。
 
 一个 buggy 或恶意的内核模块可以：
 1. 让 `instantiate_insn` 返回无害的 `MOV R0, 0; EXIT` proof sequence
 2. 让 `emit_x86` 生成 `int3; mov rdi, rsp; call arbitrary_func` 等任意代码
 
-**触发条件**: 加载一个提供 kinsn descriptor 的内核模块。由于 kinsn 通过 `btf_kfunc_id_set.kinsn_descs[]` 注册（btf.c 中新增的路径），任何注册了 kfunc ID set 的模块都可以附带 kinsn descriptor。
+**触发条件**: 加载一个提供 kop descriptor 的内核模块。由于 kop 通过 `btf_kfunc_id_set.kop_descs[]` 注册（btf.c 中新增的路径），任何注册了 kfunc ID set 的模块都可以附带 kop descriptor。
 
-**缓解因素**: 加载内核模块本身需要 `CAP_SYS_MODULE`。但 BPF 的安全模型假设即使 root 也不能通过 BPF 执行任意代码（verifier 保证）。kinsn 打破了这个假设——root + 可加载模块 = 可在 BPF JIT 镜像中注入任意代码。
+**缓解因素**: 加载内核模块本身需要 `CAP_SYS_MODULE`。但 BPF 的安全模型假设即使 root 也不能通过 BPF 执行任意代码（verifier 保证）。kop 打破了这个假设——root + 可加载模块 = 可在 BPF JIT 镜像中注入任意代码。
 
 **修复方案**:
-1. 短期：增加 `CONFIG_BPF_KINSN` Kconfig 选项，默认关闭。
-2. 中期：移除 per-arch emit callback，所有 kinsn 的 native code 必须通过标准 BPF 指令 + JIT 路径生成。
-3. 长期：将 kinsn 统一到 kfunc 框架，通过 BTF 类型系统约束行为。
+1. 短期：增加 `CONFIG_BPF_KOP` Kconfig 选项，默认关闭。
+2. 中期：移除 per-arch emit callback，所有 kop 的 native code 必须通过标准 BPF 指令 + JIT 路径生成。
+3. 长期：将 kop 统一到 kfunc 框架，通过 BTF 类型系统约束行为。
 
 ---
 
@@ -307,13 +307,13 @@ tmp->aux->btf = prog->aux->btf;
 
 ---
 
-### P1-6: `lower_kinsn_proof_regions()` 的 region start 调整逻辑有 off-by-one 风险
+### P1-6: `lower_kop_proof_regions()` 的 region start 调整逻辑有 off-by-one 风险
 
-**代码位置**: `kernel/bpf/verifier.c`, `lower_kinsn_proof_regions()`
+**代码位置**: `kernel/bpf/verifier.c`, `lower_kop_proof_regions()`
 
 ```c
-for (j = 0; j < env->kinsn_region_cnt - 1; j++) {
-    struct bpf_kinsn_region *prior = &env->kinsn_regions[j];
+for (j = 0; j < env->kop_region_cnt - 1; j++) {
+    struct bpf_kop_region *prior = &env->kop_regions[j];
     s32 new_start;
 
     if (prior->start <= region->start)
@@ -326,13 +326,13 @@ for (j = 0; j < env->kinsn_region_cnt - 1; j++) {
 }
 ```
 
-**问题**: 倒序遍历 insn 数组修改指令，同时正序遍历 `kinsn_regions[]` 调整 `start`。由于倒序修改，先处理高地址的 kinsn，此时低地址的 region start 不需要调整。但 `kinsn_regions[]` 的填充顺序是**倒序**（从 `env->prog->len - 1` 向 0 遍历，先遇到的高地址先加入数组）。所以 `kinsn_regions[0]` 是最高地址的 kinsn，`kinsn_regions[cnt-1]` 是最低地址的。
+**问题**: 倒序遍历 insn 数组修改指令，同时正序遍历 `kop_regions[]` 调整 `start`。由于倒序修改，先处理高地址的 kop，此时低地址的 region start 不需要调整。但 `kop_regions[]` 的填充顺序是**倒序**（从 `env->prog->len - 1` 向 0 遍历，先遇到的高地址先加入数组）。所以 `kop_regions[0]` 是最高地址的 kop，`kop_regions[cnt-1]` 是最低地址的。
 
-当处理 `kinsn_regions[k]` 时，`j` 从 0 遍历到 `k-1`。`prior->start > region->start` 意味着 prior 的地址 > 当前地址——但 prior 是更早加入的（即原始地址更高），已经被处理过了。它们的 start 已经是 lowered 后的值。
+当处理 `kop_regions[k]` 时，`j` 从 0 遍历到 `k-1`。`prior->start > region->start` 意味着 prior 的地址 > 当前地址——但 prior 是更早加入的（即原始地址更高），已经被处理过了。它们的 start 已经是 lowered 后的值。
 
-**风险**: 如果两个 kinsn region 相邻（连续的 sidecar+call 对），`verifier_remove_insns` + `bpf_patch_insn_data` 修改了 insn 数组长度后，prior 的 adjusted start 可能不正确——因为 prior 的 start 是基于之前的 lowering 结果，而当前 lowering 又改变了 insn 数组。
+**风险**: 如果两个 kop region 相邻（连续的 sidecar+call 对），`verifier_remove_insns` + `bpf_patch_insn_data` 修改了 insn 数组长度后，prior 的 adjusted start 可能不正确——因为 prior 的 start 是基于之前的 lowering 结果，而当前 lowering 又改变了 insn 数组。
 
-**修复方案**: 添加详细的 assert/invariant 检查。或者改为两遍：第一遍收集所有 kinsn 位置，第二遍从高到低一次性 patch。
+**修复方案**: 添加详细的 assert/invariant 检查。或者改为两遍：第一遍收集所有 kop 位置，第二遍从高到低一次性 patch。
 
 ---
 
@@ -359,28 +359,28 @@ mutex_unlock(&link->link.prog->aux->rejit_mutex);
 
 ## 三、P2 架构问题清单
 
-### P2-1: kinsn 完整平行基础设施应合并到 kfunc 框架
+### P2-1: kop 完整平行基础设施应合并到 kfunc 框架
 
 **涉及文件**:
-- `kernel/bpf/verifier.c`: `bpf_kinsn_desc`, `bpf_kinsn_desc_tab` 等被完全删除，改为在 `bpf_kfunc_desc` 中增加 `kinsn` 指针（实际上代码已经走向了这个方向——`bpf_kfunc_desc` 已有 `kinsn` 字段）
-- `kernel/bpf/btf.c`: `btf_kfunc_kinsn_set` 并行数据结构
-- `include/linux/bpf.h`: `struct bpf_kinsn` 的 per-arch callback
-- `include/uapi/linux/bpf.h`: `BPF_PSEUDO_KINSN_SIDECAR`, `BPF_PSEUDO_KINSN_CALL`
+- `kernel/bpf/verifier.c`: `bpf_kop_desc`, `bpf_kop_desc_tab` 等被完全删除，改为在 `bpf_kfunc_desc` 中增加 `kop` 指针（实际上代码已经走向了这个方向——`bpf_kfunc_desc` 已有 `kop` 字段）
+- `kernel/bpf/btf.c`: `btf_kfunc_kop_set` 并行数据结构
+- `include/linux/bpf.h`: `struct bpf_kop` 的 per-arch callback
+- `include/uapi/linux/bpf.h`: `BPF_PSEUDO_KOP_SIDECAR`, `BPF_PSEUDO_KOP_CALL`
 
-**分析**: 审查代码后发现，**实际的 verifier.c 实现已经将 kinsn 整合进了 kfunc_desc**：`add_kfunc_desc()` 统一处理 kfunc 和 kinsn call，`bpf_kfunc_desc` 已有 `kinsn` 字段。这比之前报告描述的"完全平行基础设施"要好得多。
+**分析**: 审查代码后发现，**实际的 verifier.c 实现已经将 kop 整合进了 kfunc_desc**：`add_kfunc_desc()` 统一处理 kfunc 和 kop call，`bpf_kfunc_desc` 已有 `kop` 字段。这比之前报告描述的"完全平行基础设施"要好得多。
 
-然而 btf.c 中仍然有独立的 `btf_kfunc_kinsn_set` / `btf_kfunc_kinsn_desc` 数据结构。UAPI 中仍有两个独立的 pseudo 常量。JIT 中仍有独立的 `BPF_PSEUDO_KINSN_CALL` dispatch 分支。
+然而 btf.c 中仍然有独立的 `btf_kfunc_kop_set` / `btf_kfunc_kop_desc` 数据结构。UAPI 中仍有两个独立的 pseudo 常量。JIT 中仍有独立的 `BPF_PSEUDO_KOP_CALL` dispatch 分支。
 
 **建议**:
-1. UAPI: 保留 `BPF_PSEUDO_KINSN_CALL` 但在内核内部 normalize 为 `BPF_PSEUDO_KFUNC_CALL` + `KF_KINSN` flag
-2. btf.c: 将 `kinsn_descs[]` 直接关联到 `btf_id_set8.flags` 中的 flag 位，而非独立的并行数组
-3. JIT: 在 kfunc call 路径中检查 `desc->kinsn` 而非在 dispatch 级别分支
+1. UAPI: 保留 `BPF_PSEUDO_KOP_CALL` 但在内核内部 normalize 为 `BPF_PSEUDO_KFUNC_CALL` + `KF_KOP` flag
+2. btf.c: 将 `kop_descs[]` 直接关联到 `btf_id_set8.flags` 中的 flag 位，而非独立的并行数组
+3. JIT: 在 kfunc call 路径中检查 `desc->kop` 而非在 dispatch 级别分支
 
 ---
 
-### P2-2: sidecar 伪指令（`BPF_PSEUDO_KINSN_SIDECAR`）是对 BPF ISA 的滥用
+### P2-2: sidecar 伪指令（`BPF_PSEUDO_KOP_SIDECAR`）是对 BPF ISA 的滥用
 
-**问题**: 重载 `BPF_ALU64 | BPF_MOV | BPF_K` 的 `src_reg` 字段（正常应为 0）来传递 kinsn payload metadata。这种编码方式：
+**问题**: 重载 `BPF_ALU64 | BPF_MOV | BPF_K` 的 `src_reg` 字段（正常应为 0）来传递 kop payload metadata。这种编码方式：
 1. 违反 BPF ISA 规范（`src_reg` 在 K-mode 应为 0）
 2. 混淆所有解析 BPF 指令的工具（bpftool, libbpf, objdump）
 3. 需要在 verifier、JIT、backtrack、disasm 等多处添加特殊处理
@@ -406,7 +406,7 @@ mutex_unlock(&link->link.prog->aux->rejit_mutex);
 
 **代码位置**: `kernel/bpf/btf.c`, `btf_kfunc_is_allowed()` 和 `btf_kfunc_flags()`
 
-**问题**: 原代码是清晰的两步查找（先 COMMON hook，再 prog-type hook）。新代码改为 `goto again` 循环，逻辑等价但可读性下降。这个改动与 REJIT/kinsn 功能无关。
+**问题**: 原代码是清晰的两步查找（先 COMMON hook，再 prog-type hook）。新代码改为 `goto again` 循环，逻辑等价但可读性下降。这个改动与 REJIT/kop 功能无关。
 
 **建议**: 恢复原代码结构，或如果确实需要重构，作为独立 prep patch 提交。
 
@@ -429,8 +429,8 @@ mutex_unlock(&link->link.prog->aux->rejit_mutex);
 | 项目 | 判定 |
 |------|------|
 | `BPF_PROG_REJIT` 新 bpf_cmd | ACK (命名可商议) |
-| `BPF_PSEUDO_KINSN_SIDECAR` | 要求修改 (P2-2) |
-| `BPF_PSEUDO_KINSN_CALL` | 有条件 ACK (统一后可保留为 compat) |
+| `BPF_PSEUDO_KOP_SIDECAR` | 要求修改 (P2-2) |
+| `BPF_PSEUDO_KOP_CALL` | 有条件 ACK (统一后可保留为 compat) |
 | `rejit` attr struct | 要求修改 (缺 license 等字段, P0-2) |
 | `bpf_prog_info` 的 `orig_prog_len`/`orig_prog_insns` | ACK |
 
@@ -440,15 +440,15 @@ mutex_unlock(&link->link.prog->aux->rejit_mutex);
 
 | 项目 | 判定 |
 |------|------|
-| `struct bpf_kinsn` | 要求修改 (per-arch callback -> 统一到 kfunc, P0-6) |
-| `bpf_kinsn_is_sidecar_insn` / `bpf_kinsn_sidecar_payload` | 要求修改 (P2-2) |
+| `struct bpf_kop` | 要求修改 (per-arch callback -> 统一到 kfunc, P0-6) |
+| `bpf_kop_is_sidecar_insn` / `bpf_kop_sidecar_payload` | 要求修改 (P2-2) |
 | `struct bpf_tramp_user` | ACK |
 | `bpf_dispatcher_refresh_prog` 声明 | ACK |
 | `bpf_trampoline_refresh_prog` 声明 | ACK |
 | `rejit_mutex` / `trampoline_users` 在 `bpf_prog_aux` | 要求修改 (按需分配, P1-4) |
 | `orig_insns` / `orig_prog_len` 在 `bpf_prog_aux` | 要求修改 (按需分配, P1-4) |
 | `bpf_struct_ops_refresh_prog` 声明 | ACK |
-| `bpf_jit_get_kinsn_payload` 声明 | ACK |
+| `bpf_jit_get_kop_payload` 声明 | ACK |
 
 **总判定**: 要求修改
 
@@ -456,9 +456,9 @@ mutex_unlock(&link->link.prog->aux->rejit_mutex);
 
 | 项目 | 判定 |
 |------|------|
-| `struct bpf_kinsn_region` | ACK (proof lowering 需要) |
-| `kinsn_regions` 等 4 个字段在 `bpf_verifier_env` | ACK |
-| `btf_kfunc_kinsn_desc` 声明 | ACK |
+| `struct bpf_kop_region` | ACK (proof lowering 需要) |
+| `kop_regions` 等 4 个字段在 `bpf_verifier_env` | ACK |
+| `btf_kfunc_kop_desc` 声明 | ACK |
 
 **总判定**: ACK
 
@@ -466,8 +466,8 @@ mutex_unlock(&link->link.prog->aux->rejit_mutex);
 
 | 项目 | 判定 |
 |------|------|
-| `struct bpf_kinsn` forward decl | ACK |
-| `kinsn_descs` 在 `btf_kfunc_id_set` | ACK (注册路径) |
+| `struct bpf_kop` forward decl | ACK |
+| `kop_descs` 在 `btf_kfunc_id_set` | ACK (注册路径) |
 
 **总判定**: ACK
 
@@ -483,9 +483,9 @@ mutex_unlock(&link->link.prog->aux->rejit_mutex);
 
 | 项目 | 判定 |
 |------|------|
-| `emit_kinsn_desc_call` | 要求修改 (P0-6: 任意 native code) |
+| `emit_kop_desc_call` | 要求修改 (P0-6: 任意 native code) |
 | sidecar skip in `BPF_ALU64 | BPF_MOV | BPF_K` | ACK with nit |
-| `BPF_PSEUDO_KINSN_CALL` dispatch | ACK |
+| `BPF_PSEUDO_KOP_CALL` dispatch | ACK |
 
 **总判定**: 要求修改
 
@@ -493,9 +493,9 @@ mutex_unlock(&link->link.prog->aux->rejit_mutex);
 
 | 项目 | 判定 |
 |------|------|
-| `emit_kinsn_desc_call_arm64` | 要求修改 (同 P0-6) |
+| `emit_kop_desc_call_arm64` | 要求修改 (同 P0-6) |
 | sidecar skip | ACK |
-| `BPF_PSEUDO_KINSN_CALL` dispatch | ACK |
+| `BPF_PSEUDO_KOP_CALL` dispatch | ACK |
 
 **总判定**: 要求修改
 
@@ -503,29 +503,29 @@ mutex_unlock(&link->link.prog->aux->rejit_mutex);
 
 | 项目 | 判定 |
 |------|------|
-| `bpf_pseudo_kinsn_call()` | ACK |
-| `kinsn` 字段加入 `bpf_kfunc_meta` 和 `bpf_kfunc_desc` | ACK (已统一) |
+| `bpf_pseudo_kop_call()` | ACK |
+| `kop` 字段加入 `bpf_kfunc_meta` 和 `bpf_kfunc_desc` | ACK (已统一) |
 | `__find_kfunc_desc_btf` 按需分配 `kfunc_btf_tab` | ACK (修复资源泄漏) |
-| `fetch_kfunc_meta` 中添加 `btf_kfunc_kinsn_desc` 查找 | ACK |
+| `fetch_kfunc_meta` 中添加 `btf_kfunc_kop_desc` 查找 | ACK |
 | `add_kfunc_desc` 统一替代 `add_kfunc_call` | ACK (好的重构) |
-| `sort_kfunc_descs_by_imm_off` 中 kinsn 跳过 `set_kfunc_desc_imm` | ACK |
-| `bpf_prog_has_desc_kind` / `bpf_prog_has_kfunc_call` / `bpf_prog_has_kinsn_call` | ACK |
-| `bpf_jit_find_kfunc_model` 中跳过 kinsn desc | ACK |
-| `validate_kinsn_proof_seq` | ACK (严格的 proof 验证) |
-| `lower_kinsn_proof_regions` | 要求修改 (P1-6: off-by-one 风险) |
-| `restore_kinsn_proof_regions` | ACK with nit (jt 清理逻辑需要注释) |
-| `bpf_kinsn_has_native_emit` | ACK |
-| `bpf_jit_get_kinsn_payload` | ACK |
-| `add_subprog_and_kfunc` 中 kinsn 计数 | ACK |
+| `sort_kfunc_descs_by_imm_off` 中 kop 跳过 `set_kfunc_desc_imm` | ACK |
+| `bpf_prog_has_desc_kind` / `bpf_prog_has_kfunc_call` / `bpf_prog_has_kop_call` | ACK |
+| `bpf_jit_find_kfunc_model` 中跳过 kop desc | ACK |
+| `validate_kop_proof_seq` | ACK (严格的 proof 验证) |
+| `lower_kop_proof_regions` | 要求修改 (P1-6: off-by-one 风险) |
+| `restore_kop_proof_regions` | ACK with nit (jt 清理逻辑需要注释) |
+| `bpf_kop_has_native_emit` | ACK |
+| `bpf_jit_get_kop_payload` | ACK |
+| `add_subprog_and_kfunc` 中 kop 计数 | ACK |
 | `disasm_kfunc_name` 扩展 | ACK |
 | `backtrack_insn` 中 sidecar skip | ACK |
-| `check_kinsn_sidecar_insn` | ACK |
+| `check_kop_sidecar_insn` | ACK |
 | `do_check_insn` 中 sidecar 检查 | ACK |
-| `do_check_insn` 中 kinsn call 到达 verifier 的 EFAULT | ACK (防御性检查) |
-| `fixup_call_args` 中 kinsn 检查 | ACK |
-| `do_misc_fixups` 中 kinsn sidecar 展开 fallback | ACK |
-| `bpf_check()` 中初始化顺序变更 | ACK (kinsn lowering 必须在 explored_states 前) |
-| `bpf_check()` cleanup 中 `restore_kinsn_proof_regions` | ACK |
+| `do_check_insn` 中 kop call 到达 verifier 的 EFAULT | ACK (防御性检查) |
+| `fixup_call_args` 中 kop 检查 | ACK |
+| `do_misc_fixups` 中 kop sidecar 展开 fallback | ACK |
+| `bpf_check()` 中初始化顺序变更 | ACK (kop lowering 必须在 explored_states 前) |
+| `bpf_check()` cleanup 中 `restore_kop_proof_regions` | ACK |
 
 **总判定**: 要求修改 (P1-6)，其余 ACK
 
@@ -568,14 +568,14 @@ mutex_unlock(&link->link.prog->aux->rejit_mutex);
 
 | 项目 | 判定 |
 |------|------|
-| `btf_kfunc_kinsn_desc` / `btf_kfunc_kinsn_set` | 要求修改 (P2-1: 应与 kfunc set 合并) |
-| `btf_free_kfunc_set_tab` 中 kinsn_sets 释放 | ACK |
-| `btf_kfunc_kinsn_desc_cmp` | ACK |
-| `btf_populate_kfunc_set` 中 kinsn_descs 处理 | 要求修改 (与 kfunc set 的并行结构) |
-| `btf_kfunc_kinsn_set_contains` | ACK |
+| `btf_kfunc_kop_desc` / `btf_kfunc_kop_set` | 要求修改 (P2-1: 应与 kfunc set 合并) |
+| `btf_free_kfunc_set_tab` 中 kop_sets 释放 | ACK |
+| `btf_kfunc_kop_desc_cmp` | ACK |
+| `btf_populate_kfunc_set` 中 kop_descs 处理 | 要求修改 (与 kfunc set 的并行结构) |
+| `btf_kfunc_kop_set_contains` | ACK |
 | `btf_kfunc_is_allowed` / `btf_kfunc_flags` 的 goto again 重构 | 要求修改 (P2-4: 不必要的改动) |
-| `btf_kfunc_kinsn_desc` 公开 API | ACK |
-| `__register_btf_kfunc_id_set` 中 kinsn owner 验证 | ACK (安全检查) |
+| `btf_kfunc_kop_desc` 公开 API | ACK |
+| `__register_btf_kfunc_id_set` 中 kop owner 验证 | ACK (安全检查) |
 
 **总判定**: 要求修改
 
@@ -593,7 +593,7 @@ mutex_unlock(&link->link.prog->aux->rejit_mutex);
 
 | 项目 | 判定 |
 |------|------|
-| `BPF_PSEUDO_KINSN_CALL` 分支 | ACK |
+| `BPF_PSEUDO_KOP_CALL` 分支 | ACK |
 
 **总判定**: ACK
 
@@ -633,7 +633,7 @@ mutex_unlock(&link->link.prog->aux->rejit_mutex);
 | 2 | `btf.c` | `btf_populate_kfunc_set` 中 memcpy 换行 | 2 | 无关。cosmetic |
 | 3 | `verifier.c` | `-ENOTSUPP` -> `-EOPNOTSUPP` 修正 | 3 | 独立 bug fix，应单独提交 |
 
-**说明**: 相比之前报告描述的"大量不必要改动"，实际审查发现当前代码已经做了较好的整合（kinsn desc 已合入 kfunc_desc）。不必要改动集中在 btf.c 的查找函数重构和少量 cosmetic 修改。
+**说明**: 相比之前报告描述的"大量不必要改动"，实际审查发现当前代码已经做了较好的整合（kop desc 已合入 kfunc_desc）。不必要改动集中在 btf.c 的查找函数重构和少量 cosmetic 修改。
 
 ---
 
@@ -653,13 +653,13 @@ mutex_unlock(&link->link.prog->aux->rejit_mutex);
 3. 修复 P0-3: `smp_store_release` 与读端配对（或改为 `rcu_assign_pointer`）
 4. 修复 P0-4: struct_ops refresh 失败路径的 UAF
 5. 修复 P0-5: poke target phase 的并发安全
-6. 评估 P0-6: kinsn native emit 的安全模型（可能需要设计层面的讨论）
+6. 评估 P0-6: kop native emit 的安全模型（可能需要设计层面的讨论）
 
 **第 2 轮（正确性 + 架构）**:
 1. 修复 P1-1: swap 遗漏字段 → sub-struct 重构
 2. 修复 P1-4: 按需分配 orig_insns/rejit_mutex
 3. 修复 P1-5: 错误路径清理完整性
-4. 实施 P2-1: btf.c 中 kinsn_set 合并到 kfunc set
+4. 实施 P2-1: btf.c 中 kop_set 合并到 kfunc set
 5. 实施 P2-3: `bpf_check()` 接口重构
 6. 实施 P2-5: struct_ops call site 偏移保存
 
@@ -672,10 +672,10 @@ mutex_unlock(&link->link.prog->aux->rejit_mutex);
 
 ### 整体评价
 
-REJIT 功能本身是有价值的——运行时替换 BPF 程序的 JIT 镜像是 BPF 生态中的一个重要能力。verifier.c 中的 kinsn 整合（合入 `bpf_kfunc_desc`）比预期要好，说明作者已经意识到了复用 kfunc 基础设施的必要性。
+REJIT 功能本身是有价值的——运行时替换 BPF 程序的 JIT 镜像是 BPF 生态中的一个重要能力。verifier.c 中的 kop 整合（合入 `bpf_kfunc_desc`）比预期要好，说明作者已经意识到了复用 kfunc 基础设施的必要性。
 
 但 syscall.c 中的 swap 逻辑是整个 patch set 的最大风险：25+ 个手动 swap + rollback + 多阶段 poke 更新，组成了一个复杂的状态机。任何新增的 `bpf_prog_aux` 字段都必须更新 swap 列表，这是一个维护定时炸弹。
 
-kinsn 的"双轨制"验证（proof sequence vs native emit）是核心安全隐忧。即使当前实现是正确的，这种设计增加了信任面，使得 formal verification 更加困难。长期来看，应该朝着"verifier 看到什么 = JIT 生成什么"的方向发展。
+kop 的"双轨制"验证（proof sequence vs native emit）是核心安全隐忧。即使当前实现是正确的，这种设计增加了信任面，使得 formal verification 更加困难。长期来看，应该朝着"verifier 看到什么 = JIT 生成什么"的方向发展。
 
 最后，已确认的 QEMU crash（daemon 生成 malformed bytecode → REJIT verifier 通过 → guest crash）表明当前 verifier 路径存在实际的安全缺陷。虽然后续修复似乎堵住了已知的具体路径，但系统性的审计（struct_ops 验证、flag 传递、fd_array fixup 等）是合入前的必要条件。

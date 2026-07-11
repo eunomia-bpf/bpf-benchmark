@@ -7,7 +7,7 @@
  * Using `raw_tracepoint` (not `tp/sched/sched_switch`) because:
  *   - raw_tp has a stable, well-documented ctx layout (`struct
  *     bpf_raw_tracepoint_args`) — no tracefs format file parsing.
- *   - The native_lab kinsn path doesn't yet wire up tp-ctx BTF
+ *   - The native_lab kop path doesn't yet wire up tp-ctx BTF
  *     relocations, so a CTX-agnostic program is the simplest case
  *     to start with.
  */

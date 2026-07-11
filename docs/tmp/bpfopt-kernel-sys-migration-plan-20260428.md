@@ -44,7 +44,7 @@ It has:
 
 - public scalar fields: `code`, `regs`, `off`, `imm`
 - methods: `dst_reg()`, `src_reg()`, `make_regs()`, `raw_bytes()`, `class()`, classification helpers
-- constructors: `mov64_reg`, `mov64_imm`, `mov32_imm`, `call_kinsn_with_off`, `ja`, `ldx_mem`, `kinsn_sidecar`, `stx_mem`, `alu64_imm`, `alu64_reg`, `nop`
+- constructors: `mov64_reg`, `mov64_imm`, `mov32_imm`, `call_kop_with_off`, `ja`, `ldx_mem`, `kop_sidecar`, `stx_mem`, `alu64_imm`, `alu64_reg`, `nop`
 - dump/debug helpers in the same file
 - only a size assertion: `size_of::<BpfInsn>() == 8`; no field-offset test
 
@@ -79,7 +79,7 @@ Instruction constants currently live primarily in [bpfopt/crates/bpfopt/src/insn
 - ops: `BPF_AND`, `BPF_OR`, `BPF_LSH`, `BPF_RSH`, `BPF_MOV`
 - jumps/calls: `BPF_JA`, `BPF_JEQ`, `BPF_JGT`, `BPF_JGE`, `BPF_JSET`, `BPF_JNE`, `BPF_JLT`, `BPF_JLE`, `BPF_JSGT`, `BPF_JSGE`, `BPF_JSLT`, `BPF_JSLE`, `BPF_CALL`, `BPF_EXIT`
 - pseudo tags: `BPF_PSEUDO_CALL`, `BPF_PSEUDO_KFUNC_CALL`, `BPF_PSEUDO_FUNC`
-- project/fork-specific tags: `BPF_PSEUDO_KINSN_SIDECAR`, `BPF_PSEUDO_KINSN_CALL`, `BPF_KINSN_ENC_PACKED_CALL`
+- project/fork-specific tags: `BPF_PSEUDO_KOP_SIDECAR`, `BPF_PSEUDO_KOP_CALL`, `BPF_KOP_ENC_PACKED_CALL`
 
 Other local constants exist in pass modules:
 
@@ -217,7 +217,7 @@ The current public fields cannot be preserved with a transparent newtype. That i
 Constant migration under B:
 
 - Replace local numeric instruction constants with aliases derived from `kernel_sys::*`, for example `pub const BPF_LD: u8 = kernel_sys::BPF_LD as u8;`.
-- Keep only project/fork-specific constants that libbpf-sys does not provide, such as `BPF_PSEUDO_KINSN_SIDECAR`, `BPF_PSEUDO_KINSN_CALL`, and `BPF_KINSN_ENC_PACKED_CALL`.
+- Keep only project/fork-specific constants that libbpf-sys does not provide, such as `BPF_PSEUDO_KOP_SIDECAR`, `BPF_PSEUDO_KOP_CALL`, and `BPF_KOP_ENC_PACKED_CALL`.
 - Keep helper functions for `BPF_CLASS`/`BPF_SIZE`/`BPF_MODE`/`BPF_OP`/`BPF_SRC` because libbpf-sys does not expose function-like macros.
 - Replace local `BPF_PROG_TYPE_*` constants with `kernel_sys::BPF_PROG_TYPE_*` or `kernel_sys::ProgramType as u32`. The lower-churn first step is still `u32` because `PassContext::prog_type` is `u32`.
 

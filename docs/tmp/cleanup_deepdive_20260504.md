@@ -151,18 +151,18 @@ eprintln!("[trace] tid={tid} REJIT_ENTER prog={prog_id} pass={pass}");
 }
 ```
 
-`push_missing_target` 实现是：如果 `target.kinsns` 中有任意一个 name，就不报 missing。
-`bpfget` 的 `KINSN_PROBE_TARGETS` 定义了 `json_name: "bpf_bulk_memcpy"`（无 `bpf_memcpy_bulk`），
+`push_missing_target` 实现是：如果 `target.koperation` 中有任意一个 name，就不报 missing。
+`bpfget` 的 `KOP_PROBE_TARGETS` 定义了 `json_name: "bpf_bulk_memcpy"`（无 `bpf_memcpy_bulk`），
 所以 `bpfget` 生成的 `target.json` 只会有 `bpf_bulk_memcpy`/`bpf_bulk_memset`。
 `bpf_memcpy_bulk`/`bpf_memset_bulk` 是反转别名，在 `bpfget` 中不会出现。
 
-**同时**，`bpfopt/src/main.rs:62–69` 的 `KINSN_ALIASES` 中：
+**同时**，`bpfopt/src/main.rs:62–69` 的 `KOP_ALIASES` 中：
 ```
 ("bpf_memcpy_bulk", "bpf_memcpy_bulk"),
 ("bpf_bulk_memcpy", "bpf_memcpy_bulk"),
 ```
 这说明 `bpfopt` 的规范名是 `bpf_memcpy_bulk`，但 `bpfget` probe 结果的 JSON key 是 `bpf_bulk_memcpy`。
-daemon `missing_target_kinsns` 检查的是 target.json 的 key，所以 `bpf_memcpy_bulk` 别名
+daemon `missing_target_kops` 检查的是 target.json 的 key，所以 `bpf_memcpy_bulk` 别名
 检查从未成功触发。
 
 **为什么必删**：CLAUDE.md "No Dead Code（未使用的别名名称）"。
@@ -449,19 +449,19 @@ trait dispatch 在生产 binary 中是零价值的运行时间接层，`dyn Kern
 
 ---
 
-### L3. `bpfopt/src/main.rs` 的 KINSN_ALIASES 多余反转别名
+### L3. `bpfopt/src/main.rs` 的 KOP_ALIASES 多余反转别名
 
 **位置**：`bpfopt/crates/bpfopt/src/main.rs:53–78`
 
 ```rust
-const KINSN_ALIASES: &[(&str, &str)] = &[
+const KOP_ALIASES: &[(&str, &str)] = &[
     ("bpf_memcpy_bulk", "bpf_memcpy_bulk"),  // bpfopt 规范名
     ("bpf_bulk_memcpy", "bpf_memcpy_bulk"),  // bpfget target.json 用的名字
     ...
 ```
 
 `bpfget` 生成的 `target.json` 中 key 是 `bpf_bulk_memcpy`（非 `bpf_memcpy_bulk`），
-而 bpfopt 内部规范名是 `bpf_memcpy_bulk`。`KINSN_ALIASES` 的别名做了这个映射。
+而 bpfopt 内部规范名是 `bpf_memcpy_bulk`。`KOP_ALIASES` 的别名做了这个映射。
 这是有意义的（bpfget probe 结果 → bpfopt 内部名），不是死代码。
 
 **结论**：保留，不删。

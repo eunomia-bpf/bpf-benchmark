@@ -181,10 +181,10 @@ Top absolute per-file deltas:
 
 | Design section | Status | Evidence | Deviation |
 |---|---|---|---|
-| §3 Architecture | Partial | CLI calls `lift_with_kinsn_registry()` at `bpfopt/crates/bpfopt/src/main.rs:303`, runs the pipeline at `bpfopt/crates/bpfopt/src/main.rs:315`, and lowers once for CLI output at `bpfopt/crates/bpfopt/src/main.rs:316`. | `PassManager` also lowers before and after every pass for accounting/oracle invalidation at `bpfopt/crates/bpfopt/src/pass.rs:1411` and `bpfopt/crates/bpfopt/src/pass.rs:1414`; many passes lower internally as listed above. |
-| §4 Core Data Structures | Partial | `BBProgram`, `Block`, and `Terminator` exist at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:35`, `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:53`, and `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:61`. | Fields are public (`blocks`, `entry`, `use_def`, `oracle`, `btf`, `kinsn_reg`) at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:36`, so passes can bypass APIs. `Terminator::End` is an extra design case at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:82`. |
-| §5 BBProgram API | Partial | Query APIs exist at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:116`; mutation APIs exist at `bpfopt/crates/bpfopt/src/analysis/bbprogram_api.rs:20`. | Some design APIs were removed/renamed (`replace_insn`, `insert_insn`, `delete_block`, `rewire_edge`, `replace_diamond_with_kinsn` are absent). `split_block()` panics/asserts instead of returning `Result` at `bpfopt/crates/bpfopt/src/analysis/bbprogram_api.rs:307`. |
-| §6 Lift Algorithm | Mostly yes | `lift_with_kinsn_registry()` implements block split/lift at `bpfopt/crates/bpfopt/src/analysis/bbprogram_lift.rs:17`, records original PCs at `bpfopt/crates/bpfopt/src/analysis/bbprogram_lift.rs:70`, and resolves JA/Jcc/pseudo-call at `bpfopt/crates/bpfopt/src/analysis/bbprogram_lift.rs:280`. | `VerifierOracle` is currently raw `Arc<[VerifierInsn]>` at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:13`; there is no separate translated oracle structure. |
+| §3 Architecture | Partial | CLI calls `lift_with_kop_registry()` at `bpfopt/crates/bpfopt/src/main.rs:303`, runs the pipeline at `bpfopt/crates/bpfopt/src/main.rs:315`, and lowers once for CLI output at `bpfopt/crates/bpfopt/src/main.rs:316`. | `PassManager` also lowers before and after every pass for accounting/oracle invalidation at `bpfopt/crates/bpfopt/src/pass.rs:1411` and `bpfopt/crates/bpfopt/src/pass.rs:1414`; many passes lower internally as listed above. |
+| §4 Core Data Structures | Partial | `BBProgram`, `Block`, and `Terminator` exist at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:35`, `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:53`, and `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:61`. | Fields are public (`blocks`, `entry`, `use_def`, `oracle`, `btf`, `kop_reg`) at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:36`, so passes can bypass APIs. `Terminator::End` is an extra design case at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:82`. |
+| §5 BBProgram API | Partial | Query APIs exist at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:116`; mutation APIs exist at `bpfopt/crates/bpfopt/src/analysis/bbprogram_api.rs:20`. | Some design APIs were removed/renamed (`replace_insn`, `insert_insn`, `delete_block`, `rewire_edge`, `replace_diamond_with_kop` are absent). `split_block()` panics/asserts instead of returning `Result` at `bpfopt/crates/bpfopt/src/analysis/bbprogram_api.rs:307`. |
+| §6 Lift Algorithm | Mostly yes | `lift_with_kop_registry()` implements block split/lift at `bpfopt/crates/bpfopt/src/analysis/bbprogram_lift.rs:17`, records original PCs at `bpfopt/crates/bpfopt/src/analysis/bbprogram_lift.rs:70`, and resolves JA/Jcc/pseudo-call at `bpfopt/crates/bpfopt/src/analysis/bbprogram_lift.rs:280`. | `VerifierOracle` is currently raw `Arc<[VerifierInsn]>` at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:13`; there is no separate translated oracle structure. |
 | §7 Lower Algorithm | Partial | `lower()` exists at `bpfopt/crates/bpfopt/src/analysis/bbprogram_lower.rs:7` and recomputes branch deltas at `bpfopt/crates/bpfopt/src/analysis/bbprogram_lower.rs:88`. | It emits physical block vector order at `bpfopt/crates/bpfopt/src/analysis/bbprogram_lower.rs:12`, not a topological sort. BTF output is not part of lower; it is separate `remapped_*` methods at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:331`. |
 | §8 AnalysisCache deleted | Partial | `rg AnalysisCache bpfopt/crates/bpfopt/src` returns no hits. | Old analysis modules remain exported at `bpfopt/crates/bpfopt/src/analysis/mod.rs:23`, and production passes still consume `BranchTargetAnalysis`, `CFGAnalysis`, `LivenessAnalysis`, `MapRefsAnalysis`, and `iter_sites`. The comment at `bpfopt/crates/bpfopt/src/analysis/mod.rs:29` still mentions "analysis cache consumers". |
 | §9 Pass Migration Model | Partial | `BpfPass::run` now takes `&mut BBProgram` at `bpfopt/crates/bpfopt/src/pass.rs:1048`. | The global `RewritePlan` is gone, but `ConstPropRewritePlan` remains at `bpfopt/crates/bpfopt/src/passes/const_prop.rs:397`, and map_inline still builds PC-keyed edit maps at `bpfopt/crates/bpfopt/src/passes/map_inline.rs:2926`. |
@@ -197,7 +197,7 @@ Top absolute per-file deltas:
 
 The production CLI path is now:
 
-`read bytes -> lift_with_kinsn_registry -> attach_side_inputs -> pipeline.run(&mut BBProgram) -> lower -> write bytes`
+`read bytes -> lift_with_kop_registry -> attach_side_inputs -> pipeline.run(&mut BBProgram) -> lower -> write bytes`
 
 Evidence:
 
@@ -267,7 +267,7 @@ Old public BTF remap helpers still exist in `pass.rs` and have no production
 callers after the latest map_inline rewrite:
 
 - `remap_btf_metadata()` at `bpfopt/crates/bpfopt/src/pass.rs:191`
-- `remap_kinsn_btf_metadata()` at `bpfopt/crates/bpfopt/src/pass.rs:341`
+- `remap_kop_btf_metadata()` at `bpfopt/crates/bpfopt/src/pass.rs:341`
 
 Those should either be deleted or moved behind test-only compatibility if truly
 needed.
@@ -327,7 +327,7 @@ Good:
   at `bpfopt/crates/bpfopt/src/test_helpers.rs:38`, calls the trait at
   `bpfopt/crates/bpfopt/src/test_helpers.rs:41`, and lowers at
   `bpfopt/crates/bpfopt/src/test_helpers.rs:43`.
-- P1-F DCE/kinsn coverage exists at
+- P1-F DCE/kop coverage exists at
   `bpfopt/crates/bpfopt/src/passes/dce_tests.rs:11` and
   `bpfopt/crates/bpfopt/src/analysis/liveness_tests.rs:50`.
 - P1-K const_prop regressions are explicitly represented at

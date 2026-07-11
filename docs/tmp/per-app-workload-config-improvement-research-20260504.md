@@ -3,7 +3,7 @@
 ## 背景与目标
 
 本报告分析如何让 corpus 中每个 app 触发更多 BPF program、每个 program 触发更多次。
-数据来源：x86 KVM kinsn-only corpus runs (2026-05-04)。
+数据来源：x86 KVM kop-only corpus runs (2026-05-04)。
 
 **measurable 判定规则**（corpus/driver.py:174-177）：
 ```python

@@ -308,7 +308,7 @@ Current code:
 @dataclass
 class DaemonSession:
     ...
-    kinsn_metadata: dict[str, object] = field(default_factory=dict)
+    kop_metadata: dict[str, object] = field(default_factory=dict)
     _closed: bool = False
     ...
     def close(self) -> None:
@@ -360,7 +360,7 @@ Delete the `import sys` line.
 
 - Env/CLI/config paths were not reported. Examples: `BPFREJIT_*`, `KEEP_WORKDIRS`, `--run-contract-json`, `--native-lab-symbol`, and benchmark config parsing were treated as live even when default-off.
 - Hook/callback methods were not reported. Examples: `run_workload_spec()`, `live_rejit_programs()`, `do_GET()`, and `log_message()` are intentionally callable through subclasses/frameworks.
-- Public top-level Python APIs were not reported even when only their definition appeared in grep. Examples: `docs_tmp_dir()`, `prepare_kinsn_modules()`, input generator functions, `load_app_suite_from_yaml()`, and `kvm_kernel_image_path()`.
+- Public top-level Python APIs were not reported even when only their definition appeared in grep. Examples: `docs_tmp_dir()`, `prepare_kop_modules()`, input generator functions, `load_app_suite_from_yaml()`, and `kvm_kernel_image_path()`.
 - Makefile targets, Docker image COPY/source lists, target env files, and generated `runner/build*` artifacts were not reported as deletable code.
 
 ## Top Deletable List

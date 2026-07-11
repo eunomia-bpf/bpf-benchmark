@@ -12,7 +12,7 @@
 - `tests/unittest/rejit_audit_tests.c`
 - `tests/unittest/rejit_tail_call.c`
 - `tests/unittest/rejit_prog_types.c`
-- `tests/unittest/rejit_kinsn.c`
+- `tests/unittest/rejit_kop.c`
 - `tests/unittest/rejit_verifier_negative_tests.c`
 - `tests/unittest/rejit_spectre.c`
 
@@ -158,7 +158,7 @@
 | `BPF_PROG_TYPE_SCHED_CLS` | `rejit_prog_types.c:T02_tc_sched_cls/T14_tc_functional_rejit`; freplace target 也属此 type | 是 | 否 | 是，`BPF_PROG_TEST_RUN` retval | 当前不是 tc live attach，应该补 |
 | `BPF_PROG_TYPE_SCHED_ACT` | `rejit_prog_types.c:T09_sched_act` | 是 | 否 | 是，`BPF_PROG_TEST_RUN` retval | 当前不是 tc action live attach，应该补 |
 | `BPF_PROG_TYPE_TRACEPOINT` | `rejit_prog_types.c:T06_tracepoint` | 是 | 否 | 否 | 只有 load + REJIT，应该补 |
-| `BPF_PROG_TYPE_XDP` | `rejit_regression.c`、`rejit_safety_tests.c`、`rejit_swap_tests.c`、`rejit_audit_tests.c`、`rejit_tail_call.c`、`rejit_prog_types.c`、`rejit_kinsn.c`、`rejit_verifier_negative_tests.c`、`rejit_spectre.c` | 是 | 否 | 是，retval/map/tail-call 行为 | correctness 很强，但缺 live attach，应该补 |
+| `BPF_PROG_TYPE_XDP` | `rejit_regression.c`、`rejit_safety_tests.c`、`rejit_swap_tests.c`、`rejit_audit_tests.c`、`rejit_tail_call.c`、`rejit_prog_types.c`、`rejit_kop.c`、`rejit_verifier_negative_tests.c`、`rejit_spectre.c` | 是 | 否 | 是，retval/map/tail-call 行为 | correctness 很强，但缺 live attach，应该补 |
 | `BPF_PROG_TYPE_PERF_EVENT` | `rejit_prog_types.c:T08_perf_event` | 是 | 否 | 否 | 只有 load + REJIT，应该补 |
 | `BPF_PROG_TYPE_CGROUP_SKB` | `rejit_prog_types.c:T04_cgroup_skb` | 是 | 否 | 是，`BPF_PROG_TEST_RUN` retval | 没有真实 cgroup attach，应该补 |
 | `BPF_PROG_TYPE_CGROUP_SOCK` | `rejit_prog_types.c:T21_cgroup_sock` | 是 | 否 | 否 | 只有 load + REJIT，应该补 |
@@ -190,7 +190,7 @@
 
 当前 repo 的 REJIT 覆盖重心明显偏向:
 
-- `XDP` correctness / verifier / swap / spectre / kinsn / tail-call
+- `XDP` correctness / verifier / swap / spectre / kop / tail-call
 - 少量“跨 prog_type 的 load + identity REJIT”
 
 但离“所有 prog_type 的真实 attach 覆盖”还差得很远。当前只有 `RAW_TRACEPOINT` 真正达到了：

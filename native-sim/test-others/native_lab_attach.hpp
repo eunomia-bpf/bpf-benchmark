@@ -1,7 +1,7 @@
 /*
  * Standalone native_lab attach harness for test-others/.
  *
- * Mirrors the kinsn pipeline in runner/src/native_lab_runner.cpp but
+ * Mirrors the kop pipeline in runner/src/native_lab_runner.cpp but
  * targets EVENT-DRIVEN attach (kprobe / uprobe / raw_tracepoint) rather
  * than BPF_PROG_TEST_RUN. Code is deliberately duplicated rather than
  * shared via a library because the user requested test-others/ stay

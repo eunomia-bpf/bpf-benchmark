@@ -33,9 +33,9 @@ The other two E2BIG paths (line 3622: `insn_cnt > BPF_COMPLEXITY_LIMIT_INSNS`, l
 
 ## Prefetch Pass: Insn-Count Inflation
 
-The `prefetch` pass (`bpfopt/crates/bpfopt/src/passes/prefetch.rs`) inserts `bpf_prefetch` kinsn
+The `prefetch` pass (`bpfopt/crates/bpfopt/src/passes/prefetch.rs`) inserts `bpf_prefetch` kop
 calls before pointer dereferences. Each insertion is exactly 2 instructions
-(`emit_packed_kinsn_call_with_off` returns `[kinsn_sidecar, call_kinsn_with_off]`). The pass only
+(`emit_packed_kop_call_with_off` returns `[kop_sidecar, call_kop_with_off]`). The pass only
 scans two kinds of sites: map-value dereferences (after `bpf_map_lookup_elem`) and packet data
 dereferences (for XDP/sched_cls program types only).
 
@@ -54,7 +54,7 @@ roughly 3917 (lower bound from a single subprog). At load time:
 - Maximum insns that fit in 8 pages: ~4,064 (leaving ~147 insns of slack)
 
 After 11 passes ran (5 committed bytecode changes), expansion passes — principally `map_inline`
-(which can duplicate subgraphs) and `bulk_memory` (which inserts kinsn calls) — consumed most of
+(which can duplicate subgraphs) and `bulk_memory` (which inserts kop calls) — consumed most of
 that slack. When prefetch adds its 4 final instructions, `bpf_prog_size(new_len)` exceeds
 `prog->pages * PAGE_SIZE` (32,768 bytes), triggering E2BIG. Prefetch is simply last in the pass
 order; any earlier pass that inserted the same 4 instructions would have triggered the same error

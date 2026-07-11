@@ -15,7 +15,7 @@ Allowed contents:
 
 Forbidden contents:
 - kernel `O=` build trees
-- kinsn module build trees
+- kop module build trees
 - micro or stage2 BPF/native program outputs
 - host-built corpus app binaries or BPF objects
 - copied repo artifacts staged only for Docker
@@ -26,7 +26,7 @@ Forbidden contents:
   bpftool, Katran BPF objects, and kernel `linux` build trees.
 - `vendor/build/<app>-build-*` and `vendor/build/<app>-*.yaml`: vendor-owned
   app builder intermediates that should not enter the Docker context.
-- `module/x86/build` and `module/arm64/build`: kinsn Kbuild `MO=` outputs.
+- `module/x86/build` and `module/arm64/build`: kop Kbuild `MO=` outputs.
 - `micro/programs/build-x86` and `micro/programs/build-arm64`: micro BPF/native
   programs plus generated `kernel_offsets.h`.
 - `native-sim/test/build-x86` and `native-sim/test/build-arm64`: stage2 helper
@@ -48,4 +48,4 @@ into a second staging directory just so Docker can copy them again.
 
 The default Docker context should exclude heavyweight build trees. Runtime image
 layers are ordered by change frequency: base packages, app artifacts, kernel and
-kinsn modules, runner/test artifacts, Rust daemon/tools, then Python/config data.
+kop modules, runner/test artifacts, Rust daemon/tools, then Python/config data.

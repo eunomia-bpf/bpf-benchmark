@@ -18,7 +18,7 @@ Result:
 - Run directory: `corpus/results/x86_kvm_corpus_20260625_102432_554290`
 - Suite result: `status=ok`, `samples=3`, `warmups=1`,
   `workload_seconds=180.0`, `skip_rejit=true`, `bpf_stats=false`,
-  `kinsn_modules={}`.
+  `kop_modules={}`.
 - App result: `app=bcc/set`, `runner=bcc_set`,
   `selected_workload=stress_ng_bcc_hook_hot`, `status=ok`, `error=""`.
 - Workload samples: 3 baseline workloads, returncodes `[0, 0, 0]`.

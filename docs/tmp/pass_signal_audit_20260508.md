@@ -2,7 +2,7 @@
 
 Scope: completed `corpus/results/x86_kvm_corpus_2026050[78]_*` runs. Metric: Method B per-program geomean with `min_runs >= 100`. Wins/losses/ties are counted on retained programs. Split app payloads under `details/apps/*.json` were stitched in memory and analyzed with the same functions used by `analysis/corpus_analyze.py`.
 
-Short answer: no standalone pass has a paper-ready measurable improvement in the completed runs. There are two app-level low marks worth follow-up: `map_inline` on otel in the earlier 7-app run, and the combined kinsn Run 4 on otel. Neither is sufficient as a standalone pass claim without another completed ablation/reproduction.
+Short answer: no standalone pass has a paper-ready measurable improvement in the completed runs. There are two app-level low marks worth follow-up: `map_inline` on otel in the earlier 7-app run, and the combined kop Run 4 on otel. Neither is sufficient as a standalone pass claim without another completed ablation/reproduction.
 
 Signal rule used below: for each app, Q1 and P1 define the noise interval `[B_min, B_max]`. The suite noise amplitude is `abs(Q1_B - P1_B) = 0.0431`. A speed signal must have `applied > 0` and `B < B_min - 0.0431`. A regression suspect must have `applied > 0` and `B > max(1.0, B_max) + 0.0431`.
 
@@ -39,10 +39,10 @@ Signal rule used below: for each app, Q1 and P1 define the noise interval `[B_mi
 |  | `x86_kvm_corpus_20260507_063954_002537` | 2026-05-07T06:39:54.002537+00:00 | completed | noop, map_inline | 3 | 3.0 | 1 | n/a | 80 | 0.9633 | 54/26/0 |
 |  | `x86_kvm_corpus_20260507_071728_879774` | 2026-05-07T07:17:28.879774+00:00 | completed | noop, map_inline | 3 | 30.0 | 1 | n/a | 6 | 1.0041 | 3/3/0 |
 | earlier map_inline 7-app | `x86_kvm_corpus_20260507_072543_601953` | 2026-05-07T07:25:43.601953+00:00 | completed | noop, map_inline | 3 | 30.0 | 7 | n/a | 148 | 0.8965 | 54/94/0 |
-| earlier kinsn+prefetch 7-app | `x86_kvm_corpus_20260507_081532_470100` | 2026-05-07T08:15:32.470100+00:00 | completed | rotate, cond_select, extract, endian_fusion, bulk_memory, prefetch, skb_load_bytes_spec, wide_mem | 3 | 30.0 | 7 | n/a | 147 | 0.8897 | 61/86/0 |
+| earlier kop+prefetch 7-app | `x86_kvm_corpus_20260507_081532_470100` | 2026-05-07T08:15:32.470100+00:00 | completed | rotate, cond_select, extract, endian_fusion, bulk_memory, prefetch, skb_load_bytes_spec, wide_mem | 3 | 30.0 | 7 | n/a | 147 | 0.8897 | 61/86/0 |
 | Q1 noop ReJIT floor | `x86_kvm_corpus_20260507_190554_205137` | 2026-05-07T19:05:54.205137+00:00 | completed | noop | 3 | 30.0 | 7 | n/a | 147 | 0.9019 | 73/74/0 |
 | Run 3 noop+map_inline | `x86_kvm_corpus_20260507_195045_528717` | 2026-05-07T19:50:45.528717+00:00 | completed | noop, map_inline | 3 | 30.0 | 3 | n/a | 88 | 0.8258 | 50/38/0 |
-| Run 4 kinsn ablation | `x86_kvm_corpus_20260507_200821_664435` | 2026-05-07T20:08:21.664435+00:00 | completed | rotate, cond_select, extract, endian_fusion, bulk_memory, skb_load_bytes_spec, wide_mem | 3 | 30.0 | 7 | n/a | 148 | 0.8953 | 66/82/0 |
+| Run 4 kop ablation | `x86_kvm_corpus_20260507_200821_664435` | 2026-05-07T20:08:21.664435+00:00 | completed | rotate, cond_select, extract, endian_fusion, bulk_memory, skb_load_bytes_spec, wide_mem | 3 | 30.0 | 7 | n/a | 148 | 0.8953 | 66/82/0 |
 |  | `x86_kvm_corpus_20260507_220015_257694` | 2026-05-07T22:00:15.257694+00:00 | completed | noop | 1 | 30.0 | 1 | false | 1 | 0.9597 | 1/0/0 |
 |  | `x86_kvm_corpus_20260507_222403_693079` | 2026-05-07T22:24:03.693079+00:00 | completed | noop | 1 | 30.0 | 1 | false | 1 | 0.9511 | 1/0/0 |
 |  | `x86_kvm_corpus_20260507_223952_925103` | 2026-05-07T22:39:52.925103+00:00 | completed | noop | 1 | 30.0 | 1 | false | 1 | 1.0213 | 0/1/0 |
@@ -93,55 +93,55 @@ Legend: `inside` means inside the Q1/P1 app interval. `low-near` or `high-near` 
 | map_inline | earlier map_inline 7-app | otelcol-ebpf-profiler/profiling | 1192 | 2 | 0.6567 | [0.9887, 1.1023] | clear-low | speed signal at app level |
 | map_inline | earlier map_inline 7-app | tetragon/observer | 0 | 30 | 1.0256 | [0.9042, 1.0336] | applied=0 | no opportunity |
 | map_inline | earlier map_inline 7-app | tracee/monitor | 5 | 81 | 0.8150 | [0.7888, 0.8218] | inside | no measurable signal |
-| rotate | Run 4 kinsn ablation | bcc/set | 0 | 20 | 1.0153 | [0.9818, 0.9836] | applied=0 | no opportunity |
-| rotate | Run 4 kinsn ablation | bpftrace/set | 0 | 8 | 1.0205 | [1.0217, 1.0281] | applied=0 | no opportunity |
-| rotate | Run 4 kinsn ablation | cilium/agent | 0 | 6 | 0.9791 | [0.9783, 0.9921] | applied=0 | no opportunity |
-| rotate | Run 4 kinsn ablation | katran | 0 | 1 | 0.9821 | [0.9811, 0.9957] | applied=0 | no opportunity |
-| rotate | Run 4 kinsn ablation | otelcol-ebpf-profiler/profiling | 0 | 2 | 0.6258 | [0.9887, 1.1023] | applied=0 | no opportunity |
-| rotate | Run 4 kinsn ablation | tetragon/observer | 0 | 30 | 0.9920 | [0.9042, 1.0336] | applied=0 | no opportunity |
-| rotate | Run 4 kinsn ablation | tracee/monitor | 0 | 81 | 0.8257 | [0.7888, 0.8218] | applied=0 | no opportunity |
-| cond_select | Run 4 kinsn ablation | bcc/set | 8 | 20 | 1.0153 | [0.9818, 0.9836] | high-near | above floor, not beyond noise amplitude |
-| cond_select | Run 4 kinsn ablation | bpftrace/set | 4 | 8 | 1.0205 | [1.0217, 1.0281] | low-near | below floor, not beyond noise amplitude |
-| cond_select | Run 4 kinsn ablation | cilium/agent | 208 | 6 | 0.9791 | [0.9783, 0.9921] | inside | no measurable signal |
-| cond_select | Run 4 kinsn ablation | katran | 7 | 1 | 0.9821 | [0.9811, 0.9957] | inside | no measurable signal |
-| cond_select | Run 4 kinsn ablation | otelcol-ebpf-profiler/profiling | 45 | 2 | 0.6258 | [0.9887, 1.1023] | clear-low | speed signal at app level |
-| cond_select | Run 4 kinsn ablation | tetragon/observer | 1331 | 30 | 0.9920 | [0.9042, 1.0336] | inside | no measurable signal |
-| cond_select | Run 4 kinsn ablation | tracee/monitor | 391 | 81 | 0.8257 | [0.7888, 0.8218] | high-near | above floor, not beyond noise amplitude |
-| extract | Run 4 kinsn ablation | bcc/set | 1 | 20 | 1.0153 | [0.9818, 0.9836] | high-near | above floor, not beyond noise amplitude |
-| extract | Run 4 kinsn ablation | bpftrace/set | 0 | 8 | 1.0205 | [1.0217, 1.0281] | applied=0 | no opportunity |
-| extract | Run 4 kinsn ablation | cilium/agent | 0 | 6 | 0.9791 | [0.9783, 0.9921] | applied=0 | no opportunity |
-| extract | Run 4 kinsn ablation | katran | 0 | 1 | 0.9821 | [0.9811, 0.9957] | applied=0 | no opportunity |
-| extract | Run 4 kinsn ablation | otelcol-ebpf-profiler/profiling | 36 | 2 | 0.6258 | [0.9887, 1.1023] | clear-low | speed signal at app level |
-| extract | Run 4 kinsn ablation | tetragon/observer | 112 | 30 | 0.9920 | [0.9042, 1.0336] | inside | no measurable signal |
-| extract | Run 4 kinsn ablation | tracee/monitor | 37 | 81 | 0.8257 | [0.7888, 0.8218] | high-near | above floor, not beyond noise amplitude |
-| endian_fusion | Run 4 kinsn ablation | bcc/set | 1 | 20 | 1.0153 | [0.9818, 0.9836] | high-near | above floor, not beyond noise amplitude |
-| endian_fusion | Run 4 kinsn ablation | bpftrace/set | 1 | 8 | 1.0205 | [1.0217, 1.0281] | low-near | below floor, not beyond noise amplitude |
-| endian_fusion | Run 4 kinsn ablation | cilium/agent | 24 | 6 | 0.9791 | [0.9783, 0.9921] | inside | no measurable signal |
-| endian_fusion | Run 4 kinsn ablation | katran | 6 | 1 | 0.9821 | [0.9811, 0.9957] | inside | no measurable signal |
-| endian_fusion | Run 4 kinsn ablation | otelcol-ebpf-profiler/profiling | 4 | 2 | 0.6258 | [0.9887, 1.1023] | clear-low | speed signal at app level |
-| endian_fusion | Run 4 kinsn ablation | tetragon/observer | 210 | 30 | 0.9920 | [0.9042, 1.0336] | inside | no measurable signal |
-| endian_fusion | Run 4 kinsn ablation | tracee/monitor | 4 | 81 | 0.8257 | [0.7888, 0.8218] | high-near | above floor, not beyond noise amplitude |
-| bulk_memory | Run 4 kinsn ablation | bcc/set | 0 | 20 | 1.0153 | [0.9818, 0.9836] | applied=0 | no opportunity |
-| bulk_memory | Run 4 kinsn ablation | bpftrace/set | 0 | 8 | 1.0205 | [1.0217, 1.0281] | applied=0 | no opportunity |
-| bulk_memory | Run 4 kinsn ablation | cilium/agent | 5 | 6 | 0.9791 | [0.9783, 0.9921] | inside | no measurable signal |
-| bulk_memory | Run 4 kinsn ablation | katran | 0 | 1 | 0.9821 | [0.9811, 0.9957] | applied=0 | no opportunity |
-| bulk_memory | Run 4 kinsn ablation | otelcol-ebpf-profiler/profiling | 1 | 2 | 0.6258 | [0.9887, 1.1023] | clear-low | speed signal at app level |
-| bulk_memory | Run 4 kinsn ablation | tetragon/observer | 163 | 30 | 0.9920 | [0.9042, 1.0336] | inside | no measurable signal |
-| bulk_memory | Run 4 kinsn ablation | tracee/monitor | 117 | 81 | 0.8257 | [0.7888, 0.8218] | high-near | above floor, not beyond noise amplitude |
-| skb_load_bytes_spec | Run 4 kinsn ablation | bcc/set | 0 | 20 | 1.0153 | [0.9818, 0.9836] | applied=0 | no opportunity |
-| skb_load_bytes_spec | Run 4 kinsn ablation | bpftrace/set | 0 | 8 | 1.0205 | [1.0217, 1.0281] | applied=0 | no opportunity |
-| skb_load_bytes_spec | Run 4 kinsn ablation | cilium/agent | 4 | 6 | 0.9791 | [0.9783, 0.9921] | inside | no measurable signal |
-| skb_load_bytes_spec | Run 4 kinsn ablation | katran | 0 | 1 | 0.9821 | [0.9811, 0.9957] | applied=0 | no opportunity |
-| skb_load_bytes_spec | Run 4 kinsn ablation | otelcol-ebpf-profiler/profiling | 0 | 2 | 0.6258 | [0.9887, 1.1023] | applied=0 | no opportunity |
-| skb_load_bytes_spec | Run 4 kinsn ablation | tetragon/observer | 0 | 30 | 0.9920 | [0.9042, 1.0336] | applied=0 | no opportunity |
-| skb_load_bytes_spec | Run 4 kinsn ablation | tracee/monitor | 0 | 81 | 0.8257 | [0.7888, 0.8218] | applied=0 | no opportunity |
-| wide_mem | Run 4 kinsn ablation | bcc/set | 0 | 20 | 1.0153 | [0.9818, 0.9836] | applied=0 | no opportunity |
-| wide_mem | Run 4 kinsn ablation | bpftrace/set | 10 | 8 | 1.0205 | [1.0217, 1.0281] | low-near | below floor, not beyond noise amplitude |
-| wide_mem | Run 4 kinsn ablation | cilium/agent | 0 | 6 | 0.9791 | [0.9783, 0.9921] | applied=0 | no opportunity |
-| wide_mem | Run 4 kinsn ablation | katran | 4 | 1 | 0.9821 | [0.9811, 0.9957] | inside | no measurable signal |
-| wide_mem | Run 4 kinsn ablation | otelcol-ebpf-profiler/profiling | 132 | 2 | 0.6258 | [0.9887, 1.1023] | clear-low | speed signal at app level |
-| wide_mem | Run 4 kinsn ablation | tetragon/observer | 2826 | 30 | 0.9920 | [0.9042, 1.0336] | inside | no measurable signal |
-| wide_mem | Run 4 kinsn ablation | tracee/monitor | 179 | 81 | 0.8257 | [0.7888, 0.8218] | high-near | above floor, not beyond noise amplitude |
+| rotate | Run 4 kop ablation | bcc/set | 0 | 20 | 1.0153 | [0.9818, 0.9836] | applied=0 | no opportunity |
+| rotate | Run 4 kop ablation | bpftrace/set | 0 | 8 | 1.0205 | [1.0217, 1.0281] | applied=0 | no opportunity |
+| rotate | Run 4 kop ablation | cilium/agent | 0 | 6 | 0.9791 | [0.9783, 0.9921] | applied=0 | no opportunity |
+| rotate | Run 4 kop ablation | katran | 0 | 1 | 0.9821 | [0.9811, 0.9957] | applied=0 | no opportunity |
+| rotate | Run 4 kop ablation | otelcol-ebpf-profiler/profiling | 0 | 2 | 0.6258 | [0.9887, 1.1023] | applied=0 | no opportunity |
+| rotate | Run 4 kop ablation | tetragon/observer | 0 | 30 | 0.9920 | [0.9042, 1.0336] | applied=0 | no opportunity |
+| rotate | Run 4 kop ablation | tracee/monitor | 0 | 81 | 0.8257 | [0.7888, 0.8218] | applied=0 | no opportunity |
+| cond_select | Run 4 kop ablation | bcc/set | 8 | 20 | 1.0153 | [0.9818, 0.9836] | high-near | above floor, not beyond noise amplitude |
+| cond_select | Run 4 kop ablation | bpftrace/set | 4 | 8 | 1.0205 | [1.0217, 1.0281] | low-near | below floor, not beyond noise amplitude |
+| cond_select | Run 4 kop ablation | cilium/agent | 208 | 6 | 0.9791 | [0.9783, 0.9921] | inside | no measurable signal |
+| cond_select | Run 4 kop ablation | katran | 7 | 1 | 0.9821 | [0.9811, 0.9957] | inside | no measurable signal |
+| cond_select | Run 4 kop ablation | otelcol-ebpf-profiler/profiling | 45 | 2 | 0.6258 | [0.9887, 1.1023] | clear-low | speed signal at app level |
+| cond_select | Run 4 kop ablation | tetragon/observer | 1331 | 30 | 0.9920 | [0.9042, 1.0336] | inside | no measurable signal |
+| cond_select | Run 4 kop ablation | tracee/monitor | 391 | 81 | 0.8257 | [0.7888, 0.8218] | high-near | above floor, not beyond noise amplitude |
+| extract | Run 4 kop ablation | bcc/set | 1 | 20 | 1.0153 | [0.9818, 0.9836] | high-near | above floor, not beyond noise amplitude |
+| extract | Run 4 kop ablation | bpftrace/set | 0 | 8 | 1.0205 | [1.0217, 1.0281] | applied=0 | no opportunity |
+| extract | Run 4 kop ablation | cilium/agent | 0 | 6 | 0.9791 | [0.9783, 0.9921] | applied=0 | no opportunity |
+| extract | Run 4 kop ablation | katran | 0 | 1 | 0.9821 | [0.9811, 0.9957] | applied=0 | no opportunity |
+| extract | Run 4 kop ablation | otelcol-ebpf-profiler/profiling | 36 | 2 | 0.6258 | [0.9887, 1.1023] | clear-low | speed signal at app level |
+| extract | Run 4 kop ablation | tetragon/observer | 112 | 30 | 0.9920 | [0.9042, 1.0336] | inside | no measurable signal |
+| extract | Run 4 kop ablation | tracee/monitor | 37 | 81 | 0.8257 | [0.7888, 0.8218] | high-near | above floor, not beyond noise amplitude |
+| endian_fusion | Run 4 kop ablation | bcc/set | 1 | 20 | 1.0153 | [0.9818, 0.9836] | high-near | above floor, not beyond noise amplitude |
+| endian_fusion | Run 4 kop ablation | bpftrace/set | 1 | 8 | 1.0205 | [1.0217, 1.0281] | low-near | below floor, not beyond noise amplitude |
+| endian_fusion | Run 4 kop ablation | cilium/agent | 24 | 6 | 0.9791 | [0.9783, 0.9921] | inside | no measurable signal |
+| endian_fusion | Run 4 kop ablation | katran | 6 | 1 | 0.9821 | [0.9811, 0.9957] | inside | no measurable signal |
+| endian_fusion | Run 4 kop ablation | otelcol-ebpf-profiler/profiling | 4 | 2 | 0.6258 | [0.9887, 1.1023] | clear-low | speed signal at app level |
+| endian_fusion | Run 4 kop ablation | tetragon/observer | 210 | 30 | 0.9920 | [0.9042, 1.0336] | inside | no measurable signal |
+| endian_fusion | Run 4 kop ablation | tracee/monitor | 4 | 81 | 0.8257 | [0.7888, 0.8218] | high-near | above floor, not beyond noise amplitude |
+| bulk_memory | Run 4 kop ablation | bcc/set | 0 | 20 | 1.0153 | [0.9818, 0.9836] | applied=0 | no opportunity |
+| bulk_memory | Run 4 kop ablation | bpftrace/set | 0 | 8 | 1.0205 | [1.0217, 1.0281] | applied=0 | no opportunity |
+| bulk_memory | Run 4 kop ablation | cilium/agent | 5 | 6 | 0.9791 | [0.9783, 0.9921] | inside | no measurable signal |
+| bulk_memory | Run 4 kop ablation | katran | 0 | 1 | 0.9821 | [0.9811, 0.9957] | applied=0 | no opportunity |
+| bulk_memory | Run 4 kop ablation | otelcol-ebpf-profiler/profiling | 1 | 2 | 0.6258 | [0.9887, 1.1023] | clear-low | speed signal at app level |
+| bulk_memory | Run 4 kop ablation | tetragon/observer | 163 | 30 | 0.9920 | [0.9042, 1.0336] | inside | no measurable signal |
+| bulk_memory | Run 4 kop ablation | tracee/monitor | 117 | 81 | 0.8257 | [0.7888, 0.8218] | high-near | above floor, not beyond noise amplitude |
+| skb_load_bytes_spec | Run 4 kop ablation | bcc/set | 0 | 20 | 1.0153 | [0.9818, 0.9836] | applied=0 | no opportunity |
+| skb_load_bytes_spec | Run 4 kop ablation | bpftrace/set | 0 | 8 | 1.0205 | [1.0217, 1.0281] | applied=0 | no opportunity |
+| skb_load_bytes_spec | Run 4 kop ablation | cilium/agent | 4 | 6 | 0.9791 | [0.9783, 0.9921] | inside | no measurable signal |
+| skb_load_bytes_spec | Run 4 kop ablation | katran | 0 | 1 | 0.9821 | [0.9811, 0.9957] | applied=0 | no opportunity |
+| skb_load_bytes_spec | Run 4 kop ablation | otelcol-ebpf-profiler/profiling | 0 | 2 | 0.6258 | [0.9887, 1.1023] | applied=0 | no opportunity |
+| skb_load_bytes_spec | Run 4 kop ablation | tetragon/observer | 0 | 30 | 0.9920 | [0.9042, 1.0336] | applied=0 | no opportunity |
+| skb_load_bytes_spec | Run 4 kop ablation | tracee/monitor | 0 | 81 | 0.8257 | [0.7888, 0.8218] | applied=0 | no opportunity |
+| wide_mem | Run 4 kop ablation | bcc/set | 0 | 20 | 1.0153 | [0.9818, 0.9836] | applied=0 | no opportunity |
+| wide_mem | Run 4 kop ablation | bpftrace/set | 10 | 8 | 1.0205 | [1.0217, 1.0281] | low-near | below floor, not beyond noise amplitude |
+| wide_mem | Run 4 kop ablation | cilium/agent | 0 | 6 | 0.9791 | [0.9783, 0.9921] | applied=0 | no opportunity |
+| wide_mem | Run 4 kop ablation | katran | 4 | 1 | 0.9821 | [0.9811, 0.9957] | inside | no measurable signal |
+| wide_mem | Run 4 kop ablation | otelcol-ebpf-profiler/profiling | 132 | 2 | 0.6258 | [0.9887, 1.1023] | clear-low | speed signal at app level |
+| wide_mem | Run 4 kop ablation | tetragon/observer | 2826 | 30 | 0.9920 | [0.9042, 1.0336] | inside | no measurable signal |
+| wide_mem | Run 4 kop ablation | tracee/monitor | 179 | 81 | 0.8257 | [0.7888, 0.8218] | high-near | above floor, not beyond noise amplitude |
 | prefetch | Q6 prefetch otel-only | otelcol-ebpf-profiler/profiling | 415 | 1 | 1.0107 | [0.9887, 1.1023] | inside | no measurable signal |
 | bulk_memory | Q7 bulk_memory otel-only | otelcol-ebpf-profiler/profiling | 1 | 1 | 0.9901 | [0.9887, 1.1023] | inside | no measurable signal |
 | cond_select | Q8 cond_select otel-only | otelcol-ebpf-profiler/profiling | 45 | 1 | 1.0212 | [0.9887, 1.1023] | inside | no measurable signal |
@@ -177,11 +177,11 @@ Legend: `inside` means inside the Q1/P1 app interval. `low-near` or `high-near` 
 
 **extract.** It applies in bcc, otel, tetragon, and tracee in combined runs. There is no extract-only completed 30s ablation, so the current data cannot isolate an extract signal.
 
-**endian_fusion.** It applies in the combined kinsn run, but all non-otel app Bs are inside or near the floor. No standalone ablation exists, so no pass-specific claim.
+**endian_fusion.** It applies in the combined kop run, but all non-otel app Bs are inside or near the floor. No standalone ablation exists, so no pass-specific claim.
 
 **bulk_memory.** Run 4 otel combined has `B=0.6258`, but the bulk_memory-only otel run has `B=0.9901`, inside the otel floor. The current completed data does not show a standalone bulk_memory speedup.
 
-**prefetch.** The completed prefetch-only run is otel-only and has `B=1.0107`, inside the otel floor. The earlier kinsn+prefetch 7-app run has no clear prefetch-attributable app result. The expected 7-app prefetch-only result is not completed on disk.
+**prefetch.** The completed prefetch-only run is otel-only and has `B=1.0107`, inside the otel floor. The earlier kop+prefetch 7-app run has no clear prefetch-attributable app result. The expected 7-app prefetch-only result is not completed on disk.
 
 **skb_load_bytes_spec.** It applies only in cilium in completed 30s runs (`applied=4` in Run 4), and cilium is inside the floor (`B=0.9791` inside `[0.9783, 0.9921]`). No measurable signal.
 
@@ -202,7 +202,7 @@ Program-level check for the two strongest app-level low marks:
 | `x86_kvm_corpus_20260507_200821_664435` | tracepoint__sched_process_free | 103 | 0.3872 | self applied 0 |
 | `x86_kvm_corpus_20260507_200821_664435` | native_tracer_entry | 142880 | 1.0116 | cond_select 2/2; bulk_memory 1/1 |
 
-This shows why the otel lows need follow-up: the earlier map_inline 7-app run has a self-applied low-frequency program (`min_runs=163`, ratio `0.4225`), while Run 4 combined kinsn has the strongest low ratio on `tracepoint__sched_process_free` with self applied 0 and only `min_runs=103`.
+This shows why the otel lows need follow-up: the earlier map_inline 7-app run has a self-applied low-frequency program (`min_runs=163`, ratio `0.4225`), while Run 4 combined kop has the strongest low ratio on `tracepoint__sched_process_free` with self applied 0 and only `min_runs=103`.
 
 ## 4. Paper Claim Candidates
 
@@ -210,7 +210,7 @@ No pass has a paper-ready standalone claim from the completed runs scanned here.
 
 The closest follow-up candidate is `map_inline` on `otelcol-ebpf-profiler/profiling`: the earlier completed 7-app run reports app `B=0.6567` with `applied=1192`, below the otel speed threshold `0.9456`. It is not yet paper-ready because the named Run 3 does not retain the same low-frequency program under `min_runs >= 100`; Run 3 otel is `B=0.9790`, below the floor but not beyond the suite noise amplitude.
 
-The combined kinsn Run 4 otel result (`B=0.6258`) is also not paper-ready as a pass claim: single-pass otel runs for `prefetch`, `bulk_memory`, and `cond_select` are all inside the otel floor, and no completed single-pass `wide_mem`, `extract`, or `endian_fusion` otel run is available.
+The combined kop Run 4 otel result (`B=0.6258`) is also not paper-ready as a pass claim: single-pass otel runs for `prefetch`, `bulk_memory`, and `cond_select` are all inside the otel floor, and no completed single-pass `wide_mem`, `extract`, or `endian_fusion` otel run is available.
 
 ## 5. Gap List
 

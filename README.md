@@ -12,8 +12,8 @@ the next decision.
 This repository is the execution substrate and artifact workspace for the
 `bpf-bench` paper draft in
 [`docs/ebpf27-bpfoptbench/`](docs/ebpf27-bpfoptbench/). It also provides the
-artifact and evaluation harness for the Kops paper,
-[`Kops: Safely Extending the eBPF Compilation Pipeline with Native Operations`](docs/paper/main.tex).
+artifact and evaluation harness for KOperation (short for *kernel operation*) and its paper,
+[`KOperation: Safely Extending the eBPF Compilation Pipeline with Native Operations`](docs/paper/main.tex).
 The current `bpf-bench` instantiation covers six production eBPF applications,
 146 comparable BPF program measurements, and 42 microbenchmark tasks, with
 correctness and integrity checks designed to prevent reward hacking.
@@ -45,10 +45,10 @@ The benchmark action space spans multiple layers:
 - source-level application/eBPF changes
 - LLVM and BPF bytecode transformations
 - post-load bytecode policy selection through `bpfopt`
-- kernel JIT and Kops-backed native-operation choices
+- kernel JIT and KOperation-backed native-operation choices
 - suite-wide, per-app, and per-program policy selection
 
-`bpfopt` and Kops-backed native operations are action backends in this
+`bpfopt` and KOperation-backed native operations are action backends in this
 repository, but the `bpf-bench` contribution is broader: a benchmark and
 auto-research framework for agentic eBPF optimization under real verifier, JIT,
 application, and workload feedback.
@@ -81,7 +81,7 @@ bpf-benchmark/
 ├── corpus/                   # Production app corpus, workloads, results
 ├── micro/                    # Microbenchmark programs, configs, results
 ├── bpfopt/                   # Bytecode optimizer, loader, target probing tools
-├── module/                   # Kops native-operation modules for x86 and arm64
+├── module/                   # KOperation native-operation modules for x86 and arm64
 ├── analysis/                 # Post-hoc analysis utilities
 ├── tests/                    # Selftests and negative tests
 ├── docs/                     # Design notes, reports, and paper material
@@ -168,7 +168,7 @@ make corpus SAMPLES=3
 
 Pass families currently include:
 
-- Kops-backed native-operation passes: `kinsn`, `rotate`, `cond_select`,
+- KOperation-backed native-operation passes: `kop`, `rotate`, `cond_select`,
   `ccmp`, `extract`, `endian_fusion`, `bulk_memory`, `prefetch`
 - bytecode rewriting passes: `noop`, `wide_mem`, `map_inline`, `const_prop`,
   `dce`, `bounds_check_merge`, `skb_load_bytes_spec`

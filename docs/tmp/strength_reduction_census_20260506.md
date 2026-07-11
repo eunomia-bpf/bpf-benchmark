@@ -239,7 +239,7 @@ Static candidate sites are zero, so the runtime upper bound is also zero.
 
 Baseline run counts are from the same context file used by the stack census:
 
-`corpus/results/x86_kvm_p89_kinsn_corpus_20260430_131403_981524/details/result.json`
+`corpus/results/x86_kvm_p89_kop_corpus_20260430_131403_981524/details/result.json`
 
 The result has `workload_seconds = 1.0` and status `error`, so these counters
 are only used as context. They do not affect the zero-site conclusion.

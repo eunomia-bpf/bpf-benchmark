@@ -12,9 +12,9 @@ Scope:
 
 ## Summary
 
-No CRITICAL functional blocker found in the reviewed implementation. The default optimize order matches v3 section 5, `bpfopt optimize` now skips missing side-input passes with warnings, per-pass subcommands still fail fast for missing side-inputs, and `bpfget --target` uses `kernel-sys` BTF APIs while preserving the empty-`kinsns` fallback.
+No CRITICAL functional blocker found in the reviewed implementation. The default optimize order matches v3 section 5, `bpfopt optimize` now skips missing side-input passes with warnings, per-pass subcommands still fail fast for missing side-inputs, and `bpfget --target` uses `kernel-sys` BTF APIs while preserving the empty-`koperation` fallback.
 
-I do not consider this ready for #47 full-platform corpus/e2e yet. The main remaining blocker is test coverage for the new BTF probing path: current tests validate target JSON shape and manual `--kinsns`, but they do not deterministically cover either automatic empty-probe fallback warnings or a non-empty auto-probed kinsn set. There is also downstream pass-list alignment work to confirm with daemon #44/#45.
+I do not consider this ready for #47 full-platform corpus/e2e yet. The main remaining blocker is test coverage for the new BTF probing path: current tests validate target JSON shape and manual `--koperation`, but they do not deterministically cover either automatic empty-probe fallback warnings or a non-empty auto-probed kop set. There is also downstream pass-list alignment work to confirm with daemon #44/#45.
 
 ## CRITICAL
 
@@ -24,11 +24,11 @@ Checked items:
 
 - `DEFAULT_OPTIMIZE_PASS_ORDER` is `ALL_PASS_ORDER`, whose order is `map_inline`, `const_prop`, `dce`, `skb_load_bytes_spec`, `bounds_check_merge`, `wide_mem`, `bulk_memory`, `rotate`, `cond_select`, `extract`, `endian_fusion`, `branch_flip` at `bpfopt/crates/bpfopt/src/main.rs:26`. This matches v3 section 5's public order: map-inline -> const-prop -> dce -> skb-load-bytes -> bounds-check-merge -> wide-mem -> bulk-memory -> rotate -> cond-select -> extract -> endian -> branch-flip.
 - `bpfopt optimize` builds an `OptimizePassPlan`, emits `warning: skipping ...`, and only runs passes without `skip_reason` at `bpfopt/crates/bpfopt/src/main.rs:478`.
-- Per-pass subcommands still call `validate_required_side_inputs()` and `validate_required_kinsns()` before running at `bpfopt/crates/bpfopt/src/main.rs:441`.
+- Per-pass subcommands still call `validate_required_side_inputs()` and `validate_required_kops()` before running at `bpfopt/crates/bpfopt/src/main.rs:441`.
 - No files under `bpfopt/crates/bpfopt/src/passes/*` changed in this commit.
 - `bpfget --target` probes via `kernel_sys::KernelBtf` and `kernel_sys::btf_get_next_id`, not direct `libbpf-sys`, at `bpfopt/crates/bpfget/src/main.rs:332` and `bpfopt/crates/bpfget/src/main.rs:343`.
 - `bpfget --target` emits v3 JSON names `bpf_rotate64`, `bpf_select64`, `bpf_extract64`, `bpf_endian_load64`, `bpf_bulk_memcpy`, and `bpf_bulk_memset` at `bpfopt/crates/bpfget/src/main.rs:111`.
-- No-permission fallback was verified locally: `bpfget --target` exited 0 with `"kinsns": {}` and warnings for `BPF_BTF_GET_NEXT_ID: Operation not permitted`.
+- No-permission fallback was verified locally: `bpfget --target` exited 0 with `"koperation": {}` and warnings for `BPF_BTF_GET_NEXT_ID: Operation not permitted`.
 - `KernelBtf` owns the raw `btf *` and frees it in `Drop` at `bpfopt/crates/kernel-sys/src/lib.rs:405`.
 
 ## HIGH
@@ -40,22 +40,22 @@ Location:
 - `bpfopt/crates/bpfget/tests/cli.rs:128`
 - `bpfopt/crates/bpfget/tests/cli.rs:187`
 
-Current tests assert that `kinsns` is an object and that any entries have numeric `btf_func_id`; the manual `--kinsns bpf_rotate64:77` test covers override serialization. They do not prove the new automatic BTF probing path:
+Current tests assert that `koperation` is an object and that any entries have numeric `btf_func_id`; the manual `--koperation bpf_rotate64:77` test covers override serialization. They do not prove the new automatic BTF probing path:
 
 - empty probe fallback with warning and exit 0
-- non-empty auto-probed output for the six v3 kinsn names
+- non-empty auto-probed output for the six v3 kop names
 - split-module probe path through `KernelBtf::load_from_kernel_by_id_split`
 
 Why it matters:
 
-The commit's largest new behavior is runtime BTF discovery. On a developer host without BPF permissions the current tests pass even if `probe_target_kinsns()` never finds a real kinsn, regresses the name mapping, or stops warning on fallback.
+The commit's largest new behavior is runtime BTF discovery. On a developer host without BPF permissions the current tests pass even if `probe_target_kops()` never finds a real kop, regresses the name mapping, or stops warning on fallback.
 
 Fix recommendation:
 
 Add deterministic tests around the probe layer rather than relying on the host kernel state. A practical shape is to split the probing backend behind a small trait or function table and unit-test:
 
 - `Err(EPERM)` from `btf_get_next_id` -> `{}` plus warning, exit 0
-- synthetic BTF backend containing all six names -> exact v3 `kinsns` keys and numeric IDs
+- synthetic BTF backend containing all six names -> exact v3 `koperation` keys and numeric IDs
 - synthetic BTF backend containing only fallback internal bulk names -> output still uses `bpf_bulk_memcpy` / `bpf_bulk_memset`
 
 These would be bug-detection tests, not mocks-only tautologies, because they verify observable JSON schema and fallback behavior.
@@ -126,7 +126,7 @@ Location:
 
 - `bpfopt/crates/bpfopt/src/main.rs:555`
 
-`bpfget --target` correctly emits v3 names `bpf_bulk_memcpy` / `bpf_bulk_memset`, and `bpfopt` correctly accepts those aliases. However, `optimize_skip_reason()` reports missing bulk-memory kinsns using internal registry names `bpf_memcpy_bulk` / `bpf_memset_bulk`.
+`bpfget --target` correctly emits v3 names `bpf_bulk_memcpy` / `bpf_bulk_memset`, and `bpfopt` correctly accepts those aliases. However, `optimize_skip_reason()` reports missing bulk-memory koperation using internal registry names `bpf_memcpy_bulk` / `bpf_memset_bulk`.
 
 Why it matters:
 
@@ -155,7 +155,7 @@ Results:
 - `cargo build`: PASS
 - `cargo test`: PASS
 - `cargo clippy --all-targets -- -D warnings`: FAIL due `kernel-sys` clippy warnings; one new warning is the BTF `BTF_KIND_FUNC as u32` cast.
-- `bpfget --target` local fallback: PASS, exited 0 with `"kinsns": {}` and warnings under an unprivileged environment.
+- `bpfget --target` local fallback: PASS, exited 0 with `"koperation": {}` and warnings under an unprivileged environment.
 
 ## Conclusion
 

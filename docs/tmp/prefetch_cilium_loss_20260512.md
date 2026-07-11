@@ -6,7 +6,7 @@ Source rows:
 
 - `docs/evaluation.md:313`: doc baseline says `cilium/agent` `prefetch` = `430 / 430`.
 - `corpus/results/x86_kvm_corpus_20260512_185702_727232/details/apps/cilium__agent.json`: current prefetch-only run.
-- `corpus/results/x86_kvm_corpus_20260512_190655_194595/details/apps/cilium__agent.json`: current kinsn-6 run.
+- `corpus/results/x86_kvm_corpus_20260512_190655_194595/details/apps/cilium__agent.json`: current kop-6 run.
 
 Summing `rejit_result.per_program[].passes[].bpfopt_summary` where `pass == "prefetch"`:
 
@@ -14,7 +14,7 @@ Summing `rejit_result.per_program[].passes[].bpfopt_summary` where `pass == "pre
 |---|---:|---:|---:|---:|
 | doc baseline | `prefetch` | 430 | 430 | n/a |
 | current prefetch-only | `prefetch` | 411 | 416 | 53 |
-| current kinsn-6 | `rotate,cond_select,extract,endian_fusion,bulk_memory,prefetch` | 50 | 50 | 16 |
+| current kop-6 | `rotate,cond_select,extract,endian_fusion,bulk_memory,prefetch` | 50 | 50 | 16 |
 
 The current isolated run is therefore `411 / 416`, not the documented `430 / 430`. The five missing applies inside the current isolated run are represented as prefetch `skip_reasons`. The extra matched delta versus the doc baseline (`430 -> 416`) is candidate census drift, not a matched-but-skipped apply.
 
@@ -28,19 +28,19 @@ Prefetch-only `skip_reasons`, total `5`:
 | `r2 is redefined inside the prefetch window at InsnSite { block: BlockId(1), idx: 1 }` | 2 | `cil_lxc_policy`, `prog_type=3`, `orig_insn_count=2446` |
 | `r1 is redefined inside the prefetch window at InsnSite { block: BlockId(2), idx: 1 }` | 1 | `cil_xdp_entry`, `prog_type=6`, `orig_insn_count=276` |
 
-Kinsn-6 prefetch itself has no skip reasons (`50 / 50`). The only non-trivial non-prefetch skip bucket in kinsn-6 is:
+KOperation-6 prefetch itself has no skip reasons (`50 / 50`). The only non-trivial non-prefetch skip bucket in kop-6 is:
 
 | pass | reason | count |
 |---|---|---:|
 | `cond_select` | `no dead register available to materialize immediate operand` | 2 |
 
-## 3. Why Kinsn-6 Drops To 50
+## 3. Why KOperation-6 Drops To 50
 
 Program IDs are not stable between runs, so the comparison below keys by `(prog_name, prog_type, orig_insn_count)`.
 
-Weighted by the isolated prefetch count for each kinsn-6 program:
+Weighted by the isolated prefetch count for each kop-6 program:
 
-| kinsn-6 outcome before/at prefetch | records | isolated applied | isolated matched | kinsn-6 matched | matched lost |
+| kop-6 outcome before/at prefetch | records | isolated applied | isolated matched | kop-6 matched | matched lost |
 |---|---:|---:|---:|---:|---:|
 | stopped at `cond_select failed_bpfopt` | 31 | 347 | 352 | 0 | 352 |
 | prefetch reached, nonzero sites | 12 | 50 | 50 | 50 | 0 |
@@ -50,7 +50,7 @@ Weighted by the isolated prefetch count for each kinsn-6 program:
 
 Largest identity-matched losses:
 
-| program identity | records | isolated prefetch | kinsn-6 prefetch | kinsn-6 outcome |
+| program identity | records | isolated prefetch | kop-6 prefetch | kop-6 outcome |
 |---|---:|---:|---:|---|
 | `tail_handle_sna`, type `3`, `2617` insns | 3 | `54 / 54` | `0 / 0` | all stop at `cond_select failed_bpfopt` |
 | `cil_lxc_policy`, type `3`, `2446` insns | 2 | `42 / 46` | `0 / 0` | all stop at `cond_select failed_bpfopt` |
@@ -59,7 +59,7 @@ Largest identity-matched losses:
 | `tail_handle_ipv`, type `3`, `1377` insns | 2 | `30 / 30` | `0 / 0` | all stop at `cond_select failed_bpfopt` |
 | `tail_ipv4_to_en`, type `3`, `1343` insns | 2 | `26 / 26` | `0 / 0` | all stop at `cond_select failed_bpfopt` |
 
-Conclusion: the destructive earlier pass in this corpus is `cond_select`, but not because its applied bytecode rewrites hide prefetch candidates. Where prefetch actually runs, identity-matched coverage is preserved (`50 / 50` isolated subset -> `50 / 50` kinsn-6). The coverage collapse is mainly `cond_select` exiting 1 before later passes run.
+Conclusion: the destructive earlier pass in this corpus is `cond_select`, but not because its applied bytecode rewrites hide prefetch candidates. Where prefetch actually runs, identity-matched coverage is preserved (`50 / 50` isolated subset -> `50 / 50` kop-6). The coverage collapse is mainly `cond_select` exiting 1 before later passes run.
 
 ## 4. Prefetch Pattern-Detector Audit
 
@@ -99,7 +99,7 @@ Optional profile filtering:
 
 ## 5. Host Reproduce
 
-Chosen dropped identity: `tail_handle_sna`, `prog_type=3`, `orig_insn_count=2617`. In the result comparison it drops from `54 / 54` isolated across three instances to `0 / 0` in kinsn-6 because all three stop at `cond_select failed_bpfopt`.
+Chosen dropped identity: `tail_handle_sna`, `prog_type=3`, `orig_insn_count=2617`. In the result comparison it drops from `54 / 54` isolated across three instances to `0 / 0` in kop-6 because all three stop at `cond_select failed_bpfopt`.
 
 Command run from `bpfopt/`:
 
@@ -110,7 +110,7 @@ cargo run --locked -q -p bpfopt -- \
   --output /dev/null \
   --report /dev/stdout \
   --prog-type sched_cls \
-  --kinsns bpf_prefetch
+  --koperation bpf_prefetch
 ```
 
 Result:
@@ -139,7 +139,7 @@ cargo run --locked -q -p bpfopt -- \
   --output /dev/null \
   --report /dev/stdout \
   --prog-type sched_cls \
-  --kinsns bpf_prefetch
+  --koperation bpf_prefetch
 ```
 
 Result: `21 / 23`, with the two skip reasons `r1 is redefined ... BlockId(217)` and `r2 is redefined ... BlockId(1)`, matching the corpus bucket for each `cil_lxc_policy` instance.
@@ -152,9 +152,9 @@ Current isolated `411 / 416` missing applies:
 - `bpfopt/crates/bpfopt/src/passes/prefetch.rs:459`: `reject_reg_write_between` detects a definition of the pointer register inside the insertion window.
 - `bpfopt/crates/bpfopt/src/passes/prefetch.rs:460`: emitted reason is `r{reg} is redefined inside the prefetch window at ...`.
 
-Kinsn-6 `50 / 50` collapse:
+KOperation-6 `50 / 50` collapse:
 
-- The prefetch detector is not the main cause; prefetch has no skip reasons in kinsn-6.
+- The prefetch detector is not the main cause; prefetch has no skip reasons in kop-6.
 - The main corpus failure text is `error: diamond join BlockId(...) has external predecessor BlockId(...)` from `cond_select`.
 - `bpfopt/crates/bpfopt/src/analysis/bbprogram_api.rs:795`: `replace_diamond_with_insns` iterates join predecessors.
 - `bpfopt/crates/bpfopt/src/analysis/bbprogram_api.rs:797`: it `bail!`s if a join predecessor is outside the diamond-owned predecessor/true/false set.
@@ -169,4 +169,4 @@ The result artifact was produced by a `bpfopt` path where the external-join cond
 
 Fix `cond_select` structurally, not in the daemon and not in `prefetch`: teach the diamond replacement path to handle shared joins by splitting/duplicating the join continuation so only the diamond-owned incoming edges are consumed by the branchless-select replacement, while external predecessors keep their original control-flow target. That turns non-isolated Cilium diamonds into either valid `cond_select` rewrites or ordinary site-level non-applications, without pass-chain fallback and without making `prefetch` compensate for earlier pass failures.
 
-Verdict: the Cilium kinsn-6 prefetch collapse is a `cond_select` external-join abort that prevents `prefetch` from running on most affected programs, not a prefetch detector regression.
+Verdict: the Cilium kop-6 prefetch collapse is a `cond_select` external-join abort that prevents `prefetch` from running on most affected programs, not a prefetch detector regression.

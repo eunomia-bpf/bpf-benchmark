@@ -13,10 +13,10 @@ from typing import Sequence
 
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
-from runner.libs.kinsn import load_kinsn_modules
+from runner.libs.kop import load_kop_modules
 from runner.libs.workspace_layout import (
     inside_runtime_image,
-    kinsn_module_dir,
+    kop_module_dir,
     micro_program_root,
     runner_binary_path,
     sim_proof_root,
@@ -87,22 +87,22 @@ def _run_with_status(
     return process.wait() == 0
 
 
-def _expected_kinsn_modules(workspace: Path, target_arch: str) -> list[str]:
-    module_dir = kinsn_module_dir(workspace, target_arch)
+def _expected_kop_modules(workspace: Path, target_arch: str) -> list[str]:
+    module_dir = kop_module_dir(workspace, target_arch)
     modules = sorted(
         path.stem
         for path in module_dir.glob("bpf_*.ko")
         if path.is_file()
     )
     if not modules:
-        _die(f"no kinsn modules found under {module_dir}")
+        _die(f"no kop modules found under {module_dir}")
     return modules
 
 
-def _load_kinsn_modules(workspace: Path, target_arch: str) -> None:
-    load_kinsn_modules(
-        _expected_kinsn_modules(workspace, target_arch),
-        module_dir=kinsn_module_dir(workspace, target_arch),
+def _load_kop_modules(workspace: Path, target_arch: str) -> None:
+    load_kop_modules(
+        _expected_kop_modules(workspace, target_arch),
+        module_dir=kop_module_dir(workspace, target_arch),
     )
 
 
@@ -328,7 +328,7 @@ def _run_native_loader_shim_smoke(
             _die(f"{label} is missing: {path}")
 
     _log_test_section("native-loader shim multi-prog smoke")
-    _load_kinsn_modules(workspace, args.target_arch)
+    _load_kop_modules(workspace, args.target_arch)
     shim_dir = artifact_dir / "native-loader-shim"
     shim_dir.mkdir(parents=True, exist_ok=True)
     log_path = artifact_dir / "native-loader-shim.log"
@@ -413,8 +413,8 @@ def _prepare_test_artifacts(workspace: Path, args: argparse.Namespace) -> Path:
 
 def _run_selftest_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str], artifact_dir: Path) -> None:
     log_path = artifact_dir / "selftest.log"
-    _log_test_section("Loading kinsn modules")
-    _load_kinsn_modules(workspace, args.target_arch)
+    _log_test_section("Loading kop modules")
+    _load_kop_modules(workspace, args.target_arch)
     _run_native_proof_micro_smoke(workspace, args, env, log_path=log_path)
     _run_bpf_load_negative_suite(args, fuzz=False, log_path=log_path)
 
@@ -431,8 +431,8 @@ def _run_fuzz_mode(args: argparse.Namespace, artifact_dir: Path) -> None:
 
 def _run_test_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str]) -> None:
     _run_kernel_selftest(workspace, env)
-    _log_test_section("Loading kinsn modules")
-    _load_kinsn_modules(workspace, args.target_arch)
+    _log_test_section("Loading kop modules")
+    _load_kop_modules(workspace, args.target_arch)
     _run_native_proof_micro_smoke(workspace, args, env)
     _run_bpf_load_negative_suite(args, fuzz=False)
 

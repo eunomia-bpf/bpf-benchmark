@@ -87,7 +87,7 @@ Full O3 verifier run used during validation:
 BASE=/tmp/test-all-noop-strict-llvmbpf-o3
 rm -rf "$BASE"
 mkdir -p "$BASE"
-printf '{"arch":"x86_64","kinsns":{}}\n' >"$BASE/target.json"
+printf '{"arch":"x86_64","koperation":{}}\n' >"$BASE/target.json"
 for obj in $(find bpfopt/testobject -maxdepth 1 -type f \
   \( -name '*.bpf.o' -o -name 'tetragon_*.o' \) | sort); do
   name=$(basename "$obj")

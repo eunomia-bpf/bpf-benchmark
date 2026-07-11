@@ -32,8 +32,8 @@ The current research questions are:
   compared against arm64 kernel eBPF?
 - **RQ5 Machine-code footprint:** how does generated machine-code size compare
   against kernel eBPF JIT output?
-- **RQ6 kinsn opportunity and coverage:** what speedups are visible in the best
-  local full-suite LLVM-kinsn candidate, and do matched arm64 kinsn ReJIT runs
+- **RQ6 kop opportunity and coverage:** what speedups are visible in the best
+  local full-suite LLVM-kop candidate, and do matched arm64 kop ReJIT runs
   apply sites on the full micro suites?
 
 The full pure-bytecode four-way comparison is available in the latest x86 KVM
@@ -61,10 +61,10 @@ PLATFORM=aws ARCH=arm64 SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 \
   RUNTIMES="kernel llvmbpf native native_kernel" make micro
 
 PLATFORM=aws ARCH=arm64 SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 \
-  RUNTIMES="kernel kernel_rejit" BPFREJIT_BENCH_PASSES=kinsn make micro
+  RUNTIMES="kernel kernel_rejit" BPFREJIT_BENCH_PASSES=kop make micro
 
 PLATFORM=aws ARCH=arm64 SAMPLES=3 WARMUPS=0 INNER_REPEAT=100000 \
-  RUNTIMES="kernel kernel_rejit" BPFREJIT_BENCH_PASSES=kinsn \
+  RUNTIMES="kernel kernel_rejit" BPFREJIT_BENCH_PASSES=kop \
   SUITE=micro/config/micro_stage2.yaml make micro
 ```
 
@@ -87,7 +87,7 @@ The measured runtimes are:
 - **llvmbpf:** userspace eBPF through the LLVM-BPF runtime, available in the
   latest x86 KVM and arm64 AWS four-way raw artifacts.
 - **kernel_rejit:** kernel eBPF after the requested ReJIT pass list. It is used
-  only for the arm64 kinsn follow-up in Appendix D.
+  only for the arm64 kop follow-up in Appendix D.
 
 The platform details recorded in the artifacts are:
 
@@ -209,17 +209,17 @@ userspace native. Kernel native is also smaller on x86 with helpers/maps
 ratios are 0.495x for kernel native, 0.460x for userspace eBPF, and 0.471x for
 userspace native.
 
-**RQ6 kinsn opportunity and coverage.** The best local raw LLVM-kinsn candidate
+**RQ6 kop opportunity and coverage.** The best local raw LLVM-kop candidate
 shows a 1.216x all-29 geomean speedup over the latest stock-kernel baseline,
 with top individual cases reaching 2.267x. This remains an exploratory
 upper-bound datapoint because the artifact does not record an exact matched
-compiler-control run. The selector-fixed matched arm64 AWS pure-bytecode kinsn
+compiler-control run. The selector-fixed matched arm64 AWS pure-bytecode kop
 ReJIT full-suite run is now an actual coverage/performance datapoint: it
 applies 308/308 matched sites in the median sample, 924/924 raw calls across
 three samples, and reports a 1.208x geomean speedup with zero correctness
-mismatches. The post-selector-fix with-helpers/maps kinsn rerun still has
+mismatches. The post-selector-fix with-helpers/maps kop rerun still has
 0/0 matched/applied sites and a 1.009x geomean speedup, so it remains a
-parity/noise check rather than a kinsn performance claim.
+parity/noise check rather than a kop performance claim.
 
 The concise paper claim supported by these data is:
 
@@ -231,8 +231,8 @@ The concise paper claim supported by these data is:
   comparison at 1.151x for kernel native.
 - Generated machine-code size is 0.46-0.72x of kernel eBPF JIT size across the
   measured main-comparison runtimes.
-- Matched arm64 kinsn ReJIT now has full-suite pure-bytecode coverage and
-  speedup; the post-selector-fix helper/map kinsn rerun remains zero-apply.
+- Matched arm64 kop ReJIT now has full-suite pure-bytecode coverage and
+  speedup; the post-selector-fix helper/map kop rerun remains zero-apply.
 
 ## Threats To Validity
 
@@ -247,11 +247,11 @@ The concise paper claim supported by these data is:
 - Userspace runtime data for the with-helpers/maps suite exists in the raw
   artifact but is not a kernel-helper/map-path comparison, so it is
   intentionally excluded from the main helper/map claim.
-- The x86 LLVM-kinsn result is reported as an upper-bound opportunity only. It
+- The x86 LLVM-kop result is reported as an upper-bound opportunity only. It
   uses a real full-suite raw artifact but lacks an exact matched
-  compiler-control artifact in metadata. The arm64 pure-bytecode kinsn ReJIT
+  compiler-control artifact in metadata. The arm64 pure-bytecode kop ReJIT
   artifact is matched `kernel` versus `kernel_rejit` and applies sites after
-  the selector fix. The helper/map kinsn artifact in this note is still the
+  the selector fix. The helper/map kop artifact in this note is still the
   older zero-apply run and should not be generalized to helper/map coverage.
 - Some very small x86 helper/map kernel baselines show high per-sample CV
   because one of three samples can be an outlier at tens-of-nanoseconds scale.
@@ -329,21 +329,21 @@ runtime comparison scope. Lower is smaller; the dashed line is parity.*
 | arm64 AWS | pure bytecode 29 | userspace native | 0.471 |
 | arm64 AWS | with helpers/maps 13 | kernel native | 0.724 |
 
-## Appendix D: LLVM Kinsn Micro
+## Appendix D: LLVM KOperation Micro
 
-These LLVM-kinsn micro results are separate from the kernel-native result above.
+These LLVM-kop micro results are separate from the kernel-native result above.
 This is an upper-bound engineering datapoint from the best local full-suite raw
 candidate. It uses the latest stock-kernel eBPF run as the baseline and does not
 record an exact matched compiler-control run in metadata.
 
-![LLVM-kinsn upper-bound top cases](figures/kinsn-micro-upper-bound-summary-20260527.png)
+![LLVM-kop upper-bound top cases](figures/kop-micro-upper-bound-summary-20260527.png)
 
-*Figure 5: LLVM-kinsn upper-bound top cases. Bars show the five largest
+*Figure 5: LLVM-kop upper-bound top cases. Bars show the five largest
 per-case speedups plus the all-29 geomean, using median `exec_ns` across three
 samples with `INNER_REPEAT=100000`. Higher is better; the dashed line is
 parity.*
 
-| Case | Stock kernel median ns | Kinsn candidate median ns | Speedup |
+| Case | Stock kernel median ns | KOperation candidate median ns | Speedup |
 |---|---:|---:|---:|
 | `bitmap_popcount_scan` | 1113 | 491 | 2.267x |
 | `siphash_rotate64_mixer` | 54 | 31 | 1.742x |
@@ -352,9 +352,9 @@ parity.*
 | `tracee_syscall_name_table_lookup` | 168 | 110 | 1.527x |
 | all-29 geomean | - | - | 1.216x |
 
-![Best local raw LLVM-kinsn full-suite candidate](figures/kinsn-micro-best-raw-full-20260527.png)
+![Best local raw LLVM-kop full-suite candidate](figures/kop-micro-best-raw-full-20260527.png)
 
-*Figure 6: Full per-case view for the same best local raw LLVM-kinsn candidate
+*Figure 6: Full per-case view for the same best local raw LLVM-kop candidate
 relative to the latest stock kernel eBPF baseline. Values use median `exec_ns`
 across three samples with `INNER_REPEAT=100000`. The geomean speedup is 1.216x
 over 29 cases with zero correctness mismatches, but this is not a matched
@@ -363,7 +363,7 @@ compiler-control comparison.*
 ### x86 Focused Bitops ReJIT
 
 The 2026-06-07 focused x86 bitops probes are matched `kernel` versus
-`kernel_rejit` checks for newly exposed kinsn selectors. They are not full-suite
+`kernel_rejit` checks for newly exposed kop selectors. They are not full-suite
 paper aggregates; they are used to keep micro coverage for individual opcode
 paths that may or may not apply in the app corpus.
 
@@ -373,25 +373,25 @@ paths that may or may not apply in the app corpus.
 | `packet_toeplitz_rss_hash` | `micro/results/x86_kvm_micro_20260607_072937_370032` | 3 | 0 | 257 median | 209 median | 1.230x | BMI2 shift sites |
 | `packed_header_bitfield_decode` | `micro/results/x86_kvm_micro_20260607_072937_370032` | 3 | 0 | 277 median | 242 median | 1.145x | BMI2 shift sites |
 
-### arm64 AWS Matched Kinsn ReJIT
+### arm64 AWS Matched KOperation ReJIT
 
 The 2026-06-06 arm64 pure-bytecode follow-up is a matched `kernel` versus
-`kernel_rejit` artifact using `BPFREJIT_BENCH_PASSES=kinsn`. Unlike the x86
+`kernel_rejit` artifact using `BPFREJIT_BENCH_PASSES=kop`. Unlike the x86
 upper-bound artifact above, it has an exact same-run compiler control. After
 the selector fixes, the full pure-bytecode suite is no longer a zero-apply
-parity check: 27/29 benchmarks apply kinsn sites, with 308/308 matched/applied
+parity check: 27/29 benchmarks apply kop sites, with 308/308 matched/applied
 sites in the median sample and 924/924 raw matched/applied calls across the
 three samples.
 
-![arm64 kinsn ReJIT matched micro](figures/kinsn-micro-arm64-rejit-20260606.png)
+![arm64 kop ReJIT matched micro](figures/kop-micro-arm64-rejit-20260606.png)
 
-*Figure 7: arm64 AWS matched kinsn ReJIT microbenchmark follow-up for the
+*Figure 7: arm64 AWS matched kop ReJIT microbenchmark follow-up for the
 selector-fixed pure-bytecode full suite. Bars report `kernel / kernel_rejit`
-speedup from median `exec_ns` across three samples. Green bars applied kinsn
+speedup from median `exec_ns` across three samples. Green bars applied kop
 sites; gray bars applied none. The all-29 geomean is 1.208x, and the
-kinsn-bearing geomean is 1.222x over 27 benchmarks.*
+kop-bearing geomean is 1.222x over 27 benchmarks.*
 
-| Suite | Result source | Benchmarks | Expected-result mismatches | Speedup geomean | Kinsn-bearing geomean | Wins / losses / ties | Matched/applied sites | Code-size ratio |
+| Suite | Result source | Benchmarks | Expected-result mismatches | Speedup geomean | KOperation-bearing geomean | Wins / losses / ties | Matched/applied sites | Code-size ratio |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
 | arm64 AWS pure bytecode 29, selector-fixed | `micro/results/aws_arm64_micro_20260606_001225_821028/details/result.json` | 29 | 0 | 1.208x | 1.222x over 27 | 24 / 2 / 3 | 308 / 308 median sample; 924 / 924 raw | 0.879x |
 | arm64 AWS with helpers/maps 13, selector-fixed | `micro/results/aws_arm64_micro_20260606_160621_594885/details/result.json` | 13 | 0 | 1.009x | N/A | 3 / 0 / 10 | 0 / 0 median sample; 0 / 0 raw | 1.000x |
@@ -405,7 +405,7 @@ load/endian fusion: checksum, Toeplitz, Cilium socket load-balancing, Cilium CT
 rewrite, and cgroup hash cases now match the same wide-load shapes visible in
 the native arm64 dumps.
 
-| Case | Kernel ns | Kernel ReJIT ns | Speedup | Applied sites, median sample | Dominant kinsn shape |
+| Case | Kernel ns | Kernel ReJIT ns | Speedup | Applied sites, median sample | Dominant kop shape |
 |---|---:|---:|---:|---:|---|
 | `siphash_rotate64_mixer` | 194 | 102 | 1.902x | 124 | `extr_x` rotate |
 | `cilium_socket_lb_service_select` | 1126 | 666 | 1.691x | 7 | `ldr_w` / `ldrh` |
@@ -426,24 +426,24 @@ used as positive report examples without more targeted gating.
 
 ## Appendix E: Artifact And Noise Checks
 
-The LLVM-kinsn upper-bound figures use these raw artifacts:
+The LLVM-kop upper-bound figures use these raw artifacts:
 
 | Role | Result source | Generated at | Runtimes | Benchmarks | Samples | Expected-result mismatches |
 |---|---|---|---|---:|---:|---:|
-| LLVM-kinsn upper-bound candidate | `micro/results/x86_kvm_micro_20260519_114214_364050` | 2026-05-19T11:42:14Z | kernel | 29 | 87 | 0 |
+| LLVM-kop upper-bound candidate | `micro/results/x86_kvm_micro_20260519_114214_364050` | 2026-05-19T11:42:14Z | kernel | 29 | 87 | 0 |
 | Stock-kernel baseline | `micro/results/x86_kvm_micro_20260526_210351_224315` | 2026-05-26T21:03:51Z | kernel, llvmbpf, native, native_kernel | 29 | 348 | 0 |
 
-The arm64 matched kinsn ReJIT figure uses the selector-fixed pure-bytecode raw
+The arm64 matched kop ReJIT figure uses the selector-fixed pure-bytecode raw
 artifact. The selector-fixed helpers/maps rerun is listed separately because it
-still has zero kinsn matches. The older pre-selector-fix artifacts are kept here
+still has zero kop matches. The older pre-selector-fix artifacts are kept here
 as provenance for the zero-apply diagnosis.
 
 | Role | Result source | Generated at | Runtimes | Benchmarks | Samples | Expected-result mismatches |
 |---|---|---|---|---:|---:|---:|
-| arm64 kinsn ReJIT pure bytecode, selector-fixed | `micro/results/aws_arm64_micro_20260606_001225_821028` | 2026-06-06T00:12:25Z | kernel, kernel_rejit | 29 | 174 | 0 |
-| arm64 kinsn ReJIT with helpers/maps, selector-fixed | `micro/results/aws_arm64_micro_20260606_160621_594885` | 2026-06-06T16:06:21Z | kernel, kernel_rejit | 13 | 78 | 0 |
-| arm64 kinsn ReJIT pure bytecode, pre-selector-fix | `micro/results/aws_arm64_micro_20260605_195615_598255` | 2026-06-05T19:56:15Z | kernel, kernel_rejit | 29 | 174 | 0 |
-| arm64 kinsn ReJIT with helpers/maps, pre-selector-fix | `micro/results/aws_arm64_micro_20260605_201826_257732` | 2026-06-05T20:18:26Z | kernel, kernel_rejit | 13 | 78 | 0 |
+| arm64 kop ReJIT pure bytecode, selector-fixed | `micro/results/aws_arm64_micro_20260606_001225_821028` | 2026-06-06T00:12:25Z | kernel, kernel_rejit | 29 | 174 | 0 |
+| arm64 kop ReJIT with helpers/maps, selector-fixed | `micro/results/aws_arm64_micro_20260606_160621_594885` | 2026-06-06T16:06:21Z | kernel, kernel_rejit | 13 | 78 | 0 |
+| arm64 kop ReJIT pure bytecode, pre-selector-fix | `micro/results/aws_arm64_micro_20260605_195615_598255` | 2026-06-05T19:56:15Z | kernel, kernel_rejit | 29 | 174 | 0 |
+| arm64 kop ReJIT with helpers/maps, pre-selector-fix | `micro/results/aws_arm64_micro_20260605_201826_257732` | 2026-06-05T20:18:26Z | kernel, kernel_rejit | 13 | 78 | 0 |
 
 Per-run variability check. For each benchmark/runtime pair, this computes the
 CV of the three `exec_ns` samples; runtime aggregates use the median sample.
@@ -474,19 +474,19 @@ python3 docs/tmp/plot_micro_characterization_20260606.py
 ```
 
 The plotting script for Figures 5-6 is
-`docs/tmp/plot_kinsn_micro_20260527.py`.
+`docs/tmp/plot_kop_micro_20260527.py`.
 
 ```sh
-python3 docs/tmp/plot_kinsn_micro_20260527.py
+python3 docs/tmp/plot_kop_micro_20260527.py
 ```
 
 The plotting script for Figure 7 is
-`docs/tmp/plot_arm64_kinsn_micro_20260606.py`. It also writes the detailed
-post-hoc table at `docs/tmp/arm64_kinsn_micro_20260606_summary.md`.
+`docs/tmp/plot_arm64_kop_micro_20260606.py`. It also writes the detailed
+post-hoc table at `docs/tmp/arm64_kop_micro_20260606_summary.md`.
 
 ```sh
-python3 docs/tmp/plot_arm64_kinsn_micro_20260606.py
+python3 docs/tmp/plot_arm64_kop_micro_20260606.py
 ```
 
-The older zero-apply arm64 kinsn script is
-`docs/tmp/plot_arm64_kinsn_micro_20260605.py`.
+The older zero-apply arm64 kop script is
+`docs/tmp/plot_arm64_kop_micro_20260605.py`.

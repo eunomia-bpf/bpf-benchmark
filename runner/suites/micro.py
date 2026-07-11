@@ -8,10 +8,10 @@ from pathlib import Path
 
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
-from runner.libs.kinsn import load_kinsn_modules
+from runner.libs.kop import load_kop_modules
 from runner.libs.workspace_layout import (
     kernel_modules_root,
-    kinsn_module_dir,
+    kop_module_dir,
     micro_program_root,
     runner_binary_path,
     runtime_path_value,
@@ -144,13 +144,13 @@ def _run_micro_suite(workspace: Path, args: argparse.Namespace) -> None:
 
     selected_runtimes = _selected_runtimes(args)
     if "kernel_rejit" in selected_runtimes or "native_kernel" in selected_runtimes:
-        module_dir = kinsn_module_dir(workspace, args.target_arch)
+        module_dir = kop_module_dir(workspace, args.target_arch)
         if not module_dir.is_dir():
-            _die(f"kinsn module artifact root is missing: {module_dir}")
+            _die(f"kop module artifact root is missing: {module_dir}")
         expected = sorted(path.stem for path in module_dir.glob("bpf_*.ko") if path.is_file())
         if not expected:
-            _die(f"no kinsn modules found under {module_dir}")
-        load_kinsn_modules(expected, module_dir=module_dir)
+            _die(f"no kop modules found under {module_dir}")
+        load_kop_modules(expected, module_dir=module_dir)
 
     if "native_proof" in selected_runtimes:
         proof_dir = sim_proof_root(workspace, args.target_arch)

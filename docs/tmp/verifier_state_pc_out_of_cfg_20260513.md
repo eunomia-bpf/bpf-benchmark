@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`pc 2425` comes from the step-14 verifier log as a `frame1` callee-entry full-state line, not from a raw `output_step14.bin` executable instruction site. The immediate failing state is `PcFullState`, so the current lifter does not apply its `InsnDeltaState` round-up rule and correctly fail-fasts. The strongest evidence points to a verifier-log PC namespace mismatch after kinsn-emitting passes: the raw bytecode still has 2456 slots, raw slot 2425 is the second word of an `LD_IMM64`, and the raw BPF-to-BPF subprog target that appears to correspond to the verifier's `2425` sequence is raw PC 2408. Adding raw second-slot sites or silently skipping/rounding `PcFullState` would attach verifier state to the wrong instruction.
+`pc 2425` comes from the step-14 verifier log as a `frame1` callee-entry full-state line, not from a raw `output_step14.bin` executable instruction site. The immediate failing state is `PcFullState`, so the current lifter does not apply its `InsnDeltaState` round-up rule and correctly fail-fasts. The strongest evidence points to a verifier-log PC namespace mismatch after kop-emitting passes: the raw bytecode still has 2456 slots, raw slot 2425 is the second word of an `LD_IMM64`, and the raw BPF-to-BPF subprog target that appears to correspond to the verifier's `2425` sequence is raw PC 2408. Adding raw second-slot sites or silently skipping/rounding `PcFullState` would attach verifier state to the wrong instruction.
 
 ## Evidence
 
@@ -119,13 +119,13 @@ pseudo_calls = [(1293, imm 1018, target 2312),
 pseudo_call_count = 3
 ```
 
-- The raw program also has many kinsn calls after earlier kinsn passes:
+- The raw program also has many kop calls after earlier kop passes:
 
 ```text
-call_src_counts = { helper src 0: 82, kinsn src 4: 69, pseudo-call src 1: 3 }
-kinsn_call_count = 69
-kinsn_2312_to_2408 = 13
-kinsn_2408_to_2456 = 7
+call_src_counts = { helper src 0: 82, kop src 4: 69, pseudo-call src 1: 3 }
+kop_call_count = 69
+kop_2312_to_2408 = 13
+kop_2408_to_2456 = 7
 ```
 
 ### Raw PC space differs from verifier-log PC space
@@ -164,7 +164,7 @@ Verifier pc 2425:
   2425: (07) r2 += -525483785
 ```
 
-This is the main evidence that the verifier states cannot be mapped by direct numeric PC lookup after the prior kinsn-emitting steps.
+This is the main evidence that the verifier states cannot be mapped by direct numeric PC lookup after the prior kop-emitting steps.
 
 ### Earlier step comparison
 
@@ -184,11 +184,11 @@ step14 state_like = 29034, maxpc = 2492
 step14 hits for 2425 = 267
 ```
 
-So there is no earlier full verifier-state file here that demonstrates the same failure being harmless before step 14. The new trigger is that step 14's `noop` was run at `log_level=2`, producing a full verifier-state log for bytecode that already contains prior kinsn-pass output.
+So there is no earlier full verifier-state file here that demonstrates the same failure being harmless before step 14. The new trigger is that step 14's `noop` was run at `log_level=2`, producing a full verifier-state log for bytecode that already contains prior kop-pass output.
 
 ## Root cause hypothesis
 
-1. **High confidence: verifier-log PCs are not in raw `output_step14.bin` PC space after kinsn-bearing bytecode.** Evidence: raw BPF pseudo calls are at `1293`, `1296`, `1980`, while the verifier logs the analogous calls at `1285`, `1288`, `1966`; raw PC `2425` is an `LD_IMM64` second slot, while verifier PC `2425` is an executable `frame1` instruction; raw PC `2408` has the same `r2 += -525483785` instruction shown by verifier PC `2425`. Direct `pc_to_site.get(state.pc)` is therefore using the wrong namespace.
+1. **High confidence: verifier-log PCs are not in raw `output_step14.bin` PC space after kop-bearing bytecode.** Evidence: raw BPF pseudo calls are at `1293`, `1296`, `1980`, while the verifier logs the analogous calls at `1285`, `1288`, `1966`; raw PC `2425` is an `LD_IMM64` second slot, while verifier PC `2425` is an executable `frame1` instruction; raw PC `2408` has the same `r2 += -525483785` instruction shown by verifier PC `2425`. Direct `pc_to_site.get(state.pc)` is therefore using the wrong namespace.
 
 2. **Medium confidence: the parser is structurally preserving the important data, but the lifter ignores enough of it to fail.** The parser records `frame = 1` for `2425: frame1: ...`, but `lift_verifier_states_by_site()` maps only by `state.pc`; it does not use `(frame, verifier_pc)` or any verifier-PC to raw-PC remap. This is not exactly "frame1 PC parsed as main-frame PC"; it is "frame1 PC preserved, then site mapping treats the numeric PC as a raw original PC."
 
@@ -200,7 +200,7 @@ So there is no earlier full verifier-state file here that demonstrates the same 
 
 - **Keep fail-fast strictness for non-delta states.** The current bail is useful: it exposed that the verifier-state input cannot be trusted under direct raw-PC lookup. A silent skip would hide lost verifier information; a broad round-up for `PcFullState` would attach the state to raw PC `2426`, which is still wrong for this artifact.
 
-- **Add an explicit verifier-PC to raw-site remapping layer before lifting states.** Conceptually this should map verifier log PCs in each frame to raw `InsnSite`s in the same frame. It must account for `LD_IMM64` second slots and for kinsn call encodings whose verifier-log PC stream differs from raw bytecode. The input validation should fail if a retained verifier state cannot be mapped exactly.
+- **Add an explicit verifier-PC to raw-site remapping layer before lifting states.** Conceptually this should map verifier log PCs in each frame to raw `InsnSite`s in the same frame. It must account for `LD_IMM64` second slots and for kop call encodings whose verifier-log PC stream differs from raw bytecode. The input validation should fail if a retained verifier state cannot be mapped exactly.
 
 - **Use frame-aware mapping.** The parser already records `VerifierInsn.frame`; the lifter should not reduce all verifier states to a single global `pc_to_site` lookup. A safe design would map by `(frame, verifier_pc)` to the corresponding raw `InsnSite`, using the raw subprog frame map plus a verified per-frame PC translation.
 

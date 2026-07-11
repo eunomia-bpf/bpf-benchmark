@@ -100,8 +100,8 @@ Evidence from the fork history:
 - base: `c23719abc (grafted, origin/master, origin/HEAD, master)`
 - current branch: `81cb8848b (HEAD -> rejit-v2)`
 - `git diff c23719abc..HEAD -- arch/arm64/net/bpf_jit_comp.c` shows only
-  BpfReJIT/kINSN-related additions around native ARM64 emit for
-  `BPF_PSEUDO_KINSN_CALL`.
+  BpfReJIT/KOperation-related additions around native ARM64 emit for
+  `BPF_PSEUDO_KOP_CALL`.
 - The diff does not add the `extra_pass && ctx.idx > jit_data->ctx.idx`
   bailout.
 - diff stat for the three relevant files:
@@ -109,12 +109,12 @@ Evidence from the fork history:
   - `kernel/bpf/core.c | 2 +`
   - `kernel/bpf/syscall.c | 965 +...`
 
-ARM64-specific BpfReJIT commits in the path are about kINSN emit and cleanup,
+ARM64-specific BpfReJIT commits in the path are about KOperation emit and cleanup,
 not this bailout:
 
 - `1d040ec0c bpf: REJIT Phase 0-2 fixes + ARM64 inline kfunc + selftest`
-- `20831c82d kinsn: implement bpf_kinsn_ops with verifier modeling and packed ABI`
-- `cb06f7908 bpf: Refactor kinsn handling and improve verifier region management`
+- `20831c82d kop: implement bpf_kop_ops with verifier modeling and packed ABI`
+- `cb06f7908 bpf: Refactor kop handling and improve verifier region management`
 - `81608ed9e bpf: fix 4 review issues (insn_buf overflow, callchain_buf swap, debug code, ARM64 scratch)`
 
 BpfReJIT did not create the bailout. It made the bailout reachable for live
@@ -183,7 +183,7 @@ Relevant commits:
 - `0b2d749c2 bpf: code review cleanup + st_ops REJIT + relax constraints`
   - removed the layout-match size check so REJIT can change subprogram length
   - this made ARM64 more likely to reach the final-pass image-budget invariant
-- later commits mostly handled swap safety, trampolines, poke tables, kINSN
+- later commits mostly handled swap safety, trampolines, poke tables, KOperation
   cleanup, and related review fixes
 
 Current `bpf_prog_rejit_supported()` no longer rejects multi-subprogram programs:

@@ -131,7 +131,7 @@
 
 本轮 source review 没再发现上一轮那种会挡投稿的 correctness blocker。
 
-- common header / barrier / endian / extract / rotate 这些关键点现在都对：`module/include/kinsn_common.h:94-99`、`module/include/kinsn_common.h:148-153`、`module/x86/bpf_barrier.c:20-67`、`module/arm64/bpf_barrier.c:35-87`。
+- common header / barrier / endian / extract / rotate 这些关键点现在都对：`module/include/kop_common.h:94-99`、`module/include/kop_common.h:148-153`、`module/x86/bpf_barrier.c:20-67`、`module/arm64/bpf_barrier.c:35-87`。
 - 结论：`module/` 现在是“可以继续做评测”的状态，不再是 P0 blocker。
 
 ### 2.7 `tests/`

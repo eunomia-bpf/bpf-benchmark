@@ -4,20 +4,20 @@
   "current_benchmark_index": 2,
   "current_benchmark_record": {
     "category": "alu-mix",
-    "description": "Hand-written x86 rol kinsn over SipHash-style input words",
+    "description": "Hand-written x86 rol kop over SipHash-style input words",
     "expected_result": 2666935177028490406,
     "family": "rotate-hash",
-    "hypothesis": "Tests direct rol kinsn lowering on a rotate-heavy hash input",
+    "hypothesis": "Tests direct rol kop lowering on a rotate-heavy hash input",
     "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/siphash_rotate64_mixer.mem",
     "io_mode": "staged",
-    "level": "handcraft-kinsn",
+    "level": "handcraft-kop",
     "name": "siphash_rotate64_mixer_handcraft",
     "runs": [],
     "tags": [
       "compute",
       "rotate",
       "hash",
-      "handcraft-kinsn",
+      "handcraft-kop",
       "x86"
     ]
   },

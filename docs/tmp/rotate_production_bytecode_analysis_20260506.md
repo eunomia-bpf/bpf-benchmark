@@ -28,13 +28,13 @@ Results:
 
 `cmp` confirmed rerun outputs for these three programs are byte-for-byte identical to their captured inputs.
 
-The captured target contains both rotate kinsns, so this is not a target probing problem:
+The captured target contains both rotate koperation, so this is not a target probing problem:
 
 ```json
 {
   "arch": "x86_64",
   "features": ["cmov", "bmi1", "bmi2", "rorx", "movbe"],
-  "kinsns": {
+  "koperation": {
     "bpf_rotate32": {"btf_func_id": 128702, "btf_id": 6, "call_offset": 5},
     "bpf_rotate64": {"btf_func_id": 128703, "btf_id": 6, "call_offset": 5}
   }
@@ -230,7 +230,7 @@ Relevant verifier mechanisms:
 - `vendor/linux-framework/kernel/bpf/verifier.c:24409-24427`: `bpf_get_smp_processor_id()` can be inlined to a percpu load on x86_64. This is unrelated to the missing rotate sites.
 - `vendor/linux-framework/kernel/bpf/verifier.c:22946-22951`: some arena atomics can be rewritten to probe atomics. The captured streams have 13 atomic instructions, but they are not rotate candidates.
 
-The rotate kinsn implementation itself expects the same proof shape the matcher emits:
+The rotate kop implementation itself expects the same proof shape the matcher emits:
 
 - `module/x86/bpf_rotate.c:56-77`: `bpf_rotate64` proof expansion is MOV, optional MOV, LSH, RSH, OR.
 - `module/x86/bpf_rotate.c:80-100`: `bpf_rotate32` proof expansion is MOV32, optional MOV32, LSH, RSH, OR.

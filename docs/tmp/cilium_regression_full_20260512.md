@@ -3,13 +3,13 @@
 Doc baseline source:
 
 - `docs/evaluation-05-07-2026.md` section 6.1.1.
-- Kinsn/doc multi-pass result: `/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260507_200821_664435`.
+- KOperation/doc multi-pass result: `/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260507_200821_664435`.
 - Map-inline/doc result: `/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260507_195045_528717`.
 - Prefetch/doc result: `/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260507_224441_710356`.
 
 Current evidence sources:
 
-- 5-pass kinsn: `/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260512_190158_334233`.
+- 5-pass kop: `/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260512_190158_334233`.
 - Prefetch-only: `/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260512_185702_727232`.
 - `noop,map_inline`: `/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260512_185218_803256`.
 
@@ -25,21 +25,21 @@ Observed cilium deltas:
 
 Important raw observations:
 
-- The doc kinsn run used pass order `rotate,cond_select,extract,endian_fusion,bulk_memory,skb_load_bytes_spec,wide_mem`.
+- The doc kop run used pass order `rotate,cond_select,extract,endian_fusion,bulk_memory,skb_load_bytes_spec,wide_mem`.
 - The current 5-pass run used `rotate,cond_select,extract,endian_fusion,bulk_memory`.
-- In the doc kinsn run, cilium had 53 programs and no `failed_bpfopt:cond_select`.
+- In the doc kop run, cilium had 53 programs and no `failed_bpfopt:cond_select`.
 - In the current 5-pass run, cilium had 60 programs, `cond_select=20/22`, and 37 `failed_bpfopt:cond_select` failures.
 - The current `cond_select` bpfopt failure is consistently `error: diamond join BlockId(...) has external predecessor BlockId(...)`.
-- The current 5-pass extra programs relative to the doc kinsn run are duplicate live cilium programs: `cil_from_host:1194` x2, `cil_from_netdev:1113` x1, `cil_host_policy:2` x2, `cil_to_host:351` x1, and `cil_to_netdev:1281` x1.
+- The current 5-pass extra programs relative to the doc kop run are duplicate live cilium programs: `cil_from_host:1194` x2, `cil_from_netdev:1113` x1, `cil_host_policy:2` x2, `cil_to_host:351` x1, and `cil_to_netdev:1281` x1.
 - The current prefetch-only and `noop,map_inline` runs each have 53 programs, and their program name plus instruction-count multisets match the relevant May 7 baselines except for the known prefetch live-set difference.
 
 ## Hypothesis 1: methodology mismatch (multi-pass vs isolated)
 
 The hypothesis as stated is not supported for `cond_select`, `bulk_memory`, or `endian_fusion`.
 
-The May 7 doc kinsn source run did include `wide_mem`, but `wide_mem` was last in the pass list. It could not have produced upstream bytecode for `cond_select`, `bulk_memory`, or `endian_fusion`. It also reported `wide_mem=0/0` for cilium, so there is no evidence that `wide_mem` generated the missing sites.
+The May 7 doc kop source run did include `wide_mem`, but `wide_mem` was last in the pass list. It could not have produced upstream bytecode for `cond_select`, `bulk_memory`, or `endian_fusion`. It also reported `wide_mem=0/0` for cilium, so there is no evidence that `wide_mem` generated the missing sites.
 
-The doc kinsn run also included `skb_load_bytes_spec`, but it was after `bulk_memory` in the configured order. It likewise cannot explain missing `cond_select`, `bulk_memory`, or `endian_fusion` opportunities.
+The doc kop run also included `skb_load_bytes_spec`, but it was after `bulk_memory` in the configured order. It likewise cannot explain missing `cond_select`, `bulk_memory`, or `endian_fusion` opportunities.
 
 The 60 vs 53 program-count difference in the current 5-pass run is real, but it points to live discovery/workload topology rather than the pass-composition explanation. Extra duplicate programs would normally increase candidate opportunities. They do not explain why `cond_select` collapsed from 208/218 to 20/22.
 
@@ -56,7 +56,7 @@ This hypothesis does partially explain `prefetch`:
 
 So the `prefetch` delta of -19 is explainable without a pass-code regression: -17 from live program-set difference and -2 from current skip behavior.
 
-This hypothesis only weakly explains `map_inline`. The doc and current `noop,map_inline` program multisets are identical. The current run lost six applications from two `tail_drop_notif:88` programs that failed at `noop` ReJIT, while gaining four applications on `tail_handle_ipv:227`; the net applied delta is -2. That is not a multi-pass kinsn methodology issue.
+This hypothesis only weakly explains `map_inline`. The doc and current `noop,map_inline` program multisets are identical. The current run lost six applications from two `tail_drop_notif:88` programs that failed at `noop` ReJIT, while gaining four applications on `tail_handle_ipv:227`; the net applied delta is -2. That is not a multi-pass kop methodology issue.
 
 ## Hypothesis 2: upstream cilium version drift
 
@@ -70,22 +70,22 @@ The same pin is present in the May 7-era Dockerfile checked from the repository 
 
 Program-shape evidence also argues against version drift:
 
-- The doc kinsn 53-program cilium snapshot and the current 53-program snapshots have matching name plus original-instruction-count multisets.
+- The doc kop 53-program cilium snapshot and the current 53-program snapshots have matching name plus original-instruction-count multisets.
 - The doc and current `noop,map_inline` snapshots have identical cilium program multisets.
 - The current 5-pass 60-program run differs by duplicate live programs, not by new program bytecode shapes.
 
-Workload-level behavior is also comparable. The doc kinsn baseline cilium workload recorded roughly 4203 requests and 139.95 requests/sec with 37 socket timeouts; the current 5-pass baseline recorded roughly 4326 requests and 144.01 requests/sec with 35 socket timeouts. That looks like normal runtime variance, not an upgraded cilium agent generating a different datapath corpus.
+Workload-level behavior is also comparable. The doc kop baseline cilium workload recorded roughly 4203 requests and 139.95 requests/sec with 37 socket timeouts; the current 5-pass baseline recorded roughly 4326 requests and 144.01 requests/sec with 35 socket timeouts. That looks like normal runtime variance, not an upgraded cilium agent generating a different datapath corpus.
 
 The `prefetch` program-count difference is better explained by live endpoint/program discovery during the run than by a cilium version change.
 
 ## Hypothesis 3: cleanup code regression (which tasks)
 
-This hypothesis is strongly supported for the large kinsn deltas.
+This hypothesis is strongly supported for the large kop deltas.
 
 The current failure mode is specific and new relative to the May 7 baseline:
 
-- May 7 doc kinsn: `cond_select=208/218`, no `failed_bpfopt:cond_select`.
-- May 12 5-pass kinsn: `cond_select=20/22`, 37 `failed_bpfopt:cond_select`.
+- May 7 doc kop: `cond_select=208/218`, no `failed_bpfopt:cond_select`.
+- May 12 5-pass kop: `cond_select=20/22`, 37 `failed_bpfopt:cond_select`.
 - May 12 full default-policy run found during investigation: `cond_select=21/23`, about 30 `failed_bpfopt:cond_select`, `bulk_memory=0/0`, `endian_fusion=0/0`.
 - May 12 six-pass run found during investigation: `cond_select=19/21`, about 31 `failed_bpfopt:cond_select`, `bulk_memory=0/0`, `endian_fusion=0/0`.
 
@@ -101,14 +101,14 @@ Relevant cleanup points:
 - Task 18 / `try_mutate` consolidation: commit `a8c5b966` added/used the shared `try_mutate` wrapper in BBProgram mutation paths. This is not the strongest root-cause candidate because the observed error is a semantic diamond-validation rejection, but it is near the affected mutation boundary.
 - Task 21 / `bulk_memory` width helpers: commit `a8c5b966` also changed width helper structure. The current dirty `bulk_memory.rs` diff is behavior-equivalent (`!is_some()` to `.is_none()`). This is low confidence as a bulk-specific cause. The stronger explanation is that `cond_select` aborts before `bulk_memory` gets to inspect many programs.
 - Task 22 / `hex_bytes` merge: current `map_inline` byte-preview formatting uses `hex_bytes`. This is diagnostics-only and low confidence for any applied-count delta.
-- Task 6 / `classify_r0_uses` bool parameter consolidation: `git log -S allow_helper_calls` points to `9a61ab1a`, which collapsed related helper-call booleans. This could plausibly affect `map_inline` candidate/skipped accounting, but it does not explain the kinsn collapse. Confidence is medium-low for the small `map_inline` delta and irrelevant for `cond_select`.
+- Task 6 / `classify_r0_uses` bool parameter consolidation: `git log -S allow_helper_calls` points to `9a61ab1a`, which collapsed related helper-call booleans. This could plausibly affect `map_inline` candidate/skipped accounting, but it does not explain the kop collapse. Confidence is medium-low for the small `map_inline` delta and irrelevant for `cond_select`.
 
 Commits in `44be6efb..HEAD` that touched relevant surfaces include:
 
 - `9a61ab1a` around `map_inline` helper-call classification.
 - `b42632e0` around pass test cleanup.
-- `3969eb16` around kinsn-related cleanup.
-- `b7e1b3a8` around `KinsnDescriptor` naming.
+- `3969eb16` around kop-related cleanup.
+- `b7e1b3a8` around `KopDescriptor` naming.
 - `a8c5b966` around mutation consolidation and width helper cleanup.
 
 One important caveat: the strict `validate_diamond()` introduction appears to predate `44be6efb` and postdate the May 7 baseline. So the root cause may be just outside the requested `44be6efb..HEAD` window, with later cleanup commits exposing or preserving the behavior.
@@ -137,11 +137,11 @@ The -2 applied delta happens with an identical program multiset. Current `noop` 
 
 Overall verdict:
 
-- The large kinsn mismatch is a real code regression in the current bpfopt `cond_select`/BBProgram diamond path.
+- The large kop mismatch is a real code regression in the current bpfopt `cond_select`/BBProgram diamond path.
 - The doc-vs-current methodology difference is not the cause for `cond_select`, `bulk_memory`, or `endian_fusion`.
 - Cilium upstream version drift is unlikely.
 - `prefetch` should be treated separately as a live-program-set/skipping delta.
-- `map_inline` should be treated as a small secondary drift, not part of the kinsn failure.
+- `map_inline` should be treated as a small secondary drift, not part of the kop failure.
 
 ## Recommended verification path
 
@@ -155,7 +155,7 @@ Overall verdict:
 
 4. Then compare `44be6efb^` vs `44be6efb`, because current `cond_select` trial mutation behavior is in that neighborhood and is inside the requested cleanup range.
 
-5. Only after the kinsn root cause is isolated, compare `9a61ab1a^` vs `9a61ab1a` with `BPFREJIT_BENCH_PASSES=noop,map_inline` if the small `map_inline` -2 applied delta still matters.
+5. Only after the kop root cause is isolated, compare `9a61ab1a^` vs `9a61ab1a` with `BPFREJIT_BENCH_PASSES=noop,map_inline` if the small `map_inline` -2 applied delta still matters.
 
 6. Treat `a8c5b966` as lower priority. It touches mutation and width-helper structure, but the current evidence points more strongly to `cond_select` diamond validation than to `bulk_memory` width decoding.
 

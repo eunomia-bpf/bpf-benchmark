@@ -18,7 +18,7 @@ The old matcher only scanned adjacent `shift; shift; OR` triples with one proven
 
 H2 is not supported. The pre-`2b126921` rotate64 matcher already had the same adjacent-shift assumption; `2b126921` generalized that shape to rotate32 but did not introduce the split-copy blind spot.
 
-H3 is false for Cilium. `docs/tmp/crc32_hash_kinsn_recheck_20260506.md` correctly identified Jenkins hash rotate clusters in the cached Cilium objects; the bytecode contains them.
+H3 is false for Cilium. `docs/tmp/crc32_hash_kop_recheck_20260506.md` correctly identified Jenkins hash rotate clusters in the cached Cilium objects; the bytecode contains them.
 
 ## Artifact Scope
 
@@ -76,10 +76,10 @@ Offline Cilium `xdp/tail` after the matcher fix:
 {"sites_applied":0,"sites_matched":111,"sites_skipped":111}
 ```
 
-The 111 skips are from the existing kinsn tail-call safety gate: the extracted `xdp/tail` section contains a tail-call helper, and rotate replacement changes instruction count. This investigation did not change tail-call policy. The important fix result is that structural matching is no longer zero.
+The 111 skips are from the existing kop tail-call safety gate: the extracted `xdp/tail` section contains a tail-call helper, and rotate replacement changes instruction count. This investigation did not change tail-call policy. The important fix result is that structural matching is no longer zero.
 
 ## Expected Smoke Change
 
 Rotate should no longer report `matched=0` on Cilium Jenkins-shape programs. Actual `applied` can still be lower than `matched` when existing safety checks reject a site, especially in programs with tail-call helper constraints.
 
-Top risk: if all hot production rotate sites for an app live in tail-call programs, this matcher fix will expose nonzero matched/skipped counts but may not increase applied count until tail-call-safe kinsn replacement is designed separately.
+Top risk: if all hot production rotate sites for an app live in tail-call programs, this matcher fix will expose nonzero matched/skipped counts but may not increase applied count until tail-call-safe kop replacement is designed separately.

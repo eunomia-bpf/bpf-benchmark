@@ -50,7 +50,7 @@ Top 5 LOC growers:
 | `analysis/bbprogram_api.rs` | +832 | Partly justified as mutation API, but clone-then-mutate wrappers repeat heavily. |
 | `analysis/bbprogram_lift.rs` | +494 | Justified; lift is inherently linear-bytecode boundary code. |
 | `analysis/bbprogram_use_def.rs` | +292 | Mostly justified; central analysis replacing old cache pieces. |
-| `passes/ccmp.rs` | +220 | Mostly pass migration and tests for new kinsn encoding; still PC-keyed. |
+| `passes/ccmp.rs` | +220 | Mostly pass migration and tests for new kop encoding; still PC-keyed. |
 
 Total Rust LOC is down `26167 - 29528 = -3361`. That total reduction is misleading: it is driven by test deletion and old module removal, especially `passes/map_inline_tests.rs` (-2498), `pass_tests.rs` (-515), and `rewrite.rs` (-534). The provided non-test baseline says current non-test LOC is `22099` versus start `19357`, or **+2742 non-test LOC**. The growth is primarily new BBProgram infra (`bbprogram.rs`, API, lift/lower/BTF/use_def/helpers, about +3090 to +3250 depending classification) plus pass growth (`ccmp`, `map_inline`, `const_prop`, `cond_select`, `map_info`, `branch_flip`, `bounds_check_merge`), partially offset by `pass.rs` and deleted legacy analysis/rewrite modules.
 
@@ -79,7 +79,7 @@ Total Rust LOC is down `26167 - 29528 = -3361`. That total reduction is misleadi
 - Terminator-site detection duplicated at `bounds_check_merge.rs:210-213` and `map_inline.rs:3250-3253`. Recommendation: add `BBProgram::is_terminator_site(site)` or a helper in `analysis/bbprogram_helpers.rs`.
 - Current-PC lookup duplicated as shared `site_current_pc` (`analysis/bbprogram_helpers.rs:39-47`) and local `map_inline::site_pc` (`map_inline.rs:248-253`). Recommendation: delete the local helper and pass/precompute the shared map, or add `BBProgram::site_current_pc`.
 - Block slot/slot-range helpers are scattered: `block_slot_offset` at `analysis/bbprogram_helpers.rs:28-37`, `block_slot_len` at `analysis/bbprogram.rs:554-564`, and prefetch frame/block slot bounds at `prefetch.rs:766-790`. Recommendation: hoist slot length/range queries into the BBProgram API.
-- Kinsn proof decoders repeat the same shape: `rotate.rs:24-37`, `extract.rs:17-19`, `endian.rs:53-55`, `bulk_memory.rs:34-40`, `prefetch.rs:30-32`, `cond_select.rs:16-18`, `ccmp.rs:20-22`. Recommendation: add a small `decode_packed_proof(payload, proof_len_fn)` helper, or accept if local readability is preferred.
+- KOperation proof decoders repeat the same shape: `rotate.rs:24-37`, `extract.rs:17-19`, `endian.rs:53-55`, `bulk_memory.rs:34-40`, `prefetch.rs:30-32`, `cond_select.rs:16-18`, `ccmp.rs:20-22`. Recommendation: add a small `decode_packed_proof(payload, proof_len_fn)` helper, or accept if local readability is preferred.
 - Register-state simulation is partially shared but still repeated: shared `SimpleRegValue`/`advance_reg_state` at `analysis/bbprogram_helpers.rs:104-142`; pass-local state machines in `bulk_memory.rs:120-157`, `skb_load_bytes.rs:24-51`, `const_prop.rs:581-688`, `bounds_check_merge.rs:563-622`, and `prefetch.rs:423-608`. Recommendation: hoist traversal scaffolding, keep pass-specific lattices local.
 - Subprogram-boundary replacement checks exist both as old linear helper `pass.rs:235-287` and BBProgram method `analysis/bbprogram.rs:485-552`. Recommendation: delete the linear helper if no production caller exists.
 - JSON read helper duplicated in `main.rs:1048-1052` and `analysis/bbprogram_helpers.rs:80-84`. Recommendation: share one helper if the bin/lib boundary permits; otherwise accept this small duplication.
@@ -93,7 +93,7 @@ Total Rust LOC is down `26167 - 29528 = -3361`. That total reduction is misleadi
 - `analysis/bbprogram.rs:212-214`: `blocks()` just returns `self.blocks.iter()` while `BBProgram::blocks` is public at `analysis/bbprogram.rs:131-132`. Recommendation: make the field private and keep the iterator, or remove the wrapper.
 - `analysis/bbprogram_use_def.rs:24-39`: `DefSite::site` and `UseSite::site` are trivial conversions. Recommendation: acceptable for readability if fields remain structured; otherwise inline after field privacy is decided.
 - `map_inline.rs:1101-1104` and `map_inline.rs:1152-1155`: tiny `pc()` wrappers around local `site_pc`. Recommendation: delete if `site_pc` is removed; otherwise acceptable.
-- `pass.rs:751-753`: `KinsnRegistry::unavailable()` is a trivial wrapper over `new()`. Recommendation: keep only if the semantic name is used to document "no target sidecar".
+- `pass.rs:751-753`: `KopRegistry::unavailable()` is a trivial wrapper over `new()`. Recommendation: keep only if the semantic name is used to document "no target sidecar".
 - `pass.rs:935-1043`: `PassManager` is a full policy/pipeline abstraction, but production `main.rs:334-347` builds it for a single explicit pass. Recommendation: inline single-pass execution in `main.rs` or keep only test/custom-pipeline support.
 - `passes/const_prop.rs:447-450`: `RewriteOutputs` is not the old forbidden `RewriteOutput`, but it is a small mutable bundle used to thread vectors through `rewrite_alu_if_constant` (`const_prop.rs:488`, `const_prop.rs:587`). Recommendation: acceptable, or replace with a local closure/context if simplifying.
 
@@ -119,7 +119,7 @@ Total Rust LOC is down `26167 - 29528 = -3361`. That total reduction is misleadi
 - `passes/const_prop.rs:474`: `prog.oracle.as_deref().unwrap_or(&[])` can turn missing verifier states into an empty oracle. `main.rs` validates side inputs for the CLI, but the pass API itself defaults. Recommendation: fail if required oracle is missing.
 - `passes/wide_mem.rs:507`: same empty-oracle default. Recommendation: fail or make it explicit why wide_mem can run without states.
 - `passes/cond_select.rs:166-171` and `passes/ccmp.rs:219-224`: validation errors are converted into skip reasons. Recommendation: distinguish structural non-match from invariant violation; malformed BBProgram should fail.
-- `pass.rs:1027-1028`: missing required kinsn targets return a skipped pass. `main.rs:301` already validates required kinsns before execution, so this is redundant fallback behavior. Recommendation: delete or make it unreachable/assertive in production.
+- `pass.rs:1027-1028`: missing required kop targets return a skipped pass. `main.rs:301` already validates required koperation before execution, so this is redundant fallback behavior. Recommendation: delete or make it unreachable/assertive in production.
 - `pass.rs:19-20`: re-export comment says existing `use crate::pass::*` consumers keep working. Recommendation: this compatibility smell is minor but should be cleaned once migration settles.
 - `main.rs:452`: `expect("chunk is 8 bytes")` is an internal invariant after `chunks_exact(8)`. Low severity.
 - `main.rs:947`, `main.rs:960`, `main.rs:974`, `main.rs:1007`: `unwrap_or` defaults in verifier JSON parsing. The string-prefix defaults are acceptable parsing convenience; missing verifier `kind`/`precise` defaults should be documented as schema compatibility or made explicit.
@@ -139,7 +139,7 @@ No P0 ReJIT filtering violations found in scoped source or the searched benchmar
 ### `analysis/bbprogram.rs` (1139 LOC)
 
 - Stale header: `analysis/bbprogram.rs:2` says "staged bpfopt pass migration"; this should now describe the permanent IR contract.
-- Public fields at `analysis/bbprogram.rs:131-137` allow direct pass access to `blocks`, `use_def`, `oracle`, `btf`, and `kinsn_reg`. This is the root of many direct-vector accesses. Recommendation: privatize at least `blocks`, `btf`, `oracle`, and expose checked methods.
+- Public fields at `analysis/bbprogram.rs:131-137` allow direct pass access to `blocks`, `use_def`, `oracle`, `btf`, and `kop_reg`. This is the root of many direct-vector accesses. Recommendation: privatize at least `blocks`, `btf`, `oracle`, and expose checked methods.
 - Bridge APIs dominate the file: `BlockBodyLinearView` at `analysis/bbprogram.rs:36-88`, `ProgramLinearView` at `analysis/bbprogram.rs:90-128`, current-PC maps at `analysis/bbprogram.rs:369-384`, and original-PC bridges at `analysis/bbprogram.rs:566-574`. These are useful migration scaffolding, not final design.
 - Silent invalid/default behavior exists at `analysis/bbprogram.rs:356-361`, `analysis/bbprogram.rs:591-600`, `analysis/bbprogram.rs:635-641`, `analysis/bbprogram.rs:665-668`, and `analysis/bbprogram.rs:759-762`.
 - LOC is bloated for a core IR because it mixes model types, bridge views, liveness wrappers, BTF side input attachment, map binding collection, CFG rebuild, site/PC mapping, and dominance.
@@ -181,7 +181,7 @@ No P0 ReJIT filtering violations found in scoped source or the searched benchmar
 ### `pass.rs`
 
 - `BpfProgram` still exists but is `#[cfg(test)]` (`pass.rs:291-294`), so production is clean on that point. Long-term, tests should migrate off it and delete it.
-- The old linear `kinsn_replacement_subprog_skip_reason(insns: &[BpfInsn], ...)` remains production-visible at `pass.rs:235-287`, while the BBProgram-native method exists at `analysis/bbprogram.rs:485-552` and is used by passes. Recommendation: delete or `cfg(test)` the old helper.
+- The old linear `kop_replacement_subprog_skip_reason(insns: &[BpfInsn], ...)` remains production-visible at `pass.rs:235-287`, while the BBProgram-native method exists at `analysis/bbprogram.rs:485-552` and is used by passes. Recommendation: delete or `cfg(test)` the old helper.
 - `PassManager` remains at `pass.rs:935-1043`. It is not the forbidden daemon `PassManager`, but production bpfopt CLI only runs one explicit pass per invocation (`main.rs:292-317`). Recommendation: simplify production single-pass dispatch and keep multi-pass support only where tests/custom utilities need it.
 - BTF remap helpers are not in `pass.rs`; they are in `bbprogram_btf.rs`. They likely belong closer to lower or need clear module docs.
 
@@ -217,7 +217,7 @@ No P0 ReJIT filtering violations found in scoped source or the searched benchmar
 ## 12. Prioritized Cleanup Tasks
 
 1. Privatize `BBProgram::blocks`, `btf`, and `oracle`; force pass code through checked `block`, `insn_at`, site iterators, and mutation APIs.
-2. Delete or `cfg(test)` the old linear `pass.rs:235-287` kinsn subprogram helper.
+2. Delete or `cfg(test)` the old linear `pass.rs:235-287` kop subprogram helper.
 3. Replace `program_linear_view` and `block_body_linear_view` with BBProgram-native window/site iterators; migrate `wide_mem` and `skb_load_bytes` first.
 4. Add `BBProgram::is_terminator_site`, `site_current_pc`, slot range/length helpers, and remove duplicate local helpers.
 5. Make CFG rebuild and site enumeration fail-fast: no silent invalid-successor `continue`, no invalid block -> empty iterator.

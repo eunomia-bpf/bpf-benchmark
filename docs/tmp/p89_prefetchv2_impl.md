@@ -58,7 +58,7 @@ Insertion policy:
   never inside `LD_IMM64`, and falls back to the dereference boundary when the
   post-guard window is short.
 - `prefetch` is placed at the end of the default optimize order. This avoids
-  shifting verifier-state PCs before `const_prop`, avoids DCE seeing the kinsn
+  shifting verifier-state PCs before `const_prop`, avoids DCE seeing the kop
   sidecar/call as ordinary code, and avoids disturbing later pattern matchers.
 
 ## Verification

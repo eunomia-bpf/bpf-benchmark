@@ -8,7 +8,7 @@ Scope: `git diff $(git merge-base HEAD master) HEAD` on `vendor/linux-framework`
 ## Executive Summary
 
 The kernel implementation is well-structured with clean separation between three subsystems:
-REJIT syscall (~560 LOC), kinsn verifier modeling (~470 LOC), and refresh/patching infrastructure (~180 LOC).
+REJIT syscall (~560 LOC), kop verifier modeling (~470 LOC), and refresh/patching infrastructure (~180 LOC).
 The verifier integration is thorough with comprehensive validation of module-supplied effects.
 Several issues were found: 2 CRITICAL, 3 HIGH, 6 MEDIUM, 5 LOW.
 
@@ -21,7 +21,7 @@ Total estimated LOC reduction opportunity: ~60-80 lines.
 ### 1. `include/uapi/linux/bpf.h` (+20)
 
 **Good**: REJIT attr struct layout is clean with proper `__aligned_u64` for pointers.
-`BPF_PSEUDO_KINSN_SIDECAR` value (3) doesn't conflict with existing pseudo-src values.
+`BPF_PSEUDO_KOP_SIDECAR` value (3) doesn't conflict with existing pseudo-src values.
 
 - **[CRITICAL]** `tools/include/uapi/linux/bpf.h` is out of sync: the `rejit` struct is missing the `flags` field. The kernel header has `__u32 flags;` as the last field, and `BPF_PROG_REJIT_LAST_FIELD` is defined as `rejit.flags`. The tools copy omits it. This means any userspace tool compiled against the tools header will send a shorter struct, and `CHECK_ATTR(BPF_PROG_REJIT)` will reject it because the kernel expects `flags` to be within the provided size. File: `tools/include/uapi/linux/bpf.h` line ~1935.
 
@@ -29,23 +29,23 @@ Total estimated LOC reduction opportunity: ~60-80 lines.
 
 ### 2. `include/linux/bpf.h` (+168)
 
-**Good**: kinsn structs are well-organized and compact. Enums use explicit bit positions.
-Inline helpers `bpf_kinsn_is_sidecar_insn` and `bpf_kinsn_sidecar_payload` are correctly placed.
+**Good**: kop structs are well-organized and compact. Enums use explicit bit positions.
+Inline helpers `bpf_kop_is_sidecar_insn` and `bpf_kop_sidecar_payload` are correctly placed.
 Static stubs for `!CONFIG_BPF_SYSCALL` are complete.
 
-- **[LOW]** `struct bpf_kinsn_call` has a `reserved` byte (offset 3). For a kernel-internal struct (not UAPI), reserved fields are unnecessary -- just use padding if needed, or remove it to save 1 byte.
+- **[LOW]** `struct bpf_kop_call` has a `reserved` byte (offset 3). For a kernel-internal struct (not UAPI), reserved fields are unnecessary -- just use padding if needed, or remove it to save 1 byte.
 
-- **[LOW]** `struct bpf_kinsn_operand` has `s16 imm16` followed by `s32 imm32` -- this creates a 2-byte hole between `imm16` (offset 4) and `imm32` (offset 8 with alignment). Consider reordering to `{u8 kind; u8 regno; s32 imm32; s16 imm16;}` or using `__packed` if size matters. However, since this is on the stack only, it's a minor style point.
+- **[LOW]** `struct bpf_kop_operand` has `s16 imm16` followed by `s32 imm32` -- this creates a 2-byte hole between `imm16` (offset 4) and `imm32` (offset 8 with alignment). Consider reordering to `{u8 kind; u8 regno; s32 imm32; s16 imm16;}` or using `__packed` if size matters. However, since this is on the stack only, it's a minor style point.
 
-- **[MEDIUM]** `BPF_KINSN_SIDECAR_PAYLOAD_BITS` is defined as 52 but never actually used in any runtime check. It's documentation-only. Consider either using it in an assertion/BUILD_BUG_ON or removing it.
+- **[MEDIUM]** `BPF_KOP_SIDECAR_PAYLOAD_BITS` is defined as 52 but never actually used in any runtime check. It's documentation-only. Consider either using it in an assertion/BUILD_BUG_ON or removing it.
 
 ### 3. `include/linux/bpf_verifier.h` (+3)
 
-Clean. `kinsn_clobber_mask` and `kinsn_call` in `bpf_insn_aux_data` are properly sized.
+Clean. `kop_clobber_mask` and `kop_call` in `bpf_insn_aux_data` are properly sized.
 
 ### 4. `include/linux/btf.h` (+2)
 
-**Good**: `KF_KINSN = (1 << 17)` doesn't conflict with existing KF_ flags. `KF_INLINE_EMIT` alias is clear.
+**Good**: `KF_KOP = (1 << 17)` doesn't conflict with existing KF_ flags. `KF_INLINE_EMIT` alias is clear.
 
 ### 5. `include/linux/filter.h` (+1)
 
@@ -111,22 +111,22 @@ This is the most critical function. It swaps ~30 fields between `prog` and `tmp`
 
 ### 8. `kernel/bpf/verifier.c` (+774)
 
-#### 8a. kinsn registration (bpf_register_kinsn_ops / bpf_unregister_kinsn_ops)
+#### 8a. kop registration (bpf_register_kop_ops / bpf_unregister_kop_ops)
 
 **Good**: Mutex-protected linked list. Registration validates required ops fields.
 
-- **[MEDIUM]** `bpf_kinsn_lookup` returns a raw pointer to `ops` after dropping the mutex. If the module is unloaded between lookup and use (during JIT), the pointer becomes dangling. The kfunc btf_id_set registration (which pins the module via `btf_kfunc_id_set.owner`) should prevent module unload while programs using the kfunc exist. But `bpf_kinsn_ops_desc` stores `ops` as a `const` pointer without taking a module reference. **The kinsn_ops pointer stored in `bpf_kfunc_desc` persists for the lifetime of the program's `kfunc_tab`. If the module is unloaded, `desc->kinsn_ops` is dangling.** However, the existing kfunc infrastructure already pins the module via BTF, so this is not exploitable in practice. But it would be cleaner to `try_module_get(ops->owner)` in `bpf_kinsn_lookup` and release on program free.
+- **[MEDIUM]** `bpf_kop_lookup` returns a raw pointer to `ops` after dropping the mutex. If the module is unloaded between lookup and use (during JIT), the pointer becomes dangling. The kfunc btf_id_set registration (which pins the module via `btf_kfunc_id_set.owner`) should prevent module unload while programs using the kfunc exist. But `bpf_kop_ops_desc` stores `ops` as a `const` pointer without taking a module reference. **The kop_ops pointer stored in `bpf_kfunc_desc` persists for the lifetime of the program's `kfunc_tab`. If the module is unloaded, `desc->kop_ops` is dangling.** However, the existing kfunc infrastructure already pins the module via BTF, so this is not exploitable in practice. But it would be cleaner to `try_module_get(ops->owner)` in `bpf_kop_lookup` and release on program free.
 
-- **[LOW]** `bpf_kinsn_forbidden_flags` checks a hardcoded list of flags. If new KF_ flags are added upstream, this list needs updating. Consider using an allowlist (`KF_KINSN | KF_TRUSTED_ARGS` etc.) instead of a blocklist.
+- **[LOW]** `bpf_kop_forbidden_flags` checks a hardcoded list of flags. If new KF_ flags are added upstream, this list needs updating. Consider using an allowlist (`KF_KOP | KF_TRUSTED_ARGS` etc.) instead of a blocklist.
 
 #### 8b. Sidecar validation
 
-**Good**: `check_kinsn_sidecar_insn` validates the next instruction is a kfunc call.
-`bpf_verifier_find_kinsn_sidecar` correctly checks subprog boundaries.
+**Good**: `check_kop_sidecar_insn` validates the next instruction is a kfunc call.
+`bpf_verifier_find_kop_sidecar` correctly checks subprog boundaries.
 
-- **[MEDIUM]** No explicit check that a branch cannot target a sidecar instruction in isolation. However, the verifier visits every reachable instruction, and when it encounters a sidecar it advances to the kfunc call. If a branch targets the kfunc call directly (skipping the sidecar), `bpf_verifier_find_kinsn_sidecar` will still detect the preceding sidecar in the bytecode. This is correct because sidecar is a static annotation, not runtime state. But if a branch targets the sidecar itself on a different path where the next insn is NOT a kfunc call (impossible due to static check), it would be caught. **This is safe as implemented.**
+- **[MEDIUM]** No explicit check that a branch cannot target a sidecar instruction in isolation. However, the verifier visits every reachable instruction, and when it encounters a sidecar it advances to the kfunc call. If a branch targets the kfunc call directly (skipping the sidecar), `bpf_verifier_find_kop_sidecar` will still detect the preceding sidecar in the bytecode. This is correct because sidecar is a static annotation, not runtime state. But if a branch targets the sidecar itself on a different path where the next insn is NOT a kfunc call (impossible due to static check), it would be caught. **This is safe as implemented.**
 
-#### 8c. check_kinsn_call() - Main verification
+#### 8c. check_kop_call() - Main verification
 
 **Good**: The flow is correct:
 1. Prepare call descriptor (legacy or packed)
@@ -138,18 +138,18 @@ This is the most critical function. It swaps ~30 fields between `prog` and `tmp`
 7. Check memory accesses
 8. Apply clobber mask, result, and subreg_def
 
-- **clobber_mask application**: `bpf_kinsn_apply_clobber_mask` calls `mark_reg_not_init` for all clobbered registers except the result register. This is correct -- clobbered registers become undefined.
+- **clobber_mask application**: `bpf_kop_apply_clobber_mask` calls `mark_reg_not_init` for all clobbered registers except the result register. This is correct -- clobbered registers become undefined.
 
-- **range narrowing**: `bpf_kinsn_apply_result` intersects the module-provided bounds with the load_state bounds (if any). The `min/max` operations are correct:
+- **range narrowing**: `bpf_kop_apply_result` intersects the module-provided bounds with the load_state bounds (if any). The `min/max` operations are correct:
   - `umin = max(reg.umin, effect.umin)` -- tightens lower bound
   - `umax = min(reg.umax, effect.umax)` -- tightens upper bound
   - Same for signed. Then `reg_bounds_sync` + `reg_bounds_sanity_check`. **Correct.**
 
-- **subreg_def**: `bpf_kinsn_apply_subreg_def` sets `subreg_def = insn_idx + 1` for 32-bit results, `DEF_NOT_SUBREG` for 64-bit. This matches the verifier convention where `subreg_def` tracks the instruction that last wrote the 32-bit sub-register. **Correct.**
+- **subreg_def**: `bpf_kop_apply_subreg_def` sets `subreg_def = insn_idx + 1` for 32-bit results, `DEF_NOT_SUBREG` for 64-bit. This matches the verifier convention where `subreg_def` tracks the instruction that last wrote the 32-bit sub-register. **Correct.**
 
-- **backtrack**: `bt_clear_reg_mask(bt, aux->kinsn_clobber_mask)` clears precision tracking for clobbered registers. This is correct because those registers are defined by this instruction, so their precision does not depend on prior instructions. Non-clobbered registers remain tracked (live across the call). **Correct.**
+- **backtrack**: `bt_clear_reg_mask(bt, aux->kop_clobber_mask)` clears precision tracking for clobbered registers. This is correct because those registers are defined by this instruction, so their precision does not depend on prior instructions. Non-clobbered registers remain tracked (live across the call). **Correct.**
 
-#### 8d. bpf_validate_kinsn_effect()
+#### 8d. bpf_validate_kop_effect()
 
 **Good**: Comprehensive validation of module-supplied effect:
 - Register mask bounds
@@ -160,11 +160,11 @@ This is the most critical function. It swaps ~30 fields between `prog` and `tmp`
 
 No bypass paths found. The validation is thorough.
 
-#### 8e. is_kinsn_unsized_mem_arg / void* argument handling
+#### 8e. is_kop_unsized_mem_arg / void* argument handling
 
-**Good**: Allows kinsn kfuncs to take `void *` arguments without size checks. This is needed for endian_load-style instructions where the memory access is described in the effect, not the C type.
+**Good**: Allows kop kfuncs to take `void *` arguments without size checks. This is needed for endian_load-style instructions where the memory access is described in the effect, not the C type.
 
-#### 8f. bpf_jit_find_kinsn_ops / bpf_jit_get_kinsn_call
+#### 8f. bpf_jit_find_kop_ops / bpf_jit_get_kop_call
 
 **Good**: Binary search on kfunc_tab, same pattern as existing kfunc lookup.
 
@@ -172,15 +172,15 @@ No bypass paths found. The validation is thorough.
 
 ### 9. `arch/x86/net/bpf_jit_comp.c` (+36)
 
-**Good**: `emit_kinsn_call` follows the existing emit pattern. Size validation (`ret != off || ret > max_emit_bytes`) is correct.
+**Good**: `emit_kop_call` follows the existing emit pattern. Size validation (`ret != off || ret > max_emit_bytes`) is correct.
 
-- **[LOW]** Sidecar skip in `do_jit` uses a `break` inside the `BPF_MOV_K` case. This is correct but slightly fragile -- if someone reorders cases, the break might not apply. However, the `bpf_kinsn_is_sidecar_insn` check is the first thing after the case label, so it's fine.
+- **[LOW]** Sidecar skip in `do_jit` uses a `break` inside the `BPF_MOV_K` case. This is correct but slightly fragile -- if someone reorders cases, the break might not apply. However, the `bpf_kop_is_sidecar_insn` check is the first thing after the case label, so it's fine.
 
 ### 10. `arch/arm64/net/bpf_jit_comp.c` (+47)
 
 **Good**: ARM64 emit follows the same pattern as x86. Size check `(n_insns * 4 > ops->max_emit_bytes)` correctly converts from instruction count to bytes (ARM64 insns are 4 bytes).
 
-- **[MEDIUM]** `ctx->idx - saved_idx != n_insns` check -- the ARM64 JIT can have alignment NOPs, but since the kinsn emit callback controls `ctx->idx`, this invariant should hold. Correct but potentially fragile if future ARM64 JIT changes insert implicit NOPs.
+- **[MEDIUM]** `ctx->idx - saved_idx != n_insns` check -- the ARM64 JIT can have alignment NOPs, but since the kop emit callback controls `ctx->idx`, this invariant should hold. Correct but potentially fragile if future ARM64 JIT changes insert implicit NOPs.
 
 ### 11. `kernel/bpf/bpf_struct_ops.c` (+75)
 
@@ -217,9 +217,9 @@ Clean 3-line wrapper.
 
 `get_original_poc.c`: Correct basic POC. Manually defines struct fields to work around missing tools header (see CRITICAL issue #2).
 
-`kinsn.c` (prog_test): Good integration test. Checks for specific x86 byte sequence in JIT output.
+`kop.c` (prog_test): Good integration test. Checks for specific x86 byte sequence in JIT output.
 
-`bpf_test_kinsn.c` (module): Clean example of kinsn registration. Good reference implementation.
+`bpf_test_kop.c` (module): Clean example of kop registration. Good reference implementation.
 
 ---
 
@@ -244,21 +244,21 @@ Clean 3-line wrapper.
 
 | # | Location | Description |
 |---|----------|-------------|
-| M1 | `kernel/bpf/verifier.c:bpf_kinsn_lookup()` | No `try_module_get` on kinsn_ops. Relies on kfunc BTF pinning to prevent module unload. |
+| M1 | `kernel/bpf/verifier.c:bpf_kop_lookup()` | No `try_module_get` on kop_ops. Relies on kfunc BTF pinning to prevent module unload. |
 | M2 | `kernel/bpf/syscall.c:bpf_prog_rejit()` | Trampoline/struct_ops/XDP refresh errors silently swallowed (err=0). REJIT reports success despite partial failure. |
 | M3 | `kernel/bpf/bpf_struct_ops.c:find_call_site()` | Potential false positive: 0xE8 in immediate data could match. Unlikely but possible. |
 | M4 | `kernel/bpf/trampoline.c:bpf_trampoline_link_prog()` | Narrow race between trampoline link and rejit_mutex list add. Benign but worth a comment. |
-| M5 | `include/linux/bpf.h` | `BPF_KINSN_SIDECAR_PAYLOAD_BITS` defined but never used in code. Dead constant. |
+| M5 | `include/linux/bpf.h` | `BPF_KOP_SIDECAR_PAYLOAD_BITS` defined but never used in code. Dead constant. |
 | M6 | `kernel/bpf/syscall.c:bpf_prog_rejit_swap()` | If new program is larger than original allocation, xlated insns show stale bytecode. No user-visible warning. |
 
 ### LOW (5)
 
 | # | Location | Description |
 |---|----------|-------------|
-| L1 | `include/linux/bpf.h:bpf_kinsn_call` | `reserved` byte unnecessary for kernel-internal struct. |
-| L2 | `include/linux/bpf.h:bpf_kinsn_operand` | Suboptimal field ordering creates 2-byte padding hole. |
+| L1 | `include/linux/bpf.h:bpf_kop_call` | `reserved` byte unnecessary for kernel-internal struct. |
+| L2 | `include/linux/bpf.h:bpf_kop_operand` | Suboptimal field ordering creates 2-byte padding hole. |
 | L3 | `kernel/bpf/syscall.c:bpf_prog_rejit_supported()` | 8-line comment for a trivially simple function. |
-| L4 | `kernel/bpf/verifier.c:bpf_kinsn_forbidden_flags()` | Blocklist approach fragile against new KF_ flags upstream. |
+| L4 | `kernel/bpf/verifier.c:bpf_kop_forbidden_flags()` | Blocklist approach fragile against new KF_ flags upstream. |
 | L5 | `arch/x86/net/bpf_jit_comp.c` | Sidecar skip position in MOV_K case is slightly fragile. |
 
 ---
@@ -268,11 +268,11 @@ Clean 3-line wrapper.
 | Area | Current | Savings | How |
 |------|---------|---------|-----|
 | `bpf_prog_rejit_swap()` field copies | ~60 lines | ~15 lines | Use a helper macro `SWAP_AUX(field)` or swap aux pointers directly if restructured. |
-| `bpf_validate_kinsn_effect()` | ~95 lines | ~10 lines | Consolidate repeated `verbose(env, ...); return -EINVAL;` into helper. |
+| `bpf_validate_kop_effect()` | ~95 lines | ~10 lines | Consolidate repeated `verbose(env, ...); return -EINVAL;` into helper. |
 | `bpf_prog_rejit()` EXT/func_info block | ~25 lines | ~5 lines | Extract into `bpf_rejit_copy_ext_info()` helper. |
 | `bpf_prog_rejit()` error cleanup paths | ~25 lines | ~5 lines | Use `goto` labels more aggressively or `__cleanup` attribute. |
 | `bpf_prog_rejit_supported()` comments | 8 lines | ~5 lines | Trim verbose comments. |
-| `bpf_build_legacy_kinsn_call` + `bpf_prepare_kinsn_call` | 25 lines | ~5-8 lines | Merge into single function since legacy call is immediately overwritten by packed path. |
+| `bpf_build_legacy_kop_call` + `bpf_prepare_kop_call` | 25 lines | ~5-8 lines | Merge into single function since legacy call is immediately overwritten by packed path. |
 | Inline static stubs in bpf.h | ~30 lines | ~5-10 lines | Some stubs could be one-liners. |
 | **Total** | | **~50-60 lines** | |
 
@@ -280,9 +280,9 @@ Clean 3-line wrapper.
 
 ## Naming Consistency
 
-- **kinsn naming cleanup**: `KF_KINSN` and `KF_INLINE_EMIT` are defined as aliases. The kernel code consistently uses `kinsn` in all struct/function names. The `KF_INLINE_EMIT` alias is only defined once (btf.h) and not used anywhere in the kernel diff. Module code uses `KF_KINSN` flag directly. **Recommendation**: Remove `KF_INLINE_EMIT` alias since it's unused and creates naming confusion.
+- **kop naming cleanup**: `KF_KOP` and `KF_INLINE_EMIT` are defined as aliases. The kernel code consistently uses `kop` in all struct/function names. The `KF_INLINE_EMIT` alias is only defined once (btf.h) and not used anywhere in the kernel diff. Module code uses `KF_KOP` flag directly. **Recommendation**: Remove `KF_INLINE_EMIT` alias since it's unused and creates naming confusion.
 
-- **bpf_ prefix**: All exported functions follow `bpf_` prefix convention. Internal statics follow `bpf_kinsn_` prefix consistently.
+- **bpf_ prefix**: All exported functions follow `bpf_` prefix convention. Internal statics follow `bpf_kop_` prefix consistently.
 
 - **`rejit_mutex` naming**: Consistent across all files. The rejit-related functions use `bpf_prog_rejit_*` naming.
 
@@ -295,14 +295,14 @@ Clean 3-line wrapper.
 - Brace style follows kernel convention.
 - Comments use `/* */` style throughout.
 - No unnecessary blank lines or trailing whitespace detected.
-- `#include <linux/tnum.h>` added to `bpf.h` is necessary for `struct tnum` in `bpf_kinsn_scalar_state`.
+- `#include <linux/tnum.h>` added to `bpf.h` is necessary for `struct tnum` in `bpf_kop_scalar_state`.
 
 ---
 
 ## Overall Assessment
 
 **Strengths**:
-1. Clean architectural separation: kinsn ops are a well-defined module interface with comprehensive validation
+1. Clean architectural separation: kop ops are a well-defined module interface with comprehensive validation
 2. The verifier integration is thorough -- effect validation, memory access checking, range narrowing, subreg_def, and backtracking all handled correctly
 3. Error paths are generally well-handled with proper cleanup
 4. The poke_tab (tail_call) handling is well-thought-out with correct two-phase approach

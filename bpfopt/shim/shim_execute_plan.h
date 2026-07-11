@@ -543,7 +543,7 @@ static int prog_workdir_init(struct prog_entry *pd, uint32_t want_id,
     snprintf(w->target_json, sizeof(w->target_json), "%s/target.json", w->workdir);
     snprintf(w->map_values_dir, sizeof(w->map_values_dir), "%s/map-values", w->workdir);
 
-    /* Per-prog target.json: copy from kinsnprober output once. */
+    /* Per-prog target.json: copy from kopprober output once. */
     struct stat tst;
     if (stat(w->target_json, &tst) != 0) {
         char shared[320];

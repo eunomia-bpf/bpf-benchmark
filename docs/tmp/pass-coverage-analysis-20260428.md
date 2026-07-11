@@ -94,7 +94,7 @@ Source files read: `daemon/src/passes/{wide_mem,rotate,cond_select,extract,endia
 
 No per-app or per-prog_type pass exclusions were found in
 `corpus/config/benchmark_config.yaml`; the 11 passes are enabled globally.
-The KVM artifact shows all expected kinsn modules loaded.
+The KVM artifact shows all expected kop modules loaded.
 
 ## Per-App Diagnosis
 
@@ -394,7 +394,7 @@ Expected impact:
 - Expected new applied programs: unknown but likely broader than rotate/extract
   in tracing apps.
 
-Complexity: medium. Needs either kinsn payload ABI support for immediates or
+Complexity: medium. Needs either kop payload ABI support for immediates or
 safe materialization without introducing register pressure bugs.
 
 Risk: low to medium.
@@ -418,7 +418,7 @@ packet parsers:
    - Coverage target: Tracee, Tetragon, BCC.
    - Risk: high. General `probe_read_kernel` has nofault plus zero-on-error
      semantics and accepts opaque pointers. Only a typed, verifier-proven
-     subset is safe as pure bytecode; the general form needs a safe-load kinsn
+     subset is safe as pure bytecode; the general form needs a safe-load kop
      or helper-inline contract.
 
 3. Event struct store coalescing
@@ -491,7 +491,7 @@ needs dynamic-key support and map invalidation at the policy-object level.
 | P1 | Subprog-aware `rotate` instead of whole-program veto | low-medium | medium | medium |
 | P2 | Tetragon policy pipeline specialization | high for Tetragon if robust | high | high |
 | P2 | Tail-call PIC specialization | high for Cilium/Katran | high | high |
-| P2 | Safe-load kinsn for probe-read-like typed subset | high for tracing, especially Tracee/Tetragon | high | high |
+| P2 | Safe-load kop for probe-read-like typed subset | high for tracing, especially Tracee/Tetragon | high | high |
 
 ## Recommended Next Measurement
 

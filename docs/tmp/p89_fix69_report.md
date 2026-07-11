@@ -26,26 +26,26 @@ state is test-clean on this HEAD.
 
 ## Reject Pattern Attribution
 
-I replayed the old 69 unique `kinsn5` rejected programs from
+I replayed the old 69 unique `kop5` rejected programs from
 `docs/tmp/p89h_full_verify_results.tsv` with current release `bpfopt`:
 
-Artifact: `/tmp/p89_fix69_after_kinsn5.tsv`
+Artifact: `/tmp/p89_fix69_after_kop5.tsv`
 
-| Current kinsn5 outcome | Count |
+| Current kop5 outcome | Count |
 |---|---:|
 | optimize rc=0 | 69 |
-| no current kinsn site applied | 60 |
+| no current kop site applied | 60 |
 | `extract:1` | 5 |
 | `bulk_memory:1` | 1 |
 | `bulk_memory:2` | 1 |
 | `endian_fusion:1` | 2 |
 
 The 60 no-site cases are not pass-induced rejects on current HEAD; there is no
-site where a kinsn pass can add a validity guard.
+site where a kop pass can add a validity guard.
 
 For the 9 current transformed programs, host raw `bpfverify` cannot replay the
-guest kinsn `fd_array`/BTF IDs directly, so I verifier-checked the
-verifier-visible proof bytecode for the kinsn sites.
+guest kop `fd_array`/BTF IDs directly, so I verifier-checked the
+verifier-visible proof bytecode for the kop sites.
 
 Artifact: `/tmp/p89_fix69_proof_after.tsv`
 
@@ -126,15 +126,15 @@ Artifacts:
 
 Result for the old `default11` reject set: `5 -> 0` verifier rejects.
 
-For the old `kinsn5` reject set on current HEAD:
+For the old `kop5` reject set on current HEAD:
 
 | Bucket | Count | Result |
 |---|---:|---|
-| no current kinsn site | 60 | no pass transform to fix |
+| no current kop site | 60 | no pass transform to fix |
 | proof-lowered transformed site accepted | 7 | pass |
 | original host fixture reject | 2 | same failure before/after optimization |
 
-Result for current transform-induced `kinsn5` rejects: `0`.
+Result for current transform-induced `kop5` rejects: `0`.
 
 ## Test Commands
 

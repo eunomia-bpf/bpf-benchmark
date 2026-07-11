@@ -3,7 +3,7 @@
   "daemon_socket": "/var/tmp/bpfrejit-daemon/bd-gylvtsbz/daemon.sock",
   "filters": [],
   "generated_at": "2026-04-23T05:26:55.596901+00:00",
-  "kinsn_modules": {
+  "kop_modules": {
     "captured_at": "2026-04-23T05:20:38.461857+00:00",
     "daemon_binary": "daemon/target/release/bpfrejit-daemon",
     "expected_modules": [
@@ -31,8 +31,8 @@
         "bpf_rotate",
         "bpf_select"
       ],
-      "loader": "runner.libs.kinsn.load_kinsn_modules",
-      "module_dir": "/artifacts/kinsn",
+      "loader": "runner.libs.kop.load_kop_modules",
+      "module_dir": "/artifacts/kop",
       "newly_loaded_modules": [],
       "snapshot_after": {
         "captured_at": "2026-04-23T05:20:38.461785+00:00",

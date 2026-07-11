@@ -11,28 +11,28 @@ Working tree: clean (no uncommitted changes)
 
 | # | v2 Severity | Issue | v3 Status | Evidence |
 |---|-------------|-------|-----------|----------|
-| 1 | **Critical** | `lower_kinsn_proof_regions()` control flow bug -- only processes first kinsn call due to broken indentation/early return | **FIXED** | Lines 4018-4095: for loop body is properly indented, `return 0` is after the loop closes at line 4093. All kinsn calls are processed. |
+| 1 | **Critical** | `lower_kop_proof_regions()` control flow bug -- only processes first kop call due to broken indentation/early return | **FIXED** | Lines 4018-4095: for loop body is properly indented, `return 0` is after the loop closes at line 4093. All kop calls are processed. |
 | 2 | Major | `skip_full_check:` indentation broken (extra tab) | **FIXED** | Line 26730-26740: consistent single-tab indentation after label, matching surrounding code. |
 | 3 | Major | `validate_ldimm64_layout()` debug scaffolding (~12 full-program scans per verification) | **FIXED** | No calls to `validate_ldimm64_layout` remain anywhere in verifier.c. |
-| 4 | Major | `kinsn_regions` fixed 256-element array (4KB) in committed HEAD | **FIXED** | `bpf_verifier.h` line 857: `struct bpf_kinsn_region *kinsn_regions` (pointer) + `kinsn_region_cap` (dynamic). Allocation in `alloc_kinsn_proof_regions()` uses `kvcalloc`. |
-| 5 | Major | `kfunc_desc_tab`/`kfunc_btf_tab` dynamic allocation refactor mixed with kinsn feature | **STILL MIXED** | The dynamic allocation (`ensure_desc_capacity`, `struct bpf_kfunc_desc *descs` pointer + `desc_cap`) is committed together with the kinsn feature in a single commit. Should be a separate preparatory patch for upstream. |
-| 6 | Major | `kallsyms_lookup_name()` usage for kinsn resolution | **NOT FIXED** | Line 3670: `addr = kallsyms_lookup_name(sym_name)` still present in `fetch_kinsn_desc_meta()`. |
+| 4 | Major | `kop_regions` fixed 256-element array (4KB) in committed HEAD | **FIXED** | `bpf_verifier.h` line 857: `struct bpf_kop_region *kop_regions` (pointer) + `kop_region_cap` (dynamic). Allocation in `alloc_kop_proof_regions()` uses `kvcalloc`. |
+| 5 | Major | `kfunc_desc_tab`/`kfunc_btf_tab` dynamic allocation refactor mixed with kop feature | **STILL MIXED** | The dynamic allocation (`ensure_desc_capacity`, `struct bpf_kfunc_desc *descs` pointer + `desc_cap`) is committed together with the kop feature in a single commit. Should be a separate preparatory patch for upstream. |
+| 6 | Major | `kallsyms_lookup_name()` usage for kop resolution | **NOT FIXED** | Line 3670: `addr = kallsyms_lookup_name(sym_name)` still present in `fetch_kop_desc_meta()`. |
 | 7 | Major | `bpf_trampoline_refresh_prog()` uses wrong poke type for freplace | **FIXED** | Lines 938-942: now uses `bpf_trampoline_update(tr, true)` which does a full trampoline rebuild instead of text-poke hacks. Correct and safe. |
 | 8 | Major | TOCTOU in `poke_target_phase` scan | **MITIGATED** | Lines 3329-3336: added a detailed comment explaining why the lockless pre-check is benign. Not a code fix, but acceptable. |
 
 **Score: 6/8 fixed, 1 mitigated with comment, 1 still open (`kallsyms_lookup_name`).**
 
 Also verified v1 review fixes that were uncommitted in v2:
-- `dst_reg` masked to 4 bits in `bpf_kinsn_sidecar_payload()`: COMMITTED (line 991)
-- `kinsn_tab` swap in `bpf_prog_rejit_swap()`: COMMITTED (line 3278)
+- `dst_reg` masked to 4 bits in `bpf_kop_sidecar_payload()`: COMMITTED (line 991)
+- `kop_tab` swap in `bpf_prog_rejit_swap()`: COMMITTED (line 3278)
 - E2BIG check before swap: COMMITTED (line 3623-3625)
 - Scratch buffer for x86 emit: COMMITTED (line 584)
 - Struct_ops instruction-boundary scan: COMMITTED (uses `insn_init`/`insn_get_length`)
 - ARM64 const-cast removed: COMMITTED (line 1629 uses `ctx->prog` directly)
-- `KF_KINSN` dead code removed: CONFIRMED (btf.h diff is only blank line removal)
-- `api_version`/`flags` dead fields removed from `struct bpf_kinsn`: CONFIRMED
+- `KF_KOP` dead code removed: CONFIRMED (btf.h diff is only blank line removal)
+- `api_version`/`flags` dead fields removed from `struct bpf_kop`: CONFIRMED
 - `tnum.h` include removed: CONFIRMED
-- `__maybe_unused` removed from kinsn functions: CONFIRMED
+- `__maybe_unused` removed from kop functions: CONFIRMED
 
 ---
 
@@ -42,25 +42,25 @@ Also verified v1 review fixes that were uncommitted in v2:
 
 #### [M1] `kallsyms_lookup_name()` still present -- upstream blocker
 - **File**: `kernel/bpf/verifier.c`, line 3670
-- **Issue**: `kallsyms_lookup_name(sym_name)` is used to resolve kinsn descriptor addresses from BTF symbol names. Since commit `0bd476e6c671` upstream explicitly discourages new uses of `kallsyms_lookup_name` in loadable modules. BPF maintainers (Alexei, Andrii) have repeatedly rejected patches using it.
-- **Fix**: Replace with a registration-based mechanism: kinsn modules call `register_bpf_kinsn()` at init, verifier looks up by BTF type ID from a global table. This aligns with the `register_btf_kfunc_id_set()` pattern.
+- **Issue**: `kallsyms_lookup_name(sym_name)` is used to resolve kop descriptor addresses from BTF symbol names. Since commit `0bd476e6c671` upstream explicitly discourages new uses of `kallsyms_lookup_name` in loadable modules. BPF maintainers (Alexei, Andrii) have repeatedly rejected patches using it.
+- **Fix**: Replace with a registration-based mechanism: kop modules call `register_bpf_kop()` at init, verifier looks up by BTF type ID from a global table. This aligns with the `register_btf_kfunc_id_set()` pattern.
 - **Upstream risk**: HIGH. This is the single biggest upstream acceptance blocker remaining.
 
-#### [M2] `bpf_prog_has_kinsn_call()` does O(N) full program scan -- should use `kinsn_tab`
+#### [M2] `bpf_prog_has_kop_call()` does O(N) full program scan -- should use `kop_tab`
 - **File**: `kernel/bpf/verifier.c`, lines 3811-3822
-- **Issue**: This function scans every instruction in the program to find a kinsn call. It is called from `fixup_call_args()` which runs before `bpf_prog_jit_attempt_done()` frees the tab. The equivalent `bpf_prog_has_kfunc_call()` just checks `!!prog->aux->kfunc_tab`. Same pattern should be used here.
-- **Fix**: `return !!prog->aux->kinsn_tab;`
+- **Issue**: This function scans every instruction in the program to find a kop call. It is called from `fixup_call_args()` which runs before `bpf_prog_jit_attempt_done()` frees the tab. The equivalent `bpf_prog_has_kfunc_call()` just checks `!!prog->aux->kfunc_tab`. Same pattern should be used here.
+- **Fix**: `return !!prog->aux->kop_tab;`
 - **Impact**: Wastes O(insn_cnt) on every non-JIT fallback path.
 
-#### [M3] `count_kinsn_calls()` duplicates work already done in `add_subprog_and_kfunc()`
+#### [M3] `count_kop_calls()` duplicates work already done in `add_subprog_and_kfunc()`
 - **File**: `kernel/bpf/verifier.c`, lines 3993-4005
-- **Issue**: `alloc_kinsn_proof_regions()` calls `count_kinsn_calls()` which does another O(N) scan. But `add_subprog_and_kfunc()` already iterated all instructions and found every kinsn call (calling `add_kinsn_call`). The count is `env->prog->aux->kinsn_tab->nr_descs`.
-- **Fix**: Use `tab->nr_descs` (though this is an upper bound since dedup happens -- but the current `count_kinsn_calls` counts instruction-level occurrences, not unique descriptors). Actually, instruction-level count could exceed descriptor count. A cleaner fix: store `env->kinsn_call_cnt` during `add_subprog_and_kfunc`.
+- **Issue**: `alloc_kop_proof_regions()` calls `count_kop_calls()` which does another O(N) scan. But `add_subprog_and_kfunc()` already iterated all instructions and found every kop call (calling `add_kop_call`). The count is `env->prog->aux->kop_tab->nr_descs`.
+- **Fix**: Use `tab->nr_descs` (though this is an upper bound since dedup happens -- but the current `count_kop_calls` counts instruction-level occurrences, not unique descriptors). Actually, instruction-level count could exceed descriptor count. A cleaner fix: store `env->kop_call_cnt` during `add_subprog_and_kfunc`.
 - **Impact**: Minor performance, but upstream reviewers dislike unnecessary scans.
 
 #### [M4] `kfunc_desc_tab` dynamic allocation refactor should be a separate patch
 - **File**: `kernel/bpf/verifier.c`, lines 3196-3233
-- **Issue**: The conversion of `kfunc_desc_tab.descs` from a fixed `[MAX_KFUNC_DESCS]` array to a dynamically allocated array with `ensure_desc_capacity()` is a significant refactor of pre-existing infrastructure. It changes memory allocation behavior for ALL BPF programs, even those without kinsn. This must be split into a separate preparatory patch to be reviewed and tested independently.
+- **Issue**: The conversion of `kfunc_desc_tab.descs` from a fixed `[MAX_KFUNC_DESCS]` array to a dynamically allocated array with `ensure_desc_capacity()` is a significant refactor of pre-existing infrastructure. It changes memory allocation behavior for ALL BPF programs, even those without kop. This must be split into a separate preparatory patch to be reviewed and tested independently.
 - **Risk**: Medium. Mixing unrelated infrastructure changes with feature code is a common upstream review objection.
 
 #### [M5] `bpf_struct_ops_refresh_prog()` uses `bpf_arch_text_poke` with wrong argument semantics
@@ -82,19 +82,19 @@ Also verified v1 review fixes that were uncommitted in v2:
 
 ### 2.2 Minor
 
-#### [m1] `bpf_kinsn_sidecar_payload()` silently truncates fields without validation
+#### [m1] `bpf_kop_sidecar_payload()` silently truncates fields without validation
 - **File**: `include/linux/bpf.h`, lines 989-993
-- **Issue**: The payload packing uses 4 bits for `dst_reg`, 16 bits for `off`, 32 bits for `imm` = 52 bits total. The masking `(insn->dst_reg & 0xf)` is correct but there's no compile-time assertion that `BPF_KINSN_SIDECAR_PAYLOAD_BITS == 52`. If the encoding changes, the constant and the actual packing could silently diverge.
-- **Fix**: Either add `BUILD_BUG_ON(BPF_KINSN_SIDECAR_PAYLOAD_BITS != 52)` or remove the unused constant.
+- **Issue**: The payload packing uses 4 bits for `dst_reg`, 16 bits for `off`, 32 bits for `imm` = 52 bits total. The masking `(insn->dst_reg & 0xf)` is correct but there's no compile-time assertion that `BPF_KOP_SIDECAR_PAYLOAD_BITS == 52`. If the encoding changes, the constant and the actual packing could silently diverge.
+- **Fix**: Either add `BUILD_BUG_ON(BPF_KOP_SIDECAR_PAYLOAD_BITS != 52)` or remove the unused constant.
 
 #### [m2] `bpf_prog_rejit_swap()` copies too many fields individually
 - **File**: `kernel/bpf/syscall.c`, lines 3216-3290
 - **Issue**: The swap function copies ~30 individual fields between `prog` and `tmp`. Many are boolean flags (`gpl_compatible`, `cb_access`, `blinding_requested`, etc.) that could be handled with a single `memcpy` of the flag region. This is fragile: any new field added to `bpf_prog` or `bpf_prog_aux` must also be added here, or it silently becomes stale after REJIT.
 - **Fix**: Add a comment listing which fields intentionally skip swap (e.g., `refcnt`, `type`, `expected_attach_type`, `ops`). Consider a more structured approach.
 
-#### [m3] `BPF_PSEUDO_KINSN_SIDECAR=3` and `BPF_PSEUDO_KINSN_CALL=4` -- SIDECAR is not in `src_reg` of a CALL
+#### [m3] `BPF_PSEUDO_KOP_SIDECAR=3` and `BPF_PSEUDO_KOP_CALL=4` -- SIDECAR is not in `src_reg` of a CALL
 - **File**: `include/uapi/linux/bpf.h`, lines 1383-1395
-- **Issue**: The comment says "when `bpf_mov->src_reg == BPF_PSEUDO_KINSN_SIDECAR`" but the values share the `src_reg` namespace with `BPF_PSEUDO_KFUNC_CALL=2`. SIDECAR (3) is used in a MOV instruction, KINSN_CALL (4) in a CALL instruction. They are in different instruction types so the values 3 and 4 cannot collide with KFUNC_CALL=2 in practice. But the sequential numbering suggests they are in the same namespace, which is misleading.
+- **Issue**: The comment says "when `bpf_mov->src_reg == BPF_PSEUDO_KOP_SIDECAR`" but the values share the `src_reg` namespace with `BPF_PSEUDO_KFUNC_CALL=2`. SIDECAR (3) is used in a MOV instruction, KOP_CALL (4) in a CALL instruction. They are in different instruction types so the values 3 and 4 cannot collide with KFUNC_CALL=2 in practice. But the sequential numbering suggests they are in the same namespace, which is misleading.
 - **Fix**: Add a comment clarifying that SIDECAR uses `src_reg` of ALU64|MOV|K, not of JMP|CALL.
 
 #### [m4] `orig_prog_insns` padding in `struct bpf_prog_info`
@@ -102,9 +102,9 @@ Also verified v1 review fixes that were uncommitted in v2:
 - **Issue**: `orig_prog_len` is `__u32` followed by `orig_prog_insns` which is `__aligned_u64`. There are 4 bytes of implicit padding between them. This is normal for UAPI structs but explicit padding (or reordering) is preferred upstream.
 - **Fix**: Either swap the order (`orig_prog_insns` first, then `orig_prog_len`), or add `__u32 __pad_orig;` between them.
 
-#### [m5] `BPF_KINSN_SIDECAR_PAYLOAD_BITS` constant defined but never used
+#### [m5] `BPF_KOP_SIDECAR_PAYLOAD_BITS` constant defined but never used
 - **File**: `include/linux/bpf.h`, line 981
-- **Issue**: `#define BPF_KINSN_SIDECAR_PAYLOAD_BITS 52` is defined but never referenced in any code.
+- **Issue**: `#define BPF_KOP_SIDECAR_PAYLOAD_BITS 52` is defined but never referenced in any code.
 - **Fix**: Remove it or use it in a BUILD_BUG_ON.
 
 #### [m6] `bpf_prog_rejit_poke_target_phase()` is O(N_maps * max_entries)
@@ -140,14 +140,14 @@ Also verified v1 review fixes that were uncommitted in v2:
 
 ## 3. Unnecessary Changes Checklist
 
-| File | Change | Necessary for REJIT/kinsn? | Recommendation |
+| File | Change | Necessary for REJIT/kop? | Recommendation |
 |------|--------|:---:|---|
 | `arch/x86/net/bpf_jit_comp.c` line 2804 | Enhanced pr_err message for unknown opcode | NO | Move to separate cleanup patch |
 | `include/linux/btf.h` | Remove blank line | NO | Drop (zero value, creates noise) |
 | `net/bpf/test_run.c` | Remove `bpf_prog_change_xdp` calls | UNCLEAR | Needs justification comment or revert |
-| `scripts/Makefile.btf` | Add `global_var` for external modules | YES (for kinsn module BTF) | Keep, but document |
+| `scripts/Makefile.btf` | Add `global_var` for external modules | YES (for kop module BTF) | Keep, but document |
 | `tools/testing/selftests/bpf/jit_disasm_helpers.c` | `normalize_movabs_imm_hex()` + `#include <stdlib.h>` | NO (test infra) | Move to separate patch |
-| `include/linux/bpf.h` line 981 | `BPF_KINSN_SIDECAR_PAYLOAD_BITS` constant | NO (unused) | Delete |
+| `include/linux/bpf.h` line 981 | `BPF_KOP_SIDECAR_PAYLOAD_BITS` constant | NO (unused) | Delete |
 | `kernel/bpf/core.c` lines 1010-1013 | Comment on `bpf_arch_text_invalidate` | TANGENTIAL | Move to separate cleanup or drop |
 | `kernel/bpf/verifier.c` | `kfunc_desc_tab`/`kfunc_btf_tab` dynamic allocation refactor | INDIRECTLY (shared `ensure_desc_capacity`) | Split to preparatory patch |
 
@@ -162,13 +162,13 @@ Also verified v1 review fixes that were uncommitted in v2:
 | Component | File(s) | Net Lines | Purpose |
 |-----------|---------|-----------|---------|
 | REJIT syscall + swap | `syscall.c` | 520 | Core REJIT functionality |
-| Verifier kinsn support | `verifier.c` | 550 | Proof lowering, kinsn desc management, do_misc_fixups |
+| Verifier kop support | `verifier.c` | 550 | Proof lowering, kop desc management, do_misc_fixups |
 | Internal headers | `bpf.h`, `bpf_verifier.h`, `filter.h`, `btf.h` | 87 | Struct definitions, inline helpers |
-| UAPI | `uapi/linux/bpf.h` | 23 | REJIT command, kinsn constants, prog_info fields |
+| UAPI | `uapi/linux/bpf.h` | 23 | REJIT command, kop constants, prog_info fields |
 | Struct_ops refresh | `bpf_struct_ops.c` | 89 | find_call_site + text_poke |
 | Trampoline refresh | `trampoline.c` | 45 | Reverse index + rebuild |
-| x86 JIT | `bpf_jit_comp.c` (x86) | 44 | emit_kinsn_desc_call, sidecar skip, movabs refactor |
-| ARM64 JIT | `bpf_jit_comp.c` (arm64) | 32 | emit_kinsn_desc_call_arm64, sidecar skip |
+| x86 JIT | `bpf_jit_comp.c` (x86) | 44 | emit_kop_desc_call, sidecar skip, movabs refactor |
+| ARM64 JIT | `bpf_jit_comp.c` (arm64) | 32 | emit_kop_desc_call_arm64, sidecar skip |
 | Dispatcher refresh | `dispatcher.c` | 15 | bpf_dispatcher_refresh_prog |
 | Core + disasm + filter | `core.c`, `disasm.c`, `filter.c` | 15 | Init, ksym fix, XDP refresh |
 | Makefile.btf | `Makefile.btf` | 2 | External module BTF |
@@ -180,10 +180,10 @@ Also verified v1 review fixes that were uncommitted in v2:
 | # | Opportunity | Est. Savings | Difficulty |
 |---|-------------|-------------|------------|
 | 1 | **Split kfunc_desc_tab dynamic allocation to separate patch** -- doesn't reduce total LOC but reduces the REJIT patch size by ~60 lines | 60 lines | Easy |
-| 2 | **Replace `bpf_prog_has_kinsn_call()` with `!!kinsn_tab`** | 10 lines | Trivial |
-| 3 | **Replace `count_kinsn_calls()` with counter from `add_subprog_and_kfunc`** | 12 lines | Easy |
+| 2 | **Replace `bpf_prog_has_kop_call()` with `!!kop_tab`** | 10 lines | Trivial |
+| 3 | **Replace `count_kop_calls()` with counter from `add_subprog_and_kfunc`** | 12 lines | Easy |
 | 4 | **Consolidate `bpf_prog_rejit_swap()` flag copying** into a struct-level memcpy with explicit skip list | ~20 lines | Medium (risky) |
-| 5 | **Remove unused `BPF_KINSN_SIDECAR_PAYLOAD_BITS`** | 1 line | Trivial |
+| 5 | **Remove unused `BPF_KOP_SIDECAR_PAYLOAD_BITS`** | 1 line | Trivial |
 | 6 | **Remove unrelated pr_err enhancement** | 3 lines | Trivial |
 | 7 | **Remove btf.h blank line change** | 1 line | Trivial |
 | 8 | **Move `emit_movabs_imm64` refactor to separate cleanup patch** | 0 (keeps LOC but removes from REJIT series) | Easy |
@@ -194,14 +194,14 @@ Also verified v1 review fixes that were uncommitted in v2:
 
 The current ~1418 net lines in core kernel cannot realistically be reduced to <1000 without removing functionality. The breakdown:
 - **REJIT syscall** (520 lines): This is the minimum for safe prog swap with poke_tab, trampoline, struct_ops, and dispatcher support. The swap function alone is ~75 lines of individual field copies, which is inherent complexity.
-- **Verifier kinsn** (550 lines): ~200 lines for kinsn_desc_tab management (mirrors kfunc_desc_tab), ~200 lines for proof lowering/restoration, ~150 lines for validation and misc_fixups integration. The kfunc_desc_tab dynamic allocation (~60 lines) should be split out.
+- **Verifier kop** (550 lines): ~200 lines for kop_desc_tab management (mirrors kfunc_desc_tab), ~200 lines for proof lowering/restoration, ~150 lines for validation and misc_fixups integration. The kfunc_desc_tab dynamic allocation (~60 lines) should be split out.
 - **Refresh paths** (185 lines total): struct_ops (89), trampoline (45), dispatcher (15), JIT (76). These are architecturally necessary.
 
 **After applying easy reductions**: ~1350 net lines (from ~1418).
 **After splitting kfunc refactor to prep patch**: REJIT-specific ~1290 net lines.
 **Theoretical minimum** (removing all dispatcher/XDP, simplifying comments): ~1200 lines.
 
-The plan doc claims "~550 lines." This is only achievable by counting just the core mechanism (REJIT syscall command + minimal kinsn proof lowering) without the refresh paths for trampoline/struct_ops/dispatcher/poke_tab. If upstream review demands reducing scope, the refresh paths could be deferred to follow-up patches.
+The plan doc claims "~550 lines." This is only achievable by counting just the core mechanism (REJIT syscall command + minimal kop proof lowering) without the refresh paths for trampoline/struct_ops/dispatcher/poke_tab. If upstream review demands reducing scope, the refresh paths could be deferred to follow-up patches.
 
 ---
 
@@ -213,16 +213,16 @@ The plan doc claims "~550 lines." This is only achievable by counting just the c
 
 | # | Severity | Issue | Fix Effort |
 |---|----------|-------|------------|
-| 1 | Major | `kallsyms_lookup_name()` in `fetch_kinsn_desc_meta()` -- upstream won't accept | Medium (need registration API) |
+| 1 | Major | `kallsyms_lookup_name()` in `fetch_kop_desc_meta()` -- upstream won't accept | Medium (need registration API) |
 | 2 | Major | `kfunc_desc_tab` dynamic allocation mixed with feature -- must split | Easy (git rebase -i) |
 
 ### Non-blocking but Should Fix Before Submission
 
 | # | Severity | Issue |
 |---|----------|-------|
-| 3 | Minor | `bpf_prog_has_kinsn_call()` does O(N) scan, should use `!!kinsn_tab` |
-| 4 | Minor | `count_kinsn_calls()` duplicates work |
-| 5 | Minor | `BPF_KINSN_SIDECAR_PAYLOAD_BITS` unused constant |
+| 3 | Minor | `bpf_prog_has_kop_call()` does O(N) scan, should use `!!kop_tab` |
+| 4 | Minor | `count_kop_calls()` duplicates work |
+| 5 | Minor | `BPF_KOP_SIDECAR_PAYLOAD_BITS` unused constant |
 | 6 | Minor | `orig_prog_insns` padding in UAPI struct |
 | 7 | Minor | `bpf_prog_rejit_swap()` is fragile against new fields |
 | 8 | Minor | `bpf_prog_rejit_poke_target_phase()` O(N_maps) scan |
@@ -232,10 +232,10 @@ The plan doc claims "~550 lines." This is only achievable by counting just the c
 ### Strengths (improved from v2)
 
 1. **All v1 Critical/Major issues fixed and committed** -- no uncommitted changes remaining.
-2. **`lower_kinsn_proof_regions()` control flow is correct** -- processes all kinsn calls via backward iteration.
+2. **`lower_kop_proof_regions()` control flow is correct** -- processes all kop calls via backward iteration.
 3. **`bpf_trampoline_refresh_prog()` uses full rebuild** -- much safer than text-poke hacks.
 4. **TOCTOU race documented** with clear comment explaining benign nature.
-5. **Dead code cleaned up**: `KF_KINSN`, `api_version`, `flags`, `tnum.h`, `__maybe_unused` all removed.
+5. **Dead code cleaned up**: `KF_KOP`, `api_version`, `flags`, `tnum.h`, `__maybe_unused` all removed.
 6. **`skip_full_check` indentation fixed**.
 7. **Debug scaffolding (`validate_ldimm64_layout`) removed**.
 8. **Security model is sound**: `CAP_BPF + CAP_SYS_ADMIN`, full verifier re-verification, scratch buffer for JIT emit, instruction-boundary scanning for struct_ops.
@@ -284,17 +284,17 @@ Patch 2/4: bpf: add BPF_PROG_GET_ORIGINAL and BPF_PROG_REJIT syscall commands
   Selftest: get_original_poc.c
 
 
-Patch 3/4: bpf: add kinsn (kernel instruction) extension mechanism
+Patch 3/4: bpf: add kop (kernel instruction) extension mechanism
 
-  Kinsn verifier and JIT integration:
-  - UAPI: BPF_PSEUDO_KINSN_CALL, BPF_PSEUDO_KINSN_SIDECAR
-  - kinsn_desc_tab management (add, find, free, sort)
-  - Proof sequence lowering (lower_kinsn_proof_regions) and restoration
-  - validate_kinsn_proof_seq with JMP32|JA support
+  KOperation verifier and JIT integration:
+  - UAPI: BPF_PSEUDO_KOP_CALL, BPF_PSEUDO_KOP_SIDECAR
+  - kop_desc_tab management (add, find, free, sort)
+  - Proof sequence lowering (lower_kop_proof_regions) and restoration
+  - validate_kop_proof_seq with JMP32|JA support
   - Sidecar handling in backtrack_insn, do_check_insn
-  - do_misc_fixups kinsn lowering for non-JIT fallback
-  - fixup_call_args kinsn-requires-JIT check
-  - disasm.c kinsn-descriptor string
+  - do_misc_fixups kop lowering for non-JIT fallback
+  - fixup_call_args kop-requires-JIT check
+  - disasm.c kop-descriptor string
 
   Files: kernel/bpf/verifier.c, kernel/bpf/disasm.c,
          include/linux/bpf.h, include/linux/bpf_verifier.h,
@@ -304,12 +304,12 @@ Patch 3/4: bpf: add kinsn (kernel instruction) extension mechanism
   NOTE: Replace kallsyms_lookup_name with registration API before submission.
 
 
-Patch 4/4: bpf/{x86,arm64}: JIT emit support for kinsn descriptors
+Patch 4/4: bpf/{x86,arm64}: JIT emit support for kop descriptors
 
   Architecture-specific JIT code:
-  - x86: emit_kinsn_desc_call() with scratch buffer, sidecar skip
-  - x86: emit_movabs_imm64() refactor (used by kinsn indirectly)
-  - ARM64: emit_kinsn_desc_call_arm64(), sidecar skip
+  - x86: emit_kop_desc_call() with scratch buffer, sidecar skip
+  - x86: emit_movabs_imm64() refactor (used by kop indirectly)
+  - ARM64: emit_kop_desc_call_arm64(), sidecar skip
   - scripts/Makefile.btf: global_var for external module BTF
 
   Files: arch/x86/net/bpf_jit_comp.c, arch/arm64/net/bpf_jit_comp.c,

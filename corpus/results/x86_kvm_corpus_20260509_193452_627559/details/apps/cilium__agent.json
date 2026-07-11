@@ -4328,7 +4328,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 22: Invalid argument (os error 22)\nverifier log:\nkinsn call must be preceded by sidecar payload\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            "error": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 22: Invalid argument (os error 22)\nverifier log:\nkop call must be preceded by sidecar payload\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
             "rejit_syscall_ms": 0,
             "status": "failed_rejit",
             "step": {
@@ -6328,7 +6328,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 22: Invalid argument (os error 22)\nverifier log:\nkinsn call must be preceded by sidecar payload\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            "error": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 22: Invalid argument (os error 22)\nverifier log:\nkop call must be preceded by sidecar payload\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
             "rejit_syscall_ms": 0,
             "status": "failed_rejit",
             "step": {

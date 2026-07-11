@@ -5,15 +5,15 @@
 - Pattern A is the classic four-instruction diamond described in the pass comment: `Jcc`, false `MOV`, `JA`, true `MOV` (`cond_select.rs:21-32`). `try_match_pattern_a()` requires the taken and fallthrough blocks to be distinct (`cond_select.rs:307-309`), each branch body to contain exactly one `MOV` (`cond_select.rs:310-319`), both `MOV`s to write the same destination register (`cond_select.rs:321-323`), and both branch blocks to have the same single successor join (`cond_select.rs:324-332`). The site starts at the conditional branch terminator and has `old_len = 4` (`cond_select.rs:338-346`).
 - Pattern C is the shorter shape where the "true" assignment is already in the predecessor body immediately before the conditional branch, while the false arm is a one-instruction fallthrough block (`cond_select.rs:349-390`). It requires `mov_true.dst == mov_false.dst` (`cond_select.rs:365-367`), requires the false block's single successor to be the branch taken block (`cond_select.rs:368-370`), and rejects cases where the pre-branch `MOV` overwrites a register read by the condition (`cond_select.rs:371-376`). The site starts at the pre-branch `MOV` and has `old_len = 3` (`cond_select.rs:382-390`).
 
-Lowering is built before structural replacement. `run_on_bbprogram()` computes `live_after = prog.live_out_site_checked(site.end_site)` (`cond_select.rs:110-113`), then `build_lowering()` creates a prefix plus three register operands for the packed `bpf_select64` kinsn (`cond_select.rs:416-453`). `condition_prefix()` turns the original branch predicate into a boolean condition register (`cond_select.rs:456-534`). `materialize_value()` places immediate and 32-bit source operands into registers that are not live after the site, except that the destination register itself is allowed because it is the selected output (`cond_select.rs:545-571`, `cond_select.rs:573-586`). The emitted replacement is:
+Lowering is built before structural replacement. `run_on_bbprogram()` computes `live_after = prog.live_out_site_checked(site.end_site)` (`cond_select.rs:110-113`), then `build_lowering()` creates a prefix plus three register operands for the packed `bpf_select64` kop (`cond_select.rs:416-453`). `condition_prefix()` turns the original branch predicate into a boolean condition register (`cond_select.rs:456-534`). `materialize_value()` places immediate and 32-bit source operands into registers that are not live after the site, except that the destination register itself is allowed because it is the selected output (`cond_select.rs:545-571`, `cond_select.rs:573-586`). The emitted replacement is:
 
 ```text
 prefix to materialize cond/a/b registers
-kinsn sidecar payload: dst_reg, a_reg, b_reg, cond_reg
-call kinsn bpf_select64
+kop sidecar payload: dst_reg, a_reg, b_reg, cond_reg
+call kop bpf_select64
 ```
 
-The current comment at `cond_select.rs:24-29` is stale for the packed kinsn ABI: the implementation does not move operands into `r1/r2/r3`; it encodes register operands in the sidecar payload (`cond_select.rs:144-151`, `insn.rs:680-690`).
+The current comment at `cond_select.rs:24-29` is stale for the packed kop ABI: the implementation does not move operands into `r1/r2/r3`; it encodes register operands in the sidecar payload (`cond_select.rs:144-151`, `insn.rs:680-690`).
 
 `pattern_a_for_site()` and `pattern_c_for_site()` then turn the matched instruction site into a `DiamondPattern` (`cond_select.rs:164-255`):
 
@@ -108,7 +108,7 @@ cargo run -q --manifest-path bpfopt/Cargo.toml -p bpfopt -- \
   --input bpfopt/testbin/cilium_agent/164_cil_from_host/canonicalize_output.bin \
   --output /tmp/cond_select_164.bin \
   --report /tmp/cond_select_164.json \
-  --kinsns bpf_select64:5555
+  --koperation bpf_select64:5555
 ```
 
 Report:
@@ -180,8 +180,8 @@ jne32 r1, 56710, +1                 ; if original condition false, skip predicat
 mov64 r0, 1                         ; predicate = true
 mov32 r1, -100                      ; a
 mov32 r2, -3                        ; b
-kinsn_sidecar payload 0x210         ; dst=r0, a=r1, b=r2, cond=r0
-call_kinsn bpf_select64:5555
+kop_sidecar payload 0x210         ; dst=r0, a=r1, b=r2, cond=r0
+call_kop bpf_select64:5555
 ```
 
 `r1` and `r2` are legal temps here because they are not in `BlockId(32)`'s live-in set. The replacement only changes `r0`, exactly the selected destination. It does not touch `r3/r4/r5/r6/r9/r10` or stack.
@@ -202,8 +202,8 @@ The current generic helper would try this invalid structural transformation:
 +  mov64 r0, 1
 +  mov32 r1, -100
 +  mov32 r2, -3
-+  kinsn_sidecar payload 0x210
-+  call_kinsn bpf_select64:5555
++  kop_sidecar payload 0x210
++  call_kop bpf_select64:5555
 +  jsgt32 r0, -1, -> BlockId(35) else BlockId(33)
 ```
 
@@ -223,8 +223,8 @@ The correct post-CFG for an external-join site is instead:
 +  mov64 r0, 1
 +  mov32 r1, -100
 +  mov32 r2, -3
-+  kinsn_sidecar payload 0x210
-+  call_kinsn bpf_select64:5555
++  kop_sidecar payload 0x210
++  call_kop bpf_select64:5555
 +  ja/fallthrough -> BlockId(32)
  BlockId(32):
    pc174: jsgt32 r0, -1, -> BlockId(35) else BlockId(33)
@@ -386,7 +386,7 @@ Other structural skip patterns found:
 
 # 6. Concrete cilium-site evidence
 
-Static read-only scan over `bpfopt/testbin/cilium_agent/*/canonicalize_output.bin` used the host-side `bpfopt` CLI with `--pass cond_select`, `--output /tmp/...`, `--report /tmp/...`, and `--kinsns bpf_select64:5555`. No benchmark target was run.
+Static read-only scan over `bpfopt/testbin/cilium_agent/*/canonicalize_output.bin` used the host-side `bpfopt` CLI with `--pass cond_select`, `--output /tmp/...`, `--report /tmp/...`, and `--koperation bpf_select64:5555`. No benchmark target was run.
 
 Aggregate from the static scan:
 
@@ -406,14 +406,14 @@ Examples with multiple guard-skipped diamonds:
 220_tail_ipv4_to_endpoint:           5 / 9, three external-join skips plus one temp-reg skip
 ```
 
-The doc baseline records cilium `cond_select` at `208 / 218` and tetragon at `1 331 / 1 753` (`docs/evaluation.md:305-309`). The static cilium testbin scan is not the same as the full kinsn-5 corpus pipeline, but it demonstrates that the current pass-level guard has corpus-scale impact: most cilium cond_select skips in these snapshots are the mirrored external-join predicate, not real lowering failures.
+The doc baseline records cilium `cond_select` at `208 / 218` and tetragon at `1 331 / 1 753` (`docs/evaluation.md:305-309`). The static cilium testbin scan is not the same as the full kop-5 corpus pipeline, but it demonstrates that the current pass-level guard has corpus-scale impact: most cilium cond_select skips in these snapshots are the mirrored external-join predicate, not real lowering failures.
 
 For the PC 39 site in `164_cil_from_host`, the live-in verification is:
 
 - External path `BlockId(3) -> BlockId(32)`: before rewrite, `r0 = -1`; after a preserve-join rewrite, BlockId(3) and BlockId(32) are unchanged, so `r0 = -1` and all other live-ins are identical.
 - Diamond true path `BlockId(6) -> BlockId(32)`: before rewrite, `r0 = -100`; after replacement, `bpf_select64(-100, -3, true)` writes `r0 = -100`.
 - Diamond false path `BlockId(6) -> BlockId(7) -> BlockId(32)`: before rewrite, `r0 = -3`; after replacement, `bpf_select64(-100, -3, false)` writes `r0 = -3`.
-- Join live-in set is `[r0,r3,r4,r5,r6,r9,r10]`; the replacement temps are `r1` and `r2`, and the predicate reuses `r0` before the kinsn overwrites `r0` with the selected result. No stack slot is read or written by the old true/false blocks or the replacement.
+- Join live-in set is `[r0,r3,r4,r5,r6,r9,r10]`; the replacement temps are `r1` and `r2`, and the predicate reuses `r0` before the kop overwrites `r0` with the selected result. No stack slot is read or written by the old true/false blocks or the replacement.
 
 Therefore the external predecessor is not a semantic blocker for cond_select if the join is preserved. It is only a blocker for the current generic helper because the helper deletes the join.
 

@@ -31,7 +31,7 @@ FROM --platform=${KERNEL_FORK_IMAGE_PLATFORM} \
     AS runner-runtime-kernel-base
 ```
 
-The runtime image copies `/artifacts/kernel`, `/artifacts/modules`, and `/artifacts/headers` from that image. The kinsn module build remains in an upper runtime stage and uses `/artifacts/headers` as the external module build tree, so changing `daemon/`, `bpfopt/`, runtime Python, or `module/` does not invalidate the kernel build.
+The runtime image copies `/artifacts/kernel`, `/artifacts/modules`, and `/artifacts/headers` from that image. The kop module build remains in an upper runtime stage and uses `/artifacts/headers` as the external module build tree, so changing `daemon/`, `bpfopt/`, runtime Python, or `module/` does not invalidate the kernel build.
 
 `runner/mk/build.mk` adds `image-kernel-fork-image-tar`. The target checks for the local tag first, builds it only when the tag is absent, and saves it to the same local image tar flow used by AWS transfer. It intentionally does not push to a registry.
 
@@ -43,9 +43,9 @@ All commands below ran in `/tmp/bpf-benchmark-p75` so the active P67/P72 worktre
 | --- | --- | --- |
 | x86_64 kernel fork image | `make image-kernel-fork-image-tar RUN_TARGET_ARCH=x86_64 IMAGE_BUILD_JOBS=12` | `real 516.21s` after a cancelled `-j4` warmup; combined elapsed was about `1154s`. Produced `.cache/container-images/x86_64-kernel-fork-a1b8bade1.image.tar`. |
 | x86_64 runtime image | `make image-runner-runtime-image-tar RUN_TARGET_ARCH=x86_64` | `real 1211.42s`. Runtime build copied kernel artifacts from `kernel-fork`; no kernel compile stage ran. |
-| daemon edit cache test | temporary `daemon/src/main.rs` comment, then runtime tar target | full target `real 369.87s`; Docker build reused kernel, kinsn, and bpfopt layers. Daemon Cargo rebuild finished in `10.76s`; remaining time was image load/save. |
-| module edit cache test | temporary `module/x86/bpf_rotate.c` comment, then runtime tar target | full target `real 303.66s`; Docker build reused kernel and Rust layers. Only the kinsn stage reran, with external module make taking about `3.2s`; remaining time was image load/save. |
-| Python edit cache test | temporary `runner/libs/run_contract.py` comment, then runtime tar target | full target `real 360.59s`; Docker build reused kernel, kinsn, daemon, and bpfopt layers. Only final Python/config copy layers reran; remaining time was image load/save. |
+| daemon edit cache test | temporary `daemon/src/main.rs` comment, then runtime tar target | full target `real 369.87s`; Docker build reused kernel, kop, and bpfopt layers. Daemon Cargo rebuild finished in `10.76s`; remaining time was image load/save. |
+| module edit cache test | temporary `module/x86/bpf_rotate.c` comment, then runtime tar target | full target `real 303.66s`; Docker build reused kernel and Rust layers. Only the kop stage reran, with external module make taking about `3.2s`; remaining time was image load/save. |
+| Python edit cache test | temporary `runner/libs/run_contract.py` comment, then runtime tar target | full target `real 360.59s`; Docker build reused kernel, kop, daemon, and bpfopt layers. Only final Python/config copy layers reran; remaining time was image load/save. |
 | arm64 kernel fork image | `make image-kernel-fork-image-tar RUN_TARGET_ARCH=arm64 IMAGE_BUILD_JOBS=12` | `real 1179.67s`. Produced `.cache/container-images/arm64-kernel-fork-a1b8bade1.image.tar`. |
 
 The full `image-runner-runtime-image-tar` target includes `docker load` and `docker save` of a multi-GB runtime tar, so its wall time is dominated by tar import/export. The Docker build cache behavior matches the P75 goal: daemon, module, and Python edits do not recompile the vendor kernel.

@@ -451,13 +451,13 @@ passes/map_inline.rs:2745   prog.reg_fact_at(site, src)
 
 ### Construction(`bbprogram_lift.rs` 672 行)
 
-`lift_with_kinsn_registry` 今天:
+`lift_with_kop_registry` 今天:
 1. 把 raw insns + verifier states 收集成 `ProgramCFG::new` 的参数;
 2. `new` 内部把这些塞进 BTreeMap 字段。
 
 迁移后:
 1. lift 阶段直接构造 `Vec<InsnNode>`,每个 `InsnNode` 在创建时就**把对应的 verifier state、ldimm64_second、pc_relative_ldimm64_target、btf_pc 写进字段**;
-2. `ProgramCFG::new` 接受的参数从一堆 `BTreeMap<InsnSite, ...>` 降到 `blocks: Vec<BasicBlock>` + `entry` + `kinsn_reg`;
+2. `ProgramCFG::new` 接受的参数从一堆 `BTreeMap<InsnSite, ...>` 降到 `blocks: Vec<BasicBlock>` + `entry` + `kop_reg`;
 3. `lift_verifier_states_by_site`(391 行起)从返回 `Option<VerifierStatesBySite>` 改成在构造 `InsnNode` 时直接写入 `verifier_before/after` 字段。
 
 ### 代码量预估

@@ -9,7 +9,7 @@
 结论摘要：
 
 - 端到端执行是“app 正常加载 BPF -> runner 发 execute_plan -> daemon snapshot/canonicalize -> 每步 fork 外部 bpfopt -> daemon ReJIT”的模型；不是 daemon 内建 pass pipeline。
-- 最大 P0/P1 重复来自 packet ctx/prog_type 判定、`RewritePlan` dead API、同名 libbpf const/wrapper、map_inline 5502 行巨模块、kinsn 元数据散落、手写 rewrite/branch fixup/annotation remap。
+- 最大 P0/P1 重复来自 packet ctx/prog_type 判定、`RewritePlan` dead API、同名 libbpf const/wrapper、map_inline 5502 行巨模块、kop 元数据散落、手写 rewrite/branch fixup/annotation remap。
 - 是否需要 pass-prologue/epilogue：需要，但应该以“小而显式”的 validator/cleanup/rewrite commit layer 开始；不要把所有 normalize/cleanup 默认套到每个 pass，否则会改变 PC/BTF/verifier-state 对应关系。
 
 ## 2. 完整流程时序
@@ -28,10 +28,10 @@ sequenceDiagram
 
     App->>Kernel: real app startup loads/attaches BPF programs
     Runner->>Server: newline JSON cmd=execute_plan
-    Server->>Cmd: try_execute_plan(programs, kinsn_probes)
+    Server->>Cmd: try_execute_plan(programs, kop_probes)
     Cmd->>Bpf: snapshot_program(prog_id)
     Bpf->>Sys: prog_get_fd_by_id + prog_get_original + prog info/map_ids
-    Cmd->>Bpf: optional probe_target_json(kinsn_probes)
+    Cmd->>Bpf: optional probe_target_json(kop_probes)
     Cmd->>BpfoptC: fork/exec bpfopt --canonicalize-map-refs
     BpfoptC-->>Cmd: canonical bytecode + shifted target.json
     Cmd->>Cmd: optional bpftool map snapshots; build fd_array
@@ -59,7 +59,7 @@ sequenceDiagram
 - daemon socket server 是 newline-delimited JSON：`cmd_serve()` bind/listen/accept（`daemon/src/server.rs:33`-`daemon/src/server.rs:64`），`handle_client()` 逐行 parse request 并写回一行 JSON（`daemon/src/server.rs:66`-`daemon/src/server.rs:94`）。
 - 当前唯一有效 command 是 `execute_plan`（`daemon/src/server.rs:271`-`daemon/src/server.rs:289`）。
 - 请求 schema：`programs[]`，每项有 `prog_id` 和 `steps[]`（`daemon/src/server.rs:102`-`daemon/src/server.rs:150`）；每个 step 必须有 `name`、`command`、`log_level`，且 `log_level` 只能为 1 或 2（`daemon/src/server.rs:152`-`daemon/src/server.rs:205`）。
-- `kinsn_probes[]` 是 `{name, aliases[]}`，用于 daemon BTF probing（`daemon/src/server.rs:207`-`daemon/src/server.rs:262`）。
+- `kop_probes[]` 是 `{name, aliases[]}`，用于 daemon BTF probing（`daemon/src/server.rs:207`-`daemon/src/server.rs:262`）。
 - 响应 schema：top-level 总是 `{status:"ok", per_program:{...}}`，不聚合 error_message；消费者看 `per_program[id].status` 和 `passes[*].error`（`daemon/src/server.rs:292`-`daemon/src/server.rs:310`）。
 
 ### 2.3 Daemon per-program orchestration
@@ -93,7 +93,7 @@ sequenceDiagram
 
 ### 2.7 Side-input ownership
 
-- `target.json` / kinsn registry：daemon 在 command 引用 `${TARGET}` 时 probe BTF（`daemon/src/commands.rs:521`-`daemon/src/commands.rs:532`），BTF probing 枚举 kernel BTF objects，找 aliases，module kinsn 分配 non-zero `call_offset`（`daemon/src/bpf.rs:87`-`daemon/src/bpf.rs:102`, `daemon/src/bpf.rs:172`-`daemon/src/bpf.rs:280`）。bpfopt 读 `--target`，构建 `PassContext.kinsn_registry`（`bpfopt/crates/bpfopt/src/main.rs:839`-`bpfopt/crates/bpfopt/src/main.rs:864`, `bpfopt/crates/bpfopt/src/main.rs:965`-`bpfopt/crates/bpfopt/src/main.rs:1037`）。
+- `target.json` / kop registry：daemon 在 command 引用 `${TARGET}` 时 probe BTF（`daemon/src/commands.rs:521`-`daemon/src/commands.rs:532`），BTF probing 枚举 kernel BTF objects，找 aliases，module kop 分配 non-zero `call_offset`（`daemon/src/bpf.rs:87`-`daemon/src/bpf.rs:102`, `daemon/src/bpf.rs:172`-`daemon/src/bpf.rs:280`）。bpfopt 读 `--target`，构建 `PassContext.kop_registry`（`bpfopt/crates/bpfopt/src/main.rs:839`-`bpfopt/crates/bpfopt/src/main.rs:864`, `bpfopt/crates/bpfopt/src/main.rs:965`-`bpfopt/crates/bpfopt/src/main.rs:1037`）。
 - map-value side input：daemon 在 command 引用 `${MAP_VALUES}` 时用 bpftool snapshot maps（`daemon/src/commands.rs:567`-`daemon/src/commands.rs:570`, `daemon/src/commands.rs:944`-`daemon/src/commands.rs:993`），map-in-map supplement 通过 daemon syscall wrappers 读 outer map（`daemon/src/commands.rs:1009`-`daemon/src/commands.rs:1146`）。bpfopt `map_inline` pass-local CLI 读该目录并填充 `BpfProgram` map fields（`bpfopt/crates/bpfopt/src/passes/map_inline.rs:62`-`bpfopt/crates/bpfopt/src/passes/map_inline.rs:98`, `bpfopt/crates/bpfopt/src/passes/map_inline.rs:355`-`bpfopt/crates/bpfopt/src/passes/map_inline.rs:431`）。
 - verifier states：daemon 不解析成结构体，只把 ReJIT verifier log 写到文件，并把路径作为下一步 `${VERIFIER_STATES}`（`daemon/src/commands.rs:582`-`daemon/src/commands.rs:588`, `daemon/src/commands.rs:797`-`daemon/src/commands.rs:799`）。bpfopt 读 `--verifier-states`，支持 JSON 或 raw log，空 states fail-fast（`bpfopt/crates/bpfopt/src/main.rs:787`-`bpfopt/crates/bpfopt/src/main.rs:790`, `bpfopt/crates/bpfopt/src/main.rs:1039`-`bpfopt/crates/bpfopt/src/main.rs:1083`）。parser 在 `bpfopt/crates/bpfopt/src/verifier_log.rs:168`-`bpfopt/crates/bpfopt/src/verifier_log.rs:174`，也符合设计文档 `docs/tmp/bpfopt_design_v3.md:144`-`docs/tmp/bpfopt_design_v3.md:152`。
 - fd_array：daemon-only in memory。map fds 在前，module BTF fds 按 target.json `call_offset` 放后面；contiguous check 和 open fd 都在 `build_rejit_fd_array()`（`daemon/src/commands.rs:1225`-`daemon/src/commands.rs:1358`）。
@@ -120,10 +120,10 @@ sequenceDiagram
 | P0 | `bpfopt/crates/bpfopt/src/passes/rewrite.rs:11`-`17`, `:42`-`64` | `insertions` / `internal_branch_patches` 只有 dead API 支撑；当前 production callers 主要用 `replace_range`/`delete_range`/`commit`，`prefetch` 反而手写 insertion path。 | 立即二选一：删除 `insert_before`/`add_internal_branch` 及字段，或立刻迁移 `prefetch` 到它们。按“Fail-Fast: No Dead Code”，建议先删。风险低；估计 -30 到 -70 LOC。 |
 | P0 | `bpfopt/crates/bpfopt/src/passes/rewrite.rs:33`-`53` | rewrite plan mutator 用 `assert!` / `expect`，CLI malformed plan 会 panic 而不是 friendly stderr。 | `replace_range()` / `delete_range()` 返回 `Result<()>`，call sites `?`。风险低；LOC 约 +20/-10，质量收益高。 |
 | P0 | `bpfopt/crates/bpfopt/src/insn.rs:8`-`90`, `:120`-`180` | 大量同名 libbpf const alias 与 `BpfInsn` wrapper；与“能用 libbpf 就用 libbpf”“同名零增量 const 别名违规”冲突。 | 分阶段删同名 alias，改 call sites 直接用 `libbpf_sys::BPF_*`；只保留 fork-only pseudo tags 或真正增加安全语义的 helper。`BpfInsn` wrapper 若保留，应收缩为 encode/decode + bitfield access shim，而不是新 UAPI surface。风险中高；LOC 可净 -150 到 -400。 |
-| P1 | `bpfopt/crates/bpfopt/src/passes/utils.rs:20`-`73`, `:1029`-`1080`; `rewrite.rs:119`-`131`; `prefetch.rs:288`-`320`; `map_inline.rs:2880`-`2943` | branch fixup、addr_map 构造、BTF/annotation remap 在 shared `RewritePlan` 和手写 rewrite loops 之间分裂。 | 扩展一个真实 `RewriteBuilder`/`RewritePlan` 支持 replacement/deletion/insertion/internal branch + optional cleanup；先迁移 `prefetch`，再迁移简单 kinsn passes。风险中；长期净 -300 到 -600 LOC。 |
+| P1 | `bpfopt/crates/bpfopt/src/passes/utils.rs:20`-`73`, `:1029`-`1080`; `rewrite.rs:119`-`131`; `prefetch.rs:288`-`320`; `map_inline.rs:2880`-`2943` | branch fixup、addr_map 构造、BTF/annotation remap 在 shared `RewritePlan` 和手写 rewrite loops 之间分裂。 | 扩展一个真实 `RewriteBuilder`/`RewritePlan` 支持 replacement/deletion/insertion/internal branch + optional cleanup；先迁移 `prefetch`，再迁移简单 kop passes。风险中；长期净 -300 到 -600 LOC。 |
 | P1 | `bpfopt/crates/bpfopt/src/passes/map_inline.rs:50`-`98`, `:355`-`431`, `:962`-`1661`, `:1749`-`2340`, `:2343`-`2946`, `:3061`-`4197`, `:4204`-`5502`; `wc -l` = 5502 | `map_inline.rs` 同时包含 CLI parsing、bpftool snapshot parsing、key extraction、mutability/hints、fixpoint driver、rewrite builder、map-in-map、direct value rewrite、register/stack analyzers、diagnostics。 | 拆到 `passes/map_inline/{cli,snapshot,hints,sites,key_extract,rewrite,map_value,r0_uses,diagnostics}.rs`。第一步只移动不改逻辑。风险中；LOC 净变化小，但审查成本显著下降。 |
 | P1 | `bpfopt/crates/bpfopt/src/passes/map_inline/map_info.rs:96`-`116`; `bpfopt/crates/bpfopt/src/main.rs:362`-`368`; `bpfopt/crates/bpfopt/src/passes/mod.rs:196`-`203` | `MapInfoAnalysis` 是 map_inline 专用，却作为全局 standard analysis 注册。 | 把 map_info 定义迁到 `analysis/map_info.rs`，或让 map_inline pass 私有加载，不进入全局 standard analyses。风险低中；LOC 近中性。 |
-| P1 | `bpfopt/crates/bpfopt/src/main.rs:426`-`497`, `:965`-`1037`; `bpfopt/crates/bpfopt/src/pass.rs:659`-`719`; `bpfopt/crates/bpfopt/src/passes/mod.rs:113`-`119`; `bpfopt/crates/bpfopt/src/passes/utils.rs:289`-`390`; `daemon/src/bpf.rs:172`-`280` | kinsn metadata 散落：aliases、required kinsn validation、registry fields、PASS_REGISTRY metadata、proof length、daemon BTF probe target 都各有一份映射。 | 建 `kinsn::TargetSpec` 表：canonical name、public name、aliases、required-by pass、proof decoder、registry slot。daemon 仍只接 runner probes，不链接 bpfopt crate。风险中高；LOC 可能 -100 到 -250。 |
+| P1 | `bpfopt/crates/bpfopt/src/main.rs:426`-`497`, `:965`-`1037`; `bpfopt/crates/bpfopt/src/pass.rs:659`-`719`; `bpfopt/crates/bpfopt/src/passes/mod.rs:113`-`119`; `bpfopt/crates/bpfopt/src/passes/utils.rs:289`-`390`; `daemon/src/bpf.rs:172`-`280` | kop metadata 散落：aliases、required kop validation、registry fields、PASS_REGISTRY metadata、proof length、daemon BTF probe target 都各有一份映射。 | 建 `kop::TargetSpec` 表：canonical name、public name、aliases、required-by pass、proof decoder、registry slot。daemon 仍只接 runner probes，不链接 bpfopt crate。风险中高；LOC 可能 -100 到 -250。 |
 | P1 | `bpfopt/crates/bpfopt/src/passes/const_prop.rs:34`-`339`; `map_inline.rs:1266`-`1432`; `wide_mem.rs:371`-`414` | verifier-state 查询分别内嵌在 pass：const_prop 有 exact const oracle，map_inline 有 stack/key extraction，wide_mem 有 BTF ptr oracle。 | 抽 `analysis/verifier_state.rs`，提供 typed query：exact scalar、stack bytes、latest reg type、frame consensus。注意 required/optional state semantics。风险中；LOC 初期 +100，长期 -200+。 |
 | P2 | `bpfopt/crates/bpfopt/src/main.rs:894`-`939`; `daemon/src/bpf.rs:358`-`395` | prog type string<->u32 映射在 bpfopt 和 daemon 各有一份。跨 CLI crate 不能 path-dep，直接共享不合规。 | 只在 repo 内用小脚本生成两份表，或保持现状但加 drift check。风险低；LOC 影响小。 |
 | P2 | `bpfopt/crates/bpfopt/src/main.rs:1193`-`1214`; `bpfopt/crates/bpfopt/src/pass.rs:538`-`555`; `map_inline.rs:4902`-`4993`; `daemon/src/commands.rs:180`-`197` | diagnostics/report/error capture 各自成体系：PassResult diagnostics、map_inline env debug、daemon step stdout/stderr/error。 | 建 pass-local diagnostic sink，输出仍保持 `--report` JSON；daemon 只捕获报告和 subprocess output。风险低；LOC -50 到 -120。 |
@@ -134,13 +134,13 @@ sequenceDiagram
 ### `bpfopt/crates/bpfopt/src/main.rs`
 
 - 职责包括 CLI dispatch、canonicalize implementation、prog_type parser、target/kfunc registry parsing、verifier-state parsing、report serialization。入口清晰但文件承担太多 orchestration/detail。
-- `run_main()` 的 mode dispatch 本身合理（`bpfopt/crates/bpfopt/src/main.rs:240`-`274`），但 `canonicalize_map_refs_to_idx()`（`bpfopt/crates/bpfopt/src/main.rs:529`-`588`）和 kinsn registry mapping（`bpfopt/crates/bpfopt/src/main.rs:965`-`1037`）适合移到 `canonicalize.rs` / `kinsn.rs`。
+- `run_main()` 的 mode dispatch 本身合理（`bpfopt/crates/bpfopt/src/main.rs:240`-`274`），但 `canonicalize_map_refs_to_idx()`（`bpfopt/crates/bpfopt/src/main.rs:529`-`588`）和 kop registry mapping（`bpfopt/crates/bpfopt/src/main.rs:965`-`1037`）适合移到 `canonicalize.rs` / `kop.rs`。
 - 风险：移动不应改变 CLI semantics。优先级 P2；LOC 净影响小，结构收益中。
 
 ### `bpfopt/crates/bpfopt/src/pass.rs`
 
 - `BpfProgram` 是核心 IR，但已经装入 map_inline 专用 side-input、PMU branch stats、verifier states、BTF func/line info、map provider（`bpfopt/crates/bpfopt/src/pass.rs:84`-`130`）。
-- `PassContext` 同时含 kinsn registry、platform、policy、prog_type（`bpfopt/crates/bpfopt/src/pass.rs:642`-`657`）。在 production CLI 一次只跑一个 pass 的情况下，`policy.enabled_passes` 属于残留 pipeline 概念。
+- `PassContext` 同时含 kop registry、platform、policy、prog_type（`bpfopt/crates/bpfopt/src/pass.rs:642`-`657`）。在 production CLI 一次只跑一个 pass 的情况下，`policy.enabled_passes` 属于残留 pipeline 概念。
 - 建议：保留 `BpfProgram` 的通用 fields；map_inline-only snapshot/hints 尽量下沉到 `MapInlineCliPass` 或 pass-local context。`PassManager` 可收缩成 one-pass executor，test-only multi-pass builder 继续存在。优先级 P2；风险中。
 
 ### `bpfopt/crates/bpfopt/src/passes/map_inline.rs`
@@ -150,7 +150,7 @@ sequenceDiagram
 
 ### `bpfopt/crates/bpfopt/src/passes/utils.rs` 与 `rewrite.rs`
 
-- `utils.rs` 已经 1532 行，包含 branch fixup、BTF remap、kinsn proof layout、cleanup、emit helpers；`rewrite.rs` 又有部分重写语义。边界是“低层 helper” vs “rewrite transaction”，但现状并不稳定。
+- `utils.rs` 已经 1532 行，包含 branch fixup、BTF remap、kop proof layout、cleanup、emit helpers；`rewrite.rs` 又有部分重写语义。边界是“低层 helper” vs “rewrite transaction”，但现状并不稳定。
 - `RewritePlan::commit()` 统一 replacement/deletion 的 branch fixup/BTF/annotation remap（`bpfopt/crates/bpfopt/src/passes/rewrite.rs:66`-`139`），但多个 passes 仍手写 addr_map loops（见第 3 节 P1）。
 - 建议：`utils.rs` 留 pure stateless helpers；所有 program mutation 走 `rewrite.rs` transaction。优先级 P1。
 
@@ -174,7 +174,7 @@ sequenceDiagram
 | Post-pass cleanup: unreachable/NOP coalescing 不应由每个 pass 自己决定。 | `bounds_check_merge` 手动 cleanup（`bpfopt/crates/bpfopt/src/passes/bounds_check_merge.rs:172`-`181`）；`map_inline` 只在 removed null check 时 cleanup（`bpfopt/crates/bpfopt/src/passes/map_inline.rs:2914`-`2931`）；`dce` 只删除 dead register defs（`bpfopt/crates/bpfopt/src/passes/dce.rs:8`-`12`, `:23`-`50`）。 | `RewritePlan::commit_with_cleanup(CleanupPolicy)`，默认 off，pass 显式选择 `Unreachable | Nop | DeadDefs`。 | 中高：默认全局 cleanup 会改变 verifier-state PC 和 diagnostics；必须 opt-in。 | +80 到 +140，迁移后 -80 到 -180。 | P1 |
 | Post-pass verifier-state refresh: 维持 daemon after-ReJIT refresh，不放进 bpfopt。 | daemon 成功 ReJIT 后 `verifier_states_path = verifier_log_path`（`daemon/src/commands.rs:797`）；第一步用不存在 path 强制 runner 排序（`daemon/src/commands.rs:582`-`588`）；PassManager 若 in-process 多 pass transform 会清空 states（`bpfopt/crates/bpfopt/src/pass.rs:930`-`933`）。 | 保持在 daemon；增加 plan validation 或 docs：state-needing pass 必须由前一 step 的 outgoing `log_level=2` 供应。runner 已在 `rejit_plan.py:122`-`127` 做这件事。 | 低：production 一次一进程一 pass，无 stale state；风险只在 test/in-process pipeline。 | +20 到 +60。 | P2 |
 | Shared diagnostics/observability: pass 不应各自 env print/字符串计数。 | `PassResult.diagnostics`（`bpfopt/crates/bpfopt/src/pass.rs:538`-`555`）、`pass_report()`（`bpfopt/crates/bpfopt/src/main.rs:1193`-`1214`）、map_inline env debug（`bpfopt/crates/bpfopt/src/passes/map_inline.rs:4906`-`4913`）、daemon subprocess capture（`daemon/src/commands.rs:624`-`700`）。 | `pass::Diagnostics` builder + stable report schema；debug log 走 common trace flag/env。 | 低：注意不要把 framework benchmark summary 混进 pass report。 | +50 初期，后续 -50 到 -120。 | P2 |
-| Rewrite epilogue: branch fixup + annotation/BTF remap + internal branch patching 统一事务。 | `RewritePlan::commit()` 已有一半（`bpfopt/crates/bpfopt/src/passes/rewrite.rs:66`-`139`），但 prefetch/map_inline/kinsn passes 手写 addr_map/branch/remap（第 3 节 P1）。 | 完善 `RewritePlan`，先删 dead API，再按 pass 迁移。 | 中高：BTF func/line remap和 kinsn proof subprog layout很敏感。 | 长期净 -300 到 -600。 | P1 |
+| Rewrite epilogue: branch fixup + annotation/BTF remap + internal branch patching 统一事务。 | `RewritePlan::commit()` 已有一半（`bpfopt/crates/bpfopt/src/passes/rewrite.rs:66`-`139`），但 prefetch/map_inline/kop passes 手写 addr_map/branch/remap（第 3 节 P1）。 | 完善 `RewritePlan`，先删 dead API，再按 pass 迁移。 | 中高：BTF func/line remap和 kop proof subprog layout很敏感。 | 长期净 -300 到 -600。 | P1 |
 
 是否需要“通用 pass-prologue/pass-epilogue”的结论：
 
@@ -189,7 +189,7 @@ sequenceDiagram
 3. P0：抽 `passes/packet_ctx.rs`，合并 bounds_check_merge/prefetch/skb_load_bytes/wide_mem 的 packet ctx/prog_type 判定。预计净 -60 到 -140 LOC，风险低中。
 4. P1：确定 `RewritePlan` 方向：若保留 insertion/internal patch，就先迁移 `prefetch`；否则不要保留未调用 API。随后逐个迁移 rotate/cond_select/extract/bulk_memory/endian/ccmp 的手写 addr_map loops。预计长期 -300 到 -600 LOC。
 5. P1：把 `map_inline.rs` 拆模块。第一轮只移动代码，不重构行为；第二轮再提取 verifier-state oracle、snapshot parser、rewrite builder。净 LOC 初期变化小，但会显著降低 review/bug 成本。
-6. P1：合并 kinsn target metadata 的多份表。注意不能让 daemon compile-time 依赖 bpfopt；可以用生成表或重复生成两端代码。
+6. P1：合并 kop target metadata 的多份表。注意不能让 daemon compile-time 依赖 bpfopt；可以用生成表或重复生成两端代码。
 7. P2：更新 `docs/tmp/bpfopt_design_v3.md` 中 protocol/log parser/log_level 描述：当前实现是 `execute_plan` + runner YAML command + raw verifier log path 传给 bpfopt 解析，不是旧 `optimize/enabled_passes`。
 
 ## 7. 报告范围限制

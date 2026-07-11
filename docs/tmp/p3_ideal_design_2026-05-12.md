@@ -6,7 +6,7 @@ Audience: Phase 3 BBProgram migration team + OSDI '26 paper review
 
 ## Context
 
-bpfopt is a BPF bytecode optimizer with 15 passes (7 kinsn-class, 8 bytecode-rewriting) sitting on a basic-block IR (`BBProgram`). Phase 3 moved the codebase from "flat instruction array + PC offset" to "BB IR + InsnSite". After two days of iterative cleanup we landed at ~17300 LOC (-8.7% vs Phase 3 baseline). The ideal architecture would go further by collapsing repeated workflow scaffolding, removing the PassContext god-struct, and putting CLI bloat in its rightful place.
+bpfopt is a BPF bytecode optimizer with 15 passes (7 kop-class, 8 bytecode-rewriting) sitting on a basic-block IR (`BBProgram`). Phase 3 moved the codebase from "flat instruction array + PC offset" to "BB IR + InsnSite". After two days of iterative cleanup we landed at ~17300 LOC (-8.7% vs Phase 3 baseline). The ideal architecture would go further by collapsing repeated workflow scaffolding, removing the PassContext god-struct, and putting CLI bloat in its rightful place.
 
 This document captures the design we're aiming at, not the design we have.
 
@@ -24,7 +24,7 @@ This document captures the design we're aiming at, not the design we have.
 ┌─ Layer 3: lib (bpfopt::) ──────────────────────────────────────────┐
 │   - bpfopt::side_input — JSON parsing for snapshots, hints,        │
 │                          verifier logs (1100 LOC moved from main)  │
-│   - bpfopt::pass — BpfPass trait, KinsnPass trait, executors       │
+│   - bpfopt::pass — BpfPass trait, KopPass trait, executors       │
 │   - bpfopt::passes — concrete pass implementations                 │
 └─────────────────────────────────────────────────────────────────────┘
                               │
@@ -32,7 +32,7 @@ This document captures the design we're aiming at, not the design we have.
 ┌─ Layer 2: BBProgram IR (analysis::*) ──────────────────────────────┐
 │   - Identity types (BlockId, FrameId, InsnSite) — opaque to passes │
 │   - SlotDistance — layout query newtype                            │
-│   - KinsnAdmissionWindow — admission result token                  │
+│   - KopAdmissionWindow — admission result token                  │
 │   - lift(insns, side_input) — single entry, builder-style          │
 │   - mutation API (replace_range_at, replace_terminator, ...)       │
 │   - typed verifier queries (reg_known_*, branch_*, site_*)         │
@@ -71,7 +71,7 @@ pub enum RegKind { Scalar, MapValue, MapKey, Packet, ... }
 pub struct PrefetchHint { ... }
 ```
 
-Each has narrow methods (e.g., `SlotDistance::slots()`, `KinsnAdmissionWindow::start_site()`). Internal representation hidden.
+Each has narrow methods (e.g., `SlotDistance::slots()`, `KopAdmissionWindow::start_site()`). Internal representation hidden.
 
 ### 2.3 Query methods on BBProgram
 
@@ -118,8 +118,8 @@ impl BBProgram {
     pub fn block_range_slot_count(&self, first: BlockId, last: BlockId) -> Result<SlotDistance>;
 
     // Side input queries (after PassContext deconstruction)
-    pub fn kinsn_registry(&self) -> &KinsnRegistry;
-    pub fn kinsn_call(&self, target: &str) -> Result<(i32, i16)>;  // (btf_id, kfunc_off)
+    pub fn kop_registry(&self) -> &KopRegistry;
+    pub fn kop_call(&self, target: &str) -> Result<(i32, i16)>;  // (btf_id, kfunc_off)
     pub fn platform(&self) -> PlatformCapabilities;
     pub fn prog_type(&self) -> u32;
     pub fn program_branch_miss_rate(&self) -> Option<f64>;
@@ -129,7 +129,7 @@ impl BBProgram {
 
 ### 2.4 Mutation methods
 
-The single universal core for in-block instruction replacement is `try_replace_range`. It absorbs admission (subprog/branch-target/BTF), lazy payload generation, pass-specific skip decisions, and the actual mutation into one entry point. The old `replace_range_at` and `rep_admit_kinsn_site_window` + `KinsnAdmissionWindow` token are gone.
+The single universal core for in-block instruction replacement is `try_replace_range`. It absorbs admission (subprog/branch-target/BTF), lazy payload generation, pass-specific skip decisions, and the actual mutation into one entry point. The old `replace_range_at` and `rep_admit_kop_site_window` + `KopAdmissionWindow` token are gone.
 
 ```rust
 pub enum MakeReplacement {
@@ -171,18 +171,18 @@ impl BBProgram {
     pub fn delete_unreachable_blocks(&mut self) -> Result<usize>;
     pub fn replace_diamond_with_insns(&mut self, diamond: DiamondPattern, replacement: Vec<BpfInsn>) -> Result<()>;
 
-    // Shared side-input accessor for kinsn passes
-    pub fn kinsn_call(&self, target_name: &str) -> Result<(i32, i16)>;  // (btf_id, kfunc_off)
+    // Shared side-input accessor for kop passes
+    pub fn kop_call(&self, target_name: &str) -> Result<(i32, i16)>;  // (btf_id, kfunc_off)
 
-    // For rotate's "live-out at the last insn of a kinsn window" check
+    // For rotate's "live-out at the last insn of a kop window" check
     pub fn live_out_after_window(&self, start: InsnSite, len: usize) -> Result<RegSet>;
 }
 ```
 
 **Removed entirely**:
 - `replace_range_at` — every caller migrates to `try_replace_range`
-- `rep_admit_kinsn_site_window` — admission is internal to `try_replace_range`
-- `KinsnAdmissionWindow` — unused token type
+- `rep_admit_kop_site_window` — admission is internal to `try_replace_range`
+- `KopAdmissionWindow` — unused token type
 
 Each mutation atomically:
 1. Clones state (clone-swap idiom)
@@ -208,7 +208,7 @@ pub trait BpfPass {
 
 ### 3.2 Pass body — no new trait, no shared executor
 
-Per L's design and user direction: do NOT add a trait. Do NOT add a `run_kinsn_pass<...>` shared executor function. Each pass writes its own scan + apply loop using `try_replace_range`. The shared shape is short (~10 lines of mutation loop) and not worth hiding behind another layer.
+Per L's design and user direction: do NOT add a trait. Do NOT add a `run_kop_pass<...>` shared executor function. Each pass writes its own scan + apply loop using `try_replace_range`. The shared shape is short (~10 lines of mutation loop) and not worth hiding behind another layer.
 
 Concrete example — rotate.rs after V1:
 
@@ -234,7 +234,7 @@ impl BpfPass for RotatePass {
 
     fn run(&self, prog: &mut BBProgram) -> Result<PassResult> {
         let candidates = rotate_scan(prog)?;
-        let (btf_id, kfunc_off) = prog.kinsn_call("bpf_rotate64")?;
+        let (btf_id, kfunc_off) = prog.kop_call("bpf_rotate64")?;
         let mut skipped = Vec::new();
         let mut applied = 0usize;
 
@@ -244,7 +244,7 @@ impl BpfPass for RotatePass {
                     return Ok(MakeReplacement::Skip("tmp_reg live".into()));
                 }
                 let payload = pack_rotate_payload(&c.site);
-                Ok(MakeReplacement::Use(emit_packed_kinsn_call_with_off(
+                Ok(MakeReplacement::Use(emit_packed_kop_call_with_off(
                     payload, btf_id, kfunc_off,
                 )))
             })?;
@@ -263,7 +263,7 @@ impl BpfPass for RotatePass {
 
 Every other replacing pass (extract, endian, bulk_memory, wide_mem, ccmp, cond_select, const_prop, skb_load_bytes, map_inline, bounds_check_merge, prefetch) follows the same shape: pass-specific `scan` returning a `Vec<XxxCandidate>`, then a uniform reverse-iter + try_replace_range + match outcome loop. No shared trait, no shared executor — the loop is 10 lines and reads cleanly.
 
-Pass LOC ~80-120 each (was 150-200). Total kinsn savings across 6 passes ~300-450 LOC. Plus non-kinsn passes (const_prop / skb_load_bytes / bounds_check_merge / map_inline) get unified skip plumbing they didn't have before.
+Pass LOC ~80-120 each (was 150-200). Total kop savings across 6 passes ~300-450 LOC. Plus non-kop passes (const_prop / skb_load_bytes / bounds_check_merge / map_inline) get unified skip plumbing they didn't have before.
 
 ### 3.3 PassResult — generic, no pass-specific pollution
 
@@ -285,7 +285,7 @@ pub struct PassResult {
 
 ```rust
 pub struct PassContext {
-    pub kinsn_registry: KinsnRegistry,
+    pub kop_registry: KopRegistry,
     pub platform: PlatformCapabilities,
     pub prog_type: u32,
     verifier_states: Arc<[VerifierInsn]>,
@@ -310,7 +310,7 @@ pub struct PassContext {
 ```rust
 // Only lift inputs left:
 pub struct LiftInputs {
-    pub kinsn_registry: KinsnRegistry,
+    pub kop_registry: KopRegistry,
     pub platform: PlatformCapabilities,
     pub prog_type: u32,
     pub verifier_states: Arc<[VerifierInsn]>,
@@ -322,7 +322,7 @@ pub struct LiftInputs {
 }
 ```
 
-`LiftInputs` is consumed once by `lift(insns, inputs) -> BBProgram`. After lift, all of these are attached to BBProgram as side inputs queryable via `prog.kinsn_call(...)` / `prog.platform()` / `prog.program_branch_miss_rate()` / `prog.map_inline_side_input()`.
+`LiftInputs` is consumed once by `lift(insns, inputs) -> BBProgram`. After lift, all of these are attached to BBProgram as side inputs queryable via `prog.kop_call(...)` / `prog.platform()` / `prog.program_branch_miss_rate()` / `prog.map_inline_side_input()`.
 
 Passes never see `LiftInputs`. The `BpfPass::run(&self, prog)` signature has no `ctx`.
 
@@ -380,7 +380,7 @@ main.rs only does file IO + CLI flag mapping; the side-input module handles all 
 
 9. **No new helper files.** Library logic absorbs into existing modules: `analysis/`, `pass.rs`, `passes/<name>.rs`, `insn.rs`, `verifier_log.rs`, `main.rs`. `passes/map_inline/map_info.rs` is the only existing sub-file and contains map-info-specific code.
 
-10. **No DSL for pattern matching.** Per L's design doc, every kinsn pass writes its own pattern recognition. The shared abstraction is at the SCAN/ADMIT/APPLY plumbing level (`run_kinsn_pass` executor + `scan_block_starts` window iterator), not at the predicate composition level.
+10. **No DSL for pattern matching.** Per L's design doc, every kop pass writes its own pattern recognition. The shared abstraction is at the SCAN/ADMIT/APPLY plumbing level (`run_kop_pass` executor + `scan_block_starts` window iterator), not at the predicate composition level.
 
 ## 7. Where we are vs ideal (2026-05-12)
 
@@ -397,14 +397,14 @@ main.rs only does file IO + CLI flag mapping; the side-input module handles all 
 | PolicyConfig deleted | ✅ (S) |
 | PassManager → free function | ✅ (N2) |
 | matcher API (block_body_view + scan_block_starts) | ✅ (M) |
-| **KinsnPass trait + executor** | ❌ — biggest remaining win, ~-200-400 LOC |
+| **KopPass trait + executor** | ❌ — biggest remaining win, ~-200-400 LOC |
 | **PassContext god-struct deconstructed** | ❌ — ~-150-250 LOC |
 | **main.rs side-input ingestion moved to lib** | ❌ — organization only, no LOC delta |
 | **`ctx: &PassContext` removed from BpfPass::run** | ❌ — follows PassContext deconstruction |
 | **PassResult.map_inline_records removed** | ❌ — pass-specific output channel |
 | **`insn_at`/`insn` unified** | ❌ — ~-30 LOC |
 | **`sites_in_block` returns borrow not Vec** | ❌ — perf + LOC |
-| `try_replace_kinsn` collapses admit/apply/skip | ❌ — part of KinsnPass refactor |
+| `try_replace_kop` collapses admit/apply/skip | ❌ — part of KopPass refactor |
 | Skip-reason builder unified | ❌ — minor |
 | BTF remap dedup (lower vs view) | ❌ — ~-40 LOC |
 | map_inline silent `Err(_) => None` propagated | ❌ — P review #5 |
@@ -417,11 +417,11 @@ To reach the ideal, three more codex passes are needed:
 
 ### V1: Universal mutation core + migrate every pass
 - Add `MakeReplacement`, `TryReplaceOutcome` enums + `try_replace_range(start, old_len, new_len, closure)` to bbprogram_api.rs
-- Add `BBProgram::kinsn_call(target) -> (btf_id, kfunc_off)` convenience
+- Add `BBProgram::kop_call(target) -> (btf_id, kfunc_off)` convenience
 - Add `BBProgram::live_out_after_window(start, len) -> RegSet` for rotate-style live-out checks
-- **Delete** `replace_range_at`, `rep_admit_kinsn_site_window`, `KinsnAdmissionWindow`
+- **Delete** `replace_range_at`, `rep_admit_kop_site_window`, `KopAdmissionWindow`
 - Migrate every replacing pass to `try_replace_range`:
-  - rotate, extract, endian, bulk_memory, ccmp, cond_select (currently `rep_admit_kinsn_site_window` + `replace_range_at`)
+  - rotate, extract, endian, bulk_memory, ccmp, cond_select (currently `rep_admit_kop_site_window` + `replace_range_at`)
   - wide_mem, prefetch, const_prop, skb_load_bytes, map_inline, bounds_check_merge (currently only `replace_range_at`)
 - No new trait, no shared executor. Each pass writes ~10-line uniform reverse-iter loop.
 - Expected: -250 to -450 LOC across all 12 mutation-bearing passes
@@ -429,7 +429,7 @@ To reach the ideal, three more codex passes are needed:
 ### V2: PassContext deconstruction
 - Move map-inline fields to `MapInlineSideInputSpec` consumed by lift
 - Move `branch_miss_rate` to BBProgram side-input (`prog.program_branch_miss_rate()`)
-- Move `kinsn_registry`, `platform`, `prog_type` to BBProgram side-input
+- Move `kop_registry`, `platform`, `prog_type` to BBProgram side-input
 - Delete `PassContext` (or shrink to opaque platform/policy holder)
 - Update `BpfPass::run` signature: drop `ctx` parameter
 - Expected: -150 to -250 LOC

@@ -76,7 +76,7 @@ Action: audited and left fields unchanged.
 Findings:
 - `branch_miss_rate` is used only by `branch_flip` (`bpfopt/crates/bpfopt/src/passes/branch_flip.rs:38` and `bpfopt/crates/bpfopt/src/passes/branch_flip.rs:50`), while per-site profile data is already attached to `BBProgram` (`bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:404` through `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:443`).
 - Moving program-level `branch_miss_rate` into `BBProgram` would require adding a new program-level profile side input, not just moving an existing typed attachment. That is a product/API decision, so it was left unchanged.
-- Remaining fields are used by main/lift/passes: kinsn/platform/prog-type gates, verifier-state lift, map_inline side inputs, and BTF lowering inputs (`bpfopt/crates/bpfopt/src/pass.rs:401` through `bpfopt/crates/bpfopt/src/pass.rs:432`).
+- Remaining fields are used by main/lift/passes: kop/platform/prog-type gates, verifier-state lift, map_inline side inputs, and BTF lowering inputs (`bpfopt/crates/bpfopt/src/pass.rs:401` through `bpfopt/crates/bpfopt/src/pass.rs:432`).
 
 LOC delta: 0.
 

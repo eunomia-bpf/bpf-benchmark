@@ -513,11 +513,11 @@ constexpr const char *kHtabLruPercpuMapLookupElemSymbol =
     "htab_lru_percpu_map_lookup_elem";
 constexpr int kLibbpfCoreBadRelocPoison = 195896080; // 0xbad2310
 
-#ifndef BPF_PSEUDO_KINSN_SIDECAR
-#define BPF_PSEUDO_KINSN_SIDECAR 3
+#ifndef BPF_PSEUDO_KOP_SIDECAR
+#define BPF_PSEUDO_KOP_SIDECAR 3
 #endif
-#ifndef BPF_PSEUDO_KINSN_CALL
-#define BPF_PSEUDO_KINSN_CALL 4
+#ifndef BPF_PSEUDO_KOP_CALL
+#define BPF_PSEUDO_KOP_CALL 4
 #endif
 #ifndef K_BPF_ARRAY_VALUE_OFFSET
 #error "kernel_offsets.h must define K_BPF_ARRAY_VALUE_OFFSET"
@@ -881,7 +881,7 @@ std::vector<NativeBlobChunk> plan_blob_chunks(size_t blob_size,
     size_t offset = 0;
     while (offset < blob_size) {
         size_t end = std::min(offset + kNativeLabTarget.chunk_bytes, blob_size);
-        /* A helper-call reloc slot must fit inside one kinsn emit chunk. */
+        /* A helper-call reloc slot must fit inside one kop emit chunk. */
         for (const NativeLabReloc &reloc : relocs) {
             const size_t reloc_start = reloc.global_offset;
             const size_t reloc_end = reloc_start + native_lab_reloc_slot_bytes(reloc.kind);
@@ -1392,7 +1392,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         bpf_insn sidecar = {
             .code = BPF_ALU64 | BPF_MOV | BPF_K,
             .dst_reg = 0,
-            .src_reg = BPF_PSEUDO_KINSN_SIDECAR,
+            .src_reg = BPF_PSEUDO_KOP_SIDECAR,
             .off = static_cast<int16_t>(callee_saved_mask),
             .imm = static_cast<int32_t>(i),
         };
@@ -1400,7 +1400,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         bpf_insn call = {
             .code = BPF_JMP | BPF_CALL,
             .dst_reg = 0,
-            .src_reg = BPF_PSEUDO_KINSN_CALL,
+            .src_reg = BPF_PSEUDO_KOP_CALL,
             .off = 1, // fd_array slot for module BTF
             .imm = kfunc_btf_id,
         };
@@ -1440,7 +1440,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     }
 
     // fd_array[0] is the verifier pre-scan slot; fd_array[1] is what `off=1`
-    // in the kinsn call resolves to. Retained map fds follow and are bound via
+    // in the kop call resolves to. Retained map fds follow and are bound via
     // fd_array_cnt, so map retention has no runtime BPF instruction cost.
     std::vector<int> fd_array;
     fd_array.reserve(2 + map_ref_fds.size());

@@ -1,0 +1,204 @@
+/* SPDX-License-Identifier: GPL-2.0 */
+/*
+ * kop_common.h - shared helpers for first-class v2 kop modules
+ */
+
+#ifndef _KOP_COMMON_H
+#define _KOP_COMMON_H
+
+#include <linux/bpf.h>
+#include <linux/btf.h>
+#include <linux/filter.h>
+#include <linux/init.h>
+#include <linux/kernel.h>
+#include <linux/module.h>
+#include <linux/string.h>
+
+static __always_inline bool kop_payload_wire_escaped(u64 payload)
+{
+	u8 marker = payload & 0xf;
+	u8 original_low = (payload >> 4) & 0xf;
+
+	return marker == BPF_REG_10 && original_low >= 11 && original_low <= 15;
+}
+
+static __always_inline u64 kop_payload_decode(u64 payload)
+{
+	if (!kop_payload_wire_escaped(payload))
+		return payload;
+	return ((payload >> 8) << 4) | ((payload >> 4) & 0xf);
+}
+
+static __always_inline u8 kop_payload_reg(u64 payload, u8 shift)
+{
+	payload = kop_payload_decode(payload);
+	return (payload >> shift) & 0xf;
+}
+
+static __always_inline u8 kop_payload_u8(u64 payload, u8 shift)
+{
+	payload = kop_payload_decode(payload);
+	return (payload >> shift) & 0xff;
+}
+
+static __always_inline s16 kop_payload_s16(u64 payload, u8 shift)
+{
+	payload = kop_payload_decode(payload);
+	return (s16)((payload >> shift) & 0xffff);
+}
+
+static __always_inline u8 kop_bpf_size_bits(u8 size)
+{
+	switch (size) {
+	case BPF_H:
+		return 16;
+	case BPF_W:
+		return 32;
+	case BPF_DW:
+		return 64;
+	default:
+		return 0;
+	}
+}
+
+#ifdef CONFIG_X86_64
+#define KOP_X86_REG_R9	11
+#define KOP_X86_REG_R10	12
+#define KOP_X86_REG_R11	13
+#define KOP_X86_REG_R12	14
+#define KOP_X86_REG_RSP	15
+
+static __always_inline u8 kop_x86_reg_code(u8 bpf_reg)
+{
+	switch (bpf_reg) {
+	case BPF_REG_0:
+	case BPF_REG_5:
+		return 0;
+	case BPF_REG_4:
+		return 1;
+	case BPF_REG_3:
+		return 2;
+	case BPF_REG_6:
+		return 3;
+	case BPF_REG_7:
+	case BPF_REG_10:
+		return 5;
+	case BPF_REG_2:
+	case BPF_REG_8:
+		return 6;
+	case BPF_REG_1:
+	case BPF_REG_9:
+		return 7;
+	case KOP_X86_REG_R9:
+		return 1;
+	case KOP_X86_REG_R10:
+		return 2;
+	case KOP_X86_REG_R11:
+		return 3;
+	case KOP_X86_REG_R12:
+	case KOP_X86_REG_RSP:
+		return 4;
+	default:
+		return 0xff;
+	}
+}
+
+static __always_inline bool kop_x86_reg_ext(u8 bpf_reg)
+{
+	switch (bpf_reg) {
+	case BPF_REG_5:
+	case BPF_REG_7:
+	case BPF_REG_8:
+	case BPF_REG_9:
+	case KOP_X86_REG_R9:
+	case KOP_X86_REG_R10:
+	case KOP_X86_REG_R11:
+	case KOP_X86_REG_R12:
+		return true;
+	default:
+		return false;
+	}
+}
+
+static __always_inline bool kop_x86_reg_valid(u8 bpf_reg)
+{
+	return kop_x86_reg_code(bpf_reg) != 0xff;
+}
+#endif
+
+#ifdef CONFIG_ARM64
+static __always_inline u8 kop_arm64_reg(u8 bpf_reg)
+{
+	switch (bpf_reg) {
+	case BPF_REG_0:
+		return 7;
+	case BPF_REG_1:
+		return 0;
+	case BPF_REG_2:
+		return 1;
+	case BPF_REG_3:
+		return 2;
+	case BPF_REG_4:
+		return 3;
+	case BPF_REG_5:
+		return 4;
+	case BPF_REG_6:
+		return 19;
+	case BPF_REG_7:
+		return 20;
+	case BPF_REG_8:
+		return 21;
+	case BPF_REG_9:
+		return 22;
+	case BPF_REG_10:
+		return 25;
+	default:
+		return 0xff;
+	}
+}
+
+static __always_inline int kop_arm64_emit_one(u32 *image, int *idx,
+						bool emit, u32 insn)
+{
+	if (!idx)
+		return -EINVAL;
+	if (emit && !image)
+		return -EINVAL;
+	if (emit)
+		image[*idx] = cpu_to_le32(insn);
+	*idx += 1;
+	return 1;
+}
+
+static __always_inline bool kop_arm64_scaled_uoff_ok(s16 offset, u8 shift)
+{
+	return offset >= 0 && offset <= (0x0fff << shift) &&
+	       !(offset & ((1 << shift) - 1));
+}
+
+static __always_inline bool kop_arm64_unscaled_soff_ok(s16 offset)
+{
+	return offset >= -256 && offset <= 255;
+}
+#endif
+
+#define DEFINE_KOP_V2_MODULE(prefix, desc, kfunc_ids, kop_desc_array)	\
+static const struct btf_kfunc_id_set prefix##_kfunc_set = {		\
+	.owner = THIS_MODULE,						\
+	.set = &(kfunc_ids),						\
+	.kop_descs = (kop_desc_array),				\
+};									\
+									\
+static int __init prefix##_init(void)					\
+{									\
+	return register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC,		\
+					 &prefix##_kfunc_set);		\
+}									\
+									\
+module_init(prefix##_init);						\
+									\
+MODULE_DESCRIPTION(desc);						\
+MODULE_LICENSE("GPL");							\
+MODULE_AUTHOR("BpfReJIT")
+
+#endif /* _KOP_COMMON_H */

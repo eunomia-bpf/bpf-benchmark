@@ -55,7 +55,7 @@ cargo run -q --manifest-path <snapshot>/bpfopt/Cargo.toml -p bpfopt -- \
   --input bpfopt/testbin/tracee_monitor/609_trace_security_socket_accept/canonicalize_output.bin \
   --output /tmp/x.bin \
   --report /tmp/x.json \
-  --kinsns bpf_select64:5555 \
+  --koperation bpf_select64:5555 \
   --prog-type kprobe
 ```
 
@@ -67,7 +67,7 @@ cargo run -q --manifest-path <snapshot>/bpfopt/Cargo.toml -p bpfopt -- \
   --input bpfopt/testbin/tracee_monitor/609_trace_security_socket_accept/canonicalize_output.bin \
   --output /tmp/x.bin \
   --report /tmp/x.json \
-  --kinsns bpf_bulk_memcpy:10,bpf_bulk_memset:11 \
+  --koperation bpf_bulk_memcpy:10,bpf_bulk_memset:11 \
   --prog-type kprobe
 ```
 

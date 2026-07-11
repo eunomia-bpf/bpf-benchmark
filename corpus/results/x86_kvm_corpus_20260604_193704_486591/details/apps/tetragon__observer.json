@@ -2725,7 +2725,7 @@
   "post_rejit": null,
   "rejit_result": {
     "enabled_passes": [
-      "kinsn_no_bulk"
+      "kop_no_bulk"
     ],
     "mode": "loadtime",
     "plan_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260604_193704_486591/details/loadtime-plans/tetragon__observer.json",

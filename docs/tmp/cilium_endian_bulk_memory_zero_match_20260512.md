@@ -11,7 +11,7 @@ Doc baseline: `docs/evaluation.md:310-311` says cilium had:
 | `bulk_memory` | `5 / 5` |
 | `endian_fusion` | `24 / 24` |
 
-Latest kinsn-5 run metadata confirms the pass order `rotate, cond_select, extract, endian_fusion, bulk_memory` and start time `2026-05-12T19:01:58Z`: `corpus/results/x86_kvm_corpus_20260512_190158_334233/metadata.json:3-21`.
+Latest kop-5 run metadata confirms the pass order `rotate, cond_select, extract, endian_fusion, bulk_memory` and start time `2026-05-12T19:01:58Z`: `corpus/results/x86_kvm_corpus_20260512_190158_334233/metadata.json:3-21`.
 
 Current JSON extraction from `corpus/results/x86_kvm_corpus_20260512_190158_334233/details/apps/cilium__agent.json`:
 
@@ -24,7 +24,7 @@ That verifies the literal zero-match claim for entries that exist. Example zero 
 
 Important correction: the doc-baseline matching programs mostly do not have `endian_fusion` / `bulk_memory` entries in the latest run because the per-program pass chain stopped earlier at `cond_select`. Example: `cil_xdp_entry` fails at `cond_select` with `diamond join BlockId(28) has external predecessor BlockId(1)` and never reaches `endian_fusion`: `corpus/results/x86_kvm_corpus_20260512_190158_334233/details/apps/cilium__agent.json:1810-1824`.
 
-The kinsn-6 run has the same shape: metadata includes `prefetch` after `bulk_memory` at `corpus/results/x86_kvm_corpus_20260512_190655_194595/metadata.json:3-22`, and the same `cil_xdp_entry` `cond_select` failure appears at `corpus/results/x86_kvm_corpus_20260512_190655_194595/details/apps/cilium__agent.json:1706-1720`.
+The kop-6 run has the same shape: metadata includes `prefetch` after `bulk_memory` at `corpus/results/x86_kvm_corpus_20260512_190655_194595/metadata.json:3-22`, and the same `cil_xdp_entry` `cond_select` failure appears at `corpus/results/x86_kvm_corpus_20260512_190655_194595/details/apps/cilium__agent.json:1706-1720`.
 
 Baseline-era matching programs from `corpus/results/x86_kvm_corpus_20260508_051746_445037/details/apps/cilium__agent.json`:
 
@@ -37,9 +37,9 @@ Full names come from `.baseline.bpf`, e.g. `cil_xdp_entry` at `corpus/results/x8
 
 ## 2. Host-side reproduction
 
-Kinsn target names from source:
+KOperation target names from source:
 
-| pass | source | kinsns used |
+| pass | source | koperation used |
 |---|---|---|
 | `endian_fusion` | `bpfopt/crates/bpfopt/src/passes/endian.rs:5-19` | `bpf_endian_load16:1,bpf_endian_load32:2,bpf_endian_load64:3` |
 | `bulk_memory` | `bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:8-19` | `bpf_bulk_memcpy:10,bpf_bulk_memset:11` |
@@ -130,7 +130,7 @@ git log --oneline -- bpfopt/crates/bpfopt/src/passes/endian.rs bpfopt/crates/bpf
 fb8758dc Add results and metadata for x86 KVM corpus runs
 a8c5b966 Refactor mutation methods in BBProgram to use a transactional rollback pattern for improved safety and clarity
 9a61ab1a Refactor code to remove MakeReplacement enum and update related functions for improved clarity and consistency
-b7e1b3a8 Refactor KinsnDescriptor to replace canonical_name with name and remove unused proof_len functions across multiple passes
+b7e1b3a8 Refactor KopDescriptor to replace canonical_name with name and remove unused proof_len functions across multiple passes
 b42632e0 Refactor BPF optimization passes for improved clarity and performance
 44be6efb Implement V4c fix cleanup and V5 architectural refactor documentation
 08b51e1b Refactor passes to remove MakeReplacement usage and improve site skipping
@@ -160,7 +160,7 @@ Recent suspects:
 | `9a61ab1a` | Plausible area because it changed replacement APIs and touched `bulk_memory`, `cond_select`, and `BBProgram`; current host-side reproduction rules it out as the direct zero-match cause. |
 | `b7e1b3a8`, `b42632e0`, `08b51e1b`, `01e1a7bb` | Broad pass/BBProgram refactors within the last week. They could affect detector enumeration in principle, but current HEAD detects the canonical endian/bulk patterns, so they are not the cause of this latest cilium zero in the corpus artifacts. |
 
-Timing: the failing kinsn-5 run started at `2026-05-12T19:01:58Z` (`corpus/results/x86_kvm_corpus_20260512_190158_334233/metadata.json:21`), i.e. before `18ff261a` at `2026-05-12 13:25:37 -0700`. The run therefore predates the fix commit.
+Timing: the failing kop-5 run started at `2026-05-12T19:01:58Z` (`corpus/results/x86_kvm_corpus_20260512_190158_334233/metadata.json:21`), i.e. before `18ff261a` at `2026-05-12 13:25:37 -0700`. The run therefore predates the fix commit.
 
 ## 5. Root cause
 
@@ -215,6 +215,6 @@ Text diff:
 2. In the trial validation path, after `diamond_pattern_for_site()` and before `trial.replace_diamond_with_insns(...)`, push `site.skip(reason)` and `continue` when the helper returns a reason.
 3. Repeat the same guard before the final `prog.replace_diamond_with_insns(...)`, and count only actually applied sites.
 
-This is a correct fix, not a fallback path: it preserves `BBProgram`'s structural invariant as a hard error for callers that try invalid mutations, while teaching the `cond_select` detector that this specific candidate shape is unsupported and should be reported as a skipped site. It does not add a secondary endian/bulk detector, does not mask subprocess failures generally, and does not reinterpret missing kinsn support as success.
+This is a correct fix, not a fallback path: it preserves `BBProgram`'s structural invariant as a hard error for callers that try invalid mutations, while teaching the `cond_select` detector that this specific candidate shape is unsupported and should be reported as a skipped site. It does not add a secondary endian/bulk detector, does not mask subprocess failures generally, and does not reinterpret missing kop support as success.
 
 Verdict: Root cause: `cond_select` aborted cilium candidate programs on external-predecessor diamonds before `endian_fusion` / `bulk_memory` could run. Fix: keep the `BBProgram` invariant hard error and pre-skip those unsupported diamonds inside `cond_select` as implemented by `18ff261a`.

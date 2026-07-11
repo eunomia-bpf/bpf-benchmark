@@ -13,7 +13,7 @@ Reason:
   `corpus/results/x86_kvm_corpus_20260508_213022_786370/` only preserved a
   `noop` failure workdir for prog 9; it does not contain a successful optimized
   JIT image.
-- The useful May 8 kinsn run at
+- The useful May 8 kop run at
   `corpus/results/x86_kvm_corpus_20260508_041822_768126/details/apps/katran.json`
   contains pass reports and counter data, but no persisted workdir or machine
   code dump.

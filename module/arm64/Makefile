@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0
-# Out-of-tree build for BpfReJIT ARM64 kinsn modules
+# Out-of-tree build for BpfReJIT ARM64 kop modules
 
 KDIR ?= $(CURDIR)/../../vendor/linux-framework
 

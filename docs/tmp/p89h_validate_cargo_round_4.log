@@ -7,7 +7,7 @@ test tests::pseudo_map_old_fds_preserves_unique_load_order ... ok
 test tests::map_info_json_schema_preserves_old_fd_binding ... ok
 test tests::prog_info_json_schema_round_trips_requested_fields ... ok
 test tests::required_load_metadata_rejects_missing_kprobe_prog_btf ... ok
-test tests::target_kinsn_specs_reject_missing_btf_func_id ... ok
+test tests::target_kop_specs_reject_missing_btf_func_id ... ok
 test tests::required_load_metadata_rejects_missing_tracing_attach_context ... ok
 
 test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
@@ -15,14 +15,14 @@ test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
      Running tests/cli.rs (target/debug/deps/cli-a853155ac74c7dfe)
 
 running 11 tests
-test test_target_finds_kinsn_when_loaded ... ok
+test test_target_finds_kop_when_loaded ... ok
 test info_json_requires_output_file ... ok
 test full_missing_outdir_exits_failure_without_creating_it ... ok
 test target_json_requires_output_file ... ok
 test list_without_json_exits_failure_before_enumerating_programs ... ok
 test info_missing_program_exits_failure ... ok
 test list_json_emits_array_when_supported ... ok
-test target_manual_kinsn_spec_writes_numeric_btf_func_id ... ok
+test target_manual_kop_spec_writes_numeric_btf_func_id ... ok
 test target_output_writes_json_file ... ok
 test target_output_contains_arch_and_features ... ok
 test test_target_btf_probe_failure_exits_nonzero ... ok
@@ -53,7 +53,7 @@ test pass::tests::test_analysis_cache_basic ... ok
 test pass::tests::test_bpf_program_sync_annotations_grow ... ok
 test pass::tests::test_analysis_cache_targeted_invalidation_for_known_types ... ok
 test pass::tests::test_bpf_program_sync_annotations_shrink ... ok
-test pass::tests::test_kinsn_registry_per_target_call_offsets ... ok
+test pass::tests::test_kop_registry_per_target_call_offsets ... ok
 test pass::tests::test_invalid_policy_pass_name_is_rejected ... ok
 test pass::tests::test_pass_manager_empty_pipeline ... ok
 test pass::tests::test_pass_manager_analysis_cache_invalidation ... ok
@@ -318,20 +318,20 @@ test passes::tests::test_cfg_analysis_with_subprogs ... ok
 test passes::tests::cascade_map_inline_emits_non_zero_mov_constant ... ok
 test passes::tests::test_liveness_across_branch ... ok
 test passes::tests::test_map_inline_only_pipeline_contains_only_map_inline ... ok
-test passes::utils::tests::kinsn_replacement_subprog_check_allows_site_before_tail_call ... ok
+test passes::utils::tests::kop_replacement_subprog_check_allows_site_before_tail_call ... ok
 test passes::tests::cascade_dce_eliminates_dead_branch_after_const_prop ... ok
-test passes::utils::tests::kinsn_replacement_subprog_check_allows_site_inside_one_subprog ... ok
-test passes::utils::tests::kinsn_replacement_subprog_check_rejects_pseudo_func_boundary_inside_site ... ok
+test passes::utils::tests::kop_replacement_subprog_check_allows_site_inside_one_subprog ... ok
+test passes::utils::tests::kop_replacement_subprog_check_rejects_pseudo_func_boundary_inside_site ... ok
 test passes::tests::cascade_hash_map_removes_lookup_and_null_path_then_folds_non_null_path ... ok
-test passes::utils::tests::kinsn_replacement_subprog_check_rejects_site_after_tail_call ... ok
+test passes::utils::tests::kop_replacement_subprog_check_rejects_site_after_tail_call ... ok
 test passes::utils::tests::remap_btf_metadata_rejects_out_of_range_func_info ... ok
 test passes::utils::tests::remap_btf_metadata_drops_deleted_entries_and_shifts_survivors ... ok
-test passes::utils::tests::remap_kinsn_btf_metadata_disambiguates_duplicate_btf_ids_by_call_offset ... ok
-test passes::utils::tests::remap_kinsn_btf_metadata_uses_proof_subprog_layout_for_func_info ... ok
+test passes::utils::tests::remap_kop_btf_metadata_disambiguates_duplicate_btf_ids_by_call_offset ... ok
+test passes::utils::tests::remap_kop_btf_metadata_uses_proof_subprog_layout_for_func_info ... ok
 test passes::utils::tests::test_eliminate_nops_preserves_helper_call_reserved_fields ... ok
-test passes::utils::tests::test_emit_packed_kinsn_call_wide_payload ... ok
+test passes::utils::tests::test_emit_packed_kop_call_wide_payload ... ok
 test passes::utils::tests::test_eliminate_dead_register_defs_cascades_across_overwrites ... ok
-test passes::utils::tests::test_emit_packed_kinsn_call_with_module_off ... ok
+test passes::utils::tests::test_emit_packed_kop_call_with_module_off ... ok
 test passes::utils::tests::test_fixup_all_branches_does_not_write_branch_off_into_helper_call ... ok
 test passes::utils::tests::test_fixup_all_branches_does_not_write_deleted_branch_target_into_surviving_branch ... ok
 test passes::utils::tests::test_fixup_all_branches_forward_jump ... ok
@@ -375,7 +375,7 @@ running 6 tests
 test tests::canonical_pass_names_accept_v3_cli_names ... ok
 test tests::parse_bytecode_rejects_non_instruction_multiple ... ok
 test tests::parse_bytecode_round_trips_raw_instruction_bytes ... ok
-test tests::target_json_maps_v3_kinsn_aliases_to_registry_fields ... ok
+test tests::target_json_maps_v3_kop_aliases_to_registry_fields ... ok
 test tests::verifier_states_json_builds_const_prop_delta_states ... ok
 test tests::pass_report_serializes_map_inline_records_as_hex ... ok
 
@@ -387,9 +387,9 @@ running 10 tests
 test invalid_bytecode_length_exits_with_error ... ok
 test list_passes_outputs_12_cli_names_including_branch_flip ... ok
 test optimize_default_pipeline_fails_when_required_side_inputs_are_missing ... ok
-test optimize_without_target_fails_before_running_kinsn_passes ... ok
-test optimize_explicit_kinsn_pass_fails_when_target_lacks_kinsn ... ok
-test optimize_bulk_memory_missing_kinsns_fails_with_v3_names ... ok
+test optimize_without_target_fails_before_running_kop_passes ... ok
+test optimize_explicit_kop_pass_fails_when_target_lacks_kop ... ok
+test optimize_bulk_memory_missing_kops_fails_with_v3_names ... ok
 test wide_mem_accepts_stdin_and_writes_instruction_aligned_stdout ... ok
 test optimize_map_inline_errors_when_snapshot_key_is_absent ... ok
 test optimize_map_inline_skips_hash_lookup_when_snapshot_value_is_null ... ok

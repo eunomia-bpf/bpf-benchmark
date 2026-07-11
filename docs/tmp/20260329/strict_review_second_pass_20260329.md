@@ -48,8 +48,8 @@
   - Fixed in this pass by switching to `set -euo pipefail; ulimit -l unlimited; exec ...`.
 - `e2e/cases/scx/case.py` degraded payload path: fixed.
   - Missing per-program runtime counters now abort with `RuntimeError` instead of being downgraded into a limitations payload.
-- Shared lifecycle / kinsn silent fallback: fixed.
-  - `runner/libs/kinsn.py` now raises on missing module directories, missing loader script, incomplete module loads, and missing daemon discovery output.
+- Shared lifecycle / kop silent fallback: fixed.
+  - `runner/libs/kop.py` now raises on missing module directories, missing loader script, incomplete module loads, and missing daemon discovery output.
   - `runner/libs/case_common.py` now preserves these failures as explicit lifecycle errors instead of collapsing them to `"missing"` / `"unknown"` placeholders.
 - `runner/libs/bpf_stats.py` opportunistic fallback: fixed.
   - Stats collection now hard-requires usable libbpf entrypoints and raises if any requested program stat cannot be read.

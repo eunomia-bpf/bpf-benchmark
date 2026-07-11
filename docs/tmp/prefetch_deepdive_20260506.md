@@ -4,7 +4,7 @@ Date: 2026-05-06
 
 Run under analysis: `corpus/results/x86_kvm_corpus_20260506_023522_768608/`.
 
-Scope: read-only investigation of existing result JSON, bpfopt prefetch source, kinsn modules, daemon ReJIT orchestration, and recent prefetch design notes.
+Scope: read-only investigation of existing result JSON, bpfopt prefetch source, kop modules, daemon ReJIT orchestration, and recent prefetch design notes.
 
 No benchmarks were run. No source code was changed. The only write is this report.
 
@@ -26,8 +26,8 @@ Definitions used below:
 ## Required Reading Cross-Check
 
 - Paper plan: `docs/kernel-jit-optimization-plan.md:247` says PrefetchV2 is implemented as a default Paper A pass, using x86 `PREFETCHT0` and ARM64 `PRFM`, with structural packet/map-value recognition and optional PMU filtering.
-- Historical design note: `docs/tmp/20260329/prefetch_kinsn_design_20260329.md:9` says prefetch must be runtime-guided rather than static blanket insertion.
-- The same design note says missing profile should default to no insertion at `docs/tmp/20260329/prefetch_kinsn_design_20260329.md:24` and `docs/tmp/20260329/prefetch_kinsn_design_20260329.md:395`.
+- Historical design note: `docs/tmp/20260329/prefetch_kop_design_20260329.md:9` says prefetch must be runtime-guided rather than static blanket insertion.
+- The same design note says missing profile should default to no insertion at `docs/tmp/20260329/prefetch_kop_design_20260329.md:24` and `docs/tmp/20260329/prefetch_kop_design_20260329.md:395`.
 - PrefetchV2 implementation note explicitly changed that policy: missing PMU data now emits structural candidates (`docs/tmp/p89_prefetchv2_impl.md:5`).
 - CLAUDE design rules prohibit in-framework perf aggregation and program-level ReJIT filtering; this report keeps calculations post-hoc and recommends pass-local site selection only, not runner filtering.
 
@@ -40,7 +40,7 @@ The current pass behavior is visible in source:
 - It scans map-value sites first, then packet sites for packet-capable program types (`bpfopt/crates/bpfopt/src/passes/prefetch.rs:246`).
 - It uses PMU data only if present; absent PMU data falls through to `default_site_score()` (`bpfopt/crates/bpfopt/src/passes/prefetch.rs:154`, `bpfopt/crates/bpfopt/src/passes/prefetch.rs:166`, `bpfopt/crates/bpfopt/src/passes/prefetch.rs:275`).
 - PMU admission rejects only zero execution, impossible counters, zero references, or zero misses (`bpfopt/crates/bpfopt/src/passes/prefetch.rs:282`).
-- It inserts exactly one packed kinsn pair for each retained candidate (`bpfopt/crates/bpfopt/src/passes/prefetch.rs:200`, `bpfopt/crates/bpfopt/src/passes/prefetch.rs:211`).
+- It inserts exactly one packed kop pair for each retained candidate (`bpfopt/crates/bpfopt/src/passes/prefetch.rs:200`, `bpfopt/crates/bpfopt/src/passes/prefetch.rs:211`).
 - The pass logs only `sites_applied`; it does not report target register, target PC, target kind, target address, prefetch distance, or whether PMU was present (`bpfopt/crates/bpfopt/src/passes/prefetch.rs:233`).
 - `PassResult` summary records aggregate pass counters but not per-site detail; tracee JSON confirms only `diagnostics`, instruction counts, site counters, and skip reasons are present.
 
@@ -61,21 +61,21 @@ Packet site detection:
 Insertion policy:
 
 - Current target distance is 8 BPF instructions, max distance is 16 (`bpfopt/crates/bpfopt/src/passes/prefetch.rs:18`).
-- The historical design recommended 20-50 instruction windows and target distance 32 (`docs/tmp/20260329/prefetch_kinsn_design_20260329.md:466`).
+- The historical design recommended 20-50 instruction windows and target distance 32 (`docs/tmp/20260329/prefetch_kop_design_20260329.md:466`).
 - Current insertion can be much closer than the historical design intended, which supports the late-prefetch/redundant-prefetch hypothesis.
 - It rejects windows crossing subprogram/basic-block constraints, control-flow instructions, or pointer-register redefinitions (`bpfopt/crates/bpfopt/src/passes/prefetch.rs:564`).
 - It does not cap candidates per program, does not model code-size budget, and does not record site kind in the report.
 
-Kernel kinsn behavior:
+Kernel kop behavior:
 
 - x86 module `module/x86/bpf_prefetch.c:3` implements `PREFETCHT0`.
 - x86 payload decoder rejects non-zero hint kind, reserved bits, invalid BPF registers, and invalid x86 register mappings (`module/x86/bpf_prefetch.c:16`).
 - x86 proof sequence is a single `BPF_JMP_A(0)` no-op (`module/x86/bpf_prefetch.c:34`).
 - x86 native emitter writes opcode `0f 18 /1` and handles SIB/disp cases (`module/x86/bpf_prefetch.c:58`).
-- x86 kinsn descriptor sets `max_insn_cnt = 1` and `max_emit_bytes = 6` (`module/x86/bpf_prefetch.c:108`).
+- x86 kop descriptor sets `max_insn_cnt = 1` and `max_emit_bytes = 6` (`module/x86/bpf_prefetch.c:108`).
 - ARM64 module emits `PRFM PLDL1KEEP` (`module/arm64/bpf_prefetch.c:3`, `module/arm64/bpf_prefetch.c:45`).
-- Shared register mappings are in `module/include/kinsn_common.h:46` for x86 and `module/include/kinsn_common.h:92` for ARM64.
-- The checked-in modules live under repo `module/`, not under `vendor/linux-framework`; vendor kernel sources provide the kinsn hook points.
+- Shared register mappings are in `module/include/kop_common.h:46` for x86 and `module/include/kop_common.h:92` for ARM64.
+- The checked-in modules live under repo `module/`, not under `vendor/linux-framework`; vendor kernel sources provide the kop hook points.
 
 Daemon behavior:
 
@@ -187,7 +187,7 @@ JIT size findings:
 
 - Across all tracee programs with prefetch sites, final `bytes_jited` delta sums to 4,133 bytes over 1,770 sites.
 - Average final `bytes_jited` delta per site is 2.335 bytes/site.
-- `insn_delta` is exactly 2 BPF instructions per prefetch site, matching the packed sidecar plus kinsn call path.
+- `insn_delta` is exactly 2 BPF instructions per prefetch site, matching the packed sidecar plus kop call path.
 - The final native JIT delta is not a pure prefetch-only delta because other passes also ran, but high-apply tracee rows mostly show positive code growth.
 
 Per-site target observability:
@@ -252,7 +252,7 @@ Top error-cluster source citations:
 
 1. EBUSY kernel ReJIT rejection: error strings are generated after `kernel_sys::prog_rejit` returns an error in `daemon/src/commands.rs:211`, then wrapped as `kernel rejected BPF_PROG_REJIT` at `daemon/src/commands.rs:221`; errno formatting comes from `bpfopt/crates/kernel-sys/src/lib.rs:430`.
 2. E2BIG capacity rejection: same daemon/kernel-sys error path; prefetch contributes size growth by appending two BPF instructions per candidate at `bpfopt/crates/bpfopt/src/passes/prefetch.rs:200` and `bpfopt/crates/bpfopt/src/passes/prefetch.rs:211`.
-3. No bpfopt emit-error cluster exists in this run. The bpfopt prefetch code paths that could emit errors are kinsn availability checks (`bpfopt/crates/bpfopt/src/passes/prefetch.rs:124`), invalid PMU data bails (`bpfopt/crates/bpfopt/src/passes/prefetch.rs:289`), and insertion-window skips (`bpfopt/crates/bpfopt/src/passes/prefetch.rs:564`), but tetragon failures did not hit those as fatal bpfopt errors.
+3. No bpfopt emit-error cluster exists in this run. The bpfopt prefetch code paths that could emit errors are kop availability checks (`bpfopt/crates/bpfopt/src/passes/prefetch.rs:124`), invalid PMU data bails (`bpfopt/crates/bpfopt/src/passes/prefetch.rs:289`), and insertion-window skips (`bpfopt/crates/bpfopt/src/passes/prefetch.rs:564`), but tetragon failures did not hit those as fatal bpfopt errors.
 
 All tetragon failed pass entries:
 
@@ -412,7 +412,7 @@ Per-pass site context for the six apps:
 
 - Expected impact: highest.
 - Current source makes PMU optional and structural insertion default (`bpfopt/crates/bpfopt/src/passes/prefetch.rs:166`).
-- Historical design explicitly said no profile should skip prefetch (`docs/tmp/20260329/prefetch_kinsn_design_20260329.md:529`).
+- Historical design explicitly said no profile should skip prefetch (`docs/tmp/20260329/prefetch_kop_design_20260329.md:529`).
 - Tracee shows why: 1,033 sites are below the retained threshold and 795 are on zero-run programs.
 - Minimal change: add a pass option or default policy that requires per-site prefetch PMU unless explicitly running a structural experiment.
 - Do not hide failures or filter programs; produce unchanged/no-site pass reports when no site is admitted.
@@ -428,14 +428,14 @@ Per-pass site context for the six apps:
 
 - Expected impact: high if H2 is real.
 - Current target distance is 8 BPF instructions (`bpfopt/crates/bpfopt/src/passes/prefetch.rs:18`).
-- Historical design recommended 20-50 with target 32 (`docs/tmp/20260329/prefetch_kinsn_design_20260329.md:466`).
+- Historical design recommended 20-50 with target 32 (`docs/tmp/20260329/prefetch_kop_design_20260329.md:466`).
 - A prefetch immediately before the first dereference is likely too late for L1 miss latency.
 - Implementation should keep existing same-block and register-stability checks.
 
 4. Add a small per-program candidate cap, selected by PMU score.
 
 - Expected impact: medium to high for tracee/tetragon code bloat.
-- Historical design already recommended a per-program budget (`docs/tmp/20260329/prefetch_kinsn_design_20260329.md:390`) and top-N site selection (`docs/tmp/20260329/prefetch_kinsn_design_20260329.md:500`).
+- Historical design already recommended a per-program budget (`docs/tmp/20260329/prefetch_kop_design_20260329.md:390`) and top-N site selection (`docs/tmp/20260329/prefetch_kop_design_20260329.md:500`).
 - Cap should be a pass-local site budget, not a benchmark-level program exclusion.
 - With no PMU data, cap alone is weaker because it still chooses structurally convenient sites rather than hot/missy sites.
 
@@ -698,11 +698,11 @@ Retained means `min_runs >= 100`. Rows include programs with zero prefetch sites
 | Topic | Citation |
 | --- | --- |
 | Paper plan current prefetch status | `docs/kernel-jit-optimization-plan.md:247` |
-| Historical runtime-guided warning | `docs/tmp/20260329/prefetch_kinsn_design_20260329.md:9` |
-| Historical missing-profile skip | `docs/tmp/20260329/prefetch_kinsn_design_20260329.md:24` |
-| Historical profile-gated rule | `docs/tmp/20260329/prefetch_kinsn_design_20260329.md:395` |
-| Historical distance recommendation | `docs/tmp/20260329/prefetch_kinsn_design_20260329.md:466` |
-| Historical top-N budget | `docs/tmp/20260329/prefetch_kinsn_design_20260329.md:500` |
+| Historical runtime-guided warning | `docs/tmp/20260329/prefetch_kop_design_20260329.md:9` |
+| Historical missing-profile skip | `docs/tmp/20260329/prefetch_kop_design_20260329.md:24` |
+| Historical profile-gated rule | `docs/tmp/20260329/prefetch_kop_design_20260329.md:395` |
+| Historical distance recommendation | `docs/tmp/20260329/prefetch_kop_design_20260329.md:466` |
+| Historical top-N budget | `docs/tmp/20260329/prefetch_kop_design_20260329.md:500` |
 | PrefetchV2 structural default note | `docs/tmp/p89_prefetchv2_impl.md:5` |
 | Prefetch pass structural doc comment | `bpfopt/crates/bpfopt/src/passes/prefetch.rs:35` |
 | Prefetch constants | `bpfopt/crates/bpfopt/src/passes/prefetch.rs:17` |
@@ -710,7 +710,7 @@ Retained means `min_runs >= 100`. Rows include programs with zero prefetch sites
 | Packed ABI availability skip | `bpfopt/crates/bpfopt/src/passes/prefetch.rs:134` |
 | Site scan loop and PMU/default choice | `bpfopt/crates/bpfopt/src/passes/prefetch.rs:154` |
 | Default score on missing PMU | `bpfopt/crates/bpfopt/src/passes/prefetch.rs:166` |
-| Candidate insertion and packed kinsn emit | `bpfopt/crates/bpfopt/src/passes/prefetch.rs:200` |
+| Candidate insertion and packed kop emit | `bpfopt/crates/bpfopt/src/passes/prefetch.rs:200` |
 | Pass result site counters only | `bpfopt/crates/bpfopt/src/passes/prefetch.rs:237` |
 | Map-value scanner | `bpfopt/crates/bpfopt/src/passes/prefetch.rs:311` |
 | Packet scanner | `bpfopt/crates/bpfopt/src/passes/prefetch.rs:408` |
@@ -721,14 +721,14 @@ Retained means `min_runs >= 100`. Rows include programs with zero prefetch sites
 | x86 payload decoder | `module/x86/bpf_prefetch.c:16` |
 | x86 proof no-op | `module/x86/bpf_prefetch.c:34` |
 | x86 PREFETCHT0 emitter | `module/x86/bpf_prefetch.c:58` |
-| x86 kinsn descriptor | `module/x86/bpf_prefetch.c:108` |
+| x86 kop descriptor | `module/x86/bpf_prefetch.c:108` |
 | ARM64 prefetch module | `module/arm64/bpf_prefetch.c:3` |
 | ARM64 PRFM encoding | `module/arm64/bpf_prefetch.c:45` |
-| Shared x86 BPF register mapping | `module/include/kinsn_common.h:46` |
-| Shared ARM64 BPF register mapping | `module/include/kinsn_common.h:92` |
-| Kernel x86 kinsn JIT call hook | `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:579` |
-| Kernel ARM64 kinsn JIT call hook | `vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c:1201` |
-| Kernel verifier kinsn proof lowering | `vendor/linux-framework/kernel/bpf/verifier.c:3669` |
+| Shared x86 BPF register mapping | `module/include/kop_common.h:46` |
+| Shared ARM64 BPF register mapping | `module/include/kop_common.h:92` |
+| Kernel x86 kop JIT call hook | `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:579` |
+| Kernel ARM64 kop JIT call hook | `vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c:1201` |
+| Kernel verifier kop proof lowering | `vendor/linux-framework/kernel/bpf/verifier.c:3669` |
 | Daemon per-pass loop | `daemon/src/commands.rs:530` |
 | Daemon bpfopt pass invocation | `daemon/src/commands.rs:566` |
 | Daemon ReJIT call | `daemon/src/commands.rs:617` |

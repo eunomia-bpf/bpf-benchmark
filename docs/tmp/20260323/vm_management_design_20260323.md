@@ -58,7 +58,7 @@
 
 - `VNG ?= $(ROOT_DIR)/runner/scripts/vng-wrapper.sh`
 - `VM_INIT := $(VENV_ACTIVATE) "$(ROOT_DIR)/module/load_all.sh" 2>/dev/null || true;`
-- guest 里默认加载 kinsn modules
+- guest 里默认加载 kop modules
 - guest 代码目录通过 `--rwdir "$(ROOT_DIR)"` 暴露给 VM
 - `vm-micro` / `vm-micro-smoke` 在 guest 内拉起 daemon，再运行 `micro/driver.py`
 - `vm-e2e` 在 host 先做 `tracee/setup.sh` 预下载，然后 guest 内执行 `python3 e2e/run.py all`

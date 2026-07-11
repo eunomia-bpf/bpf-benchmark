@@ -37,7 +37,7 @@ This does not skip or filter any ReJIT program. If a program still fails all ver
 Host reproduction/checks:
 
 - `/tmp/vm-corpus.log` shows Tetragon got as far as `rejit_start program_count=287` before the outer 7200s kill.
-- Older preserved Tetragon-like verifier logs under `corpus/results/x86_kvm_p89_kinsn_corpus_20260430_131403_981524/details/failures/` are 17MB each; prog 420 has `insn_cnt=2174`, 13 maps, and verifier output `processed 172996 insns`.
+- Older preserved Tetragon-like verifier logs under `corpus/results/x86_kvm_p89_kop_corpus_20260430_131403_981524/details/failures/` are 17MB each; prog 420 has `insn_cnt=2174`, 13 maps, and verifier output `processed 172996 insns`.
 - Direct host replay of prog 420 with `bpfverify --verifier-states-out` is blocked by host capabilities: `BPF_MAP_CREATE: Operation not permitted`. The command path was still useful to confirm the replay boundary.
 - Unit coverage now verifies that verifier-state capture does not request full reports and that the first timeout is back to 5s with a 5/30/60 ramp.
 

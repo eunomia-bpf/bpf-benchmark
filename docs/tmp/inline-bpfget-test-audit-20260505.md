@@ -28,7 +28,7 @@
 | `daemon/src/commands.rs:1104` | `bytecode_decoder_rejects_unaligned_input` | KEEP | Covers bytecode ABI boundary rejection for non-8-byte instruction streams. |
 | `daemon/src/commands.rs:1110 (deleted)` | `rejit_fd_array_builder_keeps_map_fds_without_target` | DELETE | Duplicate shallow map-fd coverage; map ordering is already checked with module fd placement. |
 | `daemon/src/commands.rs:1110` | `rejit_fd_array_builder_places_maps_first_and_module_btf_fds_at_call_offsets` | KEEP | Catches fd_array ABI regressions for maps-first and module call-offset placement. |
-| `daemon/src/commands.rs:1168` | `rejit_fd_array_builder_uses_btf_placeholder_when_no_maps` | KEEP | Covers verifier fd_array placeholder behavior for no-map programs with module kinsns. |
+| `daemon/src/commands.rs:1168` | `rejit_fd_array_builder_uses_btf_placeholder_when_no_maps` | KEEP | Covers verifier fd_array placeholder behavior for no-map programs with module koperation. |
 | `daemon/src/commands.rs:1197` | `rejit_fd_array_builder_rejects_missing_module_slot` | KEEP | Covers non-contiguous target call-offset error path. |
 | `daemon/src/commands.rs:1222` | `rejit_fd_array_builder_rejects_conflicting_module_offsets` | KEEP | Covers conflicting BTF module slot error path. |
 | `daemon/src/commands.rs:1257` | `target_call_offsets_shift_after_map_prefix` | KEEP | Covers target.json call-offset rewrite after map fd prefix insertion. |

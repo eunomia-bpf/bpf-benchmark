@@ -7,7 +7,7 @@
 对 `git diff master..HEAD` 的每一处改动，严格判定是否直接服务于 BpfReJIT 三大功能：
 1. **GET_ORIGINAL** — 暴露原始 BPF insns
 2. **REJIT** — 运行时重新编译 BPF 程序
-3. **kinsn** — 内核指令描述符（kinsn 实现）
+3. **kop** — 内核指令描述符（kop 实现）
 
 判定类别：
 - **必要** — 直接服务于上述功能
@@ -37,9 +37,9 @@ emit_movabs_imm64(&prog, X86_REG_R9, (u64)(__force long)priv_frame_ptr);
 
 **判定**: **不必要**
 
-**理由**: 这是纯重构——用新 helper 替代已有的 `emit_mov_imm64`。生成的机器码完全等价。`emit_movabs_imm64` 本身确实被 kinsn 的 x86 emit 路径使用（在内核模块侧），但 `emit_priv_frame_ptr` 的改动与 BpfReJIT 无关。如果 kinsn 模块需要此 helper，可通过其他方式（内联或模块侧实现）提供，不需要改动上游 JIT 中无关函数。
+**理由**: 这是纯重构——用新 helper 替代已有的 `emit_mov_imm64`。生成的机器码完全等价。`emit_movabs_imm64` 本身确实被 kop 的 x86 emit 路径使用（在内核模块侧），但 `emit_priv_frame_ptr` 的改动与 BpfReJIT 无关。如果 kop 模块需要此 helper，可通过其他方式（内联或模块侧实现）提供，不需要改动上游 JIT 中无关函数。
 
-**建议**: 保留 `emit_movabs_imm64` 函数定义（kinsn 需要），但还原 `emit_priv_frame_ptr` 中的调用方式为原始写法。
+**建议**: 保留 `emit_movabs_imm64` 函数定义（kop 需要），但还原 `emit_priv_frame_ptr` 中的调用方式为原始写法。
 
 ### 1.2 `arch/x86/net/bpf_jit_comp.c` — 增强 unknown opcode 错误打印
 
@@ -59,7 +59,7 @@ pr_err("bpf_jit: unknown opcode %02x at insn %d (dst=%u src=%u off=%d imm=%d)\n"
 
 **判定**: **不必要（调试残留）**
 
-**理由**: 这是开发过程中为调试 kinsn 指令分发问题而添加的增强日志。对 BpfReJIT 功能本身非必要，属于 debug-time convenience。虽然对上游可能有价值，但作为 BpfReJIT POC 补丁不应包含此类无关 cleanup。
+**理由**: 这是开发过程中为调试 kop 指令分发问题而添加的增强日志。对 BpfReJIT 功能本身非必要，属于 debug-time convenience。虽然对上游可能有价值，但作为 BpfReJIT POC 补丁不应包含此类无关 cleanup。
 
 **建议**: 还原为原始写法。
 
@@ -138,8 +138,8 @@ if (repeat > 1)
 
 **当前代码**:
 ```c
-static inline int btf_try_get_kinsn_desc(const struct btf *btf, u32 var_id,
-                                         const struct bpf_kinsn **desc)
+static inline int btf_try_get_kop_desc(const struct btf *btf, u32 var_id,
+                                         const struct bpf_kop **desc)
 {
     (void)btf;
     (void)var_id;
@@ -227,20 +227,20 @@ if (prog_type == BPF_PROG_TYPE_EXT) {
 - `@@ -3489,11 +3569,6 @@` 删除 `MAX_KFUNC_DESCS` 上限检查
 - `@@ -3514,6 +3589,11 @@` 新增 `ensure_desc_capacity` 调用
 - `@@ -3319,6 +3399,25 @@` `bpf_free_kfunc_btf_tab` 改为 `kvfree(tab->descs)` + `kfree(tab)`
-- 新增 `bpf_free_kfunc_desc_tab` 和 `bpf_free_kinsn_desc_tab`
+- 新增 `bpf_free_kfunc_desc_tab` 和 `bpf_free_kop_desc_tab`
 
 **判定**: **可疑（超出必要范围的重构）**
 
-**理由**: kinsn 功能需要新增 `bpf_kinsn_desc_tab` 结构和 `ensure_desc_capacity` 函数，这是必要的。但把已有的 `kfunc_desc_tab` 和 `kfunc_btf_tab` 也从固定数组改为动态数组，是超出 kinsn 功能所需的重构。
+**理由**: kop 功能需要新增 `bpf_kop_desc_tab` 结构和 `ensure_desc_capacity` 函数，这是必要的。但把已有的 `kfunc_desc_tab` 和 `kfunc_btf_tab` 也从固定数组改为动态数组，是超出 kop 功能所需的重构。
 
 具体而言：
-1. `bpf_kfunc_desc_tab.descs` 从 `struct bpf_kfunc_desc descs[MAX_KFUNC_DESCS]` 改为 `struct bpf_kfunc_desc *descs` + `u32 desc_cap` — **不必要的重构**，kinsn 不需要改动 kfunc 的数据结构
+1. `bpf_kfunc_desc_tab.descs` 从 `struct bpf_kfunc_desc descs[MAX_KFUNC_DESCS]` 改为 `struct bpf_kfunc_desc *descs` + `u32 desc_cap` — **不必要的重构**，kop 不需要改动 kfunc 的数据结构
 2. `bpf_kfunc_btf_tab.descs` 同理
 3. 删除 `MAX_KFUNC_DESCS` / `MAX_KFUNC_BTFS` 常量 — 上游用了固定上限，改为动态需要额外的 `ensure_desc_capacity` 逻辑
 4. `bpf_free_kfunc_desc_tab` 从 `kfree(tab)` 变为 `kvfree(tab->descs)` + `kfree(tab)` — 因为 `descs` 不再内嵌
-5. `__find_kfunc_desc_btf` 中 btf_tab 的延迟初始化从 `add_kfunc_call` 挪到这里 — 这是为了让 kinsn 的 `fetch_kinsn_desc_meta` 也能通过 `find_kfunc_desc_btf` 查找模块 BTF，而不经过 `add_kfunc_call`
+5. `__find_kfunc_desc_btf` 中 btf_tab 的延迟初始化从 `add_kfunc_call` 挪到这里 — 这是为了让 kop 的 `fetch_kop_desc_meta` 也能通过 `find_kfunc_desc_btf` 查找模块 BTF，而不经过 `add_kfunc_call`
 
-**建议**: 评估是否可以只添加 kinsn 的新结构，而不改动 kfunc 的既有数据结构。如果 kinsn 确实需要调用 `find_kfunc_desc_btf`（需要 btf_tab 已初始化），则 btf_tab 延迟初始化的迁移是必要的。但 kfunc_desc_tab 的动态化不是必要的——保持固定 256 上限完全可以。
+**建议**: 评估是否可以只添加 kop 的新结构，而不改动 kfunc 的既有数据结构。如果 kop 确实需要调用 `find_kfunc_desc_btf`（需要 btf_tab 已初始化），则 btf_tab 延迟初始化的迁移是必要的。但 kfunc_desc_tab 的动态化不是必要的——保持固定 256 上限完全可以。
 
 ### 2.3 `kernel/bpf/verifier.c` — `disasm_kfunc_name` 重命名为 `disasm_call_name`
 
@@ -267,7 +267,7 @@ static const char *disasm_call_name(void *data, const struct bpf_insn *insn)
     const struct btf_type *t;
     ...
     if (insn->src_reg != BPF_PSEUDO_KFUNC_CALL &&
-        insn->src_reg != BPF_PSEUDO_KINSN_CALL)
+        insn->src_reg != BPF_PSEUDO_KOP_CALL)
         return NULL;
     ...
     t = btf_type_by_id(desc_btf, insn->imm);
@@ -280,7 +280,7 @@ static const char *disasm_call_name(void *data, const struct bpf_insn *insn)
 2. 变量名 `func` → `t` — **不必要的 rename**
 3. 添加 NULL 检查 `t ? ... : "<invalid>"` — **防御性编程，非必要**
 
-**建议**: 保留 kinsn 的功能扩展（添加 `BPF_PSEUDO_KINSN_CALL` 分支），但不重命名函数和变量。NULL 检查可以保留作为防御。
+**建议**: 保留 kop 的功能扩展（添加 `BPF_PSEUDO_KOP_CALL` 分支），但不重命名函数和变量。NULL 检查可以保留作为防御。
 
 ### 2.4 `scripts/Makefile.btf` — 外部模块 BTF `global_var` 特性
 
@@ -301,7 +301,7 @@ pahole-flags-... = -j$(JOBS) --btf_features=...$(extmod-btf-global-var-y)
 
 **判定**: **可能必要**
 
-**理由**: kinsn 描述符通过 `BTF_KIND_VAR` 注册，需要外部模块的 BTF 包含 `global_var` 信息。如果没有这个改动，外部模块编译时 pahole 不会为全局变量生成 BTF entry，导致 `btf_find_by_name_kind(btf, name, BTF_KIND_VAR)` 找不到 kinsn descriptor。
+**理由**: kop 描述符通过 `BTF_KIND_VAR` 注册，需要外部模块的 BTF 包含 `global_var` 信息。如果没有这个改动，外部模块编译时 pahole 不会为全局变量生成 BTF entry，导致 `btf_find_by_name_kind(btf, name, BTF_KIND_VAR)` 找不到 kop descriptor。
 
 **建议**: 保留，但需确认仅在 `KBUILD_EXTMOD` 时生效（不影响 vmlinux BTF）。
 
@@ -337,22 +337,22 @@ pahole-flags-... = -j$(JOBS) --btf_features=...$(extmod-btf-global-var-y)
 
 | 文件 | 改动行数 | 服务功能 |
 |------|----------|----------|
-| `arch/arm64/net/bpf_jit_comp.c` | +38/-0 | kinsn ARM64 emit |
-| `arch/x86/net/bpf_jit_comp.c` — `emit_kinsn_desc_call` | +30 | kinsn x86 emit |
-| `arch/x86/net/bpf_jit_comp.c` — sidecar skip + kinsn call case | +12 | kinsn JIT |
-| `include/linux/bpf.h` | +110 | 全部 kinsn/REJIT 核心结构 |
-| `include/linux/bpf_verifier.h` | +10 | kinsn region 结构 |
-| `include/linux/btf.h` — forward decl + `btf_try_get_kinsn_desc` | +8 | kinsn BTF 查找 |
-| `include/linux/filter.h` | +11 | kinsn 宏 + XDP refresh 声明 |
-| `include/uapi/linux/bpf.h` | +24 | UAPI：REJIT 命令 + kinsn pseudo + orig_insns |
+| `arch/arm64/net/bpf_jit_comp.c` | +38/-0 | kop ARM64 emit |
+| `arch/x86/net/bpf_jit_comp.c` — `emit_kop_desc_call` | +30 | kop x86 emit |
+| `arch/x86/net/bpf_jit_comp.c` — sidecar skip + kop call case | +12 | kop JIT |
+| `include/linux/bpf.h` | +110 | 全部 kop/REJIT 核心结构 |
+| `include/linux/bpf_verifier.h` | +10 | kop region 结构 |
+| `include/linux/btf.h` — forward decl + `btf_try_get_kop_desc` | +8 | kop BTF 查找 |
+| `include/linux/filter.h` | +11 | kop 宏 + XDP refresh 声明 |
+| `include/uapi/linux/bpf.h` | +24 | UAPI：REJIT 命令 + kop pseudo + orig_insns |
 | `kernel/bpf/bpf_struct_ops.c` | +108 | REJIT struct_ops trampoline 刷新 |
-| `kernel/bpf/btf.c` — kinsn 注册 | +220 | kinsn BTF 注册/查找 |
-| `kernel/bpf/core.c` — mutex/list init + kinsn_tab free | +4 | REJIT 初始化 |
-| `kernel/bpf/disasm.c` | +2 | kinsn disasm |
+| `kernel/bpf/btf.c` — kop 注册 | +220 | kop BTF 注册/查找 |
+| `kernel/bpf/core.c` — mutex/list init + kop_tab free | +4 | REJIT 初始化 |
+| `kernel/bpf/disasm.c` | +2 | kop disasm |
 | `kernel/bpf/dispatcher.c` | +20/-3 | REJIT dispatcher 刷新 |
 | `kernel/bpf/syscall.c` — REJIT 主实现 + orig_insns | +670 | REJIT 核心 |
 | `kernel/bpf/trampoline.c` | +53 | REJIT trampoline 刷新 |
-| `kernel/bpf/verifier.c` — kinsn 相关所有新增代码 | ~600 | kinsn 验证/lowering/restore |
+| `kernel/bpf/verifier.c` — kop 相关所有新增代码 | ~600 | kop 验证/lowering/restore |
 | `net/core/filter.c` | +5 | REJIT XDP refresh |
 | `tools/include/uapi/linux/bpf.h` | +24 | UAPI 镜像 |
 | `tools/testing/selftests/bpf/get_original_poc.c` | +103 | GET_ORIGINAL 测试 |
@@ -368,7 +368,7 @@ pahole-flags-... = -j$(JOBS) --btf_features=...$(extmod-btf-global-var-y)
 | 1 | `arch/x86/net/bpf_jit_comp.c` | `emit_priv_frame_ptr` | 还原为使用 `emit_mov_imm64` 的原始写法 | -3 |
 | 2 | `arch/x86/net/bpf_jit_comp.c` | `do_jit` default case | 还原 `pr_err` 为原始简洁写法 | -3 |
 | 3 | `kernel/bpf/core.c` | `bpf_prog_pack_free` | 删除纯注释 | -4 |
-| 4 | `include/linux/btf.h` | `btf_try_get_kinsn_desc` stub | 删除 3 行 `(void)` cast | -3 |
+| 4 | `include/linux/btf.h` | `btf_try_get_kop_desc` stub | 删除 3 行 `(void)` cast | -3 |
 | 5 | `net/bpf/test_run.c` | `bpf_prog_test_run_xdp` | 还原删除的 `bpf_prog_change_xdp` 调用 | +5 |
 | 6 | `tools/testing/selftests/bpf/jit_disasm_helpers.c` | 全部改动 | 删除 `normalize_movabs_imm_hex` 和 `#include <stdlib.h>` | -32 |
 | 7 | `tools/testing/selftests/bpf/.gitignore` | orphan entries | 删除 `rejit_poc`, `rejit_safety_tests`, `rejit_prog_types`, `rejit_tail_call` | -4 |
@@ -379,7 +379,7 @@ pahole-flags-... = -j$(JOBS) --btf_features=...$(extmod-btf-global-var-y)
 |---|------|------|------|
 | 1 | `kernel/bpf/core.c` | `INIT_LIST_HEAD_RCU` | REJIT 必要但需注释说明 |
 | 2 | `kernel/bpf/btf.c` | `dst_prog` NULL 检查 | REJIT 防御但需注释说明 |
-| 3 | `kernel/bpf/verifier.c` | kfunc_desc_tab 动态化 | 超出 kinsn 所需，但还原成本高；如果不值得还原则需在 commit message 说明 |
+| 3 | `kernel/bpf/verifier.c` | kfunc_desc_tab 动态化 | 超出 kop 所需，但还原成本高；如果不值得还原则需在 commit message 说明 |
 | 4 | `kernel/bpf/verifier.c` | `disasm_kfunc_name` rename | 不必要的 rename，但影响小 |
 
 ### 净减少行数估算

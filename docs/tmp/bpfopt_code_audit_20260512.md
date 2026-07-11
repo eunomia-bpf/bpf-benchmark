@@ -10,7 +10,7 @@ Pre-read checks:
 ## A. Duplicate / 重复逻辑
 
 - [A1] `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:1300` - `fn compute_liveness(prog: &BBProgram) -> LivenessSets` and `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:1371` - `fn compute_site_liveness(prog: &BBProgram) -> anyhow::Result<SiteLivenessSets>`.
-  Why: block-level and site-level liveness both rebuild use/def sets and run the same fixed-point equation. The two versions already diverge in kinsn implicit-use treatment, so a future bug fix can land in only one path.
+  Why: block-level and site-level liveness both rebuild use/def sets and run the same fixed-point equation. The two versions already diverge in kop implicit-use treatment, so a future bug fix can land in only one path.
   Recommendation: factor the fixed-point engine into one helper parameterized by node type, successor iterator, and public live-out policy.
 
 - [A2] `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:928` - `collect_map_bindings(...)`, `bpfopt/crates/bpfopt/src/passes/map_inline.rs:2018` - `fn map_id_for_ref(...)`, and `bpfopt/crates/bpfopt/src/passes/map_inline.rs:3439` - `fn analyze_map_info(...)`.
@@ -32,7 +32,7 @@ Pre-read checks:
   Recommendation: either validate/use these fields or remove them from the current schema until consumed.
 
 - [B2] `bpfopt/crates/bpfopt/src/pass.rs:573` - `pub has_bmi1`, `bpfopt/crates/bpfopt/src/pass.rs:574` - `pub has_bmi2`, `bpfopt/crates/bpfopt/src/pass.rs:576` - `pub has_movbe`, `bpfopt/crates/bpfopt/src/pass.rs:577` - `pub has_rorx`.
-  Why: these CPU capability fields are set in `main.rs:376-379`, but production pass code no longer reads them; pass admission is kinsn-target based.
+  Why: these CPU capability fields are set in `main.rs:376-379`, but production pass code no longer reads them; pass admission is kop-target based.
   Recommendation: delete the stale fields or wire them into explicit pass requirements if they are still meant to matter.
 
 - [B3] `bpfopt/crates/bpfopt/src/analysis/bbprogram_lift.rs:485` - `} else if insn.is_cond_jmp() || insn.is_ja() {`.
@@ -50,8 +50,8 @@ Pre-read checks:
   Recommendation: special-case `BPF_LD | BPF_ABS/IND` semantics in use-def, and add liveness/DCE regression tests.
 
 - [C2] `bpfopt/crates/bpfopt/src/analysis/bbprogram_use_def.rs:190` - `RegUseDefSet { uses, defs: HashSet::new() }`.
-  Why: kinsn calls encode their result destination in the sidecar payload, but use-def models only implicit uses and no defs. A later DCE or use-def query can see stale definitions for the kinsn destination.
-  Recommendation: extend `KinsnDescriptor` to provide defs as well as uses, or decode destination registers for every kinsn payload.
+  Why: kop calls encode their result destination in the sidecar payload, but use-def models only implicit uses and no defs. A later DCE or use-def query can see stale definitions for the kop destination.
+  Recommendation: extend `KopDescriptor` to provide defs as well as uses, or decode destination registers for every kop payload.
 
 - [C3] `bpfopt/crates/bpfopt/src/passes/map_inline.rs:2111` - `let previous_sites = sites_before_in_frame_rev(prog, site)?` and `bpfopt/crates/bpfopt/src/passes/map_inline.rs:2243` - `for site in sites_before_in_frame_rev(...)`.
   Why: `map_inline` resolves map pointer definitions by linear previous-in-frame scan. At a branch join, the nearest textual def can be from a path that does not dominate the lookup/load, producing the wrong map identity or offset.
@@ -99,9 +99,9 @@ Pre-read checks:
   Why: 4-bit fields are packed at overlapping bit offsets. Current enum values are 0/1, so it works today, but the encoding shape is misleading and brittle.
   Recommendation: use explicit 1-bit packing for `fail_mode` and `width`, or document/assert the single-bit ABI.
 
-- [D4] `bpfopt/crates/bpfopt/src/pass.rs:570` - `PlatformCapabilities` has CPU-feature flags, while `bpfopt/crates/bpfopt/src/passes/mod.rs:100` and following use kinsn requirements.
-  Why: the interface exposes two capability models, but only kinsn availability is enforced in production. Tests still toggle CPU flags, which can imply coverage that is no longer real.
-  Recommendation: collapse to kinsn-target requirements plus `arch`, or make CPU features first-class requirements.
+- [D4] `bpfopt/crates/bpfopt/src/pass.rs:570` - `PlatformCapabilities` has CPU-feature flags, while `bpfopt/crates/bpfopt/src/passes/mod.rs:100` and following use kop requirements.
+  Why: the interface exposes two capability models, but only kop availability is enforced in production. Tests still toggle CPU flags, which can imply coverage that is no longer real.
+  Recommendation: collapse to kop-target requirements plus `arch`, or make CPU features first-class requirements.
 
 - [D5] `bpfopt/crates/bpfopt/src/test_helpers.rs:71` - `materialize_site_skips_for_tests(...)` drains `site_skipped` into a cfg(test) `sites_skipped` mirror.
   Why: production and tests observe different result shapes. This is understandable for PC materialization, but it creates a second skip-reporting API used only by tests.
@@ -117,8 +117,8 @@ Pre-read checks:
   Why: these tests lock in tolerant parsing of malformed verifier facts. That conflicts with the fail-fast rule for verifier-state-dependent optimizations.
   Recommendation: replace them with strict-error tests for known attributes used by passes; only truly irrelevant unknown tokens should be ignored.
 
-- [E3] `bpfopt/crates/bpfopt/src/analysis/bbprogram_liveness_tests.rs:35` - helper-call clobber test and `bpfopt/crates/bpfopt/src/analysis/bbprogram_liveness_tests.rs:49` - kinsn implicit-use test.
-  Why: liveness tests cover helper calls and kinsn uses, but not classic `LD_ABS` / `LD_IND`. That gap would have caught C1.
+- [E3] `bpfopt/crates/bpfopt/src/analysis/bbprogram_liveness_tests.rs:35` - helper-call clobber test and `bpfopt/crates/bpfopt/src/analysis/bbprogram_liveness_tests.rs:49` - kop implicit-use test.
+  Why: liveness tests cover helper calls and kop uses, but not classic `LD_ABS` / `LD_IND`. That gap would have caught C1.
   Recommendation: add a regression that proves classic packet loads use/clobber the correct registers and are protected from DCE.
 
 - [E4] `bpfopt/crates/bpfopt/src/test_helpers.rs:235` - `branch_profile(taken, not_taken, miss_rate)` computes `branch_misses`, while `bpfopt/crates/bpfopt/src/passes/branch_flip_tests.rs:33` and following test only missing program/site data.
@@ -136,7 +136,7 @@ Pre-read checks:
 ## Top 10 must-fix
 
 1. Fix `LD_ABS` / `LD_IND` use-def modeling (C1). Estimate: 30-50 LOC plus tests. Impact: analysis, DCE, any liveness-dependent pass.
-2. Model kinsn result definitions in use-def (C2). Estimate: 60-100 LOC. Impact: all kinsn passes followed by DCE/use-def consumers.
+2. Model kop result definitions in use-def (C2). Estimate: 60-100 LOC. Impact: all kop passes followed by DCE/use-def consumers.
 3. Replace map_inline linear previous-def scans with reaching-def/dominance checks (C3). Estimate: 120-200 LOC. Impact: map identity correctness.
 4. Make unresolved map writer helpers conservative or hard errors (C5). Estimate: 20-40 LOC. Impact: map_inline safety for mutable maps.
 5. Prove lookup key stack stores are private before deleting them (C4). Estimate: 60-100 LOC. Impact: map_inline semantic preservation.

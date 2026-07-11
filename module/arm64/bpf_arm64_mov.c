@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT arm64 kinsns: MOV register-to-register.
+ * BpfReJIT arm64 koperation: MOV register-to-register.
  */
 
-#include "kinsn_common.h"
+#include "kop_common.h"
 
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_arm64_mov_x(void) {}
@@ -16,8 +16,8 @@ BTF_KFUNCS_END(bpf_arm64_mov_kfunc_ids)
 static __always_inline int decode_mov_payload(u64 payload, u8 *dst_reg,
 						 u8 *src_reg)
 {
-	*dst_reg = kinsn_payload_reg(payload, 0);
-	*src_reg = kinsn_payload_reg(payload, 4);
+	*dst_reg = kop_payload_reg(payload, 0);
+	*src_reg = kop_payload_reg(payload, 4);
 
 	if (payload >> 8)
 		return -EINVAL;
@@ -60,16 +60,16 @@ static int emit_mov_x_arm64(u32 *image, int *idx, bool emit,
 	if (err)
 		return err;
 
-	dst_reg = kinsn_arm64_reg(dst_reg);
-	src_reg = kinsn_arm64_reg(src_reg);
+	dst_reg = kop_arm64_reg(dst_reg);
+	src_reg = kop_arm64_reg(src_reg);
 	if (dst_reg == 0xff || src_reg == 0xff)
 		return -EINVAL;
 
 	insn = a64_mov_x(dst_reg, src_reg);
-	return kinsn_arm64_emit_one(image, idx, emit, insn);
+	return kop_arm64_emit_one(image, idx, emit, insn);
 }
 
-const struct bpf_kinsn bpf_arm64_mov_x_desc = {
+const struct bpf_kop bpf_arm64_mov_x_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -77,9 +77,9 @@ const struct bpf_kinsn bpf_arm64_mov_x_desc = {
 	.emit_arm64 = emit_mov_x_arm64,
 };
 
-static const struct bpf_kinsn * const bpf_arm64_mov_kinsn_descs[] = {
+static const struct bpf_kop * const bpf_arm64_mov_kop_descs[] = {
 	&bpf_arm64_mov_x_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_arm64_mov, "BpfReJIT arm64 kinsns: MOV",
-		       bpf_arm64_mov_kfunc_ids, bpf_arm64_mov_kinsn_descs);
+DEFINE_KOP_V2_MODULE(bpf_arm64_mov, "BpfReJIT arm64 koperation: MOV",
+		       bpf_arm64_mov_kfunc_ids, bpf_arm64_mov_kop_descs);

@@ -80,7 +80,7 @@ Validation performed:
 ### MEDIUM: daemon constructs optimize/verify/rejit pipeline
 
 - Location: `daemon/src/commands.rs:1046`, `daemon/src/commands.rs:1062`, `daemon/src/commands.rs:1077`, `daemon/src/commands.rs:1080`, `daemon/src/commands.rs:1092`
-- Problem: daemon chooses profile side inputs, invokes `bpfopt optimize`, reads reports, scans candidate bytecode for kinsn calls, and then continues verify/rejit.
+- Problem: daemon chooses profile side inputs, invokes `bpfopt optimize`, reads reports, scans candidate bytecode for kop calls, and then continues verify/rejit.
 - Violation: no in-process transform was found, but the daemon still owns a multi-step pass pipeline. Strict v3 text says per-pass/optimize orchestration belongs in external scripts, while CLAUDE Option B says daemon may delegate optimize/rejit/profile/discover to CLI subprocesses.
 - Recommendation: KEEP only if Option B is now policy. If `docs/tmp/bpfopt_design_v3.md` is still authoritative, DELETE daemon pipeline construction and move it behind a single external script/command boundary.
 

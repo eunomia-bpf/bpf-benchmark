@@ -324,7 +324,7 @@ fn run_mode(fixture: &ProgramFixture, mode: SeedMode) -> Result<ModeSummary> {
     program.set_map_ids(fixture.map_ids.clone());
 
     let ctx = pass::PassContext {
-        kinsn_registry: pass::KinsnRegistry::default(),
+        kop_registry: pass::KopRegistry::default(),
         platform: pass::PlatformCapabilities::default(),
         policy: pass::PolicyConfig::default(),
         prog_type: fixture.program.prog_type,

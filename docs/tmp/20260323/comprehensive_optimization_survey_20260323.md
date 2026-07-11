@@ -16,7 +16,7 @@
 先说明两个边界：
 
 - 这棵树里**没有** `fixup_bpf_calls()` 这个函数。对应逻辑被拆分到了 `convert_ctx_accesses()` 和 `do_misc_fixups()`。
-- 用户已给出的已实现优化，以及已单独写过调研的 `SIMD kinsn`、`map inlining`、`verifier-assisted const propagation`、`dynamic map inlining + invalidation`，本报告只做定位，不重复展开。
+- 用户已给出的已实现优化，以及已单独写过调研的 `SIMD kop`、`map inlining`、`verifier-assisted const propagation`、`dynamic map inlining + invalidation`，本报告只做定位，不重复展开。
 
 已实现优化：
 
@@ -30,7 +30,7 @@
 
 已单独调研、本文不重复展开：
 
-- `SIMD kinsn`
+- `SIMD kop`
 - `Frozen map inlining`
 - `Verifier-assisted constant propagation`
 - `Dynamic map inlining + invalidation`
@@ -51,7 +51,7 @@
    - const-prop/map specialization 之后的 `DCE`
 
 3. **Spill/fill 泛化优化优先级低。**
-   `verifier.c` 已经有 `mark_fastcall_patterns()` + `remove_fastcall_spills_fills()`；`KF_FASTCALL` 只影响 spill/fill 删除，不改变 verifier 的 clobber 语义。新的大收益更可能来自“helper 变 non-call kinsn”或“新增更精细的 clobber metadata”，不是再做一个通用 spill/fill peephole。
+   `verifier.c` 已经有 `mark_fastcall_patterns()` + `remove_fastcall_spills_fills()`；`KF_FASTCALL` 只影响 spill/fill 删除，不改变 verifier 的 clobber 语义。新的大收益更可能来自“helper 变 non-call kop”或“新增更精细的 clobber metadata”，不是再做一个通用 spill/fill peephole。
 
 4. **Loop 方向里真正值得做的是 LICM / loop predication，不是 blanket unrolling。**
    内核已经会 inline `bpf_loop()` helper，而源码侧 `#pragma unroll` 已经很多。真正剩下的空间主要是把 invariant 的 map/config 读取和 bounds check 提到循环外。
@@ -71,7 +71,7 @@
 |---|---|---|---|---|---|---|---|
 | Generic static const propagation + DCE | already researched separately | **Merlin done** | static | no | CCP/SCCP + DCE | high downstream | 不是 BpfReJIT 差异点 |
 | Verifier-assisted const propagation | already researched separately | Merlin done (generic CP/DCE), K2 partial (offset concretization) | dynamic | yes | profile-guided speculative CP | high | 价值主要在“利用 verifier state”而非 CP 本身 |
-| SIMD kinsn | already researched separately | no public evidence | static | no | SuperWord / vector intrinsics | medium-high | 主要是 XDP/TC，不是 tracing |
+| SIMD kop | already researched separately | no public evidence | static | no | SuperWord / vector intrinsics | medium-high | 主要是 XDP/TC，不是 tracing |
 | Frozen map inlining | already researched separately | no public evidence | dynamic | yes | constant folding | medium | 真实生态里显式 freeze 很少 |
 | Dynamic map inlining + invalidation | already researched separately | no public evidence | **dynamic** | **yes** | speculative inlining + deoptimization | **high** | 仍是最强 runtime-only 论点 |
 | LFENCE/BPF_NOSPEC elimination / safe-load lowering | new | no public evidence | static | no, hotness only helps prioritize | range-check elimination / uncommon trap / intrinsic | high | 真实 barrier 插入点只有 post-verify 才能直接看到 |
@@ -178,7 +178,7 @@ arm64 JIT 则降成 `SB` 或 `DSB NSH; ISB`：
 2. **由 `aux->nospec_result` 产生的 barrier，但 write 本身可以消失。**
    例子：
    - 去掉不必要的 spill/fill
-   - 把 helper call 改成 non-call kinsn，避免为了保活寄存器而 spill
+   - 把 helper call 改成 non-call kop，避免为了保活寄存器而 spill
    - 保持栈槽处于 `STACK_ZERO/MISC` 而不是“有类型的 spill slot”
 
 3. **屏障保护的是冷路径，但热路径可以改写成 branchless / safe-load 形式。**
@@ -194,12 +194,12 @@ arm64 JIT 则降成 `SB` 或 `DSB NSH; ISB`：
    让后续访问的 speculative path 也被更宽的 guard 覆盖，从源头上不再触发 `error_recoverable_with_nospec()`。
 
 2. **减少 typed stack overwrite**
-   如果把某些 helper site 改成 kinsn 或 direct load，原来围绕 call 的 spill/fill 和 typed spill slot 就会消失，对应的 `nospec_result` 也可能随之消失。
+   如果把某些 helper site 改成 kop 或 direct load，原来围绕 call 的 spill/fill 和 typed spill slot 就会消失，对应的 `nospec_result` 也可能随之消失。
 
 3. **把 variable pointer arithmetic 改成 verifier 更喜欢的形式**
    避免 `sanitize_ptr_alu()` 触发，或缩小其 mask window；虽然这不直接删 `LFENCE`，但能减少另一类 speculation hardening 代码。
 
-### A3. `bpf_safe_load()` 新 kinsn 是否可行
+### A3. `bpf_safe_load()` 新 kop 是否可行
 
 可行，而且是比“先 `if` 再 load 再 barrier”更干净的方向。
 
@@ -439,7 +439,7 @@ arm64 JIT 则降成 `SB` 或 `DSB NSH; ISB`：
 
 - direct packet load
 - `wide_mem` / `extract` / `endian_fusion`
-- 必要时再配合一个 `safe_load` kinsn
+- 必要时再配合一个 `safe_load` kop
 
 ### D3. `bpf_probe_read_kernel` 小 size -> 直接 load
 
@@ -519,7 +519,7 @@ verifier pass pipeline 里已经有：
 
 能，但前提不是“再写一个通用 spill/fill peephole”，而是下面两种之一：
 
-1. **把 helper call 改成 non-call kinsn**
+1. **把 helper call 改成 non-call kop**
    这样 spill 根源消失。
 
 2. **让 verifier 知道更精确的 clobber set**
@@ -774,7 +774,7 @@ HotSpot 有 method inlining，BPF 也有等价物：`BPF_PSEUDO_CALL` / bpf-to-b
 | HotSpot concept | BPF/BpfReJIT mapping | Feasible? | Comment |
 |---|---|---|---|
 | Tiered compilation (`C1 -> C2`) | stock load-time JIT -> post-load REJIT optimized image | yes | 最自然的总体类比 |
-| Intrinsics | helper -> kinsn / direct packet access / safe-load intrinsic | yes | `skb_load_bytes` 等最像 |
+| Intrinsics | helper -> kop / direct packet access / safe-load intrinsic | yes | `skb_load_bytes` 等最像 |
 | Range-check elimination | packet bounds-window elimination | yes | XDP/TC 主战场 |
 | Loop predication | loop-entry packet/window guard hoisting | yes | 比 blanket unroll 更值钱 |
 | LICM | hoist invariant map/config/bounds out of loop | yes | 需要 retained facts |

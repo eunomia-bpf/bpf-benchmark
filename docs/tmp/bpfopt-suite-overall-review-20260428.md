@@ -30,11 +30,11 @@ Existing dirty daemon worktree changes were not touched. The daemon was being re
 | §2.1 `bpfopt` commands/flags | DEVIATION | All 12 pass subcommands, `optimize`, `analyze`, and `list-passes` are present. Common flags are present. However `optimize` defaults to only `dce, skb-load-bytes, bounds-check-merge, wide-mem` (`bpfopt/crates/bpfopt/src/main.rs:41-46`, `:462-480`), not the 12-pass v3 default order. |
 | §2.2 `bpfverify` | CONFORMANT with minor question | Required `--prog-type`, optional attach type, `--map-fds`, `--fd-array`, `--log-level`, `--report`, and `--verifier-states-out` exist. It pipes accepted bytecode through stdout. Report mode returns exit 0 for verifier failure when `--report` is present; decide whether v3 treats a structured fail report as command success or as exit 1. |
 | §2.3 `bpfprof` | GAP | It captures BPF run counters, but PMU branch counters are host-window availability checks only; branch counts are discarded and per-program `branch_miss_rate`, `branch_misses`, `branch_instructions` are always `null` (`bpfopt/crates/bpfprof/src/main.rs:210-223`, `:409-412`). |
-| §2.4 `bpfget` | GAP | Basic bytecode, info, full, list, and target modes exist. `--target` warns that kinsn BTF probing is not implemented and emits empty `kinsns` by default (`bpfopt/crates/bpfget/src/main.rs:273-284`). `--full` writes `prog.bin`, `prog_info.json`, and `map_fds.json`, but not `map-values.json`, so it cannot prepare all inputs needed by `bpfopt map-inline` (`bpfopt/crates/bpfget/src/main.rs:211-230`). |
+| §2.4 `bpfget` | GAP | Basic bytecode, info, full, list, and target modes exist. `--target` warns that kop BTF probing is not implemented and emits empty `koperation` by default (`bpfopt/crates/bpfget/src/main.rs:273-284`). `--full` writes `prog.bin`, `prog_info.json`, and `map_fds.json`, but not `map-values.json`, so it cannot prepare all inputs needed by `bpfopt map-inline` (`bpfopt/crates/bpfget/src/main.rs:211-230`). |
 | §2.5 `bpfrejit` | CONFORMANT with limitation | Reads file/stdin, supports `--fd-array` and `--dry-run`, calls `kernel_sys::prog_rejit`, and writes success summary to stderr. `fd_array` currently accepts inherited `btf_fd` only and rejects `btf_id`/module descriptors. |
 | §2.6 `bpfrejit-daemon` | GAP / in-flight | The separate daemon crate exists but currently fails to compile. Runner still uses `serve --socket` and socket `optimize`/`profile-*` paths, so v3 daemon migration is not complete. |
 | §3 bytecode binary | CONFORMANT | Raw `struct bpf_insn[]` little-endian parsing/serialization exists in bpfopt, bpfget, bpfverify, and bpfrejit. `bpfopt::BpfInsn` is a transparent wrapper over `kernel_sys::bpf_insn` with ABI/raw-byte tests. |
-| §3 `target.json` | GAP | Shape is accepted by bpfopt, with useful extensions (`call_offset`, `supported_encodings`). Producer side is incomplete because `bpfget --target` cannot discover kinsn BTF IDs. |
+| §3 `target.json` | GAP | Shape is accepted by bpfopt, with useful extensions (`call_offset`, `supported_encodings`). Producer side is incomplete because `bpfget --target` cannot discover kop BTF IDs. |
 | §3 `map-values.json` | DEVIATION | bpfopt consumes a compatible schema but adds `frozen` with default `true` (`bpfopt/crates/bpfopt/src/main.rs:314-333`, `:977-1012`). No reviewed tool produces this file. |
 | §3 `profile.json` | DEVIATION | Current schema adds `pmu_available`, emits nullable branch fields, and always includes `per_insn: {}` (`bpfopt/crates/bpfprof/src/main.rs:60-70`). This conflicts with v3 and the "No Redundant Informational Fields" rule. |
 | §3 `verifier-states.json` | CONFORMANT | bpfverify emits `{ "insns": [...] }`; bpfopt consumes the same shape. |
@@ -63,13 +63,13 @@ Impact: v3 expects `branch_miss_rate`, `branch_misses`, and `branch_instructions
 
 Recommendation: either implement real program-attributed branch counters or narrow v3/bpfprof to run-counter-only profiles. Remove `pmu_available`; if PMU is required for a requested field and unavailable, return an error or omit optional fields according to the schema, not an informational metadata flag.
 
-### HIGH: `bpfget --target` cannot generate usable kinsn target descriptors
+### HIGH: `bpfget --target` cannot generate usable kop target descriptors
 
 Location: `bpfopt/crates/bpfget/src/main.rs:273-284`.
 
-Impact: kinsn passes (`rotate`, `cond-select`, `extract`, `endian`, `bulk-memory`) require target kinsn BTF IDs. The current producer emits an empty `kinsns` object unless users hand-write `--kinsns name:btf_func_id`, so the toolchain cannot produce a self-contained `target.json`.
+Impact: kop passes (`rotate`, `cond-select`, `extract`, `endian`, `bulk-memory`) require target kop BTF IDs. The current producer emits an empty `koperation` object unless users hand-write `--koperation name:btf_func_id`, so the toolchain cannot produce a self-contained `target.json`.
 
-Recommendation: implement target probing or add a separate generator that discovers loaded kinsn module BTF IDs and writes v3 `target.json`. Until then, document that kinsn pass integration is manual and not Phase 4 ready.
+Recommendation: implement target probing or add a separate generator that discovers loaded kop module BTF IDs and writes v3 `target.json`. Until then, document that kop pass integration is manual and not Phase 4 ready.
 
 ### HIGH: `bpfget --full` does not produce map-values side input for `map-inline`
 
@@ -157,7 +157,7 @@ Not ready for Phase 4 yet. Must-fix items before Phase 4:
 
 1. Align `bpfopt optimize` default behavior with v3 §5 or explicitly change the design.
 2. Make `bpfprof` produce conformant profile data or narrow/remove branch PMU schema fields.
-3. Implement usable kinsn target discovery for `target.json`.
+3. Implement usable kop target discovery for `target.json`.
 4. Define and implement the map-values producer path for `map-inline`.
 5. Finish daemon/runner migration enough that `bpfrejit-daemon` builds and the benchmark runner no longer depends on legacy socket optimize/profile behavior.
 6. Resolve the `BPF_PROG_GET_ORIGINAL` contract mismatch between rules/design and `kernel-sys`.

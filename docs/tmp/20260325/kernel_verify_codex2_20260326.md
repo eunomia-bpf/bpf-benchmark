@@ -6,51 +6,51 @@
 
 | 问题 | 结论 |
 | --- | --- |
-| 1. kinsn 程序不强制 `jit_needed=true` | **确认存在** |
+| 1. kop 程序不强制 `jit_needed=true` | **确认存在** |
 | 2. `bpf_prog_rejit_swap` 漏掉 `has_callchain_buf` | **确认存在** |
 | 3. REJIT 没重放 BTF / func_info / line_info | **确认存在** |
 
 ---
 
-## 1. [HIGH] kinsn 程序不强制 `jit_needed=true`
+## 1. [HIGH] kop 程序不强制 `jit_needed=true`
 
 ### 结论
 
 **确认存在。**
 
-这不是“所有 kinsn 程序都会直接落到 interpreter”的问题，而是一个更具体但真实的漏洞窗口：
+这不是“所有 kop 程序都会直接落到 interpreter”的问题，而是一个更具体但真实的漏洞窗口：
 
 - `jit_requested=true`
 - 程序只有主程序（`subprog_cnt <= 1`）
-- verifier 保留了 kinsn pseudo-insn
+- verifier 保留了 kop pseudo-insn
 - 之后主程序 JIT 在 `bpf_prog_select_runtime()` 里失败
 
-在这个窗口下，代码会允许 interpreter fallback，而 interpreter 对 `BPF_PSEUDO_KINSN_CALL`/sidecar 并不安全。
+在这个窗口下，代码会允许 interpreter fallback，而 interpreter 对 `BPF_PSEUDO_KOP_CALL`/sidecar 并不安全。
 
 ### 关键代码
 
 - `kernel/bpf/core.c:2521-2554`
   - `bpf_prog_select_runtime()` 只在 `CONFIG_BPF_JIT_ALWAYS_ON` 或 `bpf_prog_has_kfunc_call(fp)` 时把 `jit_needed` 置为 `true`。
 - `kernel/bpf/verifier.c:3634-3647`
-  - `bpf_prog_has_kfunc_call()` 明确**忽略** `desc->kinsn`，所以 kinsn-only 程序不会因为这里而强制 JIT。
+  - `bpf_prog_has_kfunc_call()` 明确**忽略** `desc->kop`，所以 kop-only 程序不会因为这里而强制 JIT。
 - `kernel/bpf/verifier.c:23755-23777`
-  - `do_misc_fixups()` 在 `prog->jit_requested && bpf_kinsn_has_native_emit(kinsn)` 时会**保留** sidecar + `BPF_PSEUDO_KINSN_CALL`，不降级成 proof sequence。
+  - `do_misc_fixups()` 在 `prog->jit_requested && bpf_kop_has_native_emit(kop)` 时会**保留** sidecar + `BPF_PSEUDO_KOP_CALL`，不降级成 proof sequence。
 - `kernel/bpf/verifier.c:23129-23140`
   - `jit_subprogs()` 在 `env->subprog_cnt <= 1` 时直接返回 `0`。
 - `kernel/bpf/verifier.c:23426-23430`
   - `fixup_call_args()` 对 `jit_requested` 程序先调用 `jit_subprogs()`，返回 `0` 就**直接返回**，从而绕过后面的 non-JIT 拒绝逻辑。
 - `kernel/bpf/verifier.c:23435-23453`
-  - 后面的 `has_kinsn_call` 拒绝逻辑只会在上面的早返回没有发生时才执行。
+  - 后面的 `has_kop_call` 拒绝逻辑只会在上面的早返回没有发生时才执行。
 - `kernel/bpf/core.c:2036-2044`
-  - interpreter 的 `JMP_CALL` 直接执行 `(__bpf_call_base + insn->imm)(...)`。对 kinsn 来说，`imm` 是 **BTF id**，不是 helper/kfunc call offset。
+  - interpreter 的 `JMP_CALL` 直接执行 `(__bpf_call_base + insn->imm)(...)`。对 kop 来说，`imm` 是 **BTF id**，不是 helper/kfunc call offset。
 
 ### 为什么这是不安全的
 
-如果 kinsn pseudo-insn 被保留到最终程序里，而主程序 JIT 又在 `bpf_prog_select_runtime()` 阶段失败，则：
+如果 kop pseudo-insn 被保留到最终程序里，而主程序 JIT 又在 `bpf_prog_select_runtime()` 阶段失败，则：
 
 - `jit_needed` 仍是 `false`
 - `!fp->jited && jit_needed` 不成立，加载不会报错
-- interpreter 会把 `BPF_PSEUDO_KINSN_CALL` 当普通 `BPF_CALL` 执行
+- interpreter 会把 `BPF_PSEUDO_KOP_CALL` 当普通 `BPF_CALL` 执行
 
 这会把 `insn->imm`（BTF id）当成 `__bpf_call_base` 相对偏移来调用，语义明显错误，且是内核侧不安全执行路径。
 
@@ -58,13 +58,13 @@
 
 最小修复：
 
-- 在 `bpf_prog_select_runtime()` 中把“存在 kinsn call”也视为 `jit_needed=true`。
-- 实现方式可以是新增 `bpf_prog_has_kinsn_call()`，或扩展 `bpf_prog_has_kfunc_call()` 让 runtime 选择逻辑把 kinsn 也计入“必须 JIT”集合。
+- 在 `bpf_prog_select_runtime()` 中把“存在 kop call”也视为 `jit_needed=true`。
+- 实现方式可以是新增 `bpf_prog_has_kop_call()`，或扩展 `bpf_prog_has_kfunc_call()` 让 runtime 选择逻辑把 kop 也计入“必须 JIT”集合。
 
 建议再加一层保险：
 
-- 在 `fixup_call_args()` 里不要因为 `jit_subprogs()==0` 就对单函数 kinsn 程序提前返回。
-- 或者在进入 runtime 前显式拒绝任何仍包含 `BPF_PSEUDO_KINSN_CALL` 的 non-JIT 程序。
+- 在 `fixup_call_args()` 里不要因为 `jit_subprogs()==0` 就对单函数 kop 程序提前返回。
+- 或者在进入 runtime 前显式拒绝任何仍包含 `BPF_PSEUDO_KOP_CALL` 的 non-JIT 程序。
 
 ---
 
@@ -205,6 +205,6 @@
 
 这 3 个问题都不是误报：
 
-1. `kinsn` 的 interpreter fallback 保护存在缺口，且对单函数程序可达。
+1. `kop` 的 interpreter fallback 保护存在缺口，且对单函数程序可达。
 2. `has_callchain_buf` 确实漏 swap，资源所有权会错位。
 3. REJIT 对 BTF / func_info / line_info 的 replay 明显不完整，swap 后会丢失或污染 live prog metadata。

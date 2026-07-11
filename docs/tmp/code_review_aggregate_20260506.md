@@ -65,7 +65,7 @@ Residual risk:
 
 Verdict: good fix for the diagnosed symptom, but the fdinfo source-of-truth assumption should be validated or replaced with a daemon-side/live-discovery boundary.
 
-### af99d800 - `bpfopt: allow cond_select with select kinsn`
+### af99d800 - `bpfopt: allow cond_select with select kop`
 
 Intent: allow cond_select when branchless select exists through `bpf_select64`, even if the platform does not advertise a native CMOV feature.
 
@@ -175,7 +175,7 @@ Verdict: the skip-marker detection is the right contract, but map_inline should 
 
 ### `bpfopt/crates/bpfopt/src/passes/utils.rs`
 
-Intent: remove the tail-call-specific kinsn replacement guard.
+Intent: remove the tail-call-specific kop replacement guard.
 
 Quality: aligned with the user's "trust kernel verifier" direction and with the investigation's minimum-precision guard model.
 
@@ -232,7 +232,7 @@ No tracked dirty `runner/libs/*` files were present during this review. Runner-s
 | `cond_select_arm64_emit_diagnosis_20260506.md` | ARM64 issue is not missing bpf_select emission; tail-call guard dominates. | af99e800 addresses the feature gate; dirty tail-call nuke addresses the dominant blocker. |
 | `arm64_bcc_subset_diagnosis_20260506.md` | Fix bcc/set per-child readiness. | Mostly delivered by ad5fbf20. Residual fdinfo source-of-truth risk remains. |
 | `major_prog_trigger_analysis_20260506.md` | Improve Cilium endpoint workload and follow up tracee/katran/tetragon coverage. | Not present in tracked dirty files. Still pending. |
-| `katran_arm64_kinsn_gap_20260506.md` / `arm64_rejit_eopnotsupp_diagnosis.md` | Preserve ARM64 Katran EOPNOTSUPP as a real result; do not filter. | No filtering change found in reviewed diffs. Good. |
+| `katran_arm64_kop_gap_20260506.md` / `arm64_rejit_eopnotsupp_diagnosis.md` | Preserve ARM64 Katran EOPNOTSUPP as a real result; do not filter. | No filtering change found in reviewed diffs. Good. |
 | `map_inline_value_stability_design_20260506.md` | Use real value-stability proof, conservative runtime-key expansion, fail-fast on missing proof. | Partially delivered by d24e4980, but still too permissive/fail-soft in important paths. |
 
 ## 4. Missed work

@@ -55,4 +55,4 @@ Completion criteria were not met:
 - `ghcr.io/eunomia-bpf/bpf-benchmark-kernel-fork:arm64-a1b8bad` was not pushed.
 - `ghcr.io/eunomia-bpf/bpf-benchmark-katran-artifacts:arm64` was not pushed.
 
-No Dockerfile, runner Python, kinsn pass, or `vendor/linux-framework` files were modified by this task.
+No Dockerfile, runner Python, kop pass, or `vendor/linux-framework` files were modified by this task.

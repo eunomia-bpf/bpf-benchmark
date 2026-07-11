@@ -43,7 +43,7 @@ Selective policy 已经能显著降低这类代价。把 `2026-03-11` full-apply
 
 更激进的 oracle selective 模拟更直接：在 full-apply 的 `92` 个 applied 程序里，如果只保留 `29` 个 `exec_ratio <= 1.0` 的程序，geomean 会从 `1.121x` 变成 `0.849x`。也就是说，固定 heuristic 不只是“有一点不稳”，而是在 applied subset 上付出了约 `1.32x` 的相对代价。
 
-## 1. Micro 证据：CMOV 不是唯一敏感项，其他 kinsn family 也会回归
+## 1. Micro 证据：CMOV 不是唯一敏感项，其他 kop family 也会回归
 
 先看最干净的 per-form isolation rerun。`docs/tmp/2026-03-12/per-form-rerun-correct-policy.md` 是当前最适合做 family 级因果归因的 micro 证据：
 
@@ -57,7 +57,7 @@ Selective policy 已经能显著降低这类代价。把 `2026-03-11` full-apply
 
 这里最关键的不是“cond_select 赢了”，而是它只在隔离、纯 select-diamond 场景里稳定赢。它和 corpus 上的净负收益并不矛盾，反而正好支持论文想要的论点：相同合法 lowering 在不同 branch predictability / workload mix 下会翻转。
 
-再看最新 raw micro snapshot `2026-03-26`。这份数据已经不适合做干净 family 归因，但很适合证明“当前 active pipeline 里的 kinsn rewrite 不是 always-win”：
+再看最新 raw micro snapshot `2026-03-26`。这份数据已经不适合做干净 family 归因，但很适合证明“当前 active pipeline 里的 kop rewrite 不是 always-win”：
 
 | Benchmark | 实际 applied pass | Stock -> ReJIT | Exec Ratio | 备注 |
 | --- | --- | ---: | ---: | --- |
@@ -83,7 +83,7 @@ Selective policy 已经能显著降低这类代价。把 `2026-03-11` full-apply
 | `cond_select` | `0` | `0` | n/a |
 | `branch_flip` | `0` | `0` | n/a |
 
-结论：不仅 `cond_select`，其他 kinsn family 也都不是 always-win。Micro 层面的强支持点是“workload sensitivity exists”；真正的回归占比证据要靠 corpus。
+结论：不仅 `cond_select`，其他 kop family 也都不是 always-win。Micro 层面的强支持点是“workload sensitivity exists”；真正的回归占比证据要靠 corpus。
 
 ## 2. Corpus：full-apply 下 applied 程序的大多数都回归
 
@@ -101,7 +101,7 @@ Selective policy 已经能显著降低这类代价。把 `2026-03-11` full-apply
 
 ### 2.2 Per-pass 回归率
 
-下面这张表的口径是“family 在该程序上确实 applied”。注意这些不是完美的单-family 因果隔离，因为一个程序可能同时触发多个 family；但它能回答用户最关心的问题：所有 kinsn family 到底有没有回归、回归占比多少。
+下面这张表的口径是“family 在该程序上确实 applied”。注意这些不是完美的单-family 因果隔离，因为一个程序可能同时触发多个 family；但它能回答用户最关心的问题：所有 kop family 到底有没有回归、回归占比多少。
 
 | Pass | Full-apply applied | Full-apply regressed | 回归占比 | Full-apply geomean | Selective applied | Selective regressed | 回归占比 | Selective geomean |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -208,7 +208,7 @@ Micro 里也有同向迹象：`mega_basic_block_2048` 在最新 raw snapshot 中
 
 ## 5. Map Inline 的独特价值与局限
 
-map_inline 不属于最初那几类 kinsn lowering，但它值得单列，因为它体现了“某些 pass 的独特价值不是单次替换本身，而是后续 cleanup cascade”。
+map_inline 不属于最初那几类 kop lowering，但它值得单列，因为它体现了“某些 pass 的独特价值不是单次替换本身，而是后续 cleanup cascade”。
 
 ### 5.1 Compile-only / structure 价值
 

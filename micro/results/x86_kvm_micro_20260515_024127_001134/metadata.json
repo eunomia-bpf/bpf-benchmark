@@ -2,13 +2,13 @@
   "benchmarks": [
     {
       "category": "alu-mix",
-      "description": "Hand-written x86 popcnt kinsn over bitmap words",
+      "description": "Hand-written x86 popcnt kop over bitmap words",
       "expected_result": 12648566,
       "family": "popcount",
-      "hypothesis": "Tests direct popcnt kinsn lowering on a bitmap scan input",
+      "hypothesis": "Tests direct popcnt kop lowering on a bitmap scan input",
       "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bitmap_popcount_scan.mem",
       "io_mode": "staged",
-      "level": "handcraft-kinsn",
+      "level": "handcraft-kop",
       "name": "bitmap_popcount_scan_handcraft",
       "native_baseline": "bitmap_popcount_scan",
       "object": "/artifacts/user/micro-programs/x86_64/bitmap_popcount_scan_handcraft.handcraft.so",
@@ -65,19 +65,19 @@
       ],
       "tags": [
         "bitops",
-        "handcraft-kinsn",
+        "handcraft-kop",
         "x86"
       ]
     },
     {
       "category": "control-flow",
-      "description": "Hand-written x86 test/cmov kinsn over event dispatch input",
+      "description": "Hand-written x86 test/cmov kop over event dispatch input",
       "expected_result": 56,
       "family": "switch-dispatch",
-      "hypothesis": "Tests direct test plus cmov kinsn lowering for branchless event selection",
+      "hypothesis": "Tests direct test plus cmov kop lowering for branchless event selection",
       "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/trace_event_type_switch_dispatch.mem",
       "io_mode": "staged",
-      "level": "handcraft-kinsn",
+      "level": "handcraft-kop",
       "name": "trace_event_type_switch_dispatch_handcraft",
       "native_baseline": "trace_event_type_switch_dispatch",
       "object": "/artifacts/user/micro-programs/x86_64/trace_event_type_switch_dispatch_handcraft.handcraft.so",
@@ -135,7 +135,7 @@
       "tags": [
         "branch",
         "dispatch",
-        "handcraft-kinsn",
+        "handcraft-kop",
         "x86"
       ]
     }

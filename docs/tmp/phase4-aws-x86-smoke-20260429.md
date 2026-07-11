@@ -57,7 +57,7 @@ Corpus status: `error`. Results were written to `corpus/results/aws_x86_corpus_2
 | final ReJIT applied programs | 28 |
 | final ReJIT not_applied programs | 491 |
 
-Kinsn module load was OK: `bpf_bulk_memory`, `bpf_endian`, `bpf_extract`, `bpf_rotate`, and `bpf_select` were resident; `failed_modules=[]`.
+KOperation module load was OK: `bpf_bulk_memory`, `bpf_endian`, `bpf_extract`, `bpf_rotate`, and `bpf_select` were resident; `failed_modules=[]`.
 
 Corpus app status:
 

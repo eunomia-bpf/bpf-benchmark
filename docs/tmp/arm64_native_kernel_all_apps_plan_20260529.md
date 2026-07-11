@@ -137,7 +137,7 @@ pipeline:
 - `native-sim/x86/native_lab/native_link` supports both x86_64 and AArch64 ELF
   inputs; the arm64 binary is cross-built at
   `native-sim/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link`.
-- `runner/mk/build.mk` already builds arm64 kernel, kinsn module, shim, runner,
+- `runner/mk/build.mk` already builds arm64 kernel, kop module, shim, runner,
   native-loader shared library, micro programs, stage2 programs, sim proofs,
   bpfopt, and app binaries/BPF objects for the arm64 runtime image.
 
@@ -1566,7 +1566,7 @@ Raw correctness data:
   - `warmups`: `1`
   - `workload_seconds`: `10.0`
   - `bpf_stats`: `true`
-- Kinsn module load data:
+- KOperation module load data:
   - `loaded_count`: `11`
   - `failed_modules`: `[]`
   - loaded modules:
@@ -1667,9 +1667,9 @@ Raw correctness data:
   - `skip_rejit`: `true`
   - `samples`: `1`
   - `workload_seconds`: `10.0`
-  - kinsn module load status: `ok`
-  - kinsn `loaded_count`: `11`
-  - kinsn `failed_modules`: `[]`
+  - kop module load status: `ok`
+  - kop `loaded_count`: `11`
+  - kop `failed_modules`: `[]`
 - `details/apps/bcc__set.json` raw app fields:
   - `status`: `error`
   - `error`: `BCC tool vfsstat exited before BPF programs were tracked by shim`
@@ -2451,7 +2451,7 @@ Kernel state:
 
 - `git -C vendor/linux-framework status --short`: empty output.
 - `git -C vendor/linux-framework log -1 --oneline`:
-  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
+  `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`.
 - No kernel source file was changed by this ARM64 completion work.
 
 Result:
@@ -4951,7 +4951,7 @@ micro_exec Build ID: b31c3c999d2ef78a59f5ad9b251b2a6e2e4a149b
 native-link Build ID: ca1f609fa71ea1a47d9d10ad29cf7aa1155b5ca8
 bpfopt Build ID: 147a2eee8acbc77defda63d25021d8c456e1f5ce
 kernel submodule status: clean
-kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
+kernel submodule HEAD: 8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter
 micro proof build-only during image target: 29 benchmarks, all ok
 ```
 
@@ -5086,7 +5086,7 @@ Technical decision:
   layer that owns native branch relocation after variable-length rewriting.
 - Do not change kernel source. `git -C vendor/linux-framework status --short`
   remained empty, and kernel HEAD stayed
-  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
+  `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`.
 - Do not change loader or native-loader semantics. The Phase 46 shim dump is
   still temporary diagnostics only and is disabled unless
   `BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT` is set.
@@ -5117,7 +5117,7 @@ make host-native-bpf-arm64
 exit=0
 native-link arm64 Build ID: 796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc
 kernel submodule status: clean
-kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
+kernel submodule HEAD: 8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter
 ```
 
 Local Cilium link verification:
@@ -5189,7 +5189,7 @@ shim Build ID: a4a9530ce8acfd0e8737b64488921321ea20dfd7
 native_loader Build ID: 9dac070616bb76a8ee20ac511615e8a3cf6de2b6
 micro_exec Build ID: b31c3c999d2ef78a59f5ad9b251b2a6e2e4a149b
 kernel submodule status: clean
-kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
+kernel submodule HEAD: 8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter
 ```
 
 Build observation:
@@ -5322,7 +5322,7 @@ native-link Build ID: 796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc
 native_loader Build ID: 9dac070616bb76a8ee20ac511615e8a3cf6de2b6
 micro_exec Build ID: b31c3c999d2ef78a59f5ad9b251b2a6e2e4a149b
 kernel submodule status: clean
-kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
+kernel submodule HEAD: 8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter
 micro proof build-only during image target: 29 benchmarks, all ok
 ```
 
@@ -5397,7 +5397,7 @@ native_errors=0
 jit_dump_lines=0
 prog_array_updates=0
 kernel submodule status: clean
-kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
+kernel submodule HEAD: 8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter
 ```
 
 Technical decision:
@@ -5490,7 +5490,7 @@ exit=0
 data_objects=[{"native_object":"vendor/build/native-bpf/arm64/6.15.11-061511-generic/native/otel/native_stack_trace.native.o"}]
 objects=26
 kernel submodule status: clean
-kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
+kernel submodule HEAD: 8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter
 ```
 
 Next tests:
@@ -5525,7 +5525,7 @@ Result:
 exit=0
 native-link arm64 Build ID: 796c5ba8706181fcc2b8ca2e8d40b8ec64fa0efc
 kernel submodule status: clean
-kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
+kernel submodule HEAD: 8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter
 ```
 
 OTEL staged manifest verification:
@@ -5883,7 +5883,7 @@ image tar sha256: f4bac2d1f59c43eef74fcb4c7515833c30b29eab0d8bcfa524b4b42c7c291b
 image tar size: 1970936832
 image tar mtime: 2026-05-29 21:03:45 -0700
 kernel submodule status: clean
-kernel submodule HEAD: 8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter
+kernel submodule HEAD: 8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter
 ```
 
 Build IDs:
@@ -6013,7 +6013,7 @@ Technical decision:
 - Do not edit kernel source based only on this artifact.
 - Do not skip or filter `custom__generic`.
 - Do not change shim behavior.
-- Continue by inspecting the ARM64 JIT and verifier kinsn paths read-only, then
+- Continue by inspecting the ARM64 JIT and verifier kop paths read-only, then
   prefer a minimal native-link/loader-side fix if the failure is triggered by
   something the loader can encode differently while preserving x86 behavior.
 
@@ -6157,7 +6157,7 @@ make arm64-runner-runtime-image-tar
 - Kernel submodule:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Next step:
 
@@ -6224,7 +6224,7 @@ Result:
     `perf_unwind_sto`, `perf_unwind_nat`, `perf_unwind_hot`,
     `perf_unwind_per`, `perf_unwind_php`, `perf_unwind_pyt`,
     `perf_unwind_rub`, `perf_unwind_v8`.
-- Kinsn/native modules:
+- KOperation/native modules:
   - expected modules: 11
   - loaded modules: 11
   - failed modules: empty list
@@ -6342,7 +6342,7 @@ Validation result:
 - Kernel source status after the run:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Technical decision:
 
@@ -6429,7 +6429,7 @@ Validation result:
 - Kernel source status after the run:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Technical decision:
 
@@ -6544,7 +6544,7 @@ Rebuild validation:
 - Kernel source status after rebuild:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -6630,7 +6630,7 @@ Validation result:
 - Kernel source status after the run:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Technical decision:
 
@@ -6856,7 +6856,7 @@ Runtime image validation:
 - Kernel submodule:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`.
 
 Next command:
 
@@ -7312,7 +7312,7 @@ Runtime image validation:
 - Kernel submodule:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`.
 
 Next command:
 
@@ -7379,7 +7379,7 @@ Validation result:
 - Kernel source status:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Technical decision:
 
@@ -7452,7 +7452,7 @@ Kernel submodule check:
 
 - `git -C vendor/linux-framework status --short`: empty output
 - `git -C vendor/linux-framework log -1 --oneline`:
-  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+  `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -7610,7 +7610,7 @@ Result:
 - Kernel submodule remains clean:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -7875,7 +7875,7 @@ Result:
 - Kernel submodule remains clean:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Technical decision:
 
@@ -7984,7 +7984,7 @@ Kernel state:
 
 - `git -C vendor/linux-framework status --short`: empty output
 - `git -C vendor/linux-framework log -1 --oneline`:
-  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+  `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Next validation command:
 
@@ -8009,7 +8009,7 @@ make arm64-runner-runtime-image-tar
 - Kernel submodule check stayed clean:
   - `git -C vendor/linux-framework status --short`: empty output
   - latest kernel commit:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Diagnosis correction:
 
@@ -8211,7 +8211,7 @@ Validation result:
 - Kernel submodule remains clean:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -8416,7 +8416,7 @@ Kernel submodule:
 
 - `git -C vendor/linux-framework status --short`: empty output.
 - `git -C vendor/linux-framework log -1 --oneline`:
-  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+  `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Required next validation:
 
@@ -8457,7 +8457,7 @@ Validation result:
 - Kernel submodule remains clean:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -8499,7 +8499,7 @@ Result:
   - `error`:
     `shim socket /var/run/bpfrejit/shim-565.sock request failed: [Errno 111] Connection refused`
 - Module state:
-  - expected kinsn/native modules loaded successfully.
+  - expected kop/native modules loaded successfully.
   - `bpf_arm64_native_lab` was loaded.
   - failed module list was empty.
 
@@ -8642,7 +8642,7 @@ make arm64-runner-runtime-image-tar
 - Kernel submodule:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -8954,7 +8954,7 @@ Results:
 - Both shim builds only reported the pre-existing `shim_reload.h` snprintf
   truncation warning at `shim_reload.h:603`; no new compile errors.
 - Kernel submodule remains clean, with HEAD:
-  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
+  `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`.
 
 Next command:
 
@@ -9076,7 +9076,7 @@ Validation result:
 - Kernel submodule:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -9219,7 +9219,7 @@ make arm64-runner-runtime-image-tar
 - Kernel submodule:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -9307,7 +9307,7 @@ make arm64-runner-runtime-image-tar
 - Kernel submodule:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -9474,7 +9474,7 @@ make arm64-runner-runtime-image-tar
 - Kernel submodule:
   - `git -C vendor/linux-framework status --short`: empty output.
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Next command:
 
@@ -9520,7 +9520,7 @@ Validation result:
 - Kernel submodule remains clean:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Technical decision:
 
@@ -9605,7 +9605,7 @@ Technical decision:
   keeps the "no build in QEMU" constraint visible instead of silently falling
   back to proof generation inside the guest.
 - No kernel source change is needed. The kernel submodule remains clean at
-  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
+  `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`.
 
 ### Phase 84 - Use prebuilt native-link proof objects from runtime image
 
@@ -9691,7 +9691,7 @@ Validation result:
 - Kernel submodule remains clean:
   - `git -C vendor/linux-framework status --short`: empty output
   - `git -C vendor/linux-framework log -1 --oneline`:
-    `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`
+    `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`
 
 Technical decision:
 
@@ -9778,7 +9778,7 @@ Final kernel state:
 
 - `git -C vendor/linux-framework status --short`: empty output.
 - `git -C vendor/linux-framework log -1 --oneline`:
-  `8e116c79d10 bpf: Update kinsn emit functions to include final instruction pointer parameter`.
+  `8e116c79d10 bpf: Update kop emit functions to include final instruction pointer parameter`.
 - No kernel source file was changed by this ARM64 native-kernel completion work.
 
 ### Phase 105 - Remove temporary diagnostic environment knobs

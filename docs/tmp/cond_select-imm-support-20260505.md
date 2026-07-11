@@ -4,7 +4,7 @@
 
 Path A: register materialization.
 
-The current `bpf_select64` packed kinsn ABI is register-only. The x86 and
+The current `bpf_select64` packed kop ABI is register-only. The x86 and
 arm64 modules decode only `dst_reg`, `true_reg`, `false_reg`, and `cond_reg`,
 and reject any non-zero payload mode field at bits 16+. No immediate operand
 variant is available without kernel/module changes, which are forbidden for
@@ -26,7 +26,7 @@ this task.
 - Register materialization:
   - `bpfopt/crates/bpfopt/src/passes/cond_select.rs:573` materializes immediate
     and ALU32 source operands into verifier-dead temp registers before the
-    packed kinsn sidecar.
+    packed kop sidecar.
   - `bpfopt/crates/bpfopt/src/passes/cond_select.rs:610` chooses temps from the
     destination register or dead caller/callee BPF registers, excluding live
     values and predicate/source registers.

@@ -3,14 +3,14 @@
   "daemon_socket": "/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
   "filters": [],
   "generated_at": "2026-04-09T18:49:57.423322+00:00",
-  "kinsn_modules": {
+  "kop_modules": {
     "captured_at": "2026-04-09T18:32:09.296943+00:00",
     "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-    "daemon_kinsn_discovery": {
+    "daemon_kop_discovery": {
       "captured_at": "2026-04-09T18:32:09.301089+00:00",
-      "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+      "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
       "status": "ok",
-      "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+      "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
       "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
       "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
       "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -40,7 +40,7 @@
         "bpf_rotate",
         "bpf_select"
       ],
-      "loader": "runner.libs.kinsn.load_kinsn_modules",
+      "loader": "runner.libs.kop.load_kop_modules",
       "module_dir": "module/x86",
       "newly_loaded_modules": [
         "bpf_bulk_memory",
@@ -104,17 +104,17 @@
   },
   "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
   "metadata": {
-    "kinsn_modules": {
+    "kop_modules": {
       "count": 16,
       "lifecycle_runs": [
         {
           "captured_at": "2026-04-09T18:32:11.560090+00:00",
           "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-09T18:32:09.301089+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
             "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
             "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -145,7 +145,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/x86",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -214,11 +214,11 @@
         {
           "captured_at": "2026-04-09T18:32:13.155194+00:00",
           "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-09T18:32:09.301089+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
             "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
             "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -249,7 +249,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/x86",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -318,11 +318,11 @@
         {
           "captured_at": "2026-04-09T18:32:14.911772+00:00",
           "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-09T18:32:09.301089+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
             "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
             "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -353,7 +353,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/x86",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -424,11 +424,11 @@
         {
           "captured_at": "2026-04-09T18:32:16.497424+00:00",
           "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-09T18:32:09.301089+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
             "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
             "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -459,7 +459,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/x86",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -530,11 +530,11 @@
         {
           "captured_at": "2026-04-09T18:32:18.091759+00:00",
           "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-09T18:32:09.301089+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
             "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
             "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -565,7 +565,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/x86",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -640,11 +640,11 @@
         {
           "captured_at": "2026-04-09T18:32:19.699699+00:00",
           "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-09T18:32:09.301089+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
             "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
             "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -676,7 +676,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/x86",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -749,11 +749,11 @@
         {
           "captured_at": "2026-04-09T18:32:21.420036+00:00",
           "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-09T18:32:09.301089+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
             "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
             "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -785,7 +785,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/x86",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -854,11 +854,11 @@
         {
           "captured_at": "2026-04-09T18:32:23.474165+00:00",
           "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-09T18:32:09.301089+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
             "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
             "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -889,7 +889,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/x86",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -960,11 +960,11 @@
         {
           "captured_at": "2026-04-09T18:32:25.784287+00:00",
           "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-09T18:32:09.301089+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
             "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
             "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -995,7 +995,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/x86",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -1063,11 +1063,11 @@
         {
           "captured_at": "2026-04-09T18:32:27.821113+00:00",
           "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-09T18:32:09.301089+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
             "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
             "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -1098,7 +1098,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/x86",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -1168,11 +1168,11 @@
         {
           "captured_at": "2026-04-09T18:32:29.182210+00:00",
           "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-09T18:32:09.301089+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
             "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
             "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -1203,7 +1203,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/x86",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -1283,11 +1283,11 @@
         {
           "captured_at": "2026-04-09T18:32:32.179442+00:00",
           "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-09T18:32:09.301089+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
             "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
             "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -1318,7 +1318,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/x86",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -1393,11 +1393,11 @@
         {
           "captured_at": "2026-04-09T18:32:38.058187+00:00",
           "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-09T18:32:09.301089+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
             "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
             "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -1428,7 +1428,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/x86",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -1496,11 +1496,11 @@
         {
           "captured_at": "2026-04-09T18:32:47.636976+00:00",
           "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-09T18:32:09.301089+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
             "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
             "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -1532,7 +1532,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/x86",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -1616,11 +1616,11 @@
         {
           "captured_at": "2026-04-09T18:32:48.971422+00:00",
           "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-09T18:32:09.301089+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
             "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
             "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -1651,7 +1651,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/x86",
             "newly_loaded_modules": [
               "bpf_bulk_memory",
@@ -1719,11 +1719,11 @@
         {
           "captured_at": "2026-04-09T18:32:51.368705+00:00",
           "daemon_binary": "daemon/target/release/bpfrejit-daemon",
-          "daemon_kinsn_discovery": {
+          "daemon_kop_discovery": {
             "captured_at": "2026-04-09T18:32:09.301089+00:00",
-            "discovery_log": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "discovery_log": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "status": "ok",
-            "stderr": "kinsn discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
+            "stderr": "kop discovery:\n  vmlinux BTF str_len=2699124 type_cnt=145731 type_id_bias=145730\n  bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=145753 fd=3\n  bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=145755 fd=4\n  bpf_extract64: function 'bpf_extract64' found in 'bpf_extract' btf_id=145752 fd=5\n  bpf_memcpy_bulk: function 'bpf_memcpy_bulk' found in 'bpf_bulk_memory' btf_id=145759 fd=6\n  bpf_memset_bulk: function 'bpf_memset_bulk' found in 'bpf_bulk_memory' btf_id=145760 fd=6\n  bpf_endian_load16: function 'bpf_endian_load16' found in 'bpf_endian' btf_id=145755 fd=7\n  bpf_endian_load32: function 'bpf_endian_load32' found in 'bpf_endian' btf_id=145756 fd=7\n  bpf_endian_load64: function 'bpf_endian_load64' found in 'bpf_endian' btf_id=145757 fd=7\nplatform: arch=X86_64 bmi1=true bmi2=true cmov=true movbe=true rorx=true",
             "stderr_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stderr.log",
             "stdout": "serve: listening on /home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.sock",
             "stdout_path": "docs/tmp/20260409/vm-tmp/bpfrejit-daemon-axl86ffb/daemon.stdout.log"
@@ -1755,7 +1755,7 @@
               "bpf_rotate",
               "bpf_select"
             ],
-            "loader": "runner.libs.kinsn.load_kinsn_modules",
+            "loader": "runner.libs.kop.load_kop_modules",
             "module_dir": "module/x86",
             "newly_loaded_modules": [
               "bpf_bulk_memory",

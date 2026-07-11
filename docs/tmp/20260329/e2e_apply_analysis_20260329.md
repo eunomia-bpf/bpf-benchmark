@@ -52,21 +52,21 @@ For cyclic cases, counts are reported per cycle unless noted otherwise.
 | `tetragon` | `tetragon_20260329_083750` | 8 discovered, 2 selected for apply | 1 | 0 | 0 | 99 | not comparable |
 | `tracee` | `tracee_20260329_081351` | 13/cycle (`5` cycles, identical footprint) | 13/cycle | 10/cycle | 851/cycle | 1868/cycle | app deltas small / insignificant |
 
-## Kinsn modules
+## KOperation modules
 
-结论：`kinsn` modules 对这批 E2E 结果是已加载的。
+结论：`kop` modules 对这批 E2E 结果是已加载的。
 
 Evidence chain:
 
-- `runner/libs/vm.py` always prefixes guest commands with `module/load_all.sh`, so every VM guest command loads kinsn modules before running the case.
-- `module/load_all.sh` loads all arch-specific kinsn modules except `bpf_barrier`, then prints `kinsn modules: ${loaded}/${total} loaded`.
-- same-day VM corpus logs show the expected load sequence: `Loaded bpf_bulk_memory`, `Loaded bpf_endian`, `Loaded bpf_extract`, `Loaded bpf_rotate`, `Loaded bpf_select`, then `kinsn modules: 5/5 loaded`.
-- captured E2E daemon stderr logs show `kinsn discovery:` followed by `bpf_rotate64`, `bpf_select64`, `bpf_extract64`, `bpf_memcpy_bulk`, and `bpf_endian_load16/32/64`.
+- `runner/libs/vm.py` always prefixes guest commands with `module/load_all.sh`, so every VM guest command loads kop modules before running the case.
+- `module/load_all.sh` loads all arch-specific kop modules except `bpf_barrier`, then prints `kop modules: ${loaded}/${total} loaded`.
+- same-day VM corpus logs show the expected load sequence: `Loaded bpf_bulk_memory`, `Loaded bpf_endian`, `Loaded bpf_extract`, `Loaded bpf_rotate`, `Loaded bpf_select`, then `kop modules: 5/5 loaded`.
+- captured E2E daemon stderr logs show `kop discovery:` followed by `bpf_rotate64`, `bpf_select64`, `bpf_extract64`, `bpf_memcpy_bulk`, and `bpf_endian_load16/32/64`.
 
 Inference note:
 
 - the per-case `metadata.json` files here are artifact summaries and do not embed the guest stdout/stderr directly
-- so the "kinsn loaded" conclusion is inferred from shared VM launcher code plus same-day VM/daemon logs, not from a case-local boot log inside each `metadata.json`
+- so the "kop loaded" conclusion is inferred from shared VM launcher code plus same-day VM/daemon logs, not from a case-local boot log inside each `metadata.json`
 
 ## bcc
 

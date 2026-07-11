@@ -94,7 +94,7 @@
 078. Evidence: `corpus/results/x86_kvm_corpus_20260506_074857_891000/details/result.json:2`.
 079. The suite result was generated at `2026-05-06T07:49:27.936021+00:00`.
 080. Evidence: `corpus/results/x86_kvm_corpus_20260506_074857_891000/details/result.json:3`.
-081. The expected kinsn modules included `bpf_rotate`.
+081. The expected kop modules included `bpf_rotate`.
 082. Evidence: `corpus/results/x86_kvm_corpus_20260506_074857_891000/details/result.json:7`.
 083. Evidence: `corpus/results/x86_kvm_corpus_20260506_074857_891000/details/result.json:12`.
 084. The module load snapshot included `bpf_rotate`.
@@ -108,7 +108,7 @@
 092. The single result entry is `cilium/agent`.
 093. Evidence: `corpus/results/x86_kvm_corpus_20260506_074857_891000/details/result.json:103`.
 094. Evidence: `corpus/results/x86_kvm_corpus_20260506_074857_891000/details/result.json:105`.
-095. The kinsn environment was not the cause of missing artifacts.
+095. The kop environment was not the cause of missing artifacts.
 096. The rotate module was resident before the app result was recorded.
 
 ## 006. App Result Evidence
@@ -176,7 +176,7 @@
 154. Searching JSON paths for `failure` returned no app JSON path.
 155. Searching JSON paths for `tar` returned no app JSON path.
 156. Searching JSON paths for `b64` returned no app JSON path.
-157. The suite result JSON had `captured_at` kinsn metadata paths only.
+157. The suite result JSON had `captured_at` kop metadata paths only.
 158. Those paths are module snapshot timestamps, not workdir capture artifacts.
 159. The app JSON has 38 rotate records.
 160. The app JSON has one command variant.

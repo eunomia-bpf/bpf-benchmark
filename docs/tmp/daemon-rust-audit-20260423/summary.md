@@ -25,7 +25,7 @@
   - `docs/tmp/20260320/bpf_program_replacement_research_20260320.md:221`：`bpf_capable()` = `CAP_BPF` 或 `CAP_SYS_ADMIN`
 - 判断：
   - **确认存在**，而且是当前 daemon 最严重的 observability 漏洞。
-  - 这不是 prog-type gate，也不是 kinsn/verifier 限制。当前证据只支持“**权限 / raw dump policy 导致 `orig_prog_len==0`**”这个解释；daemon 代码里没有任何按 `prog_type` 特判空 `orig_insns` 的逻辑。
+  - 这不是 prog-type gate，也不是 kop/verifier 限制。当前证据只支持“**权限 / raw dump policy 导致 `orig_prog_len==0`**”这个解释；daemon 代码里没有任何按 `prog_type` 特判空 `orig_insns` 的逻辑。
   - 单程序 `optimize` 是**静默成功**，`optimize-all` 是**显式错误**，两条入口现在不一致。
 
 ### 矩阵 B：daemon 内 filter/select/gate 残留
@@ -203,9 +203,9 @@ if orig_insns.is_empty() {
   - [docs/tmp/20260325/kernel_diff_unnecessary_changes_20260325.md](/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260325/kernel_diff_unnecessary_changes_20260325.md:219)：`bpf_prog_get_info_by_fd` 对 non-capable 调用者可把 `info.orig_prog_len = 0`
   - [docs/tmp/20260321/bpfrejit_v2_design_gaps_20260321.md](/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260321/bpfrejit_v2_design_gaps_20260321.md:142)：GET_ORIGINAL 至少应满足 `bpf_capable()` + raw-dump 语义
   - [docs/tmp/20260320/bpf_program_replacement_research_20260320.md](/home/yunwei37/workspace/bpf-benchmark/docs/tmp/20260320/bpf_program_replacement_research_20260320.md:221)：`bpf_capable()` 需要 `CAP_BPF` 或 `CAP_SYS_ADMIN`
-- **没找到任何 daemon 侧证据表明这跟 prog type、kinsn、或 verifier 限制有关。**
+- **没找到任何 daemon 侧证据表明这跟 prog type、kop、或 verifier 限制有关。**
   - 这条短路发生在 pass scheduling / verifier 之前，所以不是 verifier 限制
-  - kinsn/BTF 缺失会在更后面的 per-pass verify 路径报 rejected，不会让 `orig_insns` 先天为空
+  - kop/BTF 缺失会在更后面的 per-pass verify 路径报 rejected，不会让 `orig_insns` 先天为空
   - daemon 没有按 `prog_type` 对空 `orig_insns` 做任何区分逻辑
 
 ### 2.3 为什么它绕过 Round 7 taxonomy

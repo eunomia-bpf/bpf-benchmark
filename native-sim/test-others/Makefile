@@ -5,7 +5,7 @@
 #   build/runner                  — standalone harness binary
 #   build/<name>.bpf.o            — kernel-side libbpf-loadable object
 #   build/<name>.native.o         — clang -target x86_64 object for the
-#                                   native_lab kinsn path (built but not
+#                                   native_lab kop path (built but not
 #                                   exercised by the kernel-side test;
 #                                   see README for native_lab status).
 #
@@ -68,7 +68,7 @@ $(OUTPUT_DIR)/%.native.o: %.bpf.c | $(OUTPUT_DIR)
 	$(CLANG) $(NATIVE_CFLAGS) -MF "$(OUTPUT_DIR)/$*.native.d" -MT "$@" -o "$@" "$<"
 
 # C++ runner that exercises BOTH the kernel-JIT path (libbpf) and the
-# native_lab kinsn path (via native_lab_attach.cpp), then reports
+# native_lab kop path (via native_lab_attach.cpp), then reports
 # per-call handler overhead for each. -fno-omit-frame-pointer keeps the
 # uprobe target visible in symbols even at -O2.
 $(RUNNER): runner.cpp native_lab_attach.cpp native_lab_attach.hpp | $(OUTPUT_DIR)
@@ -79,15 +79,15 @@ $(RUNNER): runner.cpp native_lab_attach.cpp native_lab_attach.hpp | $(OUTPUT_DIR
 test: all
 	sudo "$(RUNNER)"
 
-# Boot virtme-ng with the bench framework's kinsn-aware kernel + insmod
+# Boot virtme-ng with the bench framework's kop-aware kernel + insmod
 # the bpf_x86_native_lab .ko, then run the perf-compare runner.
 # Requires the regular bench build to have produced the kernel under vendor/build
-# and the kinsn modules under module/x86/build. Host's Ubuntu
-# kernel doesn't ship the kinsn / BPF_PROG_REJIT framework, so the
+# and the kop modules under module/x86/build. Host's Ubuntu
+# kernel doesn't ship the kop / BPF_PROG_REJIT framework, so the
 # native_lab leg fails outside the framework VM -- this is the canonical
 # way to exercise it standalone.
 KIMG := $(REPO_ROOT)/vendor/build/x86/linux/arch/x86/boot/bzImage
-KINSN_KO_DIR := $(REPO_ROOT)/module/x86/build
+KOP_KO_DIR := $(REPO_ROOT)/module/x86/build
 NATIVE_LINK_HOST := $(REPO_ROOT)/native-sim/x86/native_lab/native_link/target/release/native-link
 
 VM_SCRIPT := $(OUTPUT_DIR)/run-in-vm.sh
@@ -107,7 +107,7 @@ test-vm: all $(VM_SCRIPT)
 	    --append "loglevel=7 panic=30 oops=panic" \
 	    --exec "$(VM_SCRIPT)"
 
-# Script the VM runs at boot. Loads kinsn modules, then invokes the
+# Script the VM runs at boot. Loads kop modules, then invokes the
 # perf-compare runner with the host-built native-link binary path
 # threaded through via an env var.
 $(VM_SCRIPT): | $(OUTPUT_DIR)
@@ -115,7 +115,7 @@ $(VM_SCRIPT): | $(OUTPUT_DIR)
 	    '#!/bin/bash' \
 	    'set -eu' \
 	    'cd "$(CURDIR)"' \
-	    'for ko in $(KINSN_KO_DIR)/bpf_*.ko; do' \
+	    'for ko in $(KOP_KO_DIR)/bpf_*.ko; do' \
 	    '    insmod "$$ko" 2>/dev/null || true' \
 	    'done' \
 	    'export BPFREJIT_NATIVE_LINK_BINARY="$(NATIVE_LINK_HOST)"' \

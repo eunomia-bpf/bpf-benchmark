@@ -4,7 +4,7 @@ Date: 2026-04-29
 
 ## Decision
 
-Paper A remains the kinsn track: `bulk_memory`, `rotate`, `cond_select`, `extract`, and `endian_fusion`.
+Paper A remains the kop track: `bulk_memory`, `rotate`, `cond_select`, `extract`, and `endian_fusion`.
 
 Paper B is speculative runtime optimization based on profile/info. `branch_flip` is restored only as Paper B scaffolding and is marked experimental. It is not part of the default `bpfopt optimize` pass list.
 

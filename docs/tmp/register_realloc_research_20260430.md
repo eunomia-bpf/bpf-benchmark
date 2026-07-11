@@ -127,7 +127,7 @@ Key risks:
 - **Verifier state**: changing register numbers changes verifier register state traces. The transform is still pure bytecode, but verifier replay is mandatory; no unchecked proof shortcut should be added.
 - **Metadata**: if the pass deletes instructions rather than NOPing them, BTF func_info/line_info and address maps must stay consistent with existing bpfverify replay behavior.
 
-Relative complexity: this is materially harder than const-prop or a local kinsn peephole. It is closer to a small register allocator plus stack-slot reaching-def analysis.
+Relative complexity: this is materially harder than const-prop or a local kop peephole. It is closer to a small register allocator plus stack-slot reaching-def analysis.
 
 ## Stage 4: ROI estimate
 
@@ -144,7 +144,7 @@ Break-even at 3 GHz:
 | 1 ms | 1,500,000 |
 | 10 ms | 15,000,000 |
 
-Using `corpus/results/x86_kvm_p89_kinsn_corpus_20260430_131403_981524/details/result.json` (`workload_seconds = 1.0`), measured baseline BPF run counts by runner were:
+Using `corpus/results/x86_kvm_p89_kop_corpus_20260430_131403_981524/details/result.json` (`workload_seconds = 1.0`), measured baseline BPF run counts by runner were:
 
 | runner | baseline runs |
 | --- | ---: |

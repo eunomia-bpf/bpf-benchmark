@@ -1,7 +1,7 @@
 # 128-bit / Wide Load-Store 优化调研报告
 
 日期：2026-03-24  
-范围基线：先阅读 `docs/kernel-jit-optimization-plan.md`，再结合 ARM64/x86 JIT、当前 `wide_mem` pass、kinsn/verifier 实现，以及 active macro corpus 做代码级调研。
+范围基线：先阅读 `docs/kernel-jit-optimization-plan.md`，再结合 ARM64/x86 JIT、当前 `wide_mem` pass、kop/verifier 实现，以及 active macro corpus 做代码级调研。
 
 ## 1. 结论摘要
 
@@ -12,7 +12,7 @@
 2. **x86 不值得做原生 128-bit pair load/store 优化。**
    用 SSE2 `MOVDQU` 需要引入 XMM/FPU/SIMD 状态管理，和当前 BPF JIT 的纯 GPR 路线冲突；`REP MOVSB` 是内存到内存复制原语，不匹配“内存 <-> 两个 GPR”的 `ldp/stp` 语义。
 3. **这不是 `wide_mem` 的延伸，而是另一层优化。**
-   当前 `wide_mem` 只做 `byte -> 2/4/8-byte load` 合并，而且只处理 load；`128-bit / pair load-store` 应被建模为 **`word -> native pair op`**，最合理实现是新 pass + kinsn。
+   当前 `wide_mem` 只做 `byte -> 2/4/8-byte load` 合并，而且只处理 load；`128-bit / pair load-store` 应被建模为 **`word -> native pair op`**，最合理实现是新 pass + kop。
 4. **Verifier 侧不要引入 `BPF_128`。**
    eBPF 没有 128-bit 标量/寄存器类型。最稳妥方案是：`bpf_ldp64` / `bpf_stp64` 在 verifier 中展开成两条普通 `BPF_LDX_MEM(BPF_DW)` / `BPF_STX_MEM(BPF_DW)` 证明序列，原生 JIT 只在 ARM64 上把它们压成一条 `LDP/STP`。
 5. **真实程序里，IPv6-heavy 路径确实有候选，但第一波收益仍然主要来自 store。**
@@ -22,7 +22,7 @@
 
 - **Phase 1**：ARM64-only `bpf_stp64`
 - **Phase 2**：ARM64 `bpf_ldp64`
-- **Phase 3**：若需要统一抽象，再决定是否给 x86 暴露“仅 proof-seq、无 native emit”的同名 kinsn；生产优化 pass 默认仍只在 ARM64 启用
+- **Phase 3**：若需要统一抽象，再决定是否给 x86 暴露“仅 proof-seq、无 native emit”的同名 kop；生产优化 pass 默认仍只在 ARM64 启用
 
 ## 2. 调研方法
 
@@ -32,7 +32,7 @@
 - ARM64 JIT：`vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c`
 - x86 JIT：`vendor/linux-framework/arch/x86/net/bpf_jit_comp.c`
 - 当前 `wide_mem` pass：`daemon/src/passes/wide_mem.rs`
-- kinsn 描述与 verifier 降级路径：
+- kop 描述与 verifier 降级路径：
   - `vendor/linux-framework/include/linux/bpf.h`
   - `vendor/linux-framework/kernel/bpf/verifier.c`
 - x86 SIMD/FPU 约束：
@@ -154,14 +154,14 @@ ARM64 上这件事成立，原因很直接：
 
 - 对 `bpf_ldp64`：`REP MOVSB` 不适用
 - 对 `bpf_stp64`：也不适用
-- 它只可能出现在未来“memcpy-like kinsn”讨论里，而不是本报告的 pair load/store
+- 它只可能出现在未来“memcpy-like kop”讨论里，而不是本报告的 pair load/store
 
 ### 4.4 x86 的现实结论
 
 x86 最合理的方案不是“再找一种 16-byte 指令硬凑”，而是：
 
 - **不做原生 pair load/store 优化**
-- 如有统一抽象需要，可共享同名 kinsn 的 proof-seq
+- 如有统一抽象需要，可共享同名 kop 的 proof-seq
 - 生产 pass 默认按架构 gate，只在 ARM64 启用
 
 ## 5. Corpus 统计：机会很多，但主要是 store
@@ -285,21 +285,21 @@ x86 最合理的方案不是“再找一种 16-byte 指令硬凑”，而是：
 
 因此 pair pass 的第一版不应一开始就大面积碰 packet-pointer 复杂场景。
 
-## 7. kinsn 设计建议：`bpf_ldp64` / `bpf_stp64`
+## 7. kop 设计建议：`bpf_ldp64` / `bpf_stp64`
 
-### 7.1 为什么用 kinsn，而不是新加 `BPF_128`
+### 7.1 为什么用 kop，而不是新加 `BPF_128`
 
-当前内核里的 kinsn 机制已经足够表达这个优化：
+当前内核里的 kop 机制已经足够表达这个优化：
 
-- `struct bpf_kinsn` 在 `vendor/linux-framework/include/linux/bpf.h:969`
+- `struct bpf_kop` 在 `vendor/linux-framework/include/linux/bpf.h:969`
 - sidecar payload 有 **52 bit**
-  - `BPF_KINSN_SIDECAR_PAYLOAD_BITS` 在 `984`
-- verifier 会先把 kinsn proof sequence 实例化并验证：
-  - `validate_kinsn_proof_seq()` 在 `3856`
-  - `lower_kinsn_proof_regions()` 在 `3931`
-  - `build_kinsn_inst_seq()` 在 `4035`
+  - `BPF_KOP_SIDECAR_PAYLOAD_BITS` 在 `984`
+- verifier 会先把 kop proof sequence 实例化并验证：
+  - `validate_kop_proof_seq()` 在 `3856`
+  - `lower_kop_proof_regions()` 在 `3931`
+  - `build_kop_inst_seq()` 在 `4035`
 - 如果目标架构没有 native emit，verifier 最终会把它补回 proof sequence：
-  - `bpf_kinsn_has_native_emit()` 在 `4024`
+  - `bpf_kop_has_native_emit()` 在 `4024`
   - 最终选择逻辑在 `23919-23928`
 
 这套机制正适合本题：
@@ -317,7 +317,7 @@ x86 最合理的方案不是“再找一种 16-byte 指令硬凑”，而是：
 
 ### 7.2 建议的抽象
 
-建议引入两类 kinsn：
+建议引入两类 kop：
 
 - `bpf_stp64`
 - `bpf_ldp64`
@@ -329,7 +329,7 @@ x86 最合理的方案不是“再找一种 16-byte 指令硬凑”，而是：
 - **不要**定义成“单条 128-bit atomic access”
 
 这一点非常关键。  
-如果语义被说成“128-bit 一次性读/写”，那就会马上撞上 BPF ISA、verifier、内存模型和原子性承诺的问题；而如果它只是“proof-seq 可验证、native emit 可压缩”的 pair access，就和现有 kinsn 设计完全一致。
+如果语义被说成“128-bit 一次性读/写”，那就会马上撞上 BPF ISA、verifier、内存模型和原子性承诺的问题；而如果它只是“proof-seq 可验证、native emit 可压缩”的 pair access，就和现有 kop 设计完全一致。
 
 ### 7.3 Proof sequence 应该是什么
 
@@ -385,14 +385,14 @@ x86 最合理的方案不是“再找一种 16-byte 指令硬凑”，而是：
 - 非 atomic
 - 非 probe-mem
 
-### 7.6 x86 需不需要同名 kinsn
+### 7.6 x86 需不需要同名 kop
 
 有两个可行策略：
 
-1. **只在 ARM64 暴露 kfunc/kinsn**
+1. **只在 ARM64 暴露 kfunc/kop**
    - 最直接
    - daemon pass 也天然只在 ARM64 开
-2. **两架构都暴露同名 kinsn，但 x86 只提供 instantiate、不提供 native emit**
+2. **两架构都暴露同名 kop，但 x86 只提供 instantiate、不提供 native emit**
    - 更利于共享 verifier/test 路径
    - 但生产 pass 仍应在 x86 默认关闭，因为它最终会退化成原来的两条指令
 
@@ -406,7 +406,7 @@ x86 最合理的方案不是“再找一种 16-byte 指令硬凑”，而是：
 ### 8.1 没有 128-bit 类型，这反而是好事
 
 eBPF 没有 128-bit 标量寄存器，也没有现成的 `BPF_128` 访存类别。  
-所以正确方向不是扩 ISA，而是借助现有 kinsn proof-seq：
+所以正确方向不是扩 ISA，而是借助现有 kop proof-seq：
 
 - verifier 继续验证两条普通 64-bit 指令
 - 不需要新增 128-bit reg state
@@ -422,7 +422,7 @@ eBPF 没有 128-bit 标量寄存器，也没有现成的 `BPF_128` 访存类别�
 3. **fault/fixup 语义必须和 proof sequence 对齐**
 4. **寄存器 clobber 顺序必须可解释**
 
-其中第 3 点尤其重要。当前 ARM64 标量 load/store 每条之后都能接 `add_exception_handler(...)`；而原生 kinsn emit 路线目前没有现成的“自动为 pair memory op 生成等价 extable/fixup”框架。  
+其中第 3 点尤其重要。当前 ARM64 标量 load/store 每条之后都能接 `add_exception_handler(...)`；而原生 kop emit 路线目前没有现成的“自动为 pair memory op 生成等价 extable/fixup”框架。  
 这意味着第一版最好避开 `BPF_PROBE_MEM*` 和任何依赖 fault recovery 的路径。
 
 ### 8.3 Packet pointer 场景为什么要晚一点做
@@ -549,7 +549,7 @@ xdp-tools 对应对象文件统计：
 
 ### Phase 3：如果论文需要跨架构统一抽象
 
-- 给 x86 暴露同名 kinsn 的 instantiate-only 版本
+- 给 x86 暴露同名 kop 的 instantiate-only 版本
 - daemon 仍默认只在 ARM64 把它作为优化启用
 
 ## 12. 最终建议
@@ -561,7 +561,7 @@ xdp-tools 对应对象文件统计：
 这条路线和现有 BpfReJIT 设计最一致：
 
 - 和 `wide_mem` 的分工清晰
-- 和 kinsn/verifier 的 proof-seq 框架兼容
+- 和 kop/verifier 的 proof-seq 框架兼容
 - 对 ARM64 有真实收益
 - 不会把 x86 拖进 SIMD/FPU 的工程泥潭
 

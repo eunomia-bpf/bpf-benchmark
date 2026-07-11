@@ -17,9 +17,9 @@ Daemon debug-mode commit: `1cff8f9b keep daemon workdirs in debug mode`. Host to
 
 - Matrix: 519 programs x 2 pass lists x 5 rounds = 5190 verdict attempts.
 - Transformed host `bpfverify` invocations actually executed: 3085. Default11 attempts that could not produce verifier states or failed in `bpfopt` are recorded as `unverifiable`/`error`, not dropped.
-- Pass lists: `kinsn5 = bulk_memory,rotate,cond_select,extract,endian_fusion`; `default11 = map_inline,const_prop,dce,skb_load_bytes_spec,bounds_check_merge,wide_mem,bulk_memory,rotate,cond_select,extract,endian_fusion`.
+- Pass lists: `kop5 = bulk_memory,rotate,cond_select,extract,endian_fusion`; `default11 = map_inline,const_prop,dce,skb_load_bytes_spec,bounds_check_merge,wide_mem,bulk_memory,rotate,cond_select,extract,endian_fusion`.
 - Dummy maps: `bpfverify --dummy-map-fds --prog-info` was used for map FD relocation.
-- `bpfopt` consumed non-empty `func_info.bin`/`line_info.bin` when present. Host `bpfverify` did not replay guest func/line BTF records or guest kinsn `fd_array` because those BTF IDs are not portable to the host kernel; kprobe dryruns used host vmlinux BTF id 1 only to satisfy the CLI metadata path.
+- `bpfopt` consumed non-empty `func_info.bin`/`line_info.bin` when present. Host `bpfverify` did not replay guest func/line BTF records or guest kop `fd_array` because those BTF IDs are not portable to the host kernel; kprobe dryruns used host vmlinux BTF id 1 only to satisfy the CLI metadata path.
 - Default11 used verifier states generated from the original program on the host. Map-values input was metadata-only from `map_fds.json`; no map values were fabricated. Missing concrete map entries therefore surface as `map_inline` errors.
 
 ## Determinism
@@ -31,12 +31,12 @@ Daemon debug-mode commit: `1cff8f9b keep daemon workdirs in debug mode`. Host to
 
 | Mode | Accepted | Rejected | Unverifiable | Error |
 |---|---:|---:|---:|---:|
-| `kinsn5` | 209 (40.3%) | 69 (13.3%) | 241 (46.4%) | 0 (0.0%) |
+| `kop5` | 209 (40.3%) | 69 (13.3%) | 241 (46.4%) | 0 (0.0%) |
 | `default11` | 93 (17.9%) | 5 (1.0%) | 303 (58.4%) | 118 (22.7%) |
 
 ## By App
 
-| App | Programs | kinsn5 | default11 |
+| App | Programs | kop5 | default11 |
 |---|---:|---|---|
 | `bcc/bindsnoop` | 3 | A 1 (33.3%)<br>R 2 (66.7%)<br>U 0 (0.0%) | A 1 (33.3%)<br>R 2 (66.7%)<br>U 0 (0.0%)<br>E 0 (0.0%) |
 | `bcc/biosnoop` | 3 | A 3 (100.0%)<br>R 0 (0.0%)<br>U 0 (0.0%) | A 3 (100.0%)<br>R 0 (0.0%)<br>U 0 (0.0%)<br>E 0 (0.0%) |
@@ -63,7 +63,7 @@ Daemon debug-mode commit: `1cff8f9b keep daemon workdirs in debug mode`. Host to
 
 ## Rejected Programs
 
-### kinsn5
+### kop5
 
 Unique rejected programs: 69.
 
@@ -157,10 +157,10 @@ Unique rejected programs: 5.
 |---|---|---:|---|
 | `default11` | map-value pointer/context mismatch | 3 | prog 14 `bcc/bindsnoop`: 0: R1=ctx() R10=fp0 / 0: (bf) r7 = r1 ; R1=ctx() R7_w=ctx() / 2: (85) call bpf_get_current_pid_tgid#14 ; R0_w=scalar() / 3: (bf) r8 = r0 ; R0_w=sca... |
 | `default11` | other verifier reject | 2 | prog 6 `bcc/capable`: 0: R1=ctx() R10=fp0 / 0: (bf) r6 = r1 ; R1=ctx() R6_w=ctx() / 3: (85) call bpf_get_current_pid_tgid#14 ; R0_w=scalar() / 4: (bf) r7 = r0 ; R0_w=sca... |
-| `kinsn5` | invalid scalar/context memory access | 3 | prog 30 `bcc/opensnoop`: 0: R1=ctx() R10=fp0 / 0: (bf) r6 = r1 ; R1=ctx() R6_w=ctx() / 1: (79) r1 = *(u64 *)(r6 +0) ; R1_w=scalar() R6_w=ctx() / 2: (79) r8 = *(u64 *)(r1 +1... |
-| `kinsn5` | map-value pointer/context mismatch | 49 | prog 14 `bcc/bindsnoop`: 0: R1=ctx() R10=fp0 / 0: (bf) r7 = r1 ; R1=ctx() R7_w=ctx() / 2: (85) call bpf_get_current_pid_tgid#14 ; R0_w=scalar() / 3: (bf) r8 = r0 ; R0_w=sca... |
-| `kinsn5` | other verifier reject | 8 | prog 6 `bcc/capable`: 0: R1=ctx() R10=fp0 / 0: (bf) r6 = r1 ; R1=ctx() R6_w=ctx() / 3: (85) call bpf_get_current_pid_tgid#14 ; R0_w=scalar() / 4: (bf) r7 = r0 ; R0_w=sca... |
-| `kinsn5` | verifier rejected before instruction trace | 9 | prog 23 `bcc/vfsstat`: processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0 |
+| `kop5` | invalid scalar/context memory access | 3 | prog 30 `bcc/opensnoop`: 0: R1=ctx() R10=fp0 / 0: (bf) r6 = r1 ; R1=ctx() R6_w=ctx() / 1: (79) r1 = *(u64 *)(r6 +0) ; R1_w=scalar() R6_w=ctx() / 2: (79) r8 = *(u64 *)(r1 +1... |
+| `kop5` | map-value pointer/context mismatch | 49 | prog 14 `bcc/bindsnoop`: 0: R1=ctx() R10=fp0 / 0: (bf) r7 = r1 ; R1=ctx() R7_w=ctx() / 2: (85) call bpf_get_current_pid_tgid#14 ; R0_w=scalar() / 3: (bf) r8 = r0 ; R0_w=sca... |
+| `kop5` | other verifier reject | 8 | prog 6 `bcc/capable`: 0: R1=ctx() R10=fp0 / 0: (bf) r6 = r1 ; R1=ctx() R6_w=ctx() / 3: (85) call bpf_get_current_pid_tgid#14 ; R0_w=scalar() / 4: (bf) r7 = r0 ; R0_w=sca... |
+| `kop5` | verifier rejected before instruction trace | 9 | prog 23 `bcc/vfsstat`: processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0 |
 
 ## Error And Unverifiable Summary
 
@@ -168,11 +168,11 @@ Unique rejected programs: 5.
 |---|---|---|---:|---|
 | unverifiable | `default11` | host dummy map creation failed for captured map fixture | 241 | prog 121 `otelcol-ebpf-profiler/profiling`: create dummy BPF map id 480 type 13 key_size 8 value_size 4 max_entries 65536 from /home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_co... |
 | unverifiable | `default11` | original host verifier-state replay failed before default11 transform | 62 | prog 23 `bcc/vfsstat`: processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0 |
-| unverifiable | `kinsn5` | host dummy map creation failed for captured map fixture | 241 | prog 121 `otelcol-ebpf-profiler/profiling`: create dummy BPF map id 480 type 13 key_size 8 value_size 4 max_entries 65536 from /home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_co... |
+| unverifiable | `kop5` | host dummy map creation failed for captured map fixture | 241 | prog 121 `otelcol-ebpf-profiler/profiling`: create dummy BPF map id 480 type 13 key_size 8 value_size 4 max_entries 65536 from /home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_co... |
 | error | `default11` | map_inline missing concrete map-values snapshot | 116 | prog 120 `otelcol-ebpf-profiler/profiling`: error: map_inline requires a concrete snapshot value for map 476 key 0x00000000 at lookup pc 7: map_values snapshot missing map 476 key 00000000 |
 | error | `default11` | map_inline required side input absent | 2 | prog 105 `calico/felix`: error: map-inline requires --map-values and --map-ids |
 
 ## Bugs
 
 - Non-deterministic verdicts across the 5 rounds: none.
-- No kinsn pass code was changed by this task. Rejections/errors above are recorded for P89H-Root follow-up rather than fixed here.
+- No kop pass code was changed by this task. Rejections/errors above are recorded for P89H-Root follow-up rather than fixed here.

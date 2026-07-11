@@ -13,15 +13,15 @@
    - `prefetch`: removed `linear_sites_after_within_slots` use at `bpfopt/crates/bpfopt/src/passes/prefetch.rs:356`.
    - `bounds_check_merge`: removed `linear_sites_between` use; frame/block scan is at `bpfopt/crates/bpfopt/src/passes/bounds_check_merge.rs:424`.
 
-3. Converted single-block kinsn matchers away from `pc`/`start_pc` mutation.
+3. Converted single-block kop matchers away from `pc`/`start_pc` mutation.
    - `rotate`: `start_idx` flow at `bpfopt/crates/bpfopt/src/passes/rotate.rs:81`, matcher at `bpfopt/crates/bpfopt/src/passes/rotate.rs:157`, and constructor at `bpfopt/crates/bpfopt/src/passes/rotate.rs:426`.
    - `extract`: block index matcher at `bpfopt/crates/bpfopt/src/passes/extract.rs:56`.
    - `endian_fusion`: block index matcher at `bpfopt/crates/bpfopt/src/passes/endian.rs:62`.
    - `bulk_memory`: block index scan/matchers at `bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:277`, `bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:338`, and `bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:414`.
    - `wide_mem`: `start_idx` rewrite site and block-site mapping at `bpfopt/crates/bpfopt/src/passes/wide_mem.rs:17` and `bpfopt/crates/bpfopt/src/passes/wide_mem.rs:374`.
 
-4. Refactored `admit_kinsn_site_window`.
-   - `AdmittedKinsnWindow` now returns only `block` and intra-block `range` at `bpfopt/crates/bpfopt/src/analysis/bbprogram_helpers.rs:80`.
+4. Refactored `admit_kop_site_window`.
+   - `AdmittedKopWindow` now returns only `block` and intra-block `range` at `bpfopt/crates/bpfopt/src/analysis/bbprogram_helpers.rs:80`.
    - Admission still emits skip diagnostics from the boundary site internally at `bpfopt/crates/bpfopt/src/analysis/bbprogram_helpers.rs:85`.
 
 5. Deleted stale BBProgram/report bridge APIs.

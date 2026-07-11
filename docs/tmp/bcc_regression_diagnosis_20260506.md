@@ -10,7 +10,7 @@ Run context: app workload is `stress_ng_os_io_network` at `bcc__set.json:6082`; 
 
 ## 1. Per-Program Ratios
 
-| prog_id | name | type | baseline/post runs | ratio | class | bytes_jited/xlated delta | kinsn sites | source lines |
+| prog_id | name | type | baseline/post runs | ratio | class | bytes_jited/xlated delta | kop sites | source lines |
 |---:|---|---|---:|---:|---|---:|---|---|
 | 6 | `tracepoint__raw_syscalls__sys_enter` | tracepoint | 104392491 / 94134245 | 0.9958 | tie | +0 / +0 | none | `bcc__set.json:5`, `:208`, `:411` |
 | 7 | `tracepoint__raw_syscalls__sys_exit` | tracepoint | 104392661 / 94134445 | 1.0454 | loss | +0 / +0 | none | `bcc__set.json:14`, `:217`, `:687` |
@@ -41,7 +41,7 @@ Ties: prog_ids `6, 13, 14`, all within +/-1%.
 
 ## 2. Per-Pass Attribution
 
-All 20 qualified programs have `passes[]`, but only 5 qualified programs have any kinsn site applied. The full 13/13 kinsn site distribution includes one unqualified zero-run program, prog 34.
+All 20 qualified programs have `passes[]`, but only 5 qualified programs have any kop site applied. The full 13/13 kop site distribution includes one unqualified zero-run program, prog 34.
 
 | prog_id | class | applied pass sites from `passes[]` | final/status note | source |
 |---:|---|---|---|---|
@@ -67,7 +67,7 @@ All 20 qualified programs have `passes[]`, but only 5 qualified programs have an
 | 40 | loss | none | all `sites_applied=0` | `bcc__set.json:5802` |
 | 34 | unqualified | `endian_fusion` 1/1, insn_delta 0; `prefetch` 1/1, insn_delta +2 | run_cnt 0/0, excluded from ratio table | `bcc__set.json:149`, `:352`, `:4855`, `:5020` |
 
-Kinsn site distribution:
+KOperation site distribution:
 
 | pass | sites | programs |
 |---|---:|---|
@@ -76,7 +76,7 @@ Kinsn site distribution:
 | `extract` | 1 | prog 19: 1 site |
 | `endian_fusion` | 1 | prog 34: 1 site |
 
-Among the 14 qualified losses, only 4 have kinsn sites: prog 27, 33, 37, and 39. The other 10 losses have no applied sites and no bytecode metadata change. Therefore the app-level 13/13 apply rate does not imply all loss rows were transformed.
+Among the 14 qualified losses, only 4 have kop sites: prog 27, 33, 37, and 39. The other 10 losses have no applied sites and no bytecode metadata change. Therefore the app-level 13/13 apply rate does not imply all loss rows were transformed.
 
 ## 3. Bytecode Metadata
 
@@ -87,7 +87,7 @@ Loss bytecode split:
 | group | prog_ids | count | note |
 |---|---|---:|---|
 | loss + unchanged bytes | 7, 10, 11, 22, 24, 28, 29, 32, 38, 40 | 10 | no applied site and no metadata change |
-| loss + grew | 27, 33, 39 | 3 | kinsn applied; jited grew +116, +3, +11 |
+| loss + grew | 27, 33, 39 | 3 | kop applied; jited grew +116, +3, +11 |
 | loss + shrank | 37 | 1 | prefetch plus const_prop/dce; jited/xlated shrank -75/-88 |
 
 Win bytecode split: prog 12 and 23 are unchanged; prog 19 grew by `bytes_jited +3` with `extract=1`. So byte growth is not sufficient to predict regression, but the largest code growth rows are losses.
@@ -109,7 +109,7 @@ Regression is not isolated to one BPF program type. All three raw_tracepoint row
 
 Evidence for:
 
-- 10 of 14 losses have no applied sites and unchanged `bytes_jited`/`bytes_xlated`: prog_ids `7, 10, 11, 22, 24, 28, 29, 32, 38, 40`. Their geomean is `1.264x`, worse than the kinsn-applied qualified subset (`1.062x`).
+- 10 of 14 losses have no applied sites and unchanged `bytes_jited`/`bytes_xlated`: prog_ids `7, 10, 11, 22, 24, 28, 29, 32, 38, 40`. Their geomean is `1.264x`, worse than the kop-applied qualified subset (`1.062x`).
 - Workload throughput changed materially between phases: baseline `duration_s=5.8398`, `ops_per_sec=8510962`, `ops_total=49702497` at `bcc__set.json:197-199`; post `duration_s=5.4462`, `ops_per_sec=6395861`, `ops_total=34833163` at `bcc__set.json:400-402`. That is about -29.9% total ops and -24.9% ops/sec in post.
 - 7 of 20 qualified programs have run-count deltas above 10%; several are losses with no bytecode change, for example prog 10 (-40.5%), prog 29 (-31.5%), prog 38 (-42.1%), and prog 40 (-41.6%).
 
@@ -117,7 +117,7 @@ Evidence against / limit:
 
 - Some unchanged-byte losses have stable run counts but large ratios, especially prog 22 (`3798/3747` runs, ratio `2.0228`) and prog 24 (`596/644`, ratio `1.8988`). These are still small absolute run-count rows, so repeated samples are needed to distinguish real counter variance from phase effects.
 
-Current read: H1 is the strongest explanation for the app-level 1.120x geomean. The no-applied rows regress more than transformed rows, which means the 12% headline cannot be attributed cleanly to kinsn transforms.
+Current read: H1 is the strongest explanation for the app-level 1.120x geomean. The no-applied rows regress more than transformed rows, which means the 12% headline cannot be attributed cleanly to kop transforms.
 
 ### H2: `cond_select` can locally regress short BCC hot paths, but it is not the whole app regression
 
@@ -143,7 +143,7 @@ Evidence for:
 
 Evidence against / limit:
 
-- Only two qualified loss rows contain `prefetch`, and prog 37 has multiple non-kinsn changes, so prefetch is not isolated.
+- Only two qualified loss rows contain `prefetch`, and prog 37 has multiple non-kop changes, so prefetch is not isolated.
 - `extract` has the only qualified extract site and it is a win: prog 19 ratio `0.9798` with `extract=1` (`bcc__set.json:2434`).
 - `endian_fusion` only applied on prog 34, which has `run_cnt=0/0`, so this artifact has no performance evidence for or against it.
 - `wide_mem`/bulk-memory-like rewrites had no applied sites in the qualified rows, so this artifact does not support a bulk-memory overhead hypothesis.
@@ -168,7 +168,7 @@ Conclusion from history: this is not supported as an always-regressing BCC behav
 
 Do not fix this by filtering ReJIT programs or adding benchmark-side exclusions. The data points to two separate tracks:
 
-1. Measurement validation: rerun the exact `bcc/set` KVM corpus with `SAMPLES=3` and compare three groups separately: unchanged/no-applied rows, kinsn-applied rows, and failed-ReJIT rows. Success criterion for noise diagnosis: unchanged/no-applied rows should move near `1.0`; if they remain around `1.26x`, the counter/workload harness needs investigation before pass tuning.
+1. Measurement validation: rerun the exact `bcc/set` KVM corpus with `SAMPLES=3` and compare three groups separately: unchanged/no-applied rows, kop-applied rows, and failed-ReJIT rows. Success criterion for noise diagnosis: unchanged/no-applied rows should move near `1.0`; if they remain around `1.26x`, the counter/workload harness needs investigation before pass tuning.
 
 2. `cond_select` profitability: build a pass-isolated experimental run for the two affected programs, prog 27 and 39. If the regression survives repeated samples while no-applied rows normalize, tighten `cond_select` profitability in `bpfopt` for shapes that add sidecar/extra instructions without reducing final JIT size, especially BCC tracing/kprobe hot paths. Validate with both micro `cond_select_dense` and corpus `bcc/set`.
 
@@ -176,4 +176,4 @@ Do not fix this by filtering ReJIT programs or adding benchmark-side exclusions.
 
 4. ReJIT error cleanup: prog 27 and 39 record failed later passes (`errno 22` and `errno 13`) at `bcc__set.json:3461`, `:5604`, `:3646`, and `:5784`. These failures are not the main 12% explanation, but they confound pass attribution. Fix them forward in the pass/kernel interface so the final applied state is unambiguous.
 
-The first rerun should be diagnostic, not a policy change. The current artifact is useful for triage, but because 10/14 losses are no-op bytecode rows and the workload total ops differs by ~30%, it is not sufficient to blame a single kinsn pass.
+The first rerun should be diagnostic, not a policy change. The current artifact is useful for triage, but because 10/14 losses are no-op bytecode rows and the workload total ops differs by ~30%, it is not sufficient to blame a single kop pass.

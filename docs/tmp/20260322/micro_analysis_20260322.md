@@ -6,7 +6,7 @@
 - **Iterations**: 3, **Warmups**: 1, **Repeat**: 100
 - **Runtimes**: llvmbpf, kernel, kernel-rejit
 - **Total benchmarks**: 62
-- **kinsn modules loaded**: 0/3 (bpf_rotate, bpf_select, bpf_extract NOT loaded)
+- **kop modules loaded**: 0/3 (bpf_rotate, bpf_select, bpf_extract NOT loaded)
 - **POLICY**: default (micro/policies/)
 
 ## 1. Summary Table (62 benchmarks)
@@ -250,9 +250,9 @@ Benchmarks where daemon modified bytecode AND exec_ns improved (excluding sub-re
 
 ## 4. Per-Pass Site Statistics
 
-### kinsn Module Status
+### kop Module Status
 
-**0/3 kinsn modules loaded in the VM.** This means:
+**0/3 kop modules loaded in the VM.** This means:
 - RotatePass: `bpf_rotate64` kfunc NOT available => all rotate sites skipped by daemon
 - CondSelectPass: `bpf_select64` kfunc NOT available => all cmov/cond_select sites skipped
 - ExtractPass (BEXTR): `bpf_extract64` kfunc NOT available => all extract sites skipped
@@ -326,28 +326,28 @@ wider single loads (LDX_W or LDX_DW). This reduces instruction count and JIT cod
 | switch_dispatch | yes | 0 | - | APPLIED | empty policy (all sites deliberately skipped) |
 | branch_dense | yes | 0 | - | APPLIED | empty policy (all sites deliberately skipped) |
 | cmov_select | yes | 0 | - | APPLIED | empty policy (all sites deliberately skipped) |
-| cmov_dense | yes | 26 | rotate=26 | IDENTITY | kinsn module not loaded (bpf_rotate64 unavailable) |
+| cmov_dense | yes | 26 | rotate=26 | IDENTITY | kop module not loaded (bpf_rotate64 unavailable) |
 | checksum | yes | 0 | - | APPLIED | empty policy (all sites deliberately skipped) |
 | load_byte | yes | 0 | - | APPLIED | empty policy (all sites deliberately skipped) |
 | load_byte_recompose | yes | 0 | - | APPLIED | empty policy (all sites deliberately skipped) |
 | packet_parse | yes | 0 | - | APPLIED | empty policy (all sites deliberately skipped) |
-| bounds_ladder | yes | 4 | cmov=2, wide=2 | APPLIED | kinsn module not loaded (bpf_select64 unavailable) |
+| bounds_ladder | yes | 4 | cmov=2, wide=2 | APPLIED | kop module not loaded (bpf_select64 unavailable) |
 | mixed_alu_mem | yes | 0 | - | APPLIED | empty policy (all sites deliberately skipped) |
 | multi_acc_4 | yes | 0 | - | APPLIED | empty policy (all sites deliberately skipped) |
 | multi_acc_8 | yes | 0 | - | APPLIED | empty policy (all sites deliberately skipped) |
 | fibonacci_iter | yes | 0 | - | APPLIED | empty policy (all sites deliberately skipped) |
 | nested_loop_2 | yes | 0 | - | APPLIED | empty policy (all sites deliberately skipped) |
 | nested_loop_3 | yes | 0 | - | APPLIED | empty policy (all sites deliberately skipped) |
-| large_mixed_500 | yes | 7 | rotate=7 | APPLIED | kinsn module not loaded (bpf_rotate64 unavailable) |
-| large_mixed_1000 | yes | 7 | rotate=7 | APPLIED | kinsn module not loaded (bpf_rotate64 unavailable) |
+| large_mixed_500 | yes | 7 | rotate=7 | APPLIED | kop module not loaded (bpf_rotate64 unavailable) |
+| large_mixed_1000 | yes | 7 | rotate=7 | APPLIED | kop module not loaded (bpf_rotate64 unavailable) |
 | bpf_call_chain | yes | 2 | wide=2 | APPLIED | WideMemPass auto-applies (policy wide sites redundant) |
 | memcmp_prefix_64 | yes | 0 | - | APPLIED | empty policy (all sites deliberately skipped) |
 | packet_rss_hash | yes | 0 | - | IDENTITY | empty policy (all sites deliberately skipped) |
 | branch_fanout_32 | yes | 0 | - | APPLIED | empty policy (all sites deliberately skipped) |
-| rotate64_hash | yes | 116 | rotate=116 | APPLIED | kinsn module not loaded (bpf_rotate64 unavailable) |
+| rotate64_hash | yes | 116 | rotate=116 | APPLIED | kop module not loaded (bpf_rotate64 unavailable) |
 | smallmul_strength_reduce | yes | 0 | - | APPLIED | empty policy (all sites deliberately skipped) |
 | cond_select_dense | yes | 0 | - | IDENTITY | empty policy (all sites deliberately skipped) |
-| rotate_dense | yes | 256 | rotate=256 | IDENTITY | kinsn module not loaded (bpf_rotate64 unavailable) |
+| rotate_dense | yes | 256 | rotate=256 | IDENTITY | kop module not loaded (bpf_rotate64 unavailable) |
 | addr_calc_stride | yes | 0 | - | IDENTITY | empty policy (all sites deliberately skipped) |
 | extract_dense | yes | 0 | - | IDENTITY | empty policy (all sites deliberately skipped) |
 | endian_swap_dense | yes | 0 | - | IDENTITY | empty policy (all sites deliberately skipped) |
@@ -356,9 +356,9 @@ wider single loads (LDX_W or LDX_DW). This reduces instruction count and JIT cod
 
 ## 5. Why REJIT Can't Accelerate Further
 
-### A. kinsn modules not loaded (biggest blocker)
+### A. kop modules not loaded (biggest blocker)
 
-The Makefile's `LOAD_KINSN_MODULES` runs inside the VM but all 3 modules showed 0/3 loaded.
+The Makefile's `LOAD_KOP_MODULES` runs inside the VM but all 3 modules showed 0/3 loaded.
 This could be because:
 1. The .ko files were built for a different kernel version than the VM's bzImage
 2. The module files weren't accessible at the expected path inside the VM
@@ -391,7 +391,7 @@ iterations because the optimizations caused regressions:
 
 ### C. WideMemPass: the only active optimization
 
-WideMemPass is the only pass that runs without kinsn modules. It provides:
+WideMemPass is the only pass that runs without kop modules. It provides:
 
 - 16 benchmarks with >5% speedup
 - 29 benchmarks with neutral (<5% change)
@@ -423,7 +423,7 @@ byte-recompose patterns to optimize. (2 additional benchmarks are ERROR status.)
 |-----------|--------|--------|---------|-------|--------------------|
 | simple | baseline | 10 | 5 | 0.500 | trivial program, no memory patterns |
 | simple_packet | baseline | 9 | 5 | 0.556 | packet-backed: no staged input byte-recompose |
-| cmov_dense | select-diamond | 49 | 39 | 0.796 | policy has 26 rotate sites but kinsn not loaded |
+| cmov_dense | select-diamond | 49 | 39 | 0.796 | policy has 26 rotate sites but kop not loaded |
 | load_native_u64 | causal-isolation | 70 | 65 | 0.929 | native u64 loads: no byte-recompose by design |
 | packet_parse_vlans_tcpopts | parser | 20 | 12 | 0.600 | packet-backed: direct packet field access |
 | packet_rss_hash | packet-hash | 21 | 14 | 0.667 | packet-backed: direct packet field access |
@@ -455,7 +455,7 @@ byte-recompose patterns to optimize. (2 additional benchmarks are ERROR status.)
 
 ### What's Not Working
 
-1. **kinsn modules not loading**: 0/3 modules loaded means RotatePass is completely
+1. **kop modules not loading**: 0/3 modules loaded means RotatePass is completely
    inactive. This blocks 412 rotate sites across 5 benchmarks (rotate_dense,
    rotate64_hash, cmov_dense, large_mixed_500, large_mixed_1000).
 2. **spill_pressure regression**: WideMemPass increases register pressure in this
@@ -469,7 +469,7 @@ byte-recompose patterns to optimize. (2 additional benchmarks are ERROR status.)
 
 ### Next Steps
 
-1. **Fix kinsn module loading**: Debug why `insmod` fails in the VM. Likely a kernel
+1. **Fix kop module loading**: Debug why `insmod` fails in the VM. Likely a kernel
    version mismatch between the .ko files and the bzImage.
 2. **Investigate spill_pressure regression**: Consider skipping WideMemPass for
    programs with high register pressure.

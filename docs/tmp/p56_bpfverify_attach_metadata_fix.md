@@ -22,9 +22,9 @@
 reload tracing/LSM/kprobe-style programs without the original attach metadata.
 
 The observed verifier text, `kernel btf_id ... is not a function`, also
-matched kinsn replay using the wrong call encoding. The daemon generated
+matched kop replay using the wrong call encoding. The daemon generated
 `fd_array.json`, but the target metadata consumed by `bpfopt` did not carry the
-corresponding per-kinsn `call_offset`, so optimized bytecode could still encode
+corresponding per-kop `call_offset`, so optimized bytecode could still encode
 the BTF function id as an immediate instead of the fd-array slot offset.
 
 After attach metadata replay was fixed, tracee exposed a second verifier
@@ -52,7 +52,7 @@ paths where the taken edge carries `R0=map_ptr`.
 - Extended `bpfrejit --dry-run` to recover and replay `expected_attach_type`
   from the live program before calling `kernel-sys`.
 - Updated daemon target handling so `write_fd_array_from_target()` also writes
-  each required kinsn's `call_offset` into `target.json` while producing
+  each required kop's `call_offset` into `target.json` while producing
   `fd_array.json`.
 - Invalidated `BpfProgram::verifier_states` after any pass-manager transform.
   Verifier logs are tied to the current instruction layout, so downstream passes

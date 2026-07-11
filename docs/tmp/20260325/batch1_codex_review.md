@@ -3,8 +3,8 @@
 结论：FAIL
 
 **逐项结论**
-1. `verifier.c: kinsn insn_buf 溢出检查`：PASS
-- 在调用 `instantiate_insn(..., env->insn_buf)` 之前增加上界检查是正确的，见 [verifier.c](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/kernel/bpf/verifier.c#L23767)。这能挡住 `kinsn->max_insn_cnt` 明显大于 `env->insn_buf[INSN_BUF_SIZE]` 的溢出。
+1. `verifier.c: kop insn_buf 溢出检查`：PASS
+- 在调用 `instantiate_insn(..., env->insn_buf)` 之前增加上界检查是正确的，见 [verifier.c](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/kernel/bpf/verifier.c#L23767)。这能挡住 `kop->max_insn_cnt` 明显大于 `env->insn_buf[INSN_BUF_SIZE]` 的溢出。
 - 这里用 `>` 而不是 `>=` 是对的；`env->insn_buf` 恰好有 `INSN_BUF_SIZE` 个槽位，`cnt == INSN_BUF_SIZE` 仍然能装下。
 - 没看到遗漏或风格问题。
 
@@ -21,7 +21,7 @@
 - [bpf_jit_comp.c](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c#L1218) 现在把 `emit_arm64()` 调用改成 `scratch + scratch_idx=0 + emit=true`。这不是纯内部实现细节，而是悄悄改了 callback ABI 语义。
 - `emit_arm64()` 的接口本身暴露的是 `u32 *image, int *idx, bool emit`，见 [bpf.h](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/include/linux/bpf.h#L975)。旧代码传的是 live `ctx->idx`；新代码把 `idx` 重置为 0。任何依赖当前 JIT 位置生成 PC-relative 编码、绝对索引或跨序列跳转的 emitter，都会被这个改动静默改坏。
 - 同样的问题还体现在 `emit` 参数上。x86 的 scratch 路径仍然透传 `emit`，见 [x86 bpf_jit_comp.c](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/arch/x86/net/bpf_jit_comp.c#L579)；arm64 这里却硬编码 `true`。如果某个 emitter 在 `emit=false` 的 sizing pass 只做计数、不真正 materialize 指令，这个 patch 会破坏多 pass JIT 的一致性。
-- 次要问题是 [bpf_jit_comp.c](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c#L1195) 新增了 `BPF_KINSN_MAX_ARM64_INSNS = 64`，等于在 arm64 JIT 侧引入一个新的 256-byte ceiling；但这个限制没有体现在通用 `bpf_kinsn` API，也没有在更早的注册/验证路径统一约束。即使这是有意为之，也应显式文档化或前移校验。
+- 次要问题是 [bpf_jit_comp.c](/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c#L1195) 新增了 `BPF_KOP_MAX_ARM64_INSNS = 64`，等于在 arm64 JIT 侧引入一个新的 256-byte ceiling；但这个限制没有体现在通用 `bpf_kop` API，也没有在更早的注册/验证路径统一约束。即使这是有意为之，也应显式文档化或前移校验。
 
 **风格与验证**
 - `checkpatch`：0 errors, 0 warnings。

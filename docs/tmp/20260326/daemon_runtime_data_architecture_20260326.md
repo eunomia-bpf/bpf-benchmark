@@ -52,7 +52,7 @@
 | map value | `BPF_MAP_LOOKUP_ELEM` | `bpf::bpf_map_lookup_elem_by_id()` | `MapInlinePass::build_site_rewrite()` 中按 site 读取 | 不缓存；每个 site 单独读取；retry 会重读 | map specialization |
 | program stats | `run_cnt/run_time_ns` in `bpf_prog_info` | `profiler::ProgStatsPoller` | `watch` 热度排序；`--pgo` optimize 前观察；`profile` 子命令 | 每次 snapshot 即时 | hotness ranking，`ProfilingData.program_hotness` |
 | PMU 分支计数 | `perf_event_open` + `read/ioctl` | `profiler::pmu::PmuCounters` | `--pgo` optimize 前观察窗口 | 每次 optimize 一次 | `ProfilingData.branch_miss_rate` |
-| BTF/kfunc registry | `/sys/kernel/btf/vmlinux`、`/sys/kernel/btf/<module>`、`BPF_BTF_GET_*` | `kfunc_discovery::discover_kinsns()` | `main()` 启动时一次 | daemon 生命周期内固定，不刷新 | `PassContext.kinsn_registry` |
+| BTF/kfunc registry | `/sys/kernel/btf/vmlinux`、`/sys/kernel/btf/<module>`、`BPF_BTF_GET_*` | `kfunc_discovery::discover_kops()` | `main()` 启动时一次 | daemon 生命周期内固定，不刷新 | `PassContext.kop_registry` |
 | CPU 能力 | `/proc/cpuinfo` 或架构默认值 | `PlatformCapabilities::detect()` | `main()` 启动时一次 | daemon 生命周期内固定，不刷新 | `PassContext.platform` |
 | 最终 xlated/JIT image | `BPF_OBJ_GET_INFO_BY_FD` | `bpf::bpf_prog_get_runtime_images()` | REJIT 成功后调试读取 | REJIT 后即时 | debug JSON |
 | verifier log | `BPF_PROG_REJIT(log_level=2)` | `bpf::bpf_prog_rejit()` | REJIT 成功或失败时 | 每次 attempt 即时 | rollback attribution, debug |
@@ -118,7 +118,7 @@
           +-----------------------------------------------+
                               |
                               +---- PassContext
-                              |     - kinsn_registry
+                              |     - kop_registry
                               |     - platform
                               |     - policy
                               |     - prog_type
@@ -154,7 +154,7 @@
 
 `PassContext` 只承载“环境型”和“相对稳定”的信息：
 
-- `kinsn_registry`
+- `kop_registry`
 - `platform`
 - `policy`
 - `prog_type`
@@ -451,7 +451,7 @@ PMU 路径问题更大：
 
 - Unix socket
 - 启动期构造好的 `PassContext`
-- kinsn 的 BTF FDs
+- kop 的 BTF FDs
 
 它**不会**后台主动做这些事：
 
@@ -586,11 +586,11 @@ JVM 类比下的状态：
 
 ### 6.6 启动期 capability snapshot 会变陈旧
 
-`discover_kinsns()` 和 `PlatformCapabilities::detect()` 都只在 daemon 启动时运行。
+`discover_kops()` 和 `PlatformCapabilities::detect()` 都只在 daemon 启动时运行。
 
 这意味着：
 
-- 新 kinsn module 在 daemon 启动后加载，daemon 看不到。
+- 新 kop module 在 daemon 启动后加载，daemon 看不到。
 - 旧 module 被替换/卸载，daemon 不会重新发现。
 
 这在 `serve` / `watch` 这类长寿命模式里尤其明显。

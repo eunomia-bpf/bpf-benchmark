@@ -95,7 +95,7 @@ Final smoke exit code: 0.
 ## Multi-Block API Design
 
 The requested multi-block APIs (`merge_linear_chain`, `delete_block`,
-`rewire_edge`, `split_block`, `replace_diamond_with_kinsn`) still exist only as
+`rewire_edge`, `split_block`, `replace_diamond_with_kop`) still exist only as
 stubs in `analysis/bbprogram_api.rs`. `cond_select` and `ccmp` were not migrated
 to those APIs in this run.
 
@@ -216,7 +216,7 @@ Added to `analysis/bbprogram_api.rs`:
 - `BBProgram::delete_block(&mut self, b: BlockId)`
 - `BBProgram::rewire_edge(&mut self, from, old_to, new_to)`
 - `BBProgram::split_block(&mut self, at: InsnSite) -> (BlockId, BlockId)`
-- `BBProgram::replace_diamond_with_kinsn(pattern, kinsn_call: BpfInsn) -> Result<()>`
+- `BBProgram::replace_diamond_with_kop(pattern, kop_call: BpfInsn) -> Result<()>`
 
 Implementation details:
 
@@ -227,8 +227,8 @@ Implementation details:
   single-predecessor chains and preserves the last block terminator.
 - `split_block` keeps the original block as the head and inserts the tail
   immediately after it with a `Fallthrough`.
-- `replace_diamond_with_kinsn` is a single-instruction wrapper around
-  `replace_diamond_with_insns`, because real packed kinsn calls are emitted as
+- `replace_diamond_with_kop` is a single-instruction wrapper around
+  `replace_diamond_with_insns`, because real packed kop calls are emitted as
   sidecar+call instruction pairs.
 
 Unit coverage added in `analysis/bbprogram_api_tests.rs` for linear-chain
@@ -275,8 +275,8 @@ old analysis/cache/edit scaffolding.
 
 ### Legacy Bugs / Fix-Forward Decisions
 
-- The requested `replace_diamond_with_kinsn(BpfInsn)` shape is insufficient for
-  real v3 kinsn lowering because packed calls are emitted as sidecar+call
+- The requested `replace_diamond_with_kop(BpfInsn)` shape is insufficient for
+  real v3 kop lowering because packed calls are emitted as sidecar+call
   instruction pairs. I kept the requested wrapper and added the vector form used
   by migrated passes.
 - `prefetch` preserves optional PMU profile admission through a private

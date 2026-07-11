@@ -265,7 +265,7 @@ BCF 有 Listings 7-9（3 个具体 false rejection 案例），K2 有 §9（2 �
 **缺口 7: 多架构缺失**
 K2 只有 x86，Jitterbug 支持 6 种架构。我们目前：
 - 只在 x86_64 测试
-- ARM64 的 kinsn module 实现了（module/arm64/），但没有 eval
+- ARM64 的 kop module 实现了（module/arm64/），但没有 eval
 - 这是 reviewer 会直接要求的项
 
 ### 9. Reviewer 会基于这些标准要求我们什么
@@ -279,7 +279,7 @@ K2 只有 x86，Jitterbug 支持 6 种架构。我们目前：
 4. **"Overhead 的代价"**: BpfReJIT 引入了 daemon 和新 syscall，这个 overhead 在哪些场景下可接受/不可接受？
 
 **重要加分问题（有则更强）**:
-5. **"Multi-architecture"**: x86 结果能代表 ARM64 吗？（你们有 ARM64 kinsn 但没有 eval）
+5. **"Multi-architecture"**: x86 结果能代表 ARM64 吗？（你们有 ARM64 kop 但没有 eval）
 6. **"Applied vs not-applied"**: 你的 overall geomean 1.054x 是 62 个程序的混合，但 applied-only 1.074x 更有说服力。为什么有些程序 daemon 不 apply？
 7. **"E2E latency"**: exec time 提升转化为多少 end-to-end application latency？（你有 E2E tracee 结果）
 8. **"Code quality metric 多样性"**: 除了 exec time，BPF 程序质量还有 instruction count、I-cache footprint——你们有么？
@@ -287,7 +287,7 @@ K2 只有 x86，Jitterbug 支持 6 种架构。我们目前：
 **可能的 reject 理由（根据这些 paper 的标准）**:
 - K2 类 reviewer: "你的 workload 不够真实，62 个合成 case 无法说明 production BPF 的优化收益"
 - BCF 类 reviewer: "你的 overhead breakdown 不够细致，不知道瓶颈在哪，是否 scalable"
-- Jitterbug 类 reviewer（偏 correctness）: "你的 kinsn 正确性如何保证？rejit syscall 的 safety 模型是什么？"
+- Jitterbug 类 reviewer（偏 correctness）: "你的 kop 正确性如何保证？rejit syscall 的 safety 模型是什么？"
 
 ### 10. 我们应该学哪些做法
 

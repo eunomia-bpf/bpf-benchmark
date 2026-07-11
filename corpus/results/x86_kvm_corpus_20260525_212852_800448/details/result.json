@@ -1,7 +1,7 @@
 {
   "bpf_stats": true,
   "generated_at": "2026-05-25T21:32:29.281869+00:00",
-  "kinsn_modules": {
+  "kop_modules": {
     "captured_at": "2026-05-25T21:28:52.850779+00:00",
     "expected_modules": [
       "bpf_x86_alu",
@@ -58,8 +58,8 @@
         "bpf_x86_shd",
         "bpf_x86_stack"
       ],
-      "loader": "runner.libs.kinsn.load_kinsn_modules",
-      "module_dir": "/artifacts/kinsn",
+      "loader": "runner.libs.kop.load_kop_modules",
+      "module_dir": "/artifacts/kop",
       "newly_loaded_modules": [],
       "snapshot_after": {
         "captured_at": "2026-05-25T21:28:52.850682+00:00",

@@ -61,7 +61,7 @@ Fix:
 ### CRITICAL - Missing side inputs are warning-and-continue fallbacks
 
 Locations:
-- `daemon/src/commands.rs:563-586` warns and continues when `bpfget --target` fails or lacks requested kinsns.
+- `daemon/src/commands.rs:563-586` warns and continues when `bpfget --target` fails or lacks requested koperation.
 - `daemon/src/commands.rs:593-616` warns and continues when `bpfverify --verifier-states-out` fails for `const_prop`.
 - `daemon/src/commands.rs:347-355` ignores `bpfopt` report `skipped` / `reason`, so skipped requested passes disappear from daemon responses.
 - `daemon/src/commands.rs:1273-1286` test `incomplete_target_is_not_passed_to_bpfopt_optimize` locks in this fallback behavior.
@@ -72,7 +72,7 @@ Impact:
 - Smoke applied counts are hard to trust because requested passes may have been skipped without an error.
 
 Fix:
-- Treat missing `bpfget --target`, incomplete target kinsns, and `bpfverify --verifier-states-out` failure as daemon request errors when the requested pass requires them.
+- Treat missing `bpfget --target`, incomplete target koperation, and `bpfverify --verifier-states-out` failure as daemon request errors when the requested pass requires them.
 - Parse and surface `skipped` / `reason` if bpfopt keeps skip semantics for non-default discovery, but do not call the request successful for explicitly requested missing capability.
 - Replace the fallback unit test with a nonzero/error assertion.
 

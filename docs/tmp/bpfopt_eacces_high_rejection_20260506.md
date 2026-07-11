@@ -195,7 +195,7 @@ State handoff mechanics:
 
 Conclusion:
 
-- `noop` after the first five kinsn passes is correctly positioned to regenerate verifier states after any earlier instruction-count changes.
+- `noop` after the first five kop passes is correctly positioned to regenerate verifier states after any earlier instruction-count changes.
 - `map_inline` also produces fresh verifier states; therefore `const_prop` consumes the verifier log for the post-`map_inline` bytecode, not stale `noop` states.
 - If a PC mismatch exists, the likely bug is inside `const_prop`'s interpretation of verifier log PC/state semantics, not an old `noop` state being fed across `endian_fusion` or `map_inline`.
 
@@ -265,7 +265,7 @@ Support:
 Counter-evidence:
 
 - Daemon state handoff updates verifier-state path after every successful ReJIT at `daemon/src/commands.rs:662-664`.
-- `noop` is after the first five kinsn passes in `corpus/config/benchmark_config.yaml:4-17`.
+- `noop` is after the first five kop passes in `corpus/config/benchmark_config.yaml:4-17`.
 - `map_inline` and `const_prop` are declared state producers/consumers at `bpfopt/crates/bpfopt/src/passes/mod.rs:103-106`.
 - Therefore stale `noop` state does not explain the observed dominant `const_prop` helper-argument failures.
 

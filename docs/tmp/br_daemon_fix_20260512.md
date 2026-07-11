@@ -5,10 +5,10 @@
 Fixed the BR pass-set pre-pass failure:
 
 ```text
-probe target kinsns for prog X: target probing requested with no kinsn targets
+probe target koperation for prog X: target probing requested with no kop targets
 ```
 
-The direct config trigger was DCE requesting `${TARGET}` even though `dce` is a pure bytecode pass. The daemon-side issue was that target JSON preparation treated an empty kinsn probe list as an error instead of producing a platform-only target.
+The direct config trigger was DCE requesting `${TARGET}` even though `dce` is a pure bytecode pass. The daemon-side issue was that target JSON preparation treated an empty kop probe list as an error instead of producing a platform-only target.
 
 ## Changed files
 
@@ -24,15 +24,15 @@ The direct config trigger was DCE requesting `${TARGET}` even though `dce` is a 
 {
   "arch": "<detected arch>",
   "features": ["<detected features>"],
-  "kinsns": {}
+  "koperation": {}
 }
 ```
 
 - `daemon/src/bpf.rs:98`
-  - Kept `probe_target_json()` fail-fast for callers that explicitly request kinsn probing with an empty target list.
+  - Kept `probe_target_json()` fail-fast for callers that explicitly request kop probing with an empty target list.
 
 - `daemon/src/commands.rs:522`
-  - Changed target file preparation from `probe_target_json(kinsn_probes)` to `target_json_for_probes(kinsn_probes)`.
+  - Changed target file preparation from `probe_target_json(kop_probes)` to `target_json_for_probes(kop_probes)`.
   - Updated error context to `prepare target.json for prog {prog_id}`.
 
 ## Validation

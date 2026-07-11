@@ -49,8 +49,8 @@
 - `runner/libs/process_fd.py:10`
   `dup_fd_from_process()` has no call site anywhere in the repository.
 
-- `runner/libs/kinsn.py:189`
-  `capture_daemon_kinsn_discovery()` has no call site anywhere in the repository.
+- `runner/libs/kop.py:189`
+  `capture_daemon_kop_discovery()` has no call site anywhere in the repository.
 
 - `runner/libs/app_runners/tetragon.py:92`
   `describe_agent_exit()` has no call site anywhere in the repository.

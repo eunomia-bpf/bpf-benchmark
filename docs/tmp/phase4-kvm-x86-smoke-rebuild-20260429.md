@@ -23,7 +23,7 @@ Observed rebuilt layers included:
 | --- | --- |
 | daemon | `COPY daemon ./daemon`, then `cargo build --release ... daemon` |
 | bpfopt CLI suite | `COPY bpfopt ./bpfopt`, then `cargo build --release --workspace ... -p bpfopt -p bpfget -p bpfrejit -p bpfverify -p bpfprof` |
-| kinsn modules | `bpf_bulk_memory`, `bpf_endian`, `bpf_extract`, `bpf_rotate`, and `bpf_select` loaded; no missing expected module was reported |
+| kop modules | `bpf_bulk_memory`, `bpf_endian`, `bpf_extract`, `bpf_rotate`, and `bpf_select` loaded; no missing expected module was reported |
 
 ## Old Smoke Comparison
 
@@ -99,16 +99,16 @@ Applied-site coverage is **inconclusive** from this compact artifact: successful
 | Pass | Enabled in rebuilt smoke | Preserved applied-site evidence | Notes |
 | --- | --- | ---: | --- |
 | wide_mem | yes | `0` | successful applied-site details not persisted |
-| rotate | yes | `0` | kinsn module loaded |
-| cond_select | yes | `0` | kinsn module loaded |
-| extract | yes | `0` | kinsn module loaded |
-| endian_fusion | yes | `0` | kinsn module loaded |
+| rotate | yes | `0` | kop module loaded |
+| cond_select | yes | `0` | kop module loaded |
+| extract | yes | `0` | kop module loaded |
+| endian_fusion | yes | `0` | kop module loaded |
 | map_inline | yes | `0` | enabled with plan B live-value fixes |
 | const_prop | yes | `0` | successful applied-site details not persisted |
 | dce | yes | `0` | successful applied-site details not persisted |
 | bounds_check_merge | yes | `0` | successful applied-site details not persisted |
 | skb_load_bytes_spec | yes | `0` | successful applied-site details not persisted |
-| bulk_memory | yes | `0` | kinsn module loaded |
+| bulk_memory | yes | `0` | kop module loaded |
 | branch_flip | no | `0` | not in default benchmark profile; PGO-dependent |
 
 Coverage summary:

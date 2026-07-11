@@ -27,9 +27,9 @@
 当前 `vendor/linux-framework` 工作树是 dirty 的，已经混入了 BpfReJIT vendor-only 改动。和本报告最相关的两处是：
 
 - `kernel/bpf/verifier.c:23917-23944`
-  - kinsn sidecar lowering，**22 LOC**
+  - kop sidecar lowering，**22 LOC**
 - `arch/arm64/net/bpf_jit_comp.c:1627-1635`
-  - ARM64 kinsn call inline，**8 LOC**
+  - ARM64 kop call inline，**8 LOC**
 
 这两段都存在于当前 vendor tree，但不应算进“Linux 内核现有 eBPF 优化 baseline”。下文会明确标注，并在总 LOC 里扣除。
 
@@ -40,7 +40,7 @@
 - 对于 `do_misc_fixups()`、`convert_ctx_accesses()` 这类大函数，先统计函数总量，再做子块拆分说明。
 - **主口径总数 1,749 LOC**：
   - 包含：上游等价的 verifier/fixup/JIT/post-JIT pass-like 优化、硬化、特化逻辑
-  - 不包含：上面两段 vendor-only kinsn 代码
+  - 不包含：上面两段 vendor-only kop 代码
   - 也不包含：一些通用 backend 机制性代码，例如 x86 `emit_indirect_jump()` / `emit_spectre_bhb_barrier()` 这类更偏“通用分支硬化 helper”的逻辑；这些会分析，但不并入主表总数
 
 ### 0.4 真实 pipeline
@@ -103,7 +103,7 @@
 | `opt_remove_nops()` | `kernel/bpf/verifier.c:22870-22893` | 19 | `JA +0` 或 `MAY_GOTO_0` | 删除 rewrite 之后遗留的 NOP | 纯优化 | 缩短程序 |
 | `verifier_inlines_helper_call()` | `kernel/bpf/verifier.c:18788-18802` | 15 | x86/ARM64 支持 percpu insn，且 helper 属于白名单 | 作为 capability gate，决定部分 helper 是否走 verifier-side inline | 优化 gate | 自己不改程序，但控制后续 `do_misc_fixups()` |
 | `convert_ctx_accesses()` | `kernel/bpf/verifier.c:23001-23299` | 243 | ctx/sock/BTF/ARENA 访问、epilogue/prologue、`nospec` 标记 | 重写 ctx 访问、插入 `BPF_ST_NOSPEC`、做窄 load widening、生成 prologue/epilogue | 混合：功能 + 安全 + 小优化 | 内核现有“结构化 specialization”核心之一 |
-| `do_misc_fixups()`（扣除 vendor-only kinsn 后） | `kernel/bpf/verifier.c:23882-24870` | 721 | helper call、tail call、LD_ABS/IND、ptr ALU、map op、tracing helper 等 | 大一统 legalization/inline/specialization 阶段 | 混合：功能 + 优化 + 安全 | 这是内核 eBPF rewrite 的主战场 |
+| `do_misc_fixups()`（扣除 vendor-only kop 后） | `kernel/bpf/verifier.c:23882-24870` | 721 | helper call、tail call、LD_ABS/IND、ptr ALU、map op、tracing helper 等 | 大一统 legalization/inline/specialization 阶段 | 混合：功能 + 优化 + 安全 | 这是内核 eBPF rewrite 的主战场 |
 | `opt_subreg_zext_lo32_rnd_hi32()` | `kernel/bpf/verifier.c:22895-22994` | 71 | `zext_dst`、`CMPXCHG`、arch 需要 zext，或测试模式 `BPF_F_TEST_RND_HI32` | 自动补 `ZEXT`，或在测试模式下随机化高 32 位 | 主要是功能/正确性 | 更偏 backend/legalization，不是性能 pass |
 
 关于 `opt_subreg_zext_lo32_rnd_hi32()` 还要注意两点：
@@ -144,7 +144,7 @@
 
 | 子块 | 位置 | LOC | 触发条件 | 说明 | 性质 |
 | --- | --- | ---: | --- | --- | --- |
-| `kinsn_sidecar_lowering` | `23917-23944` | 22 | 当前 vendor tree 的 kinsn sidecar | BpfReJIT vendor-only；**不计入 baseline** | vendor-only |
+| `kop_sidecar_lowering` | `23917-23944` | 22 | 当前 vendor tree 的 kop sidecar | BpfReJIT vendor-only；**不计入 baseline** | vendor-only |
 | `addr_space_cast_mov32` | `23946-23955` | 8 | arena addr-space cast 或 `BPF_F_NO_USER_CONV` | 把特定 `MOV64` 改成清高 32 的 `MOV32` | 功能/特化 |
 | `needs_zext_alu32_rewrite` | `23958-23960` | 2 | `aux.needs_zext` | 把 `ALU64` 改写成 `ALU32` | 功能 |
 | `div_mod_exception_rewrite` | `23962-24080` | 97 | `DIV/MOD` 存在 0/-1 异常路径 | 插保护序列，避免架构异常 | 功能/安全 |
@@ -202,7 +202,7 @@
 
 | Peephole / 机制 | 位置 | LOC | 触发条件 | 做了什么 | 性质 | 效果/备注 |
 | --- | --- | ---: | --- | --- | --- | --- |
-| helper inline + EXIT fallthrough（扣除 vendor-only kinsn） | `arch/arm64/net/bpf_jit_comp.c:1599-1665` | 42 | helper 为 `get_smp_processor_id` / `get_current_task[_btf]`，或最后一条是 `EXIT` | 直接内联 helper；若最后一条是 `EXIT` 则直接 fallthrough 到 epilogue | 纯优化 | ARM64 JIT 的优化深度明显低于 x86 |
+| helper inline + EXIT fallthrough（扣除 vendor-only kop） | `arch/arm64/net/bpf_jit_comp.c:1599-1665` | 42 | helper 为 `get_smp_processor_id` / `get_current_task[_btf]`，或最后一条是 `EXIT` | 直接内联 helper；若最后一条是 `EXIT` 则直接 fallthrough 到 epilogue | 纯优化 | ARM64 JIT 的优化深度明显低于 x86 |
 | `BPF_END` lowering | `arch/arm64/net/bpf_jit_comp.c:1352-1391` | 35 | `BPF_END` | 用 `REV16/REV32/REV64` + `UXTH/UXTW` 实现 byteswap/zero-extend | 优化 | 有 standalone END lowering，但没有 `LDX + END` fusion |
 | `BPF_ST_NOSPEC` lowering | `arch/arm64/net/bpf_jit_comp.c:1778-1786` | 8 | `BPF_ST|BPF_NOSPEC` | `SB` 或 `DSB NSH + ISB` | 安全 | 与 x86 的 `LFENCE` 对应 |
 | subprog call shrink 额外 pass | `arch/arm64/net/bpf_jit_comp.c:2228-2233` | 2 | `extra_pass` 且子程序调用从间接变直接导致 image shrink | 再跑一轮以收敛地址 | 纯优化 | 类似 x86 的 shrink pass，但更小 |
@@ -248,7 +248,7 @@
 | `opt_remove_dead_code()` | 19 |
 | `opt_remove_nops()` | 19 |
 | `convert_ctx_accesses()` | 243 |
-| `do_misc_fixups()` baseline（去掉 vendor-only kinsn） | 721 |
+| `do_misc_fixups()` baseline（去掉 vendor-only kop） | 721 |
 | `opt_subreg_zext_lo32_rnd_hi32()` | 71 |
 | x86 peephole 小计 | 185 |
 | ARM64 peephole 小计 | 101 |
@@ -473,9 +473,9 @@
    - 没有 dynamic map inlining + deopt/re-REJIT
 4. **内核不做 generic multi-insn peephole family**
    - 没有 `wide_mem` / `rotate` / `cond_select` / `extract`
-5. **BpfReJIT 把 ISA-specific complexity 下沉到 kinsn module**
+5. **BpfReJIT 把 ISA-specific complexity 下沉到 kop module**
    - daemon 定义“找什么 pattern”
-   - kinsn module 定义“如何发射平台特定指令”
+   - kop module 定义“如何发射平台特定指令”
 
 ## 5. 内核没做、但理论上可以做的优化
 
@@ -568,13 +568,13 @@
 - verifier const propagation
 - DCE
 - 128-bit ARM64 `LDP/STP`
-- bulk memory kinsn
+- bulk memory kop
 - helper specialization
 
 ### 关键方法论差异
 
 1. 新优化优先写在 daemon 里，不碰内核 verifier/JIT 核心
-2. 若需要新指令语义，只加一个 kinsn module
+2. 若需要新指令语义，只加一个 kop module
 3. 利用 `BPF_PROG_GET_ORIGINAL` / `BPF_PROG_REJIT` 在 live program 上重写并 re-verify
 4. profile/runtime 信息可以在 userspace 收集并驱动 pass
 
@@ -583,7 +583,7 @@
 ## 6.1 内核 BPF 优化总 LOC vs BpfReJIT
 
 - Linux 内核现有 pass-like 优化/硬化/特化代码：**1,749 LOC**
-- 当前 vendor tree 中额外混入的 BpfReJIT vendor-only kinsn 代码：**30 LOC**
+- 当前 vendor tree 中额外混入的 BpfReJIT vendor-only kop 代码：**30 LOC**
 - BpfReJIT 7 个已实现 daemon pass：**5,555 LOC Rust**
 - BpfReJIT daemon 整体：**12,191 LOC Rust**
 
@@ -617,9 +617,9 @@
 通常只需要：
 
 - 一个新的 daemon pass
-- 若需要平台新语义，再加一个可选 kinsn module
+- 若需要平台新语义，再加一个可选 kop module
 
-`docs/kernel-jit-optimization-plan.md` 里的 `SIMD kinsn module` 调研结论已经明确指出：**新 module + daemon pass 即可，不必再改框架主干。**
+`docs/kernel-jit-optimization-plan.md` 里的 `SIMD kop module` 调研结论已经明确指出：**新 module + daemon pass 即可，不必再改框架主干。**
 
 ## 7. 最终大表
 
@@ -629,7 +629,7 @@
 | fastcall spill/fill 删除 | 是 | 否 | 否 | 否 |
 | `bpf_loop` helper inline | 是 | 否 | 否 | 否 |
 | ctx access specialization / 窄 ctx load widening | `convert_ctx_accesses()` | 否 | 否 | 否 |
-| helper/map 静态内联与 direct-call | `do_misc_fixups()` 中已有白名单 | 部分有：特定 kfunc/kinsn lowering | dynamic map inlining、helper specialization 已设计/调研 | 否 |
+| helper/map 静态内联与 direct-call | `do_misc_fixups()` 中已有白名单 | 部分有：特定 kfunc/kop lowering | dynamic map inlining、helper specialization 已设计/调研 | 否 |
 | subreg zext / backend legalization | 是 | 依赖内核完成 | 否 | 否 |
 | Spectre v1/v4 硬化、ptr masking、`BPF_NOSPEC` | 是 | `speculation_barrier` 已实现 | 更激进的 barrier placement / elimination 可继续扩展 | 否 |
 | byte ladder -> wide load | 否 | `wide_mem` | 否 | 否 |
@@ -641,7 +641,7 @@
 | runtime constprop / specialization-driven DCE | 否 | 否 | 已设计完成 | 否 |
 | dynamic map inlining + deopt/re-REJIT | 否 | 否 | 已设计完成 | 否 |
 | 128-bit pair load/store (`LDP/STP`) | 否 | 否 | ARM64 方向调研完成 | x86 通用方案仍缺 |
-| bulk memory idiom (`memcpy/memset`) 专门优化 | 否 | 否 | bulk memory kinsn 已设计 | 否 |
+| bulk memory idiom (`memcpy/memset`) 专门优化 | 否 | 否 | bulk memory kop 已设计 | 否 |
 | generic GVN / CSE / LICM / jump-threading / loop unswitch | 否 | 否 | 还没有完整设计 | **是** |
 
 ## 8. 结论
@@ -654,7 +654,7 @@
 - 其中最强的公开性能证据是 `bpf_loop` inline；
 - 但它们多数是 program-type-specific rewrite、helper inline、Spectre 防护和浅层 JIT peephole；
 - Linux 目前没有一个可扩展的、可插拔的、可结合 runtime/profile 信息的 eBPF pass framework；
-- BpfReJIT 的贡献正是在这个空白上：把优化复杂度移出内核主线，用 daemon + 可选 kinsn module 迭代出更丰富的 pass family。
+- BpfReJIT 的贡献正是在这个空白上：把优化复杂度移出内核主线，用 daemon + 可选 kop module 迭代出更丰富的 pass family。
 
 ### 8.2 对 motivation 的准确表述
 

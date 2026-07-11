@@ -19,8 +19,8 @@ namespace {
 
 constexpr uint8_t k_bpf_ld_imm64 = BPF_LD | BPF_DW | BPF_IMM;
 
-#ifndef BPF_PSEUDO_KINSN_CALL
-#define BPF_PSEUDO_KINSN_CALL 4
+#ifndef BPF_PSEUDO_KOP_CALL
+#define BPF_PSEUDO_KOP_CALL 4
 #endif
 
 bool infer_program_abi_from_section(const char *section_name,
@@ -541,7 +541,7 @@ void patch_program_relocations(
     const std::unordered_map<std::string, uint32_t> &map_ids,
     const std::unordered_map<size_t, std::unordered_set<size_t>> &function_entries_by_section,
     std::vector<uint8_t> &code,
-    std::vector<kinsn_call_relocation> &kinsn_calls)
+    std::vector<kop_call_relocation> &kop_calls)
 {
     auto *insns = reinterpret_cast<bpf_insn *>(code.data());
     const size_t insn_count = code.size() / sizeof(bpf_insn);
@@ -585,10 +585,10 @@ void patch_program_relocations(
                 sym.st_shndx == SHN_UNDEF &&
                 symbol_name != nullptr &&
                 std::string_view(symbol_name).starts_with("bpf_x86_")) {
-                insns[*insn_index].src_reg = BPF_PSEUDO_KINSN_CALL;
+                insns[*insn_index].src_reg = BPF_PSEUDO_KOP_CALL;
                 insns[*insn_index].off = 0;
                 insns[*insn_index].imm = 0;
-                kinsn_calls.push_back({
+                kop_calls.push_back({
                     .insn_index = static_cast<uint64_t>(*insn_index),
                     .name = symbol_name,
                 });
@@ -788,7 +788,7 @@ program_image load_program_image(const std::filesystem::path &path)
         map_ids,
         function_entries_by_section,
         image.code,
-        image.kinsn_calls);
+        image.kop_calls);
     elf_end(elf);
     return image;
 }

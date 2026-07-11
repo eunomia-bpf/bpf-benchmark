@@ -4,7 +4,7 @@ Date: 2026-05-03
 Current HEAD: `2093d7a8` (`Fix corpus ReJIT failure artifact scope`)  
 Evidence:
 
-- Old failure log before the socket-artifact fix: `/tmp/kvm-8apps-kinsn-1777795577.log`
+- Old failure log before the socket-artifact fix: `/tmp/kvm-8apps-kop-1777795577.log`
 - Old failure log after the socket-artifact fix: `/tmp/vm-corpus-failure-export-full-1777819749.log`
 - Current single-app rerun: `/tmp/otel-fullpass-20260503.log`
 - Current 12-app prefix rerun: `/tmp/otel-prefix-12apps-20260503.log`
@@ -37,7 +37,7 @@ There was no `rejit_done`, no `app_done`, no per-program daemon response, and no
 
 ## Old Failure Evidence
 
-### `/tmp/kvm-8apps-kinsn-1777795577.log`
+### `/tmp/kvm-8apps-kop-1777795577.log`
 
 The run completed these apps successfully before OTel:
 

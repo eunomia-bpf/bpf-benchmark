@@ -23,20 +23,20 @@
 #define HC_CALL(PC_DELTA) HC_RAW(BPF_JMP | BPF_CALL, 0, BPF_PSEUDO_CALL, 0, (PC_DELTA) - 1)
 #define HC_EXIT() HC_RAW(BPF_JMP | BPF_EXIT, 0, 0, 0, 0)
 
-#define HC_KINSN_CALL(SELECTOR) HC_RAW(BPF_JMP | BPF_CALL, 0, BPF_PSEUDO_KINSN_CALL, 0, SELECTOR)
-#define HC_KINSN_WIRE_PAYLOAD(PAYLOAD) \
+#define HC_KOP_CALL(SELECTOR) HC_RAW(BPF_JMP | BPF_CALL, 0, BPF_PSEUDO_KOP_CALL, 0, SELECTOR)
+#define HC_KOP_WIRE_PAYLOAD(PAYLOAD) \
     ((((__u64)(PAYLOAD) & 0xf) > BPF_REG_10) ? \
      ((__u64)BPF_REG_10 | (((__u64)(PAYLOAD) & 0xf) << 4) | (((__u64)(PAYLOAD) >> 4) << 8)) : \
      (__u64)(PAYLOAD))
-#define HC_KINSN_SIDECAR(PAYLOAD) \
+#define HC_KOP_SIDECAR(PAYLOAD) \
     HC_RAW(BPF_ALU64 | BPF_MOV | BPF_K, \
-           (__u8)(HC_KINSN_WIRE_PAYLOAD(PAYLOAD) & 0xf), \
-           BPF_PSEUDO_KINSN_SIDECAR, \
-           (__s16)((HC_KINSN_WIRE_PAYLOAD(PAYLOAD) >> 4) & 0xffff), \
-           (__s32)((HC_KINSN_WIRE_PAYLOAD(PAYLOAD) >> 20) & 0xffffffffU))
-#define HC_KINSN(PAYLOAD, SELECTOR) \
-    HC_KINSN_SIDECAR(PAYLOAD), \
-    HC_KINSN_CALL(SELECTOR)
+           (__u8)(HC_KOP_WIRE_PAYLOAD(PAYLOAD) & 0xf), \
+           BPF_PSEUDO_KOP_SIDECAR, \
+           (__s16)((HC_KOP_WIRE_PAYLOAD(PAYLOAD) >> 4) & 0xffff), \
+           (__s32)((HC_KOP_WIRE_PAYLOAD(PAYLOAD) >> 20) & 0xffffffffU))
+#define HC_KOP(PAYLOAD, SELECTOR) \
+    HC_KOP_SIDECAR(PAYLOAD), \
+    HC_KOP_CALL(SELECTOR)
 
 #define HC_X86_RAX BPF_REG_0
 #define HC_X86_RDI BPF_REG_1
@@ -96,7 +96,7 @@
 #define HC_X86_FORM_BPF_TO_ARCH_RR HC_X86_FORM_SIB_RR
 #define HC_X86_ALU_FORM_RR HC_X86_FORM_RR
 #define HC_X86_ALU_FORM_IMM HC_X86_FORM_IMM
-/* Payloads carry only x86 operands; verifier scratch is private to kinsn modules. */
+/* Payloads carry only x86 operands; verifier scratch is private to kop modules. */
 #define HC_X86_RR_PAYLOAD(DST, SRC) \
     ((__u64)(HC_X86_FORM_RR) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))
 #define HC_X86_ARCH_RR_PAYLOAD(DST, SRC) \

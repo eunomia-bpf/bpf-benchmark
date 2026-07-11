@@ -2,7 +2,7 @@
 # Read by runner/libs/pass_config.py at execute_plan build time.
 # Daemon substitutes ${...} vars; runner sends this command verbatim.
 log_level: 1
-kinsns:
+koperation:
   - name: bpf_arm64_ccmp_w
   - name: bpf_arm64_ccmp_x
   - name: bpf_arm64_cmp_w

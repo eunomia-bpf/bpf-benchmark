@@ -36,8 +36,8 @@ volatile sig_atomic_t g_measure_signal_seen = 0;
 constexpr size_t kEthernetHeaderSize = 14;
 constexpr const char *kVmlinuxBtfPath = "/sys/kernel/btf/vmlinux";
 
-#ifndef BPF_PSEUDO_KINSN_CALL
-#define BPF_PSEUDO_KINSN_CALL 4
+#ifndef BPF_PSEUDO_KOP_CALL
+#define BPF_PSEUDO_KOP_CALL 4
 #endif
 
 #if defined(__x86_64__) || defined(__i386__)
@@ -145,7 +145,7 @@ struct fd_deleter {
 
 using unique_fd = std::unique_ptr<int, fd_deleter>;
 
-struct resolved_kinsn_call {
+struct resolved_kop_call {
     int btf_func_id = 0;
     int fd_array_slot = 0;
 };
@@ -761,12 +761,12 @@ std::string btf_name_for_fd(int fd)
     return name;
 }
 
-std::unordered_map<std::string, resolved_kinsn_call> resolve_kinsn_calls(
-    const std::vector<kinsn_call_relocation> &calls,
+std::unordered_map<std::string, resolved_kop_call> resolve_kop_calls(
+    const std::vector<kop_call_relocation> &calls,
     std::vector<unique_fd> &owned_btf_fds,
     std::vector<int> &fd_array)
 {
-    std::unordered_map<std::string, resolved_kinsn_call> resolved;
+    std::unordered_map<std::string, resolved_kop_call> resolved;
     std::vector<std::string> unresolved;
     for (const auto &call : calls) {
         if (!resolved.contains(call.name) &&
@@ -827,7 +827,7 @@ std::unordered_map<std::string, resolved_kinsn_call> resolve_kinsn_calls(
                 owned_btf_fds.emplace_back(new int(fd));
                 keep_fd = true;
             }
-            resolved.emplace(*it, resolved_kinsn_call{
+            resolved.emplace(*it, resolved_kop_call{
                 .btf_func_id = func_id,
                 .fd_array_slot = slot_it->second,
             });
@@ -849,7 +849,7 @@ std::unordered_map<std::string, resolved_kinsn_call> resolve_kinsn_calls(
             }
             names += name;
         }
-        fail("unable to resolve kinsn BTF functions: " + names);
+        fail("unable to resolve kop BTF functions: " + names);
     }
 
     if (!owned_btf_fds.empty()) {
@@ -862,31 +862,31 @@ std::unordered_map<std::string, resolved_kinsn_call> resolve_kinsn_calls(
     return resolved;
 }
 
-int load_raw_kinsn_program(program_image &image)
+int load_raw_kop_program(program_image &image)
 {
     if (!image.maps.empty()) {
-        fail("raw kinsn micro loader does not support maps");
+        fail("raw kop micro loader does not support maps");
     }
     if (image.code.empty() || image.code.size() % sizeof(bpf_insn) != 0) {
-        fail("raw kinsn micro loader received invalid BPF instruction image");
+        fail("raw kop micro loader received invalid BPF instruction image");
     }
 
     auto *insns = reinterpret_cast<bpf_insn *>(image.code.data());
     const size_t insn_count = image.code.size() / sizeof(bpf_insn);
     std::vector<unique_fd> owned_btf_fds;
     std::vector<int> fd_array;
-    const auto resolved = resolve_kinsn_calls(image.kinsn_calls, owned_btf_fds, fd_array);
-    for (const auto &call : image.kinsn_calls) {
+    const auto resolved = resolve_kop_calls(image.kop_calls, owned_btf_fds, fd_array);
+    for (const auto &call : image.kop_calls) {
         if (call.insn_index >= insn_count) {
-            fail("kinsn relocation points beyond program image");
+            fail("kop relocation points beyond program image");
         }
         auto target = resolved.find(call.name);
         if (target == resolved.end()) {
-            fail("internal error: unresolved kinsn relocation " + call.name);
+            fail("internal error: unresolved kop relocation " + call.name);
         }
         auto &insn = insns[call.insn_index];
-        if (insn.code != (BPF_JMP | BPF_CALL) || insn.src_reg != BPF_PSEUDO_KINSN_CALL) {
-            fail("kinsn relocation does not point at a kinsn call instruction");
+        if (insn.code != (BPF_JMP | BPF_CALL) || insn.src_reg != BPF_PSEUDO_KOP_CALL) {
+            fail("kop relocation does not point at a kop call instruction");
         }
         insn.off = static_cast<int16_t>(target->second.fd_array_slot);
         insn.imm = target->second.btf_func_id;
@@ -919,7 +919,7 @@ int load_raw_kinsn_program(program_image &image)
     }
     if (fd < 0) {
         const char *log = opts.log_buf ? opts.log_buf : "";
-        fail("bpf_prog_load(raw kinsn): " + std::string(strerror(errno)) +
+        fail("bpf_prog_load(raw kop): " + std::string(strerror(errno)) +
              "\nverifier log:\n" + log);
     }
     return fd;
@@ -942,7 +942,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
 
     const auto object_open_start = std::chrono::steady_clock::now();
     program_image raw_image = load_program_image(options.program);
-    const bool raw_kinsn_program = !raw_image.kinsn_calls.empty();
+    const bool raw_kop_program = !raw_image.kop_calls.empty();
     bpf_object_ptr object;
     unique_fd raw_program_fd;
     int program_fd = -1;
@@ -951,16 +951,16 @@ std::vector<sample_result> run_kernel(const cli_options &options)
     clock_type::time_point object_load_start {};
     clock_type::time_point object_load_end {};
 
-    if (raw_kinsn_program) {
+    if (raw_kop_program) {
         if (options.btf_custom_path.has_value()) {
-            fail("raw kinsn micro loader does not support custom BTF paths");
+            fail("raw kop micro loader does not support custom BTF paths");
         }
         if (options.fixture_path.has_value()) {
-            fail("raw kinsn micro loader does not support map fixtures");
+            fail("raw kop micro loader does not support map fixtures");
         }
         object_open_end = std::chrono::steady_clock::now();
         object_load_start = std::chrono::steady_clock::now();
-        raw_program_fd.reset(new int(load_raw_kinsn_program(raw_image)));
+        raw_program_fd.reset(new int(load_raw_kop_program(raw_image)));
         program_fd = *raw_program_fd;
         object_load_end = std::chrono::steady_clock::now();
         effective_io_mode = options.io_mode;
@@ -1016,8 +1016,8 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         (effective_io_mode == "packet" || effective_io_mode == "staged");
 
     if (effective_io_mode == "map") {
-        if (raw_kinsn_program) {
-            fail("raw kinsn micro loader does not support io-mode map");
+        if (raw_kop_program) {
+            fail("raw kop micro loader does not support io-mode map");
         }
         bpf_map *input_map = bpf_object__find_map_by_name(object.get(), "input_map");
         bpf_map *result_map = bpf_object__find_map_by_name(object.get(), "result_map");

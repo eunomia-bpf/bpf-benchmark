@@ -1,4 +1,4 @@
-# 新 kinsn 架构下用户态 framework 设计调研
+# 新 kop 架构下用户态 framework 设计调研
 
 日期：2026-03-21  
 仓库：`/home/yunwei37/workspace/bpf-benchmark`  
@@ -552,7 +552,7 @@ seccomp 程序看到的是 `struct seccomp_data`：
 
 这样用户态只需要关注 rewrite 逻辑，最难的 map/BTF/relo consistency 可以留在内核里。
 
-## 6. 含 kinsn 的 ELF 是否还能走 libbpf
+## 6. 含 kop 的 ELF 是否还能走 libbpf
 
 ## 6.1 libbpf 会不会拒绝未知 opcode
 
@@ -570,7 +570,7 @@ seccomp 程序看到的是 `struct seccomp_data`：
 - `resolve_pseudo_ldimm64()` 调 `bpf_opcode_in_insntable()`（`vendor/linux-framework/kernel/bpf/verifier.c:21879-21883`）
 - `bpf_opcode_in_insntable()` 依赖 `BPF_INSN_MAP` 构造的公开 opcode 表（`vendor/linux-framework/kernel/bpf/core.c:1651`, `1795-1812`）
 
-**因此 kinsn 至少要改 kernel opcode table。**
+**因此 kop 至少要改 kernel opcode table。**
 
 ## 6.2 BTF / BTF.ext 要不要更新
 
@@ -587,7 +587,7 @@ seccomp 程序看到的是 `struct seccomp_data`：
 - `bpftool prog dump xlated` 复用内核 `print_bpf_insn()`，见 `vendor/linux-framework/tools/bpf/bpftool/xlated_dumper.c:270-271`, `352-353`
 - `print_bpf_insn()` 的格式化逻辑在 `vendor/linux-framework/kernel/bpf/disasm.c:186-360`
 
-所以如果新增 `kinsn` 而不更新 disassembler：
+所以如果新增 `kop` 而不更新 disassembler：
 
 - verifier 若已放行，disasm 可能打印成 `BUG_xx` 一类占位
 - 如果 opcode 连 verifier 白名单都没进，甚至会在更早阶段报 `unknown opcode`
@@ -757,7 +757,7 @@ bpf-rejit-daemon/
 
 职责：
 
-- 把匹配到的 site 从原始指令序列改写为 `kinsn`
+- 把匹配到的 site 从原始指令序列改写为 `kop`
 - Phase 1 只输出等长替换
 - 为 Phase 2 预留 patch list 格式：
   - `site_start`
@@ -895,7 +895,7 @@ RewritePlan
 
 ## 9.2 新方案下的 micro benchmark
 
-建议新增 runtime，例如 `kernel-rewrite-kinsn`：
+建议新增 runtime，例如 `kernel-rewrite-kop`：
 
 1. 打开原始 `.bpf.o`
 2. baseline:
@@ -942,7 +942,7 @@ RewritePlan
 ## 9.4 macro / e2e benchmark
 
 - `corpus/driver.py` 当前已经有 `kernel-recompile-v5` runtime 和 `recompile_apply_ns` 字段（`corpus/driver.py:752-919`）
-- 可以并行引入 `kernel-rewrite-kinsn-v1`
+- 可以并行引入 `kernel-rewrite-kop-v1`
 - e2e 则分两层：
   - **control-plane cost**：rewrite/load/replace latency
   - **steady-state benefit**：替换后 workload 的 `run_cnt_delta` / `run_time_ns delta`
@@ -1007,7 +1007,7 @@ RewritePlan
 - 如果 map/layout 不兼容：load 失败，不替换原程序
 - 如果 attach replace 不支持：保留原程序
 
-### kinsn verifier callback 有 bug
+### kop verifier callback 有 bug
 
 这是新架构最核心的安全风险。  
 当前方案和原始 `BPF_PROG_JIT_RECOMPILE` 相比，新增了一个风险面：**用户态 rewrite 会把更多语义编码为新 opcode，需要对应 verifier 证明。**
@@ -1040,7 +1040,7 @@ RewritePlan
 
 1. 把 `runner/src/elf_program_loader.cpp` 演进成正式 `relocator.cpp`
 2. 把 scanner matcher 抽成可复用库
-3. 在 benchmark 中增加 `kernel-rewrite-kinsn` runtime
+3. 在 benchmark 中增加 `kernel-rewrite-kop` runtime
 
 ## 12.3 长期建议
 

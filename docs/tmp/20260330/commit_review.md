@@ -17,11 +17,11 @@ Confirmed on the main repo:
 1. `runner/src/common.cpp`
    Benchmark names regressed for `.bpf.o` inputs because `path.stem()` turned `foo.bpf.o` into `foo.bpf`. Restored the previous `.bpf.o` / `.o` stripping behavior.
 
-2. `runner/libs/kinsn.py`
-   `capture_daemon_kinsn_discovery()` read daemon stderr only once and raced daemon startup. Added bounded polling so `DaemonSession.start(load_kinsn=True)` fails only after the discovery log is genuinely missing.
+2. `runner/libs/kop.py`
+   `capture_daemon_kop_discovery()` read daemon stderr only once and raced daemon startup. Added bounded polling so `DaemonSession.start(load_kop=True)` fails only after the discovery log is genuinely missing.
 
 3. `runner/libs/case_common.py`
-   Lifecycle metadata could leave kinsn status as `completed` even if the post-ReJIT workload failed. Error exits now rewrite the final kinsn status to `error` unless the lifecycle was explicitly aborted.
+   Lifecycle metadata could leave kop status as `completed` even if the post-ReJIT workload failed. Error exits now rewrite the final kop status to `error` unless the lifecycle was explicitly aborted.
 
 4. `e2e/cases/scx/case.py`
    The payload status could stay `ok` when REJIT returned an error or when some program applied but post-ReJIT measurement was missing. The case now reports `error` in those states.

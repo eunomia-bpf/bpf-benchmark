@@ -25,7 +25,7 @@ and verifier logs.
 - Offline report: `docs/tmp/cond_select_cilium_unsound_20260517_artifacts/198_cil_from_container_cond_select_report.json`
 
 Root cause: `condition_prefix()` chose the final destination register `r5` as
-the synthetic predicate register.  `emit_x86_cond_select_kinsns()` then emitted
+the synthetic predicate register.  `emit_x86_cond_select_kops()` then emitted
 the false-arm `movq` into `r5` before `testq/cmovneq`, clobbering the predicate.
 The cmov tests the false value, not the original condition.
 
@@ -33,7 +33,7 @@ This is not primarily a missing zero-extension issue.  `select_mov_value()`
 accepts `BPF_ALU` and `BPF_ALU64`, but `materialize_value()` uses `mov32` for
 `Reg32`/`Imm32`.  In this site the selected values are `Imm32` and are
 materialized as `w0=1` and `w2=0`.  The bug is that the predicate itself is
-stored in `r5` and is overwritten before the x86 kinsn sequence consumes it.
+stored in `r5` and is overwritten before the x86 kop sequence consumes it.
 
 ## Bytecode site
 
@@ -65,11 +65,11 @@ After offline `bpfopt --pass cond_select`, output
 0018: (b7) r5 = 1              ; synthetic predicate, cond_reg = r5
 0019: (b4) w0 = 1              ; true value materialized
 0020: (b4) w2 = 0              ; false value materialized
-0021: kinsn bpf_x86_movq       ; dst=r5, src=r2  => r5 = 0
+0021: kop bpf_x86_movq       ; dst=r5, src=r2  => r5 = 0
 0022: call bpf_x86_movq
-0023: kinsn bpf_x86_testq      ; cond=r5
+0023: kop bpf_x86_testq      ; cond=r5
 0024: call bpf_x86_testq
-0025: kinsn bpf_x86_cmovneq    ; dst=r5, src=r0, cond=r5
+0025: kop bpf_x86_cmovneq    ; dst=r5, src=r0, cond=r5
 0026: call bpf_x86_cmovneq
 0028: (63) *(u32 *)(r10 -80) = r5
 ```
@@ -132,9 +132,9 @@ Transformed output around PC 453:
 0455: (b7) r2 = 1              ; synthetic predicate, cond_reg = r2
 0456: (b4) w0 = 1
 0457: (b4) w3 = 0
-0458: kinsn bpf_x86_movq       ; dst=r2, src=r3  => r2 = 0
-0460: kinsn bpf_x86_testq      ; cond=r2
-0462: kinsn bpf_x86_cmovneq    ; dst=r2, src=r0, cond=r2
+0458: kop bpf_x86_movq       ; dst=r2, src=r3  => r2 = 0
+0460: kop bpf_x86_testq      ; cond=r2
+0462: kop bpf_x86_cmovneq    ; dst=r2, src=r0, cond=r2
 ```
 
 The 054226 verifier log shows the same clobber:
@@ -159,7 +159,7 @@ Relevant implementation points in
   `Reg32`, `Imm32`).
 - `materialize_value()` emits `mov32_reg`/`mov32_imm` for `Reg32`/`Imm32`.
 - `condition_prefix()` can choose `site.dst_reg` first via `choose_temp_reg()`.
-- `emit_x86_cond_select_kinsns()` emits `movq(dst, false)`, then `testq(cond)`,
+- `emit_x86_cond_select_kops()` emits `movq(dst, false)`, then `testq(cond)`,
   then `cmovneq(dst, true, cond)` when no result scratch is allocated.
 - `x86_result_scratch()` only checks `site.dst_reg == site.cond.dst_reg()`.
   For the `cil_from_container` site, original `site.cond.dst_reg()` is `r9`,

@@ -32,7 +32,7 @@ retention rules before Codex C treats this suite as the implementation contract.
 
 | Required regression from loss review section 2 | Current migrated coverage | Review |
 | --- | --- | --- |
-| P1-F DCE preserves kinsn implicit register uses | `passes/dce_tests.rs:dce_preserves_kinsn_implicit_register_uses`; also `analysis/liveness_tests.rs:bbprogram_liveness_includes_kinsn_implicit_register_uses` | Covered. The pass test checks materialization insns remain before sidecar + kinsn call. |
+| P1-F DCE preserves kop implicit register uses | `passes/dce_tests.rs:dce_preserves_kop_implicit_register_uses`; also `analysis/liveness_tests.rs:bbprogram_liveness_includes_kop_implicit_register_uses` | Covered. The pass test checks materialization insns remain before sidecar + kop call. |
 | P1-K round 1 frame-pointer arithmetic materialization skip | `passes/const_prop_tests.rs:const_prop_skips_frame_pointer_arithmetic_materialization` | Covered. Asserts no rewrite, pointer skip reason, original bytecode. |
 | P1-K round 2 shifted frame-pointer post-state skip | `passes/const_prop_tests.rs:const_prop_skips_frame_pointer_plus_eight_with_shifted_post_state` | Covered. Asserts no rewrite despite stale scalar evidence. |
 | Packet pointer copy must not scalarize | `passes/const_prop_tests.rs:const_prop_post_state_guard_rejects_packet_pointer_copy_materialization` | Covered. Asserts `sites_applied == 0`, pointer skip reason, unchanged bytecode. |
@@ -82,9 +82,9 @@ Sampled deletion sites and judgment:
 | `bounds_check_merge_tests.rs:test_single_bounds_check_unchanged` | Right call | Low-value baseline; retained tests cover merge and non-merge cases. |
 | `bounds_check_merge_tests.rs:test_different_base_regs_not_merged` | Wrong call | Protects against merging checks from different packet roots; not represented in retained tests. |
 | `bounds_check_merge_tests.rs:test_different_error_targets_not_merged` | Wrong call | Prevents changing slow-path semantics; not represented in retained tests. |
-| `bulk_memory_tests.rs:test_memset_fill_encoding_matrix` | Wrong call | Kinsn payload/constant encoding is ABI-like behavior; retained tests only cover zero memset. |
+| `bulk_memory_tests.rs:test_memset_fill_encoding_matrix` | Wrong call | KOperation payload/constant encoding is ABI-like behavior; retained tests only cover zero memset. |
 | `bulk_memory_tests.rs:test_bulk_memory_negative_pattern_matrix` | Right call | Mostly tabled scanner negatives; retained short/alias/temp tests keep the highest-value negatives. |
-| `ccmp_tests.rs:ccmp_payload_roundtrips_canonical_encoding` | Wrong call | ABI payload layout should be directly tested; current tests only detect that some kinsn call exists. |
+| `ccmp_tests.rs:ccmp_payload_roundtrips_canonical_encoding` | Wrong call | ABI payload layout should be directly tested; current tests only detect that some kop call exists. |
 | `ccmp_tests.rs:scan_ccmp_chain_detects_three_term_nez_guard` | Right call | Scanner-only happy path replaced by pass-path emit test. |
 | `cond_select_tests.rs:test_cond_select_alias_all_overlap_combinations` | Wrong call | Alias-safe parameter setup is real correctness behavior and not covered by retained tests. |
 | `cond_select_tests.rs:test_cond_select_short_pattern_c_no_match_cond_clobbered` | Wrong call | Prevents matching across a clobbered condition register; no retained equivalent. |
@@ -163,7 +163,7 @@ lift boundary, so passes read `prog.oracle`, not raw verifier state from `ctx`.
 | --- | --- |
 | `analysis/branch_target_tests.rs` | Good BBProgram migration. JA32 and pseudo-call assertions are meaningful; only simple JA/no-branch old cases were dropped. |
 | `analysis/cfg_tests.rs` | Mostly good. Predecessor/successor and JA32 assertions are BB-native. Subprog test is weaker than old PC-range assertion. |
-| `analysis/liveness_tests.rs` | Good direction. Tests `live_in/live_out`, call clobbers, kinsn implicit uses, and recompute after mutation. P1-F comment is present. |
+| `analysis/liveness_tests.rs` | Good direction. Tests `live_in/live_out`, call clobbers, kop implicit uses, and recompute after mutation. P1-F comment is present. |
 | `analysis/map_refs_tests.rs` | Meaningful behavior retained, but API naming (`map_bindings`) is outside the design doc. |
 | `analysis/site_scan_tests.rs` | Tests logical-site API, not old scanner. Good LDIMM64 boundary coverage; comments are implementation notes, not bug provenance. |
 | `analysis/lower_tests.rs` | Covers P1-G helper behavior, but not full `lower()` or pass-path branch remapping. |
@@ -182,7 +182,7 @@ lift boundary, so passes read `prog.oracle`, not raw verifier state from `ctx`.
 | `passes/rotate_tests.rs` | Good retained provenance and subprog tests. Missing dst-overwrite/clobber negatives. |
 | `passes/skb_load_bytes_tests.rs` | Useful pass-path basics retained. Missing positive ctx-reload and length matrix coverage. |
 | `passes/wide_mem_tests.rs` | Good branch fixup and critical skip coverage. Pointer-type matrix is partial. |
-| `pass_tests.rs` | Correctly pivots to lift-once/lower-once and BBProgram trait shape. Kinsn registry tests remain useful. Needs clearer contract around verifier oracle and side inputs. |
+| `pass_tests.rs` | Correctly pivots to lift-once/lower-once and BBProgram trait shape. KOperation registry tests remain useful. Needs clearer contract around verifier oracle and side inputs. |
 
 ## 5. Mock Infrastructure Check
 
@@ -258,7 +258,7 @@ impl BtfRecordsView {
 
 ```rust
 pub struct PassContext {
-    pub kinsn_registry: KinsnRegistry,
+    pub kop_registry: KopRegistry,
     pub platform: PlatformCapabilities,
     pub policy: PolicyConfig,
     pub prog_type: u32,
@@ -297,7 +297,7 @@ Every pass implementation must operate on the provided `BBProgram`. The old
 ### Required Pipeline And CLI Changes
 
 - `main.rs` reads bytecode and all side-input CLI files into `PassContext`.
-- The CLI lifts once at entry, using `ctx.kinsn_registry` and a verifier oracle
+- The CLI lifts once at entry, using `ctx.kop_registry` and a verifier oracle
   derived from `ctx.verifier_states`.
 - The pipeline runs every requested pass on the same `&mut BBProgram`.
 - The pipeline lowers once after all passes.
@@ -305,7 +305,7 @@ Every pass implementation must operate on the provided `BBProgram`. The old
   not through pass-local address maps.
 - `build_custom_bbprogram_pipeline(&[String]) -> Result<Vec<Box<dyn BpfPass>>>`
   or equivalent rejects unknown pass names before running anything.
-- `MapInlinePass`, `ConstPropPass`, `DcePass`, kinsn passes, `BranchFlipPass`,
+- `MapInlinePass`, `ConstPropPass`, `DcePass`, kop passes, `BranchFlipPass`,
   `PrefetchPass`, `BoundsCheckMergePass`, and `SkbLoadBytesSpecPass` must all
   satisfy the new trait directly.
 

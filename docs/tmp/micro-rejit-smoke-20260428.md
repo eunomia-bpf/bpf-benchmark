@@ -109,11 +109,11 @@ Historical code did have a micro ReJIT path.  For example, commit `317d2c9a`
 had:
 
 ```make
-vm-micro-smoke: micro_exec micro-programs daemon-binary kernel-image kinsn-modules-build
+vm-micro-smoke: micro_exec micro-programs daemon-binary kernel-image kop-modules-build
 	... bpfrejit-daemon --pgo serve --socket "$(DAEMON_SOCKET)" ...
 	... python3 micro/driver.py --runtime kernel --runtime kernel-rejit --daemon-socket "$(DAEMON_SOCKET)" ...
 
-vm-micro: micro_exec micro-programs daemon-binary kernel-image kinsn-modules-build
+vm-micro: micro_exec micro-programs daemon-binary kernel-image kop-modules-build
 	... bpfrejit-daemon --pgo serve --socket "$(DAEMON_SOCKET)" ...
 	... python3 micro/driver.py --runtime llvmbpf --runtime kernel --runtime kernel-rejit --daemon-socket "$(DAEMON_SOCKET)" ...
 ```

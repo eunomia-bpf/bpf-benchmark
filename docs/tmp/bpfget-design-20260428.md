@@ -235,7 +235,7 @@ Implement `bpfget --target` as a flag-style mode that does not require `PROG_ID`
 The current daemon already has the two required pieces:
 
 - platform feature detection in `daemon/src/platform_detect.rs`;
-- kinsn BTF discovery in `daemon/src/kfunc_discovery.rs`.
+- kop BTF discovery in `daemon/src/kfunc_discovery.rs`.
 
 Migration recommendation:
 
@@ -248,16 +248,16 @@ References:
 - `docs/tmp/bpfopt_design_v3.md:263` defines `target.json`.
 - `docs/tmp/bpfopt_design_v3.md:582` says `daemon/src/kfunc_discovery.rs` moves into `bpfget/src/main.rs`.
 - `docs/tmp/bpfopt_design_v3.md:759` lists `bpfget --target` as Phase 4 enhancement.
-- `daemon/src/main.rs:40` currently performs kinsn discovery at daemon startup.
+- `daemon/src/main.rs:40` currently performs kop discovery at daemon startup.
 - `daemon/src/main.rs:46` currently performs platform detection.
 - `daemon/src/platform_detect.rs:27` parses `/proc/cpuinfo` flags for x86_64.
 - `daemon/src/platform_detect.rs:39` maps CPU flags into `has_bmi1`, `has_bmi2`, `has_cmov`, `has_movbe`, and `has_rorx`.
-- `daemon/src/kfunc_discovery.rs:21` defines known kinsn function/module mappings.
+- `daemon/src/kfunc_discovery.rs:21` defines known kop function/module mappings.
 - `daemon/src/kfunc_discovery.rs:164` reads vmlinux BTF layout to handle split module BTF.
 - `daemon/src/kfunc_discovery.rs:192` finds a `BTF_KIND_FUNC` by name.
 - `daemon/src/kfunc_discovery.rs:313` is the discovery entry point.
 - `daemon/src/kfunc_discovery.rs:386` gets BPF BTF FDs for daemon REJIT fd-array transport; `target.json` only needs function BTF IDs.
-- `bpfopt/crates/bpfopt/src/pass.rs:593` defines `KinsnRegistry`.
+- `bpfopt/crates/bpfopt/src/pass.rs:593` defines `KopRegistry`.
 - `bpfopt/crates/bpfopt/src/pass.rs:710` defines `PlatformCapabilities`.
 
 Recommended target detection flow:
@@ -267,8 +267,8 @@ Recommended target detection flow:
    - x86_64: parse first `flags` line in `/proc/cpuinfo`;
    - aarch64: use known architectural capability for conditional select and optionally parse `/proc/cpuinfo` `Features`.
 3. Scan `/sys/kernel/btf/vmlinux` for split BTF base string length and type-count bias.
-4. For each known kinsn module under `/sys/kernel/btf/<module>`, parse BTF and find the `BTF_KIND_FUNC` ID.
-5. Emit only discovered kinsns. Missing kinsns are absent rather than encoded as `-1`.
+4. For each known kop module under `/sys/kernel/btf/<module>`, parse BTF and find the `BTF_KIND_FUNC` ID.
+5. Emit only discovered koperation. Missing koperation are absent rather than encoded as `-1`.
 
 Recommended `target.json`:
 
@@ -276,7 +276,7 @@ Recommended `target.json`:
 {
   "arch": "x86_64",
   "features": ["bmi1", "bmi2", "cmov", "movbe", "rorx"],
-  "kinsns": {
+  "koperation": {
     "bpf_rotate64": { "btf_func_id": 12345, "supported_encodings": ["packed_call"] },
     "bpf_select64": { "btf_func_id": 12346, "supported_encodings": ["packed_call"] },
     "bpf_extract64": { "btf_func_id": 12347, "supported_encodings": ["packed_call"] },
@@ -415,7 +415,7 @@ Recommended modules:
 - `binary`: byte-slice conversion for `Vec<libbpf_sys::bpf_insn>` and stdout/file writing.
 - `info`: `ProgInfoJson`, raw info collection, tag/name/type helpers.
 - `maps`: map ID two-pass fetch and map metadata JSON.
-- `target`: platform detection plus kinsn BTF discovery.
+- `target`: platform detection plus kop BTF discovery.
 - `list`: live program enumeration and plain/JSON rendering.
 
 Mode dispatch:
@@ -533,7 +533,7 @@ Keep the syscall boundary rule: all direct `libc::syscall(SYS_bpf, ...)` usage s
 {
   "arch": "x86_64",
   "features": ["bmi1", "bmi2", "cmov", "movbe", "rorx"],
-  "kinsns": {
+  "koperation": {
     "bpf_rotate64": {
       "btf_func_id": 12345,
       "supported_encodings": ["packed_call"]

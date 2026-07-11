@@ -1,0 +1,11 @@
+# Single-pass kop ablation with bulk-memory and prefetch disabled.
+log_level: 1
+command: |
+  case "${RUN_TARGET_ARCH:-}" in
+    arm64|aarch64)
+      bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kop-mode all=force,bulk_memory=disable,prefetch=disable
+      ;;
+    *)
+      bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kop-mode all=force,wide-load=disable,indexed-load=disable,movbe-load=disable --bytecode-kop-mode all=force,bulk_memory=disable,prefetch=disable
+      ;;
+  esac

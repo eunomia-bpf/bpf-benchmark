@@ -16,7 +16,7 @@
    - `bpf_prog_rejit_swap()` 发布的新程序状态不完整，遗漏了多个 verifier/JIT 产出字段；其中 `tail_call_reachable` 和 `arena` 是最危险的两个。
    - `bpf_struct_ops_refresh_prog()` 不是“吞错误”，而是“非事务性部分更新”；失败后错误会往上传播，但 rollback 只能退化到“保留新旧 image 并容忍部分不一致”。
 4. `smp_wmb() + WRITE_ONCE(prog->bpf_func)` 也是实打实的内存序 bug，但它是弱序架构问题。当前复现环境是 x86_64/TCG，它解释不了报告里的这次 live crash。
-5. `bpf_kinsn_has_native_emit()` 在当前树里已经定义在 header 里。旧 review 里“未定义”的结论已经过时。
+5. `bpf_kop_has_native_emit()` 在当前树里已经定义在 header 里。旧 review 里“未定义”的结论已经过时。
 6. 结合复现报告，当前最像真正 live crash 根因的，仍然是 `bpftool prog show` 触发的 prog-info / metadata 路径竞态，而不是 `bpf_prog_rejit()` verifier 放过 malformed `rusty_exit`。这一点超出了你要求核对的 3.1-3.5 范围，但必须说明，否则会把 root cause 认错。
 
 ## 一、复现报告关键信息复述
@@ -382,7 +382,7 @@ root cause 是设计层面问题：`bpf_prog_rejit_swap()` 试图手工维护“
 - `P0`
 - 这是当前树里最明确、最实质的 REJIT 内核 bug。
 
-## 五、3.4 `bpf_kinsn_has_native_emit()` 搜索结果
+## 五、3.4 `bpf_kop_has_native_emit()` 搜索结果
 
 ### 结论
 
@@ -390,7 +390,7 @@ root cause 是设计层面问题：`bpf_prog_rejit_swap()` 试图手工维护“
 
 ### 搜索结果
 
-`grep -rn "bpf_kinsn_has_native_emit" vendor/linux-framework/` 的源码命中包括：
+`grep -rn "bpf_kop_has_native_emit" vendor/linux-framework/` 的源码命中包括：
 
 - `vendor/linux-framework/kernel/bpf/verifier.c:23776`
 - `vendor/linux-framework/include/linux/bpf.h:981`
@@ -501,7 +501,7 @@ root cause 是发布协议不完整：只有 release 侧语义的前半边（实
    - 结论：不成立
    - 原因：`tmp->aux->attach_btf{,_id}` 和 `tmp->expected_attach_type` 已正确预填，`bpf_check()` 会走到 `check_struct_ops_btf_id()`
 
-5. `bpf_kinsn_has_native_emit()` 未定义
+5. `bpf_kop_has_native_emit()` 未定义
    - 结论：不成立
    - 原因：当前定义在 `include/linux/bpf.h:981`
 

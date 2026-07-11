@@ -86,7 +86,7 @@ Current daemon behavior:
 - `CALL.off` is the 1-based slot in the REJIT/load `fd_array`; `0` means
   vmlinux BTF (`daemon/src/pipeline.rs:16-17`,
   `bpfopt/crates/bpfopt/src/insn.rs:247-255`).
-- The daemon resolver maps kinsn target name to a live BTF raw fd and records
+- The daemon resolver maps kop target name to a live BTF raw fd and records
   the required fds in dense slot order (`daemon/src/pipeline.rs:19-84`).
 - Before verifier dry-run and final ReJIT, the daemon calls
   `build_rejit_fd_array(required_btf_fds)` (`daemon/src/commands.rs:621-633`,
@@ -142,7 +142,7 @@ safe helper for opening BTF by module name; the migration should move the
 daemon helper equivalent into `kernel-sys` rather than putting raw BPF syscalls
 in `bpfrejit`.
 
-If no `--fd-array` is provided and the bytecode contains kinsn calls with
+If no `--fd-array` is provided and the bytecode contains kop calls with
 nonzero `CALL.off`, the kernel verifier should reject naturally and its log
 should be printed. The CLI should not scan bytecode to skip such programs.
 
@@ -234,7 +234,7 @@ Arguments:
   [FILE]       raw struct bpf_insn[] input; stdin when omitted
 
 Options:
-  --fd-array <FILE>   kinsn fd_array manifest
+  --fd-array <FILE>   kop fd_array manifest
   --dry-run           verify only; do not call BPF_PROG_REJIT
   --output <FILE>     optional summary JSON output
 ```
@@ -350,7 +350,7 @@ The daemon currently does more than `bpfrejit` should:
   (`daemon/src/commands.rs:501-504`);
 - runs pass pipeline and per-pass verifier dry-runs
   (`daemon/src/commands.rs:586-634`);
-- tracks kinsn BTF fds and builds the REJIT `fd_array`
+- tracks kop BTF fds and builds the REJIT `fd_array`
   (`daemon/src/pipeline.rs:16-84`, `daemon/src/commands.rs:386-397`);
 - relocates map FDs before final ReJIT (`daemon/src/commands.rs:811-817`);
 - calls `bpf_prog_rejit` and records structured daemon result JSON

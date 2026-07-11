@@ -22,7 +22,7 @@ fd 4 is not pointing to valid bpf_map
 2. **stale fd**：`BPF_PROG_GET_ORIGINAL` 返回的是 loader 当时提交的原始指令。BCC 程序使用 `BPF_PSEUDO_MAP_FD imm=4`，这个 `4` 是 loader 进程里的旧 map fd，不是 daemon 当前进程里的 live map fd。thin dry-run 直接把原 bytecode 交给 `BPF_PROG_LOAD`，verifier 因此按 stale fd 解析并报 `valid bpf_map`。这是主因。
 3. **fd_array 顺序/语义**：fork kernel verifier 对 `BPF_PSEUDO_MAP_IDX` 使用 `fd_array[imm]`，对 `BPF_PSEUDO_MAP_FD` 不使用 `fd_array`。daemon 已按 `prog_info.map_ids` 构造 live map fd 前缀，顺序可用；bug 是原始/candidate bytecode 没有在提交前切到 idx 语义。
 
-也检查了 kinsn BTF fd 分支：`fd_array_cnt` 非零时 kernel 允许 fd_array 里有 map 或 BTF fd；module kinsn 通过 insn `off` 索引 BTF fd。因此 BTF fd 不是这次 `fd 4 is not pointing to valid bpf_map` 的直接原因。
+也检查了 kop BTF fd 分支：`fd_array_cnt` 非零时 kernel 允许 fd_array 里有 map 或 BTF fd；module kop 通过 insn `off` 索引 BTF fd。因此 BTF fd 不是这次 `fd 4 is not pointing to valid bpf_map` 的直接原因。
 
 ## Fix
 
@@ -32,7 +32,7 @@ fd 4 is not pointing to valid bpf_map
 - 在 thin dry-run 进入 `kernel_sys::prog_load_dryrun_report()` 前，把 `BPF_PSEUDO_MAP_FD` / `BPF_PSEUDO_MAP_VALUE` 改写为 `BPF_PSEUDO_MAP_IDX` / `BPF_PSEUDO_MAP_IDX_VALUE`。
 - 在最终 `BPF_PROG_REJIT` 前对 optimized bytecode 做同样改写，防止同类 stale fd 在主路径暴露。
 - 旧 fd 到 map index 的绑定只从原始 bytecode 建一次，并按 `prog_info.map_ids` / verifier used_maps 顺序解析；optimized bytecode 使用同一绑定，避免“第一个 map load 被优化删除后，第二个 map 被错误映射到 index 0”。
-- `RejitFdArray` 仍是唯一 live fd 构造路径；测试注入 BTF opener 覆盖 map-only、map+kinsn、no-map+kinsn 三个分支。
+- `RejitFdArray` 仍是唯一 live fd 构造路径；测试注入 BTF opener 覆盖 map-only、map+kop、no-map+kop 三个分支。
 
 ## Tests
 
@@ -47,7 +47,7 @@ New focused coverage:
 
 - stale loader fd `4` is rewritten to `BPF_PSEUDO_MAP_IDX imm=0` before verifier-state capture.
 - original old-fd binding survives optimized bytecode that deleted an earlier map load.
-- ReJIT fd_array construction keeps live OwnedFd objects for map-only, map+kinsn, and no-map+kinsn target cases.
+- ReJIT fd_array construction keeps live OwnedFd objects for map-only, map+kop, and no-map+kop target cases.
 
 Forbidden targets were not run:
 

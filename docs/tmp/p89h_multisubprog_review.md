@@ -4,7 +4,7 @@
 
 Overall severity: **HIGH**.
 
-`bad918ea` and `858ddd97` do not remove a live BPF program from the whole ReJIT pipeline, but they do add pass-level, program-wide guards that skip every kinsn candidate in a multi-subprog program before candidate scanning. Under `CLAUDE.md`'s no-filtering/fail-fast rules and the additional review constraint that site-level skips are already a bad smell, these two commits should be treated as policy violations that hide the root cause.
+`bad918ea` and `858ddd97` do not remove a live BPF program from the whole ReJIT pipeline, but they do add pass-level, program-wide guards that skip every kop candidate in a multi-subprog program before candidate scanning. Under `CLAUDE.md`'s no-filtering/fail-fast rules and the additional review constraint that site-level skips are already a bad smell, these two commits should be treated as policy violations that hide the root cause.
 
 `6708d2a1` is different: it fixes endian stack-offset encoding and does not add multi-subprog filtering.
 
@@ -20,7 +20,7 @@ Overall severity: **HIGH**.
 
 ## Commit bad918ea: bulk_memory
 
-Commit: `bad918ea fix(kinsn/bulk_memory): avoid multi-subprog rejit candidates`
+Commit: `bad918ea fix(kop/bulk_memory): avoid multi-subprog rejit candidates`
 
 Level: **PASS**.
 
@@ -39,9 +39,9 @@ Skipped side effect:
 
 Site-level validity assessment:
 
-- This is not a site-level validity check. A valid site-level check would run after `scan_sites`, attach the skip to the specific candidate pc, and reject only a candidate whose replacement would cross a subprog boundary or place a kinsn call at a subprog entry.
+- This is not a site-level validity check. A valid site-level check would run after `scan_sites`, attach the skip to the specific candidate pc, and reject only a candidate whose replacement would cross a subprog boundary or place a kop call at a subprog entry.
 - Existing site checks in this pass already operate at candidate granularity, for example different-base alias safety and missing packed ABI at `bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:133-177`.
-- The test added by the commit codifies the broad skip by asserting no program change, zero applied sites, a `multi-subprog` skip, and no kinsn call at `bpfopt/crates/bpfopt/src/passes/bulk_memory_tests.rs:349-365`.
+- The test added by the commit codifies the broad skip by asserting no program change, zero applied sites, a `multi-subprog` skip, and no kop call at `bpfopt/crates/bpfopt/src/passes/bulk_memory_tests.rs:349-365`.
 
 Finding:
 
@@ -49,7 +49,7 @@ Finding:
 
 ## Commit 858ddd97: extract
 
-Commit: `858ddd97 fix(kinsn/extract): avoid multi-subprog rejit candidates`
+Commit: `858ddd97 fix(kop/extract): avoid multi-subprog rejit candidates`
 
 Level: **PASS**.
 
@@ -68,9 +68,9 @@ Skipped side effect:
 
 Site-level validity assessment:
 
-- This is not a site-level validity check. It skips all extract candidates in any multi-subprog program without proving that a candidate spans subprogs or that the kinsn sidecar/call pair would be invalid.
+- This is not a site-level validity check. It skips all extract candidates in any multi-subprog program without proving that a candidate spans subprogs or that the kop sidecar/call pair would be invalid.
 - The pass already has a candidate-local branch-target check at `bpfopt/crates/bpfopt/src/passes/extract.rs:153-166`; multi-subprog safety belongs in that style of candidate-local validation if it is truly required.
-- The test added by the commit asserts the broad skip and absence of kinsn calls at `bpfopt/crates/bpfopt/src/passes/extract.rs:416-441`; it does not prove the root cause is fixed.
+- The test added by the commit asserts the broad skip and absence of kop calls at `bpfopt/crates/bpfopt/src/passes/extract.rs:416-441`; it does not prove the root cause is fixed.
 
 Finding:
 
@@ -78,7 +78,7 @@ Finding:
 
 ## Commit 6708d2a1: endian
 
-Commit: `6708d2a1 fix(kinsn/endian): encode stack offsets directly`
+Commit: `6708d2a1 fix(kop/endian): encode stack offsets directly`
 
 Level: **SITE/TRANSFORM**, not a multi-subprog skip.
 
@@ -95,7 +95,7 @@ Skipped side effect:
 
 Site-level validity assessment:
 
-- This is a direct root-cause fix: preserve the original stack base and offset in the kinsn payload when x86 can encode it, instead of growing the replacement into address-materialization instructions.
+- This is a direct root-cause fix: preserve the original stack base and offset in the kop payload when x86 can encode it, instead of growing the replacement into address-materialization instructions.
 
 Finding:
 
@@ -103,21 +103,21 @@ Finding:
 
 ## Root cause 是否可修
 
-The bulk/extract root cause appears fixable. The current evidence points to missing precision in kinsn candidate/subprog handling, not an inherent inability to optimize every multi-subprog program.
+The bulk/extract root cause appears fixable. The current evidence points to missing precision in kop candidate/subprog handling, not an inherent inability to optimize every multi-subprog program.
 
 Evidence:
 
-- The kernel verifier explicitly rejects one concrete invalid layout: a pseudo kinsn call whose immediately preceding sidecar would be in a different subprog. It nulls the sidecar when the call pc is a subprog start at `vendor/linux-framework/kernel/bpf/verifier.c:3755-3768`.
+- The kernel verifier explicitly rejects one concrete invalid layout: a pseudo kop call whose immediately preceding sidecar would be in a different subprog. It nulls the sidecar when the call pc is a subprog start at `vendor/linux-framework/kernel/bpf/verifier.c:3755-3768`.
 - The same verifier later rejects `func_info` that no longer matches subprog layout at `vendor/linux-framework/kernel/bpf/verifier.c:19543-19549`.
-- Verification order is `check_btf_info_early`, `add_subprog_and_kfunc`, `lower_kinsn_proof_regions`, `check_subprogs`, then `check_btf_info` at `vendor/linux-framework/kernel/bpf/verifier.c:26406-26434`, so kinsn proof lowering can affect the layout that `func_info` must match.
+- Verification order is `check_btf_info_early`, `add_subprog_and_kfunc`, `lower_kop_proof_regions`, `check_subprogs`, then `check_btf_info` at `vendor/linux-framework/kernel/bpf/verifier.c:26406-26434`, so kop proof lowering can affect the layout that `func_info` must match.
 - The REJIT syscall submits replacement insns and fd array, not a full fresh userspace BTF/func_info payload, at `bpfopt/crates/kernel-sys/src/lib.rs:1356-1381` and `vendor/linux-framework/kernel/bpf/syscall.c:3636-3645`. Normal programs do not get the EXT-only copied func_info setup at `vendor/linux-framework/kernel/bpf/syscall.c:3718-3754`.
 - The forked kernel already has multi-subprog swap/layout support in scope: `bpf_prog_rejit_swap()` swaps `func_info`, `func_info_cnt`, `func`, `func_cnt`, and `real_func_cnt` at `vendor/linux-framework/kernel/bpf/syscall.c:3397-3407` and `vendor/linux-framework/kernel/bpf/syscall.c:3433-3444`; the plan also lists "multi-subprog layout match" as REJIT syscall responsibility at `docs/kernel-jit-optimization-plan.md:350-358` and the `rejit-v2` branch as supporting multi-subprog at `docs/kernel-jit-optimization-plan.md:696-700`.
-- User-space already has the pieces for precise validation. `BranchTargetAnalysis` marks BPF-to-BPF pseudo-call targets at `bpfopt/crates/bpfopt/src/analysis/branch_target.rs:36-42`; `CFGAnalysis` collects pseudo-call and pseudo-func entries as subprog entries at `bpfopt/crates/bpfopt/src/analysis/cfg.rs:45-64`; `kinsn_proof_subprog_starts()` already adjusts subprog starts for proof-region expansion and rejects a kinsn call at a subprog start at `bpfopt/crates/bpfopt/src/passes/utils.rs:237-272`.
+- User-space already has the pieces for precise validation. `BranchTargetAnalysis` marks BPF-to-BPF pseudo-call targets at `bpfopt/crates/bpfopt/src/analysis/branch_target.rs:36-42`; `CFGAnalysis` collects pseudo-call and pseudo-func entries as subprog entries at `bpfopt/crates/bpfopt/src/analysis/cfg.rs:45-64`; `kop_proof_subprog_starts()` already adjusts subprog starts for proof-region expansion and rejects a kop call at a subprog start at `bpfopt/crates/bpfopt/src/passes/utils.rs:237-272`.
 
 Conclusion:
 
 - A specific site that would split sidecar and call across a subprog boundary truly should not be transformed. That is a legitimate site-level validity rejection with a precise pc and reason.
-- The two reviewed guards do not implement that. They skip the whole pass before finding the site and before using the existing CFG/proof-region helpers. Because the root cause is likely a metadata/proof-remapping or boundary-validation defect, the correct fix is to make the kinsn passes subprog-aware rather than skipping all candidates in multi-subprog programs.
+- The two reviewed guards do not implement that. They skip the whole pass before finding the site and before using the existing CFG/proof-region helpers. Because the root cause is likely a metadata/proof-remapping or boundary-validation defect, the correct fix is to make the kop passes subprog-aware rather than skipping all candidates in multi-subprog programs.
 
 ## Fail-Fast, dead code, and tests
 
@@ -135,7 +135,7 @@ Dead code:
 Unit tests:
 
 - The bulk/extract tests assert the skip behavior itself (`bpfopt/crates/bpfopt/src/passes/bulk_memory_tests.rs:349-365`, `bpfopt/crates/bpfopt/src/passes/extract.rs:416-441`). Under `CLAUDE.md:35-40`, these are weak bug-detection tests because they prove the workaround, not the root-cause fix.
-- Better tests should include a multi-subprog program with a candidate wholly inside one subprog and assert the candidate is transformed with correct pseudo-call offsets, proof-region metadata, and final verifier/ReJIT behavior. A negative test should cover the real invalid case: sidecar in one subprog and kinsn call at another subprog's entry.
+- Better tests should include a multi-subprog program with a candidate wholly inside one subprog and assert the candidate is transformed with correct pseudo-call offsets, proof-region metadata, and final verifier/ReJIT behavior. A negative test should cover the real invalid case: sidecar in one subprog and kop call at another subprog's entry.
 
 ## Summary against No ReJIT Filtering
 
@@ -143,7 +143,7 @@ Unit tests:
 |---|---|
 | YES | `bad918ea` and `858ddd97` add pass-level, program-wide filters keyed on `func_info_record_count(program)? > 1` (`bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:110-118`, `bpfopt/crates/bpfopt/src/passes/extract.rs:114-122`). They skip all candidate sites before scanning. Under the additional review constraint, this is a HIGH-severity violation even if it is not a runner-level `live_rejit_programs()` exclusion. |
 | NO | The two guards do not prevent the whole BPF program from entering `PassManager`; later passes still run (`bpfopt/crates/bpfopt/src/pass.rs:987-999`). `6708d2a1` is a bytecode emission fix and adds no multi-subprog filtering (`bpfopt/crates/bpfopt/src/passes/endian.rs:151-177`). |
-| MAYBE | If a particular candidate would put a kinsn call at a subprog start, the kernel rejects it (`vendor/linux-framework/kernel/bpf/verifier.c:3755-3768`) and a precise site-level rejection would be valid. The reviewed bulk/extract commits do not prove that condition per site; they only infer risk from the program having more than one `func_info` record. |
+| MAYBE | If a particular candidate would put a kop call at a subprog start, the kernel rejects it (`vendor/linux-framework/kernel/bpf/verifier.c:3755-3768`) and a precise site-level rejection would be valid. The reviewed bulk/extract commits do not prove that condition per site; they only infer risk from the program having more than one `func_info` record. |
 
 Fail-Fast verdict:
 
@@ -156,5 +156,5 @@ Fail-Fast verdict:
 1. Remove the `func_info_record_count(program)? > 1` early returns from `bulk_memory` and `extract` (`bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:110-118`, `bpfopt/crates/bpfopt/src/passes/extract.rs:114-122`).
 2. Replace the skip tests with root-cause tests. Keep one positive multi-subprog test where a candidate is fully inside one subprog and must still be optimized; add one negative test for the exact invalid sidecar/call-at-subprog-entry case.
 3. Extend candidate validation to compute each candidate's containing subprog from CFG/func_info and reject only candidates whose replacement span or sidecar/call pair crosses the subprog boundary. The existing branch/CFG/proof helpers are the right starting point (`bpfopt/crates/bpfopt/src/analysis/branch_target.rs:36-42`, `bpfopt/crates/bpfopt/src/analysis/cfg.rs:45-64`, `bpfopt/crates/bpfopt/src/passes/utils.rs:237-272`).
-4. Audit `remap_kinsn_btf_metadata()`/proof-region offset mapping against the verifier order so `func_info` remains aligned after proof lowering (`vendor/linux-framework/kernel/bpf/verifier.c:26406-26434`, `vendor/linux-framework/kernel/bpf/verifier.c:19543-19549`).
+4. Audit `remap_kop_btf_metadata()`/proof-region offset mapping against the verifier order so `func_info` remains aligned after proof lowering (`vendor/linux-framework/kernel/bpf/verifier.c:26406-26434`, `vendor/linux-framework/kernel/bpf/verifier.c:19543-19549`).
 5. If any site is deliberately skipped after precise validation, make it visible in the external CLI/report boundary or fail the pass when the missing capability is a bug. Do not rely on internal `sites_skipped` that disappears from `PassReport` (`bpfopt/crates/bpfopt/src/main.rs:215-225`, `bpfopt/crates/bpfopt/src/main.rs:1233-1246`).

@@ -11,7 +11,7 @@
 3. 这个混合方案的核心不是“把当前 re-JIT substrate 推倒重来”，而是：
    - 保留当前 **post-load backend re-JIT** 作为论文主机制；
    - 吸收新方案里真正有价值的部分：**live enumerate、runtime PGO daemon、以及 verifier-owned 轻量事实/annotation**；
-   - **不要**把主线改成 `kinsn + live bytecode rewrite + full re-verify/reload`。
+   - **不要**把主线改成 `kop + live bytecode rewrite + full re-verify/reload`。
 
 如果只允许在 A/B 两个纯选项里二选一，我建议 **B：保持当前架构**。
 
@@ -19,7 +19,7 @@
 
 - 当前架构与 K2/Merlin/EPSO 的差异最干净：**它是 backend-only、post-load、与 bytecode optimizer 正交**。
 - 新架构虽然更“平台化”，但会把系统从 “backend lowering substrate” 变成 “live BPF rewriting framework”，从而**更直接地落入 K2/Merlin/EPSO 的比较面**。
-- 新架构的安全故事并没有想象中那么“免费”：`kinsn verify callback` 本质上仍然是 **新的、每指令的 validator logic**，只是从 `jit_validators.c` 搬到了 verifier extension / kmodule。
+- 新架构的安全故事并没有想象中那么“免费”：`kop verify callback` 本质上仍然是 **新的、每指令的 validator logic**，只是从 `jit_validators.c` 搬到了 verifier extension / kmodule。
 - 延迟上，新架构很可能把当前 `~29.89us` 的 kernel recompile 路径，变成 **毫秒到几十毫秒** 的 full verify+JIT+replace 路径。
 - 最关键的是：**时间线已经不支持大 pivot**。截至 **2026-03-20**，USENIX OSDI '26 的完整论文提交截止时间是 **2025-12-11**，通知时间是 **2026-03-26**，终稿截止 **2026-06-09**，而且 CFP 明确 **没有 author response period**。现在讨论整体换架构，意义只会是为条件接收修改或下一轮 venue 做准备，不是“赶上 OSDI '26 deadline”。
 
@@ -50,7 +50,7 @@
 | Merlin (ASPLOS'24) | LLVM IR + BPF bytecode | pre-verification | 否 | 编译器变换正确性 + kernel verifier | 否 | 否 |
 | EPSO (ASE'25 / arXiv'25) | BPF bytecode | rule discovery offline, application pre-load | 否 | rewrite rule correctness + kernel verifier | 否 | 否 |
 | 当前 BpfReJIT | native backend lowering | post-load, same xlated program | 是 | kernel-owned validator + kernel-owned emitter | **是** | **是** |
-| 新提案 | extended BPF ISA (`kinsn`) + bytecode rewrite | post-load, live rewrite + reload | 是 | verifier + `kinsn` verify callback + JIT emit callback | **间接地是** | **是，而且更深** |
+| 新提案 | extended BPF ISA (`kop`) + bytecode rewrite | post-load, live rewrite + reload | 是 | verifier + `kop` verify callback + JIT emit callback | **间接地是** | **是，而且更深** |
 
 ### 1.2 K2：与新方案的相同点与根本差异
 
@@ -63,7 +63,7 @@
 
 1. **K2 是 base BPF ISA 内的等价程序搜索；新方案是扩展 ISA 后的程序重写。**
    - K2 从 clang 生成的 BPF bytecode 出发，搜索一个 **在原 BPF ISA 内** 更好、且等价的程序。
-   - 新方案是把程序改写成含 `kinsn` 的新 bytecode。换句话说，**它不是在原语言中找更优程序，而是在引入新语言构件后重写程序**。
+   - 新方案是把程序改写成含 `kop` 的新 bytecode。换句话说，**它不是在原语言中找更优程序，而是在引入新语言构件后重写程序**。
 
 2. **K2 的强点是等价性；新方案的强点是 live adaptation。**
    - K2 的论文卖点之一是 **formal correctness / equivalence-checking**。
@@ -81,7 +81,7 @@
 4. **K2 不需要内核扩展语言；新方案需要。**
    - K2 是 userspace compiler。
    - 新方案需要：
-     - `kinsn` core
+     - `kop` core
      - 每个优化对应 kmodule
      - verifier/JIT 对新 instruction 的理解
 
@@ -131,7 +131,7 @@ EPSO 的核心点是：
 与新方案的关系：
 
 - EPSO 已经部分占据了“高质量 bytecode rewrite + better scalability than K2”这条线。
-- 新方案若转到 `kinsn + bytecode rewrite`，它会非常像：
+- 新方案若转到 `kop + bytecode rewrite`，它会非常像：
   - **live EPSO**
   - **plus a kernel-supported extended ISA**
 
@@ -157,15 +157,15 @@ EPSO 的核心点是：
 - kfunc 已经证明：BPF 生态接受 **kernel-owned typed extension points**。
 - kfunc 也说明：verifier 可以对扩展入口做 program-type gating、trusted-arg checks、BTF-based typing。
 
-但你不能把 “kinsn 像 kfunc” 直接当 novelty：
+但你不能把 “kop 像 kfunc” 直接当 novelty：
 
 - kfunc 扩展的是 **callable function surface**
-- kinsn 扩展的是 **BPF abstract machine / instruction set**
+- kop 扩展的是 **BPF abstract machine / instruction set**
 
 这两者的复杂度和风险不是一个量级：
 
 - kfunc 不改变 BPF ISA
-- kinsn 会改变 verifier/JIT 需要理解的指令语义空间
+- kop 会改变 verifier/JIT 需要理解的指令语义空间
 
 因此：
 
@@ -243,7 +243,7 @@ EPSO 的核心点是：
 2. compile-time bytecode optimizer 无法做 post-load adaptation
 3. 所以我们做一个 **live BPF rewriting framework**
 4. 它有：
-   - `kinsn` extensible ISA hook
+   - `kop` extensible ISA hook
    - privileged daemon
    - verifier-mediated safety
    - `bpf_link`-based hot replace
@@ -276,7 +276,7 @@ EPSO 的核心点是：
 
 如果未来真的要走新架构，这个故事不能继续写成：
 
-> “kernel JIT instruction selection 太保守，所以我们做 kinsn”
+> “kernel JIT instruction selection 太保守，所以我们做 kop”
 
 更强的写法会是：
 
@@ -303,7 +303,7 @@ EPSO 的核心点是：
 
 ### 3.2 不够强或不应主卖的点
 
-#### `kinsn` 像 kfunc
+#### `kop` 像 kfunc
 
 这是个 **natural extension**，不是强 novelty。
 
@@ -339,7 +339,7 @@ EPSO 的核心点是：
 原因：
 
 1. verifier 不是 equivalence checker
-2. `kinsn verify callback` 和 `emit callback` 自己就是新 TCB
+2. `kop verify callback` 和 `emit callback` 自己就是新 TCB
 3. 因此安全模型不是 “零新增 validator code”，而是：
    - **把 validator logic 分散到 per-insn verifier extension**
 
@@ -353,7 +353,7 @@ EPSO 的核心点是：
 
 因为：
 
-- 一旦有 `kinsn`
+- 一旦有 `kop`
 - verifier 必须知道这种 instruction 的：
   - type effect
   - pointer effect
@@ -399,7 +399,7 @@ EPSO 的核心点是：
 
 新方案的“`~200 LOC core + kmodule`”只统计了 **core kernel diff**，没有统计：
 
-- kinsn verifier integration
+- kop verifier integration
 - 每个优化的 verify callback
 - 每个优化的 JIT emit callback
 - userspace live rewriter
@@ -426,7 +426,7 @@ EPSO 的核心点是：
    - 那就要在 rewritten program 里显式加 bounds check
    - 这会侵蚀性能收益
 
-3. **通过 `kinsn` verify callback 自定义说明其合法性**
+3. **通过 `kop` verify callback 自定义说明其合法性**
    - 这又回到了“你写新的 verifier semantics”
    - 并不是真正省掉了安全证明工作
 
@@ -438,7 +438,7 @@ EPSO 的核心点是：
   - 或者把该优化降回当前 backend-only 机制
   - 或者承认这个优化仍然需要 custom semantics logic
 
-### 4.4 upstream 接受度：`kinsn` 比 kfunc 难得多
+### 4.4 upstream 接受度：`kop` 比 kfunc 难得多
 
 我对 upstream 接受度的判断是：
 
@@ -448,7 +448,7 @@ EPSO 的核心点是：
 原因：
 
 - kfunc 扩的是 interface
-- `kinsn` 扩的是 VM/ISA
+- `kop` 扩的是 VM/ISA
 
 这会碰到更多核心顾虑：
 
@@ -462,7 +462,7 @@ EPSO 的核心点是：
 也就是说：
 
 - 把 kfunc 当先例是对的
-- 但把它当“因此 kinsn 容易 upstream”是不对的
+- 但把它当“因此 kop 容易 upstream”是不对的
 
 ### 4.5 沉没成本：不仅是代码沉没，更是证据链沉没
 
@@ -599,13 +599,13 @@ EPSO 的核心点是：
    - 更强调 workload-aware live policy，而不是静态 YAML
 
 3. **往 verifier-owned 轻量 annotation / post-pass collector 方向演化**
-   - 不是全面改成 `kinsn`
+   - 不是全面改成 `kop`
    - 而是：
      - 让 verifier 产出少量 durable facts / site metadata
      - 以此缩小当前 validator 体量
      - 强化安全故事
 
-4. **若真要试新机制，只把 `kinsn` 限定成 future / narrow prototype**
+4. **若真要试新机制，只把 `kop` 限定成 future / narrow prototype**
    - 只做一个当前 substrate 明确做不到、但论文价值高的 case
    - 不要把整篇 paper 的主路径切过去
 
@@ -616,7 +616,7 @@ EPSO 的核心点是：
 - **时间上来不及**：对 OSDI '26 这篇线已经没有意义
 - **故事会换赛道**：backend paper 变 live transformation framework
 - **差异化会变弱**：从正交 prior work 变成直接竞争 prior work
-- **安全论证并不免费**：`kinsn` 并没有消灭 validator，只是重分布
+- **安全论证并不免费**：`kop` 并没有消灭 validator，只是重分布
 - **延迟会显著变差**
 - **现有数据和实现沉没成本太大**
 

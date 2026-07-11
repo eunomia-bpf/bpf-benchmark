@@ -323,7 +323,7 @@ Ordering: #1 is the biggest win and worth doing first. #2 is medium.
 # Build
 make -C native-sim/test
 cargo build --release --manifest-path native-sim/x86/native_lab/native_link/Cargo.toml
-make host-kinsn-x86
+make host-kop-x86
 cmake --build runner/build-llvmbpf --target micro_exec -j8
 
 # Run

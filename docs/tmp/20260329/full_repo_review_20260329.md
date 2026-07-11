@@ -18,7 +18,7 @@
 - E2E goals: `4/5 PASS`, `1 FAIL`
 - Corpus goals: `6/6 PASS`
 - Source fixes applied in this review: none
-- Remaining gap: existing March 29, 2026 E2E artifacts do not yet contain `kinsn_modules` evidence, even though the current code path and tests support it
+- Remaining gap: existing March 29, 2026 E2E artifacts do not yet contain `kop_modules` evidence, even though the current code path and tests support it
 
 ## Daemon Goals
 
@@ -50,4 +50,4 @@
 
 - No source regression was reproduced in the required build/test set
 - No code edit was necessary to satisfy the checked implementation goals
-- The only remaining gap I could confirm is artifact evidence for `kinsn_modules`: the implementation is present and tested, but the stored March 29, 2026 authoritative E2E artifacts in the repo do not yet show it
+- The only remaining gap I could confirm is artifact evidence for `kop_modules`: the implementation is present and tested, but the stored March 29, 2026 authoritative E2E artifacts in the repo do not yet show it

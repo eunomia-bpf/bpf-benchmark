@@ -48,15 +48,15 @@ Addressed:
 - `bpfopt/crates/bpfopt/src/main.rs:441` uses fallible `chunk.try_into()?`.
 - `bpfopt/crates/bpfopt/src/main.rs:442` feeds the checked array into `BpfInsn::from_raw_bytes`.
 
-## Issue 5: prefetch / kinsn admission policy
+## Issue 5: prefetch / kop admission policy
 
-Chosen policy: prefetch remains outside `admit_kinsn_site_window` because it is insert-only, not a replacement. The existing shared helper remains kinsn-replacement admission for non-zero old/new instruction windows.
+Chosen policy: prefetch remains outside `admit_kop_site_window` because it is insert-only, not a replacement. The existing shared helper remains kop-replacement admission for non-zero old/new instruction windows.
 
 Addressed:
 - `bpfopt/crates/bpfopt/src/passes/prefetch.rs:276` documents the insert-only exception and points to `choose_prefetch_insert_site` for block/subprogram bounds.
-- `bpfopt/crates/bpfopt/src/analysis/bbprogram_helpers.rs:114` keeps kinsn replacement admission on the shared diagnostic/site helper path.
+- `bpfopt/crates/bpfopt/src/analysis/bbprogram_helpers.rs:114` keeps kop replacement admission on the shared diagnostic/site helper path.
 
-`wide_mem` and `skb_load_bytes_spec` remain pure-BPF passes and are not treated as kinsn admission users.
+`wide_mem` and `skb_load_bytes_spec` remain pure-BPF passes and are not treated as kop admission users.
 
 ## LOC
 

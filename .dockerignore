@@ -80,10 +80,10 @@ bpfopt/target
 bpfopt/target/**
 # Re-include the host-built bpfopt-suite binaries needed by runner-runtime image COPY.
 !bpfopt/target/release/bpfopt
-!bpfopt/target/release/kinsnprober
+!bpfopt/target/release/kopprober
 !bpfopt/target/release/bpfprof
 !bpfopt/target/aarch64-unknown-linux-gnu/release/bpfopt
-!bpfopt/target/aarch64-unknown-linux-gnu/release/kinsnprober
+!bpfopt/target/aarch64-unknown-linux-gnu/release/kopprober
 !bpfopt/target/aarch64-unknown-linux-gnu/release/bpfprof
 
 bpfperf/target

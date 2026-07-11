@@ -65,13 +65,13 @@ is only local until someone runs `docker push`.
   dependency set is intentionally broad because the output is the kernel image,
   modules, and headers.
 - `runner-runtime`: expected to rebuild when `runner/mk/build.mk`, daemon,
-  bpfopt, C++ runner, tests, kinsn modules, or runtime Python/YAML change. The
+  bpfopt, C++ runner, tests, kop modules, or runtime Python/YAML change. The
   important behavior is that it depends on `x86_64-katran-artifacts.image.tar`
   and now loads that tar instead of scheduling a Katran artifact rebuild for
   daemon/bpfopt/kernel syscall edits.
 - `runner-runtime-bpfopt-artifacts` and `runner-runtime-daemon-artifact`: these
   are supposed to rebuild for Rust changes and do not affect Katran artifacts.
-- `runner-runtime-kinsn-artifacts`: supposed to rebuild for `module/` changes;
+- `runner-runtime-kop-artifacts`: supposed to rebuild for `module/` changes;
   it is separate from Katran and kernel-fork.
 
 ## Options Considered

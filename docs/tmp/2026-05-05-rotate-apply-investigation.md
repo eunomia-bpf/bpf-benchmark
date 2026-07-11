@@ -1,4 +1,4 @@
-# Rotate 0-Apply Investigation for KVM 5-Kinsn Corpus
+# Rotate 0-Apply Investigation for KVM 5-KOperation Corpus
 
 Date: 2026-05-05
 
@@ -28,11 +28,11 @@ No benchmark rerun, app load, or code change was performed.
   shift amounts sum to 32, including 39 with the same immediate-MOV provenance
   shape as the current rotate64 matcher. These are not safe to feed to
   `bpf_rotate64`; a legitimate optimization needs rotate32 semantics and an
-  upper-32-zero proof or an exact equivalent 32-bit kinsn contract.
+  upper-32-zero proof or an exact equivalent 32-bit kop contract.
 - Highest-ROI matcher work is: add a proven rotate32 path, then generalize
   provenance through a local reaching-definition/equivalence proof. Do not just
   remove the `dst_reg != tmp_reg` filter; it unlocked zero observed sites and is
-  required by the current packed rotate kinsn ABI.
+  required by the current packed rotate kop ABI.
 
 ## Artifact inventory
 
@@ -93,7 +93,7 @@ Current daemon behavior in `daemon/src/commands.rs`:
 - `WorkDir::drop` removes that directory with `fs::remove_dir_all`.
 - `try_apply_one` writes these transient files per program/pass:
   - `prog.bin`
-  - `target.json` when kinsn target probing is needed
+  - `target.json` when kop target probing is needed
   - `verifier-states.json` when a stateful pass needs prior verifier states
   - `map-values.json` for map-inline side inputs
   - `pass-XX-<pass>.in.bin`
@@ -333,7 +333,7 @@ prove the input upper half was zero.
 
 Safety required:
 
-- A distinct rotate32 kinsn contract, or a rotate kinsn payload width flag, not
+- A distinct rotate32 kop contract, or a rotate kop payload width flag, not
   reuse of current `bpf_rotate64`.
 - A proof that source upper 32 bits are zero at the site, either from a local
   syntactic zero-extension/use-def proof or verifier-state side input.
@@ -370,7 +370,7 @@ Safety required for relaxation:
 - Either leave the provenance MOV in place and replace only the shift/OR window,
   or remove the MOV only when it is directly adjacent and provably dead.
 - Keep the `tmp_reg` live-out check, because the original sequence destroys the
-  tmp copy and the native kinsn path does not.
+  tmp copy and the native kop path does not.
 
 ### 3. Fixed shift order and OR operand order
 
@@ -409,8 +409,8 @@ Observed impact:
   zero in the scanned Tetragon, Tracee, Katran, and BCC artifacts.
 
 Removing the filter would not increase observed apply count. It would also be
-unsafe for the current packed rotate kinsn ABI. The x86 module and bpfopt proof
-length logic both reject `tmp_reg == dst_reg` or `tmp_reg == src_reg`; the kinsn
+unsafe for the current packed rotate kop ABI. The x86 module and bpfopt proof
+length logic both reject `tmp_reg == dst_reg` or `tmp_reg == src_reg`; the kop
 uses `tmp_reg` as verifier proof scratch. Supporting result-in-tmp would require
 a different payload contract or a separate scratch-register allocation, not a
 matcher-only deletion.
@@ -423,8 +423,8 @@ sites before these safety filters could matter.
 They remain necessary for any rotate32 or provenance-relaxed matcher:
 
 - interior branch targets must not jump into the replaced window
-- tail-call-helper-sensitive kinsn replacement windows must still be rejected
-- `tmp_reg` must not be live after the site unless the new kinsn/proof contract
+- tail-call-helper-sensitive kop replacement windows must still be rejected
+- `tmp_reg` must not be live after the site unless the new kop/proof contract
   explicitly preserves the original tmp destruction semantics
 
 ## Concrete relaxation proposals
@@ -472,11 +472,11 @@ fn try_match_rotate32(insns, pc, analyses_or_states) -> Option<RotateSite> {
 
 Implementation notes:
 
-- Prefer a new `bpf_rotate32` kinsn or an explicit width field in the rotate
+- Prefer a new `bpf_rotate32` kop or an explicit width field in the rotate
   payload. The current `bpf_rotate64` name and contract are too specific.
 - The proof sequence must preserve BPF semantics. If the native emitter wants to
   use `rol`/`ror` on a 32-bit register, the optimizer must prove source upper
-  bits are zero. Otherwise the kinsn is not a legitimate replacement for the
+  bits are zero. Otherwise the kop is not a legitimate replacement for the
   64-bit-shift-plus-mask sequence.
 - Fold the trailing `<<= 32; >>= 32` pair only when it is part of the matched
   semantics and no branch target enters it.
@@ -536,7 +536,7 @@ Expected impact:
   triplets, but only a subset is likely legitimate because masked byte-pack
   forms are mixed in.
 
-### Priority 3: support result-in-tmp only with a new kinsn ABI or scratch allocation
+### Priority 3: support result-in-tmp only with a new kop ABI or scratch allocation
 
 Do not remove `dst_reg != tmp_reg` as a standalone matcher relaxation.
 

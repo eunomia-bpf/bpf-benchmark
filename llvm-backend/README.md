@@ -1,21 +1,21 @@
-# BPF kinsn LLVM backend notes
+# BPF kop LLVM backend notes
 
 This directory contains the experimental LLVM fork/build used to emit BPF
-kinsn pseudo instructions directly from the BPF backend.
+kop pseudo instructions directly from the BPF backend.
 
 ## Selection model
 
 The intended pipeline is:
 
 1. Let LLVM canonicalize source code into standard IR/DAG/MI semantics.
-2. Collect kinsn candidates from those canonical forms.
+2. Collect kop candidates from those canonical forms.
 3. Check legality: target module exists, operand form is supported, local
    subprog/verifier risks are avoided, and the replacement has no overlapping
    MI range.
 4. Score profitability using static cost first: loop weight, expected native
-   instruction savings, kinsn bundle/proof cost, and one-time scratch init.
-5. Select positive, non-overlapping candidates and lower them to kinsn pseudos.
-6. Let `BPFAsmPrinter` emit `kinsn_sidecar` plus a named kfunc call. BTF id and
+   instruction savings, kop bundle/proof cost, and one-time scratch init.
+5. Select positive, non-overlapping candidates and lower them to kop pseudos.
+6. Let `BPFAsmPrinter` emit `kop_sidecar` plus a named kfunc call. BTF id and
    module fd resolution stay outside LLVM.
 
 The backend should prefer LLVM semantic nodes over late bytecode guessing. Late
@@ -28,43 +28,43 @@ check whether the matched MI range is too broad or too narrow. The replacement
 should cover the whole canonical idiom that the x86 instruction subsumes; leaving
 redundant cleanup instructions behind can make a good instruction look bad.
 
-If an optimization can be represented by an existing kinsn, the backend should
-select that kinsn rather than only replacing the sequence with verifier-native
+If an optimization can be represented by an existing kop, the backend should
+select that kop rather than only replacing the sequence with verifier-native
 BPF. Plain BPF rewrites are useful for correctness and verifier proof shape, but
 they do not exercise the module/native-instruction path. For example, little
 endian byte-ladder load packing must lower to `bpf_x86_movzwl`, `bpf_x86_movl`,
 or `bpf_x86_movq` when legal, not just to `LDH`, `LDW`, or `LDD`.
 
-The exception is local bpf2bpf subprogram code. Current kinsn proof sequences
+The exception is local bpf2bpf subprogram code. Current kop proof sequences
 can consume verifier stack, and verifier combines caller/callee stack depth.
 Inside local subprograms, the backend may still use verifier-native wide-load
 canonicalization to reduce register pressure, but it must not force a
-stack-using kinsn proof until the local proof-stack model is fixed.
+stack-using kop proof until the local proof-stack model is fixed.
 
 ## Experiment protocol
 
 For each optimization step:
 
 1. Build the BPF backend:
-   `ninja -C llvm-backend/build-bpf-kinsn LLVMBPFCodeGen llc -j4`
-2. Generate micro objects with kinsn selection:
-   `make -C micro/programs OUTPUT_DIR=$PWD/micro/results/llvm_kinsn_programs_<tag> KERNEL_OFFSETS_INPUT=$PWD/micro/programs/build-x86/kernel_offsets.h BPFREJIT_MICRO_BPF_COMPILER=kinsn-llvm BPF_KINSN_LLC=$PWD/llvm-backend/build-bpf-kinsn/bin/llc all`
+   `ninja -C llvm-backend/build-bpf-kop LLVMBPFCodeGen llc -j4`
+2. Generate micro objects with kop selection:
+   `make -C micro/programs OUTPUT_DIR=$PWD/micro/results/llvm_kop_programs_<tag> KERNEL_OFFSETS_INPUT=$PWD/micro/programs/build-x86/kernel_offsets.h BPFREJIT_MICRO_BPF_COMPILER=kop-llvm BPF_KOP_LLC=$PWD/llvm-backend/build-bpf-kop/bin/llc all`
 3. Run full micro through the normal entrypoint:
-   `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir micro/results/llvm_kinsn_programs_<tag>"`
-4. Compare against the no-kinsn LLVM baseline:
+   `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir micro/results/llvm_kop_programs_<tag>"`
+4. Compare against the no-kop LLVM baseline:
    `micro/results/x86_kvm_micro_20260518_210242_364278/metadata.json`
 
 ## Baseline before this series
 
-Current kinsn build:
+Current kop build:
 
-- Objects: `micro/results/llvm_kinsn_programs_20260518_133500`
+- Objects: `micro/results/llvm_kop_programs_20260518_133500`
 - Micro run: `micro/results/x86_kvm_micro_20260518_204755_001539/metadata.json`
 - Baseline run: `micro/results/x86_kvm_micro_20260518_210242_364278/metadata.json`
 - Config: `SAMPLES=1 WARMUPS=0 INNER_REPEAT=100000 runtime=kernel`
 - Correctness: 29/29 matched expected result
 
-Summary versus no-kinsn LLVM baseline:
+Summary versus no-kop LLVM baseline:
 
 | Metric | Value |
 |---|---:|
@@ -75,7 +75,7 @@ Summary versus no-kinsn LLVM baseline:
 
 Notable deltas:
 
-| Benchmark | Baseline | kinsn | Ratio | JIT bytes |
+| Benchmark | Baseline | kop | Ratio | JIT bytes |
 |---|---:|---:|---:|---:|
 | `siphash_rotate64_mixer` | 54 ns | 38 ns | 0.704 | 3529 -> 2399 |
 | `flow_5tuple_rss_hash` | 13 ns | 11 ns | 0.846 | 819 -> 702 |
@@ -83,9 +83,9 @@ Notable deltas:
 | `katran_lb_consistent_hash_select` | 17 ns | 16 ns | 0.941 | 2975 -> 2817 |
 | `payload_prefix_memcmp_scan` | 106 ns | 100 ns | 0.943 | 569 -> 572 |
 
-Selected kinsns in that object set:
+Selected koperation in that object set:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_rolq` | 119 |
 | `bpf_x86_rorxl` | 40 |
@@ -110,21 +110,21 @@ suite.
 
 Implementation:
 
-- Added `BPF_KINSN_X86_POPCNTQ` pseudo.
+- Added `BPF_KOP_X86_POPCNTQ` pseudo.
 - `BPFISelLowering` keeps `ISD::CTPOP` legal only when
-  `-bpf-enable-kinsn-select` is enabled; without the flag it keeps the original
+  `-bpf-enable-kop-select` is enabled; without the flag it keeps the original
   generic expansion path.
 - `BPFAsmPrinter` lowers the pseudo to `bpf_x86_popcntq` with the module's RR
   payload schema.
 
 Build/object checks:
 
-- `ninja -C llvm-backend/build-bpf-kinsn LLVMBPFCodeGen llc -j4`: pass.
+- `ninja -C llvm-backend/build-bpf-kop LLVMBPFCodeGen llc -j4`: pass.
 - Objects after rotate score fix and scratch init fix:
-  `micro/results/llvm_kinsn_programs_rotatefix_20260518_164111`
-- Selected kinsns:
+  `micro/results/llvm_kop_programs_rotatefix_20260518_164111`
+- Selected koperation:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_popcntq` | 1 |
 | `bpf_x86_rolq` | 119 |
@@ -137,9 +137,9 @@ Micro status:
 - Run:
   `micro/results/x86_kvm_micro_20260518_234645_670440/metadata.json`
 - Command:
-  `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir micro/results/llvm_kinsn_programs_rotatefix_20260518_164111"`
+  `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir micro/results/llvm_kop_programs_rotatefix_20260518_164111"`
 
-Summary versus the no-kinsn LLVM baseline
+Summary versus the no-kop LLVM baseline
 `micro/results/x86_kvm_micro_20260518_210242_364278`:
 
 | Metric | Value |
@@ -161,9 +161,9 @@ Key case deltas:
 
 Two fixes were needed before the full run was valid:
 
-- Scratch init: kinsn module proof saves `r6/r7/r8`; verifier rejects saving an
+- Scratch init: kop module proof saves `r6/r7/r8`; verifier rejects saving an
   uninitialized register. Emitting `r6 = 0; r7 = 0; r8 = 0` from
-  `BPFAsmPrinter::emitFunctionBodyStart()` for functions containing kinsn
+  `BPFAsmPrinter::emitFunctionBodyStart()` for functions containing kop
   pseudos made the proof path explicit and survived later MI cleanup.
 - Rotate score regression: the candidate struct grew for movbe/BMI/SHD, but
   `collectRotate()` did not fill the new fields, so `Score` became zero and all
@@ -175,7 +175,7 @@ Two fixes were needed before the full run was valid:
 
 Implementation:
 
-- Added `BPF_KINSN_X86_MOVBE32` and `BPF_KINSN_X86_MOVBE64` pseudos.
+- Added `BPF_KOP_X86_MOVBE32` and `BPF_KOP_X86_MOVBE64` pseudos.
 - Extended `bpf_x86_movbe` payload decoding to support non-indexed base+offset
   memory operands in addition to the existing indexed/SIB form.
 - Candidate selection looks for `BSWAP32/64` or endian pseudos whose operand is
@@ -209,13 +209,13 @@ Result in the current micro set:
 
 - Selected count: 0.
 - Objects:
-  `micro/results/llvm_kinsn_programs_select_20260518_165342`
+  `micro/results/llvm_kop_programs_select_20260518_165342`
 - Full `make micro` passed: 29/29 correct.
 - Run:
   `micro/results/x86_kvm_micro_20260518_235759_125789/metadata.json`
-- Selected kinsns remained unchanged:
+- Selected koperation remained unchanged:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_popcntq` | 1 |
 | `bpf_x86_rolq` | 119 |
@@ -228,7 +228,7 @@ covered by the existing cmov module ABI. This step is therefore correctness-only
 for now; measured runtime movement versus Step 1 is run-to-run noise and JIT
 bytes are identical to the previous object set.
 
-Summary versus the no-kinsn LLVM baseline:
+Summary versus the no-kop LLVM baseline:
 
 | Metric | Value |
 |---|---:|
@@ -240,11 +240,11 @@ Summary versus the no-kinsn LLVM baseline:
 
 Implementation:
 
-- Added `bpf_x86_bextrq` to the BMI1 module and `BPF_KINSN_X86_BEXTRQ` in the
+- Added `bpf_x86_bextrq` to the BMI1 module and `BPF_KOP_X86_BEXTRQ` in the
   BPF backend.
 - Candidate selection matches same-block one-use `AND_ri(SRL_ri(x, start),
   low_contiguous_mask)` and materializes the x86 control operand with an ordinary
-  BPF move before the kinsn. The emitted native instruction remains one real x86
+  BPF move before the kop. The emitted native instruction remains one real x86
   `bextrq`; the control move is the source value setup that x86 itself requires.
 - The verifier proof had to avoid restoring a scratch register that is also the
   destination operand. The first full run failed in `packed_header_bitfield_decode`
@@ -254,12 +254,12 @@ Implementation:
 
 Build/object checks:
 
-- `make host-kinsn-x86`: pass.
+- `make host-kop-x86`: pass.
 - Objects:
-  `micro/results/llvm_kinsn_programs_bextr_20260518_170534`
-- Selected kinsns:
+  `micro/results/llvm_kop_programs_bextr_20260518_170534`
+- Selected koperation:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_bextrq` | 10 |
 | `bpf_x86_popcntq` | 1 |
@@ -273,12 +273,12 @@ Micro status:
 - Run:
   `micro/results/x86_kvm_micro_20260519_001658_821939/metadata.json`
 - Command:
-  `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir micro/results/llvm_kinsn_programs_bextr_20260518_170534"`
+  `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir micro/results/llvm_kop_programs_bextr_20260518_170534"`
 - JIT dump check found real `bextr` instructions in both hit programs:
   nine in `packed_header_bitfield_decode` and one in
   `bcc_runqlat_log2_histogram_bucket`.
 
-Summary versus the no-kinsn LLVM baseline:
+Summary versus the no-kop LLVM baseline:
 
 | Metric | Value |
 |---|---:|
@@ -302,7 +302,7 @@ Key hit deltas:
 
 The hit count is real, but the first static selection rule is not clearly
 profitable. `bextrq` replaces a shift-and-mask pair, but it also needs a control
-operand and the kinsn bundle changes local code layout. On these two programs the
+operand and the kop bundle changes local code layout. On these two programs the
 runtime is effectively flat while code size grows slightly at the hit sites. The
 profitability rule should therefore require either a reused/preexisting control
 value, a hotter loop weight, or a stronger native-cost win before selecting
@@ -315,13 +315,13 @@ Default selector update:
   selected unless a future form can reuse an existing control operand or prove a
   stronger native-cost win.
 - Objects:
-  `micro/results/llvm_kinsn_programs_profit_20260519_002050`
+  `micro/results/llvm_kop_programs_profit_20260519_002050`
 - Full `make micro` passed: 29/29 correct.
 - Run:
   `micro/results/x86_kvm_micro_20260519_002239_202418/metadata.json`
-- Selected kinsns:
+- Selected koperation:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_popcntq` | 1 |
 | `bpf_x86_rolq` | 119 |
@@ -332,7 +332,7 @@ Default selector summary:
 
 | Comparison | Geomean ratio | JIT byte delta |
 |---|---:|---:|
-| default vs no-kinsn baseline | 0.9488 | -1478 bytes |
+| default vs no-kop baseline | 0.9488 | -1478 bytes |
 | default vs Step 3 | 1.0038 | 0 bytes |
 | default vs Step 4 bextr-enabled run | 0.9908 | -54 bytes |
 
@@ -352,7 +352,7 @@ Implementation:
 
 - Added selection for `AND_rr` fed by same-block one-use `ADD_ri -1`
   (`bpf_x86_blsrq`) or `NEG_64` (`bpf_x86_blsiq`).
-- Added `BPF_KINSN_X86_BLSRQ` and `BPF_KINSN_X86_BLSIQ` pseudos and payload
+- Added `BPF_KOP_X86_BLSRQ` and `BPF_KOP_X86_BLSIQ` pseudos and payload
   lowering.
 
 Result in the current micro set:
@@ -370,7 +370,7 @@ Result in the current micro set:
 
 Implementation:
 
-- Added `BPF_KINSN_X86_SHLDL/SHLDQ/SHRDL/SHRDQ` pseudos.
+- Added `BPF_KOP_X86_SHLDL/SHLDQ/SHRDL/SHRDQ` pseudos.
 - Candidate selection matches same-block one-use `or(shift(lhs), shift(src))`
   where the shifts sum to the operand width and the sources differ.
 
@@ -387,7 +387,7 @@ Result in the current micro set:
 
 Implementation:
 
-- Added `BPF_KINSN_X86_MOVBE16` and a narrow MI recognizer for the common
+- Added `BPF_KOP_X86_MOVBE16` and a narrow MI recognizer for the common
   packet-field pattern:
   `ldb high; high <<= 8; ldb low; high | low; value &= 0xffff`.
 - The recognizer is intentionally strict: same basic block, one-use chain, same
@@ -395,20 +395,20 @@ Implementation:
   a local peephole over a canonical byte ladder rather than a general bytecode
   compiler.
 - `movbe r16, m16` is a partial-width x86 write: it preserves the upper bits of
-  the destination. The first attempt fed the old destination into the kinsn proof
+  the destination. The first attempt fed the old destination into the kop proof
   directly and failed verification when that old value was uninitialized or was a
   packet/data-end pointer. The fixed pseudo ties an explicit zero operand to the
-  destination, so LLVM emits `wDst = 0` before the kinsn and the module proof
+  destination, so LLVM emits `wDst = 0` before the kop and the module proof
   reads a scalar old value. The existing `& 0xffff` mask is left in place after
-  the kinsn.
+  the kop.
 
 Build/object checks:
 
 - Objects with `movbe16` enabled:
-  `micro/results/llvm_kinsn_programs_movbe16fix_20260519_011000`
-- Selected kinsns:
+  `micro/results/llvm_kop_programs_movbe16fix_20260519_011000`
+- Selected koperation:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_movbe16` | 5 |
 | `bpf_x86_popcntq` | 1 |
@@ -422,7 +422,7 @@ Micro status:
 - Run:
   `micro/results/x86_kvm_micro_20260519_010741_008104/metadata.json`
 
-Summary versus the no-kinsn LLVM baseline:
+Summary versus the no-kop LLVM baseline:
 
 | Metric | Value |
 |---|---:|
@@ -455,20 +455,20 @@ path win.
 Final default after disabling `movbe16` selection:
 
 - Objects:
-  `micro/results/llvm_kinsn_programs_default2_20260518_181034`
+  `micro/results/llvm_kop_programs_default2_20260518_181034`
 - Full `make micro` passed: 29/29 correct.
 - Run:
   `micro/results/x86_kvm_micro_20260519_011249_513906/metadata.json`
-- Selected kinsns:
+- Selected koperation:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_popcntq` | 1 |
 | `bpf_x86_rolq` | 119 |
 | `bpf_x86_rorxl` | 40 |
 | `bpf_x86_shldq` | 1 |
 
-Final default summary versus the no-kinsn LLVM baseline:
+Final default summary versus the no-kop LLVM baseline:
 
 | Metric | Value |
 |---|---:|
@@ -476,7 +476,7 @@ Final default summary versus the no-kinsn LLVM baseline:
 | geomean ratio | 0.9455 |
 | summed JIT byte delta | -1478 bytes |
 
-The final object set has the same selected-kinsn distribution and same total JIT
+The final object set has the same selected-kop distribution and same total JIT
 byte delta as the previous default run; the small geomean movement is run-to-run
 noise. This is the safer default for now.
 
@@ -492,10 +492,10 @@ Rationale:
 Build/object checks:
 
 - Objects:
-  `micro/results/llvm_kinsn_programs_roll32_20260518_190300`
-- Selected kinsns:
+  `micro/results/llvm_kop_programs_roll32_20260518_190300`
+- Selected koperation:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_popcntq` | 1 |
 | `bpf_x86_rolq` | 119 |
@@ -512,7 +512,7 @@ Result:
 
 | Comparison | Geomean ratio | JIT byte delta |
 |---|---:|---:|
-| `roll32` vs no-kinsn baseline | 0.9476 | -1477 bytes |
+| `roll32` vs no-kop baseline | 0.9476 | -1477 bytes |
 | `roll32` vs final default | 1.0021 | +1 byte |
 
 Key deltas versus final default:
@@ -531,7 +531,7 @@ therefore keeps the current `rorxl` default for 32-bit rotate selection.
 
 Rationale:
 
-- Step 7 left the final `AND_ri_32 0xffff` in place after the `movbe16` kinsn.
+- Step 7 left the final `AND_ri_32 0xffff` in place after the `movbe16` kop.
   That made the final JIT sequence `xor; movbe; and; cmp`, so the measured
   result was not a clean test of the x86 instruction. The selector now treats
   the final `AND` as the candidate root and removes the whole five-instruction
@@ -542,12 +542,12 @@ Rationale:
 
 Build/object checks:
 
-- `ninja -C llvm-backend/build-bpf-kinsn LLVMBPFCodeGen llc -j4`: pass.
+- `ninja -C llvm-backend/build-bpf-kop LLVMBPFCodeGen llc -j4`: pass.
 - Objects:
-  `micro/results/llvm_kinsn_programs_movbe16_strict_20260518_193158`
-- Selected kinsns:
+  `micro/results/llvm_kop_programs_movbe16_strict_20260518_193158`
+- Selected koperation:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_movbe16` | 5 |
 | `bpf_x86_popcntq` | 1 |
@@ -561,13 +561,13 @@ Micro status:
 - Run:
   `micro/results/x86_kvm_micro_20260519_023437_058615/metadata.json`
 - Command:
-  `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_movbe16_strict_20260518_193158"`
+  `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kop_programs_movbe16_strict_20260518_193158"`
 
 Summary:
 
 | Comparison | Geomean ratio | JIT byte delta |
 |---|---:|---:|
-| strict `movbe16` vs no-kinsn baseline | 0.9534 | -1536 bytes |
+| strict `movbe16` vs no-kop baseline | 0.9534 | -1536 bytes |
 | strict `movbe16` vs previous default | 1.0083 | -58 bytes |
 
 Key deltas versus previous default:
@@ -591,50 +591,50 @@ clear win on the Toeplitz workload. The one-sample suite geomean still moves
 backward versus the previous default because most benchmarks are unaffected and
 some movement is measurement noise; that should not veto a strict, local selector
 with a strong hit in a representative packet/endian workload. The important
-lesson is methodological: do not reject a kinsn class based on a loose selector
+lesson is methodological: do not reject a kop class based on a loose selector
 that leaves cleanup instructions behind; tighten the matched idiom first, then
 measure the hit programs and the full suite separately.
 
-### Step 10: bpfopt kinsn pass coverage audit
+### Step 10: bpfopt kop pass coverage audit
 
-I checked the current bpfopt kinsn-class passes against the LLVM backend
+I checked the current bpfopt kop-class passes against the LLVM backend
 selector. The useful x86 coverage now looks like this:
 
-| bpfopt pass | x86 kinsn targets | LLVM backend status |
+| bpfopt pass | x86 kop targets | LLVM backend status |
 |---|---|---|
 | `rotate` | `bpf_x86_rolq`, `bpf_x86_rorxl` | implemented and selected by default |
 | `endian_fusion` | `bpf_x86_rolw`, `bpf_x86_bswapl`, `bpf_x86_bswapq` | `bswapq` already implemented; `rolw` and `bswapl` pseudos/AsmPrinter lowering added in this step; current micro has no `rolw/bswapl` hits |
 | `cond_select` | `bpf_x86_testq`, `bpf_x86_cmoveq`, `bpf_x86_cmovneq` | backend lowering exists for LLVM `SELECT_CC`, but current micro has no safe RR select hits |
 | `extract` | `bpf_x86_shrq`, `bpf_x86_andl` | exact bpfopt split is not selected; LLVM has stronger `bpf_x86_bextrq` recognition, default-disabled until a profitable control-operand form exists |
 | `lea` | `bpf_x86_leaq`, `bpf_x86_leal` | pseudo/AsmPrinter lowering exists and automatic `ADD_rr/ADD_rr_32` selection now passes micro after fixing the module proof path |
-| `bulk_memory` | `bpf_x86_movzbl`, `bpf_x86_movb` | not ported as an LLVM selector; ordinary BPF byte load/store already lowers to these machine instructions, so duplicating them as kinsns is not useful without a larger bulk-copy semantic source |
+| `bulk_memory` | `bpf_x86_movzbl`, `bpf_x86_movb` | not ported as an LLVM selector; ordinary BPF byte load/store already lowers to these machine instructions, so duplicating them as koperation is not useful without a larger bulk-copy semantic source |
 | `prefetch` | `bpf_x86_prefetcht0` | not ported; bpfopt's pass is program/dataflow placement over map/packet dereferences, while the LLVM backend only sees local MI patterns unless source emits `llvm.prefetch` |
 
 LEA experiment:
 
-- Added `BPF_KINSN_X86_LEAQ/LEAL` pseudos and a first `ADD_rr/ADD_rr_32`
+- Added `BPF_KOP_X86_LEAQ/LEAL` pseudos and a first `ADD_rr/ADD_rr_32`
   selector.
 - Objects:
-  `micro/results/llvm_kinsn_programs_bpfopt_gap_20260518_201638`
-- Selected kinsns included 238 `bpf_x86_leaq` and 38 `bpf_x86_leal`.
+  `micro/results/llvm_kop_programs_bpfopt_gap_20260518_201638`
+- Selected koperation included 238 `bpf_x86_leaq` and 38 `bpf_x86_leal`.
 - Full micro failed verification in pointer-heavy programs. Example failure:
-  verifier saw `r6 += r7` over values loaded from kinsn shadow-stack slots, then
+  verifier saw `r6 += r7` over values loaded from kop shadow-stack slots, then
   rejected a later packet load with `invalid mem access 'scalar'`.
 
 The failure was not a fundamental LLVM legality problem. It exposed a module
 boundary bug: `bpf_x86_lea.c` sent the normal BPF-register payload form through
-the x86 shadow-register proof path because `kinsn_x86_reg_is_shadowed()` returns
+the x86 shadow-register proof path because `kop_x86_reg_is_shadowed()` returns
 true for BPF regs. That is correct for arch-register/native-lab payloads, but it
 is wrong for verifier-facing BPF-register LEA. The normal form must instantiate
 as verifier-visible `MOV/ADD/LSH` over the original BPF registers so packet and
 frame-pointer provenance stay intact. The module now only uses the shadow path
-for `KINSN_X86_LEA_FORM_ARCH_REG`.
+for `KOP_X86_LEA_FORM_ARCH_REG`.
 
 LEA retry after the module fix:
 
 - Objects:
-  `micro/results/llvm_kinsn_programs_lea_retry_20260518_210000`
-- Selected LEA kinsns: 238 `bpf_x86_leaq`, 38 `bpf_x86_leal` (276 total).
+  `micro/results/llvm_kop_programs_lea_retry_20260518_210000`
+- Selected LEA koperation: 238 `bpf_x86_leaq`, 38 `bpf_x86_leal` (276 total).
 - Top LEA hit programs:
 
 | Benchmark | LEA count |
@@ -652,18 +652,18 @@ Micro status:
 - Run:
   `micro/results/x86_kvm_micro_20260519_034347_448372/metadata.json`
 - Command:
-  `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_lea_retry_20260518_210000"`
+  `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kop_programs_lea_retry_20260518_210000"`
 
 Summary:
 
 | Comparison | Geomean ratio | JIT byte delta |
 |---|---:|---:|
-| LEA retry vs no-kinsn baseline | 0.9512 | -1357 bytes |
+| LEA retry vs no-kop baseline | 0.9512 | -1357 bytes |
 | LEA retry vs LEA-disabled bpfopt-gap2 | 1.0166 | +179 bytes |
 
 The correctness result is the important part: broad LEA selection no longer
 breaks packet-pointer verification. The first performance result is mixed. LEA
-adds many kinsn bundles and is not automatically a suite-wide win in this micro
+adds many kop bundles and is not automatically a suite-wide win in this micro
 set; it improves or holds several cases, but regresses `bcc_runqlat_log2_histogram_bucket`
 and increases total JIT bytes versus the LEA-disabled selector. The next LEA
 step should therefore be profitability refinement rather than another verifier
@@ -673,10 +673,10 @@ final x86 actually removes a move/add pair or materially shrinks a hot block.
 ROLW/BSWAPL + LEA-disabled validation:
 
 - Objects:
-  `micro/results/llvm_kinsn_programs_bpfopt_gap2_20260518_204000`
-- Selected kinsns:
+  `micro/results/llvm_kop_programs_bpfopt_gap2_20260518_204000`
+- Selected koperation:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_movbe16` | 5 |
 | `bpf_x86_popcntq` | 1 |
@@ -690,16 +690,16 @@ Micro status:
 - Run:
   `micro/results/x86_kvm_micro_20260519_032814_683943/metadata.json`
 - Command:
-  `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_bpfopt_gap2_20260518_204000"`
+  `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kop_programs_bpfopt_gap2_20260518_204000"`
 
 Summary:
 
 | Comparison | Geomean ratio | JIT byte delta |
 |---|---:|---:|
-| bpfopt-gap2 vs no-kinsn baseline | 0.9357 | -1536 bytes |
+| bpfopt-gap2 vs no-kop baseline | 0.9357 | -1536 bytes |
 | bpfopt-gap2 vs strict `movbe16` | 0.9814 | 0 bytes |
 
-Key deltas versus the no-kinsn baseline:
+Key deltas versus the no-kop baseline:
 
 | Benchmark | Baseline | bpfopt-gap2 | Ratio | JIT bytes |
 |---|---:|---:|---:|---:|
@@ -727,11 +727,11 @@ logic.
 
 Objects:
 
-- `micro/results/llvm_kinsn_programs_lea_live2_20260519_041000`
+- `micro/results/llvm_kop_programs_lea_live2_20260519_041000`
 
-Selected kinsns:
+Selected koperation:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_rolq` | 119 |
 | `bpf_x86_leaq` | 51 |
@@ -751,13 +751,13 @@ Micro status:
 - Run:
   `micro/results/x86_kvm_micro_20260519_040112_031843/metadata.json`
 - Command:
-  `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_lea_live2_20260519_041000"`
+  `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kop_programs_lea_live2_20260519_041000"`
 
 Summary:
 
 | Comparison | Geomean ratio | summed exec delta | JIT byte delta |
 |---|---:|---:|---:|
-| live-aware LEA vs no-kinsn baseline | 0.9442 | -772 ns | -1399 bytes |
+| live-aware LEA vs no-kop baseline | 0.9442 | -772 ns | -1399 bytes |
 | live-aware LEA vs LEA-disabled bpfopt-gap2 | 1.0091 | +37 ns | +137 bytes |
 | live-aware LEA vs broad LEA retry | 0.9926 | -104 ns | -42 bytes |
 
@@ -794,19 +794,19 @@ elimination. It now only rewrites adjacent final physical pairs:
 - `MOV_rr dst, base; ADD_ri dst, dst, imm` -> `bpf_x86_leaq/leal`
 - `MOV_rr dst, base; ADD_rr dst, dst, index` -> `bpf_x86_leaq/leal`
 
-Normal BPF-register LEA does not need kinsn scratch initialization, because the
+Normal BPF-register LEA does not need kop scratch initialization, because the
 module verifier proof instantiates to ordinary BPF `MOV/ADD` over the original
-BPF registers. `BPFAsmPrinter::functionNeedsKinsnScratch()` therefore no longer
+BPF registers. `BPFAsmPrinter::functionNeedsKopScratch()` therefore no longer
 marks LEA pseudos as scratch users. Shadow/arch-register LEA remains a module
 internal proof form and is not used by this verifier-facing LLVM path.
 
 Objects:
 
-- `micro/results/llvm_kinsn_programs_lea_reg_pair_20260518_215822`
+- `micro/results/llvm_kop_programs_lea_reg_pair_20260518_215822`
 
-Selected kinsns:
+Selected koperation:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_leaq` | 159 |
 | `bpf_x86_rolq` | 119 |
@@ -822,7 +822,7 @@ Single-sample full micro status:
 - Run:
   `micro/results/x86_kvm_micro_20260519_050046_753367/metadata.json`
 - Command:
-  `make micro COMMON_DEPS= TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_lea_reg_pair_20260518_215822"`
+  `make micro COMMON_DEPS= TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kop_programs_lea_reg_pair_20260518_215822"`
 
 Summary versus the same-environment LEA-disabled run
 `micro/results/x86_kvm_micro_20260519_045526_806779`:
@@ -873,7 +873,7 @@ Rationale:
 
 - Several packet/parser micros still lowered simple little-endian
   `u16/u32` field reads as byte ladders: `ldb; shl; ldb; or`.
-- This is not a kinsn-only opportunity. For naturally aligned little-endian
+- This is not a kop-only opportunity. For naturally aligned little-endian
   byte ladders, ordinary verifier-facing BPF `LDH32/LDW32` is the right
   canonical form because the normal kernel JIT already emits the target native
   memory load.
@@ -883,7 +883,7 @@ Rationale:
 
 Objects:
 
-- `micro/results/llvm_kinsn_programs_wideload_20260519_024858`
+- `micro/results/llvm_kop_programs_wideload_20260519_024858`
 
 Object-level effect versus final-MI LEA objects:
 
@@ -901,7 +901,7 @@ Micro status:
 - Run:
   `micro/results/x86_kvm_micro_20260519_095437_720881/metadata.json`
 - Command:
-  `make micro MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_wideload_20260519_024858"`
+  `make micro MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kop_programs_wideload_20260519_024858"`
 
 Summary versus final-MI LEA single-sample run
 `micro/results/x86_kvm_micro_20260519_050046_753367`:
@@ -924,7 +924,7 @@ This is the strongest post-LEA result in this series because it removes whole
 byte-ladder idioms rather than replacing one scalar ALU instruction with another
 machine instruction. It also shows the intended LLVM-backend boundary: use
 ordinary BPF when normal BPF is already a verifier-safe native instruction, and
-reserve kinsn for instructions the kernel JIT cannot otherwise emit.
+reserve kop for instructions the kernel JIT cannot otherwise emit.
 
 ### Step 14: big-endian byte ladder -> `bpf_x86_movbe16/32`
 
@@ -945,11 +945,11 @@ Rationale:
 
 Objects:
 
-- `micro/results/llvm_kinsn_programs_movbe_be_20260519_030015`
+- `micro/results/llvm_kop_programs_movbe_be_20260519_030015`
 
-Selected kinsns:
+Selected koperation:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_leaq` | 160 |
 | `bpf_x86_rolq` | 119 |
@@ -978,7 +978,7 @@ Three-sample status:
 - Run:
   `micro/results/x86_kvm_micro_20260519_101946_349411/metadata.json`
 - Command:
-  `make micro COMMON_DEPS= TIMEOUT=7200 MICRO_ARGS="--samples 3 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_movbe_be_20260519_030015"`
+  `make micro COMMON_DEPS= TIMEOUT=7200 MICRO_ARGS="--samples 3 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kop_programs_movbe_be_20260519_030015"`
 
 Summary using analysis-side per-benchmark mean over three raw samples:
 
@@ -986,7 +986,7 @@ Summary using analysis-side per-benchmark mean over three raw samples:
 |---|---:|---:|---:|---:|
 | movbe BE vs final-MI LEA | 0.9852 | -190.7 ns | -1532 bytes | 16/8/5 |
 | movbe BE vs LEA-disabled | 0.9756 | -220.0 ns | -1998 bytes | 23/4/2 |
-| movbe BE vs no-kinsn LLVM baseline | 0.9289 | -926.7 ns | -3534 bytes | 22/5/2 |
+| movbe BE vs no-kop LLVM baseline | 0.9289 | -926.7 ns | -3534 bytes | 22/5/2 |
 
 Key three-sample deltas versus final-MI LEA:
 
@@ -1009,7 +1009,7 @@ and the three-sample geomean is positive.
 
 I also tested extending the final-MI LEA peephole from adjacent `MOV+ADD` pairs
 to `MOV+ADD+ADD/disp` chains. The generated object set had exactly the same
-kinsn distribution as the movbe BE objects, so there were zero new hits in the
+kop distribution as the movbe BE objects, so there were zero new hits in the
 current micro suite. That change was not kept; the pair-only LEA selector is
 the cleaner default until a real scaled-index or displacement-chain opportunity
 shows up in final MI.
@@ -1020,25 +1020,25 @@ Rationale:
 
 - The remaining native/JIT gap after movbe BE was dominated by byte-ladder
   recomposition in local subprograms, especially `bpf_local_call_fanout_dispatch`.
-- Enabling every kinsn selector inside local subprograms is not verifier-safe
-  today. A test version that allowed local `rolq` kinsns failed with:
-  `combined stack size of 2 calls is 544. Too large`. The cause is kinsn proof
+- Enabling every kop selector inside local subprograms is not verifier-safe
+  today. A test version that allowed local `rolq` koperation failed with:
+  `combined stack size of 2 calls is 544. Too large`. The cause is kop proof
   stack usage inside a bpf2bpf callee, combined with the caller stack.
 - Ordinary BPF wide loads do not have that proof-stack problem. The kept change
   allows local subprograms to use only verifier-native little-endian wide-load
-  canonicalization, while kinsn selectors that instantiate proof stack remain
+  canonicalization, while kop selectors that instantiate proof stack remain
   disabled in local subprograms.
 
 Objects:
 
-- `micro/results/llvm_kinsn_programs_local_ldd_20260519_034100`
+- `micro/results/llvm_kop_programs_local_ldd_20260519_034100`
 
 Object-level effect:
 
-- kinsn count is unchanged from movbe BE: 358 total kinsn calls.
+- kop count is unchanged from movbe BE: 358 total kop calls.
 - `bpf_local_call_fanout_dispatch` direct `*(u64 *)` loads increased from 6 to
   14, replacing the main 8-byte byte ladders in local callees.
-- The local all-kinsn attempt is not kept; only verifier-native `LDD` in local
+- The local all-kop attempt is not kept; only verifier-native `LDD` in local
   subprograms is kept.
 
 Single-sample status:
@@ -1053,7 +1053,7 @@ Three-sample status:
 - Run:
   `micro/results/x86_kvm_micro_20260519_104019_462499/metadata.json`
 - Command:
-  `make micro COMMON_DEPS= TIMEOUT=7200 MICRO_ARGS="--samples 3 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_local_ldd_20260519_034100"`
+  `make micro COMMON_DEPS= TIMEOUT=7200 MICRO_ARGS="--samples 3 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kop_programs_local_ldd_20260519_034100"`
 
 Summary using analysis-side per-benchmark mean over three raw samples:
 
@@ -1079,7 +1079,7 @@ run-to-run noise or layout/cache effects outside the local `LDD` hit set. The
 directly affected local-call and SipHash cases improve substantially and the
 suite code size drops by another 1494 bytes versus movbe BE. This change is
 kept, with the explicit rule that local subprograms may receive verifier-native
-wide-load canonicalization but not stack-using kinsn proof sequences until the
+wide-load canonicalization but not stack-using kop proof sequences until the
 local proof-stack model is fixed.
 
 ### Step 16: 64-bit OR trees may carry 16/32-bit little-endian byte ladders
@@ -1091,15 +1091,15 @@ Rationale:
   selected the native-width root and missed these strict sub-width loads.
 - The kept change lets `collectWideLoadLE()` use `LDH/LDW` when a 16/32-bit
   byte ladder is carried by a 64-bit OR tree. This is still verifier-native BPF,
-  not a kinsn proof, so it is allowed in local subprograms as well.
+  not a kop proof, so it is allowed in local subprograms as well.
 
 Objects:
 
-- `micro/results/llvm_kinsn_programs_wideload64_20260519_035538`
+- `micro/results/llvm_kop_programs_wideload64_20260519_035538`
 
-Selected kinsns:
+Selected koperation:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_leaq` | 160 |
 | `bpf_x86_rolq` | 119 |
@@ -1132,7 +1132,7 @@ Key three-sample deltas versus local `LDD`:
 | `packet_toeplitz_rss_hash` | 225.0 ns | 234.7 ns | 916 -> 916 |
 
 This change is kept because it is verifier-native, reduces code size, and adds
-coverage without introducing kinsn proof stack. Runtime is mixed and the main
+coverage without introducing kop proof stack. Runtime is mixed and the main
 runqlat loss in this run is not supported by a larger JIT body; the next step
 therefore targeted the actual indexed byte-load shape instead of widening this
 rule further.
@@ -1146,7 +1146,7 @@ Rationale:
   repeated byte loads from `base + index + offset`. Ordinary BPF represents this
   as address arithmetic plus `LDX_MEM`; x86 can issue one SIB memory operand.
 - The LLVM selector now recognizes a same-block one-use `ADD_rr` feeding an
-  `LDB/LDB32` and emits `BPF_KINSN_X86_MOVZBL dst, base, index, scale, off`.
+  `LDB/LDB32` and emits `BPF_KOP_X86_MOVZBL dst, base, index, scale, off`.
 - The first attempt exposed two verifier-facing module bugs:
   - non-arch SIB proof read BPF registers through the shadow-register path,
     losing packet-pointer provenance and failing with `invalid mem access
@@ -1162,11 +1162,11 @@ Rationale:
 
 Objects:
 
-- `micro/results/llvm_kinsn_programs_sib_ec_20260519_043546`
+- `micro/results/llvm_kop_programs_sib_ec_20260519_043546`
 
-Selected kinsns:
+Selected koperation:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_leaq` | 160 |
 | `bpf_x86_rolq` | 119 |
@@ -1214,20 +1214,20 @@ selector, but do not broaden it to more memory widths or scaled forms until the
 profitability model can distinguish address-ladder loads from tight induction
 loops where BPF's existing `lea/add + load` schedule is already strong.
 
-### Step 18: force-select every legal kinsn candidate
+### Step 18: force-select every legal kop candidate
 
 Question tested: what happens if the LLVM selector ignores profitability and
-selects every currently recognized kinsn candidate?
+selects every currently recognized kop candidate?
 
 Implementation:
 
-- Added hidden llc flag `-bpf-kinsn-force-all` for this experiment. This was
-  later replaced by the unified `-bpf-kinsn-mode=...` policy knob in Step 22.
-- Added `BPF_KINSN_LLC_FLAGS` to `micro/programs/Makefile` so experiments can
+- Added hidden llc flag `-bpf-kop-force-all` for this experiment. This was
+  later replaced by the unified `-bpf-kop-mode=...` policy knob in Step 22.
+- Added `BPF_KOP_LLC_FLAGS` to `micro/programs/Makefile` so experiments can
   pass extra llc flags without changing the default build path.
 - The flag ignores candidate score only. It does not override legality. In
-  particular, local bpf2bpf subprogram kinsn selection stays disabled because
-  kinsn proof sequences consume verifier stack that is combined with the caller.
+  particular, local bpf2bpf subprogram kop selection stays disabled because
+  kop proof sequences consume verifier stack that is combined with the caller.
 
 The first experiment also forced local subprograms. That is not legal today:
 `bpf_local_call_fanout_dispatch` failed verifier with:
@@ -1241,11 +1241,11 @@ a verifier legality rule, not just conservative profitability.
 
 Legal force-all objects:
 
-- `micro/results/llvm_kinsn_programs_force_all_legal_20260519_050157`
+- `micro/results/llvm_kop_programs_force_all_legal_20260519_050157`
 
-Selected kinsns:
+Selected koperation:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_leaq` | 160 |
 | `bpf_x86_rolq` | 119 |
@@ -1286,7 +1286,7 @@ Key three-sample deltas versus SIB early-clobber default:
 | `trace_event_type_switch_dispatch` | 283.3 ns | 277.3 ns | 1457 -> 1457 | 1912 -> 1912 |
 | `packed_header_bitfield_decode` | 266.0 ns | 269.0 ns | 1006 -> 1009 | 2032 -> 2120 |
 
-Conclusion: enabling all legal kinsn candidates is not the right default. It
+Conclusion: enabling all legal kop candidates is not the right default. It
 mostly adds `bpf_x86_bextrq` and cold `rolw/bswapl` unary forms. Those are
 correct, but not consistently profitable on this suite. The current
 profitability gate is doing useful work: keep `bextrq` available for targeted
@@ -1294,24 +1294,24 @@ experiments, but default-enable it only after there is a control-operand form or
 a better cost model that can prove the final x86 sequence is actually shorter or
 faster.
 
-### Step 19: little-endian byte-ladder packing uses MOV kinsns by default
+### Step 19: little-endian byte-ladder packing uses MOV koperation by default
 
 Rationale:
 
 - Step 13 used verifier-native `LDH/LDW/LDD` for little-endian byte-ladder
   packing. That was a useful canonicalization, but it did not exercise the
-  kinsn/native-instruction path.
-- The backend rule is now explicit: when an existing kinsn can represent the
-  optimization, select the kinsn. Little-endian packing therefore lowers to
+  kop/native-instruction path.
+- The backend rule is now explicit: when an existing kop can represent the
+  optimization, select the kop. Little-endian packing therefore lowers to
   `bpf_x86_movzwl`, `bpf_x86_movl`, or `bpf_x86_movq` for non-local code.
-- Local bpf2bpf subprograms remain the exception. An all-kinsn local-call test
+- Local bpf2bpf subprograms remain the exception. An all-kop local-call test
   can exceed the verifier's combined caller/callee stack depth. Local callees
   still use verifier-native `LDH/LDW/LDD` packing to reduce register pressure
   and keep the program loadable.
 
 Implementation:
 
-- `BPFKinsnSelect` now emits MOV-family kinsn pseudos for non-local
+- `BPFKopSelect` now emits MOV-family kop pseudos for non-local
   little-endian byte ladders.
 - The pseudo uses the existing `bpf_x86_mov*` kfuncs and a direct
   base+offset memory payload; no new module ABI was added.
@@ -1323,11 +1323,11 @@ Implementation:
 
 Objects:
 
-- `micro/results/llvm_kinsn_programs_pack_kinsn3_20260519_055006`
+- `micro/results/llvm_kop_programs_pack_kop3_20260519_055006`
 
-Selected kinsns:
+Selected koperation:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_leaq` | 160 |
 | `bpf_x86_rolq` | 119 |
@@ -1350,18 +1350,18 @@ Validation:
   Run:
   `micro/results/x86_kvm_micro_20260519_125211_307977/metadata.json`
 - Command:
-  `make micro COMMON_DEPS= TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_pack_kinsn3_20260519_055006"`
+  `make micro COMMON_DEPS= TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kop_programs_pack_kop3_20260519_055006"`
 
 Summary using analysis-side per-benchmark values:
 
 | Comparison | Geomean ratio | summed exec delta | JIT byte delta |
 |---|---:|---:|---:|
-| MOV-packing kinsn vs no-kinsn LLVM baseline | 0.9164 | -990 ns | -5228 bytes |
-| MOV-packing kinsn vs SIB early-clobber default | 1.0043 | -1.7 ns | +160 bytes |
+| MOV-packing kop vs no-kop LLVM baseline | 0.9164 | -990 ns | -5228 bytes |
+| MOV-packing kop vs SIB early-clobber default | 1.0043 | -1.7 ns | +160 bytes |
 
-Key deltas versus the no-kinsn LLVM baseline:
+Key deltas versus the no-kop LLVM baseline:
 
-| Benchmark | Baseline | MOV-packing kinsn | JIT bytes |
+| Benchmark | Baseline | MOV-packing kop | JIT bytes |
 |---|---:|---:|---:|
 | `bitmap_popcount_scan` | 1115 ns | 492 ns | 489 -> 337 |
 | `tc_packet_checksum_fold` | 13352 ns | 13237 ns | 292 -> 228 |
@@ -1379,31 +1379,31 @@ combined stack size of 2 calls is 528. Too large
 ```
 
 That failure happened because local subprogram byte-ladder packing was converted
-to MOV kinsns and the callee's proof stack combined with caller stack. The kept
+to MOV koperation and the callee's proof stack combined with caller stack. The kept
 version restores the earlier local-subprog rule: local code may use ordinary
-wide loads, while non-local code must use the available MOV kinsns. This keeps
+wide loads, while non-local code must use the available MOV koperation. This keeps
 the suite loadable and preserves the intended native-instruction coverage for
 normal packet/parser code.
 
 JIT byte audit:
 
 - The initial MOV-packing run was `+160` JIT bytes versus the SIB
-  early-clobber default even though it still saved bytes versus the no-kinsn
+  early-clobber default even though it still saved bytes versus the no-kop
   baseline.
-- Root cause: `BPFAsmPrinter::functionNeedsKinsnScratch()` treated
-  `BPF_KINSN_X86_MOVZBL/MOVZWL/MOVL/MOVQ` as scratch users. For the forms LLVM
+- Root cause: `BPFAsmPrinter::functionNeedsKopScratch()` treated
+  `BPF_KOP_X86_MOVZBL/MOVZWL/MOVL/MOVQ` as scratch users. For the forms LLVM
   emits, `bpf_x86_mov.c` has verifier-native no-scratch fast paths, so this was
   unnecessary. The extra function-entry `r6/r7/r8 = 0` made the x86 JIT save
   callee-saved registers (`rbx/r13/r14`) and allocate stack space. In
   `packet_checksum_fold`, the +25 bytes were entirely prologue/epilogue:
   `sub rsp`, `push rbx/r13/r14`, three zeroing instructions, and three pops.
-- Fix: keep the MOV-load kinsns selected, but do not count these BPF-register
+- Fix: keep the MOV-load koperation selected, but do not count these BPF-register
   MOV-load pseudos as function-level scratch users.
 
 Validation after the scratch-init fix:
 
 - Objects:
-  `micro/results/llvm_kinsn_programs_mov_scratchfix_20260519_061416`
+  `micro/results/llvm_kop_programs_mov_scratchfix_20260519_061416`
 - Full single-sample `make micro` passed: 29/29 correct.
   Run:
   `micro/results/x86_kvm_micro_20260519_131610_476641/metadata.json`
@@ -1414,7 +1414,7 @@ Analysis-side deltas:
 |---|---:|---:|---:|---:|
 | scratch-init fix vs MOV-packing | 0.9991 | +70 ns | -142 bytes | -360 bytes |
 | scratch-init fix vs SIB early-clobber default | 1.0013 | +69 ns | +18 bytes | +448 bytes |
-| scratch-init fix vs no-kinsn LLVM baseline | 0.9155 | -920 ns | -5370 bytes | -9072 bytes |
+| scratch-init fix vs no-kop LLVM baseline | 0.9155 | -920 ns | -5370 bytes | -9072 bytes |
 
 The remaining `+18` bytes versus SIB are a separate regalloc/ABI effect, not a
 module emit bug. The MOV-load pseudo is globally early-clobber to keep SIB
@@ -1433,8 +1433,8 @@ initialization only when a real SIB overlap is selected.
 Follow-up implementation:
 
 - Split the LLVM-only MOV-load pseudos into direct base+offset forms
-  (`BPF_KINSN_X86_MOVZBL_MEM/MOVZWL_MEM/MOVL_MEM/MOVQ_MEM`) and SIB forms
-  (`BPF_KINSN_X86_MOVZBL/MOVZWL/MOVL/MOVQ`).
+  (`BPF_KOP_X86_MOVZBL_MEM/MOVZWL_MEM/MOVL_MEM/MOVQ_MEM`) and SIB forms
+  (`BPF_KOP_X86_MOVZBL/MOVZWL/MOVL/MOVQ`).
 - Direct forms carry only `dst, base, off` and do not use early-clobber. This
   lets LLVM keep shapes such as `dst == base` when they are valid and avoids
   introducing a callee-saved temporary only because SIB needs stricter operand
@@ -1445,7 +1445,7 @@ Follow-up implementation:
 Validation:
 
 - Objects:
-  `micro/results/llvm_kinsn_programs_mov_split_20260519_090434`
+  `micro/results/llvm_kop_programs_mov_split_20260519_090434`
 - Full single-sample `make micro` passed: 29/29 correct.
   Run:
   `micro/results/x86_kvm_micro_20260519_160716_947398/metadata.json`
@@ -1455,7 +1455,7 @@ Analysis-side deltas:
 | Comparison | Geomean ratio | summed exec delta | JIT byte delta | xlated byte delta |
 |---|---:|---:|---:|---:|
 | direct/SIB split vs scratch-init fix | 0.9982 | -24 ns | -7 bytes | 0 bytes |
-| direct/SIB split vs no-kinsn LLVM baseline | 0.9140 | -944 ns | -5377 bytes | -9072 bytes |
+| direct/SIB split vs no-kop LLVM baseline | 0.9140 | -944 ns | -5377 bytes | -9072 bytes |
 
 The concrete byte win was `packet_checksum_fold`: the direct MEM pseudo no
 longer forced the extra `push rbx` shape that the unified early-clobber MOV
@@ -1483,7 +1483,7 @@ Implementation:
 Validation:
 
 - Objects:
-  `micro/results/llvm_kinsn_programs_movbe_fast_20260519_091202`
+  `micro/results/llvm_kop_programs_movbe_fast_20260519_091202`
 - Full single-sample `make micro` passed: 29/29 correct.
   Run:
   `micro/results/x86_kvm_micro_20260519_161612_466178/metadata.json`
@@ -1494,14 +1494,14 @@ Analysis-side deltas:
 |---|---:|---:|---:|---:|
 | MOVBE fast proof vs direct/SIB split | 0.9923 | -24 ns | 0 bytes | 0 bytes |
 | MOVBE fast proof vs scratch-init fix | 0.9905 | -48 ns | -7 bytes | 0 bytes |
-| MOVBE fast proof vs no-kinsn LLVM baseline | 0.9068 | -968 ns | -5377 bytes | -9072 bytes |
+| MOVBE fast proof vs no-kop LLVM baseline | 0.9068 | -968 ns | -5377 bytes | -9072 bytes |
 
 The main value is not a new final x86 instruction; it is removing unnecessary
 proof scratch pressure so future selectors do not pay accidental prologue cost.
 
 ### Step 18: precise scratch mask and POPCNT fast proof
 
-The earlier scratch initialization was still boolean: any scratch-using kinsn
+The earlier scratch initialization was still boolean: any scratch-using kop
 initialized all of `r6/r7/r8`, which made the x86 JIT save `rbx/r13/r14` even
 when only one or two verifier scratch registers were actually needed.
 
@@ -1517,7 +1517,7 @@ Implementation:
 Validation:
 
 - Objects:
-  `micro/results/llvm_kinsn_programs_scratch_mask_20260519_092354`
+  `micro/results/llvm_kop_programs_scratch_mask_20260519_092354`
 - Full single-sample `make micro` passed: 29/29 correct.
   Run:
   `micro/results/x86_kvm_micro_20260519_162833_596819/metadata.json`
@@ -1528,7 +1528,7 @@ Analysis-side deltas:
 |---|---:|---:|---:|---:|
 | precise scratch mask vs MOVBE fast proof | 1.0011 | +37 ns | -33 bytes | -56 bytes |
 | precise scratch mask vs direct/SIB split | 0.9934 | +13 ns | -33 bytes | -56 bytes |
-| precise scratch mask vs no-kinsn LLVM baseline | 0.9078 | -931 ns | -5410 bytes | -9128 bytes |
+| precise scratch mask vs no-kop LLVM baseline | 0.9078 | -931 ns | -5410 bytes | -9128 bytes |
 
 The runtime difference against the immediately previous run is single-sample
 noise, but the code-shape fix is real. In `bitmap_popcount_scan`, the JIT
@@ -1589,7 +1589,7 @@ Implementation:
 Validation:
 
 - Objects:
-  `micro/results/llvm_kinsn_programs_movbe16_fast_20260519_093430`
+  `micro/results/llvm_kop_programs_movbe16_fast_20260519_093430`
 - Full single-sample `make micro` passed: 29/29 correct.
   Run:
   `micro/results/x86_kvm_micro_20260519_163959_668431/metadata.json`
@@ -1599,7 +1599,7 @@ Analysis-side deltas:
 | Comparison | Geomean ratio | summed exec delta | JIT byte delta | xlated byte delta |
 |---|---:|---:|---:|---:|
 | direct MOVBE16 proof vs precise scratch mask | 0.9992 | -88 ns | -9 bytes | -24 bytes |
-| direct MOVBE16 proof vs no-kinsn LLVM baseline | 0.9072 | -1019 ns | -5419 bytes | -9152 bytes |
+| direct MOVBE16 proof vs no-kop LLVM baseline | 0.9072 | -1019 ns | -5419 bytes | -9152 bytes |
 
 The code-shape win is visible but small. In `packet_toeplitz_rss_hash`, the
 new proof removes the scratch zero-init for `r14`:
@@ -1609,7 +1609,7 @@ new proof removes the scratch zero-init for `r14`:
 ```
 
 The function still contains `push r14` because LLVM uses that register for the
-program itself, not because the kinsn scratch init requires it. This is the
+program itself, not because the kop scratch init requires it. This is the
 current clean boundary: the selector should remove artificial prologue cost, but
 not fight normal register allocation unless a later cost model can prove that is
 profitable.
@@ -1637,7 +1637,7 @@ Implementation:
 Validation:
 
 - Objects:
-  `micro/results/llvm_kinsn_programs_rotate_scratch_20260519_104343`
+  `micro/results/llvm_kop_programs_rotate_scratch_20260519_104343`
 - Full single-sample `make micro` passed: 29/29 correct.
   Run:
   `micro/results/x86_kvm_micro_20260519_174650_398599/metadata.json`
@@ -1647,12 +1647,12 @@ Analysis-side deltas:
 | Comparison | Geomean ratio | summed exec delta | JIT byte delta | xlated byte delta |
 |---|---:|---:|---:|---:|
 | operand-aware rotate proof vs direct MOVBE16 proof | 0.9929 | +37 ns | -9 bytes | -24 bytes |
-| operand-aware rotate proof vs no-kinsn LLVM baseline | 0.9007 | -982 ns | -5428 bytes | -9176 bytes |
+| operand-aware rotate proof vs no-kop LLVM baseline | 0.9007 | -982 ns | -5428 bytes | -9176 bytes |
 
 The runtime delta against the previous run is noise-level; the useful change is
 that rotate proof now has a cleaner register contract. It no longer needs to
 treat the fixed scratch pair as globally safe when one of those physical BPF
-registers is itself a kinsn operand.
+registers is itself a kop operand.
 
 ### Step 21: post-RA scaled-index folds must respect live-out registers
 
@@ -1686,19 +1686,19 @@ Implementation:
 
 Validation:
 
-- `ninja -C llvm-backend/build-bpf-kinsn LLVMBPFCodeGen llc -j4`: pass.
+- `ninja -C llvm-backend/build-bpf-kop LLVMBPFCodeGen llc -j4`: pass.
 - Objects:
-  `micro/results/llvm_kinsn_programs_liveoutfix_20260519_114208`
+  `micro/results/llvm_kop_programs_liveoutfix_20260519_114208`
 - Full single-sample `make micro` passed: 29/29 correct.
   Run:
   `micro/results/x86_kvm_micro_20260519_185045_458143/metadata.json`
 - A follow-up build with the LEA-pair live-out check produced byte-identical
   BPF objects:
-  `micro/results/llvm_kinsn_programs_lea_liveout2_20260519_115307`
+  `micro/results/llvm_kop_programs_lea_liveout2_20260519_115307`
 
-Selected kinsns in the validated object set:
+Selected koperation in the validated object set:
 
-| kinsn | count |
+| kop | count |
 |---|---:|
 | `bpf_x86_leaq` | 160 |
 | `bpf_x86_rolq` | 119 |
@@ -1713,12 +1713,12 @@ Selected kinsns in the validated object set:
 | `bpf_x86_shldq` | 1 |
 | `bpf_x86_popcntq` | 1 |
 
-Single-sample summary versus the no-kinsn LLVM baseline
+Single-sample summary versus the no-kop LLVM baseline
 `micro/results/x86_kvm_micro_20260518_210242_364278`:
 
 | Comparison | Geomean ratio | summed exec delta | JIT byte delta | xlated byte delta |
 |---|---:|---:|---:|---:|
-| live-out-safe LLVM kinsn vs baseline | 0.9070 | -992 ns | -5448 bytes | -9232 bytes |
+| live-out-safe LLVM kop vs baseline | 0.9070 | -992 ns | -5448 bytes | -9232 bytes |
 
 Key deltas:
 
@@ -1763,11 +1763,11 @@ must be controllable rather than deleted after one noisy run. The rule reduced
 three cold `rolq` selections and the full micro run remained correct:
 
 - Objects:
-  `micro/results/llvm_kinsn_programs_rotate_cost_20260519_134610`
+  `micro/results/llvm_kop_programs_rotate_cost_20260519_134610`
 - Full single-sample `make micro` passed: 29/29 correct.
   Run:
   `micro/results/x86_kvm_micro_20260519_211121_812654/metadata.json`
-- Versus no-kinsn baseline:
+- Versus no-kop baseline:
   geomean `0.9040`, summed exec delta `-1043 ns`, JIT byte delta `-5422`,
   xlated byte delta `-9200`, result mismatches `0`.
 - Versus live-out-safe:
@@ -1780,13 +1780,13 @@ boundary is:
 - legality/correctness checks stay unconditional, for example post-RA live-out
   checks before deleting a physical register def;
 - profitability and experimental selector choices get `llc` flags and are
-  exercised through `BPF_KINSN_LLC_FLAGS`.
+  exercised through `BPF_KOP_LLC_FLAGS`.
 
 The flag surface is intentionally compact. Do not add one boolean flag per
 selector. Selector policy is one three-state option:
 
 ```text
--bpf-kinsn-mode=family=disable|cost|force
+-bpf-kop-mode=family=disable|cost|force
 ```
 
 Entries are comma-separated or repeated. `all=...` applies to every family and
@@ -1804,44 +1804,44 @@ Current families:
 | `wide-load` | byte-ladder wide-load packing |
 | `movbe-be` | big-endian byte-ladder `movbe` |
 | `movbe-load` | load + byte-swap `movbe` |
-| `indexed-load` | indexed/SIB load kinsns |
+| `indexed-load` | indexed/SIB load koperation |
 | `bextr` | BEXTR candidate collection |
 | `bmi1` | BLSI/BLSR candidates |
 | `rotate` | rotate candidates and rotate amortization policy |
 | `shd` | SHLD/SHRD candidates |
-| `cmov` | LLVM `select` lowering to cmp/cmov kinsns |
+| `cmov` | LLVM `select` lowering to cmp/cmov koperation |
 | `popcnt` | `ctpop` SelectionDAG legalization to `popcntq` |
 | `preemit-lea` | post-RA MOV+ADD to LEA |
-| `scaled-index-mem` | post-RA scaled-index fold for SIB memory kinsns |
+| `scaled-index-mem` | post-RA scaled-index fold for SIB memory koperation |
 
 The only remaining numeric tuning flag is
-`-bpf-kinsn-rotate-amortization-threshold=<N>`, default `4`; it is used only
+`-bpf-kop-rotate-amortization-threshold=<N>`, default `4`; it is used only
 when `rotate=cost`.
 
 Validation:
 
-- `ninja -C llvm-backend/build-bpf-kinsn LLVMBPFCodeGen llc -j4`: pass.
+- `ninja -C llvm-backend/build-bpf-kop LLVMBPFCodeGen llc -j4`: pass.
 - `llc --help-hidden` now lists only:
-  `-bpf-enable-kinsn-select`, `-bpf-kinsn-mode=<family=mode>`, and
-  `-bpf-kinsn-rotate-amortization-threshold=<N>`.
+  `-bpf-enable-kop-select`, `-bpf-kop-mode=<family=mode>`, and
+  `-bpf-kop-rotate-amortization-threshold=<N>`.
 - Default policy objects:
-  `micro/results/llvm_kinsn_programs_mode_default_20260519_143046`
+  `micro/results/llvm_kop_programs_mode_default_20260519_143046`
 - Rotate forced objects:
-  `micro/results/llvm_kinsn_programs_mode_rotate_force_20260519_143046`
+  `micro/results/llvm_kop_programs_mode_rotate_force_20260519_143046`
 - All disabled objects:
-  `micro/results/llvm_kinsn_programs_mode_all_disable_20260519_143046`
+  `micro/results/llvm_kop_programs_mode_all_disable_20260519_143046`
 - The default object set is byte-identical to the previous
-  `llvm_kinsn_programs_flags_default_20260519_141800` set.
+  `llvm_kop_programs_flags_default_20260519_141800` set.
 - The `rotate=force` object set is byte-identical to the previous
-  `llvm_kinsn_programs_flags_rotate_nocost_20260519_141800` set.
+  `llvm_kop_programs_flags_rotate_nocost_20260519_141800` set.
 
 The rotate flag changes only the intended sparse rotate sites:
 
-| Object set | total kinsns | `bpf_x86_rolq` |
+| Object set | total koperation | `bpf_x86_rolq` |
 |---|---:|---:|
 | default policy | 442 | 116 |
-| `-bpf-kinsn-mode=rotate=force` | 445 | 119 |
-| `-bpf-kinsn-mode=all=disable` | 0 | 0 |
+| `-bpf-kop-mode=rotate=force` | 445 | 119 |
+| `-bpf-kop-mode=all=disable` | 0 | 0 |
 
 Changed programs:
 
@@ -1854,8 +1854,8 @@ This keeps the default policy measurable while preserving the ability to run
 the previous behavior without code changes:
 
 ```sh
-BPF_KINSN_LLC_FLAGS="-bpf-kinsn-mode=rotate=force" \
+BPF_KOP_LLC_FLAGS="-bpf-kop-mode=rotate=force" \
 make -C micro/programs OUTPUT_DIR=... \
-  BPFREJIT_MICRO_BPF_COMPILER=kinsn-llvm \
-  BPF_KINSN_LLC="$PWD/llvm-backend/build-bpf-kinsn/bin/llc" all
+  BPFREJIT_MICRO_BPF_COMPILER=kop-llvm \
+  BPF_KOP_LLC="$PWD/llvm-backend/build-bpf-kop/bin/llc" all
 ```

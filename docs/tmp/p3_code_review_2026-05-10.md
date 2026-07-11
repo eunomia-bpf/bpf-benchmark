@@ -24,7 +24,7 @@ the CLI still creates `BpfProgram` and runs `PassManager` at
 Only `dce` is fully BBProgram-native. `const_prop` and
 `bounds_check_merge` are real partial migrations. `map_inline` is still a
 linear `BpfProgram` pass that builds old-style PC-indexed edit plans and only
-lifts inside `apply_map_inline_edit()`. Most kinsn passes flatten BBProgram back
+lifts inside `apply_map_inline_edit()`. Most kop passes flatten BBProgram back
 to `Vec<BpfInsn>` for scanning and old analyses, then map original PCs back to
 BBProgram for `replace_range()`.
 
@@ -102,7 +102,7 @@ representation is not enforcing the design boundary strongly.
 Key issues:
 
 - Most fields are public: `blocks`, `entry`, `use_def`, `oracle`, `btf`, and
-  `kinsn_reg` (`bbprogram.rs:28-40`). Passes can bypass mutation APIs and read
+  `kop_reg` (`bbprogram.rs:28-40`). Passes can bypass mutation APIs and read
   internal maps directly. The design says BBProgram should enforce invariants.
 - `BtfMetadataMap` is really an original-PC map, not full BTF metadata. BTF
   remapping still lives in `pass.rs` and pass-local address maps.
@@ -133,13 +133,13 @@ Production caller counts outside `bbprogram_api.rs`:
 | `delete_unreachable_blocks()` | 1 |
 | `rewire_edge()` | 0 |
 | `split_block()` | 3 |
-| `replace_diamond_with_kinsn()` | 0 |
+| `replace_diamond_with_kop()` | 0 |
 | `replace_diamond_with_insns()` | 3 |
 
 Obvious cleanup candidates:
 
 - Delete or make private the zero-caller APIs: `replace_insn()`, `insert_insn()`,
-  `delete_block()`, `rewire_edge()`, and `replace_diamond_with_kinsn()`.
+  `delete_block()`, `rewire_edge()`, and `replace_diamond_with_kop()`.
 - Stop re-exporting `range_len`; it is only used by `bbprogram_api.rs`.
 - Keep `replace_diamond_with_insns()` because `cond_select` uses it.
 - Keep `split_block()`, `merge_linear_chain()`, `permute_blocks()`, and
@@ -159,7 +159,7 @@ branches, frames, and original-PC mapping.
 Design gaps:
 
 - `lift()` itself has no production caller; production uses
-  `lift_with_kinsn_registry()`. This is not clippy-dead because it is public.
+  `lift_with_kop_registry()`. This is not clippy-dead because it is public.
 - The design promised lift once at the CLI boundary. Current production invokes
   lift inside each pass, and `map_inline` invokes it inside its edit commit path.
 
@@ -187,7 +187,7 @@ should be folded into BBProgram methods. Current production still uses:
   `prefetch`, `wide_mem`, `branch_flip`, `skb_load_bytes`, `map_inline`.
 - `LivenessAnalysis`: `rotate`, `bulk_memory`, `wide_mem`, `cond_select`,
   `ccmp`.
-- `CFGAnalysis`: `prefetch` and `pass.rs` kinsn BTF helper path.
+- `CFGAnalysis`: `prefetch` and `pass.rs` kop BTF helper path.
 - `MapRefsAnalysis`: `map_inline/map_info.rs`.
 - `site_scan::iter_sites`: many migrated passes still scan `&[BpfInsn]`.
 
@@ -316,7 +316,7 @@ Remaining bloat and design mismatch:
 - `BpfProgram` remains a large carrier for bytecode, annotations, map metadata,
   map values, overlays, hints, provider, verifier states, and BTF records
   (`pass.rs:592-832`).
-- BTF remap helpers and kinsn subprogram layout helpers remain in `pass.rs`
+- BTF remap helpers and kop subprogram layout helpers remain in `pass.rs`
   (`pass.rs:191-589`), so BBProgram has not absorbed BTF remapping as planned.
 
 This file can shrink only after the trait boundary changes. Until then,
@@ -345,7 +345,7 @@ Likely contributors:
 
 - `map_inline`: 500 to 800 LOC by deleting `MapInlineEdit`, manual addr-map
   construction, old-PC branch patching, and the lift-at-commit adapter.
-- Flat kinsn passes (`rotate`, `extract`, `endian`, `bulk_memory`, `prefetch`,
+- Flat kop passes (`rotate`, `extract`, `endian`, `bulk_memory`, `prefetch`,
   `wide_mem`, `skb_load_bytes`): 700 to 1,000 LOC total by moving scans and
   safety checks to BBProgram sites and deleting duplicated PC mapping helpers.
 - `cond_select`, `ccmp`, `branch_flip`: 200 to 400 LOC total by moving scans to
@@ -404,7 +404,7 @@ Targeted cleanup should focus on the highest leverage items:
 1. `map_inline`: either add a real `run_on_bbprogram()` or explicitly declare it
    out of Phase 3 scope. If it remains in scope, remove `MapInlineEdit`,
    PC-keyed replacements, manual addr maps, and lift-at-commit.
-2. Flat kinsn scanners: migrate `rotate`, `extract`, `endian`, `bulk_memory`,
+2. Flat kop scanners: migrate `rotate`, `extract`, `endian`, `bulk_memory`,
    `prefetch`, `wide_mem`, and `skb_load_bytes` away from `lower(prog) ->
    BpfProgram::new() -> old analyses -> PC remap`.
 3. Analysis folding: add BBProgram-native branch target/liveness/subprog/map-ref

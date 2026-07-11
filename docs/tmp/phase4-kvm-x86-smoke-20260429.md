@@ -34,7 +34,7 @@ Summary from `details/result.json`:
 | final ReJIT applied programs | 25 |
 | final ReJIT not_applied programs | 494 |
 
-Kinsn module state was OK: expected modules `bpf_bulk_memory`, `bpf_endian`, `bpf_extract`, `bpf_rotate`, and `bpf_select` were resident; `failed_modules=[]`.
+KOperation module state was OK: expected modules `bpf_bulk_memory`, `bpf_endian`, `bpf_extract`, `bpf_rotate`, and `bpf_select` were resident; `failed_modules=[]`.
 
 Note on the coverage table: the persisted artifact compacts successful per-program ReJIT details and keeps detailed pass summaries for non-applied/noop program records. The table below is computed from the available compact per-program pass summaries (`noop_programs[].passes`) and should be read as observed pass-site hits in the saved artifact, while final successful ReJIT application is represented separately by `program_counts.applied=25`.
 

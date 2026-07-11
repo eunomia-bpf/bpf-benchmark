@@ -17,12 +17,12 @@ libbpf: failed to pin map: File exists
 
 3 个 map 都 LPM_TRIE，初步以为 fork kernel 7.0-rc2 破坏了 BPF_MAP_CREATE 路径。
 
-**反证**：`git log v7.0-rc2..HEAD -- kernel/bpf/lpm_trie.c kernel/bpf/syscall.c` 显示 fork 没动 lpm_trie.c 也没动 BPF_MAP_CREATE 主路径。fork commits 全是 REJIT/kinsn related：
+**反证**：`git log v7.0-rc2..HEAD -- kernel/bpf/lpm_trie.c kernel/bpf/syscall.c` 显示 fork 没动 lpm_trie.c 也没动 BPF_MAP_CREATE 主路径。fork commits 全是 REJIT/kop related：
 - bpf: minimal prog rejit syscall
 - bpf: expose original prog insns
-- bpf: kinsn_ops with verifier modeling
+- bpf: kop_ops with verifier modeling
 - bpf: convert poke desc update BUG_ON to error return
-- ... 全部 REJIT/kinsn，不动 map create
+- ... 全部 REJIT/kop，不动 map create
 
 bcc/bpftrace/tracee/tetragon 用 hash/array map 全部正常 attach BPF program → BPF_MAP_CREATE 整体路径正常。
 

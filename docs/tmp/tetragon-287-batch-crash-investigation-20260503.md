@@ -1,7 +1,7 @@
 # Tetragon 287-Program Batch Crash Investigation
 
 Date: 2026-05-03  
-Evidence: `/tmp/kvm-tracee-tetragon-kinsn-v7-1777792974.log`, daemon source `daemon/src/commands.rs`, `runner/libs/rejit.py`, `runner/libs/kvm_executor.py`
+Evidence: `/tmp/kvm-tracee-tetragon-kop-v7-1777792974.log`, daemon source `daemon/src/commands.rs`, `runner/libs/rejit.py`, `runner/libs/kvm_executor.py`
 
 ---
 

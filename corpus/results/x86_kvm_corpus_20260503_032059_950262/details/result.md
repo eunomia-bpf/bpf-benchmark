@@ -4,7 +4,7 @@
 {
   "daemon": "/home/yunwei37/workspace/bpf-benchmark/daemon/target/release/bpfrejit-daemon",
   "generated_at": "2026-05-03T03:24:26.983984+00:00",
-  "kinsn_modules": {
+  "kop_modules": {
     "captured_at": "2026-05-03T03:20:59.984723+00:00",
     "daemon_binary": "daemon/target/release/bpfrejit-daemon",
     "expected_modules": [
@@ -35,8 +35,8 @@
         "bpf_rotate",
         "bpf_select"
       ],
-      "loader": "runner.libs.kinsn.load_kinsn_modules",
-      "module_dir": "/artifacts/kinsn",
+      "loader": "runner.libs.kop.load_kop_modules",
+      "module_dir": "/artifacts/kop",
       "newly_loaded_modules": [],
       "snapshot_after": {
         "captured_at": "2026-05-03T03:20:59.984655+00:00",

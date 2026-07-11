@@ -37,13 +37,13 @@ rg -n "if \\(emit && !image\\)" module/arm64 -S
 | `bpfopt/crates/bpfopt/src/passes/rotate.rs:174` | Medium | Move-register payload builders are duplicated across passes. | Move shared payload helper into a pass-common module. |
 | `bpfopt/crates/bpfopt/src/passes/map_inline.rs:369` | Medium | `map_inline` has duplicated alias/stack scan logic across long helper functions. | Extract a single lookup-alias tracker or reuse existing CFG facts. |
 | `module/arm64/Makefile:16` | Medium | `bpf_arm64_ldp` is built but no bpfopt pass consumes its kfuncs. | Remove from default build or implement a real pass using it. |
-| `module/x86/Makefile:15` | Medium | Several x86 micro-only kinsn modules are default-built though no bpfopt pass uses them. | Split micro-only support from bpfopt/evaluation module set. |
-| `module/arm64/bpf_arm64_mov.c:59` | Medium | Arm64 kinsn modules repeat the same `emit && !image` boilerplate at 15 sites. | Add one common arm64 emit helper. |
+| `module/x86/Makefile:15` | Medium | Several x86 micro-only kop modules are default-built though no bpfopt pass uses them. | Split micro-only support from bpfopt/evaluation module set. |
+| `module/arm64/bpf_arm64_mov.c:59` | Medium | Arm64 kop modules repeat the same `emit && !image` boilerplate at 15 sites. | Add one common arm64 emit helper. |
 | `runner/libs/rejit_plan.py:63` | Medium | `programs.default` fallback hides missing program-specific pass policy. | Require explicit program policy or fail with a config error. |
 | `micro/programs/converter/native_asm_to_handcraft.py:4` | Medium | Converter advertises warning-and-continue behavior and is not production-ready. | Archive outside production path or make unsupported translations fatal. |
 | `ebpf-vm/test-others/native_lab_attach.cpp:22` | Medium | POC intentionally copies native_lab runner helper bodies. | Factor shared helper code or keep POC as out-of-tree archive. |
 
-## kinsn
+## kop
 
 ### Finding K1: arm64 LDP/STP module is built but has no pass consumer
 
@@ -74,7 +74,7 @@ module/arm64/bpf_arm64_ldp.c:191:... bpf_arm64_ldp_x ...
 module/arm64/bpf_arm64_ldp.c:205:... bpf_arm64_stp_x ...
 ```
 
-No `bpfopt/crates/bpfopt/src/passes/*::KINSN_TARGETS` entry references those symbols.
+No `bpfopt/crates/bpfopt/src/passes/*::KOP_TARGETS` entry references those symbols.
 
 Recommendation:
 
@@ -100,12 +100,12 @@ obj-m += bpf_x86_stack.o
 
 Why this is dead/redundant:
 
-These modules are real for micro/native handcraft paths, but they are not consumed by the bpfopt pass policy used by corpus evaluation. Keeping them in the default module set mixes "micro fixture support" with "production kinsn replacement pass support" and makes the default image larger than the active optimization surface.
+These modules are real for micro/native handcraft paths, but they are not consumed by the bpfopt pass policy used by corpus evaluation. Keeping them in the default module set mixes "micro fixture support" with "production kop replacement pass support" and makes the default image larger than the active optimization surface.
 
 Caller / grep evidence:
 
 ```text
-rg -n "bpf_x86_(movbe|popcnt|bmi1|imul|not|stack)|KINSN_TARGETS" module/x86 bpfopt/crates/bpfopt/src/passes micro ...
+rg -n "bpf_x86_(movbe|popcnt|bmi1|imul|not|stack)|KOP_TARGETS" module/x86 bpfopt/crates/bpfopt/src/passes micro ...
 ```
 
 The kfuncs appear in module files and micro handcraft/converter material. The pass registry targets do not include `movbe`, `popcnt`, `bmi1`, `imul`, `not`, or `stack`; `shd` has module/micro coverage but not a dedicated bpfopt pass policy entry beyond unrelated shift/extract lowering.
@@ -132,7 +132,7 @@ idx++;
 
 Why this is over-complex:
 
-The same three-state emit/count pattern is hand-rolled in nearly every arm64 kinsn encoder. That produces repeated error handling and repeated endian stores, which are easy to drift. The abstraction would have multiple callers and would reduce real duplication.
+The same three-state emit/count pattern is hand-rolled in nearly every arm64 kop encoder. That produces repeated error handling and repeated endian stores, which are easy to drift. The abstraction would have multiple callers and would reduce real duplication.
 
 Caller / grep evidence:
 
@@ -157,13 +157,13 @@ module/arm64/bpf_arm64_ldp.c:170
 
 Recommendation:
 
-Add a small common helper such as `kinsn_arm64_emit_one(image, &idx, emit, insn)` in an arm64 kinsn header. It should own the null-image check, `cpu_to_le32`, and index increment.
+Add a small common helper such as `kop_arm64_emit_one(image, &idx, emit, insn)` in an arm64 kop header. It should own the null-image check, `cpu_to_le32`, and index increment.
 
 Estimated removable LOC: 80-120 LOC after replacing duplicated blocks.
 
 ### Finding K4: x86 ALU local REX helper overlaps common x86 emit helpers
 
-Path: `module/x86/bpf_x86_alu.c:1001`, `module/include/kinsn_x86_emit.h:411`.
+Path: `module/x86/bpf_x86_alu.c:1001`, `module/include/kop_x86_emit.h:411`.
 
 Current code:
 
@@ -174,7 +174,7 @@ static int emit_rex8_mem(u8 **pprog, u8 reg, u8 index, u8 base)
 Common helper already exists:
 
 ```c
-static inline u8 *kinsn_emit_rex8_mem(u8 *prog, u8 dst_reg, u8 src_reg)
+static inline u8 *kop_emit_rex8_mem(u8 *prog, u8 dst_reg, u8 src_reg)
 ```
 
 Why this is over-complex:
@@ -184,14 +184,14 @@ The local helper is not a pure duplicate because it handles an index/base form, 
 Caller / grep evidence:
 
 ```text
-rg -n "emit_rex8_mem|kinsn_emit_rex8_mem" module/x86 module/include
+rg -n "emit_rex8_mem|kop_emit_rex8_mem" module/x86 module/include
 module/x86/bpf_x86_alu.c:1001:static int emit_rex8_mem(...)
-module/include/kinsn_x86_emit.h:411:static inline u8 *kinsn_emit_rex8_mem(...)
+module/include/kop_x86_emit.h:411:static inline u8 *kop_emit_rex8_mem(...)
 ```
 
 Recommendation:
 
-Either move the indexed/base variant into `kinsn_x86_emit.h` with a precise name, or rename the local helper to describe the addressing mode. This is a cleanup finding, not a deletion blocker.
+Either move the indexed/base variant into `kop_x86_emit.h` with a precise name, or rename the local helper to describe the addressing mode. This is a cleanup finding, not a deletion blocker.
 
 Estimated removable LOC: small; value is consistency rather than LOC reduction.
 
@@ -680,7 +680,7 @@ fn x86_mov_reg_payload(dst_reg: u8, src_reg: u8) -> u64 { ... }
 
 Why this is redundant:
 
-Pass-common kinsn descriptor tables already exist in `passes/mod.rs`, but the payload construction for the same move operation is copied in individual passes. That creates needless per-pass drift for register packing.
+Pass-common kop descriptor tables already exist in `passes/mod.rs`, but the payload construction for the same move operation is copied in individual passes. That creates needless per-pass drift for register packing.
 
 Caller / grep evidence:
 
@@ -694,7 +694,7 @@ cond_select.rs:279:fn x86_mov_reg_payload
 
 Recommendation:
 
-Move payload construction to a small pass-common helper next to existing kinsn target definitions. Keep pass-specific code focused on pattern matching and candidate emission.
+Move payload construction to a small pass-common helper next to existing kop target definitions. Keep pass-specific code focused on pattern matching and candidate emission.
 
 Estimated removable LOC: 15-25 LOC.
 

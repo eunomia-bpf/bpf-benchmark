@@ -1,0 +1,4 @@
+# Single-pass kop ablation with bulk-memory selectors disabled.
+log_level: 1
+command: |
+  bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kop-mode all=force,wide-load=disable,indexed-load=disable,movbe-load=disable --bytecode-kop-mode bulk_memory=disable,prefetch=disable

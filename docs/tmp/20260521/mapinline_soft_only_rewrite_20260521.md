@@ -1,7 +1,7 @@
 # LLVM bpfopt map_inline:删 hard+hint,改全自动 soft fold(2026-05-21)
 
 ## 做了什么(按用户指令)
-把 LLVM bpfopt(kinsn 路径)的 map_inline 从「手写 hint + hard fold」改成
+把 LLVM bpfopt(kop 路径)的 map_inline 从「手写 hint + hard fold」改成
 「无 hint、全自动 soft fold,提供 snapshot + 满足条件就尽量折」。hint 后续提升到全局层。
 
 ### 改动

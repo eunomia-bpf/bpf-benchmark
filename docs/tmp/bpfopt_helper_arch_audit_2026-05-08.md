@@ -20,7 +20,7 @@ The current `bpfopt` layout is mostly workable, but the shared helper boundary i
 | `mov32_reg(dst, src)` | Local `cond_select.rs::mov32_reg`; `BpfInsn` only has `mov64_reg`, `mov64_imm`, `mov32_imm` | `src/test_helpers.rs`, `passes/cond_select.rs`, `src/insn.rs` | `BpfInsn::mov32_reg(dst, src)` | Yes. Same instruction encoding. | Low. |
 | `add64_imm(dst, imm)` | `BpfInsn::alu64_imm(BPF_ADD, dst, imm)` | `src/test_helpers.rs`, `src/insn.rs` | Either keep test spelling as a thin wrapper around `BpfInsn::alu64_imm`, or add a small named constructor only if production call sites benefit | Mostly yes. This is an alias for a general ALU constructor, not a separate abstraction. | Low. API alignment matters more than extracting every alias. |
 | `st_mem(size, dst, off, imm)` | `BpfInsn::stx_mem` and scattered raw stack/map stores | `src/test_helpers.rs`, `src/insn.rs`, pass code | `BpfInsn::st_mem(size, dst, off, imm)` beside `stx_mem` | Yes. Store-immediate and store-register are sibling instruction constructors. | Low. |
-| `sidecar_payload(insn)` | `BpfInsn::kinsn_sidecar`, `BpfInsn::is_kinsn_sidecar`, private sidecar payload decode in `passes/utils.rs` | `src/test_helpers.rs`, `src/insn.rs`, `passes/utils.rs` | `insn::kinsn` or `BpfInsn::kinsn_sidecar_payload()` | Yes. Kinsn sidecar encoding/decoding is one binary ABI concept. | Low-medium. Keep encode/decode in one place to avoid hidden sidecar layout drift. |
+| `sidecar_payload(insn)` | `BpfInsn::kop_sidecar`, `BpfInsn::is_kop_sidecar`, private sidecar payload decode in `passes/utils.rs` | `src/test_helpers.rs`, `src/insn.rs`, `passes/utils.rs` | `insn::kop` or `BpfInsn::kop_sidecar_payload()` | Yes. KOperation sidecar encoding/decoding is one binary ABI concept. | Low-medium. Keep encode/decode in one place to avoid hidden sidecar layout drift. |
 | `scalar_reg`, `fp_reg`, `verifier_delta_state*` | Production verifier-state readers such as scalar value and stack-byte extraction in `map_inline`, plus CLI verifier-state parsing in `main.rs` | `src/test_helpers.rs`, `passes/map_inline.rs`, `src/main.rs` | `analysis::verifier_state` for read-only predicates/oracles; test fixture constructors can remain test-only but should target the same types | Partly. Fixtures are test-only, but the meaning of scalar/FP/stack state is production logic. | Medium. This must stay fail-fast and must not become heuristic fallback logic. |
 | `stack_snapshot_from_key` | `constant_stack_bytes_for_range`, `constant_stack_byte`, `verifier_known_scalar_value`, and stack-slot layout assumptions around map lookup keys | `src/test_helpers.rs`, `passes/map_inline.rs` | `analysis::verifier_state` for stack snapshot querying; test-only builder next to it under `cfg(test)` | Yes for the verifier stack layout; no for the fixture convenience itself. | High. Stack-slot offsets and fixed-width assumptions directly affect correctness of `map_inline`. |
 | `install_map`, `install_array_map` | `mock_maps` and `SnapshotMapProvider`-style map data used by production inputs | `src/test_helpers.rs`, `src/mock_maps.rs`, `src/pass.rs`, `passes/map_inline.rs` | Keep as test-only wrappers over `mock_maps`; do not move into production | No. The test helper installs fake state; production should consume explicit map snapshots/providers. | Low if kept test-only; high if promoted incorrectly. |
@@ -32,9 +32,9 @@ The important pattern is that instruction constructors and binary encoders are p
 
 ### Current layout issues
 
-`src/insn.rs` is the right place for BPF instruction ABI helpers, but it is incomplete. It has the core wrapper, predicates, generic constructors, and some kinsn support, yet tests and passes still create common instructions by spelling raw opcodes directly. This makes tests read differently from production code even when they are expressing the same instruction.
+`src/insn.rs` is the right place for BPF instruction ABI helpers, but it is incomplete. It has the core wrapper, predicates, generic constructors, and some kop support, yet tests and passes still create common instructions by spelling raw opcodes directly. This makes tests read differently from production code even when they are expressing the same instruction.
 
-`passes/utils.rs` has unrelated responsibilities in one module: branch fixups, BTF metadata remapping, kinsn proof/sidecar remapping, replacement address maps, unreachable/NOP/dead-def cleanup, `LD_IMM64` emission, and kinsn call offset resolution. The name `utils` is hiding several domain modules with different invariants and different expected callers.
+`passes/utils.rs` has unrelated responsibilities in one module: branch fixups, BTF metadata remapping, kop proof/sidecar remapping, replacement address maps, unreachable/NOP/dead-def cleanup, `LD_IMM64` emission, and kop call offset resolution. The name `utils` is hiding several domain modules with different invariants and different expected callers.
 
 `map_inline.rs` is doing too many kinds of work in one file: map-info analysis reexports, side-input parsing, hint handling, verifier-guided key extraction, R0 use classification, map reference resolution, direct map value rewrites, diagnostics, and tests. That is not a recommendation to split the pass algorithm now, but the generic read-only pieces should not stay pass-local forever.
 
@@ -55,7 +55,7 @@ src/
     branch.rs                     # relative offset and target helpers
     helper.rs                     # helper IDs/classification, backed by kernel_sys constants
     ldimm64.rs                    # encode/decode and typed pseudo-source helpers
-    kinsn.rs                      # kinsn sidecar encode/decode
+    kop.rs                      # kop sidecar encode/decode
 
   analysis/
     mod.rs
@@ -73,7 +73,7 @@ src/
     mod.rs
     rewrite.rs                    # address maps, branch fixups, BTF annotation remap
     cleanup.rs                    # unreachable block/NOP/dead-def cleanup
-    kinsn.rs                      # kinsn replacement emission and BTF/proof remap
+    kop.rs                      # kop replacement emission and BTF/proof remap
     rotate.rs
     cond_select.rs
     ...
@@ -91,10 +91,10 @@ src/
     insn.rs                       # test aliases over production instruction constructors
     verifier.rs                   # verifier-state fixtures
     maps.rs                       # mock map installation fixtures
-    kinsn.rs                      # kinsn fixture helpers
+    kop.rs                      # kop fixture helpers
 ```
 
-`utils.rs` should not be replaced by another broad `common.rs`. If an intermediate step is needed, split it first into `passes/rewrite.rs`, `passes/kinsn.rs`, and `passes/cleanup.rs`, then move instruction-width and `LD_IMM64` helpers into `insn`.
+`utils.rs` should not be replaced by another broad `common.rs`. If an intermediate step is needed, split it first into `passes/rewrite.rs`, `passes/kop.rs`, and `passes/cleanup.rs`, then move instruction-width and `LD_IMM64` helpers into `insn`.
 
 `analysis::verifier_state` should provide exact queries only: known scalar value, frame-pointer stack range, known stack bytes, and maybe verifier-state lookup by instruction index. It must not add fallback behavior for missing verifier data.
 
@@ -127,7 +127,7 @@ The `mock_maps` public items are acceptable because the whole module is `cfg(tes
 | Register read/write/def effect | Liveness has private `insn_use_def`; several passes have local `reads_reg`, `writes_reg`, or `reg_write_kind`. | `analysis::reg_effect`. |
 | Verifier-state scalar/stack oracle | `test_helpers` constructs states, `main.rs` parses them, `map_inline` interprets them. | `analysis::verifier_state`. |
 | Map reference resolution | `pass.rs`, `map_info`, and `map_inline` each know different pseudo-map cases. | `analysis::map_ref`. |
-| Kinsn sidecar payload decoder | Tests decode sidecar payload separately from production sidecar emission/remap. | `insn::kinsn` or a kinsn ABI subsection of `insn`. |
+| KOperation sidecar payload decoder | Tests decode sidecar payload separately from production sidecar emission/remap. | `insn::kop` or a kop ABI subsection of `insn`. |
 
 ## 5. Improvement path
 
@@ -146,7 +146,7 @@ P0 is intentionally mechanical and should not change pass behavior.
 
 | item | change | estimated LOC | risk | expected line savings |
 |---|---|---:|---|---:|
-| Split `passes/utils.rs` | Move branch/BTF remap into `passes/rewrite.rs`, kinsn replacement/BTF/proof code into `passes/kinsn.rs`, cleanup routines into `passes/cleanup.rs`, and instruction-width/`LD_IMM64` helpers into `insn`. | 150 to 250 moved/edited lines | Medium | 0 to 80 direct lines; much better ownership |
+| Split `passes/utils.rs` | Move branch/BTF remap into `passes/rewrite.rs`, kop replacement/BTF/proof code into `passes/kop.rs`, cleanup routines into `passes/cleanup.rs`, and instruction-width/`LD_IMM64` helpers into `insn`. | 150 to 250 moved/edited lines | Medium | 0 to 80 direct lines; much better ownership |
 | Add `analysis::verifier_state` | Centralize exact scalar and stack-byte queries used by `map_inline`; keep fixture builders under `cfg(test)`. | +200 to +300 | Medium-high | 150 to 250 lines once pass-local/test parsing helpers collapse |
 | Add `analysis::map_ref` | Centralize pseudo-map reference resolution and fd/index/value binding interpretation. | +150 to +220 | Medium | 80 to 160 lines and fewer partial map-reference implementations |
 | Add `analysis::reg_effect` | Extract instruction use/def/write effects from liveness and pass-local helpers. | +100 to +180 | Medium | 100 to 200 lines over several passes |
@@ -157,7 +157,7 @@ P1 should be done one module at a time with focused tests for encoded ABI, branc
 
 | item | change | estimated LOC | risk | expected line savings |
 |---|---|---:|---|---:|
-| Split `test_helpers.rs` | Move fixtures into `test_helpers::{insn, verifier, maps, kinsn}`. Production instruction aliases should already be gone or thin. | 100 to 250 moved lines | Low | 0 to 50 direct lines; better navigation |
+| Split `test_helpers.rs` | Move fixtures into `test_helpers::{insn, verifier, maps, kop}`. Production instruction aliases should already be gone or thin. | 100 to 250 moved lines | Low | 0 to 50 direct lines; better navigation |
 | Split `map_inline.rs` mechanically | After `verifier_state`, `map_ref`, and instruction helpers exist, split into `map_info`, `hints`, `key_extraction`, `alias`, `rewrite`, and `side_inputs`. | 500+ moved lines | High for merge conflicts, medium for behavior | Little direct savings; major reviewability gain |
 | Shrink `pass.rs` | Move map-provider/snapshot/input metadata into `program_inputs.rs` or `map_provider.rs` only after `map_ref` stabilizes. | 100 to 250 moved lines | Medium | Little direct savings; clearer core framework boundary |
 

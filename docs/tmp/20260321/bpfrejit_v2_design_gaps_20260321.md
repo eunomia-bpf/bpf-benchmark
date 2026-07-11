@@ -7,16 +7,16 @@
 先把“设计设想”和“代码现实”分开，否则后面会把已有基础设施和需要新造的基础设施混在一起。
 
 - 当前树里没有 `BPF_PROG_REJIT` 或 `BPF_PROG_JIT_RECOMPILE` syscall，也没有 `jit_directives.c` / staged JIT swap 框架。`enum bpf_cmd` 在 `vendor/linux-framework/include/uapi/linux/bpf.h:961-995` 结束于 `BPF_PROG_ASSOC_STRUCT_OPS`；`__sys_bpf()` 的 switch 在 `vendor/linux-framework/kernel/bpf/syscall.c:6300-6331` 也没有任何 recompile/rejit 分支。
-- 当前树里已经有一半 kinsn 基础设施，不是从零开始：
+- 当前树里已经有一半 kop 基础设施，不是从零开始：
   - `KF_INLINE_EMIT` 已定义在 `vendor/linux-framework/include/linux/btf.h:82`。
   - `struct bpf_kfunc_inline_ops` 已定义在 `vendor/linux-framework/include/linux/bpf.h:968-973`。
   - verifier 在 `add_kfunc_call()` 里会把 `KF_INLINE_EMIT` kfunc 解析成 `desc->inline_ops`，见 `vendor/linux-framework/kernel/bpf/verifier.c:3569-3618`。
-  - x86_64 JIT 已经在 CALL case 里尝试 `emit_kinsn_desc_call()`，失败时优雅回退到普通 CALL，见 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:579-595` 和 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:2463-2471`。
+  - x86_64 JIT 已经在 CALL case 里尝试 `emit_kop_desc_call()`，失败时优雅回退到普通 CALL，见 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:579-595` 和 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:2463-2471`。
 
 结论：
 
 - `REJIT` 这条线，当前树几乎没有现成 commit/rollback 基础设施，必须新设计。
-- `kinsn` 这条线，当前树已经有注册、查找、x86_64 fallback 机制；需要补的是 verifier-to-JIT metadata、module lifetime、和更清晰的 emitter contract。
+- `kop` 这条线，当前树已经有注册、查找、x86_64 fallback 机制；需要补的是 verifier-to-JIT metadata、module lifetime、和更清晰的 emitter contract。
 
 ## 1. `BPF_PROG_GET_ORIGINAL` 设计
 
@@ -316,19 +316,19 @@ struct bpf_prog_aux {
 
 后者不应该要求 daemon 再把 original bytecode 传回来，因为内核已经保存了 `orig` snapshot。
 
-## 3. kinsn：当前基础设施已经在哪一步，缺什么
+## 3. kop：当前基础设施已经在哪一步，缺什么
 
 ### 3.1 当前已经到哪一步
 
-kinsn 不是纯设想，当前树已经具备：
+kop 不是纯设想，当前树已经具备：
 
 - flag：`KF_INLINE_EMIT`，见 `vendor/linux-framework/include/linux/btf.h:82`；
 - 注册接口：`bpf_register_kfunc_inline_ops()` / `bpf_unregister_kfunc_inline_ops()`，见 `vendor/linux-framework/include/linux/bpf.h:3043-3051` 和 `vendor/linux-framework/kernel/bpf/verifier.c:3240-3293`；
 - verifier side binding：`add_kfunc_call()` 会把 `KF_INLINE_EMIT` kfunc 解析成 `desc->inline_ops`，见 `vendor/linux-framework/kernel/bpf/verifier.c:3569-3618`；
-- x86_64 JIT side use：CALL case 里对 `BPF_PSEUDO_KFUNC_CALL` 先尝试 `emit_kinsn_desc_call()`，失败时回退成普通 CALL，见 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:2463-2471`；
-- fallback 语义已经很合理：`emit_kinsn_desc_call()` 找不到 emitter 时返回 `-ENOENT`，CALL case 继续走普通 CALL，见 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:579-595`。
+- x86_64 JIT side use：CALL case 里对 `BPF_PSEUDO_KFUNC_CALL` 先尝试 `emit_kop_desc_call()`，失败时回退成普通 CALL，见 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:2463-2471`；
+- fallback 语义已经很合理：`emit_kop_desc_call()` 找不到 emitter 时返回 `-ENOENT`，CALL case 继续走普通 CALL，见 `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:579-595`。
 
-因此，论文里不应该把 kinsn 写成“完全新发明”，而应该写成“把现有 per-kfunc inline hook 补成完整 ISA-extension 机制”。
+因此，论文里不应该把 kop 写成“完全新发明”，而应该写成“把现有 per-kfunc inline hook 补成完整 ISA-extension 机制”。
 
 ### 3.2 当前 emitter interface 的不足
 
@@ -445,12 +445,12 @@ Inline emitter 应该照这个模式做一套 owner pinning：
 
 这意味着 v1 应该明确限制：
 
-- kinsn 不能再发出 tail call；
-- kinsn 不能引入新的 bpf-to-bpf edge；
-- kinsn 不能依赖 JIT 的 call-depth accounting；
-- kinsn 不能要求 verifier/JIT 重新计算 subprog call graph。
+- kop 不能再发出 tail call；
+- kop 不能引入新的 bpf-to-bpf edge；
+- kop 不能依赖 JIT 的 call-depth accounting；
+- kop 不能要求 verifier/JIT 重新计算 subprog call graph。
 
-换句话说，v1 的 kinsn 应该是“leaf machine-code expansion”，不是“任意自定义 mini-subprogram”。
+换句话说，v1 的 kop 应该是“leaf machine-code expansion”，不是“任意自定义 mini-subprogram”。
 
 ## 4. Correctness Story：不能只说“userspace 负责 correctness”
 
@@ -524,7 +524,7 @@ struct bpf_prog_info {
 合理做法是：
 
 - daemon 为每一类 transformation 生成 transformation-specific certificate；
-- 例如 peephole algebraic rewrite、kinsn substitution、constant folding，各自有不同证书格式；
+- 例如 peephole algebraic rewrite、kop substitution、constant folding，各自有不同证书格式；
 - 论文里把它定义为“optional correctness discipline”，不是 kernel-enforced safety mechanism。
 
 这类证书最适合做成：
@@ -569,7 +569,7 @@ struct bpf_prog_info {
 - verifier 仍然卡住 memory safety / type safety；
 - JIT 后端仍然是固定 arch JIT。
 
-但 kinsn emitter module 更接近 kernel module 风险，因为：
+但 kop emitter module 更接近 kernel module 风险，因为：
 
 - emitter 在 JIT 期间直接生成 native code；
 - 如果 emitter bug 了，可能 miscompile；
@@ -650,7 +650,7 @@ perf 路径更好，因为内核已经在 load/unload 时发事件：
 - prog type / attach type allowlist；
 - prog name / BTF id match 规则；
 - blacklist map ids / kfunc ids；
-- 是否允许 kinsn；
+- 是否允许 kop；
 - 是否要求 test_run 通过；
 - rollback 阈值。
 
@@ -800,7 +800,7 @@ x86 JIT compile 时会先尝试 `bpf_jit_blind_constants()`，见 `vendor/linux-
 - no `prog_array_member_cnt`；
 - no `BPF_MAP_TYPE_INSN_ARRAY`；
 - no live `struct_ops`；
-- kinsn 仅支持 leaf emitter，不支持外部 call / tail call / may-fault。
+- kop 仅支持 leaf emitter，不支持外部 call / tail call / may-fault。
 
 这个 scope 不漂亮，但它把真正的 blocker 收敛到一小撮。
 
@@ -826,7 +826,7 @@ x86 JIT compile 时会先尝试 `bpf_jit_blind_constants()`，见 `vendor/linux-
 1. patch-based ABI；
 2. subset/new extern universe；
 3. richer certificates / machine-checked proofs；
-4. 多架构 kinsn emitter；
+4. 多架构 kop emitter；
 5. finer-grained rollout/shadow execution；
 6. 对 offload/struct_ops/insn_array/full tailcall membership 的完整支持。
 
@@ -835,7 +835,7 @@ x86 JIT compile 时会先尝试 `bpf_jit_blind_constants()`，见 `vendor/linux-
 1. 如果不能解决“同一 `struct bpf_prog` 身份下的安全 image swap”，方案不成立。
 2. 如果不能解决 tailcall callee image 更新后的 reverse repoke，且又不把 `prog_array_member_cnt != 0` 排除掉，方案不成立。
 3. 如果 reverify 不能保留原始 verifier privilege/attach/external-universe 语义，而只是“让特权 daemon 重新 load 一遍”，方案不成立。
-4. 如果 kinsn emitter 没有 owner pinning 和 verifier-to-emitter metadata，只能做几个 ad-hoc special case，不能称为完整 ISA-extension story。
+4. 如果 kop emitter 没有 owner pinning 和 verifier-to-emitter metadata，只能做几个 ad-hoc special case，不能称为完整 ISA-extension story。
 
 ## 10. Bottom Line
 
@@ -843,6 +843,6 @@ BpfReJIT v2 的大方向是成立的，但 current story 里最缺的不是“�
 
 - `GET_ORIGINAL` 必须是一个精确定义的 post-reloc/pre-rewrite snapshot，而不是模糊的“保存原始字节码”；
 - `REJIT` 的核心难点不是 verifier，而是保留 prog identity 的 image/meta swap，以及 tailcall/trampoline/ksym/perf 周边同步；
-- kinsn 在这棵树里已经有一半实现，真正缺的是 metadata plumbing、module lifetime 和 emitter contract。
+- kop 在这棵树里已经有一半实现，真正缺的是 metadata plumbing、module lifetime 和 emitter contract。
 
 如果论文把这三个点讲实，方案会从“直觉上很优雅”变成“工程上可实现且边界清楚”。

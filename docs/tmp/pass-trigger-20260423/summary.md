@@ -93,7 +93,7 @@ Needs:
 Skips / properties:
 - Rejects interior branch targets and live scratch regs (`daemon/src/passes/wide_mem.rs:411-458`).
 - On packet-sensitive program types (`TC`, `XDP`, `LWT_*`, `SK_SKB`), heuristically rejects bases likely derived from `ctx->data` / `ctx->data_end` (`daemon/src/passes/wide_mem.rs:323-378`, `daemon/src/passes/wide_mem.rs:470-501`).
-- No kinsn dependency; pure BPF rewrite.
+- No kop dependency; pure BPF rewrite.
 
 ### `bulk_memory`
 

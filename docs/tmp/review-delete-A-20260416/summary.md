@@ -83,4 +83,4 @@ No pending off-scope patch files. Import cleanups that would otherwise have been
 ## Verification
 
 - `python -m compileall runner/libs runner/libs/app_runners`: passed.
-- `python -c "from runner.libs import run_target_suite, case_common, reporting, kinsn, rejit"`: passed.
+- `python -c "from runner.libs import run_target_suite, case_common, reporting, kop, rejit"`: passed.

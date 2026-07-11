@@ -6,7 +6,7 @@
 
 ## 0. 结论摘要
 
-`BulkMemoryPass` 的目标是把 BPF 字节码里已经被 LLVM 标量化的大块 copy / zero run 收拢成 bulk-memory kinsn 调用：
+`BulkMemoryPass` 的目标是把 BPF 字节码里已经被 LLVM 标量化的大块 copy / zero run 收拢成 bulk-memory kop 调用：
 
 - `bpf_memcpy_bulk(dst_base, dst_off, src_base, src_off, len)`
 - `bpf_memset_bulk(dst_base, dst_off, val, len)`
@@ -14,7 +14,7 @@
 daemon 侧采用和 `rotate` / `extract` / `endian_fusion` 一致的 packed transport：
 
 - `sidecar pseudo-insn`
-- `BPF_PSEUDO_KINSN_CALL`
+- `BPF_PSEUDO_KOP_CALL`
 
 本设计的关键约束如下：
 
@@ -22,7 +22,7 @@ daemon 侧采用和 `rotate` / `extract` / `endian_fusion` 一致的 packed tran
 - `memcpy` 只处理同宽度、连续偏移、`LDX_MEM + STX_MEM` 紧邻 pair。
 - `memset` v1 以 zeroing 为主；非零只保留 repeated-byte 扩展位，默认不启用。
 - 最小替换门槛是 `32B`；小于 `32B` 的 run 保持原始标量指令。
-- 单个 bulk kinsn chunk 上限是 `128B`；更长 run 由 daemon 分裂成多个 chunk。
+- 单个 bulk kop chunk 上限是 `128B`；更长 run 由 daemon 分裂成多个 chunk。
 - pass 顺序放在 `wide_mem` 之后、`rotate` 之前；也必须在 `map_inline + const_prop + dce` 之后。
 
 和 2026-03-24 的旧 bulk-memory 设计相比，本文有两个明确收敛：
@@ -65,11 +65,11 @@ daemon 侧最终需要扩以下点：
   - `pub use bulk_memory::BulkMemoryPass;`
   - 在 `PASS_REGISTRY` 中插入 `bulk_memory`
 - `daemon/src/pass.rs`
-  - `KinsnRegistry` 新增 `memcpy_bulk_btf_id` / `memset_bulk_btf_id`
+  - `KopRegistry` 新增 `memcpy_bulk_btf_id` / `memset_bulk_btf_id`
   - `btf_id_for_target_name()` 增加两个 target
   - 建议新增 `btf_fd_for_target_name()`；因为一个 pass 对应两个 target，不能只靠 `btf_fd_for_pass(self.name())`
 - `daemon/src/kfunc_discovery.rs`
-  - `KNOWN_KINSNS` 新增 `bpf_memcpy_bulk` / `bpf_memset_bulk`
+  - `KNOWN_KOPS` 新增 `bpf_memcpy_bulk` / `bpf_memset_bulk`
 
 建议的 canonical pass name：
 
@@ -83,7 +83,7 @@ daemon 侧最终需要扩以下点：
 
 实现方式应和 `rotate.rs` / `extract.rs` / `endian.rs` 保持一致：
 
-- packed 发射复用 `emit_packed_kinsn_call_with_off()`
+- packed 发射复用 `emit_packed_kop_call_with_off()`
 - BTF fd slot 复用 `ensure_btf_fd_slot()`
 - branch 修复复用 `fixup_all_branches()`
 - `PassResult` / `SkipReason` 结构直接沿用
@@ -166,7 +166,7 @@ r3 = *(u64 *)(r6 + 0)
 ... 后面继续使用 r3 ...
 ```
 
-原标量代码会把最后一次 load 的值留在 `r3`；bulk kinsn 不会。此类 site 必须 skip。
+原标量代码会把最后一次 load 的值留在 `r3`；bulk kop 不会。此类 site 必须 skip。
 
 ### 3.2.3 overlap / alias 规则
 
@@ -290,7 +290,7 @@ v1 的行为是：
 切分规则：
 
 - 尽量贪心取 `128B`
-- 最后一个 chunk 只有在 `>= 32B` 时才单独发 kinsn
+- 最后一个 chunk 只有在 `>= 32B` 时才单独发 kop
 - 剩余尾巴 `< 32B` 时保留原始标量指令
 
 例子：
@@ -302,7 +302,7 @@ v1 的行为是：
 
 这正好覆盖题设里最关键的 corpus 机会，同时避免一个 super-site 吞下几百字节。
 
-## 4. Kinsn Call Emission
+## 4. KOperation Call Emission
 
 ## 4.1 传输格式
 
@@ -310,12 +310,12 @@ BulkMemoryPass 继续复用现有 packed transport：
 
 ```text
 sidecar(payload)
-CALL BPF_PSEUDO_KINSN_CALL imm=<btf_id> off=<fd_slot>
+CALL BPF_PSEUDO_KOP_CALL imm=<btf_id> off=<fd_slot>
 ```
 
 daemon 直接调用：
 
-- `emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off)`
+- `emit_packed_kop_call_with_off(payload, btf_id, kfunc_off)`
 
 不引入 legacy call ABI，不引入额外 helper argument 搬运协议。
 
@@ -384,8 +384,8 @@ BulkMemoryPass 是一个 pass 对两个 target，因此 site 级别选择 target
 
 daemon 侧需要：
 
-- `ctx.kinsn_registry.memcpy_bulk_btf_id`
-- `ctx.kinsn_registry.memset_bulk_btf_id`
+- `ctx.kop_registry.memcpy_bulk_btf_id`
+- `ctx.kop_registry.memset_bulk_btf_id`
 
 以及一个新 helper：
 
@@ -396,7 +396,7 @@ fn btf_fd_for_target_name(&self, target_name: &str) -> Option<i32>
 发射时的逻辑应为：
 
 1. 根据 site.kind 选 target name。
-2. 从 `KinsnRegistry` 取该 target 的 `btf_id`。
+2. 从 `KopRegistry` 取该 target 的 `btf_id`。
 3. 检查 `packed_supported_for_target_name(target_name)`。
 4. 从 `target_btf_fds[target_name]` 取 BTF fd。
 5. 用 `ensure_btf_fd_slot()` 得到 `CALL.off`。
@@ -423,15 +423,15 @@ fn btf_fd_for_target_name(&self, target_name: &str) -> Option<i32>
 
 本文按题设采用以下 kernel-side 契约：
 
-- transport 仍然是当前仓库的 `sidecar + BPF_PSEUDO_KINSN_CALL`
-- verifier 语义采用 bulk kinsn 的 `model_call -> memory range effect`
+- transport 仍然是当前仓库的 `sidecar + BPF_PSEUDO_KOP_CALL`
+- verifier 语义采用 bulk kop 的 `model_call -> memory range effect`
 
 也就是说，bulk-memory 不应像 `rotate` / `extract` 那样去依赖一长段 proof sequence；否则：
 
 - `32B~128B` 的 bulk site 会重新膨胀成大量普通 load/store
 - verifier patch/remove/restore 成本会重新回到大 run 的数量级
 
-bulk-memory kinsn 需要的 effect 很简单：
+bulk-memory kop 需要的 effect 很简单：
 
 - `memcpy_bulk`
   - read: `[src_base + src_off, len]`
@@ -531,7 +531,7 @@ daemon 侧仍需做的唯一寄存器安全检查是：
 - `map_inline + const_prop + dce` 会把很多局部初始化收敛成更规整的连续 stores。
 - `bounds_check_merge` 先把 packet window canonicalize，bulk-memory 更容易证明整段区间。
 - `wide_mem` 先把 byte-pack 机会变成 `B/H/W/DW` 的规整访问，bulk-memory 再去吞长 run。
-- `bulk_memory` 应早于其他 peephole kinsn pass；否则长 memory burst 先被局部优化切碎，不利于整体收拢。
+- `bulk_memory` 应早于其他 peephole kop pass；否则长 memory burst 先被局部优化切碎，不利于整体收拢。
 - 若未来有 `pair_mem` / `LDP/STP` pass，则 `bulk_memory` 应在它之前；pair 只吃 residual pair。
 
 ## 7. Rust 实现轮廓
@@ -651,7 +651,7 @@ struct BulkSite {
 同时也要明确：
 
 - 2026-03-24 旧报告里提到的 `20B` copy，在本文门槛下不会再被 `BulkMemoryPass` 吃掉。
-- 这不是回退，而是主动收敛：小于 `32B` 时，2 条 kinsn transport 指令和 verifier/jit metadata 成本不一定优于原始标量序列。
+- 这不是回退，而是主动收敛：小于 `32B` 时，2 条 kop transport 指令和 verifier/jit metadata 成本不一定优于原始标量序列。
 
 ## 10. 最终建议
 
@@ -659,7 +659,7 @@ struct BulkSite {
 
 - `memcpy` 只吃紧邻 `LDX_MEM + STX_MEM`、同宽度、连续偏移、可证明非重叠的 run。
 - `memset` v1 先专注 zeroing；非零 repeated-byte 留作扩展位。
-- transport 继续复用现有 `sidecar + BPF_PSEUDO_KINSN_CALL`。
+- transport 继续复用现有 `sidecar + BPF_PSEUDO_KOP_CALL`。
 - verifier 契约按 `model_call` 的 range effect 设计，而不是回退到长 proof sequence。
 - pipeline 中放在 `wide_mem` 之后、`rotate` 之前。
 

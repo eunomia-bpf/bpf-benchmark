@@ -8,7 +8,7 @@
 
 1. `lkm_seeker_modtree_loop`（14236 insns）在 E2E 里为什么全部 verifier reject。
 2. Katran `balancer_ingress` 为什么只改了 19 insns。
-3. E2E VM 里 kinsn modules 到底有没有加载。
+3. E2E VM 里 kop modules 到底有没有加载。
 
 本次主要读取的输入：
 
@@ -38,7 +38,7 @@
 
 1. 当前最实质的 blocker 是 Tracee 的大程序 `lkm_seeker_modtree_loop` 在 per-pass verify-only 阶段全部被 reject，程序没有进入真正的最终 commit 阶段。
 2. Katran `balancer_ingress` “只改 19 insns” 不是异常，更像是这份最新 E2E live image 本来就只有 19 个当前 daemon 能合法落地的 site。
-3. 现有证据不支持“kinsn modules 没加载”是这轮 E2E 的最大问题。`vm-e2e` 代码路径明确会先执行 `module/load_all.sh`；真正缺的是 E2E 工件没有把 loader / discovery 证据保存下来。
+3. 现有证据不支持“kop modules 没加载”是这轮 E2E 的最大问题。`vm-e2e` 代码路径明确会先执行 `module/load_all.sh`；真正缺的是 E2E 工件没有把 loader / discovery 证据保存下来。
 
 另外一个现实问题是：时间上最新的 Tracee rerun `tracee_tailcall_fix_20260329_165448` 工件本身已损坏，`metadata.json` 为 0 字节，`details/result.json` 被截断在 8 MiB，不能作为强证据源。下面 Tracee 的细节分析以最新“可解析”的 `tracee_20260329_081351` 为主。
 
@@ -185,7 +185,7 @@ if (attr->rejit.flags)
 
 所以这个 case 的主要问题不是 verifier reject，而是“可优化密度本来就低”。
 
-## 3. kinsn modules 在 E2E VM 里有没有加载
+## 3. kop modules 在 E2E VM 里有没有加载
 
 ### `case_common.py` 本身不负责加载
 
@@ -217,7 +217,7 @@ if (attr->rejit.flags)
 - 对 `.ko` 逐个 `insmod`。
 - 跳过 `bpf_barrier`。
 - 最后打印：
-  - `kinsn modules: ${loaded}/${total} loaded`
+  - `kop modules: ${loaded}/${total} loaded`
 
 因为现在脚本跳过了 `bpf_barrier`，所以当前树上预期更像是 `5/5 loaded`，而不是旧工件里偶尔能看到的 `6/6 loaded`。
 
@@ -226,7 +226,7 @@ if (attr->rejit.flags)
 daemon 并不是“假定模块已在”。它在启动时会主动扫一遍：
 
 - `daemon/src/main.rs:45-73`
-  - 先调用 `discover_kinsns()`
+  - 先调用 `discover_kops()`
   - 再把 discovery registry 放进 `PassContext`
 - `daemon/src/kfunc_discovery.rs:312-360`
   - 实际扫描 `/sys/kernel/btf/<module>`
@@ -235,23 +235,23 @@ daemon 并不是“假定模块已在”。它在启动时会主动扫一遍：
 - `daemon/src/commands.rs:339-355`
   - 真正需要 descriptor BTF fd 的 pass，还会校验 `required_btf_fds` 是否在 registry 里
 
-所以如果 kinsn modules 真的没加载，理论上不应完全“静默”。
+所以如果 kop modules 真的没加载，理论上不应完全“静默”。
 
 ### 现有证据支持什么，不支持什么
 
 当前能稳妥说的是：
 
-- 从代码路径看，`vm-e2e` 会先加载 kinsn modules。
+- 从代码路径看，`vm-e2e` 会先加载 kop modules。
 - 从 daemon 启动路径看，它也会主动 discovery。
 - 但最新 E2E 工件没有保存 `module/load_all.sh` 的 stdout，也没有把 daemon discovery log 作为一等结果字段留出来。
 
-因此，现有证据不足以支持“这轮 E2E 最大问题是 kinsn modules 没加载”。
+因此，现有证据不足以支持“这轮 E2E 最大问题是 kop modules 没加载”。
 
 我更倾向于把它定性为：
 
 - 当前主要问题不是“确认没加载”，而是“没有把加载成功/失败证据固化进 E2E 工件”。
 
-### 如果后面确认真的是 kinsn 没加载，应该怎么修
+### 如果后面确认真的是 kop 没加载，应该怎么修
 
 如果后面发现有人不是通过 `make vm-e2e` 跑，或者存在别的 guest 入口绕过了 `VM_INIT`，最小修法应该是：
 
@@ -261,8 +261,8 @@ daemon 并不是“假定模块已在”。它在启动时会主动扫一遍：
    - `module/load_all.sh` stdout/stderr
    - `lsmod` 或 `/sys/module/*` 快照
    - `/sys/kernel/btf/<module>` 是否存在
-   - daemon 的 `kinsn discovery` 日志
-4. 如果 discovery 结果为空，而当前 case 又依赖 rotate/extract/endian/cond-select/bulk-memory 这类 kinsn pass，直接在 E2E 前置检查里 fail fast，不要等到 benchmark 结果阶段再猜。
+   - daemon 的 `kop discovery` 日志
+4. 如果 discovery 结果为空，而当前 case 又依赖 rotate/extract/endian/cond-select/bulk-memory 这类 kop pass，直接在 E2E 前置检查里 fail fast，不要等到 benchmark 结果阶段再猜。
 
 ## 最后判断：哪个是这轮最大的性能/落地阻塞
 
@@ -270,9 +270,9 @@ daemon 并不是“假定模块已在”。它在启动时会主动扫一遍：
 
 1. Tracee 大程序的 per-pass verify-only reject，是最硬的功能性阻塞。
 2. Katran live image 只暴露 19 个可优化 site，是收益上限偏低，不是接口故障。
-3. kinsn module load 更像“观测缺失”，不是目前最有证据的首因。
+3. kop module load 更像“观测缺失”，不是目前最有证据的首因。
 
-因此，本轮最应该优先追的不是“为什么 Katran 只有 19 条”，也不是先假设“VM 没加载 kinsn”，而是：
+因此，本轮最应该优先追的不是“为什么 Katran 只有 19 条”，也不是先假设“VM 没加载 kop”，而是：
 
 - 先把 Tracee `lkm_seeker_modtree_loop` 的 verify-only `EINVAL` / log overflow 这条链路彻底钉死。
 - 同时把 E2E artifact 的 loader/discovery 证据补齐，避免下轮还要靠代码阅读反推 VM 里到底发生了什么。

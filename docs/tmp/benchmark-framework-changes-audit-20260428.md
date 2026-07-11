@@ -37,7 +37,7 @@ e68ddbd6 docs: audit bpfopt v3 conformance
 dbfda9fc docs: record v3 phase 1 completion in plan doc
 8ca15b6c fix(bpfget,bpfrejit): respect kernel-sys boundary; --dry-run supports fd_array; --full atomicity
 9c38e740 docs: review bpfget bpfrejit cli
-aaaaa76a fix(bpfopt): exit 1 on missing required side-input or unavailable kinsn
+aaaaa76a fix(bpfopt): exit 1 on missing required side-input or unavailable kop
 dc3abe33 feat: implement bpfget and bpfrejit CLI (v3 §2.4 + §2.5)
 0929d7ad docs: review bpfopt CLI commit
 b0da364e feat(bpfopt): implement v3 CLI (12 pass subcommands + optimize + analyze)

@@ -2885,7 +2885,7 @@ fn plan_x86_entry_abi_strip(
         }
     }
 
-    // The runner encodes `callee_saved_mask` in the kinsn sidecar, and the
+    // The runner encodes `callee_saved_mask` in the kop sidecar, and the
     // native_lab proof uses it to force the x86 BPF JIT prologue to save the
     // same host registers we strip here. The total stack movement before the
     // function body is therefore unchanged, so adding an extra alignment pad

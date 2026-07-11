@@ -36,7 +36,7 @@ Replace the current "13 passes each scan `Vec<bpf_insn>`" model with a unified
 chain (`BBProgram`). Lift and lower happen exactly once at `bpfopt` main entry
 and exit.
 
-Net target: ~3500 LOC reduction + DCE/const_prop/kinsn pass simplification +
+Net target: ~3500 LOC reduction + DCE/const_prop/kop pass simplification +
 elimination of branch-fixup bug class.
 
 ## 2. Non-Goals
@@ -47,7 +47,7 @@ elimination of branch-fixup bug class.
   multi-graph.
 - Not changing the daemon, runner, or corpus framework. BBProgram is internal
   to the `bpfopt` lib crate, hidden behind the existing CLI.
-- Not changing benchmark policy (`benchmark_config.yaml`), pass list, or kinsn
+- Not changing benchmark policy (`benchmark_config.yaml`), pass list, or kop
   module ABI.
 
 ## 3. Architecture
@@ -79,7 +79,7 @@ pub struct BBProgram {
     pub use_def:     UseDefGraph,           // primary, auto-maintained
     pub oracle:      Option<VerifierOracle>,// from prior pass's verifier log
     pub btf:         BtfMetadataMap,        // (BlockId, intra_idx) → original PC
-    pub kinsn_reg:   Arc<KinsnRegistry>,
+    pub kop_reg:   Arc<KopRegistry>,
 }
 
 pub struct Block {
@@ -154,11 +154,11 @@ impl BBProgram {
     pub fn rewire_edge(&mut self, from: BlockId, old_to: BlockId, new_to: BlockId);
     pub fn split_block(&mut self, at: UseSite) -> (BlockId, BlockId);
 
-    // ---- emit kinsn replacement (multi-block diamond → single helper call) ----
-    pub fn replace_diamond_with_kinsn(
+    // ---- emit kop replacement (multi-block diamond → single helper call) ----
+    pub fn replace_diamond_with_kop(
         &mut self,
         diamond_blocks: DiamondPattern,
-        kinsn_call: BpfInsn,
+        kop_call: BpfInsn,
     );
 }
 ```
@@ -274,7 +274,7 @@ impl BpfPass for Dce {
 addr_map, fixup_all_branches) is absorbed into BBProgram mutation methods +
 the lower stage.
 
-### Multi-block kinsn (cond_select / ccmp)
+### Multi-block kop (cond_select / ccmp)
 
 cond_select and ccmp match diamond / chain patterns spanning **multiple
 blocks**. They use the BB-graph mutation API:
@@ -284,18 +284,18 @@ blocks**. They use the BB-graph mutation API:
 fn cond_select_run(prog: &mut BBProgram, ctx: &PassCtx) -> PassReport {
     let diamonds = scan_diamonds(prog);
     for d in diamonds {
-        let kinsn_call = build_select64_call(d);
-        prog.replace_diamond_with_kinsn(d, kinsn_call);
+        let kop_call = build_select64_call(d);
+        prog.replace_diamond_with_kop(d, kop_call);
         // ↑ this:
         //   - merges the predecessor + true-mov-block + false-mov-block + join
-        //   - inserts kinsn_call into the merged block
+        //   - inserts kop_call into the merged block
         //   - rewires successors of the join to be successors of merged block
     }
     ...
 }
 ```
 
-Single-block kinsn (rotate / extract / endian / bulk_memory / prefetch) use
+Single-block kop (rotate / extract / endian / bulk_memory / prefetch) use
 `replace_range` only.
 
 ## 10. Stage Plan — single autonomous codex run
@@ -363,7 +363,7 @@ lowers. There is no `Vec<bpf_insn>`-based mutation path in the lib crate.
    `corpus/`, `runner/`, `e2e/`, `micro/`, `daemon/` remain untouched for the
    BBProgram migration. The accepted exception is
    `runner/config/passes/dce/default.yaml` passing `--target ${TARGET}` so dce
-   can use `target.json` for kinsn-aware liveness. The daemon socket protocol
+   can use `target.json` for kop-aware liveness. The daemon socket protocol
    and per-pass CLI invocation contract are otherwise unchanged.
 
 6. **Significant code-volume reduction**: total `bpfopt/crates/bpfopt/src/`
@@ -384,14 +384,14 @@ lowers. There is no `Vec<bpf_insn>`-based mutation path in the lib crate.
 | JA32 imm vs JA off divergence | already a known landmine (P1-G defect-2); handle in lift + lower symmetrically |
 | Branch offset overflow on lower (i16 Jcc / i32 JA32) | currently can't happen because lift preserves graph and lower preserves reachability; assert on emit |
 | BTF metadata desync | `btf` map is updated in every mutation method; assert in roundtrip test that BTF entries map to valid PCs |
-| Multi-block kinsn (cond_select/ccmp) breaks reachability | pattern matcher must verify all intermediate blocks have exactly one predecessor inside the diamond before merging |
+| Multi-block kop (cond_select/ccmp) breaks reachability | pattern matcher must verify all intermediate blocks have exactly one predecessor inside the diamond before merging |
 | 13-pass migration spans weeks | each stage is independent; paper data line continues on `main` between stages without depending on this work |
 
 ## 13. Out of Scope (Phase 4+ Later)
 
 - e-graph / equality saturation (Phase 4)
 - Verified rewriting (Phase 5)
-- Pattern DSL proc-macro for kinsn passes (folded into Stage 7-11 if cheap)
+- Pattern DSL proc-macro for kop passes (folded into Stage 7-11 if cheap)
 
 ## 14. Approval Gate
 

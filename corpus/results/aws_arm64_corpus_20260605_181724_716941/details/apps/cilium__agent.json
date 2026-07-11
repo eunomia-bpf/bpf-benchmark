@@ -1623,7 +1623,7 @@
   },
   "rejit_result": {
     "enabled_passes": [
-      "kinsn_all_no_bulk_prefetch"
+      "kop_all_no_bulk_prefetch"
     ],
     "mode": "loadtime",
     "plan_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/aws_arm64_corpus_20260605_181724_716941/details/loadtime-plans/cilium__agent.json",

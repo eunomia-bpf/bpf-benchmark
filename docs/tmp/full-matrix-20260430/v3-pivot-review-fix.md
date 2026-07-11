@@ -13,7 +13,7 @@ Scope: fixes for every P0/P1/P2/P3 item in `docs/tmp/full-matrix-20260430/v3-piv
 - P2#5/P3: removed stale fd_array JSON reader and minor fail-fast cleanup.
 - P2#6: updated stale daemon/design schemas.
 - P2#7: added daemon-level verifier reject/success tests through `KernelOps`.
-- P2#8: moved kinsn final-image copy before Rust artifacts and added `bpfprof` executable smoke check.
+- P2#8: moved kop final-image copy before Rust artifacts and added `bpfprof` executable smoke check.
 
 ## Issue Fixes
 
@@ -90,7 +90,7 @@ The tests use a fake `bpfopt` executable only inside the test harness; productio
 
 Updated `runner/containers/runner-runtime.Dockerfile`:
 
-- copied `/artifacts/kinsn` before Rust daemon/bpfopt artifacts in the final image;
+- copied `/artifacts/kop` before Rust daemon/bpfopt artifacts in the final image;
 - added `test -x /usr/local/bin/bpfprof` next to the existing `bpfopt` smoke check.
 
 `make check` rebuilt the image and the new smoke check passed.

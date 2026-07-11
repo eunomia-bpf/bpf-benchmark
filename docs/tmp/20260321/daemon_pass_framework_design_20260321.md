@@ -275,7 +275,7 @@ pub enum PassCategory {
 /// 这些信息在整个 pipeline 执行期间不变。
 #[derive(Clone, Debug)]
 pub struct PassContext {
-    /// 平台上可用的 kinsn kfunc 及其 BTF ID
+    /// 平台上可用的 kop kfunc 及其 BTF ID
     pub kfunc_registry: KfuncRegistry,
     /// CPU 特性
     pub platform: PlatformCapabilities,
@@ -1058,7 +1058,7 @@ use crate::insn::*;
 /// WIDE_MEM 优化 pass：将 byte load + shift + or 序列合并为单条 wide load。
 ///
 /// 这是 BpfReJIT 最重要的优化之一，占 kernel JIT surplus 的 50.7%。
-/// 不需要 kinsn 支持 — 纯 BPF 指令替换。
+/// 不需要 kop 支持 — 纯 BPF 指令替换。
 pub struct WideMemPass;
 
 impl BpfPass for WideMemPass {
@@ -1205,7 +1205,7 @@ fn scan_wide_mem_sites(insns: &[BpfInsn]) -> Vec<WideMemSite> {
 ///   call bpf_rotate64                (kfunc call)
 ///   r_dst = r0                       (MOV64_REG, 如果 dst 不是 r0)
 ///
-/// 需要 kinsn 支持：JIT 会把 kfunc call 内联为 RORX 指令。
+/// 需要 kop 支持：JIT 会把 kfunc call 内联为 RORX 指令。
 pub struct RotatePass;
 
 impl BpfPass for RotatePass {
@@ -1679,7 +1679,7 @@ impl BpfPass for CondSelectPass {
 /// 而 fall-through path 是 cold path，则翻转条件使 hot path 成为 fall-through。
 /// 这对现代 CPU 的分支预测器有利（fall-through 是默认预测方向）。
 ///
-/// 不需要 kinsn — 纯 BPF 指令重排。
+/// 不需要 kop — 纯 BPF 指令重排。
 pub struct BranchFlipPass {
     /// 最低 taken rate 差异才翻转（避免噪声）
     pub min_bias: f64, // e.g., 0.7 表示 taken > 70% 才考虑
@@ -1789,10 +1789,10 @@ pub fn build_default_pipeline() -> PassManager {
     pm.register_analysis(LivenessAnalysis);
 
     // 添加 pass（按顺序执行）
-    // 1. 纯 BPF 指令优化（不需要 kinsn）
+    // 1. 纯 BPF 指令优化（不需要 kop）
     pm.add_pass(WideMemPass);
 
-    // 2. 需要 kinsn 的优化
+    // 2. 需要 kop 的优化
     pm.add_pass(RotatePass);
     pm.add_pass(CondSelectPass { predictability_threshold: 0.8 });
 
@@ -2262,7 +2262,7 @@ loop {
 | 论文章节 | 框架组件 |
 |---------|---------|
 | Insight 1: LLVM-pass-like framework | PassManager + BpfPass trait |
-| Insight 2: mechanism/policy separation | PassContext (kinsn registry) / pass pipeline (policy) |
+| Insight 2: mechanism/policy separation | PassContext (kop registry) / pass pipeline (policy) |
 | §3 变换分类 | 各 Pass 实现 |
 | §4.1 daemon 架构 | Pipeline + AnalysisCache |
 | §4.2 工作流 | `optimize_program()` 端到端流程 |

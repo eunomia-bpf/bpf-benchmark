@@ -125,24 +125,24 @@ static const struct bpf_insn program[] = {
     HC_LDX(BPF_W, BPF_REG_3, BPF_REG_1, 4),
     /* 0x1107: xor    eax,eax [bpf-jit: zero idiom] */
     HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 0),
-    /* 0x1109: cmp    rcx,rdx [exact-kinsn: cmpq reg,reg kinsn] */
-    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
+    /* 0x1109: cmp    rcx,rdx [exact-kop: cmpq reg,reg kop] */
+    HC_KOP(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x110c: ja     1130 <simple_packet_xdp+0x30> [bpf-branch: lowered cmp    rcx,rdx + ja     1130 <simple_packet_xdp+0x30> to verifier-visible BPF branch] */
     HC_JMP_REG(BPF_JGT, BPF_REG_4, BPF_REG_3, 12),
-    /* 0x110e: lea    rsi,[rcx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
-    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    /* 0x1112: cmp    rsi,rdx [exact-kinsn: cmpq reg,reg kinsn] */
-    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
+    /* 0x110e: lea    rsi,[rcx+0x8] [exact-kop: LEA via x86 kop selector] */
+    HC_KOP(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    /* 0x1112: cmp    rsi,rdx [exact-kop: cmpq reg,reg kop] */
+    HC_KOP(HC_REG_REG_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x1115: ja     1130 <simple_packet_xdp+0x30> [bpf-branch: lowered cmp    rsi,rdx + ja     1130 <simple_packet_xdp+0x30> to verifier-visible BPF branch] */
     HC_JMP_REG(BPF_JGT, BPF_REG_2, BPF_REG_3, 7),
     /* 0x1117: mov    WORD PTR [rcx],0x614e [bpf-jit: immediate memory store] */
     HC_ST(BPF_H, BPF_REG_4, 0, 24910),
-    /* 0x111c: mov    BYTE PTR [rcx+0x2],0xbc [exact-kinsn: movb immediate memory store via x86 kinsn selector] */
-    HC_KINSN(HC_STORE_IMM_PAYLOAD(BPF_REG_4, 2, 188), MICRO_HANDCRAFT_BPF_X86_MOVB_IMM_MEM),
+    /* 0x111c: mov    BYTE PTR [rcx+0x2],0xbc [exact-kop: movb immediate memory store via x86 kop selector] */
+    HC_KOP(HC_STORE_IMM_PAYLOAD(BPF_REG_4, 2, 188), MICRO_HANDCRAFT_BPF_X86_MOVB_IMM_MEM),
     /* 0x1120: mov    DWORD PTR [rcx+0x3],0x0 [bpf-jit: immediate memory store] */
     HC_ST(BPF_W, BPF_REG_4, 3, 0),
-    /* 0x1127: mov    BYTE PTR [rcx+0x7],0x0 [exact-kinsn: movb immediate memory store via x86 kinsn selector] */
-    HC_KINSN(HC_STORE_IMM_PAYLOAD(BPF_REG_4, 7, 0), MICRO_HANDCRAFT_BPF_X86_MOVB_IMM_MEM),
+    /* 0x1127: mov    BYTE PTR [rcx+0x7],0x0 [exact-kop: movb immediate memory store via x86 kop selector] */
+    HC_KOP(HC_STORE_IMM_PAYLOAD(BPF_REG_4, 7, 0), MICRO_HANDCRAFT_BPF_X86_MOVB_IMM_MEM),
     /* 0x112b: mov    eax,0x2 [bpf-jit: 32-bit immediate move] */
     HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 2),
     /* 0x1130: ret [bpf-jit: BPF exit; kernel JIT emits the real return sequence] */

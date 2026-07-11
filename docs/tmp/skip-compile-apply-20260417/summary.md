@@ -11,7 +11,7 @@
 - Kept the Phase 2 single-artifact layout in the final runtime image:
   - `/artifacts/kernel`
   - `/artifacts/modules`
-  - `/artifacts/kinsn`
+  - `/artifacts/kop`
   - `/artifacts/manifest.json`
 - Removed runtime-image source builds for BCC/libbpf-tools, bpftrace, Tracee, Tetragon, SCX, and workload tools from `runner/mk/build.mk`.
 - Kept the Katran source build path because the benchmark still consumes Katran repo artifacts.
@@ -55,7 +55,7 @@
 - Runtime artifact structure check:
   - `/artifacts/kernel`
   - `/artifacts/modules`
-  - `/artifacts/kinsn`
+  - `/artifacts/kop`
   - `/artifacts/user`
   - `/artifacts/tracee`
   - `/artifacts/tetragon`

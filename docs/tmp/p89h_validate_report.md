@@ -2,9 +2,9 @@
 
 Date: 2026-04-30
 
-Validated tree: `1d619c17 fix(kinsn): validate tail-call-sensitive sites`
+Validated tree: `1d619c17 fix(kop): validate tail-call-sensitive sites`
 
-Corpus input: `corpus/results/x86_kvm_p89_kinsn_corpus_20260430_131403_981524`
+Corpus input: `corpus/results/x86_kvm_p89_kop_corpus_20260430_131403_981524`
 
 Scope: host-only validation. No KVM run was started. No source code was edited by this validation task.
 
@@ -31,7 +31,7 @@ Artifacts:
 
 Coverage per round:
 
-- `kinsn5`: 81/81 programs succeeded with `bulk_memory,rotate,cond_select,extract,endian_fusion`.
+- `kop5`: 81/81 programs succeeded with `bulk_memory,rotate,cond_select,extract,endian_fusion`.
 - `default11`: 11/81 programs succeeded.
 - `default11`: 70/81 programs failed fast in `map_inline` because the saved failure workdirs do not contain concrete map-value snapshots. `map_fds.json` has map metadata, but not the map entries required by default-pipeline `map_inline`.
 
@@ -66,7 +66,7 @@ Artifacts:
 - `docs/tmp/p89h_validate_bpfverify_candidates.tsv`
 - `docs/tmp/p89h_validate_bpfverify_round_1.tsv` through `docs/tmp/p89h_validate_bpfverify_round_5.tsv`
 
-## Stage 4: micro baseline and kinsn coverage
+## Stage 4: micro baseline and kop coverage
 
 Host micro baseline, direct driver, `simple`, 5 measured samples, `inner_repeat=10`:
 
@@ -94,13 +94,13 @@ Artifacts:
 - `docs/tmp/p89h_validate_micro_baseline.log`
 - `docs/tmp/p89h_validate_micro_baseline_20260430_191348_749824/metadata.json`
 - `docs/tmp/p89h_validate_micro_bench_specs.tsv`
-- `docs/tmp/p89h_validate_micro_all_kinsns_target.json`
-- `docs/tmp/p89h_validate_micro_kinsn_apply.tsv`
-- `docs/tmp/p89h_validate_micro_kinsn_apply.log`
+- `docs/tmp/p89h_validate_micro_all_kops_target.json`
+- `docs/tmp/p89h_validate_micro_kop_apply.tsv`
+- `docs/tmp/p89h_validate_micro_kop_apply.log`
 
 ## Stage 5: skip-residue grep
 
-Required grep returned matches only for the site-level helper `kinsn_replacement_subprog_skip_reason` and its call sites/tests:
+Required grep returned matches only for the site-level helper `kop_replacement_subprog_skip_reason` and its call sites/tests:
 
 - `bulk_memory.rs`, `cond_select.rs`, `endian.rs`, `extract.rs`, `rotate.rs`
 - `utils.rs`
@@ -119,13 +119,13 @@ Validation gaps / follow-up defects:
 
 1. Medium: default 11-pass host replay is blocked for 70/81 saved failure programs because the saved corpus failure workdirs lack concrete map-value snapshots needed by `map_inline`. Fix suggestion: preserve `map-values.json` and verifier-states side inputs in failure workdirs for default-pipeline host replay.
 2. Medium: host-only `bpfverify` dry run has 0 executable programs because every saved failure requires guest map FD replay. Fix suggestion: preserve a host-replayable verifier fixture or run these 81 in KVM smoke.
-3. Medium: current micro suite does not provide host xlated candidates for `bulk_memory` or `cond_select`, so it cannot prove wins for all five kinsn passes. Fix suggestion: add dedicated micro programs that compile to packed-compatible cond-select diamonds and scalarized bulk memory store/load sequences.
+3. Medium: current micro suite does not provide host xlated candidates for `bulk_memory` or `cond_select`, so it cannot prove wins for all five kop passes. Fix suggestion: add dedicated micro programs that compile to packed-compatible cond-select diamonds and scalarized bulk memory store/load sequences.
 4. Medium: direct host micro driver cannot run post-ReJIT performance on this host kernel. Fix suggestion: use the ReJIT fork kernel/KVM for post-ReJIT micro performance, or add a host driver mode that explicitly reports unsupported ReJIT capability before benchmarking.
 
 Overall result:
 
 - Cargo/unit tests: pass, deterministic, 5/5 rounds.
-- Host `kinsn5` bpfopt replay: pass, deterministic, 5/5 rounds.
+- Host `kop5` bpfopt replay: pass, deterministic, 5/5 rounds.
 - Host `default11` replay: deterministic, but incomplete due missing map snapshots.
 - Host bpfverify: no host-verifiable subset in this corpus.
 - Micro baseline: no smoke regression observed.

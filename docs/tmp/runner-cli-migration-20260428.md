@@ -271,7 +271,7 @@ CLI 模式推荐:
 ```python
 class RejitSession:
     @classmethod
-    def start(cls, *, load_kinsn: bool = False) -> "RejitSession": ...
+    def start(cls, *, load_kop: bool = False) -> "RejitSession": ...
     def apply_rejit(
         self,
         prog_ids: Sequence[int],
@@ -297,7 +297,7 @@ class CliToolchain:
 class CliRejitSession(RejitSession):
     tools: CliToolchain
     work_root: Path
-    kinsn_metadata: dict[str, object]
+    kop_metadata: dict[str, object]
 
     def apply_rejit(self, prog_ids, *, enabled_passes=None):
         passes = normalize(enabled_passes or benchmark_rejit_enabled_passes())

@@ -4,11 +4,11 @@ Scope: all 7 supported corpus apps. This audits workload coverage only; it does 
 
 Run inputs:
 - `corpus/results/x86_kvm_corpus_20260507_023000_475311/` (`noop,map_inline`, `SAMPLES=3`)
-- `corpus/results/x86_kvm_corpus_20260507_025319_683029/` (kinsn-only, `SAMPLES=3`)
+- `corpus/results/x86_kvm_corpus_20260507_025319_683029/` (kop-only, `SAMPLES=3`)
 
 Method notes:
-- Tables use the kinsn-only run for all apps with complete baseline/post data.
-- Cilium is the exception: the kinsn-only app JSON contains no phase BPF records, while the noop+map_inline app JSON contains baseline records but no `post_rejit.bpf`. Cilium therefore has zero strict qualified programs in these latest runs.
+- Tables use the kop-only run for all apps with complete baseline/post data.
+- Cilium is the exception: the kop-only app JSON contains no phase BPF records, while the noop+map_inline app JSON contains baseline records but no `post_rejit.bpf`. Cilium therefore has zero strict qualified programs in these latest runs.
 - `qualified` means `min(baseline run_cnt_delta, post_rejit run_cnt_delta) >= 100`.
 - Large zero-run programs (>5KB JIT) are treated as coverage gaps unless source/context shows they are optional selector/action tails. Tiny high-run programs (<500B) are called out as suspect dispatchers unless the app source/script shows they are complete tracing probe bodies.
 
@@ -18,13 +18,13 @@ Second-pass source/doc checks used: local runner/app source under `runner/libs/a
 
 | app | table source | total programs in table | qualified programs | baseline programs >=100 | heavy unqualified >5KB | tiny high-run <500B | verdict | workload fix |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| bcc/set | kinsn-only baseline+post | 21 | 20 | 20 | 0 | 14 | **GREEN** | None required for coverage; current stress_ng_os_io_network workload drives the selected BCC tools. |
-| bpftrace/set | kinsn-only baseline+post | 9 | 8 | 8 | 0 | 4 | **GREEN** | None required for coverage; current stress_ng_os_io_network workload drives the selected scripts except the low-rate interval perf_event. |
+| bcc/set | kop-only baseline+post | 21 | 20 | 20 | 0 | 14 | **GREEN** | None required for coverage; current stress_ng_os_io_network workload drives the selected BCC tools. |
+| bpftrace/set | kop-only baseline+post | 9 | 8 | 8 | 0 | 4 | **GREEN** | None required for coverage; current stress_ng_os_io_network workload drives the selected scripts except the low-rate interval perf_event. |
 | cilium/agent | noop+map_inline baseline-only | 60 | 0 | 6 | 24 | 1 | **YELLOW** | Fix the post-ReJIT stats/ID-disappearance failure first, then make the endpoint traffic matrix authoritative for both phases and add service/NodePort plus policy traffic so cil_lxc_policy and tail_nodeport/tail_ct paths run. |
-| tetragon/observer | kinsn-only baseline+post | 287 | 30 | 30 | 117 | 0 | **YELLOW** | Add a short policy-aware trigger phase: repeated execs plus module-load/read-file events and targeted file/socket syscalls that match the loaded policies, so event_execve and generic_*_process_event paths reach >=100. |
-| katran | kinsn-only baseline+post | 3 | 1 | 1 | 1 | 1 | **RED** | Known #177: send VIP traffic through Katran so xdp_root tail-calls balancer_ingress instead of only exercising the root dispatcher. |
-| tracee/monitor | kinsn-only baseline+post | 158 | 78 | 78 | 61 | 15 | **YELLOW** | Add Tracee event-generator coverage for LKM/syscall-table/exec security paths, e.g. module load/unload or lsm-check plus repeated execve/execveat, while retaining the OS/IO/network stress. |
-| otelcol-ebpf-profiler | kinsn-only baseline+post | 13 | 1 | 1 | 8 | 0 | **RED** | Run sustained native and interpreter CPU workloads after profiler metadata is ready, and fail if perf_unwind_native plus at least one interpreter unwinder stays at zero. |
+| tetragon/observer | kop-only baseline+post | 287 | 30 | 30 | 117 | 0 | **YELLOW** | Add a short policy-aware trigger phase: repeated execs plus module-load/read-file events and targeted file/socket syscalls that match the loaded policies, so event_execve and generic_*_process_event paths reach >=100. |
+| katran | kop-only baseline+post | 3 | 1 | 1 | 1 | 1 | **RED** | Known #177: send VIP traffic through Katran so xdp_root tail-calls balancer_ingress instead of only exercising the root dispatcher. |
+| tracee/monitor | kop-only baseline+post | 158 | 78 | 78 | 61 | 15 | **YELLOW** | Add Tracee event-generator coverage for LKM/syscall-table/exec security paths, e.g. module load/unload or lsm-check plus repeated execve/execveat, while retaining the OS/IO/network stress. |
+| otelcol-ebpf-profiler | kop-only baseline+post | 13 | 1 | 1 | 8 | 0 | **RED** | Run sustained native and interpreter CPU workloads after profiler metadata is ready, and fail if perf_unwind_native plus at least one interpreter unwinder stays at zero. |
 
 ## Action List
 
@@ -42,7 +42,7 @@ Second-pass source/doc checks used: local runner/app source under `runner/libs/a
 
 Coverage verdict: **GREEN**
 
-Status/source: `ok` from `corpus/results/x86_kvm_corpus_20260507_025319_683029`. kinsn-only app JSON; noop+map_inline run has the same coverage shape.
+Status/source: `ok` from `corpus/results/x86_kvm_corpus_20260507_025319_683029`. kop-only app JSON; noop+map_inline run has the same coverage shape.
 
 A. Currently exercised: 20/21 program IDs are qualified. They are the expected BCC tools: capable, biosnoop, vfsstat, opensnoop, syscount, tcpconnect, tcplife, and runqlat hooks.
 
@@ -80,7 +80,7 @@ Programs sorted by `bytes_jited` descending:
 
 Coverage verdict: **GREEN**
 
-Status/source: `ok` from `corpus/results/x86_kvm_corpus_20260507_025319_683029`. kinsn-only app JSON; noop+map_inline run has the same coverage shape.
+Status/source: `ok` from `corpus/results/x86_kvm_corpus_20260507_025319_683029`. kop-only app JSON; noop+map_inline run has the same coverage shape.
 
 A. Currently exercised: 8/9 program IDs are qualified: tcp_set_state, block_io_done/start, cap_capable, sched_switch, vfs_create, sched_wakeup, and sched_wakeup_new.
 
@@ -106,7 +106,7 @@ Programs sorted by `bytes_jited` descending:
 
 Coverage verdict: **YELLOW**
 
-Status/source: `error` from `corpus/results/x86_kvm_corpus_20260507_023000_475311`. Cilium table uses the noop+map_inline run because it is the only latest run with Cilium baseline BPF records. That run has no post_rejit BPF stats; the kinsn-only run has no phase records. Strict qualified count is therefore zero.
+Status/source: `error` from `corpus/results/x86_kvm_corpus_20260507_023000_475311`. Cilium table uses the noop+map_inline run because it is the only latest run with Cilium baseline BPF records. That run has no post_rejit BPF stats; the kop-only run has no phase records. Strict qualified count is therefore zero.
 Error: `BPF stats missing requested program IDs: 171, 174, 176, 177, 183, 185, 186`
 
 A. Currently exercised: Strictly none are qualified because post_rejit stats are missing. Baseline-only exercised >=100: cil_from_container (two IDs), cil_to_netdev, cil_from_netdev, cil_from_host, and cil_xdp_entry.
@@ -186,7 +186,7 @@ Programs sorted by `bytes_jited` descending:
 
 Coverage verdict: **YELLOW**
 
-Status/source: `ok` from `corpus/results/x86_kvm_corpus_20260507_025319_683029`. kinsn-only app JSON; noop+map_inline run has the same 30-qualified-program shape.
+Status/source: `ok` from `corpus/results/x86_kvm_corpus_20260507_025319_683029`. kop-only app JSON; noop+map_inline run has the same 30-qualified-program shape.
 
 A. Currently exercised: 30/287 program IDs are qualified: 20 generic_kprobe_event instances, 7 generic_retkprobe_event instances, generic_tracepoint_event, event_wake_up_new_task, and event_exit_acct_process.
 
@@ -490,7 +490,7 @@ Programs sorted by `bytes_jited` descending:
 
 Coverage verdict: **RED**
 
-Status/source: `ok` from `corpus/results/x86_kvm_corpus_20260507_025319_683029`. kinsn-only app JSON; noop+map_inline run has the same dispatcher-only shape.
+Status/source: `ok` from `corpus/results/x86_kvm_corpus_20260507_025319_683029`. kop-only app JSON; noop+map_inline run has the same dispatcher-only shape.
 
 A. Currently exercised: Only xdp_root is qualified.
 
@@ -510,7 +510,7 @@ Programs sorted by `bytes_jited` descending:
 
 Coverage verdict: **YELLOW**
 
-Status/source: `ok` from `corpus/results/x86_kvm_corpus_20260507_025319_683029`. kinsn-only app JSON; noop+map_inline run has the same 78-qualified-program shape.
+Status/source: `ok` from `corpus/results/x86_kvm_corpus_20260507_025319_683029`. kop-only app JSON; noop+map_inline run has the same 78-qualified-program shape.
 
 A. Currently exercised: 78/158 program IDs are qualified, including heavy LSM/file/network programs such as trace_security_task_prctl, trace_security_mmap_file, trace_security_file_mprotect, trace_security_file_open, cgroup_skb_ingress/egress, trace_ret_vfs_read/write, and raw syscall entry/exit.
 
@@ -685,7 +685,7 @@ Programs sorted by `bytes_jited` descending:
 
 Coverage verdict: **RED**
 
-Status/source: `ok` from `corpus/results/x86_kvm_corpus_20260507_025319_683029`. kinsn-only app JSON; noop+map_inline run has the same native-entry-only shape.
+Status/source: `ok` from `corpus/results/x86_kvm_corpus_20260507_025319_683029`. kop-only app JSON; noop+map_inline run has the same native-entry-only shape.
 
 A. Currently exercised: Only native_tracer_entry is qualified.
 

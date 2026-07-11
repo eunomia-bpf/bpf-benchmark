@@ -26,7 +26,7 @@ The important distinction is:
 - Current experimental pass implementation:
   `bpfopt/crates/bpfopt/src/passes/lea.rs`
 - Existing broader census:
-  `docs/tmp/lea_kinsn_design_census_20260513.md`
+  `docs/tmp/lea_kop_design_census_20260513.md`
 - Existing full corpus artifact:
   `corpus/results/x86_kvm_corpus_20260513_085300_456487/details/apps/katran.json`
 
@@ -57,7 +57,7 @@ bpfopt/target/debug/bpfopt \
   --output /tmp/katran_candidate_reports/lea.bin \
   --report /tmp/katran_candidate_reports/lea.json \
   --prog-type xdp \
-  --target /tmp/bpfopt-katran-kinsn-target.json
+  --target /tmp/bpfopt-katran-kop-target.json
 ```
 
 Report:
@@ -153,7 +153,7 @@ For Katran, `lea_index_fold` has three separate problems:
    provenance is lost.
 
 The current pass also has no bytecode instruction-count reduction for the
-dominant two-instruction `MOV+ADD` form: packed kinsn replacement is still two
+dominant two-instruction `MOV+ADD` form: packed kop replacement is still two
 BPF instruction slots. Any win would have to come from final x86 lowering, and
 Katran's verifier-safe scalar population is not established.
 
@@ -163,7 +163,7 @@ Do not pursue Katran-specific `lea_index_fold` now.
 
 A viable LEA pass would need to be scalar-only and verifier-state-gated before
 benchmarking. It should reject stack, packet, map-value, ctx, and other pointer
-provenance cases rather than trying to fold them through a kInsn. Once that
+provenance cases rather than trying to fold them through a KOperation. Once that
 exists, the likely ROI is in non-Katran scalar-heavy programs, not in Katran.
 
 For Katran specifically, the present answer is no-go:

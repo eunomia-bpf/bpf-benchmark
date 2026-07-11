@@ -6,14 +6,14 @@
 ## 结论摘要
 
 - **可行，但建议做成“新增的 LLVM-specialization 子路径”，不要直接 wholesale 替换当前全部 BPF-level pass。**
-- **最小 POC 不需要改 LLVM BPF backend**，前提是 scope 只做 `map_inline + const_prop + dce`，且输出里**不保留**新的 global/map-address 语义，也**不碰 kinsn**。
+- **最小 POC 不需要改 LLVM BPF backend**，前提是 scope 只做 `map_inline + const_prop + dce`，且输出里**不保留**新的 global/map-address 语义，也**不碰 kop**。
 - **最大技术风险不是 lifter，也不是 SCCP，而是 verifier 兼容性**：`llvmbpf` 从 bytecode lift 出来的 IR 是“弱类型/弱语义”的，缺少 BPF verifier 真正在乎的 `PTR_TO_CTX` / static-offset / loop-bound / pointer provenance 信息。`bpftime` 自己的文档也明确写了这一点。
 - `llvmbpf` **现有** array-map inline 实现可以证明“helper call 在 LLVM IR 里可重写、再让 LLVM 做级联优化”这条路是对的；但它的实现方式是把 `value_base` 变成**宿主机地址常量**，这条路**不能直接**拿来回到 kernel verifier。
-- **kinsn 不适合放进第一阶段 LLVM 路线。** 当前树里的 kinsn 是 `sidecar + BPF_PSEUDO_KINSN_CALL` 自定义传输格式；upstream LLVM BPF backend 没有直接支持。第一阶段应继续保留现有 bytecode/kinsn 路线。
+- **kop 不适合放进第一阶段 LLVM 路线。** 当前树里的 kop 是 `sidecar + BPF_PSEUDO_KOP_CALL` 自定义传输格式；upstream LLVM BPF backend 没有直接支持。第一阶段应继续保留现有 bytecode/kop 路线。
 - 时间线判断：
   - **1 周**：可以做出一个窄 POC，覆盖 `ARRAY + constant key + fixed-offset scalar loads`，并在 1-2 个小程序上 round-trip 成功。
   - **2 周**：有机会把它接到 daemon 的旁路工具里，并在 1 个真实程序上拿到 verifier-stable 结果。
-  - **1 个月**：才接近“可默认开启”的工程化水平；如果把 `kinsn` 也纳入 LLVM 路线，1 个月都偏乐观。
+  - **1 个月**：才接近“可默认开启”的工程化水平；如果把 `kop` 也纳入 LLVM 路线，1 个月都偏乐观。
 
 ## 调研方法与来源
 
@@ -21,7 +21,7 @@
 
 1. 本仓库当前实现与已有调研文档：
    - [`docs/daemon-architecture.md`](../../daemon-architecture.md)
-   - [`docs/kinsn-design.md`](../../kinsn-design.md)
+   - [`docs/kop-design.md`](../../kop-design.md)
    - [`docs/tmp/20260326/map_inline_coverage_analysis_20260326.md`](../20260326/map_inline_coverage_analysis_20260326.md)
    - [`docs/tmp/20260326/map_inline_performance_validation_20260326.md`](../20260326/map_inline_performance_validation_20260326.md)
    - [`docs/tmp/2026-03-11/llvmbpf-array-map-inline-poc.md`](../2026-03-11/llvmbpf-array-map-inline-poc.md)
@@ -394,21 +394,21 @@ call void @llvm.assume(i1 %in.range)
 
 ---
 
-## 3. kinsn 在 LLVM IR 里的表示
+## 3. kop 在 LLVM IR 里的表示
 
-### 3.1 当前树里的 kinsn 不是普通 helper/kfunc
+### 3.1 当前树里的 kop 不是普通 helper/kfunc
 
 当前实现的核心事实：
 
-- transport 是 `BPF_PSEUDO_KINSN_SIDECAR + BPF_PSEUDO_KINSN_CALL`
+- transport 是 `BPF_PSEUDO_KOP_SIDECAR + BPF_PSEUDO_KOP_CALL`
 - canonical semantics 来自 `instantiate_insn(payload, insn_buf)`
 - verifier 先 lower 成 proof sequence，再 restore
 - JIT 侧再走 native emit callback
 
 来源：
 
-- [`docs/kinsn-design.md`](../../kinsn-design.md)
-- `BPF_PSEUDO_KINSN_*` UAPI：
+- [`docs/kop-design.md`](../../kop-design.md)
+- `BPF_PSEUDO_KOP_*` UAPI：
   [`vendor/linux-framework/include/uapi/linux/bpf.h`](../../vendor/linux-framework/include/uapi/linux/bpf.h)
   第 `1382-1394` 行
 
@@ -419,8 +419,8 @@ call void @llvm.assume(i1 %in.range)
 | 方案 | 形式 | 优点 | 问题 |
 | --- | --- | --- | --- |
 | inline asm | `call asm ...` | 最省 frontend 表达 | 语义对 LLVM 不透明，基本放弃优化，不推荐 |
-| ordinary call | `declare i64 @bpf_rotate64(...)` | 最接近现有 BPF/kfunc toolchain | 只能自然 lower 成普通 call/kfunc，不会自动变成当前 kinsn transport |
-| custom intrinsic | `llvm.bpf.kinsn.rotate64(...)` | 最适合以后教 backend 识别 | 需要改 backend/MC/test，第一阶段不值得 |
+| ordinary call | `declare i64 @bpf_rotate64(...)` | 最接近现有 BPF/kfunc toolchain | 只能自然 lower 成普通 call/kfunc，不会自动变成当前 kop transport |
+| custom intrinsic | `llvm.bpf.kop.rotate64(...)` | 最适合以后教 backend 识别 | 需要改 backend/MC/test，第一阶段不值得 |
 
 ### 3.3 LLVM BPF backend 现在能做什么
 
@@ -449,19 +449,19 @@ Linux side 对普通 kfunc 的用户态写法也是 `extern ... __ksym`：
 结论：
 
 - **如果目标是“把某个 LLVM call lower 成普通 BPF kfunc call”**，LLVM 现有设施是够用的。
-- **如果目标是“lower 成当前树里的 `sidecar + PSEUDO_KINSN_CALL`”**，我没有找到现成支持。
+- **如果目标是“lower 成当前树里的 `sidecar + PSEUDO_KOP_CALL`”**，我没有找到现成支持。
 
-### 3.4 如果一定要让 LLVM 产出当前 kinsn 传输格式
+### 3.4 如果一定要让 LLVM 产出当前 kop 传输格式
 
 需要的改动大致是：
 
 1. 新的 IR 约定：
-   - custom intrinsic 或 metadata 标识“这是 kinsn，不是普通 call”
+   - custom intrinsic 或 metadata 标识“这是 kop，不是普通 call”
 2. SelectionDAG / machine IR lowering：
    - 识别该 intrinsic，产出自定义 pseudo machine op
 3. BPF MC emission：
    - 在 call 前插 sidecar pseudo-insn
-   - 把 `src_reg` 编成 `BPF_PSEUDO_KINSN_CALL`
+   - 把 `src_reg` 编成 `BPF_PSEUDO_KOP_CALL`
 4. payload 编码：
    - 把 dst/off/imm packing 回 sidecar
 5. tests：
@@ -475,7 +475,7 @@ Linux side 对普通 kfunc 的用户态写法也是 `extern ... __ksym`：
 我的判断：
 
 - **第一阶段不该做。**
-- `map_inline` 路线与 `kinsn` 路线最好先分治。
+- `map_inline` 路线与 `kop` 路线最好先分治。
 
 ---
 
@@ -549,8 +549,8 @@ LLVM 源码里直接写出来的 BPF-specific 问题包括：
    - 这是最危险的部分，因为 lift 出来的 IR 缺少 typed frontend metadata
 4. **loops 不能随便做激进变换**
    - `bpftime` 文档明确说 loop bounds 信息可能缺失
-5. **kfunc/kinsn/BTF 关系必须保留**
-   - 这也是为什么我建议第一阶段完全不碰 kinsn
+5. **kfunc/kop/BTF 关系必须保留**
+   - 这也是为什么我建议第一阶段完全不碰 kop
 
 我的判断：
 
@@ -569,7 +569,7 @@ LLVM 源码里直接写出来的 BPF-specific 问题包括：
 - 只支持 `ARRAY`
 - 只支持 constant map handle + constant key
 - 只支持 lookup result 的 fixed-offset scalar loads
-- **不做 kinsn**
+- **不做 kop**
 - **不做 percpu/map-in-map/prog-array**
 - **尽量不动 whole-module aggressive loop/GVN pipeline**
 
@@ -602,7 +602,7 @@ LLVM 源码里直接写出来的 BPF-specific 问题包括：
 
 - **最小 POC**：`1.2k-2.3k LOC`，`5-8` 个工作日
 - **可在 daemon 中可控使用**：`2-3` 周
-- **如果要把 kinsn 也纳入 LLVM 路线**：再加 `1-2` 周，且风险明显上升
+- **如果要把 kop 也纳入 LLVM 路线**：再加 `1-2` 周，且风险明显上升
 
 ### 5.5 要不要改 LLVM BPF backend
 
@@ -610,7 +610,7 @@ LLVM 源码里直接写出来的 BPF-specific 问题包括：
 | --- | --- |
 | 仅 `map_inline + const_prop + dce`，最终全折成 scalar immediates | **大概率不需要** |
 | 需要普通 kfunc call lowering | **大概率不需要** |
-| 需要当前树里的 `PSEUDO_KINSN_CALL + sidecar` | **需要** |
+| 需要当前树里的 `PSEUDO_KOP_CALL + sidecar` | **需要** |
 
 ### 5.6 要不要改 `bpftime/llvmbpf`
 
@@ -709,7 +709,7 @@ LLVM 不会凭空解决：
 | lifted IR 缺 verifier-relevant type/provenance | 高 | 高 | 最大风险 | 初期只跑保守 pass；后续给 lifter 补 metadata |
 | 现有 `llvmbpf` array-map inline 用 host `value_base` | 高 | 高 | 不能直接回 kernel | 改做 load-result constant replacement |
 | fake globals 最终没被折掉 | 高 | 中 | `BPF_PROG_REJIT` 没有新 global transport | 约束 pipeline；必要时直接替换成 immediates |
-| `kinsn` lowering 不被 LLVM backend 支持 | 高 | 高 | 但只在你把 kinsn 纳入 scope 时成立 | 第一阶段不做 |
+| `kop` lowering 不被 LLVM backend 支持 | 高 | 高 | 但只在你把 kop 纳入 scope 时成立 | 第一阶段不做 |
 | `PERCPU_ARRAY` / map-in-map / prog-array 语义不清 | 中 | 高 | LLVM 不会自动补语义 | 第一阶段只做 `ARRAY` |
 | daemon 集成把 LLVM 依赖灌进 Rust 主进程 | 中 | 中 | 工程复杂度上升 | 用独立 C++ 工具 |
 | 性能收益不显著 | 中 | 中 | 当前 real-program 机会本来就窄 | 先证明“覆盖+code shrink”，再追 exec win |
@@ -724,16 +724,16 @@ LLVM 不会凭空解决：
 
 前提：
 
-- 不碰 kinsn
+- 不碰 kop
 - 不试图用 host pointer inline map value
 - 只做 `ARRAY + constant key + scalar loads`
 
-#### 全面替换当前 bytecode + kinsn 路线
+#### 全面替换当前 bytecode + kop 路线
 
 - **现在有两个 show-stopper**
 
 1. `llvmbpf` lift IR 丢失 verifier 关键信息
-2. 当前树里的 kinsn transport 没有 LLVM backend 支持
+2. 当前树里的 kop transport 没有 LLVM backend 支持
 
 ### 7.3 时间线
 
@@ -751,7 +751,7 @@ LLVM 不会凭空解决：
 
 ### 8.1 采用 hybrid 方案
 
-1. **保留当前 bytecode/kinsn 路线**
+1. **保留当前 bytecode/kop 路线**
    - `rotate`
    - `cond_select`
    - `extract`
@@ -780,7 +780,7 @@ LLVM 不会凭空解决：
 第一阶段不要追求：
 
 - 全 map type 覆盖
-- kinsn 全部进 LLVM
+- kop 全部进 LLVM
 - whole-program `-O3`
 
 第一阶段应该追求：
@@ -802,7 +802,7 @@ LLVM 不会凭空解决：
 
 如果问题是：
 
-> “能不能把当前整个 BpfReJIT pass 体系都迁到 LLVM IR，并顺便把 kinsn 也统一进去？”
+> “能不能把当前整个 BpfReJIT pass 体系都迁到 LLVM IR，并顺便把 kop 也统一进去？”
 
 我的答案是：
 
@@ -811,7 +811,7 @@ LLVM 不会凭空解决：
 更准确的建议是：
 
 - **把 LLVM IR 路线限定为 map specialization 专线**
-- **保留 bytecode/kinsn 路线处理 verifier-visible instruction synthesis**
+- **保留 bytecode/kop 路线处理 verifier-visible instruction synthesis**
 
 这条路线的最大价值不是“LLVM 比手写 Rust 更聪明”这么简单，而是：
 

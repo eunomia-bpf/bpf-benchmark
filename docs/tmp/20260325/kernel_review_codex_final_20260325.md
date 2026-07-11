@@ -1,28 +1,28 @@
 # BPF Patch Set Review
 
-整体看，这个 patch set 把 `BPF_PROG_REJIT`、`kinsn`、trampoline/dispatcher 刷新路径一次性都拉进来了，但当前实现里还有几处不能接受的问题，尤其是 JIT fallback、REJIT 回滚并发、资源转移和 UAPI 完整性。下面按文件列出具体问题。
+整体看，这个 patch set 把 `BPF_PROG_REJIT`、`kop`、trampoline/dispatcher 刷新路径一次性都拉进来了，但当前实现里还有几处不能接受的问题，尤其是 JIT fallback、REJIT 回滚并发、资源转移和 UAPI 完整性。下面按文件列出具体问题。
 
 ## kernel/bpf/verifier.c
 
-### 1. [HIGH] `do_misc_fixups()` 对 kinsn proof sequence 使用固定 32 指令缓冲区，缺少上界检查
+### 1. [HIGH] `do_misc_fixups()` 对 kop proof sequence 使用固定 32 指令缓冲区，缺少上界检查
 位置: `kernel/bpf/verifier.c:3669-3720`, `kernel/bpf/verifier.c:23755-23785`, `include/linux/bpf_verifier.h:27`
 
-问题: `validate_kinsn_proof_seq()` 只要求 `cnt <= kinsn->max_insn_cnt`，但 `do_misc_fixups()` 里再次调用 `kinsn->instantiate_insn()` 时，目标缓冲区是固定大小的 `env->insn_buf[INSN_BUF_SIZE]`，而 `INSN_BUF_SIZE` 只有 32。这里既没有约束 `kinsn->max_insn_cnt <= 32`，也没有在 `instantiate_insn()` 返回后检查 `cnt <= 32`。
+问题: `validate_kop_proof_seq()` 只要求 `cnt <= kop->max_insn_cnt`，但 `do_misc_fixups()` 里再次调用 `kop->instantiate_insn()` 时，目标缓冲区是固定大小的 `env->insn_buf[INSN_BUF_SIZE]`，而 `INSN_BUF_SIZE` 只有 32。这里既没有约束 `kop->max_insn_cnt <= 32`，也没有在 `instantiate_insn()` 返回后检查 `cnt <= 32`。
 
-影响: 只要某个 kinsn 描述符把 `max_insn_cnt` 设到 32 以上，或者 `instantiate_insn()` 本身写超，就会在 verifier 堆对象里越界写，属于直接的内核内存破坏路径。
+影响: 只要某个 kop 描述符把 `max_insn_cnt` 设到 32 以上，或者 `instantiate_insn()` 本身写超，就会在 verifier 堆对象里越界写，属于直接的内核内存破坏路径。
 
-建议: 要么在注册/验证 kinsn 描述符时强制 `max_insn_cnt <= INSN_BUF_SIZE`，要么这里改成按 `max_insn_cnt` 动态分配临时缓冲区，不能继续写死到 `env->insn_buf`。
+建议: 要么在注册/验证 kop 描述符时强制 `max_insn_cnt <= INSN_BUF_SIZE`，要么这里改成按 `max_insn_cnt` 动态分配临时缓冲区，不能继续写死到 `env->insn_buf`。
 
 ## kernel/bpf/core.c
 
-### 2. [HIGH] kinsn-only 程序不再强制 `jit_needed=true`，JIT 失败后可能错误回退到 interpreter
+### 2. [HIGH] kop-only 程序不再强制 `jit_needed=true`，JIT 失败后可能错误回退到 interpreter
 位置: `kernel/bpf/core.c:2521-2553`, `kernel/bpf/verifier.c:3634-3647`, `kernel/bpf/verifier.c:23776-23777`
 
-问题: 现在 `bpf_prog_has_kfunc_call()` 只把传统 kfunc 视为 “必须 JIT”，显式排除了 `desc->kinsn`。但 `bpf_prog_select_runtime()` 仍然只依赖这个 helper 来决定 `jit_needed`。与此同时，`do_misc_fixups()` 在 `prog->jit_requested && bpf_kinsn_has_native_emit(kinsn)` 时会保留原始 `BPF_PSEUDO_KINSN_CALL`，把 lowering 留给 JIT。
+问题: 现在 `bpf_prog_has_kfunc_call()` 只把传统 kfunc 视为 “必须 JIT”，显式排除了 `desc->kop`。但 `bpf_prog_select_runtime()` 仍然只依赖这个 helper 来决定 `jit_needed`。与此同时，`do_misc_fixups()` 在 `prog->jit_requested && bpf_kop_has_native_emit(kop)` 时会保留原始 `BPF_PSEUDO_KOP_CALL`，把 lowering 留给 JIT。
 
-影响: 在 x86/arm64 这类支持 native emit 的架构上，只要主 JIT 在最后阶段因为内存或其它原因失败，程序就可能被错误地回退到 interpreter，而最终指令流里还留着 interpreter 根本不认识的 kinsn pseudo-insn。这不是单纯的 load failure，而是会把一个不可解释的程序放进运行路径。
+影响: 在 x86/arm64 这类支持 native emit 的架构上，只要主 JIT 在最后阶段因为内存或其它原因失败，程序就可能被错误地回退到 interpreter，而最终指令流里还留着 interpreter 根本不认识的 kop pseudo-insn。这不是单纯的 load failure，而是会把一个不可解释的程序放进运行路径。
 
-建议: `kinsn` 也必须被视为 “JIT required”。最直接的修法是让 `bpf_prog_has_kfunc_call()` 把 `kinsn` 一起算进去，或者单独增加 `bpf_prog_has_kinsn_call()` 并在 `bpf_prog_select_runtime()` 里并联判断。
+建议: `kop` 也必须被视为 “JIT required”。最直接的修法是让 `bpf_prog_has_kfunc_call()` 把 `kop` 一起算进去，或者单独增加 `bpf_prog_has_kop_call()` 并在 `bpf_prog_select_runtime()` 里并联判断。
 
 ## kernel/bpf/syscall.c
 

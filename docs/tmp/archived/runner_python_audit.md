@@ -37,7 +37,7 @@
 | ★ | `results.py` | 238 | UnifiedResultRecord + 各 TypedDict 类型定义（跨 suite 共用 schema）| **必要** |
 | ★ | `guest_prereqs.py` | 235 | 在 guest 侧检查/安装工具、加载容器镜像 | **必要** |
 | ★ | `arm64_kernel_config.py` | 225 | ARM64 内核编译配置注入（scripts/config 调用封装）| **可削减** |
-| ★ | `kinsn.py` | 217 | kinsn 模块加载/卸载/snapshot 捕获 | **必要** |
+| ★ | `kop.py` | 217 | kop 模块加载/卸载/snapshot 捕获 | **必要** |
 | ★ | `__init__.py` | 209 | 根模块：ROOT_DIR、run_command、resolve_binary、tail_text 等基础工具 | **必要** |
 | ★ | `app_runners/bpftrace.py` | 209 | bpftrace 脚本定义（6 个 ScriptSpec 硬编码）+ 启动/workload | **可用配置替代** |
 | ★ | `statistics.py` | 195 | 统计工具：geomean/ns_summary/float_summary/perf_metrics | **必要** |
@@ -80,7 +80,7 @@
 | `_deep_merge` + `_mapping_dict` | ~20 | 用 `dict.update` 或 PyYAML merge key 替代，不需要自定义 |
 | `_benchmark_config_skeleton` | ~15 | 硬编码骨架可以直接写在 YAML 文件里 |
 | `_zero_site_counts` | ~20 | 应移到 `results.py` 的 TypedDict 定义旁边，或完全删掉（调用者可用 `{}.get(key, 0)` 直接处理缺失 key） |
-| `collect_effective_enabled_passes` | ~30 | 仅被 `kinsn.py` 调用一处，可以内联到调用方 |
+| `collect_effective_enabled_passes` | ~30 | 仅被 `kop.py` 调用一处，可以内联到调用方 |
 | `_site_summary_from_counts` | ~20 | 纯字符串格式化，可删（调用方直接格式化） |
 | `_ordered_unique_passes` / `_normalize_pass_list` | ~25 | 重复逻辑，合并为一个函数即可 |
 | `_parse_enabled_passes` / `_benchmark_config_enabled_passes` | ~20 | 两层 lru_cache 封装同一个功能，合并 |
@@ -134,7 +134,7 @@ E2E case 的共享逻辑，但职责仍然混乱：
 
 | 代码块 | 行数估算 | 处理建议 |
 |---|:---:|---|
-| `_PENDING_KINSN_METADATA` 全局列表 + `reset_pending_result_metadata` + `attach_pending_result_metadata` | ~50 | 全局可变状态是 anti-pattern。改为 `CaseLifecycleState` 的字段即可，3 个函数合并为 1 |
+| `_PENDING_KOP_METADATA` 全局列表 + `reset_pending_result_metadata` + `attach_pending_result_metadata` | ~50 | 全局可变状态是 anti-pattern。改为 `CaseLifecycleState` 的字段即可，3 个函数合并为 1 |
 | `_current_program_ids` + `_new_program_ids` | ~30 | 与 `tetragon.py` 中的 `current_prog_ids` 完全重复；合并到 `bpf_stats.py` |
 | `_benchmark_pass_plan` + `_normalize_enabled_passes` + `_program_records_by_id` + `_scan_record_counts` + `_program_policy_context` | ~100 | Pass plan 解析逻辑应集中在 `rejit.py`，这里的 5 个函数是为了调用 `rejit.py` 而引入的间接层 |
 | `_merge_group_rejit_results` | ~80 | 仅被 `run_rejit_lifecycle` 内部使用一次，可以内联 |
@@ -238,7 +238,7 @@ AWS EC2 实例 launch/terminate/SSH 流程。
 |---|:---:|---|
 | `_run_in_runtime_container` | ~80 | Docker run 命令拼装，大量 `-v` bind mount 枚举，可以改为配置驱动 |
 | `SuiteEntrypoint._run_micro` / `_run_corpus` / `_run_e2e` / `_run_test` | ~250 | 四个方法结构高度类似（设置 env → 调 subprocess），可以提取公共 `_run_driver(driver_module, argv)` |
-| `SuiteEntrypoint._kinsn_load_command` / `_kinsn_unload_command` | ~40 | 仅构造一个 CLI 调用，可以内联 |
+| `SuiteEntrypoint._kop_load_command` / `_kop_unload_command` | ~40 | 仅构造一个 CLI 调用，可以内联 |
 
 ---
 

@@ -23,7 +23,7 @@ not the 261-line schema-validating version described in the prompt.
    "app", None)` and fall back to pass defaults.
 4. **Risk / dead surface:** `capture_workdir` is declared in YAML, e.g.
    `runner/config/passes/noop/default.yaml:4-7`, but `StepConfig` contains only
-   `command/log_level/kinsns` (`runner/libs/rejit_plan.py:29-33`) and daemon
+   `command/log_level/koperation` (`runner/libs/rejit_plan.py:29-33`) and daemon
    tars only failed workdirs (`daemon/src/commands.rs:408-420`). Fix: delete it
    or plumb it through the protocol.
 ## A. Design correctness

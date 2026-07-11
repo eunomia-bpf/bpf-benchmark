@@ -28,7 +28,7 @@
 从 related work 和 upstream 信号看，最需要避免的错误定位有两个:
 
 - **不要主打“minimal extensible compiler framework”**。这会直接撞上 K2/Merlin/ePass/BCF。
-- **不要主打“module-defined BPF ISA / kinsn”**。这会直接踩中 upstream 对 ISA 扩展和 verifier 复杂度的敏感点。
+- **不要主打“module-defined BPF ISA / kop”**。这会直接踩中 upstream 对 ISA 扩展和 verifier 复杂度的敏感点。
 
 更稳健的定位是:
 
@@ -503,7 +503,7 @@ bpftime 和你们最容易被混淆的地方是:
 对你们的启示非常强:
 
 - 如果要向 upstream 讲故事，**这条线比 “module-defined public ISA” 合法得多**。
-- 也就是说，最现实的路线不是 `kinsn`，而是:
+- 也就是说，最现实的路线不是 `kop`，而是:
   - 用户或 daemon 触发某种变换；
   - kernel 内部以 verifier-owned metadata 和 JIT-owned lowering 落地；
   - 对外仍尽量保持现有 UAPI 与安全边界。
@@ -810,7 +810,7 @@ Tracee 的 security model 文档明确写道:
 | **“这不就是 ePass + daemon 吗？”** | 不是。ePass 的主轴是 in-kernel IR/pass framework；我们的主轴应是 minimal kernel substrate + userspace optimizer + transparent specialization。我们不追求 general compiler framework。 |
 | **“BCF 已经把复杂 reasoning 下放到 userspace 了。”** | 对，这正是我们应该主动借力的思想。但 BCF 解决 acceptance；我们解决 transformation and replacement。最好把自己的 correctness story 升级为 pass-specific certificate / cheaply-checkable invariant。 |
 | **“verifier 只能保证 safety，不能保证语义等价。”** | 完全同意，而且要主动写出来。kernel 保证 memory/control-flow/resource safety；userspace/certificate 负责 transformation correctness。不要混淆 safety 与 semantic equivalence。 |
-| **“ISA extension / kinsn 不会上游。”** | 大概率不会。应该主动收缩 claim: 论文可以探索这个 design point，但更现实的 upstream-aligned 路线是 kfunc surface + verifier/JIT internal rewrite 或 same-prog re-JIT primitive。 |
+| **“ISA extension / kop 不会上游。”** | 大概率不会。应该主动收缩 claim: 论文可以探索这个 design point，但更现实的 upstream-aligned 路线是 kfunc surface + verifier/JIT internal rewrite 或 same-prog re-JIT primitive。 |
 | **“透明热替换并不存在，`bpf_link_update` 已经够了。”** | `bpf_link_update` 只能替换 link 所指向的新 prog，对 program identity 不是完全透明，且覆盖 attach type 有限。真正的透明 replacement 仍缺 same-`struct bpf_prog` re-JIT/image swap primitive。 |
 | **“const propagation / invariant specialization 对 map 可变性不成立。”** | 只有在 `BPF_MAP_FREEZE`、`BPF_F_RDONLY_PROG`、rodata/kconfig map 或其他足够强的 immutability 条件下才成立。没有这些条件就不要 claim。 |
 | **“生产系统已经会热更新 BPF 程序，Cilium/Tetragon/Tracee 已经做了。”** | 它们是 owner-managed lifecycle systems，只替换自己控制的程序，不透明，也不对 arbitrary live program 做在线 specialization。 |
@@ -937,7 +937,7 @@ Tracee 的 security model 文档明确写道:
 
 1. **把 thesis 锁死在 online + transparent + post-load + verifier-guarded specialization。**
 2. **把 correctness/safety split 讲成 certificate/invariant story，而不是“userspace 尽量保证正确”。**
-3. **把 upstream 故事从 `kinsn` 收缩到更现实的 building blocks。**
+3. **把 upstream 故事从 `kop` 收缩到更现实的 building blocks。**
 
 ## 9. Sources
 

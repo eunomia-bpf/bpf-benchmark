@@ -64,9 +64,9 @@ Add a server-level fake-CLI test for `{"cmd":"optimize"}` and one for `optimize-
 ## Verified Good
 
 - C1 implementation is fixed for the main subprocess paths. `run_output` and `run_with_file_io` check `status.success()` and include stderr/stdout summaries in the error (`daemon/src/commands.rs:1244-1272`). Final `bpfverify` and `bpfrejit` failures now use `?` and return through `server.rs` as `status: error`.
-- C2 implementation is fixed for explicitly requested side inputs. `bpfget --target` failure, missing requested target kinsns, `bpfverify --verifier-states-out` failure, and skipped explicitly requested passes now bail instead of warning and continuing.
+- C2 implementation is fixed for explicitly requested side inputs. `bpfget --target` failure, missing requested target koperation, `bpfverify --verifier-states-out` failure, and skipped explicitly requested passes now bail instead of warning and continuing.
 - H4 is fixed. The daemon test mock state uses type aliases, dead-code allowances were removed or replaced with `#[cfg(test)]`, and clippy passes.
-- The daemon test count is now 31. The meaningful new daemon coverage is `missing_target_kinsn_is_error`, `verifier_states_failure_is_error`, `final_verify_failure_is_error`, `rejit_failure_is_error`, and `map_inline_report_records_refresh_invalidation_tracker_after_rejit` (one previous target fallback test was converted, net +4). These are useful error-path/state-change tests.
+- The daemon test count is now 31. The meaningful new daemon coverage is `missing_target_kop_is_error`, `verifier_states_failure_is_error`, `final_verify_failure_is_error`, `rejit_failure_is_error`, and `map_inline_report_records_refresh_invalidation_tracker_after_rejit` (one previous target fallback test was converted, net +4). These are useful error-path/state-change tests.
 - `bpfopt` added `pass_report_serializes_map_inline_records_as_hex`, which is a useful serialization-contract test for the report side-output.
 - No added daemon matches for `.ok()`, `let _ =`, `unwrap_or_default`, or `#[allow(dead_code)]` were introduced by `bb354cd3`. Current matches are preexisting/test/drop cleanup uses.
 

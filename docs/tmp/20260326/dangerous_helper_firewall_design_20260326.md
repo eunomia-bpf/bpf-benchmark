@@ -227,7 +227,7 @@ helper_id = insn.imm
 
 - pseudo-call：`src_reg()==BPF_PSEUDO_CALL`
 - kfunc call：`src_reg()==BPF_PSEUDO_KFUNC_CALL`
-- kinsn packed / sidecar call
+- kop packed / sidecar call
 
 这与研究脚本统计口径一致，也和当前 `dangerous_helper_firewall.rs` 的实现风格一致。
 

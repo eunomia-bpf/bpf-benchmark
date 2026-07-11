@@ -79,12 +79,12 @@ daemon/src/
   commands.rs          # optimize/apply core, per-pass verify, final REJIT, structured result
   bpf.rs               # raw BPF syscall wrappers; no libbpf
   insn.rs              # BPF instruction encoding/decoding helpers
-  pass.rs              # BpfProgram IR, PassManager, PolicyConfig, KinsnRegistry
+  pass.rs              # BpfProgram IR, PassManager, PolicyConfig, KopRegistry
   passes/              # optimization pass implementations
   analysis/            # CFG/liveness/branch target/map info analyses
   invalidation.rs      # map-inline dependency tracking and invalidation
   profiler.rs          # bpf_stats/PMU profiling helpers
-  kfunc_discovery.rs   # /sys/kernel/btf kinsn discovery
+  kfunc_discovery.rs   # /sys/kernel/btf kop discovery
   verifier_log.rs      # verifier log parser for const/range oracle
   elf_parser.rs        # test-only object parsing support
   *_tests.rs           # unit/integration tests
@@ -109,7 +109,7 @@ Pass registry in `daemon/src/passes/mod.rs` contains:
 
 Key implementation points:
 
-- `daemon/src/main.rs` exposes only `Serve { socket }`, discovers kinsns at startup, detects platform caps, constructs `PassContext`, then calls `server::cmd_serve`.
+- `daemon/src/main.rs` exposes only `Serve { socket }`, discovers koperation at startup, detects platform caps, constructs `PassContext`, then calls `server::cmd_serve`.
 - `daemon/src/server.rs` owns the long-running Unix socket loop. It runs invalidation once per second and processes JSON requests.
 - `daemon/src/server.rs` implements `optimize`, `optimize-all`, `status`, profiling start/stop/load/snapshot paths.
 - `daemon/src/commands.rs::try_apply_one()` opens a live program fd, fetches original bytecode, runs the full pass pipeline, verifies each changed pass with `BPF_PROG_LOAD`, and does final `BPF_PROG_REJIT` only if the optimized program changed.
@@ -255,8 +255,8 @@ So `bpfopt` is not currently the daemon's compiler pass library. It is a standal
 
 `bpfopt-core` production API now has:
 
-- `KinsnRegistry.target_call_offsets`
-- `KinsnRegistry.call_off_for_pass()`
+- `KopRegistry.target_call_offsets`
+- `KopRegistry.call_off_for_pass()`
 
 But tests still reference old daemon-side transport fields/methods:
 
@@ -267,26 +267,26 @@ But tests still reference old daemon-side transport fields/methods:
 
 Examples:
 
-- `bpfopt/crates/bpfopt-core/src/pass_tests.rs` constructs `KinsnRegistry { target_btf_fds: ... }` and calls `btf_fd_for_pass()`.
-- `bpfopt/crates/bpfopt-core/src/passes/endian.rs` test writes `ctx.kinsn_registry.target_btf_fds` and asserts `prog.required_btf_fds.contains(&42)`.
+- `bpfopt/crates/bpfopt-core/src/pass_tests.rs` constructs `KopRegistry { target_btf_fds: ... }` and calls `btf_fd_for_pass()`.
+- `bpfopt/crates/bpfopt-core/src/passes/endian.rs` test writes `ctx.kop_registry.target_btf_fds` and asserts `prog.required_btf_fds.contains(&42)`.
 - `bpfopt/crates/bpfopt-core/src/passes/extract.rs` has the same pattern.
 
 But `bpfopt/crates/bpfopt-core/src/pass.rs` does not define those members. This is a clear stale-test / half-refactor artifact. Under `cargo test`, these test modules would need to compile, so this is likely a test build blocker unless hidden by some target selection not visible here.
 
-### 4.2 daemon and bpfopt kinsn transport models diverged
+### 4.2 daemon and bpfopt kop transport models diverged
 
 Daemon model:
 
 - `BpfProgram.required_btf_fds`
-- `KinsnRegistry.target_btf_fds`
-- pass emits kinsn calls with `CALL.off` determined by `ensure_btf_fd_slot()`
+- `KopRegistry.target_btf_fds`
+- pass emits kop calls with `CALL.off` determined by `ensure_btf_fd_slot()`
 - final `BPF_PROG_REJIT` sends `fd_array`
 
 bpfopt model:
 
 - no live BTF FD transport
 - target JSON may provide `call_off`
-- pass emits `CALL.off` from `KinsnRegistry.target_call_offsets`
+- pass emits `CALL.off` from `KopRegistry.target_call_offsets`
 
 This is reasonable for an offline CLI, but it means the pass code is no longer a drop-in shared library for daemon without an adapter layer. The plan doc says pass was extracted, but the implementation has split semantics.
 
@@ -321,7 +321,7 @@ Not verified:
 
 Static finding:
 
-- bpfopt-core test code contains stale references to fields/methods not present in current bpfopt-core `KinsnRegistry` / `BpfProgram`. This is more severe than a warning; it is likely a test compile failure once bpfopt tests are wired.
+- bpfopt-core test code contains stale references to fields/methods not present in current bpfopt-core `KopRegistry` / `BpfProgram`. This is more severe than a warning; it is likely a test compile failure once bpfopt tests are wired.
 
 ## 6. v2 architecture progress vs plan
 
@@ -332,9 +332,9 @@ Static finding:
 - **JSON request model**: `status`, `optimize`, `optimize-all`, profiling commands, pass enable/disable override.
 - **per-pass verify**: daemon verifies each changed pass with `BPF_PROG_LOAD`, updates verifier-derived state when possible, rolls back rejected pass changes.
 - **final REJIT**: daemon does final `BPF_PROG_REJIT` only when the pipeline result changes the program.
-- **kinsn discovery and transport**: daemon discovers kinsn BTF metadata, tracks required BTF FDs, builds `fd_array`, and emits packed kinsn calls.
+- **kop discovery and transport**: daemon discovers kop BTF metadata, tracks required BTF FDs, builds `fd_array`, and emits packed kop calls.
 - **dynamic map inlining invalidation**: serve loop owns `MapInvalidationTracker` and reoptimizes invalidated programs.
-- **kernel/module side exists in tree**: vendor kernel has `BPF_PROG_REJIT`, `orig_prog_insns`, kinsn verifier/JIT hooks; `module/x86` and `module/arm64` contain kinsn modules.
+- **kernel/module side exists in tree**: vendor kernel has `BPF_PROG_REJIT`, `orig_prog_insns`, kop verifier/JIT hooks; `module/x86` and `module/arm64` contain kop modules.
 
 ### Partially implemented / mismatched
 
@@ -347,7 +347,7 @@ Static finding:
 
 Plan-doc future/low-priority items are still not present as default implemented passes:
 
-- prefetch kinsn
+- prefetch kop
 - CCMP / SETcc / RDTSC / ADC/SBB / ANDN/BLS* families
 - register reallocation / REJIT spill-to-register
 - security passes remain explicitly out of current OSDI evaluation scope

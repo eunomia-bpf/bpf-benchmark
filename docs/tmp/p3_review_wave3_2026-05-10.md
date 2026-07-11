@@ -72,8 +72,8 @@ Summary: wave 3 remains `14A + 1B`. There are still no C/D-rated passes. `map_in
    - Production callers include `dce.rs:42`, `bounds_check_merge.rs:199`, `branch_flip.rs:455-477`, `ccmp.rs:276-304`, and `map_inline.rs:3191-3297`.
    - Wave 3 fixed the biggest offenders (`merge_linear_chain`, `remove_blocks`, and map-inline batch application), but the API is not uniformly clone-swap.
 
-3. Kinsn duplicate target registration still panics.
-   - Evidence: `assert!(previous.is_none(), "duplicate kinsn target name {name}")` remains at `bpfopt/crates/bpfopt/src/pass.rs:820-828`.
+3. KOperation duplicate target registration still panics.
+   - Evidence: `assert!(previous.is_none(), "duplicate kop target name {name}")` remains at `bpfopt/crates/bpfopt/src/pass.rs:820-828`.
    - Fix: return `Result` through registry construction and surface duplicate names as a friendly CLI error.
 
 ### P1 - design contract
@@ -193,7 +193,7 @@ Recommended wave 4:
 
 1. Codex 1 - BBProgram fail-fast and atomicity lane.
    - Scope: `bpfopt/crates/bpfopt/src/analysis/bbprogram_api.rs`, `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs`, `bpfopt/crates/bpfopt/src/pass.rs`, targeted tests only.
-   - Tasks: clone-swap `delete_insn`, `delete_cond_branch`, `replace_terminator`, and `permute_blocks`; convert duplicate kinsn-name registration panic into `Result`; delete or `#[cfg(test)]` unchecked panic APIs if production still has no callers.
+   - Tasks: clone-swap `delete_insn`, `delete_cond_branch`, `replace_terminator`, and `permute_blocks`; convert duplicate kop-name registration panic into `Result`; delete or `#[cfg(test)]` unchecked panic APIs if production still has no callers.
    - Risk: medium. Expected LOC delta: neutral to `+60`, with possible total LOC reduction if test-only APIs are removed.
 
 2. Codex 2 - `map_inline` B-to-A core.

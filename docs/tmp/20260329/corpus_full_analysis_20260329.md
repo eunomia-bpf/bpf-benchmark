@@ -26,7 +26,7 @@ Therefore:
 2. The measured-to-comparable loss is well explained: `290` pairs drop there, mostly because attach-trigger programs never fired (`214`, 73.8%) or because both sides reported `exec_ns=0` (`49`, 16.9%).
 3. `katran`'s `1.544x` is not strong evidence of a repo-wide speedup. It is based on only 2 transformed comparable pairs, and `all-comparable` katran is actually `0.923x`.
 4. `calico`'s `0.914x` is a much larger-sample result (`54` transformed comparable pairs), but it is concentrated in a few objects and the code-size delta is tiny. Trust the repo-level negative direction more than any single-object ranking.
-5. Kinsn modules did load: the guest log reports `5/5 loaded` twice on x86, so zero hit rate for `rotate` is a pattern issue, not a module-loading issue.
+5. KOperation modules did load: the guest log reports `5/5 loaded` twice on x86, so zero hit rate for `rotate` is a pattern issue, not a module-loading issue.
 6. This artifact records `--repeat 50`, but not `--profile dev`; the often-quoted `iterations=1` is not actually recorded for `091745`. The statistical discussion should be about 50-repeat averaged samples with no preserved variance, not about a confirmed `iterations=1` run.
 
 ## 1. Funnel: How Much Drops at Each Step, and Why
@@ -227,10 +227,10 @@ Denominator choices:
 Takeaways:
 
 - The corpus is still overwhelmingly a `dce` / `const_prop` / `map_inline` story.
-- Kinsn-backed passes are active, but sparse.
+- KOperation-backed passes are active, but sparse.
 - `rotate` is enabled in config but produced zero hits in this full run.
 
-## 5. Were the Kinsn Modules Loaded?
+## 5. Were the KOperation Modules Loaded?
 
 Yes.
 
@@ -241,7 +241,7 @@ The exact `091745` guest log says:
 - `Loaded bpf_extract`
 - `Loaded bpf_rotate`
 - `Loaded bpf_select`
-- `kinsn modules: 5/5 loaded`
+- `kop modules: 5/5 loaded`
 
 This appears twice in the same `stdout_tail`, once before the VM script banner and once inside the captured script transcript.
 
@@ -255,7 +255,7 @@ The x86 module snapshot under `guest-inputs/module/x86` contains exactly these f
 
 So:
 
-- missing pass hits are not caused by missing kinsn modules
+- missing pass hits are not caused by missing kop modules
 - `rotate=0` means "no corpus opportunities fired", not "module failed to load"
 
 ## 6. Code Change Quantification
@@ -322,7 +322,7 @@ High confidence:
 - funnel counts
 - exclusion reasons
 - pass hit rates
-- kinsn module load status
+- kop module load status
 - code-size ratios
 
 Medium confidence:

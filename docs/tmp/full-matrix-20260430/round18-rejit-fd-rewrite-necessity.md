@@ -9,7 +9,7 @@
 ## 读码范围
 
 - `kernel/bpf/syscall.c`: `BPF_PROG_REJIT` 入口、swap、`orig_insns` 保存和导出。
-- `kernel/bpf/verifier.c`: `bpf_check()`、`process_fd_array()`、`resolve_pseudo_ldimm64()`、module kfunc/kinsn BTF 解析。
+- `kernel/bpf/verifier.c`: `bpf_check()`、`process_fd_array()`、`resolve_pseudo_ldimm64()`、module kfunc/kop BTF 解析。
 - `daemon/src/bpf.rs`: `relocate_map_fds_for_rejit()`。
 - `daemon/src/commands.rs`: `rejit_program()`、`build_rejit_fd_array()`。
 - `bpfopt/crates/kernel-sys/src/lib.rs`: `prog_rejit()` attr 包装、`prog_get_original()`。
@@ -106,7 +106,7 @@ daemon 端：
 
 1. `bpfget::snapshot_program()` 打开 prog fd，读取 `prog_get_original()`，再读取 `prog_info.map_ids`：`daemon/crates/bpfget/src/lib.rs:126-140`。
 2. `build_rejit_fd_array()`：
-   - module kinsn BTF fd 按 `call_offset` 放进 `fd_array` 前缀。
+   - module kop BTF fd 按 `call_offset` 放进 `fd_array` 前缀。
    - 如果有 module BTF，`fd_array[0]` 放第一个 module BTF fd 的 duplicate placeholder。
    - map fd 按 `map_ids` 顺序 append：`daemon/src/commands.rs:1466-1590`。
 3. `rejit_program()` 复制 candidate，调用 `relocate_map_fds_for_rejit()`，然后把 relocated insns 和完整 `fd_array` 传给 `kernel_sys::prog_rejit()`：`daemon/src/commands.rs:368-392`。
@@ -127,7 +127,7 @@ verifier 端：
    - BTF fd: `__add_used_btf(env, btf)`
    - 其它 fd: reject
    代码：`kernel/bpf/verifier.c:25835-25895`
-3. `add_subprog_and_kfunc()` 处理 kfunc/kinsn call。对 module BTF 的 call，`insn->off > 0` 会在后续 `find_kfunc_desc_btf()` 中从 `fd_array[off]` 取 module BTF fd：`kernel/bpf/verifier.c:3273-3315`、`3348-3359`。
+3. `add_subprog_and_kfunc()` 处理 kfunc/kop call。对 module BTF 的 call，`insn->off > 0` 会在后续 `find_kfunc_desc_btf()` 中从 `fd_array[off]` 取 module BTF fd：`kernel/bpf/verifier.c:3273-3315`、`3348-3359`。
 4. `resolve_pseudo_ldimm64()` 解析 map pseudo ldimm64：`kernel/bpf/verifier.c:26437`、`22109-22225`。
 
 四种 map pseudo mode：
@@ -168,7 +168,7 @@ prog_fd + new bytecode + optional fd_array
    它是 `fd_array` index。daemon 若想用 IDX 规避 raw fd，就必须传 `fd_array`，并且 imm 要匹配完整 `fd_array` 布局。
 
 3. **module BTF 也要每次 verify 时提供 fd**  
-   module kfunc/kinsn call 的 `off > 0` 被解释成 `fd_array[off]`。当前 verifier 不从旧 `prog->aux->kfunc_btf_tab` / `used_btfs` 复用 module BTF。
+   module kfunc/kop call 的 `off > 0` 被解释成 `fd_array[off]`。当前 verifier 不从旧 `prog->aux->kfunc_btf_tab` / `used_btfs` 复用 module BTF。
 
 ### fd_array 是否能退化成“原始 fd_array 的 daemon 端等价”
 
@@ -219,7 +219,7 @@ prog_fd + new bytecode + optional fd_array
 
 ## Q6: BTF module fd_array
 
-module kfunc/kinsn 的 BTF fd_array 不是 daemon 自己凭空发明的；当前 verifier 明确这样设计：
+module kfunc/kop 的 BTF fd_array 不是 daemon 自己凭空发明的；当前 verifier 明确这样设计：
 
 - `CALL.off == 0`: 使用 vmlinux BTF。
 - `CALL.off > 0`: `off` 是 `fd_array` 下标，verifier 从 `fd_array[off]` 读取 BTF fd。
@@ -230,11 +230,11 @@ module kfunc/kinsn 的 BTF fd_array 不是 daemon 自己凭空发明的；当前
 - `find_kfunc_desc_btf()` 对 `offset > 0` 调 `__find_kfunc_desc_btf()`: `kernel/bpf/verifier.c:3348-3359`
 - `__find_kfunc_desc_btf()` 要求 `env->fd_array` 非空，从 `fd_array[offset]` 读 `btf_fd`: `kernel/bpf/verifier.c:3289-3299`
 - 检查 `btf_is_module(btf)`: `kernel/bpf/verifier.c:3305-3308`
-- `add_subprog_and_kfunc()` 对 `BPF_PSEUDO_KINSN_CALL` 调 `add_kfunc_desc(..., true)`: `kernel/bpf/verifier.c:3954-3964`
+- `add_subprog_and_kfunc()` 对 `BPF_PSEUDO_KOP_CALL` 调 `add_kfunc_desc(..., true)`: `kernel/bpf/verifier.c:3954-3964`
 
 REJIT swap 确实会交换 `used_btfs` 和 `kfunc_btf_tab`，但这些是 tmp verifier pass 生成的新 metadata，不是进入 verifier 前从旧 prog 复用的解析表：`kernel/bpf/syscall.c:3401-3402`、`3422-3423`。
 
-所以当前 ABI 下，如果 candidate 里有 module kinsn/kfunc call，daemon 必须每次 verify 提供 module BTF fd。这个复杂度是 kernel verifier ABI 强制的。
+所以当前 ABI 下，如果 candidate 里有 module kop/kfunc call，daemon 必须每次 verify 提供 module BTF fd。这个复杂度是 kernel verifier ABI 强制的。
 
 ## Q7: GET_ORIGINAL 里的 old loader fd
 
@@ -272,7 +272,7 @@ Bug D 本质就是这条绕路造成的：如果 daemon 从 transformed candidat
 
 - map fd 重新打开是必要的，因为 verifier 当前只认 fd/fd_array。
 - `fd_array_cnt` 预绑定所有旧 maps，有助于在 pass 删除 map 引用时仍保持 live program 的 map bindings。
-- module BTF fd_array 是 verifier 对 module kfunc/kinsn 的硬要求。
+- module BTF fd_array 是 verifier 对 module kfunc/kop 的硬要求。
 
 真正可以质疑的是当前 FD-form rewrite 的形态。更稳的 no-kernel-change 方向是尽早把 daemon 内部 bytecode 从 raw fd 语义切到 IDX 语义，避免每个 pass 都携带 loader fd。
 

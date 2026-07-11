@@ -32,7 +32,7 @@ $ find runner/libs -name '*.py' | xargs wc -l | sort -rn
    276 runner/libs/run_target_suite.py
    269 runner/libs/app_runners/tetragon.py
    257 runner/libs/kvm_executor.py
-   217 runner/libs/kinsn.py
+   217 runner/libs/kop.py
    208 runner/libs/results.py
    207 runner/libs/aws_common.py
    207 runner/libs/app_runners/bpftrace.py
@@ -105,7 +105,7 @@ $ find runner/suites -name '*.py' | xargs wc -l | sort -rn
 | P1 | `runner/suites/micro.env:8` | `SUITE_DEFAULT_REMOTE_COMMANDS` | 同上 | 1 |
 | P1 | `runner/suites/test.env:14` | `SUITE_DEFAULT_REMOTE_COMMANDS` | 同上 | 1 |
 | P2 | `runner/libs/bpf_stats.py:3/12-13` | 非 root 时自动加 `sudo` | 项目 runner 约束倾向 VM 内 root 执行；host 不应隐式 sudo | 3 |
-| P2 | `runner/libs/kinsn.py:3/119-121` | 非 root 时自动加 `sudo` | `resolve_binary("sudo")` 只用于这里；删除 fallback 后可同步收 import | 4 |
+| P2 | `runner/libs/kop.py:3/119-121` | 非 root 时自动加 `sudo` | `resolve_binary("sudo")` 只用于这里；删除 fallback 后可同步收 import | 4 |
 | P2 | `runner/suites/_common.py:266-272` | `ensure_bpf_stats_enabled()` 的 sudo fallback | 同类问题；应 root-only fail fast | 7 |
 
 合计：233 行。
@@ -210,7 +210,7 @@ $ find runner/suites -name '*.py' | xargs wc -l | sort -rn
 
 `runner/libs/input_generators.py`（679 行）：micro benchmark 输入生成器与 YAML spec 绑定，`materialize_input` `668-679` 是入口。大量 `generate_*` 函数是动态 registry 目标，不能用简单 grep 判死。机械重复来自输入构造模板，但属于生成器表驱动代码，暂不建议压缩。
 
-`runner/libs/kinsn.py`（217 行）：kinsn module 解析、加载、snapshot、daemon discovery。未发现死函数。`load_kinsn_modules()` `101-166` 中 `119-121` 的 sudo fallback 建议删除，并同步清理 `os/resolve_binary` import。
+`runner/libs/kop.py`（217 行）：kop module 解析、加载、snapshot、daemon discovery。未发现死函数。`load_kop_modules()` `101-166` 中 `119-121` 的 sudo fallback 建议删除，并同步清理 `os/resolve_binary` import。
 
 `runner/libs/kvm_executor.py`（257 行）：KVM guest suite 命令构造、guest script 写入、vng 执行。未发现死函数。主要问题是 `micro/corpus/e2e/test_suite_command` `32-192` 与 AWS remote helper 重复。
 
@@ -246,7 +246,7 @@ $ find runner/suites -name '*.py' | xargs wc -l | sort -rn
 
 `runner/suites/micro.py`（213 行）：micro suite 独立入口，准备 runner binary、program dir、runtime env，调用 `micro/driver.py`。未发现死函数；有 2 个未用 import：`20/25`。
 
-`runner/suites/test.py`（384 行）：test suite 独立入口，覆盖 selftest/negative/test/full/fuzz，加载 kinsn modules，生成 artifact 和 summary。未发现死函数；有 3 个未用 import：`23/30/32`。比其他 suite 特殊，不建议强行合并。
+`runner/suites/test.py`（384 行）：test suite 独立入口，覆盖 selftest/negative/test/full/fuzz，加载 kop modules，生成 artifact 和 summary。未发现死函数；有 3 个未用 import：`23/30/32`。比其他 suite 特殊，不建议强行合并。
 
 ## 按优先级排序的修复建议
 
@@ -258,7 +258,7 @@ $ find runner/suites -name '*.py' | xargs wc -l | sort -rn
 
 4. P1：修正 `suite_args.py` 的边界：公开 CSV helper，停止 `run_contract.py:15` 导入私有函数；补齐 AWS prefix 下 test 参数 `FUZZ_ROUNDS` / `SCX_PROG_SHOW_RACE_*`。
 
-5. P2：删除 runner common 路径里的隐式 sudo fallback：`bpf_stats.py:12-13`、`kinsn.py:119-121`、`_common.py:266-272`。如果 AWS 远端确实需要 sudo，应只保留在 `aws_remote_host.py:353-367` 这类远端 root escalation 边界。
+5. P2：删除 runner common 路径里的隐式 sudo fallback：`bpf_stats.py:12-13`、`kop.py:119-121`、`_common.py:266-272`。如果 AWS 远端确实需要 sudo，应只保留在 `aws_remote_host.py:353-367` 这类远端 root escalation 边界。
 
 6. P2：处理 `enable_bpf_stats()` no-op context manager。建议先让 suite entrypoint 明确启用 `kernel.bpf_stats_enabled`，然后把 corpus/e2e case 里的 `with enable_bpf_stats():` 改成普通代码块，最后删除 `bpf_stats.py:18-19`。
 

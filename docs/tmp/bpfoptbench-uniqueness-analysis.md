@@ -29,7 +29,7 @@ The naive framing of "BPFOptBench is iterative while K2 is one-shot" misses the 
 **Critical Distinction:**
 K2 assumes the optimization decision is uniform (find the best bytecode for this program). BPFOptBench discovers that the optimization decision is context-dependent:
 - Same pass (bulk_memory): 1.9x speedup on siphash_rotate64_mixer, 14% regression on bpftrace_comm_key_fnv
-- Same pass (kinsn): 7% speedup on tracee, 7% regression on OTEL
+- Same pass (kop): 7% speedup on tracee, 7% regression on OTEL
 - Same pass (bulk_memory) on Cilium: 22% speedup on x86, 7% regression on ARM64
 
 K2 cannot discover these cross-program, cross-architecture interactions because it optimizes one program at a time without production workload context.
@@ -108,7 +108,7 @@ K2 cannot discover these cross-program, cross-architecture interactions because 
 BPFOptBench provides feedback at three distinct stages:
 
 1. **Verifier Layer**: Safety constraints, bounds analysis, register state tracking, rejection reasons
-2. **JIT Layer**: Native code size, architecture-specific lowering (kinsn emit), instruction selection
+2. **JIT Layer**: Native code size, architecture-specific lowering (kop emit), instruction selection
 3. **Runtime Layer**: Per-program `run_cnt_delta` and `run_time_ns_delta`, workload success/failure
 
 No other framework spans all three layers. ComPilot has compiler feedback but not kernel verifier/JIT. KernelBench has execution feedback but not verifier states.
@@ -155,7 +155,7 @@ Based on implementation analysis:
 **What Exists:**
 - 2,075+ result directories in `corpus/results/`
 - Structured JSON with metadata, result, progress payloads
-- Per-session artifacts: enabled passes, kinsn module discovery, per-app results
+- Per-session artifacts: enabled passes, kop module discovery, per-app results
 - Git history: 1,651 automated commits
 
 **What Does NOT Exist:**
@@ -168,7 +168,7 @@ Based on implementation analysis:
 
 The 2,874 sessions represent accumulated knowledge, but agents cannot directly access it. Learning happens through:
 1. Human analysis of past results
-2. Manual policy curation (e.g., selecting kinsn as the most effective family)
+2. Manual policy curation (e.g., selecting kop as the most effective family)
 3. Configuration updates to benchmark_config.yaml
 
 This is a potential improvement area: adding queryable history would enable agents to learn from past sessions (e.g., "bulk_memory regressed on OTEL in session X, skip it this time").
@@ -207,7 +207,7 @@ This is a potential improvement area: adding queryable history would enable agen
 
 - "BPFOptBench is iterative while traditional optimizers are one-shot" (K2 also iterates)
 - "BPFOptBench uses LLMs" (the value is the framework, not the model)
-- Overemphasizing kinsn results (the contribution is the framework that discovered kinsn effectiveness)
+- Overemphasizing kop results (the contribution is the framework that discovered kop effectiveness)
 
 ### 6.2 Emphasize
 
@@ -223,7 +223,7 @@ This is a potential improvement area: adding queryable history would enable agen
 
 ### 6.3 Key Narrative
 
-> Traditional eBPF optimizers apply uniform transformations without execution feedback. BPFOptBench enables iterative exploration under real workload conditions, revealing that per-program, per-architecture policy selection is essential. The framework's 2,874-session exploration discovered that kinsn (kernel instruction lowering) is the most effective optimization family, achieving 6% speedup on x86 and 21% on ARM64 micro benchmarks.
+> Traditional eBPF optimizers apply uniform transformations without execution feedback. BPFOptBench enables iterative exploration under real workload conditions, revealing that per-program, per-architecture policy selection is essential. The framework's 2,874-session exploration discovered that kop (kernel instruction lowering) is the most effective optimization family, achieving 6% speedup on x86 and 21% on ARM64 micro benchmarks.
 
 ---
 
@@ -253,7 +253,7 @@ history.query("best pass list for tracee on arm64") -> [...]
 
 ### 8.2 Episodic Memory Integration
 Enable agents to leverage cross-session patterns:
-- "OTEL consistently regresses with kinsn; skip by default"
+- "OTEL consistently regresses with kop; skip by default"
 - "tracee benefits most from cond_select; prioritize"
 
 ### 8.3 Automated Policy Learning
@@ -265,7 +265,7 @@ Train policy selection models from the 2,874-session corpus to predict optimal p
 
 ### Per-Program Variance (Table 1)
 ```
-Target                        kinsn Pass    Speedup
+Target                        kop Pass    Speedup
 siphash_rotate64_mixer        bulk_memory   1.90x
 bpftrace_comm_key_fnv         bulk_memory   0.86x (14% regression)
 ```

@@ -119,7 +119,7 @@ Stdout:
   {
     "name": "bulk-memory",
     "canonical_name": "bulk_memory",
-    "description": "Lower large scalarized memcpy/memset runs into bulk-memory kinsn calls"
+    "description": "Lower large scalarized memcpy/memset runs into bulk-memory kop calls"
   },
   {
     "name": "rotate",
@@ -172,15 +172,15 @@ Usage: bpfopt [OPTIONS] <COMMAND>
 
 Commands:
   wide-mem            Fuse byte-by-byte loads into wider memory accesses
-  rotate              Replace shift+or patterns with rotate kinsn calls
+  rotate              Replace shift+or patterns with rotate kop calls
   const-prop          Fold register constants
-  cond-select         Replace branch-over-mov with conditional select kinsn calls
-  extract             Replace shift+mask with bit-field extract kinsn calls
+  cond-select         Replace branch-over-mov with conditional select kop calls
+  extract             Replace shift+mask with bit-field extract kop calls
   endian              Fuse endian load+swap sequences
   branch-flip         Reorder if/else bodies using PGO profile data
   dce                 Remove unreachable blocks, NOPs, and dead register definitions
   map-inline          Inline stable map lookup values
-  bulk-memory         Lower large memcpy/memset runs into bulk-memory kinsn calls
+  bulk-memory         Lower large memcpy/memset runs into bulk-memory kop calls
   bounds-check-merge  Merge packet bounds-check ladders
   skb-load-bytes      Specialize skb_load_bytes helper sites
   optimize            Run a pass pipeline in-process
@@ -193,7 +193,7 @@ Options:
       --output <FILE>           Output bytecode or JSON file. Defaults to stdout
       --report <FILE>           Pass report JSON output file
       --platform <ARCH>         Target architecture: x86_64 or aarch64
-      --kinsns <LIST>           Available kinsns, comma-separated. Entries may be name or name:btf_id
+      --koperation <LIST>           Available koperation, comma-separated. Entries may be name or name:btf_id
       --target <FILE>           Target platform JSON file
       --profile <FILE>          PGO profile JSON file
       --verifier-states <FILE>  Verifier states JSON file
@@ -222,7 +222,7 @@ Stdout:
   "insn_count": 2,
   "subprog_count": 1,
   "map_lookups": [],
-  "kinsn_calls": [],
+  "kop_calls": [],
   "ld_imm64_count": 0,
   "branch_count": 0
 }
@@ -422,7 +422,7 @@ Status: PASS
 Command:
 
 ```sh
-printf '%s' '{"arch":"x86_64","features":["cmov"],"kinsns":{}}' > /tmp/empty-target.json
+printf '%s' '{"arch":"x86_64","features":["cmov"],"koperation":{}}' > /tmp/empty-target.json
 $BIN/bpfopt rotate --target /tmp/empty-target.json < /tmp/min.bin
 ```
 
@@ -433,7 +433,7 @@ Stdout: empty
 Stderr:
 
 ```text
-error: kinsn 'bpf_rotate64' not in target
+error: kop 'bpf_rotate64' not in target
 ```
 
 Status: PASS
@@ -596,7 +596,7 @@ Options:
       --json           Use JSON output for --list
       --target         Write target.json for the host platform
       --output <FILE>  Output file. Defaults to stdout
-      --kinsns <LIST>  Manual kinsn descriptors for --target, comma-separated name:btf_func_id
+      --koperation <LIST>  Manual kop descriptors for --target, comma-separated name:btf_func_id
   -h, --help           Print help
   -V, --version        Print version
 ```
@@ -681,7 +681,7 @@ Arguments:
   [FILE]     Raw struct bpf_insn[] input file. Defaults to stdin
 
 Options:
-      --fd-array <FILE>  kinsn fd_array JSON manifest
+      --fd-array <FILE>  kop fd_array JSON manifest
       --dry-run          Verify the bytecode with BPF_PROG_LOAD and do not call BPF_PROG_REJIT
       --output <FILE>    Optional summary JSON output file
   -h, --help             Print help
@@ -754,7 +754,7 @@ Stdout:
   "insn_count": 24,
   "subprog_count": 1,
   "map_lookups": [],
-  "kinsn_calls": [],
+  "kop_calls": [],
   "ld_imm64_count": 0,
   "branch_count": 3
 }

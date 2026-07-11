@@ -2,18 +2,18 @@
 
 ## Scope
 
-Implemented the experimental `prefetch` kinsn pass for helper-before-lookup sites.
+Implemented the experimental `prefetch` kop pass for helper-before-lookup sites.
 Phase 1 inserts a memory hint before `map_lookup_elem` when a hot PMU profile site
 is present. Phase 2 map-inline direct-load prefetching is left as follow-up work.
 
 The pass is registered for explicit use but is not part of
 `DEFAULT_OPTIMIZE_PASS_ORDER`.
 
-## Kernel kinsn modules
+## Kernel kop modules
 
 - Added `module/x86/bpf_prefetch.c`.
   - Encodes `PREFETCHT0 [ptr]`.
-  - The kinsn is a pure hint and uses a no-op proof program, so verifier-visible
+  - The kop is a pure hint and uses a no-op proof program, so verifier-visible
     state is unchanged.
   - Registers `bpf_prefetch` through the module BTF/kfunc registration path.
 - Added `module/arm64/bpf_prefetch.c`.
@@ -43,7 +43,7 @@ The pass is registered for explicit use but is not part of
 ## Runtime integration
 
 - Added `prefetch_sites` profile JSON parsing.
-- Added `bpf_prefetch` kinsn discovery/required-kinsn mapping.
+- Added `bpf_prefetch` kop discovery/required-kop mapping.
 - Added runner result aggregation support for `prefetch_sites`.
 - Updated daemon side-input generation so pass-specific side inputs are only
   captured for passes that need them. This keeps a prefetch-only run from
@@ -65,7 +65,7 @@ The pass is registered for explicit use but is not part of
     `corpus/results/x86_kvm_corpus_20260430_204123_124983`
   - Status: `ok`
   - Apps: 22/22 ok
-  - Loaded kinsn modules included `bpf_prefetch`
+  - Loaded kop modules included `bpf_prefetch`
   - Requested programs: 519
   - Prefetch-applied programs: 0
   - Not-applied programs: 519
@@ -73,7 +73,7 @@ The pass is registered for explicit use but is not part of
   - Acceptance rate for requested programs: 519/519 (100%)
   - Acceptance rate for mutated programs: not applicable because no PMU
     `prefetch_sites` profile was provided, so the runtime profile gate emitted
-    no kinsn calls.
+    no kop calls.
   - Corpus performance summary for the run:
     - `program_count`: 132
     - `wins`: 54

@@ -4,7 +4,7 @@ A research escape hatch that lets userspace upload arbitrary x86-64 byte
 sequences and execute them in kernel context as if they were the body of
 a BPF program. The whole pipeline is end-to-end functional and gives us a
 true "no verifier, no BPF JIT translation" performance baseline to compare
-against bpfopt+kinsn passes — i.e. the A column of the OSDI paper's
+against bpfopt+kop passes — i.e. the A column of the OSDI paper's
 three-archetype comparison.
 
 ## Goal
@@ -13,8 +13,8 @@ For each micro benchmark in `micro/programs/*.bpf.c`:
 
 | column | what runs | what it tells us |
 |--------|-----------|------------------|
-| **A. native kernel** (`native_lab`) | clang -target x86_64 -O2 of the same `.bpf.c` source → linked through `native-link` → splatted into a BPF JIT image via the `bpf_x86_native_lab` kinsn | what the function would cost with no verifier inserts, no BPF→x86 translation |
-| **B. kinsn** | the production bpfopt+kinsn pipeline (run via `make micro` etc.) | how close the production pipeline gets to A |
+| **A. native kernel** (`native_lab`) | clang -target x86_64 -O2 of the same `.bpf.c` source → linked through `native-link` → splatted into a BPF JIT image via the `bpf_x86_native_lab` kop | what the function would cost with no verifier inserts, no BPF→x86 translation |
+| **B. kop** | the production bpfopt+kop pipeline (run via `make micro` etc.) | how close the production pipeline gets to A |
 | **C. kernel BPF JIT** | stock `.bpf.o` → libbpf → BPF JIT | the BPF performance baseline B is trying to beat |
 
 This directory ships A. B and C run through existing `make micro` infra;
@@ -35,7 +35,7 @@ inside the same `micro_exec` binary.
    │ tiny BPF stub (built at runtime)     │  BPF_PROG_LOAD      ▼
    │   for each chunk:                    │ ───────────────▶ verifier sees
    │     sidecar(blob_id=i)               │                  `r0 = XDP_PASS`
-   │     call bpf_x86_native_lab_emit     │                  (the kinsn's
+   │     call bpf_x86_native_lab_emit     │                  (the kop's
    │   exit                               │                   instantiate_insn
    └──────────────────────────────────────┘                   proof; the actual
                                                               emit_x86 splats
@@ -71,10 +71,10 @@ native-sim/x86/native_lab/
                                       (gitignored)
 ```
 
-The kernel-side kinsn module lives at `module/x86/bpf_x86_native_lab.c`
-because the project's existing kinsn build pipeline auto-scans that
+The kernel-side kop module lives at `module/x86/bpf_x86_native_lab.c`
+because the project's existing kop build pipeline auto-scans that
 directory. Conceptually it's part of this research line; physically it
-sits with the other kinsn modules so `make host-kinsn-x86` picks it up.
+sits with the other kop modules so `make host-kop-x86` picks it up.
 
 ## The linker — what it actually does
 
@@ -84,7 +84,7 @@ absolute minimum work needed to bridge two ABIs:
 
 1. **SysV AMD64** (what clang emits): `rdi` = first arg, `rax` = return,
    `rbx`/`rbp`/`r12`-`r15` callee-saved, control returns via `ret`.
-2. **The native kernel kinsn contract** (what kernel will run): splatted in
+2. **The native kernel kop contract** (what kernel will run): splatted in
    the middle of a BPF JIT image where the BPF JIT prologue already
    pushed the callee-saved registers and the BPF JIT epilogue expects to
    pop them. The blob must fall through to the epilogue, never `ret`.
@@ -118,8 +118,8 @@ pushed, and the BPF JIT prologue's saved values are intact.
 # 1. Rust linker
 cargo build --release --manifest-path native-sim/x86/native_lab/native_link/Cargo.toml
 
-# 2. Kinsn module (uses the existing host-kinsn-x86 target)
-make host-kinsn-x86
+# 2. KOperation module (uses the existing host-kop-x86 target)
+make host-kop-x86
 
 # 3. micro_exec (the `run-native-lab` mode is already wired into the
 #    existing CMake target via runner/src/native_lab_runner.cpp)
@@ -465,7 +465,7 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   save/restore such as `stp x30, x19, [sp, #-16]!` / `ldp x30, x19,
   [sp], #16`, unlike x86 where native-link trims the entry ABI frame and
   asks the BPF JIT to preserve raw-blob callee-saved registers via the
-  kinsn sidecar. arm64 now uses the same model: proof mode replaces entry
+  kop sidecar. arm64 now uses the same model: proof mode replaces entry
   STP/LDP save/restore pairs for x19..x22/x30 with NOPs, records a
   generic `callee_saved_mask` in `.native_link_abi`, and the arm64
   native_lab proof marks BPF r6..r9 as used so the BPF JIT prologue owns
@@ -474,7 +474,7 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   buffer address.** On 2026-05-22 the first direct-call attempt used the
   temporary `image + off` pointer while the x86 BPF JIT was still sizing
   and copying code, so the computed rel32 displacement did not match the
-  final executable address. The kinsn x86 emitter now receives the final
+  final executable address. The kop x86 emitter now receives the final
   JIT IP through the existing `emit_x86` callback and rewrites
   `movabs rax, target; call *rax` slots to `call rel32` only when
   the final target is reachable. ARRAY/PERCPU_ARRAY map updates are
@@ -545,7 +545,7 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   needs a lookup table, the linker will need to splat the `.rodata`
   bytes adjacent to `.text` and fix up the `disp32`s.
 - **`bpf_x86_native_lab` is loaded explicitly, never automatically.**
-  It is *not* part of `expected_kinsn_modules()` and the production
+  It is *not* part of `expected_kop_modules()` and the production
   benchmark runner doesn't insmod it. Smoke scripts insmod it before
   use.
 - **Current helper-call runtime ABI is fail-fast `call rel32`.**

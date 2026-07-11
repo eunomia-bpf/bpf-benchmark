@@ -7,7 +7,7 @@
   - `prog_type=0`, `arch=X86_64`, **无 verifier states**, **map_inline / branch_flip 被排除**
   - 每个 pass 独立喂入 fresh ProgramCFG,无上游 pass 影响
 - **corpus**(live kernel + daemon socket protocol,x86 kvm,SAMPLES=3):
-  - kinsn 6 + wide_mem + skb_load_bytes_spec: `x86_kvm_corpus_20260507_081532_470100`
+  - kop 6 + wide_mem + skb_load_bytes_spec: `x86_kvm_corpus_20260507_081532_470100`
     pipeline: `rotate → cond_select → extract → endian_fusion → bulk_memory → prefetch → skb_load_bytes_spec → wide_mem`
   - map_inline: `x86_kvm_corpus_20260514_055119_589172`(`noop → map_inline`)
   - lea: `x86_kvm_corpus_20260514_045949_477265`(lea 单独)
@@ -52,7 +52,7 @@
 
 → **结论**: lea 是 testbin 数字最权威的 pass,可直接拿来当 paper 数据(tracee 须用其他 run 补)。
 
-### kinsn 系 6 (rotate / cond_select / extract / endian_fusion / bulk_memory / prefetch) + wide_mem
+### kop 系 6 (rotate / cond_select / extract / endian_fusion / bulk_memory / prefetch) + wide_mem
 
 | pass | app | testbin apply | corpus apply | 差异 | 原因 |
 |---|---|---:|---:|---:|---|
@@ -132,7 +132,7 @@ testbin YAML 注释明示 `map_inline` excluded(需要 external side-input)。co
 
 ### ✅ 修正 1: `rotate` 不再"消失"
 
-`rotate katran=20 / tetragon=44` 在新 corpus 完全等于 testbin。之前看到 corpus rotate=0 是因为读了 0507_081532 那次的 pipeline,kinsn pass 顺序里其实正常 hit。"rotate 谜题" 消除。
+`rotate katran=20 / tetragon=44` 在新 corpus 完全等于 testbin。之前看到 corpus rotate=0 是因为读了 0507_081532 那次的 pipeline,kop pass 顺序里其实正常 hit。"rotate 谜题" 消除。
 
 ### ⚠️ 新发现:`const_prop` pointer-skip 跨 app 一致高
 

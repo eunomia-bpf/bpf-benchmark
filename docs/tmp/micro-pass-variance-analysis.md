@@ -15,7 +15,7 @@ per-program or per-workload tuning is essential for optimal performance.
 
 From ARM64 AWS micro benchmarks (`aws_arm64_micro_20260606_001225_821028`):
 
-| Benchmark | Kernel ns | ReJIT ns | Speedup | Applied Kinsn |
+| Benchmark | Kernel ns | ReJIT ns | Speedup | Applied KOperation |
 |-----------|-----------|----------|---------|---------------|
 | `siphash_rotate64_mixer` | 194 | 102 | **1.902x** (WIN) | extr_x=348, ldrh=21, ldr_w=3 |
 | `cilium_socket_lb_service_select` | 1126 | 666 | **1.691x** (WIN) | ldr_w=15, ldrh=6 |
@@ -23,7 +23,7 @@ From ARM64 AWS micro benchmarks (`aws_arm64_micro_20260606_001225_821028`):
 | `bpftrace_comm_key_fnv_hash` | 1581 | 1835 | **0.862x** (LOSS) | ldr_w=6, stp_x=3 |
 | `bitmap_popcount_scan` | 2190 | 2266 | **0.966x** (LOSS) | ldr_w=6 |
 
-The same kinsn families (`ldr_w`, `stp_x`) help `siphash_rotate64_mixer` achieve
+The same kop families (`ldr_w`, `stp_x`) help `siphash_rotate64_mixer` achieve
 1.9x speedup while hurting `bpftrace_comm_key_fnv_hash` by 14%.
 
 ### 2. Wide Variance Range
@@ -49,7 +49,7 @@ Same BMI2 shift optimization: 23% speedup on one benchmark, 1.4% slowdown on ano
 
 ### 4. Corpus App-Level Variance
 
-From kinsn corpus evaluation (`kinsn_eval_20260604_summary.md`):
+From kop corpus evaluation (`kop_eval_20260604_summary.md`):
 
 | App | Geomean | Wins/Losses/Ties | Applied Sites |
 |-----|---------|------------------|---------------|
@@ -78,7 +78,7 @@ and others 31% slower.
 
 ### 6. Platform-Specific Policy Sensitivity (arm64)
 
-From kinsn ablation (`kinsn_ablation_20260605_summary.md`):
+From kop ablation (`kop_ablation_20260605_summary.md`):
 
 **x86 Cilium:**
 - Full policy: workload 1.114x, BPF cost 0.776x (best)
@@ -92,7 +92,7 @@ The same pass that helps x86 hurts arm64 for the same app.
 
 ### 7. Predictability-Sensitive Passes (cond_select)
 
-From OTEL regression analysis (`otel_native_tracer_kinsn_regression_20260507.md`):
+From OTEL regression analysis (`otel_native_tracer_kop_regression_20260507.md`):
 
 The `cond_select` pass (CMOV/CSEL) converts branch-over-mov sequences to branchless
 conditional moves. This helps when branches are **unpredictable** but hurts when
@@ -118,7 +118,7 @@ branches, but hurt real app programs with predictable control flow.
 - **Hurts**: `bpftrace_comm_key_fnv_hash` (0.86x = 14% regression)
 - **Conclusion**: Bulk memory load/store fusion depends on access patterns
 
-### Example 2: kinsn LEA/load selectors
+### Example 2: kop LEA/load selectors
 - **Helps BCC**: 11 wins, 4 losses (geomean 0.961x = 4% faster)
 - **Hurts OTEL**: 0 wins, 1 loss (geomean 1.065x = 6.5% slower)
 - **Conclusion**: LEA optimization profitability depends on register pressure and
@@ -136,7 +136,7 @@ branches, but hurt real app programs with predictable control flow.
    31% slower).
 
 2. **Per-app tuning required**: Different apps benefit from different pass subsets:
-   - BCC: full kinsn helps
+   - BCC: full kop helps
    - OTEL: conservative policy needed
    - Katran: rotate/extract/endian good, bulk_memory/prefetch bad on arm64
 
@@ -151,7 +151,7 @@ branches, but hurt real app programs with predictable control flow.
 
 - `micro/results/aws_arm64_micro_20260606_001225_821028/` - ARM64 full micro suite
 - `micro/results/x86_kvm_micro_20260607_072937_370032/` - x86 BMI2 focused micro
-- `docs/tmp/kinsn_eval_20260604_summary.md` - Corpus per-app breakdown
-- `docs/tmp/kinsn_ablation_20260605_summary.md` - Platform ablation study
-- `docs/tmp/otel_native_tracer_kinsn_regression_20260507.md` - OTEL regression case study
-- `docs/tmp/kinsn_per_app_native_guided_20260607.md` - Per-app policy trials
+- `docs/tmp/kop_eval_20260604_summary.md` - Corpus per-app breakdown
+- `docs/tmp/kop_ablation_20260605_summary.md` - Platform ablation study
+- `docs/tmp/otel_native_tracer_kop_regression_20260507.md` - OTEL regression case study
+- `docs/tmp/kop_per_app_native_guided_20260607.md` - Per-app policy trials

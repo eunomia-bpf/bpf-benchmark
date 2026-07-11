@@ -4,13 +4,13 @@
   "current_benchmark_index": 1,
   "current_benchmark_record": {
     "category": "alu-mix",
-    "description": "Hand-written x86 popcnt kinsn over bitmap words",
+    "description": "Hand-written x86 popcnt kop over bitmap words",
     "expected_result": 12648566,
     "family": "popcount",
-    "hypothesis": "Tests direct popcnt kinsn lowering on a bitmap scan input",
+    "hypothesis": "Tests direct popcnt kop lowering on a bitmap scan input",
     "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bitmap_popcount_scan.mem",
     "io_mode": "staged",
-    "level": "handcraft-kinsn",
+    "level": "handcraft-kop",
     "name": "bitmap_popcount_scan_handcraft",
     "native_baseline": "bitmap_popcount_scan",
     "object": "/artifacts/user/micro-programs/x86_64/bitmap_popcount_scan_handcraft.handcraft.so",
@@ -18,7 +18,7 @@
     "runs": [],
     "tags": [
       "bitops",
-      "handcraft-kinsn",
+      "handcraft-kop",
       "x86"
     ]
   },

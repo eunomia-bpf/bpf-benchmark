@@ -1,0 +1,12 @@
+log_level: 1
+programs:
+  default:
+    command: |
+      case "${RUN_TARGET_ARCH:-}" in
+        arm64|aarch64)
+          bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kop-mode bulk_memory=disable,endian_fusion=disable,prefetch=disable
+          ;;
+        *)
+          bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --kop-mode all=force,wide-load=disable,indexed-load=disable,movbe-load=disable --bytecode-kop-mode bulk_memory=disable,prefetch=disable
+          ;;
+      esac

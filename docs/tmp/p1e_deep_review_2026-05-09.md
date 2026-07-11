@@ -6,7 +6,7 @@
 - LOC：全树 29,334 LOC；排除 `*_tests.rs` 后 19,586 LOC；`passes/` 非测试源码 13,915 LOC。
 - pass 数：`PASS_REGISTRY` 当前是 15 个 pass，不是 13 个：`noop` / `map_inline` / `const_prop` / `dce` / `skb_load_bytes_spec` / `bounds_check_merge` / `wide_mem` / `bulk_memory` / `rotate` / `cond_select` / `ccmp` / `extract` / `endian_fusion` / `branch_flip` / `prefetch`。
 - 整体架构评分：
-  - 清晰度：7/10。P1-C 之后 `RewritePlan`、`insn_width`、kinsn proof/remap 已经有共享骨架，但 `map_inline.rs` 仍然是超大单体。
+  - 清晰度：7/10。P1-C 之后 `RewritePlan`、`insn_width`、kop proof/remap 已经有共享骨架，但 `map_inline.rs` 仍然是超大单体。
   - 复用度：5/10。扫描、branch target、subprog、payload pack、packet pointer state、map ref decode 仍然在多处重复。
   - 健壮性：5/10。主要风险在 branch offset 宽度、metadata remap 链、path-insensitive scan、以及 pass-level fail-fast 不一致。
 
@@ -86,7 +86,7 @@
 - 收益估算：节省约 80 LOC；修复 IDX canonical map ref 在 shared provider 层解析不全的问题。
 - 优先级：P0。
 
-### 重复-5: kinsn target availability check 重复
+### 重复-5: kop target availability check 重复
 - 重复出现位置：
   - `bpfopt/crates/bpfopt/src/passes/rotate.rs:79` and `bpfopt/crates/bpfopt/src/passes/rotate.rs:127`
   - `bpfopt/crates/bpfopt/src/passes/cond_select.rs:129` and `bpfopt/crates/bpfopt/src/passes/cond_select.rs:163`
@@ -96,10 +96,10 @@
   - `bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:231`
   - `bpfopt/crates/bpfopt/src/passes/prefetch.rs:240`
   - `bpfopt/crates/bpfopt/src/pass.rs:1610`
-- 问题：`PassMetadata` 已经有 `kinsn_targets`，但 `PassManager::run` 没有统一 gate；每个 pass 自己决定 skip 或 per-site skip，行为和 diagnostics 不一致。
+- 问题：`PassMetadata` 已经有 `kop_targets`，但 `PassManager::run` 没有统一 gate；每个 pass 自己决定 skip 或 per-site skip，行为和 diagnostics 不一致。
 - 建议抽出 API：
-  - `BpfPass::kinsn_requirement() -> KinsnRequirement`
-  - `KinsnRequirement::{All(&[target]), Any(&[target]), PerSite(&[target])}`
+  - `BpfPass::kop_requirement() -> KopRequirement`
+  - `KopRequirement::{All(&[target]), Any(&[target]), PerSite(&[target])}`
   - `PassManager` 在 pass 运行前自动返回 `PassResult::skipped`，per-site pass 仍可在 site 层细分。
 - 收益估算：节省约 60 LOC；skip reason 统一，避免 pass 忘记检查 target。
 - 优先级：P1。
@@ -115,7 +115,7 @@
   - `bpfopt/crates/bpfopt/src/passes/ccmp.rs:212`
   - `bpfopt/crates/bpfopt/src/passes/extract.rs:159`
   - `bpfopt/crates/bpfopt/src/passes/endian.rs:440`
-- 问题：`CFGAnalysis` 已经能识别 pseudo call 和 `LD_IMM64 BPF_PSEUDO_FUNC` subprog entry，但 `map_inline::subprog_bounds` 只看 pseudo call；kinsn pass 又通过 `kinsn_replacement_subprog_skip_reason` 每次重算 `BpfProgram::new(insns.to_vec())`。
+- 问题：`CFGAnalysis` 已经能识别 pseudo call 和 `LD_IMM64 BPF_PSEUDO_FUNC` subprog entry，但 `map_inline::subprog_bounds` 只看 pseudo call；kop pass 又通过 `kop_replacement_subprog_skip_reason` 每次重算 `BpfProgram::new(insns.to_vec())`。
 - 建议抽出 API：
   - `SubprogIndex::build(&[BpfInsn])`
   - `SubprogIndex::bounds(pc) -> Range<usize>`
@@ -139,7 +139,7 @@
 - 收益估算：节省约 180 LOC；重点收益是避免 bounds_check_merge 这类 cleanup 后漏 BTF remap。
 - 优先级：P0。
 
-### 重复-8: kinsn sidecar payload 编码/解码重复
+### 重复-8: kop sidecar payload 编码/解码重复
 - 重复出现位置：
   - decode helper：`bpfopt/crates/bpfopt/src/pass.rs:102`
   - rotate pack：`bpfopt/crates/bpfopt/src/passes/rotate.rs:174`
@@ -149,10 +149,10 @@
   - ccmp pack：`bpfopt/crates/bpfopt/src/passes/ccmp.rs:361`
   - bulk_memory pack：`bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:590`
   - prefetch pack：`bpfopt/crates/bpfopt/src/passes/prefetch.rs:218`
-- 问题：每个 kinsn pass 自己 `shift + or`，proof decode 又集中在 `pass.rs::remap_kinsn_btf_metadata`。新增 payload 字段时很容易 encode/decode 不同步。
+- 问题：每个 kop pass 自己 `shift + or`，proof decode 又集中在 `pass.rs::remap_kop_btf_metadata`。新增 payload 字段时很容易 encode/decode 不同步。
 - 建议抽出 API：
-  - `KinsnPayloadBuilder::new().reg("dst", reg, shift).u8(...).s16(...)`
-  - 或每类 kinsn 一个 typed payload，统一实现 `encode()` / `decode()` / `proof_len()`.
+  - `KopPayloadBuilder::new().reg("dst", reg, shift).u8(...).s16(...)`
+  - 或每类 kop 一个 typed payload，统一实现 `encode()` / `decode()` / `proof_len()`.
 - 收益估算：节省约 90 LOC；把 payload reserved-bit validation 和 BTF proof region 一起测试。
 - 优先级：P1。
 
@@ -196,7 +196,7 @@
 - 改法建议：去掉 `rustfmt::skip`，把 `PassMetadata`、macro 输出、`PASS_REGISTRY` 按正常 Rust 格式展开。
 - 优先级：P2。
 
-### Style-2: `KinsnDescriptor::probe_aliases()` 每次分配 `Vec`
+### Style-2: `KopDescriptor::probe_aliases()` 每次分配 `Vec`
 - 位置：`bpfopt/crates/bpfopt/src/pass.rs:33`
 - 问题：`probe_aliases(self) -> Vec<&'static str>` 为 1 或 2 个静态别名分配 `Vec`，serde 路径 `bpfopt/crates/bpfopt/src/pass.rs:56` 也会触发。
 - 改法建议：返回 `&'static [&'static str]`，或实现小型 iterator；aliases 在 descriptor 层静态存储。
@@ -304,7 +304,7 @@
 
 ### Style-14: platform capabilities 有 dead-field 味道
 - 位置：`bpfopt/crates/bpfopt/src/pass.rs:1347`
-- 问题：`has_bmi1`、`has_bmi2`、`has_movbe`、`has_rorx` 主要由 `main.rs` 和测试写入，pass 内实际 target availability 仍依赖 kinsn registry。当前只有 `has_cmov` 被 `PassContext::has_branchless_select()` 使用。
+- 问题：`has_bmi1`、`has_bmi2`、`has_movbe`、`has_rorx` 主要由 `main.rs` 和测试写入，pass 内实际 target availability 仍依赖 kop registry。当前只有 `has_cmov` 被 `PassContext::has_branchless_select()` 使用。
 - 改法建议：要么 pass 明确消费 platform feature，要么把 feature probing 降到 diagnostics，不作为 `PassContext` public surface。
 - 优先级：P2。
 
@@ -396,7 +396,7 @@
   r1 >>= 8       // BPF_ALU RSH K
   r1 &= 0xff     // BPF_ALU AND K
   ```
-- 当前行为 vs 应有行为：当前不产生 extract site；应至少覆盖 ALU32 RSH/AND，若 kinsn 支持 64-bit extract 则 payload/proof 也不应硬拒 `bit_len > 32`。
+- 当前行为 vs 应有行为：当前不产生 extract site；应至少覆盖 ALU32 RSH/AND，若 kop 支持 64-bit extract 则 payload/proof 也不应硬拒 `bit_len > 32`。
 - 优先级：P1。
 
 ### 缺陷-9: `endian_fusion` little-endian matcher 使用疑似无效 opcode
@@ -472,12 +472,12 @@
 - 优先级：P1。
 
 ### 缺陷-15: proof region decode 与 per-pass payload encode 没有 compile-time 绑定
-- 缺陷描述：`remap_kinsn_btf_metadata` 解码所有 kinsn payload，但 payload encode 分散在各 pass。新增字段时没有类型系统约束 encode/decode 同步。
+- 缺陷描述：`remap_kop_btf_metadata` 解码所有 kop payload，但 payload encode 分散在各 pass。新增字段时没有类型系统约束 encode/decode 同步。
 - 位置：
   - decode：`bpfopt/crates/bpfopt/src/pass.rs:340`
   - encode examples：`bpfopt/crates/bpfopt/src/passes/ccmp.rs:361`, `bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:590`, `bpfopt/crates/bpfopt/src/passes/prefetch.rs:218`
-- 触发条件 + 输入例子：某 kinsn payload 新增 reserved bit 或 offset 字段，pass encode 更新但 `kinsn_proof_len` 没更新。
-- 当前行为 vs 应有行为：当前只能靠测试覆盖；应每个 kinsn payload 有单一 typed definition，同时生成 encode/decode/proof_len。
+- 触发条件 + 输入例子：某 kop payload 新增 reserved bit 或 offset 字段，pass encode 更新但 `kop_proof_len` 没更新。
+- 当前行为 vs 应有行为：当前只能靠测试覆盖；应每个 kop payload 有单一 typed definition，同时生成 encode/decode/proof_len。
 - 优先级：P1。
 
 ## 整体推荐
@@ -488,10 +488,10 @@
 - 修复 map ref decode：shared `build_map_fd_bindings` 必须支持 FD/VALUE/IDX/IDX_VALUE，最好直接替换为 `MapRef::decode_ldimm64`。
 
 ### 中期 (3-5 round) 应做的 P1 重构
-- 引入 `SubprogIndex`，删除 map_inline/prefetch/kinsn pass 的本地 subprog bounds 逻辑。
+- 引入 `SubprogIndex`，删除 map_inline/prefetch/kop pass 的本地 subprog bounds 逻辑。
 - 引入 `InsnEffects` 和 CFG 数据流 skeleton，统一 register use/def/kill、packet pointer state、constant state。
-- 把 kinsn payload 做成 typed encode/decode/proof，一处定义覆盖 pass encode 和 BTF proof decode。
-- 让 `PassManager` 根据 `PassMetadata.kinsn_targets` 做统一 kinsn availability gate。
+- 把 kop payload 做成 typed encode/decode/proof，一处定义覆盖 pass encode 和 BTF proof decode。
+- 让 `PassManager` 根据 `PassMetadata.kop_targets` 做统一 kop availability gate。
 - 拆分 `map_inline.rs`，但只按真实职责拆模块，不新增 dump-style `utils.rs`。
 
 ### 长期可选 P2

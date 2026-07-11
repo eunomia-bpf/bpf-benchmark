@@ -13,7 +13,7 @@
  *   4. Write a typed native-link plan and fork+exec native-link.
  *   5. Upload the resulting blob (and reloc table, if any) into
  *      /sys/kernel/debug/bpf_x86_native_lab/blob<N>[.relocs].
- *   6. Build a stub program `(sidecar; call kinsn)*chunks; exit` with
+ *   6. Build a stub program `(sidecar; call kop)*chunks; exit` with
  *      prog_type set to KPROBE / RAW_TRACEPOINT, fd_array containing
  *      the module BTF fd and the count_map fd, and BPF_PROG_LOAD it.
  *   7. Attach the resulting prog_fd via the perf_event_open ABI
@@ -50,11 +50,11 @@
 #include <utility>
 #include <vector>
 
-#ifndef BPF_PSEUDO_KINSN_SIDECAR
-#define BPF_PSEUDO_KINSN_SIDECAR 3
+#ifndef BPF_PSEUDO_KOP_SIDECAR
+#define BPF_PSEUDO_KOP_SIDECAR 3
 #endif
-#ifndef BPF_PSEUDO_KINSN_CALL
-#define BPF_PSEUDO_KINSN_CALL 4
+#ifndef BPF_PSEUDO_KOP_CALL
+#define BPF_PSEUDO_KOP_CALL 4
 #endif
 
 namespace {
@@ -201,7 +201,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         bpf_insn sidecar = {
             .code = BPF_ALU64 | BPF_MOV | BPF_K,
             .dst_reg = 0,
-            .src_reg = BPF_PSEUDO_KINSN_SIDECAR,
+            .src_reg = BPF_PSEUDO_KOP_SIDECAR,
             .off = 0,
             .imm = static_cast<int32_t>(i),
         };
@@ -209,7 +209,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         bpf_insn call = {
             .code = BPF_JMP | BPF_CALL,
             .dst_reg = 0,
-            .src_reg = BPF_PSEUDO_KINSN_CALL,
+            .src_reg = BPF_PSEUDO_KOP_CALL,
             .off = 1, // fd_array slot for module BTF
             .imm = kfunc_btf_id,
         };
@@ -221,7 +221,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
 
     /* fd_array layout: [mod_btf_fd, mod_btf_fd, count_map_fd]. The
      * verifier-side fd_array[0] is the module BTF for pseudo_btf_id
-     * resolution; fd_array[1] is what `off=1` in the kinsn call insn
+     * resolution; fd_array[1] is what `off=1` in the kop call insn
      * resolves to (same module BTF); fd_array[2] keeps count_map
      * alive across BPF_PROG_LOAD even though the stub bytecode itself
      * doesn't reference it -- the inner native blob does, via the
@@ -606,8 +606,8 @@ int attach_raw_tp(int prog_fd, const char *tp_name, NlSession *out)
 /* Steps (1)-(6) of the native_lab attach pipeline: load the companion
  * .bpf.o, extract the map's kernel address from its JIT image, resolve
  * helpers via kallsyms, invoke native-link, upload the blob+relocs into
- * the kinsn module's debugfs, and BPF_PROG_LOAD the (sidecar; call
- * kinsn)*N; exit stub program with the supplied prog_type. The caller
+ * the kop module's debugfs, and BPF_PROG_LOAD the (sidecar; call
+ * kop)*N; exit stub program with the supplied prog_type. The caller
  * runs the attach step appropriate for its event type. */
 int nl_load_only(const char *bpf_o_path, const char *prog_name,
                  uint32_t prog_type, NlSession *out)

@@ -228,7 +228,7 @@ The fork kernel did change recently in verifier/ReJIT-adjacent areas:
 - `b07468207 bpf: fix verifier patch buffer restore` touched
   `include/linux/bpf_verifier.h` and `kernel/bpf/verifier.c`.
 - `81608ed9e bpf: fix 4 review issues...` touched verifier/JIT-adjacent code.
-- `9be94921f bpf: Add native emit check for kinsn and improve verifier logic`
+- `9be94921f bpf: Add native emit check for kop and improve verifier logic`
   changed `kernel/bpf/syscall.c`.
 
 So the fork verifier/JIT stack is not stable. However, the latest artifact
@@ -274,7 +274,7 @@ Those failures should not be counted as pass regressions.
    The daemon/CLI path needs to replay enough load metadata for original and
    optimized verification:
    `btf_id`/attach metadata for tracing and LSM programs, expected attach type,
-   and fd-array side input whenever the bytecode requires fd indexes or kinsn
+   and fd-array side input whenever the bytecode requires fd indexes or kop
    calls. The BCC tracing and Cilium failures are concrete examples.
 
 4. After logs are preserved, bisect passes on a small failing set.

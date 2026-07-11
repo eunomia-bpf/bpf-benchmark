@@ -11,7 +11,7 @@ Scope: read `CLAUDE.md`, `docs/bbprogram-architecture-design.md`, current `bpfop
 The build/test/clippy/smoke gates pass and the non-test LOC claim is correct at 19,230. However convergence criteria are not met:
 
 - Issue (A1) is not fully fixed: `BBProgram.entry` is still public at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:30-36`.
-- The 9-pass kinsn/admission dedup claim is only partially true: the shared helper exists and six kinsn replacement passes use it, but `prefetch` emits a kfunc without the helper at `bpfopt/crates/bpfopt/src/passes/prefetch.rs:274-280`; `wide_mem` and `skb_load_bytes` are pure-BPF replacements rather than kinsn replacements.
+- The 9-pass kop/admission dedup claim is only partially true: the shared helper exists and six kop replacement passes use it, but `prefetch` emits a kfunc without the helper at `bpfopt/crates/bpfopt/src/passes/prefetch.rs:274-280`; `wide_mem` and `skb_load_bytes` are pure-BPF replacements rather than kop replacements.
 - Per-pass convergence is not all A. Only `noop` and `dce` are A by the requested rubric; the other 13 passes still use PC bridge, current linear site order, branch-target site sets, block-local flat scans, or PC-keyed profile/oracle data.
 - CLAUDE production scan found one production `expect()` in `bpfopt/crates/bpfopt/src/main.rs:438-441`.
 - Short-file audit found six non-pass testing-infrastructure files <=80 LOC with <=30 tests that should be inlined.
@@ -22,7 +22,7 @@ The build/test/clippy/smoke gates pass and the non-test LOC claim is correct at 
 
 **FAIL.** Most target fields were restricted, but `entry` remains public.
 
-- `BBProgram.blocks`, `use_def`, `oracle`, `btf`, and `kinsn_reg` are `pub(super)` at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:30-36`.
+- `BBProgram.blocks`, `use_def`, `oracle`, `btf`, and `kop_reg` are `pub(super)` at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:30-36`.
 - `BBProgram.entry` is still `pub entry: BlockId` at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:30-36`.
 - `Block.insns` and `Block.terminator` are `pub(super)` at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:47-51`.
 
@@ -36,14 +36,14 @@ The build/test/clippy/smoke gates pass and the non-test LOC claim is correct at 
 
 Important residual: pass bodies still use the public PC bridge wrappers (`report_pc`, `ordered_site_pcs`, `current_sites`, `branch_target_sites`, `block_start_pc`). That does not fail this specific named-function check, but it prevents A-level convergence in section D.
 
-### 3. 9 passes kinsn dedup
+### 3. 9 passes kop dedup
 
 **PARTIAL / FAIL as written.**
 
 Shared helper:
 
-- `AdmittedKinsnWindow` and `admit_kinsn_site_window` live at `bpfopt/crates/bpfopt/src/analysis/bbprogram_helpers.rs:38-67`.
-- The helper calls `prog.report_pc(start)` and `kinsn_replacement_subprog_skip_reason(...)` at `bpfopt/crates/bpfopt/src/analysis/bbprogram_helpers.rs:44-60`.
+- `AdmittedKopWindow` and `admit_kop_site_window` live at `bpfopt/crates/bpfopt/src/analysis/bbprogram_helpers.rs:38-67`.
+- The helper calls `prog.report_pc(start)` and `kop_replacement_subprog_skip_reason(...)` at `bpfopt/crates/bpfopt/src/analysis/bbprogram_helpers.rs:44-60`.
 
 Passes that use the helper:
 
@@ -56,11 +56,11 @@ Passes that use the helper:
 
 Passes that do not use the helper:
 
-- `prefetch` emits `emit_packed_kinsn_call_with_off(...)` through a direct zero-length `replace_range` at `bpfopt/crates/bpfopt/src/passes/prefetch.rs:274-280`.
+- `prefetch` emits `emit_packed_kop_call_with_off(...)` through a direct zero-length `replace_range` at `bpfopt/crates/bpfopt/src/passes/prefetch.rs:274-280`.
 - `wide_mem` is a pure-BPF replacement using `emit_wide_mem` at `bpfopt/crates/bpfopt/src/passes/wide_mem.rs:645-646`.
 - `skb_load_bytes` is a pure-BPF replacement using `emit_replacement` at `bpfopt/crates/bpfopt/src/passes/skb_load_bytes.rs:105-115`.
 
-If the requirement is literally "each of the nine listed files calls the shared kinsn admission helper", it is not satisfied. If `wide_mem` and `skb_load_bytes` are intentionally out of scope because they do not emit kinsn calls, the audit criterion should say that explicitly.
+If the requirement is literally "each of the nine listed files calls the shared kop admission helper", it is not satisfied. If `wide_mem` and `skb_load_bytes` are intentionally out of scope because they do not emit kop calls, the audit criterion should say that explicitly.
 
 ### 4. cond_select/ccmp error split
 
@@ -173,7 +173,7 @@ No `.ok()`, `unwrap_or_default`, `let _ =`, `warn!`, or `#[allow(dead_code)]` ma
 Non-production/test-only matches:
 
 - `BBProgram::live_in`, `live_out`, `live_out_site`, and `btf_records` panic wrappers are all under `#[cfg(test)]` at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:198-225` and `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:321-327`.
-- `KinsnRegistry::default` and `PassContext::baseline` `expect(...)` calls are under `#[cfg(test)]` at `bpfopt/crates/bpfopt/src/pass.rs:417-421` and `bpfopt/crates/bpfopt/src/pass.rs:678-682`.
+- `KopRegistry::default` and `PassContext::baseline` `expect(...)` calls are under `#[cfg(test)]` at `bpfopt/crates/bpfopt/src/pass.rs:417-421` and `bpfopt/crates/bpfopt/src/pass.rs:678-682`.
 
 ### Dead code / zero-caller pub
 
@@ -191,12 +191,12 @@ Gates pass, but multiple convergence blockers remain:
 2. Per-pass migration is not all A; 13/15 passes still use PC bridge or private linear/flat views.
 3. Short-file audit exceeds the allowed threshold: six small non-pass test files should be inlined.
 4. Production `expect()` remains in `main.rs`.
-5. Kinsn admission dedup is only partially satisfied as written, because `prefetch` directly emits a kfunc without the shared helper and the criterion includes two pure-BPF passes.
+5. KOperation admission dedup is only partially satisfied as written, because `prefetch` directly emits a kfunc without the shared helper and the criterion includes two pure-BPF passes.
 
 ## G. Next Fix Tasks
 
 1. Make `BBProgram.entry` private or `pub(crate)` and route all non-analysis access through a narrow accessor/mutator API.
 2. Migrate the 13 B-rated passes off `report_pc`, `current_sites`, `ordered_site_pcs`, `branch_target_sites`, `block_start_pc`, and block-local flat scans where possible; reserve PC mapping for true CLI/BTF/verifier-profile boundaries.
-3. Decide and encode the kinsn admission policy for `prefetch`; either share/adapt `admit_kinsn_site_window` for zero-length kfunc insertions or document why insertions are outside the admission contract. Remove `wide_mem` and `skb_load_bytes` from that kinsn-specific criterion if they are intentionally pure-BPF.
+3. Decide and encode the kop admission policy for `prefetch`; either share/adapt `admit_kop_site_window` for zero-length kfunc insertions or document why insertions are outside the admission contract. Remove `wide_mem` and `skb_load_bytes` from that kop-specific criterion if they are intentionally pure-BPF.
 4. Inline the six small non-pass test files into parent `#[cfg(test)] mod tests` modules.
 5. Replace the production `.expect("chunk is 8 bytes")` in bytecode parsing with explicit fallible handling or a fixed-size array copy that does not use `expect`.

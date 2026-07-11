@@ -243,7 +243,7 @@ requests_per_sec = float(req_match.group(1))  # assigned, never read
    `TARGET_KVM_EXECUTABLE=runner/scripts/vng-wrapper.py`。
 
 3. **`module/load_all.sh` 删除**: 虽然 `module/load_all.sh` 已从 git 删除，
-   但所有 Python 代码使用 `runner/libs/kinsn.py` 的 `load_kinsn_modules()` 函数直接调用 `insmod`。
+   但所有 Python 代码使用 `runner/libs/kop.py` 的 `load_kop_modules()` 函数直接调用 `insmod`。
    无活跃代码引用 `load_all.sh`。（results JSON 中的历史引用不影响运行时。）
 
 4. **`from __future__ import annotations` 下的 `"NoReturn"`**: pyflakes 报告了

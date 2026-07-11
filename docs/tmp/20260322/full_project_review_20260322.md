@@ -311,7 +311,7 @@
 
 #### 结论
 
-`module/` 是当前最像“论文创新点”的层，但也同时含有**本轮审查里最严重的 correctness blocker**。在修掉这些问题前，不应继续扩展新 kinsn family。
+`module/` 是当前最像“论文创新点”的层，但也同时含有**本轮审查里最严重的 correctness blocker**。在修掉这些问题前，不应继续扩展新 kop family。
 
 ### 3.7 `tests/`
 

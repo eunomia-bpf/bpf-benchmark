@@ -29,7 +29,7 @@ The 5 claimed blocker fixes are verified under the exact requested checks, and a
    - `parse_bytecode` returns `Result<Vec<BpfInsn>>` and propagates conversion errors at `bpfopt/crates/bpfopt/src/main.rs:431` and `bpfopt/crates/bpfopt/src/main.rs:441`.
 
 5. **Prefetch admission policy documented insert-only: PASS**
-   - Comment says prefetch is insert-only and kinsn replacement admission does not apply at `bpfopt/crates/bpfopt/src/passes/prefetch.rs:276`.
+   - Comment says prefetch is insert-only and kop replacement admission does not apply at `bpfopt/crates/bpfopt/src/passes/prefetch.rs:276`.
    - The implementation inserts with an empty `replace_range` range at `bpfopt/crates/bpfopt/src/passes/prefetch.rs:280`.
 
 ## B. Per-Pass A/B/C/D Rating
@@ -48,13 +48,13 @@ Rating key used here:
 | `const_prop` | B | Builds `program_site_pcs` and `pc_to_site` at `bpfopt/crates/bpfopt/src/passes/const_prop.rs:128`, partitions by PC at `bpfopt/crates/bpfopt/src/passes/const_prop.rs:353`, and calls `site_pc` at `bpfopt/crates/bpfopt/src/passes/const_prop.rs:520`. |
 | `bounds_check_merge` | B | Uses `control_flow_target_sites` at `bpfopt/crates/bpfopt/src/passes/bounds_check_merge.rs:72`, `site_pc` at `bpfopt/crates/bpfopt/src/passes/bounds_check_merge.rs:249`, and `linear_sites_between` at `bpfopt/crates/bpfopt/src/passes/bounds_check_merge.rs:433`. |
 | `branch_flip` | B | Consumes PC-keyed profile data at `bpfopt/crates/bpfopt/src/passes/branch_flip.rs:143`, uses `control_flow_target_sites` at `bpfopt/crates/bpfopt/src/passes/branch_flip.rs:255`, and `site_pc` at `bpfopt/crates/bpfopt/src/passes/branch_flip.rs:535`. |
-| `bulk_memory` | B | Uses `admit_kinsn_site_window` at `bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:232`, `site_pc` at `bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:279`, and flat local `insns[pc]` lookback at `bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:721`. |
-| `ccmp` | B | Uses `admit_kinsn_site_window` at `bpfopt/crates/bpfopt/src/passes/ccmp.rs:193` and computes `site_pc`/`block_start_slot` at `bpfopt/crates/bpfopt/src/passes/ccmp.rs:473`. |
-| `cond_select` | B | Uses `admit_kinsn_site_window` at `bpfopt/crates/bpfopt/src/passes/cond_select.rs:157` and `site_pc` to build branch shape at `bpfopt/crates/bpfopt/src/passes/cond_select.rs:310`. |
-| `endian_fusion` | B | Scans flat local `insns[pc]` at `bpfopt/crates/bpfopt/src/passes/endian.rs:87`, uses `admit_kinsn_site_window` at `bpfopt/crates/bpfopt/src/passes/endian.rs:392`, and `site_pc`/`next_site_in_linear_order` at `bpfopt/crates/bpfopt/src/passes/endian.rs:452`. |
-| `extract` | B | Uses `admit_kinsn_site_window` at `bpfopt/crates/bpfopt/src/passes/extract.rs:131` and `site_pc`/`next_site_in_linear_order` at `bpfopt/crates/bpfopt/src/passes/extract.rs:194`. |
+| `bulk_memory` | B | Uses `admit_kop_site_window` at `bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:232`, `site_pc` at `bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:279`, and flat local `insns[pc]` lookback at `bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:721`. |
+| `ccmp` | B | Uses `admit_kop_site_window` at `bpfopt/crates/bpfopt/src/passes/ccmp.rs:193` and computes `site_pc`/`block_start_slot` at `bpfopt/crates/bpfopt/src/passes/ccmp.rs:473`. |
+| `cond_select` | B | Uses `admit_kop_site_window` at `bpfopt/crates/bpfopt/src/passes/cond_select.rs:157` and `site_pc` to build branch shape at `bpfopt/crates/bpfopt/src/passes/cond_select.rs:310`. |
+| `endian_fusion` | B | Scans flat local `insns[pc]` at `bpfopt/crates/bpfopt/src/passes/endian.rs:87`, uses `admit_kop_site_window` at `bpfopt/crates/bpfopt/src/passes/endian.rs:392`, and `site_pc`/`next_site_in_linear_order` at `bpfopt/crates/bpfopt/src/passes/endian.rs:452`. |
+| `extract` | B | Uses `admit_kop_site_window` at `bpfopt/crates/bpfopt/src/passes/extract.rs:131` and `site_pc`/`next_site_in_linear_order` at `bpfopt/crates/bpfopt/src/passes/extract.rs:194`. |
 | `prefetch` | B | Reads PC-keyed profile entries at `bpfopt/crates/bpfopt/src/passes/prefetch.rs:122`, uses `program_sites` at `bpfopt/crates/bpfopt/src/passes/prefetch.rs:217`, and uses `site_pc` plus `linear_sites_after_within_slots` at `bpfopt/crates/bpfopt/src/passes/prefetch.rs:373`. |
-| `rotate` | B | Uses `admit_kinsn_site_window`, which returns/report PCs, at `bpfopt/crates/bpfopt/src/passes/rotate.rs:94`, and scans flat local `insns[pc]` at `bpfopt/crates/bpfopt/src/passes/rotate.rs:283`. |
+| `rotate` | B | Uses `admit_kop_site_window`, which returns/report PCs, at `bpfopt/crates/bpfopt/src/passes/rotate.rs:94`, and scans flat local `insns[pc]` at `bpfopt/crates/bpfopt/src/passes/rotate.rs:283`. |
 | `skb_load_bytes_spec` | B | Uses `control_flow_target_sites` at `bpfopt/crates/bpfopt/src/passes/skb_load_bytes.rs:89` and `site_pc` at `bpfopt/crates/bpfopt/src/passes/skb_load_bytes.rs:130`. |
 | `wide_mem` | B | Scans flat local `while pc < n` / `insns[pc]` at `bpfopt/crates/bpfopt/src/passes/wide_mem.rs:71` and `bpfopt/crates/bpfopt/src/passes/wide_mem.rs:88`, uses `control_flow_target_sites` at `bpfopt/crates/bpfopt/src/passes/wide_mem.rs:513`, and `site_pc` at `bpfopt/crates/bpfopt/src/passes/wide_mem.rs:536`. |
 
@@ -107,8 +107,8 @@ Not green-lit. Because this review is **NOT-CONVERGED**, Phase 3 is not done and
 
 2. Replace private linear current-site views with BBProgram-native traversal. Priority targets are `map_inline` (`current_sites_after_in_frame`, `current_sites_before_in_frame_rev`, `current_site_position`), `prefetch` (`linear_sites_after_within_slots`), and `bounds_check_merge` (`linear_sites_between`).
 
-3. Convert single-block kinsn matchers away from `pc`-named flat slice scans and `start_pc` mutation. Priority targets are `rotate`, `extract`, `endian_fusion`, `bulk_memory`, and `wide_mem`.
+3. Convert single-block kop matchers away from `pc`-named flat slice scans and `start_pc` mutation. Priority targets are `rotate`, `extract`, `endian_fusion`, `bulk_memory`, and `wide_mem`.
 
-4. Replace `admit_kinsn_site_window` with a BBProgram-native admission API that returns block/range/site-only data and does not leak/report absolute PCs back into pass logic.
+4. Replace `admit_kop_site_window` with a BBProgram-native admission API that returns block/range/site-only data and does not leak/report absolute PCs back into pass logic.
 
 5. Delete or privatize stale BBProgram PC/report bridge APIs after consumers move off them, especially `site_by_report_pc` and `branch_target_sites`; then rerun the exact gates above.

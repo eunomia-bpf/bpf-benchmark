@@ -72,7 +72,7 @@ Core methodology rules:
 | 2026-04-18 | `x86_kvm_micro_20260418_004726_916783` | micro | Micro baseline | - |
 | 2026-04-21 | `x86_kvm_corpus_20260421_181829_750236` | corpus | all_geomean 1.010x, 10/48 applied | 38 programs excluded (no_programs_changed_in_loader) |
 
-### May 2026 — Intensive Development & Kinsn Integration
+### May 2026 — Intensive Development & KOperation Integration
 
 | Date | Session | Type | Key Results | Issues |
 |------|---------|------|-------------|--------|
@@ -84,15 +84,15 @@ Core methodology rules:
 | 2026-05-22 | `aws_arm64_micro_20260522_*` | micro | ARM64 extensive micro | - |
 | 2026-05-29 | Native evaluation | corpus | native/eBPF geomean 1.349x, OTEL 14.81x BPF speedup | tracee shows no improvement |
 
-### June 2026 — Kinsn All-Force Evaluation
+### June 2026 — KOperation All-Force Evaluation
 
 | Date | Session | Type | Key Results | Issues |
 |------|---------|------|-------------|--------|
 | 2026-06-02 | `x86_kvm_corpus_20260602_*` | corpus | LEA pass testing | - |
-| 2026-06-03 | `x86_kvm_corpus_20260603_175429_964295` | corpus | **All-force kinsn: BPF geomean 0.938x (6.2% speedup)** | 27085 sites applied |
-| 2026-06-04 | `x86_kvm_corpus_20260604_*` | corpus | Kinsn corpus continuation | - |
-| 2026-06-05 | `aws_arm64_micro_20260605_*` | micro | ARM64 kinsn ablation | - |
-| 2026-06-06 | `aws_arm64_micro_20260606_001225_821028` | micro | **ARM64 kinsn: geomean 1.208x (20.8% speedup)**, 24 wins / 2 losses | - |
+| 2026-06-03 | `x86_kvm_corpus_20260603_175429_964295` | corpus | **All-force kop: BPF geomean 0.938x (6.2% speedup)** | 27085 sites applied |
+| 2026-06-04 | `x86_kvm_corpus_20260604_*` | corpus | KOperation corpus continuation | - |
+| 2026-06-05 | `aws_arm64_micro_20260605_*` | micro | ARM64 kop ablation | - |
+| 2026-06-06 | `aws_arm64_micro_20260606_001225_821028` | micro | **ARM64 kop: geomean 1.208x (20.8% speedup)**, 24 wins / 2 losses | - |
 | 2026-06-15-17 | `aws_arm64_corpus_2026061*` | corpus | ARM64 corpus runs | Some metadata empty (incomplete) |
 | 2026-06-22 | `x86_kvm_corpus_20260622_*` | corpus | Many runs same day | Running/recent |
 
@@ -111,14 +111,14 @@ Core methodology rules:
 - Result: Overall **1.054x** (VM noise warning)
 - Applied-only: **1.074x** (16/62 applied)
 
-### Corpus Benchmark — June 3, 2026 (All-Force Kinsn)
+### Corpus Benchmark — June 3, 2026 (All-Force KOperation)
 
 **Session:** `x86_kvm_corpus_20260603_175429_964295`
 
 - Apps: 6 (bcc/set, otel, cilium, tetragon, katran, tracee)
 - Samples: 3
 - Workload duration: 30s
-- Pass: All-force kinsn (lea dominant)
+- Pass: All-force kop (lea dominant)
 - **BPF all-qualified geomean: 0.938x** (6.2% improvement)
 - **BPF direct-self-applied geomean: 0.933x** (6.7% improvement)
 - Applied sites: 27085 (lea=26097, cond_select=988)
@@ -141,7 +141,7 @@ Core methodology rules:
 - Platform: AWS t4g.small
 - Benchmarks: 29
 - **Speedup geomean: 1.208x** (20.8% improvement)
-- Kinsn-bearing geomean: 1.222x over 27 benchmarks
+- KOperation-bearing geomean: 1.222x over 27 benchmarks
 - Wins/losses/ties: 24/2/3
 - Code-size ratio geomean: 0.879x (12% smaller)
 
@@ -170,14 +170,14 @@ The June 2026 runs fall into several categories:
 
 2. **aws_arm64_corpus_2026061*** — ARM64 corpus runs June 15-17, but metadata files show 0 bytes (incomplete).
 
-3. **kinsn evaluation runs** — June 2-6 runs with `lea`, `kinsn` passes are the most complete authoritative runs with full analysis scripts and summaries.
+3. **kop evaluation runs** — June 2-6 runs with `lea`, `kop` passes are the most complete authoritative runs with full analysis scripts and summaries.
 
 ### Recommendation
 
 **For the paper, the authoritative sessions should be:**
 
-1. **June 3, 2026 x86 corpus** (`x86_kvm_corpus_20260603_175429_964295`) — All-force kinsn, SAMPLES=3, 30s workload, full 6-app coverage
-2. **June 6, 2026 ARM64 micro** (`aws_arm64_micro_20260606_001225_821028`) — ARM64 kinsn, 29 benchmarks, 20.8% speedup
+1. **June 3, 2026 x86 corpus** (`x86_kvm_corpus_20260603_175429_964295`) — All-force kop, SAMPLES=3, 30s workload, full 6-app coverage
+2. **June 6, 2026 ARM64 micro** (`aws_arm64_micro_20260606_001225_821028`) — ARM64 kop, 29 benchmarks, 20.8% speedup
 3. **May 29, 2026 native evaluation** — Native vs eBPF upper bound comparison
 
 The April 2026 data referenced in MEMORY.md (`vm_micro_authoritative_20260314`) is older and from the VM noise period before methodology stabilization.
@@ -214,10 +214,10 @@ All authoritative results since May 2026 use the stabilized framework with:
 
 | Metric | Session | Value |
 |--------|---------|-------|
-| x86 kinsn corpus BPF speedup | June 3 | **6.7%** (0.933x applied) |
-| ARM64 kinsn micro speedup | June 6 | **20.8%** (1.208x) |
+| x86 kop corpus BPF speedup | June 3 | **6.7%** (0.933x applied) |
+| ARM64 kop micro speedup | June 6 | **20.8%** (1.208x) |
 | Native vs eBPF upper bound | May 29 | **34.9%** (1.349x workload) |
 | Micro authoritative (VM) | March 14 | **1.054x** overall (noisy) |
 | VM noise impact | March 14 | >10% variance on non-applied |
 
-The June 2026 kinsn evaluation runs represent the most recent authoritative data and should be prioritized over March/April numbers for paper claims.
+The June 2026 kop evaluation runs represent the most recent authoritative data and should be prioritized over March/April numbers for paper claims.

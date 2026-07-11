@@ -4,7 +4,7 @@ Date: 2026-05-09
 
 ## Scope
 
-Migrated these kinsn-class passes from pass-local transaction loops to
+Migrated these kop-class passes from pass-local transaction loops to
 `RewritePlan`:
 
 - `rotate`
@@ -24,8 +24,8 @@ corpus, e2e, micro, or vendor trees.
 | --- | --- | --- |
 | `replace_range(...)` | now returns `anyhow::Result<()>` | duplicate replacement is now a propagated error instead of `assert!` panic |
 | `delete_range(...)` | now returns `anyhow::Result<()>` | range overflow and duplicate deletion are now propagated errors instead of `expect`/`assert!` panic |
-| `BtfRemapPolicy::RemapKinsn(&KinsnRegistry)` | added | kinsn passes need the same `remap_kinsn_btf_metadata()` behavior they previously called after manual rewrites |
-| `insert_before(pc, insns)` | kept and now used by `prefetch` | `prefetch` inserts packed kinsn calls before existing instructions, rather than replacing old bytecode |
+| `BtfRemapPolicy::RemapKOperation(&KopRegistry)` | added | kop passes need the same `remap_kop_btf_metadata()` behavior they previously called after manual rewrites |
+| `insert_before(pc, insns)` | kept and now used by `prefetch` | `prefetch` inserts packed kop calls before existing instructions, rather than replacing old bytecode |
 | `add_internal_branch(...)` | kept and now used by `ccmp` | `ccmp` creates a new branch inside the replacement stream; it must be patched to an old target PC after the global address map is known |
 
 `insert_before` and `add_internal_branch` are no longer dead APIs.
@@ -49,7 +49,7 @@ transaction block, including directly related helper cleanup where applicable.
 ### Per-Pass Notes
 
 - `rotate`: emits the same packed rotate call payload in ascending site order,
-  then commits with `RemapKinsn`.
+  then commits with `RemapKOperation`.
 - `cond_select`: preserves `prefix` emission before the packed select call.
 - `extract`: preserves packed extract payload construction and site ordering.
 - `endian_fusion`: modeled as `replace_range(load_pc, 1, call)` plus
@@ -106,8 +106,8 @@ same safe site list and calls the same emit functions with the same inputs:
 - `prefetch` preserves insertion order by iterating the already sorted and
   deduplicated candidate list; repeated insertions at the same PC append in the
   same order as the deleted grouped BTreeMap loop.
-- All kinsn passes commit with `RemapKinsn`, matching the previous
-  `remap_kinsn_btf_metadata()` call after mutation.
+- All kop passes commit with `RemapKOperation`, matching the previous
+  `remap_kop_btf_metadata()` call after mutation.
 
 Only `cargo build --workspace --locked` was run, per task instruction. No cargo
 tests, benchmarks, or make targets were run.

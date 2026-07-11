@@ -67,7 +67,7 @@ bpfopt/target/debug/bpfopt \
   --output /tmp/katran_candidate_reports/rotate.bin \
   --report /tmp/katran_candidate_reports/rotate.json \
   --prog-type xdp \
-  --target /tmp/bpfopt-katran-kinsn-target.json
+  --target /tmp/bpfopt-katran-kop-target.json
 ```
 
 Report:

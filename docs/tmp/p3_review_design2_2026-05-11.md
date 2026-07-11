@@ -47,8 +47,8 @@ No production pass directly accesses `InsnSite.idx`, `BlockId.0`, or `FrameId.0`
 - REAL: `bpfopt/crates/bpfopt/src/passes/map_inline.rs:4090-4099` builds `sites = prog.all_sites().collect::<Vec<_>>()`, computes `min_removed_pos` and `lookup_pos`, then slices `sites[min_removed_pos..=lookup_pos]`. This is whole-program order arithmetic disguised as vector indexing. Fix: add a BBProgram query for "sites between these sites in same frame/path" or a specific lookup-pattern safety API.
 - REAL: `bpfopt/crates/bpfopt/src/passes/map_inline.rs:4578-4612`, `4629`, `4639`, `4654`, `4660`, `4677`, and `4690` iterate a frame/program-order site vector with `pos += 1` and `pos = next_pos`. Fix: expose a BBProgram cursor/iterator for successor traversal instead of indexing a program-order vector in pass code.
 - REAL: `bpfopt/crates/bpfopt/src/passes/map_inline.rs:4884-4895` repeats the same pattern for null-check window scanning using `position_in_sites`, `target_pos`, `pos`, and `sites[pos]`. Fix: move the null-check window traversal into BBProgram.
-- REAL: `bpfopt/crates/bpfopt/src/passes/rotate.rs:87-100` accepts `admission_range: Range<usize>` from `prog.rep_admit_kinsn_site_window(...)`, uses `admission_range.end.checked_sub(1)`, and indexes `block_sites.get(last_idx)`. This is a BBProgram-derived body/program position leaking into the pass. Fix: have BBProgram return the final `InsnSite` or perform the admission plus live-out check behind an opaque method.
-- REAL: `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:1517-1541` exposes `rep_admit_kinsn_site_window(...) -> Option<(BlockId, Range<usize>)>`. Even though the arithmetic is inside BBProgram, the returned `Range<usize>` is a direct leak of block-local instruction position. Fix: replace this API with site-keyed/semantic admission helpers.
+- REAL: `bpfopt/crates/bpfopt/src/passes/rotate.rs:87-100` accepts `admission_range: Range<usize>` from `prog.rep_admit_kop_site_window(...)`, uses `admission_range.end.checked_sub(1)`, and indexes `block_sites.get(last_idx)`. This is a BBProgram-derived body/program position leaking into the pass. Fix: have BBProgram return the final `InsnSite` or perform the admission plus live-out check behind an opaque method.
+- REAL: `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:1517-1541` exposes `rep_admit_kop_site_window(...) -> Option<(BlockId, Range<usize>)>`. Even though the arithmetic is inside BBProgram, the returned `Range<usize>` is a direct leak of block-local instruction position. Fix: replace this API with site-keyed/semantic admission helpers.
 - FALSE-ALARM: `bpfopt/crates/bpfopt/src/passes/wide_mem.rs:13-16` (`start_idx`, `old_len`) and the local `idx + 1` uses are block-local matching over `block_insns`/`block_sites`, not a PC alias. They do not come from `BBProgram` numeric identity fields.
 - FALSE-ALARM: `bpfopt/crates/bpfopt/src/passes/ccmp.rs:343-370` uses `idx + 1` and `chain[idx - 1]` over a pass-local CFG chain vector. It does not derive a numeric PC or `InsnSite.idx` from `BBProgram`.
 
@@ -118,7 +118,7 @@ No relocation violation found here.
 ## J. Single-Path Mutation Enforcement
 
 - OK: the old public `replace_range(block, Range<usize>, ...)` API is gone. `bpfopt/crates/bpfopt/src/analysis/bbprogram_api.rs:49-80` exposes only `replace_range_at(site, len, replacement)`, and `82-89` keeps `replace_range_in_place` private.
-- REAL: `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:1517-1541` exposes `rep_admit_kinsn_site_window(...) -> Option<(BlockId, Range<usize>)>`, leaking mutation-window ranges to passes.
+- REAL: `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:1517-1541` exposes `rep_admit_kop_site_window(...) -> Option<(BlockId, Range<usize>)>`, leaking mutation-window ranges to passes.
 - REAL: `bpfopt/crates/bpfopt/src/passes/rotate.rs:87-100` holds and indexes a BBProgram-derived `Range<usize>` as described in section B.
 
 No other pass-held `Range<usize>` derived from BBProgram state was found.
@@ -216,6 +216,6 @@ Assignments in `map_info.rs`:
 6. Make raw verifier types private/crate-private and remove their public re-export from `pass.rs`; hide `PassContext.verifier_states` from passes.
 7. Replace discarded typed queries in `map_inline` (`_r2_kind`, `_r2_bounds`) with real proof logic or remove them.
 8. Make `BBProgram::ldimm64_second_slots` private and migrate `const_prop` and `map_inline` to `ldimm64_second_slot(site)`.
-9. Replace `rep_admit_kinsn_site_window` so it no longer returns `(BlockId, Range<usize>)`; fix `rotate` to consume an opaque site result instead of a range.
+9. Replace `rep_admit_kop_site_window` so it no longer returns `(BlockId, Range<usize>)`; fix `rotate` to consume an opaque site result instead of a range.
 10. Move `reset_btf_to_current_pcs` out of `map_inline` and into the BBProgram/PassManager lifecycle boundary.
 

@@ -36,17 +36,17 @@ not bind-mounted, and is therefore also lost when the container exits.
 ## Part 2: Why Do Tetragon Programs Reject?
 
 The answer is documented in `docs/tmp/p89h_root_cause.md` from an Apr 30 debug run
-(`x86_kvm_p89_kinsn_tetragon_debug_20260430_134738_850952`), which DID export 22
+(`x86_kvm_p89_kop_tetragon_debug_20260430_134738_850952`), which DID export 22
 populated failure workdirs (that run used an older daemon version that wrote failures
 into the corpus result directory).
 
-**Root cause: multi-subprogram kinsn candidates in `bulk_memory` and `extract`.**
+**Root cause: multi-subprogram kop candidates in `bulk_memory` and `extract`.**
 
 All 22 rejecting tetragon progs are `generic_kprobe_` or `generic_retkprobe`
 programs with `nr_func_info = 2` or `6` — i.e. multi-subprogram. The bpfopt passes
-`bulk_memory` and `extract` were emitting kinsn replacement candidates into these
+`bulk_memory` and `extract` were emitting kop replacement candidates into these
 programs. The bpfverify dry-run passed (bytecode is verifier-valid), but the kernel
-REJIT path rejected because the kinsn candidate boundary did not preserve subprogram
+REJIT path rejected because the kop candidate boundary did not preserve subprogram
 metadata boundaries required by the ReJIT replacement contract.
 
 Fixes were committed as `858ddd97` (`extract` skips multi-subprog candidates) and
@@ -55,7 +55,7 @@ an image built BEFORE those commits, the same rejections will recur.
 
 The single-insn proof that the code is not actually invalid: the
 `bpfverify_report.json` for every failing prog shows `"status": "pass"` — the
-problem is not bad bytecode, it is the kinsn subprogram boundary contract in the
+problem is not bad bytecode, it is the kop subprogram boundary contract in the
 REJIT kernel path.
 
 Tracee progs do not hit this because tracee's `generic_calls` programs are

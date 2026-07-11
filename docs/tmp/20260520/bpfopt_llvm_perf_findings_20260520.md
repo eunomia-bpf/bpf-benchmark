@@ -1,8 +1,8 @@
-# bpfopt/llvm O3 map_inline runtime perf on katran (no kinsn) — 2026-05-20/21
+# bpfopt/llvm O3 map_inline runtime perf on katran (no kop) — 2026-05-20/21
 
 Measured via the loader's built-in `katran_optimization_path` perf flow
 (BPF_PROG_TEST_RUN repeat=10000, duration_ns), driving the **LLVM O3 bpfopt**
-(`bpfopt/llvm/build/bpfopt`, system LLVM-18, NO kinsn) on
+(`bpfopt/llvm/build/bpfopt`, system LLVM-18, NO kop) on
 `katran_balancer.bpf.o : balancer_ingress`. 5 hard `--inline-hint`s → 16 sites.
 
 ## Headline: ~20% speedup, verifier-OK, forwarding-correct

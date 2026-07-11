@@ -50,7 +50,7 @@ The biggest concrete findings are:
 | 153-211 | `FROM runner-runtime-build-base AS runner-runtime-userspace` + big `RUN` | Copy partial sources, optionally clone Katran, build `bpftool`, build Katran | Partly | `bpftool` build is optional; Katran build is necessary unless artifacts are prebuilt elsewhere. The single huge `RUN` is bad for cache reuse. |
 | 213-225 | `COPY` Tracee binaries/libs + musl fixup | Import Tracee runtime artifacts | Yes | Good use of upstream prebuilt artifacts. The apt `musl` package is not required for this. |
 | 226-227 | `COPY` Tetragon binary + `/var/lib/tetragon` | Import Tetragon artifacts | Yes | Good. No local Tetragon build happens anymore. |
-| 229-267 | `FROM runner-runtime-build-base AS runner-runtime-kernel-artifacts` + install `bsdextrautils` + build kernel/modules/kinsn | Build kernel-side artifacts | Yes | Kernel build is necessary in current design. `bsdextrautils` is build-only and isolated already. |
+| 229-267 | `FROM runner-runtime-build-base AS runner-runtime-kernel-artifacts` + install `bsdextrautils` + build kernel/modules/kop | Build kernel-side artifacts | Yes | Kernel build is necessary in current design. `bsdextrautils` is build-only and isolated already. |
 | 269-429 | `FROM runner-runtime-userspace AS runner-runtime` + big `RUN` | Copy repo sources, build runner/micro/tests/daemon, delete sources, purge build deps | Partly | All artifacts are needed, but the one-shot `RUN` makes cache invalidation much worse than necessary. |
 | 431-450 | `COPY --from` kernel/Cilium/Calico artifacts | Import kernel outputs and upstream app assets | Yes | Good. Cilium and Calico are already consuming upstream prebuilt artifacts. |
 | 451 | `COPY` installer script | Add `bpfrejit-install` | Yes | Fine. |

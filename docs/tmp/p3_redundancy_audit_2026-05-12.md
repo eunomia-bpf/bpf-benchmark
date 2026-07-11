@@ -58,7 +58,7 @@ The main shrink opportunities are:
 
 1. **`BBProgram` depends on a pass-specific type.** Evidence above: `MapInlineSideInput` import/storage/accessor (`analysis/bbprogram.rs:12`, `analysis/bbprogram.rs:86`, `analysis/bbprogram.rs:635`). Severity: **must-fix structural**. LOC delta included in A1.
 
-2. **`PassContext` is a global side-input bag.** It includes kinsn state, platform, verifier states, PMU annotations, branch miss rate, map IDs, map metadata, map values, compressed overlays, inner map IDs, skipped snapshots, inline hints, and BTF records (`pass.rs:439` through `pass.rs:473`). Most passes use only a few fields. Severity: **must-fix structural**. LOC delta: **200-350** if map-inline side inputs are removed from the global context path.
+2. **`PassContext` is a global side-input bag.** It includes kop state, platform, verifier states, PMU annotations, branch miss rate, map IDs, map metadata, map values, compressed overlays, inner map IDs, skipped snapshots, inline hints, and BTF records (`pass.rs:439` through `pass.rs:473`). Most passes use only a few fields. Severity: **must-fix structural**. LOC delta: **200-350** if map-inline side inputs are removed from the global context path.
 
 3. **`main.rs` knows pass internals.** It special-cases `map_inline` before constructing the pass (`main.rs:305`) and parses map-inline-only args in main (`main.rs:771`). Severity: **must-fix structural**. LOC delta included in A3.
 
@@ -82,7 +82,7 @@ The main shrink opportunities are:
 
 ## F. Dead / Legacy Concepts
 
-1. **`KinsnAdmissionWindow.end_site` is not dead.** It is returned from `rep_admit_kinsn_site_window` (`analysis/bbprogram.rs:1515`) and used by `rotate` for live-out checks (`passes/rotate.rs:87`). Severity: **no action**. LOC delta: **0**.
+1. **`KopAdmissionWindow.end_site` is not dead.** It is returned from `rep_admit_kop_site_window` (`analysis/bbprogram.rs:1515`) and used by `rotate` for live-out checks (`passes/rotate.rs:87`). Severity: **no action**. LOC delta: **0**.
 
 2. **`PolicyConfig.enabled_passes` is dead.** See C1 (`pass.rs:685`). Severity: **high-value cleanup**. LOC delta included in C1.
 
@@ -103,7 +103,7 @@ Top 10:
 | 402 | `passes/map_inline.rs:1142` `run_map_inline_round` | full scan, hint handling, rewrite assembly, conflict handling, diagnostics, apply | doing multiple unrelated jobs; strongest split/delete target |
 | 129 | `passes/branch_flip.rs:63` `run_on_bbprogram` | profile validation, candidate filtering, safety checks, apply | cohesive but long |
 | 117 | `passes/map_inline.rs:2583` `classify_r0_uses_with_options` | alias tracking/use classification after lookup | hard to read; separable from map-inline orchestration |
-| 112 | `analysis/bbprogram_lift.rs:27` `lift_with_kinsn_registry` | linear bytecode to BBProgram | cohesive |
+| 112 | `analysis/bbprogram_lift.rs:27` `lift_with_kop_registry` | linear bytecode to BBProgram | cohesive |
 | 101 | `passes/map_inline.rs:1988` `build_direct_map_value_load_rewrites` | pseudo-map-value constantization | separable feature from lookup inlining |
 | 100 | `passes/wide_mem.rs:209` `run_on_bbprogram` | scan, filter, skip, apply | moderately mixed |
 | 99 | `analysis/bbprogram_api.rs:257` `merge_linear_chain_in_place` | CFG/body/metadata merge | cohesive but mutation-heavy |
@@ -115,7 +115,7 @@ The other >80 LOC functions are `passes/ccmp.rs:154`, `passes/bounds_check_merge
 
 ## H. Repeated Patterns
 
-1. **Kinsn passes repeat the same outer pass loop.** `rotate` scans, admits, checks liveness, reverses safe sites, then replaces (`passes/rotate.rs:72`); `extract` scans cross-block skips then admits and replaces (`passes/extract.rs:59`); `endian` does the same with extra preserved instructions (`passes/endian.rs:281`). Severity: **nice-to-have**. LOC delta: **120-220**, but removing this without adding a new abstraction is hard.
+1. **KOperation passes repeat the same outer pass loop.** `rotate` scans, admits, checks liveness, reverses safe sites, then replaces (`passes/rotate.rs:72`); `extract` scans cross-block skips then admits and replaces (`passes/extract.rs:59`); `endian` does the same with extra preserved instructions (`passes/endian.rs:281`). Severity: **nice-to-have**. LOC delta: **120-220**, but removing this without adding a new abstraction is hard.
 
 2. **Cross-block “interior branch target” diagnostics are repeated.** `extract` implements a cross-block two-instruction skip (`passes/extract.rs:125`), `endian` repeats the same shape (`passes/endian.rs:367`), and `wide_mem` has a more general version (`passes/wide_mem.rs:309`). Severity: **high-value cleanup** if diagnostics can be simplified. LOC delta: **80-140**.
 
@@ -157,7 +157,7 @@ Yes, **500+ LOC can leave `main.rs`**, but only if the CLI stops accepting old m
 
 ## K. Test Redundancy
 
-The shared test helper already covers common pass execution (`test_helpers.rs:214`), skip materialization (`test_helpers.rs:258`), base contexts (`test_helpers.rs:270`), kinsn contexts (`test_helpers.rs:274`), map-inline setters (`test_helpers.rs:301`, `test_helpers.rs:317`), and skip assertions (`test_helpers.rs:479`). Tests still define many tiny per-pass context wrappers such as `ccmp_ctx`, `bulk_ctx`, `prefetch_ctx`, `rotate64_ctx`, `extract_ctx`, `endian_ctx`, and `select_ctx` (examples found at `passes/ccmp_tests.rs:12`, `passes/bulk_memory_tests.rs:7`, `passes/prefetch_tests.rs:8`, `passes/rotate_tests.rs:7`, `passes/extract_tests.rs:7`, `passes/endian_tests.rs:7`, `passes/cond_select_tests.rs:8`).
+The shared test helper already covers common pass execution (`test_helpers.rs:214`), skip materialization (`test_helpers.rs:258`), base contexts (`test_helpers.rs:270`), kop contexts (`test_helpers.rs:274`), map-inline setters (`test_helpers.rs:301`, `test_helpers.rs:317`), and skip assertions (`test_helpers.rs:479`). Tests still define many tiny per-pass context wrappers such as `ccmp_ctx`, `bulk_ctx`, `prefetch_ctx`, `rotate64_ctx`, `extract_ctx`, `endian_ctx`, and `select_ctx` (examples found at `passes/ccmp_tests.rs:12`, `passes/bulk_memory_tests.rs:7`, `passes/prefetch_tests.rs:8`, `passes/rotate_tests.rs:7`, `passes/extract_tests.rs:7`, `passes/endian_tests.rs:7`, `passes/cond_select_tests.rs:8`).
 
 Severity: **nice-to-have**. Estimated test LOC delta: **250-450**. Production LOC delta: **0**. Do not chase this before production cleanup.
 

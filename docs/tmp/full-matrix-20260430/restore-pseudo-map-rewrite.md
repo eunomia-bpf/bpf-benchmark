@@ -27,7 +27,7 @@ This is a fundamental requirement of cross-process ReJIT in user-space, not a v3
 
 1. Scan `LD_IMM64` (`code == 0x18`) with `src_reg ∈ {PSEUDO_MAP_FD, PSEUDO_MAP_VALUE}`.
 2. Collect unique `imm` values (stale loader fds) in first-seen order — matches the kernel's `used_maps` order.
-3. Build `old_fd → daemon_fd` map by pairing each unique old fd with `map_fds_slice[i]`, where `map_fds_slice` is the map-only suffix of the ReJIT fd_array. The full fd_array may have a BTF module prefix for kinsn calls; that prefix must not participate in map fd rebinding.
+3. Build `old_fd → daemon_fd` map by pairing each unique old fd with `map_fds_slice[i]`, where `map_fds_slice` is the map-only suffix of the ReJIT fd_array. The full fd_array may have a BTF module prefix for kop calls; that prefix must not participate in map fd rebinding.
 4. Patch each matching fd-form instruction's `imm` to the daemon's fd. `src_reg` stays as `PSEUDO_MAP_FD/MAP_VALUE`.
 5. Convert `PSEUDO_MAP_IDX` / `PSEUDO_MAP_IDX_VALUE` to fd form using the map-only fd slice, preserving the second `LD_IMM64` word for map-value offsets.
 

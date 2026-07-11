@@ -35,7 +35,7 @@ use serde::{Deserialize, Serialize};
 // All paths are relative to the project root; the binary expects to be invoked
 // from there (`cargo test` chdirs to the crate dir, so the smoke test does the
 // chdir itself).
-const BPFOPT_BIN: &str = "bpfopt/llvm/build-kinsn/bpfopt";
+const BPFOPT_BIN: &str = "bpfopt/llvm/build-kop/bpfopt";
 const PASS_CONFIG_DIR: &str = "runner/config/passes";
 #[cfg(test)]
 const CORPUS_BUILD_DIR: &str = "corpus/build";
@@ -78,7 +78,7 @@ struct Cli {
     /// bpfopt executable to invoke.
     #[arg(long, value_name = "FILE", default_value = BPFOPT_BIN)]
     bpfopt: PathBuf,
-    /// Target.json passed to the pass yaml (only needed by kinsn-class passes).
+    /// Target.json passed to the pass yaml (only needed by kop-class passes).
     #[arg(long, value_name = "FILE")]
     target: Option<PathBuf>,
     /// Workdir to use. If omitted, a tmp dir is created and removed on exit.

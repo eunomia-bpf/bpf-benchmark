@@ -1317,42 +1317,42 @@ rewrite_linfo := patched baseline line_info
 
 ---
 
-## 7. 与 `kinsn` 的配合
+## 7. 与 `kop` 的配合
 
-## 7.1 当前 tree 没有 `kinsn` 机制
+## 7.1 当前 tree 没有 `kop` 机制
 
-我在 `vendor/linux-framework/kernel/bpf` / `include/linux` 里没有找到任何 `kinsn` 注册接口。
+我在 `vendor/linux-framework/kernel/bpf` / `include/linux` 里没有找到任何 `kop` 注册接口。
 
 当前 verifier 的 opcode 接受面仍然是硬编码闭集:
 
 - `bpf_opcode_in_insntable()` `vendor/linux-framework/kernel/bpf/core.c:1795-1815`
 - `resolve_pseudo_ldimm64()` 早期用它拒绝未知 opcode，`vendor/linux-framework/kernel/bpf/verifier.c:21879-21883`
 
-所以在当前 tree 中，`kinsn` 还是 **future work / separate subsystem**，不是现成能力。
+所以在当前 tree 中，`kop` 还是 **future work / separate subsystem**，不是现成能力。
 
-## 7.2 如果未来有 `kinsn`，`BPF_PROG_REWRITE` 如何配合
+## 7.2 如果未来有 `kop`，`BPF_PROG_REWRITE` 如何配合
 
-只有在以下前提都成立时，`BPF_PROG_REWRITE` 才能接 `kinsn`:
+只有在以下前提都成立时，`BPF_PROG_REWRITE` 才能接 `kop`:
 
-1. verifier opcode whitelist 接受 `kinsn`
-2. verifier 能为 `kinsn` 建模
-3. JIT backend 能 emit `kinsn`
-4. dump/disasm/tooling 能认识 `kinsn`
+1. verifier opcode whitelist 接受 `kop`
+2. verifier 能为 `kop` 建模
+3. JIT backend 能 emit `kop`
+4. dump/disasm/tooling 能认识 `kop`
 
 在这个前提下，`BPF_PROG_REWRITE` 的配合方式很直接:
 
 1. daemon 读 live xlated
 2. 定位优化 site
-3. 构造 baseline patch，把普通序列替换成 `kinsn`
+3. 构造 baseline patch，把普通序列替换成 `kop`
 4. `BPF_PROG_REWRITE`
 5. 内核 full re-verify + re-JIT + live swap
 
 但要强调:
 
-- **`BPF_PROG_REWRITE` 不会降低 `kinsn` 本身的 verifier/JIT 集成复杂度**
-- 它只是提供“把含 `kinsn` 的新 baseline 原子切到 live program”的机制
+- **`BPF_PROG_REWRITE` 不会降低 `kop` 本身的 verifier/JIT 集成复杂度**
+- 它只是提供“把含 `kop` 的新 baseline 原子切到 live program”的机制
 
-因此 `kinsn` 是 `BPF_PROG_REWRITE` 的可选上层，而不是后者的前提。
+因此 `kop` 是 `BPF_PROG_REWRITE` 的可选上层，而不是后者的前提。
 
 ---
 

@@ -19,7 +19,7 @@ Verdict: FAIL under the exact requested greps. The old `UseDefGraph.uses` field 
 4. Zero-cache invariants: FAIL literally because `_cache:` still exists as a pass-local variable; otherwise the bbprogram storage invariants hold.
    - `rg -n "Mutex<" crates/bpfopt/src` produced no output.
    - `rg -n "_cache:" crates/bpfopt/src` hits `crates/bpfopt/src/passes/map_inline.rs:2166`: local `map_cache`, not `ProgramCFG` storage.
-   - `ProgramCFG` fields remain `blocks`, `entry`, `use_def`, `kinsn_reg`, `map_bindings`, `func_info`, `line_info`, `prog_type`: `crates/bpfopt/src/analysis/bbprogram.rs:68-76`.
+   - `ProgramCFG` fields remain `blocks`, `entry`, `use_def`, `kop_reg`, `map_bindings`, `func_info`, `line_info`, `prog_type`: `crates/bpfopt/src/analysis/bbprogram.rs:68-76`.
    - `rg -n "BTreeMap<InsnSite|HashMap<InsnSite" crates/bpfopt/src` hits type aliases, return values, locals, and pass-local maps; no `ProgramCFG` field.
    - Only persistent use-def index is `UseDefGraph.defs`: `crates/bpfopt/src/analysis/bbprogram_use_def.rs:28-29`; `ProgramCFG` stores it at `crates/bpfopt/src/analysis/bbprogram.rs:71`.
    - Per-instruction facts live on `InsnNode`: `crates/bpfopt/src/analysis/bbprogram.rs:104-119`.
@@ -46,7 +46,7 @@ Verdict: FAIL. One residual persistent map contradicts item 4: `ProgramCFG` stor
 
 2. No `_cache:` fields on `ProgramCFG`: TRUE.
    - Grep: `rg -n "_cache:" crates/bpfopt/src/analysis` produced no output.
-   - `ProgramCFG` fields at `crates/bpfopt/src/analysis/bbprogram.rs:68-77` are `blocks`, `entry`, `use_def`, `kinsn_reg`, `map_bindings`, `func_info`, `line_info`, and `prog_type`; no `_cache` fields.
+   - `ProgramCFG` fields at `crates/bpfopt/src/analysis/bbprogram.rs:68-77` are `blocks`, `entry`, `use_def`, `kop_reg`, `map_bindings`, `func_info`, `line_info`, and `prog_type`; no `_cache` fields.
 
 3. No `BTreeMap<InsnSite,` or `HashMap<InsnSite,` as persistent `ProgramCFG` storage: TRUE.
    - `ProgramCFG` has no direct `InsnSite` map fields: `crates/bpfopt/src/analysis/bbprogram.rs:68-77`.

@@ -22,7 +22,7 @@ The six-tool architecture is present or explicitly staged: `bpfopt`, `bpfget`, a
 
 Rating: **CONFORMANT WITH DEVIATION**
 
-`bpfopt` implements all 12 top-level pass subcommands, `optimize`, `analyze`, and `list-passes`; global flags cover `--input`, `--output`, `--report`, `--platform`, `--kinsns`, `--target`, `--profile`, `--verifier-states`, `--map-values`, and `--map-ids` (`bpfopt/crates/bpfopt/src/main.rs:107-138`, `:141-177`). Required side inputs and target kinsns are rejected with exit 1 (`:552-607`). Bytecode parsing and writing use 8-byte little-endian records (`:646-667`).
+`bpfopt` implements all 12 top-level pass subcommands, `optimize`, `analyze`, and `list-passes`; global flags cover `--input`, `--output`, `--report`, `--platform`, `--koperation`, `--target`, `--profile`, `--verifier-states`, `--map-values`, and `--map-ids` (`bpfopt/crates/bpfopt/src/main.rs:107-138`, `:141-177`). Required side inputs and target koperation are rejected with exit 1 (`:552-607`). Bytecode parsing and writing use 8-byte little-endian records (`:646-667`).
 
 Deviation: `optimize` defaults to the zero-side-input subset `dce, skb-load-bytes, bounds-check-merge, wide-mem`, not the full v3 §5 order (`bpfopt/crates/bpfopt/src/main.rs:41-46`). This matches the implementation-level constraint that default invocations must not require side inputs.
 
@@ -32,7 +32,7 @@ Rating: **CONFORMANT WITH DEVIATION**
 
 The CLI surface covers default `PROG_ID` bytecode output, `--info`, `--full --outdir`, `--list`, `--list --json`, and `--target` (`bpfopt/crates/bpfget/src/main.rs:24-51`). It uses `kernel-sys` for live program enumeration, info, original bytecode, and map metadata (`:235-260`, `:387-422`).
 
-Deviation: `--target` currently emits arch/features and accepts manual `--kinsns`, but automatic kinsn BTF probing is explicitly not implemented and emits a warning (`bpfopt/crates/bpfget/src/main.rs:273-284`). The plan records this as TODO (`docs/kernel-jit-optimization-plan.md:413`, `:424`).
+Deviation: `--target` currently emits arch/features and accepts manual `--koperation`, but automatic kop BTF probing is explicitly not implemented and emits a warning (`bpfopt/crates/bpfget/src/main.rs:273-284`). The plan records this as TODO (`docs/kernel-jit-optimization-plan.md:413`, `:424`).
 
 ### v3 §2.5 bpfrejit
 
@@ -46,7 +46,7 @@ Rating: **CONFORMANT WITH DEVIATION**
 
 `bytecode`: conformant. `bpfopt`, `bpfget`, and `bpfrejit` encode/decode raw 8-byte little-endian `struct bpf_insn[]`.
 
-`target.json`: conformant for `bpfopt --target` input and simplified `bpfget --target` output; automatic kinsn probing is pending as above.
+`target.json`: conformant for `bpfopt --target` input and simplified `bpfget --target` output; automatic kop probing is pending as above.
 
 `map-values.json`: conformant for `bpfopt --map-values`; implementation accepts v3 fields and an additional `frozen` default.
 
@@ -110,7 +110,7 @@ Phase 1 items are implemented beyond the minimum: `bpfopt` has all 12 passes, no
 
 Rating: **CONFORMANT WITH DEVIATION**
 
-No public C FFI, `.a`, `.so`, public Rust API publishing, `ValidationOracle`, `KinsnRequirement`, custom pipe framing, or binary headers were introduced in audited Phase 1 code. Direct libbpf linking is allowed by the newer CLAUDE/plan rule (`CLAUDE.md:49-55`, `docs/kernel-jit-optimization-plan.md:386-392`). The daemon still has internal `PassManager`, pass pipeline, profiler, and direct syscall code; this is Phase 3 pending, not a Phase 1 conformance failure.
+No public C FFI, `.a`, `.so`, public Rust API publishing, `ValidationOracle`, `KopRequirement`, custom pipe framing, or binary headers were introduced in audited Phase 1 code. Direct libbpf linking is allowed by the newer CLAUDE/plan rule (`CLAUDE.md:49-55`, `docs/kernel-jit-optimization-plan.md:386-392`). The daemon still has internal `PassManager`, pass pipeline, profiler, and direct syscall code; this is Phase 3 pending, not a Phase 1 conformance failure.
 
 ## GAPs
 
@@ -126,7 +126,7 @@ No public C FFI, `.a`, `.so`, public Rust API publishing, `ValidationOracle`, `K
 
 3. `bpfopt optimize` default is the zero-side-input subset, not all 12 v3 §5 passes. Reference: `bpfopt/crates/bpfopt/src/main.rs:41-46`.
 
-4. `bpfget --target` kinsn BTF probing is simplified/TODO; manual `--kinsns` is available. References: `bpfopt/crates/bpfget/src/main.rs:273-284`, `docs/kernel-jit-optimization-plan.md:413`, `:424`.
+4. `bpfget --target` kop BTF probing is simplified/TODO; manual `--koperation` is available. References: `bpfopt/crates/bpfget/src/main.rs:273-284`, `docs/kernel-jit-optimization-plan.md:413`, `:424`.
 
 5. `bpfrejit-daemon` remains top-level `daemon/` and temporarily depends on `bpfopt` while retaining pipeline/profiler code. References: `docs/kernel-jit-optimization-plan.md:384`, `:426-429`, `CLAUDE.md:47`.
 

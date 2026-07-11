@@ -97,4 +97,4 @@ cargo test --release --workspace --manifest-path daemon/Cargo.toml    → 36 tes
 - **test_helpers.rs 新模块**：需确保 `#[cfg(test)]` 可见性正确；已在多平台 test 运行中验证。
 - **BpfInsn::set_code/set_off/set_imm 删除**：grep 验证无调用方，但若有通过 trait object 或宏的隐式调用则会报编译错误（构建通过证明无此风险）。
 - **decode_ldimm64 unwrap 改 index**：若存在截断的畸形 LD_IMM64 bytecode（最后一条是 LD_IMM64 但后无 hi_half），现在会 panic 而非静默返回 0。这是期望的 fail-fast 行为。
-- **kinsn rewrite loop 样板（~280 行，7 个 pass）**：此次未抽象为 `apply_site_rewrites`（评估后认为闭包参数会增加代码复杂度，风险大于收益），留待后续 round 决策。
+- **kop rewrite loop 样板（~280 行，7 个 pass）**：此次未抽象为 `apply_site_rewrites`（评估后认为闭包参数会增加代码复杂度，风险大于收益），留待后续 round 决策。

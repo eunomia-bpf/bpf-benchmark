@@ -773,7 +773,7 @@
 
 这也是 BpfReJIT 论文里值得强调的设计哲学：
 
-- kernel 只放必须在 TCB 内的机制：抓原始 bytecode、重提交 verifier/JIT、支持 kinsn；
+- kernel 只放必须在 TCB 内的机制：抓原始 bytecode、重提交 verifier/JIT、支持 kop；
 - 真正高 churn、高复杂度、架构特定、算法迭代快的 pass policy 放在 userspace daemon。
 
 ### 10.6 单程序 vs 多程序优化
@@ -807,7 +807,7 @@
 ### 11.4 第四类贡献：机制/策略分离
 
 - ePass 倾向把 pass infra 深嵌 kernel。
-- BpfReJIT 则把 kernel 收缩为最小机制层：syscall 扩展 + re-verification path + kinsn 支撑。
+- BpfReJIT 则把 kernel 收缩为最小机制层：syscall 扩展 + re-verification path + kop 支撑。
 - 这一点使它比 kernel-heavy 方案更容易演进、更容易做 architecture-specific experimentation，也更符合“论文原型可持续工程化”的方向。
 
 ### 11.5 第五类贡献：把 runtime optimization 传统带入 kernel eBPF

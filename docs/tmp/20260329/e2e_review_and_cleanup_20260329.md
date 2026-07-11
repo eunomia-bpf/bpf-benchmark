@@ -32,7 +32,7 @@
 ## 1.1 `case_common.py` boundary
 
 - `case_common.py` 里没有 repo-specific app runner。
-- 它主要是 generic lifecycle shell + kinsn/module metadata + result persistence。
+- 它主要是 generic lifecycle shell + kop/module metadata + result persistence。
 - 因此它和新架构不冲突；真正要下沉到 `runner/libs/app_runners/` 的是各 case 传给 `run_case_lifecycle()` 的 repo-specific hooks。
 
 ## 1.2 Extraction priority

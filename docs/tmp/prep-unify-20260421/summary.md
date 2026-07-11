@@ -99,13 +99,13 @@ The source and target mtimes were restored after the probe so the cache state re
 
 ## `workspace_layout.py` fixes
 
-- `kinsn_module_dir()` now returns `/artifacts/kinsn` only inside the runtime image. Host-side execution now uses `workspace/module/x86` or `workspace/module/arm64` according to `target_arch`.
+- `kop_module_dir()` now returns `/artifacts/kop` only inside the runtime image. Host-side execution now uses `workspace/module/x86` or `workspace/module/arm64` according to `target_arch`.
 - `kernel_modules_root()` no longer deletes `target_arch` or hardcodes the x86 module path for all KVM runs. Outside the runtime image, KVM now asserts `x86_64` and returns `repo_artifact_root(workspace, target_arch) / "kernel-modules"`. Non-KVM executors still return `/`.
 
 ## Commit Hashes
 
 - `52f2ab8c` `[prep] unify KVM/AWS image rebuild on make dep tracking (drop AWS short-circuit)`
-- `10c1a392` `[workspace] respect target_arch in kinsn_module_dir / kernel_modules_root outside runtime image`
+- `10c1a392` `[workspace] respect target_arch in kop_module_dir / kernel_modules_root outside runtime image`
 
 ## Edge Cases
 

@@ -6,7 +6,7 @@ Date: 2026-05-01
 
 - `verifier-states.json`：`map_inline`、`const_prop`
 - `map-values.json` + `--map-ids`：`map_inline`
-- `target.json` + ReJIT `fd_array` kinsn BTF fd/call offset：`rotate`、`cond_select`、`extract`、`endian_fusion`、`bulk_memory`、`prefetch`，以及非默认 `ccmp`
+- `target.json` + ReJIT `fd_array` kop BTF fd/call offset：`rotate`、`cond_select`、`extract`、`endian_fusion`、`bulk_memory`、`prefetch`，以及非默认 `ccmp`
 - PMU profile：非默认 `branch_flip` 必须显式 profile；`prefetch` 可消费 profile，但缺 profile 时按结构规则运行，不是 daemon 必需 side-input
 
 ## Matrix
@@ -14,18 +14,18 @@ Date: 2026-05-01
 | pass | default 12 | implementation dependencies | daemon side-input action |
 |---|:---:|---|---|
 | `wide_mem` | yes | bytecode; `branch_targets`; `liveness`; `ctx.prog_type` for packet pointer safety | Pass `--prog-type` from snapshot. No verifier states or map values. |
-| `rotate` | yes | bytecode; `branch_targets`; `liveness`; `ctx.kinsn_registry`; kinsn call offsets | Probe `target.json`; build kinsn fd_array entries and call offsets. |
-| `cond_select` | yes | bytecode; `branch_targets`; `ctx.platform.has_cmov`; `ctx.kinsn_registry`; kinsn call offsets | Probe `target.json`; build kinsn fd_array entries and call offsets. |
-| `extract` | yes | bytecode; `branch_targets`; `ctx.kinsn_registry`; kinsn call offsets | Probe `target.json`; build kinsn fd_array entries and call offsets. |
-| `endian_fusion` | yes | bytecode; `branch_targets`; `ctx.platform.arch`; endian kinsn availability/call offsets | Probe `target.json`; build kinsn fd_array entries and call offsets. |
+| `rotate` | yes | bytecode; `branch_targets`; `liveness`; `ctx.kop_registry`; kop call offsets | Probe `target.json`; build kop fd_array entries and call offsets. |
+| `cond_select` | yes | bytecode; `branch_targets`; `ctx.platform.has_cmov`; `ctx.kop_registry`; kop call offsets | Probe `target.json`; build kop fd_array entries and call offsets. |
+| `extract` | yes | bytecode; `branch_targets`; `ctx.kop_registry`; kop call offsets | Probe `target.json`; build kop fd_array entries and call offsets. |
+| `endian_fusion` | yes | bytecode; `branch_targets`; `ctx.platform.arch`; endian kop availability/call offsets | Probe `target.json`; build kop fd_array entries and call offsets. |
 | `map_inline` | yes | bytecode; `branch_targets`; `map_info`; `program.map_ids`; `program.map_fd_bindings`; live map metadata/values; `program.verifier_states` for lookup key extraction | Snapshot maps, write `map-values.json`, pass `--map-ids`, and capture `verifier-states.json` automatically. |
 | `const_prop` | yes | bytecode; `cfg`; `program.verifier_states` exact scalar facts | Capture `verifier-states.json` automatically. |
 | `dce` | yes | bytecode; `cfg`; optional offline func/line metadata remap if caller supplied it | No daemon side-input beyond bytecode. It does not read verifier states. |
 | `bounds_check_merge` | yes | bytecode; `cfg`; `branch_targets`; `liveness`; `ctx.prog_type` packet layout | Pass `--prog-type` from snapshot. It does not read verifier states. |
 | `skb_load_bytes_spec` | yes | bytecode; `branch_targets`; `ctx.prog_type` for TC skb layout | Pass `--prog-type` from snapshot. No verifier states. |
-| `bulk_memory` | yes | bytecode; `branch_targets`; `liveness`; memcpy/memset kinsn availability/call offsets | Probe `target.json`; build kinsn fd_array entries and call offsets. |
-| `prefetch` | yes | bytecode; `cfg`; `branch_targets`; `ctx.prog_type`; prefetch kinsn availability/call offsets; optional `prefetch_profile` annotations | Probe `target.json`; build kinsn fd_array entries and call offsets. Pass profile only when one is loaded. |
-| `ccmp` | no | bytecode; `branch_targets`; `liveness`; `ctx.platform.arch == aarch64`; `ctx.kinsn_registry`; kinsn call offsets | If explicitly requested, probe `target.json`; build kinsn fd_array entries and call offsets. |
+| `bulk_memory` | yes | bytecode; `branch_targets`; `liveness`; memcpy/memset kop availability/call offsets | Probe `target.json`; build kop fd_array entries and call offsets. |
+| `prefetch` | yes | bytecode; `cfg`; `branch_targets`; `ctx.prog_type`; prefetch kop availability/call offsets; optional `prefetch_profile` annotations | Probe `target.json`; build kop fd_array entries and call offsets. Pass profile only when one is loaded. |
+| `ccmp` | no | bytecode; `branch_targets`; `liveness`; `ctx.platform.arch == aarch64`; `ctx.kop_registry`; kop call offsets | If explicitly requested, probe `target.json`; build kop fd_array entries and call offsets. |
 | `branch_flip` | no | bytecode; `branch_targets`; program-level `branch_miss_rate`; per-site `branch_profile` with count/miss/taken/not-taken | Requires loaded real PMU profile. Missing profile remains fail-fast. |
 
 ## Audit Notes

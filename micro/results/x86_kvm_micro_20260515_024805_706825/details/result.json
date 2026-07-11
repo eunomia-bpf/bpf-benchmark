@@ -2,13 +2,13 @@
   "benchmarks": [
     {
       "category": "memory-local",
-      "description": "Hand-written x86 shift and mask kinsns over packed header fields",
+      "description": "Hand-written x86 shift and mask koperation over packed header fields",
       "expected_result": 4715,
       "family": "bitfield-extract",
-      "hypothesis": "Tests direct shr and and kinsn lowering for packed bitfield extraction",
+      "hypothesis": "Tests direct shr and and kop lowering for packed bitfield extraction",
       "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packed_header_bitfield_decode.mem",
       "io_mode": "staged",
-      "level": "handcraft-kinsn",
+      "level": "handcraft-kop",
       "name": "packed_header_bitfield_decode_handcraft",
       "native_baseline": "packed_header_bitfield_decode",
       "object": "/artifacts/user/micro-programs/x86_64/packed_header_bitfield_decode_handcraft.handcraft.so",
@@ -67,7 +67,7 @@
         "memory",
         "fields",
         "bitfield",
-        "handcraft-kinsn",
+        "handcraft-kop",
         "x86"
       ]
     }

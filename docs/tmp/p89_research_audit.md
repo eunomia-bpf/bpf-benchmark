@@ -13,18 +13,18 @@ Broad searches covered `docs/tmp/`, `docs/kernel-jit-optimization-plan*.md`, and
 - `blsi`, `blsr`, `blsmsk`, `lowest[-_]set[-_]bit`, `bitmap.*census`
 - `division[-_]reduction`, `const.*div`, `mulhi`, `shift[-_]multiply`, `magic[-_]number`, `granlund`, `divisor`
 - `register[-_](alloc|reall|map)`, `liveness`, `callee[-_]saved`, `R6.*spill`
-- `region[-_]kinsn`, `region.*proof`, `region.*ABI`, `extended[-_]register`
-- top-level docs: `bit_ops_kinsn_research`, `arm64_kinsn_research`, `x86_kinsn_research`, `kinsn_audit`, `kinsn_census`
+- `region[-_]kop`, `region.*proof`, `region.*ABI`, `extended[-_]register`
+- top-level docs: `bit_ops_kop_research`, `arm64_kop_research`, `x86_kop_research`, `kop_audit`, `kop_census`
 
 Implementation sweep:
 
 ```bash
-rg -n -i "(setcc|cset|andn|blsi|blsr|division|register_realloc|region_kinsn|spill_to_reg)" bpfopt/crates/bpfopt/src/passes
+rg -n -i "(setcc|cset|andn|blsi|blsr|division|register_realloc|region_kop|spill_to_reg)" bpfopt/crates/bpfopt/src/passes
 ```
 
 Result: no dedicated pass implementation for these six items. A broader `div|mod|BPF_DIV|BPF_MOD` sweep only found `const_prop.rs` constant evaluation and divide-by-zero handling, not division strength reduction.
 
-Existing passes under `bpfopt/crates/bpfopt/src/passes/` are `wide_mem`, `rotate`, `cond_select`, `extract`, `endian`, `branch_flip`, `map_inline`, `const_prop`, `dce`, `bounds_check_merge`, `bulk_memory`, `prefetch`, `skb_load_bytes`, and `ccmp`; none are SETcc/ANDN/BLS*/division-reduction/register-realloc/region-kinsn passes.
+Existing passes under `bpfopt/crates/bpfopt/src/passes/` are `wide_mem`, `rotate`, `cond_select`, `extract`, `endian`, `branch_flip`, `map_inline`, `const_prop`, `dce`, `bounds_check_merge`, `bulk_memory`, `prefetch`, `skb_load_bytes`, and `ccmp`; none are SETcc/ANDN/BLS*/division-reduction/register-realloc/region-kop passes.
 
 ## SETcc/CSET
 
@@ -57,7 +57,7 @@ Current status: `📝 待做（待调研）` is accurate.
 Found research/docs:
 
 - `docs/tmp/20260320/x86_new_optimization_opportunities_20260320.md:146` observes `sete/setne + andn` in a Tracee LLVM-vs-stock native gap.
-- `docs/tmp/20260329/bit_ops_kinsn_research_20260329.md:5` scopes bit-op research to `POPCNT/CLZ/CTZ + PDEP/PEXT + SHRX/SHLX`; it does not cover `ANDN`.
+- `docs/tmp/20260329/bit_ops_kop_research_20260329.md:5` scopes bit-op research to `POPCNT/CLZ/CTZ + PDEP/PEXT + SHRX/SHLX`; it does not cover `ANDN`.
 - `docs/tmp/p89_plan_status_review.md:39` already concluded no dedicated ANDN research was found.
 
 Conclusion: no corpus-wide `a & ~b` / mask-clear census exists. The Tracee observation is useful seed evidence, not a completed ANDN study.
@@ -83,7 +83,7 @@ Found research/docs:
 - `docs/tmp/2026-03-07/additional_jit_optimizations.md:332-340` discusses only the microbenchmark pattern `x &= x - 1 -> blsr`, with likely benefit limited to `bitcount`.
 - `docs/tmp/2026-03-08/directive-discovery-analysis.md:241` says the narrow `blsr`-style idiom is too small to drive the roadmap.
 - `docs/tmp/2026-03-13/ablation-byte-recompose-callee-bmi.md:30` reports near-zero BMI-only delta in a proxy estimate and includes `blsr` in that proxy family.
-- `docs/tmp/20260329/bit_ops_kinsn_research_20260329.md` does not include BLSI/BLSR/BLSMSK in its scope.
+- `docs/tmp/20260329/bit_ops_kop_research_20260329.md` does not include BLSI/BLSR/BLSMSK in its scope.
 - `docs/tmp/p89_plan_status_review.md:40` already concluded no dedicated BLS* research was found.
 
 Conclusion: there is partial historical coverage for `BLSR` in one microbenchmark, but no current corpus bitmap / lowest-set-bit census covering BLSI, BLSR, and BLSMSK.
@@ -149,19 +149,19 @@ find corpus/build -name '*.bpf.o' -print0 |
 
 Follow with a liveness-aware script that counts R6-R9 live ranges, spill/fill pairs, and conflicts with helper-call ABI boundaries.
 
-## Region kinsn
+## Region kop
 
 Current status: `📝 待做（待调研）` is accurate.
 
 Found research/docs:
 
-- `docs/tmp/20260325/kinsn_kfunc_unification_codex_research_20260325.md:10` and `:31` document the current `struct bpf_kinsn` plus `lower_kinsn_proof_regions()` model.
-- `docs/tmp/20260326/kinsn_formal_semantics_review_20260326.md:24-35` reviews current proof-lowering semantics.
-- `docs/tmp/p89_plan_status_review.md:45` already concluded no dedicated extended-register region-kinsn research was found.
+- `docs/tmp/20260325/kop_kfunc_unification_codex_research_20260325.md:10` and `:31` document the current `struct bpf_kop` plus `lower_kop_proof_regions()` model.
+- `docs/tmp/20260326/kop_formal_semantics_review_20260326.md:24-35` reviews current proof-lowering semantics.
+- `docs/tmp/p89_plan_status_review.md:45` already concluded no dedicated extended-register region-kop research was found.
 
-Conclusion: current kinsn proof-region docs explain how existing sidecar+kfunc kinsn calls are lowered for verifier proof. They do not define a region ABI, proof model, or native emit callback model for wrapping high-register-pressure code and using extra native registers.
+Conclusion: current kop proof-region docs explain how existing sidecar+kfunc kop calls are lowered for verifier proof. They do not define a region ABI, proof model, or native emit callback model for wrapping high-register-pressure code and using extra native registers.
 
-Existing code: `bpfopt/crates/bpfopt/src/passes/utils.rs` contains proof-region utilities for existing kinsn calls, but there is no `region_kinsn` pass or extended-register region ABI implementation.
+Existing code: `bpfopt/crates/bpfopt/src/passes/utils.rs` contains proof-region utilities for existing kop calls, but there is no `region_kop` pass or extended-register region ABI implementation.
 
 Recommended next step:
 
@@ -171,7 +171,7 @@ find corpus/build -name '*.bpf.o' -print0 |
   rg -n "(\\*\\(u64 \\*\\)\\(r10 -[0-9]+\\)|r[0-9]+ = \\*\\(u64 \\*\\)\\(r10 -[0-9]+\\))"
 ```
 
-Use that only as a pressure seed. The real next artifact should be a design doc for region ABI, verifier proof-lowering boundaries, allowed live-in/live-out registers, and how this relates to existing kinsn v2 proof regions.
+Use that only as a pressure seed. The real next artifact should be a design doc for region ABI, verifier proof-lowering boundaries, allowed live-in/live-out registers, and how this relates to existing kop v2 proof regions.
 
 ## Final Classification
 
@@ -182,4 +182,4 @@ Use that only as a pressure seed. The real next artifact should be a design doc 
 | BLSI/BLSR/BLSMSK | Partial historical BLSR/micro evidence only; no current corpus census, no implementation | Keep `📝 待做（待调研）`; link this audit |
 | Division strength reduction | Generic const-prop research only; no division-specific census, no implementation | Keep `📝 待做（待调研）`; link this audit |
 | Register reallocation | Adjacent REJIT spill-to-register research exists, but not this bytecode pass; no implementation | Keep `📝 待做（待调研）`; link this audit |
-| Region kinsn | Current proof-lowering docs exist, but not extended-register region ABI/proof research; no implementation | Keep `📝 待做（待调研）`; link this audit |
+| Region kop | Current proof-lowering docs exist, but not extended-register region ABI/proof research; no implementation | Keep `📝 待做（待调研）`; link this audit |

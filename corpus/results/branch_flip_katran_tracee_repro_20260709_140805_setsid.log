@@ -1486,7 +1486,7 @@ make[1]: Entering directory '/home/yunwei37/workspace/bpf-benchmark/vendor/libbp
 make[1]: '/home/yunwei37/workspace/bpf-benchmark/runner/build-host-docker-llvmbpf/vendor/libbpf/pic-obj/libbpf.a' is up to date.
   INSTALL  bpf.h libbpf.h btf.h libbpf_common.h libbpf_legacy.h bpf_helpers.h bpf_helper_defs.h bpf_tracing.h bpf_endian.h bpf_core_read.h skel_internal.h libbpf_version.h usdt.bpf.h
 make[1]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src'
-cmake -S "/home/yunwei37/workspace/bpf-benchmark/runner" -B "/home/yunwei37/workspace/bpf-benchmark/runner/build-host-docker-llvmbpf" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="gcc" -DCMAKE_CXX_COMPILER="g++" -DMICRO_REPO_ROOT="/home/yunwei37/workspace/bpf-benchmark" -DMICRO_LIBBPF_PREFIX="/home/yunwei37/workspace/bpf-benchmark/runner/build-host-docker-llvmbpf/vendor/libbpf/prefix" -DMICRO_LIBBPF_LIBRARY="/home/yunwei37/workspace/bpf-benchmark/runner/build-host-docker-llvmbpf/vendor/libbpf/pic-obj/libbpf.a" -DMICRO_KERNEL_OFFSETS_INCLUDE="/home/yunwei37/workspace/bpf-benchmark/micro/programs/build-host-docker-x86" -DMICRO_EXEC_ENABLE_LLVMBPF=1 -DLLVM_DIR="/home/yunwei37/workspace/bpf-benchmark/llvm-backend/build-bpf-kinsn/lib/cmake/llvm" 
+cmake -S "/home/yunwei37/workspace/bpf-benchmark/runner" -B "/home/yunwei37/workspace/bpf-benchmark/runner/build-host-docker-llvmbpf" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="gcc" -DCMAKE_CXX_COMPILER="g++" -DMICRO_REPO_ROOT="/home/yunwei37/workspace/bpf-benchmark" -DMICRO_LIBBPF_PREFIX="/home/yunwei37/workspace/bpf-benchmark/runner/build-host-docker-llvmbpf/vendor/libbpf/prefix" -DMICRO_LIBBPF_LIBRARY="/home/yunwei37/workspace/bpf-benchmark/runner/build-host-docker-llvmbpf/vendor/libbpf/pic-obj/libbpf.a" -DMICRO_KERNEL_OFFSETS_INCLUDE="/home/yunwei37/workspace/bpf-benchmark/micro/programs/build-host-docker-x86" -DMICRO_EXEC_ENABLE_LLVMBPF=1 -DLLVM_DIR="/home/yunwei37/workspace/bpf-benchmark/llvm-backend/build-bpf-kop/lib/cmake/llvm" 
 /etc/bash.bashrc: line 7: PS1: unbound variable
 -- Configuring done (0.1s)
 -- Generating done (0.0s)
@@ -1621,7 +1621,7 @@ docker build --platform linux/amd64 \
 	--build-context runner-runtime-host-kernel-config="/home/yunwei37/workspace/bpf-benchmark/.cache/container-images/host-docker-x86/kernel-config" \
 	--build-context runner-runtime-host-kernel-offsets="/home/yunwei37/workspace/bpf-benchmark/micro/programs/build-host-docker-x86" \
 	--build-context runner-runtime-host-kernel-modules="/home/yunwei37/workspace/bpf-benchmark/.cache/container-images/host-docker-x86/kernel-modules/lib/modules" \
-		--build-context runner-runtime-host-kinsn-artifacts="/home/yunwei37/workspace/bpf-benchmark/.cache/container-images/host-docker-x86/empty" \
+		--build-context runner-runtime-host-kop-artifacts="/home/yunwei37/workspace/bpf-benchmark/.cache/container-images/host-docker-x86/empty" \
 		--build-context runner-runtime-host-shim="/home/yunwei37/workspace/bpf-benchmark/bpfopt/shim/build-x86" \
 		--build-context runner-runtime-host-native-bpf="/home/yunwei37/workspace/bpf-benchmark/.cache/container-images/host-docker-x86/empty" \
 		--build-context runner-runtime-host-merlin="/home/yunwei37/workspace/bpf-benchmark/vendor/build/merlin-runtime-context" \
@@ -1630,8 +1630,8 @@ docker build --platform linux/amd64 \
 	--build-arg VENDOR_BUILD_ARCH=x86 \
 	--build-arg RUNNER_BUILD_DIR_NAME=build-host-docker-llvmbpf \
 	--build-arg KERNEL_IMAGE_NAME=bzImage \
-	--build-arg BPFOPT_HOST_BIN="bpfopt/llvm/build-kinsn/bpfopt" \
-	--build-arg KINSNPROBER_HOST_BIN="runner/assets/host-docker-unavailable" \
+	--build-arg BPFOPT_HOST_BIN="bpfopt/llvm/build-kop/bpfopt" \
+	--build-arg KOPPROBER_HOST_BIN="runner/assets/host-docker-unavailable" \
 	--build-arg BPFPROF_HOST_BIN="bpfperf/target/release/bpfprof" \
 	--build-arg NATIVE_LINK_HOST_BIN="runner/assets/host-docker-unavailable" \
 	-t "bpf-benchmark/runner-runtime:x86_64" -f "/home/yunwei37/workspace/bpf-benchmark/runner/containers/runner-runtime.Dockerfile" "/home/yunwei37/workspace/bpf-benchmark"
@@ -1694,8 +1694,8 @@ docker build --platform linux/amd64 \
 #12 transferring runner-runtime-host-stage2-programs: 2B done
 #12 DONE 0.6s
 
-#13 [context runner-runtime-host-kinsn-artifacts] load .dockerignore
-#13 transferring runner-runtime-host-kinsn-artifacts: 2B done
+#13 [context runner-runtime-host-kop-artifacts] load .dockerignore
+#13 transferring runner-runtime-host-kop-artifacts: 2B done
 #13 DONE 0.6s
 
 #14 [context runner-runtime-host-native-bpf] load .dockerignore
@@ -1761,8 +1761,8 @@ docker build --platform linux/amd64 \
 #26 transferring runner-runtime-host-shim: 482.53kB done
 #26 DONE 1.0s
 
-#27 [context runner-runtime-host-kinsn-artifacts] load from client
-#27 transferring runner-runtime-host-kinsn-artifacts: 2B done
+#27 [context runner-runtime-host-kop-artifacts] load from client
+#27 transferring runner-runtime-host-kop-artifacts: 2B done
 #27 DONE 1.1s
 
 #28 [context runner-runtime-host-merlin] load from client
@@ -3339,7 +3339,7 @@ docker build --platform linux/amd64 \
 #63 [runner-runtime 15/36] COPY --link tests /home/yunwei37/workspace/bpf-benchmark/tests
 #63 DONE 0.2s
 
-#64 [runner-runtime 16/36] COPY --link --chmod=0755 bpfopt/llvm/build-kinsn/bpfopt /usr/local/bin/bpfopt
+#64 [runner-runtime 16/36] COPY --link --chmod=0755 bpfopt/llvm/build-kop/bpfopt /usr/local/bin/bpfopt
 #64 DONE 0.3s
 
 #65 [runner-runtime 17/36] COPY --link --chmod=0755     runner/assets/host-docker-unavailable     bpfperf/target/release/bpfprof     runner/assets/host-docker-unavailable     /usr/local/bin/
@@ -3362,7 +3362,7 @@ docker build --platform linux/amd64 \
 #69 0.237 + ldconfig
 #69 DONE 0.3s
 
-#70 [runner-runtime 22/36] COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
+#70 [runner-runtime 22/36] COPY --link --from=runner-runtime-host-kop-artifacts / /artifacts/kop
 #70 DONE 0.2s
 
 #71 [runner-runtime 23/36] COPY --link --from=runner-runtime-host-shim /libbpfrejit_shim.so /usr/local/lib/bpfrejit/libbpfrejit_shim.so

@@ -229,7 +229,7 @@ Current status:
   - no inline cache-only short-circuit branch
   - active build targets now depend on `__require-arm64-toolchain`, which validates the fixed root instead of provisioning it
   - validated locally: `make -f runner/mk/bootstrap.mk bootstrap-arm64-toolchain` succeeds and materializes `runner/build-arm64/toolchain/usr/lib64/*`
-- KVM kinsn modules are now normalized to the real `kernel_release` during Make-side prep; the executor no longer rewrites `.virtme_mods/lib/modules/0.0.0` at runtime
+- KVM kop modules are now normalized to the real `kernel_release` during Make-side prep; the executor no longer rewrites `.virtme_mods/lib/modules/0.0.0` at runtime
 - KVM runtime kernel modules now come only from:
   - `RUN_KERNEL_MODULES_ROOT=.cache/repo-artifacts/x86_64/kernel-modules`
   - there is no `.virtme_mods` fallback in runtime code
@@ -307,7 +307,7 @@ Runtime reruns are active again on the current tree:
 Recent runtime-relevant fixes already applied:
 
 - `kernelrelease` no longer comes from `make kernelrelease`; artifact packaging now reads `include/config/kernel.release` directly for x86 and ARM.
-- KVM kinsn modules no longer use the `vendor/linux-framework/.virtme_mods` staging tree.
+- KVM kop modules no longer use the `vendor/linux-framework/.virtme_mods` staging tree.
   - Make-side prep now builds and installs them directly into `RUN_REPO_ARTIFACT_ROOT/kernel-modules`.
 - ARM kernel artifact packaging now runs `modules_install CONFIG_MODULE_SIG=n`, so AWS ARM setup is no longer blocked by module signing failures in `bpf_preload.ko`.
 - `corpus/e2e` now use a single guest runtime command contract plus an explicit bundled workload-tool root:
@@ -445,7 +445,7 @@ Note:
   - repo-native Katran BPF outputs are under `deps/bpfprog/bpf/*.o`
   - active Make staging now copies from that actual output directory instead of the stale `deps/bpfprog/katran/lib/bpf/*.o` path
 - current ARM blocker that was fixed:
-  - `__kinsn-modules-arm64` now passes `ARM64_AWS_BASE_CONFIG` through to `__kernel-arm64-aws`
+  - `__kop-modules-arm64` now passes `ARM64_AWS_BASE_CONFIG` through to `__kernel-arm64-aws`
   - this removed the immediate local-prep crash in fresh AWS ARM64 `corpus/e2e` reruns
 
 - current fresh reruns on the fixed tree:
@@ -488,7 +488,7 @@ Note:
     - `suite_entrypoint` now enables `kernel.bpf_stats_enabled=1` through `sudo sysctl` when not already root
     - this is now a shared contract fix instead of four target-specific failures
   - the next shared runtime blocker across AWS `corpus/e2e` was root-only module and bpftool operations.
-    - `kinsn` module loading now uses `sudo insmod` when the suite is not already root
+    - `kop` module loading now uses `sudo insmod` when the suite is not already root
     - `bpftool -j -p prog show` now runs through `sudo` in shared runtime helpers instead of failing with `Operation not permitted`
   - the next shared `corpus` blocker across x86 and arm64 AWS was guest `libbpf` runtime incompatibility.
     - bundled host-built `libbpf.so` required guest-incompatible glibc symbols

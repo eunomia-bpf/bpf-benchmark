@@ -14,7 +14,7 @@
 |------|------|-----------|--------|--------|
 | app_runners/katran.py | 784 | Katran XDP 负载均衡器的完整运行器（网络拓扑、多进程管理、BPF map 操作） | ~550 | ~230 |
 | rejit.py | 752 | daemon 会话管理、ReJIT 策略解析、benchmark 配置加载 | ~500 | ~250 |
-| case_common.py | 749 | corpus/e2e 应用运行的公共流程（quiescence 等待、BPF stats、kinsn 元数据） | ~550 | ~200 |
+| case_common.py | 749 | corpus/e2e 应用运行的公共流程（quiescence 等待、BPF stats、kop 元数据） | ~550 | ~200 |
 | workload.py | 705 | 工作负载生成器（HTTP、IO storm、scheduler、exec、network load 等）| ~550 | ~150 |
 | input_generators.py | 699 | micro benchmark 输入数据生成（纯计算，LCG 变体，20+ 生成器函数） | ~550 | ~150 |
 | run_contract.py | 617 | 运行配置构建（target.env + suite.env → RunConfig dataclass） | ~450 | ~167 |
@@ -29,7 +29,7 @@
 | run_target_suite.py | 276 | 高层入口：构建 RunConfig → 本地 prep → aws/kvm 执行 | ~220 | ~56 |
 | app_runners/tetragon.py | 269 | Tetragon 安全可观测性工具运行器 | ~220 | ~49 |
 | kvm_executor.py | 257 | KVM VM 内部 guest 脚本生成与执行 | ~200 | ~57 |
-| kinsn.py | 217 | kinsn 内核模块加载、发现、daemon kinsn 元数据捕获 | ~180 | ~37 |
+| kop.py | 217 | kop 内核模块加载、发现、daemon kop 元数据捕获 | ~180 | ~37 |
 | results.py | 208 | micro 测试结果数据结构与 JSON 序列化 | ~180 | ~28 |
 | aws_common.py | 207 | AWS CLI 调用的公共辅助函数 | ~170 | ~37 |
 | app_runners/bpftrace.py | 207 | bpftrace 运行器 | ~170 | ~37 |
@@ -76,7 +76,7 @@
 
 **原因 2：rejit.py 和 case_common.py 承载核心业务逻辑（必要的复杂度）**
 - rejit.py：daemon 会话生命周期 + ReJIT 策略 YAML 解析 + benchmark 配置合并逻辑，本质上是 v2 架构的核心 Python 接口
-- case_common.py：quiescence 检测 + BPF stats 采样 + kinsn 元数据管理，这些是测量精度的保证
+- case_common.py：quiescence 检测 + BPF stats 采样 + kop 元数据管理，这些是测量精度的保证
 
 **原因 3：run_contract.py 是配置合并的巨石（部分可优化）**
 - 617 行，功能：读取 target.env + suite.env + 环境变量 → 构建 RunConfig
@@ -117,7 +117,7 @@
 - **可削减**：约 250 行。`_PASS_TO_SITE_FIELD`/`_TOTAL_SITE_FIELDS` 等字段映射可以大幅压缩；`BenchmarkConfig` 的 deep_merge 和 YAML 解析辅助函数约 100 行可以简化
 
 ### case_common.py（749 行）
-- **做什么**：corpus/e2e 测试公共流程——quiescence 等待（等待 BPF 程序稳定）、kinsn 生命周期元数据、CPU/BPF stats 采样线程管理
+- **做什么**：corpus/e2e 测试公共流程——quiescence 等待（等待 BPF 程序稳定）、kop 生命周期元数据、CPU/BPF stats 采样线程管理
 - **必要行估计**：~550 行
 - **可削减**：约 200 行。`wait_for_suite_quiescence` 的容错逻辑较冗长；部分统计辅助函数与 statistics.py 有重叠
 

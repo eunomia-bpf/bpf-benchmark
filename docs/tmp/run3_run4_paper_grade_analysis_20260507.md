@@ -4,7 +4,7 @@
 作者：Claude (dispatcher) + 用户 review
 源数据：
 - Run 3 noop+map_inline 7-app SAMPLES=3 → `corpus/results/x86_kvm_corpus_20260507_072543_601953`
-- Run 4 kinsn-only 7-app SAMPLES=3 → `corpus/results/x86_kvm_corpus_20260507_081532_470100`
+- Run 4 kop-only 7-app SAMPLES=3 → `corpus/results/x86_kvm_corpus_20260507_081532_470100`
 - 全 295 个 prog 的明细表 → `docs/tmp/run3_run4_detailed_20260507.txt`
 
 ## TL;DR — 修正前的粗结论 → 修正后的严谨结论
@@ -15,7 +15,7 @@
 | "KVM 噪声" | 表述不准。**主要来源是 workload phase variance**——baseline 和 post-rejit phase 跑的 syscall/IO pattern 不一致，per-prog avg_ns 被工作量主导。CPU jitter 是次要因素 |
 | Method B 0.8965 = ~10% 加速 | 误导。Run 3 applied-only Method B 是 0.9378，但只有 9 个程序且受低 min_runs outlier 影响；Run 4 applied-only Method B 是 0.8305，但需要结合同程序 phase variance 解读 |
 
-**底线判断**：Run 3 的 Method B 0.8965 被 applied=0 的 phase variance 和低 min_runs outlier 混杂；Run 4 kinsn-only Method B 0.8897 也需要结合 same-prog 跨 run 的 phase variance 解读（vfs_create 同程序 applied=0 在 Run 3 是 2.232x、Run 4 是 0.388x）。要拿 paper-grade 数字必须先跑 noop-only baseline 标定噪声楼层。
+**底线判断**：Run 3 的 Method B 0.8965 被 applied=0 的 phase variance 和低 min_runs outlier 混杂；Run 4 kop-only Method B 0.8897 也需要结合 same-prog 跨 run 的 phase variance 解读（vfs_create 同程序 applied=0 在 Run 3 是 2.232x、Run 4 是 0.388x）。要拿 paper-grade 数字必须先跑 noop-only baseline 标定噪声楼层。
 
 ---
 
@@ -55,7 +55,7 @@ Run 3 top 8 wins（按 ratio 升序）：
 
 ### 证据 3：Run 4 同一组 trace_ret_* 程序 applied=17 比值仅小幅变化
 
-Run 4（kinsn-only）同一组：
+Run 4（kop-only）同一组：
 
 | 程序 | Run 3 ratio (applied=0) | Run 4 ratio (applied=17) | 差异 |
 |------|---|---|---|
@@ -66,9 +66,9 @@ Run 4（kinsn-only）同一组：
 | trace_ret_inotify_find_inode | 0.107 | 0.089 | -17% |
 | trace_ret_vfs_readv | 0.090 | 0.147 | +63% |
 
-加 17 个 kinsn site 之后比值平均变动只有几个百分点（且方向不一致），远小于 baseline-vs-post phase 间的 baseline avg 变动。
+加 17 个 kop site 之后比值平均变动只有几个百分点（且方向不一致），远小于 baseline-vs-post phase 间的 baseline avg 变动。
 
-**结论**：0.07× 加速的主要驱动是 phase 间 workload pattern 差异（kretprobe 当 phase 1 重活在 phase 2 没复现），kinsn 的 17 个 site 只是叠加了 < 5% 的小修正。
+**结论**：0.07× 加速的主要驱动是 phase 间 workload pattern 差异（kretprobe 当 phase 1 重活在 phase 2 没复现），kop 的 17 个 site 只是叠加了 < 5% 的小修正。
 
 ### 证据 4：trace_X 系 1.5-2.2× "输家"两次都 applied=0
 
@@ -93,13 +93,13 @@ Run 3 + Run 4 cross-check：
 | 3 noop+map_inline | applied-only | 9 | 0.9378 |
 | 3 noop+map_inline | not-applied | 139 | 0.8939 |
 | 3 noop+map_inline | 全体 | 148 | 0.8965 |
-| 4 kinsn-only | applied-only | 112 | 0.8305 |
-| 4 kinsn-only | not-applied | 35 | 1.1090 |
-| 4 kinsn-only | 全体 | 147 | 0.8897 |
+| 4 kop-only | applied-only | 112 | 0.8305 |
+| 4 kop-only | not-applied | 35 | 1.1090 |
+| 4 kop-only | 全体 | 147 | 0.8897 |
 
 **Method B 分群体看：**
 - Run 3 map_inline 实际命中的 9 个 prog 是 0.9378。九个里面只有 otel 54/sched_process_free（applied=6 sites, ratio 0.423, min_runs=163）拉低了 Method B；其他 8 个全部 ≥ 0.997。
-- Run 4 kinsn 命中的 112 个 prog 是 0.8305，但需要结合 applied=0 群体和 same-prog 跨 run phase variance 解读。
+- Run 4 kop 命中的 112 个 prog 是 0.8305，但需要结合 applied=0 群体和 same-prog 跨 run phase variance 解读。
 - not-applied 群体也有大幅漂移 → 这些变化由 phase 偏置主导，不是 ReJIT 信号。
 
 ### 证据 6：Method B 被低 min_runs 程序主导
@@ -128,7 +128,7 @@ Run 3 cilium/otel applied prog（这是 map_inline 唯一出力的地方）：
 
 **map_inline 9 个 applied prog 里 6 个是 slowdown / flat**，只有一个 min_runs 极低的 otel sched_process_free 拉出 0.423 拉低了 Method B。这九个里 cilium 5 个（41+48+26+9+1=125 sites）合起来是 +1% slowdown。
 
-Run 4 kinsn 112 个 applied prog 里的代表点：
+Run 4 kop 112 个 applied prog 里的代表点：
 
 | app | pid | name | applied | min_runs | ratio |
 |-----|-----|------|---------|----------|-------|
@@ -170,7 +170,7 @@ baseline 30 秒和 post 30 秒之间，workload 进程是**新 spawn 的两个�
 3. **app 重启在两 phase 之间**（清 page cache + reset app 内部状态）—— 但破坏 ReJIT 测量语义
 4. **paper-grade 必须在每次 run 都跑 noop baseline 配对**，做差减法去除 phase 偏置
 
-**最低代价的修复 #4**：cron-style 跑 `noop` 和待测 pass 各 5-10 次，per-prog 算 (kinsn ratio mean) / (noop ratio mean) 抵消 phase 偏置。
+**最低代价的修复 #4**：cron-style 跑 `noop` 和待测 pass 各 5-10 次，per-prog 算 (kop ratio mean) / (noop ratio mean) 抵消 phase 偏置。
 
 ---
 
@@ -182,7 +182,7 @@ baseline 30 秒和 post 30 秒之间，workload 进程是**新 spawn 的两个�
 |---|------|------|------|
 | Q1 | noop-baseline-7app | `BPFREJIT_BENCH_PASSES=noop SAMPLES=3 7-app` | **噪声楼层**：所有 prog applied=0，Method B 应趋近 1.0；任何偏离 1.0 都是 phase variance |
 | Q2 | mi-verify-3app | `noop,map_inline` on cilium+otel+tracee | #226：复测 map_inline applied prog 集中报告 |
-| Q3 | kinsn-no-prefetch-7app | kinsn 去掉 prefetch | 检查 prefetch 是 Run 4 信号源否 |
+| Q3 | kop-no-prefetch-7app | kop 去掉 prefetch | 检查 prefetch 是 Run 4 信号源否 |
 | Q4 | prefetch-only-7app | prefetch only | prefetch 单 pass 净效应 |
 | Q5 | wide-mem-only-7app | wide_mem only | wide_mem 单 pass 净效应 |
 | Q6 | otel-prefetch | prefetch on otel | #213 native_tracer_entry isolation |
@@ -200,11 +200,11 @@ baseline 30 秒和 post 30 秒之间，workload 进程是**新 spawn 的两个�
 
 不要写：
 - "ReJIT 实现了 10% 几何平均加速"（Method B 0.89 是 phase 偏置主导，不是 ReJIT 信号）
-- "kinsn 在 1898 个 site 实现了加速"（Run 4 Method B 尚未经过 noop baseline 校正）
+- "kop 在 1898 个 site 实现了加速"（Run 4 Method B 尚未经过 noop baseline 校正）
 
 可以写（前提：Q1 baseline 噪声楼层确认 < ±5%）：
 - "当前 Run 3/Run 4 中，small-prog 的 ±10% 漂移由 workload phase variance 主导，非 ReJIT 优化效果"
-- "1898 kinsn sites are emitted across 112 programs; headline speedup requires paired noop baseline correction"
+- "1898 kop sites are emitted across 112 programs; headline speedup requires paired noop baseline correction"
 - 个别 prog 的真信号需要靠 workload-side throughput 度量（见 #217 corpus app-throughput delta 分析）
 
 不能在 paper 里报 Method B 0.89 作主指标。

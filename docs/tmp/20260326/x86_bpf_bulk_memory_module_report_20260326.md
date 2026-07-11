@@ -6,7 +6,7 @@ Date: 2026-03-26
 
 - Added `module/x86/bpf_bulk_memory.c`.
 - Added `bpf_bulk_memory.o` to `module/x86/Makefile`.
-- Aligned the daemon-side packed `memcpy` payload with the current kinsn v2 proof-sequence model by carrying an explicit dead scratch BPF register.
+- Aligned the daemon-side packed `memcpy` payload with the current kop v2 proof-sequence model by carrying an explicit dead scratch BPF register.
 
 ## Implemented Behavior
 
@@ -31,12 +31,12 @@ Date: 2026-03-26
 
 ## Notes
 
-- The current repository still uses `instantiate_insn()` as canonical kinsn semantics. Because of that, `memcpy` needs an explicit scratch BPF reg in the packed payload; a pure memory-effect-only ABI would require a different verifier model than the one implemented in-tree today.
+- The current repository still uses `instantiate_insn()` as canonical kop semantics. Because of that, `memcpy` needs an explicit scratch BPF reg in the packed payload; a pure memory-effect-only ABI would require a different verifier model than the one implemented in-tree today.
 - `memset` remains backward-compatible with the current daemon zero-fill payloads and also accepts the more general packed byte-fill form.
 
 ## Verification
 
-- `make kinsn-modules`
+- `make kop-modules`
   - Result: built `module/x86/bpf_bulk_memory.ko` successfully.
 - `cargo test --manifest-path daemon/Cargo.toml bulk_memory`
   - Result: `17 passed, 0 failed`.

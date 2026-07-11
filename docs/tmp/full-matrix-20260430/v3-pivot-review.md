@@ -149,7 +149,7 @@ The pivot has tests for relocation and some command helpers, but I did not find 
 Evidence:
 - `daemon/crates/bpfget/src/lib.rs:1028` tests multi-map relocation.
 - `daemon/crates/bpfget/src/lib.rs:1083` tests BTF multi-subprogram byte preservation.
-- `daemon/src/commands.rs:1675` tests bytecode decoder and kinsn target helpers.
+- `daemon/src/commands.rs:1675` tests bytecode decoder and kop target helpers.
 - `daemon/src/server.rs:631` tests state handling and request validation.
 - No static hit for a daemon test that forces `bpfverify::verify_pass` to return verifier reject and validates daemon response/failure artifacts.
 
@@ -165,7 +165,7 @@ Fix direction:
 
 Status: WARN
 
-The pivot correctly stops installing old standalone `bpfget`, `bpfverify`, and `bpfrejit` binaries. The remaining layer order still places kernel/kinsn final-image content after Rust artifacts.
+The pivot correctly stops installing old standalone `bpfget`, `bpfverify`, and `bpfrejit` binaries. The remaining layer order still places kernel/kop final-image content after Rust artifacts.
 
 Evidence:
 - `runner/mk/build.mk:38` now lists only `bpfopt` and `bpfprof` under `ACTIVE_BPFOPT_BINARIES`.
@@ -173,15 +173,15 @@ Evidence:
 - `runner/containers/runner-runtime.Dockerfile:441` installs only `bpfrejit-daemon` from the daemon build.
 - `runner/containers/runner-runtime.Dockerfile:471` installs only `bpfopt` and `bpfprof`.
 - `runner/containers/runner-runtime.Dockerfile:517` copies daemon and bpfopt artifacts into the final image.
-- `runner/containers/runner-runtime.Dockerfile:520` copies kinsn artifacts after Rust artifacts.
-- `CLAUDE.md:89` says kernel + kinsn modules should be below runner/Rust/Python layers.
+- `runner/containers/runner-runtime.Dockerfile:520` copies kop artifacts after Rust artifacts.
+- `CLAUDE.md:89` says kernel + kop modules should be below runner/Rust/Python layers.
 
 Impact:
 - This does not appear to make Python changes rebuild apps/kernel/daemon.
 - It is still a strict mismatch against the documented layering contract.
 
 Fix direction:
-- Move kinsn/kernel final image copy before Rust daemon/bpfopt copies, or document why final-image copy order is not considered part of the cache-sensitive layering contract.
+- Move kop/kernel final image copy before Rust daemon/bpfopt copies, or document why final-image copy order is not considered part of the cache-sensitive layering contract.
 - Add an explicit `test -x /usr/local/bin/bpfprof` smoke check next to the existing `bpfopt` check at `runner/containers/runner-runtime.Dockerfile:528`.
 
 ### P3: Minor fail-fast cleanup items remain
@@ -341,7 +341,7 @@ Findings:
 - Build scripts no longer build/install old standalone `bpfget`, `bpfverify`, or `bpfrejit` binaries.
 - `bpfopt` and `bpfprof` remain as expected external CLIs.
 - Runtime Python/YAML/config files are separated from compile-source dependency lists in `runner/mk/build.mk`.
-- Docker final-image kinsn copy order is not strictly aligned with the documented layer order.
+- Docker final-image kop copy order is not strictly aligned with the documented layer order.
 
 Evidence:
 - `runner/mk/build.mk:38`

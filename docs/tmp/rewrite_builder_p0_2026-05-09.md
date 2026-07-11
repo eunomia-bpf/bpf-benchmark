@@ -5,7 +5,7 @@ Date: 2026-05-09
 Scope:
 - Added `bpfopt/crates/bpfopt/src/passes/rewrite.rs`.
 - Migrated first-batch passes only: `skb_load_bytes_spec`, `bounds_check_merge`, `const_prop`, `wide_mem`.
-- Did not migrate kinsn-class passes or `map_inline`.
+- Did not migrate kop-class passes or `map_inline`.
 - Did not run corpus benchmarks.
 
 ## LOC Delta

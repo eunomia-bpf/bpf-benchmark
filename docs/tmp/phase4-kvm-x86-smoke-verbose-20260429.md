@@ -30,7 +30,7 @@ The smoke rebuilt the KVM runtime image with the daemon diagnostic fix:
 | image digest | `sha256:a49596f55ed1b53e9bb201e8a0a9426e16abfc4ca53f7e5ab0ebf034899162fd` |
 | image tar | `.cache/container-images/x86_64-runner-runtime.image.tar`, 9.3 GiB, timestamp `2026-04-29 06:13` |
 | rebuilt components | daemon and bpfopt CLI suite were rebuilt into the image |
-| kinsn modules | `bpf_bulk_memory`, `bpf_endian`, `bpf_extract`, `bpf_rotate`, `bpf_select` loaded, `failed_modules=[]` |
+| kop modules | `bpf_bulk_memory`, `bpf_endian`, `bpf_extract`, `bpf_rotate`, `bpf_select` loaded, `failed_modules=[]` |
 
 ## Diagnostic Capture
 
@@ -192,7 +192,7 @@ processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_stat
 ```
 
 Because the original bytecode fails verifier-state capture, these records should
-not be attributed to `map_inline`, `const_prop`, `dce`, or kinsn passes.
+not be attributed to `map_inline`, `const_prop`, `dce`, or kop passes.
 
 ### Map-heavy errno 13 final verifier logs
 
@@ -274,11 +274,11 @@ as a micro benchmark family (`branch_flip_dense`), but it is not in
 | skb_load_bytes_spec | yes | yes | enabled |
 | bounds_check_merge | yes | yes | enabled |
 | wide_mem | yes | yes | enabled |
-| bulk_memory | yes | yes | enabled, kinsn module loaded |
-| rotate | yes | yes | enabled, kinsn module loaded |
-| cond_select | yes | yes | enabled, kinsn module loaded |
-| extract | yes | yes | enabled, kinsn module loaded |
-| endian_fusion | yes | yes | enabled, kinsn module loaded |
+| bulk_memory | yes | yes | enabled, kop module loaded |
+| rotate | yes | yes | enabled, kop module loaded |
+| cond_select | yes | yes | enabled, kop module loaded |
+| extract | yes | yes | enabled, kop module loaded |
+| endian_fusion | yes | yes | enabled, kop module loaded |
 | branch_flip | yes | no | covered by micro benchmark family, not daemon default |
 
 Saved pass summaries in the result JSON only retain no-op style per-program

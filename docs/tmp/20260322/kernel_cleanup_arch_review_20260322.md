@@ -106,7 +106,7 @@ rollback re-swap 将 `prog->bpf_func` 恢复为旧值，`tmp->bpf_func` 恢复�
 | 组件 | 状态 | 说明 |
 |------|:---:|------|
 | syscall (GET_ORIGINAL + REJIT) | 完整 | `BPF_PROG_REJIT` cmd、`orig_prog_insns`/`orig_prog_len` in `bpf_prog_info`、完整 verify+JIT+swap 流程 |
-| kinsn (KF_INLINE_EMIT) | 完整 | `bpf_kfunc_inline_ops` 结构体、register/unregister API、x86+ARM64 JIT 分发、verifier `inline_ops` 缓存 |
+| kop (KF_INLINE_EMIT) | 完整 | `bpf_kfunc_inline_ops` 结构体、register/unregister API、x86+ARM64 JIT 分发、verifier `inline_ops` 缓存 |
 | daemon | N/A | 纯用户态，不在 kernel diff 中 |
 
 **结论**：内核侧三组件完整，与 SS1.7 设计一致。
@@ -128,15 +128,15 @@ rollback re-swap 将 `prog->bpf_func` 恢复为旧值，`tmp->bpf_func` 恢复�
 
 **问题**：流程整体正确。唯一问题是 A.3 中的 refresh 失败回滚 bug。
 
-### B.3 kinsn (KF_INLINE_EMIT) 路径
+### B.3 kop (KF_INLINE_EMIT) 路径
 
 **注册**：`bpf_register_kfunc_inline_ops(func_name, ops)` → 加入 `bpf_kfunc_inline_list`
 
 **verifier 集成**：`add_kfunc_call()` 中检查 `KF_INLINE_EMIT` flag → `bpf_kfunc_inline_lookup()` → 缓存到 `desc->inline_ops`
 
 **JIT 分发**：
-- x86：`emit_kinsn_desc_call()` → `ops->emit_x86()` → 检查 `ret == off && ret <= max_emit_bytes`
-- ARM64：`emit_kinsn_desc_call_arm64()` → `ops->emit_arm64()` → 检查 `ctx->idx - saved_idx == n_insns` + `n_insns * 4 <= max_emit_bytes`
+- x86：`emit_kop_desc_call()` → `ops->emit_x86()` → 检查 `ret == off && ret <= max_emit_bytes`
+- ARM64：`emit_kop_desc_call_arm64()` → `ops->emit_arm64()` → 检查 `ctx->idx - saved_idx == n_insns` + `n_insns * 4 <= max_emit_bytes`
 
 **fallback**：如果 `bpf_jit_find_kfunc_inline_ops` 返回 NULL（module 未加载），JIT 正常 emit CALL 指令。
 
@@ -151,7 +151,7 @@ rollback re-swap 将 `prog->bpf_func` 恢复为旧值，`tmp->bpf_func` 恢复�
 - **不检查** subprog 签名/参数类型，但这由 verifier 保证（bpf_check 会验证）
 - **不检查** subprog 名称/BTF，但 swap 中已 swap `func_info`/`func_info_aux`
 
-**已知限制**：如果 daemon 的变换改变了某个 subprog 的 insn count（如 inline 了一条 kinsn call），layout match 会拒绝。这是 by design——daemon 需要保持每个 subprog 的 insn count 不变（padding NOP），或者变换只适用于单函数程序。
+**已知限制**：如果 daemon 的变换改变了某个 subprog 的 insn count（如 inline 了一条 kop call），layout match 会拒绝。这是 by design——daemon 需要保持每个 subprog 的 insn count 不变（padding NOP），或者变换只适用于单函数程序。
 
 **结论**：对当前需求足够。如果未来需要支持 subprog-level 变换（insn count 变化），需要放宽此检查并相应调整 func[] swap 逻辑。
 

@@ -1,8 +1,8 @@
 #ifndef BPFREJIT_SHIM_SNAPSHOT_H
 #define BPFREJIT_SHIM_SNAPSHOT_H
 
-#ifndef BPF_PSEUDO_KINSN_CALL
-#define BPF_PSEUDO_KINSN_CALL 4
+#ifndef BPF_PSEUDO_KOP_CALL
+#define BPF_PSEUDO_KOP_CALL 4
 #endif
 
 /* --- snapshot helpers (MAP_IDS / MAP_VALUES / canonicalize) --- */
@@ -408,7 +408,7 @@ static int run_canonicalize(const char *input_path, const char *out_path,
 }
 
 /* Parse target.json for the (btf_id, call_offset) pairs of BTF modules that
- * provide kinsn kfuncs. Pairs are stored adjacent in the JSON by serde_json's
+ * provide kop kfuncs. Pairs are stored adjacent in the JSON by serde_json's
  * alphabetic field ordering: "btf_func_id" < "btf_id" < "call_offset". We
  * scan linearly to extract each (btf_id, call_offset). Skips call_offset==0
  * entries (those mean vmlinux which doesn't need an fd_array slot). Caller

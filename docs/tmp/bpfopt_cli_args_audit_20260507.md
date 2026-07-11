@@ -12,8 +12,8 @@ Scope: `bpfopt/crates/bpfopt/src/main.rs`, `pass.rs`, `passes/*.rs`, `runner/lib
 | `--report` | `main.rs` | all passes through `PassResult` serialization | framework-shared | Pass-agnostic reporting envelope. |
 | `--platform` | `main.rs` -> `PassContext.platform.arch` | `ccmp`, `endian_fusion`; indirectly `cond_select` via `has_branchless_select` | framework-shared | Platform context, not a concrete pass flag. |
 | `--prog-type` | `main.rs` -> `PassContext.prog_type` | `wide_mem`, `bounds_check_merge`, `skb_load_bytes_spec`, `prefetch` | framework-shared | Multiple pass safety filters. |
-| `--kinsns` | `main.rs` -> `PassContext.kinsn_registry` | kinsn passes: `rotate`, `cond_select`, `ccmp`, `extract`, `endian_fusion`, `bulk_memory`, `prefetch` | framework-shared | Target capability input. |
-| `--target` | `main.rs` -> `PassContext.platform` / `KinsnRegistry` | same kinsn passes as `--kinsns` | framework-shared | Target JSON side input. |
+| `--koperation` | `main.rs` -> `PassContext.kop_registry` | kop passes: `rotate`, `cond_select`, `ccmp`, `extract`, `endian_fusion`, `bulk_memory`, `prefetch` | framework-shared | Target capability input. |
+| `--target` | `main.rs` -> `PassContext.platform` / `KopRegistry` | same kop passes as `--koperation` | framework-shared | Target JSON side input. |
 | `--verifier-states` | `main.rs` -> `BpfProgram.verifier_states` | `map_inline`, `const_prop`, `wide_mem` | framework-shared | Used by multiple passes. |
 | `--func-info` | `main.rs` -> `BpfProgram.func_info` | BTF metadata remap helpers called by many rewriting passes | framework-shared | Remapped whenever instruction offsets change. |
 | `--func-info-rec-size` | `main.rs` | paired with `--func-info` | framework-shared | ABI size for shared BTF side input. |
@@ -35,8 +35,8 @@ Scope: `bpfopt/crates/bpfopt/src/main.rs`, `pass.rs`, `passes/*.rs`, `runner/lib
 | `branch_miss_rate` | `branch_flip` only | pass-local | Move into `BranchFlipPass` profile input. |
 | `cache_miss_rate` | parsed and stored, never read | dead | Delete. |
 | `verifier_states` | `const_prop`, `map_inline`, `wide_mem`; invalidated by pass manager | shared | Keep. |
-| `func_info` | BTF remap helpers used by kinsn/rewriting passes | shared | Keep. |
-| `line_info` | BTF remap helpers used by kinsn/rewriting passes | shared | Keep. |
+| `func_info` | BTF remap helpers used by kop/rewriting passes | shared | Keep. |
+| `line_info` | BTF remap helpers used by kop/rewriting passes | shared | Keep. |
 | `map_values` | `map_inline`, test mock provider | pass-local | Move to map-inline input. |
 | `map_inner_map_ids` | `map_inline` only | pass-local | Move to map-inline input. |
 | `map_bpf_writable` | `map_inline` only | pass-local | Move to map-inline input. |
@@ -55,14 +55,14 @@ Scope: `bpfopt/crates/bpfopt/src/main.rs`, `pass.rs`, `passes/*.rs`, `runner/lib
 | `skb_load_bytes_spec` | `ctx.prog_type` | Shared program type. |
 | `bounds_check_merge` | `ctx.prog_type` | Shared program type. |
 | `wide_mem` | `ctx.prog_type`, optional `program.verifier_states` | Shared safety inputs. |
-| `bulk_memory` | `ctx.kinsn_registry`, BTF remap metadata | Shared target/BTF inputs. |
-| `rotate` | `ctx.kinsn_registry`, BTF remap metadata | Shared target/BTF inputs. |
-| `cond_select` | `ctx.has_branchless_select()`, `ctx.kinsn_registry`, BTF remap metadata | Shared target/platform inputs. |
-| `ccmp` | `ctx.platform.arch`, `ctx.kinsn_registry`, BTF remap metadata | Shared target/platform inputs. |
-| `extract` | `ctx.kinsn_registry`, BTF remap metadata | Shared target input. |
-| `endian_fusion` | `ctx.platform.arch`, `ctx.kinsn_registry`, BTF remap metadata | Shared target/platform inputs. |
+| `bulk_memory` | `ctx.kop_registry`, BTF remap metadata | Shared target/BTF inputs. |
+| `rotate` | `ctx.kop_registry`, BTF remap metadata | Shared target/BTF inputs. |
+| `cond_select` | `ctx.has_branchless_select()`, `ctx.kop_registry`, BTF remap metadata | Shared target/platform inputs. |
+| `ccmp` | `ctx.platform.arch`, `ctx.kop_registry`, BTF remap metadata | Shared target/platform inputs. |
+| `extract` | `ctx.kop_registry`, BTF remap metadata | Shared target input. |
+| `endian_fusion` | `ctx.platform.arch`, `ctx.kop_registry`, BTF remap metadata | Shared target/platform inputs. |
 | `branch_flip` | `program.branch_miss_rate`, `program.annotations[*].branch_profile` | Profile is pass-local; current main-level parsing leaks branch-flip schema. |
-| `prefetch` | `ctx.prog_type`, `ctx.kinsn_registry`, optional `program.annotations[*].prefetch_profile` | Target/prog type shared; optional profile filter is pass-local. |
+| `prefetch` | `ctx.prog_type`, `ctx.kop_registry`, optional `program.annotations[*].prefetch_profile` | Target/prog type shared; optional profile filter is pass-local. |
 
 ## Command assembly
 

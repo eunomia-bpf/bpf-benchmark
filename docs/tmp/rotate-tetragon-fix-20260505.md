@@ -7,7 +7,7 @@ Approach B-style userspace fix. The current tetragon observer failures were not 
 The fix has two parts:
 
 - `bpfopt/crates/bpfopt/src/passes/rotate.rs:270-335` now routes all Pattern A/B matches through `rotate_site`.
-- `bpfopt/crates/bpfopt/src/passes/rotate.rs:345-363` rejects matched sites where `dst_reg == tmp_reg`. The packed rotate kinsn uses `tmp_reg` as verifier proof scratch, so a site whose original OR writes the result into that same temp is not representable by the packed proof ABI. The regression test is at `rotate.rs:445-455`.
+- `bpfopt/crates/bpfopt/src/passes/rotate.rs:345-363` rejects matched sites where `dst_reg == tmp_reg`. The packed rotate kop uses `tmp_reg` as verifier proof scratch, so a site whose original OR writes the result into that same temp is not representable by the packed proof ABI. The regression test is at `rotate.rs:445-455`.
 - `daemon/src/commands.rs:740-748` treats `report.changed == false` as a no-op pass: it verifies the output bytecode is identical, records the pass report, and continues without submitting an identical bytecode candidate to ReJIT. If a pass claims unchanged but modifies bytes, it fails fast.
 - `daemon/src/commands.rs:673`, `daemon/src/commands.rs:687-692`, and `daemon/src/commands.rs:755-760` now report committed ReJIT count separately from executed/no-op passes.
 

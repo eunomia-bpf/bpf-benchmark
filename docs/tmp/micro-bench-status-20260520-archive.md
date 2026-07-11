@@ -267,7 +267,7 @@ These are not LEA problems. They are cases where native code benefits from struc
 The gap should now be read with two mechanisms in mind:
 
 - Normal bpfopt passes rewrite verifier-facing BPF into better verifier-facing BPF. The kernel verifier and the normal kernel JIT see the rewritten instruction stream.
-- Machine-level kinsns are a separate path. The verifier sees the module's `instantiate_insn()` BPF expansion; the final x86 emitter lowers the same kinsn to one named x86 instruction form. This is the path used to test whether "native C asm converted to machine-kinsn BPF" can converge to the same final kernel JIT code.
+- Machine-level koperation are a separate path. The verifier sees the module's `instantiate_insn()` BPF expansion; the final x86 emitter lowers the same kop to one named x86 instruction form. This is the path used to test whether "native C asm converted to machine-kop BPF" can converge to the same final kernel JIT code.
 
 The native-asm-to-handcraft converter experiment is archived under
 `micro/programs/converter/`. The archived files include generated markdown
@@ -278,19 +278,19 @@ not be the production path: it grew into a small semantic lowerer for
 `cmp/test`, `jcc`, `cmov`, operand snapshots, and native-register
 materialization, while tight-loop scalar proofs still exceeded verifier limits.
 
-Current kinsn work should therefore use kinsns as basic-block-local
+Current kop work should therefore use koperation as basic-block-local
 superinstructions emitted by bpfopt or an LLVM backend, not as a complete x86
 execution model.
 
 The concrete x86 instruction/form matrix from the archived converter experiment
 is retained below only as instruction-set guidance:
 
-| x86 Insn/Form | Existing bpfopt Pass Path | Machine-Kinsn Path | Verifier-Facing Instantiation | Current Test Status | Remaining Gap |
+| x86 Insn/Form | Existing bpfopt Pass Path | Machine-KOperation Path | Verifier-Facing Instantiation | Current Test Status | Remaining Gap |
 |---|---|---|---|---|---|
 | `leaq` / `leal` | `lea` rewrites BPF address idioms; full run applied `552/552` | `bpf_x86_leaq`, `bpf_x86_leal` | verifier-native `dst = base + index * scale + disp` BPF sequence | used by `simple`, `simple_packet`, `siphash_rotate64_mixer`; JIT body parity passes | scaled add-chain recovery in automatic pass is still narrower than native addressing forms |
 | `rolq imm` | `rotate` recovered `492/492` sites in the full run | `bpf_x86_rolq` | shift/or rotate expansion using a temp register | heavily used by `siphash_rotate64_mixer`; JIT body parity passes | automatic pass still does not solve scheduling/register allocation around rotate-heavy code |
 | `rolw imm`, `rorxl imm` | `rotate` / `endian_fusion` adjacent | `bpf_x86_rolw`, `bpf_x86_rorxl` | width-specific rotate-equivalent BPF | selector exists; needs current handcraft micro coverage | Katran/Toeplitz-style endian+rotate patterns need more conversion coverage |
-| `movzbl/movzwl/movl/movq disp(base), reg` | `wide_mem` applied `186/255` in full run; LLVM backend now also canonicalizes aligned little-endian byte ladders to ordinary `LDH/LDW/LDD` | `bpf_x86_movzbl`, `bpf_x86_movzwl`, `bpf_x86_movl`, `bpf_x86_movq` with direct-memory payload when exact kinsn parity is needed | direct verifier-safe `LDX_MEM` from the same base/disp, or ordinary BPF wide load when the kernel JIT already emits the right native load | LLVM local-`LDD` objects passed 29/29; SAMPLES=3 geomean is 0.9726 vs final-MI LEA with -3026 JIT bytes, and `bpf_local_call_fanout_dispatch` improved 102.0 -> 84.3 ns vs movbe BE | whole-record packet clusters and unaligned cases still need automatic `wide_mem`/kinsn work; stack-using kinsns are still unsafe in local subprograms |
+| `movzbl/movzwl/movl/movq disp(base), reg` | `wide_mem` applied `186/255` in full run; LLVM backend now also canonicalizes aligned little-endian byte ladders to ordinary `LDH/LDW/LDD` | `bpf_x86_movzbl`, `bpf_x86_movzwl`, `bpf_x86_movl`, `bpf_x86_movq` with direct-memory payload when exact kop parity is needed | direct verifier-safe `LDX_MEM` from the same base/disp, or ordinary BPF wide load when the kernel JIT already emits the right native load | LLVM local-`LDD` objects passed 29/29; SAMPLES=3 geomean is 0.9726 vs final-MI LEA with -3026 JIT bytes, and `bpf_local_call_fanout_dispatch` improved 102.0 -> 84.3 ns vs movbe BE | whole-record packet clusters and unaligned cases still need automatic `wide_mem`/kop work; stack-using koperation are still unsafe in local subprograms |
 | `movzwl/movl/movq disp(base,index,scale), reg` | partially reachable through `lea` + `wide_mem` | same `mov*` kfuncs with SIB payload | temp = index shift; ptr = base + temp; `LDX_MEM`; optional temp payload handles `dst == base/index` without changing final x86 | indexed `mov*` forms are unit-covered, including `dst == index`; `bitmap_popcount_scan` emits native indexed-load shape; `trace_event_type_switch_dispatch` keeps the packet-field `movl` SIB exact | static table loads still need a real data/table transport path; dense-switch table load currently uses verifier-visible packet-table repair |
 | `movbe16/movbe32/movbe64 disp(base,index,scale), reg` | `endian_fusion` neighbor; LLVM backend now matches strict BE byte ladders for packet/network fields | `bpf_x86_movbe16`, `bpf_x86_movbe32`, `bpf_x86_movbe64` with SIB/base+disp payload | module proof expands to verifier-visible byte loads, shifts, and ORs; final x86 emits one `movbe` memory instruction | LLVM movbe BE objects passed 29/29, selected 9 `movbe16` and 4 `movbe32`, and SAMPLES=3 gave geomean 0.985 vs final-MI LEA with -1532 JIT bytes | `movbe64` and broader endian-table patterns are still mostly absent from current micro; Toeplitz runtime remains noisy despite smaller JIT |
 | `movb/movw/movl/movq reg, disp(base)` | ordinary BPF stores already map well in many cases | `bpf_x86_movb`, `bpf_x86_movw`, `bpf_x86_movl`, `bpf_x86_movq` with store payload | direct verifier-safe `STX_MEM` | selectors exist; direct stores need broader handcraft coverage | packet write paths should be checked against native output case by case |
@@ -304,33 +304,33 @@ is retained below only as instruction-set guidance:
 | `addq/addl/subq/subl/xorq/xorl/orq/orl/shl/shr/sar imm-or-reg` | ordinary BPF ALU maps only BPF-register-visible cases; shadow native regs need explicit proof state | `bpf_x86_addq`, `bpf_x86_addl`, `bpf_x86_subq`, `bpf_x86_subl`, `bpf_x86_xorq`, `bpf_x86_xorl`, `bpf_x86_orq`, `bpf_x86_orl`, `bpf_x86_shlq`, `bpf_x86_shll`, `bpf_x86_shrq`, `bpf_x86_shrl`, `bpf_x86_sarq`, `bpf_x86_sarl` | one consolidated payload records operand form; verifier loads/stores shadow regs from stack only for proof, final emit remains one x86 ALU instruction | `siphash_rotate64_mixer` now verifies and returns native result: native 36 ns, kernel 66 ns, handcraft 49 ns | keep `btf_id_set` and descriptor arrays in resolved BTF-id order; uncommon operand forms should be added to the same mnemonic selector, not as `_rr/_imm/_mem` aliases |
 | `cmpq/cmpl/cmpw/cmpb` and `testq/testl/testw/testb` | BPF branches normally fuse compare/test with branch, but do not leave reusable flags | `bpf_x86_cmp*`, `bpf_x86_test*` | `cmp*` updates ZF, CF, and a signed-ge condition slot; narrow compares sign-extend for the signed condition; `test*` updates ZF/CF | module builds; unit tests cover 8/16/32/64-bit cmp/test forms including `testb [mem], imm`; converter emits current cmp/test sites directly | branch consumers still need machine branch ABI; broader SF/OF consumers should extend the same shadow-flag model |
 | `testq/testb` + `cmoveq/cmovneq` | `cond_select` is the automatic branchless-select path | `bpf_x86_testq`, `bpf_x86_testb`, `bpf_x86_cmoveq`, `bpf_x86_cmovneq` | verifier uses module shadow flags for handcraft, and the legacy cond-reg payload for the automatic `cond_select` proof path; final x86 emits one `cmov*` instruction | covered by unit tests, including `dst == condition` overlap; converter emits `cmov` sites directly with stack-shadow-flag payloads | automatic pass still needs proof that no flags/condition dependency is broken before it can use the shadow-flag mode |
-| `setne/sete/setge`, `cmovbl/cmovbq`, `sbbl imm0` | no automatic pass yet | `bpf_x86_setne`, `bpf_x86_sete`, `bpf_x86_setge`, `bpf_x86_cmovbl`, `bpf_x86_cmovbq`, `bpf_x86_sbbl` | verifier uses stack-shadow flags/conditions for handcraft; final x86 consumes adjacent physical flags | modules build; unit tests cover `cmovb*`, `setcc`, and `cmpl; setge` true/false stack-shadow proof; generated `setge`/`cmov` sites are exact kinsns now | `sbb` needs broader CF stack-shadow payload support before broad handcraft conversion |
+| `setne/sete/setge`, `cmovbl/cmovbq`, `sbbl imm0` | no automatic pass yet | `bpf_x86_setne`, `bpf_x86_sete`, `bpf_x86_setge`, `bpf_x86_cmovbl`, `bpf_x86_cmovbq`, `bpf_x86_sbbl` | verifier uses stack-shadow flags/conditions for handcraft; final x86 consumes adjacent physical flags | modules build; unit tests cover `cmovb*`, `setcc`, and `cmpl; setge` true/false stack-shadow proof; generated `setge`/`cmov` sites are exact koperation now | `sbb` needs broader CF stack-shadow payload support before broad handcraft conversion |
 | `popcntq` | no automatic pass yet | `bpf_x86_popcntq` | scalar popcount fallback sequence | covered by `bitmap_popcount_scan`; handcraft verifies, returns the native result, and dumps `popcnt rdi,rdi`; measured 475 ns vs native 467 ns and kernel BPF 1131 ns | add automatic scalar-pattern pass only after workload evidence says it matters |
 | `blsiq` / `blsrq` | no automatic pass yet | `bpf_x86_blsiq`, `bpf_x86_blsrq` | `x & -x` / `x & (x - 1)` BPF sequence | selector exists; needs bitmap traversal coverage | same as `popcntq`: useful for bitmap cases, not yet broad |
 | `andb/xorb/addb/subb/orw/shlb`, `xorb r8,r8`, `incl/incq` | ordinary BPF emits wider ALU or `add imm 1` forms | `bpf_x86_andb`, `bpf_x86_xorb`, `bpf_x86_addb`, `bpf_x86_subb`, `bpf_x86_orw`, `bpf_x86_shlb`, `bpf_x86_incl`, `bpf_x86_incq`; operand form in payload | byte/word ops preserve upper bits through temp-register verifier BPF; `incl/incq` are direct `ADD 1` proof forms | unit tests cover newly exposed `subb`, `orw`, and `shlb`; converter no longer warns for the corresponding native forms seen in checked-in handcraft sources | these are parity-only machine-instruction gaps, not independent high-level transforms |
-| `shrq imm`, `andl imm32`, `sar imm` | ordinary BPF ALU often maps acceptably | `bpf_x86_shrq`, `bpf_x86_andl`; `sar imm` currently stays ordinary BPF | direct BPF ALU operation | selector exists where needed; converter no longer treats `sar imm` as a missing kinsn | not a high-level transform by itself |
+| `shrq imm`, `andl imm32`, `sar imm` | ordinary BPF ALU often maps acceptably | `bpf_x86_shrq`, `bpf_x86_andl`; `sar imm` currently stays ordinary BPF | direct BPF ALU operation | selector exists where needed; converter no longer treats `sar imm` as a missing kop | not a high-level transform by itself |
 | `prefetcht0` | `prefetch` pass applied `9/9` in full run | `bpf_x86_prefetcht0` | verifier-safe no-value prefetch semantics | selector exists | not a dominant native-code gap in the inspected cases |
-| `cmp/test + jcc` | ordinary BPF branches lower to compare/test plus jump as one BPF semantic unit | no active branch kinsn path; standalone `cmp/test` kinsns remain only for `setcc`/`cmov`/flag consumers | raw BPF branch encodes the verifier-visible comparison and program-level target | active converter emits all control flow as raw BPF; `simple` verifies and returns `12345678` with this path | final x86 no longer exactly matches native `cmp/test; jcc`; this is the accepted correctness-first tradeoff until a separately justified control-flow ABI exists |
+| `cmp/test + jcc` | ordinary BPF branches lower to compare/test plus jump as one BPF semantic unit | no active branch kop path; standalone `cmp/test` koperation remain only for `setcc`/`cmov`/flag consumers | raw BPF branch encodes the verifier-visible comparison and program-level target | active converter emits all control flow as raw BPF; `simple` verifies and returns `12345678` with this path | final x86 no longer exactly matches native `cmp/test; jcc`; this is the accepted correctness-first tradeoff until a separately justified control-flow ABI exists |
 | `pushq` / `popq`, `mov rbp,rsp`, `[rsp+disp]`, `ret` | ordinary BPF prologue/epilogue is generated by the kernel JIT, not by BPF bytecode | `bpf_x86_pushq`, `bpf_x86_popq`, and `bpf_x86_movq` frame payload; `rsp` is payload register `15`; `ret` is the explicit BPF exit boundary | verifier uses a stack-shadow `RSP` slot initialized by handcraft prelude and stack-shadow `RBP` only for frame moves; final emit is one `pushq`, `popq`, or `movq` instruction | module builds; converter no longer warns for `push/pop`, `mov rbp,rsp`, `mov rsp,rbp`, or `[rsp+disp]`; unit tests cover `push/pop` and frame-move proof paths | native `rbp` as a general data register still needs payload ABI work because `BPF_REG_10` is also verifier FP |
 | dense switch jump/table load | no automatic pass | partial handcraft path only: exact `movl` SIB for input field, verifier-visible repaired table load | compare tree today for normal BPF; handcraft stages the native 512 B switch table after packet payload | `trace_event_type_switch_dispatch` now verifies and runs: native 54 ns, kernel 310 ns, handcraft 87 ns, result `16`; final JIT is close in hot-loop shape but has an extra table-tail bounds proof and no RIP-relative rodata table | needs automatic switch/table recovery and a real rodata/table side channel instead of packet-tail staging |
-| local `callq` / bpf2bpf call layout | no automatic local-inline pass | no machine-call kinsn path | bpf2bpf call ABI | not covered by handcraft parity | requires interprocedural transform, not only single-instruction kinsns |
+| local `callq` / bpf2bpf call layout | no automatic local-inline pass | no machine-call kop path | bpf2bpf call ABI | not covered by handcraft parity | requires interprocedural transform, not only single-instruction koperation |
 
 Viewed from pass ownership:
 
-| Existing Pass | Current Role After Machine-Kinsn Work | Still Missing |
+| Existing Pass | Current Role After Machine-KOperation Work | Still Missing |
 |---|---|---|
 | `lea` | verifier-facing automatic address cleanup; LLVM backend now has final-MI `MOV+ADD` pair selection that passed micro and improved SAMPLES=3 geomean by about 1.0% vs LEA-disabled | broader scaled-index/add-chain recognition; a tested `MOV+ADD+ADD/disp` extension had zero hits in current micro and was not kept |
-| `wide_mem` | automatic wide-load cleanup; LLVM backend now also rewrites aligned little-endian byte ladders to ordinary wide BPF loads, including local-subprogram `LDD` where no kinsn proof stack is needed | record-cluster, loop-carried memory patterns, and unaligned packet loads |
+| `wide_mem` | automatic wide-load cleanup; LLVM backend now also rewrites aligned little-endian byte ladders to ordinary wide BPF loads, including local-subprogram `LDD` where no kop proof stack is needed | record-cluster, loop-carried memory patterns, and unaligned packet loads |
 | `rotate` | automatic rotate idiom recovery; handcraft has `rolq/rolw/rorxl` selectors | endian+rotate combinations and scheduling |
 | `endian_fusion` | automatic byte-order cleanup path; LLVM backend now emits `movbe16/32` for strict BE byte-ladder packet fields with byte-load verifier proof | `movbe64`, table-driven endian cases, and better runtime stability on Toeplitz-like loops |
 | `cond_select` | automatic branchless-select recovery | machine selectors for `cmovb*`, `setcc`, and `sbb` now exist, but automatic use needs adjacent cmp/test/carry proof |
 | `extract` | automatic bitfield idiom cleanup | BMI-style x86 bit extraction is not covered |
-| `prefetch` | automatic prefetch kinsn path | already covered where explicit prefetch sites exist |
+| `prefetch` | automatic prefetch kop path | already covered where explicit prefetch sites exist |
 | `ccmp` | arm64-oriented; not an x86 solution | no x86 condition-code equivalent today |
 | `dce` | cleanup after other passes | does not create native x86 forms itself |
 | `bounds_check_merge`, `bulk_memory`, `map_inline`, `const_prop`, `skb_load_bytes_spec`, `branch_flip` | relevant for other suite shapes, but not the new handcraft parity result | not single x86-instruction parity mechanisms |
 
-This changes the next-step priority. The immediate handcraft work is no longer "invent an indexed-load kinsn" in the abstract; those selectors now exist. The next work is to regenerate markdown from successful selected `make micro` runs, feed those markdown files into the converter, and make the final `Handcraft Kernel JIT ASM` match `Native ASM` for more workload-pattern cases. If an instruction is not covered by an existing exact selector, the converter now leaves a warning in the generated C rather than producing a semantic fallback. That makes the missing kinsn set visible instead of hiding it in generated BPF.
+This changes the next-step priority. The immediate handcraft work is no longer "invent an indexed-load kop" in the abstract; those selectors now exist. The next work is to regenerate markdown from successful selected `make micro` runs, feed those markdown files into the converter, and make the final `Handcraft Kernel JIT ASM` match `Native ASM` for more workload-pattern cases. If an instruction is not covered by an existing exact selector, the converter now leaves a warning in the generated C rather than producing a semantic fallback. That makes the missing kop set visible instead of hiding it in generated BPF.
 
 ## Case Studies
 
@@ -448,7 +448,7 @@ ReJIT applies `lea=87`, `wide_mem=33`, and `rotate=30` across 3 samples. The imp
 
 The native size number needs care: `269 B` is only the entry symbol. The rebuilt native object contains reachable local symbols `local_call_linear` (`72 B`), `local_call_pressure` (`74 B`), `local_call_crossload` (`134 B`), and `local_call_bytes` (`203 B`), with a total `.text` section of `971 B`. The native entry still uses real `callq` instructions, but the callees are compact and use direct wide loads/rotates. For local-call benchmarks, entry-symbol size is not total executable native footprint.
 
-The latest LLVM-backend experiment removes the main local-subprogram 8-byte byte ladders with ordinary verifier-native `LDD`, improving `bpf_local_call_fanout_dispatch` from `102.0 ns` to `84.3 ns` versus the previous movbe BE objects and shrinking JIT code from `1803 B` to `1089 B`. A broader attempt to enable all kinsn selectors inside local subprograms was rejected by the verifier with `combined stack size of 2 calls is 544`, because stack-using kinsn proof sequences compose poorly with bpf2bpf call-stack accounting. This benchmark therefore still points at an interprocedural pass class: inline or lay out small local callees, then run proof-stack-safe wide-load/rotate cleanup inside the merged body.
+The latest LLVM-backend experiment removes the main local-subprogram 8-byte byte ladders with ordinary verifier-native `LDD`, improving `bpf_local_call_fanout_dispatch` from `102.0 ns` to `84.3 ns` versus the previous movbe BE objects and shrinking JIT code from `1803 B` to `1089 B`. A broader attempt to enable all kop selectors inside local subprograms was rejected by the verifier with `combined stack size of 2 calls is 544`, because stack-using kop proof sequences compose poorly with bpf2bpf call-stack accounting. This benchmark therefore still points at an interprocedural pass class: inline or lay out small local callees, then run proof-stack-safe wide-load/rotate cleanup inside the merged body.
 
 ## Binary Size Methodology
 
@@ -509,7 +509,7 @@ This validates that native code size is now recording entry symbol size rather t
 The next pass work should be driven by the mismatches above:
 
 1. Wide-load and endian clustering: start with `packet_record_bounds_window`, `katran_lb_consistent_hash_select`, and `cilium_policy_guard_tree_filter`.
-2. Local-call inlining/specialization: start with `bpf_local_call_fanout_dispatch`; local `LDD` is now covered, but stack-using kinsns still need either inlining or a proof-stack-safe local-subprog model before `rotate`/`cmov` can be selected there.
+2. Local-call inlining/specialization: start with `bpf_local_call_fanout_dispatch`; local `LDD` is now covered, but stack-using koperation still need either inlining or a proof-stack-safe local-subprog model before `rotate`/`cmov` can be selected there.
 3. Toeplitz/key-table reconstruction: `packet_toeplitz_rss_hash` shows llvmbpf can be much faster despite larger code.
 4. Loop-level transforms: start with `packet_checksum_fold`, where code shrinks but runtime is unchanged.
 5. Dense switch/table lowering: start with `trace_event_type_switch_dispatch`, where native has an indexed table form and ReJIT does not.
@@ -518,9 +518,9 @@ The next pass work should be driven by the mismatches above:
 8. Add analysis-only reachable native code-size extraction for `.native.so`.
 9. Add a controlled selected-case artifact mode for post-ReJIT `bpftool prog dump jited`, without changing benchmark result payloads.
 
-## Research Direction: kinsn Shadow ISA
+## Research Direction: kop Shadow ISA
 
-The more aggressive handcraft direction is to treat kinsns as a shadow x86 ISA rather than as isolated BPF peephole replacements. In this model every translated x86 instruction has two definitions:
+The more aggressive handcraft direction is to treat koperation as a shadow x86 ISA rather than as isolated BPF peephole replacements. In this model every translated x86 instruction has two definitions:
 
 - `instantiate_insn(payload)` emits verifier-visible BPF that simulates one x86 instruction over a shadow x86 machine state.
 - `emit_x86(payload)` emits the native x86 instruction sequence that executes the same instruction over the hidden native state.
@@ -538,19 +538,19 @@ The kernel verifier only proves the BPF shadow program. Correctness of the nativ
 ```text
 Let R relate verifier shadow state and hidden native x86 state.
 
-For every kinsn K(payload):
+For every kop K(payload):
   if R(BPF_state, X86_state) holds before K,
   then executing instantiate_insn(K) on BPF_state
   and executing emit_x86(K) on X86_state
   produces states where R still holds.
 ```
 
-By induction, if every emitted kinsn preserves `R`, the whole translated program preserves the relation across kinsn boundaries. This makes the cross-kinsn contract a property of the kinsn ABI and its external formal validation, not a new responsibility for the kernel verifier.
+By induction, if every emitted kop preserves `R`, the whole translated program preserves the relation across kop boundaries. This makes the cross-kop contract a property of the kop ABI and its external formal validation, not a new responsibility for the kernel verifier.
 
-Under this spec, ghost stack slots are not required to correspond to real runtime stack memory. They are verifier shadow storage. The native side may keep the corresponding values in hidden x86 registers as long as every instruction that can observe or update that state is represented by a kinsn whose `instantiate_insn()` and `emit_x86()` have been proven equivalent. Calls, tail calls, helper calls, branches, memory operations, flags, and exits are not special exemptions; they need kinsn definitions or boundary adapters in the same shadow-ISA spec.
+Under this spec, ghost stack slots are not required to correspond to real runtime stack memory. They are verifier shadow storage. The native side may keep the corresponding values in hidden x86 registers as long as every instruction that can observe or update that state is represented by a kop whose `instantiate_insn()` and `emit_x86()` have been proven equivalent. Calls, tail calls, helper calls, branches, memory operations, flags, and exits are not special exemptions; they need kop definitions or boundary adapters in the same shadow-ISA spec.
 
 Control-flow is the exception in the current implementation. We considered a
-`jcc`/`jmp` kinsn ABI, but rejected it for the active micro path because it
+`jcc`/`jmp` kop ABI, but rejected it for the active micro path because it
 would require userspace to provide verifier-facing proof offsets or target
 metadata that are not x86 instruction operands. The current rule is stricter
 and simpler:
@@ -559,7 +559,7 @@ and simpler:
   instructions.
 - Userspace only performs assembler-style relocation of raw BPF branch `off`
   fields after instruction widths are known.
-- Kinsn modules never receive branch targets, verifier proof offsets, or CFG
+- KOperation modules never receive branch targets, verifier proof offsets, or CFG
   metadata in payloads.
 - The kernel verifier checks the resulting BPF CFG exactly as it does for any
   other BPF program.
@@ -590,13 +590,13 @@ the current micro handcraft implementation.
 
 ## Native Lab: in-kernel native x86 vs BPF JIT (2026-05-17)
 
-A new probe column has been added alongside `kernel`, `kernel_rejit`, and `native`: **native_lab**. Each micro program's `.native.so` (clang `-target x86_64` of the same `.bpf.c` source) is linked through a 250-line mini ELF linker (`native-sim/x86/native_lab/native_link`, Rust + `object` + `iced-x86`) into a position-independent byte blob, uploaded into kernel memory via the `bpf_x86_native_lab` kinsn debugfs interface, and splatted directly into a BPF JIT image. The BPF program is a 3-instruction stub (`sidecar; call kinsn; exit`) whose body the JIT replaces verbatim with the native bytes; the kernel verifier sees only a benign `r0 = 0` proof.
+A new probe column has been added alongside `kernel`, `kernel_rejit`, and `native`: **native_lab**. Each micro program's `.native.so` (clang `-target x86_64` of the same `.bpf.c` source) is linked through a 250-line mini ELF linker (`native-sim/x86/native_lab/native_link`, Rust + `object` + `iced-x86`) into a position-independent byte blob, uploaded into kernel memory via the `bpf_x86_native_lab` kop debugfs interface, and splatted directly into a BPF JIT image. The BPF program is a 3-instruction stub (`sidecar; call kop; exit`) whose body the JIT replaces verbatim with the native bytes; the kernel verifier sees only a benign `r0 = 0` proof.
 
-This gives us a paper-grade A baseline: what the function would cost with **no verifier inserts, no BPF→x86 translation, no BPF JIT code-shape constraints**. It's the upper bound any future kinsn pass family can approach, and it's measured through the same `micro_exec test-run / run-native-lab` harness that already runs the production `kernel` / `kernel_rejit` / `llvmbpf` paths, so timing semantics line up: `exec_ns` is the kernel-reported per-iteration `duration` and `result` comes out of the same packet/staged path the kernel runner uses.
+This gives us a paper-grade A baseline: what the function would cost with **no verifier inserts, no BPF→x86 translation, no BPF JIT code-shape constraints**. It's the upper bound any future kop pass family can approach, and it's measured through the same `micro_exec test-run / run-native-lab` harness that already runs the production `kernel` / `kernel_rejit` / `llvmbpf` paths, so timing semantics line up: `exec_ns` is the kernel-reported per-iteration `duration` and `result` comes out of the same packet/staged path the kernel runner uses.
 
 ### Linker — only ABI-mandated rewrites
 
-The linker takes a userspace `.so` plus an entry symbol name and emits a single blob. It performs the minimum set of transforms required to bridge SysV AMD64 (what the userspace compiler emits) and the "fall through to the BPF JIT epilogue" contract of the kinsn:
+The linker takes a userspace `.so` plus an entry symbol name and emits a single blob. It performs the minimum set of transforms required to bridge SysV AMD64 (what the userspace compiler emits) and the "fall through to the BPF JIT epilogue" contract of the kop:
 
 1. Recursive symbol discovery: starting from the entry, every direct `call rel32` edge into another in-`.text` symbol is followed and the called function is included.
 2. Every `RET` in the **entry** function is rewritten as `JMP rel32 -> end_label`; subprogram `RET`s are left alone so they pop the return address the entry's `CALL` pushed.
@@ -615,11 +615,11 @@ native-sim/x86/native_lab/
 ├── tests/analyze.py                       -- per-program ratio + geomean
 └── results/all_micro.jsonl                -- raw sample_result records (gitignored)
 
-module/x86/bpf_x86_native_lab.c            -- the test kinsn module; built by host-kinsn-x86
+module/x86/bpf_x86_native_lab.c            -- the test kop module; built by host-kop-x86
 runner/src/native_lab_runner.cpp           -- micro_exec's `run-native-lab` command
 ```
 
-The kinsn module is **test-only**: it lets userspace splat arbitrary bytes into BPF JIT images and bypasses every verifier guarantee. It is intentionally not part of `expected_kinsn_modules()` and is not auto-loaded by the production runner. Smoke scripts insmod it explicitly.
+The kop module is **test-only**: it lets userspace splat arbitrary bytes into BPF JIT images and bypasses every verifier guarantee. It is intentionally not part of `expected_kop_modules()` and is not auto-loaded by the production runner. Smoke scripts insmod it explicitly.
 
 ### Results
 
@@ -682,7 +682,7 @@ XDP programs do not trip this because `xdp_md` UAPI offsets (0/8 for data/data_e
 Build (one-time per source change):
 
 ```sh
-make host-kinsn-x86                                                       # produces bpf_x86_native_lab.ko
+make host-kop-x86                                                       # produces bpf_x86_native_lab.ko
 cargo build --release --manifest-path native-sim/x86/native_lab/native_link/Cargo.toml
 cmake --build runner/build-llvmbpf --target micro_exec -j8                # picks up native_lab_runner.cpp
 make -C micro/programs                                                    # *.bpf.o + *.native.so
@@ -701,6 +701,6 @@ python3 native-sim/x86/native_lab/tests/analyze.py
 
 ### What this column unlocks for the paper
 
-- **A vs C**: ~1.5x average gap between userspace-compiled native x86 and the stock BPF JIT — this is the addressable target ceiling for any kinsn / ReJIT pass family.
-- **A vs B (kinsn)**: with the kinsn ReJIT result column already published (`docs/tmp/micro_native_runtime_report_20260514.md`), the new A column lets us claim "kinsn closes X% of the BPF JIT vs native gap" on a per-program basis. The mapping is now mechanical: divide `(kernel - kernel_rejit)` by `(kernel - native_lab)` per program and take a population summary.
-- **Diagnostic for bpfopt pass design**: programs where A is very close to C (e.g. bcc_runqlat at 1.000x, bpftrace_comm_key_fnv_hash at 1.000x) suggest the BPF JIT is already optimal for that shape — no kinsn pass will win there. Programs with large A/C gap (otel 0.289x, cilium_policy 0.425x, siphash 0.532x) are the natural targets for new passes.
+- **A vs C**: ~1.5x average gap between userspace-compiled native x86 and the stock BPF JIT — this is the addressable target ceiling for any kop / ReJIT pass family.
+- **A vs B (kop)**: with the kop ReJIT result column already published (`docs/tmp/micro_native_runtime_report_20260514.md`), the new A column lets us claim "kop closes X% of the BPF JIT vs native gap" on a per-program basis. The mapping is now mechanical: divide `(kernel - kernel_rejit)` by `(kernel - native_lab)` per program and take a population summary.
+- **Diagnostic for bpfopt pass design**: programs where A is very close to C (e.g. bcc_runqlat at 1.000x, bpftrace_comm_key_fnv_hash at 1.000x) suggest the BPF JIT is already optimal for that shape — no kop pass will win there. Programs with large A/C gap (otel 0.289x, cilium_policy 0.425x, siphash 0.532x) are the natural targets for new passes.

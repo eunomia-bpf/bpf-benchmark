@@ -288,7 +288,7 @@ Ranked by likely paper payoff, not by ease.
 
 - Kernel status: verifier validates and some JITs lower helpers; it is not a general instruction scheduler or register allocator for BPF bytecode. The generic verifier cleanup list is not scheduling: `vendor/linux-framework/kernel/bpf/verifier.c:26497-26508`。
 - Catch cost: High. Need target model and strict dependency analysis.
-- Paper payoff estimate: Low/medium unless targeted to known latency chains. More useful as small target-specific kinsn/layout hints than as broad reordering.
+- Paper payoff estimate: Low/medium unless targeted to known latency chains. More useful as small target-specific kop/layout hints than as broad reordering.
 - Risk: High. Reordering across memory/helper/verifier-sensitive pointer ops is dangerous. Start with same-basic-block pure ALU scheduling only.
 
 ### 7. Helper specialization beyond map_inline

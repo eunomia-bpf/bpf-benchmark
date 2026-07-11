@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT arm64 kinsn: PRFM PLDL1KEEP for ARM64
+ * BpfReJIT arm64 kop: PRFM PLDL1KEEP for ARM64
  */
 
-#include "kinsn_common.h"
+#include "kop_common.h"
 
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_arm64_prfm_pldl1keep(void) {}
@@ -17,7 +17,7 @@ static __always_inline int decode_prfm_pldl1keep_payload(u64 payload, u8 *ptr_re
 {
 	u8 hint_kind = (payload >> 4) & 0xf;
 
-	*ptr_reg = kinsn_payload_reg(payload, 0);
+	*ptr_reg = kop_payload_reg(payload, 0);
 
 	if (hint_kind)
 		return -EINVAL;
@@ -62,15 +62,15 @@ static int emit_prfm_pldl1keep_arm64(u32 *image, int *idx, bool emit,
 	if (err)
 		return err;
 
-	ptr_reg = kinsn_arm64_reg(ptr_reg);
+	ptr_reg = kop_arm64_reg(ptr_reg);
 	if (ptr_reg == 0xff)
 		return -EINVAL;
 
 	insn = a64_prfm_pldl1keep(ptr_reg);
-	return kinsn_arm64_emit_one(image, idx, emit, insn);
+	return kop_arm64_emit_one(image, idx, emit, insn);
 }
 
-const struct bpf_kinsn bpf_arm64_prfm_pldl1keep_desc = {
+const struct bpf_kop bpf_arm64_prfm_pldl1keep_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -78,9 +78,9 @@ const struct bpf_kinsn bpf_arm64_prfm_pldl1keep_desc = {
 	.emit_arm64 = emit_prfm_pldl1keep_arm64,
 };
 
-static const struct bpf_kinsn * const bpf_arm64_prfm_kinsn_descs[] = {
+static const struct bpf_kop * const bpf_arm64_prfm_kop_descs[] = {
 	&bpf_arm64_prfm_pldl1keep_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_arm64_prfm, "BpfReJIT arm64 kinsn: PRFM PLDL1KEEP",
-		       bpf_arm64_prfm_kfunc_ids, bpf_arm64_prfm_kinsn_descs);
+DEFINE_KOP_V2_MODULE(bpf_arm64_prfm, "BpfReJIT arm64 kop: PRFM PLDL1KEEP",
+		       bpf_arm64_prfm_kfunc_ids, bpf_arm64_prfm_kop_descs);

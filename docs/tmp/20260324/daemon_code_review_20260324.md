@@ -20,7 +20,7 @@ The daemon codebase is well-structured, following an LLVM-inspired pass manager 
 
 ### main.rs (191 LOC)
 #### Minor
-- Lines 131-145: kinsn discovery log and platform detection output goes to stderr unconditionally. In daemon/serve mode, this noise is benign but could benefit from a `--quiet` flag or log-level control.
+- Lines 131-145: kop discovery log and platform detection output goes to stderr unconditionally. In daemon/serve mode, this noise is benign but could benefit from a `--quiet` flag or log-level control.
 - Line 152: `_btf_fds` pattern to keep FDs alive is correct but fragile -- a comment explaining lifetime coupling would help future maintainers.
 
 **Verdict**: Clean entry point, well-organized CLI.
@@ -30,7 +30,7 @@ The daemon codebase is well-structured, following an LLVM-inspired pass manager 
 ### insn.rs (654 LOC)
 #### Minor
 - Line 161: `is_ja()` has a subtle guard `self.code != (BPF_JMP | BPF_CALL)` to avoid false positives since `BPF_JA == 0x00` and `BPF_CALL == 0x80`, but `bpf_op(code)` already distinguishes them (JA op=0x00, CALL op=0x80). The extra guard is defensive but redundant.
-- Lines 269-276: `kinsn_sidecar()` payload packing -- the bit layout comment says `bits [51:20] = imm field` but the code does `(payload >> 20) & 0xffff_ffff`, which extracts bits [51:20] correctly (32 bits). This is correct but the comment/field name "imm" is slightly misleading since the sidecar imm field is only 32 bits of the payload.
+- Lines 269-276: `kop_sidecar()` payload packing -- the bit layout comment says `bits [51:20] = imm field` but the code does `(payload >> 20) & 0xffff_ffff`, which extracts bits [51:20] correctly (32 bits). This is correct but the comment/field name "imm" is slightly misleading since the sidecar imm field is only 32 bits of the payload.
 
 #### Nit
 - Lines 347-357: `hex_bytes()` function is duplicated in `bpf.rs` (lines 184-194). Should be a shared utility.
@@ -120,7 +120,7 @@ if let Some(buf) = log_buf.as_ref() {  // Should be as_mut()
 - Line 209: `hdr.magic` is validated, but `hdr.version` is not checked. If a future BTF version changes the type encoding, the parser would silently produce wrong results.
 
 #### Nit: `/sys/kernel/btf/<module>` path construction
-- Line 311: `format!("/sys/kernel/btf/{}", module_name)` -- if `module_name` contained path separators, this could read arbitrary files. In practice, module names come from the hardcoded `KNOWN_KINSNS` table, so this is not exploitable.
+- Line 311: `format!("/sys/kernel/btf/{}", module_name)` -- if `module_name` contained path separators, this could read arbitrary files. In practice, module names come from the hardcoded `KNOWN_KOPS` table, so this is not exploitable.
 
 **Verdict**: Thorough BTF parsing with good split-BTF handling. Tests verify against real kernel headers.
 
@@ -279,7 +279,7 @@ if let Some(buf) = log_buf.as_ref() {  // Should be as_mut()
 - **Socket path**: `--socket` defaults to `/var/run/bpfrejit.sock`. A malicious `--socket /path/to/file` could clobber an existing file (line 41 removes it). This is a minor concern since the daemon requires CAP_BPF/root to function.
 
 ### File Operations
-- **Symlink attack surface**: `/sys/kernel/btf/<module>` paths are constructed from hardcoded module names in `KNOWN_KINSNS`. No user-controlled path components.
+- **Symlink attack surface**: `/sys/kernel/btf/<module>` paths are constructed from hardcoded module names in `KNOWN_KOPS`. No user-controlled path components.
 - **`/proc/cpuinfo`**: Read-only access for feature detection. No risk.
 
 ### Error Handling
@@ -303,7 +303,7 @@ if let Some(buf) = log_buf.as_ref() {  // Should be as_mut()
 The canonical order is: `wide_mem -> rotate -> cond_select -> extract -> endian_fusion -> branch_flip -> speculation_barrier`
 
 **Dependencies**:
-- All kinsn passes (rotate, cond_select, extract, endian_fusion, spectre) are independent of each other -- they match different patterns and don't interfere.
+- All kop passes (rotate, cond_select, extract, endian_fusion, spectre) are independent of each other -- they match different patterns and don't interfere.
 - `wide_mem` should run first because it reduces instruction count, potentially exposing new patterns for later passes (or making branch targets cleaner).
 - `branch_flip` should run late because it doesn't change instruction count, only reorders bodies.
 - `speculation_barrier` should run last because it inserts new instructions after branches; earlier passes would need to work around them.

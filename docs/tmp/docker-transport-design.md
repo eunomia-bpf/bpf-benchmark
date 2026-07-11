@@ -45,7 +45,7 @@ workspace_layout.py 的 `remote_transfer_roots()` 确定需传内容，包括：
 - `.cache/container-images/{arch}-runner-runtime.image.tar` — runtime container
 - `daemon/target/{triple}/release/bpfrejit-daemon`
 - `runner/build[-arm64]/micro_exec`
-- `module/{x86,arm64}/` — kinsn .ko 模块
+- `module/{x86,arm64}/` — kop .ko 模块
 - `.cache/workload-tools/{arch}/`
 - `.cache/micro-programs/{arch}/`
 - `.cache/repo-artifacts/{arch}/{bcc,bpftrace,tracee,tetragon,katran,scx}/`

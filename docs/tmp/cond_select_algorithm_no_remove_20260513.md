@@ -32,13 +32,13 @@ That said, block-order safety is separate from verifier reachability. A no-remov
 
 The safer algorithm is: always preserve `join`, but still remove private `T/F`. That removes the join-hoist physical-contiguity assumption while avoiding verifier-unreachable branch bodies. It should make the pass-local `physically_contiguous()` guard removable; that guard is currently enforced at `bpfopt/crates/bpfopt/src/passes/cond_select.rs:314-319`, `cond_select.rs:365-369`, with the helper at `cond_select.rs:382-392`.
 
-## 3. Why does current preserve_join+contiguity still panic on tetragon kinsn-6?
+## 3. Why does current preserve_join+contiguity still panic on tetragon kop-6?
 
 The available artifacts do not prove `cond_select` is the crashing pass.
 
-The kinsn-5 tetragon run at `corpus/results/x86_kvm_corpus_20260513_024139_382635` completed. Its metadata enables `rotate`, `cond_select`, `extract`, `endian_fusion`, and `bulk_memory`; see `metadata.json`. The app payload shows `cond_select` was heavily exercised: local `jq` over `details/apps/tetragon__observer.json` found 1,636 `cond_select` applications across 170 programs, while the run still completed.
+The kop-5 tetragon run at `corpus/results/x86_kvm_corpus_20260513_024139_382635` completed. Its metadata enables `rotate`, `cond_select`, `extract`, `endian_fusion`, and `bulk_memory`; see `metadata.json`. The app payload shows `cond_select` was heavily exercised: local `jq` over `details/apps/tetragon__observer.json` found 1,636 `cond_select` applications across 170 programs, while the run still completed.
 
-The kinsn-6 run at `corpus/results/x86_kvm_corpus_20260513_025046_252709` adds only `prefetch` in `metadata.json`. It has no `details/apps` payload because the VM died during the run. The pty log `/tmp/vng-pty-log.d140dqei` shows:
+The kop-6 run at `corpus/results/x86_kvm_corpus_20260513_025046_252709` adds only `prefetch` in `metadata.json`. It has no `details/apps` payload because the VM died during the run. The pty log `/tmp/vng-pty-log.d140dqei` shows:
 
 - tetragon baseline completed, then `rejit_start` began for 287 programs;
 - three `bpf_rejit: retaining old JIT image after refresh failure` messages appeared;
@@ -46,9 +46,9 @@ The kinsn-6 run at `corpus/results/x86_kvm_corpus_20260513_025046_252709` adds o
 - the stack is `trace_call_bpf -> kprobe_perf_func -> kprobe_ftrace_handler -> bpf_check -> bpf_prog_rejit -> __sys_bpf`;
 - loaded modules include `bpf_prefetch`.
 
-Those facts point to a rewritten tetragon kprobe program firing while `bpf_check()` is verifying another ReJIT candidate. The crash happens during ReJIT, not after a clean `rejit_done`. Since kinsn-5 already survived many `cond_select` rewrites, the strongest local hypothesis is that `prefetch`, or `prefetch` interacting with a prior kinsn rewrite, introduced a runtime JIT-image hazard.
+Those facts point to a rewritten tetragon kprobe program firing while `bpf_check()` is verifying another ReJIT candidate. The crash happens during ReJIT, not after a clean `rejit_done`. Since kop-5 already survived many `cond_select` rewrites, the strongest local hypothesis is that `prefetch`, or `prefetch` interacting with a prior kop rewrite, introduced a runtime JIT-image hazard.
 
-Relevant prefetch code: the pass inserts a packed kinsn call with `old_len = 0` through `apply_candidates_reverse()` at `bpfopt/crates/bpfopt/src/passes/prefetch.rs:76-86` and `bpfopt/crates/bpfopt/src/pass.rs:601-617`. The x86 module proves the kinsn as `BPF_JMP_A(0)` at `module/x86/bpf_prefetch.c:34-45` and emits native `PREFETCHT0 [reg]` bytes at `module/x86/bpf_prefetch.c:58-105`.
+Relevant prefetch code: the pass inserts a packed kop call with `old_len = 0` through `apply_candidates_reverse()` at `bpfopt/crates/bpfopt/src/passes/prefetch.rs:76-86` and `bpfopt/crates/bpfopt/src/pass.rs:601-617`. The x86 module proves the kop as `BPF_JMP_A(0)` at `module/x86/bpf_prefetch.c:34-45` and emits native `PREFETCHT0 [reg]` bytes at `module/x86/bpf_prefetch.c:58-105`.
 
 The current cond_select block-removal path could still be a latent issue, but this panic is not evidence that a pure no-remove cond_select fix would avoid it. A pure no-remove fix would likely fail earlier with verifier-unreachable branch bodies.
 
@@ -176,14 +176,14 @@ If the project insists that this helper itself never call `remove_blocks_in_plac
 
 ## 6. What happens to `cond_select_rewrites_diamond_join_with_external_predecessor`?
 
-The existing test is at `bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:148-167`. It already asserts `sites_applied == 1` and that the lowered program contains a kinsn call. Under the safe "always preserve join, remove private T/F" variant, that should continue to pass; it is exactly the current shared-join behavior generalized to every join-present diamond.
+The existing test is at `bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:148-167`. It already asserts `sites_applied == 1` and that the lowered program contains a kop call. Under the safe "always preserve join, remove private T/F" variant, that should continue to pass; it is exactly the current shared-join behavior generalized to every join-present diamond.
 
 Under the unsafe pure no-remove variant, the test would probably still pass too, because it does not assert reachability or absence of stale branch blocks. That means the current test is not strong enough to distinguish verifier-safe preserve-join from verifier-invalid no-remove.
 
 Recommended test strengthening:
 
 - keep `sites_applied == 1`;
-- keep the `is_call_kinsn()` assertion;
+- keep the `is_call_kop()` assertion;
 - add an assertion that the old private branch body instructions from the inner diamond are not present as stale unreachable code, or add a CFG reachability assertion if a test-only helper is exposed;
 - keep the external predecessor edge to the join covered, because that is the original regression.
 

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT x86 kinsns: ROLQ/RORXL — rotate lowering for x86-64
+ * BpfReJIT x86 koperation: ROLQ/RORXL — rotate lowering for x86-64
  */
 
-#include "kinsn_x86_emit.h"
+#include "kop_x86_emit.h"
 
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_x86_roll(void) {}
@@ -32,13 +32,13 @@ struct rotate_payload {
 
 static __always_inline u8 rotate_payload_form(u64 payload)
 {
-	return kinsn_payload_decode(payload) & 0xf;
+	return kop_payload_decode(payload) & 0xf;
 }
 
 static __always_inline int decode_rotate_payload(u64 payload, u8 shift_mask,
 						 struct rotate_payload *rot)
 {
-	payload = kinsn_payload_decode(payload);
+	payload = kop_payload_decode(payload);
 	if ((payload & 0xf) != X86_ROTATE_FORM_IMM &&
 	    (payload & 0xf) != X86_ROTATE_FORM_ARCH_IMM)
 		return -EINVAL;
@@ -47,8 +47,8 @@ static __always_inline int decode_rotate_payload(u64 payload, u8 shift_mask,
 	rot->shift = ((payload >> 12) & 0xff) & shift_mask;
 	if (payload >> 20)
 		return -EINVAL;
-	if (!kinsn_x86_operand_valid(rot->dst_reg) ||
-	    !kinsn_x86_operand_valid(rot->src_reg))
+	if (!kop_x86_operand_valid(rot->dst_reg) ||
+	    !kop_x86_operand_valid(rot->src_reg))
 		return -EINVAL;
 	return 0;
 }
@@ -91,7 +91,7 @@ static __always_inline int decode_rotate_cl_payload(u64 payload,
 						    u8 *dst_reg,
 						    u8 *cnt_reg)
 {
-	payload = kinsn_payload_decode(payload);
+	payload = kop_payload_decode(payload);
 	if ((payload & 0xf) != X86_ROTATE_FORM_RR &&
 	    (payload & 0xf) != X86_ROTATE_FORM_ARCH_RR)
 		return -EINVAL;
@@ -102,7 +102,7 @@ static __always_inline int decode_rotate_cl_payload(u64 payload,
 		return -EINVAL;
 	if (*cnt_reg != BPF_REG_4)
 		return -EINVAL;
-	if (!kinsn_x86_operand_valid(*dst_reg))
+	if (!kop_x86_operand_valid(*dst_reg))
 		return -EINVAL;
 	return 0;
 }
@@ -129,8 +129,8 @@ static __always_inline struct bpf_insn rotate_alu_reg(u8 width, u8 op, u8 dst,
 static int instantiate_rotate(u64 payload, struct bpf_insn *insn_buf, u8 width)
 {
 	struct rotate_payload rot;
-	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0) |
-			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH1);
+	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0) |
+			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1);
 	bool arch_reg;
 	int cnt = 0;
 	int err;
@@ -140,44 +140,44 @@ static int instantiate_rotate(u64 payload, struct bpf_insn *insn_buf, u8 width)
 		return err;
 
 	arch_reg = rotate_payload_form(payload) == X86_ROTATE_FORM_ARCH_IMM;
-	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
 	if (arch_reg)
-		kinsn_x86_read64_arch(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+		kop_x86_read64_arch(insn_buf, &cnt, KOP_X86_SCRATCH0,
 				      rot.src_reg);
 	else
-		kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+		kop_x86_read64(insn_buf, &cnt, KOP_X86_SCRATCH0,
 				 rot.src_reg);
 	if (rot.shift) {
-		insn_buf[cnt++] = rotate_mov(width, KINSN_X86_SCRATCH1,
-					     KINSN_X86_SCRATCH0);
+		insn_buf[cnt++] = rotate_mov(width, KOP_X86_SCRATCH1,
+					     KOP_X86_SCRATCH0);
 		insn_buf[cnt++] = rotate_alu_imm(width, BPF_LSH,
-						 KINSN_X86_SCRATCH0,
+						 KOP_X86_SCRATCH0,
 						 rot.shift);
 		insn_buf[cnt++] = rotate_alu_imm(width, BPF_RSH,
-						 KINSN_X86_SCRATCH1,
+						 KOP_X86_SCRATCH1,
 						 width - rot.shift);
 		insn_buf[cnt++] = rotate_alu_reg(width, BPF_OR,
-						 KINSN_X86_SCRATCH0,
-						 KINSN_X86_SCRATCH1);
+						 KOP_X86_SCRATCH0,
+						 KOP_X86_SCRATCH1);
 	}
 	if (width == 32) {
 		if (arch_reg)
-			kinsn_x86_write32_arch(insn_buf, &cnt, rot.dst_reg,
-					       KINSN_X86_SCRATCH0,
+			kop_x86_write32_arch(insn_buf, &cnt, rot.dst_reg,
+					       KOP_X86_SCRATCH0,
 					       scratch_mask);
 		else
-			kinsn_x86_write32(insn_buf, &cnt, rot.dst_reg,
-					  KINSN_X86_SCRATCH0, scratch_mask);
+			kop_x86_write32(insn_buf, &cnt, rot.dst_reg,
+					  KOP_X86_SCRATCH0, scratch_mask);
 	} else {
 		if (arch_reg)
-			kinsn_x86_write64_arch(insn_buf, &cnt, rot.dst_reg,
-					       KINSN_X86_SCRATCH0,
+			kop_x86_write64_arch(insn_buf, &cnt, rot.dst_reg,
+					       KOP_X86_SCRATCH0,
 					       scratch_mask);
 		else
-			kinsn_x86_write64(insn_buf, &cnt, rot.dst_reg,
-					  KINSN_X86_SCRATCH0, scratch_mask);
+			kop_x86_write64(insn_buf, &cnt, rot.dst_reg,
+					  KOP_X86_SCRATCH0, scratch_mask);
 	}
-	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
 }
 
@@ -198,13 +198,13 @@ static int instantiate_rotate_bpf(u64 payload, struct bpf_insn *insn_buf,
 		return err;
 	if (rot.shift == 0)
 		return -EINVAL;
-	if (!kinsn_x86_reg_is_bpf_writable(rot.dst_reg) ||
-	    !kinsn_x86_reg_is_bpf_writable(rot.src_reg))
+	if (!kop_x86_reg_is_bpf_writable(rot.dst_reg) ||
+	    !kop_x86_reg_is_bpf_writable(rot.src_reg))
 		return -EINVAL;
 
-	scratch = kinsn_x86_scratch_avoid(rot.dst_reg, rot.src_reg, 0);
-	scratch_mask = KINSN_X86_SCRATCH_MASK(scratch);
-	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	scratch = kop_x86_scratch_avoid(rot.dst_reg, rot.src_reg, 0);
+	scratch_mask = KOP_X86_SCRATCH_MASK(scratch);
+	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
 	if (rot.dst_reg != rot.src_reg)
 		insn_buf[cnt++] = rotate_mov(width, rot.dst_reg, rot.src_reg);
 	insn_buf[cnt++] = rotate_mov(width, scratch, rot.dst_reg);
@@ -215,12 +215,12 @@ static int instantiate_rotate_bpf(u64 payload, struct bpf_insn *insn_buf,
 	insn_buf[cnt++] = rotate_alu_reg(width, BPF_OR, rot.dst_reg,
 					 scratch);
 	if (width == 32)
-		kinsn_x86_write32(insn_buf, &cnt, rot.dst_reg, rot.dst_reg,
+		kop_x86_write32(insn_buf, &cnt, rot.dst_reg, rot.dst_reg,
 				  scratch_mask);
 	else
-		kinsn_x86_write64(insn_buf, &cnt, rot.dst_reg, rot.dst_reg,
+		kop_x86_write64(insn_buf, &cnt, rot.dst_reg, rot.dst_reg,
 				  scratch_mask);
-	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
 }
 
@@ -277,9 +277,9 @@ static int instantiate_rol_cl(u64 payload, struct bpf_insn *insn_buf,
 			      u8 width)
 {
 	u8 dst_reg, cnt_reg;
-	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0) |
-			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH1) |
-			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH2);
+	u32 scratch_mask = KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH0) |
+			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH1) |
+			   KOP_X86_SCRATCH_MASK(KOP_X86_SCRATCH2);
 	bool arch_reg;
 	bool width64;
 	u8 shift_mask;
@@ -296,69 +296,69 @@ static int instantiate_rol_cl(u64 payload, struct bpf_insn *insn_buf,
 	width64 = width == 64;
 	shift_mask = width - 1;
 	arch_reg = rotate_payload_form(payload) == X86_ROTATE_FORM_ARCH_RR;
-	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kinsn_x86_read(insn_buf, &cnt, KINSN_X86_SCRATCH0, dst_reg,
+	kop_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	kop_x86_read(insn_buf, &cnt, KOP_X86_SCRATCH0, dst_reg,
 		       width64, arch_reg);
 	if (arch_reg)
-		kinsn_x86_read(insn_buf, &cnt, KINSN_X86_SCRATCH1,
+		kop_x86_read(insn_buf, &cnt, KOP_X86_SCRATCH1,
 			       cnt_reg, width64, true);
 	else
-		insn_buf[cnt++] = rotate_mov(width, KINSN_X86_SCRATCH1,
+		insn_buf[cnt++] = rotate_mov(width, KOP_X86_SCRATCH1,
 					     cnt_reg);
 	insn_buf[cnt++] = rotate_alu_imm(width, BPF_AND,
-					 KINSN_X86_SCRATCH1, shift_mask);
-	insn_buf[cnt++] = rotate_mov(width, KINSN_X86_SCRATCH2,
-				     KINSN_X86_SCRATCH0);
+					 KOP_X86_SCRATCH1, shift_mask);
+	insn_buf[cnt++] = rotate_mov(width, KOP_X86_SCRATCH2,
+				     KOP_X86_SCRATCH0);
 	insn_buf[cnt++] = rotate_alu_reg(width, BPF_LSH,
-					 KINSN_X86_SCRATCH0,
-					 KINSN_X86_SCRATCH1);
+					 KOP_X86_SCRATCH0,
+					 KOP_X86_SCRATCH1);
 	insn_buf[cnt++] = rotate_alu_imm(width, BPF_NEG,
-					 KINSN_X86_SCRATCH1, 0);
+					 KOP_X86_SCRATCH1, 0);
 	insn_buf[cnt++] = rotate_alu_imm(width, BPF_AND,
-					 KINSN_X86_SCRATCH1, shift_mask);
+					 KOP_X86_SCRATCH1, shift_mask);
 	insn_buf[cnt++] = rotate_alu_reg(width, BPF_RSH,
-					 KINSN_X86_SCRATCH2,
-					 KINSN_X86_SCRATCH1);
+					 KOP_X86_SCRATCH2,
+					 KOP_X86_SCRATCH1);
 	insn_buf[cnt++] = rotate_alu_reg(width, BPF_OR,
-					 KINSN_X86_SCRATCH0,
-					 KINSN_X86_SCRATCH2);
-	kinsn_x86_write(insn_buf, &cnt, dst_reg, KINSN_X86_SCRATCH0,
+					 KOP_X86_SCRATCH0,
+					 KOP_X86_SCRATCH2);
+	kop_x86_write(insn_buf, &cnt, dst_reg, KOP_X86_SCRATCH0,
 			scratch_mask, width64, arch_reg);
-	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	kop_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
 }
 
 static void emit_rol_imm(u8 *buf, u32 *len, bool is64, u8 dst_reg, u8 imm8)
 {
-	kinsn_emit_rex_rr(buf, len, is64, 0, dst_reg);
-	kinsn_emit_u8(buf, len, 0xC1);
-	kinsn_emit_u8(buf, len, 0xC0 | kinsn_x86_code(dst_reg));
-	kinsn_emit_u8(buf, len, imm8);
+	kop_emit_rex_rr(buf, len, is64, 0, dst_reg);
+	kop_emit_u8(buf, len, 0xC1);
+	kop_emit_u8(buf, len, 0xC0 | kop_x86_code(dst_reg));
+	kop_emit_u8(buf, len, imm8);
 }
 
 static void emit_rol_cl(u8 *buf, u32 *len, bool is64, u8 dst_reg)
 {
-	kinsn_emit_rex_rr(buf, len, is64, 0, dst_reg);
-	kinsn_emit_u8(buf, len, 0xD3);
-	kinsn_emit_u8(buf, len, 0xC0 | kinsn_x86_code(dst_reg));
+	kop_emit_rex_rr(buf, len, is64, 0, dst_reg);
+	kop_emit_u8(buf, len, 0xD3);
+	kop_emit_u8(buf, len, 0xC0 | kop_x86_code(dst_reg));
 }
 
 static void emit_rorx32_imm(u8 *buf, u32 *len, u8 dst_reg, u8 src_reg, u8 imm8)
 {
 	u8 vex2 = 0x43;
 
-	if (!kinsn_x86_ext(dst_reg))
+	if (!kop_x86_ext(dst_reg))
 		vex2 |= 0x80;
-	if (!kinsn_x86_ext(src_reg))
+	if (!kop_x86_ext(src_reg))
 		vex2 |= 0x20;
 
-	kinsn_emit_u8(buf, len, 0xC4);
-	kinsn_emit_u8(buf, len, vex2);
-	kinsn_emit_u8(buf, len, 0x7B);
-	kinsn_emit_u8(buf, len, 0xF0);
-	kinsn_emit_u8(buf, len, 0xC0 | (kinsn_x86_code(dst_reg) << 3) |
-		      kinsn_x86_code(src_reg));
-	kinsn_emit_u8(buf, len, imm8);
+	kop_emit_u8(buf, len, 0xC4);
+	kop_emit_u8(buf, len, vex2);
+	kop_emit_u8(buf, len, 0x7B);
+	kop_emit_u8(buf, len, 0xF0);
+	kop_emit_u8(buf, len, 0xC0 | (kop_x86_code(dst_reg) << 3) |
+		      kop_x86_code(src_reg));
+	kop_emit_u8(buf, len, imm8);
 }
 
 static int emit_rol_imm_x86(u8 *image, u32 *off, bool emit,
@@ -379,13 +379,13 @@ static int emit_rol_imm_x86(u8 *image, u32 *off, bool emit,
 	if (rot.dst_reg != rot.src_reg || !rot.shift)
 		return -EINVAL;
 	if (rotate_payload_form(payload) != X86_ROTATE_FORM_ARCH_IMM)
-		rot.dst_reg = kinsn_x86_reg_for_prog(prog, rot.dst_reg);
-	if (!kinsn_x86_reg_valid(rot.dst_reg))
+		rot.dst_reg = kop_x86_reg_for_prog(prog, rot.dst_reg);
+	if (!kop_x86_reg_valid(rot.dst_reg))
 		return -EINVAL;
 
 	emit_rol_imm(buf, &len, width == 64, rot.dst_reg, rot.shift);
 
-	return kinsn_emit_finish(image, off, emit, buf, len);
+	return kop_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_rotate32_x86(u8 *image, u32 *off, bool emit,
@@ -401,15 +401,15 @@ static int emit_rotate32_x86(u8 *image, u32 *off, bool emit,
 	if (err)
 		return err;
 	if (rotate_payload_form(payload) != X86_ROTATE_FORM_ARCH_IMM) {
-		dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
-		src_reg = kinsn_x86_reg_for_prog(prog, src_reg);
+		dst_reg = kop_x86_reg_for_prog(prog, dst_reg);
+		src_reg = kop_x86_reg_for_prog(prog, src_reg);
 	}
-	if (!kinsn_x86_reg_valid(dst_reg) || !kinsn_x86_reg_valid(src_reg))
+	if (!kop_x86_reg_valid(dst_reg) || !kop_x86_reg_valid(src_reg))
 		return -EINVAL;
 
 	emit_rorx32_imm(buf, &len, dst_reg, src_reg, (-shift) & 31);
 
-	return kinsn_emit_finish(image, off, emit, buf, len);
+	return kop_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_rol_cl_x86(u8 *image, u32 *off, bool emit,
@@ -428,14 +428,14 @@ static int emit_rol_cl_x86(u8 *image, u32 *off, bool emit,
 	if (err)
 		return err;
 	if (rotate_payload_form(payload) != X86_ROTATE_FORM_ARCH_RR)
-		dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
-	if (!kinsn_x86_reg_valid(dst_reg))
+		dst_reg = kop_x86_reg_for_prog(prog, dst_reg);
+	if (!kop_x86_reg_valid(dst_reg))
 		return -EINVAL;
 	(void)cnt_reg;
 
 	emit_rol_cl(buf, &len, width == 64, dst_reg);
 
-	return kinsn_emit_finish(image, off, emit, buf, len);
+	return kop_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_rol_x86(u8 *image, u32 *off, bool emit, u64 payload,
@@ -469,35 +469,35 @@ static int emit_roll_x86(u8 *image, u32 *off, bool emit,
 	return emit_rol_x86(image, off, emit, payload, prog, 32);
 }
 
-const struct bpf_kinsn bpf_x86_rolq_desc = {
+const struct bpf_kop bpf_x86_rolq_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 15 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 15 + KOP_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_rolq,
 	.emit_x86 = emit_rolq_x86,
 };
 
-const struct bpf_kinsn bpf_x86_roll_desc = {
+const struct bpf_kop bpf_x86_roll_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 15 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 15 + KOP_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_roll,
 	.emit_x86 = emit_roll_x86,
 };
 
-const struct bpf_kinsn bpf_x86_rorxl_desc = {
+const struct bpf_kop bpf_x86_rorxl_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 10 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 10 + KOP_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_rotate32,
 	.emit_x86 = emit_rotate32_x86,
 };
 
-static const struct bpf_kinsn * const bpf_x86_rotate_kinsn_descs[] = {
+static const struct bpf_kop * const bpf_x86_rotate_kop_descs[] = {
 	&bpf_x86_roll_desc,
 	&bpf_x86_rolq_desc,
 	&bpf_x86_rorxl_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_x86_rotate, "BpfReJIT x86 kinsns: ROL/RORX",
-		       bpf_x86_rotate_kfunc_ids, bpf_x86_rotate_kinsn_descs);
+DEFINE_KOP_V2_MODULE(bpf_x86_rotate, "BpfReJIT x86 koperation: ROL/RORX",
+		       bpf_x86_rotate_kfunc_ids, bpf_x86_rotate_kop_descs);

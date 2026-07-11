@@ -13,7 +13,7 @@
 4. arm64 的空间明显更大。当前文件里未使用的整数寄存器较多，其中 `x23/x24` 是最适合的新增长期寄存器候选，因为它们是 callee-saved。
 5. verifier 大概率不需要理解 `reg_map`。只要 BPF 语义不变，`reg_map` 可以作为 JIT 后端的实现细节，放在 `bpf_prog_select_runtime()` 之前写入 `prog->aux`。
 6. “spill-to-register” 比“全局自定义 reg_map”更现实，但也只能做受限版本：只替换少量 64-bit、非 address-taken、成对 load/store 的 stack slot，并且只用额外的 callee-saved native 寄存器。
-7. 最大的隐藏障碍不是 verifier，而是 JIT 内部保留寄存器、helper ABI、exception boundary save/restore，以及 kinsn native emit 接口目前拿不到 `reg_map`/slot 映射。
+7. 最大的隐藏障碍不是 verifier，而是 JIT 内部保留寄存器、helper ABI、exception boundary save/restore，以及 kop native emit 接口目前拿不到 `reg_map`/slot 映射。
 
 我的建议是分阶段做：
 
@@ -323,7 +323,7 @@ ARM64 也不是只改一个 `bpf2a64[]` 就够，但比 x86 好做一些，因�
 1. **helper ABI 友好布局不能乱。**
    - 当前 `R1-R5 -> x0-x4` 是明显贴合 AAPCS/helper ABI 的设计。
 2. **caller-saved 不能直接拿来做长期状态。**
-   - 如果 daemon 想把长期活跃值映射到 `x5/x6/x8/x13...`，就必须在所有 helper call、tail call、trampoline、可能的 kinsn/native emit 点前后做保存恢复。
+   - 如果 daemon 想把长期活跃值映射到 `x5/x6/x8/x13...`，就必须在所有 helper call、tail call、trampoline、可能的 kop/native emit 点前后做保存恢复。
 3. **当前 callee-save 发现逻辑只认识 `R6-R9/FP`。**
    - 如果把别的 BPF 寄存器映射到 `x23/x24`，或者让 spill slot 占用 `x23/x24`，这套逻辑必须同步泛化。
 
@@ -387,18 +387,18 @@ mov x0, spill_reg0
 
 只有在你想让 verifier 参与“哪些 slot 允许寄存器化”的合法性判定时，才需要额外接口；但从机制上讲，这不是必需条件。
 
-## 4. kinsn emit 的冲突点
+## 4. kop emit 的冲突点
 
 这是这次调研里我认为最容易被忽略的问题。
 
-### 4.1 x86 kinsn emit 接口
+### 4.1 x86 kop emit 接口
 
-`emit_kinsn_desc_call()` 在 `arch/x86/net/bpf_jit_comp.c:579-606`。
+`emit_kop_desc_call()` 在 `arch/x86/net/bpf_jit_comp.c:579-606`。
 
 真正的 callback 形状是：
 
 ```c
-kinsn->emit_x86(scratch, &off, emit, payload, bpf_prog)
+kop->emit_x86(scratch, &off, emit, payload, bpf_prog)
 ```
 
 它拿到：
@@ -415,29 +415,29 @@ kinsn->emit_x86(scratch, &off, emit, payload, bpf_prog)
 - 当前 native `reg_map`
 - 当前 spill-slot 映射
 
-### 4.2 arm64 kinsn emit 接口
+### 4.2 arm64 kop emit 接口
 
-`emit_kinsn_desc_call_arm64()` 在 `arch/arm64/net/bpf_jit_comp.c:1201-1235`。
+`emit_kop_desc_call_arm64()` 在 `arch/arm64/net/bpf_jit_comp.c:1201-1235`。
 
 callback 形状是：
 
 ```c
-kinsn->emit_arm64(scratch, &scratch_idx, ctx->write, payload, bpf_prog)
+kop->emit_arm64(scratch, &scratch_idx, ctx->write, payload, bpf_prog)
 ```
 
 同样拿不到 `reg_map` 或 slot 映射。
 
 ### 4.3 这意味着什么
 
-如果某个 kinsn native emitter 默认假设“BPF R6 一定在 `rbx`/`x19`”之类的固定约定，那么：
+如果某个 kop native emitter 默认假设“BPF R6 一定在 `rbx`/`x19`”之类的固定约定，那么：
 
 - 自定义 `reg_map` 会悄悄把它搞错
 - spill slot remap 也可能和它抢寄存器
 
 所以二选一：
 
-1. 扩展 kinsn emit ABI，把 `reg_map`/额外 scratch 寄存器约束显式传进去
-2. 第一版直接限制：有 kinsn/native emit 的程序不允许启用自定义 reg_map / spill-to-register
+1. 扩展 kop emit ABI，把 `reg_map`/额外 scratch 寄存器约束显式传进去
+2. 第一版直接限制：有 kop/native emit 的程序不允许启用自定义 reg_map / spill-to-register
 
 我倾向于先做第 2 种限制版。
 
@@ -604,16 +604,16 @@ arm64 第一版最现实的形式是：
 - save/restore 检测逻辑要泛化
 - 仍然只能覆盖少量最热点 slot
 
-### 6.4 和 kinsn emit 的冲突
+### 6.4 和 kop emit 的冲突
 
 如果启用 spill-to-register，必须额外回答：
 
-- kinsn native emitter 是否会用这些额外寄存器
-- kinsn 是否默认假设当前固定映射
+- kop native emitter 是否会用这些额外寄存器
+- kop 是否默认假设当前固定映射
 
 所以第一版最好直接加限制：
 
-- “含 native kinsn emit 的程序禁用 spill-to-register”
+- “含 native kop emit 的程序禁用 spill-to-register”
 
 ## 7. Corpus 静态数据
 
@@ -734,7 +734,7 @@ arm64 第一版最现实的形式是：
 可行，但前提是：
 
 - 不是开放任意 native 寄存器
-- 不是忽略 helper ABI/JIT 保留寄存器/exception boundary/kinsn
+- 不是忽略 helper ABI/JIT 保留寄存器/exception boundary/kop
 - 最好按架构分别定义“允许的目标寄存器集合”
 
 ### 9.2 “spill-to-register”是否可行
@@ -771,7 +771,7 @@ x86 不是不能做，但第一版应该很克制：
 1. **Phase 1: arm64 spill-to-register 限制版**
    - 只支持 `x23/x24`
    - 只支持 1-2 个 `u64` slot
-   - 禁止与 kinsn/native emit 共存
+   - 禁止与 kop/native emit 共存
 
 2. **Phase 2: x86 spill-to-register 限制版**
    - 只支持 `r12`
@@ -782,9 +782,9 @@ x86 不是不能做，但第一版应该很克制：
    - 只允许映射到约定好的安全寄存器集合
    - verifier 仍保持无感知
 
-4. **Phase 4: 解决 kinsn/native emit ABI**
-   - 如果后续确实需要更自由的 remap，再扩展 kinsn emit 接口
+4. **Phase 4: 解决 kop/native emit ABI**
+   - 如果后续确实需要更自由的 remap，再扩展 kop emit 接口
 
 ## 附：本次调研的核心结论一句话版
 
-REJIT 接受可选 `reg_map` 在机制上没问题，但真正值得做的不是“任意自定义寄存器映射”，而是“面向少量热点 stack slot 的、严格受限的 spill-to-register”；arm64 先做，x86 后做，verifier 不需要先动，kinsn 接口是主要隐患。
+REJIT 接受可选 `reg_map` 在机制上没问题，但真正值得做的不是“任意自定义寄存器映射”，而是“面向少量热点 stack slot 的、严格受限的 spill-to-register”；arm64 先做，x86 后做，verifier 不需要先动，kop 接口是主要隐患。

@@ -176,7 +176,7 @@ Answer:
 - libbpf exposes the same in `bpf_prog_load_opts`: `fd_array` and `fd_array_cnt` (`vendor/libbpf/src/bpf.h:90-115`), and copies them into `attr.fd_array` / `attr.fd_array_cnt` (`vendor/libbpf/src/bpf.c:315-316`).
 - Current daemon supports fd_array for BPF_PROG_LOAD in its custom `AttrProgLoad` path (`daemon/src/bpf.rs:1513-1557`) and passes fd_array during per-pass verify (`daemon/src/commands.rs:621-634`).
 - Current pipeline resolver stores required BTF FDs and encodes `CALL.off` as a 1-based fd_array slot (`daemon/src/pipeline.rs:16-18`, `daemon/src/pipeline.rs:63-74`, `daemon/src/pipeline.rs:77-87`).
-- `commands.rs` reserves slot 0 with a duplicate valid BTF FD because kinsn `CALL.off` uses 0 for vmlinux and 1-based slots for descriptor BTFs (`daemon/src/commands.rs:386-398`).
+- `commands.rs` reserves slot 0 with a duplicate valid BTF FD because kop `CALL.off` uses 0 for vmlinux and 1-based slots for descriptor BTFs (`daemon/src/commands.rs:386-398`).
 
 Kernel-sys gap:
 
@@ -243,7 +243,7 @@ Optional:
 - `--map-fds FILE`
   - Stable map binding side input from `bpfget --full`.
 - `--fd-array FILE`
-  - kinsn BTF fd_array side input.
+  - kop BTF fd_array side input.
 - `--log-level N`
   - Recommended accepted values: 0, 1, 2.
   - This task requests default 1 for basic error logs and forced 2 when `--verifier-states-out` is present.

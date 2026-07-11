@@ -1,6 +1,6 @@
 # BpfReJIT Benchmark Results Analysis (2026-03-24/25)
 
-> Analysis of all benchmark runs completed 2026-03-25, on v2 architecture (syscall + kinsn + daemon).
+> Analysis of all benchmark runs completed 2026-03-25, on v2 architecture (syscall + kop + daemon).
 > Platform: Intel Core Ultra 9 285K, QEMU/KVM VM (virtme-ng), kernel 7.0.0-rc2+.
 > Results directories:
 > - Micro: `micro/results/vm_micro_20260325_023400/`
@@ -187,7 +187,7 @@ These suggest the rejit path has some non-trivial overhead even when no transfor
 - tracepoint__sch: +0.49%, +84.3% (one anomalous), +0.34%, -0.62%
 - trace_security_: +1.02%, +0.26%
 
-**Assessment**: Tracee shows near-neutral performance overall. The exec_storm anomaly (+3574% throughput) is suspicious and likely a measurement artifact (possibly different baseline state). Most individual program BPF ns/run deltas are within +/-1%, except one anomalous tracepoint__sch measurement (+84.3%). The scan found no optimization sites, so this is a "zero overhead" transparency test. The scan_results are empty, suggesting no kinsn sites were found in Tracee's programs.
+**Assessment**: Tracee shows near-neutral performance overall. The exec_storm anomaly (+3574% throughput) is suspicious and likely a measurement artifact (possibly different baseline state). Most individual program BPF ns/run deltas are within +/-1%, except one anomalous tracepoint__sch measurement (+84.3%). The scan found no optimization sites, so this is a "zero overhead" transparency test. The scan_results are empty, suggesting no kop sites were found in Tracee's programs.
 
 #### Tetragon (Security Enforcement)
 
@@ -255,7 +255,7 @@ These suggest the rejit path has some non-trivial overhead even when no transfor
 | Metric | Value |
 |--------|-------|
 | Status | completed |
-| Sites | 0 (no kinsn sites in scx programs) |
+| Sites | 0 (no kop sites in scx programs) |
 | Scanned programs | 0 |
 
 **Workload comparison:**

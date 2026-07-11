@@ -54,7 +54,7 @@
 
 1. **零 reconstruction** — 所有字段直接从 `prog_info` 读，不变形不规范化。`prog_type / expected_attach_type / prog_flags / btf_id / btf_obj_id / attach_btf_id / dst_prog_fd` 全部 read-as-is 填到 `bpf_attr`。
 2. **不传 BTF func_info / line_info** — `bpf_attr.line_info_cnt = 0`、`bpf_attr.func_info_cnt = 0`。verifier 不需要 source-level metadata 来跑 verify + 输出 register state log。
-3. **默认 12-pass + 自动 side-input** — daemon 默认启用 v2 时代 12 个 pass：`wide_mem, rotate, cond_select, extract, endian_fusion, map_inline, const_prop, dce, bounds_check_merge, skb_load_bytes_spec, bulk_memory, prefetch`。调用方不需要 side-input opt-in；daemon 看到 `map_inline` 自动生成 live map values 和 verifier states，看到 `const_prop` 自动生成 verifier states，看到 kinsn pass 自动 probe target / 构造 fd_array。`branch_flip` 仍不在默认 12 pass 中。
+3. **默认 12-pass + 自动 side-input** — daemon 默认启用 v2 时代 12 个 pass：`wide_mem, rotate, cond_select, extract, endian_fusion, map_inline, const_prop, dce, bounds_check_merge, skb_load_bytes_spec, bulk_memory, prefetch`。调用方不需要 side-input opt-in；daemon 看到 `map_inline` 自动生成 live map values 和 verifier states，看到 `const_prop` 自动生成 verifier states，看到 kop pass 自动 probe target / 构造 fd_array。`branch_flip` 仍不在默认 12 pass 中。
 
 ## 新主路径
 
@@ -144,7 +144,7 @@ fn capture_verifier_states(prog_info: &ProgInfo, bytecode: &[Insn], fd_array: &[
 - 估计 `-1,369` 行
 
 ### Step 3: 压缩 bpfget
-- 保留：`prog_get_original` snapshot、`prog_info` 字段读取、`map_id → fd_array` builder、kinsn target probing
+- 保留：`prog_get_original` snapshot、`prog_info` 字段读取、`map_id → fd_array` builder、kop target probing
 - 删：`normalize_func_info_for_insns`、`normalize_line_info_for_insns`、`relocate_for_load`、resolved kernel pointer rewrite、ProgramSnapshot 的 BTF metadata fields
 - 不再需要 `OwnedFd` 长期持有（map fd 只在 dry-run / REJIT 调用时短期持有）
 - 估计 `-1,400` 行
@@ -166,7 +166,7 @@ fn capture_verifier_states(prog_info: &ProgInfo, bytecode: &[Insn], fd_array: &[
 ### Step 6: daemon side-input 集成
 - daemon 检测 `enabled_passes` 含 `map_inline` / `const_prop` → 触发 dry-run 写 states.json → 传给 bpfopt CLI
 - daemon 检测 `enabled_passes` 含 `map_inline` → 写 live `map-values.json` 和 `--map-ids`
-- daemon 检测 kinsn pass → probe `target.json` 并构造 fd_array call offsets
+- daemon 检测 kop pass → probe `target.json` 并构造 fd_array call offsets
 - 加 integration test：包含 `const_prop` 的默认 12-pass 语义会触发 dry-run
 
 ### Step 7: 删除残留协议代码

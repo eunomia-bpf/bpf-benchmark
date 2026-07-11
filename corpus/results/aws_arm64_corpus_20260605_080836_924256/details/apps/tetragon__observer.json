@@ -2725,7 +2725,7 @@
   "post_rejit": null,
   "rejit_result": {
     "enabled_passes": [
-      "kinsn"
+      "kop"
     ],
     "mode": "loadtime",
     "plan_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/aws_arm64_corpus_20260605_080836_924256/details/loadtime-plans/tetragon__observer.json",

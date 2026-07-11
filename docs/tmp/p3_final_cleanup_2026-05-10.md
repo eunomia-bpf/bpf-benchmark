@@ -25,7 +25,7 @@ The re-ported BBProgram coverage tests were moved to crate-root test modules:
 
 ## 2. Legacy Consumer Re-Port Audit
 
-- `pass.rs:194` replaced `CFGAnalysis::run(&insns)` subprogram discovery with direct pseudo-call / pseudo-func target scanning for `kinsn_candidate_subprog_starts`.
+- `pass.rs:194` replaced `CFGAnalysis::run(&insns)` subprogram discovery with direct pseudo-call / pseudo-func target scanning for `kop_candidate_subprog_starts`.
 - `passes/rotate.rs:80` replaced `BranchTargetAnalysis::run` with `prog.branch_target_pcs()`.
 - `passes/rotate.rs:113` replaced `LivenessAnalysis::run` with `prog.live_out_current_pc(...)`.
 - `passes/rotate.rs:230` replaced `iter_sites` with `linear_insn_sites`.
@@ -71,7 +71,7 @@ Known remaining cleanup gap: this file did not reach the requested `3500-4000` L
 - LOC: `1497 -> 1115`.
 - Removed legacy `CFGAnalysis` dependency.
 - Removed old BTF remap helpers from `pass.rs`; BTF remapping now lives on BBProgram lowering.
-- Removed kinsn BTF/proof remap helpers that belonged to the old linear `BpfProgram` path.
+- Removed kop BTF/proof remap helpers that belonged to the old linear `BpfProgram` path.
 - Slimmed `BpfProgram` to the map snapshot helper view and removed unused annotation/profiling/BTF fields and helper methods.
 
 ## 5. `bbprogram_api.rs`
@@ -82,7 +82,7 @@ Zero-caller public APIs checked by `rg` and absent in the final tree:
 - `insert_insn`
 - `delete_block`
 - `rewire_edge`
-- `replace_diamond_with_kinsn`
+- `replace_diamond_with_kop`
 
 No new zero-caller public BBProgram APIs were found by the final clippy gate.
 

@@ -1,7 +1,7 @@
 {
   "bpf_stats": true,
   "generated_at": "1970-01-01T00:00:10.458191+00:00",
-  "kinsn_modules": {
+  "kop_modules": {
     "captured_at": "1970-01-01T00:00:06.164456+00:00",
     "expected_modules": [
       "bpf_arm64_ccmp",
@@ -46,8 +46,8 @@
         "bpf_arm64_str",
         "bpf_arm64_ubfm"
       ],
-      "loader": "runner.libs.kinsn.load_kinsn_modules",
-      "module_dir": "/artifacts/kinsn",
+      "loader": "runner.libs.kop.load_kop_modules",
+      "module_dir": "/artifacts/kop",
       "newly_loaded_modules": [
         "bpf_arm64_ccmp",
         "bpf_arm64_csel",

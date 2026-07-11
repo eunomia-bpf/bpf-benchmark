@@ -1,9 +1,9 @@
-# Micro Benchmark Analysis v2 (with kinsn modules)
+# Micro Benchmark Analysis v2 (with kop modules)
 
 **Date**: 2026-03-22 07:12
 **Run**: `make vm-micro` (ITERATIONS=3, WARMUPS=1, REPEAT=100)
 **CPU**: Intel Core Ultra 9 285K (VM environment)
-**kinsn modules**: 3/3 loaded (bpf_rotate, bpf_select, bpf_extract)
+**kop modules**: 3/3 loaded (bpf_rotate, bpf_select, bpf_extract)
 **Policy dir**: micro/policies/ (default)
 **Results file**: micro/results/dev/vm_micro.json
 
@@ -47,8 +47,8 @@ VM scheduling jitter that affects the first runtime measured within each iterati
 | WideMemPass | wide-load-2 | 4 | 2 | bounds_ladder, bpf_call_chain |
 
 **Key observations**:
-- **RotatePass**: 412 sites across 5 benchmarks -- this is the newly working pass with kinsn modules!
-  Previously (without kinsn), rotate sites could not be applied because bpf_rotate.ko was not loaded.
+- **RotatePass**: 412 sites across 5 benchmarks -- this is the newly working pass with kop modules!
+  Previously (without kop), rotate sites could not be applied because bpf_rotate.ko was not loaded.
 - **CondSelectPass (CMOV)**: Only 2 sites in bounds_ladder. cond_select_dense has 0 applied sites
   (policy deliberately skips CMOV for predictable-branch workloads -- policy-sensitive).
 - **WideMemPass**: 4 sites across 2 benchmarks (bounds_ladder, bpf_call_chain).
@@ -119,7 +119,7 @@ confirming this is a VM measurement artifact, not a daemon/rewrite effect.
 | Benchmark | KR/K | Improvement | K (ns) | KR (ns) | Category | Sites | Note |
 |-----------|------|-------------|--------|---------|----------|-------|------|
 | cond_select_dense | 0.672 | +32.8% | 58 | 39 | identity (0 sites) | 0 | adj=0.729, likely VM bias |
-| rotate64_hash | 0.734 | +26.6% | 64 | 47 | applied (116 sites) | 116 | adj=0.796, real kinsn benefit |
+| rotate64_hash | 0.734 | +26.6% | 64 | 47 | applied (116 sites) | 116 | adj=0.796, real kop benefit |
 | branch_flip_dense | 0.767 | +23.3% | 189 | 145 | identity (0 sites) | 0 | adj=0.832, likely VM bias |
 | deep_guard_tree_8 | 0.779 | +22.1% | 86 | 67 | no-policy (0 sites) | 0 | adj=0.845, likely VM bias |
 | const_fold_chain | 0.787 | +21.3% | 282 | 222 | no-policy (0 sites) | 0 | adj=0.853, likely VM bias |
@@ -128,7 +128,7 @@ confirming this is a VM measurement artifact, not a daemon/rewrite effect.
 | struct_field_cluster | 0.823 | +17.7% | 62 | 51 | no-policy (0 sites) | 0 | adj=0.892, likely VM bias |
 | bitcount | 0.831 | +16.9% | 5264 | 4376 | identity (0 sites) | 0 | adj=0.901, likely VM bias |
 | load_word32 | 0.835 | +16.5% | 91 | 76 | no-policy (0 sites) | 0 | adj=0.905, likely VM bias |
-| rotate_dense | 0.837 | +16.3% | 202 | 169 | applied (256 sites) | 256 | adj=0.907, real kinsn benefit |
+| rotate_dense | 0.837 | +16.3% | 202 | 169 | applied (256 sites) | 256 | adj=0.907, real kop benefit |
 | extract_dense | 0.838 | +16.2% | 197 | 165 | identity (0 sites) | 0 | adj=0.908, likely VM bias |
 | imm64_storm | 0.864 | +13.6% | 177 | 153 | no-policy (0 sites) | 0 | adj=0.937, likely VM bias |
 | endian_swap_dense | 0.865 | +13.5% | 126 | 109 | identity (0 sites) | 0 | adj=0.938, likely VM bias |
@@ -183,7 +183,7 @@ confirming this is a VM measurement artifact, not a daemon/rewrite effect.
 
 ## 10. Comparison with v1 Results
 
-| Metric | v1 (native rewrite) | v2 (kinsn + daemon) | Note |
+| Metric | v1 (native rewrite) | v2 (kop + daemon) | Note |
 |--------|--------------------|--------------------|------|
 | Overall micro geomean | 1.057x | 0.919x (raw) | v2 raw looks better but has 7.8% VM bias |
 | Applied-only geomean | 1.193x | 0.892x (raw) / 0.967x (adj) | v2 adjusted shows ~3.3% real improvement |
@@ -191,14 +191,14 @@ confirming this is a VM measurement artifact, not a daemon/rewrite effect.
 | llvmbpf/kernel gap | 0.581x | 0.710x | Different suite/benchmark mix |
 | Applied count | 16 | 7 (6 above threshold) | v2 has fewer applied (RotatePass is new) |
 
-**Key difference**: v2 newly enables RotatePass (ROL instruction) via kinsn modules,
+**Key difference**: v2 newly enables RotatePass (ROL instruction) via kop modules,
 which was not available in v1. rotate64_hash and rotate_dense show genuine improvements.
 However, the VM measurement environment introduces significant systematic bias that
 inflates the raw numbers. Bare-metal measurement is needed for authoritative results.
 
 ## 11. Conclusions
 
-1. **kinsn modules successfully loaded**: All 3 modules (bpf_rotate, bpf_select, bpf_extract) loaded in VM.
+1. **kop modules successfully loaded**: All 3 modules (bpf_rotate, bpf_select, bpf_extract) loaded in VM.
 2. **RotatePass is now working**: 412 rotate sites detected and applied across 5 benchmarks.
    - rotate64_hash: 26.6% raw improvement (adj ~20.4%), 48.6% gap closure
    - rotate_dense: 16.3% raw improvement (adj ~9.3%), 63.5% gap closure

@@ -16,7 +16,7 @@
  * NOTE: without this header, `<bpf/bpf_helpers.h>` defines helpers as
  * `((void *(*)(...))BPF_FUNC_xxx)` -- i.e. integer-literal-cast-to-
  * function-pointer. Under `-target x86_64` clang emits `mov eax,
- * <id>; call rax`, which is meaningless when the kinsn splats the
+ * <id>; call rax`, which is meaningless when the kop splats the
  * blob into the JIT image (RAX holds a tiny integer, the call jumps
  * to a tiny address, kernel oopses). The extern-declaration pattern
  * forces clang to emit a real GOTPCREL relocation that native-link
@@ -54,7 +54,7 @@ extern long  bpf_map_delete_elem(void *map, const void *key);
 #define BPF_MAP_TYPE_ARRAY         2
 
 /* SEC() macro is a no-op in native mode — clang doesn't emit a section
- * directive that matters for the .native.o → native-link → kinsn
+ * directive that matters for the .native.o → native-link → kop
  * pipeline (native-link reads the entry symbol by name + walks `.text`). */
 #ifndef SEC
 #define SEC(NAME) __attribute__((section(NAME), used))

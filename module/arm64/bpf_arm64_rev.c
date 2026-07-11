@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT arm64 kinsns: REV byte-order instructions.
+ * BpfReJIT arm64 koperation: REV byte-order instructions.
  */
 
-#include "kinsn_common.h"
+#include "kop_common.h"
 
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_arm64_rev16_w(void) {}
@@ -19,7 +19,7 @@ BTF_KFUNCS_END(bpf_arm64_rev_kfunc_ids)
 
 static __always_inline int decode_reg_payload(u64 payload, u8 *dst_reg)
 {
-	*dst_reg = kinsn_payload_reg(payload, 0);
+	*dst_reg = kop_payload_reg(payload, 0);
 
 	if (payload >> 4)
 		return -EINVAL;
@@ -85,7 +85,7 @@ static int emit_rev_arm64(u32 *image, int *idx, bool emit, u64 payload,
 	if (err)
 		return err;
 
-	dst_reg = kinsn_arm64_reg(dst_reg);
+	dst_reg = kop_arm64_reg(dst_reg);
 	if (dst_reg == 0xff)
 		return -EINVAL;
 
@@ -103,7 +103,7 @@ static int emit_rev_arm64(u32 *image, int *idx, bool emit, u64 payload,
 		return -EINVAL;
 	}
 
-	return kinsn_arm64_emit_one(image, idx, emit, insn);
+	return kop_arm64_emit_one(image, idx, emit, insn);
 }
 
 static int emit_rev16_w_arm64(u32 *image, int *idx, bool emit, u64 payload,
@@ -133,7 +133,7 @@ static int emit_rev_x_arm64(u32 *image, int *idx, bool emit, u64 payload,
 	return emit_rev_arm64(image, idx, emit, payload, prog, 64);
 }
 
-const struct bpf_kinsn bpf_arm64_rev16_w_desc = {
+const struct bpf_kop bpf_arm64_rev16_w_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -141,7 +141,7 @@ const struct bpf_kinsn bpf_arm64_rev16_w_desc = {
 	.emit_arm64 = emit_rev16_w_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_rev_w_desc = {
+const struct bpf_kop bpf_arm64_rev_w_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -149,7 +149,7 @@ const struct bpf_kinsn bpf_arm64_rev_w_desc = {
 	.emit_arm64 = emit_rev_w_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_rev_x_desc = {
+const struct bpf_kop bpf_arm64_rev_x_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -157,11 +157,11 @@ const struct bpf_kinsn bpf_arm64_rev_x_desc = {
 	.emit_arm64 = emit_rev_x_arm64,
 };
 
-static const struct bpf_kinsn * const bpf_arm64_rev_kinsn_descs[] = {
+static const struct bpf_kop * const bpf_arm64_rev_kop_descs[] = {
 	&bpf_arm64_rev16_w_desc,
 	&bpf_arm64_rev_w_desc,
 	&bpf_arm64_rev_x_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_arm64_rev, "BpfReJIT arm64 kinsns: REV",
-		       bpf_arm64_rev_kfunc_ids, bpf_arm64_rev_kinsn_descs);
+DEFINE_KOP_V2_MODULE(bpf_arm64_rev, "BpfReJIT arm64 koperation: REV",
+		       bpf_arm64_rev_kfunc_ids, bpf_arm64_rev_kop_descs);

@@ -20,7 +20,7 @@ Date: 2026-05-01
 - `const_prop` 需要 verifier states。
 - `dce` 不读取 verifier states。
 - `bounds_check_merge` 不读取 verifier states。
-- kinsn passes 需要 target/kfunc BTF fd 与 call offset side-input：`rotate`, `cond_select`, `extract`, `endian_fusion`, `bulk_memory`, `prefetch`，以及非默认 `ccmp`。
+- kop passes 需要 target/kfunc BTF fd 与 call offset side-input：`rotate`, `cond_select`, `extract`, `endian_fusion`, `bulk_memory`, `prefetch`，以及非默认 `ccmp`。
 - `prefetch` 可消费 profile，但没有 profile 时按结构规则运行，不是 daemon 必需 side-input。
 - `branch_flip` 不在默认 12 pass，必须有真实 program-level 和 per-site PMU profile。
 
@@ -31,7 +31,7 @@ Date: 2026-05-01
 - daemon 根据 requested passes 自动判断 side-input：
   - `map_inline` / `const_prop` 触发 thin dry-run，生成 `verifier-states.json`
   - `map_inline` 继续自动生成 `map-values.json` 和 `--map-ids`
-  - kinsn passes 继续生成 `target.json` 并构造 ReJIT `fd_array`
+  - kop passes 继续生成 `target.json` 并构造 ReJIT `fd_array`
 - `bpfopt optimize` 对 `map_inline` 的离线 CLI 要求更新为 `--verifier-states`, `--map-values`, `--map-ids` 三者都存在，避免 daemon 以外调用缺 side-input 静默跑偏。
 - `kernel_sys::prog_rejit()` 的 log 参数改为 caller-owned `Vec<u8>`，ENOSPC retry 扩容后的最终 verifier log 会回填给 daemon，failure artifact 写入的是 retry 后完整 log。
 

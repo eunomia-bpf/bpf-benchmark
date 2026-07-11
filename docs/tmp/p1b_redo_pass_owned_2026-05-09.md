@@ -1,25 +1,25 @@
-# P1-B redo: pass-owned kinsn descriptors
+# P1-B redo: pass-owned kop descriptors
 
 Date: 2026-05-09
 
 ## Design
 
-P1-B was redone from a centralized `kinsn.rs` target table to pass-owned kinsn metadata. Each kinsn pass now owns its own `KINSN_TARGETS` slice containing `KinsnDescriptor` entries:
+P1-B was redone from a centralized `kop.rs` target table to pass-owned kop metadata. Each kop pass now owns its own `KOP_TARGETS` slice containing `KopDescriptor` entries:
 
 ```rust
-pub struct KinsnDescriptor {
+pub struct KopDescriptor {
     pub canonical_name: &'static str,
     pub aliases: &'static [&'static str],
     pub decode_proof: fn(&[u8]) -> ProofRegion,
 }
 ```
 
-`PASS_REGISTRY` is the only aggregation point. `PassMetadata` now stores `kinsn_targets: &'static [KinsnDescriptor]`, and `KinsnRegistry::new()` walks `PASS_REGISTRY` to populate:
+`PASS_REGISTRY` is the only aggregation point. `PassMetadata` now stores `kop_targets: &'static [KopDescriptor]`, and `KopRegistry::new()` walks `PASS_REGISTRY` to populate:
 
 - `by_name: HashMap<&'static str, RegistryEntry>`
-- `by_btf_id: HashMap<i32, &'static KinsnDescriptor>`
+- `by_btf_id: HashMap<i32, &'static KopDescriptor>`
 
-`RegistryEntry` stores the runtime `btf_id`, `call_off`, and descriptor pointer. CLI alias canonicalization goes through `KinsnRegistry`'s `by_name` map, so canonical names and all descriptor aliases are accepted from `target.json` and `--kinsns`.
+`RegistryEntry` stores the runtime `btf_id`, `call_off`, and descriptor pointer. CLI alias canonicalization goes through `KopRegistry`'s `by_name` map, so canonical names and all descriptor aliases are accepted from `target.json` and `--koperation`.
 
 Proof remapping no longer matches a centralized `ProofLayout` enum. `passes/utils.rs` now does:
 
@@ -35,21 +35,21 @@ The individual proof decoder functions moved into their owning pass modules.
 
 Deleted from the source tree:
 
-- `bpfopt/crates/bpfopt/src/kinsn.rs`
-- `KinsnSlot`
+- `bpfopt/crates/bpfopt/src/kop.rs`
+- `KopSlot`
 - `ProofLayout`
 - `TargetSpec`
-- `KinsnRef`
+- `KopRef`
 
 New/changed fields:
 
-- `pass.rs::KinsnDescriptor`: `canonical_name`, `aliases`, `decode_proof`
-- `pass.rs::KinsnRegistry`: `by_name`, `by_btf_id`
+- `pass.rs::KopDescriptor`: `canonical_name`, `aliases`, `decode_proof`
+- `pass.rs::KopRegistry`: `by_name`, `by_btf_id`
 - `pass.rs::RegistryEntry`: `btf_id`, `call_off`, `descriptor`
-- `passes/mod.rs::PassMetadata`: `kinsn_targets`
-- `main.rs::ListPassEntry`: internal `kinsn_targets`, serialized as the existing `kinsns_used` JSON field for compatibility
+- `passes/mod.rs::PassMetadata`: `kop_targets`
+- `main.rs::ListPassEntry`: internal `kop_targets`, serialized as the existing `kops_used` JSON field for compatibility
 
-## Kinsn Targets
+## KOperation Targets
 
 | pass | canonical targets | aliases |
 |---|---|---|
@@ -65,10 +65,10 @@ New/changed fields:
 
 The emit path was not changed:
 
-- `emit_packed_kinsn_call_with_off()` is unchanged.
+- `emit_packed_kop_call_with_off()` is unchanged.
 - Per-pass payload packing is unchanged.
-- Per-pass BTF ID and call offset reads now use canonical target names instead of `KinsnSlot`, but feed the same values into the same emit helper.
-- Decoder functions only compute proof-region lengths for BTF metadata remapping after kinsn replacement; they do not participate in instruction emission.
+- Per-pass BTF ID and call offset reads now use canonical target names instead of `KopSlot`, but feed the same values into the same emit helper.
+- Decoder functions only compute proof-region lengths for BTF metadata remapping after kop replacement; they do not participate in instruction emission.
 
 Therefore the emitted bytecode for a given registry state is byte-identical to the previous implementation. The change is metadata ownership and proof-dispatch structure, not lowering.
 
@@ -114,11 +114,11 @@ Per-file `git diff --numstat HEAD -- bpfopt/crates/bpfopt/src daemon/src`:
 
 Note: this HEAD-scoped table includes pre-existing dirty bpfopt changes in the workspace. No `daemon/src` file changed in this redo.
 
-## Adding A New Kinsn
+## Adding A New KOperation
 
-Adding a new target to an existing kinsn pass now changes one pass file:
+Adding a new target to an existing kop pass now changes one pass file:
 
-1. Add a `KinsnDescriptor` to that pass's `KINSN_TARGETS`.
+1. Add a `KopDescriptor` to that pass's `KOP_TARGETS`.
 2. Add the pass-local `decode_*_proof` function.
 3. Use the canonical target name in that pass's existing availability/emit path.
 
@@ -130,8 +130,8 @@ Adding an entirely new pass still needs the normal pass-module registration in `
 
 - Did not touch `vendor/linux-framework`.
 - Did not touch daemon, runner, corpus, e2e, micro, or vendor code.
-- Did not change `emit_packed_kinsn_call_with_off()` or kinsn payload emit paths.
-- Removed the centralized kinsn table and enum dispatch.
+- Did not change `emit_packed_kop_call_with_off()` or kop payload emit paths.
+- Removed the centralized kop table and enum dispatch.
 - Did not add hardcoded BTF IDs or helper-number aliases.
 - Did not add `#[allow(dead_code)]`, `.ok()`, `let _ =`, or `unwrap_or_default()`.
 - Did not run `cargo test` or `make`.

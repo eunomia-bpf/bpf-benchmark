@@ -17,7 +17,7 @@
 - Applied: ✓ 已Apply
 - Passes Applied: prog 8 (trace_security_): **4 passes, 3 sites applied** (4565 → 4556 insns)
 - Error: ⚠️ REJIT syscall 失败 - `BPF_PROG_REJIT: Bad file descriptor (os error 9)`
-  - 注：其他程序未找到任何变换机会，Kinsn 模块未加载（BTF 缺失）
+  - 注：其他程序未找到任何变换机会，KOperation 模块未加载（BTF 缺失）
 
 **性能数据** (正数=改善, 负数=回归):
 
@@ -94,4 +94,4 @@
 - 生成时间: 2026-03-22T17:42-17:47 UTC
 - 内核: Linux 7.0.0-rc2-g8a692389396c (BpfReJIT v2)
 - 模式: manual_fallback (Tracee) / normal (Tetragon) / probe_only (SCX)
-- 限制: Kinsn 模块未加载（BTF 缺失）、手动加载方式信息不完整
+- 限制: KOperation 模块未加载（BTF 缺失）、手动加载方式信息不完整

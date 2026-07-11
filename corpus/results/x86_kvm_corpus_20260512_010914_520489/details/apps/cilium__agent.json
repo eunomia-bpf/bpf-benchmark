@@ -1714,7 +1714,7 @@
           {
             "bpfopt_ms": 3,
             "bpfopt_summary": null,
-            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-56/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-56/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-56/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kinsn call btf_id 128703 call_off 11 is not present in the kinsn registry",
+            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-56/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-56/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-56/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kop call btf_id 128703 call_off 11 is not present in the kop registry",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
@@ -1916,7 +1916,7 @@
           {
             "bpfopt_ms": 2,
             "bpfopt_summary": null,
-            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-75/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-75/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-75/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kinsn call btf_id 128703 call_off 7 is not present in the kinsn registry",
+            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-75/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-75/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-75/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kop call btf_id 128703 call_off 7 is not present in the kop registry",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
@@ -2893,7 +2893,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-61/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-61/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-61/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kinsn call btf_id 128703 call_off 8 is not present in the kinsn registry",
+            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-61/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-61/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-61/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kop call btf_id 128703 call_off 8 is not present in the kop registry",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
@@ -3027,7 +3027,7 @@
           {
             "bpfopt_ms": 2,
             "bpfopt_summary": null,
-            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-68/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-68/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-68/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kinsn call btf_id 128703 call_off 7 is not present in the kinsn registry",
+            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-68/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-68/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-68/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kop call btf_id 128703 call_off 7 is not present in the kop registry",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
@@ -3297,7 +3297,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-66/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-66/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-66/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kinsn call btf_id 128703 call_off 11 is not present in the kinsn registry",
+            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-66/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-66/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-66/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kop call btf_id 128703 call_off 11 is not present in the kop registry",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
@@ -3499,7 +3499,7 @@
           {
             "bpfopt_ms": 2,
             "bpfopt_summary": null,
-            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-72/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-72/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-72/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kinsn call btf_id 128703 call_off 7 is not present in the kinsn registry",
+            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-72/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-72/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-72/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kop call btf_id 128703 call_off 7 is not present in the kop registry",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
@@ -3633,7 +3633,7 @@
           {
             "bpfopt_ms": 2,
             "bpfopt_summary": null,
-            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-82/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-82/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-82/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kinsn call btf_id 128703 call_off 8 is not present in the kinsn registry",
+            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-82/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-82/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-82/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kop call btf_id 128703 call_off 8 is not present in the kop registry",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
@@ -4074,7 +4074,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-60/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-60/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-60/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kinsn call btf_id 128703 call_off 11 is not present in the kinsn registry",
+            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-60/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-60/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-60/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kop call btf_id 128703 call_off 11 is not present in the kop registry",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
@@ -4276,7 +4276,7 @@
           {
             "bpfopt_ms": 2,
             "bpfopt_summary": null,
-            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-57/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-57/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-57/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kinsn call btf_id 128703 call_off 7 is not present in the kinsn registry",
+            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-57/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-57/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-57/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kop call btf_id 128703 call_off 7 is not present in the kop registry",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
@@ -5007,7 +5007,7 @@
           {
             "bpfopt_ms": 3,
             "bpfopt_summary": null,
-            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-62/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-62/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-62/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kinsn call btf_id 128703 call_off 15 is not present in the kinsn registry",
+            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-62/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-62/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-62/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kop call btf_id 128703 call_off 15 is not present in the kop registry",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
@@ -5685,7 +5685,7 @@
           {
             "bpfopt_ms": 5,
             "bpfopt_summary": null,
-            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-40/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-40/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-40/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kinsn call btf_id 128703 call_off 7 is not present in the kinsn registry",
+            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-40/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-40/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-40/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kop call btf_id 128703 call_off 7 is not present in the kop registry",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
@@ -5887,7 +5887,7 @@
           {
             "bpfopt_ms": 2,
             "bpfopt_summary": null,
-            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-65/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-65/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-65/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kinsn call btf_id 128703 call_off 15 is not present in the kinsn registry",
+            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-65/output_step4.bin --output /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-65/output_step5.bin --report /var/tmp/bpfrejit-runtime/jihr/bpfrejit-daemon-plan-1868-65/report_step5.json --prog-type sched_cls\nsubprocess output:\nerror: kop call btf_id 128703 call_off 15 is not present in the kop registry",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",

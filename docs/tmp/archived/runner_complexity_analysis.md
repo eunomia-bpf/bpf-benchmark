@@ -9,7 +9,7 @@
 | 行数 | 文件 | 本质在做什么 |
 |------|------|------------|
 | 1158 | `app_runners/katran.py` | 用 Python 手动搭建一套虚拟网络拓扑（4 个 network namespace + veth pair + ARP + IP routing），然后用 raw socket 发包，测量 XDP LB 吞吐 |
-| 1126 | `case_common.py` | E2E 测试的"粘合胶水"：BPF 程序变更检测、CPU 采样线程、quiescence 等待、kinsn metadata 合并，把 4 种 app runner 的行为统一 |
+| 1126 | `case_common.py` | E2E 测试的"粘合胶水"：BPF 程序变更检测、CPU 采样线程、quiescence 等待、kop metadata 合并，把 4 种 app runner 的行为统一 |
 | 1016 | `workload.py` | 把 stress-ng/hackbench/wrk/dd/fio 等 6+ 种工具的调用封装成统一的 `WorkloadResult`，并实现一个内嵌 HTTP server 用于 tracee 健康检查 |
 | 919 | `input_generators.py` | 为 micro benchmark 生成 5 种不同数据分布的二进制输入文件（用 Python 实现 LCG 随机数和手写 struct pack） |
 | 899 | `rejit.py` | 封装 BpfReJIT daemon 的 socket 通信、scan/apply 调用、policy 规则匹配，以及从 YAML 文件读取优化策略 |
@@ -28,7 +28,7 @@
 | 266 | `run_target_suite.py` | 顶层入口：生成 run token，调用 local_prep，分发到 aws_executor 或 kvm_executor |
 | 238 | `results.py` | 定义 `RunnerSample`/`RejitSummary` 等 TypedDict 数据结构，解析 runner 的 JSON stdout 输出 |
 | 235 | `guest_prereqs.py` | 在 guest 上验证或确保所需命令（docker/bpftool/Python 包等）存在 |
-| 217 | `kinsn.py` | insmod .ko 文件，检查 lsmod，等待 daemon 输出 kinsn discovery 日志 |
+| 217 | `kop.py` | insmod .ko 文件，检查 lsmod，等待 daemon 输出 kop discovery 日志 |
 | 209 | `__init__.py` | 公用工具函数：`run_command`、`write_json`、`resolve_bpftool_binary` 等基础设施 |
 | 209 | `app_runners/bpftrace.py` | 启动 bpftrace 脚本，等待健康，运行 workload，解析 probe 统计，收集 BPF stats |
 | 195 | `statistics.py` | 统计工具函数：geomean、ns_summary、bootstrap CI、perf counter 摘要 |

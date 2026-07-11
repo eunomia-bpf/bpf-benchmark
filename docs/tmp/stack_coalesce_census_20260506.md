@@ -163,7 +163,7 @@ Static payoff is zero:
 
 I checked the existing baseline counter source used by prior P89 research:
 
-`corpus/results/x86_kvm_p89_kinsn_corpus_20260430_131403_981524/details/result.json`
+`corpus/results/x86_kvm_p89_kop_corpus_20260430_131403_981524/details/result.json`
 
 It contains one-second baseline run counts by runner:
 

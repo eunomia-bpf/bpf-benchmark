@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT arm64 kinsns: direct stores.
+ * BpfReJIT arm64 koperation: direct stores.
  */
 
-#include "kinsn_common.h"
+#include "kop_common.h"
 
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_arm64_strb(void) {}
@@ -25,18 +25,18 @@ BTF_KFUNCS_END(bpf_arm64_str_kfunc_ids)
 static __always_inline int decode_store_reg_payload(u64 payload, u8 *src_reg,
 						    u8 *base_reg, s16 *offset)
 {
-	payload = kinsn_payload_decode(payload);
+	payload = kop_payload_decode(payload);
 	if ((payload & 0xf) == ARM64_STR_FORM_REG) {
-		*src_reg = kinsn_payload_reg(payload, 4);
-		*base_reg = kinsn_payload_reg(payload, 8);
-		*offset = kinsn_payload_s16(payload, 12);
+		*src_reg = kop_payload_reg(payload, 4);
+		*base_reg = kop_payload_reg(payload, 8);
+		*offset = kop_payload_s16(payload, 12);
 
 		if (payload >> 28)
 			return -EINVAL;
 	} else {
-		*src_reg = kinsn_payload_reg(payload, 0);
-		*base_reg = kinsn_payload_reg(payload, 4);
-		*offset = kinsn_payload_s16(payload, 8);
+		*src_reg = kop_payload_reg(payload, 0);
+		*base_reg = kop_payload_reg(payload, 4);
+		*offset = kop_payload_s16(payload, 8);
 
 		if (payload >> 24)
 			return -EINVAL;
@@ -50,18 +50,18 @@ static __always_inline int decode_store_reg_payload(u64 payload, u8 *src_reg,
 static __always_inline int decode_store_imm_payload(u64 payload, u8 *base_reg,
 						    s16 *offset, u8 *imm)
 {
-	payload = kinsn_payload_decode(payload);
+	payload = kop_payload_decode(payload);
 	if ((payload & 0xf) == ARM64_STR_FORM_ZERO) {
-		*base_reg = kinsn_payload_reg(payload, 4);
-		*offset = kinsn_payload_s16(payload, 8);
-		*imm = kinsn_payload_u8(payload, 24);
+		*base_reg = kop_payload_reg(payload, 4);
+		*offset = kop_payload_s16(payload, 8);
+		*imm = kop_payload_u8(payload, 24);
 
 		if (payload >> 32)
 			return -EINVAL;
 	} else {
-		*base_reg = kinsn_payload_reg(payload, 0);
-		*offset = kinsn_payload_s16(payload, 4);
-		*imm = kinsn_payload_u8(payload, 20);
+		*base_reg = kop_payload_reg(payload, 0);
+		*offset = kop_payload_s16(payload, 4);
+		*imm = kop_payload_u8(payload, 20);
 
 		if (payload >> 28)
 			return -EINVAL;
@@ -90,7 +90,7 @@ static int instantiate_strb_zero_mem(u64 payload, struct bpf_insn *insn_buf);
 
 static int instantiate_strb(u64 payload, struct bpf_insn *insn_buf)
 {
-	if ((kinsn_payload_decode(payload) & 0xf) == ARM64_STR_FORM_ZERO)
+	if ((kop_payload_decode(payload) & 0xf) == ARM64_STR_FORM_ZERO)
 		return instantiate_strb_zero_mem(payload, insn_buf);
 	return instantiate_store_reg(payload, insn_buf, BPF_B);
 }
@@ -128,7 +128,7 @@ static int instantiate_strb_zero_mem(u64 payload, struct bpf_insn *insn_buf)
 
 static inline u32 a64_strb(u8 rt, u8 rn, s16 offset)
 {
-	if (kinsn_arm64_scaled_uoff_ok(offset, 0))
+	if (kop_arm64_scaled_uoff_ok(offset, 0))
 		return 0x39000000U | ((u32)((u16)offset) << 10) |
 		       ((u32)rn << 5) | (u32)rt;
 
@@ -138,7 +138,7 @@ static inline u32 a64_strb(u8 rt, u8 rn, s16 offset)
 
 static inline u32 a64_strh(u8 rt, u8 rn, s16 offset)
 {
-	if (kinsn_arm64_scaled_uoff_ok(offset, 1))
+	if (kop_arm64_scaled_uoff_ok(offset, 1))
 		return 0x79000000U | ((((u32)offset) >> 1) << 10) |
 		       ((u32)rn << 5) | (u32)rt;
 
@@ -148,7 +148,7 @@ static inline u32 a64_strh(u8 rt, u8 rn, s16 offset)
 
 static inline u32 a64_str_w(u8 rt, u8 rn, s16 offset)
 {
-	if (kinsn_arm64_scaled_uoff_ok(offset, 2))
+	if (kop_arm64_scaled_uoff_ok(offset, 2))
 		return 0xB9000000U | ((((u32)offset) >> 2) << 10) |
 		       ((u32)rn << 5) | (u32)rt;
 
@@ -158,7 +158,7 @@ static inline u32 a64_str_w(u8 rt, u8 rn, s16 offset)
 
 static inline u32 a64_str_x(u8 rt, u8 rn, s16 offset)
 {
-	if (kinsn_arm64_scaled_uoff_ok(offset, 3))
+	if (kop_arm64_scaled_uoff_ok(offset, 3))
 		return 0xF9000000U | ((((u32)offset) >> 3) << 10) |
 		       ((u32)rn << 5) | (u32)rt;
 
@@ -180,33 +180,33 @@ static int emit_store_reg_arm64(u32 *image, int *idx, bool emit, u64 payload,
 	if (err)
 		return err;
 
-	src_reg = kinsn_arm64_reg(src_reg);
-	base_reg = kinsn_arm64_reg(base_reg);
+	src_reg = kop_arm64_reg(src_reg);
+	base_reg = kop_arm64_reg(base_reg);
 	if (src_reg == 0xff || base_reg == 0xff)
 		return -EINVAL;
 
 	switch (size) {
 	case BPF_B:
-		if (!kinsn_arm64_scaled_uoff_ok(offset, 0) &&
-		    !kinsn_arm64_unscaled_soff_ok(offset))
+		if (!kop_arm64_scaled_uoff_ok(offset, 0) &&
+		    !kop_arm64_unscaled_soff_ok(offset))
 			return -EINVAL;
 		insn = a64_strb(src_reg, base_reg, offset);
 		break;
 	case BPF_H:
-		if (!kinsn_arm64_scaled_uoff_ok(offset, 1) &&
-		    !kinsn_arm64_unscaled_soff_ok(offset))
+		if (!kop_arm64_scaled_uoff_ok(offset, 1) &&
+		    !kop_arm64_unscaled_soff_ok(offset))
 			return -EINVAL;
 		insn = a64_strh(src_reg, base_reg, offset);
 		break;
 	case BPF_W:
-		if (!kinsn_arm64_scaled_uoff_ok(offset, 2) &&
-		    !kinsn_arm64_unscaled_soff_ok(offset))
+		if (!kop_arm64_scaled_uoff_ok(offset, 2) &&
+		    !kop_arm64_unscaled_soff_ok(offset))
 			return -EINVAL;
 		insn = a64_str_w(src_reg, base_reg, offset);
 		break;
 	case BPF_DW:
-		if (!kinsn_arm64_scaled_uoff_ok(offset, 3) &&
-		    !kinsn_arm64_unscaled_soff_ok(offset))
+		if (!kop_arm64_scaled_uoff_ok(offset, 3) &&
+		    !kop_arm64_unscaled_soff_ok(offset))
 			return -EINVAL;
 		insn = a64_str_x(src_reg, base_reg, offset);
 		break;
@@ -214,7 +214,7 @@ static int emit_store_reg_arm64(u32 *image, int *idx, bool emit, u64 payload,
 		return -EINVAL;
 	}
 
-	return kinsn_arm64_emit_one(image, idx, emit, insn);
+	return kop_arm64_emit_one(image, idx, emit, insn);
 }
 
 static int emit_strb_fixed_arm64(u32 *image, int *idx, bool emit, u64 payload,
@@ -226,7 +226,7 @@ static int emit_strb_arm64(u32 *image, int *idx, bool emit,
 {
 	(void)final_ip;
 
-	if ((kinsn_payload_decode(payload) & 0xf) == ARM64_STR_FORM_ZERO)
+	if ((kop_payload_decode(payload) & 0xf) == ARM64_STR_FORM_ZERO)
 		return emit_strb_fixed_arm64(image, idx, emit, payload, prog, 31);
 	return emit_store_reg_arm64(image, idx, emit, payload, prog, BPF_B);
 }
@@ -274,18 +274,18 @@ static int emit_strb_fixed_arm64(u32 *image, int *idx, bool emit, u64 payload,
 	if (imm)
 		return -EINVAL;
 
-	base_reg = kinsn_arm64_reg(base_reg);
+	base_reg = kop_arm64_reg(base_reg);
 	if (base_reg == 0xff)
 		return -EINVAL;
-	if (!kinsn_arm64_scaled_uoff_ok(offset, 0) &&
-	    !kinsn_arm64_unscaled_soff_ok(offset))
+	if (!kop_arm64_scaled_uoff_ok(offset, 0) &&
+	    !kop_arm64_unscaled_soff_ok(offset))
 		return -EINVAL;
 
 	insn = a64_strb(src_reg, base_reg, offset);
-	return kinsn_arm64_emit_one(image, idx, emit, insn);
+	return kop_arm64_emit_one(image, idx, emit, insn);
 }
 
-const struct bpf_kinsn bpf_arm64_strb_desc = {
+const struct bpf_kop bpf_arm64_strb_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -293,7 +293,7 @@ const struct bpf_kinsn bpf_arm64_strb_desc = {
 	.emit_arm64 = emit_strb_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_strh_desc = {
+const struct bpf_kop bpf_arm64_strh_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -301,7 +301,7 @@ const struct bpf_kinsn bpf_arm64_strh_desc = {
 	.emit_arm64 = emit_strh_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_str_w_desc = {
+const struct bpf_kop bpf_arm64_str_w_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -309,7 +309,7 @@ const struct bpf_kinsn bpf_arm64_str_w_desc = {
 	.emit_arm64 = emit_str_w_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_str_x_desc = {
+const struct bpf_kop bpf_arm64_str_x_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -317,12 +317,12 @@ const struct bpf_kinsn bpf_arm64_str_x_desc = {
 	.emit_arm64 = emit_str_x_arm64,
 };
 
-static const struct bpf_kinsn * const bpf_arm64_str_kinsn_descs[] = {
+static const struct bpf_kop * const bpf_arm64_str_kop_descs[] = {
 	&bpf_arm64_str_w_desc,
 	&bpf_arm64_str_x_desc,
 	&bpf_arm64_strb_desc,
 	&bpf_arm64_strh_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_arm64_str, "BpfReJIT arm64 kinsns: STR",
-		       bpf_arm64_str_kfunc_ids, bpf_arm64_str_kinsn_descs);
+DEFINE_KOP_V2_MODULE(bpf_arm64_str, "BpfReJIT arm64 koperation: STR",
+		       bpf_arm64_str_kfunc_ids, bpf_arm64_str_kop_descs);

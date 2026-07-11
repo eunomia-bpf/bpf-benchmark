@@ -130,7 +130,7 @@ daemon/src/commands_tests.rs:145:    assert_eq!(parsed["passes"][0]["pass"], "wi
 runner/libs/rejit.py:465:        pass_name_key = "pass_name" if "pass_name" in item else "pass"
 ```
 
-### 5. Pending `kinsn` lifecycle overlay and its self-referential metadata fields are write-only artifact scaffolding
+### 5. Pending `kop` lifecycle overlay and its self-referential metadata fields are write-only artifact scaffolding
 
 Evidence:
 - Global pending overlay and attach path:
@@ -151,7 +151,7 @@ Write-only fields confirmed in source:
 - `lifecycle_index`
 - `count`
 - `lifecycle_runs`
-- `daemon_kinsn_discovery`
+- `daemon_kop_discovery`
 - `abort_phase`
 
 Why this is dead/redundant:
@@ -160,20 +160,20 @@ Why this is dead/redundant:
 - This is extra global state plus artifact noise without an in-repo reader.
 
 Suggested deletion:
-- Delete `_PENDING_KINSN_METADATA`, `reset_pending_result_metadata()`, `attach_pending_result_metadata()`, `_append_pending_kinsn_metadata()`, and the unconsumed self-referential metadata fields above.
+- Delete `_PENDING_KOP_METADATA`, `reset_pending_result_metadata()`, `attach_pending_result_metadata()`, `_append_pending_kop_metadata()`, and the unconsumed self-referential metadata fields above.
 
 Caller / consumer grep:
 ```text
-$ rg -n --glob '!docs/tmp/**' --glob '!corpus/results/**' --glob '!e2e/results/**' --glob '!runner/build-*/**' --glob '!vendor/**' 'captured_at|lifecycle_runs|daemon_kinsn_discovery|abort_phase|\\.get\\("kinsn_modules"\\)|\\["kinsn_modules"\\]' runner e2e corpus tests
-runner/libs/case_common.py:40:    existing_kinsn = metadata_payload.get("kinsn_modules")
-runner/libs/case_common.py:42:    existing_runs = kinsn_payload.get("lifecycle_runs")
-runner/libs/case_common.py:45:    kinsn_payload["count"] = len(lifecycle_runs)
-runner/libs/case_common.py:46:    kinsn_payload["lifecycle_runs"] = lifecycle_runs
+$ rg -n --glob '!docs/tmp/**' --glob '!corpus/results/**' --glob '!e2e/results/**' --glob '!runner/build-*/**' --glob '!vendor/**' 'captured_at|lifecycle_runs|daemon_kop_discovery|abort_phase|\\.get\\("kop_modules"\\)|\\["kop_modules"\\]' runner e2e corpus tests
+runner/libs/case_common.py:40:    existing_kop = metadata_payload.get("kop_modules")
+runner/libs/case_common.py:42:    existing_runs = kop_payload.get("lifecycle_runs")
+runner/libs/case_common.py:45:    kop_payload["count"] = len(lifecycle_runs)
+runner/libs/case_common.py:46:    kop_payload["lifecycle_runs"] = lifecycle_runs
 runner/libs/case_common.py:193:    metadata.update(captured_at=datetime.now(timezone.utc).isoformat(), daemon_binary=relpath(binary),
-runner/libs/case_common.py:194:                    daemon_kinsn_discovery=_capture_daemon_kinsn_discovery(...),
+runner/libs/case_common.py:194:                    daemon_kop_discovery=_capture_daemon_kop_discovery(...),
 runner/libs/case_common.py:201:    metadata.update(captured_at=datetime.now(timezone.utc).isoformat(), status="pending")
-runner/libs/case_common.py:427:            kinsn_metadata.update(status="aborted", reason=abort.reason, abort_phase=phase)
-runner/libs/case_common.py:530:            artifacts["kinsn_modules"] = copy.deepcopy(kinsn_metadata)
+runner/libs/case_common.py:427:            kop_metadata.update(status="aborted", reason=abort.reason, abort_phase=phase)
+runner/libs/case_common.py:530:            artifacts["kop_modules"] = copy.deepcopy(kop_metadata)
 ```
 
 ## MEDIUM

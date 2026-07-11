@@ -25,7 +25,7 @@ Commit: none
 ## Fresh-Eyes Section 12
 
 - 1. Delete `program_linear_view`: yes. Deleted `ProgramLinearView` / `BlockBodyLinearView`; no remaining `rg` hits. Replacement BBProgram APIs are in `bbprogram.rs:280`, `bbprogram.rs:285`, `bbprogram.rs:474`, and call sites in `wide_mem.rs:512`, `skb_load_bytes.rs:128`.
-- 2. Delete old linear kinsn subprogram helper in `pass.rs`: yes. Removed old `kinsn_candidate_subprog_starts` / flat `kinsn_replacement_subprog_skip_reason`; the only remaining helper is BBProgram-native at `bbprogram.rs:348`.
+- 2. Delete old linear kop subprogram helper in `pass.rs`: yes. Removed old `kop_candidate_subprog_starts` / flat `kop_replacement_subprog_skip_reason`; the only remaining helper is BBProgram-native at `bbprogram.rs:348`.
 - 3. Replace `block_body_linear_view`: yes. `wide_mem` uses `sites_in_block` at `wide_mem.rs:512`; `skb_load_bytes` uses `sites_in_block` at `skb_load_bytes.rs:128`; no remaining view hits.
 - 4. Add BBProgram helpers and delete local copies: yes. Added slot/site helpers at `bbprogram.rs:429`, `bbprogram.rs:474`, `bbprogram.rs:534`, `bbprogram.rs:575`; ccmp block-remap helpers at `bbprogram.rs:435` and `bbprogram.rs:449`; pass-local copies deleted.
 - 5. CFG rebuild and site enumeration fail-fast: yes. Mutation paths propagate `rebuild_cfg_edges()?` at `bbprogram_api.rs:151`, `bbprogram_api.rs:179`, `bbprogram_api.rs:224`, `bbprogram_api.rs:409`, `bbprogram_api.rs:556`; CFG rebuild bails on invalid successors at `bbprogram.rs:617`; logical site enumeration validates blocks at `bbprogram.rs:696`.
@@ -48,7 +48,7 @@ Commit: none
 
 ## X2 Audit
 
-- rotate/extract/endian kinsn subprogram helper duplication: yes. All use BBProgram helper `kinsn_replacement_subprog_skip_reason` at `bbprogram.rs:348`; representative call sites: `rotate.rs:99`, `extract.rs:137`, `endian.rs:403`.
+- rotate/extract/endian kop subprogram helper duplication: yes. All use BBProgram helper `kop_replacement_subprog_skip_reason` at `bbprogram.rs:348`; representative call sites: `rotate.rs:99`, `extract.rs:137`, `endian.rs:403`.
 - extract/endian cross-block scan fail-fast and PC map removal: yes. Both use `site_at_current_pc` instead of `current_pc_sites`: `extract.rs:201`, `endian.rs:472`.
 - bulk_memory fallbacks: yes. Reset helper uses `should_reset_linear_state_at_block` at `bulk_memory.rs:299`; invalid widths bail via `width_class` / `width_bytes` at `bulk_memory.rs:685` and `bulk_memory.rs:775`; match routines propagate `Result` at `bulk_memory.rs:380` and `bulk_memory.rs:462`.
 - prefetch duplicate helpers / silent errors: yes. Insert selection and range checks return `Result`: `prefetch.rs:600`, `prefetch.rs:647`, `prefetch.rs:668`, `prefetch.rs:689`; reset helper uses BBProgram at `prefetch.rs:468`.

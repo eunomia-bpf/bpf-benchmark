@@ -7,7 +7,7 @@
 - guest 内核正常 panic
 - OOM / systemd-oomd
 - 之前那类 QEMU 8.2.2 TCG 用户态崩溃
-- repo 里的 REJIT/kinsn 代码直接“越过 VM”打坏宿主机
+- repo 里的 REJIT/kop 代码直接“越过 VM”打坏宿主机
 
 我对下面几点判断有较高把握：
 
@@ -44,7 +44,7 @@
 - `/var/crash/`
 - `/sys/fs/pstore`
 - 当前 boot 的 MCE 相关日志
-- `vendor/linux-framework` 里 REJIT / kinsn / `text_poke` / `bpf_prog_pack` 相关路径
+- `vendor/linux-framework` 里 REJIT / kop / `text_poke` / `bpf_prog_pack` 相关路径
 
 ## 1. VM 实际是怎么启动的
 
@@ -295,7 +295,7 @@ Mar 26 15:52:09 lab kernel: mce: [Hardware Error]: Machine check events logged
 - Mar 26 这次是**宿主机整机重启**
 - 两者不能混为同一根因
 
-## 5. 代码侧评估：REJIT/kinsn 本身没有直接触碰 KVM 控制面
+## 5. 代码侧评估：REJIT/kop 本身没有直接触碰 KVM 控制面
 
 我重点看了这些路径：
 
@@ -379,4 +379,4 @@ Mar 26 15:52:09 lab kernel: mce: [Hardware Error]: Machine check events logged
 
 ## 一句话结论
 
-本次 `2026-03-26 15:50` 左右的宿主机重启，现有证据最支持“高负载下触发的宿主机热/硬件/MCE 相关硬复位”；不支持 OOM，也没有证据表明 repo 里的 REJIT/kinsn 代码直接导致了 host 崩溃。
+本次 `2026-03-26 15:50` 左右的宿主机重启，现有证据最支持“高负载下触发的宿主机热/硬件/MCE 相关硬复位”；不支持 OOM，也没有证据表明 repo 里的 REJIT/kop 代码直接导致了 host 崩溃。

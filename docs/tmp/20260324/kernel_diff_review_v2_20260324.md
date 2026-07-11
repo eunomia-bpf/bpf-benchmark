@@ -44,13 +44,13 @@ Core kernel files (working tree vs master):
 
 | # | Severity | Issue | Status | Verification |
 |---|----------|-------|--------|-------------|
-| 1 | Critical | `validate_kinsn_proof_seq` JMP32\|JA uses `insn->off` instead of `insn->imm` | **FIXED** | Lines 3917-3919: `jmp_off = insn->off; if (class == BPF_JMP32 && op == BPF_JA) jmp_off = insn->imm;`. Also removed the misleading `BPF_OP(insn->code) != BPF_CALL` condition. |
-| 2 | Critical | `kinsn_tab` swap not symmetric with `kfunc_tab` | **FIXED** | Uncommitted change adds `swap(prog->aux->kinsn_tab, tmp->aux->kinsn_tab)` in `bpf_prog_rejit_swap()`. |
-| 3 | Major | `bpf_kinsn_sidecar_payload()` `dst_reg` not masked to 4 bits | **FIXED** | Uncommitted change: `(u64)(insn->dst_reg & 0xf)`. |
+| 1 | Critical | `validate_kop_proof_seq` JMP32\|JA uses `insn->off` instead of `insn->imm` | **FIXED** | Lines 3917-3919: `jmp_off = insn->off; if (class == BPF_JMP32 && op == BPF_JA) jmp_off = insn->imm;`. Also removed the misleading `BPF_OP(insn->code) != BPF_CALL` condition. |
+| 2 | Critical | `kop_tab` swap not symmetric with `kfunc_tab` | **FIXED** | Uncommitted change adds `swap(prog->aux->kop_tab, tmp->aux->kop_tab)` in `bpf_prog_rejit_swap()`. |
+| 3 | Major | `bpf_kop_sidecar_payload()` `dst_reg` not masked to 4 bits | **FIXED** | Uncommitted change: `(u64)(insn->dst_reg & 0xf)`. |
 | 4 | Major | `bpf_prog_rejit_swap()` silently drops xlated insns if new prog larger | **FIXED** | Uncommitted change: replaced conditional copy with unconditional copy, and added early `-E2BIG` return if `bpf_prog_size(tmp->len) > prog->pages * PAGE_SIZE` before the swap. |
 | 5 | Major | `find_call_site()` byte-by-byte 0xE8 scan could false-positive | **FIXED** | Uncommitted change: x86 path now uses `insn_init()`/`insn_get_length()` from `<asm/insn.h>` to decode instruction boundaries, stepping by actual instruction length instead of byte-by-byte. |
-| 6 | Major | x86 `emit_kinsn_desc_call()` buffer overflow: module writes to live JIT image before size check | **FIXED** | Uncommitted change: module now writes to a stack-local `scratch[BPF_MAX_INSN_SIZE]` buffer. After validation, `memcpy(prog, scratch, off)` copies to the actual image. Also added pre-check: `if (kinsn->max_emit_bytes > BPF_MAX_INSN_SIZE) return -E2BIG;`. |
-| 7 | Major | ARM64 const-cast `(struct bpf_prog *)ctx->prog` | **PARTIALLY FIXED** | `emit_kinsn_desc_call_arm64()` signature now takes `const struct bpf_prog *`. The `emit_arm64` callback also takes `const`. BUT the call site at line 1630 still has `(struct bpf_prog *)ctx->prog` -- the cast is now unnecessary and should be removed. |
+| 6 | Major | x86 `emit_kop_desc_call()` buffer overflow: module writes to live JIT image before size check | **FIXED** | Uncommitted change: module now writes to a stack-local `scratch[BPF_MAX_INSN_SIZE]` buffer. After validation, `memcpy(prog, scratch, off)` copies to the actual image. Also added pre-check: `if (kop->max_emit_bytes > BPF_MAX_INSN_SIZE) return -E2BIG;`. |
+| 7 | Major | ARM64 const-cast `(struct bpf_prog *)ctx->prog` | **PARTIALLY FIXED** | `emit_kop_desc_call_arm64()` signature now takes `const struct bpf_prog *`. The `emit_arm64` callback also takes `const`. BUT the call site at line 1630 still has `(struct bpf_prog *)ctx->prog` -- the cast is now unnecessary and should be removed. |
 
 ---
 
@@ -58,9 +58,9 @@ Core kernel files (working tree vs master):
 
 ### 3.1 Critical
 
-### [Critical] Broken control flow in `lower_kinsn_proof_regions()` (uncommitted working tree)
+### [Critical] Broken control flow in `lower_kop_proof_regions()` (uncommitted working tree)
 - **File**: `kernel/bpf/verifier.c`, lines 4113-4127
-- **Issue**: The function has a severe indentation/control-flow bug. After `verifier_remove_insns()` (line 4113), the code starting at line 4117 (`new_prog = bpf_patch_insn_data(...)`) is indented as if inside a block, but there is no opening brace. The closing brace at line 4125 corresponds to the `for` loop body, and `return 0;` at line 4127 causes the function to return after processing the **first** kinsn call, skipping all remaining ones.
+- **Issue**: The function has a severe indentation/control-flow bug. After `verifier_remove_insns()` (line 4113), the code starting at line 4117 (`new_prog = bpf_patch_insn_data(...)`) is indented as if inside a block, but there is no opening brace. The closing brace at line 4125 corresponds to the `for` loop body, and `return 0;` at line 4127 causes the function to return after processing the **first** kop call, skipping all remaining ones.
 
   Specifically:
   ```c
@@ -74,14 +74,14 @@ Core kernel files (working tree vs master):
               return -ENOMEM;
 
           env->prog = new_prog;
-          adjust_prior_kinsn_region_starts(env, region->start,
+          adjust_prior_kop_region_starts(env, region->start,
                                          cnt - 2);
       }    // closes the for loop
 
-      return 0;  // returns after first kinsn!
+      return 0;  // returns after first kop!
   ```
 
-  If the program has multiple kinsn calls, only the last one found (iterating backward) gets lowered. The rest are silently skipped.
+  If the program has multiple kop calls, only the last one found (iterating backward) gets lowered. The rest are silently skipped.
 
 - **Fix**: Remove the errant indentation. The `bpf_patch_insn_data` block should be at the same indentation as the `verifier_remove_insns` call. Remove the misplaced `}` and `return 0;`, and let the `for` loop continue. The `return 0;` should be after the `for` loop.
 - **Upstream acceptance risk**: High (correctness bug, would be caught immediately)
@@ -96,35 +96,35 @@ Core kernel files (working tree vs master):
           kvfree(env->explored_states);   // extra tab
           env->explored_states = NULL;    // extra tab
   ```
-  All subsequent code (the kinsn restore, `remove_fastcall_spills_fills`, etc.) has inconsistent indentation compared to the rest of the function. This would fail `checkpatch.pl --strict`.
+  All subsequent code (the kop restore, `remove_fastcall_spills_fills`, etc.) has inconsistent indentation compared to the rest of the function. This would fail `checkpatch.pl --strict`.
 - **Fix**: Remove the extra tab level after `skip_full_check:`.
 - **Upstream acceptance risk**: Medium (checkpatch failure, but not a correctness bug)
 
 ### [Major] `validate_ldimm64_layout()` debug scaffolding pollutes the verification path
 - **File**: `kernel/bpf/verifier.c`, lines 26767-26826 (uncommitted)
-- **Issue**: The working tree inserts `validate_ldimm64_layout()` calls after **every single verification pass** (restore_kinsn, remove_fastcall, check_max_stack_depth, optimize_bpf_loop, opt_hard_wire, opt_remove_dead_code, opt_remove_nops, sanitize_dead_code, convert_ctx_accesses, do_misc_fixups, opt_subreg_zext). This is ~12 additional full-program scans added to every verification, adding O(12*N) overhead where N is program length. This is clearly debug/development scaffolding, not production code.
+- **Issue**: The working tree inserts `validate_ldimm64_layout()` calls after **every single verification pass** (restore_kop, remove_fastcall, check_max_stack_depth, optimize_bpf_loop, opt_hard_wire, opt_remove_dead_code, opt_remove_nops, sanitize_dead_code, convert_ctx_accesses, do_misc_fixups, opt_subreg_zext). This is ~12 additional full-program scans added to every verification, adding O(12*N) overhead where N is program length. This is clearly debug/development scaffolding, not production code.
 - **Fix**: Remove all `validate_ldimm64_layout()` calls. If a specific pass has a known ldimm64 corruption bug, fix that pass directly. At most, add a single assert under `CONFIG_BPF_JIT_ALWAYS_ON` or `CONFIG_DEBUG_INFO_BTF` for debug builds.
 - **Upstream acceptance risk**: High (would never be accepted upstream, pure debug overhead)
 
-### [Major] `kinsn_regions` fixed array still in committed HEAD
+### [Major] `kop_regions` fixed array still in committed HEAD
 - **File**: `include/linux/bpf_verifier.h` (committed HEAD)
-- **Issue**: The committed HEAD has `struct bpf_kinsn_region kinsn_regions[MAX_KINSN_REGIONS]` (256 elements * 16 bytes = 4KB) embedded in `bpf_verifier_env`. The working tree fixes this with dynamic allocation (`struct bpf_kinsn_region *kinsn_regions` + `u32 kinsn_region_cap`), but this fix is **uncommitted**.
+- **Issue**: The committed HEAD has `struct bpf_kop_region kop_regions[MAX_KOP_REGIONS]` (256 elements * 16 bytes = 4KB) embedded in `bpf_verifier_env`. The working tree fixes this with dynamic allocation (`struct bpf_kop_region *kop_regions` + `u32 kop_region_cap`), but this fix is **uncommitted**.
 - **Fix**: Commit the dynamic allocation change.
 - **Upstream acceptance risk**: Medium (4KB isn't catastrophic since verifier_env is heap-allocated, but upstream reviewers would flag fixed-size arrays)
 
-### [Major] `kfunc_desc_tab` and `kfunc_btf_tab` dynamic allocation changes are mixed with kinsn feature
+### [Major] `kfunc_desc_tab` and `kfunc_btf_tab` dynamic allocation changes are mixed with kop feature
 - **File**: `kernel/bpf/verifier.c` (uncommitted)
-- **Issue**: The uncommitted working tree changes the existing `kfunc_desc_tab` and `kfunc_btf_tab` from fixed-size arrays (`descs[MAX_KFUNC_DESCS]`) to dynamically allocated arrays with `ensure_desc_capacity()`. This is a significant refactor of pre-existing infrastructure (not BpfReJIT-specific) that changes the memory allocation pattern for all BPF programs, even those without kinsn. This should be a **separate preparatory patch** that is reviewed and tested independently.
+- **Issue**: The uncommitted working tree changes the existing `kfunc_desc_tab` and `kfunc_btf_tab` from fixed-size arrays (`descs[MAX_KFUNC_DESCS]`) to dynamically allocated arrays with `ensure_desc_capacity()`. This is a significant refactor of pre-existing infrastructure (not BpfReJIT-specific) that changes the memory allocation pattern for all BPF programs, even those without kop. This should be a **separate preparatory patch** that is reviewed and tested independently.
 - **Fix**: Split into patch 0/N: "bpf: convert kfunc/kfunc_btf desc tables to dynamic allocation".
 - **Upstream acceptance risk**: Medium (mixing unrelated refactors with feature code is a common review objection)
 
-### [Major] `kallsyms_lookup_name()` for kinsn resolution is fragile
-- **File**: `kernel/bpf/verifier.c`, `fetch_kinsn_desc_meta()`, line ~3646
-- **Issue**: Uses `kallsyms_lookup_name(sym_name)` to resolve a BTF symbol name to a `struct bpf_kinsn *`. Multiple problems:
+### [Major] `kallsyms_lookup_name()` for kop resolution is fragile
+- **File**: `kernel/bpf/verifier.c`, `fetch_kop_desc_meta()`, line ~3646
+- **Issue**: Uses `kallsyms_lookup_name(sym_name)` to resolve a BTF symbol name to a `struct bpf_kop *`. Multiple problems:
   1. If two modules export symbols with the same name, the wrong one is resolved.
-  2. No validation that the returned address points to a valid `struct bpf_kinsn` beyond checking three fields are non-NULL.
+  2. No validation that the returned address points to a valid `struct bpf_kop` beyond checking three fields are non-NULL.
   3. `kallsyms_lookup_name` is discouraged for new uses in upstream (see commit `0bd476e6c671`).
-- **Fix**: Use a proper registration mechanism similar to `register_btf_kfunc_id_set()`, where kinsn modules register their descriptors at load time into a global table. The verifier then looks up by BTF type ID directly instead of doing symbol name resolution.
+- **Fix**: Use a proper registration mechanism similar to `register_btf_kfunc_id_set()`, where kop modules register their descriptors at load time into a global table. The verifier then looks up by BTF type ID directly instead of doing symbol name resolution.
 - **Upstream acceptance risk**: High (upstream BPF maintainers have repeatedly objected to `kallsyms_lookup_name` usage)
 
 ### [Major] `bpf_trampoline_refresh_prog()` uses wrong `bpf_arch_text_poke()` arguments for freplace
@@ -166,13 +166,13 @@ Core kernel files (working tree vs master):
 - **Fix**: Remove the include.
 - **Upstream acceptance risk**: Low
 
-### [Minor] `KF_KINSN (1 << 17)` in `btf.h` is dead code
+### [Minor] `KF_KOP (1 << 17)` in `btf.h` is dead code
 - **File**: `include/linux/btf.h`, line 82
-- **Issue**: `KF_KINSN` is defined but never checked or used anywhere in the codebase. The kinsn mechanism uses BTF_KIND_VAR resolution, not the kfunc flags path.
+- **Issue**: `KF_KOP` is defined but never checked or used anywhere in the codebase. The kop mechanism uses BTF_KIND_VAR resolution, not the kfunc flags path.
 - **Fix**: Remove if unused.
 - **Upstream acceptance risk**: Low (dead code is a common review complaint)
 
-### [Minor] `api_version` and `flags` in `struct bpf_kinsn` are unused
+### [Minor] `api_version` and `flags` in `struct bpf_kop` are unused
 - **File**: `include/linux/bpf.h`, line 971/974
 - **Issue**: These fields are defined in the struct but never read or written by kernel code. They waste 4 bytes per descriptor and suggest unimplemented features.
 - **Fix**: Remove or document planned use. If reserved for future, at minimum add a comment.
@@ -180,13 +180,13 @@ Core kernel files (working tree vs master):
 
 ### [Minor] ARM64 call site retains unnecessary cast
 - **File**: `arch/arm64/net/bpf_jit_comp.c`, line 1630
-- **Issue**: `(struct bpf_prog *)ctx->prog` cast is now unnecessary since `emit_kinsn_desc_call_arm64` accepts `const struct bpf_prog *`.
+- **Issue**: `(struct bpf_prog *)ctx->prog` cast is now unnecessary since `emit_kop_desc_call_arm64` accepts `const struct bpf_prog *`.
 - **Fix**: Change to `ctx->prog` directly.
 - **Upstream acceptance risk**: Low
 
-### [Minor] `BPF_PSEUDO_KINSN_SIDECAR=3` and `BPF_PSEUDO_KINSN_CALL=4` defined in confusing order
+### [Minor] `BPF_PSEUDO_KOP_SIDECAR=3` and `BPF_PSEUDO_KOP_CALL=4` defined in confusing order
 - **File**: `include/uapi/linux/bpf.h`, lines ~1387-1395
-- **Issue**: `BPF_PSEUDO_KINSN_CALL` (4) is defined before `BPF_PSEUDO_KINSN_SIDECAR` (3) in the source, violating numerical ordering convention.
+- **Issue**: `BPF_PSEUDO_KOP_CALL` (4) is defined before `BPF_PSEUDO_KOP_SIDECAR` (3) in the source, violating numerical ordering convention.
 - **Fix**: Reorder definitions to match numerical order (3 before 4).
 - **Upstream acceptance risk**: Low
 
@@ -196,22 +196,22 @@ Core kernel files (working tree vs master):
 - **Verdict**: Acceptable as-is since type is inherited from prog.
 - **Upstream acceptance risk**: Low
 
-### [Minor] `bpf_pseudo_kinsn_call()` is marked `__maybe_unused`
+### [Minor] `bpf_pseudo_kop_call()` is marked `__maybe_unused`
 - **File**: `kernel/bpf/verifier.c`, line 275
 - **Issue**: The function IS used (in `add_subprog_and_kfunc`, `do_check_insn`, `do_misc_fixups`, etc.). The `__maybe_unused` attribute is incorrect.
 - **Fix**: Remove `__maybe_unused`.
 - **Upstream acceptance risk**: Low
 
-### [Minor] `lower_kinsn_proof_regions()` and `restore_kinsn_proof_regions()` are `__maybe_unused`
+### [Minor] `lower_kop_proof_regions()` and `restore_kop_proof_regions()` are `__maybe_unused`
 - **File**: `kernel/bpf/verifier.c`
 - **Issue**: These functions ARE called from `bpf_check()`. The `__maybe_unused` suggests development scaffolding.
 - **Fix**: Remove `__maybe_unused`.
 - **Upstream acceptance risk**: Low
 
-### [Minor] `count_kinsn_calls()` does a full program scan that duplicates work
+### [Minor] `count_kop_calls()` does a full program scan that duplicates work
 - **File**: `kernel/bpf/verifier.c`, line ~3997
-- **Issue**: `alloc_kinsn_proof_regions()` calls `count_kinsn_calls()` which scans all instructions. This is called from `bpf_check()` after `add_subprog_and_kfunc()` which already iterated all instructions and found all kinsn calls. The count could be tracked during `add_kinsn_call()` instead.
-- **Fix**: Store the count in `env->kinsn_call_cnt` during `add_subprog_and_kfunc`.
+- **Issue**: `alloc_kop_proof_regions()` calls `count_kop_calls()` which scans all instructions. This is called from `bpf_check()` after `add_subprog_and_kfunc()` which already iterated all instructions and found all kop calls. The count could be tracked during `add_kop_call()` instead.
+- **Fix**: Store the count in `env->kop_call_cnt` during `add_subprog_and_kfunc`.
 - **Upstream acceptance risk**: Low
 
 ### [Minor] `orig_prog_insns` placement in `struct bpf_prog_info` may break ABI
@@ -257,19 +257,19 @@ Core kernel files (working tree vs master):
 1. **REJIT requires `CAP_BPF + CAP_SYS_ADMIN`** -- strongest privilege level, correct.
 2. **Full verifier re-verification** of new bytecode -- no bypass possible.
 3. **`rejit_mutex`** serializes concurrent REJIT on the same prog.
-4. **kinsn proof sequence validation** prevents arbitrary native code injection -- the verifier verifies the BPF equivalent, the JIT emits the native equivalent.
+4. **kop proof sequence validation** prevents arbitrary native code injection -- the verifier verifies the BPF equivalent, the JIT emits the native equivalent.
 5. **UAPI design** is backward-compatible (new fields appended, CHECK_ATTR used).
 6. **dst_reg masking** in sidecar payload now prevents field overlap (fixed).
-7. **Scratch buffer** for x86 kinsn emit prevents buffer overflow (fixed).
+7. **Scratch buffer** for x86 kop emit prevents buffer overflow (fixed).
 8. **Instruction-boundary scan** for struct_ops `find_call_site` prevents false positives (fixed).
 9. **`insn_cnt` bounded** by `BPF_COMPLEXITY_LIMIT_INSNS`, `fd_array_cnt` bounded by 64.
 10. **`copy_from_user` return value** checked correctly.
 
 ### Remaining Concerns
-1. **`kallsyms_lookup_name`** for kinsn resolution is fragile (symbol collisions, discouraged API).
+1. **`kallsyms_lookup_name`** for kop resolution is fragile (symbol collisions, discouraged API).
 2. **Trampoline freplace refresh** uses potentially wrong poke type (`BPF_MOD_JUMP` vs `BPF_MOD_CALL`).
 3. **TOCTOU in poke_target_phase** -- benign but undocumented.
-4. **kinsn module trust boundary**: `instantiate_insn` and `emit_x86`/`emit_arm64` callbacks run in kernel context with full access. A malicious module could emit arbitrary code. Trust model: module loading requires `CAP_SYS_MODULE`, so this is acceptable.
+4. **kop module trust boundary**: `instantiate_insn` and `emit_x86`/`emit_arm64` callbacks run in kernel context with full access. A malicious module could emit arbitrary code. Trust model: module loading requires `CAP_SYS_MODULE`, so this is acceptable.
 
 ### Integer Overflow Analysis
 - `insn_cnt * sizeof(struct bpf_insn)` via `bpf_prog_insn_size()`: `insn_cnt` is capped at `BPF_COMPLEXITY_LIMIT_INSNS` (1M). `sizeof(bpf_insn)` = 8. Product = 8MB, no overflow on 32/64-bit.
@@ -299,7 +299,7 @@ Core kernel files (working tree vs master):
 ### Verdict: **Not ready for upstream submission**
 
 ### Blocking Issues (must fix)
-1. **Critical**: `lower_kinsn_proof_regions()` control flow bug -- only processes first kinsn call.
+1. **Critical**: `lower_kop_proof_regions()` control flow bug -- only processes first kop call.
 2. **Major**: `validate_ldimm64_layout()` debug scaffolding must be removed.
 3. **Major**: `skip_full_check:` indentation would fail checkpatch.
 4. **Major**: `kallsyms_lookup_name` usage would be rejected by BPF maintainers.
@@ -308,18 +308,18 @@ Core kernel files (working tree vs master):
 7. **Major**: kfunc_desc_tab dynamic allocation refactor must be split to a separate patch.
 
 ### Non-blocking but Important
-1. Dead code: `KF_KINSN`, `api_version`, `flags`, `tnum.h` include.
+1. Dead code: `KF_KOP`, `api_version`, `flags`, `tnum.h` include.
 2. `__maybe_unused` on functions that are used.
 3. ARM64 unnecessary const-cast.
 4. `test_run.c` behavior change needs documentation.
-5. UAPI ordering of KINSN_SIDECAR/KINSN_CALL definitions.
+5. UAPI ordering of KOP_SIDECAR/KOP_CALL definitions.
 
 ### Positive Aspects
 1. The architecture (proof-sequence lowering, verifier modeling, scratch-buffer emit) is sound and well-designed.
 2. Permission model is correct and conservative (`CAP_BPF + CAP_SYS_ADMIN`).
 3. Error paths are thorough with proper cleanup.
 4. The REJIT swap with two-phase poke targeting is clever and correct.
-5. The kinsn_tab/kfunc_tab swap symmetry fix (from v1 review) is correct.
+5. The kop_tab/kfunc_tab swap symmetry fix (from v1 review) is correct.
 6. Dynamic allocation of desc tables (when committed) removes hard limits.
 7. Struct_ops instruction-boundary scan fix is correct.
 8. The `smp_wmb()` + `WRITE_ONCE()` pattern for bpf_func publication is correct.
@@ -363,23 +363,23 @@ Patch 5/8: bpf: REJIT support for struct_ops and XDP dispatcher
   - bpf_dispatcher_refresh_prog()
   - bpf_prog_refresh_xdp()
 
-Patch 6/8: bpf: add kinsn (kernel instruction) extension mechanism
-  - UAPI: BPF_PSEUDO_KINSN_CALL, BPF_PSEUDO_KINSN_SIDECAR
+Patch 6/8: bpf: add kop (kernel instruction) extension mechanism
+  - UAPI: BPF_PSEUDO_KOP_CALL, BPF_PSEUDO_KOP_SIDECAR
   - Verifier: proof sequence lowering/restoration
-  - kinsn_desc_tab, add_kinsn_call, find_kinsn_desc
-  - kinsn registration (replace kallsyms_lookup_name with proper API)
+  - kop_desc_tab, add_kop_call, find_kop_desc
+  - kop registration (replace kallsyms_lookup_name with proper API)
 
-Patch 7/8: bpf/x86: JIT emit support for kinsn descriptors
-  - emit_kinsn_desc_call() with scratch buffer
+Patch 7/8: bpf/x86: JIT emit support for kop descriptors
+  - emit_kop_desc_call() with scratch buffer
   - Sidecar skip in MOV_K handler
   - emit_movabs_imm64() refactor
 
-Patch 8/8: bpf/arm64: JIT emit support for kinsn descriptors
-  - emit_kinsn_desc_call_arm64()
+Patch 8/8: bpf/arm64: JIT emit support for kop descriptors
+  - emit_kop_desc_call_arm64()
   - Sidecar skip in build_insn()
 ```
 
-Each patch should be independently compilable and testable. The existing `get_original_poc` selftest covers Patch 1. Additional selftests should cover REJIT (Patch 2-5) and kinsn (Patch 6-8).
+Each patch should be independently compilable and testable. The existing `get_original_poc` selftest covers Patch 1. Additional selftests should cover REJIT (Patch 2-5) and kop (Patch 6-8).
 
 ---
 

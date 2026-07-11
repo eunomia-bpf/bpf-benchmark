@@ -2,7 +2,7 @@
 
 Date: 2026-06-26
 
-This document summarizes all optimization results from BPFOptBench, covering Source-level, bytecode ReJIT, and kinsn-backed kernel JIT optimizations.
+This document summarizes all optimization results from BPFOptBench, covering Source-level, bytecode ReJIT, and kop-backed kernel JIT optimizations.
 
 ---
 
@@ -31,14 +31,14 @@ This document summarizes all optimization results from BPFOptBench, covering Sou
 | **tracee/monitor** | **+0.86%** | Below target | phase3-prctl-fentry |
 | **otelcol-ebpf-profiler** | **-1.42% to +0%** | No positive signal | All attempts regressed or flat |
 
-### Kernel JIT / ReJIT Summary (Kinsn + Bytecode Passes)
+### Kernel JIT / ReJIT Summary (KOperation + Bytecode Passes)
 
 | Metric | Value | Source |
 |--------|-------|--------|
 | Micro benchmark geomean (all passes) | **1.054x** overall | vm_micro_authoritative_20260314 |
 | Micro applied-only geomean | **1.074x** (16 applied, 62/62 valid) | vm_micro_authoritative_20260314 |
-| Best kinsn corpus geomean | **0.938x** (6.2% improvement) | x86_kvm_corpus_20260603_175429_964295 |
-| Kinsn sites applied (single run) | 27,085 | June 3 breakthrough session |
+| Best kop corpus geomean | **0.938x** (6.2% improvement) | x86_kvm_corpus_20260603_175429_964295 |
+| KOperation sites applied (single run) | 27,085 | June 3 breakthrough session |
 
 ---
 
@@ -61,11 +61,11 @@ This document summarizes all optimization results from BPFOptBench, covering Sou
 | Phase 2 (stacked tuning) | 30 | 12 (40%) | 12 (40%) | 4 (13%) | 2 (7%) |
 | Phase 3 (deep tuning) | 32 | 14 (44%) | 17 (53%) | 0 | 1 (3%) |
 
-### ReJIT / Kinsn Optimizations
+### ReJIT / KOperation Optimizations
 
 | Pass Category | Typical Wins | Typical Losses | Notes |
 |---------------|--------------|----------------|-------|
-| kinsn (full) | 24/29 micro | 2/29 micro | 1.208x geomean on ARM64 |
+| kop (full) | 24/29 micro | 2/29 micro | 1.208x geomean on ARM64 |
 | rotate | High apply count | Rare regression | 222,547 sites across sessions |
 | cond_select | Dense conditional benchmarks | Predictable branches | 6,578 sites, policy-sensitive |
 | map_inline | Static maps | Dynamic maps (33% skip rate) | 3,918 applied, 1,941 skipped |
@@ -130,11 +130,11 @@ This document summarizes all optimization results from BPFOptBench, covering Sou
 | wide_mem | 1 | 1 | Limited visibility |
 | bounds_check_merge | 1 | 1 | Limited visibility |
 
-### Kernel JIT Layer (Kinsn Passes)
+### Kernel JIT Layer (KOperation Passes)
 
 | Pass Family | Sessions | Sites Applied | Typical Speedup |
 |-------------|----------|---------------|-----------------|
-| kinsn (combined) | 30 | 305,449 | 1.2x on select benchmarks |
+| kop (combined) | 30 | 305,449 | 1.2x on select benchmarks |
 | rotate | 40 | 222,547 | Up to 1.9x on rotate-heavy code |
 | cond_select | 13 | 6,578 | Policy-sensitive (-28% to +37%) |
 | extract | 6 | 48 | Modest improvements |
@@ -156,7 +156,7 @@ This document summarizes all optimization results from BPFOptBench, covering Sou
 | tracee/monitor | 460,865 bogo ops/s | 464,810 bogo ops/s | **+0.86%** | 15 |
 | otelcol-ebpf-profiler | 19.64B ops | 19.64B ops (flat) | **0%** | 15 |
 
-### ReJIT / Kinsn Results by App (from kinsn_eval_20260604)
+### ReJIT / KOperation Results by App (from kop_eval_20260604)
 
 | App | Geomean | Wins/Losses/Ties | Applied Sites |
 |-----|---------|------------------|---------------|
@@ -261,5 +261,5 @@ CV drops from 29.6% (no filter) to 17.7% with min_runs >= 100 filter. Without fi
 | Source (bcc) | +11.81% | Task-local-storage syscount | 2026-06-26 |
 | Source (tetragon) | +11.59% | Load-time no-selector config | 2026-06-26 |
 | Source (katran) | +11.53% | VIP flag branch layout | 2026-06-26 |
-| Kinsn (x86) | 0.938x geomean | Full kinsn policy | 2026-06-03 |
+| KOperation (x86) | 0.938x geomean | Full kop policy | 2026-06-03 |
 | Micro (applied) | 1.074x | 16 programs, all passes | 2026-03-14 |

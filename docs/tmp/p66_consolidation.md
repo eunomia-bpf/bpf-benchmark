@@ -31,7 +31,7 @@ Follow-up audit from the repo root showed `HEAD=f28b81b5` already ahead of `orig
 - Removed `elf_parser` and `test_utils` modules from `bpfopt/crates/bpfopt/src/lib.rs:8`.
 - Removed ELF-backed test helpers from `bpfopt/crates/bpfopt/src/insn.rs` and all remaining callers.
 - Removed `goblin` from `bpfopt/Cargo.toml`, `bpfopt/crates/bpfopt/Cargo.toml`, and `bpfopt/Cargo.lock`.
-- Replaced optimize-mode skip/fallback reporting with fail-fast side-input and kinsn validation in `bpfopt/crates/bpfopt/src/main.rs:630`, `:743`, `:757`, `:782`.
+- Replaced optimize-mode skip/fallback reporting with fail-fast side-input and kop validation in `bpfopt/crates/bpfopt/src/main.rs:630`, `:743`, `:757`, `:782`.
 - Updated CLI tests to assert fail-fast behavior and absence of `skipped`/`reason` report fields: `bpfopt/crates/bpfopt/tests/cli_pipeline.rs`.
 
 ## mock_maps Decision

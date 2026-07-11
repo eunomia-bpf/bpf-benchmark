@@ -27,15 +27,15 @@ Call counts are from the requested pre-change `bpfopt/crates/bpfopt/src` grep. `
 | `stx_mem` | 23 | 0 | `BpfInsn::new(BPF_STX | size | BPF_MEM, BpfInsn::make_regs(dst, src), off, 0)` |
 | `nop` | 22 | 0 | `BpfInsn::new(BPF_JMP | BPF_JA, 0, 0, 0)` |
 | `mov32_reg` | 11 | 0 | `BpfInsn::new(BPF_ALU | BPF_MOV | BPF_X, BpfInsn::make_regs(dst, src), 0, 0)` |
-| `kinsn_sidecar` | 3 | 0 | `BpfInsn::new(BPF_ALU64 | BPF_MOV | BPF_K, BpfInsn::make_regs((payload & 0xf) as u8, BPF_PSEUDO_KINSN_SIDECAR), ((payload >> 4) & 0xffffu64) as u16 as i16, ((payload >> 20) & 0xffff_ffffu64) as u32 as i32)` |
-| `call_kinsn_with_off` | 3 | 0 | `BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, BPF_PSEUDO_KINSN_CALL), off, btf_id)` |
+| `kop_sidecar` | 3 | 0 | `BpfInsn::new(BPF_ALU64 | BPF_MOV | BPF_K, BpfInsn::make_regs((payload & 0xf) as u8, BPF_PSEUDO_KOP_SIDECAR), ((payload >> 4) & 0xffffu64) as u16 as i16, ((payload >> 20) & 0xffff_ffffu64) as u32 as i32)` |
+| `call_kop_with_off` | 3 | 0 | `BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, BPF_PSEUDO_KOP_CALL), off, btf_id)` |
 | `jump_reg` | 2 | 0 | `BpfInsn::new(BPF_JMP | op | BPF_X, BpfInsn::make_regs(dst, src), off, 0)` |
 | `jump_imm` | 2 | 0 | `BpfInsn::new(BPF_JMP | op | BPF_K, BpfInsn::make_regs(dst, 0), off, imm)` |
 | `call_kfunc` | 2 | 0 | `BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, BPF_PSEUDO_KFUNC_CALL), 0, btf_id)` |
 | `call_kfunc_with_off` | 0 | 0 | `BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, BPF_PSEUDO_KFUNC_CALL), off, btf_id)` |
 
 Post-cleanup checks:
-- `rg 'BpfInsn::(mov64_reg|mov32_reg|mov64_imm|mov32_imm|helper_call|ja|jump_imm|jump_reg|exit|ldx_mem|stx_mem|st_mem|alu64_imm|alu64_reg|nop|call_kfunc|call_kfunc_with_off|call_kinsn_with_off|kinsn_sidecar)\(' bpfopt/crates/bpfopt` returns no matches.
+- `rg 'BpfInsn::(mov64_reg|mov32_reg|mov64_imm|mov32_imm|helper_call|ja|jump_imm|jump_reg|exit|ldx_mem|stx_mem|st_mem|alu64_imm|alu64_reg|nop|call_kfunc|call_kfunc_with_off|call_kop_with_off|kop_sidecar)\(' bpfopt/crates/bpfopt` returns no matches.
 
 ### Bulk-memory BTF IDs
 
@@ -44,7 +44,7 @@ Deleted:
 - `const MEMSET_BTF_ID: i32 = 4102;`
 
 Replacement:
-- `ctx_with_bulk_kfuncs()` now creates local non-negative IDs, injects them into `ctx.kinsn_registry.memcpy_bulk_btf_id` and `ctx.kinsn_registry.memset_bulk_btf_id`, and callers read the IDs back through `memcpy_btf_id()` / `memset_btf_id()`.
+- `ctx_with_bulk_kfuncs()` now creates local non-negative IDs, injects them into `ctx.kop_registry.memcpy_bulk_btf_id` and `ctx.kop_registry.memset_bulk_btf_id`, and callers read the IDs back through `memcpy_btf_id()` / `memset_btf_id()`.
 - Remaining `4101` / `4102` occurrences are local setup variables only.
 
 Post-cleanup check:

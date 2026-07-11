@@ -23,7 +23,7 @@ Description:
 
 `run_optimize()` only calls `validate_required_side_inputs()` in the `else` branch for explicit `--passes`. When `--passes` is omitted, it selects `DEFAULT_PASS_ORDER` and immediately runs all 12 passes without validating the side-inputs required by that default order.
 
-That conflicts with v3's pipeline contract and the review requirement that missing required side-inputs exit 1 with a clear `--xxx required` stderr. The default order includes `map-inline`, `const-prop`, kinsn passes, and `branch-flip`, so a bare `bpfopt optimize` currently succeeds even though it has no `--map-values`, `--map-ids`, `--verifier-states`, `--target`/`--kinsns`, or `--profile`.
+That conflicts with v3's pipeline contract and the review requirement that missing required side-inputs exit 1 with a clear `--xxx required` stderr. The default order includes `map-inline`, `const-prop`, kop passes, and `branch-flip`, so a bare `bpfopt optimize` currently succeeds even though it has no `--map-values`, `--map-ids`, `--verifier-states`, `--target`/`--koperation`, or `--profile`.
 
 Reproduction:
 
@@ -41,7 +41,7 @@ Fix suggestion:
 
 Canonicalize the selected pass list first, then call `validate_required_side_inputs(common, &pass_names)` for both default and explicit `--passes` before reading bytecode or running any pass. Update the default optimize integration test to either provide all required side-input files or assert the expected missing-side-input error. If the intended product behavior is "default optimize only runs side-input-free passes when side inputs are absent", document that as a v3 change first; it is not what the current design says.
 
-### CRITICAL: `--target`/`--kinsns` presence is accepted even when the selected kinsn is missing
+### CRITICAL: `--target`/`--koperation` presence is accepted even when the selected kop is missing
 
 Location:
 - `bpfopt/crates/bpfopt/src/main.rs:547`
@@ -50,14 +50,14 @@ Location:
 
 Description:
 
-For kinsn-backed passes, validation checks only whether `--target` exists or `--kinsns` is non-empty. It does not verify that the selected pass's required kinsn is present in the resulting `KinsnRegistry`.
+For kop-backed passes, validation checks only whether `--target` exists or `--koperation` is non-empty. It does not verify that the selected pass's required kop is present in the resulting `KopRegistry`.
 
-As a result, a malformed or incomplete `target.json` with an empty `kinsns` object is accepted. The pass then returns `PassResult::skipped(...)`, the CLI exits 0, and the original bytecode is passed through. The review requirement explicitly calls out: "kinsns missing -> kinsn-required pass reports error".
+As a result, a malformed or incomplete `target.json` with an empty `koperation` object is accepted. The pass then returns `PassResult::skipped(...)`, the CLI exits 0, and the original bytecode is passed through. The review requirement explicitly calls out: "koperation missing -> kop-required pass reports error".
 
 Reproduction:
 
 ```text
-target.json = {"arch":"x86_64","features":["cmov"],"kinsns":{}}
+target.json = {"arch":"x86_64","features":["cmov"],"koperation":{}}
 
 bpfopt rotate --target target.json < minimal.bin
 status=0
@@ -76,7 +76,7 @@ stderr=
 
 Fix suggestion:
 
-After `build_pass_context()` constructs the final registry from `--target` plus `--kinsns`, validate each selected pass against the actual required target names and BTF IDs. For example, `rotate` should require `bpf_rotate64`, `cond-select` should require `bpf_select64`, `extract` should require `bpf_extract64`, and `bulk-memory` should require the bulk-memory kinsns defined by the target schema. Return exit 1 with messages like `rotate requires --target kinsn bpf_rotate64` instead of silently reporting an unchanged pass.
+After `build_pass_context()` constructs the final registry from `--target` plus `--koperation`, validate each selected pass against the actual required target names and BTF IDs. For example, `rotate` should require `bpf_rotate64`, `cond-select` should require `bpf_select64`, `extract` should require `bpf_extract64`, and `bulk-memory` should require the bulk-memory koperation defined by the target schema. Return exit 1 with messages like `rotate requires --target kop bpf_rotate64` instead of silently reporting an unchanged pass.
 
 ### HIGH: `optimize --passes` is not strictly equivalent to chaining the listed pass commands
 
@@ -121,7 +121,7 @@ They do not cover:
 - successful `--verifier-states` file parsing by the CLI
 - successful `--map-values` + `--map-ids` file parsing
 - `optimize --passes A,B,C` preserving the requested order
-- `--target` present but missing the pass-required kinsn
+- `--target` present but missing the pass-required kop
 - default `optimize` missing required side-inputs
 
 The tests use inline bytecode and do not depend on `tests/fixtures`; the existing `tests/fixtures` symlink points to `../../../../daemon/tests/fixtures` but is not used by this test file.
@@ -157,7 +157,7 @@ Install a short-lived custom panic hook around CLI execution or around pass exec
 - Single-pass report JSON uses the v3 field names: `pass`, `changed`, `sites_applied`, `insn_count_before`, `insn_count_after`, `insn_delta`.
 - Optimize report uses `{ "passes": [...] }`, which is one of the accepted shapes in the review brief.
 - `--verifier-states` deserializes JSON directly into `VerifierInsn`-compatible state and does not parse raw verifier logs.
-- `target.json` supports `arch`, `features`, and `kinsns` with v3 aliases such as `bpf_bulk_memcpy`.
+- `target.json` supports `arch`, `features`, and `koperation` with v3 aliases such as `bpf_bulk_memcpy`.
 - `lib.rs` and `bpfopt/crates/bpfopt/Cargo.toml` are unchanged in `b0da364e`; the commit does not widen the library module surface or add CLI crate cross-dependencies.
 - `bpfopt` depends on `kernel-sys`, but this path is used for constants/data types in the CLI, not direct BPF syscalls.
 
@@ -177,8 +177,8 @@ target/release/bpfopt optimize --report opt-report.json < minimal.bin
 target/release/bpfopt optimize --passes wide-mem,dce --report custom-report.json < minimal.bin
 target/release/bpfopt wide-mem < invalid-9-byte.bin
 target/release/bpfopt const-prop < minimal.bin
-target/release/bpfopt rotate --target target-with-empty-kinsns.json < minimal.bin
-target/release/bpfopt optimize --passes rotate --target target-with-empty-kinsns.json < minimal.bin
+target/release/bpfopt rotate --target target-with-empty-koperation.json < minimal.bin
+target/release/bpfopt optimize --passes rotate --target target-with-empty-koperation.json < minimal.bin
 target/release/bpfopt rotate --target malformed-target.json < minimal.bin
 ```
 
@@ -203,8 +203,8 @@ optimize --passes wide-mem,dce: status 0, report order wide_mem,dce
 invalid 9-byte input: status 1, stdout empty, stderr contains multiple of 8
 const-prop without --verifier-states: status 1, stdout empty, stderr contains --verifier-states
 rotate with malformed target JSON: status 1, stdout empty, friendly parse context
-rotate with empty target kinsns: status 0, pass-through bytecode; this is a finding
-optimize --passes rotate with empty target kinsns: status 0, pass-through bytecode; this is a finding
+rotate with empty target koperation: status 0, pass-through bytecode; this is a finding
+optimize --passes rotate with empty target koperation: status 0, pass-through bytecode; this is a finding
 ```
 
 Release startup/per-pass timing on this machine:
@@ -223,5 +223,5 @@ Not ready as the CLI baseline for #41 Phase 1 minimal pipeline validation. The r
 
 #39 (`bpfget`) and #40 (`bpfrejit`) can proceed as parallel implementation work if needed, but #41 should not consume this CLI as the integration baseline until:
 - default `optimize` validates required side-inputs or the v3 semantics are explicitly changed;
-- kinsn-required passes error when the selected target does not provide the required kinsn;
+- kop-required passes error when the selected target does not provide the required kop;
 - tests cover those negative paths and at least one positive side-input file path.

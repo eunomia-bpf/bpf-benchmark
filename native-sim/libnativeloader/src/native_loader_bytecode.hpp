@@ -139,7 +139,7 @@ std::vector<SourceHelperCall> collect_source_helper_calls(
         if (code == (BPF_JMP | BPF_CALL)) {
             if (in.src_reg == BPF_PSEUDO_CALL ||
                 in.src_reg == BPF_PSEUDO_KFUNC_CALL ||
-                in.src_reg == BPF_PSEUDO_KINSN_CALL) {
+                in.src_reg == BPF_PSEUDO_KOP_CALL) {
                 for (int r = 0; r <= 5; r++) reg_map[r] = SourceMapBinding{};
                 continue;
             }

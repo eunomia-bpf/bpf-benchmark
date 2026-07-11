@@ -225,7 +225,7 @@ Supported runtime corpus, ranked by strict unique candidate count.
 
 Baseline counter source:
 
-`corpus/results/x86_kvm_p89_kinsn_corpus_20260430_131403_981524/details/result.json`
+`corpus/results/x86_kvm_p89_kop_corpus_20260430_131403_981524/details/result.json`
 
 The result status is `error`, so these counters are context only. Counts are
 baseline `run_cnt_delta` summed by runner.

@@ -275,7 +275,7 @@ procedure decide(scan_result, cfg_info, policy):
 
 ---
 
-## 3. 不需要 kinsn 的变换（纯 BPF 指令重写）
+## 3. 不需要 kop 的变换（纯 BPF 指令重写）
 
 ### 3.1 WIDE_MEM: byte load+shift+or → BPF wide load
 
@@ -406,7 +406,7 @@ BRANCH_FLIP 是 **policy-sensitive** 变换：只有当原始 not-taken path 实
 
 ---
 
-## 4. 需要 kinsn 的变换（注入 kfunc call）
+## 4. 需要 kop 的变换（注入 kfunc call）
 
 ### 4.1 BPF kfunc call 的精确编码
 
@@ -563,7 +563,7 @@ insn[6]: MOV64_REG  r_dst, R0          // r_dst = result
 { .code = 0xbf, .dst_reg = r_dst, .src_reg = 0,    .off = 0, .imm = 0 }
 ```
 
-**注意**：cond_select 替换后指令数通常增加（4→7 或 3→7），是 **N < M** 的情况。但 kinsn（KF_INLINE_EMIT）使 JIT 将这个 kfunc call 发射为单条 CMOV native 指令，所以 bytecode 膨胀不影响最终 native code size。
+**注意**：cond_select 替换后指令数通常增加（4→7 或 3→7），是 **N < M** 的情况。但 kop（KF_INLINE_EMIT）使 JIT 将这个 kfunc call 发射为单条 CMOV native 指令，所以 bytecode 膨胀不影响最终 native code size。
 
 ### 4.4 BITFIELD_EXTRACT: shift+and → `bpf_extract64()` kfunc call
 
@@ -1142,5 +1142,5 @@ Bindings: dst_reg=R7, src_reg=R7, amount=13
 | Const propagation | 利用 frozen map 值做常量折叠 |
 | Subprog inline | 在 bytecode 层展开 BPF-to-BPF call |
 | Security insertions | bounds check、lfence 注入 |
-| ENDIAN_FUSION | load+bswap → MOVBE kinsn |
-| ADDR_CALC | mov+shift+add → LEA kinsn |
+| ENDIAN_FUSION | load+bswap → MOVBE kop |
+| ADDR_CALC | mov+shift+add → LEA kop |

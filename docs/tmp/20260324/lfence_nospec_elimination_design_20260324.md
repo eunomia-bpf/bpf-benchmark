@@ -296,7 +296,7 @@ REJIT 路径里：
 1. 用 def-use 分析找 stack spill/fill 对。
 2. 标记以下高价值候选：
    - helper 前后的单次 spill/fill
-   - kinsn / direct load 替代 helper 后变 dead 的 spill
+   - kop / direct load 替代 helper 后变 dead 的 spill
    - 为了 verifier 保活而引入、但可在后续 block 重算的 scalar spill
 3. 尝试寄存器保活或局部重算。
 4. 只有当 offending write 真正消失时才继续。

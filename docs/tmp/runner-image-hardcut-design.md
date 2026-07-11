@@ -23,7 +23,7 @@ Status: implemented
   whole host repo over that path.
 - Export host-coupled kernel/module artifacts with
   `docker build --target runner-host-artifacts --output`.
-- Bake target-arch kinsn `.ko` files into the runtime image instead of
+- Bake target-arch kop `.ko` files into the runtime image instead of
   transferring `module/<arch>` to the target.
 - Execute AWS host kernel installation through the loaded runtime image as a
   privileged Docker container. The container may mutate the target host, but it
@@ -45,7 +45,7 @@ host make
        -> COPY stable benchmark data
        -> COPY and build the daemon artifact
        -> COPY runtime Python scripts and config last
-       -> COPY full kernel/module sources and build target-arch kinsn .ko
+       -> COPY full kernel/module sources and build target-arch kop .ko
        -> delete Go toolchain files and build-only intermediates
        -> docker save .cache/container-images/<arch>-runner-runtime.image.tar
   -> docker run bpf-benchmark/runner-runtime:<arch> for benchmark suites
@@ -93,7 +93,7 @@ Host-exported roots:
 .cache/repo-artifacts/<arch>/kernel-modules/...
 ```
 
-In-image kinsn root:
+In-image kop root:
 
 ```text
 <image-workspace>/module/<arch>/*.ko
@@ -112,7 +112,7 @@ In-image kinsn root:
 - Changed remote transfer roots to image tar only for suite execution.
 - Moved AWS target kernel installation into a privileged runtime-image
   container, and removed the separate suite-time image load.
-- Changed kinsn module handling to kernel `MO=` output inside the runtime image
+- Changed kop module handling to kernel `MO=` output inside the runtime image
   instead of source staging or target transfer.
 - Unified `x86-kvm` and `aws-x86` onto one x86 kernel build/config path.
 - Split runtime Dockerfile artifact builds into native repo, workload-tool,
@@ -138,7 +138,7 @@ In-image kinsn root:
   inside the image-side kernel recipe; it is not an artifact transport path.
 - AWS remote result collection uses tar-over-SSH. No directory-sync tool is
   required for build staging or result collection.
-- AWS setup/suite staging sends the runtime image tar only; kinsn modules are
+- AWS setup/suite staging sends the runtime image tar only; kop modules are
   already present in the image.
 - The base image is Ubuntu 24.04 to match the host family. Compiler defaults are
   `/usr/bin/gcc` and `/usr/bin/g++`, LLVM defaults to

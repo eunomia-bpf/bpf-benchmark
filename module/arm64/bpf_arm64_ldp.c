@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT arm64 kinsns: LDP/STP.
+ * BpfReJIT arm64 koperation: LDP/STP.
  */
 
-#include "kinsn_common.h"
+#include "kop_common.h"
 
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_arm64_ldp_x(void) {}
@@ -46,12 +46,12 @@ static __always_inline int decode_pair_payload(u64 payload, u8 *lane0_reg,
 					       u8 *lane1_reg, u8 *base_reg,
 					       s16 *offset)
 {
-	*lane0_reg = kinsn_payload_reg(payload, 0);
-	*lane1_reg = kinsn_payload_reg(payload, 4);
-	*base_reg = kinsn_payload_reg(payload, 8);
-	*offset = kinsn_payload_s16(payload, 12);
+	*lane0_reg = kop_payload_reg(payload, 0);
+	*lane1_reg = kop_payload_reg(payload, 4);
+	*base_reg = kop_payload_reg(payload, 8);
+	*offset = kop_payload_s16(payload, 12);
 
-	if (kinsn_payload_reg(payload, 28))
+	if (kop_payload_reg(payload, 28))
 		return -EINVAL;
 	if (*lane0_reg > BPF_REG_10 || *lane1_reg > BPF_REG_10 ||
 	    *base_reg > BPF_REG_10)
@@ -139,14 +139,14 @@ static int emit_ldp_arm64(u32 *image, int *idx, bool emit,
 	if (err)
 		return err;
 
-	dst_lo_reg = kinsn_arm64_reg(dst_lo_reg);
-	dst_hi_reg = kinsn_arm64_reg(dst_hi_reg);
-	base_reg = kinsn_arm64_reg(base_reg);
+	dst_lo_reg = kop_arm64_reg(dst_lo_reg);
+	dst_hi_reg = kop_arm64_reg(dst_hi_reg);
+	base_reg = kop_arm64_reg(base_reg);
 	if (dst_lo_reg == 0xff || dst_hi_reg == 0xff || base_reg == 0xff)
 		return -EINVAL;
 
 	insn = a64_ldp_x(dst_lo_reg, dst_hi_reg, base_reg, offset);
-	return kinsn_arm64_emit_one(image, idx, emit, insn);
+	return kop_arm64_emit_one(image, idx, emit, insn);
 }
 
 static int emit_stp_arm64(u32 *image, int *idx, bool emit,
@@ -166,17 +166,17 @@ static int emit_stp_arm64(u32 *image, int *idx, bool emit,
 	if (err)
 		return err;
 
-	src_lo_reg = kinsn_arm64_reg(src_lo_reg);
-	src_hi_reg = kinsn_arm64_reg(src_hi_reg);
-	base_reg = kinsn_arm64_reg(base_reg);
+	src_lo_reg = kop_arm64_reg(src_lo_reg);
+	src_hi_reg = kop_arm64_reg(src_hi_reg);
+	base_reg = kop_arm64_reg(base_reg);
 	if (src_lo_reg == 0xff || src_hi_reg == 0xff || base_reg == 0xff)
 		return -EINVAL;
 
 	insn = a64_stp_x(src_lo_reg, src_hi_reg, base_reg, offset);
-	return kinsn_arm64_emit_one(image, idx, emit, insn);
+	return kop_arm64_emit_one(image, idx, emit, insn);
 }
 
-const struct bpf_kinsn bpf_arm64_ldp_x_desc = {
+const struct bpf_kop bpf_arm64_ldp_x_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 2,
 	.max_emit_bytes = 4,
@@ -184,7 +184,7 @@ const struct bpf_kinsn bpf_arm64_ldp_x_desc = {
 	.emit_arm64 = emit_ldp_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_stp_x_desc = {
+const struct bpf_kop bpf_arm64_stp_x_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 2,
 	.max_emit_bytes = 4,
@@ -192,10 +192,10 @@ const struct bpf_kinsn bpf_arm64_stp_x_desc = {
 	.emit_arm64 = emit_stp_arm64,
 };
 
-static const struct bpf_kinsn * const bpf_arm64_ldp_kinsn_descs[] = {
+static const struct bpf_kop * const bpf_arm64_ldp_kop_descs[] = {
 	&bpf_arm64_ldp_x_desc,
 	&bpf_arm64_stp_x_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_arm64_ldp, "BpfReJIT arm64 kinsns: LDP/STP",
-		       bpf_arm64_ldp_kfunc_ids, bpf_arm64_ldp_kinsn_descs);
+DEFINE_KOP_V2_MODULE(bpf_arm64_ldp, "BpfReJIT arm64 koperation: LDP/STP",
+		       bpf_arm64_ldp_kfunc_ids, bpf_arm64_ldp_kop_descs);

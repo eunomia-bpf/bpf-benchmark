@@ -91,8 +91,8 @@ Call counts are from `rg 'BpfInsn::<name>(' bpfopt/crates/bpfopt/src daemon/src`
 | `nop` | 19 | yes: `BPF_JMP|BPF_JA, off=0` | about +70 LOC |
 | `call_kfunc` | 2 | yes: `BPF_JMP|BPF_CALL`, src `BPF_PSEUDO_KFUNC_CALL` | about +5 LOC |
 | `call_kfunc_with_off` | 0 external, 1 internal | yes | delete or inline into the two `call_kfunc` users |
-| `call_kinsn_with_off` | 3 | yes: src `BPF_PSEUDO_KINSN_CALL` | about +10 LOC |
-| `kinsn_sidecar` | 3 | yes, but payload field packing is project-specific | about +20 LOC |
+| `call_kop_with_off` | 3 | yes: src `BPF_PSEUDO_KOP_CALL` | about +10 LOC |
+| `kop_sidecar` | 3 | yes, but payload field packing is project-specific | about +20 LOC |
 | `helper_call` **#268** | 97 | yes: `BPF_JMP|BPF_CALL`, src 0 | about +380 LOC |
 
 If the team accepts `BpfInsn::new(...)` as the only raw gateway, deleting semantic constructors would likely reduce about 70-90 LOC with small call-site churn. If "direct libbpf" means raw `libbpf_sys::bpf_insn` at every call site, LOC explodes by roughly 5k+ lines and is not a code-size improvement. The cleaner compromise is: keep only raw ABI conversion/accessors, delete semantic constructors, and use `libbpf_sys::*` constants directly at construction sites.
@@ -112,7 +112,7 @@ No other `BTF_ID` numeric constants or `4101/4102` hits were found in `bpfopt/cr
 
 Why this violates the rule: the tests encode fake BTF IDs as global constants, then thread them through expected emissions and assertions at lines 81, 102, 310-311, 369, 483-484, 508, 518.
 
-Replacement: remove the file-level `MEMCPY_BTF_ID`/`MEMSET_BTF_ID`; make expected builders and `bulk_call_count` assertions read `ctx.kinsn_registry.memcpy_bulk_btf_id` / `ctx.kinsn_registry.memset_bulk_btf_id` from the same `PassContext` passed into `BulkMemoryPass`. A fixture can return `(ctx, memcpy_id, memset_id)` if the tests need local names, but the IDs should be registry-provided, not hardcoded global BTF constants.
+Replacement: remove the file-level `MEMCPY_BTF_ID`/`MEMSET_BTF_ID`; make expected builders and `bulk_call_count` assertions read `ctx.kop_registry.memcpy_bulk_btf_id` / `ctx.kop_registry.memset_bulk_btf_id` from the same `PassContext` passed into `BulkMemoryPass`. A fixture can return `(ctx, memcpy_id, memset_id)` if the tests need local names, but the IDs should be registry-provided, not hardcoded global BTF constants.
 
 ## Same-Name Const Alias Audit
 
@@ -215,11 +215,11 @@ P1 migration candidates:
 
 | Priority | Pass | Reason |
 |---|---|---|
-| P1 | `bulk_memory` | emits kinsn replacement ranges and already uses shared branch/BTF utilities; high LOC payoff |
-| P1 | `extract` | simple kinsn replacement pattern; likely fits replace-range |
-| P1 | `endian` | similar replace-range structure with kinsn metadata remap |
+| P1 | `bulk_memory` | emits kop replacement ranges and already uses shared branch/BTF utilities; high LOC payoff |
+| P1 | `extract` | simple kop replacement pattern; likely fits replace-range |
+| P1 | `endian` | similar replace-range structure with kop metadata remap |
 | P1 | `cond_select` | structured replacement plus internal branches, but only after internal branch API has a real caller |
-| P2 | `rotate` / `ccmp` | smaller kinsn passes; migrate after API cleanup |
+| P2 | `rotate` / `ccmp` | smaller kop passes; migrate after API cleanup |
 | P2 | `prefetch` | more side-input/profile handling; useful but not first |
 | P2/P3 | `map_inline` | complex map/value/control-flow rewrite; leave until plan API is proven |
 
@@ -248,7 +248,7 @@ Delete recommendation by Unit Test Quality: **delete no test function from this 
 
 ### P0
 
-1. `bpfopt/crates/bpfopt/src/passes/bulk_memory_tests.rs:8-9` hardcodes fake BTF IDs `4101/4102`. Remove globals and use `ctx.kinsn_registry.*_btf_id` throughout expected emission/assertions.
+1. `bpfopt/crates/bpfopt/src/passes/bulk_memory_tests.rs:8-9` hardcodes fake BTF IDs `4101/4102`. Remove globals and use `ctx.kop_registry.*_btf_id` throughout expected emission/assertions.
 2. `bpfopt/crates/bpfopt/src/insn.rs:305-427` semantic instruction constructors violate the user's direct-libbpf rejection, especially #268's `exit/helper_call/mov32_reg/st_mem/jump_imm/jump_reg`. Decide a strict construction policy and delete wrappers accordingly.
 3. Same-name same-type libbpf aliases listed in A above violate the explicit zero-increment const rule. Delete and use `libbpf_sys::...` directly.
 4. `bpfopt/crates/bpfopt/src/passes/rewrite.rs:42,56` dead public plan methods plus their backing fields are speculative. Delete until a pass uses them.

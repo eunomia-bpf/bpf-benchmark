@@ -13,25 +13,25 @@ submodule.
 `arch/arm64/net/bpf_jit_comp.c:1213-1214`
 
 ```c
-if (!kinsn || !kinsn->emit_arm64)
+if (!kop || !kop->emit_arm64)
 	return -EOPNOTSUPP;
 ```
 
-Condition: ARM64 is compiling a `BPF_PSEUDO_KINSN_CALL` and the kinsn payload either
+Condition: ARM64 is compiling a `BPF_PSEUDO_KOP_CALL` and the kop payload either
 does not exist or has no ARM64 emitter. The call site is
 `arch/arm64/net/bpf_jit_comp.c:1643-1648`, under:
 
 ```c
 case BPF_JMP | BPF_CALL:
-	if (src == BPF_PSEUDO_KINSN_CALL) {
-		ret = emit_kinsn_desc_call_arm64(insn, ctx);
+	if (src == BPF_PSEUDO_KOP_CALL) {
+		ret = emit_kop_desc_call_arm64(insn, ctx);
 		break;
 	}
 ```
 
 Assessment for katran `balancer_ingress` noop ReJIT: weak match. The failing input is
 the bootstrap identity/noop bytecode. The captured verifier log shows normal helper
-calls and BPF-to-BPF calls, not kinsn calls. This direct `-EOPNOTSUPP` path is present
+calls and BPF-to-BPF calls, not kop calls. This direct `-EOPNOTSUPP` path is present
 but is not the likely failure for this case.
 
 ### Early return that leaves the temp program non-JITed
@@ -226,11 +226,11 @@ during normal load and x86 JITed the same ReJIT input successfully.
 `arch/x86/net/bpf_jit_comp.c:592-593`
 
 ```c
-if (!kinsn || !kinsn->emit_x86)
+if (!kop || !kop->emit_x86)
 	return -EOPNOTSUPP;
 ```
 
-Condition: x86 is compiling a `BPF_PSEUDO_KINSN_CALL` and the kinsn payload is absent
+Condition: x86 is compiling a `BPF_PSEUDO_KOP_CALL` and the kop payload is absent
 or has no x86 emitter. The analogous x86 call path is in the x86 `BPF_CALL` handling
 logic.
 
@@ -334,7 +334,7 @@ early transformed ReJITs.
 
 ## 3. ARM64/x86 differences relevant to `balancer_ingress`
 
-The important difference is not the existence of a direct `-EOPNOTSUPP` for kinsn
+The important difference is not the existence of a direct `-EOPNOTSUPP` for kop
 calls. Both JITs have that path, and the failing katran noop ReJIT does not match it.
 
 The important difference is the multi-subprogram final-pass accounting model:
@@ -394,7 +394,7 @@ Observed `balancer_ingress` features:
   balancer program itself does not match a tail-call-helper failure path in the
   collected log.
 - Atomic operations: no evidence in the collected verifier log.
-- Kinsn/kfunc pseudo calls: no evidence in the noop input/log, so the direct
+- KOperation/kfunc pseudo calls: no evidence in the noop input/log, so the direct
   ARM64 `-EOPNOTSUPP` at `arch/arm64/net/bpf_jit_comp.c:1214` is not a good match.
 
 Hypothesis ranking:
@@ -474,7 +474,7 @@ the ARM64 kernel log line that would prove the `multi-func JIT bug %d > %d` bran
 executed. Without instrumentation or dmesg capture, the exact root branch cannot be
 proven beyond the source/control-flow and program-shape evidence. The direct
 `-EOPNOTSUPP` at `arch/arm64/net/bpf_jit_comp.c:1214` is lower confidence because
-the failing noop bytecode does not show kinsn pseudo calls.
+the failing noop bytecode does not show kop pseudo calls.
 
 ## 6. Daemon-side pre-check feasibility
 

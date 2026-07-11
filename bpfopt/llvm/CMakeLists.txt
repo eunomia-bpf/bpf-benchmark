@@ -9,7 +9,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(SPDLOG REQUIRED IMPORTED_TARGET spdlog)
 
 # Resolve LLVM component libraries via the CMake config package rather than
-# shelling out to llvm-config: the in-repo kinsn LLVM build does not ship a
+# shelling out to llvm-config: the in-repo kop LLVM build does not ship a
 # working llvm-config, and the component targets carry their own transitive
 # system-lib dependencies (zlib, zstd, etc.).
 # bpfopt-llvm emits BPF object code (BPF backend mandatory). The host backend
@@ -33,7 +33,7 @@ if("AArch64" IN_LIST LLVM_TARGETS_TO_BUILD)
 endif()
 llvm_map_components_to_libnames(LLVM_LINK_FLAGS ${BPFOPT_LLVM_COMPONENTS})
 
-# Match the LLVM build's RTTI setting; the in-repo kinsn LLVM is built without
+# Match the LLVM build's RTTI setting; the in-repo kop LLVM is built without
 # RTTI, so compiling our translation units with RTTI on leaves typeinfo symbols
 # (ErrorInfoBase, format_adapter) unresolved at link time.
 if(NOT LLVM_ENABLE_RTTI)

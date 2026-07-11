@@ -58,7 +58,7 @@ The cleanest family-level micro evidence comes from the per-form isolation rerun
 
 The key point is not that `cond_select` wins here. The key point is that it wins only in a pure isolated select-diamond benchmark. That does not contradict the corpus result where `cond_select` is net negative; it supports the paper's argument that the same legal lowering flips sign across workload classes.
 
-The latest raw micro snapshot (`2026-03-26`) is less useful for clean family attribution, but it is still useful as evidence that active kinsn rewrites are not always profitable:
+The latest raw micro snapshot (`2026-03-26`) is less useful for clean family attribution, but it is still useful as evidence that active kop rewrites are not always profitable:
 
 | Benchmark | Applied Pass | Stock -> ReJIT | Exec Ratio | Note |
 | --- | --- | ---: | ---: | --- |
@@ -84,7 +84,7 @@ If we only count benchmarks in the latest raw micro run where a given family act
 | `cond_select` | `0` | `0` | n/a |
 | `branch_flip` | `0` | `0` | n/a |
 
-So the broader statement is defensible: not just `cond_select`, but multiple kinsn-related families can regress. Micro is strongest as workload-sensitivity evidence; corpus is where regression-rate evidence becomes compelling.
+So the broader statement is defensible: not just `cond_select`, but multiple kop-related families can regress. Micro is strongest as workload-sensitivity evidence; corpus is where regression-rate evidence becomes compelling.
 
 ## 2. Corpus: Most Full-Apply Rewrites Regress
 
@@ -210,7 +210,7 @@ The latest raw micro run shows the same direction on a synthetic dense case: `me
 
 ## 5. Map Inline: Real Structural Value, Still Not a Blanket Runtime Win
 
-`map_inline` is not one of the original kinsn lowerings, but it deserves separate treatment because it shows a different form of value: not just the direct rewrite, but the optimization cascade it unlocks.
+`map_inline` is not one of the original kop lowerings, but it deserves separate treatment because it shows a different form of value: not just the direct rewrite, but the optimization cascade it unlocks.
 
 ### 5.1 Compile-Only Structural Value
 

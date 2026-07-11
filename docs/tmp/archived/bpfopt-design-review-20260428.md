@@ -60,18 +60,18 @@ Per-pass diff summary:
 | Pass / file | Diff summary | Design impact |
 | --- | --- | --- |
 | `map_inline.rs` | Largest divergence. Daemon uses `crate::bpf` live map APIs for map metadata and value lookup. bpfopt replaces this with `BpfProgram.map_metadata` and `BpfProgram.map_values` snapshots. Daemon also has newer alias-offset tracking: `alias_regs: HashMap<reg, offset>`, `alias_adjustment()`, offset-aware fixed loads, and fp-alias stack-store handling. bpfopt keeps only `HashSet` alias tracking and dropped related tests. | bpfopt is not feature-equivalent. It can run offline from snapshots, but misses daemon's current map-inline coverage and live-kernel behavior. |
-| `bulk_memory.rs` | Daemon imports `ensure_btf_fd_slot()` and turns target BTF FDs into `CALL.off` fd-array slots. bpfopt removes that and uses `ctx.kinsn_registry.call_off_for_target_name()`. | Same rewrite intent, different kinsn transport model. |
+| `bulk_memory.rs` | Daemon imports `ensure_btf_fd_slot()` and turns target BTF FDs into `CALL.off` fd-array slots. bpfopt removes that and uses `ctx.kop_registry.call_off_for_target_name()`. | Same rewrite intent, different kop transport model. |
 | `rotate.rs` | Same as above: daemon records required BTF FD slots; bpfopt uses precomputed `call_off_for_pass()`. Other diff is mostly expanded `PassResult` construction. | Transport/API divergence, not a pass-algorithm improvement. |
-| `cond_select.rs` | Same kinsn transport divergence. bpfopt expands daemon's `PassResult::skipped*()` helpers inline. | Transport/API divergence. |
-| `extract.rs` | Same kinsn transport divergence. bpfopt tests still assert daemon-only `target_btf_fds` / `required_btf_fds`, so tests are stale. | Broken test state plus transport divergence. |
-| `endian.rs` | Same kinsn transport divergence. bpfopt tests still assert daemon-only BTF FD recording. | Broken test state plus transport divergence. |
+| `cond_select.rs` | Same kop transport divergence. bpfopt expands daemon's `PassResult::skipped*()` helpers inline. | Transport/API divergence. |
+| `extract.rs` | Same kop transport divergence. bpfopt tests still assert daemon-only `target_btf_fds` / `required_btf_fds`, so tests are stale. | Broken test state plus transport divergence. |
+| `endian.rs` | Same kop transport divergence. bpfopt tests still assert daemon-only BTF FD recording. | Broken test state plus transport divergence. |
 | `branch_flip.rs` | No substantive algorithm change observed; bpfopt inlines `PassResult` helper construction. | Mostly cosmetic/API drift. |
 | `bounds_check_merge.rs` | No substantive algorithm change observed; bpfopt inlines `PassResult` helper construction. | Mostly cosmetic/API drift. |
 | `const_prop.rs` | Production logic is effectively the same. Tests switch from daemon `crate::bpf` mock maps to `crate::mock_maps` plus `apply_mock_maps()`. | Test harness divergence only. |
 | `dce.rs` | No substantive algorithm change observed; bpfopt inlines `PassResult::unchanged()`. | Mostly cosmetic/API drift. |
 | `skb_load_bytes.rs` | No substantive algorithm change observed; bpfopt inlines unchanged results. | Mostly cosmetic/API drift. |
 | `wide_mem.rs` | No substantive algorithm change observed; bpfopt inlines unchanged result construction. | Mostly cosmetic/API drift. |
-| `utils.rs` | Daemon has `ensure_btf_fd_slot(program, btf_fd) -> i16`; bpfopt deletes it. | This is the common helper that makes daemon kinsn transport work, so its absence is central to the split. |
+| `utils.rs` | Daemon has `ensure_btf_fd_slot(program, btf_fd) -> i16`; bpfopt deletes it. | This is the common helper that makes daemon kop transport work, so its absence is central to the split. |
 
 Support-code diffs that affect pass behavior:
 
@@ -86,8 +86,8 @@ Main divergences:
 
 | Area | daemon API | bpfopt-core API |
 | --- | --- | --- |
-| Program metadata | `BpfProgram.required_btf_fds` records descriptor BTF FDs needed by kinsn calls. | No `required_btf_fds`; instead has `map_values` and `map_metadata` offline snapshots. |
-| Kinsn transport | `KinsnRegistry.target_btf_fds`, `btf_fd_for_pass()`, `btf_fd_for_target_name()`, `all_btf_fds()`. Passes call `ensure_btf_fd_slot()`. | `KinsnRegistry.target_call_offsets`, `call_off_for_pass()`, `call_off_for_target_name()`. |
+| Program metadata | `BpfProgram.required_btf_fds` records descriptor BTF FDs needed by kop calls. | No `required_btf_fds`; instead has `map_values` and `map_metadata` offline snapshots. |
+| KOperation transport | `KopRegistry.target_btf_fds`, `btf_fd_for_pass()`, `btf_fd_for_target_name()`, `all_btf_fds()`. Passes call `ensure_btf_fd_slot()`. | `KopRegistry.target_call_offsets`, `call_off_for_pass()`, `call_off_for_target_name()`. |
 | Per-pass verify | `PassResult.verify`, `PassVerifyStatus`, `PassVerifyResult`, `PassRollbackResult`. | No verify/rollback types in production API. |
 | Pass manager | `run_with_verifier()` and `run_with_profiling_and_verifier()` verify every changed pass and rollback rejected output. | Only pure `run()` / `run_with_profiling()`. Changed pass output is always kept. |
 | Debug trace | Includes `verify` in `PassDebugTrace`. | Only `pass_name`, `changed`, bytecode before/after. |
@@ -118,8 +118,8 @@ Representative failures:
 
 - `PassDebugTrace` has no field `verify`.
 - `PassVerifyStatus`, `PassVerifyResult`, and `PassRollbackResult` are undeclared.
-- `KinsnRegistry` has no `target_btf_fds` field.
-- `KinsnRegistry` has no `btf_fd_for_pass()` or `all_btf_fds()`.
+- `KopRegistry` has no `target_btf_fds` field.
+- `KopRegistry` has no `btf_fd_for_pass()` or `all_btf_fds()`.
 - `PassManager` has no `run_with_verifier()`.
 - `BpfProgram` has no `required_btf_fds`.
 - `endian.rs` and `extract.rs` tests still assert daemon-only BTF FD recording.
@@ -136,13 +136,13 @@ This matches the #646 plan text, but only if `bpfopt-core` becomes the real sour
 
 - tests do not compile,
 - map-inline is behind daemon's current implementation,
-- kinsn transport has incompatible semantics,
+- kop transport has incompatible semantics,
 - per-pass verify/rollback is missing from the API even though daemon's runtime correctness depends on it,
 - no canonical build target exists.
 
 If choosing A, do not make daemon depend on the current bpfopt-core as-is. Instead, rebuild bpfopt-core from daemon's current pass code and introduce explicit traits/adapters:
 
-- `KinsnCallResolver`: live daemon implementation returns fd-array slots; offline CLI implementation returns precomputed call offsets.
+- `KopCallResolver`: live daemon implementation returns fd-array slots; offline CLI implementation returns precomputed call offsets.
 - `MapInfoProvider` / `MapValueProvider`: daemon uses raw BPF syscalls; bpfopt CLI uses JSON snapshots.
 - `PassVerifier`: daemon uses `BPF_PROG_LOAD`; offline CLI uses no-op or test verifier.
 
@@ -190,7 +190,7 @@ No unique pass name exists only in daemon, but daemon has substantial runtime an
 - per-pass `BPF_PROG_LOAD` verification;
 - rollback of rejected pass output;
 - verifier-log state refresh between passes;
-- kfunc/kinsn discovery from kernel BTF;
+- kfunc/kop discovery from kernel BTF;
 - descriptor BTF FD lifetime and fd-array construction;
 - final `BPF_PROG_REJIT`;
 - PMU/profile integration;

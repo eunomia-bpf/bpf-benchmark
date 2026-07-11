@@ -84,7 +84,7 @@ ESwitch 快 5–10×。DPDK/FastClick plugin 也有(但 stateful 优化被禁用
 | 操作层次 | LLVM IR + Polycube/FastClick 工具链 | raw BPF 字节码 + LD_PRELOAD 透明 shim | **✅ 区别** |
 | 透明性 | 否(需用其工具链构建程序) | 是(拦截未改动上游 app,作用于已部署程序) | **✅ 区别** |
 | profiling 信号 | per-packet map-access heatmap 插桩 | run-stats / PMU per-site | **✅ 区别** |
-| 下游硬件 lowering | ✗(IR 层做不了,§7 自承) | ✅(字节码产物可喂 kinsn / idea #2) | **✅ 区别(衍生)** |
+| 下游硬件 lowering | ✗(IR 层做不了,§7 自承) | ✅(字节码产物可喂 kop / idea #2) | **✅ 区别(衍生)** |
 
 ---
 
@@ -102,7 +102,7 @@ ESwitch 快 5–10×。DPDK/FastClick plugin 也有(但 stateful 优化被禁用
 2. **层次 + 透明性**:Morpheus 在 IR 层、集成进 Polycube/FastClick;bpfopt 在字节码层 +
    LD_PRELOAD shim 透明拦截未改动上游 app,作用于已部署程序、不要源码/IR。**最干净的一条。**
 3. **信号**:Morpheus per-packet 插桩;bpfopt run-stats/PMU。
-4. (衍生)bpfopt 字节码产物能喂 kinsn 做硬件 lowering —— Morpheus §7 说 IR 层做不到。
+4. (衍生)bpfopt 字节码产物能喂 kop 做硬件 lowering —— Morpheus §7 说 IR 层做不到。
 
 **审稿人会打**:"这就是把 Morpheus 从 networking 推广到 general eBPF、从 IR 层换到
 bytecode+shim 层,机制一样,delta 够 OSDI 吗?" —— idea #1 必须把 contribution **重新

@@ -52,7 +52,7 @@ stdin Vec<bpf_insn> → 13 个 pass 串行 (各自 scan loop + RewritePlan emit)
 ### 2.4 MLIR (Multi-Level IR)
 - 多 dialect：高层 → 低层
 - 每 dialect 自己 ops + lowering pattern
-- 适合"kinsn-class" target-specific 操作
+- 适合"kop-class" target-specific 操作
 
 ### 2.5 Verified compiler (CompCert / VeRiSafe)
 - 每个 transform 形式化证明 source ≡ target
@@ -77,14 +77,14 @@ pass! {
     name: "rotate",
     pattern: ALU64_REG(SHL, dst, val, sh) | ALU64_REG(LSR, dst, val, sub_imm) | OR(dst, dst, dst),
     require: liveness(dst).dead_after(),
-    emit: call_kinsn("bpf_rotate64", dst, val, sh),
+    emit: call_kop("bpf_rotate64", dst, val, sh),
 }
 ```
 
 **实现**：proc-macro ~500 LOC，编译时展开成 scan + emit + addr_map + BTF remap
-**收益**：7 个 kinsn 类 pass 各从 ~500 LOC 缩到 ~30 LOC = **省 ~3000 LOC**
+**收益**：7 个 kop 类 pass 各从 ~500 LOC 缩到 ~30 LOC = **省 ~3000 LOC**
 **正确性**：scan/fixup 集中实现一次，pattern 错了编译期就报
-**扩展性**：加新 kinsn 写 5-10 行 pattern
+**扩展性**：加新 kop 写 5-10 行 pattern
 **风险**：低（不动 IR，emit 路径不变）
 
 ### Phase 3 (再下月)：方案 B BB + use-def IR
@@ -137,7 +137,7 @@ struct BbProgram {
 
 **会议方向**：OSDI / SOSP / EuroSys / ATC
 
-### 4.2 kinsn 架构
+### 4.2 kop 架构
 
 **Novelty**：
 - 可插拔 kernel inline emit
@@ -145,8 +145,8 @@ struct BbProgram {
 - 大多 JIT/emitter 是硬编码在 compiler 里；我们外置
 
 **Contribution**：
-- 上游 kernel 提议 kinsn 接口（让其他 BPF 生态系统也能 plug-in）
-- LLVM BPF backend 加 kinsn 元数据（让 LLVM 直接 emit kinsn-aware bytecode）
+- 上游 kernel 提议 kop 接口（让其他 BPF 生态系统也能 plug-in）
+- LLVM BPF backend 加 kop 元数据（让 LLVM 直接 emit kop-aware bytecode）
 
 ### 4.3 Verifier-Feedback-Driven Optimization（PGO 的新形态）
 
@@ -197,8 +197,8 @@ struct BbProgram {
 ### 4.8 In-Kernel JIT 协作模型
 
 **Novelty**：
-- userspace bpfopt + kernel kinsn modules 协同设计
-- userspace 决策"哪个 kinsn"，kernel 决定"如何 inline"
+- userspace bpfopt + kernel kop modules 协同设计
+- userspace 决策"哪个 kop"，kernel 决定"如何 inline"
 - 允许 hot-swap JIT strategy 而不重 build kernel
 
 **Contribution**：上游 kernel 提案
@@ -217,11 +217,11 @@ struct BbProgram {
 | 贡献 | 上游项目 | 状态 |
 |---|---|---|
 | BPF_PROG_REJIT syscall | linux kernel | 已 fork 实现，未 upstream |
-| kinsn 模块接口 | linux kernel | 已实现，未 upstream |
+| kop 模块接口 | linux kernel | 已实现，未 upstream |
 | LLVM BPF backend 改进（fix 不跑的 pass） | LLVM | 待调研 |
 | BPF re-JIT C library API | libbpf | 设计中 |
 | bpfopt CLI 作为 standalone tool | 自己开源 | 待发布 |
-| kinsn modules 上游 | linux kernel | 待提案 |
+| kop modules 上游 | linux kernel | 待提案 |
 | Test corpus 7 apps × full prog | 自己开源 | dump 中 |
 | 论文 datasets | OSDI 2026 / 后续 | 准备中 |
 
@@ -231,8 +231,8 @@ struct BbProgram {
 
 **主 contribution**：
 1. **BpfReJIT system**：first in-kernel re-JIT 系统
-2. **kinsn architecture**：可插拔 inline emit
-3. **kinsn-class optimizations**：rotate / cmov / movbe / extract / etc. 在已 load BPF 上的应用
+2. **kop architecture**：可插拔 inline emit
+3. **kop-class optimizations**：rotate / cmov / movbe / extract / etc. 在已 load BPF 上的应用
 4. **Performance evaluation**：7 apps, geomean speedup, ablation studies
 
 **潜在 secondary contribution**（如果 Phase 2-3 完成）：
@@ -247,7 +247,7 @@ struct BbProgram {
 
 ### Phase 1 收尾（本月内）
 - [x] P1-A RewritePlan + 7 pass 迁移
-- [x] P1-B pass-owned KinsnDescriptor + tetragon panic fix + call_off=0 fix
+- [x] P1-B pass-owned KopDescriptor + tetragon panic fix + call_off=0 fix
 - [x] P1-C utils.rs 拆分 + wrapper/sentinel 清理
 - [x] P1-G mega refactor (rewrite 顶级 + 9 重复 + 缺陷-1/2 fix)
 - [ ] P1-F dce regression 修复（invest + fix codex 进行中）

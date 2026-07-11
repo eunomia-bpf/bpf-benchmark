@@ -114,8 +114,8 @@ Post-fix bytecode around the rewritten site:
 ```text
 pc 723: r0 = 0
 pc 724: r2 = 1
-pc 725: kinsn sidecar, payload dst=r0, a=r0, b=r2, cond=r1
-pc 726: call_kinsn bpf_select64
+pc 725: kop sidecar, payload dst=r0, a=r0, b=r2, cond=r1
+pc 726: call_kop bpf_select64
 pc 727: ja pc 729
 pc 728: r0 = 0          # preserved shared false branch
 pc 729: r0 &= 1         # preserved shared join
@@ -127,11 +127,11 @@ That is the new preserve-join mode in action: the optimized predecessor bypasses
 
 Block ordering: no evidence of a silent fallthrough adjacency failure. Lowering explicitly rejects non-adjacent fallthroughs and conditional fallthroughs at [bbprogram_lower.rs](/home/yunwei37/workspace/bpf-benchmark/bpfopt/crates/bpfopt/src/analysis/bbprogram_lower.rs:106) and [bbprogram_lower.rs](/home/yunwei37/workspace/bpf-benchmark/bpfopt/crates/bpfopt/src/analysis/bbprogram_lower.rs:123). Host-side `bpfopt` produced lowered bytecode for the candidate programs without this error.
 
-Stack state: `cond_select` does not emit stack stores. The relevant builders emit MOV/ALU/JMP plus the kinsn sidecar/call in `condition_prefix()` and `materialize_value()` at [cond_select.rs](/home/yunwei37/workspace/bpf-benchmark/bpfopt/crates/bpfopt/src/passes/cond_select.rs:430) and [cond_select.rs](/home/yunwei37/workspace/bpf-benchmark/bpfopt/crates/bpfopt/src/passes/cond_select.rs:519).
+Stack state: `cond_select` does not emit stack stores. The relevant builders emit MOV/ALU/JMP plus the kop sidecar/call in `condition_prefix()` and `materialize_value()` at [cond_select.rs](/home/yunwei37/workspace/bpf-benchmark/bpfopt/crates/bpfopt/src/passes/cond_select.rs:430) and [cond_select.rs](/home/yunwei37/workspace/bpf-benchmark/bpfopt/crates/bpfopt/src/passes/cond_select.rs:519).
 
 Plain register liveness: the pass computes `live_after` at [cond_select.rs](/home/yunwei37/workspace/bpf-benchmark/bpfopt/crates/bpfopt/src/passes/cond_select.rs:110), and temp selection avoids live-after registers except the selected destination at [cond_select.rs](/home/yunwei37/workspace/bpf-benchmark/bpfopt/crates/bpfopt/src/passes/cond_select.rs:547). For the shown Pattern C site, the replacement only changes `r0` on the optimized path; external paths into `F` and `J` are left intact.
 
-The native symptom is still important: landing in mostly `cc` bytes is more consistent with a bad native control-flow target than with a wrong scalar result. The new bytecode shape in `generic_retkprobe_filter_arg` adds `call_kinsn bpf_select64; ja <shared join>` continuations at several formerly skipped sites.
+The native symptom is still important: landing in mostly `cc` bytes is more consistent with a bad native control-flow target than with a wrong scalar result. The new bytecode shape in `generic_retkprobe_filter_arg` adds `call_kop bpf_select64; ja <shared join>` continuations at several formerly skipped sites.
 
 ## Concrete implementation defect
 
@@ -195,7 +195,7 @@ external predecessors:
   goto original J
 ```
 
-This is the old join-hoist idea without deleting the original join. It avoids relying on a shared join to merge an optimized kinsn path with unoptimized external paths and avoids introducing the new `call_kinsn; ja shared_join` continuation shape at formerly skipped sites.
+This is the old join-hoist idea without deleting the original join. It avoids relying on a shared join to merge an optimized kop path with unoptimized external paths and avoids introducing the new `call_kop; ja shared_join` continuation shape at formerly skipped sites.
 
 ## Verdict
 

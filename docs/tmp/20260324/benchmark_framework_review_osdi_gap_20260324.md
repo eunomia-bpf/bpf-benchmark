@@ -106,7 +106,7 @@
 
 **Strengths:**
 - Clean separation: root `Makefile` delegates to `runner/Makefile` for build, uses Python drivers for orchestration
-- All VM targets properly chain dependencies: `vm-micro: micro_exec micro-programs daemon-binary kernel-image kinsn-modules-build`
+- All VM targets properly chain dependencies: `vm-micro: micro_exec micro-programs daemon-binary kernel-image kop-modules-build`
 - ARM64 cross-compilation support with Docker-based toolchain (`arm64-crossbuild.Dockerfile`)
 - AWS Graviton remote execution pipeline (`aws_arm64.sh`)
 - VM lock wrapper (`with_vm_lock.py`) prevents concurrent VM access
@@ -138,7 +138,7 @@
 |----------|--------|----------|-----|
 | Q1: Userspace policy produces different results across hardware/workload/programs? | Partial | CMOV policy-sensitivity shown (cond_select_dense 0.482x vs log2_fold +28.3%). x86 VM data exists. | **No ARM64 performance data. No workload-dependent policy variation data (same program, different inputs).** |
 | Q2: Differences outperform fixed kernel heuristics? | Partial | v1 had `jit-fixed-baselines` branch for comparison. v2 lacks a head-to-head. | **No systematic "BpfReJIT vs kernel-fixed-cmov" comparison in v2. Plan mentions this but data is missing.** |
-| Q3: Legality substrate acceptance rate on real programs? | Good | 303 daemon tests, 49/62 micro applied, 16535 total sites across 8 families. | **Acceptably complete for wide_mem; kinsn families (rotate/cond_select/extract) are blocked by verifier changes -- "0 applied" for kinsn passes.** |
+| Q3: Legality substrate acceptance rate on real programs? | Good | 303 daemon tests, 49/62 micro applied, 16535 total sites across 8 families. | **Acceptably complete for wide_mem; kop families (rotate/cond_select/extract) are blocked by verifier changes -- "0 applied" for kop passes.** |
 | Q4: System generalizes to multiple directive families? | Good | 8 families implemented: wide_mem, rotate, cond_select, bitfield_extract, endian_fusion, branch_flip + spectre barrier + map inlining (design). | Sufficient breadth. |
 | Q5: Operators can safely manage policy in production? | Missing | Watch mode "to be implemented". No rollback demonstration. No A/B testing framework. | **Critical gap. No production-readiness evidence.** |
 
@@ -184,7 +184,7 @@
 **Gap severity: HIGH.** OSDI reviewers will strongly question VM-only data. The `validate_publication_environment()` function even warns about VM detection, but all current data is from VMs. Key concerns:
 1. **VM noise**: Plan doc acknowledges ">10% fluctuation in 3-iteration runs for non-applied benchmarks". This is unacceptable for publication.
 2. **No bare-metal validation**: The 1.054x overall micro improvement could be entirely within VM noise margin.
-3. **ARM64 is a primary kinsn selling point** (LDP/STP, MOVBE alternatives) but has zero performance data.
+3. **ARM64 is a primary kop selling point** (LDP/STP, MOVBE alternatives) but has zero performance data.
 
 ### 2.5 Statistical Rigor
 

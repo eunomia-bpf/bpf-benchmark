@@ -30,7 +30,7 @@
 3. `arm64` 列表：12 + `ccmp` = 13 pass ✅
 4. `runner/libs/rejit.py:355-392` 新增 `_benchmark_policy_arch_keys()` + `_platform_policy_passes()`，优先读 `policy.platforms`，用 `RUN_TARGET_ARCH` 环境变量或 `platform.machine()` 选平台键，不支持时 `raise SystemExit`（fail-fast）
 5. 仅一个 benchmark_config.yaml（corpus/config 下），e2e / micro 无独立 pass-list YAML（e2e 通过 `benchmark_rejit_enabled_passes()` 读同一文件，micro 不用 daemon）
-6. 无平台 runtime check 阻止 x86 加载 ccmp：daemon 端正确实现为 `pass_needs_target("ccmp") == true`，运行时会通过 `missing_target_kinsns()` 检查 `bpf_ccmp64` 是否在线；若不在线则 fail（x86 不加载 `bpf_ccmp.ko`，自然 fail-fast）
+6. 无平台 runtime check 阻止 x86 加载 ccmp：daemon 端正确实现为 `pass_needs_target("ccmp") == true`，运行时会通过 `missing_target_kops()` 检查 `bpf_ccmp64` 是否在线；若不在线则 fail（x86 不加载 `bpf_ccmp.ko`，自然 fail-fast）
 
 ---
 
@@ -41,12 +41,12 @@
 | ID | 处理方式 | 验证 |
 |----|---------|------|
 | D1 `wants_branch_flip` | **保留，不再是死分支**。删除 `effective_pass_list()` 后，runner 可显式传 `branch_flip`，`wants_branch_flip` 真实可达 | grep 确认代码在 line 983-997 |
-| D2 `pass_needs_target/missing_target_kinsns` 中 `"ccmp"` arm | **保留，不再是死分支**。ARM64 runner policy 含 ccmp，这些 arm 现在可达 | grep 确认 line 1226, 1450, 1466 |
+| D2 `pass_needs_target/missing_target_kops` 中 `"ccmp"` arm | **保留，不再是死分支**。ARM64 runner policy 含 ccmp，这些 arm 现在可达 | grep 确认 line 1226, 1450, 1466 |
 | D3 loop 内 `pass == "branch_flip"` 检查 | **保留，不再是死条件**。runner-controlled list 可含 branch_flip | grep 确认 line 1046 |
 | D4 `BpfProgram::has_transforms()` | **已删除** | `grep -rn 'has_transforms' bpfopt/` → 0 hit |
 | D5 `scan_wide_mem` 过宽 pub | **已改为私有** `fn scan_wide_mem` | grep 确认 `bpfopt/crates/bpfopt/src/passes/wide_mem.rs:57` |
 
-**说明**：round15-kinsn-passes-and-deadcode.md 报告中，D1/D2/D3 的根本原因是 `effective_pass_list()` 阻止非默认 list 进入，导致这些分支不可达。删除 `effective_pass_list()` 后，这些分支自然变活，保留是正确的处理方式，不是遗漏。
+**说明**：round15-kop-passes-and-deadcode.md 报告中，D1/D2/D3 的根本原因是 `effective_pass_list()` 阻止非默认 list 进入，导致这些分支不可达。删除 `effective_pass_list()` 后，这些分支自然变活，保留是正确的处理方式，不是遗漏。
 
 ---
 

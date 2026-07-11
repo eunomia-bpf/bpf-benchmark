@@ -14,7 +14,7 @@ Scope:
 
 Not ready to enter #41 as a v3-conformant Phase 1 pipeline yet.
 
-The commit builds and the workspace tests pass, and the two new CLIs do not add compile-time dependencies on `bpfopt`, the daemon, or other CLI crates. However, there are two blocking issues before this should be treated as ready: `bpfget` bypasses the `kernel-sys` syscall boundary for map-id info reads, and `bpfrejit --dry-run --fd-array` is explicitly unsupported even though kinsn-bearing bytecode needs fd-array support to be dry-run verified.
+The commit builds and the workspace tests pass, and the two new CLIs do not add compile-time dependencies on `bpfopt`, the daemon, or other CLI crates. However, there are two blocking issues before this should be treated as ready: `bpfget` bypasses the `kernel-sys` syscall boundary for map-id info reads, and `bpfrejit --dry-run --fd-array` is explicitly unsupported even though kop-bearing bytecode needs fd-array support to be dry-run verified.
 
 ## Findings
 
@@ -28,7 +28,7 @@ Impact: this moves ABI/error handling back into a CLI crate, duplicates the errn
 
 Fix: move the second-pass map-id read into `kernel-sys`, for example `kernel_sys::prog_map_ids(fd)` or `kernel_sys::obj_get_info_with_map_ids(fd)`, and have `bpfget` call that wrapper. Keep the raw `bpf_obj_get_info_by_fd` usage and errno conversion private to `kernel-sys`.
 
-### HIGH: `bpfrejit --dry-run --fd-array` rejects the required kinsn verification path
+### HIGH: `bpfrejit --dry-run --fd-array` rejects the required kop verification path
 
 Location: `bpfopt/crates/bpfrejit/src/main.rs:69-72`
 
@@ -38,9 +38,9 @@ Location: `bpfopt/crates/bpfrejit/src/main.rs:69-72`
 --dry-run with --fd-array is not supported by current kernel-sys prog_load_dryrun
 ```
 
-v3 §2.5 defines `--dry-run` as verifier-only validation and also defines `--fd-array FILE` for kinsn BTF fd_array input. Those flags need to compose because optimized bytecode containing kinsn calls cannot be verifier-checked without the same fd_array that would be used for `BPF_PROG_REJIT`.
+v3 §2.5 defines `--dry-run` as verifier-only validation and also defines `--fd-array FILE` for kop BTF fd_array input. Those flags need to compose because optimized bytecode containing kop calls cannot be verifier-checked without the same fd_array that would be used for `BPF_PROG_REJIT`.
 
-Impact: a pipeline can submit kinsn bytecode through normal ReJIT but cannot run the v3 dry-run validation for the same payload. That blocks reliable Phase 1 validation for transformations that emit kinsn calls.
+Impact: a pipeline can submit kop bytecode through normal ReJIT but cannot run the v3 dry-run validation for the same payload. That blocks reliable Phase 1 validation for transformations that emit kop calls.
 
 Fix: extend `kernel_sys::prog_load_dryrun()` to accept fd_array data and set `bpf_prog_load_opts.fd_array` / `fd_array_cnt`. Keep the backing fds alive through the load attempt, then remove this CLI-side rejection.
 
@@ -68,11 +68,11 @@ Fix: stage all outputs in a temporary directory or same-directory temporary file
 
 Location: `bpfopt/crates/bpfget/src/main.rs:267-302`
 
-`--target` emits `arch`, `features`, and `kinsns`, and it provides a manual `--kinsns name:btf_func_id` override. By default, though, `kinsns` is `{}` and the CLI prints a warning that kinsn BTF probing is not implemented.
+`--target` emits `arch`, `features`, and `koperation`, and it provides a manual `--koperation name:btf_func_id` override. By default, though, `koperation` is `{}` and the CLI prints a warning that kop BTF probing is not implemented.
 
-Impact: the JSON shape matches v3 §3.2, but it does not yet perform the automatic kinsn discovery required for a useful `target.json`. Any pass requiring kinsn IDs will fail or skip unless the user supplies manual `--kinsns` values.
+Impact: the JSON shape matches v3 §3.2, but it does not yet perform the automatic kop discovery required for a useful `target.json`. Any pass requiring kop IDs will fail or skip unless the user supplies manual `--koperation` values.
 
-Fix: move the kinsn discovery logic into `bpfget` or into a shared non-CLI library callable by `bpfget`, and emit discovered kinsns by default. Keep `--kinsns` as an override/debug escape hatch.
+Fix: move the kop discovery logic into `bpfget` or into a shared non-CLI library callable by `bpfget`, and emit discovered koperation by default. Keep `--koperation` as an override/debug escape hatch.
 
 ### MEDIUM: integration tests miss several committed CLI modes
 

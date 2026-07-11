@@ -105,7 +105,7 @@ Kernel-side relevant return points:
   too-large `BPF_PROG_REJIT` instruction/fd-array inputs with `-E2BIG`.
 - `vendor/linux-framework/kernel/bpf/syscall.c:3789-3791`: rejects replacement
   program size if it exceeds the original program's allocated page budget.
-- `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:594-595`: rejects a kinsn
+- `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:594-595`: rejects a kop
   descriptor whose `max_emit_bytes` exceeds `BPF_MAX_INSN_SIZE`.
 
 Classification: limitation/capacity class, not the first pass implementation bug

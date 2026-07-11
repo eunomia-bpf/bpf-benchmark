@@ -6,7 +6,7 @@
 
 ## v2 daemon 主路径架构（commit + 代码片段）
 
-`4fc97556:daemon/src/pipeline.rs` 文件头说明 v2 daemon 负责 live-kernel concerns：kinsn `fd_array`、per-pass verifier dry-runs、verifier-state refresh、rejected transform rollback。主流程在 `commands.rs`：打开 live prog fd，取 `BPF_PROG_GET_ORIGINAL` 原始 insns，取 `prog_info.map_ids`，构造 `BpfProgram`，daemon 内直接跑 `passes::build_full_pipeline()`。
+`4fc97556:daemon/src/pipeline.rs` 文件头说明 v2 daemon 负责 live-kernel concerns：kop `fd_array`、per-pass verifier dry-runs、verifier-state refresh、rejected transform rollback。主流程在 `commands.rs`：打开 live prog fd，取 `BPF_PROG_GET_ORIGINAL` 原始 insns，取 `prog_info.map_ids`，构造 `BpfProgram`，daemon 内直接跑 `passes::build_full_pipeline()`。
 
 ```rust
 let (info, orig_insns) = bpf::bpf_prog_get_info(prog_fd.as_raw_fd(), true)?;
@@ -27,7 +27,7 @@ match verifier(pass.name(), program)? {
 }
 ```
 
-verify closure 会 clone 当前 insns，做 map fd relocation，build kinsn `fd_array`，直接 syscall `BPF_PROG_LOAD`。最终提交则再次 relocation 后调用 `BPF_PROG_REJIT`。当前 `d3c3a19d` 相反：daemon snapshot -> 写 `prog.bin/info.json` -> 生成 side inputs -> fork+exec `bpfopt optimize` -> 读 `opt.bin` -> rewrite map refs to fd-array indices -> `kernel.rejit(...)`。daemon 不再有 PassManager，也没有 per-pass rollback。
+verify closure 会 clone 当前 insns，做 map fd relocation，build kop `fd_array`，直接 syscall `BPF_PROG_LOAD`。最终提交则再次 relocation 后调用 `BPF_PROG_REJIT`。当前 `d3c3a19d` 相反：daemon snapshot -> 写 `prog.bin/info.json` -> 生成 side inputs -> fork+exec `bpfopt optimize` -> 读 `opt.bin` -> rewrite map refs to fd-array indices -> `kernel.rejit(...)`。daemon 不再有 PassManager，也没有 per-pass rollback。
 
 ## v2 const_prop verifier states 获取（代码片段）
 

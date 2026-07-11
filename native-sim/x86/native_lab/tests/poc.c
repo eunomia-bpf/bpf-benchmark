@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * Userspace POC for the bpf_x86_native_lab kinsn module.
+ * Userspace POC for the bpf_x86_native_lab kop module.
  *
  *   1. Upload a hand-written x86 byte blob into debugfs slot 0.
- *   2. Load a tiny BPF program that calls the native_lab kinsn:
+ *   2. Load a tiny BPF program that calls the native_lab kop:
  *
  *          r1 = imm                ; argument staged into rdi
  *          sidecar(blob_id=0)
  *          call bpf_x86_native_lab_emit
  *          exit
  *
- *      The kinsn replaces the call site with the blob's bytes verbatim.
+ *      The kop replaces the call site with the blob's bytes verbatim.
  *      The blob sets rax (= BPF r0) and falls through into the BPF exit
  *      epilogue, so the program returns whatever the blob put in rax.
  *
@@ -44,11 +44,11 @@
 #define MODULE_BTF_PATH			"/sys/kernel/btf/" MODULE_NAME
 #define VMLINUX_BTF_PATH		"/sys/kernel/btf/vmlinux"
 
-#ifndef BPF_PSEUDO_KINSN_SIDECAR
-#define BPF_PSEUDO_KINSN_SIDECAR	3
+#ifndef BPF_PSEUDO_KOP_SIDECAR
+#define BPF_PSEUDO_KOP_SIDECAR	3
 #endif
-#ifndef BPF_PSEUDO_KINSN_CALL
-#define BPF_PSEUDO_KINSN_CALL		4
+#ifndef BPF_PSEUDO_KOP_CALL
+#define BPF_PSEUDO_KOP_CALL		4
 #endif
 
 #define BPF_ALU64			0x07
@@ -220,10 +220,10 @@ static int build_and_load_prog(int kfunc_btf_id, int mod_btf_fd,
 	 *   mov r1, return_imm                    ; 1 insn (stages rdi)
 	 *   for each chunk i in [0, chunk_count):
 	 *       sidecar(blob_id = first_blob_id+i)
-	 *       call kinsn bpf_x86_native_lab_emit
+	 *       call kop bpf_x86_native_lab_emit
 	 *   exit                                  ; 1 insn
 	 *
-	 * Sidecar payload mapping (see linux/bpf.h bpf_kinsn_sidecar_payload):
+	 * Sidecar payload mapping (see linux/bpf.h bpf_kop_sidecar_payload):
 	 *   payload = (dst_reg & 0xf)
 	 *           | ((u16)off << 4)
 	 *           | ((u32)imm << 20)
@@ -252,13 +252,13 @@ static int build_and_load_prog(int kfunc_btf_id, int mod_btf_fd,
 	for (unsigned int i = 0; i < chunk_count; i++) {
 		insns[idx++] = (struct bpf_insn_native){
 			.code = BPF_ALU64 | BPF_MOV | BPF_K,
-			.dst_src = (uint8_t)((BPF_PSEUDO_KINSN_SIDECAR & 0xf) << 4),
+			.dst_src = (uint8_t)((BPF_PSEUDO_KOP_SIDECAR & 0xf) << 4),
 			.off = 0,
 			.imm = (int32_t)(first_blob_id + i),
 		};
 		insns[idx++] = (struct bpf_insn_native){
 			.code = BPF_JMP | BPF_CALL,
-			.dst_src = (uint8_t)((BPF_PSEUDO_KINSN_CALL & 0xf) << 4),
+			.dst_src = (uint8_t)((BPF_PSEUDO_KOP_CALL & 0xf) << 4),
 			.off = 1,
 			.imm = kfunc_btf_id,
 		};
@@ -273,7 +273,7 @@ static int build_and_load_prog(int kfunc_btf_id, int mod_btf_fd,
 	/*
 	 * fd_array[0] must be a valid fd: the verifier pre-scans the array
 	 * even when no maps reference it. fd_array[1] is the module BTF fd
-	 * that off=1 in the kinsn call insn addresses. Duplicating the BTF
+	 * that off=1 in the kop call insn addresses. Duplicating the BTF
 	 * fd into slot 0 satisfies the verifier's fd_array pre-scan.
 	 */
 	int fd_array[2] = { mod_btf_fd, mod_btf_fd };

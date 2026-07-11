@@ -132,8 +132,8 @@ runner 中有约 **3,000~4,000 行**代码属于"可删/可大幅精简"范畴�
 | `wait_for_suite_quiescence`：等待 BPF 程序表稳定 | **必要** | 防止相邻 case 污染 |
 | `prepare_daemon_session` / `PreparedDaemonSession` | **必要** | daemon 会话准备 |
 | `CaseLifecycleState` / `LifecycleRunResult` / `LifecycleAbort` dataclass | **必要** | 生命周期状态载体 |
-| `_pending_kinsn_metadata` 全局列表 + `attach_pending_result_metadata` | **可选** | kinsn 模块元数据收集，用于 research，非 benchmark 核心 |
-| `_append_pending_kinsn_metadata` / `reset_pending_result_metadata` | **可选** | 同上 |
+| `_pending_kop_metadata` 全局列表 + `attach_pending_result_metadata` | **可选** | kop 模块元数据收集，用于 research，非 benchmark 核心 |
+| `_append_pending_kop_metadata` / `reset_pending_result_metadata` | **可选** | 同上 |
 | `summarize_numbers` / `percent_delta` / `speedup_ratio` / `percentile` （约40行） | **不必要** | 这4个 utility 函数定义在 case_common.py 里，但在此文件中没有被调用，且 `wait_for_suite_quiescence` 也未被任何外部 suite 文件调用（只定义在这里） |
 
 **等待 quiescence 函数（约 25行）**：定义在 case_common，但外部 suite 没有导入调用它（搜索结果只在 corpus/driver.py 和 e2e/case.py 的 `.cache` 快照里有引用，说明在实际运行路径上会用到，是必要的）。

@@ -1,9 +1,9 @@
-# P3 Matcher Design: kinsn-Class Pattern Matchers
+# P3 Matcher Design: kop-Class Pattern Matchers
 
 Date: 2026-05-11
 
 Scope: read-only architecture audit and API design for the current hand-written
-pattern matchers in kinsn-class replacement passes.
+pattern matchers in kop-class replacement passes.
 
 Inspected files:
 
@@ -38,7 +38,7 @@ Rejected:
 
 - A declarative instruction-pattern DSL.
 - A generic CFG matcher DSL.
-- Folding `rep_admit_kinsn_site_window` into matching.
+- Folding `rep_admit_kop_site_window` into matching.
 
 ## Counting Convention
 
@@ -64,7 +64,7 @@ Existing `BBProgram` primitives already provide most raw ingredients:
   `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:562`.
 - `insn_at(site)` fetches body or terminator instructions:
   `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:625`.
-- `rep_admit_kinsn_site_window(start, old_len, replacement_len, skipped)`
+- `rep_admit_kop_site_window(start, old_len, replacement_len, skipped)`
   performs replacement admission:
   `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:1684`.
 
@@ -271,7 +271,7 @@ Repeated direct opcode checks still appear in several passes, for example
   `bpfopt/crates/bpfopt/src/passes/wide_mem.rs:340`.
 - Non-shared: high/low ladder semantics, alignment, packet/BTF pointer policy,
   scratch liveness, cross-block skip reporting. This is BPF-to-BPF and does
-  not call `rep_admit_kinsn_site_window`.
+  not call `rep_admit_kop_site_window`.
 
 ### cond_select.rs
 
@@ -586,7 +586,7 @@ let raw_sites = prog.scan_block_starts(5, |w| {
 
 for hit in raw_sites {
     let Some(admit) =
-        prog.rep_admit_kinsn_site_window(hit.start, hit.old_len, 2, &mut skipped)?
+        prog.rep_admit_kop_site_window(hit.start, hit.old_len, 2, &mut skipped)?
     else {
         continue;
     };
@@ -876,7 +876,7 @@ Const generics vs runtime N:
 
 Admission:
 
-- `rep_admit_kinsn_site_window` stays as the admission gate.
+- `rep_admit_kop_site_window` stays as the admission gate.
 - It should run after raw pattern matching.
 - It records skip reasons and exposes the end site.
 

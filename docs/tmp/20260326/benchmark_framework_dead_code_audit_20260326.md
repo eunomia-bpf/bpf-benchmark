@@ -18,7 +18,7 @@
 | --- | --- | --- |
 | `vm-shell` | `runner/Makefile:195-202` | `python3 runner/scripts/run_vm_shell.py --action vm-test --kernel-image <bzImage> --command 'cd <repo> && <VM_INIT> <VM_COMMAND>'` |
 | `vm-test` | `runner/Makefile:204-216` | `python3 runner/scripts/run_vm_shell.py --action vm-test --kernel-image <bzImage> --command '<VM_INIT> scripts/run_all_tests.sh <repo>'`，同时注入 `SCX_*` 环境变量 |
-| `vm-selftest` | `runner/Makefile:218-225` | `python3 runner/scripts/run_vm_shell.py --action vm-selftest --kernel-image <bzImage> --command '<VM_INIT> scripts/vm-selftest.sh <repo> <tests/unittest> <kinsn_module_dir> <negative_test_dir> <fuzz_rounds>'` |
+| `vm-selftest` | `runner/Makefile:218-225` | `python3 runner/scripts/run_vm_shell.py --action vm-selftest --kernel-image <bzImage> --command '<VM_INIT> scripts/vm-selftest.sh <repo> <tests/unittest> <kop_module_dir> <negative_test_dir> <fuzz_rounds>'` |
 | `vm-static-test` | `runner/Makefile:227-235` | `python3 runner/scripts/run_vm_shell.py --action vm-static-test --kernel-image <bzImage> --command 'cd <repo> && <VM_INIT> python3 daemon/tests/static_verify.py --daemon-binary <daemon> --daemon-args=<args> --output <json> <STATIC_VERIFY_ARGS>'` |
 | `vm-negative-test` | `runner/Makefile:237-245` | `python3 runner/scripts/run_vm_shell.py --action vm-negative-test --kernel-image <bzImage> --command '<VM_INIT> adversarial_rejit && fuzz_rejit && scx_prog_show_race <repo> --mode <mode> --iterations <n> --load-timeout <n> [--skip-probe]'` |
 | `vm-micro-smoke` | `runner/Makefile:247-255` | 先在 VM 内后台启动 `bpfrejit-daemon --pgo serve --socket <sock>`，再执行 `python3 micro/driver.py --runtime kernel --runtime kernel-rejit --daemon-socket <sock> <VM_SMOKE_ARGS> --output <json>` |

@@ -9326,7 +9326,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -9708,7 +9708,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -10672,7 +10672,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -11054,7 +11054,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -12018,7 +12018,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -12400,7 +12400,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -13364,7 +13364,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -14134,7 +14134,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -15098,7 +15098,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -16450,7 +16450,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -18772,7 +18772,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -19736,7 +19736,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -21088,7 +21088,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -22828,7 +22828,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -23404,7 +23404,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -23980,7 +23980,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -26884,7 +26884,7 @@
               "sites_skipped": 0,
               "skip_reasons": {}
             },
-            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "error": "exit_code=1 error=error: kop target bpf_x86_leaq not registered\n",
             "status": "error",
             "step": {
               "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",

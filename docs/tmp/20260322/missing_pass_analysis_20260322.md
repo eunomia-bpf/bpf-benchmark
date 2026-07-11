@@ -5,7 +5,7 @@
 **数据来源**:
 - `corpus/results/archive/corpus-8families-persection.json` — 627 个 ELF 的 8-family 普查（截至 2026-03-12，是目前最全的横向数据）
 - `corpus/results/corpus_authoritative_20260320.json` — 授权 corpus 跑批（有 endian 数据，v2 架构）
-- `micro/results/dev/vm_micro.json` — 2026-03-22 VM micro 跑批（v2 with kinsn）
+- `micro/results/dev/vm_micro.json` — 2026-03-22 VM micro 跑批（v2 with kop）
 - `docs/tmp/20260322/micro_analysis_v2_20260322.md` — micro 性能分析报告
 
 ---
@@ -129,7 +129,7 @@ rsh r1, 48         ; 清除高位
 - 历史数据（v1 corpus 授权）：extract_dense 从 0.556x（有 bug）修复后到正常水平，说明 BEXTR 有收益但需要正确实现
 - **I-cache 开销**：kfunc call site 扩展 2→5 insns（+3 insns），dense sites 会触发 I-cache flush，这正是 extract_dense 当前 policy 被清空的原因（见 micro_analysis_v2 §3）
 
-**实现状态**：kinsn `bpf_extract64` 已在 `module/x86/bpf_extract.c` 实现，emit BEXTR。daemon 中无对应 pass（ExtractPass 未实现）。
+**实现状态**：kop `bpf_extract64` 已在 `module/x86/bpf_extract.c` 实现，emit BEXTR。daemon 中无对应 pass（ExtractPass 未实现）。
 
 ### 3.2 ENDIAN_FUSION
 
@@ -149,9 +149,9 @@ bswap r1, 32            ; 字节序转换（ntohs/ntohl）
 - endian_swap_dense 的 L/K = 0.549（45% 差距），说明 LLVM 能在这个 benchmark 上显著优化
 - MOVBE 是 Haswell 以来的通用 Intel 指令（x86-64 baseline 上不保证，但所有 Broadwell+ 支持）
 - 主要优化：load+bswap 2条指令→1条，减少 instruction count，可能改善 OoO 调度
-- **注意**：MOVBE 需要新 kinsn 或直接 BPF bytecode 层合并（不需要单独 kinsn，可以直接 JIT emit MOVBE）
+- **注意**：MOVBE 需要新 kop 或直接 BPF bytecode 层合并（不需要单独 kop，可以直接 JIT emit MOVBE）
 
-**实现状态**：无 kinsn 模块，无 daemon pass。
+**实现状态**：无 kop 模块，无 daemon pass。
 
 ### 3.3 ADDR_CALC
 
@@ -182,9 +182,9 @@ add r3, r2          ; r3 = base + index*8
 
 | Pattern | Corpus Sites | Projects | Site/Object | L/K Gap | 实现难度 | 综合优先级 |
 |---------|-------------|---------|------------|---------|---------|----------|
-| ENDIAN_FUSION | **1,386** | **16** | 27.7 | 45% | 中（新 kinsn 或 direct emit） | **高** |
-| BITFIELD_EXTRACT | 542 | 15 | 13.6 | 27% | 中（kinsn 已有，需 daemon pass） | **中** |
-| ADDR_CALC | **19** | **2** | 2.0 | 52% | 中（kinsn + daemon pass） | **低/可跳过** |
+| ENDIAN_FUSION | **1,386** | **16** | 27.7 | 45% | 中（新 kop 或 direct emit） | **高** |
+| BITFIELD_EXTRACT | 542 | 15 | 13.6 | 27% | 中（kop 已有，需 daemon pass） | **中** |
+| ADDR_CALC | **19** | **2** | 2.0 | 52% | 中（kop + daemon pass） | **低/可跳过** |
 
 ### 4.2 ENDIAN_FUSION — 推荐优先做
 
@@ -197,13 +197,13 @@ add r3, r2          ; r3 = base + index*8
 
 **风险**：
 - MOVBE 在 VM 中可能不可用（需要 CPUID 检查），daemon 需要做能力检测
-- 是否需要新 kinsn：可以用 direct BPF bytecode rewrite（把 ldxw+bswap 替换为一条 kfunc call bpf_movbe32）；或者直接在 JIT emit 层处理（更简单，但不需要 kinsn）
+- 是否需要新 kop：可以用 direct BPF bytecode rewrite（把 ldxw+bswap 替换为一条 kfunc call bpf_movbe32）；或者直接在 JIT emit 层处理（更简单，但不需要 kop）
 
 ### 4.3 BITFIELD_EXTRACT — 中等优先级，有条件推进
 
 **理由**：
 1. 542 corpus sites，40 objects，覆盖 cilium/tetragon/loxilb 等关键项目
-2. kinsn `bpf_extract64` 已实现（`module/x86/bpf_extract.c`），需要的是 daemon ExtractPass
+2. kop `bpf_extract64` 已实现（`module/x86/bpf_extract.c`），需要的是 daemon ExtractPass
 3. L/K gap = 0.733（27%），比 ENDIAN 小但仍值得
 4. **警告**：dense site 导致 I-cache flush 开销，extract_dense policy 已被清空。实际 corpus 程序中每对象 13.6 sites 平均密度，不像 micro 中的极端 dense case，I-cache 问题可能不严重
 
@@ -217,7 +217,7 @@ add r3, r2          ; r3 = base + index*8
 1. **仅 19 total sites，corpus 中 14 sites**：与已实现的 family（COND_SELECT 7,724 / ROTATE 2,685）相差 2-3 个数量级
 2. **只有 tetragon 有真实 sites**：tetragon 是 compile-only（无 exec 数据），对 exec ratio 没有贡献
 3. **L/K gap 虽然大（52%）但是 canonical benchmark 的数字**：addr_calc_stride 是专门设计来测 LEA 的，真实程序里的 14 个 sites 分散在各函数中，几乎感觉不到
-4. **实现成本不低**：需要 kinsn `bpf_lea()` + daemon AddrCalcPass，两者都不存在
+4. **实现成本不低**：需要 kop `bpf_lea()` + daemon AddrCalcPass，两者都不存在
 5. **论文价值几乎为零**：site 数量太少，无法在 corpus/e2e 评估中展示显著差异
 
 ---
@@ -238,7 +238,7 @@ add r3, r2          ; r3 = base + index*8
 3. 预期 corpus 改善：calico exec ratio 可能有 5-15% 提升（需要实际测量）
 
 **BITFIELD_EXTRACT** 值得做但优先级次之：
-- kinsn 已有，只需 daemon ExtractPass
+- kop 已有，只需 daemon ExtractPass
 - 注意 policy 需要 site density 限制（< 某阈值才 apply）
 
 ### 5.2 Skip（不做）

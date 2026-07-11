@@ -38,7 +38,7 @@ Review stance: prioritize delete/reduce findings over adding compatibility. The 
 - 类别：fail-soft
 - 建议：DELETE the `_ => {}` arm in `apply_features()` and return `Result<()>` so target JSON schema drift exits 1. A misspelled feature currently degrades pass gating without surfacing a defect.
 
-### bpfopt/crates/bpfopt/src/main.rs:994 - unknown kinsn encoding names collapse to zero bits
+### bpfopt/crates/bpfopt/src/main.rs:994 - unknown kop encoding names collapse to zero bits
 - 严重度：MEDIUM
 - 类别：fail-soft
 - 建议：重构 `parse_supported_encodings()` to return `Result<u32>` and reject unknown names. The current fold only recognizes `packed`/`packed_call`; every other string is ignored, which can silently disable a target capability.
@@ -73,10 +73,10 @@ Review stance: prioritize delete/reduce findings over adding compatibility. The 
 - 类别：fail-soft
 - 建议：DELETE the non-mapping zero return and the per-program non-mapping `continue` path around line 526. Schema drift in `per_program` should raise, not make aggregate site counts look like a clean no-op.
 
-### bpfopt/crates/bpfopt/src/pass.rs:795 - KinsnCallResolver is a one-implementation trait
+### bpfopt/crates/bpfopt/src/pass.rs:795 - KopCallResolver is a one-implementation trait
 - 严重度：LOW
 - 类别：complexity
-- 建议：DELETE the trait object and `Arc<dyn KinsnCallResolver>` until a real second resolver exists. `StaticKinsnCallResolver` only forwards to `KinsnRegistry::call_off_for_target_name()`, so the wrapper adds indirection without policy.
+- 建议：DELETE the trait object and `Arc<dyn KopCallResolver>` until a real second resolver exists. `StaticKopCallResolver` only forwards to `KopRegistry::call_off_for_target_name()`, so the wrapper adds indirection without policy.
 
 ### bpfopt/crates/bpfopt/src/passes/wide_mem.rs:21 - wide_mem carries old generic matcher shapes as public structs
 - 严重度：LOW
@@ -138,7 +138,7 @@ Review stance: prioritize delete/reduce findings over adding compatibility. The 
 ### runner/containers/runner-runtime.Dockerfile:441 - Rust daemon and bpfopt artifacts are upper layers
 - 严重度：LOW
 - 类别：complexity
-- 建议：KEEP. The runtime Dockerfile keeps app artifacts, kernel artifacts, kinsn/test artifacts, Rust daemon/CLI artifacts, then Python/config layers in the expected order.
+- 建议：KEEP. The runtime Dockerfile keeps app artifacts, kernel artifacts, kop/test artifacts, Rust daemon/CLI artifacts, then Python/config layers in the expected order.
 
 ### corpus/driver.py:188 - corpus summary is per-program avg_ns_per_run
 - 严重度：LOW
@@ -163,7 +163,7 @@ Review stance: prioritize delete/reduce findings over adding compatibility. The 
 4. `bpfopt/crates/bpfopt/src/pass.rs:990`: delete string-keyed required-analysis precompute, or make missing analysis names fatal.
 5. `bpfopt/crates/bpfopt/src/main.rs:935` and `:994`: delete silent ignore for unknown target features/encodings.
 6. `bpfopt/crates/bpfopt/src/passes/map_inline.rs:1400`: delete diagnostic-and-continue for map provider resolver errors.
-7. `bpfopt/crates/bpfopt/src/pass.rs:795`: delete `KinsnCallResolver` trait until a second real resolver exists.
+7. `bpfopt/crates/bpfopt/src/pass.rs:795`: delete `KopCallResolver` trait until a second real resolver exists.
 8. `bpfopt/crates/bpfrejit/src/main.rs:42` plus `bpfverify/src/main.rs:177`: delete duplicate fd-array parser copies via a shared library module.
 9. `bpfopt/crates/bpfopt/src/passes/wide_mem.rs:21`: delete generic `Binding` matcher leftovers and use a typed private site.
 10. `Makefile:192`: delete the advertised no-op `clean-results` target or implement it.

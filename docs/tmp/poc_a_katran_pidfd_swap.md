@@ -113,7 +113,7 @@ Runtime and privilege requirements:
 - Enable BPF runtime counters before checking `run_cnt`:
   `sysctl -q -w kernel.bpf_stats_enabled=1`. The corpus suite does this in
   `runner/suites/_common.py::ensure_bpf_stats_enabled()`.
-- A kinsn-only kernel is sufficient. This PoC does not use any kinsn program,
+- A kop-only kernel is sufficient. This PoC does not use any kop program,
   kfunc, `BPF_PROG_REJIT`, verifier-state side input, or daemon pass.
 
 External version references used while preparing this plan:
@@ -1078,5 +1078,5 @@ Action:
 - It does not prove a transparent fallback for legacy netlink XDP. Netlink
   replace can be atomic with expected old fd, but discovering and owning that
   attach path is a separate mechanism from pidfd link-FD takeover.
-- It does not require, exercise, or validate kinsn support.
+- It does not require, exercise, or validate kop support.
 

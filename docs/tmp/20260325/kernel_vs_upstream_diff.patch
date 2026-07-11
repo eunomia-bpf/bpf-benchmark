@@ -6,28 +6,28 @@ index adf84962d..48cbcd38e 100644
  	return 0;
  }
  
-+static int emit_kinsn_desc_call_arm64(struct jit_ctx *ctx,
++static int emit_kop_desc_call_arm64(struct jit_ctx *ctx,
 +				      const struct bpf_prog *bpf_prog,
 +				      const struct bpf_insn *insn)
 +{
-+	const struct bpf_kinsn *kinsn;
++	const struct bpf_kop *kop;
 +	u64 payload;
 +	int ret, saved_idx, n_insns;
 +
-+	ret = bpf_jit_get_kinsn_payload(bpf_prog, insn, &kinsn, &payload);
++	ret = bpf_jit_get_kop_payload(bpf_prog, insn, &kop, &payload);
 +	if (ret)
 +		return ret;
-+	if (!kinsn || !kinsn->emit_arm64)
++	if (!kop || !kop->emit_arm64)
 +		return -EOPNOTSUPP;
 +
 +	saved_idx = ctx->idx;
-+	n_insns = kinsn->emit_arm64(ctx->image, &ctx->idx, ctx->write,
++	n_insns = kop->emit_arm64(ctx->image, &ctx->idx, ctx->write,
 +				    payload, bpf_prog);
 +	if (n_insns < 0)
 +		return n_insns;
 +	if (ctx->idx - saved_idx != n_insns)
 +		return -EFAULT;
-+	if (n_insns * 4 > kinsn->max_emit_bytes)
++	if (n_insns * 4 > kop->max_emit_bytes)
 +		return -EFAULT;
 +
 +	return 0;
@@ -40,7 +40,7 @@ index adf84962d..48cbcd38e 100644
  	int ret;
  	bool sign_extend;
  
-+	if (bpf_kinsn_is_sidecar_insn(insn))
++	if (bpf_kop_is_sidecar_insn(insn))
 +		return 0;
 +
  	switch (code) {
@@ -50,9 +50,9 @@ index adf84962d..48cbcd38e 100644
  			break;
  		}
  
-+		/* Try to inline a kinsn call via module-provided ARM64 emit */
-+		if (insn->src_reg == BPF_PSEUDO_KINSN_CALL) {
-+			ret = emit_kinsn_desc_call_arm64(ctx, ctx->prog, insn);
++		/* Try to inline a kop call via module-provided ARM64 emit */
++		if (insn->src_reg == BPF_PSEUDO_KOP_CALL) {
++			ret = emit_kop_desc_call_arm64(ctx, ctx->prog, insn);
 +			if (ret)
 +				return ret;
 +			break;
@@ -69,28 +69,28 @@ index e9b78040d..f88ee3f57 100644
  	return emit_patch(pprog, func, ip, 0xE8);
  }
  
-+static int emit_kinsn_desc_call(u8 **pprog, const struct bpf_prog *bpf_prog,
++static int emit_kop_desc_call(u8 **pprog, const struct bpf_prog *bpf_prog,
 +				const struct bpf_insn *insn, bool emit)
 +{
-+	const struct bpf_kinsn *kinsn;
++	const struct bpf_kop *kop;
 +	u8 scratch[BPF_MAX_INSN_SIZE];
 +	u8 *prog = *pprog;
 +	u32 off = 0;
 +	u64 payload;
 +	int ret;
 +
-+	ret = bpf_jit_get_kinsn_payload(bpf_prog, insn, &kinsn, &payload);
++	ret = bpf_jit_get_kop_payload(bpf_prog, insn, &kop, &payload);
 +	if (ret)
 +		return ret;
-+	if (!kinsn || !kinsn->emit_x86)
++	if (!kop || !kop->emit_x86)
 +		return -EOPNOTSUPP;
-+	if (kinsn->max_emit_bytes > BPF_MAX_INSN_SIZE)
++	if (kop->max_emit_bytes > BPF_MAX_INSN_SIZE)
 +		return -E2BIG;
 +
-+	ret = kinsn->emit_x86(scratch, &off, emit, payload, bpf_prog);
++	ret = kop->emit_x86(scratch, &off, emit, payload, bpf_prog);
 +	if (ret < 0)
 +		return ret;
-+	if (ret != off || ret > kinsn->max_emit_bytes)
++	if (ret != off || ret > kop->max_emit_bytes)
 +		return -EFAULT;
 +	if (emit)
 +		memcpy(prog, scratch, off);
@@ -106,7 +106,7 @@ index e9b78040d..f88ee3f57 100644
  
  		case BPF_ALU64 | BPF_MOV | BPF_K:
  		case BPF_ALU | BPF_MOV | BPF_K:
-+			if (bpf_kinsn_is_sidecar_insn(insn))
++			if (bpf_kop_is_sidecar_insn(insn))
 +				break;
  			emit_mov_imm32(&prog, BPF_CLASS(insn->code) == BPF_ALU64,
  				       dst_reg, imm32);
@@ -115,8 +115,8 @@ index e9b78040d..f88ee3f57 100644
  			u8 *ip = image + addrs[i - 1];
  
  			func = (u8 *) __bpf_call_base + imm32;
-+			if (src_reg == BPF_PSEUDO_KINSN_CALL) {
-+				err = emit_kinsn_desc_call(&prog, bpf_prog, insn,
++			if (src_reg == BPF_PSEUDO_KOP_CALL) {
++				err = emit_kop_desc_call(&prog, bpf_prog, insn,
 +							    !!rw_image);
 +				if (err)
 +					return err;
@@ -133,7 +133,7 @@ index 05b34a635..8b49fe99b 100644
  	bool (*allowed)(const struct bpf_prog *prog);
  };
  
-+struct bpf_kinsn {
++struct bpf_kop {
 +	struct module *owner; /* NULL for built-in/vmlinux descriptors */
 +	u16 max_insn_cnt;
 +	u16 max_emit_bytes;
@@ -146,28 +146,28 @@ index 05b34a635..8b49fe99b 100644
 +			  u64 payload, const struct bpf_prog *prog);
 +};
 +
-+static inline bool bpf_kinsn_has_native_emit(const struct bpf_kinsn *kinsn)
++static inline bool bpf_kop_has_native_emit(const struct bpf_kop *kop)
 +{
-+	if (!kinsn)
++	if (!kop)
 +		return false;
 +#ifdef CONFIG_X86
-+	if (kinsn->emit_x86)
++	if (kop->emit_x86)
 +		return true;
 +#endif
 +#ifdef CONFIG_ARM64
-+	if (kinsn->emit_arm64)
++	if (kop->emit_arm64)
 +		return true;
 +#endif
 +	return false;
 +}
 +
-+static inline bool bpf_kinsn_is_sidecar_insn(const struct bpf_insn *insn)
++static inline bool bpf_kop_is_sidecar_insn(const struct bpf_insn *insn)
 +{
 +	return insn->code == (BPF_ALU64 | BPF_MOV | BPF_K) &&
-+	       insn->src_reg == BPF_PSEUDO_KINSN_SIDECAR;
++	       insn->src_reg == BPF_PSEUDO_KOP_SIDECAR;
 +}
 +
-+static inline u64 bpf_kinsn_sidecar_payload(const struct bpf_insn *insn)
++static inline u64 bpf_kop_sidecar_payload(const struct bpf_insn *insn)
 +{
 +	return (u64)(insn->dst_reg & 0xf) |
 +	       ((u64)(u16)insn->off << 4) |
@@ -238,9 +238,9 @@ index 05b34a635..8b49fe99b 100644
  const struct btf_func_model *
  bpf_jit_find_kfunc_model(const struct bpf_prog *prog,
  			 const struct bpf_insn *insn);
-+int bpf_jit_get_kinsn_payload(const struct bpf_prog *prog,
++int bpf_jit_get_kop_payload(const struct bpf_prog *prog,
 +			      const struct bpf_insn *insn,
-+			      const struct bpf_kinsn **kinsn,
++			      const struct bpf_kop **kop,
 +			      u64 *payload);
  int bpf_get_kfunc_addr(const struct bpf_prog *prog, u32 func_id,
  		       u16 btf_fd_idx, u8 **func_addr);
@@ -250,9 +250,9 @@ index 05b34a635..8b49fe99b 100644
  }
  
 +static inline int
-+bpf_jit_get_kinsn_payload(const struct bpf_prog *prog,
++bpf_jit_get_kop_payload(const struct bpf_prog *prog,
 +			      const struct bpf_insn *insn,
-+			      const struct bpf_kinsn **kinsn,
++			      const struct bpf_kop **kop,
 +			      u64 *payload)
 +{
 +	return -EOPNOTSUPP;
@@ -317,15 +317,15 @@ index c8d400b76..f8fdf5786 100644
   * bpf_call->imm == btf_id of a BTF_KIND_FUNC in the running kernel
   */
  #define BPF_PSEUDO_KFUNC_CALL	2
-+/* when bpf_mov->src_reg == BPF_PSEUDO_KINSN_SIDECAR,
-+ * the instruction carries packed kinsn metadata for the immediately
-+ * following kinsn call.
++/* when bpf_mov->src_reg == BPF_PSEUDO_KOP_SIDECAR,
++ * the instruction carries packed kop metadata for the immediately
++ * following kop call.
 + */
-+#define BPF_PSEUDO_KINSN_SIDECAR 3
-+/* when bpf_call->src_reg == BPF_PSEUDO_KINSN_CALL,
-+ * bpf_call->imm == btf_id of a BTF_KIND_FUNC kinsn stub
++#define BPF_PSEUDO_KOP_SIDECAR 3
++/* when bpf_call->src_reg == BPF_PSEUDO_KOP_CALL,
++ * bpf_call->imm == btf_id of a BTF_KIND_FUNC kop stub
 + */
-+#define BPF_PSEUDO_KINSN_CALL	4
++#define BPF_PSEUDO_KOP_CALL	4
  
  enum bpf_addr_space_cast {
  	BPF_ADDR_SPACE_CAST = 1,
@@ -543,19 +543,19 @@ index 4872d2a6c..64f592148 100644
  	u32 nr_filters;
  };
  
-+struct btf_kfunc_kinsn_desc {
++struct btf_kfunc_kop_desc {
 +	u32 id;
-+	const struct bpf_kinsn *kinsn;
++	const struct bpf_kop *kop;
 +};
 +
-+struct btf_kfunc_kinsn_set {
++struct btf_kfunc_kop_set {
 +	u32 cnt;
-+	struct btf_kfunc_kinsn_desc descs[];
++	struct btf_kfunc_kop_desc descs[];
 +};
 +
  struct btf_kfunc_set_tab {
  	struct btf_id_set8 *sets[BTF_KFUNC_HOOK_MAX];
-+	struct btf_kfunc_kinsn_set *kinsn_sets[BTF_KFUNC_HOOK_MAX];
++	struct btf_kfunc_kop_set *kop_sets[BTF_KFUNC_HOOK_MAX];
  	struct btf_kfunc_hook_filter hook_filters[BTF_KFUNC_HOOK_MAX];
  };
  
@@ -566,16 +566,16 @@ index 4872d2a6c..64f592148 100644
 -	for (hook = 0; hook < ARRAY_SIZE(tab->sets); hook++)
 +	for (hook = 0; hook < ARRAY_SIZE(tab->sets); hook++) {
  		kfree(tab->sets[hook]);
-+		kfree(tab->kinsn_sets[hook]);
++		kfree(tab->kop_sets[hook]);
 +	}
  	kfree(tab);
  	btf->kfunc_set_tab = NULL;
  }
  
-+static int btf_kfunc_kinsn_desc_cmp(const void *a, const void *b)
++static int btf_kfunc_kop_desc_cmp(const void *a, const void *b)
 +{
-+	const struct btf_kfunc_kinsn_desc *d0 = a;
-+	const struct btf_kfunc_kinsn_desc *d1 = b;
++	const struct btf_kfunc_kop_desc *d0 = a;
++	const struct btf_kfunc_kop_desc *d1 = b;
 +
 +	if (d0->id != d1->id)
 +		return d0->id < d1->id ? -1 : 1;
@@ -604,14 +604,14 @@ index 4872d2a6c..64f592148 100644
  {
  	struct btf_kfunc_hook_filter *hook_filter;
  	struct btf_id_set8 *add_set = kset->set;
-+	const struct bpf_kinsn * const *add_kinsn_descs = kset->kinsn_descs;
++	const struct bpf_kop * const *add_kop_descs = kset->kop_descs;
  	bool vmlinux_set = !btf_is_module(btf);
  	bool add_filter = !!kset->filter;
  	struct btf_kfunc_set_tab *tab;
-+	struct btf_kfunc_kinsn_set *kinsn_set;
++	struct btf_kfunc_kop_set *kop_set;
  	struct btf_id_set8 *set;
 -	u32 set_cnt, i;
-+	u32 kinsn_set_cnt, set_cnt, i;
++	u32 kop_set_cnt, set_cnt, i;
  	int ret;
  
  	if (hook >= BTF_KFUNC_HOOK_MAX) {
@@ -629,39 +629,39 @@ index 4872d2a6c..64f592148 100644
  
  	sort(set->pairs, set->cnt, sizeof(set->pairs[0]), btf_id_cmp_func, NULL);
  
-+	if (add_kinsn_descs) {
-+		kinsn_set = tab->kinsn_sets[hook];
-+		kinsn_set_cnt = kinsn_set ? kinsn_set->cnt : 0;
++	if (add_kop_descs) {
++		kop_set = tab->kop_sets[hook];
++		kop_set_cnt = kop_set ? kop_set->cnt : 0;
 +
-+		if (kinsn_set_cnt > U32_MAX - add_set->cnt) {
++		if (kop_set_cnt > U32_MAX - add_set->cnt) {
 +			ret = -EOVERFLOW;
 +			goto end;
 +		}
 +
-+		kinsn_set = krealloc(tab->kinsn_sets[hook],
-+				     struct_size(kinsn_set, descs,
-+						 kinsn_set_cnt + add_set->cnt),
++		kop_set = krealloc(tab->kop_sets[hook],
++				     struct_size(kop_set, descs,
++						 kop_set_cnt + add_set->cnt),
 +				     GFP_KERNEL | __GFP_NOWARN);
-+		if (!kinsn_set) {
++		if (!kop_set) {
 +			ret = -ENOMEM;
 +			goto end;
 +		}
 +
-+		if (!tab->kinsn_sets[hook])
-+			kinsn_set->cnt = 0;
-+		tab->kinsn_sets[hook] = kinsn_set;
++		if (!tab->kop_sets[hook])
++			kop_set->cnt = 0;
++		tab->kop_sets[hook] = kop_set;
 +
 +		for (i = 0; i < add_set->cnt; i++) {
-+			struct btf_kfunc_kinsn_desc *desc =
-+				&kinsn_set->descs[kinsn_set->cnt + i];
++			struct btf_kfunc_kop_desc *desc =
++				&kop_set->descs[kop_set->cnt + i];
 +
 +			desc->id = btf_relocate_id(btf, add_set->pairs[i].id);
-+			desc->kinsn = add_kinsn_descs[i];
++			desc->kop = add_kop_descs[i];
 +		}
 +
-+		kinsn_set->cnt += add_set->cnt;
-+		sort(kinsn_set->descs, kinsn_set->cnt, sizeof(kinsn_set->descs[0]),
-+		     btf_kfunc_kinsn_desc_cmp, NULL);
++		kop_set->cnt += add_set->cnt;
++		sort(kop_set->descs, kop_set->cnt, sizeof(kop_set->descs[0]),
++		     btf_kfunc_kop_desc_cmp, NULL);
 +	}
 +
  	if (add_filter) {
@@ -671,24 +671,24 @@ index 4872d2a6c..64f592148 100644
  	return id + 1;
  }
  
-+static const struct bpf_kinsn *
-+btf_kfunc_kinsn_set_contains(const struct btf *btf, enum btf_kfunc_hook hook,
++static const struct bpf_kop *
++btf_kfunc_kop_set_contains(const struct btf *btf, enum btf_kfunc_hook hook,
 +			     u32 kfunc_btf_id)
 +{
-+	struct btf_kfunc_kinsn_desc key = { .id = kfunc_btf_id };
-+	struct btf_kfunc_kinsn_set *set;
-+	struct btf_kfunc_kinsn_desc *desc;
++	struct btf_kfunc_kop_desc key = { .id = kfunc_btf_id };
++	struct btf_kfunc_kop_set *set;
++	struct btf_kfunc_kop_desc *desc;
 +
 +	if (hook >= BTF_KFUNC_HOOK_MAX)
 +		return NULL;
 +	if (!btf->kfunc_set_tab)
 +		return NULL;
-+	set = btf->kfunc_set_tab->kinsn_sets[hook];
++	set = btf->kfunc_set_tab->kop_sets[hook];
 +	if (!set)
 +		return NULL;
 +	desc = bsearch(&key, set->descs, set->cnt, sizeof(set->descs[0]),
-+		       btf_kfunc_kinsn_desc_cmp);
-+	return desc ? desc->kinsn : NULL;
++		       btf_kfunc_kop_desc_cmp);
++	return desc ? desc->kop : NULL;
 +}
 +
  static bool __btf_kfunc_is_allowed(const struct btf *btf,
@@ -750,16 +750,16 @@ index 4872d2a6c..64f592148 100644
 +	return NULL;
 +}
 +
-+const struct bpf_kinsn *btf_kfunc_kinsn_desc(const struct btf *btf, u32 kfunc_btf_id,
++const struct bpf_kop *btf_kfunc_kop_desc(const struct btf *btf, u32 kfunc_btf_id,
 +					     const struct bpf_prog *prog)
 +{
 +	enum btf_kfunc_hook hook = BTF_KFUNC_HOOK_COMMON;
-+	const struct bpf_kinsn *kinsn;
++	const struct bpf_kop *kop;
 +
 +again:
-+	kinsn = btf_kfunc_kinsn_set_contains(btf, hook, kfunc_btf_id);
-+	if (kinsn && __btf_kfunc_is_allowed(btf, hook, kfunc_btf_id, prog))
-+		return kinsn;
++	kop = btf_kfunc_kop_set_contains(btf, hook, kfunc_btf_id);
++	if (kop && __btf_kfunc_is_allowed(btf, hook, kfunc_btf_id, prog))
++		return kop;
 +
 +	if (hook == BTF_KFUNC_HOOK_COMMON) {
 +		hook = bpf_prog_type_to_kfunc_hook(resolve_prog_type(prog));
@@ -776,10 +776,10 @@ index 4872d2a6c..64f592148 100644
  		if (ret)
  			goto err_out;
 +
-+		if (kset->kinsn_descs) {
-+			const struct bpf_kinsn *kinsn = kset->kinsn_descs[i];
++		if (kset->kop_descs) {
++			const struct bpf_kop *kop = kset->kop_descs[i];
 +
-+			if (!kinsn || kinsn->owner != kset->owner) {
++			if (!kop || kop->owner != kset->owner) {
 +				ret = -EINVAL;
 +				goto err_out;
 +			}
@@ -808,8 +808,8 @@ index f8a3c7eb4..4df9a9ab9 100644
  		snprintf(buff, len, "%+d", insn->imm);
  	else if (insn->src_reg == BPF_PSEUDO_KFUNC_CALL)
  		snprintf(buff, len, "kernel-function");
-+	else if (insn->src_reg == BPF_PSEUDO_KINSN_CALL)
-+		snprintf(buff, len, "kinsn-function");
++	else if (insn->src_reg == BPF_PSEUDO_KOP_CALL)
++		snprintf(buff, len, "kop-function");
  
  	return buff;
  }
@@ -2093,10 +2093,10 @@ index 159b25f82..c531aea0d 100644
  	       insn->src_reg == BPF_PSEUDO_KFUNC_CALL;
  }
  
-+static bool bpf_pseudo_kinsn_call(const struct bpf_insn *insn)
++static bool bpf_pseudo_kop_call(const struct bpf_insn *insn)
 +{
 +	return insn->code == (BPF_JMP | BPF_CALL) &&
-+	       insn->src_reg == BPF_PSEUDO_KINSN_CALL;
++	       insn->src_reg == BPF_PSEUDO_KOP_CALL;
 +}
 +
  struct bpf_map_desc {
@@ -2106,7 +2106,7 @@ index 159b25f82..c531aea0d 100644
  struct bpf_kfunc_meta {
  	struct btf *btf;
  	const struct btf_type *proto;
-+	const struct bpf_kinsn *kinsn;
++	const struct bpf_kop *kop;
  	const char *name;
  	const u32 *flags;
  	s32 id;
@@ -2114,7 +2114,7 @@ index 159b25f82..c531aea0d 100644
  
  struct bpf_kfunc_desc {
  	struct btf_func_model func_model;
-+	const struct bpf_kinsn *kinsn;
++	const struct bpf_kop *kop;
  	u32 func_id;
  	s32 imm;
  	u16 offset;
@@ -2156,7 +2156,7 @@ index 159b25f82..c531aea0d 100644
  	memset(kfunc, 0, sizeof(*kfunc));
  	kfunc->btf = btf;
  	kfunc->id = func_id;
-+	kfunc->kinsn = btf_kfunc_kinsn_desc(btf, func_id, env->prog);
++	kfunc->kop = btf_kfunc_kop_desc(btf, func_id, env->prog);
  	kfunc->name = func_name;
  	kfunc->proto = func_proto;
  	kfunc->flags = kfunc_flags;
@@ -2166,7 +2166,7 @@ index 159b25f82..c531aea0d 100644
  
 -static int add_kfunc_call(struct bpf_verifier_env *env, u32 func_id, s16 offset)
 +static int add_kfunc_desc(struct bpf_verifier_env *env, u32 func_id, s16 offset,
-+			  bool kinsn_call)
++			  bool kop_call)
  {
 -	struct bpf_kfunc_btf_tab *btf_tab;
  	struct btf_func_model func_model;
@@ -2183,7 +2183,7 @@ index 159b25f82..c531aea0d 100644
 +	 * loaded from userspace. It is also required that offset be untouched
 +	 * for such calls.
 +	 */
-+	if (!kinsn_call && !func_id && !offset)
++	if (!kop_call && !func_id && !offset)
 +		return 0;
 +
  	tab = prog_aux->kfunc_tab;
@@ -2193,7 +2193,7 @@ index 159b25f82..c531aea0d 100644
 -			verbose(env, "calling kernel function is not supported without CONFIG_DEBUG_INFO_BTF\n");
 -			return -ENOTSUPP;
 -		}
-+		if (!kinsn_call) {
++		if (!kop_call) {
 +			if (!btf_vmlinux) {
 +				verbose(env,
 +					"calling kernel function is not supported without CONFIG_DEBUG_INFO_BTF\n");
@@ -2255,7 +2255,7 @@ index 159b25f82..c531aea0d 100644
  	if (tab->nr_descs == MAX_KFUNC_DESCS) {
 -		verbose(env, "too many different kernel function calls\n");
 +		verbose(env, "too many different kernel/%s calls\n",
-+			kinsn_call ? "kinsn" : "function");
++			kop_call ? "kop" : "function");
  		return -E2BIG;
  	}
  
@@ -2271,9 +2271,9 @@ index 159b25f82..c531aea0d 100644
 +	desc = &tab->descs[tab->nr_descs++];
 +	desc->func_id = func_id;
 +	desc->offset = offset;
-+	if (kinsn_call) {
-+		if (!kfunc.kinsn) {
-+			verbose(env, "kfunc btf_id %d is not registered as kinsn\n",
++	if (kop_call) {
++		if (!kfunc.kop) {
++			verbose(env, "kfunc btf_id %d is not registered as kop\n",
 +				func_id);
 +			tab->nr_descs--;
 +			return -ENOENT;
@@ -2282,15 +2282,15 @@ index 159b25f82..c531aea0d 100644
 -	if (bpf_dev_bound_kfunc_id(func_id)) {
 -		err = bpf_dev_bound_kfunc_check(&env->log, prog_aux);
 -		if (err)
-+		if (!kfunc.kinsn->instantiate_insn || !kfunc.kinsn->max_insn_cnt) {
-+			verbose(env, "kinsn function btf_id %d is incomplete\n",
++		if (!kfunc.kop->instantiate_insn || !kfunc.kop->max_insn_cnt) {
++			verbose(env, "kop function btf_id %d is incomplete\n",
 +				func_id);
 +			tab->nr_descs--;
 +			return -EINVAL;
 +		}
 +
 +		desc->imm = func_id;
-+		desc->kinsn = kfunc.kinsn;
++		desc->kop = kfunc.kop;
 +	} else {
 +		addr = kallsyms_lookup_name(kfunc.name);
 +		if (!addr) {
@@ -2357,7 +2357,7 @@ index 159b25f82..c531aea0d 100644
 +		struct bpf_kfunc_desc *desc = &tab->descs[i];
 +		int err;
 +
-+		if (desc->kinsn) {
++		if (desc->kop) {
 +			desc->imm = desc->func_id;
 +			continue;
 +		}
@@ -2378,7 +2378,7 @@ index 159b25f82..c531aea0d 100644
 +		return false;
 +
 +	for (i = 0; i < tab->nr_descs; i++) {
-+		if (!tab->descs[i].kinsn)
++		if (!tab->descs[i].kop)
 +			return true;
 +	}
 +
@@ -2405,25 +2405,25 @@ index 159b25f82..c531aea0d 100644
 +		return NULL;
 +	desc = bsearch(&key, tab->descs, tab->nr_descs,
 +		       sizeof(tab->descs[0]), kfunc_desc_cmp_by_imm_off);
-+	return desc && !desc->kinsn ? &desc->func_model : NULL;
++	return desc && !desc->kop ? &desc->func_model : NULL;
 +}
 +
-+static int validate_kinsn_proof_seq(struct bpf_verifier_env *env,
-+				    const struct bpf_kinsn *kinsn,
++static int validate_kop_proof_seq(struct bpf_verifier_env *env,
++				    const struct bpf_kop *kop,
 +				    const struct bpf_insn *insn_buf,
 +				    u32 cnt)
 +{
 +	u32 i;
 +
-+	if (!cnt || cnt > kinsn->max_insn_cnt)
++	if (!cnt || cnt > kop->max_insn_cnt)
 +		return -EINVAL;
 +
 +	for (i = 0; i < cnt; i++) {
 +		const struct bpf_insn *insn = &insn_buf[i];
 +		u8 class = BPF_CLASS(insn->code);
 +
-+		if (bpf_kinsn_is_sidecar_insn(insn)) {
-+			verbose(env, "kinsn proof sequence cannot contain sidecar pseudo-insns\n");
++		if (bpf_kop_is_sidecar_insn(insn)) {
++			verbose(env, "kop proof sequence cannot contain sidecar pseudo-insns\n");
 +			return -EINVAL;
 +		}
 +
@@ -2434,7 +2434,7 @@ index 159b25f82..c531aea0d 100644
  
 -	return res ? &res->func_model : NULL;
 +			if (op == BPF_CALL || op == BPF_EXIT) {
-+				verbose(env, "kinsn proof sequence cannot contain calls or exits\n");
++				verbose(env, "kop proof sequence cannot contain calls or exits\n");
 +				return -EINVAL;
 +			}
 +
@@ -2444,18 +2444,18 @@ index 159b25f82..c531aea0d 100644
 +
 +			tgt = i + 1 + jmp_off;
 +			if (tgt < 0 || tgt > cnt) {
-+				verbose(env, "kinsn proof sequence jump escapes its region\n");
++				verbose(env, "kop proof sequence jump escapes its region\n");
 +				return -EINVAL;
 +			}
 +			if (tgt <= i) {
-+				verbose(env, "kinsn proof sequence cannot contain back-edges\n");
++				verbose(env, "kop proof sequence cannot contain back-edges\n");
 +				return -EINVAL;
 +			}
 +		}
 +
 +		if (class == BPF_LD && BPF_MODE(insn->code) == BPF_IMM &&
 +		    insn->src_reg != 0) {
-+			verbose(env, "kinsn proof sequence cannot contain pseudo ldimm64\n");
++			verbose(env, "kop proof sequence cannot contain pseudo ldimm64\n");
 +			return -EINVAL;
 +		}
 +	}
@@ -2463,28 +2463,28 @@ index 159b25f82..c531aea0d 100644
 +	return 0;
 +}
 +
-+static int lower_kinsn_proof_regions(struct bpf_verifier_env *env)
++static int lower_kop_proof_regions(struct bpf_verifier_env *env)
 +{
-+	u32 cap = env->kinsn_call_cnt;
++	u32 cap = env->kop_call_cnt;
 +	struct bpf_insn *proof_buf = NULL;
 +	int err;
 +	int i;
 +
-+	kvfree(env->kinsn_regions);
-+	env->kinsn_regions = NULL;
-+	env->kinsn_region_cnt = 0;
-+	env->kinsn_region_cap = cap;
++	kvfree(env->kop_regions);
++	env->kop_regions = NULL;
++	env->kop_region_cnt = 0;
++	env->kop_region_cap = cap;
 +	if (cap) {
-+		env->kinsn_regions = kvcalloc(cap, sizeof(*env->kinsn_regions),
++		env->kop_regions = kvcalloc(cap, sizeof(*env->kop_regions),
 +					      GFP_KERNEL_ACCOUNT);
-+		if (!env->kinsn_regions)
++		if (!env->kop_regions)
 +			return -ENOMEM;
 +	}
 +
 +	for (i = env->prog->len - 1; i >= 0; i--) {
 +		struct bpf_prog *new_prog;
-+		struct bpf_kinsn_region *region;
-+		const struct bpf_kinsn *kinsn;
++		struct bpf_kop_region *region;
++		const struct bpf_kop *kop;
 +		struct bpf_insn *call;
 +		const struct bpf_insn *sidecar = NULL;
 +		u64 payload;
@@ -2492,10 +2492,10 @@ index 159b25f82..c531aea0d 100644
 +
 +		proof_buf = NULL;
 +		call = &env->prog->insnsi[i];
-+		if (!bpf_pseudo_kinsn_call(call))
++		if (!bpf_pseudo_kop_call(call))
 +			continue;
 +
-+		if (i > 0 && bpf_kinsn_is_sidecar_insn(&env->prog->insnsi[i - 1])) {
++		if (i > 0 && bpf_kop_is_sidecar_insn(&env->prog->insnsi[i - 1])) {
 +			int j;
 +
 +			sidecar = &env->prog->insnsi[i - 1];
@@ -2507,36 +2507,36 @@ index 159b25f82..c531aea0d 100644
 +			}
 +		}
 +		if (!sidecar) {
-+			verbose(env, "kinsn call must be preceded by sidecar payload\n");
++			verbose(env, "kop call must be preceded by sidecar payload\n");
 +			return -EINVAL;
 +		}
 +
-+		err = bpf_jit_get_kinsn_payload(env->prog, call, &kinsn, &payload);
++		err = bpf_jit_get_kop_payload(env->prog, call, &kop, &payload);
 +		if (err)
 +			return err;
 +
-+		proof_buf = kvcalloc(kinsn->max_insn_cnt, sizeof(*proof_buf),
++		proof_buf = kvcalloc(kop->max_insn_cnt, sizeof(*proof_buf),
 +				     GFP_KERNEL_ACCOUNT);
 +		if (!proof_buf)
 +			return -ENOMEM;
 +
-+		cnt = kinsn->instantiate_insn(payload, proof_buf);
++		cnt = kop->instantiate_insn(payload, proof_buf);
 +		if (cnt <= 0) {
 +			err = cnt ? cnt : -EINVAL;
 +			goto err_free_proof_buf;
 +		}
 +
-+		err = validate_kinsn_proof_seq(env, kinsn, proof_buf, cnt);
++		err = validate_kop_proof_seq(env, kop, proof_buf, cnt);
 +		if (err)
 +			goto err_free_proof_buf;
 +
-+		if (env->kinsn_region_cnt == env->kinsn_region_cap) {
-+			verbose(env, "too many kinsn proof regions\n");
++		if (env->kop_region_cnt == env->kop_region_cap) {
++			verbose(env, "too many kop proof regions\n");
 +			err = -E2BIG;
 +			goto err_free_proof_buf;
 +		}
 +
-+		region = &env->kinsn_regions[env->kinsn_region_cnt++];
++		region = &env->kop_regions[env->kop_region_cnt++];
 +		region->start = i - 1;
 +		region->proof_len = cnt;
 +		region->orig[0] = *sidecar;
@@ -2555,8 +2555,8 @@ index 159b25f82..c531aea0d 100644
 +		if (cnt != 2) {
 +			u32 j;
 +
-+			for (j = 0; j < env->kinsn_region_cnt - 1; j++) {
-+				struct bpf_kinsn_region *prior = &env->kinsn_regions[j];
++			for (j = 0; j < env->kop_region_cnt - 1; j++) {
++				struct bpf_kop_region *prior = &env->kop_regions[j];
 +				s32 new_start;
 +
 +				if (prior->start <= region->start)
@@ -2577,14 +2577,14 @@ index 159b25f82..c531aea0d 100644
 +	return err;
 +}
 +
-+static int restore_kinsn_proof_regions(struct bpf_verifier_env *env)
++static int restore_kop_proof_regions(struct bpf_verifier_env *env)
 +{
 +	struct bpf_insn_aux_data *aux = env->insn_aux_data;
 +	u32 i;
 +
-+	for (i = 0; i < env->kinsn_region_cnt; i++) {
++	for (i = 0; i < env->kop_region_cnt; i++) {
 +		struct bpf_prog *new_prog;
-+		struct bpf_kinsn_region *region = &env->kinsn_regions[i];
++		struct bpf_kop_region *region = &env->kop_regions[i];
 +		int err;
 +
 +		new_prog = bpf_patch_insn_data(env, region->start, region->orig, 2);
@@ -2622,9 +2622,9 @@ index 159b25f82..c531aea0d 100644
 +	return 0;
 +}
 +
-+int bpf_jit_get_kinsn_payload(const struct bpf_prog *prog,
++int bpf_jit_get_kop_payload(const struct bpf_prog *prog,
 +			      const struct bpf_insn *insn,
-+			      const struct bpf_kinsn **kinsn,
++			      const struct bpf_kop **kop,
 +			      u64 *payload)
 +{
 +	const struct bpf_kfunc_desc key = {
@@ -2640,16 +2640,16 @@ index 159b25f82..c531aea0d 100644
 +		return -ENOENT;
 +	desc = bsearch(&key, tab->descs, tab->nr_descs,
 +		       sizeof(tab->descs[0]), kfunc_desc_cmp_by_imm_off);
-+	if (!desc || !desc->kinsn)
++	if (!desc || !desc->kop)
 +		return -ENOENT;
 +
-+	if (insn_idx <= 0 || !bpf_kinsn_is_sidecar_insn(insn - 1))
++	if (insn_idx <= 0 || !bpf_kop_is_sidecar_insn(insn - 1))
 +		return -EINVAL;
 +
-+	if (kinsn)
-+		*kinsn = desc->kinsn;
++	if (kop)
++		*kop = desc->kop;
 +	if (payload)
-+		*payload = bpf_kinsn_sidecar_payload(insn - 1);
++		*payload = bpf_kop_sidecar_payload(insn - 1);
 +	return 0;
  }
  
@@ -2667,7 +2667,7 @@ index 159b25f82..c531aea0d 100644
  	struct bpf_insn *insn = env->prog->insnsi;
  
  	/* Add entry function. */
-+	env->kinsn_call_cnt = 0;
++	env->kop_call_cnt = 0;
 +
  	ret = add_subprog(env, 0);
  	if (ret)
@@ -2677,7 +2677,7 @@ index 159b25f82..c531aea0d 100644
  		if (!bpf_pseudo_func(insn) && !bpf_pseudo_call(insn) &&
 -		    !bpf_pseudo_kfunc_call(insn))
 +		    !bpf_pseudo_kfunc_call(insn) &&
-+		    !bpf_pseudo_kinsn_call(insn))
++		    !bpf_pseudo_kop_call(insn))
  			continue;
  
  		if (!env->bpf_capable) {
@@ -2690,7 +2690,7 @@ index 159b25f82..c531aea0d 100644
 +		else if (bpf_pseudo_kfunc_call(insn))
 +			ret = add_kfunc_desc(env, insn->imm, insn->off, false);
 +		else {
-+			env->kinsn_call_cnt++;
++			env->kop_call_cnt++;
 +			ret = add_kfunc_desc(env, insn->imm, insn->off, true);
 +		}
  
@@ -2706,7 +2706,7 @@ index 159b25f82..c531aea0d 100644
  
 -	if (insn->src_reg != BPF_PSEUDO_KFUNC_CALL)
 +	if (insn->src_reg != BPF_PSEUDO_KFUNC_CALL &&
-+	    insn->src_reg != BPF_PSEUDO_KINSN_CALL)
++	    insn->src_reg != BPF_PSEUDO_KOP_CALL)
  		return NULL;
  
  	desc_btf = find_kfunc_desc_btf(data, insn->off);
@@ -2724,7 +2724,7 @@ index 159b25f82..c531aea0d 100644
  	 */
  	bt_sync_linked_regs(bt, hist);
  
-+	if (bpf_kinsn_is_sidecar_insn(insn))
++	if (bpf_kop_is_sidecar_insn(insn))
 +		return 0;
 +
  	if (class == BPF_ALU || class == BPF_ALU64) {
@@ -2734,19 +2734,19 @@ index 159b25f82..c531aea0d 100644
  	return 0;
  }
  
-+static int check_kinsn_sidecar_insn(struct bpf_verifier_env *env,
++static int check_kop_sidecar_insn(struct bpf_verifier_env *env,
 +				    const struct bpf_insn *insn)
 +{
 +	const struct bpf_insn *next;
 +
 +	if (env->insn_idx == env->prog->len - 1) {
-+		verbose(env, "kinsn sidecar must be followed by a kinsn call\n");
++		verbose(env, "kop sidecar must be followed by a kop call\n");
 +		return -EINVAL;
 +	}
 +
 +	next = &env->prog->insnsi[env->insn_idx + 1];
-+	if (!bpf_pseudo_kinsn_call(next)) {
-+		verbose(env, "kinsn sidecar must be immediately followed by a kinsn call\n");
++	if (!bpf_pseudo_kop_call(next)) {
++		verbose(env, "kop sidecar must be immediately followed by a kop call\n");
 +		return -EINVAL;
 +	}
 +
@@ -2760,8 +2760,8 @@ index 159b25f82..c531aea0d 100644
  	struct bpf_insn *insn = &env->prog->insnsi[env->insn_idx];
  	u8 class = BPF_CLASS(insn->code);
  
-+	if (bpf_kinsn_is_sidecar_insn(insn))
-+		return check_kinsn_sidecar_insn(env, insn);
++	if (bpf_kop_is_sidecar_insn(insn))
++		return check_kop_sidecar_insn(env, insn);
 +
  	if (class == BPF_ALU || class == BPF_ALU64) {
  		err = check_alu_op(env, insn);
@@ -2770,13 +2770,13 @@ index 159b25f82..c531aea0d 100644
  		if (opcode == BPF_CALL) {
  			if (BPF_SRC(insn->code) != BPF_K ||
  			    (insn->src_reg != BPF_PSEUDO_KFUNC_CALL &&
-+			     insn->src_reg != BPF_PSEUDO_KINSN_CALL &&
++			     insn->src_reg != BPF_PSEUDO_KOP_CALL &&
  			     insn->off != 0) ||
  			    (insn->src_reg != BPF_REG_0 &&
  			     insn->src_reg != BPF_PSEUDO_CALL &&
 -			     insn->src_reg != BPF_PSEUDO_KFUNC_CALL) ||
 +			     insn->src_reg != BPF_PSEUDO_KFUNC_CALL &&
-+			     insn->src_reg != BPF_PSEUDO_KINSN_CALL) ||
++			     insn->src_reg != BPF_PSEUDO_KOP_CALL) ||
  			    insn->dst_reg != BPF_REG_0 || class == BPF_JMP32) {
  				verbose(env, "BPF_CALL uses reserved fields\n");
  				return -EINVAL;
@@ -2784,8 +2784,8 @@ index 159b25f82..c531aea0d 100644
  				err = check_kfunc_call(env, insn, &env->insn_idx);
  				if (!err && is_bpf_throw_kfunc(insn))
  					return process_bpf_exit_full(env, do_print_state, true);
-+			} else if (insn->src_reg == BPF_PSEUDO_KINSN_CALL) {
-+				verbose(env, "internal error: kinsn call reached verifier without proof lowering\n");
++			} else if (insn->src_reg == BPF_PSEUDO_KOP_CALL) {
++				verbose(env, "internal error: kop call reached verifier without proof lowering\n");
 +				return -EFAULT;
  			} else {
  				err = check_helper_call(env, insn, &env->insn_idx);
@@ -2796,7 +2796,7 @@ index 159b25f82..c531aea0d 100644
  	struct bpf_insn *insn = prog->insnsi;
 -	bool has_kfunc_call = bpf_prog_has_kfunc_call(prog);
 +	struct bpf_kfunc_desc_tab *tab = prog->aux->kfunc_tab;
-+	bool has_kfunc_call = false, has_kinsn_call = false;
++	bool has_kfunc_call = false, has_kop_call = false;
  	int i, depth;
  #endif
  	int err = 0;
@@ -2806,11 +2806,11 @@ index 159b25f82..c531aea0d 100644
  #ifndef CONFIG_BPF_JIT_ALWAYS_ON
 +	if (tab) {
 +		for (i = 0; i < tab->nr_descs; i++) {
-+			if (tab->descs[i].kinsn)
-+				has_kinsn_call = true;
++			if (tab->descs[i].kop)
++				has_kop_call = true;
 +			else
 +				has_kfunc_call = true;
-+			if (has_kfunc_call && has_kinsn_call)
++			if (has_kfunc_call && has_kop_call)
 +				break;
 +		}
 +	}
@@ -2819,8 +2819,8 @@ index 159b25f82..c531aea0d 100644
  		verbose(env, "calling kernel functions are not allowed in non-JITed programs\n");
  		return -EINVAL;
  	}
-+	if (has_kinsn_call) {
-+		verbose(env, "kinsn calls are not allowed in non-JITed programs\n");
++	if (has_kop_call) {
++		verbose(env, "kop calls are not allowed in non-JITed programs\n");
 +		return -EINVAL;
 +	}
  	if (env->subprog_cnt > 1 && env->prog->aux->tail_call_reachable) {
@@ -2830,27 +2830,27 @@ index 159b25f82..c531aea0d 100644
  	}
  
  	for (i = 0; i < insn_cnt;) {
-+		if (bpf_kinsn_is_sidecar_insn(insn)) {
-+			const struct bpf_kinsn *kinsn;
++		if (bpf_kop_is_sidecar_insn(insn)) {
++			const struct bpf_kop *kop;
 +			const struct bpf_insn *call = insn + 1;
 +
-+			if (i + 1 >= insn_cnt || !bpf_pseudo_kinsn_call(call))
++			if (i + 1 >= insn_cnt || !bpf_pseudo_kop_call(call))
 +				goto next_insn;
 +
-+			ret = bpf_jit_get_kinsn_payload(env->prog, call, &kinsn, NULL);
++			ret = bpf_jit_get_kop_payload(env->prog, call, &kop, NULL);
 +			if (ret)
 +				return ret;
 +
-+			cnt = kinsn->instantiate_insn(bpf_kinsn_sidecar_payload(insn),
++			cnt = kop->instantiate_insn(bpf_kop_sidecar_payload(insn),
 +						      env->insn_buf);
 +			if (cnt <= 0)
 +				return cnt ? cnt : -EINVAL;
 +
-+			ret = validate_kinsn_proof_seq(env, kinsn, env->insn_buf, cnt);
++			ret = validate_kop_proof_seq(env, kop, env->insn_buf, cnt);
 +			if (ret)
 +				return ret;
 +
-+			if (prog->jit_requested && bpf_kinsn_has_native_emit(kinsn))
++			if (prog->jit_requested && bpf_kop_has_native_emit(kop))
 +				goto next_insn;
 +
 +			ret = verifier_remove_insns(env, i + delta + 1, 1);
@@ -2875,7 +2875,7 @@ index 159b25f82..c531aea0d 100644
  			goto next_insn;
  		if (insn->src_reg == BPF_PSEUDO_CALL)
  			goto next_insn;
-+		if (insn->src_reg == BPF_PSEUDO_KINSN_CALL)
++		if (insn->src_reg == BPF_PSEUDO_KOP_CALL)
 +			goto next_insn;
  		if (insn->src_reg == BPF_PSEUDO_KFUNC_CALL) {
  			ret = fixup_kfunc_call(env, insn, insn_buf, i + delta, &cnt);
@@ -2892,7 +2892,7 @@ index 159b25f82..c531aea0d 100644
 +	if (ret < 0)
 +		goto skip_full_check;
 +
-+	ret = lower_kinsn_proof_regions(env);
++	ret = lower_kop_proof_regions(env);
 +	if (ret < 0)
 +		goto skip_full_check;
 +
@@ -2921,7 +2921,7 @@ index 159b25f82..c531aea0d 100644
 +	env->explored_states = NULL;
 +
 +	if (ret == 0)
-+		ret = restore_kinsn_proof_regions(env);
++		ret = restore_kop_proof_regions(env);
  
  	/* might decrease stack depth, keep it before passes that
  	 * allocate additional slots.
@@ -2929,7 +2929,7 @@ index 159b25f82..c531aea0d 100644
  	kvfree(env->scc_info);
  	kvfree(env->succ);
  	kvfree(env->gotox_tmp_buf);
-+	kvfree(env->kinsn_regions);
++	kvfree(env->kop_regions);
  	kvfree(env);
  	return ret;
  }

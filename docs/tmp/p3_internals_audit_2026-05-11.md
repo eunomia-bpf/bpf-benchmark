@@ -21,7 +21,7 @@ The leaks are visible but fixable:
 ## A. BBProgram Surface
 
 Must-fix:
-- Delete zero-call production APIs: `entry()` [bbprogram.rs:137], `block_body_len()` [bbprogram.rs:152], `block_body_insns()` [bbprogram.rs:180], `body_insn_window()` [bbprogram.rs:194], `block_entry_site()` [bbprogram.rs:614], `kinsn_registry()` [bbprogram.rs:499], `delete_cond_branch_at_site()` [bbprogram_api.rs:145], `split_block_at_site()` [bbprogram_api.rs:394]. Estimated delta: `-70..100 LOC`.
+- Delete zero-call production APIs: `entry()` [bbprogram.rs:137], `block_body_len()` [bbprogram.rs:152], `block_body_insns()` [bbprogram.rs:180], `body_insn_window()` [bbprogram.rs:194], `block_entry_site()` [bbprogram.rs:614], `kop_registry()` [bbprogram.rs:499], `delete_cond_branch_at_site()` [bbprogram_api.rs:145], `split_block_at_site()` [bbprogram_api.rs:394]. Estimated delta: `-70..100 LOC`.
 - Delete old typed-verifier/oracle residue: `reg_known_map_ptr()` [bbprogram.rs:321], `reg_proven_bounds()` [bbprogram.rs:331], `MapPtr` [pass.rs:27], `map_ptr_from_reg_state()` [bbprogram.rs:935], `proven_bounds_from_reg_state()` [bbprogram.rs:943]. No production callers. Estimated delta: `-60..80 LOC`.
 - Gate or delete test-only liveness/oracle helpers: `oracle()` [bbprogram.rs:304], `live_out_site()` [bbprogram.rs:270], `reaching_defs()` [bbprogram.rs:283], `dominance()` [bbprogram.rs:243]. Estimated delta: `-40..70 LOC`.
 
@@ -45,7 +45,7 @@ Must-fix / high ROI:
 - `rep_site_slot()` [bbprogram.rs:1682] only supports prefetch internals through `pf_*`; remove or privatize after moving `pf_*`.
 
 Keep:
-- `rep_admit_kinsn_site_window()` [bbprogram.rs:1687] is shared by several kinsn-class passes, so it is real shared infrastructure. Rename to a non-`rep_` name if cleaning surface.
+- `rep_admit_kop_site_window()` [bbprogram.rs:1687] is shared by several kop-class passes, so it is real shared infrastructure. Rename to a non-`rep_` name if cleaning surface.
 
 ## C. Lifecycle / Mutation
 
@@ -78,7 +78,7 @@ Must-fix:
 - `map_pseudo_kind()` [insn.rs:406] overlaps `map_pseudo()` [insn.rs:397]. Collapse callers to `map_pseudo()`.
 
 Keep:
-- `pack_u4/u8/u16/u32` and `unpack_u4/u8/u16/u32` [insn.rs:608-639] are used by kinsn payload code and sidecar decoding.
+- `pack_u4/u8/u16/u32` and `unpack_u4/u8/u16/u32` [insn.rs:608-639] are used by kop payload code and sidecar decoding.
 - `packet_ctx_layout()` [insn.rs:109] is shared by packet-access passes and belongs in common instruction/layout code.
 - `SimpleRegValue` [insn.rs:644] is justified because it shares one register-state transition implementation across const-prop and map-inline style analysis.
 
@@ -123,7 +123,7 @@ Largest non-test source files:
 - `verifier_log.rs`: `853`
 
 Longest functions in audited files:
-- `lift_with_kinsn_registry()` [bbprogram_lift.rs:27], about `112 LOC`
+- `lift_with_kop_registry()` [bbprogram_lift.rs:27], about `112 LOC`
 - `merge_linear_chain_in_place()` [bbprogram_api.rs:264], about `99 LOC`
 - `parse_compressed_map_values_json()` [main.rs:1349], about `81 LOC`
 - `replace_diamond_with_insns_in_place()` [bbprogram_api.rs:458], about `81 LOC`

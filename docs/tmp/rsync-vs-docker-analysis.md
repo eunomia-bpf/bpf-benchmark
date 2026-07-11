@@ -32,7 +32,7 @@
    _rsync_to(ctx, ip, modules_root, f"{remote_kernel_stage_dir}/lib/modules/{kernel_release}", excludes=("build", "source"))
    ```
    
-2. `aws_executor.py:395` — `_sync_remote_roots()`：将整个 workspace 的多个子目录（runner 代码、构建产物、kinsn 模块等）rsync 到远端  
+2. `aws_executor.py:395` — `_sync_remote_roots()`：将整个 workspace 的多个子目录（runner 代码、构建产物、kop 模块等）rsync 到远端  
    ```
    aws_common._rsync_to(ctx, ip, source_path, remote_path, excludes=("results/", "__pycache__/"))
    ```
@@ -95,7 +95,7 @@
 | **内核模块**（用于 AWS 自定义内核安装）| 本地 `.cache/repo-artifacts/*/kernel-modules/lib/modules/<version>/` → 远端 stage | `aws_executor.py:225` |
 | **runner Python 代码** | `runner/__init__.py`, `runner/libs`, `runner/suites` 等 | `aws_executor.py:395` |
 | **benchmark driver 代码** | `micro/driver.py`, `corpus/driver.py`, `e2e/driver.py` 等 | 同上 |
-| **kinsn 内核模块**（bpf_*.ko）| `module/x86/` 或 `module/arm64/` 目录 | 同上 |
+| **kop 内核模块**（bpf_*.ko）| `module/x86/` 或 `module/arm64/` 目录 | 同上 |
 | **workload-tools binaries** | `.cache/workload-tools/arm64/bin/` | 同上 |
 | **native repo 构建产物** | bcc, tracee, bpftrace, katran, tetragon 二进制 | 同上 |
 | **SCX packages** | `.cache/repo-artifacts/*/scx/` | 同上 |
@@ -117,7 +117,7 @@
 
 **可以打包进 Docker image 的内容：**
 
-1. **kinsn 内核模块（bpf_*.ko）**：文件小（几百 KB），随构建确定，适合打包  
+1. **kop 内核模块（bpf_*.ko）**：文件小（几百 KB），随构建确定，适合打包  
 2. **workload-tools binaries**（hackbench, sysbench, wrk）：静态/半静态，适合打包  
 3. **native repo 构建产物**（tracee, bpftrace, bcc tools 等）：二进制，适合打包  
 4. **micro BPF objects**：小文件，适合打包  
@@ -180,7 +180,7 @@ sudo depmod -a <version>
 | **增量更新代价高** | rsync 天然支持增量（只传变化的文件），docker image 每次 rebuild 即使只改了一个 .py 文件也要重新 push/pull 整层 |
 | **开发迭代成本** | 改一行 runner 代码，需要 rebuild image → save → rsync → remote docker load，而现在只需 rsync 那一个文件 |
 | **结果回传无法通过 Docker** | benchmark 结果是运行后动态产生的，必须用 rsync/scp 回传，无法用 image |
-| **kinsn 模块频繁迭代** | 论文研究阶段 kinsn 模块经常改动，打包进 image 意味着每次改 .ko 都要 rebuild image |
+| **kop 模块频繁迭代** | 论文研究阶段 kop 模块经常改动，打包进 image 意味着每次改 .ko 都要 rebuild image |
 
 ---
 
@@ -206,7 +206,7 @@ sudo depmod -a <version>
 
 **方案 B：对 runtime 镜像和产物使用 registry**
 
-将 runner-runtime image 和不常变化的构建产物（workload-tools, native repos）推送到私有 ECR registry，远端 `docker pull` 而非 rsync。kinsn 模块、内核相关、Python 代码仍用 rsync。这样可以减少大文件的 rsync 传输量。
+将 runner-runtime image 和不常变化的构建产物（workload-tools, native repos）推送到私有 ECR registry，远端 `docker pull` 而非 rsync。kop 模块、内核相关、Python 代码仍用 rsync。这样可以减少大文件的 rsync 传输量。
 
 **方案 C（最小改动）：去掉远端 AMI 对 rsync 的依赖**
 

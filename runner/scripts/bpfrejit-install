@@ -4,13 +4,13 @@ set -euo pipefail
 usage() {
     cat >&2 <<'EOF'
 usage: bpfrejit-install [--extract-kernel] [--extract-kernel-only]
-                         [--kernel-out-dir DIR] [--skip-kinsn]
+                         [--kernel-out-dir DIR] [--skip-kop]
                          [--image IMAGE] <runner-runtime.image.tar>
 
 Environment:
   BPFREJIT_INSTALL_EXTRACT_KERNEL=1
   BPFREJIT_INSTALL_KERNEL_OUT_DIR=DIR
-  BPFREJIT_INSTALL_SKIP_KINSN=1
+  BPFREJIT_INSTALL_SKIP_KOP=1
   BPFREJIT_RUNTIME_IMAGE=IMAGE
 EOF
 }
@@ -18,7 +18,7 @@ EOF
 extract_kernel="${BPFREJIT_INSTALL_EXTRACT_KERNEL:-0}"
 kernel_only=0
 kernel_out_dir="${BPFREJIT_INSTALL_KERNEL_OUT_DIR:-}"
-skip_kinsn="${BPFREJIT_INSTALL_SKIP_KINSN:-0}"
+skip_kop="${BPFREJIT_INSTALL_SKIP_KOP:-0}"
 image_ref="${BPFREJIT_RUNTIME_IMAGE:-}"
 image_tar=""
 
@@ -30,15 +30,15 @@ while [ "$#" -gt 0 ]; do
         --extract-kernel-only)
             extract_kernel=1
             kernel_only=1
-            skip_kinsn=1
+            skip_kop=1
             ;;
         --kernel-out-dir)
             [ "$#" -ge 2 ] || { usage; exit 2; }
             kernel_out_dir="$2"
             shift
             ;;
-        --skip-kinsn)
-            skip_kinsn=1
+        --skip-kop)
+            skip_kop=1
             ;;
         --image)
             [ "$#" -ge 2 ] || { usage; exit 2; }
@@ -117,9 +117,9 @@ if [ "$kernel_only" = 1 ]; then
 fi
 
 running_release="$(uname -r)"
-if [ "$skip_kinsn" != 1 ] && [ "$kernel_release" != "$running_release" ]; then
+if [ "$skip_kop" != 1 ] && [ "$kernel_release" != "$running_release" ]; then
     echo "image kernel release $kernel_release does not match running kernel $running_release" >&2
-    echo "use --skip-kinsn only for pre-reboot kernel installation" >&2
+    echo "use --skip-kop only for pre-reboot kernel installation" >&2
     exit 1
 fi
 
@@ -131,12 +131,12 @@ cp -a "$modules_tmp" "/lib/modules/$kernel_release"
 rm -f "/lib/modules/$kernel_release/build" "/lib/modules/$kernel_release/source"
 depmod "$kernel_release"
 
-if [ "$skip_kinsn" = 1 ]; then
+if [ "$skip_kop" = 1 ]; then
     exit 0
 fi
 
-kinsn_tmp="$tmpdir/kinsn"
-docker cp "$cid:/artifacts/kinsn" "$kinsn_tmp"
+kop_tmp="$tmpdir/kop"
+docker cp "$cid:/artifacts/kop" "$kop_tmp"
 found=0
 while IFS= read -r -d '' ko_path; do
     found=1
@@ -145,6 +145,6 @@ while IFS= read -r -d '' ko_path; do
         continue
     fi
     insmod "$ko_path"
-done < <(find "$kinsn_tmp" -type f -name '*.ko' -print0 | sort -z)
+done < <(find "$kop_tmp" -type f -name '*.ko' -print0 | sort -z)
 
-[ "$found" = 1 ] || { echo "no kinsn .ko files found in image" >&2; exit 1; }
+[ "$found" = 1 ] || { echo "no kop .ko files found in image" >&2; exit 1; }

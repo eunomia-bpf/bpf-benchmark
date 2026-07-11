@@ -12,9 +12,9 @@
 
 由 `docs/kernel-jit-optimization-plan.md` §3 / §4 / §4.6 推导出的三条硬约束：
 
-1. `bpfopt` 必须同时支持三类 pass：纯 bytecode pass、target-aware kinsn pass、runtime-guided specialization pass。
+1. `bpfopt` 必须同时支持三类 pass：纯 bytecode pass、target-aware kop pass、runtime-guided specialization pass。
 2. per-pass verify 仍然要保留，但 verify 必须是外部 hook，不得把 kernel 依赖带回 `bpfopt`。
-3. kinsn 可用性必须是“声明式 target 描述”，而不是在库内部做 runtime BTF discovery。
+3. kop 可用性必须是“声明式 target 描述”，而不是在库内部做 runtime BTF discovery。
 
 非目标：
 
@@ -36,7 +36,7 @@ pub use crate::api::{
     OptimizeInput, OptimizeOutput, OptConfig,
 };
 pub use crate::ir::{BpfInsn, BytecodeBlob, BytecodeFormat};
-pub use crate::target::{TargetDesc, ProgramAbi, KinsnCatalog, KinsnRequirement};
+pub use crate::target::{TargetDesc, ProgramAbi, KopCatalog, KopRequirement};
 pub use crate::inputs::{PgoProfile, VerifierStateSet, MapValueSet, ProgramMetadata};
 pub use crate::report::{PassInfo, PassReport, TransformReport, SpecializationDependency};
 pub use crate::validate::{ValidationOracle, ValidationOutcome, ValidationStatus};
@@ -84,7 +84,7 @@ pub struct OptConfig {
     pub pipeline: PipelineSpec,
     pub target: TargetDesc,
     pub platform: PlatformDesc,
-    pub kinsns: KinsnCatalog,
+    pub koperation: KopCatalog,
     pub pgo_profile: Option<PgoProfile>,
     pub verifier_states: Option<VerifierStateSet>,
     pub map_values: Option<MapValueSet>,
@@ -96,7 +96,7 @@ pub struct OptConfig {
 其中 prompt 点名的字段保留：
 
 1. `platform`
-2. `kinsns`
+2. `koperation`
 3. `pgo_profile`
 4. `verifier_states`
 5. `map_values`
@@ -106,7 +106,7 @@ pub struct OptConfig {
 1. `program`
    原因：当前 `wide_mem` / `skb_load_bytes_spec` / `bounds_check_merge` 依赖 `prog_type`，`map_inline` 依赖 `map_fd_bindings`；纯库不能再隐式从内核拿。
 2. `strictness`
-   原因：需要明确“缺 side-input / 缺 kinsn binding / pass 不可用”时是报错还是结构化 skip。
+   原因：需要明确“缺 side-input / 缺 kop binding / pass 不可用”时是报错还是结构化 skip。
 
 建议的 `ProgramMetadata`：
 
@@ -151,9 +151,9 @@ pub enum ProgramAbi {
 1. `bpfopt` 需要的是“packet-pointer / ctx layout / verifier safety class”，不是 syscall 数字本身。
 2. 未来 libbpf 集成、离线对象优化、测试输入都可以直接构造同一语义枚举。
 
-### A.3 target / kinsn 输入模型
+### A.3 target / kop 输入模型
 
-`TargetDesc` 和 `KinsnCatalog` 分离：
+`TargetDesc` 和 `KopCatalog` 分离：
 
 ```rust
 pub struct PlatformDesc {
@@ -169,17 +169,17 @@ pub struct TargetDesc {
     pub verifier_model: String,        // "linux-ebpf-v1"
 }
 
-pub struct KinsnCatalog {
-    pub entries: BTreeMap<String, KinsnCapability>,
+pub struct KopCatalog {
+    pub entries: BTreeMap<String, KopCapability>,
 }
 
-pub struct KinsnCapability {
+pub struct KopCapability {
     pub available: bool,
-    pub encodings: BTreeSet<KinsnEncoding>,
-    pub binding: Option<KinsnBinding>,
+    pub encodings: BTreeSet<KopEncoding>,
+    pub binding: Option<KopBinding>,
 }
 
-pub struct KinsnBinding {
+pub struct KopBinding {
     pub symbol: String,
     pub btf_func_id: Option<i32>,
     pub transport_slot_hint: Option<u16>,
@@ -201,7 +201,7 @@ pub struct OptimizeOutput {
     pub bytecode: BytecodeBlob,
     pub changed: bool,
     pub report: TransformReport,
-    pub link_requirements: Vec<KinsnRequirement>,
+    pub link_requirements: Vec<KopRequirement>,
     pub specialization_dependencies: Vec<SpecializationDependency>,
     pub updated_side_inputs: UpdatedSideInputs,
 }
@@ -243,17 +243,17 @@ pub struct PassReport {
 `link_requirements` 是新引入的关键输出：
 
 ```rust
-pub struct KinsnRequirement {
+pub struct KopRequirement {
     pub pc: usize,                    // output bytecode 中 CALL 的 pc
     pub symbol: String,               // e.g. "bpf_rotate64"
-    pub encoding: KinsnEncoding,      // packed_call
+    pub encoding: KopEncoding,      // packed_call
 }
 ```
 
 原因：
 
 1. `bpfopt` 不能假定 runtime BTF 一定存在。
-2. 但 kinsn pass 仍需要产出“符号化 kinsn 调用”。
+2. 但 kop pass 仍需要产出“符号化 kop 调用”。
 3. 因此 output 是“bytecode + relocation-like requirements”，由 daemon / libbpf 在最后一跳绑定。
 
 `specialization_dependencies` 用来承接当前 `map_inline_records`：
@@ -285,7 +285,7 @@ pub trait ValidationOracle {
         &mut self,
         pass: &PassInfo,
         program: &[u8],
-        link_requirements: &[KinsnRequirement],
+        link_requirements: &[KopRequirement],
     ) -> anyhow::Result<ValidationOutcome>;
 }
 
@@ -379,7 +379,7 @@ FFI 设计原则：
 1. config / report / side-inputs 全走 JSON，避免在 C ABI 暴露大量 version-sensitive Rust struct。
 2. raw bytecode 保持 `uint8_t* + len`。
 3. v1 不提供 C callback validator；需要 per-pass verify 的 embedding 走 Rust API。
-4. 这足够支撑未来 libbpf 集成：libbpf 传字节码和 target/config JSON，拿回 bytecode + report + kinsn requirements。
+4. 这足够支撑未来 libbpf 集成：libbpf 传字节码和 target/config JSON，拿回 bytecode + report + kop requirements。
 
 ## B. CLI 设计
 
@@ -418,7 +418,7 @@ bpfopt optimize \
 1. `prog.bin` 是 raw `struct bpf_insn[]`。
 2. `prog.meta.json` 是主 sidecar，包含 pipeline 选择、program ABI、map binding。
 3. `target.json` / `profile.json` / `verifier.json` / `maps.json` 是标准化输入，主 sidecar 可选择内联或引用它们。
-4. `prog.opt.meta.json` 输出 report、updated side-inputs、kinsn relocations、specialization dependencies。
+4. `prog.opt.meta.json` 输出 report、updated side-inputs、kop relocations、specialization dependencies。
 
 ### B.3 `analyze`
 
@@ -438,7 +438,7 @@ bpfopt analyze \
 1. CFG / liveness / branch targets 等 analysis
 2. 每个 pass 的 candidate sites
 3. 每个 candidate 的 blocker，例如：
-   `no_kinsn_binding`
+   `no_kop_binding`
    `missing_verifier_states`
    `interior_branch_target`
    `packet_prog_type_not_safe`
@@ -465,7 +465,7 @@ bpfopt list-passes --format json
 4. `requires_analyses`
 5. `requires_side_inputs`
 6. `requires_target_features`
-7. `requires_kinsns`
+7. `requires_kops`
 8. `description`
 
 ### B.5 管道模式
@@ -512,7 +512,7 @@ bpfopt pack --input in.bin --meta in.meta.json \
   "pipeline": {
     "passes": ["map_inline", "const_prop", "dce"],
     "strict_side_inputs": false,
-    "require_resolved_kinsns": false
+    "require_resolved_kops": false
   },
   "program": {
     "abi": "xdp",
@@ -573,7 +573,7 @@ bpfopt pack --input in.bin --meta in.meta.json \
 | `daemon/src/analysis/cfg.rs` | `bpfopt/src/analysis/cfg.rs` | 直接移动 | 纯 analysis |
 | `daemon/src/analysis/liveness.rs` | `bpfopt/src/analysis/liveness.rs` | 直接移动 | 纯 analysis |
 | `daemon/src/analysis/map_info.rs` | `bpfopt/src/analysis/map_refs.rs` + daemon glue | 拆分 | 解析/绑定逻辑进 bpfopt，live map resolver 留 daemon |
-| `daemon/src/passes/rotate.rs` | `bpfopt/src/passes/rotate.rs` | 重构后移动 | 用 symbolic kinsn requirement 代替 BTF FD slot |
+| `daemon/src/passes/rotate.rs` | `bpfopt/src/passes/rotate.rs` | 重构后移动 | 用 symbolic kop requirement 代替 BTF FD slot |
 | `daemon/src/passes/cond_select.rs` | `bpfopt/src/passes/cond_select.rs` | 重构后移动 | 同上 |
 | `daemon/src/passes/extract.rs` | `bpfopt/src/passes/extract.rs` | 重构后移动 | 同上 |
 | `daemon/src/passes/endian.rs` | `bpfopt/src/passes/endian.rs` | 重构后移动 | 同上 |
@@ -603,9 +603,9 @@ bpfopt pack --input in.bin --meta in.meta.json \
 1. `bpfopt/src/inputs/mod.rs`
    放 `PgoProfile` / `VerifierStateSet` / `MapValueSet` / `ProgramMetadata`
 2. `bpfopt/src/target.rs`
-   放 `PlatformDesc` / `TargetDesc` / `ProgramAbi` / `KinsnCatalog`
+   放 `PlatformDesc` / `TargetDesc` / `ProgramAbi` / `KopCatalog`
 3. `bpfopt/src/link.rs`
-   放 `KinsnRequirement` 和 symbolic relocation patch points
+   放 `KopRequirement` 和 symbolic relocation patch points
 4. `bpfopt/src/validate.rs`
    放 `ValidationOracle` trait
 5. `bpfopt/src/report.rs`
@@ -616,7 +616,7 @@ bpfopt pack --input in.bin --meta in.meta.json \
 daemon 侧需要新增四块胶水：
 
 1. `target_manifest.rs`
-   把 `kfunc_discovery` + host CPU detect + program ABI 映射成 `TargetDesc + KinsnCatalog`
+   把 `kfunc_discovery` + host CPU detect + program ABI 映射成 `TargetDesc + KopCatalog`
 2. `side_input_collectors.rs`
    负责：
    - 原始 verifier log capture -> `VerifierStateSet`
@@ -625,7 +625,7 @@ daemon 侧需要新增四块胶水：
 3. `validator.rs`
    用 `BPF_PROG_LOAD(log_level=2)` 实现 `ValidationOracle`
 4. `linker.rs`
-   把 `KinsnRequirement` 解析成真实 `btf_func_id` / `fd_array`，并 patch output bytecode
+   把 `KopRequirement` 解析成真实 `btf_func_id` / `fd_array`，并 patch output bytecode
 
 ### C.5 daemon 调 `bpfopt` 的具体 API
 
@@ -638,7 +638,7 @@ let input = bpfopt::OptimizeInput {
         pipeline,
         target,
         platform,
-        kinsns,
+        koperation,
         pgo_profile,
         verifier_states,
         map_values,
@@ -650,7 +650,7 @@ let input = bpfopt::OptimizeInput {
 let mut validator = DaemonProgLoadValidator::new(...);
 let output = bpfopt::optimize_with_validator(input, &mut validator)?;
 
-let linked = daemon::linker::bind_kinsns(
+let linked = daemon::linker::bind_kops(
     output.bytecode,
     &output.link_requirements,
     &runtime_discovery,
@@ -682,7 +682,7 @@ daemon::invalidation::update(prog_id, &output.specialization_dependencies)?;
 
 替换方案：
 
-1. pass 在 rewrite 时只登记 `KinsnRequirement { pc, symbol, encoding }`
+1. pass 在 rewrite 时只登记 `KopRequirement { pc, symbol, encoding }`
 2. output sidecar 里记录这些 requirements
 3. daemon / libbpf 在最后一步绑定
 
@@ -878,7 +878,7 @@ daemon::invalidation::update(prog_id, &output.specialization_dependencies)?;
 
 1. target 是显式输入
 2. 类似 LLVM `-march` / `-mattr`
-3. kinsn availability 也是 target manifest 的一部分
+3. kop availability 也是 target manifest 的一部分
 
 ### E.2 CLI 形态
 
@@ -908,7 +908,7 @@ bpfopt optimize --target target.json ...
     "cpu": "generic",
     "features": ["cmov", "movbe", "bmi1", "bmi2", "rorx"]
   },
-  "kinsns": {
+  "koperation": {
     "bpf_rotate64": {
       "available": true,
       "encodings": ["packed_call"],
@@ -925,14 +925,14 @@ bpfopt optimize --target target.json ...
 }
 ```
 
-### E.4 kinsn 描述方式
+### E.4 kop 描述方式
 
 核心要求：不依赖运行时 BTF 发现。
 
 因此 `bpfopt` 只认三层语义：
 
 1. `available`
-   这个 kinsn 语义是否可用
+   这个 kop 语义是否可用
 2. `encodings`
    支持哪种调用编码，当前就是 `packed_call`
 3. `binding`
@@ -959,7 +959,7 @@ bpfopt optimize --target target.json ...
    `bounds_check_merge`
    `wide_mem`
    `branch_flip`
-2. target-aware kinsn pass
+2. target-aware kop pass
    `rotate`
    `cond_select`
    `extract`
@@ -981,7 +981,7 @@ bpfopt optimize --target target.json ...
    - 取 original bytecode
    - 取 map IDs / map FDs / attach metadata
 2. runtime binding
-   - kinsn discovery
+   - kop discovery
    - map FD relocation
    - `BPF_PROG_LOAD` dry-run verify
    - `BPF_PROG_REJIT`
@@ -1028,9 +1028,9 @@ request
   -> snapshot live prog
   -> build ProgramMetadata
   -> load external PGO / verifier / map-value inputs
-  -> build TargetDesc + KinsnCatalog
+  -> build TargetDesc + KopCatalog
   -> bpfopt::optimize_with_validator()
-  -> link unresolved kinsn requirements
+  -> link unresolved kop requirements
   -> final BPF_PROG_REJIT
   -> install specialization dependencies into invalidation tracker
   -> response
@@ -1058,7 +1058,7 @@ request
 daemon 只消费：
 
 1. `TransformReport`
-2. `KinsnRequirement`
+2. `KopRequirement`
 3. `SpecializationDependency`
 
 ### F.5 map invalidation 与 re-optimize

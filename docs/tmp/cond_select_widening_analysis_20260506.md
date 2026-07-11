@@ -42,14 +42,14 @@ Lowering is also register-capable:
 - Temp selection avoids live-out and protected registers at
   `cond_select.rs:600-623`.
 
-The replacement is the packed kinsn ABI, not ordinary call-argument setup:
+The replacement is the packed kop ABI, not ordinary call-argument setup:
 `cond_select.rs:226-237` encodes `dst`, `a_reg`, `b_reg`, and `cond_reg` into a
-sidecar payload, then emits `emit_packed_kinsn_call_with_off(...)`.
+sidecar payload, then emits `emit_packed_kop_call_with_off(...)`.
 `bpfopt/crates/bpfopt/src/passes/utils.rs:1177-1191` shows the packed
-replacement is exactly two BPF instructions: sidecar plus kinsn call.
+replacement is exactly two BPF instructions: sidecar plus kop call.
 
 The Rust comment at `cond_select.rs:21-29` describes an older-looking logical
-`bpf_select64(a,b,cond)` call shape. The kernel modules expose the actual kinsn
+`bpf_select64(a,b,cond)` call shape. The kernel modules expose the actual kop
 stub as `__bpf_kfunc void bpf_select64(void) {}` at
 `module/x86/bpf_select.c:8-10` and `module/arm64/bpf_select.c:8-10`, and decode
 all operands from the packed sidecar payload at `module/x86/bpf_select.c:18-36`
@@ -79,11 +79,11 @@ After matching, `cond_select` requires branch-target and liveness analyses at
 - lowering failures, `cond_select.rs:159-168`;
 - interior branch targets, excluding the site's own JCC target,
   `cond_select.rs:170-187`;
-- generic kinsn subprogram/tail-call safety,
+- generic kop subprogram/tail-call safety,
   `cond_select.rs:189-200`.
 
 The generic guard is in `bpfopt/crates/bpfopt/src/passes/utils.rs:728-785`.
-For tail-call programs, the key rule is `utils.rs:787-803`: a kinsn replacement
+For tail-call programs, the key rule is `utils.rs:787-803`: a kop replacement
 is allowed only when `replacement_len == old_len` and `start_pc` is after the
 exclusive end of the last tail-call instruction. `utils.rs:823-844` defines the
 protected prefix as the region through the last tail-call helper or tail-call
@@ -180,7 +180,7 @@ slots for destination, true value, false value, and condition:
 - payload encoding in bpfopt: `cond_select.rs:230-234`;
 - payload decoding in x86 module: `module/x86/bpf_select.c:18-36`;
 - payload decoding in ARM64 module: `module/arm64/bpf_select.c:18-36`;
-- formal payload fields in `docs/kinsn-formal-semantics.md:333-364`.
+- formal payload fields in `docs/kop-formal-semantics.md:333-364`.
 
 No new kfunc is required. The current packed ABI naturally handles source
 register values. Immediate values are the special case, because they need prefix
@@ -188,19 +188,19 @@ materialization into a register before the packed select.
 
 3. Verifier safety
 
-This is the safest axis. The kinsn proof sequence is just a conditional branch
+This is the safest axis. The kop proof sequence is just a conditional branch
 plus MOVs:
 
 - x86 proof instantiation: `module/x86/bpf_select.c:38-53`;
 - ARM64 proof instantiation: `module/arm64/bpf_select.c:38-53`;
-- formal proof semantics: `docs/kinsn-formal-semantics.md:356-368`.
+- formal proof semantics: `docs/kop-formal-semantics.md:356-368`.
 
 There is no speculative computation of an untaken branch. If the original code
 could move either register into `dst`, the proof code does the same. The main
 pitfalls are aliasing and preserving the condition source before any `dst`
 write. The x86 emitter explicitly handles ordering around aliasing; the formal
 semantics document calls out this condition at
-`docs/kinsn-formal-semantics.md:647-650`, and the Rust tests cover source
+`docs/kop-formal-semantics.md:647-650`, and the Rust tests cover source
 aliasing at `cond_select_tests.rs:613-665`.
 
 4. Estimated site uplift

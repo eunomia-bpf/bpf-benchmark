@@ -677,11 +677,11 @@
               "sites_matched": 5,
               "sites_skipped": 5,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 477)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 483)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 553)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 636)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 751)": 1
+                "kop site in program with tail-call helper (tail call pc 372, site pc 477)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 483)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 553)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 636)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 751)": 1
               }
             },
             "error": null,
@@ -715,9 +715,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1015)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1026)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1039)": 1
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1015)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1026)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1039)": 1
               }
             },
             "error": null,
@@ -781,7 +781,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 445, site pc 377)": 1
+                "kop site in program with tail-call helper (tail call pc 445, site pc 377)": 1
               }
             },
             "error": null,
@@ -877,7 +877,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 175, site pc 24)": 1
+                "kop site in program with tail-call helper (tail call pc 175, site pc 24)": 1
               }
             },
             "error": null,
@@ -1161,13 +1161,13 @@
               "sites_matched": 7,
               "sites_skipped": 7,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 335)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 341)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 429)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 435)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 646)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 723)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 842)": 1
+                "kop site in program with tail-call helper (tail call pc 784, site pc 335)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 341)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 429)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 435)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 646)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 723)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 842)": 1
               }
             },
             "error": null,
@@ -1201,7 +1201,7 @@
               "sites_matched": 3,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 1101)": 1
+                "kop site in program with tail-call helper (tail call pc 784, site pc 1101)": 1
               }
             },
             "error": null,
@@ -1360,7 +1360,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 175, site pc 24)": 1
+                "kop site in program with tail-call helper (tail call pc 175, site pc 24)": 1
               }
             },
             "error": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 16: Device or resource busy (os error 16)\nverifier log summary:\nfunc#0 @0\nLive regs before insn:\n      0: .1........ (bf) r6 = r1\n      1: ......6... (61) r7 = *(u32 *)(r6 +48)\n      2: ......67.. (b4) w1 = 0\n      3: .1....67.. (63) *(u32 *)(r6 +48) = r1\n      4: ......67.. (18) r1 = 0xffffd26f802e6004\n      6: .1....67.. (71) r1 = *(u8 *)(r1 +0)\n      7: .1....67.. (61) r2 = *(u32 *)(r6 +80)\n      8: .12...67.. (61) r3 = *(u32 *)(r6 +76)\n      9: .123..67.. (0f) r3 += r1\n     10: ..23..67.. (b4) w0 = -134\n     11: 0.23..67.. (07) r3 += 20\n     12: 0.23..67.. (2d) if r3 > r2 goto pc+118\n     13: 0.....67.. (18) r1 = 0xffffd26f802e603c\n     15: 01....67.. (61) r1 = *(u32 *)(r1 +0)\n     16: 0.....67.. (61) r1 = *(u32 *)(r6 +44)\n     17: 01....67.. (63) *(u32 *)(r10 -32) = r1\n     18: 01....67.. (61) r2 = *(u32 *)(r10 -32)\n     19: 012...67.. (63) *(u32 *)(r10 -32) = r1\n     20: 0.2...67.. (54) w2 &= 1\n     21: 0.2...67.. (61) r1 = *(u32 *)(r10 -32)\n     22: 012...67.. (54) w1 &= 2\n     23: 012...67.. (4c) w1 |= w2\n     24: 01....67.. (b4) w8 = 1\n     25: 01....678. (56) if w1 != 0x0 goto pc+1\n     26: 0.....67.. (b4) w8 = 0\n     27: 0.....678. (18) r1 = 0xffffd26f802e6004\n     29: 01....678. (71) r1 = *(u8 *)(r1 +0)\n     30: 01....678. (61) r2 = *(u32 *)(r6 +80)\n     31: 012...678. (61) r9 = *(u32 *)(r6 +76)\n     32: 012...6789 (0f) r9 += r1\n     33: 0.2...6789 (bf) r1 = r9\n     34: 012...6789 (07) r1 += 20\n     35: 012...6789 (2d) if r1 > r2 goto pc+95\n     36: ......6789 (61) r1 = *(u32 *)(r9 +16)\n     37: .1....6789 (b7) r2 = 0\n     38: .12...6789 (63) *(u32 *)(r10 -16) = r2\n     39: .12...6789 (63) *(u32 *)(r10 -20) = r2\n     40: .12...6789 (63) *(u32 *)(r10 -24) = r2\n     41: .12...6789 (63) *(u32 *)(r10 -28) = r2\n     42: .1....6789 (63) *(u32 *)(r10 -32) = r1\n     43: ......6789 (b4) w1 = 1\n     44: .1....6789 (73) *(u8 *)(r10 -16) = r1\n     45: ......6789 (bf) r2 = r10\n     46: ..2...6789 (07) r2 += -32\n     47: ..2...6789 (18) r1 = 0xffff8ebd2a43c800\n     49: .12...6789 (85) call bpf_map_lookup_elem#1\n     50: 0.....6789 (15) if r0 == 0x0 goto pc+43\n     51: 0.....67.9 (18) r1 = 0xffffd26f802e6004\n     53: 01....67.9 (71) r2 = *(u8 *)(r1 +0)\n     54: 0.2...67.9 (61) r1 = *(u32 *)(r0 +8)\n     55: 012...67.9 (54) w1 &= 3\n     56: 012...67.9 (56) if w1 != 0x0 goto pc+62\n     57: 0.2...67.9 (79) r1 = *(u64 *)(r0 +24)\n     58: 012...67.9 (7b) *(u64 *)(r10 -40) = r1\n     59: 0.2...67.9 (79) r1 = *(u64 *)(r0 +16)\n     60: 012...67.9 (7b) *(u64 *)(r10 -48) = r1\n     61: 0.2...67.9 (71) r3 = *(u8 *)(r9 +8)\n     62: 0.23..67.9 (a6) if w3 < 0x2 goto pc+95\n     63: 0.23..67.9 (bf) r8 = r0\n     64: ..23..6789 (bc) w4 = w3\n     65: ..234.6789 (04) w4 += -1\n     66: ..234.6789 (73) *(u8 *)(r9 +8) = r4\n     67: ..234.678. (04) w2 += 10\n     68: ..234.678. (54) w4 &= 255\n     69: ..234.678. (bf) r1 = r6\n     70: .1234.678. (b4) w5 = 2\n     71: .12345678. (85) call bpf_l3_csum_replace#10\n     72: 0.....678. (c6) if w0 s< 0x0 goto pc+105\n     73: ......678. (bf) r3 = r10\n     74: ...3..678. (07) r3 += -40\n     75: ...3..678. (bf) r1 = r6\n     76: .1.3..678. (b4) w2 = 6\n     77: .123..678. (b4) w4 = 6\n     78: .1234.678. (b4) w5 = 0\n     79: .12345678. (85) call bpf_skb_store_bytes#9\n     80: 0.....678. (bc) w1 = w0\n     81: .1....678. (b4) w0 = -141\n     82: 01....678. (c6) if w1 s< 0x0 goto pc+48\n     83: ......678. (bf) r3 = r10\n     84: ...3..678. (07) r3 += -48\n     85: ...3..678. (bf) r1 = r6\n     86: .1.3..678. (b4) w2 = 0\n     87: .123..678. (b4) w4 = 6\n     88: .1234.678. (b4) w5 = 0\n     89: .12345678. (85) call bpf_skb_store_bytes#9\n     90: 0.....678. (bc) w1 = w0\n     91: .1....678. (b4) w0 = -141\n     92: 01....678. (c6) if w1 s< 0x0 goto pc+38\n     93: ......678. (05) goto pc+88\n     94: ......6789 (61) r1 = *(u32 *)(r9 +16)\n     95: .1....678. (b4) w2 = 0\n     96: .12...678. (63) *(u32 *)(r10 -12) = r2\n     97: .12...678. (63) *(u32 *)(r10 -16) = r2\n     98: .12...678. (63) *(u32 *)(r10 -20) = r2\n     99: .1....678. (63) *(u32 *)(r10 -24) = r1\n    100: ......678. (b4) w1 = 64\n    101: .1....678. (63) *(u32 *)(r10 -32) = r1\n    102: ......678. (b4) w1 = 16777216\n    103: .1....678\n... verifier log truncated ...",
@@ -1784,13 +1784,13 @@
               "sites_matched": 7,
               "sites_skipped": 7,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 335)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 341)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 429)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 435)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 646)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 723)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 842)": 1
+                "kop site in program with tail-call helper (tail call pc 784, site pc 335)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 341)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 429)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 435)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 646)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 723)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 842)": 1
               }
             },
             "error": null,
@@ -1824,7 +1824,7 @@
               "sites_matched": 3,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 1101)": 1
+                "kop site in program with tail-call helper (tail call pc 784, site pc 1101)": 1
               }
             },
             "error": null,
@@ -1888,7 +1888,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 445, site pc 377)": 1
+                "kop site in program with tail-call helper (tail call pc 445, site pc 377)": 1
               }
             },
             "error": null,
@@ -2172,11 +2172,11 @@
               "sites_matched": 5,
               "sites_skipped": 5,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 477)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 483)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 553)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 636)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 751)": 1
+                "kop site in program with tail-call helper (tail call pc 372, site pc 477)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 483)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 553)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 636)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 751)": 1
               }
             },
             "error": null,
@@ -2210,9 +2210,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1015)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1026)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1039)": 1
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1015)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1026)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1039)": 1
               }
             },
             "error": null,
@@ -2276,7 +2276,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 175, site pc 24)": 1
+                "kop site in program with tail-call helper (tail call pc 175, site pc 24)": 1
               }
             },
             "error": null,
@@ -2466,11 +2466,11 @@
               "sites_matched": 5,
               "sites_skipped": 5,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 477)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 483)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 553)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 636)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 751)": 1
+                "kop site in program with tail-call helper (tail call pc 372, site pc 477)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 483)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 553)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 636)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 751)": 1
               }
             },
             "error": null,
@@ -2504,9 +2504,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1015)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1026)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1039)": 1
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1015)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1026)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1039)": 1
               }
             },
             "error": null,
@@ -2570,7 +2570,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 445, site pc 377)": 1
+                "kop site in program with tail-call helper (tail call pc 445, site pc 377)": 1
               }
             },
             "error": null,
@@ -2760,7 +2760,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 175, site pc 24)": 1
+                "kop site in program with tail-call helper (tail call pc 175, site pc 24)": 1
               }
             },
             "error": null,
@@ -2950,13 +2950,13 @@
               "sites_matched": 7,
               "sites_skipped": 7,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 335)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 341)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 429)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 435)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 646)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 723)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 842)": 1
+                "kop site in program with tail-call helper (tail call pc 784, site pc 335)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 341)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 429)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 435)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 646)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 723)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 842)": 1
               }
             },
             "error": null,
@@ -2990,7 +2990,7 @@
               "sites_matched": 3,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 1101)": 1
+                "kop site in program with tail-call helper (tail call pc 784, site pc 1101)": 1
               }
             },
             "error": null,
@@ -3148,7 +3148,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 175, site pc 24)": 1
+                "kop site in program with tail-call helper (tail call pc 175, site pc 24)": 1
               }
             },
             "error": null,
@@ -3244,13 +3244,13 @@
               "sites_matched": 7,
               "sites_skipped": 7,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 335)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 341)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 429)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 435)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 646)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 723)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 842)": 1
+                "kop site in program with tail-call helper (tail call pc 784, site pc 335)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 341)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 429)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 435)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 646)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 723)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 842)": 1
               }
             },
             "error": null,
@@ -3284,7 +3284,7 @@
               "sites_matched": 3,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 1101)": 1
+                "kop site in program with tail-call helper (tail call pc 784, site pc 1101)": 1
               }
             },
             "error": null,
@@ -3630,7 +3630,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 445, site pc 377)": 1
+                "kop site in program with tail-call helper (tail call pc 445, site pc 377)": 1
               }
             },
             "error": null,
@@ -3945,11 +3945,11 @@
               "sites_matched": 5,
               "sites_skipped": 5,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 477)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 483)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 553)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 636)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 751)": 1
+                "kop site in program with tail-call helper (tail call pc 372, site pc 477)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 483)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 553)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 636)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 751)": 1
               }
             },
             "error": null,
@@ -3983,9 +3983,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1015)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1026)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1039)": 1
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1015)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1026)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1039)": 1
               }
             },
             "error": null,
@@ -4049,13 +4049,13 @@
               "sites_matched": 7,
               "sites_skipped": 7,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 335)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 341)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 429)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 435)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 646)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 723)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 842)": 1
+                "kop site in program with tail-call helper (tail call pc 784, site pc 335)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 341)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 429)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 435)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 646)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 723)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 842)": 1
               }
             },
             "error": null,
@@ -4089,7 +4089,7 @@
               "sites_matched": 3,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 1101)": 1
+                "kop site in program with tail-call helper (tail call pc 784, site pc 1101)": 1
               }
             },
             "error": null,
@@ -4247,7 +4247,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 175, site pc 24)": 1
+                "kop site in program with tail-call helper (tail call pc 175, site pc 24)": 1
               }
             },
             "error": null,
@@ -4343,13 +4343,13 @@
               "sites_matched": 7,
               "sites_skipped": 7,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 335)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 341)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 429)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 435)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 646)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 723)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 842)": 1
+                "kop site in program with tail-call helper (tail call pc 784, site pc 335)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 341)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 429)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 435)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 646)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 723)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 842)": 1
               }
             },
             "error": null,
@@ -4383,7 +4383,7 @@
               "sites_matched": 3,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 1101)": 1
+                "kop site in program with tail-call helper (tail call pc 784, site pc 1101)": 1
               }
             },
             "error": null,
@@ -4541,7 +4541,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 445, site pc 377)": 1
+                "kop site in program with tail-call helper (tail call pc 445, site pc 377)": 1
               }
             },
             "error": null,
@@ -4888,11 +4888,11 @@
               "sites_matched": 5,
               "sites_skipped": 5,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 477)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 483)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 553)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 636)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 751)": 1
+                "kop site in program with tail-call helper (tail call pc 372, site pc 477)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 483)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 553)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 636)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 751)": 1
               }
             },
             "error": null,
@@ -4926,9 +4926,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1015)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1026)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1039)": 1
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1015)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1026)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1039)": 1
               }
             },
             "error": null,
@@ -4993,7 +4993,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 175, site pc 24)": 1
+                "kop site in program with tail-call helper (tail call pc 175, site pc 24)": 1
               }
             },
             "error": null,
@@ -5371,11 +5371,11 @@
               "sites_matched": 5,
               "sites_skipped": 5,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 477)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 483)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 553)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 636)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 751)": 1
+                "kop site in program with tail-call helper (tail call pc 372, site pc 477)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 483)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 553)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 636)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 751)": 1
               }
             },
             "error": null,
@@ -5409,9 +5409,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1015)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1026)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 372, site pc 1039)": 1
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1015)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1026)": 1,
+                "kop site in program with tail-call helper (tail call pc 372, site pc 1039)": 1
               }
             },
             "error": null,
@@ -5475,13 +5475,13 @@
               "sites_matched": 7,
               "sites_skipped": 7,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 335)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 341)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 429)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 435)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 646)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 723)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 842)": 1
+                "kop site in program with tail-call helper (tail call pc 784, site pc 335)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 341)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 429)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 435)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 646)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 723)": 1,
+                "kop site in program with tail-call helper (tail call pc 784, site pc 842)": 1
               }
             },
             "error": null,
@@ -5515,7 +5515,7 @@
               "sites_matched": 3,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 784, site pc 1101)": 1
+                "kop site in program with tail-call helper (tail call pc 784, site pc 1101)": 1
               }
             },
             "error": null,
@@ -5673,7 +5673,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 175, site pc 24)": 1
+                "kop site in program with tail-call helper (tail call pc 175, site pc 24)": 1
               }
             },
             "error": null,

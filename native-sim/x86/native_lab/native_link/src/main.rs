@@ -5,11 +5,11 @@
 //! function plus every static subprogram reachable from it via direct
 //! `call rel32` edges, and emits a single position-independent byte stream
 //! suitable for splatting into a BPF JIT image via the
-//! `bpf_x86_native_lab` kinsn.
+//! `bpf_x86_native_lab` kop.
 //!
 //! Transformation rules — the bare minimum to bridge the SysV AMD64 ABI a
 //! userspace compiler emits and the "fall through to BPF JIT epilogue"
-//! contract the kinsn enforces:
+//! contract the kop enforces:
 //!
 //!   1. Every `RET` in the **entry** function becomes `JMP rel32 -> end_label`.
 //!      Subprogram `RET`s are left alone — they pop the return address the

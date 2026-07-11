@@ -95,10 +95,10 @@ test commands::tests::array_of_maps_supplement_iterates_all_slots_without_bpftoo
 test server::tests::parse_execute_plan_rejects_blank_step_command ... ok
 test server::tests::optimize_response_keeps_per_program_errors_under_top_level_ok ... ok
 test commands::tests::try_apply_programs_converts_failures_to_program_results ... ok
-test server::tests::parse_execute_plan_parses_kinsn_probes ... ok
+test server::tests::parse_execute_plan_parses_kop_probes ... ok
 test server::tests::parse_execute_plan_rejects_duplicate_prog_id ... ok
 test server::tests::parse_execute_plan_rejects_invalid_log_level ... ok
-test server::tests::parse_execute_plan_rejects_kinsn_probe_with_no_aliases ... ok
+test server::tests::parse_execute_plan_rejects_kop_probe_with_no_aliases ... ok
 test server::tests::parse_execute_plan_rejects_missing_log_level ... ok
 test server::tests::parse_execute_plan_rejects_missing_programs ... ok
 test server::tests::parse_execute_plan_rejects_non_array_programs ... ok

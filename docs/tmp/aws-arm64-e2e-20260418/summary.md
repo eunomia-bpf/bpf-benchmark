@@ -10,18 +10,18 @@
 - `69b62b59` `[tetragon] wait for expected programs to attach before snapshotting IDs`
 - `0133184c` `refactor: streamline ARM64 kernel artifact extraction in AWS executor`
   - contains the real AWS arm64 module-format fix in `runner/libs/aws_executor.py`
-  - also contains the daemon per-pass kinsn fd-array fix in `daemon/src/commands.rs` and `daemon/src/commands_tests.rs`
+  - also contains the daemon per-pass kop fd-array fix in `daemon/src/commands.rs` and `daemon/src/commands_tests.rs`
 
 ## Root cause and fix
 
 - Root cause of `insmod ... bpf_bulk_memory.ko: Invalid module format`:
-  - AWS host setup was reusing a stale locally extracted arm64 host-kernel/modules cache, while the runtime container always used the current runtime-image tar's `/artifacts/kinsn`.
-  - That put the EC2 host on kernel artifacts from one extraction and tried to load kinsn modules from another image build.
+  - AWS host setup was reusing a stale locally extracted arm64 host-kernel/modules cache, while the runtime container always used the current runtime-image tar's `/artifacts/kop`.
+  - That put the EC2 host on kernel artifacts from one extraction and tried to load kop modules from another image build.
 - Fix:
   - stop reusing the stale arm64 host-artifact cache
   - always re-extract/install arm64 host kernel artifacts from the current `arm64-runner-runtime.image.tar`
 - Corpus follow-up fix:
-  - reserve fd-array slot 0 for per-pass `BPF_PROG_LOAD` verification too, matching the 1-based module-BTF kinsn call convention already used by REJIT
+  - reserve fd-array slot 0 for per-pass `BPF_PROG_LOAD` verification too, matching the 1-based module-BTF kop call convention already used by REJIT
 
 ## AWS runs
 
@@ -60,14 +60,14 @@
 - `sample_count`: `16`
 - `selected_apps`: `20`
 
-## Post-fix kinsn discovery
+## Post-fix kop discovery
 
 - `loaded_count=6`
 - `loaded_modules=[bpf_bulk_memory, bpf_endian, bpf_extract, bpf_ldp, bpf_rotate, bpf_select]`
 - Excerpt from `e2e/results/katran_20260421_220940_906295/result.json`:
 
 ```text
-kinsn discovery:
+kop discovery:
   vmlinux BTF str_len=2287195 type_cnt=126294 type_id_bias=126293
   bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=126314 fd=3
   bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=126314 fd=4

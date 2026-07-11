@@ -10,7 +10,7 @@ The unsupported feature is ARM64 tail-call poke/update support for PROG_ARRAY di
 - Used the ARM64 result at `corpus/results/aws_arm64_corpus_20260513_221545_067112/details/apps/tetragon__observer.json`.
 - Used `bpfopt/testbin/tetragon_observer/*/input_step0.bin` and `output_step0.bin` for representative decoded bytecode. The noop step is byte-identical for sampled entries; for example `337_generic_kprobe_setup_event`, `338_generic_kprobe_process_event`, and `340_generic_kprobe_filter_arg` have matching input/output SHA256 pairs.
 - Cross-referenced `corpus/build/tetragon/bpf_generic_kprobe.o` symbols to map the recurring generic-kprobe bytecode shapes (`setup_event`, `process_event`, `process_filter`, `filter_arg`, `actions`, `output`, `event`).
-- Decoded raw `struct bpf_insn` fields from testbin binaries and checked helper IDs, pseudo-call source registers, map references, kfunc calls, kinsn calls, atomics, and MEMSX loads.
+- Decoded raw `struct bpf_insn` fields from testbin binaries and checked helper IDs, pseudo-call source registers, map references, kfunc calls, kop calls, atomics, and MEMSX loads.
 - Cross-referenced ARM64 JIT and `BPF_PROG_REJIT` kernel paths in `vendor/linux-framework`.
 
 The ARM64 JSON truncates every generic kprobe BPF program name to `generic_kprobe_`, so full suffixes below are inferred by matching instruction-count/bytecode shape against testbin and the Tetragon object symbols.
@@ -19,7 +19,7 @@ The ARM64 JSON truncates every generic kprobe BPF program name to `generic_kprob
 
 Representative decoded testbin shapes:
 
-| Shape | ARM64 result behavior | insns | tail_call helper | bpf_loop | for_each_map_elem | dynptr helpers | bpf2bpf calls | kfunc calls | kinsn calls | atomics | MEMSX |
+| Shape | ARM64 result behavior | insns | tail_call helper | bpf_loop | for_each_map_elem | dynptr helpers | bpf2bpf calls | kfunc calls | kop calls | atomics | MEMSX |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | `337_generic_kprobe_setup_event` | ok shape | 255 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `341_generic_kprobe_event` | ok shape | 400 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
@@ -32,7 +32,7 @@ Representative decoded testbin shapes:
 What this rules out:
 
 - Not `bpf_for_each_map_elem()` or dynptr helpers: sampled generic-kprobe shapes have zero.
-- Not kinsn calls: sampled noop bytecode has zero `CALL src_reg=BPF_PSEUDO_KINSN_CALL`.
+- Not kop calls: sampled noop bytecode has zero `CALL src_reg=BPF_PSEUDO_KOP_CALL`.
 - Not MEMSX: sampled shapes have zero.
 - Not atomics alone: some atomics pass, and the always-failing 2109-insn shape has none.
 - Not kfunc calls alone: the kfunc-call process-filter shape has both ok and error outcomes.
@@ -50,7 +50,7 @@ So the failure is not a pure target-bytecode instruction class. It depends on li
 
 ## Kernel-side error path
 
-ARM64 JIT source has one explicit bytecode-adjacent `-EOPNOTSUPP` path at `vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c:1210-1214`: missing ARM64 kinsn native emit for `BPF_PSEUDO_KINSN_CALL`. The sampled noop bytecode has zero kinsn calls, so this does not match the tetragon noop failures.
+ARM64 JIT source has one explicit bytecode-adjacent `-EOPNOTSUPP` path at `vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c:1210-1214`: missing ARM64 kop native emit for `BPF_PSEUDO_KOP_CALL`. The sampled noop bytecode has zero kop calls, so this does not match the tetragon noop failures.
 
 The matching path is the ReJIT tail-call target repoke path:
 

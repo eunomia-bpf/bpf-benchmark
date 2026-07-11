@@ -1135,7 +1135,7 @@
           {
             "bpfopt_ms": 149,
             "bpfopt_summary": null,
-            "error": "error: kinsn target bpf_x86_bswapq not registered\n",
+            "error": "error: kop target bpf_x86_bswapq not registered\n",
             "exit_code": 1,
             "rejit_syscall_ms": 0,
             "status": "failed_bpfopt",

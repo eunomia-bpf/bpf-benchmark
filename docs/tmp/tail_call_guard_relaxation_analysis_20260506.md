@@ -1,12 +1,12 @@
-# Tail-call kinsn guard relaxation analysis - 2026-05-06
+# Tail-call kop guard relaxation analysis - 2026-05-06
 
-+ NUKED: tail-call program-wide guard deleted. `kinsn_replacement_subprog_skip_reason()` now returns after only bpfopt subprogram/range checks (`bpfopt/crates/bpfopt/src/passes/utils.rs:725-776`); `const_prop` no longer filters replacements through a tail-call protected prefix (`bpfopt/crates/bpfopt/src/passes/const_prop.rs:190-207`); `dce` runs unreachable/dead-def/nop cleanup without tail-call gating (`bpfopt/crates/bpfopt/src/passes/dce.rs:43-60`).
++ NUKED: tail-call program-wide guard deleted. `kop_replacement_subprog_skip_reason()` now returns after only bpfopt subprogram/range checks (`bpfopt/crates/bpfopt/src/passes/utils.rs:725-776`); `const_prop` no longer filters replacements through a tail-call protected prefix (`bpfopt/crates/bpfopt/src/passes/const_prop.rs:190-207`); `dce` runs unreachable/dead-def/nop cleanup without tail-call gating (`bpfopt/crates/bpfopt/src/passes/dce.rs:43-60`).
 
 All parent-repo source citations were read with `git show HEAD:<path>`. The user prompt named `HEAD=e3c3388b`, but the checked-out parent `HEAD` during this investigation was `88e43e83b87bc5cc406110de50de77e3450021de`. The relevant guard file is identical between `e3c3388b` and this checked-out `HEAD`; `vendor/linux-framework` is the same submodule commit in both (`81cb8848bacea3595befa0d5bdea842f976dee41`). Kernel citations below were read with `git -C vendor/linux-framework show HEAD:<path>`.
 
 ## 1. What the guard does today
 
-The generic kinsn replacement guard is `kinsn_replacement_subprog_skip_reason()` in `bpfopt/crates/bpfopt/src/passes/utils.rs:728-785`. It first enforces nonzero lengths, site bounds, subprogram containment, replacement containment, and no subprogram entry inside the old replacement range. Then it calls `kinsn_replacement_tail_call_skip_reason()` at `utils.rs:787-803`.
+The generic kop replacement guard is `kop_replacement_subprog_skip_reason()` in `bpfopt/crates/bpfopt/src/passes/utils.rs:728-785`. It first enforces nonzero lengths, site bounds, subprogram containment, replacement containment, and no subprogram entry inside the old replacement range. Then it calls `kop_replacement_tail_call_skip_reason()` at `utils.rs:787-803`.
 
 Tail-call behavior today:
 
@@ -14,10 +14,10 @@ Tail-call behavior today:
 - `is_tail_call_insn()` recognizes both verifier-rewritten `BPF_JMP | BPF_TAIL_CALL` and source helper calls with `imm == BPF_FUNC_tail_call` (`utils.rs:841-844`).
 - If there is no tail call, the guard permits the site.
 - If `replacement_len == old_len` and `start_pc >= last_tail_end`, the guard permits the site (`utils.rs:793-796`).
-- Otherwise it rejects with `kinsn site in program with tail-call helper (tail call pc {pc}, site pc {start_pc})` (`utils.rs:798-802`).
+- Otherwise it rejects with `kop site in program with tail-call helper (tail call pc {pc}, site pc {start_pc})` (`utils.rs:798-802`).
 - The diagnostic tail-call pc is not necessarily nearest. `tail_call_skip_report_pc()` reports a tail call inside the old site if the site covers one; otherwise it reports the first tail call in the program (`utils.rs:805-820`).
 
-So this is not quite a program-wide ban. It allows fixed-length replacements after the last tail-call instruction. But it is still effectively a broad ban for most packed-kinsn optimizations:
+So this is not quite a program-wide ban. It allows fixed-length replacements after the last tail-call instruction. But it is still effectively a broad ban for most packed-kop optimizations:
 
 - Any replacement before or through the last tail call is rejected, even if length-preserving.
 - Any length-changing replacement anywhere in a program containing a tail-call helper is rejected, even after the last tail call.
@@ -30,14 +30,14 @@ Guard callers in `HEAD`:
 | `bulk_memory` | `bulk_memory.rs:176-181` | `site.replacement_len()` | yes |
 | `ccmp` | `ccmp.rs:197-202` | constant `CCMP_REPLACEMENT_LEN = 3` | yes |
 | `cond_select` | `cond_select.rs:189-194` | `lowering.prefix.len() + 2` | yes |
-| `endian_fusion` | `endian.rs:452-464` | architecture-dependent packed-kinsn lowering plus retained suffix | yes |
+| `endian_fusion` | `endian.rs:452-464` | architecture-dependent packed-kop lowering plus retained suffix | yes |
 | `extract` | `extract.rs:145-150` | `2` | yes |
 | `rotate` | `rotate.rs:65-70` | `2` | yes |
 
 Other related passes:
 
-- `prefetch` is a packed-kinsn pass and inserts two instructions per candidate (`prefetch.rs:196-228`), but it does not call this guard.
-- `wide_mem` and `map_inline` are length-changing transforms but do not use packed kinsn calls and do not call this guard.
+- `prefetch` is a packed-kop pass and inserts two instructions per candidate (`prefetch.rs:196-228`), but it does not call this guard.
+- `wide_mem` and `map_inline` are length-changing transforms but do not use packed kop calls and do not call this guard.
 - `const_prop` and `dce` use `tail_call_protected_prefix_end()` separately (`const_prop.rs:193-210`, `dce.rs:38-55`), so they have related tail-call conservatism but are not blocked by this exact skip reason.
 
 ## 2. What invariants it protects
@@ -52,13 +52,13 @@ The original reason for a PC-preservation guard was reasonable for an older desi
 
 2. BTF func_info / line_info offsets.
 
-`struct bpf_func_info` and `struct bpf_line_info` both store `insn_off` (`include/uapi/linux/bpf.h:7475-7488`). bpfopt has metadata remapping helpers for ordinary rewrites and special kinsn proof-subprogram layout (`utils.rs:85-108`, `utils.rs:635-677`). The CLI can read/write raw metadata when supplied (`bpfopt/src/main.rs:585-644`).
+`struct bpf_func_info` and `struct bpf_line_info` both store `insn_off` (`include/uapi/linux/bpf.h:7475-7488`). bpfopt has metadata remapping helpers for ordinary rewrites and special kop proof-subprogram layout (`utils.rs:85-108`, `utils.rs:635-677`). The CLI can read/write raw metadata when supplied (`bpfopt/src/main.rs:585-644`).
 
-In the daemon path, however, `BPF_PROG_REJIT` is invoked with only bytecode and an fd array (`daemon/src/commands.rs:182-204`, `daemon/src/commands.rs:670-677`). The ReJIT attr itself has `prog_fd`, `insn_cnt`, `insns`, log fields, `fd_array`, and flags; it has no func_info or line_info fields (`include/uapi/linux/bpf.h:1935-1945`). BTF metadata preservation is therefore a general transform invariant when metadata is present, not a reason to ban kinsn replacements in tail-call programs.
+In the daemon path, however, `BPF_PROG_REJIT` is invoked with only bytecode and an fd array (`daemon/src/commands.rs:182-204`, `daemon/src/commands.rs:670-677`). The ReJIT attr itself has `prog_fd`, `insn_cnt`, `insns`, log fields, `fd_array`, and flags; it has no func_info or line_info fields (`include/uapi/linux/bpf.h:1935-1945`). BTF metadata preservation is therefore a general transform invariant when metadata is present, not a reason to ban kop replacements in tail-call programs.
 
 3. Branch target reachability and subprogram layout.
 
-The kinsn passes already check interior branch targets before calling the tail-call guard, and `fixup_all_branches()` remaps surviving branches and pseudo calls through an address map (`utils.rs:13-67`). `kinsn_replacement_subprog_skip_reason()` separately ensures the old and replacement ranges stay within the same subprogram (`utils.rs:753-777`). This invariant should remain, but it does not require a tail-call-program-wide instruction-count ban.
+The kop passes already check interior branch targets before calling the tail-call guard, and `fixup_all_branches()` remaps surviving branches and pseudo calls through an address map (`utils.rs:13-67`). `kop_replacement_subprog_skip_reason()` separately ensures the old and replacement ranges stay within the same subprogram (`utils.rs:753-777`). This invariant should remain, but it does not require a tail-call-program-wide instruction-count ban.
 
 ## 3. Kernel preservation requirements vs defensive bpfopt policy
 
@@ -118,7 +118,7 @@ Two observations matter:
 
 ## 5. Per-pass impact across recent corpus runs
 
-I parsed `corpus/results/x86_kvm_corpus_20260506_073134_900272/details/result.json` and all present `corpus/results/aws_arm64_corpus_20260506_*/details/result.json` artifacts. Only rows with a nonzero `kinsn site in program with tail-call helper` count are shown.
+I parsed `corpus/results/x86_kvm_corpus_20260506_073134_900272/details/result.json` and all present `corpus/results/aws_arm64_corpus_20260506_*/details/result.json` artifacts. Only rows with a nonzero `kop site in program with tail-call helper` count are shown.
 
 | run | app | pass | programs hit | matched | applied | matched-applied | guard skips | other skips in same rows |
 |---|---|---|---:|---:|---:|---:|---:|---:|
@@ -167,7 +167,7 @@ Residual risk is not zero. A transform that rewrites a tail-call instruction or 
 Minimum-precision safety rule, stated semantically rather than as code:
 
 - Keep existing subprogram-boundary and interior-branch-target checks.
-- Reject a kinsn replacement whose old range contains a tail-call instruction.
+- Reject a kop replacement whose old range contains a tail-call instruction.
 - Reject, or rely on ReJIT to reject, a replacement that changes the ordered direct-tail-call descriptor pattern `(count, reason, map, key)`.
 - Do not reject solely because instruction count changes before or after a tail-call pc.
 
@@ -195,9 +195,9 @@ Even under the older PC-index preservation model, length-changing replacements a
 
 The kernel evidence does not require an `N`-instruction exclusion window around tail calls. If the team wants a temporary implementation guard, a small window can reduce risk, but it should be treated as proof debt. From the otel ARM64 artifact, an `N=256` window around the reported tail-call pc would have admitted all 30 guard-rejected `cond_select` sites.
 
-6. Consistent packed-kinsn policy.
+6. Consistent packed-kop policy.
 
-`prefetch` already inserts packed kinsn calls without this generic guard. Whatever tail-call safety contract is chosen should be applied consistently across packed-kinsn transforms, rather than blocking only the replacement-style passes.
+`prefetch` already inserts packed kop calls without this generic guard. Whatever tail-call safety contract is chosen should be applied consistently across packed-kop transforms, rather than blocking only the replacement-style passes.
 
 7. Diagnostics.
 

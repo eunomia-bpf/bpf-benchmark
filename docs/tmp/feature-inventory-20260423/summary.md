@@ -2,7 +2,7 @@
 
 范围说明：
 - 只盘点当前仓库里真实存在、能被用户或开发者触发的功能面。
-- 不展开 `bpfopt-suite/`、`vendor/linux-framework/` 内核改动本体；只把 daemon 侧实际注册/发现到的 kinsn 面板算作功能。
+- 不展开 `bpfopt-suite/`、`vendor/linux-framework/` 内核改动本体；只把 daemon 侧实际注册/发现到的 kop 面板算作功能。
 - `Active?` 采用三档：
   - `Yes`：过去 1 个月有 authoritative 文档或最近 commit 明确使用/维护。
   - `Indirect`：不是用户主入口，但被其他活跃入口稳定调用。
@@ -38,10 +38,10 @@ Data source:
 | `aws-corpus` | 架构参数化的 AWS 单-suite corpus 快捷入口 | `RUN_TARGET_ARCH` + `AWS_{X86,ARM64}_*` | Yes | `Possible alias`，与 `aws-*-benchmark ... BENCH_MODE=corpus` 等价 |
 | `clean` | 清理 `.cache/*-kernel-build`、`runner/build*`、`micro/results/*` 等 | `X86_BUILD_DIR` `ARM64_BUILD_DIR` `RUNNER_BUILD_DIR` | No evidence | No |
 | `image-runner-runtime-image-tar` | 在 runner Dockerfile 内打 runtime image tar | `RUN_TARGET_ARCH` `IMAGE_BUILD_JOBS` | Indirect | No |
-| `image-kernel-artifacts` | 在 runtime image 内提取 kernel image + modules + kinsn + manifest | `RUN_TARGET_ARCH` `ACTIVE_KERNEL_BUILD_DIR` | Indirect | No |
+| `image-kernel-artifacts` | 在 runtime image 内提取 kernel image + modules + kop + manifest | `RUN_TARGET_ARCH` `ACTIVE_KERNEL_BUILD_DIR` | Indirect | No |
 | `image-kernel-build` | 在 runtime image 内编 framework kernel | `RUN_TARGET_ARCH` `JOBS` | Indirect | No |
 | `image-kernel-modules-artifacts` | 在 runtime image 内导出 `/lib/modules/<release>` | `RUN_TARGET_ARCH` `KERNEL_MODULES_ARTIFACT_ROOT` | Indirect | No |
-| `image-kinsn-artifacts` | 在 runtime image 内编 kinsn modules | `RUN_TARGET_ARCH` `ACTIVE_KINSN_SOURCE_DIR` | Indirect | No |
+| `image-kop-artifacts` | 在 runtime image 内编 kop modules | `RUN_TARGET_ARCH` `ACTIVE_KOP_SOURCE_DIR` | Indirect | No |
 | `image-katran-artifacts` | 产出 Katran runtime artifacts | `RUN_TARGET_ARCH` | Indirect | No |
 | `image-runner-artifacts` | 产出 `micro_exec` runner binary | `RUN_TARGET_ARCH` `LLVM_DIR/RUN_LLVM_DIR` | Indirect | No |
 | `image-daemon-artifact` | 产出 `bpfrejit-daemon` release binary | `RUN_TARGET_ARCH` | Indirect | No |
@@ -77,7 +77,7 @@ Data source:
 | `python3 micro/compare_results.py` | 比较两个 micro result JSON | README/manual only | No evidence | `Yes`，usage 仍写 `make compare`，但 Makefile 无该 target |
 | `python3 micro/generate_figures.py` | 从 micro result 生成论文图表 | `micro/README:16` | Yes | No |
 | `python3 micro/summarize_rq.py` | 从 micro result 生成 RQ markdown summary | `micro/README:16` | Yes | No |
-| `runner/scripts/bpfrejit-install` | 从 runtime image tar 安装 kernel/modules/kinsn 到宿主或 VM | `runner/mk/build.mk:43,141-145`，`runner/libs/kvm_executor.py:97-103` | Yes | No |
+| `runner/scripts/bpfrejit-install` | 从 runtime image tar 安装 kernel/modules/kop 到宿主或 VM | `runner/mk/build.mk:43,141-145`，`runner/libs/kvm_executor.py:97-103` | Yes | No |
 | `docs/paper/helpers/build_tikz_figure.sh` | 论文图单文件 LaTeX 包装和裁边 | `docs/paper/Makefile` caller，非 benchmark runtime | No evidence | No |
 
 结论：
@@ -199,7 +199,7 @@ Data source:
 | `skb_load_bytes_spec` | skb helper 专化为 direct packet access | 只对 `skb_load_bytes` 类 helper site | Medium | Yes |
 | `bounds_check_merge` | 合并 packet bounds-check ladder | 需要 packet parser 形状 | Medium | Yes |
 | `wide_mem` | byte-by-byte load 融成宽 load | 需要 byte-load chain pattern | Medium-High | Yes |
-| `bulk_memory` | scalarized memcpy/memset -> bulk-memory kinsn | 需要 bulk-memory kfunc 可用 | Medium | Yes |
+| `bulk_memory` | scalarized memcpy/memset -> bulk-memory kop | 需要 bulk-memory kfunc 可用 | Medium | Yes |
 | `rotate` | shift+or -> rotate kfunc | 需要 rotate kfunc + arch support | Low-Medium | Yes |
 | `cond_select` | branch-over-mov -> select kfunc | 需要 select kfunc + arch support | Low-Medium | Yes |
 | `extract` | shift+mask -> bitfield-extract kfunc | 需要 extract kfunc + arch support | Low | Yes |
@@ -210,14 +210,14 @@ Data source:
 - daemon 的 internal default 是“全 registry 开启”，见 `daemon/src/pass.rs:672-676`。
 - benchmark default profile 只启 11 个 pass，故 `branch_flip` 是“实现了但不在默认 benchmark 面上”的唯一 pass。
 
-## 7. Kinsn / Kfunc 功能表
+## 7. KOperation / Kfunc 功能表
 Data source:
 - `nl -ba daemon/src/kfunc_discovery.rs | sed -n '17,31p'`
 - `rg -n 'ROR|ROL|RORX|CMOV|CSEL|BEXTR|MOVBE|REV|LDP|STP|LEA' module/x86 module/arm64`
 - `nl -ba docs/kernel-jit-optimization-plan.md | sed -n '198,216p'`
 
 说明：
-- 本树里没有 `vendor/linux-framework/include/uapi/linux/bpf_kinsn*.h`，`find vendor/linux-framework/include/uapi/linux -name '*kinsn*'` 为空；因此 daemon discovery registry 才是当前仓库的“真实功能面板”。
+- 本树里没有 `vendor/linux-framework/include/uapi/linux/bpf_kop*.h`，`find vendor/linux-framework/include/uapi/linux -name '*kop*'` 为空；因此 daemon discovery registry 才是当前仓库的“真实功能面板”。
 - daemon 已注册的是 8 个 kfunc target；`LEA` 和 `ARM64 LDP/STP pair-load/store` 只有 plan/module 侧存在，不在当前 daemon registry。
 
 | Registry / family | daemon 注册键 | x86 lowering | arm64 lowering | 当前是否接入 daemon pass |
@@ -234,7 +234,7 @@ Data source:
 | ARM64 pair load/store | `bpf_ldp` module only | x86 不需要 | `LDP/STP`，见 `module/arm64/bpf_ldp.c:3,212` | No，module 有但 daemon registry 无项 |
 
 结论：
-- 当前 daemon 真正能发现并用到的 kinsn family 只有 `rotate/select/extract/bulk/endian`。
+- 当前 daemon 真正能发现并用到的 kop family 只有 `rotate/select/extract/bulk/endian`。
 - `LEA` 不存在于 `daemon/src/kfunc_discovery.rs:22-31`，因此不是“隐藏功能”，而是明确未接入。
 - ARM64 `bpf_ldp` 也是“module 已有、benchmark surface 未暴露”的能力缺口。
 
@@ -251,7 +251,7 @@ Data source:
 | `unittest` | `make -C tests/unittest run`；被 `vm-selftest/vm-test` 间接调用 | 跑 repo-owned `rejit_*` binaries 和 module tests | Yes |
 | `negative` | `make -C tests/negative run`；被 `vm-negative-test/vm-test` 间接调用 | adversarial + replay + fuzz 负向健壮性 | Yes |
 | `fuzz` | `python -m runner.suites.test --test-mode fuzz` | 只跑 `fuzz_rejit` | Yes |
-| `selftest` | `make vm-selftest` / `runner.suites.test --test-mode selftest` | load kinsn + unittest + negative 子集，不含 scx race | Yes |
+| `selftest` | `make vm-selftest` / `runner.suites.test --test-mode selftest` | load kop + unittest + negative 子集，不含 scx race | Yes |
 | `test` | `make vm-test` / `runner.suites.test --test-mode test` | kernel selftest + unittest + negative 全套 | Yes |
 | `full` | `runner.suites.test --test-mode full` | `test` 的纯 alias，见 `runner/suites/test.py:51-55,65` | Yes |
 | `smoke` | `make vm-micro-smoke`；`runner.suites.e2e --e2e-smoke`；`e2e/driver.py --smoke` | 小样本/短 duration 快速验证 | Yes |
@@ -272,8 +272,8 @@ Data source:
 - 写入位置和入口在 `runner/libs/run_artifacts.py:66-84`。
 - 载 run-level summary：`status`、`started_at`、`last_updated_at`、可选 `completed_at/error_message`。
 - micro 会把 `summarize_benchmark_results(results)` 的摘要塞进去，见 `micro/driver.py:311-319`。
-- corpus 会记录 `suite/manifest/samples/workload_seconds/kinsn_enabled/optimization_summary`，见 `corpus/driver.py:1445-1456`。
-- e2e 会记录 `suite/case/smoke/kinsn_enabled/optimization_summary`，见 `e2e/driver.py:207-221`。
+- corpus 会记录 `suite/manifest/samples/workload_seconds/kop_enabled/optimization_summary`，见 `corpus/driver.py:1445-1456`。
+- e2e 会记录 `suite/case/smoke/kop_enabled/optimization_summary`，见 `e2e/driver.py:207-221`。
 
 `result.json`
 - 是完整结构化 payload；artifact writer 在 `runner/libs/run_artifacts.py:58-64,76-79`。
@@ -344,7 +344,7 @@ Data source:
 | `BPFREJIT_BENCH_PASSES` | runtime env | unset -> benchmark default | `runner/libs/rejit.py:486-493` | `Yes`，和 wrapper-hidden `--rejit-passes` 是双 surface |
 | `BPFREJIT_MICRO_PROGRAM_DIR` | runtime env | unset -> wrapper computes | `runner/suites/micro.py:145-147` / `micro/driver.py` | No |
 | `BPFREJIT_MICRO_RUNNER_BINARY` | runtime env | unset -> wrapper computes | `runner/suites/micro.py:145-147` / `micro/driver.py` | No |
-| `BPFREJIT_INSTALL_{EXTRACT_KERNEL,KERNEL_OUT_DIR,SKIP_KINSN}` | install script env | `0/""/0` | `runner/scripts/bpfrejit-install:10-23,106-147` | No |
+| `BPFREJIT_INSTALL_{EXTRACT_KERNEL,KERNEL_OUT_DIR,SKIP_KOP}` | install script env | `0/""/0` | `runner/scripts/bpfrejit-install:10-23,106-147` | No |
 
 额外 dead / ambiguous surface：
 - `Makefile:93-94` help 还在示例里宣传 `--rejit-passes`，但 direct corpus/e2e driver 已按 `docs/kernel-jit-optimization-plan.md:1036` 删除该 CLI，只剩 wrapper 兼容层在偷偷吃掉它。

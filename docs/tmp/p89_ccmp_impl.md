@@ -4,7 +4,7 @@ Date: 2026-04-30
 
 ## Summary
 
-Implemented `ccmp` as an ARM64-only kinsn pass for short zero-test conditional
+Implemented `ccmp` as an ARM64-only kop pass for short zero-test conditional
 compare chains.
 
 - Module: `module/arm64/bpf_ccmp.c`
@@ -13,10 +13,10 @@ compare chains.
 - Default pipeline: included only in the ARM64 optimize default order
 - No x86 module or x86 default-order entry was added
 
-The kinsn payload encodes a predicate destination register, a 2-4 term chain,
+The kop payload encodes a predicate destination register, a 2-4 term chain,
 branch fail polarity, BPF branch width, and compare registers. The proof
 sequence is ordinary BPF and computes `dst = 1` only if every chain term
-continues; the final branch to the original target remains outside the kinsn.
+continues; the final branch to the original target remains outside the kop.
 
 ## Site Validity
 

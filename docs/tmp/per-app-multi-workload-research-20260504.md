@@ -547,5 +547,5 @@ MacroAppDefinition(name="otelcol-ebpf-profiler/profiling", runner="otelcol-ebpf-
 
 ---
 
-*数据来源：x86 KVM corpus runs 2026-05-04（SAMPLES=1，kinsn-only）*
+*数据来源：x86 KVM corpus runs 2026-05-04（SAMPLES=1，kop-only）*
 *代码分析：runner/libs/workload.py, runner/libs/benchmark_catalog.py, runner/libs/app_runners/*.py*

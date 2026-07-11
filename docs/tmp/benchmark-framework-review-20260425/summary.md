@@ -453,9 +453,9 @@ DaemonSession.start()
 
 代码定位：
 
-- `runner/libs/rejit.py:847-857` `DaemonSession.start()` 启 daemon，并在需要时准备 kinsn metadata。
+- `runner/libs/rejit.py:847-857` `DaemonSession.start()` 启 daemon，并在需要时准备 kop metadata。
 - `runner/libs/rejit.py:651-667` `_start_daemon_server()` 用 `serve --socket` 起 Unix socket server。
-- `runner/libs/case_common.py:162-171` `prepare_daemon_session()` 会把 kinsn metadata deep-copy 一份，避免后续被 session 生命周期污染。
+- `runner/libs/case_common.py:162-171` `prepare_daemon_session()` 会把 kop metadata deep-copy 一份，避免后续被 session 生命周期污染。
 
 suite 对 daemon session 的粒度也不一样：
 
@@ -726,7 +726,7 @@ DaemonSession.start()
 - `runner/libs/rejit.py:675-678` `_stop_daemon_server()`
 - `runner/libs/rejit.py:835-875` `DaemonSession`
 
-`PreparedDaemonSession` 的作用是把“活着的 daemon session”与“需要一起落盘的 kinsn metadata”绑在一起，见 `runner/libs/case_common.py:135-171`。
+`PreparedDaemonSession` 的作用是把“活着的 daemon session”与“需要一起落盘的 kop metadata”绑在一起，见 `runner/libs/case_common.py:135-171`。
 
 ### 7.3 ReJIT apply 流程
 

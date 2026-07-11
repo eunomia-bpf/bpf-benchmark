@@ -148,8 +148,8 @@ FROM runner-runtime-runtime-base AS runner-runtime
 
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
-ARG BPFOPT_HOST_BIN=bpfopt/llvm/build-kinsn/bpfopt
-ARG KINSNPROBER_HOST_BIN=bpfopt/target/release/kinsnprober
+ARG BPFOPT_HOST_BIN=bpfopt/llvm/build-kop/bpfopt
+ARG KOPPROBER_HOST_BIN=bpfopt/target/release/kopprober
 ARG BPFPROF_HOST_BIN=bpfperf/target/release/bpfprof
 ARG NATIVE_LINK_HOST_BIN=native-sim/x86/native_lab/native_link/target/release/native-link
 
@@ -170,7 +170,7 @@ COPY --link --from=runner-runtime-host-native-bpf / /artifacts/user/native-bpf/$
 COPY --link tests ${IMAGE_WORKSPACE}/tests
 COPY --link --chmod=0755 ${BPFOPT_HOST_BIN} /usr/local/bin/bpfopt
 COPY --link --chmod=0755 \
-    ${KINSNPROBER_HOST_BIN} \
+    ${KOPPROBER_HOST_BIN} \
     ${BPFPROF_HOST_BIN} \
     ${NATIVE_LINK_HOST_BIN} \
     /usr/local/bin/
@@ -185,7 +185,7 @@ RUN set -eux; \
     ln -sfn /usr/local/bin/merlin-bpf-clang /usr/local/bin/clang-18; \
     ldconfig
 
-COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
+COPY --link --from=runner-runtime-host-kop-artifacts / /artifacts/kop
 
 # LD_PRELOAD shim installed at a fixed runtime path for glibc-linked apps.
 COPY --link --from=runner-runtime-host-shim /libbpfrejit_shim.so /usr/local/lib/bpfrejit/libbpfrejit_shim.so

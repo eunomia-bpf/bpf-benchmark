@@ -4,10 +4,10 @@
   "current_benchmark_index": 2,
   "current_benchmark_record": {
     "category": "alu-mix",
-    "description": "Native bitmap_popcount_scan asm translated to x86 kinsns plus verifier-visible BPF",
+    "description": "Native bitmap_popcount_scan asm translated to x86 koperation plus verifier-visible BPF",
     "expected_result": 12830754992348206170,
     "family": "popcount",
-    "hypothesis": "Checks full-function native-to-kinsn lowering for indexed loads and loop branches",
+    "hypothesis": "Checks full-function native-to-kop lowering for indexed loads and loop branches",
     "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bitmap_popcount_scan.mem",
     "io_mode": "staged",
     "level": "handcraft-native",
@@ -17,7 +17,7 @@
       "bitops",
       "loop",
       "memory",
-      "handcraft-kinsn",
+      "handcraft-kop",
       "x86"
     ]
   },

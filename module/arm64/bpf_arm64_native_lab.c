@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT arm64 native-code lab kinsn.
+ * BpfReJIT arm64 native-code lab kop.
  *
  * Test-only escape hatch matching the x86 native_lab shape: userspace
  * uploads an arbitrary AArch64 instruction stream through debugfs, then a
- * BPF kinsn call splats those instructions inline into the BPF JIT image.
+ * BPF kop call splats those instructions inline into the BPF JIT image.
  *
  * Safety: this intentionally bypasses verifier guarantees for the emitted
  * native instructions. Do not load on production kernels.
@@ -37,7 +37,7 @@
 #include <linux/unaligned.h>
 #include <asm/cpufeature.h>
 
-#include "kinsn_common.h"
+#include "kop_common.h"
 
 #define NATIVE_LAB_MAX_BLOBS		512
 #define NATIVE_LAB_ABI_X19		(1U << 0)
@@ -50,7 +50,7 @@
 					 NATIVE_LAB_ABI_X22)
 /*
  * Keep arm64 native chunks large enough that normal programs are emitted as a
- * single kinsn callback. The arm64 BPF JIT allocates the callback scratch
+ * single kop callback. The arm64 BPF JIT allocates the callback scratch
  * buffer from this descriptor's max_emit_bytes.
  */
 #define NATIVE_LAB_MAX_BLOB_BYTES	(16 * 1024)
@@ -119,7 +119,7 @@ BTF_KFUNCS_END(bpf_arm64_native_lab_kfunc_ids)
 
 static int decode_native_lab_payload(u64 payload, u32 *blob_id, u32 *abi_mask)
 {
-	payload = kinsn_payload_decode(payload);
+	payload = kop_payload_decode(payload);
 
 	if (payload & 0xf)
 		return -EINVAL;
@@ -534,7 +534,7 @@ out_free:
 	return err;
 }
 
-const struct bpf_kinsn bpf_arm64_native_lab_desc = {
+const struct bpf_kop bpf_arm64_native_lab_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 6,
 	.max_emit_bytes = NATIVE_LAB_MAX_BLOB_BYTES,
@@ -542,7 +542,7 @@ const struct bpf_kinsn bpf_arm64_native_lab_desc = {
 	.emit_arm64 = emit_native_lab_arm64,
 };
 
-static const struct bpf_kinsn * const bpf_arm64_native_lab_kinsn_descs[] = {
+static const struct bpf_kop * const bpf_arm64_native_lab_kop_descs[] = {
 	&bpf_arm64_native_lab_desc,
 };
 
@@ -884,7 +884,7 @@ static void bpf_arm64_native_lab_debugfs_exit(void)
 static const struct btf_kfunc_id_set bpf_arm64_native_lab_kfunc_set = {
 	.owner = THIS_MODULE,
 	.set = &bpf_arm64_native_lab_kfunc_ids,
-	.kinsn_descs = bpf_arm64_native_lab_kinsn_descs,
+	.kop_descs = bpf_arm64_native_lab_kop_descs,
 };
 
 static int __init bpf_arm64_native_lab_init(void)
@@ -913,7 +913,7 @@ static void __exit bpf_arm64_native_lab_exit(void)
 module_init(bpf_arm64_native_lab_init);
 module_exit(bpf_arm64_native_lab_exit);
 
-MODULE_DESCRIPTION("BpfReJIT arm64 native-code lab kinsn (test only; bypasses verifier guarantees)");
+MODULE_DESCRIPTION("BpfReJIT arm64 native-code lab kop (test only; bypasses verifier guarantees)");
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("BpfReJIT");
 MODULE_IMPORT_NS("BPF_INTERNAL");

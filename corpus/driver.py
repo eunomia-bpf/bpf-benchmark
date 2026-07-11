@@ -29,7 +29,7 @@ from runner.libs.case_common import (
     LifecycleRunResult,
     wait_for_suite_quiescence,
 )
-from runner.libs.kinsn import prepare_kinsn_modules
+from runner.libs.kop import prepare_kop_modules
 from runner.libs import rejit_plan
 from runner.libs.rejit import (
     benchmark_rejit_enabled_passes,
@@ -697,14 +697,14 @@ def run_suite(
         native_loader_post_only=native_loader_post_only
     )
 
-    # Kinsn modules are only valid on the benchmark kernel that built them.
+    # KOperation modules are only valid on the benchmark kernel that built them.
     # Host Docker runs on the host kernel and must not install image modules.
-    should_load_kinsn = (
+    should_load_kop = (
         not workload_only
         and not skip_rejit_disables_shim()
         and not _local_docker_executor(args)
     )
-    kinsn_module_metadata = prepare_kinsn_modules() if should_load_kinsn else {}
+    kop_module_metadata = prepare_kop_modules() if should_load_kop else {}
     for app in suite.apps:
             _print_progress("app_start", app=app.name, runner=app.runner, workload=app.workload_for("corpus"))
             runner: AppRunner | None = None
@@ -1122,7 +1122,7 @@ def run_suite(
                 except Exception as write_exc:
                     _print_progress("incremental_write_error", app=app.name, error=str(write_exc))
 
-    kinsn_metadata = dict(kinsn_module_metadata)
+    kop_metadata = dict(kop_module_metadata)
 
     # No top-level results array. Per-app data is in details/apps/<safe>.json
     # (incrementally written). Only suite status is copied into result.json.
@@ -1140,7 +1140,7 @@ def run_suite(
         "workload_only": workload_only,
         "bpf_stats": collect_bpf_stats,
         "workload_seconds": workload_seconds,
-        "kinsn_modules": kinsn_metadata,
+        "kop_modules": kop_metadata,
         "status": "error" if any_app_failed else "ok",
     }
     return payload

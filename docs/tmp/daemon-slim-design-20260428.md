@@ -14,7 +14,7 @@ v3 目标下，daemon 应缩成事件源和脚本触发器：
 - 轮询 map inline hints 对应的 map values，变化时调用 `on_invalidation_script`
 - 可选保留只读 status socket
 
-删除重点是：daemon 不再依赖 `bpfopt::{pass, passes, verifier_log}`，不再维护 `DaemonContext`、`FdArrayKinsnCallResolver`、`PassManager` 包装层，不再有 profiler 线程，不再做 kfunc discovery，不再解析 verifier log，不再处理 socket `optimize` / `optimize-all` / `profile-*` 命令。
+删除重点是：daemon 不再依赖 `bpfopt::{pass, passes, verifier_log}`，不再维护 `DaemonContext`、`FdArrayKopCallResolver`、`PassManager` 包装层，不再有 profiler 线程，不再做 kfunc discovery，不再解析 verifier log，不再处理 socket `optimize` / `optimize-all` / `profile-*` 命令。
 
 runner 迁移顺序必须是先 #44，再 #45：当前 runner 仍启动 `bpfrejit-daemon serve --socket ...` 并发送 `optimize`、`profile-start`、`profile-stop` JSON 请求；如果先删 socket optimize 协议，corpus/e2e 会直接断。
 
@@ -29,9 +29,9 @@ runner 迁移顺序必须是先 #44，再 #45：当前 runner 仍启动 `bpfreji
 | `daemon/src/commands.rs` | 963 | socket `optimize` 的核心：response schema、live map provider、map inline records、verifier log parse、PassManager pipeline、per-pass verify、final REJIT、debug payload | 删除。少量 map-inline hint 记录思路可重写到 invalidation hints loader；优化逻辑交给外部脚本/CLI |
 | `daemon/src/commands_tests.rs` | 640 | optimize response serialization、pass detail、map inline record tracking、verifier log parse、pipeline smoke | 删除 optimize/profile/pass/verifier 相关测试；保留思路迁为 invalidation hint loader 测试 |
 | `daemon/src/invalidation.rs` | 368 | `MapInvalidationTracker`：记录 `(prog_id, map_fd, key, expected_value)`，轮询 map value，变化或缺失则返回 affected prog ids | 保留核心算法，重写输入源。从 daemon 内部 pass result 改成读取 `invalidation-hints.json` |
-| `daemon/src/kfunc_discovery.rs` | 872 | 扫 `/sys/kernel/btf/vmlinux` 和 module BTF，发现 kinsn stub func BTF ID，保活 BTF fd | 删除出 daemon。迁到 `bpfget --target` / target.json 生成路径 |
+| `daemon/src/kfunc_discovery.rs` | 872 | 扫 `/sys/kernel/btf/vmlinux` 和 module BTF，发现 kop stub func BTF ID，保活 BTF fd | 删除出 daemon。迁到 `bpfget --target` / target.json 生成路径 |
 | `daemon/src/main.rs` | 72 | 只支持 `serve --socket`；启动时做 kfunc discovery、platform detect、构造 `PassContext` 和 `DaemonContext` | 重写为 slim daemon CLI：config flags、watch loop、script runner、可选 status socket |
-| `daemon/src/pipeline.rs` | 546 | daemon-owned PassManager wrappers：fd_array kinsn resolver、per-pass verifier、rollback、debug trace | 删除。per-pass verify loop 属于外部脚本/CLI，不在 daemon 内 |
+| `daemon/src/pipeline.rs` | 546 | daemon-owned PassManager wrappers：fd_array kop resolver、per-pass verifier、rollback、debug trace | 删除。per-pass verify loop 属于外部脚本/CLI，不在 daemon 内 |
 | `daemon/src/platform_detect.rs` | 48 | 解析 `/proc/cpuinfo`，给 pass policy 填 CPU capabilities | 删除出 daemon。target discovery 属于 `bpfget --target` |
 | `daemon/src/profiler.rs` | 969 | PGO snapshot、background profiler thread、BPF run stats、PMU branch counters、hotness ranking | 删除出 daemon。核心采样逻辑迁到 `bpfprof` CLI |
 | `daemon/src/server.rs` | 1118 | Unix socket server；每秒 invalidation tick；处理 `optimize`、`optimize-all`、`profile-start/stop/save/load`、`status` | 大幅重写或删除。推荐 benchmark 不使用 socket；若保留，只做 status/event 订阅，不做 optimize pipeline |
@@ -152,7 +152,7 @@ runner 迁移顺序必须是先 #44，再 #45：当前 runner 仍启动 `bpfreji
 4. 构造 `pass::BpfProgram`，挂 live map provider。
 5. `passes::build_full_pipeline()`。
 6. apply mode 下跑 `pipeline::run_with_verifier()` 或 `run_with_profiling_and_verifier()`。
-7. final changed 时 relocation map fd、build kinsn fd_array、调用 `BPF_PROG_REJIT`。
+7. final changed 时 relocation map fd、build kop fd_array、调用 `BPF_PROG_REJIT`。
 
 瘦身后这些都不属于 daemon。外部 pipeline 示例：
 
@@ -194,7 +194,7 @@ bpfget "$PROG_ID" | bpfopt branch-flip --profile "/run/bpfrejit/profile/$PROG_ID
 
 ## 删除功能：kfunc discovery
 
-当前 `daemon/src/main.rs` 启动时调用 `kfunc_discovery::discover_kinsns()`，并把 registry 和 BTF fds 塞进 `PassContext` / `DaemonContext`。`kfunc_discovery.rs` 自己解析 BTF blob、扫固定模块名和函数名，并通过 `bpf_btf_get_fd_by_module_name()` 获取 verifier 可用 BTF fd。
+当前 `daemon/src/main.rs` 启动时调用 `kfunc_discovery::discover_kops()`，并把 registry 和 BTF fds 塞进 `PassContext` / `DaemonContext`。`kfunc_discovery.rs` 自己解析 BTF blob、扫固定模块名和函数名，并通过 `bpf_btf_get_fd_by_module_name()` 获取 verifier 可用 BTF fd。
 
 瘦身后 daemon 不运行 pass，也不组装 REJIT fd_array，所以不需要 kfunc discovery。目标位置是 `bpfget --target` 或 target.json 生成工具，供外部 `bpfopt` CLI 使用。
 

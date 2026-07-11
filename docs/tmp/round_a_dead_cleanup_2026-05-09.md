@@ -17,7 +17,7 @@ Paths are relative to `bpfopt/crates/bpfopt/src/`; `daemon/src` was unchanged. T
 
 ## Deleted dead/redundant APIs
 - Removed `PlatformCapabilities::test_default`; `rg 'PlatformCapabilities::test_default|PassContext::test_default|fn test_default|test_default\(' bpfopt/crates/bpfopt/src/pass.rs bpfopt/crates/bpfopt/src/pass_tests.rs bpfopt/crates/bpfopt/src/passes` returns no matches.
-- Removed duplicate helpers `test_helpers::{call_helper,exit_insn,mov32_reg,st_mem}`, `utils::is_kinsn_sidecar_insn`, `cond_select::mov32_reg`, and `skb_load_bytes::jgt_reg`; targeted `rg` checks return no defining matches.
+- Removed duplicate helpers `test_helpers::{call_helper,exit_insn,mov32_reg,st_mem}`, `utils::is_kop_sidecar_insn`, `cond_select::mov32_reg`, and `skb_load_bytes::jgt_reg`; targeted `rg` checks return no defining matches.
 - Removed map_inline numeric helper constants; `rg 'const HELPER_|HELPER_MAP_' bpfopt/crates/bpfopt/src/passes/map_inline.rs bpfopt/crates/bpfopt/src/passes/mod_tests.rs` returns no matches.
 - `rg '#\[allow\(dead_code\)\]' bpfopt/crates/bpfopt/src daemon/src` returns no matches. A caller scan found no additional 0-caller `passes/utils.rs` functions after cleanup.
 

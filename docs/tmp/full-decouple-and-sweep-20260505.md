@@ -37,7 +37,7 @@ Baseline line references are from `c510c6465355`.
 - `daemon/src/commands.rs:341`: `required_json_string()`
 - `daemon/src/commands.rs:731`: `pass_detail_from_report()`
 - `daemon/src/commands.rs:745`: `pass_detail_without_report()`
-- `daemon/src/commands.rs:868`: `missing_target_kinsns()`
+- `daemon/src/commands.rs:868`: `missing_target_kops()`
 - `daemon/src/commands.rs:906`: `target_has_any()`
 - `daemon/src/commands.rs:910`: `push_missing_target()`
 - `daemon/src/commands.rs:1088`: `push_unique()`

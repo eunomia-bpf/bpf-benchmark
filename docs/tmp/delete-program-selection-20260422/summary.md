@@ -180,11 +180,11 @@ Deleted / simplified:
 - `runner/libs/case_common.py:199-202`
   - `_clone_daemon_metadata(...)` no longer accepts a program-ID list
 - `runner/libs/case_common.py:437-467`
-  - lifecycle metadata no longer writes `requested_prog_ids` into `kinsn_modules.lifecycle_runs[*]`
+  - lifecycle metadata no longer writes `requested_prog_ids` into `kop_modules.lifecycle_runs[*]`
 - `corpus/driver.py:790-804`
   - corpus runner lifecycle now seeds both target/apply IDs from the same full discovered program list
 - `corpus/driver.py:1197-1207`
-  - corpus-side kinsn metadata clone path no longer passes or stores requested/apply subsets
+  - corpus-side kop metadata clone path no longer passes or stores requested/apply subsets
 
 Related truth-source cleanups needed to make this consistent across runners:
 
@@ -323,7 +323,7 @@ Observed and fixed:
   - first smoke rerun failed with `name 'os' is not defined`
   - fixed by restoring `import os` at `runner/libs/app_runners/scx.py:3`
 - `runner/libs/case_common.py:199-202,437-467` and `corpus/driver.py:1203-1205`
-  - first post-cleanup smoke rerun still leaked `requested_prog_ids` through `kinsn_modules.lifecycle_runs[*]`
+  - first post-cleanup smoke rerun still leaked `requested_prog_ids` through `kop_modules.lifecycle_runs[*]`
   - fixed by removing the metadata write entirely and cloning only daemon metadata, not requested/apply subsets
 - `corpus/driver.py:1004-1029`
   - the first full-set corpus rerun surfaced a genuine per-program apply failure in `tracee/default`:

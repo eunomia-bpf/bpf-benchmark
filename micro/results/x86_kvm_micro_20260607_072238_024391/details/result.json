@@ -101,10 +101,10 @@
                           "insn_count_after": 2,
                           "insn_count_before": 2,
                           "insn_delta": 0,
-                          "kinsn_calls_by_family": {},
-                          "kinsn_calls_by_name": {},
-                          "kinsn_payload_shapes": {},
-                          "kinsn_policy": {
+                          "kop_calls_by_family": {},
+                          "kop_calls_by_name": {},
+                          "kop_payload_shapes": {},
+                          "kop_policy": {
                             "bytecode_families": {
                               "bitops": true,
                               "bulk_memory": true,
@@ -120,16 +120,16 @@
                             },
                             "llvm_args": [
                               "bpfopt",
-                              "-bpf-enable-kinsn-select",
+                              "-bpf-enable-kop-select",
                               "-bpf-stack-size=4096",
-                              "-bpf-kinsn-mode=all=force,movbe-load=disable"
+                              "-bpf-kop-mode=all=force,movbe-load=disable"
                             ],
                             "pass_args": [
-                              "--bytecode-kinsn-mode",
+                              "--bytecode-kop-mode",
                               "prefetch=disable"
                             ]
                           },
-                          "pass": "kinsn",
+                          "pass": "kop",
                           "sites_applied": 0,
                           "sites_matched": 0,
                           "sites_skipped": 0,
@@ -140,9 +140,9 @@
                         "rejit_syscall_ms": 0,
                         "status": "ok",
                         "step": {
-                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "command": "bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kop-mode prefetch=disable",
                           "log_level": 1,
-                          "name": "kinsn"
+                          "name": "kop"
                         }
                       }
                     ],
@@ -192,10 +192,10 @@
                           "insn_count_after": 2,
                           "insn_count_before": 2,
                           "insn_delta": 0,
-                          "kinsn_calls_by_family": {},
-                          "kinsn_calls_by_name": {},
-                          "kinsn_payload_shapes": {},
-                          "kinsn_policy": {
+                          "kop_calls_by_family": {},
+                          "kop_calls_by_name": {},
+                          "kop_payload_shapes": {},
+                          "kop_policy": {
                             "bytecode_families": {
                               "bitops": true,
                               "bulk_memory": true,
@@ -211,16 +211,16 @@
                             },
                             "llvm_args": [
                               "bpfopt",
-                              "-bpf-enable-kinsn-select",
+                              "-bpf-enable-kop-select",
                               "-bpf-stack-size=4096",
-                              "-bpf-kinsn-mode=all=force,movbe-load=disable"
+                              "-bpf-kop-mode=all=force,movbe-load=disable"
                             ],
                             "pass_args": [
-                              "--bytecode-kinsn-mode",
+                              "--bytecode-kop-mode",
                               "prefetch=disable"
                             ]
                           },
-                          "pass": "kinsn",
+                          "pass": "kop",
                           "sites_applied": 0,
                           "sites_matched": 0,
                           "sites_skipped": 0,
@@ -231,9 +231,9 @@
                         "rejit_syscall_ms": 0,
                         "status": "ok",
                         "step": {
-                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "command": "bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kop-mode prefetch=disable",
                           "log_level": 1,
-                          "name": "kinsn"
+                          "name": "kop"
                         }
                       }
                     ],
@@ -253,25 +253,25 @@
                         "bpfopt_ms": 19,
                         "bpfopt_summary": {
                           "diagnostics": [
-                            "bytecode_kinsn_recovery_applied=5"
+                            "bytecode_kop_recovery_applied=5"
                           ],
                           "inlined_map_entries": [],
                           "insn_count_after": 190,
                           "insn_count_before": 226,
                           "insn_delta": -36,
-                          "kinsn_calls_by_family": {
+                          "kop_calls_by_family": {
                             "bitops": 5,
                             "endian_fusion": 3,
                             "lea": 6
                           },
-                          "kinsn_calls_by_name": {
+                          "kop_calls_by_name": {
                             "bpf_x86_leaq": 6,
                             "bpf_x86_movbe16": 1,
                             "bpf_x86_movbe32": 2,
                             "bpf_x86_shlxq": 3,
                             "bpf_x86_shrxq": 2
                           },
-                          "kinsn_payload_shapes": {
+                          "kop_payload_shapes": {
                             "bpf_x86_leaq|dst=r0|base=r1|index=r7|scale=0|disp=0": 1,
                             "bpf_x86_leaq|dst=r1|base=r2|index=none|scale=0|disp=34": 1,
                             "bpf_x86_leaq|dst=r3|base=r2|index=none|scale=0|disp=31": 1,
@@ -286,7 +286,7 @@
                             "bpf_x86_shrxq|payload=0x400": 1,
                             "bpf_x86_shrxq|payload=0x766": 1
                           },
-                          "kinsn_policy": {
+                          "kop_policy": {
                             "bytecode_families": {
                               "bitops": true,
                               "bulk_memory": true,
@@ -302,16 +302,16 @@
                             },
                             "llvm_args": [
                               "bpfopt",
-                              "-bpf-enable-kinsn-select",
+                              "-bpf-enable-kop-select",
                               "-bpf-stack-size=4096",
-                              "-bpf-kinsn-mode=all=force,movbe-load=disable"
+                              "-bpf-kop-mode=all=force,movbe-load=disable"
                             ],
                             "pass_args": [
-                              "--bytecode-kinsn-mode",
+                              "--bytecode-kop-mode",
                               "prefetch=disable"
                             ]
                           },
-                          "pass": "kinsn",
+                          "pass": "kop",
                           "sites_applied": 14,
                           "sites_matched": 14,
                           "sites_skipped": 0,
@@ -322,9 +322,9 @@
                         "rejit_syscall_ms": 2,
                         "status": "ok",
                         "step": {
-                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "command": "bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kop-mode prefetch=disable",
                           "log_level": 1,
-                          "name": "kinsn"
+                          "name": "kop"
                         }
                       }
                     ],
@@ -462,10 +462,10 @@
                           "insn_count_after": 2,
                           "insn_count_before": 2,
                           "insn_delta": 0,
-                          "kinsn_calls_by_family": {},
-                          "kinsn_calls_by_name": {},
-                          "kinsn_payload_shapes": {},
-                          "kinsn_policy": {
+                          "kop_calls_by_family": {},
+                          "kop_calls_by_name": {},
+                          "kop_payload_shapes": {},
+                          "kop_policy": {
                             "bytecode_families": {
                               "bitops": true,
                               "bulk_memory": true,
@@ -481,16 +481,16 @@
                             },
                             "llvm_args": [
                               "bpfopt",
-                              "-bpf-enable-kinsn-select",
+                              "-bpf-enable-kop-select",
                               "-bpf-stack-size=4096",
-                              "-bpf-kinsn-mode=all=force,movbe-load=disable"
+                              "-bpf-kop-mode=all=force,movbe-load=disable"
                             ],
                             "pass_args": [
-                              "--bytecode-kinsn-mode",
+                              "--bytecode-kop-mode",
                               "prefetch=disable"
                             ]
                           },
-                          "pass": "kinsn",
+                          "pass": "kop",
                           "sites_applied": 0,
                           "sites_matched": 0,
                           "sites_skipped": 0,
@@ -501,9 +501,9 @@
                         "rejit_syscall_ms": 0,
                         "status": "ok",
                         "step": {
-                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "command": "bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kop-mode prefetch=disable",
                           "log_level": 1,
-                          "name": "kinsn"
+                          "name": "kop"
                         }
                       }
                     ],
@@ -553,10 +553,10 @@
                           "insn_count_after": 2,
                           "insn_count_before": 2,
                           "insn_delta": 0,
-                          "kinsn_calls_by_family": {},
-                          "kinsn_calls_by_name": {},
-                          "kinsn_payload_shapes": {},
-                          "kinsn_policy": {
+                          "kop_calls_by_family": {},
+                          "kop_calls_by_name": {},
+                          "kop_payload_shapes": {},
+                          "kop_policy": {
                             "bytecode_families": {
                               "bitops": true,
                               "bulk_memory": true,
@@ -572,16 +572,16 @@
                             },
                             "llvm_args": [
                               "bpfopt",
-                              "-bpf-enable-kinsn-select",
+                              "-bpf-enable-kop-select",
                               "-bpf-stack-size=4096",
-                              "-bpf-kinsn-mode=all=force,movbe-load=disable"
+                              "-bpf-kop-mode=all=force,movbe-load=disable"
                             ],
                             "pass_args": [
-                              "--bytecode-kinsn-mode",
+                              "--bytecode-kop-mode",
                               "prefetch=disable"
                             ]
                           },
-                          "pass": "kinsn",
+                          "pass": "kop",
                           "sites_applied": 0,
                           "sites_matched": 0,
                           "sites_skipped": 0,
@@ -592,9 +592,9 @@
                         "rejit_syscall_ms": 0,
                         "status": "ok",
                         "step": {
-                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "command": "bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kop-mode prefetch=disable",
                           "log_level": 1,
-                          "name": "kinsn"
+                          "name": "kop"
                         }
                       }
                     ],
@@ -614,24 +614,24 @@
                         "bpfopt_ms": 17,
                         "bpfopt_summary": {
                           "diagnostics": [
-                            "bytecode_kinsn_recovery_applied=4"
+                            "bytecode_kop_recovery_applied=4"
                           ],
                           "inlined_map_entries": [],
                           "insn_count_after": 236,
                           "insn_count_before": 234,
                           "insn_delta": 2,
-                          "kinsn_calls_by_family": {
+                          "kop_calls_by_family": {
                             "bitops": 4,
                             "bulk_memory": 2,
                             "lea": 3
                           },
-                          "kinsn_calls_by_name": {
+                          "kop_calls_by_name": {
                             "bpf_x86_leaq": 3,
                             "bpf_x86_movl": 2,
                             "bpf_x86_shlxq": 2,
                             "bpf_x86_shrxq": 2
                           },
-                          "kinsn_payload_shapes": {
+                          "kop_payload_shapes": {
                             "bpf_x86_leaq|dst=r2|base=r3|index=none|scale=0|disp=1040": 1,
                             "bpf_x86_leaq|dst=r2|base=r3|index=none|scale=0|disp=8": 1,
                             "bpf_x86_leaq|dst=r9|base=r6|index=none|scale=0|disp=1": 1,
@@ -642,7 +642,7 @@
                             "bpf_x86_shrxq|payload=0x622": 1,
                             "bpf_x86_shrxq|payload=0x688": 1
                           },
-                          "kinsn_policy": {
+                          "kop_policy": {
                             "bytecode_families": {
                               "bitops": true,
                               "bulk_memory": true,
@@ -658,16 +658,16 @@
                             },
                             "llvm_args": [
                               "bpfopt",
-                              "-bpf-enable-kinsn-select",
+                              "-bpf-enable-kop-select",
                               "-bpf-stack-size=4096",
-                              "-bpf-kinsn-mode=all=force,movbe-load=disable"
+                              "-bpf-kop-mode=all=force,movbe-load=disable"
                             ],
                             "pass_args": [
-                              "--bytecode-kinsn-mode",
+                              "--bytecode-kop-mode",
                               "prefetch=disable"
                             ]
                           },
-                          "pass": "kinsn",
+                          "pass": "kop",
                           "sites_applied": 9,
                           "sites_matched": 9,
                           "sites_skipped": 0,
@@ -678,9 +678,9 @@
                         "rejit_syscall_ms": 3,
                         "status": "ok",
                         "step": {
-                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "command": "bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kop-mode prefetch=disable",
                           "log_level": 1,
-                          "name": "kinsn"
+                          "name": "kop"
                         }
                       }
                     ],
@@ -818,10 +818,10 @@
                           "insn_count_after": 2,
                           "insn_count_before": 2,
                           "insn_delta": 0,
-                          "kinsn_calls_by_family": {},
-                          "kinsn_calls_by_name": {},
-                          "kinsn_payload_shapes": {},
-                          "kinsn_policy": {
+                          "kop_calls_by_family": {},
+                          "kop_calls_by_name": {},
+                          "kop_payload_shapes": {},
+                          "kop_policy": {
                             "bytecode_families": {
                               "bitops": true,
                               "bulk_memory": true,
@@ -837,16 +837,16 @@
                             },
                             "llvm_args": [
                               "bpfopt",
-                              "-bpf-enable-kinsn-select",
+                              "-bpf-enable-kop-select",
                               "-bpf-stack-size=4096",
-                              "-bpf-kinsn-mode=all=force,movbe-load=disable"
+                              "-bpf-kop-mode=all=force,movbe-load=disable"
                             ],
                             "pass_args": [
-                              "--bytecode-kinsn-mode",
+                              "--bytecode-kop-mode",
                               "prefetch=disable"
                             ]
                           },
-                          "pass": "kinsn",
+                          "pass": "kop",
                           "sites_applied": 0,
                           "sites_matched": 0,
                           "sites_skipped": 0,
@@ -857,9 +857,9 @@
                         "rejit_syscall_ms": 0,
                         "status": "ok",
                         "step": {
-                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "command": "bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kop-mode prefetch=disable",
                           "log_level": 1,
-                          "name": "kinsn"
+                          "name": "kop"
                         }
                       }
                     ],
@@ -909,10 +909,10 @@
                           "insn_count_after": 2,
                           "insn_count_before": 2,
                           "insn_delta": 0,
-                          "kinsn_calls_by_family": {},
-                          "kinsn_calls_by_name": {},
-                          "kinsn_payload_shapes": {},
-                          "kinsn_policy": {
+                          "kop_calls_by_family": {},
+                          "kop_calls_by_name": {},
+                          "kop_payload_shapes": {},
+                          "kop_policy": {
                             "bytecode_families": {
                               "bitops": true,
                               "bulk_memory": true,
@@ -928,16 +928,16 @@
                             },
                             "llvm_args": [
                               "bpfopt",
-                              "-bpf-enable-kinsn-select",
+                              "-bpf-enable-kop-select",
                               "-bpf-stack-size=4096",
-                              "-bpf-kinsn-mode=all=force,movbe-load=disable"
+                              "-bpf-kop-mode=all=force,movbe-load=disable"
                             ],
                             "pass_args": [
-                              "--bytecode-kinsn-mode",
+                              "--bytecode-kop-mode",
                               "prefetch=disable"
                             ]
                           },
-                          "pass": "kinsn",
+                          "pass": "kop",
                           "sites_applied": 0,
                           "sites_matched": 0,
                           "sites_skipped": 0,
@@ -948,9 +948,9 @@
                         "rejit_syscall_ms": 0,
                         "status": "ok",
                         "step": {
-                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "command": "bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kop-mode prefetch=disable",
                           "log_level": 1,
-                          "name": "kinsn"
+                          "name": "kop"
                         }
                       }
                     ],
@@ -970,26 +970,26 @@
                         "bpfopt_ms": 19,
                         "bpfopt_summary": {
                           "diagnostics": [
-                            "bytecode_kinsn_recovery_applied=4"
+                            "bytecode_kop_recovery_applied=4"
                           ],
                           "inlined_map_entries": [],
                           "insn_count_after": 248,
                           "insn_count_before": 247,
                           "insn_delta": 1,
-                          "kinsn_calls_by_family": {
+                          "kop_calls_by_family": {
                             "bitops": 4,
                             "bulk_memory": 2,
                             "extract": 9,
                             "lea": 7
                           },
-                          "kinsn_calls_by_name": {
+                          "kop_calls_by_name": {
                             "bpf_x86_bextrq": 9,
                             "bpf_x86_leaq": 7,
                             "bpf_x86_movl": 2,
                             "bpf_x86_shlxq": 2,
                             "bpf_x86_shrxq": 2
                           },
-                          "kinsn_payload_shapes": {
+                          "kop_payload_shapes": {
                             "bpf_x86_bextrq|payload=0x211": 1,
                             "bpf_x86_bextrq|payload=0x212": 1,
                             "bpf_x86_bextrq|payload=0x343": 1,
@@ -1013,7 +1013,7 @@
                             "bpf_x86_shrxq|payload=0x233": 1,
                             "bpf_x86_shrxq|payload=0x911": 1
                           },
-                          "kinsn_policy": {
+                          "kop_policy": {
                             "bytecode_families": {
                               "bitops": true,
                               "bulk_memory": true,
@@ -1029,16 +1029,16 @@
                             },
                             "llvm_args": [
                               "bpfopt",
-                              "-bpf-enable-kinsn-select",
+                              "-bpf-enable-kop-select",
                               "-bpf-stack-size=4096",
-                              "-bpf-kinsn-mode=all=force,movbe-load=disable"
+                              "-bpf-kop-mode=all=force,movbe-load=disable"
                             ],
                             "pass_args": [
-                              "--bytecode-kinsn-mode",
+                              "--bytecode-kop-mode",
                               "prefetch=disable"
                             ]
                           },
-                          "pass": "kinsn",
+                          "pass": "kop",
                           "sites_applied": 22,
                           "sites_matched": 22,
                           "sites_skipped": 0,
@@ -1049,9 +1049,9 @@
                         "rejit_syscall_ms": 2,
                         "status": "ok",
                         "step": {
-                          "command": "bpfopt --pass kinsn --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kinsn-mode prefetch=disable",
+                          "command": "bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kop-mode prefetch=disable",
                           "log_level": 1,
-                          "name": "kinsn"
+                          "name": "kop"
                         }
                       }
                     ],

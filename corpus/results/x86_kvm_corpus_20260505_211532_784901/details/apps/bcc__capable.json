@@ -53,7 +53,7 @@
         "passes": [
           {
             "bpfopt_summary": null,
-            "error": "bpfopt pass rotate failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"rotate\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.eca00847/bpfrejit-daemon-optimize-1860-0/pass-00-rotate.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.eca00847/bpfrejit-daemon-optimize-1860-0/target.json\": error: target kinsn bpf_memcpy_bulk missing supported_encodings",
+            "error": "bpfopt pass rotate failed: bpfopt pass failed (returncode 1, status exit status: 1): subprocess \"bpfopt\" \"--pass\" \"rotate\" \"--report\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.eca00847/bpfrejit-daemon-optimize-1860-0/pass-00-rotate.report.json\" \"--prog-type\" \"kprobe\" \"--target\" \"/var/tmp/bpfrejit-runtime/run.x86-kvm.corpus.eca00847/bpfrejit-daemon-optimize-1860-0/target.json\": error: target kop bpf_memcpy_bulk missing supported_encodings",
             "pass": "rotate",
             "status": "failed_bpfopt"
           }

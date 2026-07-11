@@ -102,7 +102,7 @@ LOC 估算按相关状态类型、transfer、扫描 helper、alias/provenance he
 | dead code | `BBProgram::site_is_dead_code(&self, site: InsnSite) -> bool` (`analysis/bbprogram.rs:351-355`) | 读 oracle；所有 state 都 speculative 时认为 dead | `const_prop.rs:220`、`map_inline.rs:369` |
 | site liveness | `BBProgram::live_out_site_checked(&self, site: InsnSite) -> anyhow::Result<RegSet>` (`analysis/bbprogram.rs:265-272`) | 每次调用都跑 `compute_site_liveness(self)` (`analysis/bbprogram.rs:1315-1370`)；不是 cache | `bulk_memory.rs:219`、`wide_mem.rs:220`、另有 `ccmp`、`cond_select`、`rotate` |
 | per-insn use/def | `insn_use_def_set(insn: &BpfInsn) -> RegUseDefSet` (`analysis/bbprogram_use_def.rs:225-281`) | 纯 opcode decode；不查 BBProgram cache | `endian`、`map_inline`、`bulk_memory`、`cond_select`、`UseDefGraph::build` |
-| use-def graph | `UseDefGraph::build(prog: &BBProgram) -> anyhow::Result<Self>` (`analysis/bbprogram_use_def.rs:39-72`) | fixed-point reaching defs over `dataflow_successors`，使用 kinsn-aware per-site facts；结果缓存到 `BBProgram.use_def` (`analysis/bbprogram.rs:71,706-729`) | 间接供 `def_sites` / `uses_for_def` / DCE |
+| use-def graph | `UseDefGraph::build(prog: &BBProgram) -> anyhow::Result<Self>` (`analysis/bbprogram_use_def.rs:39-72`) | fixed-point reaching defs over `dataflow_successors`，使用 kop-aware per-site facts；结果缓存到 `BBProgram.use_def` (`analysis/bbprogram.rs:71,706-729`) | 间接供 `def_sites` / `uses_for_def` / DCE |
 | def sites | `BBProgram::def_sites(&self) -> impl Iterator<Item = DefSite>` (`analysis/bbprogram.rs:425-427`) | 读 cached `use_def.defs` | `dce.rs:25`、`bounds_check_merge.rs:321` |
 | uses for def | `BBProgram::uses_for_def(&self, def: DefSite) -> &[UseSite]` (`analysis/bbprogram.rs:428-430`) | 读 cached `use_def.defs[def]` | `dce.rs:26`、`bounds_check_merge.rs:330` |
 | CFG predecessor/successor | `predecessors(&self, block) -> &[BlockId]`, `successors(&self, block) -> &[BlockId]` (`analysis/bbprogram.rs:214-218`) | `rebuild_cfg_edges` 维护 cached vectors (`analysis/bbprogram.rs:679-704`) | `bbprogram_api`、`ccmp`、analysis tests |
@@ -136,7 +136,7 @@ pub fn defs_for_use(&self, site: InsnSite, reg: u8) -> &[DefSite];
 pub fn uses_of_site_def(&self, site: InsnSite, reg: u8) -> &[UseSite];
 ```
 
-实现思路：`UseDefGraph` 已有 `uses: BTreeMap<UseSite, Vec<DefSite>>` 和 `defs: BTreeMap<DefSite, Vec<UseSite>>`，只是没有对 `uses` 的 public accessor，也没有 per-site cached `RegUseDefSet` accessor。`kinsn_aware_site_facts` 目前 build 时临时生成，可持久化到 BBProgram 或 UseDefGraph。
+实现思路：`UseDefGraph` 已有 `uses: BTreeMap<UseSite, Vec<DefSite>>` 和 `defs: BTreeMap<DefSite, Vec<UseSite>>`，只是没有对 `uses` 的 public accessor，也没有 per-site cached `RegUseDefSet` accessor。`kop_aware_site_facts` 目前 build 时临时生成，可持久化到 BBProgram 或 UseDefGraph。
 
 替代代码：
 `map_inline.rs:2154-2235,2248-2297,2307-2380,2745-2755`；`endian.rs:74-117,134-168`；`bounds_check_merge.rs:315-336` 可从手写 `def_sites().find(...)` 收敛为一行。

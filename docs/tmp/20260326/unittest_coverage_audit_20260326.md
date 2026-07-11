@@ -25,8 +25,8 @@
 | `tests/unittest/rejit_prog_types.c` | a | **21 个 prog type** 的 identity REJIT + `GET_ORIGINAL` + 部分 `TEST_RUN` |
 | `tests/unittest/rejit_safety_tests.c` | a, d, f | **N01-N16** 负面测试；**C01-C05** 正确性/roundtrip/metadata；含 unprivileged、bad fd、wrong helper、failed REJIT preserves original |
 | `tests/unittest/rejit_verifier_negative_tests.c` | d, f | 回放 4 个 daemon bug 模式：map_value 常量折叠、unreachable insn、bad call dest、unsupported `BPF_PSEUDO_MAP_VALUE` |
-| `tests/unittest/rejit_kinsn.c` | b, d | kinsn discovery；rotate/select/extract/endian/barrier 的 verifier/JIT 建模；少量负面 case |
-| `tests/unittest/module/rejit_select_alias.c` | b | x86 `bpf_select64` alias bug 回归；9 个 vector 比较 plain BPF proof vs native kinsn |
+| `tests/unittest/rejit_kop.c` | b, d | kop discovery；rotate/select/extract/endian/barrier 的 verifier/JIT 建模；少量负面 case |
+| `tests/unittest/module/rejit_select_alias.c` | b | x86 `bpf_select64` alias bug 回归；9 个 vector 比较 plain BPF proof vs native kop |
 | `tests/unittest/rejit_pass_correctness.c` | a, e(近似) | **16 个 daemon pass pattern** 对应 `.bpf.o` 的 identity REJIT；含 struct_ops / fentry best-effort |
 | `tests/unittest/rejit_spectre.c` | a, e(近似) | branch-containing program 在 changed insn count 下的 REJIT correctness；显式注明不是实际 SpectreMitigationPass |
 | `tests/unittest/rejit_tail_call.c` | a | tail-call caller/target 两个基础 REJIT 交互 case |
@@ -78,18 +78,18 @@
 
 - 缺少更“后半段”的 rollback 测试，尤其是 verifier 通过后、swap/refresh/poke 失败时的恢复语义。
 
-#### b. kinsn 模块测试
+#### b. kop 模块测试
 
 当前 unittest 主要集中在：
 
-- `rejit_kinsn.c`
+- `rejit_kop.c`
 - `module/rejit_select_alias.c`
-- `rejit_safety_tests.c` 的 barrier kinsn 有效路径
+- `rejit_safety_tests.c` 的 barrier kop 有效路径
 - `rejit_pass_correctness.c` 的 pattern `.bpf.o`（更多是 identity REJIT，不是直接模块单测）
 
 关键边界：
 
-- [`tests/unittest/rejit_kinsn.c`](../../../tests/unittest/rejit_kinsn.c) 的 discovery matrix 只包含 `rotate/select/extract/endian/barrier` 五个 family；**没有 `bulk_memory`，也没有 `arm64/bpf_ldp`**。
+- [`tests/unittest/rejit_kop.c`](../../../tests/unittest/rejit_kop.c) 的 discovery matrix 只包含 `rotate/select/extract/endian/barrier` 五个 family；**没有 `bulk_memory`，也没有 `arm64/bpf_ldp`**。
 
 #### c. hotswap 压力测试（12 个 prog_type）
 
@@ -117,15 +117,15 @@
 
 - 大多只切换一个 immediate/return value，偏向 smoke/stress，不是深语义验证。
 
-#### d. verifier 测试（kinsn 验证语义）
+#### d. verifier 测试（kop 验证语义）
 
 当前已有：
 
 - `rejit_safety_tests.c`
-  - `N01-N16`：空程序、未知 opcode、无 exit、未初始化 `r0`、越界 stack、反向跳转、非法 helper、oversized、invalid register、bad fd、non-BPF fd、truncated `LD_IMM64`、wrong helper for prog type、unprivileged REJIT、failed REJIT preserves original、valid barrier kinsn path
+  - `N01-N16`：空程序、未知 opcode、无 exit、未初始化 `r0`、越界 stack、反向跳转、非法 helper、oversized、invalid register、bad fd、non-BPF fd、truncated `LD_IMM64`、wrong helper for prog type、unprivileged REJIT、failed REJIT preserves original、valid barrier kop path
 - `rejit_verifier_negative_tests.c`
   - 4 个 daemon bug regression
-- `rejit_kinsn.c`
+- `rejit_kop.c`
   - `rotate_invalid_tmp_rejected`
   - `endian_invalid_access_rejected`
   - `extract_range_narrowing`
@@ -133,7 +133,7 @@
 评价：
 
 - generic verifier negative 覆盖不错。
-- 但“**每个 kinsn payload 的边界与错误处理**”覆盖仍然浅。
+- 但“**每个 kop payload 的边界与错误处理**”覆盖仍然浅。
 
 #### e. daemon 集成测试
 
@@ -158,23 +158,23 @@
 
 - `rejit_safety_tests.c`：权限、错误 fd、invalid bytecode、oversized、wrong helper、unprivileged
 - `rejit_verifier_negative_tests.c`：4 个 malformed bytecode regression
-- `rejit_kinsn.c`：rotate invalid tmp、endian invalid access
+- `rejit_kop.c`：rotate invalid tmp、endian invalid access
 - `rejit_audit_tests.c`：`flags!=0` rejected
 
 不足：
 
-- per-kinsn 的 payload boundary / error handling 还没有系统化 matrix。
+- per-kop 的 payload boundary / error handling 还没有系统化 matrix。
 
-## 2. kinsn 模块 unittest 审计
+## 2. kop 模块 unittest 审计
 
 ### 2.1 审计总览
 
-从 [`module/`](../../../module) 看，当前共有 13 个 kinsn module source：
+从 [`module/`](../../../module) 看，当前共有 13 个 kop module source：
 
 - x86：`bpf_rotate`、`bpf_select`、`bpf_extract`、`bpf_endian`、`bpf_barrier`、`bpf_bulk_memory`
 - arm64：`bpf_rotate`、`bpf_select`、`bpf_extract`、`bpf_endian`、`bpf_barrier`、`bpf_bulk_memory`、`bpf_ldp`
 
-但 [`tests/unittest/rejit_kinsn.c`](../../../tests/unittest/rejit_kinsn.c) 的 discovery enum / table 只注册了：
+但 [`tests/unittest/rejit_kop.c`](../../../tests/unittest/rejit_kop.c) 的 discovery enum / table 只注册了：
 
 - `MOD_ROTATE`
 - `MOD_SELECT`
@@ -182,21 +182,21 @@
 - `MOD_ENDIAN`
 - `MOD_BARRIER`
 
-也就是说，**当前 unittest 框架层面就没有把 `bulk_memory` 和 `arm64/bpf_ldp` 纳入 kinsn discovery/test matrix**。
+也就是说，**当前 unittest 框架层面就没有把 `bulk_memory` 和 `arm64/bpf_ldp` 纳入 kop discovery/test matrix**。
 
 ### 2.2 逐模块审计
 
 | 模块 | 有没有 unittest | 当前测了什么 | 主要缺口 |
 |---|---|---|---|
-| `module/x86/bpf_rotate.c` | 有，直接覆盖 | `rejit_kinsn.c` 覆盖 apply、x86 `ROL` byte pattern、arbitrary regs、`r5` preserved、`LD_IMM64` layout、invalid tmp reject；`rejit_pass_correctness.c` 还覆盖 rotate pattern `.bpf.o` | 缺 `shift=0`、`shift=63`、`dst==src`、invalid `dst/src`、更复杂多-site/attached 场景 |
-| `module/arm64/bpf_rotate.c` | 只有共享覆盖，无 arm64 专项 | 理论上 `rejit_kinsn.c` 在 arm64 运行时可触发 rotate success path | 缺 `EXTR` emit 专项验证、arm64 scratch/clobber、`shift=0/63` 边界 |
-| `module/x86/bpf_select.c` | 有，直接覆盖 | `rejit_kinsn.c` 覆盖 apply、arbitrary dst；`module/rejit_select_alias.c` 覆盖 9 个 alias/normal/high-reg vector，直接打 x86 alias bug | 缺 invalid cond mode、`true_reg==false_reg` fast path、更多 payload reject case、x86 emit byte pattern |
+| `module/x86/bpf_rotate.c` | 有，直接覆盖 | `rejit_kop.c` 覆盖 apply、x86 `ROL` byte pattern、arbitrary regs、`r5` preserved、`LD_IMM64` layout、invalid tmp reject；`rejit_pass_correctness.c` 还覆盖 rotate pattern `.bpf.o` | 缺 `shift=0`、`shift=63`、`dst==src`、invalid `dst/src`、更复杂多-site/attached 场景 |
+| `module/arm64/bpf_rotate.c` | 只有共享覆盖，无 arm64 专项 | 理论上 `rejit_kop.c` 在 arm64 运行时可触发 rotate success path | 缺 `EXTR` emit 专项验证、arm64 scratch/clobber、`shift=0/63` 边界 |
+| `module/x86/bpf_select.c` | 有，直接覆盖 | `rejit_kop.c` 覆盖 apply、arbitrary dst；`module/rejit_select_alias.c` 覆盖 9 个 alias/normal/high-reg vector，直接打 x86 alias bug | 缺 invalid cond mode、`true_reg==false_reg` fast path、更多 payload reject case、x86 emit byte pattern |
 | `module/arm64/bpf_select.c` | 只有共享覆盖，无 arm64 专项 | 共享 success path 可在 arm64 运行时触发 | 缺 `CSEL` emit 专项、arm64 alias/fast path、invalid payload |
-| `module/x86/bpf_extract.c` | 有，但偏浅 | `rejit_kinsn.c` 只测 `extract_range_narrowing`；`rejit_pass_correctness.c` 有 `bitfield_extract` / `bitfield_extract_boundary` pattern | 缺 invalid `start/len` reject、`len==32` special case、native emit (`BEXTR`/x86 lowering) 专项 |
+| `module/x86/bpf_extract.c` | 有，但偏浅 | `rejit_kop.c` 只测 `extract_range_narrowing`；`rejit_pass_correctness.c` 有 `bitfield_extract` / `bitfield_extract_boundary` pattern | 缺 invalid `start/len` reject、`len==32` special case、native emit (`BEXTR`/x86 lowering) 专项 |
 | `module/arm64/bpf_extract.c` | 只有共享覆盖，无 arm64 专项 | 共享 `extract_range_narrowing` 可在 arm64 运行时触发 | 缺 `UBFM` emit 专项、boundary/invalid payload matrix |
-| `module/x86/bpf_endian.c` | 有，但偏浅 | `rejit_kinsn.c` 覆盖 endian16、endian32、arbitrary regs、invalid access reject；`rejit_pass_correctness.c` 有 endian pattern | 缺 64-bit path、offset/alignment boundary、x86 emit byte pattern |
+| `module/x86/bpf_endian.c` | 有，但偏浅 | `rejit_kop.c` 覆盖 endian16、endian32、arbitrary regs、invalid access reject；`rejit_pass_correctness.c` 有 endian pattern | 缺 64-bit path、offset/alignment boundary、x86 emit byte pattern |
 | `module/arm64/bpf_endian.c` | 只有共享覆盖，无 arm64 专项 | 共享 endian success path 可在 arm64 运行时触发 | 缺 `REV` 16/32/64 emit、scaled/unscaled offset path、boundary case |
-| `module/x86/bpf_barrier.c` | 有，但很浅 | `rejit_kinsn.c` 的 `barrier_preserves_r5`；`rejit_safety_tests.c:N16` 覆盖有效 barrier kinsn 路径 | 缺 `LFENCE` emit 检查、non-zero payload reject、multi-barrier、与真实 Spectre pass 的联动 |
+| `module/x86/bpf_barrier.c` | 有，但很浅 | `rejit_kop.c` 的 `barrier_preserves_r5`；`rejit_safety_tests.c:N16` 覆盖有效 barrier kop 路径 | 缺 `LFENCE` emit 检查、non-zero payload reject、multi-barrier、与真实 Spectre pass 的联动 |
 | `module/arm64/bpf_barrier.c` | 只有共享覆盖，无 arm64 专项 | barrier success path 可在 arm64 运行时触发 | 缺 `DSB SY + ISB` emit 检查、payload reject、arm64 特有语义 |
 | `module/x86/bpf_bulk_memory.c` | **没有** | `tests/unittest/` 对 `bpf_memcpy_bulk` / `bpf_memset_bulk` 无引用 | 缺整个 family：`memcpy/memset` 正确性、zero-fill / value-from-reg / width class / len 上界 / offset 边界 / reg preservation / emit bytes |
 | `module/arm64/bpf_bulk_memory.c` | **没有** | 无 unittest 命中 | 缺整个 family；尤其 arm64 loop/tail handling、宽度/长度/偏移边界、错误 payload、emit correctness |
@@ -220,11 +220,11 @@
 | 应有测试 | 当前状态 | 审计结论 |
 |---|---|---|
 | a. 并发 REJIT 测试 | **部分已有** | `rejit_poc.c`、`rejit_regression.c`、`rejit_swap_tests.c` 已覆盖 same-prog / different-prog / `REJIT+run` / `get_info+REJIT` 并发；但缺 attached prog type 上的同 prog 冲突式并发 REJIT |
-| b. REJIT 失败回滚测试 | **部分已有** | `rejit_safety_tests.c:N15`、`rejit_kinsn.c` 的 failure-preserves-original 只覆盖 verifier reject；缺 swap/trampoline/map-poke 等 late failure rollback |
+| b. REJIT 失败回滚测试 | **部分已有** | `rejit_safety_tests.c:N15`、`rejit_kop.c` 的 failure-preserves-original 只覆盖 verifier reject；缺 swap/trampoline/map-poke 等 late failure rollback |
 | c. map 引用计数测试 | **基本缺失** | 有 `fd_array` leak stress，但没有直接 map refcount/lifetime 断言，例如 close original map fd 后程序是否仍持有正确引用、反复 REJIT 后 `map_ids` 稳定、prog_array / map delete 交错生命周期 |
 | d. tail call + REJIT 交互测试 | **已有** | `rejit_tail_call.c`、`rejit_swap_tests.c:T4`、`rejit_regression.c:T7` 已覆盖 caller/target/concurrent map update |
 | e. daemon 集成测试 | **当前 unittest 缺失** | `tests/unittest/` 内没有任何真实 daemon process E2E |
-| f. kinsn 注册/注销测试 | **缺失** | 现在只有 discovery 已加载模块；没有 module load/unload、stale BTF fd、重复注册/卸载、re-load 路径 |
+| f. kop 注册/注销测试 | **缺失** | 现在只有 discovery 已加载模块；没有 module load/unload、stale BTF fd、重复注册/卸载、re-load 路径 |
 | g. 性能回归测试 | **当前 unittest 缺失** | 性能应放在 `vm-micro` / `vm-corpus` / `vm-e2e`，当前 unittest 没有 regression gate |
 
 ### 3.2 额外缺口
@@ -250,12 +250,12 @@
 3. **补 late-failure rollback 测试。**  
    不要只测 verifier reject；要测 verify/JIT 之后、refresh/poke/swap 失败时，旧 program / link / trampoline 是否仍然可用。
 
-4. **补 kinsn 注册/注销生命周期测试。**  
+4. **补 kop 注册/注销生命周期测试。**  
    覆盖 module load、discover、use、unload、stale BTF fd reject、reload。
 
 ### P1
 
-5. **把已有 kinsn family 的 boundary/error matrix 补完整。**
+5. **把已有 kop family 的 boundary/error matrix 补完整。**
    - rotate：`shift=0/63`、`dst==src`
    - select：invalid cond mode、`true_reg==false_reg`
    - extract：invalid `start/len`、`len==32`
@@ -280,7 +280,7 @@
 
 如果问题是“当前 unittest 对 **REJIT syscall** 覆盖够不够”，答案是：**中上，主路径和若干关键 regression 都覆盖到了。**
 
-如果问题是“当前 unittest 对 **kernel module / kinsn** 覆盖够不够”，答案是：**不够。**
+如果问题是“当前 unittest 对 **kernel module / kop** 覆盖够不够”，答案是：**不够。**
 
 根本原因有三条：
 

@@ -8,7 +8,7 @@
 | 严重度 | 发现 | 证据 |
 | --- | --- | --- |
 | BLOCKER | Docker/BuildKit 是本机满盘主因。`/var/lib/docker` 实占 213G，其中 `overlay2` 197G；`docker system df` 显示 Build Cache 183.4G，全部 reclaimable。 | `docker system df`: Build Cache 1642 entries / 183.4GB；`sudo du -sh /var/lib/docker`: 213G；`sudo du -sh /var/lib/docker/*`: overlay2 197G |
-| HIGH | 最近 P89 KVM corpus 结果跨 run 累积 15G；整个 `corpus/results` 18G。 | 13 个 `corpus/results/x86_kvm_p89_kinsn_corpus_*` 目录合计 15G |
+| HIGH | 最近 P89 KVM corpus 结果跨 run 累积 15G；整个 `corpus/results` 18G。 | 13 个 `corpus/results/x86_kvm_p89_kop_corpus_*` 目录合计 15G |
 | HIGH | `e2e/results` 200 个目录合计 15G，无历史轮数限制。 | `du -sh e2e/results`: 15G |
 | MEDIUM | `docs/tmp` 有 KVM docker sparse image 残留：2 个 64G apparent size 文件，当前实际占用 519M；失败/崩溃时可变成大实际占用。 | `docs/tmp/20260424/vm-tmp/bpf-benchmark-docker.img` 517M actual / 64G apparent；`docs/tmp/20260430/...` 2.3M actual / 64G apparent |
 | MEDIUM | 全局 `~/.cache` 65G，但主要不是本仓库 P89：HuggingFace 32G、Go build cache 27G。 | `du -sh ~/.cache/*` |
@@ -102,7 +102,7 @@ BuildKit duplicate-layer evidence:
 
 | 严重度 | 路径 | 当前占用 | 跨 run 模式 |
 | --- | --- | ---: | --- |
-| HIGH | `corpus/results/x86_kvm_p89_kinsn_corpus_*` | 15G | 13 轮 P89 结果目录保留；最大单目录 5.4G、2.7G、2.5G、2.4G、1.3G。 |
+| HIGH | `corpus/results/x86_kvm_p89_kop_corpus_*` | 15G | 13 轮 P89 结果目录保留；最大单目录 5.4G、2.7G、2.5G、2.4G、1.3G。 |
 | HIGH | `corpus/results` | 18G | 173 个结果目录/文件，无自动 retention。 |
 | HIGH | `e2e/results` | 15G | 200 个结果目录，无自动 retention；最大 `tetragon_20260430_001822_658984` 为 7.6G。 |
 | MEDIUM | `docs/tmp/runtime-container-tmp` | 975M | 14 个 run token 目录残留；KVM executor 只在成功时清理 scratch dir，失败保留。 |
@@ -143,7 +143,7 @@ BuildKit duplicate-layer evidence:
 | SAFE | HIGH | stale `docs/tmp/*/vm-tmp/bpf-benchmark-docker.img` | 当前 519M actual，未来可能几十 G | 生成性 KVM docker disk；确认无 KVM run active 后可删。 |
 | SAFE | MEDIUM | `docs/tmp/runtime-container-tmp/run.*` | 975M | 临时 runtime dir；失败 forensics 不需要时可删。 |
 | SAFE | LOW | `/tmp/codex_p*.log`, `/tmp/p86-unittest-build`, `/tmp/p88-*` | 约数百 M | 非结果主路径。 |
-| RISKY | HIGH | `corpus/results/x86_kvm_p89_kinsn_corpus_*` 旧轮次 | 15G | 结果数据；先保留最好/最新/需要对比的轮次，归档后删。 |
+| RISKY | HIGH | `corpus/results/x86_kvm_p89_kop_corpus_*` 旧轮次 | 15G | 结果数据；先保留最好/最新/需要对比的轮次，归档后删。 |
 | RISKY | HIGH | `e2e/results/*` 旧轮次 | 15G | 结果数据；需要先确认哪些是 paper/debug 证据。 |
 | RISKY | MEDIUM | `~/.cache/go-build`, `~/.cache/huggingface` | 59G | 全局缓存，可能影响其他项目；不是本仓库 P89 主因。 |
 | RISKY | MEDIUM | Docker images (`bpf-benchmark/*`, upstream app images) | 34.6G | Docker 认为全部 reclaimable；删除后必须重 pull/rebuild。 |

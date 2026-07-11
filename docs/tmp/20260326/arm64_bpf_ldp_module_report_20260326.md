@@ -2,7 +2,7 @@
 
 Date: 2026-03-26
 
-Implemented [`module/arm64/bpf_ldp.c`](/home/yunwei37/workspace/bpf-benchmark/module/arm64/bpf_ldp.c) with two v2 kinsn descriptors:
+Implemented [`module/arm64/bpf_ldp.c`](/home/yunwei37/workspace/bpf-benchmark/module/arm64/bpf_ldp.c) with two v2 kop descriptors:
 
 - `bpf_ldp128`: proof-lowers to two ordered `BPF_LDX_MEM(BPF_DW, ...)` loads and emits one ARM64 signed-offset `LDP`.
 - `bpf_stp128`: proof-lowers to two ordered `BPF_STX_MEM(BPF_DW, ...)` stores and emits one ARM64 signed-offset `STP`.

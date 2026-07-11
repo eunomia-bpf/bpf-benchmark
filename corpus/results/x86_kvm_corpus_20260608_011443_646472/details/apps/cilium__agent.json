@@ -1155,7 +1155,7 @@
   },
   "rejit_result": {
     "enabled_passes": [
-      "kinsn"
+      "kop"
     ],
     "mode": "loadtime",
     "plan_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260608_011443_646472/details/loadtime-plans/cilium__agent.json",

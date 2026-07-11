@@ -19,7 +19,7 @@
 - Host: Intel Core Ultra 9 285K, Ubuntu, kernel 6.15.11
 - VM: QEMU/KVM + virtme-ng 1.40
 - Guest kernel: 7.0-rc2+rejit-v2 分支（`vendor/linux-framework`）
-- kinsn modules: bpf_barrier, bpf_endian, bpf_extract, bpf_rotate, bpf_select
+- kop modules: bpf_barrier, bpf_endian, bpf_extract, bpf_rotate, bpf_select
 
 ### 复现命令（Makefile 方式）
 

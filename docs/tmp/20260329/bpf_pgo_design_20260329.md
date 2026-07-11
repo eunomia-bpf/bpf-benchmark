@@ -847,7 +847,7 @@ LBR 数据量约是 IP 的 `1.56x`。
 - `docs/tmp/20260329/lbr_guest_probe/current_vm_ip.script.txt`
 - `docs/tmp/20260329/lbr_guest_probe/bpftool_prog_show_live.json`
 - `docs/tmp/20260320/pgo_policy_design_20260320.md`
-- `docs/tmp/20260329/prefetch_kinsn_design_20260329.md`
+- `docs/tmp/20260329/prefetch_kop_design_20260329.md`
 - `docs/tmp/20260328/aws_arm64_benchmark_20260328.md`
 - `docs/tmp/20260328/aws_x86_benchmark_final_20260328.md`
 

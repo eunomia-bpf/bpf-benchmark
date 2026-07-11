@@ -2,7 +2,7 @@
 
 ## 背景
 
-Subagent commit `cff84bff` 恢复了 daemon `bpfget` 的 `call_offset` + `build_rejit_fd_array` 加载 BTF module fd，解决了 round 14 三类 bug 中的 A/B（kinsn 跨 BTF 分不清）。但实现存在 off-by-one 错误。
+Subagent commit `cff84bff` 恢复了 daemon `bpfget` 的 `call_offset` + `build_rejit_fd_array` 加载 BTF module fd，解决了 round 14 三类 bug 中的 A/B（kop 跨 BTF 分不清）。但实现存在 off-by-one 错误。
 
 ## 发现的问题
 
@@ -21,7 +21,7 @@ copy_from_bpfptr_offset(&btf_fd, env->fd_array,
 
 `call_offset=0` 走 `btf_vmlinux` 分支，不查 fd_array，不需要 daemon 提供。
 
-### TargetKinsnJson 字段过宽
+### TargetKopJson 字段过宽
 
 `btf_id` / `call_offset` 都用 `#[serde(default)]`，意味着缺字段时静默 fallback 到 0。这违反 fail-fast：daemon 应该在 target.json 缺字段时立刻报错而不是装作 vmlinux。
 
@@ -35,13 +35,13 @@ copy_from_bpfptr_offset(&btf_fd, env->fd_array,
 - 新增 `build_rejit_fd_array_with_openers`：通过 closure 注入 BTF fd opener，使单元测试可注入 mock
 - docstring 改正 `fd_array[call_offset]` 语义
 
-### `daemon/src/commands.rs::TargetKinsnJson`
+### `daemon/src/commands.rs::TargetKopJson`
 
 - 移除 `#[serde(default)]`，要求 `btf_id` 和 `call_offset` 必填
 
 ### `bpfopt/crates/bpfopt/src/main.rs`
 
-- 同步：`KinsnJson.call_offset` 从 `Option<i16>` 改为 `i16`，移除 `serde(default, alias)`
+- 同步：`KopJson.call_offset` 从 `Option<i16>` 改为 `i16`，移除 `serde(default, alias)`
 
 ### `daemon/src/bpf.rs::relocate_map_fds_for_rejit`
 

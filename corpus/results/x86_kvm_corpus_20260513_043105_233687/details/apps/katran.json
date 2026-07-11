@@ -198,7 +198,7 @@
           {
             "bpfopt_ms": 4,
             "bpfopt_summary": null,
-            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/shz6597/bpfrejit-daemon-plan-1869-0/output_step4.bin --output /var/tmp/bpfrejit-runtime/shz6597/bpfrejit-daemon-plan-1869-0/output_step5.bin --report /var/tmp/bpfrejit-runtime/shz6597/bpfrejit-daemon-plan-1869-0/report_step5.json --prog-type xdp\nsubprocess output:\nerror: kinsn call btf_id 128704 call_off 15 is not present in the kinsn registry",
+            "error": "step 5 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/shz6597/bpfrejit-daemon-plan-1869-0/output_step4.bin --output /var/tmp/bpfrejit-runtime/shz6597/bpfrejit-daemon-plan-1869-0/output_step5.bin --report /var/tmp/bpfrejit-runtime/shz6597/bpfrejit-daemon-plan-1869-0/report_step5.json --prog-type xdp\nsubprocess output:\nerror: kop call btf_id 128704 call_off 15 is not present in the kop registry",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",

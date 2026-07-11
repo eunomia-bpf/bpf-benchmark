@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0
-# Top-level Makefile for BpfReJIT kinsn kernel modules
+# Top-level Makefile for BpfReJIT kop kernel modules
 
 SUBDIRS := x86 arm64
 

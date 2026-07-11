@@ -19,7 +19,7 @@ Executed the high-confidence N cleanup items in the allowed bpfopt files:
 - `bbprogram.rs:180 block_body_insns()` -> deleted.
 - `bbprogram.rs:194 body_insn_window()` -> deleted.
 - `bbprogram.rs:614 block_entry_site()` -> deleted.
-- `bbprogram.rs:499 kinsn_registry()` -> deleted.
+- `bbprogram.rs:499 kop_registry()` -> deleted.
 - `bbprogram_api.rs:145 delete_cond_branch_at_site()` -> deleted.
 - `bbprogram_api.rs:394 split_block_at_site()` -> deleted.
 - `bbprogram.rs:321 reg_known_map_ptr()` -> deleted.

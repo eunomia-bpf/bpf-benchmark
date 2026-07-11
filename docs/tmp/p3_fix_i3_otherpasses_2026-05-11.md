@@ -39,7 +39,7 @@ Modified only the assigned pass files:
 
 ## Gates
 
-- `cd bpfopt && cargo build --release`: FAIL, expected while I1 API migration is not landed. First failures are missing `BBProgram::site_block`, missing `BBProgram::terminator_at_site`, and old `rep_admit_kinsn_site_window` still returning `(BlockId, Range<usize>)` instead of `KinsnAdmissionWindow`.
+- `cd bpfopt && cargo build --release`: FAIL, expected while I1 API migration is not landed. First failures are missing `BBProgram::site_block`, missing `BBProgram::terminator_at_site`, and old `rep_admit_kop_site_window` still returning `(BlockId, Range<usize>)` instead of `KopAdmissionWindow`.
 - Formatting applied to the seven assigned files with `rustfmt`.
 - `cd bpfopt && cargo fmt --all -- --check`: FAIL on unowned `crates/bpfopt/src/passes/prefetch.rs:178`. I left it untouched because it is outside this job's write set.
 

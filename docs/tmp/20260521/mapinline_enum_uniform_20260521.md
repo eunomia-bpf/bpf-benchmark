@@ -20,7 +20,7 @@ OVER_CALL:<原 null 检查>
   覆盖 r3 安全)。
 - 删掉了被取代的 `derive_const_lookup_key` / `lookup_snapshot_value`(dead)。
 
-### katran 验证(kinsn LLVM-23,带 overlays)
+### katran 验证(kop LLVM-23,带 overlays)
 **6 个 site 折叠,sound**:
 - vip_map ×2(枚举 guard,1 条目)
 - ch_rings ×2(uniform 消除)
@@ -48,8 +48,8 @@ IPIP 封装 + 校验和),所以 soft 折叠 ≈ 0%。之前传说的「~17%」�
 soft fold 机制正确 + sound;katran 上收益微小是因为查找非瓶颈。
 
 ## 2. LLVM 多版本兼容(llvmbpf)
-`make corpus` 默认用**仓库的 kinsn LLVM-23**(`runner/mk/build.mk:14`
-`DEFAULT_RUNNER_LLVM_DIR = llvm-backend/build-bpf-kinsn`);ARM64 corpus 目前用
+`make corpus` 默认用**仓库的 kop LLVM-23**(`runner/mk/build.mk:14`
+`DEFAULT_RUNNER_LLVM_DIR = llvm-backend/build-bpf-kop`);ARM64 corpus 目前用
 `arm64-llvm15` sysroot(`build.mk:18`)。LLVM 21 起 `lookupTarget`/`createTargetMachine`/
 `setTargetTriple` 从收 `std::string` triple 改成收 `llvm::Triple`。
 
@@ -62,14 +62,14 @@ soft fold 机制正确 + sound;katran 上收益微小是因为查找非瓶颈。
 #endif
 ```
 5 处调用点改用该宏 → **同一份代码在 LLVM-15(arm64).str() 和 LLVM-23(x86)Triple 下都能编译**。
-- x86 kinsn LLVM-23:已实测 `build-kinsn` 编译干净(EXIT 0)。
+- x86 kop LLVM-23:已实测 `build-kop` 编译干净(EXIT 0)。
 - arm64 LLVM-15:宏走 `.str()` 分支,语法正确(未在 arm64 实测,无 arm64 LLVM 环境)。
 
 ### arm64 也切到「仓库 LLVM-23」✅(已完成)
 在 host 上**交叉编译**(aarch64-linux-gnu 工具链 + 复用 x86 `llvm-tblgen`,非 qemu)了
-arm64 版的 kinsn LLVM-23 → `llvm-backend/build-bpf-kinsn-arm64`:
+arm64 版的 kop LLVM-23 → `llvm-backend/build-bpf-kop-arm64`:
 ```
-cmake -S llvm-backend/llvm/llvm -B llvm-backend/build-bpf-kinsn-arm64 -G Ninja \
+cmake -S llvm-backend/llvm/llvm -B llvm-backend/build-bpf-kop-arm64 -G Ninja \
   -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RTTI=OFF -DLLVM_ENABLE_ASSERTIONS=OFF \
   -DBUILD_SHARED_LIBS=OFF -DLLVM_BUILD_TOOLS=OFF -DLLVM_TARGETS_TO_BUILD="AArch64;BPF" \
   -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_ZLIB=OFF \
@@ -77,12 +77,12 @@ cmake -S llvm-backend/llvm/llvm -B llvm-backend/build-bpf-kinsn-arm64 -G Ninja \
   -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ \
   -DCMAKE_SYSROOT=.cache/aarch64-sysroot -DCMAKE_FIND_ROOT_PATH=.cache/aarch64-sysroot \
   -DLLVM_HOST_TRIPLE=aarch64-unknown-linux-gnu \
-  -DLLVM_TABLEGEN=<x86>/build-bpf-kinsn/bin/llvm-tblgen \
-  -DLLVM_NATIVE_TOOL_DIR=<x86>/build-bpf-kinsn/bin
+  -DLLVM_TABLEGEN=<x86>/build-bpf-kop/bin/llvm-tblgen \
+  -DLLVM_NATIVE_TOOL_DIR=<x86>/build-bpf-kop/bin
 ```
 - 产物:`LLVM_PACKAGE_VERSION 23.0.0git`,`AArch64;BPF`,libs 是 ARM aarch64 ELF。约 7 分钟。
 - `runner/mk/build.mk:18` `ARM64_RUNNER_LLVM_DIR` 已从 `arm64-llvm15` 改到
-  `build-bpf-kinsn-arm64/lib/cmake/llvm`。
+  `build-bpf-kop-arm64/lib/cmake/llvm`。
 - **验证**:arm64 runner cmake configure 干净 + `micro_exec` 编译并**链接** arm64 LLVM-23
   通过 → 产出 ARM aarch64 ELF(75 MB)。即 **arm/x86 两边的 corpus 现在都链接仓库改过的
   LLVM-23**。
@@ -97,7 +97,7 @@ cmake -S llvm-backend/llvm/llvm -B llvm-backend/build-bpf-kinsn-arm64 -G Ninja \
   .rodata,无栈往返** → O3 能真正传播 + DCE。
 - 不可折的 use(store/phi/未知)→ 跳过该 site(安全)。
 
-### 结果(katran,kinsn LLVM-23)
+### 结果(katran,kop LLVM-23)
 - **test 通过**:retval 3(XDP_TX)、data_size_out 84(IPIP),转发正确。
 - **程序变小 + lookup 变少**:insns 2542 → **2367**(-175),map_lookup_elem 70 → **60**
   (消掉 10 个)。**这是第一次优化后程序真的更小**(对比 bytecode-stack 方式膨胀到 2600)。
@@ -108,7 +108,7 @@ cmake -S llvm-backend/llvm/llvm -B llvm-backend/build-bpf-kinsn-arm64 -G Ninja \
   之前 hard-fold 的「16」含 ctl_array(数据路径写,折它本就 unsound)。
 
 ### 构建相关
-- kinsn LLVM 现在带 **X86 target**(`需要带 x86`):build-bpf-kinsn 编了 X86 库;
+- kop LLVM 现在带 **X86 target**(`需要带 x86`):build-bpf-kop 编了 X86 库;
   `bpfopt/llvm/CMakeLists.txt` 改用显式 X86 库名(x86codegen/...,umbrella `x86` 映射错)。
 - `vendor/llvmbpf/src/compiler.cpp` 的 `hasTerminator` 修复又被回退过一次,已重新修。
 
@@ -130,7 +130,7 @@ katran 收益仍微小是因为**查找非其瓶颈**;要展示 map_inline 的�
     `select(key==K, const, 真 load)`,**保留真 lookup 当 fallback**。const/可证 key → O3 把
     select 折掉并 DCE lookup;runtime key → 保留守卫回退(对其他 key sound)。无 hard fold。
 
-### katran 结果(全 IR,kinsn LLVM-23)
+### katran 结果(全 IR,kop LLVM-23)
 - test **通过**(retval 3 / IPIP 84,转发正确)。
 - insns 2542 → **2367**,map_lookup_elem 70 → **60**(消 10 个),折 ch_rings + server_id。
 - **性能 5 次:baseline ~138 vs fold ~138 ns(噪声内)**——再次确认查找非 katran 瓶颈。
@@ -166,7 +166,7 @@ merge: %r0 = phi [fastptr, fast], [%r, slow]
   `build_stack_value_block` / `stack_bytes_used` / `allocate_stack_slot` / `mem_access_size` /
   `collect_value_loads` / `le_value` / `GuardEntry`)。
 
-### katran 结果(分支级 guard,kinsn LLVM build-kinsn,map_inline-only)
+### katran 结果(分支级 guard,kop LLVM build-kop,map_inline-only)
 - test **通过**(retval 3 / IPIP 84,转发正确)。
 - insns 2542 → **2371**,map_lookup_elem 70 → **56**(消 14 个)。
 - **sites_applied=8**:vip_map(25740)**4 个守卫站** + ch_rings(25744)/server_id(25752)
@@ -292,7 +292,7 @@ reals/16:soft 路线在 katran 上既不划算(ARRAY 廉价)又撞 verifier;要 
 hard fold(unsound)或路径特化(对 reals 的大 cone 不可行)。**保持 10 站 sound。**
 
 ## 状态
-- map_inline 多条目枚举 + uniform 消除:✅ 实现 + sound + kinsn 编译通过。
+- map_inline 多条目枚举 + uniform 消除:✅ 实现 + sound + kop 编译通过。
 - llvmbpf LLVM 多版本兼容宏:✅ x86-23 编译通过,arm64-15 语法兼容。
-- arm64 用仓库 LLVM-23:⏳ 需交叉构建 arm64 kinsn LLVM(重)。
+- arm64 用仓库 LLVM-23:⏳ 需交叉构建 arm64 kop LLVM(重)。
 - 所有改动未 commit。

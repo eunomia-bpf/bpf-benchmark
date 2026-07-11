@@ -1636,7 +1636,7 @@
   "post_rejit": null,
   "rejit_result": {
     "enabled_passes": [
-      "kinsn"
+      "kop"
     ],
     "mode": "loadtime",
     "plan_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/aws_arm64_corpus_20260605_053223_453376/details/loadtime-plans/tracee__monitor.json",

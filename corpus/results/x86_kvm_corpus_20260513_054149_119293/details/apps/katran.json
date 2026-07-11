@@ -1475,7 +1475,7 @@
           {
             "bpfopt_ms": 208,
             "bpfopt_summary": null,
-            "error": "step 8 failed (exit 1): timeout 6000 bpfopt --pass ccmp --input /var/tmp/bpfrejit-runtime/odb/bpfrejit-daemon-plan-1856-0/output_step7.bin --output /var/tmp/bpfrejit-runtime/odb/bpfrejit-daemon-plan-1856-0/output_step8.bin --report /var/tmp/bpfrejit-runtime/odb/bpfrejit-daemon-plan-1856-0/report_step8.json --prog-type xdp --target /var/tmp/bpfrejit-runtime/odb/bpfrejit-daemon-plan-1856-0/target.json\nsubprocess output:\nerror: kinsn target bpf_ccmp64 not registered",
+            "error": "step 8 failed (exit 1): timeout 6000 bpfopt --pass ccmp --input /var/tmp/bpfrejit-runtime/odb/bpfrejit-daemon-plan-1856-0/output_step7.bin --output /var/tmp/bpfrejit-runtime/odb/bpfrejit-daemon-plan-1856-0/output_step8.bin --report /var/tmp/bpfrejit-runtime/odb/bpfrejit-daemon-plan-1856-0/report_step8.json --prog-type xdp --target /var/tmp/bpfrejit-runtime/odb/bpfrejit-daemon-plan-1856-0/target.json\nsubprocess output:\nerror: kop target bpf_ccmp64 not registered",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass ccmp --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",

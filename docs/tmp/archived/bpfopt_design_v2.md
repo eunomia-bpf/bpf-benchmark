@@ -22,7 +22,7 @@ v2 的判断很明确：
 3. profiling 应拆成独立 CLI：`bpfprof`。
 4. `bpfopt`、`bpfverify`、`bpfprof`、`bpfrejit-daemon` 应放在同一个独立 git repo 中，由 `bpf-benchmark` 以 submodule 固定版本。
 5. 现在不做 libbpf FFI；近期兼容路径是“离线预处理纯 bytecode passes”或“load 前 fork+exec CLI”。
-6. 原设计里最需要删除的是：公共库 API、C FFI、`ValidationOracle`、symbolic `KinsnRequirement` 输出、自定义 pipe framing、过于泛化的 target/link 抽象。
+6. 原设计里最需要删除的是：公共库 API、C FFI、`ValidationOracle`、symbolic `KopRequirement` 输出、自定义 pipe framing、过于泛化的 target/link 抽象。
 7. 四工具拆分是合理的；再继续往下拆就过细了。
 
 ## 1. 对用户七个问题的明确回答
@@ -120,14 +120,14 @@ v2 的近期兼容路径分两类：
 
 需要正视一个限制：
 
-1. 在本次 v2 里，我们删掉 delayed kinsn binding。
-2. 因此 **target-aware kinsn passes 不能假设离线预处理一定可用**。
-3. 这类 pass 通常需要在接近 load/rejit 的时刻拿到 resolved kinsn 信息后再跑。
+1. 在本次 v2 里，我们删掉 delayed kop binding。
+2. 因此 **target-aware kop passes 不能假设离线预处理一定可用**。
+3. 这类 pass 通常需要在接近 load/rejit 的时刻拿到 resolved kop 信息后再跑。
 
 所以更准确的判断是：
 
 1. **离线预处理适合纯 bytecode passes。**
-2. **kinsn passes 更适合 daemon/live loader wrapper 模式。**
+2. **kop passes 更适合 daemon/live loader wrapper 模式。**
 3. 如果将来 libbpf integration 真的成为必须，再考虑做一个很薄的 loader-side wrapper，甚至再进一步做库；那是下一阶段问题，不应反向绑架 v2。
 
 ### 1.6 现有设计里哪些地方不合理？
@@ -136,8 +136,8 @@ v2 的近期兼容路径分两类：
 
 逐项回答：
 
-1. `KinsnRequirement` 符号化延迟绑定：**当前是过度设计。**
-   在 CLI-only 模式下，`bpfopt` 直接通过 `--target` / `--kinsns` 获得 resolved kinsn 能力即可。当前不需要把“待绑定 requirement”再吐给外部 linker。
+1. `KopRequirement` 符号化延迟绑定：**当前是过度设计。**
+   在 CLI-only 模式下，`bpfopt` 直接通过 `--target` / `--koperation` 获得 resolved kop 能力即可。当前不需要把“待绑定 requirement”再吐给外部 linker。
 
 2. `ValidationOracle` hook：**过度设计。**
    如果 verifier 由 `bpfverify` 作为独立 CLI 提供，那么 daemon 串起 `bpfopt pass -> bpfverify -> accept/reject` 就足够了。
@@ -148,8 +148,8 @@ v2 的近期兼容路径分两类：
 4. `pack/unpack` + 自定义 pipe framing：**过度设计。**
    v2 不需要为了 shell pipeline 去发明二进制 framing。daemon 完全可以用显式临时文件来编排。
 
-5. `TargetDesc` / `PlatformDesc` / `KinsnCatalog` 多层拆分：**对当前范围过细。**
-   v2 直接用一个 `target.json` 文件描述 arch/features/kinsns 即可。
+5. `TargetDesc` / `PlatformDesc` / `KopCatalog` 多层拆分：**对当前范围过细。**
+   v2 直接用一个 `target.json` 文件描述 arch/features/koperation 即可。
 
 6. “公共 analyze API” 与大量导出 struct：**过度设计。**
    如果还需要分析能力，做成 `bpfopt inspect` 或 `bpfopt list-passes` 子命令即可。
@@ -181,7 +181,7 @@ v2 的近期兼容路径分两类：
 不应再往下拆的原因：
 
 1. 不需要再单独拆一个 analyzer binary；分析是 `bpfopt` 的子命令即可。
-2. 不需要再拆一个 linker binary；v2 不做 delayed kinsn linking。
+2. 不需要再拆一个 linker binary；v2 不做 delayed kop linking。
 3. 不需要再拆一个 side-input remapper binary；这属于 `bpfopt` pass 执行后的附带输出。
 
 所以推荐边界是：
@@ -384,7 +384,7 @@ v2 的重点不是把 schema 做得无限泛化，而是做到：
 
 ### 4.2 `target.json`
 
-`target.json` 是 `bpfopt` 的 target-aware 输入，包含 arch/features 以及 resolved kinsn 能力。
+`target.json` 是 `bpfopt` 的 target-aware 输入，包含 arch/features 以及 resolved kop 能力。
 
 建议形态：
 
@@ -394,7 +394,7 @@ v2 的重点不是把 schema 做得无限泛化，而是做到：
   "arch": "x86_64",
   "march": "x86_64-v3",
   "features": ["cmov", "movbe", "bmi2", "rorx"],
-  "kinsns": {
+  "koperation": {
     "bpf_rotate64": {
       "available": true,
       "encoding": "packed_call",
@@ -411,9 +411,9 @@ v2 的重点不是把 schema 做得无限泛化，而是做到：
 
 说明：
 
-1. v2 中 `bpfopt` 直接消费 resolved kinsn 能力。
-2. 缺少某个被请求 pass 所要求的 kinsn 时，`bpfopt` 应直接报错退出，不能静默降级。
-3. 这里不再引入 symbolic `KinsnRequirement` 输出，也不设计独立 linker 阶段。
+1. v2 中 `bpfopt` 直接消费 resolved kop 能力。
+2. 缺少某个被请求 pass 所要求的 kop 时，`bpfopt` 应直接报错退出，不能静默降级。
+3. 这里不再引入 symbolic `KopRequirement` 输出，也不设计独立 linker 阶段。
 
 ### 4.3 `load-context.json`
 
@@ -423,7 +423,7 @@ v2 的重点不是把 schema 做得无限泛化，而是做到：
 
 1. dry-run `BPF_PROG_LOAD` 需要重放的 verifier 相关 attr。
 2. map FD 绑定。
-3. kfunc/kinsn 相关 fd_array。
+3. kfunc/kop 相关 fd_array。
 4. 其他 attach / BTF / flag 上下文。
 
 这样做的原因是：
@@ -611,7 +611,7 @@ daemon 最终保存的记录至少应包含：
 1. 公共 Rust API 设计。
 2. `optimize_with_validator()` / `ValidationOracle`。
 3. C FFI 设计。
-4. symbolic `KinsnRequirement` 输出。
+4. symbolic `KopRequirement` 输出。
 5. 单独 linker 阶段。
 6. `pack/unpack` 和自定义 pipe framing。
 7. 通用 strictness 策略对象。
@@ -634,7 +634,7 @@ daemon 最终保存的记录至少应包含：
    保留为 `invalidation.json`
 
 5. target-aware passes
-   保留，但通过 `target.json` 提供 resolved kinsn 信息
+   保留，但通过 `target.json` 提供 resolved kop 信息
 
 ## 7. 推荐的仓库组织
 
@@ -675,7 +675,7 @@ bpfopt-suite/
 1. 对纯 bytecode passes：
    在 build pipeline 或对象处理阶段离线调用 `bpfopt`。
 
-2. 对 kinsn passes：
+2. 对 kop passes：
    在接近 load 的时刻，由 wrapper 或 daemon 准备 resolved `target.json` 后调用 `bpfopt`。
 
 3. 对 live 程序 REJIT：

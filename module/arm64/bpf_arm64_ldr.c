@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT arm64 kinsns: direct loads.
+ * BpfReJIT arm64 koperation: direct loads.
  */
 
-#include "kinsn_common.h"
+#include "kop_common.h"
 
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_arm64_ldrb(void) {}
@@ -22,9 +22,9 @@ BTF_KFUNCS_END(bpf_arm64_ldr_kfunc_ids)
 static __always_inline int decode_ldr_payload(u64 payload, u8 *dst_reg,
 					      u8 *base_reg, s16 *offset)
 {
-	*dst_reg = kinsn_payload_reg(payload, 0);
-	*base_reg = kinsn_payload_reg(payload, 4);
-	*offset = kinsn_payload_s16(payload, 8);
+	*dst_reg = kop_payload_reg(payload, 0);
+	*base_reg = kop_payload_reg(payload, 4);
+	*offset = kop_payload_s16(payload, 8);
 
 	if (payload >> 24)
 		return -EINVAL;
@@ -70,7 +70,7 @@ static int instantiate_ldr_x_mem(u64 payload, struct bpf_insn *insn_buf)
 
 static inline u32 a64_ldrh(u8 rt, u8 rn, s16 offset)
 {
-	if (kinsn_arm64_scaled_uoff_ok(offset, 1))
+	if (kop_arm64_scaled_uoff_ok(offset, 1))
 		return 0x79400000U | ((((u32)offset) >> 1) << 10) |
 		       ((u32)rn << 5) | (u32)rt;
 
@@ -80,7 +80,7 @@ static inline u32 a64_ldrh(u8 rt, u8 rn, s16 offset)
 
 static inline u32 a64_ldrb(u8 rt, u8 rn, s16 offset)
 {
-	if (kinsn_arm64_scaled_uoff_ok(offset, 0))
+	if (kop_arm64_scaled_uoff_ok(offset, 0))
 		return 0x39400000U | ((u32)((u16)offset) << 10) |
 		       ((u32)rn << 5) | (u32)rt;
 
@@ -90,7 +90,7 @@ static inline u32 a64_ldrb(u8 rt, u8 rn, s16 offset)
 
 static inline u32 a64_ldr_w(u8 rt, u8 rn, s16 offset)
 {
-	if (kinsn_arm64_scaled_uoff_ok(offset, 2))
+	if (kop_arm64_scaled_uoff_ok(offset, 2))
 		return 0xB9400000U | ((((u32)offset) >> 2) << 10) |
 		       ((u32)rn << 5) | (u32)rt;
 
@@ -100,7 +100,7 @@ static inline u32 a64_ldr_w(u8 rt, u8 rn, s16 offset)
 
 static inline u32 a64_ldr_x(u8 rt, u8 rn, s16 offset)
 {
-	if (kinsn_arm64_scaled_uoff_ok(offset, 3))
+	if (kop_arm64_scaled_uoff_ok(offset, 3))
 		return 0xF9400000U | ((((u32)offset) >> 3) << 10) |
 		       ((u32)rn << 5) | (u32)rt;
 
@@ -122,33 +122,33 @@ static int emit_ldr_arm64(u32 *image, int *idx, bool emit, u64 payload,
 	if (err)
 		return err;
 
-	dst_reg = kinsn_arm64_reg(dst_reg);
-	base_reg = kinsn_arm64_reg(base_reg);
+	dst_reg = kop_arm64_reg(dst_reg);
+	base_reg = kop_arm64_reg(base_reg);
 	if (dst_reg == 0xff || base_reg == 0xff)
 		return -EINVAL;
 
 	switch (size) {
 	case BPF_B:
-		if (!kinsn_arm64_scaled_uoff_ok(offset, 0) &&
-		    !kinsn_arm64_unscaled_soff_ok(offset))
+		if (!kop_arm64_scaled_uoff_ok(offset, 0) &&
+		    !kop_arm64_unscaled_soff_ok(offset))
 			return -EINVAL;
 		insn = a64_ldrb(dst_reg, base_reg, offset);
 		break;
 	case BPF_H:
-		if (!kinsn_arm64_scaled_uoff_ok(offset, 1) &&
-		    !kinsn_arm64_unscaled_soff_ok(offset))
+		if (!kop_arm64_scaled_uoff_ok(offset, 1) &&
+		    !kop_arm64_unscaled_soff_ok(offset))
 			return -EINVAL;
 		insn = a64_ldrh(dst_reg, base_reg, offset);
 		break;
 	case BPF_W:
-		if (!kinsn_arm64_scaled_uoff_ok(offset, 2) &&
-		    !kinsn_arm64_unscaled_soff_ok(offset))
+		if (!kop_arm64_scaled_uoff_ok(offset, 2) &&
+		    !kop_arm64_unscaled_soff_ok(offset))
 			return -EINVAL;
 		insn = a64_ldr_w(dst_reg, base_reg, offset);
 		break;
 	case BPF_DW:
-		if (!kinsn_arm64_scaled_uoff_ok(offset, 3) &&
-		    !kinsn_arm64_unscaled_soff_ok(offset))
+		if (!kop_arm64_scaled_uoff_ok(offset, 3) &&
+		    !kop_arm64_unscaled_soff_ok(offset))
 			return -EINVAL;
 		insn = a64_ldr_x(dst_reg, base_reg, offset);
 		break;
@@ -156,7 +156,7 @@ static int emit_ldr_arm64(u32 *image, int *idx, bool emit, u64 payload,
 		return -EINVAL;
 	}
 
-	return kinsn_arm64_emit_one(image, idx, emit, insn);
+	return kop_arm64_emit_one(image, idx, emit, insn);
 }
 
 static int emit_ldrh_mem_arm64(u32 *image, int *idx, bool emit, u64 payload,
@@ -195,7 +195,7 @@ static int emit_ldr_x_mem_arm64(u32 *image, int *idx, bool emit, u64 payload,
 	return emit_ldr_arm64(image, idx, emit, payload, prog, BPF_DW);
 }
 
-const struct bpf_kinsn bpf_arm64_ldrh_desc = {
+const struct bpf_kop bpf_arm64_ldrh_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -203,7 +203,7 @@ const struct bpf_kinsn bpf_arm64_ldrh_desc = {
 	.emit_arm64 = emit_ldrh_mem_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_ldrb_desc = {
+const struct bpf_kop bpf_arm64_ldrb_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -211,7 +211,7 @@ const struct bpf_kinsn bpf_arm64_ldrb_desc = {
 	.emit_arm64 = emit_ldrb_mem_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_ldr_w_desc = {
+const struct bpf_kop bpf_arm64_ldr_w_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -219,7 +219,7 @@ const struct bpf_kinsn bpf_arm64_ldr_w_desc = {
 	.emit_arm64 = emit_ldr_w_mem_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_ldr_x_desc = {
+const struct bpf_kop bpf_arm64_ldr_x_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -227,12 +227,12 @@ const struct bpf_kinsn bpf_arm64_ldr_x_desc = {
 	.emit_arm64 = emit_ldr_x_mem_arm64,
 };
 
-static const struct bpf_kinsn * const bpf_arm64_ldr_kinsn_descs[] = {
+static const struct bpf_kop * const bpf_arm64_ldr_kop_descs[] = {
 	&bpf_arm64_ldr_w_desc,
 	&bpf_arm64_ldr_x_desc,
 	&bpf_arm64_ldrb_desc,
 	&bpf_arm64_ldrh_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_arm64_ldr, "BpfReJIT arm64 kinsns: LDR",
-		       bpf_arm64_ldr_kfunc_ids, bpf_arm64_ldr_kinsn_descs);
+DEFINE_KOP_V2_MODULE(bpf_arm64_ldr, "BpfReJIT arm64 koperation: LDR",
+		       bpf_arm64_ldr_kfunc_ids, bpf_arm64_ldr_kop_descs);

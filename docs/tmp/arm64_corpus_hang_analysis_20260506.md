@@ -43,7 +43,7 @@ Current ARM64 run pass list is 13 passes:
 
 `wide_mem, rotate, cond_select, extract, endian_fusion, map_inline, const_prop, dce, bounds_check_merge, skb_load_bytes_spec, bulk_memory, prefetch, ccmp`
 
-This is not the same as the local x86 KVM run `x86_kvm_corpus_20260506_023522_768608`, whose metadata shows 6 kinsn-ish passes:
+This is not the same as the local x86 KVM run `x86_kvm_corpus_20260506_023522_768608`, whose metadata shows 6 kop-ish passes:
 
 `rotate, cond_select, extract, endian_fusion, bulk_memory, prefetch`
 
@@ -163,7 +163,7 @@ Why x86 KVM completed:
 Recommended fixes:
 
 1. Do not raise the ReJIT log cap as the primary fix. The sampled call already succeeded after retries; larger caps would make the artifact and memory problem worse.
-2. Use a daemon image containing at least `e59bf141`, which limits verbose `log_level=2` ReJIT to stateful passes (`noop`, `map_inline`, `const_prop`) and uses basic logging for stateless kinsn/peephole passes.
+2. Use a daemon image containing at least `e59bf141`, which limits verbose `log_level=2` ReJIT to stateful passes (`noop`, `map_inline`, `const_prop`) and uses basic logging for stateless kop/peephole passes.
 3. Keep the new `execute_plan` protocol question separate. The immediate hang signature is explained by pre-`e59bf141` verbose logging behavior, not by needing the new protocol.
 4. If full stateful passes remain too expensive on 287-prog tetragon even after `e59bf141`, treat compact verifier-state transport as a follow-up engineering item: avoid pretty JSON for large state arrays, avoid persisting success logs by default, or move to compact binary/state sidecar files.
 5. Track the ARM64 `bpf_arch_poke_desc_update()` WARN separately as a kernel-side ARM64 ReJIT correctness/post-paper item. It is not the observed 4-hour stall mechanism.

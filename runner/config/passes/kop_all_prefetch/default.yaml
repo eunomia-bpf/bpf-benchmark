@@ -1,0 +1,4 @@
+# Single-pass kop ablation with every bytecode kop family forced.
+log_level: 1
+command: |
+  bpfopt --pass kop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} -- --bytecode-kop-mode all=force

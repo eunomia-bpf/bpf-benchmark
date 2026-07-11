@@ -34,7 +34,7 @@
     Citation: `CLAUDE.md:86-101`.
 20. Architecture context: BpfReJIT depends on transparent post-load optimization of live BPF programs.
     Citation: `docs/kernel-jit-optimization-plan.md:120-132`.
-21. Architecture context: kinsns are platform modules with verifier/JIT emit semantics.
+21. Architecture context: koperation are platform modules with verifier/JIT emit semantics.
     Citation: `docs/kernel-jit-optimization-plan.md:123-126`.
 22. Cost constraint: ARM bench defaults stay on `t4g.small`, not larger instance classes.
     Citation: `CLAUDE.md:128-129`.
@@ -71,7 +71,7 @@
 36. Q2 conclusion:
     ARM64 `cond_select` is not explained by a missing `bpf_select` module.
 37. Q2 conclusion:
-    target kinsn probing is not the immediate blocker for the observed skip reason.
+    target kop probing is not the immediate blocker for the observed skip reason.
 38. Q2 actual root cause:
     `CondSelectPass` checks `ctx.platform.has_cmov` before checking `bpf_select64`.
 39. Q2 actual root cause:
@@ -79,7 +79,7 @@
 40. Q2 actual root cause:
     ARM64 target feature detection intentionally emits no features.
 41. Q2 actual root cause:
-    therefore ARM64 always returns `platform lacks CMOV support` before using the ARM64 `bpf_select` CSEL kinsn.
+    therefore ARM64 always returns `platform lacks CMOV support` before using the ARM64 `bpf_select` CSEL kop.
 42. Q2 site-shape nuance:
     ARM64 matched different sites because Q1 left only `vfsstat` and `syscount` programs in scope.
 43. Q2 fix priority:
@@ -376,7 +376,7 @@
 
 ## Q2 Artifact Evidence
 
-191. ARM64 loaded all expected kinsn modules.
+191. ARM64 loaded all expected kop modules.
 192. ARM64 expected module list includes `bpf_select`.
      Citation: `corpus/results/aws_arm64_corpus_20260506_073741_286113/details/result.json:7-16`.
 193. ARM64 module load has `failed_modules: []`.
@@ -449,7 +449,7 @@
 230. ARM64 target feature detection intentionally emits nothing.
      Citation: `daemon/src/bpf.rs:653-656`.
 231. This is the direct code path for ARM64 `has_cmov=false`.
-232. `cond_select` pass metadata requires target kinsn `bpf_select64`.
+232. `cond_select` pass metadata requires target kop `bpf_select64`.
      Citation: `bpfopt/crates/bpfopt/src/passes/mod.rs:90-92`.
 233. `cond_select` is described as `CMOV/CSEL`.
      Citation: `bpfopt/crates/bpfopt/src/passes/mod.rs:110-113`.
@@ -464,7 +464,7 @@
      Citation: `module/arm64/bpf_select.c:55-69`.
 239. ARM64 emitter writes those two instructions when emitting.
      Citation: `module/arm64/bpf_select.c:98-105`.
-240. ARM64 kinsn descriptor wires `emit_arm64`.
+240. ARM64 kop descriptor wires `emit_arm64`.
      Citation: `module/arm64/bpf_select.c:108-114`.
 241. x86 module analogously implements CMOV.
      Citation: `module/x86/bpf_select.c:92-100`.
@@ -487,7 +487,7 @@
      Citation: `corpus/results/aws_arm64_corpus_20260506_073741_286113/details/result.json:303-320`.
 
 249. Hypothesis 2:
-     ARM64 kinsn module for `cond_select` is missing or different.
+     ARM64 kop module for `cond_select` is missing or different.
 250. Decision:
      missing is rejected; different is true but not a failure.
 251. Evidence:
@@ -501,13 +501,13 @@
      Citation: `module/x86/bpf_select.c:92-154`.
 
 254. Hypothesis 3:
-     ARM64 daemon `target.json` is missing kinsn entries that x86 has.
+     ARM64 daemon `target.json` is missing kop entries that x86 has.
 255. Decision:
      not supported as the immediate cause.
 256. Evidence:
      the current artifact did not retain a `target.json`.
 257. Evidence:
-     the skip reason proves bpfopt exited at the platform feature check before the kinsn registry check.
+     the skip reason proves bpfopt exited at the platform feature check before the kop registry check.
      Citation: `bpfopt/crates/bpfopt/src/passes/cond_select.rs:99-137`.
 258. Evidence:
      module load confirms the kernel-side `bpf_select` module was resident.
@@ -627,7 +627,7 @@
 307. Better patch shape:
      update skip reason to `platform lacks branchless select support`.
 308. Required behavior:
-     still require `bpf_select64` target kinsn.
+     still require `bpf_select64` target kop.
      Citation: `bpfopt/crates/bpfopt/src/main.rs:437-442`.
 309. Required behavior:
      do not proceed if target lacks `bpf_select64`.
@@ -651,7 +651,7 @@
      do not add redundant informational fields to normal result payloads.
      Citation: `CLAUDE.md:67-68`.
 318. Suggested form:
-     when a kinsn pass skips for target/platform reasons, preserve target JSON in failure/debug artifacts, not summary metrics.
+     when a kop pass skips for target/platform reasons, preserve target JSON in failure/debug artifacts, not summary metrics.
 319. Reason:
      Q2 requested `target.json`, but this artifact did not retain it.
 320. Priority:

@@ -35,7 +35,7 @@ side-input 准备全部挂在 `requested_passes` 上：
 
 当前 `bpfopt optimize` 的空 `--passes` 是 v3 默认 12-pass：`bpfopt/crates/bpfopt/src/main.rs:623` 到 `bpfopt/crates/bpfopt/src/main.rs:631`。它会先 fail-fast 校验 side-input：`bpfopt/crates/bpfopt/src/main.rs:633`，具体要求在 `bpfopt/crates/bpfopt/src/main.rs:722` 到 `bpfopt/crates/bpfopt/src/main.rs:746`：
 
-- kinsn passes 需要 `--target` 或 `--kinsns`
+- kop passes 需要 `--target` 或 `--koperation`
 - `branch-flip` 需要 `--profile`
 - `const-prop` 需要 `--verifier-states`
 - `map-inline` 需要 `--map-values` 和 `--map-ids`
@@ -214,7 +214,7 @@ grep 方法：对 `pub fn` / `pub struct` / `pub trait` / `pub enum` / `pub cons
 - `bpfopt/crates/bpfopt/src/passes/mod.rs:121` `pub fn available_passes_help() -> String`。grep 结果：bpfopt crate 内只有定义；daemon 有自己的 `commands::available_passes_help` shell out：`daemon/src/commands.rs:1030`。
 - `bpfopt/crates/bpfopt/src/passes/mod.rs:153` `pub fn validate_pass_names(...)`。grep 结果：只有测试 `bpfopt/crates/bpfopt/src/passes/mod_tests.rs:235`。
 - `bpfopt/crates/bpfopt/src/passes/mod.rs:166` `pub fn build_full_pipeline() -> PassManager`。grep 结果：只有测试 `bpfopt/crates/bpfopt/src/passes/mod_tests.rs:194` 和 `bpfopt/crates/bpfopt/src/passes/mod_tests.rs:363`。production CLI 自己按 registry build：`bpfopt/crates/bpfopt/src/main.rs:675` 到 `bpfopt/crates/bpfopt/src/main.rs:687`。
-- `bpfopt/crates/bpfopt/src/pass.rs:718` `KinsnRegistry::call_off_for_pass(...)`。grep 结果：只有 `bpfopt/crates/bpfopt/src/pass_tests.rs:590` 到 `bpfopt/crates/bpfopt/src/pass_tests.rs:592`；production 走 trait method `KinsnCallResolver::call_off_for_pass`：`bpfopt/crates/bpfopt/src/pass.rs:761` 到 `bpfopt/crates/bpfopt/src/pass.rs:765`，调用点在 `bpfopt/crates/bpfopt/src/passes/utils.rs:420` 到 `bpfopt/crates/bpfopt/src/passes/utils.rs:422`。
+- `bpfopt/crates/bpfopt/src/pass.rs:718` `KopRegistry::call_off_for_pass(...)`。grep 结果：只有 `bpfopt/crates/bpfopt/src/pass_tests.rs:590` 到 `bpfopt/crates/bpfopt/src/pass_tests.rs:592`；production 走 trait method `KopCallResolver::call_off_for_pass`：`bpfopt/crates/bpfopt/src/pass.rs:761` 到 `bpfopt/crates/bpfopt/src/pass.rs:765`，调用点在 `bpfopt/crates/bpfopt/src/passes/utils.rs:420` 到 `bpfopt/crates/bpfopt/src/passes/utils.rs:422`。
 - `bpfopt/crates/bpfopt/src/pass.rs:943` `PassManager::pass_at(...)`。grep 结果：只有定义，没有 caller。
 - `bpfopt/crates/bpfopt/src/insn.rs:29` `pub const BPF_MEMSX`。grep 结果：只有定义，没有 caller。
 - `bpfopt/crates/bpfopt/src/insn.rs:188` `BpfInsn::from_kernel(...)`。grep 结果：只有定义，没有 caller。
@@ -234,7 +234,7 @@ grep 方法：对 `pub fn` / `pub struct` / `pub trait` / `pub enum` / `pub cons
 
 - hex 编码重复：`daemon/src/commands.rs:893` 到 `daemon/src/commands.rs:901`，`bpfopt/crates/bpfopt/src/pass.rs:301` 到 `bpfopt/crates/bpfopt/src/pass.rs:309`。另有 decode 在 `daemon/src/commands.rs:903` 到 `daemon/src/commands.rs:923` 和 `bpfopt/crates/bpfopt/src/main.rs:1298` 到 `bpfopt/crates/bpfopt/src/main.rs:1314`。
 - pass alias/canonicalization 重复：`bpfopt/crates/bpfopt/src/main.rs:44` 到 `bpfopt/crates/bpfopt/src/main.rs:69`，`bpfopt/crates/bpfopt/src/main.rs:704` 到 `bpfopt/crates/bpfopt/src/main.rs:720`，daemon 版在 `daemon/src/commands.rs:2022` 到 `daemon/src/commands.rs:2041`。
-- kinsn/target requirement mapping 重复：bpfopt 在 `bpfopt/crates/bpfopt/src/main.rs:71` 到 `bpfopt/crates/bpfopt/src/main.rs:92` 和 `bpfopt/crates/bpfopt/src/main.rs:754` 到 `bpfopt/crates/bpfopt/src/main.rs:776`；daemon 在 `daemon/src/commands.rs:1883` 到 `daemon/src/commands.rs:2014`。
+- kop/target requirement mapping 重复：bpfopt 在 `bpfopt/crates/bpfopt/src/main.rs:71` 到 `bpfopt/crates/bpfopt/src/main.rs:92` 和 `bpfopt/crates/bpfopt/src/main.rs:754` 到 `bpfopt/crates/bpfopt/src/main.rs:776`；daemon 在 `daemon/src/commands.rs:1883` 到 `daemon/src/commands.rs:2014`。
 - map-values JSON schema 生产/消费重复：daemon writer 在 `daemon/src/commands.rs:833` 到 `daemon/src/commands.rs:853`；bpfopt reader 在 `bpfopt/crates/bpfopt/src/main.rs:336` 到 `bpfopt/crates/bpfopt/src/main.rs:366`。
 - `map_fds` / `fd_array` handling 在 bpfverify 和 bpfrejit 重复：`bpfopt/crates/bpfverify/src/main.rs:312` 到 `bpfopt/crates/bpfverify/src/main.rs:551`，`bpfopt/crates/bpfrejit/src/main.rs:250` 到 `bpfopt/crates/bpfrejit/src/main.rs:493`。
 - prog type / attach type metadata规则重复：bpfget validates live metadata at `bpfopt/crates/bpfget/src/main.rs:262` 到 `bpfopt/crates/bpfget/src/main.rs:315`；bpfverify validates replay metadata at `bpfopt/crates/bpfverify/src/main.rs:787` 到 `bpfopt/crates/bpfverify/src/main.rs:848`；bpfopt has its own `parse_prog_type` at `bpfopt/crates/bpfopt/src/main.rs:958` 到 `bpfopt/crates/bpfopt/src/main.rs:1003`。
@@ -247,7 +247,7 @@ grep 方法：对 `pub fn` / `pub struct` / `pub trait` / `pub enum` / `pub cons
 2. 修 daemon watcher/status 的 fallback。`ProgramWatcher::from_live()` / `tick()` 返回 `Result` 并 propagate；`status` 对 `bpfopt list-passes` 失败返回 error JSON。
 3. 删除 `disabled_passes` 全链路：daemon request/result、`PolicyConfig`、tests、fixture/result reader stale fields。
 4. 删除 `branch_flip` per-site profile 缺失时的 heuristic fallback。
-5. 删或收窄确认 dead public APIs：`available_passes_help`、`validate_pass_names`、`build_full_pipeline`、`PassManager::pass_at`、`KinsnRegistry::call_off_for_pass`、未用的 `BpfInsn` constructors/accessors、`BPF_MEMSX`。
+5. 删或收窄确认 dead public APIs：`available_passes_help`、`validate_pass_names`、`build_full_pipeline`、`PassManager::pass_at`、`KopRegistry::call_off_for_pass`、未用的 `BpfInsn` constructors/accessors、`BPF_MEMSX`。
 6. 收窄 daemon `pub` 为 `pub(crate)`/private，并清掉 stale doc comments。
 7. 把 map-inline 优化前 side-input 采集从 daemon 移到 `bpfget`/独立 CLI，daemon 只 fork+exec 并保留 invalidation polling。
 8. 清理 daemon response legacy fields；如果 runner 仍依赖旧字段，先写 compatibility 注释并限制字段范围。

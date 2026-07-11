@@ -3,7 +3,7 @@
 ## Per-Item Execution
 
 DONE: daemon/src/commands.rs:530 — delete — Delta -14 / +0 lines — removed optimize snapshot id and instruction-count cross-checks.
-DONE: daemon/src/commands.rs:713 — delete — Delta -25 / +0 lines — removed candidate kinsn output scan guard and its helper/test.
+DONE: daemon/src/commands.rs:713 — delete — Delta -25 / +0 lines — removed candidate kop output scan guard and its helper/test.
 DONE: bpfopt/crates/bpfopt/src/main.rs:263 — delete — Delta -28 / +2 lines — removed bpfopt/pass panic-catching wrappers.
 DONE: daemon/src/commands.rs:447 and daemon/src/server.rs:79 — delete — Delta -67 / +9 lines — removed daemon request/worker panic recovery.
 DONE: bpfopt/crates/bpfprof/src/main.rs:982 — refactor — Delta -17 / +20 lines — removed impossible slice-length-changed error branches.
@@ -23,7 +23,7 @@ DONE: bpfopt/crates/bpfopt/src/pass.rs:786 — delete — Delta -70 / +0 lines �
 DONE: corpus/driver.py:153 — delete — Delta -98 / +3 lines — removed result.md generation and stale Python assertions.
 DONE: runner/src/common.cpp:60 — delete — Delta -7 / +1 lines — removed code_size.inflation_ratio.
 DONE: docs/bpfrejit-story.md:182 — refactor — Delta -1 / +1 lines — rewrote stale map invalidation story to snapshot benchmark wording.
-DONE: bpfopt/crates/bpfopt/src/pass_tests.rs:473 — delete — Delta -25 / +0 lines — deleted trivial kinsn registry call-offset test.
+DONE: bpfopt/crates/bpfopt/src/pass_tests.rs:473 — delete — Delta -25 / +0 lines — deleted trivial kop registry call-offset test.
 DONE: bpfopt/crates/bpfopt/src/pass_tests.rs:651 — delete — Delta -37 / +0 lines — deleted skip_reason_counts test with the dead helper.
 DONE: bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:482 — delete — Delta -29 / +0 lines — deleted duplicate cond_select register alias test.
 DONE: bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:689 — delete — Delta -29 / +0 lines — deleted duplicate cond_select r1/r2 alias-cycle test.

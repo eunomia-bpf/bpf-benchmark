@@ -139,7 +139,7 @@ Confirmed fixed from R2:
 - `MapInlineHintAnchor::Pc` removed from pass-side hint representation: pass-side anchor variants are only `Site` and `MapName` at `bpfopt/crates/bpfopt/src/passes/map_inline.rs:16-19`; PC hint specs are resolved at lift time in `bpfopt/crates/bpfopt/src/analysis/bbprogram_lift.rs:246-256`.
 - Map-inline references are site-keyed, not slot/PC keyed: `MapReference` stores `site: InsnSite` at `bpfopt/crates/bpfopt/src/passes/map_inline/map_info.rs:75-82`, and lookup is by site at `:93-98`.
 - Map-inline no longer reads raw `ldimm64_second_slots`; the accessor is `ldimm64_second_slot` at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:563-565`, used by passes such as `const_prop` at `bpfopt/crates/bpfopt/src/passes/const_prop.rs:488-495`.
-- `rep_admit_kinsn_site_window` returns `KinsnAdmissionWindow` with typed accessors `start_site()` / `end_site()` at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:65-76` and `:1446-1480`.
+- `rep_admit_kop_site_window` returns `KopAdmissionWindow` with typed accessors `start_site()` / `end_site()` at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:65-76` and `:1446-1480`.
 - BTF reset lifecycle was removed; BTF lowering remaps original PCs to current PCs via `old_pc_to_current_pc` at `bpfopt/crates/bpfopt/src/analysis/bbprogram_btf.rs:130-140` and lowering at `bpfopt/crates/bpfopt/src/analysis/bbprogram_lower.rs:55-101`.
 
 Confirmed fixed from R3/R4 and N cleanup:
@@ -147,7 +147,7 @@ Confirmed fixed from R3/R4 and N cleanup:
 - Build/fmt regressions are gone: all gates in section 5 exit 0.
 - `PassManager` is removed in production; see Goal I.
 - `bbprogram_helpers.rs` is gone; see Goal J.
-- Matcher APIs exist and are used by the linear kinsn passes; see Goal K.
+- Matcher APIs exist and are used by the linear kop passes; see Goal K.
 - `map_inline` is materially simplified: current LOC is 2,847 for `bpfopt/crates/bpfopt/src/passes/map_inline.rs`, and it uses `reg_known_stack_bytes` at `bpfopt/crates/bpfopt/src/passes/map_inline.rs:373`.
 - Pass-specific helpers were moved out of BBProgram; see Goal E.
 

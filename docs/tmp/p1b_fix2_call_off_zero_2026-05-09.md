@@ -1,30 +1,30 @@
-# P1-B Fix 2: KinsnRegistry call_offset=0 Compound Key - 2026-05-09
+# P1-B Fix 2: KopRegistry call_offset=0 Compound Key - 2026-05-09
 
 ## Option
 
-Implemented Option A: an atomic `KinsnRegistry::set_kinsn_call_for_target_name(target, btf_id, call_off)` setter.
+Implemented Option A: an atomic `KopRegistry::set_kop_call_for_target_name(target, btf_id, call_off)` setter.
 
 Reason: the registry identity is the full runtime call key `(btf_id, call_off)`. Updating the two fields independently created invalid intermediate keys, and `call_offset=0` is a legal final key. The atomic setter keeps duplicate detection on the final compound key only, while preserving fail-fast rejection for true duplicate `(btf_id, call_off)` ownership.
 
 ## Code Diff Summary
 
 - `bpfopt/crates/bpfopt/src/pass.rs`
-  - Replaced the split public setters with `set_kinsn_call_for_target_name()`.
+  - Replaced the split public setters with `set_kop_call_for_target_name()`.
   - Moved `by_call` maintenance to the atomic final-key update path.
   - Kept duplicate detection for exact `(btf_id, call_off)` collisions.
 - `bpfopt/crates/bpfopt/src/main.rs`
-  - `kinsn_registry_from_target()` now installs target JSON entries with the atomic setter.
-  - `apply_kinsn_list()` uses the atomic setter with default `call_off=0`.
+  - `kop_registry_from_target()` now installs target JSON entries with the atomic setter.
+  - `apply_kop_list()` uses the atomic setter with default `call_off=0`.
 - `bpfopt/crates/bpfopt/src/passes/*_tests.rs` and `passes/utils.rs`
-  - Updated test contexts and proof-remap tests to construct registered kinsn calls through the atomic API.
+  - Updated test contexts and proof-remap tests to construct registered kop calls through the atomic API.
 
-The emit path is unchanged: passes still read `btf_id_for_target_name()` and `call_off_for_target_name()` and emit the same kinsn call instruction fields.
+The emit path is unchanged: passes still read `btf_id_for_target_name()` and `call_off_for_target_name()` and emit the same kop call instruction fields.
 
 ## Test Coverage
 
 - `pass_tests.rs`
-  - `kinsn_registry_atomic_call_setter_allows_shared_btf_id_with_zero_call_offset`
-  - `kinsn_registry_atomic_call_setter_rejects_duplicate_call_key`
+  - `kop_registry_atomic_call_setter_allows_shared_btf_id_with_zero_call_offset`
+  - `kop_registry_atomic_call_setter_rejects_duplicate_call_key`
 - `main.rs`
   - `target_json_allows_shared_btf_id_when_zero_call_offset_is_first`
 

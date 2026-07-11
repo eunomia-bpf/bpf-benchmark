@@ -32,7 +32,7 @@ fn insn_width(insn: &BpfInsn) -> usize {
 
 ---
 
-### 1.2 kinsn pass 的"rewrite loop 样板" — 7 个 pass 各 35–60 行
+### 1.2 kop pass 的"rewrite loop 样板" — 7 个 pass 各 35–60 行
 
 rotate / cond_select / extract / ccmp / bulk_memory / endian / prefetch 的 `run()` 方法中有**结构几乎相同**的重写循环：
 
@@ -61,7 +61,7 @@ while pc < orig_len {
 addr_map[orig_len] = new_insns.len();
 fixup_all_branches(&mut new_insns, &program.insns, &addr_map);
 program.insns = new_insns;
-remap_kinsn_btf_metadata(program, &ctx.kinsn_registry)?;
+remap_kop_btf_metadata(program, &ctx.kop_registry)?;
 program.remap_annotations(&addr_map);
 ```
 
@@ -130,7 +130,7 @@ program.remap_annotations(&addr_map);
 `insn.rs` 将 kernel_sys 的 ~50 个 BPF 常量重新声明为 `pub const`（行 9–91），将 `u32` 类型 cast 成 `u8`（因为 libbpf-sys bindgen 生成 `u32` 但 bpfopt 内部约定用 `u8`）。  
 
 **结论**: 这层转型**是合理的**——libbpf-sys 的 bindgen 常量是 `u32`，但 bpfopt 的 `BpfInsn` 使用 `u8`。这个转型层有存在价值，不应挪走。  
-但其中 `BPF_PSEUDO_KINSN_SIDECAR = 3` 和 `BPF_PSEUDO_KINSN_CALL = 4` 是 bpfopt-suite 自定义扩展常量（不在 libbpf-sys），应有注释标注来源。**不是 kernel-sys 问题，是文档问题**。
+但其中 `BPF_PSEUDO_KOP_SIDECAR = 3` 和 `BPF_PSEUDO_KOP_CALL = 4` 是 bpfopt-suite 自定义扩展常量（不在 libbpf-sys），应有注释标注来源。**不是 kernel-sys 问题，是文档问题**。
 
 ---
 
@@ -192,24 +192,24 @@ v3 设计要求 bpfopt 单 pass 运行（daemon 编排 12 pass 循环），但 `
 | 使用者数 | 函数 |
 |---------|------|
 | 13 个 pass | `fixup_all_branches` |
-| 8 个 pass | `emit_packed_kinsn_call_with_off` |
-| 7 个 pass | `remap_kinsn_btf_metadata` |
-| 6 个 pass | `kinsn_replacement_subprog_skip_reason`, `map_replacement_range` |
+| 8 个 pass | `emit_packed_kop_call_with_off` |
+| 7 个 pass | `remap_kop_btf_metadata` |
+| 6 个 pass | `kop_replacement_subprog_skip_reason`, `map_replacement_range` |
 | 5 个 pass | `remap_btf_metadata` |
-| 4 个 pass | `compose_addr_maps`, `eliminate_unreachable_blocks`, `resolve_kinsn_call_off_for_pass` |
-| 3 个 pass | `eliminate_nops`, `resolve_kinsn_call_off_for_target` |
+| 4 个 pass | `compose_addr_maps`, `eliminate_unreachable_blocks`, `resolve_kop_call_off_for_pass` |
+| 3 个 pass | `eliminate_nops`, `resolve_kop_call_off_for_target` |
 | 2 个 pass | `tail_call_protected_prefix_end` |
 | **1 个 pass** | `eliminate_dead_register_defs`（只有 dce.rs 用） |
 
 `eliminate_dead_register_defs` 是 dce.rs 私用函数，但放在了 `utils.rs` 公开 API 里。  
-`kinsn_proof_*` 相关的 20 多个私有函数（行 210–710）只服务于 kinsn 替换验证，可提取为 `utils/kinsn_proof.rs`。
+`kop_proof_*` 相关的 20 多个私有函数（行 210–710）只服务于 kop 替换验证，可提取为 `utils/kop_proof.rs`。
 
 **建议拆分**：
 - `utils/branch_fixup.rs`：`fixup_all_branches`, `compose_addr_maps`（~100 行）
-- `utils/btf_remap.rs`：`remap_btf_metadata`, `remap_kinsn_btf_metadata`（~200 行）
-- `utils/kinsn_proof.rs`：kinsn proof region 验证、proof_len 计算（~600 行）
+- `utils/btf_remap.rs`：`remap_btf_metadata`, `remap_kop_btf_metadata`（~200 行）
+- `utils/kop_proof.rs`：kop proof region 验证、proof_len 计算（~600 行）
 - `utils/dead_code_elim.rs`：`eliminate_unreachable_blocks`, `eliminate_nops`, `eliminate_dead_register_defs`（~200 行）
-- `utils/emit.rs`：`emit_packed_kinsn_call_with_off`, `resolve_kinsn_call_off_*`（~30 行）
+- `utils/emit.rs`：`emit_packed_kop_call_with_off`, `resolve_kop_call_off_*`（~30 行）
 
 ---
 
@@ -218,7 +218,7 @@ v3 设计要求 bpfopt 单 pass 运行（daemon 编排 12 pass 循环），但 `
 行 525–1219 约有 695 行纯粹是 IO + JSON 解析函数（`read_bytecode`, `parse_bytecode`, `read_verifier_states`, `read_profile`, `read_map_values`, `read_target`, `parse_*` 等）。
 
 这些函数与 CLI 命令逻辑（行 266–520，约 254 行）职责不同。  
-**建议提取为 `src/inputs.rs`（约 580 行）**，main.rs 只保留 `main()` + `run_main()` + command dispatch + kinsn validation（约 350 行）。
+**建议提取为 `src/inputs.rs`（约 580 行）**，main.rs 只保留 `main()` + `run_main()` + command dispatch + kop validation（约 350 行）。
 
 ---
 
@@ -238,7 +238,7 @@ v3 设计要求 bpfopt 单 pass 运行（daemon 编排 12 pass 循环），但 `
 | 类型 | 条目数 | 估计可消行数 |
 |------|--------|------------|
 | `insn_width` 重复 | 6 个冗余副本 | ~30 行 |
-| kinsn rewrite loop 样板 | 7 个 pass | ~280 行（如果抽象为 `apply_site_rewrites`） |
+| kop rewrite loop 样板 | 7 个 pass | ~280 行（如果抽象为 `apply_site_rewrites`） |
 | `emit_ldimm64`/`decode_ldimm64` 重复 | 2 处 | ~24 行 |
 | `emit_constant_load` 重复 | 2 处 | ~15 行 |
 | 测试辅助函数重复（exit_insn 等）| 5 处 | ~60 行 |
@@ -270,7 +270,7 @@ v3 设计要求 bpfopt 单 pass 运行（daemon 编排 12 pass 循环），但 `
 
 ### 中优先级（改动略大但收益明显）
 
-5. **kinsn rewrite loop 样板 → `apply_site_rewrites` 泛型函数**  
+5. **kop rewrite loop 样板 → `apply_site_rewrites` 泛型函数**  
    - 改动：`utils.rs` 加 ~40 行新函数，7 个 pass 各删 ~35 行  
    - 行数：净消 ~205 行，代价是引入泛型/闭包参数  
 

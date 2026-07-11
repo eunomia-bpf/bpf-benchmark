@@ -1,6 +1,6 @@
 # v2 vs v3 Daemon: 9 轮 vm-corpus bug 归因分析
 
-本文回答一个具体问题：为什么 v2 daemon 时代看起来没有这么多 bug，而 v3 pivot 之后 `vm-corpus` 连续 9 轮调试暴露大量问题。结论先说清楚：这不是单一“v3 锅”。按 round 报告和 git evidence 粗分，v3 daemon/replay 架构相关问题约占一半以上；corpus framework/workload 演进约占四分之一；剩下是新 app 或更大 program set 首次暴露，以及 pass/kinsn 自身 verifier correctness。周报里的频率估算也支持这个判断：cross-process/load-context 约 35%，relocation/metadata 约 17%，daemon hang/timeout 约 17%，line_info/func_info 约 13%，workload setup 约 22%。这些类别有重叠，不能简单相加。
+本文回答一个具体问题：为什么 v2 daemon 时代看起来没有这么多 bug，而 v3 pivot 之后 `vm-corpus` 连续 9 轮调试暴露大量问题。结论先说清楚：这不是单一“v3 锅”。按 round 报告和 git evidence 粗分，v3 daemon/replay 架构相关问题约占一半以上；corpus framework/workload 演进约占四分之一；剩下是新 app 或更大 program set 首次暴露，以及 pass/kop 自身 verifier correctness。周报里的频率估算也支持这个判断：cross-process/load-context 约 35%，relocation/metadata 约 17%，daemon hang/timeout 约 17%，line_info/func_info 约 13%，workload setup 约 22%。这些类别有重叠，不能简单相加。
 
 ## v2 vs v3 daemon 实现差异（表格 + git commit 链接）
 
@@ -52,7 +52,7 @@ workload 也变了：
 | HTTP/1.1 keep-alive / `wrk` EADDRNOTAVAIL | 否 | 是 | Calico/Cilium 暴露 | `wrk` workload 来自标准 workload 路径；round6 证明 client 已在 netns，真正原因是 HTTP/1.0 短连接导致 TIME_WAIT/ephemeral port pressure；[`dc92a15c`](https://github.com/eunomia-bpf/bpf-benchmark/commit/dc92a15c) 把 handlers 改为 HTTP/1.1。 |
 | `timerfd` stressor timeout | 否 | 是 | Tracee/BCC OS workload 暴露 | [`273a0894`](https://github.com/eunomia-bpf/bpf-benchmark/commit/273a0894) explicit `stress_ng_os` 加 `timerfd`；round3 判定 VM-load-sensitive，`65d9325e` 移除。 |
 | all loaders 先启动、后面 app 空等导致 program IDs stale | 否 | 是 | Otel/Cilium/Calico 暴露 | round2 诊断：22 apps 全启动后再顺序 30-sample baseline，后面的 loader 空等二十多分钟；[`35e74100`](https://github.com/eunomia-bpf/bpf-benchmark/commit/35e74100) 改为 per-loader `start -> baseline -> ReJIT -> post -> stop`。 |
-| verifier reject optimized bytecode | 混合 | 间接 | 是 | misaligned wide load、tail-call-sensitive kinsn、candidate BTF remap 属 pass/kinsn correctness 或 metadata consistency，不全是 daemon v3；但 v3 final verify-only 和 broader corpus 让它们更快暴露。相关 commits 包括 `3f0653bb`、`1d619c17`、`ce956452`、`d6d5acbc`。 |
+| verifier reject optimized bytecode | 混合 | 间接 | 是 | misaligned wide load、tail-call-sensitive kop、candidate BTF remap 属 pass/kop correctness 或 metadata consistency，不全是 daemon v3；但 v3 final verify-only 和 broader corpus 让它们更快暴露。相关 commits 包括 `3f0653bb`、`1d619c17`、`ce956452`、`d6d5acbc`。 |
 
 ## v2 build #42 真实测试范围（apps list、workload type）
 

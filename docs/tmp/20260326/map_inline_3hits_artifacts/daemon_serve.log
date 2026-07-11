@@ -1,4 +1,4 @@
-kinsn discovery:
+kop discovery:
   vmlinux BTF str_len=2761768 type_cnt=148882 type_id_bias=148881
   bpf_rotate64: function 'bpf_rotate64' found in 'bpf_rotate' btf_id=148904 fd=3
   bpf_select64: function 'bpf_select64' found in 'bpf_select' btf_id=148906 fd=4

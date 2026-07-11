@@ -645,7 +645,7 @@
   },
   "rejit_result": {
     "enabled_passes": [
-      "kinsn_all_no_bulk_no_prefetch"
+      "kop_all_no_bulk_no_prefetch"
     ],
     "mode": "loadtime",
     "plan_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/aws_arm64_corpus_20260605_185723_289466/details/loadtime-plans/bcc__set.json",

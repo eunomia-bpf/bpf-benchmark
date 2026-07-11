@@ -20,7 +20,7 @@
 | --- | --- | --- |
 | `bpfopt/crates/kernel-sys/src/verifier_log.rs` (943 LOC) | `bpfopt/crates/bpfopt/src/verifier_log.rs` (1179 LOC) | Moved verifier log parser into the only remaining caller crate. The destination also carries the former public verifier-state JSON/API conversion structs from `kernel-sys/src/lib.rs`. |
 | `bpfopt/crates/kernel-sys/src/lib.rs` syscall wrapper subset | `daemon/src/syscall.rs` (633 LOC) | Moved only daemon-used wrappers: map lookup/iteration/open/info, prog open/info/map ids/original/rejit, and BTF id/fd helpers. bpfprof-only perf/ring-buffer/profiling code was not moved. |
-| `daemon/src/bpf.rs` map-reference bytecode canonicalization helpers | `bpfopt/crates/bpfopt/src/main.rs` | `bpfopt --canonicalize-map-refs --map-ids ...` is now the first init step. This includes LDIMM64 map pseudo handling and target kinsn call-offset shifting through `--target` / `--target-output`. |
+| `daemon/src/bpf.rs` map-reference bytecode canonicalization helpers | `bpfopt/crates/bpfopt/src/main.rs` | `bpfopt --canonicalize-map-refs --map-ids ...` is now the first init step. This includes LDIMM64 map pseudo handling and target kop call-offset shifting through `--target` / `--target-output`. |
 
 ## Workspace Structure
 

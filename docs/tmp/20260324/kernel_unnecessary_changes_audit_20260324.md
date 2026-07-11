@@ -22,8 +22,8 @@ Total uncommitted: **6 files, +292/-85 lines**
 | Hunk | Cat | 改动摘要 | 能否删？ | 理由 |
 |------|-----|---------|---------|------|
 | @@ -79: 恢复被删的空行 | **A** | 恢复上面 committed 中错删的空行 | YES (net: 不变) | 和 committed 的 -1 抵消 |
-| @@ -114: forward declare `struct bpf_kinsn` | 核心 | btf.h 需要引用 bpf_kinsn 类型 | NO | `btf_try_get_kinsn_desc` 签名需要 |
-| @@ -582: `btf_try_get_kinsn_desc()` 声明 | 核心 | 新 API 声明 | NO | kinsn 注册表查询入口 |
+| @@ -114: forward declare `struct bpf_kop` | 核心 | btf.h 需要引用 bpf_kop 类型 | NO | `btf_try_get_kop_desc` 签名需要 |
+| @@ -582: `btf_try_get_kop_desc()` 声明 | 核心 | 新 API 声明 | NO | kop 注册表查询入口 |
 | @@ -649: CONFIG_BPF_SYSCALL=n stub | 核心 | 编译守卫 | NO | 必须 |
 | @@ -653: stub 中 `(void)btf; (void)var_id; (void)desc;` | **C** | 过度防御：用 `__maybe_unused` 或 `(void)` 不符合内核 stub 惯例 | 应简化 | 内核 stub 通常直接 `return -ENOENT;`，不需要 cast-to-void |
 
@@ -34,9 +34,9 @@ Total uncommitted: **6 files, +292/-85 lines**
 
 | Hunk | Cat | 改动摘要 | 能否删？ | 理由 |
 |------|-----|---------|---------|------|
-| @@ -1192: `emit_kinsn_desc_call_arm64()` | 核心 | ARM64 kinsn native emit | NO | 功能核心 |
-| @@ -1224: `bpf_kinsn_is_sidecar_insn` skip | 核心 | 跳过 sidecar 伪指令 | NO | JIT 必须 |
-| @@ -1594: `BPF_PSEUDO_KINSN_CALL` 分支 | 核心 | kinsn call dispatch | NO | 功能核心 |
+| @@ -1192: `emit_kop_desc_call_arm64()` | 核心 | ARM64 kop native emit | NO | 功能核心 |
+| @@ -1224: `bpf_kop_is_sidecar_insn` skip | 核心 | 跳过 sidecar 伪指令 | NO | JIT 必须 |
+| @@ -1594: `BPF_PSEUDO_KOP_CALL` 分支 | 核心 | kop call dispatch | NO | 功能核心 |
 
 所有 hunk 均为核心功能。
 
@@ -44,11 +44,11 @@ Total uncommitted: **6 files, +292/-85 lines**
 
 | Hunk | Cat | 改动摘要 | 能否删？ | 理由 |
 |------|-----|---------|---------|------|
-| @@ -576: `emit_kinsn_desc_call()` | 核心 | x86 kinsn native emit | NO | 功能核心 |
-| @@ -972: `emit_movabs_imm64()` 新函数 | **B** | 提取 movabs helper，原 `emit_mov_imm64` 的轻量重构 | 应拆 | 不属于 kinsn 功能，是独立 refactor |
+| @@ -576: `emit_kop_desc_call()` | 核心 | x86 kop native emit | NO | 功能核心 |
+| @@ -972: `emit_movabs_imm64()` 新函数 | **B** | 提取 movabs helper，原 `emit_mov_imm64` 的轻量重构 | 应拆 | 不属于 kop 功能，是独立 refactor |
 | @@ -1582: `emit_priv_frame_ptr` 改用 `emit_movabs_imm64` | **B** | 使用新 helper | 应拆 | 搭配上面的重构 |
-| @@ -1865: sidecar `bpf_kinsn_is_sidecar_insn` skip | 核心 | 跳过 sidecar | NO | 功能核心 |
-| @@ -2443: `BPF_PSEUDO_KINSN_CALL` dispatch | 核心 | kinsn call | NO | 功能核心 |
+| @@ -1865: sidecar `bpf_kop_is_sidecar_insn` skip | 核心 | 跳过 sidecar | NO | 功能核心 |
+| @@ -2443: `BPF_PSEUDO_KOP_CALL` dispatch | 核心 | kop call | NO | 功能核心 |
 | @@ -2755: 增强 unknown opcode pr_err 消息 | **A** | 给 unknown opcode 的 pr_err 加了 dst/src/off/imm 打印 | **YES** | 纯 debug 增强，删掉不影响任何功能 |
 
 **A 类行数**: ~3 (pr_err 增强)
@@ -58,27 +58,27 @@ Total uncommitted: **6 files, +292/-85 lines**
 
 | Hunk | Cat | 改动摘要 | 能否删？ | 理由 |
 |------|-----|---------|---------|------|
-| @@ -965: `struct bpf_kinsn` 定义 | 核心 | kinsn 描述符结构 | NO | |
-| @@ -965: `BPF_KINSN_SIDECAR_PAYLOAD_BITS` 宏 | **D** | 定义了但从未被引用 | **YES** | grep 全树无使用者，死代码 |
-| @@ -965: `bpf_kinsn_is_sidecar_insn()` | 核心 | sidecar 识别 | NO | |
-| @@ -965: `bpf_kinsn_sidecar_payload()` | 核心 | payload 解码 | NO | |
+| @@ -965: `struct bpf_kop` 定义 | 核心 | kop 描述符结构 | NO | |
+| @@ -965: `BPF_KOP_SIDECAR_PAYLOAD_BITS` 宏 | **D** | 定义了但从未被引用 | **YES** | grep 全树无使用者，死代码 |
+| @@ -965: `bpf_kop_is_sidecar_insn()` | 核心 | sidecar 识别 | NO | |
+| @@ -965: `bpf_kop_sidecar_payload()` | 核心 | payload 解码 | NO | |
 | @@ -1359: `struct bpf_tramp_user` | 核心 | REJIT trampoline 反向索引 | NO | |
 | @@ -1531: `bpf_dispatcher_refresh_prog` 声明 | 核心 | REJIT dispatcher 刷新 | NO | |
 | @@ -1541: `bpf_trampoline_refresh_prog` 声明 | 核心 | REJIT trampoline 刷新 | NO | |
 | @@ -1567: CONFIG_BPF_JIT=n stubs | 核心 | 编译守卫 | NO | |
-| @@ -1622: forward `struct bpf_kinsn_desc_tab` | 核心 | 前向声明 | NO | |
+| @@ -1622: forward `struct bpf_kop_desc_tab` | 核心 | 前向声明 | NO | |
 | @@ -1675: `rejit_mutex` + `trampoline_users` | 核心 | REJIT 序列化 | NO | |
-| @@ -1710: `kinsn_tab` in prog_aux | 核心 | 核心数据结构 | NO | |
+| @@ -1710: `kop_tab` in prog_aux | 核心 | 核心数据结构 | NO | |
 | @@ -1724: `orig_insns` + `orig_prog_len` | 核心 | GET_ORIGINAL 功能 | NO | |
 | @@ -2097: `bpf_struct_ops_refresh_prog` 声明 | 核心 | REJIT struct_ops | NO | |
 | @@ -3032: `bpf_free_kfunc_desc_tab` 声明 | **B** | kfunc_desc_tab 从 `kfree` 改为专用 free 函数 | 应拆 | 动态分配重构的一部分 |
-| @@ -3032: `bpf_free_kinsn_desc_tab` 声明 | 核心 | kinsn tab 释放 | NO | |
-| @@ -3032: `bpf_prog_has_kinsn_call` 声明 | 核心 | | NO | |
-| @@ -3032: `bpf_jit_find_kinsn_desc` 声明 | 核心 | | NO | |
-| @@ -3032: `bpf_jit_get_kinsn_payload` 声明 | 核心 | | NO | |
+| @@ -3032: `bpf_free_kop_desc_tab` 声明 | 核心 | kop tab 释放 | NO | |
+| @@ -3032: `bpf_prog_has_kop_call` 声明 | 核心 | | NO | |
+| @@ -3032: `bpf_jit_find_kop_desc` 声明 | 核心 | | NO | |
+| @@ -3032: `bpf_jit_get_kop_payload` 声明 | 核心 | | NO | |
 | @@ -3315: CONFIG_BPF_SYSCALL=n stubs | 核心 + **B** | `bpf_free_kfunc_desc_tab` stub 属于 B 类 | 部分应拆 | |
 
-**A 类行数**: 2 (`BPF_KINSN_SIDECAR_PAYLOAD_BITS` 宏)
+**A 类行数**: 2 (`BPF_KOP_SIDECAR_PAYLOAD_BITS` 宏)
 **B 类行数**: ~6 (`bpf_free_kfunc_desc_tab` 相关声明和 stub)
 
 ### 1.6 `include/linux/bpf.h` (uncommitted: +24)
@@ -86,9 +86,9 @@ Total uncommitted: **6 files, +292/-85 lines**
 | Hunk | Cat | 改动摘要 | 能否删？ | 理由 |
 |------|-----|---------|---------|------|
 | @@ -966: 给 `owner` 字段加注释 `/* NULL for built-in/vmlinux */` | 核心 | 文档化语义 | NO | 有用的注释 |
-| @@ -978: `struct bpf_kinsn_id` + `struct bpf_kinsn_set` | 核心 | kinsn 注册 API | NO | |
-| @@ -978: 删除 `BPF_KINSN_SIDECAR_PAYLOAD_BITS` | 核心 | 清理上面标记的死代码 | NO | 好的清理 |
-| @@ -3085: `register_bpf_kinsn_set` / `unregister_bpf_kinsn_set` 声明 | 核心 | | NO | |
+| @@ -978: `struct bpf_kop_id` + `struct bpf_kop_set` | 核心 | kop 注册 API | NO | |
+| @@ -978: 删除 `BPF_KOP_SIDECAR_PAYLOAD_BITS` | 核心 | 清理上面标记的死代码 | NO | 好的清理 |
+| @@ -3085: `register_bpf_kop_set` / `unregister_bpf_kop_set` 声明 | 核心 | | NO | |
 | @@ -3384: CONFIG_BPF_SYSCALL=n stubs | 核心 | | NO | |
 
 所有 hunk 均为核心功能。
@@ -97,30 +97,30 @@ Total uncommitted: **6 files, +292/-85 lines**
 
 | Hunk | Cat | 改动摘要 | 能否删？ | 理由 |
 |------|-----|---------|---------|------|
-| @@ -742: `struct bpf_kinsn_region` | 核心 | proof region 结构 | NO | |
-| @@ -851: `kinsn_regions/cnt/cap` in verifier_env | 核心 | | NO | |
+| @@ -742: `struct bpf_kop_region` | 核心 | proof region 结构 | NO | |
+| @@ -851: `kop_regions/cnt/cap` in verifier_env | 核心 | | NO | |
 
 ### 1.8 `include/linux/bpf_verifier.h` (uncommitted: +1)
 
 | Hunk | Cat | 改动摘要 | 能否删？ | 理由 |
 |------|-----|---------|---------|------|
-| @@ -858: `kinsn_call_cnt` field | 核心 | 优化：避免重复遍历计数 | NO | |
+| @@ -858: `kop_call_cnt` field | 核心 | 优化：避免重复遍历计数 | NO | |
 
 ### 1.9 `include/linux/filter.h` (committed: +11)
 
 | Hunk | Cat | 改动摘要 | 能否删？ | 理由 |
 |------|-----|---------|---------|------|
-| @@ -484: `BPF_CALL_KINSN` macro | **D** | 定义了但 grep 全树无使用者 | **YES** | 目前是死代码；测试/用户空间都没用它 |
+| @@ -484: `BPF_CALL_KOP` macro | **D** | 定义了但 grep 全树无使用者 | **YES** | 目前是死代码；测试/用户空间都没用它 |
 | @@ -1016: `bpf_prog_refresh_xdp` 声明 | 核心 | REJIT XDP 刷新 | NO | |
 
-**A/D 类行数**: ~10 (`BPF_CALL_KINSN` macro)
+**A/D 类行数**: ~10 (`BPF_CALL_KOP` macro)
 
 ### 1.10 `include/uapi/linux/bpf.h` (committed: +24)
 
 | Hunk | Cat | 改动摘要 | 能否删？ | 理由 |
 |------|-----|---------|---------|------|
 | @@ -993: `BPF_PROG_REJIT` enum | 核心 | syscall 入口 | NO | |
-| @@ -1382: `BPF_PSEUDO_KINSN_SIDECAR`, `BPF_PSEUDO_KINSN_CALL` | 核心 | 指令编码 | NO | |
+| @@ -1382: `BPF_PSEUDO_KOP_SIDECAR`, `BPF_PSEUDO_KOP_CALL` | 核心 | 指令编码 | NO | |
 | @@ -1922: `union bpf_attr { .rejit {} }` | 核心 | REJIT syscall attr | NO | |
 | @@ -6696: `orig_prog_len`, `orig_prog_insns` in `bpf_prog_info` | 核心 | GET_ORIGINAL info | NO | |
 
@@ -129,7 +129,7 @@ Total uncommitted: **6 files, +292/-85 lines**
 | 子项 | Cat | 详情 |
 |------|-----|------|
 | `rejit.flags` 字段 | **C** | 当前 `if (attr->rejit.flags) return -EINVAL;`，定义了但未使用。保留给未来扩展可以接受，但 UAPI 审阅者可能要求删除直到真正需要时 |
-| `rejit.fd_array_cnt` 字段 | 核心 | 用于 kinsn fd_array |
+| `rejit.fd_array_cnt` 字段 | 核心 | 用于 kop fd_array |
 
 **C 类行数**: ~1 (`flags` field — 争议小)
 
@@ -153,7 +153,7 @@ Total uncommitted: **6 files, +292/-85 lines**
 |------|-----|---------|---------|------|
 | @@ -138: `mutex_init(&fp->aux->rejit_mutex)` + `INIT_LIST_HEAD(&fp->aux->trampoline_users)` | 核心 | REJIT 初始化 | NO | |
 | @@ -197: `kfree` → `bpf_free_kfunc_desc_tab` | **B** | 动态分配重构 | 应拆 | 和 kfunc_desc_tab 重构一起 |
-| @@ -197: `bpf_free_kinsn_desc_tab` + NULL | 核心 | kinsn tab 释放 | NO | |
+| @@ -197: `bpf_free_kop_desc_tab` + NULL | 核心 | kop tab 释放 | NO | |
 | @@ -652: `INIT_LIST_HEAD_RCU(&ksym->lnode)` after erase | **D** | 可疑：原代码 `list_del_rcu` 后不做 reinit；这个 reinit 使 `list_empty()` guard 在 double-del 时返回 true。这看起来是修复 REJIT 重新 add ksym 时的 double-del bug | 核心 (bug fix) | 实际上是 `bpf_prog_rejit_swap` 中 `bpf_prog_kallsyms_del_all` + `bpf_prog_kallsyms_add` 的前提条件 |
 | @@ -1005: `bpf_prog_pack_free` 上方注释 | **A** | 3 行纯注释，描述已有行为 | **YES** | 不改变任何行为，只是注释 |
 
@@ -164,7 +164,7 @@ Total uncommitted: **6 files, +292/-85 lines**
 
 | Hunk | Cat | 改动摘要 | 能否删？ | 理由 |
 |------|-----|---------|---------|------|
-| @@ -36: `BPF_PSEUDO_KINSN_CALL` → "kinsn-descriptor" | 核心 | disasm 支持 kinsn 调用 | NO | |
+| @@ -36: `BPF_PSEUDO_KOP_CALL` → "kop-descriptor" | 核心 | disasm 支持 kop 调用 | NO | |
 
 ### 1.15 `kernel/bpf/dispatcher.c` (committed: +23/-4)
 
@@ -182,7 +182,7 @@ Total uncommitted: **6 files, +292/-85 lines**
 | Hunk | Cat | 改动摘要 | 能否删？ | 理由 |
 |------|-----|---------|---------|------|
 | @@ -2380: `kfree` → `bpf_free_kfunc_desc_tab` | **B** | 动态分配重构 | 应拆 | |
-| @@ -2380: `bpf_free_kinsn_desc_tab(prog->aux->kinsn_tab)` | 核心 | | NO | |
+| @@ -2380: `bpf_free_kop_desc_tab(prog->aux->kop_tab)` | 核心 | | NO | |
 | @@ -2380: `kvfree(prog->aux->orig_insns)` | 核心 | GET_ORIGINAL cleanup | NO | |
 | @@ -3020: `orig_insns = kvmemdup(...)` in bpf_prog_load | 核心 | GET_ORIGINAL 保存原始指令 | NO | |
 | @@ -3139: `kvfree(prog->aux->orig_insns)` in error path | 核心 | | NO | |
@@ -211,43 +211,43 @@ Total uncommitted: **6 files, +292/-85 lines**
 
 | Hunk | Cat | 改动摘要 | 能否删？ | 理由 |
 |------|-----|---------|---------|------|
-| @@ -272: `bpf_pseudo_kinsn_call()` | 核心 | | NO | |
+| @@ -272: `bpf_pseudo_kop_call()` | 核心 | | NO | |
 | @@ -3167: 删除 `#define MAX_KFUNC_DESCS 256` + `MAX_KFUNC_BTFS 256` | **B** | 改为动态分配 | 应拆 | kfunc_desc_tab 动态分配重构 |
 | @@ -3190: `struct bpf_kfunc_desc_tab` 从固定数组 → `*descs + cap` | **B** | 动态分配 | 应拆 | |
 | @@ -3190: `struct bpf_kfunc_btf_tab` 从固定数组 → `*descs + cap` | **B** | 动态分配 | 应拆 | |
-| @@ -3190: `struct bpf_kinsn_desc` + `bpf_kinsn_desc_tab` | 核心 | | NO | |
-| @@ -3190: `ensure_desc_capacity()` | **B** | 通用动态扩容helper，被kfunc和kinsn共用 | 部分应拆 | kfunc 部分是独立重构 |
-| @@ -3190: forward declares (`kinsn_desc_cmp`, `find_kinsn_desc`, `bpf_patch_insn_data`, `verifier_remove_insns`) | 核心 | | NO | 其中 `bpf_patch_insn_data` 和 `verifier_remove_insns` 的 forward declare 是因为函数顺序，虽丑但必要 |
+| @@ -3190: `struct bpf_kop_desc` + `bpf_kop_desc_tab` | 核心 | | NO | |
+| @@ -3190: `ensure_desc_capacity()` | **B** | 通用动态扩容helper，被kfunc和kop共用 | 部分应拆 | kfunc 部分是独立重构 |
+| @@ -3190: forward declares (`kop_desc_cmp`, `find_kop_desc`, `bpf_patch_insn_data`, `verifier_remove_insns`) | 核心 | | NO | 其中 `bpf_patch_insn_data` 和 `verifier_remove_insns` 的 forward declare 是因为函数顺序，虽丑但必要 |
 | @@ -3257: `__find_kfunc_desc_btf` 中删除 `MAX_KFUNC_BTFS` 检查，加 `ensure_desc_capacity` | **B** | 动态分配 | 应拆 | |
 | @@ -3257: `__find_kfunc_desc_btf` 中 `if (!tab)` 懒初始化 | **B** | 和动态分配一起 | 应拆 | |
 | @@ -3319: `bpf_free_kfunc_btf_tab` 加 `kvfree(tab->descs)` | **B** | 动态分配 | 应拆 | |
 | @@ -3319: `bpf_free_kfunc_desc_tab()` 新函数 | **B** | 动态分配 | 应拆 | |
-| @@ -3319: `bpf_free_kinsn_desc_tab()` | 核心 | | NO | |
+| @@ -3319: `bpf_free_kop_desc_tab()` | 核心 | | NO | |
 | @@ -3489: `add_kfunc_call` 删除 `MAX_KFUNC_DESCS` 检查，加 `ensure_desc_capacity` | **B** | 动态分配 | 应拆 | |
-| @@ -3524: `btf_type_is_kinsn_desc()` | 核心 | | NO | |
-| @@ -3524: `fetch_kinsn_desc_meta()` | 核心 | | NO | |
-| @@ -3524: `add_kinsn_call()` | 核心 | | NO | |
-| @@ -3536: `kinsn_desc_cmp_by_imm_off()` | 核心 | | NO | |
-| @@ -3536: `find_kinsn_desc()` | 核心 | | NO | |
-| @@ -3580: `bpf_prog_has_kinsn_call()` | 核心 | | NO | |
-| @@ -3598: `bpf_jit_find_kinsn_desc()` | 核心 | | NO | |
-| @@ -3598: kinsn proof region 一整套 (lower/restore/validate/scrub/alloc/adjust) | 核心 | ~200 行 | NO | |
-| @@ -3598: `bpf_jit_get_kinsn_payload()` | 核心 | | NO | |
-| @@ -4160: `disasm_kfunc_name` → `disasm_call_name` 重命名 + 支持 kinsn | 核心 + **B** | 重命名属于 refactor | 部分应拆 | 函数重命名可以拆出，但加 kinsn 分支是核心 |
-| @@ -4160: 增加 null check `t ? ... : "<invalid>"` | **A** | 防御性检查，和 kinsn 无关 | **YES** | 如果只支持 kfunc，`btf_type_by_id` 不会返回 NULL（verified by add_kfunc_call） |
+| @@ -3524: `btf_type_is_kop_desc()` | 核心 | | NO | |
+| @@ -3524: `fetch_kop_desc_meta()` | 核心 | | NO | |
+| @@ -3524: `add_kop_call()` | 核心 | | NO | |
+| @@ -3536: `kop_desc_cmp_by_imm_off()` | 核心 | | NO | |
+| @@ -3536: `find_kop_desc()` | 核心 | | NO | |
+| @@ -3580: `bpf_prog_has_kop_call()` | 核心 | | NO | |
+| @@ -3598: `bpf_jit_find_kop_desc()` | 核心 | | NO | |
+| @@ -3598: kop proof region 一整套 (lower/restore/validate/scrub/alloc/adjust) | 核心 | ~200 行 | NO | |
+| @@ -3598: `bpf_jit_get_kop_payload()` | 核心 | | NO | |
+| @@ -4160: `disasm_kfunc_name` → `disasm_call_name` 重命名 + 支持 kop | 核心 + **B** | 重命名属于 refactor | 部分应拆 | 函数重命名可以拆出，但加 kop 分支是核心 |
+| @@ -4160: 增加 null check `t ? ... : "<invalid>"` | **A** | 防御性检查，和 kop 无关 | **YES** | 如果只支持 kfunc，`btf_type_by_id` 不会返回 NULL（verified by add_kfunc_call） |
 | @@ -4409: `backtrack_insn` 中 sidecar skip | 核心 | | NO | |
-| @@ -21029: `check_kinsn_sidecar_insn()` | 核心 | | NO | |
+| @@ -21029: `check_kop_sidecar_insn()` | 核心 | | NO | |
 | @@ -21029: `do_check_insn` 中 sidecar dispatch | 核心 | | NO | |
 | @@ -21098: BPF_CALL reserved fields 检查扩展 | 核心 | | NO | |
-| @@ -21123: kinsn_call verifier error | 核心 | | NO | |
-| @@ -22883: `jit_subprogs` 中 `func[i]->aux->kinsn_tab = prog->aux->kinsn_tab` | 核心 | | NO | |
-| @@ -23067: `fixup_call_args` 中 `has_kinsn_call` 检查 | 核心 | | NO | |
-| @@ -23386: `do_misc_fixups` 中 kinsn sidecar lowering | 核心 | | NO | |
-| @@ -23695: kinsn call skip in fixup_kfunc path | 核心 | | NO | |
-| @@ -25988: `bpf_check` 中重排 `check_btf_info_early` + `add_subprog_and_kfunc` + `lower_kinsn_proof_regions` 到 `explored_states` 分配之前 | 核心 | | NO | kinsn lowering 需要在验证之前完成 |
+| @@ -21123: kop_call verifier error | 核心 | | NO | |
+| @@ -22883: `jit_subprogs` 中 `func[i]->aux->kop_tab = prog->aux->kop_tab` | 核心 | | NO | |
+| @@ -23067: `fixup_call_args` 中 `has_kop_call` 检查 | 核心 | | NO | |
+| @@ -23386: `do_misc_fixups` 中 kop sidecar lowering | 核心 | | NO | |
+| @@ -23695: kop call skip in fixup_kfunc path | 核心 | | NO | |
+| @@ -25988: `bpf_check` 中重排 `check_btf_info_early` + `add_subprog_and_kfunc` + `lower_kop_proof_regions` 到 `explored_states` 分配之前 | 核心 | | NO | kop lowering 需要在验证之前完成 |
 | @@ -25988: `explored_states = NULL` after kvfree | 核心 | 防止 double-free | NO | |
-| @@ -25988: `restore_kinsn_proof_regions` 调用 | 核心 | | NO | |
-| @@ -26194: `kvfree(env->kinsn_regions)` cleanup | 核心 | | NO | |
+| @@ -25988: `restore_kop_proof_regions` 调用 | 核心 | | NO | |
+| @@ -26194: `kvfree(env->kop_regions)` cleanup | 核心 | | NO | |
 
 **A 类行数**: ~2 (null check in disasm_call_name)
 **B 类行数**: ~80 (kfunc_desc_tab/kfunc_btf_tab 动态分配重构)
@@ -256,12 +256,12 @@ Total uncommitted: **6 files, +292/-85 lines**
 
 | Hunk | Cat | 改动摘要 | 能否删？ | 理由 |
 |------|-----|---------|---------|------|
-| @@ -3395: 简化 `bpf_free_kinsn_desc_tab` (删除 module_put 循环) | 核心 | 配合 btf_try_get_kinsn_desc 不再 try_module_get | NO | |
-| @@ -3613: 删除 `btf_type_is_kinsn_desc()` 从 verifier（移到 btf.c） | 核心 | 重构到 btf.c | NO | |
-| @@ -3613: 重写 `fetch_kinsn_desc_meta()` 使用 `btf_try_get_kinsn_desc()` | 核心 | | NO | |
-| @@ -3810: 简化 `bpf_prog_has_kinsn_call()` 为 `!!prog->aux->kinsn_tab` | 核心 | 优化 | NO | |
-| @@ -3963: 删除 `count_kinsn_calls()` 用 `kinsn_call_cnt` 替代 | 核心 | | NO | |
-| @@ -4213: `add_subprog_and_kfunc` 中递增 `kinsn_call_cnt` | 核心 | | NO | |
+| @@ -3395: 简化 `bpf_free_kop_desc_tab` (删除 module_put 循环) | 核心 | 配合 btf_try_get_kop_desc 不再 try_module_get | NO | |
+| @@ -3613: 删除 `btf_type_is_kop_desc()` 从 verifier（移到 btf.c） | 核心 | 重构到 btf.c | NO | |
+| @@ -3613: 重写 `fetch_kop_desc_meta()` 使用 `btf_try_get_kop_desc()` | 核心 | | NO | |
+| @@ -3810: 简化 `bpf_prog_has_kop_call()` 为 `!!prog->aux->kop_tab` | 核心 | 优化 | NO | |
+| @@ -3963: 删除 `count_kop_calls()` 用 `kop_call_cnt` 替代 | 核心 | | NO | |
+| @@ -4213: `add_subprog_and_kfunc` 中递增 `kop_call_cnt` | 核心 | | NO | |
 
 全部核心（BTF 查询重构 + 优化）。
 
@@ -269,16 +269,16 @@ Total uncommitted: **6 files, +292/-85 lines**
 
 | Hunk | Cat | 改动摘要 | 能否删？ | 理由 |
 |------|-----|---------|---------|------|
-| @@ -240: `struct btf_kinsn_desc` + `struct btf_kinsn_tab` | 核心 | BTF-side kinsn 注册表 | NO | |
-| @@ -267: `btf->kinsn_tab` field | 核心 | | NO | |
-| @@ -1804: `btf_free_kinsn_tab()` | 核心 | | NO | |
-| @@ -1852: `btf_free_kinsn_tab(btf)` in `btf_free()` | 核心 | | NO | |
-| @@ -8952: `btf_kinsn_desc_cmp` | 核心 | | NO | |
-| @@ -8952: `btf_type_is_kinsn_desc` (moved from verifier.c) | 核心 | | NO | |
-| @@ -8952: `btf_resolve_kinsn_desc_id()` | 核心 | | NO | |
-| @@ -8952: `register_bpf_kinsn_set()` | 核心 | | NO | |
-| @@ -8952: `unregister_bpf_kinsn_set()` | 核心 | | NO | |
-| @@ -8952: `btf_try_get_kinsn_desc()` | 核心 | | NO | |
+| @@ -240: `struct btf_kop_desc` + `struct btf_kop_tab` | 核心 | BTF-side kop 注册表 | NO | |
+| @@ -267: `btf->kop_tab` field | 核心 | | NO | |
+| @@ -1804: `btf_free_kop_tab()` | 核心 | | NO | |
+| @@ -1852: `btf_free_kop_tab(btf)` in `btf_free()` | 核心 | | NO | |
+| @@ -8952: `btf_kop_desc_cmp` | 核心 | | NO | |
+| @@ -8952: `btf_type_is_kop_desc` (moved from verifier.c) | 核心 | | NO | |
+| @@ -8952: `btf_resolve_kop_desc_id()` | 核心 | | NO | |
+| @@ -8952: `register_bpf_kop_set()` | 核心 | | NO | |
+| @@ -8952: `unregister_bpf_kop_set()` | 核心 | | NO | |
+| @@ -8952: `btf_try_get_kop_desc()` | 核心 | | NO | |
 
 全部核心。
 
@@ -307,7 +307,7 @@ Total uncommitted: **6 files, +292/-85 lines**
 
 | Hunk | Cat | 改动摘要 | 能否删？ | 理由 |
 |------|-----|---------|---------|------|
-| @@ -2: `extmod-btf-global-var-y` 变量 | 核心 | 外部模块 BTF 需要 `global_var` 特性来暴露 kinsn 描述符 | NO | kinsn 模块的 BTF 需要 VAR 类型 |
+| @@ -2: `extmod-btf-global-var-y` 变量 | 核心 | 外部模块 BTF 需要 `global_var` 特性来暴露 kop 描述符 | NO | kop 模块的 BTF 需要 VAR 类型 |
 | @@ -14: 追加 `$(extmod-btf-global-var-y)` 到 `--btf_features` | 核心 | | NO | |
 
 ### 1.25 `tools/testing/selftests/bpf/.gitignore` (committed: +5)
@@ -331,7 +331,7 @@ Total uncommitted: **6 files, +292/-85 lines**
 | Hunk | Cat | 改动摘要 | 能否删？ | 理由 |
 |------|-----|---------|---------|------|
 | @@ -10: `#include <stdlib.h>` | **B** | 为 `strtoull` 加的 include，属于下面 normalize 函数的依赖 | 和下面一起 | |
-| @@ -88: `normalize_movabs_imm_hex()` 函数 | **A** | 格式化 movabs 负立即数的显示，和 kinsn/REJIT 功能无关。这是修复 disasm 输出中 movabs 显示负数时的格式问题 | **YES** | 纯 selftest 工具修复，和 REJIT/kinsn 无关 |
+| @@ -88: `normalize_movabs_imm_hex()` 函数 | **A** | 格式化 movabs 负立即数的显示，和 kop/REJIT 功能无关。这是修复 disasm 输出中 movabs 显示负数时的格式问题 | **YES** | 纯 selftest 工具修复，和 REJIT/kop 无关 |
 | @@ -141: 在 disasm 循环中调用 `normalize_movabs_imm_hex` | **A** | 同上 | **YES** | |
 
 **A 类行数**: 32 (整个 normalize_movabs_imm_hex + include + 调用点)
@@ -349,9 +349,9 @@ Total uncommitted: **6 files, +292/-85 lines**
 | 文件 | 行数 | 描述 |
 |------|------|------|
 | `include/linux/btf.h` (committed) | 1 | 空行删除 |
-| `include/linux/bpf.h` | 2 | `BPF_KINSN_SIDECAR_PAYLOAD_BITS` 死宏（uncommitted 已清理） |
+| `include/linux/bpf.h` | 2 | `BPF_KOP_SIDECAR_PAYLOAD_BITS` 死宏（uncommitted 已清理） |
 | `arch/x86/net/bpf_jit_comp.c` | 3 | unknown opcode pr_err 增强 |
-| `include/linux/filter.h` | 10 | `BPF_CALL_KINSN` 死宏 |
+| `include/linux/filter.h` | 10 | `BPF_CALL_KOP` 死宏 |
 | `kernel/bpf/core.c` | 4 | `bpf_prog_pack_free` 上方纯注释 |
 | `net/bpf/test_run.c` (committed) | 5 | 误删 `bpf_prog_change_xdp`（uncommitted 已恢复，net=0） |
 | `tools/testing/selftests/bpf/.gitignore` | 4 | 4 个指向不存在 binary 的 .gitignore 条目 |
@@ -403,7 +403,7 @@ Total uncommitted: **6 files, +292/-85 lines**
 1. **Prep patch 1**: kfunc_desc_tab/kfunc_btf_tab 动态分配重构 (~80 行)
 2. **Prep patch 2**: emit_movabs_imm64 x86 helper 提取 (~13 行)
 3. **Prep patch 3**: disasm_call_name rename (~5 行)
-4. **Feature patch**: BpfReJIT + kinsn + GET_ORIGINAL (~2059 行)
+4. **Feature patch**: BpfReJIT + kop + GET_ORIGINAL (~2059 行)
 5. **Test patch**: get_original_poc.c + .gitignore (~108 行)
 
 清理后 feature patch 的 diff: **~2059 行 (+/-)** = 当前的 ~89%

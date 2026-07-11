@@ -10,17 +10,17 @@
 结论先说：
 
 1. **第一优先级是 `skb_load_bytes -> direct packet access`，而且优先做 XDP/TC fast path 的纯 bytecode rewrite。**  
-   这类 site 的 helper 语义与 direct packet access 最接近；内核已有完整 verifier 合同（`data/data_end`、`PTR_TO_PACKET`、bounds check），不需要新 kinsn。
+   这类 site 的 helper 语义与 direct packet access 最接近；内核已有完整 verifier 合同（`data/data_end`、`PTR_TO_PACKET`、bounds check），不需要新 kop。
 
 2. **`skb_store_bytes` 只能做窄子集特化，不能把“所有 packet store helper”简单改成 direct write。**  
    `flags`、non-linear/cloned skb、按需 `make_writable()` 以及 TC direct-write prologue 都会改变成本模型。最现实的子集是 `flags=0`、固定小长度、已经有 writable/linear 保证的 path。
 
 3. **`probe_read_kernel` 不是“把 4B/8B helper call 换成 LDX”这么简单。**  
    它的核心价值是 `copy_from_kernel_nofault()` + fault 后清零目标缓冲区。这个 fault-handling 语义不能省。对 Tracee 这类 tracing workload，绝大多数 site 的 `unsafe_ptr` 本来就是 verifier 不会允许直接解引用的“opaque/unsafe pointer”。  
-   因此：**纯 bytecode rewrite 只适用于极窄的 non-faulting typed-pointer 子集；一般情形若要内联，必须引入新的 safe-load intrinsic/kinsn 或等价内核支持。**
+   因此：**纯 bytecode rewrite 只适用于极窄的 non-faulting typed-pointer 子集；一般情形若要内联，必须引入新的 safe-load intrinsic/kop 或等价内核支持。**
 
 4. **`ktime_get_ns` 不适合做纯 bytecode rewrite。**  
-   BPF ISA 里没有“读 monotonic ns”的等价指令；helper 已经直接走 `ktime_get_mono_fast_ns()`。除非引入新的 arch-specific intrinsic/kinsn，否则只能保留 helper。即使做 inline，语义也比 packet helper 更难保持。
+   BPF ISA 里没有“读 monotonic ns”的等价指令；helper 已经直接走 `ktime_get_mono_fast_ns()`。除非引入新的 arch-specific intrinsic/kop，否则只能保留 helper。即使做 inline，语义也比 packet helper 更难保持。
 
 5. **Tracee 与 Cilium 恰好代表两种完全不同的安全模型。**  
    Tracee 的 `probe_read_kernel` 优化面“量大但危险”；Cilium 的 `skb_load_bytes` 优化面“量没那么大，但 verifier 合同最清楚、最适合先落地”。
@@ -200,7 +200,7 @@ x = *(u64 *)unsafe_ptr;
 - **对 Tracee upside 很大，但 ready-to-ship 程度最低。**
 
 结论：  
-`probe_read_kernel` 的**一般情形**不应先做纯 bytecode rewrite。若真要内联，方向应该是“带 verifier 语义的新 safe-load intrinsic / kinsn / 内核 special-case”，而不是盲目换成 `LDX`。
+`probe_read_kernel` 的**一般情形**不应先做纯 bytecode rewrite。若真要内联，方向应该是“带 verifier 语义的新 safe-load intrinsic / kop / 内核 special-case”，而不是盲目换成 `LDX`。
 
 ## 3.2 `skb_load_bytes`
 
@@ -245,7 +245,7 @@ UAPI 文档已经把路线说得很清楚：`skb_load_bytes()` 原本是“easy 
 ### 判断
 
 - **最适合做纯 bytecode rewrite。**
-- **不需要 kinsn。**
+- **不需要 kop。**
 - **改写后还能继续喂给 `wide_mem` / `extract` / `endian_fusion`。**
 
 结论：  
@@ -323,7 +323,7 @@ UAPI：返回自 boot 以来的 monotonic ns (`vendor/linux-framework/include/ua
 你不能像对纯函数那样自由 hoist / CSE 两次 time read。
 
 结论：  
-`ktime_get_ns` 不是一个好的“helper call inlining”首目标。除非引入新的 helper-inline contract/kinsn，并明确接受其语义边界，否则应保持 helper。
+`ktime_get_ns` 不是一个好的“helper call inlining”首目标。除非引入新的 helper-inline contract/kop，并明确接受其语义边界，否则应保持 helper。
 
 ## 4. Verifier 交互：helper 改成 direct access 后要满足什么
 
@@ -471,9 +471,9 @@ Cilium 的 helper 使用非常规律：
 - **Cilium 最适合做 `skb_load_bytes` first implementation**
 - **不适合把 `skb_store_bytes` 一刀切换成 direct write**
 
-## 7. kinsn vs 纯 bytecode rewrite 决策
+## 7. kop vs 纯 bytecode rewrite 决策
 
-| helper | 首选实现形态 | 需要 kinsn 吗 | 结论 |
+| helper | 首选实现形态 | 需要 kop 吗 | 结论 |
 |---|---|---|---|
 | `skb_load_bytes` | `ctx->data/data_end` + bounds guard + direct load/store to stack | **不需要** | **纯 bytecode rewrite** 最合适 |
 | `skb_store_bytes` | 仅 `flags=0`、小长度、明确 writable/linear path 的 direct write | **窄子集不需要**；全语义等价需要额外内核支持 | 先做**纯 rewrite 的窄子集**，不要做全覆盖 |

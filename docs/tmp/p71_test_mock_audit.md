@@ -124,7 +124,7 @@ Cleanup inside `mock_maps.rs`:
 | `pass_tests.rs` | 357 | `test_analysis_cache_invalidate_specific` | Duplicate cache invalidation shape. |
 | `pass_tests.rs` | 419 | `test_pass_manager_single_pass_no_change` | Shallow single-pass result assertion covered by policy/debug/no-op paths. |
 | `pass_tests.rs` | 436 | `test_pass_manager_single_pass_with_change` | Shallow single-pass mutation assertion covered by multi-pass and debug trace tests. |
-| `pass_tests.rs` | 643 | `test_kinsn_registry_with_available_targets` | Mostly field-presence/getter behavior; per-target call offset contract remains. |
+| `pass_tests.rs` | 643 | `test_kop_registry_with_available_targets` | Mostly field-presence/getter behavior; per-target call offset contract remains. |
 | `pass_tests.rs` | 696 | `test_remap_annotations_basic` | Insert remap covered by `test_prepend_nop_pass_shifts_annotations_forward`; deletion remap remains. |
 | `wide_mem_tests.rs` | 127 | `test_scan_wide_mem_prefers_largest_width` | Duplicate of 4-byte scanner match assertions. |
 | `wide_mem_tests.rs` | 175 | `test_scan_high_first_4byte` | Covered by clang-order high-first matcher test. |
@@ -140,8 +140,8 @@ Cleanup inside `mock_maps.rs`:
 | `wide_mem_tests.rs` | 878 | `test_wide_mem_allows_non_stack_with_unknown_prog_type` | Same non-packet allow branch as tracing/default contexts. |
 | `cli_pipeline.rs` | 190 | `wide_mem_report_is_valid_pass_report_json` | CLI report shape covered by optimize report smoke and pass-level tests. |
 | `cli_pipeline.rs` | 339 | `direct_side_input_required_pass_fails_when_missing_input` | Duplicates optimize side-input fail-fast tests. |
-| `cli_pipeline.rs` | 348 | `rotate_with_empty_target_kinsns_exits_with_error` | Covered by explicit optimize kinsn target failure. |
-| `cli_pipeline.rs` | 370 | `cond_select_with_empty_target_kinsns_exits_with_error` | Same target-kinsn failure shape as retained optimize test. |
+| `cli_pipeline.rs` | 348 | `rotate_with_empty_target_kops_exits_with_error` | Covered by explicit optimize kop target failure. |
+| `cli_pipeline.rs` | 370 | `cond_select_with_empty_target_kops_exits_with_error` | Same target-kop failure shape as retained optimize test. |
 | `cli_pipeline.rs` | 392 | `optimize_explicit_const_prop_fails_when_verifier_states_missing` | Duplicates missing side-input contract covered by default optimize fail-fast. |
 | `cli_pipeline.rs` | 418 | `optimize_explicit_map_inline_fails_when_map_side_inputs_missing` | Duplicates default optimize map-inline side-input error. |
 | `cli_pipeline.rs` | 519 | `optimize_map_inline_errors_when_array_snapshot_value_is_null` | Covered by missing-key and hash-null snapshot CLI cases. |
@@ -155,7 +155,7 @@ Cleanup inside `mock_maps.rs`:
 - `bulk_memory_tests.rs`: retained. Tests cover memcpy/memset matching, overlap,
   branch fixup, kfunc availability, alias gate, and live temporary proof.
 - `bpfget/tests/cli.rs`: retained. Kernel-dependent cases are the CLI boundary for
-  target JSON, manual kinsn specs, and fail-fast missing program/outdir behavior.
+  target JSON, manual kop specs, and fail-fast missing program/outdir behavior.
 - `bpfrejit/tests/cli.rs`: retained. Tests cover parse and fd/map side-input error
   paths before opening target programs.
 - `bpfverify/tests/cli.rs`: retained. Tests cover pipe/report/verifier-states CLI

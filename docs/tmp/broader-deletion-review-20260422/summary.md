@@ -127,7 +127,7 @@ Estimated additional net deletion available from the findings below: about **247
 - Why they are dead:
   - `setup_state` is written into `LifecycleRunResult` but never read.
   - `LifecycleRunResult.metadata` is also written at return sites, but no caller reads `lifecycle_result.metadata`.
-  - Kinsn metadata still survives elsewhere through `PreparedDaemonSession.metadata`, so removing this field does not remove the actual data source.
+  - KOperation metadata still survives elsewhere through `PreparedDaemonSession.metadata`, so removing this field does not remove the actual data source.
 - Grep evidence:
   - Whole-repo search finds `.setup_state` nowhere.
   - Whole-repo search finds no `lifecycle_result.metadata` reader.

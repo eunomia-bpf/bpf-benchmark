@@ -192,7 +192,7 @@ encoded through pointer comparisons and helper results. I therefore used the
 requested conservative trip-count sweep `32 / 64 / 128`.
 
 Existing one-second baseline run counts from
-`corpus/results/x86_kvm_p89_kinsn_corpus_20260430_131403_981524/details/result.json`
+`corpus/results/x86_kvm_p89_kop_corpus_20260430_131403_981524/details/result.json`
 are used only as an upper-bound frequency context:
 
 | app | unique LICM sites | baseline BPF runs |

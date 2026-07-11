@@ -6,7 +6,7 @@
 - 这项放宽是**正确的**。对当前 in-place `poke_tab` 更新模型来说，`insn_idx` 不是运行时消费的不变量；真正影响后续 `map_poke_run()` 正确性的，是 `poke` 条目数、`reason`、`map`、`key`，以及新 JIT image 里已经生成好的 patch 地址。
 - `insn_idx` 检查不是原始 tail-call REJIT 设计的一部分。`bpf_prog_rejit_update_poke_tab()` 在最初引入的提交里只有 `reason + map + key` 校验；`insn_idx` 是 2026-03-25 的 cleanup commit 后加的一行 tighten，没有 commit message 论证，也没有设计文档把它定义成安全边界。
 - `map + key + 当前 slot 顺序` 对**当前实现**足够，但不是最小条件。它仍然会拒绝某些安全的 reorder；而“新增/删除 poke entry”的 structural delta 仍然不支持。这是未来 tail-call specialization 的独立 blocker，不是这次 `insn_idx` 放宽的问题。
-- 这次审查没有在 `trampoline.c` refresh、`dispatcher.c` refresh、x86 JIT kinsn dispatch 里发现同等级的“明显过严且应立即删除”的当前校验。当前更像 implementation gate 的，主要是 attached `EXT/freplace` 的 REJIT reject。
+- 这次审查没有在 `trampoline.c` refresh、`dispatcher.c` refresh、x86 JIT kop dispatch 里发现同等级的“明显过严且应立即删除”的当前校验。当前更像 implementation gate 的，主要是 attached `EXT/freplace` 的 REJIT reject。
 
 ## 1. `poke_tab` `insn_idx` 改动审查
 
@@ -221,11 +221,11 @@ runtime `map_poke_run()` 就是按 `(map,key)` 找 descriptor 的。
 | `syscall.c:3224-3248` | `size_poke_tab` 相等，逐 slot `reason/map/key` 相等 | 当前 in-place `poke_tab` 重用模型的内存安全和后续 `map_poke_run()` 正确性 | llvmbpf round-trip、未来 tail-call specialization | **部分放宽**。`insn_idx` 已应删除；`size/reason/map/key` 该保留。slot-order 约束是保守实现，不是最小必要条件。 |
 | `syscall.c:3774-3778` | `!bpf_prog_rejit_supported(tmp) || !tmp->jited`，以及 `bpf_prog_size(tmp->len) > prog->pages * PAGE_SIZE` | 保证 replacement image 真正可 JIT，并且 fit 进现有 prog allocation/page budget | llvmbpf 增大指令数、任何 code-size 增长 pass | **保留**。这是实际内存/发布约束，不是 defensive overkill。 |
 | `verifier.c:19525-19549` | `func_info_cnt == subprog_cnt` 且每个 `func_info[i].insn_off == subprog start` | BTF/func_info 元数据与真实 subprog layout 一致 | 任何改变 subprog 边界却还复用旧 `func_info` 的变换；尤其是 full subprog relift / subprog inline | **保留**。这是 metadata correctness 边界。若要放宽，必须先扩 UAPI 或重建新 metadata。 |
-| `verifier.c:23448-23460` | JIT 失败后，带 kfunc / kinsn / `tail_call + bpf2bpf` 的程序不允许退回 interpreter | interpreter 本身不支持这些语义组合 | 间接地，任何让 JIT 失败的程序 | **保留**。这是 runtime support gap，不是多余防御。 |
+| `verifier.c:23448-23460` | JIT 失败后，带 kfunc / kop / `tail_call + bpf2bpf` 的程序不允许退回 interpreter | interpreter 本身不支持这些语义组合 | 间接地，任何让 JIT 失败的程序 | **保留**。这是 runtime support gap，不是多余防御。 |
 | `verifier.c:24708-24718` | `map_poke_track/untrack/run` 三个 hook 必须同时存在 | 确保 poke 生命周期完整，不会 track 了却无法 untrack / repatch | 任意支持 direct-tail-call poke 的 map type 扩展 | **保留**。这是生命周期完整性检查。 |
 | `trampoline.c:936-950` | refresh 遍历 `trampoline_users`，遇错即停 | 这里没有明显 over-strict reject；问题在 failure atomicity 和覆盖范围 | attached prog REJIT、部分 refresh 失败 | **不属于“过严校验”**。当前问题是 refresh 语义不够完整，不是 guard 太严。 |
 | `dispatcher.c:145-149` | 只有 dispatcher image 存在且确实包含该 prog 时才 refresh | 避免无意义 rebuild | XDP prog REJIT | **保留**。不是过严。 |
-| `x86/net/bpf_jit_comp.c:592-600` | `emit_x86` 必须存在，返回长度必须和 `off/max_emit_bytes` 一致 | 防止 kinsn native emitter 越界或内部协议错位 | 任何 kinsn emit path | **保留**。这是内存安全/内部一致性检查。 |
+| `x86/net/bpf_jit_comp.c:592-600` | `emit_x86` 必须存在，返回长度必须和 `off/max_emit_bytes` 一致 | 防止 kop native emitter 越界或内部协议错位 | 任何 kop emit path | **保留**。这是内存安全/内部一致性检查。 |
 
 ## 4. 重点结论
 
@@ -251,7 +251,7 @@ runtime `map_poke_run()` 就是按 `(map,key)` 找 descriptor 的。
 - `func_info` 与 subprog layout 严格一致
 - attached `EXT/freplace` 在无法重建 live target 时继续拒绝
 - JIT fallback 到 interpreter 时对 unsupported 语义组合的 reject
-- kinsn emit bounds / consistency 校验
+- kop emit bounds / consistency 校验
 
 这些要么是：
 
@@ -281,7 +281,7 @@ runtime `map_poke_run()` 就是按 `(map,key)` 找 descriptor 的。
 
 ### 其他当前检查
 
-- **保留**：`size_poke_tab`、`reason/map/key`、page budget、`func_info`/subprog layout、non-JIT fallback reject、poke hook completeness、x86 kinsn emit bounds。
+- **保留**：`size_poke_tab`、`reason/map/key`、page budget、`func_info`/subprog layout、non-JIT fallback reject、poke hook completeness、x86 kop emit bounds。
 - **保留但属于 implementation gate**：attached `EXT/freplace` 的 `dst_prog` 检查。
 - **未发现当前应立即删除的第二个同级别过严校验**。
 

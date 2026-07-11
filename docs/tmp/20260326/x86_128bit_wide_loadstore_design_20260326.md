@@ -1,14 +1,14 @@
-# x86-64 128-bit 宽 load/store kinsn 设计报告
+# x86-64 128-bit 宽 load/store kop 设计报告
 
 日期：2026-03-26  
 状态：design only  
-结论标签：**x86 pair load/store 不建议走 SIMD；x86 的“16B 宽机会”应并入 Bulk memory，而不是做 `ldp/stp` 风格 kinsn**
+结论标签：**x86 pair load/store 不建议走 SIMD；x86 的“16B 宽机会”应并入 Bulk memory，而不是做 `ldp/stp` 风格 kop**
 
 ## 0. 文档目标与方法
 
 本文回答的问题不是“x86 有没有 16B 指令”，而是：
 
-1. 在 **BpfReJIT 当前 kinsn v2 框架** 下，x86-64 是否值得为 `memory <-> two GPR` 设计一个真正的 128-bit 宽 load/store kinsn。
+1. 在 **BpfReJIT 当前 kop v2 框架** 下，x86-64 是否值得为 `memory <-> two GPR` 设计一个真正的 128-bit 宽 load/store kop。
 2. 如果要做，最佳 native 路线是：
    - SSE2 `MOVDQU/MOVDQA`
    - AVX `VMOVDQU`
@@ -21,9 +21,9 @@
 - 仓库内设计与实现：
   - `docs/kernel-jit-optimization-plan.md`
   - `docs/tmp/20260324/128bit_wide_loadstore_research_20260324.md`
-  - `docs/tmp/20260324/simd_kinsn_design_20260324.md`
-  - `docs/kinsn-design.md`
-  - `module/include/kinsn_common.h`
+  - `docs/tmp/20260324/simd_kop_design_20260324.md`
+  - `docs/kop-design.md`
+  - `module/include/kop_common.h`
   - `module/x86/*.c`
   - `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c`
   - `vendor/linux-framework/Documentation/core-api/floating-point.rst`
@@ -59,10 +59,10 @@
 1. **Option D（两条普通 `mov`）应作为 x86 `wide_load128/store128` 的默认答案。**  
    对 `memory <-> two GPR` 语义，SSE2/AVX 的 pack/unpack 成本已经让它在指令级上输给两条普通 `mov`，更不要说 FPU section。
 2. **Option C（`REP MOVSB`）是 x86 的正确“16B 宽机会”，但它只适用于 `memcpy`-like bulk memory，不适用于 pair load/store。**
-3. **Option A/B（SSE2 / AVX）不适合做 x86 pair load/store kinsn。**  
-   它们只在 `memory -> XMM -> memory` 的 bulk copy 上才有机会；即便如此，也必须把 `kernel_fpu_begin/end()` 的固定成本按**整次 BPF 程序调用**摊销，而不是按单条 kinsn。
+3. **Option A/B（SSE2 / AVX）不适合做 x86 pair load/store kop。**  
+   它们只在 `memory -> XMM -> memory` 的 bulk copy 上才有机会；即便如此，也必须把 `kernel_fpu_begin/end()` 的固定成本按**整次 BPF 程序调用**摊销，而不是按单条 kop。
 4. **如果论文需要统一抽象，可以保留 `bpf_ldp64/bpf_stp64` 的架构无关语义，但 x86 只做 scalar emit 或 instantiate-only。**
-5. **x86 的性能 story 应放在 Bulk memory kinsn：`rep movsb/stosb` phase 1，SIMD phase 2。**  
+5. **x86 的性能 story 应放在 Bulk memory kop：`rep movsb/stosb` phase 1，SIMD phase 2。**  
    这和 ARM64 `LDP/STP` 的 free win 形成了非常好的架构对比。
 
 ### 1.2 选项结论矩阵
@@ -84,16 +84,16 @@
 
 - `emit_ldx()`：`BPF_DW` load -> `mov r64, [base+off]`
 - `emit_stx()`：`BPF_DW` store -> `mov [base+off], r64`
-- `emit_kinsn_desc_call()`：module 只负责发一小段原生 bytes；当前 x86 kinsn 都是 GPR-only 的短序列
+- `emit_kop_desc_call()`：module 只负责发一小段原生 bytes；当前 x86 kop 都是 GPR-only 的短序列
 
 也就是说，现状不是“已经有 XMM 支持，差一个 peephole”，而是：
 
 - JIT 的寄存器模型、调用点、异常/fixup、模块 emit helper，全部默认 **不碰 XMM/YMM**
 - 现有 `module/x86/*.c` 也都只发射短小的整数/标量序列
 
-### 2.2 当前 kinsn v2 的 verifier 模型是 proof sequence，不是 effect DSL
+### 2.2 当前 kop v2 的 verifier 模型是 proof sequence，不是 effect DSL
 
-`docs/kinsn-design.md` 已经确定：
+`docs/kop-design.md` 已经确定：
 
 - `instantiate_insn(payload, insn_buf)` 是唯一 canonical 语义源
 - verifier 通过 proof lowering 分析普通 BPF 指令序列
@@ -263,7 +263,7 @@ rep movsb
 
 结论：
 
-- **`REP MOVSB` 是 x86 Bulk memory kinsn 的好答案**
+- **`REP MOVSB` 是 x86 Bulk memory kop 的好答案**
 - **不是 x86 `bpf_wide_load128/store128` 的答案**
 
 ### D. Two `mov`
@@ -385,9 +385,9 @@ movq %rdx, 8(%rdi)
 
 ## 4.3 能否跨多个 SIMD 操作摊销 FPU section？
 
-**能，但只能按整次 BPF 程序调用摊销，不能按单条 kinsn 摊销。**
+**能，但只能按整次 BPF 程序调用摊销，不能按单条 kop 摊销。**
 
-### 每条 kinsn 各自 begin/end
+### 每条 kop 各自 begin/end
 
 这是最差方案：
 
@@ -401,13 +401,13 @@ movq %rdx, 8(%rdi)
 
 这是唯一可能成立的 SIMD 方案：
 
-- JIT prologue：若程序包含 SIMD kinsn，则 enter FPU section
+- JIT prologue：若程序包含 SIMD kop，则 enter FPU section
 - JIT epilogue：统一 leave
 - 中间多个 bulk-memory SIMD op 共摊一次固定成本
 
 但这已经超出了当前 module `emit_x86()` 的能力边界：
 
-- 现有 x86 kinsn emitter 只发本地短序列，不负责 JIT prologue/epilogue
+- 现有 x86 kop emitter 只发本地短序列，不负责 JIT prologue/epilogue
 - 要做到程序级摊销，需要 **JIT 级别** 新增“本程序使用 SIMD”标记和包裹逻辑
 
 因此：
@@ -422,7 +422,7 @@ movq %rdx, 8(%rdi)
 - tracing / perf / kprobe 这类程序可能跑在 NMI / hardirq / 杂上下文
 - XDP / TC 通常更接近 softirq / process context
 
-因此任何 x86 SIMD kinsn 若存在，都不应该像当前通用 x86 kinsn 那样默认 `BPF_PROG_TYPE_UNSPEC` 全开。
+因此任何 x86 SIMD kop 若存在，都不应该像当前通用 x86 kop 那样默认 `BPF_PROG_TYPE_UNSPEC` 全开。
 
 更合理的 gate 是：
 
@@ -559,7 +559,7 @@ SSE2/AVX 仍然更慢。
 - 512B 只是一个**乐观但不离谱**的 future threshold
 - 对 16B/32B/64B 小块，根本不该进 FPU
 
-### 若按“每条 kinsn 各自包一次 FPU section”
+### 若按“每条 kop 各自包一次 FPU section”
 
 那每个 16B chunk 只能省约 1 cycle，却要支付几十到上百 cycles 的固定成本。
 
@@ -597,7 +597,7 @@ SSE2/AVX 仍然更慢。
 
 ---
 
-## 6. kinsn API 设计
+## 6. kop API 设计
 
 ## 6.1 若坚持做 pair API：建议保留跨架构语义，但 x86 不做 SIMD native
 
@@ -656,7 +656,7 @@ stxdw [base + off + 8], src_hi
 ### x86 native emit 建议
 
 - **首选**：两条普通 `mov`
-- **可选**：如果论文需要“同名 kinsn 双架构统一”，x86 也可以干脆不提供 native emit，只用 proof sequence
+- **可选**：如果论文需要“同名 kop 双架构统一”，x86 也可以干脆不提供 native emit，只用 proof sequence
 - **不建议**：SSE2/AVX pair native emit
 
 ## 6.2 若 x86 真要抓 16B 宽机会：API 应转向 `memcpy128` / bulk-memory，而不是 pair
@@ -681,12 +681,12 @@ payload 可编码为：
 
 但这里有一个更强结论：
 
-- 仓库已经有更一般的 **Bulk memory kinsn** 设计
+- 仓库已经有更一般的 **Bulk memory kop** 设计
 - `memcpy128` 只是它的一个定长子例
 
-因此 x86 最合理的路线不是再定义一个新的“16B 专用 SIMD kinsn”，而是：
+因此 x86 最合理的路线不是再定义一个新的“16B 专用 SIMD kop”，而是：
 
-- **直接把这类机会并入 Bulk memory pass / kinsn**
+- **直接把这类机会并入 Bulk memory pass / kop**
 - x86 phase 1 用 `rep movsb`
 - x86 phase 2 再讨论 AVX/SSE
 
@@ -719,7 +719,7 @@ payload 可编码为：
 - 不承诺 atomicity
 - 不引入新的 128-bit reg state
 
-这与 `docs/kinsn-design.md` 的 proof-lowering 路线完全兼容。
+这与 `docs/kop-design.md` 的 proof-lowering 路线完全兼容。
 
 ## 7.2 XMM/YMM clobber 对 verifier 应透明
 
@@ -745,11 +745,11 @@ payload 可编码为：
 但它引出一个 verifier 之外的关键约束：
 
 - verifier 无法证明“这个程序永远不在 NMI/hardirq 里跑”
-- 因而是否允许某个 kinsn 使用 SIMD，不能交给 proof sequence 决定
+- 因而是否允许某个 kop 使用 SIMD，不能交给 proof sequence 决定
 
 必须由：
 
-1. kfunc/kinsn 注册 gate
+1. kfunc/kop 注册 gate
 2. JIT emit 时基于 `prog->type` 的策略
 3. 必要时 runtime guard + scalar fallback
 
@@ -804,7 +804,7 @@ payload 可编码为：
 
 ### 2. 若语义是 `memory -> memory` 的定长或短 run copy
 
-- 优先尝试 **Bulk memory kinsn**
+- 优先尝试 **Bulk memory kop**
 - x86 phase 1：`rep movsb`
 - 要求：
   - CPU 对 short/medium `rep` 友好
@@ -875,20 +875,20 @@ payload 可编码为：
 
 最好的 OSDI story 不是“我们也给 x86 造了一个 128-bit SIMD pair op”，而是：
 
-1. **同一套 kinsn 机制可以承载架构不对称的优化机会**
+1. **同一套 kop 机制可以承载架构不对称的优化机会**
 2. **ARM64**：有天然 pair GPR primitive，`LDP/STP` 是 free lunch
 3. **x86**：没有对应 pair GPR primitive，pair 语义不值得 SIMD 化；真正的宽机会转向 bulk memory/string instruction
 
-这比硬说“双架构都做 128-bit kinsn”更强，因为它展示的是：
+这比硬说“双架构都做 128-bit kop”更强，因为它展示的是：
 
-- kinsn 机制的抽象能力
+- kop 机制的抽象能力
 - 不同 ISA 上“同一语义为何有不同 native answer”
 
 ## 9.3 最终落地建议
 
 **推荐的实际设计：**
 
-1. 若要定义跨架构 pair kinsn：
+1. 若要定义跨架构 pair kop：
    - 定义 `bpf_wide_load128/bpf_wide_store128`
    - verifier 一律展开成两条 `LDXDW/STXDW`
    - ARM64 native emit -> `LDP/STP`
@@ -896,7 +896,7 @@ payload 可编码为：
 2. x86 的真正优化机会并入 Bulk memory：
    - phase 1：`rep movsb/stosb`
    - phase 2：AVX/SSE，仅在 `>= 512B` 且程序级 FPU 摊销成立时考虑
-3. **不要**为 x86 专门做 SSE2/AVX 的 pair load/store kinsn
+3. **不要**为 x86 专门做 SSE2/AVX 的 pair load/store kop
 
 一句话结论：
 

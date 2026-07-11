@@ -17,14 +17,14 @@ corpus、micro 套件和测量基础设施),但用不同的设计和实现解决
 | # | Idea | 问题 | 设计核心 | 内核改动 |
 |---|---|---|---|---|
 | 1 | **Speculative eBPF optimization**(投机式 eBPF 优化) | 已加载的 eBPF 程序错失了那些只有在程序上线后才可见的优化机会(map 内容稳定下来、分支 profile 浮现、helper 调用模式显现)。 | 纯用户态工具:观察运行中的程序,施加 BPF-to-BPF 重写 pass(`map_inline`、`const_prop`、`dce`、`bounds_check_merge`、`branch_flip` 等),再用 stock 内核的原子或近原子 attach 更新机制换入优化后的候选程序。 | 接近零。 |
-| 2 | **Kinsn** | eBPF 指令集离硬件太远,无法表达若干 native 等价的优化(rotate、conditional select、BMI 位域提取、BLS 指令、prefetch)。 | 一个新的 OS 抽象:内核定义的双语义指令,以 kfunc 机制的 `KF_KINSN` 特化形式实现。verifier 把一个声明式 effect(`model_call` → `bpf_kinsn_effect`)施加到它的抽象状态上,JIT 则分派到内核模块提供的、按架构区分的 `emit_x86()` / `emit_arm64()` 回调。用户态优化器(`bpfopt`)负责识别候选模式。 | kinsn 框架 patch + 各架构模块,TCB 增长但有界。 |
+| 2 | **KOperation** | eBPF 指令集离硬件太远,无法表达若干 native 等价的优化(rotate、conditional select、BMI 位域提取、BLS 指令、prefetch)。 | 一个新的 OS 抽象:内核定义的双语义指令,以 kfunc 机制的 `KF_KOP` 特化形式实现。verifier 把一个声明式 effect(`model_call` → `bpf_kop_effect`)施加到它的抽象状态上,JIT 则分派到内核模块提供的、按架构区分的 `emit_x86()` / `emit_arm64()` 回调。用户态优化器(`bpfopt`)负责识别候选模式。 | kop 框架 patch + 各架构模块,TCB 增长但有界。 |
 | 3 | **NativeBPF**(本文档) | 内核扩展被"安全 × 高效"三难逼着二选一:模块快但不安全、eBPF 安全但有 codegen 惩罚、Rust 快但安全靠信任编译器而非独立验证。如何同时拿到 native 性能 + 对不可信作者也成立的独立安全? | 用 eBPF C 写一个目标 ISA 的忠实解释器。针对某个具体目标程序特化,把解释器坍缩成 straight-line eBPF,**交给 stock eBPF verifier 做它平常那套安全分析**。**verifier 接受后直接裸跑 native P;那段 eBPF 只是被分析的对象,从不执行,无 lowering。** | 接近零(执行 native P 的路径除外)。 |
 
 这三者不是同一个设计的递进版本。每个各自挑了一个不同的问题、一个在 trust /
 内核暴露面 / 覆盖面空间里不同的位置。本文档讲的是 idea #3。idea #1 在
 `docs/rejit-speculative-optimization-ebpf_idea.md`,idea #2 在
-`docs/kinsn_idea.md`(机制设计见 `docs/tmp/kinsn-design.md`,形式语义见
-`docs/tmp/kinsn-formal-semantics.md`)。
+`docs/kop_idea.md`(机制设计见 `docs/tmp/kop-design.md`,形式语义见
+`docs/tmp/kop-formal-semantics.md`)。
 
 "NativeBPF" 还有一个 kernel-ABI 变体(由内核拥有的双语义 ISA),那是 idea #3
 更早的一种 framing。它和 idea #2 重叠很大,现在只作为一条备选路径记录在
@@ -159,18 +159,18 @@ eBPF-JIT 的产物"——那是错的:那样会白白背上 eBPF codegen 的性�
 的内核地址做计算型间接调用、用运行时数据构造的、目标集合无界的跳转表、不支持的 SIMD
 指令),特化会失败,程序在到达 verifier 之前就被拒绝。
 
-## 与 kinsn 的关系
+## 与 kop 的关系
 
-Kinsn(idea #2)和 NativeBPF(idea #3)从相反的两端攻击同一个底层问题——如何让
+KOperation(idea #2)和 NativeBPF(idea #3)从相反的两端攻击同一个底层问题——如何让
 非平凡的 native 操作在 eBPF 安全模型内变得可用:
 
-- Kinsn 用内核定义的双语义原语扩展内核侧的指令集。每个新原语都让内核 TCB 小幅增长。
+- KOperation 用内核定义的双语义原语扩展内核侧的指令集。每个新原语都让内核 TCB 小幅增长。
 - NativeBPF 用一个经过验证的 simulator 或 JIT 扩展用户态侧的 lowering。内核保持不变。
   新增的 TCB 是一个用户态产物:每个目标 ISA 一个 C 文件,可独立验证。
 
-Kinsn 覆盖的是"普通 eBPF 表达不好的少数几种模式"。NativeBPF 覆盖的是"目标 ISA 能
-表达的任何东西,只要其 lowering 对 verifier 可处理"。两者并不互斥:一个支持 kinsn 的
-内核,配上一个在有益处时 emit kinsn 的 NativeBPF,是一个自然的 ablation 点,但二者
+KOperation 覆盖的是"普通 eBPF 表达不好的少数几种模式"。NativeBPF 覆盖的是"目标 ISA 能
+表达的任何东西,只要其 lowering 对 verifier 可处理"。两者并不互斥:一个支持 kop 的
+内核,配上一个在有益处时 emit kop 的 NativeBPF,是一个自然的 ablation 点,但二者
 互不依赖。
 
 ## 机制
@@ -380,7 +380,7 @@ idea #3 内部的另一条路是:用 C 写一个 native-to-eBPF JIT,把这个 JI
 - 目标二进制大到使得整程序 clang 特化慢得无法放进流程里;
 - lowering 需要 clang 常量传播发现不了的显式模式匹配(例如模式驱动地融合 native 的多
   指令惯用法);
-- JIT 也可以充当 ablation 的宿主(关掉特定的 lowering、在可用处 emit kinsn 等)。
+- JIT 也可以充当 ablation 的宿主(关掉特定的 lowering、在可用处 emit kop 等)。
 
 何时偏向 simulator 变体:
 
@@ -549,7 +549,7 @@ helper 调用、且让 verifier 检查该指针的类型/边界 —— 而不是
 
 idea #3 更早的一种 framing 把双语义放进内核里:每条 NativeBPF 指令同时拥有一个 verifier
 可见的 `instantiate_insn()` lowering 和一个按架构区分的 native emitter,二者都归内核 ABI
-所有。这个 framing 已被降级为备选路径,因为它与 idea #2(Kinsn,整程序泛化)有显著重叠。
+所有。这个 framing 已被降级为备选路径,因为它与 idea #2(KOperation,整程序泛化)有显著重叠。
 
 为完整起见在此记录:
 
@@ -568,13 +568,13 @@ native 语义。
 要让它成为一个整程序 substrate 而不是 peephole 机制,内核接口还需要:
 
 - 分支感知的 proof lowering,而不只是局部 proof 序列;
-- 一种在 kinsn 展开中编码或重定位程序级分支目标的办法;
+- 一种在 kop 展开中编码或重定位程序级分支目标的办法;
 - region 级的隐藏状态布局;
 - 针对 call、tail call、exit 以及 helper 可见栈状态的显式 boundary adapter;
 - 按架构区分的、针对隐藏 native 寄存器的寄存器分配和 save/restore 规则。
 
-这本质上就是 kinsn(idea #2)从 peephole 泛化到整程序 substrate。如果项目以后发现值得做,
-它属于 kinsn 论文线,而不是本篇。上面的 simulator 和 JIT 变体把内核暴露面保持在接近零,
+这本质上就是 kop(idea #2)从 peephole 泛化到整程序 substrate。如果项目以后发现值得做,
+它属于 kop 论文线,而不是本篇。上面的 simulator 和 JIT 变体把内核暴露面保持在接近零,
 仍然是 idea #3 的核心。
 
 ## 相关工作定位
@@ -746,7 +746,7 @@ reused as an off-the-shelf safety checker (not a proof checker — nothing is
 carried or certificate-checked); P runs with no lowering.
 ```
 
-这正是它与传统 proof-carrying code、以及 kernel-ABI 变体(那个与 kinsn 重叠)二者的关键
+这正是它与传统 proof-carrying code、以及 kernel-ABI 变体(那个与 kop 重叠)二者的关键
 区别。
 
 ## 附录 A:原始讨论记录(2026-05-17)
@@ -776,7 +776,7 @@ carried or certificate-checked); P runs with no lowering.
 
 > 也不容易因为状态爆炸导致过不去验证器
 
-> 目前的 kinsn 基本上能表达大多数,但是跳转指令不好搞
+> 目前的 kop 基本上能表达大多数,但是跳转指令不好搞
 
 > 因为跳转指令需要被 verifier 和 jit relocation
 
@@ -832,7 +832,7 @@ carried or certificate-checked); P runs with no lowering.
 
 > 一个城市,隔一两天好像
 
-> 不过今天讨论的这个如果是 simulator 其实变成又和 kinsn 不一样的 idea 了(?
+> 不过今天讨论的这个如果是 simulator 其实变成又和 kop 不一样的 idea 了(?
 
 > 确实在一个地儿 我都没注意到
 
@@ -854,7 +854,7 @@ carried or certificate-checked); P runs with no lowering.
 > 解决的问题也会不一样,一个的出发点是怎么把 ebpf 变得更快,现在说的出发点变成,
 > 如何直接跑 native insn 还能保证安全
 
-> 其实经过 clang 的常量传播,实际上验证器验证的就等于 kinsn 展开的 bpf insn
+> 其实经过 clang 的常量传播,实际上验证器验证的就等于 kop 展开的 bpf insn
 > proof format
 
 > 经过常量传播就等于把 x86 jit 成 ebpf 然后验证 ebpf
@@ -869,15 +869,15 @@ carried or certificate-checked); P runs with no lowering.
 
 > 不过感觉这个 idea 挺疯狂的哈哈,不错
 
-> kinsn 实现太复杂了...主要是最后涉及 register 和 jmp,还得全局 relocate
+> kop 实现太复杂了...主要是最后涉及 register 和 jmp,还得全局 relocate
 
-> 也就是,如果我们想要做类似的事情,验证 kinsn 会更难(因为等于直接验证 jit
+> 也就是,如果我们想要做类似的事情,验证 kop 会更难(因为等于直接验证 jit
 > compiler,不如直接验证 simulator)
 
 > x86 simulator 也很复杂
 
-> 确实 dan 提出来一个问题,我们怎么选择了 kinsn 的?是不是看看 native code
-> 产物?然后我根据 native code 逐步加 kinsn,直到加了七八十个,然后我发现既然
+> 确实 dan 提出来一个问题,我们怎么选择了 kop 的?是不是看看 native code
+> 产物?然后我根据 native code 逐步加 kop,直到加了七八十个,然后我发现既然
 > 大多数 insn 都有了那为啥不能直接跑 native code 得了
 
 > simulator 可以想象成 native 指令对应的 eBPF 指令序列的 map
@@ -886,7 +886,7 @@ carried or certificate-checked); P runs with no lowering.
 
 > Verifier 通过 lookup 找到 native 程序对应的语义,然后进行验证
 
-> 但是 kinsn 跑 native code 我发现 jmp 很难解决,register 分配也很麻烦。。。
+> 但是 kop 跑 native code 我发现 jmp 很难解决,register 分配也很麻烦。。。
 
 > 是这样的,目前就是这样做的
 
@@ -896,7 +896,7 @@ carried or certificate-checked); P runs with no lowering.
 
 > '看看 Claude 写的 C compiler 有多少 bug 就能想象'
 
-> 是的....今天折腾了一天发现 kinsn 完全覆盖 x86 走不通,太难了
+> 是的....今天折腾了一天发现 kop 完全覆盖 x86 走不通,太难了
 
 > 而且还是改 kernel module
 
@@ -1021,13 +1021,13 @@ Takeaway:
    解决的问题: 已加载的 eBPF 程序在运行时上下文变化(map 内容、profile)后
               错失的优化机会
 
-2. Kinsn
+2. KOperation
    定位: new OS abstraction for eBPF optimization,
         brings eBPF closer to hardware
    关键技术: 双语义 kernel-defined 指令(instantiate_insn + native emit) +
             可能的 LLVM backend / userspace optimizer 支持
-   内核改动: 中等(verifier + JIT + 每条 kinsn 的 proof + relocation)
-   形式化对象: 每条 kinsn 的 verifier 语义和 native emit 的等价性
+   内核改动: 中等(verifier + JIT + 每条 kop 的 proof + relocation)
+   形式化对象: 每条 kop 的 verifier 语义和 native emit 的等价性
    解决的问题: 让 eBPF 能表达更接近硬件的操作而不放弃 verifier 保证
 
 3. NativeBPF (本 doc)

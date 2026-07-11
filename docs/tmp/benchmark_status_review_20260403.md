@@ -28,7 +28,7 @@ The goal here is to describe current benchmark status, not to change code.
 | `make vm-corpus` | `runner/Makefile:305-313` | `corpus/results/vm_corpus_20260403_035346/` | Can run; pass | `result.json` is `status=ok`. `20/20 app ok`. `114` discovered programs. `114` applied programs in per-app totals. `61` comparable/applied samples. `all_comparable_geomean = applied_only_geomean = 1.0328579392552086`. |
 | `make vm-e2e` | `runner/Makefile:315-323` | latest per-case dirs under `e2e/results/` plus `*_authoritative_20260403.json` | Can run; pass | Latest completed case dirs: `tracee_20260403_043753`, `tetragon_20260403_044745`, `bpftrace_20260403_044905`, `scx_20260403_045546`, `bcc_20260403_045709`, `katran_20260403_050750`. All six `result.json` files report `status=ok`. |
 | `make vm-selftest` | `runner/Makefile:266-273` + `runner/scripts/vm-selftest.sh` | task tracker #644 | Can run; pass | No fresh structured `results/` artifact directory. Tracker #644 says `make vm-selftest` passed. Current implementation is broader than old docs: it runs all discovered `tests/unittest/build/rejit_*` binaries plus `adversarial_rejit` and `fuzz_rejit`. |
-| `make vm-test` | `runner/Makefile:252-264` + `runner/scripts/run_all_tests.sh` | `docs/tmp/vm-test.latest.log` + task tracker #645 | Can run; pass | #645 says `make vm-test` passed on 2026-04-03. Latest log shows 5/5 kinsn modules loaded, then kernel selftest + unittest + negative + upstream `test_verifier` + upstream `test_progs` path executing. |
+| `make vm-test` | `runner/Makefile:252-264` + `runner/scripts/run_all_tests.sh` | `docs/tmp/vm-test.latest.log` + task tracker #645 | Can run; pass | #645 says `make vm-test` passed on 2026-04-03. Latest log shows 5/5 kop modules loaded, then kernel selftest + unittest + negative + upstream `test_verifier` + upstream `test_progs` path executing. |
 | `make vm-negative-test` | `runner/Makefile:275-283` | task tracker #644; latest explicit standalone numbers in `docs/tmp/20260325/batch1_test_results.md` | Can run; pass | #644 says it passed in the current full validation round. Latest explicit standalone log I found is older (`2026-03-25`): adversarial `23 passed / 0 failed / 0 skipped`, fuzz `1000` rounds, `scx_prog_show_race` `20/20`. |
 | `make check` | `Makefile:395-399` | task tracker #645 | Can run; pass | Actual target is `all + daemon-tests + python-tests + smoke`. #645 says `make check` passed on 2026-04-03. |
 | `make smoke` | `Makefile:385-387` | `micro/results/smoke_20260403_174351/` | Can run; pass | Latest local smoke artifact completed at `2026-04-03T17:43:51Z`. It is a 1-benchmark `simple` run with `samples=1`, `warmups=0`, `inner_repeat=10`, runtime `llvmbpf`. |
@@ -84,7 +84,7 @@ The goal here is to describe current benchmark status, not to change code.
 
 - Current behavior no longer matches the old one-line description in §6.4.
 - `runner/scripts/vm-selftest.sh` now:
-  - loads kinsn modules once
+  - loads kop modules once
   - auto-discovers all `rejit_*` binaries in `tests/unittest/build`
   - runs `adversarial_rejit`
   - runs `fuzz_rejit`

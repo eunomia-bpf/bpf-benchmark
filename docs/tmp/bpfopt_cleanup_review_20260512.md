@@ -272,7 +272,7 @@ bpfopt/crates/bpfopt/src/insn.rs:332:        Self::new_raw(
 pub const BPF_PSEUDO_CALL: u8 = libbpf_sys::BPF_PSEUDO_CALL as u8;
 #[cfg(test)]
 pub const BPF_PSEUDO_KFUNC_CALL: u8 = libbpf_sys::BPF_PSEUDO_KFUNC_CALL as u8;
-pub const BPF_PSEUDO_KINSN_SIDECAR: u8 = 3;
+pub const BPF_PSEUDO_KOP_SIDECAR: u8 = 3;
 ```
 
 ```rust

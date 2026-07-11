@@ -127,7 +127,7 @@ naturally expects the same pointer.
            rewrite disp32 to point at kernel bpf_map ptr
        - emit final position-independent native blob
 
-   5. blob -> debugfs chunks -> kinsn -> JIT image splat
+   5. blob -> debugfs chunks -> kop -> JIT image splat
        Existing native kernel path takes over here.
 ```
 
@@ -358,7 +358,7 @@ fixed; can be done in parallel.
   tail-call counter slot if a program uses tail calls. Defer until a
   test program actually needs it.
 - **Stub-program ctx access**. For programs that need ctx fields beyond
-  data/data_end, the Stage 1 stub (`sidecar; call kinsn; exit`) is
+  data/data_end, the Stage 1 stub (`sidecar; call kop; exit`) is
   insufficient. We may need to add per-program prologue insns that
   pre-fetch ctx fields and stage them in caller-saved registers for the
   native body. Decide once a test program actually depends on a ctx

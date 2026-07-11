@@ -13,7 +13,7 @@ I searched the tree with `rg` excluding `docs/tmp/**` and `__pycache__/**` for t
 
 - `write_json`
 - `dup_fd_from_process`
-- `capture_daemon_kinsn_discovery`
+- `capture_daemon_kop_discovery`
 - `describe_agent_exit`
 - `scan_site_totals_for_passes`
 - `benchmark_policy_candidate_passes`
@@ -58,7 +58,7 @@ Ran `python -m py_compile` on every non-deleted file changed by `30c43b2e`:
 - `runner/libs/__init__.py`
 - `runner/libs/app_runners/tetragon.py`
 - `runner/libs/case_common.py`
-- `runner/libs/kinsn.py`
+- `runner/libs/kop.py`
 - `runner/libs/rejit.py`
 
 Result:
@@ -70,7 +70,7 @@ Result:
 Addressed from the earlier review:
 
 - Section 2 dead fallback branches in BCC, bpftrace, and Katran were removed.
-- Section 3 dead code items called out in `runner/libs/__init__.py`, `runner/libs/app_runners/tetragon.py`, `runner/libs/kinsn.py`, `runner/libs/process_fd.py`, and `runner/libs/rejit.py` were removed.
+- Section 3 dead code items called out in `runner/libs/__init__.py`, `runner/libs/app_runners/tetragon.py`, `runner/libs/kop.py`, `runner/libs/process_fd.py`, and `runner/libs/rejit.py` were removed.
 - Section 4 duplicate helper definitions were merged into `runner/libs/case_common.py`.
 
 Still present from the earlier review:

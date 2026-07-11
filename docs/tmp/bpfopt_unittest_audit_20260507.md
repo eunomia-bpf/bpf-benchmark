@@ -35,7 +35,7 @@ Specific audit flags:
 | `test_map_inline_only_pipeline_contains_only_map_inline` | `bpfopt/crates/bpfopt/src/passes/mod_tests.rs:278` | Trivial one-entry registry/pass-name check, covered by custom-order and CLI single-pass tests. |
 | `cascade_map_inline_emits_non_zero_mov_constant` | `bpfopt/crates/bpfopt/src/passes/mod_tests.rs:311` | Duplicate of map-inline scalar rewrite coverage; despite the name it is not a cascade test. |
 | `test_empty_program` | `bpfopt/crates/bpfopt/src/passes/bulk_memory_tests.rs:337` | Empty no-op behavior with no optimizer branch beyond iterating an empty vector. |
-| `test_kfunc_not_available_skipped` | `bpfopt/crates/bpfopt/src/passes/bulk_memory_tests.rs:529` | Duplicates `tests/cli_pipeline.rs:468`; v3 CLI fail-fast owns missing-kinsn behavior. |
+| `test_kfunc_not_available_skipped` | `bpfopt/crates/bpfopt/src/passes/bulk_memory_tests.rs:529` | Duplicates `tests/cli_pipeline.rs:468`; v3 CLI fail-fast owns missing-kop behavior. |
 | `test_cond_select_short_pattern_c_emit_jne` | `bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:161` | Only verifies that some kfunc call exists; stronger sidecar/payload tests cover the emitted contract. |
 | `test_cond_select_no_emit_3insn_pattern_b` | `bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:375` | Duplicate of `test_cond_select_pattern_b_removed`; if analyzer rejects the pattern, the pass cannot emit it. |
 | `test_cond_select_emit_with_reg_values` | `bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:482` | Duplicate of alias-overlap and payload tests; non-overlap r6/r7 variant adds no new branch. |
@@ -115,7 +115,7 @@ Specific audit flags:
 | `test_profiling_data_injection` | `bpfopt/crates/bpfopt/src/pass_tests.rs:476` | PGO branch profiles being injected into the wrong instruction annotation. |
 | `test_invalid_policy_pass_name_is_rejected` | `bpfopt/crates/bpfopt/src/pass_tests.rs:530` | Legacy/unknown pass aliases being silently ignored instead of rejected fail-fast. |
 | `test_pass_result_insns_before_after_filled_by_pass_manager` | `bpfopt/crates/bpfopt/src/pass_tests.rs:547` | Per-pass report metadata recording wrong before/after instruction counts. |
-| `pass_registry_declares_all_emitted_kinsn_probe_names` | `bpfopt/crates/bpfopt/src/passes/mod_tests.rs:170` | Registry metadata missing a kinsn probe alias needed for target capability discovery. |
+| `pass_registry_declares_all_emitted_kop_probe_names` | `bpfopt/crates/bpfopt/src/passes/mod_tests.rs:170` | Registry metadata missing a kop probe alias needed for target capability discovery. |
 | `test_cfg_analysis_with_subprogs` | `bpfopt/crates/bpfopt/src/passes/mod_tests.rs:192` | CFG analysis failing to discover a normal pseudo-call subprogram boundary. |
 | `test_cfg_analysis_with_callback_subprog_refs` | `bpfopt/crates/bpfopt/src/passes/mod_tests.rs:212` | CFG analysis ignoring `BPF_PSEUDO_FUNC` callback references. |
 | `test_liveness_across_branch` | `bpfopt/crates/bpfopt/src/passes/mod_tests.rs:234` | Liveness analysis losing registers across branch joins. |
@@ -124,7 +124,7 @@ Specific audit flags:
 | `test_build_custom_pipeline_rejects_unknown_pass_name` | `bpfopt/crates/bpfopt/src/passes/mod_tests.rs:301` | Unknown pass names being accepted or partially ignored. |
 | `cascade_const_prop_folds_non_zero_map_inline_output` | `bpfopt/crates/bpfopt/src/passes/mod_tests.rs:335` | `const_prop` failing to consume constants emitted by a prior `map_inline` pass. |
 | `cascade_full_pipeline_materializes_alu_and_leaves_branch_cleanup_to_kernel` | `bpfopt/crates/bpfopt/src/passes/mod_tests.rs:370` | The pass cascade changing sequencing, losing DCE, or performing forbidden framework-side branch cleanup. |
-| `test_memcpy_pattern_8_pairs` | `bpfopt/crates/bpfopt/src/passes/bulk_memory_tests.rs:356` | Bulk memcpy lowering emitting the wrong packed kinsn payload for a normal run. |
+| `test_memcpy_pattern_8_pairs` | `bpfopt/crates/bpfopt/src/passes/bulk_memory_tests.rs:356` | Bulk memcpy lowering emitting the wrong packed kop payload for a normal run. |
 | `test_memcpy_pattern_inside_multi_subprog_program` | `bpfopt/crates/bpfopt/src/passes/bulk_memory_tests.rs:367` | Scanner/rewrite logic crossing or missing subprogram boundaries. |
 | `test_memset_zero_pattern` | `bpfopt/crates/bpfopt/src/passes/bulk_memory_tests.rs:379` | Zero-fill store runs lowering to the wrong memset payload. |
 | `test_non_stack_base_memcpy_skipped_by_alias_gate` | `bpfopt/crates/bpfopt/src/passes/bulk_memory_tests.rs:456` | Rewriting memcpy when alias safety cannot be proven. |
@@ -137,8 +137,8 @@ Specific audit flags:
 | `test_cond_select_analyze_short_pattern_c` | `bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:107` | Failing to detect the valid short Pattern C form. |
 | `test_cond_select_short_pattern_c_no_match_cond_clobbered` | `bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:142` | Rewriting a Pattern C candidate that changes the condition register before testing it. |
 | `test_cond_select_analyze_multiple_sites` | `bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:213` | Scanner stopping after the first conditional-select site. |
-| `test_cond_select_skip_when_kfunc_unavailable` | `bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:250` | Emitting cond-select kinsns when the required kfunc id is unavailable. |
-| `test_cond_select_emit_on_arm64_select_kfunc_without_cmov` | `bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:272` | Incorrectly requiring x86 CMOV when arm64 has a select kinsn. |
+| `test_cond_select_skip_when_kfunc_unavailable` | `bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:250` | Emitting cond-select koperation when the required kfunc id is unavailable. |
+| `test_cond_select_emit_on_arm64_select_kfunc_without_cmov` | `bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:272` | Incorrectly requiring x86 CMOV when arm64 has a select kop. |
 | `test_cond_select_emit_jeq_swaps_args` | `bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:392` | JEQ lowering swapping true/false operands incorrectly. |
 | `test_cond_select_emit_non_zero_compare_imm` | `bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:419` | Non-zero compare immediate lowering losing the XOR predicate normalization. |
 | `test_cond_select_emit_jmp32_zero_compare_predicate` | `bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:440` | JMP32 predicate lowering using 64-bit register semantics. |

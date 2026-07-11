@@ -1558,7 +1558,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-43/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-43/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-43/report_step1.json --prog-type xdp --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-43/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-43/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-43/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-43/report_step1.json --prog-type xdp --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-43/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -1604,7 +1604,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-41/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-41/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-41/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-41/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-41/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-41/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-41/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-41/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -1650,7 +1650,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-55/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-55/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-55/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-55/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-55/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-55/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-55/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-55/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -1696,7 +1696,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-78/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-78/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-78/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-78/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-78/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-78/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-78/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-78/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -1742,7 +1742,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-36/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-36/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-36/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-36/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-36/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-36/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-36/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-36/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -1788,7 +1788,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-37/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-37/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-37/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-37/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-37/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-37/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-37/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-37/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -1834,7 +1834,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-40/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-40/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-40/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-40/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-40/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-40/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-40/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-40/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -1880,7 +1880,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-34/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-34/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-34/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-34/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-34/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-34/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-34/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-34/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -1926,7 +1926,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-77/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-77/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-77/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-77/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-77/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-77/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-77/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-77/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -1972,7 +1972,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-73/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-73/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-73/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-73/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-73/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-73/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-73/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-73/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2018,7 +2018,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-76/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-76/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-76/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-76/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-76/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-76/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-76/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-76/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2064,7 +2064,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-35/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-35/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-35/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-35/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-35/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-35/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-35/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-35/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2110,7 +2110,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-53/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-53/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-53/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-53/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-53/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-53/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-53/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-53/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2156,7 +2156,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-68/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-68/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-68/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-68/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-68/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-68/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-68/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-68/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2202,7 +2202,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-71/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-71/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-71/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-71/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-71/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-71/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-71/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-71/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2248,7 +2248,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-80/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-80/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-80/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-80/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-80/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-80/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-80/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-80/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2294,7 +2294,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-85/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-85/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-85/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-85/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-85/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-85/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-85/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-85/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2340,7 +2340,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-39/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-39/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-39/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-39/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-39/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-39/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-39/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-39/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2386,7 +2386,7 @@
           {
             "bpfopt_ms": 2,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-62/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-62/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-62/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-62/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-62/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-62/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-62/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-62/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2432,7 +2432,7 @@
           {
             "bpfopt_ms": 2,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-84/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-84/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-84/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-84/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-84/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-84/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-84/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-84/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2478,7 +2478,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-47/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-47/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-47/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-47/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-47/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-47/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-47/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-47/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2524,7 +2524,7 @@
           {
             "bpfopt_ms": 2,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-54/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-54/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-54/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-54/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-54/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-54/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-54/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-54/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2570,7 +2570,7 @@
           {
             "bpfopt_ms": 2,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-52/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-52/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-52/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-52/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-52/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-52/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-52/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-52/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2616,7 +2616,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-60/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-60/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-60/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-60/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-60/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-60/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-60/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-60/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2662,7 +2662,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-38/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-38/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-38/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-38/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-38/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-38/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-38/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-38/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2743,7 +2743,7 @@
           {
             "bpfopt_ms": 2,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-64/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-64/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-64/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-64/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-64/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-64/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-64/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-64/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2789,7 +2789,7 @@
           {
             "bpfopt_ms": 2,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-48/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-48/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-48/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-48/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-48/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-48/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-48/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-48/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2835,7 +2835,7 @@
           {
             "bpfopt_ms": 2,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-49/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-49/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-49/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-49/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-49/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-49/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-49/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-49/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2881,7 +2881,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-51/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-51/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-51/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-51/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-51/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-51/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-51/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-51/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2927,7 +2927,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-45/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-45/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-45/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-45/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-45/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-45/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-45/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-45/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -2973,7 +2973,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-59/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-59/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-59/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-59/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-59/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-59/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-59/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-59/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3019,7 +3019,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-61/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-61/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-61/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-61/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-61/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-61/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-61/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-61/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3065,7 +3065,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-65/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-65/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-65/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-65/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-65/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-65/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-65/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-65/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3111,7 +3111,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-67/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-67/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-67/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-67/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-67/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-67/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-67/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-67/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3157,7 +3157,7 @@
           {
             "bpfopt_ms": 2,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-66/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-66/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-66/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-66/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-66/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-66/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-66/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-66/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3203,7 +3203,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-81/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-81/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-81/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-81/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-81/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-81/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-81/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-81/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3249,7 +3249,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-44/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-44/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-44/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-44/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-44/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-44/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-44/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-44/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3295,7 +3295,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-56/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-56/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-56/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-56/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-56/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-56/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-56/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-56/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3341,7 +3341,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-57/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-57/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-57/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-57/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-57/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-57/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-57/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-57/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3387,7 +3387,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-58/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-58/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-58/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-58/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-58/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-58/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-58/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-58/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3433,7 +3433,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-63/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-63/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-63/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-63/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-63/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-63/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-63/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-63/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3479,7 +3479,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-70/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-70/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-70/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-70/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-70/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-70/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-70/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-70/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3525,7 +3525,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-75/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-75/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-75/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-75/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-75/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-75/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-75/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-75/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3571,7 +3571,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-69/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-69/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-69/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-69/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-69/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-69/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-69/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-69/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3617,7 +3617,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-72/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-72/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-72/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-72/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-72/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-72/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-72/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-72/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3663,7 +3663,7 @@
           {
             "bpfopt_ms": 3,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-74/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-74/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-74/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-74/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-74/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-74/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-74/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-74/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3709,7 +3709,7 @@
           {
             "bpfopt_ms": 2,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-79/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-79/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-79/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-79/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-79/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-79/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-79/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-79/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3755,7 +3755,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-83/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-83/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-83/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-83/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-83/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-83/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-83/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-83/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3801,7 +3801,7 @@
           {
             "bpfopt_ms": 3,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-82/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-82/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-82/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-82/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-82/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-82/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-82/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-82/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3847,7 +3847,7 @@
           {
             "bpfopt_ms": 3,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-86/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-86/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-86/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-86/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-86/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-86/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-86/report_step1.json --prog-type sched_cls --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-86/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
@@ -3893,7 +3893,7 @@
           {
             "bpfopt_ms": 1,
             "bpfopt_summary": null,
-            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-46/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-46/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-46/report_step1.json --prog-type tracing --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-46/target.json\nsubprocess output:\nerror: kinsn btf_id 128703 is already registered for bpf_endian_load16",
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass rotate --input /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-46/output_step0.bin --output /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-46/output_step1.bin --report /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-46/report_step1.json --prog-type tracing --target /var/tmp/bpfrejit-runtime/h49/bpfrejit-daemon-plan-1855-46/target.json\nsubprocess output:\nerror: kop btf_id 128703 is already registered for bpf_endian_load16",
             "status": "failed_bpfopt",
             "step": {
               "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",

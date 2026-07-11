@@ -10,7 +10,7 @@
 
 - 新增 `SkbLoadBytesSpecPass`
 - 只在 BpfReJIT daemon 的纯 bytecode pass 管线中实现
-- 不引入 kinsn
+- 不引入 kop
 - 不改源码语义，只把一部分 `bpf_skb_load_bytes()` helper 调用改写成“站点内 direct packet access fast path + 原 helper slow path”
 - v1 只支持 `BPF_PROG_TYPE_SCHED_CLS` / `BPF_PROG_TYPE_SCHED_ACT`
 

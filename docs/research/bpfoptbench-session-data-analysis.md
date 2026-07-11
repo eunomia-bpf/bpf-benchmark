@@ -50,7 +50,7 @@ The analysis used five local sources:
 | `corpus/results/*/details/result.json` | Historical and current benchmark artifacts. | Mixed legacy/v3 schemas; older artifacts include summaries that are no longer allowed in framework code. |
 | `docs/tmp/*.md` and `docs/tmp/active/*.md` | Human analysis of pass signal, policy iteration, and corpus stability. | Post-hoc notes, not a frozen benchmark dataset. |
 | `~/.codex/history.jsonl` and `~/.codex/session_index.jsonl` | Local prompt/session history related to this repo and adjacent eBPF agent work. | Useful for task taxonomy, not scored outcomes. Raw prompts should not be quoted into a public artifact. |
-| `~/.agentsight/monitor/monitor-2026-W25.db` | Current-week agent process monitor metadata. | No direct `bpf-benchmark`/`bpfopt`/`rejit`/`kinsn` cwd or command matches in the tracked sessions. |
+| `~/.agentsight/monitor/monitor-2026-W25.db` | Current-week agent process monitor metadata. | No direct `bpf-benchmark`/`bpfopt`/`rejit`/`kop` cwd or command matches in the tracked sessions. |
 | BPFix/verifier-repair data from the adjacent verifier-agent project | Evidence that structured verifier feedback can help repair tasks. | It is a different benchmark problem; it should be cited only as methodological precedent. |
 
 ## Corpus Artifact Inventory
@@ -127,7 +127,7 @@ The same audit reports:
 1. No standalone pass had paper-ready measurable improvement in completed runs.
 2. Earlier `map_inline` on OTEL showed a strong low ratio in one 7-app run, but
    the result was not reproduced in a named follow-up run.
-3. Combined kinsn runs had strong OTEL-looking numbers, but single-pass
+3. Combined kop runs had strong OTEL-looking numbers, but single-pass
    attribution did not isolate the cause.
 4. Several passes had large applied counts but no reliable speedup signal.
 
@@ -191,7 +191,7 @@ Top keyword counts:
 | `agent` | 511 |
 | `benchmark` | 338 |
 | `native` | 332 |
-| `kinsn` | 313 |
+| `kop` | 313 |
 | `corpus` | 271 |
 | `JIT` | 254 |
 | `verifier` | 239 |
@@ -235,7 +235,7 @@ Interpretation:
 
 The previous prompts suggest a useful evolution in problem framing:
 
-1. Early prompts focus on concrete mechanisms: verifier repair, kinsn, ReJIT,
+1. Early prompts focus on concrete mechanisms: verifier repair, kop, ReJIT,
    bytecode rewriting, loader behavior, and pass policy.
 2. Later prompts ask whether the work should become an agent benchmark rather
    than another optimizer-system paper.
@@ -273,7 +273,7 @@ current data supports a staged RQ structure:
 | RQ3 | Can historical repo sessions be converted into realistic benchmark tasks? | partially supported | 20-50 audited tasks with labels and replay scripts |
 | RQ4 | Does structured feedback reduce invalid or noisy optimization decisions? | planned | raw-vs-structured prompt experiment |
 | RQ5 | Can agents beat no-op, static-policy, random/grid, and human baselines? | not yet supported | frozen live task set plus repeated agent runs |
-| RQ6 | Does the benchmark generalize across optimization layers? | design-supported only | bytecode-only, kinsn-enabled, and future source/LLVM adapters |
+| RQ6 | Does the benchmark generalize across optimization layers? | design-supported only | bytecode-only, kop-enabled, and future source/LLVM adapters |
 
 The key adjustment is to make benchmark construction and difficulty evidence
 first-class contributions. Agent performance can be a result, but the paper
@@ -292,7 +292,7 @@ the first paper:
 | L3 per-site gating | choose rewrite sites or thresholds | near-term for selected passes |
 | L4 profile-guided decisions | consume real PMU/profile data such as branch site stats | planned; must use real per-site profile data |
 | L5 source/LLVM/backend modifications | edit source, LLVM backend, or pass implementation | future/harder |
-| L6 kinsn/kernel-layer actions | choose kinsn-backed transformations and kernel/JIT variants | BpfReJIT-specific extension path |
+| L6 kop/kernel-layer actions | choose kop-backed transformations and kernel/JIT variants | BpfReJIT-specific extension path |
 
 For the workshop version, L0-L3 are enough. L4-L6 should be presented as
 adapter generality or future expansion unless there are fresh results.
@@ -339,7 +339,7 @@ Examples:
 
 1. Choose a pass subset for one app from historical reports, then run a small
    smoke benchmark.
-2. Choose a per-app policy for `map_inline` or kinsn-family passes.
+2. Choose a per-app policy for `map_inline` or kop-family passes.
 3. Compare no-op, default static, random/grid, and agent-chosen pass lists under
    the same workload budget.
 4. Reproduce one historical strong-looking signal such as OTEL `map_inline`
@@ -478,7 +478,7 @@ The safest current contribution wording is:
 Avoid claiming:
 
 1. BPFOptBench proves agents can optimize eBPF;
-2. kinsn is required for the benchmark;
+2. kop is required for the benchmark;
 3. verifier repair is the main novelty;
 4. current pass results already provide a stable optimization win.
 
@@ -486,13 +486,13 @@ Avoid claiming:
 
 | Claim | Status | Notes |
 |---|---|---|
-| BPFOptBench is distinct from BpfReJIT/kinsn/native-loader papers. | supported | It evaluates agents and task/oracle design rather than proposing one optimizer mechanism. |
+| BPFOptBench is distinct from BpfReJIT/kop/native-loader papers. | supported | It evaluates agents and task/oracle design rather than proposing one optimizer mechanism. |
 | Existing data shows eBPF optimization is difficult and noisy. | supported | Historical reports give multiple concrete failure modes. |
 | The current repo can host a real evaluator. | partially supported | Latest v3 six-app raw runs are promising; hidden evaluator still needs implementation. |
 | Sessions can seed realistic tasks. | partially supported | Strong aggregate evidence; needs curated task manifest and labels. |
 | Structured feedback improves optimization. | not yet supported | Requires raw-vs-structured controlled study. |
 | Agents outperform baselines on live eBPF tuning. | not yet supported | Requires frozen live tasks and repeated runs. |
-| Cross-layer optimization generality is demonstrated. | not yet supported | Current evidence is strongest for bytecode/pass-policy and kinsn-adjacent paths. |
+| Cross-layer optimization generality is demonstrated. | not yet supported | Current evidence is strongest for bytecode/pass-policy and kop-adjacent paths. |
 
 ## Bottom Line
 

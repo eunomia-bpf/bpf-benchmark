@@ -8,7 +8,7 @@ from runner.libs import ROOT_DIR
 
 RUNTIME_IMAGE_WORKSPACE = ROOT_DIR
 RUNTIME_IMAGE_ARTIFACT_ROOT = Path("/opt/bpf-benchmark")
-RUNTIME_KINSN_MODULE_DIR = Path("/artifacts/kinsn")
+RUNTIME_KOP_MODULE_DIR = Path("/artifacts/kop")
 
 # (arm64_parts, x86_parts)
 _ARCH_PATHS: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
@@ -75,9 +75,9 @@ def runtime_workload_tools_root(workspace: Path, target_arch: str) -> Path:
 def runtime_container_image_tar_path(workspace: Path, target_arch: str) -> Path:
     return workspace / ".cache" / "container-images" / f"{str(target_arch).strip()}-runner-runtime.image.tar"
 
-def kinsn_module_dir(workspace: Path, target_arch: str) -> Path:
+def kop_module_dir(workspace: Path, target_arch: str) -> Path:
     if inside_runtime_image():
-        return RUNTIME_KINSN_MODULE_DIR
+        return RUNTIME_KOP_MODULE_DIR
     return workspace / "module" / ("arm64" if _is_arm64(target_arch) else "x86")
 
 def kernel_modules_root(workspace: Path, target_arch: str, executor: str) -> Path:

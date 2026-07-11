@@ -6,7 +6,7 @@
       "map_inline",
       "const_prop",
       "dce",
-      "kinsn",
+      "kop",
       "wide_mem",
       "bounds_check_merge",
       "skb_load_bytes_spec",
@@ -16,7 +16,7 @@
     ]
   },
   "details_dir": "details",
-  "error_message": "failed to load bpf_x86_alu: insmod: ERROR: could not insert module /artifacts/kinsn/bpf_x86_alu.ko: Invalid module format",
+  "error_message": "failed to load bpf_x86_alu: insmod: ERROR: could not insert module /artifacts/kop/bpf_x86_alu.ko: Invalid module format",
   "generated_at": "2026-06-29T23:25:01.225634+00:00",
   "last_updated_at": "2026-06-29T23:25:01.225630+00:00",
   "launcher_boot_id": "dae251a0-b500-4bd1-a5f4-549d64942b3d",

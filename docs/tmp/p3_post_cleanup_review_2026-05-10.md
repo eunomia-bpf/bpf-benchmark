@@ -213,7 +213,7 @@ This file has absorbed analysis logic that should probably be split into modules
 
 BBProgram exposes many internals directly:
 
-- `BBProgram.blocks`, `entry`, `use_def`, `oracle`, `btf`, and `kinsn_reg` are public at `bbprogram.rs:33-40`.
+- `BBProgram.blocks`, `entry`, `use_def`, `oracle`, `btf`, and `kop_reg` are public at `bbprogram.rs:33-40`.
 - `Block.insns`, `Block.terminator`, and `Block.frame` are public at `bbprogram.rs:51-57`.
 - `InsnSite` has public raw fields at `bbprogram.rs:21-25`.
 
@@ -409,7 +409,7 @@ So tests exercise the BBProgram wrapper path. However, for C/D-rated passes, tha
 
 Critical regression coverage:
 
-- P1-F DCE kinsn-aware coverage is alive at `bpfopt/crates/bpfopt/src/passes/dce_tests.rs:9-40`.
+- P1-F DCE kop-aware coverage is alive at `bpfopt/crates/bpfopt/src/passes/dce_tests.rs:9-40`.
 - P1-K const-prop coverage is alive at `bpfopt/crates/bpfopt/src/passes/const_prop_tests.rs:112-147`, `const_prop_tests.rs:172-197`, and `const_prop_tests.rs:199-210`.
 - P1-G JA32 target coverage is alive at `bpfopt/crates/bpfopt/src/analysis/bbprogram_branch_target_tests.rs:7-27` and `bpfopt/crates/bpfopt/src/analysis/bbprogram_cfg_tests.rs:26-39`.
 - P1-G branch delta overflow coverage is alive at `bpfopt/crates/bpfopt/src/analysis/lower_tests.rs:5-34`.
@@ -435,7 +435,7 @@ Excluded: `#[cfg(test)]` functions and test modules. Included: production code a
 
 - `bpfopt/crates/bpfopt/src/main.rs:452` - `expect("chunk is 8 bytes")` after `chunks_exact(8)`. Low risk, but still a production `expect`.
 - `bpfopt/crates/bpfopt/src/main.rs:707` and `main.rs:714` - `unwrap_or_default()` silently writes empty BTF records.
-- `bpfopt/crates/bpfopt/src/pass.rs:828` - `assert!(previous.is_none(), "duplicate kinsn target name {name}")` in kinsn registry construction.
+- `bpfopt/crates/bpfopt/src/pass.rs:828` - `assert!(previous.is_none(), "duplicate kop target name {name}")` in kop registry construction.
 - `bpfopt/crates/bpfopt/src/passes/bounds_check_merge.rs:125` - `group.last().unwrap()`.
 - `bpfopt/crates/bpfopt/src/passes/bounds_check_merge.rs:405-406` and `bounds_check_merge.rs:496-497` - `expect("setup site is valid")`.
 - `bpfopt/crates/bpfopt/src/passes/branch_flip.rs:540` and `branch_flip.rs:565` - `expect` on integer conversion invariants.

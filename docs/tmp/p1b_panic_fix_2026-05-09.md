@@ -2,47 +2,47 @@
 
 ## Root Cause
 
-The P1-B redo changed kinsn runtime identity from the old `(btf_id, call_offset)` pair to `btf_id` alone.
+The P1-B redo changed kop runtime identity from the old `(btf_id, call_offset)` pair to `btf_id` alone.
 
-The deleted `passes/utils.rs` code did not only centralize proof decoders. Its proof-sidecar path also matched a kinsn call with both:
+The deleted `passes/utils.rs` code did not only centralize proof decoders. Its proof-sidecar path also matched a kop call with both:
 
 - the BTF func id stored in the `BPF_PSEUDO_KFUNC_CALL` instruction immediate
 - the module fd-array call offset stored in the same instruction's `off`
 
-After the redo, `collect_kinsn_proof_regions()` called `kinsn_proof_len(registry, btf_id, payload)`, and `KinsnRegistry` indexed descriptors by `by_btf_id`. That made every kinsn BTF func id globally unique.
+After the redo, `collect_kop_proof_regions()` called `kop_proof_len(registry, btf_id, payload)`, and `KopRegistry` indexed descriptors by `by_btf_id`. That made every kop BTF func id globally unique.
 
-That assumption is wrong. The daemon loads multiple kinsn modules, and their BTF func ids are module-local. The corpus artifacts show real collisions:
+That assumption is wrong. The daemon loads multiple kop modules, and their BTF func ids are module-local. The corpus artifacts show real collisions:
 
 ```text
-error: kinsn btf_id 128703 is already registered for bpf_endian_load16
+error: kop btf_id 128703 is already registered for bpf_endian_load16
 ```
 
 This appeared repeatedly in `bcc`, `otel`, and `cilium` app results while running `bpfopt --pass rotate`. Tetragon then crashed after those apps in the full corpus sequence, while a standalone tetragon run passed, matching a prior-app state leak pattern.
 
-The emit path itself was not byte-different. The bytecode comparison below shows the same optimized bytes as both the old centralized implementation and the P1-B redo stash. The regression was in kinsn target resolution and proof metadata remapping around those bytes: a sidecar proof can only be decoded correctly when the call's `off` participates in the lookup key.
+The emit path itself was not byte-different. The bytecode comparison below shows the same optimized bytes as both the old centralized implementation and the P1-B redo stash. The regression was in kop target resolution and proof metadata remapping around those bytes: a sidecar proof can only be decoded correctly when the call's `off` participates in the lookup key.
 
 Other checks:
 
-- `KinsnRegistry::new()` still discovers all 11 v3 targets from `PASS_REGISTRY`: `rotate64`, `rotate32`, `select64`, `ccmp64`, `extract64`, `endian_load16`, `endian_load32`, `endian_load64`, `bulk_memcpy`, `bulk_memset`, `prefetch`.
+- `KopRegistry::new()` still discovers all 11 v3 targets from `PASS_REGISTRY`: `rotate64`, `rotate32`, `select64`, `ccmp64`, `extract64`, `endian_load16`, `endian_load32`, `endian_load64`, `bulk_memcpy`, `bulk_memset`, `prefetch`.
 - CLI alias canonicalization covered the existing aliases, and is now explicitly regression-tested for all v3 aliases including `bulk_memcpy`, `memcpy_bulk`, and `bpf_memcpy_bulk`.
 - `map_inline`, `const_prop`, `dce`, and `bounds_check_merge` did not depend on the deleted proof decoder helpers.
 
 ## Fix
 
-Changed `KinsnRegistry` to index runtime calls by `(btf_id, call_off)` instead of only `btf_id`.
+Changed `KopRegistry` to index runtime calls by `(btf_id, call_off)` instead of only `btf_id`.
 
 Files changed:
 
 - `bpfopt/crates/bpfopt/src/pass.rs`
-  - replaced `by_btf_id` with `by_call: HashMap<KinsnCallKey, ...>`
-  - added `lookup_by_kinsn_call(btf_id, call_off)`
+  - replaced `by_btf_id` with `by_call: HashMap<KopCallKey, ...>`
+  - added `lookup_by_kop_call(btf_id, call_off)`
   - kept fail-fast duplicate detection for the exact same `(btf_id, call_off)` owned by different targets
   - synchronized the index from both `set_btf_id_for_target_name()` and `set_call_off_for_target_name()`
 - `bpfopt/crates/bpfopt/src/passes/utils.rs`
   - restored call-offset-aware proof dispatch by reading `insns[pc + 1].off`
   - added a regression test showing two descriptors can share a BTF func id and still decode the correct proof through different call offsets
 - `bpfopt/crates/bpfopt/src/main.rs`
-  - added regression tests for all v3 kinsn aliases
+  - added regression tests for all v3 kop aliases
   - added target JSON tests proving duplicate module-local BTF ids are allowed when call offsets differ and rejected when the full call key collides
 
 This keeps the pass-owned descriptor design from P1-B redo. It does not reintroduce centralized proof-layout dispatch.
@@ -62,7 +62,7 @@ bf 12 00 00 00 00 00 00 77 02 00 00 08 00 00 00
 Target JSON:
 
 ```json
-{"arch":"x86_64","features":["rorx"],"kinsns":{"bpf_rotate64":{"btf_func_id":101,"btf_id":1001,"call_offset":7},"bpf_rotate32":{"btf_func_id":102,"btf_id":1001,"call_offset":7}}}
+{"arch":"x86_64","features":["rorx"],"koperation":{"bpf_rotate64":{"btf_func_id":101,"btf_id":1001,"call_offset":7},"bpf_rotate32":{"btf_func_id":102,"btf_id":1001,"call_offset":7}}}
 ```
 
 Command shape:

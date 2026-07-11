@@ -8,7 +8,7 @@
 | --- | --- |
 | 1. `include/linux/filter.h` 中 `smp_load_acquire(&prog->bpf_func)` 在热路径 | 部分确认：热路径位置属实；x86 运行时开销基本可忽略，ARM64 有真实额外指令成本 |
 | 2. `syscall.c` `bpf_prog_rejit_swap()` 中 `memcpy(prog->insnsi, tmp->insnsi, ...)` page 粒度越界检查 | 不确认：这是误报；按当前分配/容量模型没有 OOB 写入风险 |
-| 3. `verifier.c` `validate_kinsn_proof_seq()` / `INSN_BUF_SIZE=32` 是否缺少上界约束 | 确认存在：`max_insn_cnt` 没有被约束到 `INSN_BUF_SIZE`，`do_misc_fixups()` 可写爆固定 32 insn 缓冲区 |
+| 3. `verifier.c` `validate_kop_proof_seq()` / `INSN_BUF_SIZE=32` 是否缺少上界约束 | 确认存在：`max_insn_cnt` 没有被约束到 `INSN_BUF_SIZE`，`do_misc_fixups()` 可写爆固定 32 insn 缓冲区 |
 
 ## 1. `smp_load_acquire(&prog->bpf_func)` 在热路径
 
@@ -107,7 +107,7 @@
   - 例如对比原始 `bpf_prog_size()` 或单独记录初始可接受的 `len` 上界。
   - 但这属于语义约束，不是 memory-safety 修复。
 
-## 3. `validate_kinsn_proof_seq()` / `INSN_BUF_SIZE=32` 是否缺少 `max_insn_cnt` 上界
+## 3. `validate_kop_proof_seq()` / `INSN_BUF_SIZE=32` 是否缺少 `max_insn_cnt` 上界
 
 **结论**
 
@@ -122,53 +122,53 @@
 - `include/linux/bpf_verifier.h:851`
   - `env->insn_buf[INSN_BUF_SIZE]`
 - `include/linux/bpf.h:968-973`
-  - `struct bpf_kinsn { u16 max_insn_cnt; int (*instantiate_insn)(...) }`
+  - `struct bpf_kop { u16 max_insn_cnt; int (*instantiate_insn)(...) }`
 - `kernel/bpf/verifier.c:3532-3536`
   - 只检查 `instantiate_insn` 非空、`max_insn_cnt` 非零
 - `kernel/bpf/btf.c:9034-9040`
-  - kinsn 注册路径仅检查 owner，一样没有上界
+  - kop 注册路径仅检查 owner，一样没有上界
 - `kernel/bpf/verifier.c:3676`
-  - `validate_kinsn_proof_seq()` 只验证 `cnt <= kinsn->max_insn_cnt`
+  - `validate_kop_proof_seq()` 只验证 `cnt <= kop->max_insn_cnt`
 - `kernel/bpf/verifier.c:3775-3786`
-  - `lower_kinsn_proof_regions()` 用 `kvcalloc(kinsn->max_insn_cnt, ...)` 动态分配 proof buffer
+  - `lower_kop_proof_regions()` 用 `kvcalloc(kop->max_insn_cnt, ...)` 动态分配 proof buffer
 - `kernel/bpf/verifier.c:26477-26510`
-  - verifier 恢复原始 kinsn region 后，后续还会执行 `do_misc_fixups()`
+  - verifier 恢复原始 kop region 后，后续还会执行 `do_misc_fixups()`
 - `kernel/bpf/verifier.c:23767-23776`
-  - `do_misc_fixups()` 重新调用 `kinsn->instantiate_insn(..., env->insn_buf)`
+  - `do_misc_fixups()` 重新调用 `kop->instantiate_insn(..., env->insn_buf)`
 
 **为什么这个问题是真的**
 
 - 前半段验证路径是安全的：
-  - `lower_kinsn_proof_regions()` 按 `kinsn->max_insn_cnt` 动态分配 `proof_buf`。
+  - `lower_kop_proof_regions()` 按 `kop->max_insn_cnt` 动态分配 `proof_buf`。
 - 但后半段 `do_misc_fixups()` 不一致：
   - 它把输出直接写到固定大小的 `env->insn_buf[32]`。
   - 在调用 `instantiate_insn()` 之前，没有任何 `max_insn_cnt <= INSN_BUF_SIZE` 的保护。
-- 这意味着只要某个 kinsn descriptor 声明：
+- 这意味着只要某个 kop descriptor 声明：
   - `max_insn_cnt > 32`
   - 或 `instantiate_insn()` 实际会生成超过 32 条指令
-  - 就会先写爆 `env->insn_buf`，而后面的 `cnt` 检查和 `validate_kinsn_proof_seq()` 已经来不及。
+  - 就会先写爆 `env->insn_buf`，而后面的 `cnt` 检查和 `validate_kop_proof_seq()` 已经来不及。
 - 更糟的是，即使 native emit 路径本来不打算真正 patch proof sequence：
   - `do_misc_fixups()` 也是先 `instantiate_insn(..., env->insn_buf)`，
-  - 然后才在 `23776` 行判断 `prog->jit_requested && bpf_kinsn_has_native_emit(kinsn)` 并跳过。
+  - 然后才在 `23776` 行判断 `prog->jit_requested && bpf_kop_has_native_emit(kop)` 并跳过。
   - 所以 native emit 场景同样带着这个溢出窗口。
 
 **当前树里的可触发性**
 
-- 我没有在当前源码树里找到 in-tree 的 kinsn descriptor 实例。
+- 我没有在当前源码树里找到 in-tree 的 kop descriptor 实例。
 - 所以这更像是“基础设施已经写出 bug，但尚未有 in-tree provider 触发”的 latent bug。
-- 但从 API 设计看，问题已经存在，只要后续模块/内核代码注册了 `max_insn_cnt > 32` 的 kinsn，就会踩到。
+- 但从 API 设计看，问题已经存在，只要后续模块/内核代码注册了 `max_insn_cnt > 32` 的 kop，就会踩到。
 
 **修复建议**
 
 - 最稳妥的修法：
-  - 把 `do_misc_fixups()` 的 kinsn 分支改成动态 scratch/proof buffer，
-  - 大小按 `kinsn->max_insn_cnt` 分配，
-  - 与 `lower_kinsn_proof_regions()` 保持一致。
+  - 把 `do_misc_fixups()` 的 kop 分支改成动态 scratch/proof buffer，
+  - 大小按 `kop->max_insn_cnt` 分配，
+  - 与 `lower_kop_proof_regions()` 保持一致。
 - 最小修法：
   - 在 `__register_btf_kfunc_id_set()` 或 `add_kfunc_desc()` 强制 `max_insn_cnt < INSN_BUF_SIZE`，
   - 否则拒绝注册/拒绝加载。
 - 额外优化：
-  - 对于 `prog->jit_requested && bpf_kinsn_has_native_emit(kinsn)` 的路径，先判断是否 native emit，
+  - 对于 `prog->jit_requested && bpf_kop_has_native_emit(kop)` 的路径，先判断是否 native emit，
   - 再决定是否需要调用 `instantiate_insn()`，避免无意义地碰固定缓冲区。
 
 ## 最终判断

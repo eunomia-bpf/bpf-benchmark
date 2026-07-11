@@ -3,7 +3,7 @@
 Standalone test folder. **Does not depend on the bench micro framework**
 — no `make micro`, no yaml suite, no `driver.py`. A single C++ harness
 loads each `.bpf.o` twice (once via libbpf for the canonical kernel-JIT
-path, once via the `bpf_x86_native_lab` kinsn pipeline), attaches both
+path, once via the `bpf_x86_native_lab` kop pipeline), attaches both
 via the event-driven path (kprobe/uprobe via `perf_event_open` +
 `PERF_EVENT_IOC_SET_BPF`, raw_tp via `bpf_raw_tracepoint_open`),
 triggers the probe 100 000 times, and reports per-call handler
@@ -40,7 +40,7 @@ exercised the same handler logic.
   `<bpf/bpf_helpers.h>` directly in `-DMICRO_NATIVE` mode expands every
   helper to `((void *(*)(...))BPF_FUNC_xxx)`, i.e. integer literal cast
   to a function pointer — clang then emits `mov eax, <id>; call rax`,
-  which crashes the kernel when the kinsn splats the bytes in place of
+  which crashes the kernel when the kop splats the bytes in place of
   a BPF body. The extern pattern forces a real GOTPCREL relocation.
 - `runner.cpp` — top-level harness. Iterates {NONE, KERNEL JIT,
   NATIVE LAB} configurations per program, times the trigger loop, and
@@ -55,7 +55,7 @@ exercised the same handler logic.
 - `Makefile` — `make` builds everything, `make test` runs against the
   host kernel (kernel-JIT only — Ubuntu's mainline kernel has no
   bpf_x86_native_lab module), `make test-vm` boots virtme-ng with the
-  bench framework's kinsn-aware kernel and exercises both paths.
+  bench framework's kop-aware kernel and exercises both paths.
 
 ## Build + run
 
@@ -63,7 +63,7 @@ exercised the same handler logic.
 cd native-sim/test-others
 make             # builds .bpf.o + .native.o for each program + build/runner
 sudo make test   # host kernel only (kernel JIT only)
-make test-vm     # boots virtme-ng with framework kernel + insmod kinsn
+make test-vm     # boots virtme-ng with framework kernel + insmod kop
                  # + runs the full kernel-JIT + native_lab comparison
 ```
 
@@ -115,8 +115,8 @@ The native_lab attach pipeline added by this POC (event-driven
 `perf_event_open` + `PERF_EVENT_IOC_SET_BPF` for kprobe/uprobe,
 `bpf_raw_tracepoint_open` for raw_tp) is the runner-side change
 flagged in `stage2-status-20260518.md` as a "mechanical extension" of
-the existing TEST_RUN pipeline. The `bpf_x86_native_lab` kinsn module
+the existing TEST_RUN pipeline. The `bpf_x86_native_lab` kop module
 itself is unchanged; the stub program produced by `load_stub_prog` is
-the same `(sidecar; call kinsn)*N; exit` shape used by the bench's
+the same `(sidecar; call kop)*N; exit` shape used by the bench's
 `micro_exec run-native-lab`, just with `prog_type` set to KPROBE or
 RAW_TRACEPOINT instead of XDP/SCHED_CLS/CGROUP_SKB.

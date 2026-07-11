@@ -10,7 +10,7 @@ Mode: read-only audit, except writing this report.
 Commands used:
 
 - `git status --short --branch`
-- `rg` for wave-3 legacy names, PC-keyed map-inline state, BBProgram atomicity, kinsn registry, unchecked query APIs, helper duplication, and fallback patterns
+- `rg` for wave-3 legacy names, PC-keyed map-inline state, BBProgram atomicity, kop registry, unchecked query APIs, helper duplication, and fallback patterns
 - `wc -l`
 - `git diff --numstat`
 - `cargo test --release --manifest-path bpfopt/Cargo.toml`
@@ -111,12 +111,12 @@ Fixed P0: BBProgram atomicity
 - `replace_terminator()` clone-swaps at `bbprogram_api.rs:155-162`.
 - `permute_blocks()` clone-swaps at `bbprogram_api.rs:183-186`; validation/remap happens inside `permute_blocks_in_place()` at `bbprogram_api.rs:190-225`.
 
-Fixed P0: kinsn duplicate registration
+Fixed P0: kop duplicate registration
 
-- `KinsnRegistry::new()` now returns `anyhow::Result<Self>` and propagates duplicate registration errors at `pass.rs:736-747`.
+- `KopRegistry::new()` now returns `anyhow::Result<Self>` and propagates duplicate registration errors at `pass.rs:736-747`.
 - Duplicate names now `bail!` instead of panicking at `pass.rs:812-829`.
 - Panic-only `Default` is test-only at `pass.rs:731-735`.
-- Production callers use `PassContext::try_baseline()` and `KinsnRegistry::unavailable()?` at `pass.rs:1089-1092`, `main.rs:725`, `main.rs:865`, and `main.rs:895`.
+- Production callers use `PassContext::try_baseline()` and `KopRegistry::unavailable()?` at `pass.rs:1089-1092`, `main.rs:725`, `main.rs:865`, and `main.rs:895`.
 
 Fixed P0: unchecked query API gating
 

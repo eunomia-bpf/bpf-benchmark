@@ -2,7 +2,7 @@
 
 Date: 2026-05-04
 
-Scope: read-only investigation of the 3-app kinsn-only corpus run that produced
+Scope: read-only investigation of the 3-app kop-only corpus run that produced
 `corpus/results/x86_kvm_corpus_20260504_003830_701212/`. No source code or build
 artifacts were changed.
 

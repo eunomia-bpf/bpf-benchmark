@@ -146,7 +146,7 @@ make vm-shell TARGET=local-x86-vng-tcg VM_CPUS=2 VM_MEM=8G \
 Result:
 
 - VM entered the guest
-- kinsn modules loaded
+- kop modules loaded
 - `vm-shell` exited with code 255
 - E2E metadata stayed in `running`
 - Host journal showed a `qemu-system-x86_64` segfault
@@ -626,7 +626,7 @@ Findings:
   allocation up to whole pages and `bpf_prog_rejit()` rejects replacements that
   exceed the original page budget. So the observed `30 -> 31 insns` case is not
   by itself evidence of an out-of-bounds write there.
-- the verifier/kinsn refactor between `03cad9145` and `f0e7f673e` is mostly
+- the verifier/kop refactor between `03cad9145` and `f0e7f673e` is mostly
   cleanup/inlining; I do not yet have a direct path from that refactor to the
   present `rusty_exit` failure
 
@@ -650,17 +650,17 @@ Re-ran the canonical repository kernel compile entrypoint:
 
 - `make kernel-build JOBS=1`
 
-This first exposed a branch-local compile break in the REJIT/kinsn series,
+This first exposed a branch-local compile break in the REJIT/kop series,
 not a generic unrelated kernel build failure:
 
 - `kernel/bpf/verifier.c:23776`: implicit declaration of
-  `bpf_kinsn_has_native_emit`
+  `bpf_kop_has_native_emit`
 - the same block also had misleading indentation, making the intended control
   flow around the `jit_requested && native_emit` fast path ambiguous
 
 Minimal local compile fix applied:
 
-- added `bpf_kinsn_has_native_emit()` in
+- added `bpf_kop_has_native_emit()` in
   `vendor/linux-framework/include/linux/bpf.h`
 - fixed the indentation/control flow in
   `vendor/linux-framework/kernel/bpf/verifier.c`
@@ -674,7 +674,7 @@ After that fix, the same `make kernel-build JOBS=1` re-run progressed past:
 
 At the time of writing this note, the single-threaded full kernel build was
 still continuing beyond `kernel/bpf/` into the generic kernel and filesystem
-subtrees. The important immediate result is that the current REJIT/kinsn patch
+subtrees. The important immediate result is that the current REJIT/kop patch
 set did have a real compile blocker, and that blocker is now locally repaired
 enough for the BPF/JIT objects to compile.
 
@@ -1300,8 +1300,8 @@ Important compatibility note:
   `1d040ec0c3f1819b33999f94fec4e171dda07a81` is **not** a valid reproducer
   environment
 - that mixed setup fails before VM boot in `module/x86/bpf_rotate.c`, because
-  the current repo's kinsn module sources expect newer `struct bpf_kinsn` /
-  `DEFINE_KINSN_V2_MODULE` interfaces that do not exist in `1d040ec0c`
+  the current repo's kop module sources expect newer `struct bpf_kop` /
+  `DEFINE_KOP_V2_MODULE` interfaces that do not exist in `1d040ec0c`
 
 The valid historical test environment was:
 

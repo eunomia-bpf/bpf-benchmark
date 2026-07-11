@@ -2,7 +2,7 @@
 
 Date: 2026-03-26
 
-Implemented [`module/arm64/bpf_bulk_memory.c`](/home/yunwei37/workspace/bpf-benchmark/module/arm64/bpf_bulk_memory.c) with two v2 kinsn descriptors:
+Implemented [`module/arm64/bpf_bulk_memory.c`](/home/yunwei37/workspace/bpf-benchmark/module/arm64/bpf_bulk_memory.c) with two v2 kop descriptors:
 
 - `bpf_memcpy_bulk`
 - `bpf_memset_bulk`
@@ -11,11 +11,11 @@ Key implementation points:
 
 - `bpf_memcpy_bulk` decodes the packed bulk-memory payload already emitted by [`daemon/src/passes/bulk_memory.rs`](/home/yunwei37/workspace/bpf-benchmark/daemon/src/passes/bulk_memory.rs), reuses the transported `temp_reg` for proof lowering, expands to bytewise `LDX_MEM/STX_MEM`, and emits an ARM64 `LDP/STP` post-index loop plus scalar `LDR/STR` tail handling for the final `< 16B`.
 - `bpf_memset_bulk` supports immediate byte-fill and the reserved `value_from_reg` shape, proof-lowers to byte stores, and emits an ARM64 `STP` post-index loop plus scalar store tail handling.
-- Native emit uses internal scratch registers `x9-x13`, which do not overlap the current BPF-to-ARM64 register mapping in [`module/include/kinsn_common.h`](/home/yunwei37/workspace/bpf-benchmark/module/include/kinsn_common.h).
+- Native emit uses internal scratch registers `x9-x13`, which do not overlap the current BPF-to-ARM64 register mapping in [`module/include/kop_common.h`](/home/yunwei37/workspace/bpf-benchmark/module/include/kop_common.h).
 
 Current-tree interface note:
 
-- The checked-in kernel kinsn API still requires `instantiate_insn()`; there is no in-tree `model_call` callback yet.
+- The checked-in kernel kop API still requires `instantiate_insn()`; there is no in-tree `model_call` callback yet.
 - `bpf_memcpy_bulk` therefore uses the pass-supplied `temp_reg` field for proof lowering rather than relying on hidden BPF-visible scratch state.
 
 Build wiring:

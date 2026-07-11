@@ -12,7 +12,7 @@ No CRITICAL fail-fast regressions found in the reviewed scope.
 
 The commit removes the two requested fallback paths:
 
-- `bpfget --target` no longer emits `target.json` with empty `kinsns`; locally it exits 1 with contextual stderr and empty stdout when BTF enumeration is denied.
+- `bpfget --target` no longer emits `target.json` with empty `koperation`; locally it exits 1 with contextual stderr and empty stdout when BTF enumeration is denied.
 - `bpfprof` no longer emits `pmu_available: false`; PMU collection is required and failures propagate as errors.
 
 The dead-code and silence-error grep checks are clean for `bpfopt/crates/`. The only non-code grep hits outside `daemon/`, `vendor/`, `target/`, and `docs/tmp/` are policy text in `CLAUDE.md` and `docs/kernel-jit-optimization-plan.md`.
@@ -23,7 +23,7 @@ The dead-code and silence-error grep checks are clean for `bpfopt/crates/`. The 
 
 Location: `bpfopt/crates/bpfget/tests/cli.rs:59`
 
-`target_btf_probe_unavailable()` recognizes permission-denied probing, no BTF objects, and no kinsn functions. It does not recognize the new fail-fast error path from `bpfget --target` when `KernelBtf::load_vmlinux()` itself fails, for example a host with no readable vmlinux BTF:
+`target_btf_probe_unavailable()` recognizes permission-denied probing, no BTF objects, and no kop functions. It does not recognize the new fail-fast error path from `bpfget --target` when `KernelBtf::load_vmlinux()` itself fails, for example a host with no readable vmlinux BTF:
 
 - `bpfopt/crates/bpfget/src/main.rs:307`
 - `bpfopt/crates/bpfget/src/main.rs:333`
@@ -40,11 +40,11 @@ Impact: this is a test portability gap, not a production fallback. It can matter
 
 ```text
 exit 1
-stderr: failed to probe target kinsn BTF; --target requires readable kernel BTF or explicit --kinsns: enumerate BTF objects after id 0: BPF_BTF_GET_NEXT_ID: Operation not permitted (os error 1)
+stderr: failed to probe target kop BTF; --target requires readable kernel BTF or explicit --koperation: enumerate BTF objects after id 0: BPF_BTF_GET_NEXT_ID: Operation not permitted (os error 1)
 stdout: empty
 ```
 
-`bpfget --target --kinsns bpf_rotate64:77` exits 0 and emits target JSON with the explicit kinsn descriptor.
+`bpfget --target --koperation bpf_rotate64:77` exits 0 and emits target JSON with the explicit kop descriptor.
 
 `bpfprof --all --duration 100ms` exits 1 in this local environment before PMU setup because BPF program enumeration is not permitted:
 
@@ -60,7 +60,7 @@ Commands run:
 
 ```bash
 rg -n "#\[allow\(dead_code\)\]|#\[cfg_attr\(not\(test\), allow\(dead_code\)\)\]" bpfopt/crates
-rg -n "kinsns:\s*HashMap::new\(\)|kinsns:\s*BTreeMap::new\(\)|pmu_available:\s*false|pmu_available" bpfopt/crates
+rg -n "koperation:\s*HashMap::new\(\)|koperation:\s*BTreeMap::new\(\)|pmu_available:\s*false|pmu_available" bpfopt/crates
 rg -n "\.ok\(\)|let _ = |unwrap_or_default\(|unwrap_or_else\(\|_\|" bpfopt/crates
 rg -n "prog_load_dryrun\b|map_get_next_id\b" bpfopt/crates
 rg -n "\.ok\(\)|let _ = |unwrap_or_default\(|unwrap_or_else\(\|_\|" --glob '!daemon/**' --glob '!vendor/**' --glob '!docs/tmp/**' --glob '!target/**' --glob '!**/target/**'
@@ -68,7 +68,7 @@ rg -n "\.ok\(\)|let _ = |unwrap_or_default\(|unwrap_or_else\(\|_\|" --glob '!dae
 
 Results:
 
-- `bpfopt/crates`: zero hits for `#[allow(dead_code)]`, empty-kinsns/PMU fallback patterns, and banned silence-error text patterns.
+- `bpfopt/crates`: zero hits for `#[allow(dead_code)]`, empty-koperation/PMU fallback patterns, and banned silence-error text patterns.
 - `prog_load_dryrun` and `map_get_next_id`: zero hits in `bpfopt/crates`; `prog_load_dryrun_with_fd_array` remains as a real caller-facing API.
 - non-daemon/non-vendor/non-target code grep: only policy-document hits in `CLAUDE.md` and `docs/kernel-jit-optimization-plan.md`.
 

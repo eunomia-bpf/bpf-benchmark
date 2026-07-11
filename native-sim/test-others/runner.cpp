@@ -7,7 +7,7 @@
  *   1. NONE      — trigger the probe point with no BPF attached
  *                  (baseline wall time per trigger).
  *   2. KERNEL    — libbpf-load the .bpf.o, attach via libbpf, trigger.
- *   3. NATIVE    — go through the bpf_x86_native_lab kinsn:
+ *   3. NATIVE    — go through the bpf_x86_native_lab kop:
  *                  native-link the .native.o, upload blob, load stub
  *                  prog with prog_type=KPROBE/RAW_TRACEPOINT, attach
  *                  via perf_event_open or bpf_raw_tracepoint_open,

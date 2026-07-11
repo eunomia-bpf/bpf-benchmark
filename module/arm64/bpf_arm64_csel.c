@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT arm64 kinsns: TST and CSEL.
+ * BpfReJIT arm64 koperation: TST and CSEL.
  */
 
-#include "kinsn_common.h"
+#include "kop_common.h"
 
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_arm64_tst(void) {}
@@ -19,7 +19,7 @@ BTF_KFUNCS_END(bpf_arm64_csel_kfunc_ids)
 
 static __always_inline int decode_tst_payload(u64 payload, u8 *reg)
 {
-	*reg = kinsn_payload_reg(payload, 0);
+	*reg = kop_payload_reg(payload, 0);
 
 	if (payload >> 4)
 		return -EINVAL;
@@ -35,10 +35,10 @@ static __always_inline int decode_csel_payload(u64 payload,
 					       u8 *false_reg,
 					       u8 *cond_reg)
 {
-	*dst_reg = kinsn_payload_reg(payload, 0);
-	*true_reg = kinsn_payload_reg(payload, 4);
-	*false_reg = kinsn_payload_reg(payload, 8);
-	*cond_reg = kinsn_payload_reg(payload, 12);
+	*dst_reg = kop_payload_reg(payload, 0);
+	*true_reg = kop_payload_reg(payload, 4);
+	*false_reg = kop_payload_reg(payload, 8);
+	*cond_reg = kop_payload_reg(payload, 12);
 
 	if (payload >> 16)
 		return -EINVAL;
@@ -108,12 +108,12 @@ static int emit_tst_arm64(u32 *image, int *idx, bool emit,
 	if (err)
 		return err;
 
-	reg = kinsn_arm64_reg(reg);
+	reg = kop_arm64_reg(reg);
 	if (reg == 0xff)
 		return -EINVAL;
 
 	insn = a64_tst(reg, reg);
-	return kinsn_arm64_emit_one(image, idx, emit, insn);
+	return kop_arm64_emit_one(image, idx, emit, insn);
 }
 
 static int emit_csel_ne_arm64(u32 *image, int *idx, bool emit,
@@ -132,19 +132,19 @@ static int emit_csel_ne_arm64(u32 *image, int *idx, bool emit,
 	if (err)
 		return err;
 
-	dst_reg = kinsn_arm64_reg(dst_reg);
-	true_reg = kinsn_arm64_reg(true_reg);
-	false_reg = kinsn_arm64_reg(false_reg);
-	cond_reg = kinsn_arm64_reg(cond_reg);
+	dst_reg = kop_arm64_reg(dst_reg);
+	true_reg = kop_arm64_reg(true_reg);
+	false_reg = kop_arm64_reg(false_reg);
+	cond_reg = kop_arm64_reg(cond_reg);
 	if (dst_reg == 0xff || true_reg == 0xff ||
 	    false_reg == 0xff || cond_reg == 0xff)
 		return -EINVAL;
 
 	insn = a64_csel(dst_reg, true_reg, false_reg, COND_NE);
-	return kinsn_arm64_emit_one(image, idx, emit, insn);
+	return kop_arm64_emit_one(image, idx, emit, insn);
 }
 
-const struct bpf_kinsn bpf_arm64_tst_desc = {
+const struct bpf_kop bpf_arm64_tst_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -152,7 +152,7 @@ const struct bpf_kinsn bpf_arm64_tst_desc = {
 	.emit_arm64 = emit_tst_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_csel_ne_desc = {
+const struct bpf_kop bpf_arm64_csel_ne_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 4,
 	.max_emit_bytes = 4,
@@ -160,10 +160,10 @@ const struct bpf_kinsn bpf_arm64_csel_ne_desc = {
 	.emit_arm64 = emit_csel_ne_arm64,
 };
 
-static const struct bpf_kinsn * const bpf_arm64_csel_kinsn_descs[] = {
+static const struct bpf_kop * const bpf_arm64_csel_kop_descs[] = {
 	&bpf_arm64_csel_ne_desc,
 	&bpf_arm64_tst_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_arm64_csel, "BpfReJIT arm64 kinsns: TST/CSEL",
-		       bpf_arm64_csel_kfunc_ids, bpf_arm64_csel_kinsn_descs);
+DEFINE_KOP_V2_MODULE(bpf_arm64_csel, "BpfReJIT arm64 koperation: TST/CSEL",
+		       bpf_arm64_csel_kfunc_ids, bpf_arm64_csel_kop_descs);

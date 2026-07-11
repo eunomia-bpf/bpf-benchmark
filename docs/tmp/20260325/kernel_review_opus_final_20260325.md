@@ -11,7 +11,7 @@
 
 此 patch 向 BPF 子系统添加了三个主要功能：
 1. `BPF_PROG_REJIT` syscall —— 在线替换已加载 BPF 程序的 JIT image
-2. `kinsn` 机制 —— 允许内核模块注册平台特定指令扩展，由 verifier 验证后由 JIT 内联发射
+2. `kop` 机制 —— 允许内核模块注册平台特定指令扩展，由 verifier 验证后由 JIT 内联发射
 3. `BPF_PROG_GET_ORIGINAL` —— 通过 `bpf_prog_info` 暴露原始 bytecode
 
 修改涉及 ~15 个文件，覆盖 UAPI、verifier、JIT (x86/arm64)、trampoline、dispatcher、struct_ops、btf。patch 规模大、横跨面广，以下按文件逐条列出问题。
@@ -20,16 +20,16 @@
 
 ## 1. `include/uapi/linux/bpf.h` — UAPI 设计
 
-### 1.1 [HIGH] `BPF_PSEUDO_KINSN_SIDECAR = 3` 与 `BPF_PSEUDO_KINSN_CALL = 4` 值域冲突风险
+### 1.1 [HIGH] `BPF_PSEUDO_KOP_SIDECAR = 3` 与 `BPF_PSEUDO_KOP_CALL = 4` 值域冲突风险
 
 ```c
-#define BPF_PSEUDO_KINSN_SIDECAR 3
-#define BPF_PSEUDO_KINSN_CALL    4
+#define BPF_PSEUDO_KOP_SIDECAR 3
+#define BPF_PSEUDO_KOP_CALL    4
 ```
 
-`BPF_PSEUDO_KINSN_SIDECAR` 复用 `src_reg` 域（4 bit 宽），值 3 和 4 在 `BPF_ALU64|BPF_MOV|BPF_K` 的 src_reg 位置。现有内核中 `src_reg` 在 MOV_K 指令里必须为 0，否则 verifier 拒绝。但 SIDECAR 编码直接覆盖了这个隐式约束，且值 3 在其他 context 中已被 `BPF_PSEUDO_KFUNC_CALL` 使用（在 `BPF_JMP|BPF_CALL` 中）。虽然 opcode class 不同不会冲突，但数字重复增加了审计/工具链混淆风险。
+`BPF_PSEUDO_KOP_SIDECAR` 复用 `src_reg` 域（4 bit 宽），值 3 和 4 在 `BPF_ALU64|BPF_MOV|BPF_K` 的 src_reg 位置。现有内核中 `src_reg` 在 MOV_K 指令里必须为 0，否则 verifier 拒绝。但 SIDECAR 编码直接覆盖了这个隐式约束，且值 3 在其他 context 中已被 `BPF_PSEUDO_KFUNC_CALL` 使用（在 `BPF_JMP|BPF_CALL` 中）。虽然 opcode class 不同不会冲突，但数字重复增加了审计/工具链混淆风险。
 
-**建议**：sidecar/kinsn_call 编号应从更高值开始（如 5/6），或在注释中明确标注值域隔离规则。
+**建议**：sidecar/kop_call 编号应从更高值开始（如 5/6），或在注释中明确标注值域隔离规则。
 
 ### 1.2 [MEDIUM] `bpf_prog_info` 新增字段 `orig_prog_len` / `orig_prog_insns` 缺少版本协商
 
@@ -61,10 +61,10 @@ struct bpf_prog_info {
 
 ## 2. `include/linux/bpf.h` — 内部 API
 
-### 2.1 [HIGH] `struct bpf_kinsn` 的 `emit_x86` / `emit_arm64` 回调可被模块任意提供，缺少安全边界
+### 2.1 [HIGH] `struct bpf_kop` 的 `emit_x86` / `emit_arm64` 回调可被模块任意提供，缺少安全边界
 
 ```c
-struct bpf_kinsn {
+struct bpf_kop {
     struct module *owner;
     u16 max_insn_cnt;
     u16 max_emit_bytes;
@@ -86,16 +86,16 @@ x86 JIT 用 scratch buffer 缓解了直接覆写风险，但 ARM64 JIT 直接写
 2. 考虑对 emit 输出做基本 sanity check（至少检查不包含 RET/INT3）
 3. 在文档中明确声明模块承担正确性责任
 
-### 2.2 [MEDIUM] `bpf_kinsn_has_native_emit()` 使用 `#ifdef CONFIG_X86` 而非运行时检测
+### 2.2 [MEDIUM] `bpf_kop_has_native_emit()` 使用 `#ifdef CONFIG_X86` 而非运行时检测
 
 ```c
-static inline bool bpf_kinsn_has_native_emit(const struct bpf_kinsn *kinsn)
+static inline bool bpf_kop_has_native_emit(const struct bpf_kop *kop)
 {
 #ifdef CONFIG_X86
-    if (kinsn->emit_x86) return true;
+    if (kop->emit_x86) return true;
 #endif
 #ifdef CONFIG_ARM64
-    if (kinsn->emit_arm64) return true;
+    if (kop->emit_arm64) return true;
 #endif
     return false;
 }
@@ -103,10 +103,10 @@ static inline bool bpf_kinsn_has_native_emit(const struct bpf_kinsn *kinsn)
 
 如果内核同时配置了 x86 和 arm64（交叉编译场景），这个函数会检查两个平台的 emit 回调。虽然实际上不太可能同时 `CONFIG_X86` 和 `CONFIG_ARM64`，但逻辑上应只检查当前运行平台。
 
-### 2.3 [MEDIUM] `bpf_kinsn_sidecar_payload()` 编码 52 bit payload 但只用了 4+16+32=52 bit
+### 2.3 [MEDIUM] `bpf_kop_sidecar_payload()` 编码 52 bit payload 但只用了 4+16+32=52 bit
 
 ```c
-static inline u64 bpf_kinsn_sidecar_payload(const struct bpf_insn *insn)
+static inline u64 bpf_kop_sidecar_payload(const struct bpf_insn *insn)
 {
     return (u64)(insn->dst_reg & 0xf) |
            ((u64)(u16)insn->off << 4) |
@@ -114,7 +114,7 @@ static inline u64 bpf_kinsn_sidecar_payload(const struct bpf_insn *insn)
 }
 ```
 
-`dst_reg` 只有 4 bit，`off` 16 bit，`imm` 32 bit，总计 52 bit。这是一个合理的编码，但没有对应的 `encode` 函数（用户态 daemon 必须手动构造）。缺少配套的 `BPF_KINSN_SIDECAR_ENCODE()` 宏增加了出错概率。
+`dst_reg` 只有 4 bit，`off` 16 bit，`imm` 32 bit，总计 52 bit。这是一个合理的编码，但没有对应的 `encode` 函数（用户态 daemon 必须手动构造）。缺少配套的 `BPF_KOP_SIDECAR_ENCODE()` 宏增加了出错概率。
 
 **建议**：在 UAPI 或 `include/linux/bpf.h` 中提供 encode 宏。
 
@@ -452,18 +452,18 @@ err = bpf_arch_text_poke(call_sites[i], BPF_MOD_CALL,
 
 ---
 
-## 8. `kernel/bpf/btf.c` — kinsn 注册基础设施
+## 8. `kernel/bpf/btf.c` — kop 注册基础设施
 
-### 8.1 [MEDIUM] `kinsn_descs` 数组与 `set->pairs` 必须 1:1 对应，但只有隐式约束
+### 8.1 [MEDIUM] `kop_descs` 数组与 `set->pairs` 必须 1:1 对应，但只有隐式约束
 
 ```c
 for (i = 0; i < add_set->cnt; i++) {
     desc->id = btf_relocate_id(btf, add_set->pairs[i].id);
-    desc->kinsn = add_kinsn_descs[i];
+    desc->kop = add_kop_descs[i];
 }
 ```
 
-`kinsn_descs[i]` 必须与 `add_set->pairs[i]` 一一对应。如果模块注册时数组长度不匹配，会越界读取。虽然在 `__register_btf_kfunc_id_set` 中有检查 `kinsn_descs[i]` 不为 NULL，但没有检查数组长度。
+`kop_descs[i]` 必须与 `add_set->pairs[i]` 一一对应。如果模块注册时数组长度不匹配，会越界读取。虽然在 `__register_btf_kfunc_id_set` 中有检查 `kop_descs[i]` 不为 NULL，但没有检查数组长度。
 
 **建议**：添加显式长度字段或 sentinel。
 
@@ -481,7 +481,7 @@ again:
     }
 ```
 
-重构为 `goto again` 不如原来的两次独立检查清晰。且这个重构与 kinsn 功能无关——属于不必要的 churn。
+重构为 `goto again` 不如原来的两次独立检查清晰。且这个重构与 kop 功能无关——属于不必要的 churn。
 
 **建议**：恢复原始代码，或者在单独的 cleanup patch 中重构。
 
@@ -489,29 +489,29 @@ again:
 
 ## 9. `kernel/bpf/verifier.c` — Verifier 集成
 
-### 9.1 [HIGH] `lower_kinsn_proof_regions` 在 verifier 探索之前修改指令流，但 `restore_kinsn_proof_regions` 在探索之后恢复
+### 9.1 [HIGH] `lower_kop_proof_regions` 在 verifier 探索之前修改指令流，但 `restore_kop_proof_regions` 在探索之后恢复
 
 ```
 bpf_check() {
-    add_subprog_and_kfunc();          // 识别 kinsn call
-    lower_kinsn_proof_regions();      // 替换 sidecar+call -> proof sequence
+    add_subprog_and_kfunc();          // 识别 kop call
+    lower_kop_proof_regions();      // 替换 sidecar+call -> proof sequence
     ...
     do_check();                       // verifier 探索 proof sequence
     ...
-    restore_kinsn_proof_regions();    // 恢复 sidecar+call
-    do_misc_fixups();                 // 再次处理 kinsn
+    restore_kop_proof_regions();    // 恢复 sidecar+call
+    do_misc_fixups();                 // 再次处理 kop
 }
 ```
 
 这个 lower-verify-restore 模式有几个问题：
 
-1. `restore_kinsn_proof_regions` 中使用 `bpf_patch_insn_data` + `verifier_remove_insns` 修改指令流，但此时 `env->insn_aux_data` 的 adjustments 可能与 verifier 探索过程中记录的 aux 数据不一致。
+1. `restore_kop_proof_regions` 中使用 `bpf_patch_insn_data` + `verifier_remove_insns` 修改指令流，但此时 `env->insn_aux_data` 的 adjustments 可能与 verifier 探索过程中记录的 aux 数据不一致。
 2. `region->start` 是基于 lower 后的指令偏移，restore 时如果多个 region 重叠调整，偏移计算可能出错（虽然 lower 是逆序遍历，但 restore 是正序）。
 3. 强制清空 `aux[region->start].jt` 和 `aux[region->start + 1].jt` 可能丢失 verifier 的 jump target 信息。
 
 **建议**：需要更严格的数学证明说明 offset adjustment 的正确性，或添加 assertion 验证。
 
-### 9.2 [HIGH] `validate_kinsn_proof_seq` 的跳转验证不完整
+### 9.2 [HIGH] `validate_kop_proof_seq` 的跳转验证不完整
 
 ```c
 tgt = i + 1 + jmp_off;
@@ -531,8 +531,8 @@ if (tgt <= i) { ... }
 desc = &tab->descs[tab->nr_descs++];
 desc->func_id = func_id;
 desc->offset = offset;
-if (kinsn_call) {
-    if (!kfunc.kinsn) {
+if (kop_call) {
+    if (!kfunc.kop) {
         tab->nr_descs--;
         return -ENOENT;
     }
@@ -556,14 +556,14 @@ tab = env->prog->aux->kfunc_btf_tab;
 +}
 ```
 
-原来 `__find_kfunc_desc_btf` 在 `!tab` 时不会自行分配（由 `add_kfunc_call` 预分配）。现在 kinsn 路径跳过了预分配（因为 kinsn 不需要 btf_tab），但如果 kinsn 的 BTF 解析路径意外进入这里，就会 lazy allocate。这改变了 `add_kfunc_call` 移除 btf_tab 预分配后的行为。
+原来 `__find_kfunc_desc_btf` 在 `!tab` 时不会自行分配（由 `add_kfunc_call` 预分配）。现在 kop 路径跳过了预分配（因为 kop 不需要 btf_tab），但如果 kop 的 BTF 解析路径意外进入这里，就会 lazy allocate。这改变了 `add_kfunc_call` 移除 btf_tab 预分配后的行为。
 
 需要确认所有调用 `__find_kfunc_desc_btf` 的路径是否都能正确处理 lazy allocation。
 
-### 9.5 [MEDIUM] `check_kinsn_sidecar_insn` 直接跳过 `env->insn_idx++`
+### 9.5 [MEDIUM] `check_kop_sidecar_insn` 直接跳过 `env->insn_idx++`
 
 ```c
-static int check_kinsn_sidecar_insn(struct bpf_verifier_env *env, ...)
+static int check_kop_sidecar_insn(struct bpf_verifier_env *env, ...)
 {
     ...
     env->insn_idx++;
@@ -571,19 +571,19 @@ static int check_kinsn_sidecar_insn(struct bpf_verifier_env *env, ...)
 }
 ```
 
-在 `do_check_insn` 返回 0 后，`do_check` 循环会再次 `env->insn_idx++`。所以 sidecar insn 实际跳过 2 条指令（sidecar 自身 + kinsn call）。这**假设** kinsn call 紧跟 sidecar，且 kinsn call 不需要 verifier 检查（因为 proof sequence 已经被验证）。
+在 `do_check_insn` 返回 0 后，`do_check` 循环会再次 `env->insn_idx++`。所以 sidecar insn 实际跳过 2 条指令（sidecar 自身 + kop call）。这**假设** kop call 紧跟 sidecar，且 kop call 不需要 verifier 检查（因为 proof sequence 已经被验证）。
 
-但是——在 `lower_kinsn_proof_regions` 之后，sidecar+call 已被替换为 proof sequence。所以在 `do_check` 执行时，不应该遇到 sidecar insn。这个 `check_kinsn_sidecar_insn` 只在 proof regions 没有被 lower 的情况下才会被触发。
+但是——在 `lower_kop_proof_regions` 之后，sidecar+call 已被替换为 proof sequence。所以在 `do_check` 执行时，不应该遇到 sidecar insn。这个 `check_kop_sidecar_insn` 只在 proof regions 没有被 lower 的情况下才会被触发。
 
-这形成了一个矛盾：如果 lower 成功了，sidecar 不存在；如果 lower 失败了，verifier 不应该继续。那么 `check_kinsn_sidecar_insn` 在什么场景下会被调用？
+这形成了一个矛盾：如果 lower 成功了，sidecar 不存在；如果 lower 失败了，verifier 不应该继续。那么 `check_kop_sidecar_insn` 在什么场景下会被调用？
 
 **建议**：如果这是 dead code，应删除。如果有合法场景，需要文档化。
 
-### 9.6 [LOW] `bpf_pseudo_kinsn_call` 在 `do_check_insn` 中触发 `-EFAULT`
+### 9.6 [LOW] `bpf_pseudo_kop_call` 在 `do_check_insn` 中触发 `-EFAULT`
 
 ```c
-} else if (insn->src_reg == BPF_PSEUDO_KINSN_CALL) {
-    verbose(env, "internal error: kinsn call reached verifier without proof lowering\n");
+} else if (insn->src_reg == BPF_PSEUDO_KOP_CALL) {
+    verbose(env, "internal error: kop call reached verifier without proof lowering\n");
     return -EFAULT;
 }
 ```
@@ -594,37 +594,37 @@ static int check_kinsn_sidecar_insn(struct bpf_verifier_env *env, ...)
 
 ## 10. `arch/x86/net/bpf_jit_comp.c` — x86 JIT
 
-### 10.1 [MEDIUM] `emit_kinsn_desc_call` 使用栈上 `BPF_MAX_INSN_SIZE` 字节的 scratch buffer
+### 10.1 [MEDIUM] `emit_kop_desc_call` 使用栈上 `BPF_MAX_INSN_SIZE` 字节的 scratch buffer
 
 ```c
 u8 scratch[BPF_MAX_INSN_SIZE];
 ```
 
-`BPF_MAX_INSN_SIZE` 通常是 15（x86 最长指令）或更大的值。如果 `max_emit_bytes` 可以很大（如 256 字节），栈上分配可能溢出。虽然有 `if (kinsn->max_emit_bytes > BPF_MAX_INSN_SIZE) return -E2BIG` 保护，但 `BPF_MAX_INSN_SIZE` 的定义需要确认是否足够。
+`BPF_MAX_INSN_SIZE` 通常是 15（x86 最长指令）或更大的值。如果 `max_emit_bytes` 可以很大（如 256 字节），栈上分配可能溢出。虽然有 `if (kop->max_emit_bytes > BPF_MAX_INSN_SIZE) return -E2BIG` 保护，但 `BPF_MAX_INSN_SIZE` 的定义需要确认是否足够。
 
 ### 10.2 [MEDIUM] `BPF_ALU64|BPF_MOV|BPF_K` 的 sidecar skip 位置可能影响其他 MOV_K 指令
 
 ```c
 case BPF_ALU64 | BPF_MOV | BPF_K:
 case BPF_ALU | BPF_MOV | BPF_K:
-+   if (bpf_kinsn_is_sidecar_insn(insn))
++   if (bpf_kop_is_sidecar_insn(insn))
 +       break;
     emit_mov_imm32(&prog, ...);
 ```
 
-`bpf_kinsn_is_sidecar_insn` 检查 `code == (BPF_ALU64|BPF_MOV|BPF_K) && src_reg == BPF_PSEUDO_KINSN_SIDECAR`。这意味着 `BPF_ALU|BPF_MOV|BPF_K`（32-bit MOV）的 case 也会经过这个检查。虽然 sidecar 只使用 `BPF_ALU64|BPF_MOV|BPF_K`，检查不会匹配 32-bit case，但 fallthrough 位置在两个 case label 之间，每个 32-bit MOV_K 都会执行一次额外的 `bpf_kinsn_is_sidecar_insn` 检查——这是 JIT 编译时的 micro-overhead。
+`bpf_kop_is_sidecar_insn` 检查 `code == (BPF_ALU64|BPF_MOV|BPF_K) && src_reg == BPF_PSEUDO_KOP_SIDECAR`。这意味着 `BPF_ALU|BPF_MOV|BPF_K`（32-bit MOV）的 case 也会经过这个检查。虽然 sidecar 只使用 `BPF_ALU64|BPF_MOV|BPF_K`，检查不会匹配 32-bit case，但 fallthrough 位置在两个 case label 之间，每个 32-bit MOV_K 都会执行一次额外的 `bpf_kop_is_sidecar_insn` 检查——这是 JIT 编译时的 micro-overhead。
 
 ---
 
 ## 11. `arch/arm64/net/bpf_jit_comp.c` — ARM64 JIT
 
-### 11.1 [HIGH] `emit_kinsn_desc_call_arm64` 直接写入 `ctx->image` 而非 scratch buffer
+### 11.1 [HIGH] `emit_kop_desc_call_arm64` 直接写入 `ctx->image` 而非 scratch buffer
 
 ```c
-n_insns = kinsn->emit_arm64(ctx->image, &ctx->idx, ctx->write, payload, bpf_prog);
+n_insns = kop->emit_arm64(ctx->image, &ctx->idx, ctx->write, payload, bpf_prog);
 if (n_insns < 0) return n_insns;
 if (ctx->idx - saved_idx != n_insns) return -EFAULT;
-if (n_insns * 4 > kinsn->max_emit_bytes) return -EFAULT;
+if (n_insns * 4 > kop->max_emit_bytes) return -EFAULT;
 ```
 
 与 x86 不同，ARM64 直接让模块回调写入 JIT image。如果回调写入超过声明的 `max_emit_bytes`，后验证（`ctx->idx - saved_idx != n_insns`）会检测到不一致，但写入已经发生——可能破坏后续指令或越界写入。
@@ -634,7 +634,7 @@ if (n_insns * 4 > kinsn->max_emit_bytes) return -EFAULT;
 ### 11.2 [LOW] `build_insn` 开头的 sidecar skip 对性能无影响但增加了代码路径
 
 ```c
-if (bpf_kinsn_is_sidecar_insn(insn))
+if (bpf_kop_is_sidecar_insn(insn))
     return 0;
 ```
 
@@ -665,21 +665,21 @@ INIT_LIST_HEAD(&fp->aux->trampoline_users);
 
 ## 14. 缺失功能
 
-### 14.1 [HIGH] 缺少 `bpf_kinsn_region` 结构定义
+### 14.1 [HIGH] 缺少 `bpf_kop_region` 结构定义
 
-diff 中使用了 `struct bpf_kinsn_region`，但未包含其定义（应在 `include/linux/bpf_verifier.h` 中）。patch 不完整。
+diff 中使用了 `struct bpf_kop_region`，但未包含其定义（应在 `include/linux/bpf_verifier.h` 中）。patch 不完整。
 
 ### 14.2 [HIGH] 缺少 verifier env 字段的定义
 
-`env->kinsn_regions`、`env->kinsn_region_cnt`、`env->kinsn_region_cap`、`env->kinsn_call_cnt` 在 `struct bpf_verifier_env` 中的定义未包含在 diff 中。
+`env->kop_regions`、`env->kop_region_cnt`、`env->kop_region_cap`、`env->kop_call_cnt` 在 `struct bpf_verifier_env` 中的定义未包含在 diff 中。
 
 ### 14.3 [HIGH] 缺少 `bpf_prog_refresh_xdp` 的实现
 
 只有声明，没有实现。
 
-### 14.4 [MEDIUM] 缺少 `btf_kfunc_id_set::kinsn_descs` 字段定义
+### 14.4 [MEDIUM] 缺少 `btf_kfunc_id_set::kop_descs` 字段定义
 
-`kset->kinsn_descs` 被引用但 `struct btf_kfunc_id_set` 的修改不在 diff 中。
+`kset->kop_descs` 被引用但 `struct btf_kfunc_id_set` 的修改不在 diff 中。
 
 ### 14.5 [MEDIUM] 缺少 selftests
 

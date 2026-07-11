@@ -3152,9 +3152,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 3770, site pc 103)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3770, site pc 794)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3770, site pc 809)": 1
+                "kop site in program with tail-call helper (tail call pc 3770, site pc 103)": 1,
+                "kop site in program with tail-call helper (tail call pc 3770, site pc 794)": 1,
+                "kop site in program with tail-call helper (tail call pc 3770, site pc 809)": 1
               }
             },
             "error": null,
@@ -3204,7 +3204,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 3770, site pc 41)": 1
+                "kop site in program with tail-call helper (tail call pc 3770, site pc 41)": 1
               }
             },
             "error": null,
@@ -3488,9 +3488,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 2466, site pc 103)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2466, site pc 800)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2466, site pc 815)": 1
+                "kop site in program with tail-call helper (tail call pc 2466, site pc 103)": 1,
+                "kop site in program with tail-call helper (tail call pc 2466, site pc 800)": 1,
+                "kop site in program with tail-call helper (tail call pc 2466, site pc 815)": 1
               }
             },
             "error": null,
@@ -3508,11 +3508,11 @@
               "sites_matched": 5,
               "sites_skipped": 5,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 2466, site pc 1426)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2466, site pc 1568)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2466, site pc 1698)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2466, site pc 1825)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2466, site pc 1954)": 1
+                "kop site in program with tail-call helper (tail call pc 2466, site pc 1426)": 1,
+                "kop site in program with tail-call helper (tail call pc 2466, site pc 1568)": 1,
+                "kop site in program with tail-call helper (tail call pc 2466, site pc 1698)": 1,
+                "kop site in program with tail-call helper (tail call pc 2466, site pc 1825)": 1,
+                "kop site in program with tail-call helper (tail call pc 2466, site pc 1954)": 1
               }
             },
             "error": null,
@@ -3546,7 +3546,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 2466, site pc 41)": 1
+                "kop site in program with tail-call helper (tail call pc 2466, site pc 41)": 1
               }
             },
             "error": null,
@@ -3944,9 +3944,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 103)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 776)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 791)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 103)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 776)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 791)": 1
               }
             },
             "error": null,
@@ -3964,11 +3964,11 @@
               "sites_matched": 5,
               "sites_skipped": 5,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1387)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1529)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1659)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1786)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1913)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1387)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1529)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1659)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1786)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1913)": 1
               }
             },
             "error": null,
@@ -4003,7 +4003,7 @@
               "sites_skipped": 2,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r7)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 41)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 41)": 1
               }
             },
             "error": null,
@@ -4177,9 +4177,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 103)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 776)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 791)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 103)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 776)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 791)": 1
               }
             },
             "error": null,
@@ -4197,11 +4197,11 @@
               "sites_matched": 5,
               "sites_skipped": 5,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1387)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1529)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1659)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1786)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1913)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1387)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1529)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1659)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1786)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1913)": 1
               }
             },
             "error": null,
@@ -4236,7 +4236,7 @@
               "sites_skipped": 2,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r7)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 41)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 41)": 1
               }
             },
             "error": null,
@@ -4410,9 +4410,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 103)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 776)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 791)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 103)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 776)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 791)": 1
               }
             },
             "error": null,
@@ -4430,11 +4430,11 @@
               "sites_matched": 5,
               "sites_skipped": 5,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1387)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1529)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1659)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1786)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1913)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1387)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1529)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1659)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1786)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1913)": 1
               }
             },
             "error": null,
@@ -4469,7 +4469,7 @@
               "sites_skipped": 2,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r7)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 41)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 41)": 1
               }
             },
             "error": null,
@@ -4643,9 +4643,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 103)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 776)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 791)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 103)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 776)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 791)": 1
               }
             },
             "error": null,
@@ -4663,11 +4663,11 @@
               "sites_matched": 5,
               "sites_skipped": 5,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1387)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1529)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1659)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1786)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1913)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1387)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1529)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1659)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1786)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1913)": 1
               }
             },
             "error": null,
@@ -4702,7 +4702,7 @@
               "sites_skipped": 2,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r7)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 41)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 41)": 1
               }
             },
             "error": null,
@@ -4876,9 +4876,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 103)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 776)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 791)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 103)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 776)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 791)": 1
               }
             },
             "error": null,
@@ -4896,11 +4896,11 @@
               "sites_matched": 5,
               "sites_skipped": 5,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1387)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1529)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1659)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1786)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1913)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1387)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1529)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1659)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1786)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1913)": 1
               }
             },
             "error": null,
@@ -4935,7 +4935,7 @@
               "sites_skipped": 2,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r7)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 41)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 41)": 1
               }
             },
             "error": null,
@@ -5109,9 +5109,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 103)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 776)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 791)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 103)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 776)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 791)": 1
               }
             },
             "error": null,
@@ -5129,11 +5129,11 @@
               "sites_matched": 5,
               "sites_skipped": 5,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1387)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1529)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1659)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1786)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 1913)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1387)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1529)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1659)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1786)": 1,
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 1913)": 1
               }
             },
             "error": null,
@@ -5168,7 +5168,7 @@
               "sites_skipped": 2,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r7)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 2436, site pc 41)": 1
+                "kop site in program with tail-call helper (tail call pc 2436, site pc 41)": 1
               }
             },
             "error": null,
@@ -6118,7 +6118,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 1022, site pc 171)": 1
+                "kop site in program with tail-call helper (tail call pc 1022, site pc 171)": 1
               }
             },
             "error": null,
@@ -6169,7 +6169,7 @@
               "sites_skipped": 2,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r7)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 1022, site pc 109)": 1
+                "kop site in program with tail-call helper (tail call pc 1022, site pc 109)": 1
               }
             },
             "error": null,
@@ -6673,11 +6673,11 @@
               "sites_matched": 5,
               "sites_skipped": 5,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 4360, site pc 102)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 4360, site pc 2807)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 4360, site pc 2822)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 4360, site pc 3388)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 4360, site pc 3404)": 1
+                "kop site in program with tail-call helper (tail call pc 4360, site pc 102)": 1,
+                "kop site in program with tail-call helper (tail call pc 4360, site pc 2807)": 1,
+                "kop site in program with tail-call helper (tail call pc 4360, site pc 2822)": 1,
+                "kop site in program with tail-call helper (tail call pc 4360, site pc 3388)": 1,
+                "kop site in program with tail-call helper (tail call pc 4360, site pc 3404)": 1
               }
             },
             "error": null,
@@ -6728,7 +6728,7 @@
               "sites_skipped": 2,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r7)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 4360, site pc 40)": 1
+                "kop site in program with tail-call helper (tail call pc 4360, site pc 40)": 1
               }
             },
             "error": null,
@@ -10936,9 +10936,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 3963, site pc 126)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3963, site pc 796)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3963, site pc 811)": 1
+                "kop site in program with tail-call helper (tail call pc 3963, site pc 126)": 1,
+                "kop site in program with tail-call helper (tail call pc 3963, site pc 796)": 1,
+                "kop site in program with tail-call helper (tail call pc 3963, site pc 811)": 1
               }
             },
             "error": null,
@@ -10989,7 +10989,7 @@
               "sites_skipped": 2,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r8)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3963, site pc 63)": 1
+                "kop site in program with tail-call helper (tail call pc 3963, site pc 63)": 1
               }
             },
             "error": null,
@@ -11165,9 +11165,9 @@
               "sites_matched": 4,
               "sites_skipped": 4,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 6513, site pc 149)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 6513, site pc 3970)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 6513, site pc 810)": 1,
+                "kop site in program with tail-call helper (tail call pc 6513, site pc 149)": 1,
+                "kop site in program with tail-call helper (tail call pc 6513, site pc 3970)": 1,
+                "kop site in program with tail-call helper (tail call pc 6513, site pc 810)": 1,
                 "no dead register available to materialize immediate operand": 1
               }
             },
@@ -11500,9 +11500,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 3962, site pc 126)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3962, site pc 796)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3962, site pc 811)": 1
+                "kop site in program with tail-call helper (tail call pc 3962, site pc 126)": 1,
+                "kop site in program with tail-call helper (tail call pc 3962, site pc 796)": 1,
+                "kop site in program with tail-call helper (tail call pc 3962, site pc 811)": 1
               }
             },
             "error": null,
@@ -11553,7 +11553,7 @@
               "sites_skipped": 2,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r8)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3962, site pc 63)": 1
+                "kop site in program with tail-call helper (tail call pc 3962, site pc 63)": 1
               }
             },
             "error": null,
@@ -11729,11 +11729,11 @@
               "sites_matched": 5,
               "sites_skipped": 5,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 6502, site pc 134)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 6502, site pc 3933)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 6502, site pc 3937)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 6502, site pc 766)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 6502, site pc 781)": 1
+                "kop site in program with tail-call helper (tail call pc 6502, site pc 134)": 1,
+                "kop site in program with tail-call helper (tail call pc 6502, site pc 3933)": 1,
+                "kop site in program with tail-call helper (tail call pc 6502, site pc 3937)": 1,
+                "kop site in program with tail-call helper (tail call pc 6502, site pc 766)": 1,
+                "kop site in program with tail-call helper (tail call pc 6502, site pc 781)": 1
               }
             },
             "error": null,
@@ -11783,7 +11783,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 6502, site pc 72)": 1
+                "kop site in program with tail-call helper (tail call pc 6502, site pc 72)": 1
               }
             },
             "error": null,
@@ -12067,9 +12067,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 3963, site pc 126)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3963, site pc 796)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3963, site pc 811)": 1
+                "kop site in program with tail-call helper (tail call pc 3963, site pc 126)": 1,
+                "kop site in program with tail-call helper (tail call pc 3963, site pc 796)": 1,
+                "kop site in program with tail-call helper (tail call pc 3963, site pc 811)": 1
               }
             },
             "error": null,
@@ -12120,7 +12120,7 @@
               "sites_skipped": 2,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r8)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3963, site pc 63)": 1
+                "kop site in program with tail-call helper (tail call pc 3963, site pc 63)": 1
               }
             },
             "error": null,
@@ -12296,9 +12296,9 @@
               "sites_matched": 4,
               "sites_skipped": 4,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 6513, site pc 149)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 6513, site pc 3970)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 6513, site pc 810)": 1,
+                "kop site in program with tail-call helper (tail call pc 6513, site pc 149)": 1,
+                "kop site in program with tail-call helper (tail call pc 6513, site pc 3970)": 1,
+                "kop site in program with tail-call helper (tail call pc 6513, site pc 810)": 1,
                 "no dead register available to materialize immediate operand": 1
               }
             },
@@ -12521,9 +12521,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 3963, site pc 126)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3963, site pc 796)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3963, site pc 811)": 1
+                "kop site in program with tail-call helper (tail call pc 3963, site pc 126)": 1,
+                "kop site in program with tail-call helper (tail call pc 3963, site pc 796)": 1,
+                "kop site in program with tail-call helper (tail call pc 3963, site pc 811)": 1
               }
             },
             "error": null,
@@ -12574,7 +12574,7 @@
               "sites_skipped": 2,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r8)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3963, site pc 63)": 1
+                "kop site in program with tail-call helper (tail call pc 3963, site pc 63)": 1
               }
             },
             "error": null,
@@ -12638,8 +12638,8 @@
               "sites_matched": 2,
               "sites_skipped": 2,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 3479, site pc 132)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3479, site pc 3349)": 1
+                "kop site in program with tail-call helper (tail call pc 3479, site pc 132)": 1,
+                "kop site in program with tail-call helper (tail call pc 3479, site pc 3349)": 1
               }
             },
             "error": null,
@@ -12689,7 +12689,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 3479, site pc 70)": 1
+                "kop site in program with tail-call helper (tail call pc 3479, site pc 70)": 1
               }
             },
             "error": null,
@@ -12863,9 +12863,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 3962, site pc 126)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3962, site pc 796)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3962, site pc 811)": 1
+                "kop site in program with tail-call helper (tail call pc 3962, site pc 126)": 1,
+                "kop site in program with tail-call helper (tail call pc 3962, site pc 796)": 1,
+                "kop site in program with tail-call helper (tail call pc 3962, site pc 811)": 1
               }
             },
             "error": null,
@@ -12916,7 +12916,7 @@
               "sites_skipped": 2,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r8)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3962, site pc 63)": 1
+                "kop site in program with tail-call helper (tail call pc 3962, site pc 63)": 1
               }
             },
             "error": null,
@@ -12980,8 +12980,8 @@
               "sites_matched": 2,
               "sites_skipped": 2,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 3768, site pc 135)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3768, site pc 3623)": 1
+                "kop site in program with tail-call helper (tail call pc 3768, site pc 135)": 1,
+                "kop site in program with tail-call helper (tail call pc 3768, site pc 3623)": 1
               }
             },
             "error": null,
@@ -13031,7 +13031,7 @@
               "sites_matched": 1,
               "sites_skipped": 1,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 3768, site pc 73)": 1
+                "kop site in program with tail-call helper (tail call pc 3768, site pc 73)": 1
               }
             },
             "error": null,
@@ -13541,15 +13541,15 @@
               "sites_matched": 9,
               "sites_skipped": 9,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 7467, site pc 111)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 7467, site pc 3640)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 7467, site pc 4129)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 7467, site pc 4144)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 7467, site pc 823)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 7467, site pc 840)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 7467, site pc 864)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 7467, site pc 889)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 7467, site pc 904)": 1
+                "kop site in program with tail-call helper (tail call pc 7467, site pc 111)": 1,
+                "kop site in program with tail-call helper (tail call pc 7467, site pc 3640)": 1,
+                "kop site in program with tail-call helper (tail call pc 7467, site pc 4129)": 1,
+                "kop site in program with tail-call helper (tail call pc 7467, site pc 4144)": 1,
+                "kop site in program with tail-call helper (tail call pc 7467, site pc 823)": 1,
+                "kop site in program with tail-call helper (tail call pc 7467, site pc 840)": 1,
+                "kop site in program with tail-call helper (tail call pc 7467, site pc 864)": 1,
+                "kop site in program with tail-call helper (tail call pc 7467, site pc 889)": 1,
+                "kop site in program with tail-call helper (tail call pc 7467, site pc 904)": 1
               }
             },
             "error": null,
@@ -13600,9 +13600,9 @@
               "sites_skipped": 4,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r8)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 7467, site pc 3436)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 7467, site pc 49)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 7467, site pc 6731)": 1
+                "kop site in program with tail-call helper (tail call pc 7467, site pc 3436)": 1,
+                "kop site in program with tail-call helper (tail call pc 7467, site pc 49)": 1,
+                "kop site in program with tail-call helper (tail call pc 7467, site pc 6731)": 1
               }
             },
             "error": null,
@@ -13776,15 +13776,15 @@
               "sites_matched": 9,
               "sites_skipped": 9,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 1830, site pc 102)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 1830, site pc 1866)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 1830, site pc 1881)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 1830, site pc 2494)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 1830, site pc 2497)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 1830, site pc 2595)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 1830, site pc 2644)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 1830, site pc 786)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 1830, site pc 801)": 1
+                "kop site in program with tail-call helper (tail call pc 1830, site pc 102)": 1,
+                "kop site in program with tail-call helper (tail call pc 1830, site pc 1866)": 1,
+                "kop site in program with tail-call helper (tail call pc 1830, site pc 1881)": 1,
+                "kop site in program with tail-call helper (tail call pc 1830, site pc 2494)": 1,
+                "kop site in program with tail-call helper (tail call pc 1830, site pc 2497)": 1,
+                "kop site in program with tail-call helper (tail call pc 1830, site pc 2595)": 1,
+                "kop site in program with tail-call helper (tail call pc 1830, site pc 2644)": 1,
+                "kop site in program with tail-call helper (tail call pc 1830, site pc 786)": 1,
+                "kop site in program with tail-call helper (tail call pc 1830, site pc 801)": 1
               }
             },
             "error": null,
@@ -13835,7 +13835,7 @@
               "sites_skipped": 2,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r8)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 1830, site pc 40)": 1
+                "kop site in program with tail-call helper (tail call pc 1830, site pc 40)": 1
               }
             },
             "error": null,
@@ -14793,9 +14793,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 3802, site pc 102)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3802, site pc 768)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3802, site pc 783)": 1
+                "kop site in program with tail-call helper (tail call pc 3802, site pc 102)": 1,
+                "kop site in program with tail-call helper (tail call pc 3802, site pc 768)": 1,
+                "kop site in program with tail-call helper (tail call pc 3802, site pc 783)": 1
               }
             },
             "error": null,
@@ -14848,7 +14848,7 @@
               "sites_skipped": 2,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r7)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3802, site pc 40)": 1
+                "kop site in program with tail-call helper (tail call pc 3802, site pc 40)": 1
               }
             },
             "error": null,
@@ -17932,9 +17932,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 3576, site pc 107)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3576, site pc 770)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3576, site pc 785)": 1
+                "kop site in program with tail-call helper (tail call pc 3576, site pc 107)": 1,
+                "kop site in program with tail-call helper (tail call pc 3576, site pc 770)": 1,
+                "kop site in program with tail-call helper (tail call pc 3576, site pc 785)": 1
               }
             },
             "error": null,
@@ -17985,7 +17985,7 @@
               "sites_skipped": 2,
               "skip_reasons": {
                 "different-base memcpy alias not provably safe (src r0, dst r8)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3576, site pc 45)": 1
+                "kop site in program with tail-call helper (tail call pc 3576, site pc 45)": 1
               }
             },
             "error": null,
@@ -18049,9 +18049,9 @@
               "sites_matched": 3,
               "sites_skipped": 3,
               "skip_reasons": {
-                "kinsn site in program with tail-call helper (tail call pc 3608, site pc 124)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3608, site pc 796)": 1,
-                "kinsn site in program with tail-call helper (tail call pc 3608, site pc 811)": 1
+                "kop site in program with tail-call helper (tail call pc 3608, site pc 124)": 1,
+                "kop site in program with tail-call helper (tail call pc 3608, site pc 796)": 1,
+                "kop site in program with tail-call helper (tail call pc 3608, site pc 811)": 1
               }
             },
             "error": null,

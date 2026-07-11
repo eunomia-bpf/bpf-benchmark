@@ -1,6 +1,6 @@
 # bpfopt/llvm O3 roundtrip full re-sweep (post ENOSPC + empty-target loader fixes) — 2026-05-20
 
-Binary: `bpfopt/llvm/build/bpfopt` (system LLVM-18, NO kinsn). Loader: `bpfopt-loader`.
+Binary: `bpfopt/llvm/build/bpfopt` (system LLVM-18, NO kop). Loader: `bpfopt-loader`.
 Raw: `o3_resweep_summary_20260520.tsv` + `/tmp/o3-resweep-20260520/`.
 
 ## Verdict

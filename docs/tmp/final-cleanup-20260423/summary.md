@@ -36,8 +36,8 @@ Scope:
 
 - Removed decorative section comments from `Makefile`.
 - Removed stale `--rejit-passes ...` help examples and replaced them with current live examples:
-  - `VM_CORPUS_ARGS="--no-kinsn"`
-  - `E2E_ARGS="--no-kinsn"`
+  - `VM_CORPUS_ARGS="--no-kop"`
+  - `E2E_ARGS="--no-kop"`
 - While in the same file, also deleted dead helper vars `empty`, `space`, and `comma` that were no longer referenced.
 
 ### 5. Same-scope dead leftovers found during final sweep

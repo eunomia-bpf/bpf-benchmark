@@ -16,7 +16,7 @@ agent benchmark。我们的目标不是证明某一个 eBPF pass 已经稳定带
 我们围绕六个问题组织评估：
 
 - **RQ1：任务覆盖。** BPFOptBench 能否表达真实 eBPF 优化任务，而不是只覆盖
-  一个固定 pass 或一个 kinsn 后端？
+  一个固定 pass 或一个 kop 后端？
 - **RQ2：难度来源。** 现有数据是否说明 eBPF 优化不是简单的静态 pass 选择问题？
 - **RQ3：组合 oracle。** verifier 接受是否足够？还是必须同时检查 app、workload、
   performance 和 benchmark integrity？
@@ -24,7 +24,7 @@ agent benchmark。我们的目标不是证明某一个 eBPF pass 已经稳定带
   human-tuned 策略？
 - **RQ5：反馈格式。** 结构化反馈是否比 raw log 或 one-shot prompt 更能帮助 agent
   做出有效决策？
-- **RQ6：后端依赖。** benchmark 是否依赖 kinsn/kprog，还是 bytecode-only 任务也能
+- **RQ6：后端依赖。** benchmark 是否依赖 kop/kprog，还是 bytecode-only 任务也能
   形成有意义的评测？
 
 当前已有数据主要支撑 RQ1-RQ3 的动机和可行性；RQ4-RQ6 需要 frozen task set 和
@@ -151,7 +151,7 @@ BPFOptBench 的任务不应绑定到某一个 optimizer implementation。任务�
 同一份 pass-signal audit 显示：完成的单 pass run 中，没有一个 pass 具备
 paper-ready 的稳定收益。`map_inline` 在一个早期 7-app run 中对 OTEL 有强 signal
 （app-level `B=0.6567`，`applied=1192`），但在后续命名 run 中没有复现到足够强的
-paper-grade 结论。combined kinsn run 也出现 OTEL 低 ratio，但 single-pass ablation
+paper-grade 结论。combined kop run 也出现 OTEL 低 ratio，但 single-pass ablation
 无法把收益归因到具体 pass。
 
 这说明 benchmark 不能只看 `applied` 数量。agent 的任务不只是“找到可应用 rewrite”，
@@ -268,18 +268,18 @@ to reason about eBPF-specific accounting.”
 这个实验可以先做 offline：让 agent 读已有 pass-signal/policy 文档，判断结果是否可信、
 下一步应该跑什么。这样成本低，而且能先验证 task/interface/prompt 设计。
 
-## 5.7 RQ6: Is The Benchmark Independent Of Kinsn?
+## 5.7 RQ6: Is The Benchmark Independent Of KOperation?
 
-论文必须避免让 reviewer 误解为“BPFOptBench 只是 kinsn 的新包装”。评估中应明确分层：
+论文必须避免让 reviewer 误解为“BPFOptBench 只是 kop 的新包装”。评估中应明确分层：
 
 | Track | Action Space | 第一版状态 |
 |---|---|---|
 | bytecode-only | `wide_mem`, `map_inline`, `const_prop`, `dce`, pass policy | 必须有 |
 | live ReJIT | post-load bytecode rewrite + verifier/JIT feedback | 主路径 |
-| kinsn-enabled | `rotate`, `cond_select`, `extract`, `endian_fusion`, `bulk_memory`, `prefetch` | 可作为扩展后端 |
+| kop-enabled | `rotate`, `cond_select`, `extract`, `endian_fusion`, `bulk_memory`, `prefetch` | 可作为扩展后端 |
 | source/LLVM | source edit、compiler flag、LLVM backend patch | 未来 adapter 或 smoke |
 
-最低要求是至少一个 meaningful task track 不依赖 kinsn。这样 contribution 才是 agentic eBPF
+最低要求是至少一个 meaningful task track 不依赖 kop。这样 contribution 才是 agentic eBPF
 optimization benchmark，而不是某个 kernel-extension benchmark。
 
 ## 5.8 Integrity Evaluation
@@ -304,12 +304,12 @@ protected path、run command、result provenance 和 fresh-VM replay。这个表
 | 图表 | 讲什么 | 当前数据状态 |
 |---|---|---|
 | Fig. 1 | benchmark loop：agent action -> real app loader -> verifier/JIT/workload -> raw feedback -> hidden evaluator | design-ready |
-| Table 1 | optimization space：source、LLVM、bytecode、live ReJIT、kinsn | design-ready |
+| Table 1 | optimization space：source、LLVM、bytecode、live ReJIT、kop | design-ready |
 | Fig. 2 | historical difficulty：noop floor、pass instability、applied-count mismatch | 有现有数据 |
 | Table 2 | oracle/failure taxonomy | 需要整理 task examples |
 | Fig. 3 | agent/baseline scoreboard | 待跑 |
 | Fig. 4 | raw vs structured vs closed-loop feedback | 待跑，可先 offline |
-| Table 3 | bytecode-only vs kinsn-enabled track | 待跑/需 task manifest |
+| Table 3 | bytecode-only vs kop-enabled track | 待跑/需 task manifest |
 | Table 4 | integrity failures and hidden evaluator catches | 需要实现 hidden evaluator |
 
 ## 5.10 What Is The Most Valuable Evaluation?
@@ -371,13 +371,13 @@ no-op、static、random、human 和 agent。
 
 | Claim | 当前状态 | 推荐写法 |
 |---|---|---|
-| BPFOptBench 和 BpfReJIT/kinsn/native-loader 是不同 contribution | supported | 它评测 agent task/oracle，而不是提出一个 optimizer 机制 |
+| BPFOptBench 和 BpfReJIT/kop/native-loader 是不同 contribution | supported | 它评测 agent task/oracle，而不是提出一个 optimizer 机制 |
 | eBPF optimization 难、噪声大、policy-sensitive | supported | 用 historical difficulty study 支撑 |
 | 真实 evaluator 可以基于当前 repo 构建 | partially supported | v3 six-app raw run 支撑 substrate，hidden evaluator 待实现 |
 | session history 可转成真实任务 | partially supported | 有聚合证据，但需要 task manifest 和 labels |
 | structured feedback improves decisions | unsupported until run | 先做 offline ablation |
 | agents outperform baselines | unsupported until run | frozen live scoreboard 后再说 |
-| benchmark 不依赖 kinsn | planned | 必须放入 bytecode-only task track |
+| benchmark 不依赖 kop | planned | 必须放入 bytecode-only task track |
 
 因此，当前最稳的论文定位是：
 

@@ -12,8 +12,8 @@ Date: 2026-03-26
 - Detects straight-line scalarized `memcpy` runs formed by adjacent `LDX_MEM + STX_MEM` pairs with stable bases and contiguous offsets.
 - Detects straight-line scalarized zeroing `memset` runs formed by contiguous `ST_MEM` / `STX_MEM` stores with a stable base.
 - Enforces the `32B` minimum threshold.
-- Chunks long runs into packed kinsn calls with a `128B` maximum chunk size.
-- Emits packed `sidecar + BPF_PSEUDO_KINSN_CALL` replacements for:
+- Chunks long runs into packed kop calls with a `128B` maximum chunk size.
+- Emits packed `sidecar + BPF_PSEUDO_KOP_CALL` replacements for:
   - `bpf_memcpy_bulk`
   - `bpf_memset_bulk`
 - Skips safely when the required kfunc or packed ABI support is unavailable.

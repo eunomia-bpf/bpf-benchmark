@@ -1,10 +1,10 @@
-# P3 Single-Block Kinsn Pass BBProgram Migration
+# P3 Single-Block KOperation Pass BBProgram Migration
 
 Date: 2026-05-10
 
 ## Summary
 
-Migrated the five single-block C-rated kinsn passes to BBProgram-native production paths. The pass entries now iterate `prog.blocks()` / `prog.sites_in_block(...)` and apply edits with `prog.replace_range(...)`; the old lowering, flat linear views, local original-PC replacement shims, and local prefetch CFG are gone from these files.
+Migrated the five single-block C-rated kop passes to BBProgram-native production paths. The pass entries now iterate `prog.blocks()` / `prog.sites_in_block(...)` and apply edits with `prog.replace_range(...)`; the old lowering, flat linear views, local original-PC replacement shims, and local prefetch CFG are gone from these files.
 
 ## Per-Pass Status
 

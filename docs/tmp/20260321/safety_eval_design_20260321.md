@@ -129,7 +129,7 @@ Based on the security model in the plan doc (section 4.3), BpfReJIT makes these 
 | S2 | Failed REJIT does not affect the running program | Negative tests: verify original program still works after rejected REJIT |
 | S3 | REJIT requires CAP_BPF + CAP_SYS_ADMIN | Privilege tests: unprivileged REJIT returns EPERM |
 | S4 | Concurrent REJIT + execution is safe (no crash/UAF) | Stress tests: concurrent test_run + REJIT |
-| S5 | kinsn modules have safe lifecycle (load/unload during program execution) | Module lifecycle tests |
+| S5 | kop modules have safe lifecycle (load/unload during program execution) | Module lifecycle tests |
 | S6 | Daemon correctness: transformed program produces same results | Differential tests: stock vs. REJIT output comparison |
 | S7 | Fail-safe: daemon bug cannot crash kernel | Fuzz tests: random bytecode mutations via REJIT |
 
@@ -146,7 +146,7 @@ The kernel review identified critical issues that our tests must also cover:
 | Incomplete `prog_flags` replay | Major | Negative test: REJIT with flag-dependent behavior |
 | Torn reader state during concurrent REJIT | Major | Concurrent GET_INFO_BY_FD + REJIT |
 | `load_time` semantic change | Minor | Info API consistency test |
-| kinsn registry global string collision | Major | Module test: same-name kfuncs in different BTFs |
+| kop registry global string collision | Major | Module test: same-name kfuncs in different BTFs |
 
 ---
 
@@ -300,7 +300,7 @@ Thread 4 (dmesg_monitor):
 | C03 | Rapid rejit toggle | 1 exec + 1 rejit (no sleep) | 10s | No crash |
 | C04 | Concurrent info read | 1 exec + 1 rejit + 1 info | 10s | No torn state crash |
 | C05 | REJIT during attached XDP | exec via XDP + rejit | 10s | No UAF (addresses kernel review finding) |
-| C06 | Module unload during REJIT | rejit + module rmmod | 10s | No crash (kinsn lifecycle) |
+| C06 | Module unload during REJIT | rejit + module rmmod | 10s | No crash (kop lifecycle) |
 
 **Invariants checked**:
 1. `retval` is always in the set `{result_of_old_program, result_of_new_program}`
@@ -365,7 +365,7 @@ For each benchmark in micro/config/micro_pure_jit.yaml:
 **Edge cases to test**:
 - Programs where daemon finds no optimization sites (REJIT should be no-op or identity)
 - Programs with every supported transformation family (wide, rotate, cmov, bextr, branch_flip, endian)
-- Programs with kinsn calls (test with and without module loaded)
+- Programs with kop calls (test with and without module loaded)
 
 **Input diversity**: For each program, test with:
 1. The standard generated input (from input_generators.py)
@@ -395,22 +395,22 @@ For each benchmark in micro/config/micro_pure_jit.yaml:
 
 **Implementation file**: `tests/safety/negative/test_rejit_info_consistency.c` (can be merged into negative suite)
 
-### G. Module Lifecycle Test (kinsn)
+### G. Module Lifecycle Test (kop)
 
-**Goal**: Demonstrate claim S5 (kinsn modules have safe lifecycle).
+**Goal**: Demonstrate claim S5 (kop modules have safe lifecycle).
 
 **Test cases**:
 
 | # | Scenario | Expected |
 |---|----------|----------|
-| M01 | Load module -> load program with kinsn -> execute | Inline emission, correct result |
-| M02 | Load program with kinsn -> unload module -> execute | Fallback to normal CALL, correct result |
-| M03 | Load module -> REJIT to add kinsn call -> execute | Inline emission after REJIT |
-| M04 | REJIT to add kinsn call -> unload module -> execute | Graceful fallback |
+| M01 | Load module -> load program with kop -> execute | Inline emission, correct result |
+| M02 | Load program with kop -> unload module -> execute | Fallback to normal CALL, correct result |
+| M03 | Load module -> REJIT to add kop call -> execute | Inline emission after REJIT |
+| M04 | REJIT to add kop call -> unload module -> execute | Graceful fallback |
 | M05 | Rapid module load/unload during REJIT | No crash |
 | M06 | Two modules with same-name kfunc (collision test) | Deterministic resolution or error |
 
-**Implementation file**: `tests/safety/module/test_kinsn_lifecycle.c`
+**Implementation file**: `tests/safety/module/test_kop_lifecycle.c`
 
 ---
 
@@ -431,7 +431,7 @@ tests/
     differential/
       test_rejit_differential.py      # Stock vs REJIT result comparison (Part III.E)
     module/
-      test_kinsn_lifecycle.c          # kinsn module load/unload lifecycle (Part III.G)
+      test_kop_lifecycle.c          # kop module load/unload lifecycle (Part III.G)
     Makefile                          # Build all C test programs
     run_all.sh                        # Run full safety suite in VM
     README.md                         # Test descriptions and usage
@@ -461,7 +461,7 @@ The `tests/safety/Makefile` should:
 
 `tests/safety/run_all.sh` should:
 1. Boot VM with BpfReJIT kernel (`vng --run vendor/linux-framework/arch/x86/boot/bzImage`)
-2. Load kinsn modules if available
+2. Load kop modules if available
 3. Run each test category in order: privilege -> negative -> info -> differential -> fuzz -> concurrent -> module
 4. Collect dmesg before and after each category
 5. Report summary: PASS/FAIL per category, total kernel warnings, any crashes
@@ -486,7 +486,7 @@ The `tests/safety/Makefile` should:
 | Fuzzing | 100K+ | Random bytecode mutation + REJIT submission | 0 kernel crashes; >99% rejection rate |
 | Concurrent stress | 6 scenarios | Parallel execution + REJIT + info reads | 0 crashes; 0 torn states; retvals always in expected set |
 | Differential | 62 micro + 91 corpus | Compare stock vs. REJIT-optimized execution results | 100% result equivalence across all inputs |
-| kinsn lifecycle | 6 scenarios | Module load/unload during program execution | 0 crashes; correct fallback behavior |
+| kop lifecycle | 6 scenarios | Module load/unload during program execution | 0 crashes; correct fallback behavior |
 
 **Key sentences for the paper**:
 
@@ -523,7 +523,7 @@ The `tests/safety/Makefile` should:
 | P1 | Concurrent stress test (C) | 2-3 days | Yes |
 | P1 | Privilege model test (D) | 1 day | Yes |
 | P2 | Fuzz testing (B) | 3-5 days | Nice-to-have |
-| P2 | Module lifecycle test (G) | 1-2 days | Only if kinsn in paper |
+| P2 | Module lifecycle test (G) | 1-2 days | Only if kop in paper |
 | P3 | Info API consistency (F) | 1 day | After kernel fixes |
 
 **Total estimated effort**: 10-16 days for P0+P1+P2.

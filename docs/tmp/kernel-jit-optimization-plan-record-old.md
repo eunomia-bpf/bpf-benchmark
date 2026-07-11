@@ -313,8 +313,8 @@
 - **1.1 `bpfopt-core` 合并进 `bpfopt`**：`bpfopt` 现在同时提供 lib + bin，消除 `-core` 命名（`7d34960`、`d973a4f`、`de64cde`；见 `docs/tmp/bpfopt-merge-review-20260428.md`、`docs/tmp/unit-test-audit-20260428.md`）。
 - **1.2 `kernel-sys` crate**：标准 BPF 命令走 `libbpf-rs`/`libbpf-sys`，项目 fork 的 `BPF_PROG_REJIT`/`BPF_PROG_GET_ORIGINAL` 留在 syscall 边界内（`9f59ee4`、`588da36`；见 `docs/tmp/kernel-sys-review-20260428.md`、`docs/tmp/kernel-sys-fix-review-20260428.md`、`docs/tmp/libbpf-rs-eval-20260428.md`）。其中 `GET_ORIGINAL` 通过 `BPF_OBJ_GET_INFO_BY_FD` 加 fork 扩展 `orig_prog_*` 实现，不是独立 syscall cmd。
 - **1.2.5 `bpfopt` 切到 `kernel-sys` 类型**：`BpfInsn = #[repr(transparent)] kernel_sys::bpf_insn`（`a441e22`；见 `docs/tmp/bpfopt-kernel-sys-migration-plan-20260428.md`、`docs/tmp/bpfopt-kernel-sys-fix-review-20260428.md`）。
-- **1.3 `bpfopt` CLI 单 pass 化**：优化入口要求 `--pass <name>`，一次只跑一个 pass；删除默认 `optimize` pipeline 和多 pass list。`list-passes` 保留。缺少 required side-input 或 kinsn 不可用时退出 1（见 `docs/tmp/full-matrix-20260430/per-pass-rejit-impl.md`）。
-- **1.4 daemon-owned `bpfget` library**：live bytecode/metadata/map snapshot 已移入 daemon workspace；`ProgramSnapshot` 不再保存 BTF func_info/line_info bytes，不做 BTF normalize/replay；kinsn target probing 由 daemon 进程内调用（见 `docs/tmp/full-matrix-20260430/v3-arch-pivot.md`）。
+- **1.3 `bpfopt` CLI 单 pass 化**：优化入口要求 `--pass <name>`，一次只跑一个 pass；删除默认 `optimize` pipeline 和多 pass list。`list-passes` 保留。缺少 required side-input 或 kop 不可用时退出 1（见 `docs/tmp/full-matrix-20260430/per-pass-rejit-impl.md`）。
+- **1.4 daemon-owned `bpfget` library**：live bytecode/metadata/map snapshot 已移入 daemon workspace；`ProgramSnapshot` 不再保存 BTF func_info/line_info bytes，不做 BTF normalize/replay；kop target probing 由 daemon 进程内调用（见 `docs/tmp/full-matrix-20260430/v3-arch-pivot.md`）。
 - **1.5 per-pass direct ReJIT**：`bpfverify` / `bpfrejit` crate 和 daemon `dry_run.rs` 已删除；daemon 对默认 12 pass 逐个调用 `bpfopt --pass`，每个 pass 输出立即 `kernel_sys::prog_rejit()`，主路径不做 `BPF_PROG_LOAD` dry-run。
 - **1.6 minimal fd_array**：daemon 只从 `prog_info.used_maps` / `map_ids` 打开 map fd 构造 `fd_array`；不追加 BTF fd，不做 pseudo-map fd 到 idx 的 rewrite。
 - **3.3 verifier states from ReJIT log**：daemon 解析每次成功 per-pass `BPF_PROG_REJIT(log_level=2)` 的 verifier log，写 `verifier-states.json` 供后续 `map_inline` / `const_prop` 使用。
@@ -325,7 +325,7 @@
 
 - **2.1 verifier-state parser 迁移**：verifier log parser 已移到 `kernel-sys`，供 daemon per-pass ReJIT log side-input 使用。
 - **2.2 `bpfprof` CLI**：task #43 进行中（见 `docs/tmp/bpfprof-design-20260428.md`）。
-- **target probing**：daemon-owned `bpfget` library 负责 kinsn BTF 自动探测并写 `bpfopt --target` side-input。
+- **target probing**：daemon-owned `bpfget` library 负责 kop BTF 自动探测并写 `bpfopt --target` side-input。
 
 ### Phase 3（集成）— 完成（#44 + #45）
 

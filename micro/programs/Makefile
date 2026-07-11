@@ -3,10 +3,10 @@ SYS_INCLUDE_FLAGS ?= $(if $(DEB_HOST_MULTIARCH),-I/usr/include/$(DEB_HOST_MULTIA
 OUTPUT_DIR ?= $(CURDIR)
 CLANG ?= clang
 BPFREJIT_MICRO_BPF_COMPILER ?= clang
-BPF_KINSN_LLC ?=
-BPF_KINSN_LLC_FLAGS ?=
-BPF_KINSN_TRIPLE ?= bpfel
-BPF_KINSN_CPU ?= v3
+BPF_KOP_LLC ?=
+BPF_KOP_LLC_FLAGS ?=
+BPF_KOP_TRIPLE ?= bpfel
+BPF_KOP_CPU ?= v3
 NATIVE_TARGET ?=
 NATIVE_ARCH ?= $(shell uname -m)
 REPO_ROOT := $(abspath $(CURDIR)/../..)
@@ -40,10 +40,10 @@ NATIVE_DEPS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.native.d,$(BPF_SRCS))
 all: $(BPF_OBJS) $(NATIVE_SOS)
 
 $(OUTPUT_DIR)/%.bpf.o: %.bpf.c | $(OUTPUT_DIR)
-ifeq ($(BPFREJIT_MICRO_BPF_COMPILER),kinsn-llvm)
-	@test -x "$(BPF_KINSN_LLC)" || { echo "BPF_KINSN_LLC must point to the kinsn-enabled llc" >&2; exit 1; }
+ifeq ($(BPFREJIT_MICRO_BPF_COMPILER),kop-llvm)
+	@test -x "$(BPF_KOP_LLC)" || { echo "BPF_KOP_LLC must point to the kop-enabled llc" >&2; exit 1; }
 	$(CLANG) $(CFLAGS) -MF "$(OUTPUT_DIR)/$*.bpf.d" -MT "$@" -S -emit-llvm -c -o "$(OUTPUT_DIR)/$*.bpf.ll" "$<"
-	"$(BPF_KINSN_LLC)" -mtriple="$(BPF_KINSN_TRIPLE)" -mcpu="$(BPF_KINSN_CPU)" -filetype=obj -bpf-enable-kinsn-select $(BPF_KINSN_LLC_FLAGS) -o "$@" "$(OUTPUT_DIR)/$*.bpf.ll"
+	"$(BPF_KOP_LLC)" -mtriple="$(BPF_KOP_TRIPLE)" -mcpu="$(BPF_KOP_CPU)" -filetype=obj -bpf-enable-kop-select $(BPF_KOP_LLC_FLAGS) -o "$@" "$(OUTPUT_DIR)/$*.bpf.ll"
 else
 	$(CLANG) $(CFLAGS) -MF "$(OUTPUT_DIR)/$*.bpf.d" -MT "$@" -c -o "$@" "$<"
 endif

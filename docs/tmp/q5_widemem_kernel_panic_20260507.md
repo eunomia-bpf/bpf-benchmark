@@ -167,7 +167,7 @@ old: rD = *(u8 *)(base + off)
 new: rD = *(u16/u32/u64 *)(base + off)
 ```
 
-It is a pure BPF bytecode rewrite. It does not emit a `KFUNC_INLINE_EMIT` call and does not depend on a wide-memory kinsn module. The relevant emission is a single `BpfInsn::ldx_mem(size, dst, base, off)` at line `314`.
+It is a pure BPF bytecode rewrite. It does not emit a `KFUNC_INLINE_EMIT` call and does not depend on a wide-memory kop module. The relevant emission is a single `BpfInsn::ldx_mem(size, dst, base, off)` at line `314`.
 
 Safety filters in the pass:
 

@@ -4,8 +4,8 @@
  * harness calling getpid() in a tight loop after attach.
  *
  * Native_lab note: this program type is `kprobe`. To run it via the
- * native_lab kinsn path, the standalone runner would have to load the
- * stub `(sidecar; call kinsn)*N; exit` program with
+ * native_lab kop path, the standalone runner would have to load the
+ * stub `(sidecar; call kop)*N; exit` program with
  * prog_type=BPF_PROG_TYPE_KPROBE and attach it via
  * perf_event_open(PERF_TYPE_TRACEPOINT, kprobe ID) + PERF_EVENT_IOC_SET_BPF.
  * The existing `micro_exec run-native-lab` runner only wires up the

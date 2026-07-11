@@ -74,7 +74,7 @@ Date: 2026-05-12
 ### `bpfopt/crates/bpfopt/src/main_tests.rs`
 
 - Deleted `registered_call_name()`.
-  - Rationale: one-line wrapper around `lookup_by_kinsn_call(...).canonical_name`.
+  - Rationale: one-line wrapper around `lookup_by_kop_call(...).canonical_name`.
 
 ## Tests Kept Despite Review
 

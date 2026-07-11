@@ -131,13 +131,13 @@
     },
     {
       "category": "alu-mix",
-      "description": "Hand-written x86 popcnt kinsn over bitmap words",
+      "description": "Hand-written x86 popcnt kop over bitmap words",
       "expected_result": 12648566,
       "family": "popcount",
-      "hypothesis": "Tests direct popcnt kinsn lowering on a bitmap scan input",
+      "hypothesis": "Tests direct popcnt kop lowering on a bitmap scan input",
       "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bitmap_popcount_scan.mem",
       "io_mode": "staged",
-      "level": "handcraft-kinsn",
+      "level": "handcraft-kop",
       "name": "bitmap_popcount_scan_handcraft",
       "runs": [
         {
@@ -184,7 +184,7 @@
       ],
       "tags": [
         "bitops",
-        "handcraft-kinsn",
+        "handcraft-kop",
         "x86"
       ]
     },
@@ -320,13 +320,13 @@
     },
     {
       "category": "control-flow",
-      "description": "Hand-written x86 test/cmov kinsn over event dispatch input",
+      "description": "Hand-written x86 test/cmov kop over event dispatch input",
       "expected_result": 56,
       "family": "switch-dispatch",
-      "hypothesis": "Tests direct test plus cmov kinsn lowering for branchless event selection",
+      "hypothesis": "Tests direct test plus cmov kop lowering for branchless event selection",
       "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/trace_event_type_switch_dispatch.mem",
       "io_mode": "staged",
-      "level": "handcraft-kinsn",
+      "level": "handcraft-kop",
       "name": "trace_event_type_switch_dispatch_handcraft",
       "runs": [
         {
@@ -374,7 +374,7 @@
       "tags": [
         "branch",
         "dispatch",
-        "handcraft-kinsn",
+        "handcraft-kop",
         "x86"
       ]
     },
@@ -511,13 +511,13 @@
     },
     {
       "category": "alu-mix",
-      "description": "Hand-written x86 rol kinsn over SipHash-style input words",
+      "description": "Hand-written x86 rol kop over SipHash-style input words",
       "expected_result": 4934070464779147397,
       "family": "rotate-hash",
-      "hypothesis": "Tests direct rol kinsn lowering on a rotate-heavy hash input",
+      "hypothesis": "Tests direct rol kop lowering on a rotate-heavy hash input",
       "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/siphash_rotate64_mixer.mem",
       "io_mode": "staged",
-      "level": "handcraft-kinsn",
+      "level": "handcraft-kop",
       "name": "siphash_rotate64_mixer_handcraft",
       "runs": [
         {
@@ -566,7 +566,7 @@
         "compute",
         "rotate",
         "hash",
-        "handcraft-kinsn",
+        "handcraft-kop",
         "x86"
       ]
     },
@@ -703,13 +703,13 @@
     },
     {
       "category": "memory-local",
-      "description": "Hand-written x86 shift and mask kinsns over packed header fields",
+      "description": "Hand-written x86 shift and mask koperation over packed header fields",
       "expected_result": 4715,
       "family": "bitfield-extract",
-      "hypothesis": "Tests direct shr and and kinsn lowering for packed bitfield extraction",
+      "hypothesis": "Tests direct shr and and kop lowering for packed bitfield extraction",
       "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packed_header_bitfield_decode.mem",
       "io_mode": "staged",
-      "level": "handcraft-kinsn",
+      "level": "handcraft-kop",
       "name": "packed_header_bitfield_decode_handcraft",
       "runs": [
         {
@@ -758,7 +758,7 @@
         "memory",
         "fields",
         "bitfield",
-        "handcraft-kinsn",
+        "handcraft-kop",
         "x86"
       ]
     },

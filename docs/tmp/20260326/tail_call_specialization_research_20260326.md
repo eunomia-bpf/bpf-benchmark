@@ -28,7 +28,7 @@
 
 5. **“跨 tail_call 程序做 LTO” 是更强但更难的 phase 2。**  
    它确实有论文价值，但不能建立在“简单 bytecode inline”这种不严谨前提上。tail call 的语义包含“不返回”“重新进入新 prog frame”“受 `tail_call_cnt` 限制”；而 verifier 还明确限制 tail call 与 bpf-to-bpf call 的组合。  
-   结论是：**phase 1 做 dynamic-site inline-cache；phase 2 再讨论 tail-transfer IR/kinsn 与 chain fusion。**
+   结论是：**phase 1 做 dynamic-site inline-cache；phase 2 再讨论 tail-transfer IR/kop 与 chain fusion。**
 
 ## 1. 调研范围与问题重述
 
@@ -690,7 +690,7 @@ tail-call specialization 应完全复用这套分层：
 一旦走到 phase 2，例如：
 
 - 把跨 tail-call 的链融合成一个特殊 IR
-- 或引入 tail-transfer kinsn
+- 或引入 tail-transfer kop
 - 或做跨 prog constprop / DCE
 
 这时 specialized artifact 就和“当前 slot target 是谁”直接绑定了。  
@@ -824,7 +824,7 @@ generic indirect tail_call 的成本包括：
 
 因此 phase 2 若要做得严谨，需要：
 
-1. 新的 tail-transfer IR / kinsn
+1. 新的 tail-transfer IR / kop
 2. 或 kernel 明确支持“frame-reset-preserving inter-prog transfer”
 
 在没有这层 IR 之前，论文里只能把 cross-tail-call LTO 写成**有前景的下一阶段，而不是 phase 1 主实现**。

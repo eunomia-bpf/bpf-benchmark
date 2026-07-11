@@ -7,7 +7,7 @@ The host machine (ASRock Z890M, Intel Core Ultra 9 285K, 125 GiB RAM) has experi
 1. **BPF_PROG_REJIT verifier 安全边界失效**：daemon 生成的 malformed bytecode（错误的 LD_IMM64 scalar loads）通过 REJIT verifier 进入 JIT 执行，导致 guest kernel 执行非法代码。**无论 daemon 发送什么 bytecode，kernel verifier 必须拦住** — 这是内核侧 bug，不是用户态问题。
 2. **Guest kernel crash → QEMU segfault**：malformed JIT code 在 guest 中执行导致非法内存访问，QEMU TCG 在 `tlb_set_dirty` 处 segfault（5 个 boot 中反复出现）。这不是"QEMU bug"，而是我们的 guest kernel 产生了非法行为。
 3. **struct_ops refresh 吞错误导致 UAF**：`bpf_struct_ops_refresh_prog()` 失败时 err=0 静默继续，释放旧 JIT image 后 trampoline 指向已释放内存 — 经典 use-after-free。
-4. **Host kernel slab corruption**：pstore 确认 `kfree` 栈损坏（ext4 路径触发），但 kernel tainted `[O][E]` 表示 kinsn OOT module 已加载 — **slab corruption 可能由 kinsn module 或 REJIT 内存管理 bug 引起**，只是被 ext4 路径触发。
+4. **Host kernel slab corruption**：pstore 确认 `kfree` 栈损坏（ext4 路径触发），但 kernel tainted `[O][E]` 表示 kop OOT module 已加载 — **slab corruption 可能由 kop module 或 REJIT 内存管理 bug 引起**，只是被 ext4 路径触发。
 5. **`panic_on_oops=1` 放大效应**：以上任何 oops 都被放大为硬重启。
 6. **MCE 硬件问题**（可能的额外因素）：5/18 boots 有 MCE。
 
@@ -34,7 +34,7 @@ Call Trace:
 **Analysis:**
 - The crashed process is `pet` (VS Code Python Environment Tool at `~/.vscode-server/extensions/ms-python.python-*/python-env-tools/bin/pet`) -- **NOT a BpfReJIT process**.
 - The stack canary (`__stack_chk_fail`) was tripped inside `kfree`, called from `ext4_release_dir` during a `close()` syscall.
-- The kernel is tainted `[O]=OOT_MODULE, [E]=UNSIGNED_MODULE` -- the kinsn out-of-tree modules were loaded, but the crash path (`ext4_release_dir -> free_rb_tree_fname -> kfree`) is entirely in the stock kernel ext4 filesystem code.
+- The kernel is tainted `[O]=OOT_MODULE, [E]=UNSIGNED_MODULE` -- the kop out-of-tree modules were loaded, but the crash path (`ext4_release_dir -> free_rb_tree_fname -> kfree`) is entirely in the stock kernel ext4 filesystem code.
 - Stack corruption in `kfree` can be caused by: a slab corruption from any part of the kernel (including OOT modules), or a hardware memory error (see #3).
 
 **Why this causes host reboot:** The kernel cmdline includes `panic_on_oops=1 panic=10`, so any stack corruption detection immediately triggers a kernel panic and reboot after 10 seconds.
@@ -130,7 +130,7 @@ These long gaps are consistent with either:
 
 1. **REJIT verifier bypass 已确认**：daemon 生成的 malformed bytecode 曾通过 verifier 进入 JIT 执行（见 `docs/tmp/20260325/tcg_min_repro_and_e2e_investigation_20260325.md`）。虽然 replay 测试显示当前 verifier 能拦截，但 live 场景下曾经放过，说明存在竞态或条件性 bypass。
 2. **struct_ops refresh UAF**：`bpf_struct_ops_refresh_prog()` 失败时吞错误（err=0），释放旧 JIT image 后 trampoline 仍指向已释放内存 — 这是确认的内核 use-after-free bug。
-3. **Kernel tainted [O][E]**：kinsn OOT module 已加载。pstore crash 虽在 ext4/kfree，但 slab corruption 可能来自 kinsn module 或 REJIT 的内存管理。
+3. **Kernel tainted [O][E]**：kop OOT module 已加载。pstore crash 虽在 ext4/kfree，但 slab corruption 可能来自 kop module 或 REJIT 的内存管理。
 4. **QEMU segfault 与 BpfReJIT 直接相关**：crash 只在运行 VM 测试时出现，且 `docs/tmp/20260325/tcg_min_repro_and_e2e_investigation_20260325.md` 已精确定位到 `scx prog 20 (rusty_exit)` 的 REJIT apply。
 5. **smp_wmb() 不足**：upstream review 指出 `bpf_prog_rejit_swap` 使用 `smp_wmb()` 而非 `smp_store_release()`，在弱序架构上可能导致读端看到不一致状态。
 
@@ -193,7 +193,7 @@ Mar 25     0      current
 
 ### Debugging Improvements
 
-8. **Enable KASAN in guest kernel:** Add `CONFIG_KASAN=y` to the rejit-v2 kernel config to catch any memory corruption in the BPF/REJIT code paths. This would confirm or rule out kinsn module corruption.
+8. **Enable KASAN in guest kernel:** Add `CONFIG_KASAN=y` to the rejit-v2 kernel config to catch any memory corruption in the BPF/REJIT code paths. This would confirm or rule out kop module corruption.
 
 9. **Enable pstore in guest kernel:** Configure `CONFIG_PSTORE` in the guest kernel so guest crashes are also captured.
 
@@ -203,7 +203,7 @@ Mar 25     0      current
 
 11. **Fix struct_ops refresh error swallowing** (Risk 2 from previous report): If `bpf_struct_ops_refresh_prog()` fails, do not free the old JIT image.
 
-12. **Add explicit slab integrity checks** in kinsn module `init`/`exit` paths to rule out OOT module slab corruption.
+12. **Add explicit slab integrity checks** in kop module `init`/`exit` paths to rule out OOT module slab corruption.
 
 ## 5. Conclusion
 
@@ -220,6 +220,6 @@ Mar 25     0      current
 - `panic_on_oops=1` 已从 grub 移除（不再将 oops 放大为硬重启）
 
 **仍需排查：**
-- KASAN 测试确认 kinsn module 是否引入 slab corruption
+- KASAN 测试确认 kop module 是否引入 slab corruption
 - MCE 硬件问题（memtest86+）
 - REJIT verifier 路径与 PROG_LOAD 路径的完整对比（调查中，见 `rejit_verifier_safety_investigation_20260325.md`）

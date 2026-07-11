@@ -26,7 +26,7 @@
 
 ## Retained
 
-- Kept `metadata.kinsn_modules` because [docs/kernel-jit-optimization-plan.md](/home/yunwei37/workspace/bpf-benchmark/docs/kernel-jit-optimization-plan.md:994) marks it authoritative.
+- Kept `metadata.kop_modules` because [docs/kernel-jit-optimization-plan.md](/home/yunwei37/workspace/bpf-benchmark/docs/kernel-jit-optimization-plan.md:994) marks it authoritative.
 - Kept SCX `site_summary` / `baseline` / `post_rejit` because markdown reads them at [e2e/cases/scx/case.py](/home/yunwei37/workspace/bpf-benchmark/e2e/cases/scx/case.py:425), [e2e/cases/scx/case.py](/home/yunwei37/workspace/bpf-benchmark/e2e/cases/scx/case.py:433), [e2e/cases/scx/case.py](/home/yunwei37/workspace/bpf-benchmark/e2e/cases/scx/case.py:443).
 - Kept Tetragon `baseline` / `post_rejit` / `programs` because markdown reads them at [e2e/cases/tetragon/case.py](/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tetragon/case.py:374), [e2e/cases/tetragon/case.py](/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tetragon/case.py:375), [e2e/cases/tetragon/case.py](/home/yunwei37/workspace/bpf-benchmark/e2e/cases/tetragon/case.py:404).
 - Kept `/boot:ro` and `BPFREJIT_INSIDE_RUNTIME_CONTAINER`; `/boot:ro` remains documented in [docs/benchmark-runtime-architecture.md](/home/yunwei37/workspace/bpf-benchmark/docs/benchmark-runtime-architecture.md:128), and `inside_runtime_image()` still keys off `BPFREJIT_INSIDE_RUNTIME_CONTAINER` in [runner/libs/workspace_layout.py](/home/yunwei37/workspace/bpf-benchmark/runner/libs/workspace_layout.py:42).

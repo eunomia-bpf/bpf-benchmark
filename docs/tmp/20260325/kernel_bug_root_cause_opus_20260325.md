@@ -171,23 +171,23 @@ swap(prog->aux->tail_call_reachable, tmp->aux->tail_call_reachable);
 
 ---
 
-## Bug #4: `bpf_kinsn_has_native_emit()` 原未定义 + 缩进错误（已修复）
+## Bug #4: `bpf_kop_has_native_emit()` 原未定义 + 缩进错误（已修复）
 
 ### Root Cause
 
 **文件**: `kernel/bpf/verifier.c:23776`
 **函数**: `do_misc_fixups()`
 
-原始代码中 `bpf_kinsn_has_native_emit()` 函数**未定义**（grep 确认只有 verifier.c 中一处引用，没有定义）。同时该代码块存在严重缩进错误（多了一层 tab），导致控制流含义不明。
+原始代码中 `bpf_kop_has_native_emit()` 函数**未定义**（grep 确认只有 verifier.c 中一处引用，没有定义）。同时该代码块存在严重缩进错误（多了一层 tab），导致控制流含义不明。
 
 ### 当前状态
 
 dirty-tree 中已修复两个问题：
 
-1. **`include/linux/bpf.h:981-993`** — 添加了 `bpf_kinsn_has_native_emit()` 内联函数
+1. **`include/linux/bpf.h:981-993`** — 添加了 `bpf_kop_has_native_emit()` 内联函数
 2. **`verifier.c:23773-23781`** — 修复了缩进，使控制流清晰
 
-修复后的逻辑：如果 `prog->jit_requested` 且 kinsn 有 native emit callback，则跳过 proof sequence 的 insn 替换（因为 JIT 会直接使用 native emit）。否则执行标准的 `verifier_remove_insns` + `bpf_patch_insn_data` 路径。
+修复后的逻辑：如果 `prog->jit_requested` 且 kop 有 native emit callback，则跳过 proof sequence 的 insn 替换（因为 JIT 会直接使用 native emit）。否则执行标准的 `verifier_remove_insns` + `bpf_patch_insn_data` 路径。
 
 ### 优先级: **P0**（已在 dirty-tree 中修复，需 commit）
 
@@ -419,7 +419,7 @@ bpf_prog_kallsyms_add(prog);
 |---|-----|--------------|---------|--------|
 | 1 | QEMU TCG 崩溃 — `bpf_prog_get_stats` null deref + 后续崩溃 | `syscall.c:bpf_prog_get_info_by_fd:5751` | probe_register + scx_rusty + bpftool prog show | **P0** |
 | 3 | `tail_call_reachable` 未 swap | `syscall.c:bpf_prog_rejit_swap:3372-3470` | REJIT 改变 tail_call 可达性 | **P0** |
-| 4 | `bpf_kinsn_has_native_emit` 未定义 + 缩进 | `verifier.c:23776` + `bpf.h:981` | kinsn non-JIT fallback | **P0** (已修复) |
+| 4 | `bpf_kop_has_native_emit` 未定义 + 缩进 | `verifier.c:23776` + `bpf.h:981` | kop non-JIT fallback | **P0** (已修复) |
 | 2 | `smp_wmb` 替代 `smp_store_release` | `syscall.c:bpf_prog_rejit_swap:3455-3457` | ARM64 REJIT + 并发 BPF 执行 | **P0** (ARM64) |
 | 5 | struct_ops refresh 部分成功不一致 | `bpf_struct_ops.c:bpf_struct_ops_refresh_prog:1561-1577` | REJIT struct_ops + text_poke 失败 | **P1** |
 | 6 | swap 遗漏 `arena`, `ctx_arg_info` 等 | `syscall.c:bpf_prog_rejit_swap:3372-3470` | REJIT 使用 arena/ctx_arg_info 的程序 | **P1** |
@@ -466,7 +466,7 @@ bpf_prog_kallsyms_add(prog);
 
 ## 建议的修复顺序
 
-1. **立即**: 将 dirty-tree 中的 `bpf_kinsn_has_native_emit()` 和 `null stats guard` commit（Bug #4, #1 部分修复）
+1. **立即**: 将 dirty-tree 中的 `bpf_kop_has_native_emit()` 和 `null stats guard` commit（Bug #4, #1 部分修复）
 2. **本轮修复**: `tail_call_reachable` swap（Bug #3）, `smp_wmb` → `smp_store_release`（Bug #2）
 3. **下一轮**: git bisect 定位 QEMU TCG 崩溃的精确回归 commit（Bug #1 完整修复）, struct_ops refresh 部分成功处理（Bug #5）, swap 遗漏字段（Bug #6）
 4. **后续**: `INIT_LIST_HEAD_RCU` 时序（Bug #7）, kallsyms 子函数管理（Bug #9）

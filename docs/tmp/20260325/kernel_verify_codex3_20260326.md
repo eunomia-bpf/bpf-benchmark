@@ -60,7 +60,7 @@
 ### 关键代码
 
 - `arch/arm64/net/bpf_jit_comp.c:1195-1216`
-  - `emit_kinsn_desc_call_arm64()` 直接把 `ctx->image` 和 `&ctx->idx` 传给 `kinsn->emit_arm64(...)`。
+  - `emit_kop_desc_call_arm64()` 直接把 `ctx->image` 和 `&ctx->idx` 传给 `kop->emit_arm64(...)`。
 - `arch/arm64/net/bpf_jit_comp.c:110-123`
   - ARM64 通用 `emit()` / `emit_u32_data()` 会在 `ctx->write == false` 时避免写 image，但这是 JIT 内部 helper 的约束，不会自动约束外部 `emit_arm64` 回调。
 - `arch/arm64/net/bpf_jit_comp.c:2131-2148`
@@ -68,7 +68,7 @@
 - `arch/arm64/net/bpf_jit_comp.c:2176-2204`
   - pass 2 / pass 3 中，`ctx.image` 已有效，但会先经历一次 `ctx.write = false` 的 dry-run，再进入 `ctx.write = true` 的最终写入。
 - `arch/x86/net/bpf_jit_comp.c:579-606`
-  - x86 的 `emit_kinsn_desc_call()` 先写本地 `scratch[BPF_MAX_INSN_SIZE]`，校验完成后才在 `emit == true` 时 `memcpy()` 到最终 image。
+  - x86 的 `emit_kop_desc_call()` 先写本地 `scratch[BPF_MAX_INSN_SIZE]`，校验完成后才在 `emit == true` 时 `memcpy()` 到最终 image。
 
 ### 为什么确认是问题
 

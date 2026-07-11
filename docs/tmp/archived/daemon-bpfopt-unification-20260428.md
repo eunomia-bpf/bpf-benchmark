@@ -42,7 +42,7 @@ The unified pass code uses adapters rather than daemon-only imports:
 - `MapInfoProvider` / `MapValueProvider`
   - daemon: live raw BPF syscall provider
   - bpfopt CLI/tests: snapshot metadata/value provider
-- `KinsnCallResolver`
+- `KopCallResolver`
   - daemon: descriptor BTF FD array slots encoded in `CALL.off`
   - bpfopt CLI: static target call offsets
 

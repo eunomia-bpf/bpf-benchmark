@@ -9,7 +9,7 @@ Primary references:
 - `daemon/src/`
 - `bpfopt/crates/bpfopt/src/analysis/bbprogram_lift.rs`
 - `bpfopt/crates/bpfopt/src/passes/{rotate,cond_select,endian,lea,extract,bulk_memory,prefetch,ccmp}.rs`
-- `bpfopt/kinsnprober/src/main.rs`
+- `bpfopt/kopprober/src/main.rs`
 - `runner/libs/rejit.py`
 - `runner/libs/app_runners/{tracee,bcc,katran,bpftrace,otelcol_ebpf_profiler,cilium,tetragon}.py`
 - `vendor/linux-framework/kernel/bpf/syscall.c`
@@ -28,13 +28,13 @@ The hub doc's idea #1 moves speculative ReJIT from a daemon-owned `BPF_PROG_REJI
 | `fd_array_cnt` | ReJIT syscall has its own daemon-built attr; it does not replay an app's original `BPF_PROG_LOAD` count. | `reload_and_reattach()` starts from captured original `union bpf_attr` and sets `a.fd_array`, but does not intentionally rebuild/clear all stale fd-array fields. | If original `fd_array_cnt` is nonzero, kernel scans beyond the shim-built array or scans stale entries, producing EBADF/EINVAL. This matches Tracee errors. |
 | BTF func/line metadata | ReJIT validates transformed program against existing kernel program context. It does not need to replay original stock-load `func_info` layout as a fresh load. | Shim copies original `func_info`/`line_info` bytes into transformed `BPF_PROG_LOAD`. | If a pass changes instruction layout or subprog offsets, kernel rejects with `func_info BTF section doesn't match subprog layout`. This appears in katran. |
 | Verifier-state input | Daemon captures verifier logs after each successful ReJIT and feeds them to later `bpfopt` passes. | Shim writes `verifier_log_stepN.log` and feeds the previous successful log to `bpfopt --verifier-log`. | The transport exists, but verifier PCs may be in a different namespace than the next raw CFG. Current bpfopt mapping fails closed with `verifier state pc ... not present in CFG`. |
-| Target/kfunc module model | `kinsnprober` produces module call offsets, then daemon shifts/validates fd slots around maps. | bpfopt shifts module `call_offset` by map prefix; shim consumes shifted target JSON. | The shift logic is coherent. The audit did not find evidence that katran's current failures are caused by an off-by-map-prefix generation bug. |
+| Target/kfunc module model | `kopprober` produces module call offsets, then daemon shifts/validates fd slots around maps. | bpfopt shifts module `call_offset` by map prefix; shim consumes shifted target JSON. | The shift logic is coherent. The audit did not find evidence that katran's current failures are caused by an off-by-map-prefix generation bug. |
 | Socket discovery | Runner talks to the daemon's stable socket. | Runner discovers `/var/run/bpfrejit/shim-*.sock` and maps `prog_id -> socket`; fallback uses `shim-<app_pid>.sock`. | Multi-process apps need actual loader process injection. `bcc/set` never injects shim env in its custom runner, so no socket appears. |
 | Error surface | Daemon errors are isolated to the daemon's syscall path and are usually tied to ReJIT. | Shim errors combine app loader ABI replay, process state, reattach state, and bpfopt output. | Root-cause labels must distinguish bpfopt bytecode generation, shim ABI replay, and kernel verifier rejection. |
 
 The main migration risk is not only "make the same fd_array"; it is that `BPF_PROG_LOAD` has stricter fresh-load metadata requirements than `BPF_PROG_REJIT`. The shim must either reconstruct a minimal clean load attr or remap every metadata side channel it replays.
 
-## 2. #34 根因分析: katran kinsn 4 个 pass 失败
+## 2. #34 根因分析: katran kop 4 个 pass 失败
 
 ### Artifact sanity check
 
@@ -42,14 +42,14 @@ The retained katran workdir is:
 
 `corpus/results/x86_kvm_corpus_20260519_155851_162854/details/shim-workdirs/work_9/`
 
-It contains the requested files, but the current `output.next.bin` is not a failed kinsn-pass candidate. A read-only disassembly scan for `BPF_JMP | BPF_CALL` with `src_reg = BPF_PSEUDO_KINSN_CALL` found:
+It contains the requested files, but the current `output.next.bin` is not a failed kop-pass candidate. A read-only disassembly scan for `BPF_JMP | BPF_CALL` with `src_reg = BPF_PSEUDO_KOP_CALL` found:
 
-| file | bytes | insns | kinsn calls |
+| file | bytes | insns | kop calls |
 |---|---:|---:|---:|
 | `output.bin` | 20336 | 2542 | 0 |
 | `output.next.bin` | 20264 | 2533 | 0 |
 
-This matches the workdir's later state: `output.next.bin` was overwritten by a later non-kinsn pass output. Therefore this artifact cannot prove the failed rotate/cond_select/endian_fusion/lea call instructions by inspecting the retained `output.next.bin`. Any statement that those retained bytes contain the failed kfunc calls would be incorrect.
+This matches the workdir's later state: `output.next.bin` was overwritten by a later non-kop pass output. Therefore this artifact cannot prove the failed rotate/cond_select/endian_fusion/lea call instructions by inspecting the retained `output.next.bin`. Any statement that those retained bytes contain the failed kfunc calls would be incorrect.
 
 The app result JSON for the same corpus run also differs from the symptom summary in the prompt:
 
@@ -63,7 +63,7 @@ The root-cause conclusion below is therefore scoped to the actual retained files
 
 `fd-to-id.json` for katran program 9 contains 14 unique map ids. `target.json` has shifted module call offsets in slots 14 through 20:
 
-| fd_array slot | BTF id | kinsn symbols |
+| fd_array slot | BTF id | kop symbols |
 |---:|---:|---|
 | 14 | 2 | `bpf_x86_andl`, `bpf_x86_shrq` |
 | 15 | 4 | `bpf_x86_bswapl`, `bpf_x86_rolw` |
@@ -73,7 +73,7 @@ The root-cause conclusion below is therefore scoped to the actual retained files
 | 19 | 13 | `bpf_x86_prefetcht0` |
 | 20 | 14 | `bpf_x86_rolq`, `bpf_x86_rorxl` |
 
-This is consistent with `bbprogram_lift.rs`: `shift_target_module_call_offsets_for_map_prefix()` computes `module_base = map_count.max(1)` and shifts original module offsets by `module_base + original_call_offset - 1`. `kinsnprober` emits module offsets starting at 1, so 7 module BTFs become slots 14 through 20 when katran has 14 maps.
+This is consistent with `bbprogram_lift.rs`: `shift_target_module_call_offsets_for_map_prefix()` computes `module_base = map_count.max(1)` and shifts original module offsets by `module_base + original_call_offset - 1`. `kopprober` emits module offsets starting at 1, so 7 module BTFs become slots 14 through 20 when katran has 14 maps.
 
 Expected failed/success slot use from `target.json`:
 
@@ -89,7 +89,7 @@ Expected failed/success slot use from `target.json`:
 
 ### bpfopt generation vs shim fd_array vs kernel reject
 
-**bpfopt generation bug:** not supported by the retained target evidence. The shifted offsets are exactly what the daemon-compatible map-prefix model requires. `bpfopt` emits kinsn calls with `insn.off = call_offset` and `insn.imm = kfunc BTF func id`; the target offsets are already shifted. The retained `output.next.bin` cannot confirm individual failed call `off/imm` values because it contains no kinsn calls.
+**bpfopt generation bug:** not supported by the retained target evidence. The shifted offsets are exactly what the daemon-compatible map-prefix model requires. `bpfopt` emits kop calls with `insn.off = call_offset` and `insn.imm = kfunc BTF func id`; the target offsets are already shifted. The retained `output.next.bin` cannot confirm individual failed call `off/imm` values because it contains no kop calls.
 
 **shim fd_array fill bug:** not supported for the katran slot shift itself. The shim's `build_full_fd_array()` would build a 21-entry array for this target: maps at slots 0-13 and module BTF fds at 14-20. The result context records `fd_array_n=21` and `fd_array_neg1=0`, so the constructed array had no holes. That argues against "slot 14-20 still point at maps" or "missing map-count shift" as the root cause in this artifact.
 
@@ -108,7 +108,7 @@ For cond_select/endian_fusion/lea, the retained result only shows early `EINVAL`
 
 The katran retained artifact does not show a bpfopt call-offset shift bug. The expected BTF module slots are coherent and the shim's constructed array length/no-hole context is consistent with the target. The clearest proven bug class is shim fresh-load ABI replay: original BTF func/line metadata is reused after bytecode transformation and the kernel rejects it at attr/metadata validation.
 
-For the four named kinsn failures, the exact per-pass `insn.off/imm` cannot be confirmed from the current workdir because failed candidate bytes were not preserved. The next diagnostic fix should preserve per-step candidate bytecode and full verifier logs before overwriting `output.next.bin`; the product fix should sanitize or remap fresh-load metadata instead of blindly replaying original `func_info`/`line_info`.
+For the four named kop failures, the exact per-pass `insn.off/imm` cannot be confirmed from the current workdir because failed candidate bytes were not preserved. The next diagnostic fix should preserve per-step candidate bytecode and full verifier logs before overwriting `output.next.bin`; the product fix should sanitize or remap fresh-load metadata instead of blindly replaying original `func_info`/`line_info`.
 
 ## 3. #36 根因分析: bcc/set 0/21 and missing shim socket
 
@@ -298,7 +298,7 @@ This interface keeps verifier-state consumption fail-fast while making the PC na
 |---:|---|---|---|
 | P0 | #36 bcc/set no shim socket | It blocks all bcc/set ReJIT coverage and has a clear root cause. | Inject shim env in `BccSetRunner._spawn_child()` or centralize bcc process launch; rely on socket discovery by program id. |
 | P0 | #37 Tracee stale fresh-load attr | It likely explains most EBADF/EINVAL failures and is cheaper than a helper rewrite. | Reconstruct/sanitize `BPF_PROG_LOAD` attr; clear stale `fd_array_cnt` when using shim-built fd arrays; audit all pointer/count pairs. |
-| P1 | #34 katran metadata replay | It blocks transformed fresh loads and affects more than kinsn passes. | Remap or drop/rebuild `func_info` and `line_info` for transformed stock loads; preserve per-pass candidate bytecode/logs for future diagnosis. |
+| P1 | #34 katran metadata replay | It blocks transformed fresh loads and affects more than kop passes. | Remap or drop/rebuild `func_info` and `line_info` for transformed stock loads; preserve per-pass candidate bytecode/logs for future diagnosis. |
 | P1 | #35 verifier-PC namespace | Needed for stateful second-run passes like const_prop without unsafe state attachment. | Add explicit verifier-PC remapper API with provenance and fail-closed policy. |
 | P2 | Full fork+exec helper | Useful architecture hardening, but not the first fix for the observed failures. | Consider after attr sanitation; helper must execute clean attrs and should not replay dirty captured `union bpf_attr`. |
 

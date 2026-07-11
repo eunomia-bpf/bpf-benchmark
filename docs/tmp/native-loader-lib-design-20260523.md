@@ -1797,7 +1797,7 @@ This also removes the arm64-only prelinked-blob smoke artifact under
 the old blob path and could not exercise the shared loader library.
 
 Terminology correction: `native_lab_stub` is the kernel-visible BPF program name
-for the tiny `(sidecar; kinsn-call)*N; exit` wrapper that the native-lab kinsn
+for the tiny `(sidecar; kop-call)*N; exit` wrapper that the native-lab kop
 JIT expands with uploaded native bytes. It is not a separate user-space loader
 stub, and the hot path should not be described as a normal kfunc call per event.
 BPF entry/stats accounting is also not native-only overhead; ordinary JITed BPF
@@ -1899,7 +1899,7 @@ Validation:
 
 - `cargo fmt --manifest-path native-sim/x86/native_lab/native_link/Cargo.toml`
   passed.
-- `make host-rust-x86 host-kinsn-x86 host-runner-x86` passed.
+- `make host-rust-x86 host-kop-x86 host-runner-x86` passed.
 - Focused micro rerun:
   `SUITE=micro/config/micro_stage2.yaml RUNTIMES="native_kernel kernel" BENCH=helper_only_uid_gid SAMPLES=1 WARMUPS=0 INNER_REPEAT=10 TIMEOUT=1200 make micro`
   passed in `micro/results/x86_kvm_micro_20260525_200806_839921`.

@@ -396,7 +396,7 @@ eBPF 的核心风险一直都不是“程序能不能跑”, 而是 **verifier �
 - 你们可以:
   - 识别 call-site
   - 插 guard
-  - 或把 helper id 改成 kinsn wrapper
+  - 或把 helper id 改成 kop wrapper
   - 再过 verifier
   - 原子替换 live 程序
 
@@ -520,7 +520,7 @@ signed BPF 解决的是:
 
 1. daemon 把 program 与租户/容器绑定
 2. 在程序入口注入:
-   - 读取 `bpf_get_current_cgroup_id()` / `bpf_get_netns_cookie()` / kinsn
+   - 读取 `bpf_get_current_cgroup_id()` / `bpf_get_netns_cookie()` / kop
    - 与 allowlist map 或立即数比较
 3. mismatch 则返回 attach-type aware safe default
 4. hot-swap live image
@@ -553,7 +553,7 @@ signed BPF 解决的是:
 #### 实现方案
 
 1. daemon 给目标程序插入一小段前置块
-2. 前置块调用 kinsn:
+2. 前置块调用 kop:
    - `audit_bpf_exec(prog_id, hash, helper_mask, tenant_id, ts)`
 3. 对敏感 helper call-site 再插 before/after 事件
 4. 通过策略控制 sampling rate
@@ -632,7 +632,7 @@ signed BPF 解决的是:
 对已加载程序进行 selective hardening:
 
 - 检测高风险分支/内存访问模式
-- 插入 `BPF_ST_NOSPEC` 或自定义 barrier 指令 / kinsn
+- 插入 `BPF_ST_NOSPEC` 或自定义 barrier 指令 / kop
 - 在高威胁等级时打开, 平时恢复原图像
 
 #### 为什么不是重复内核已有逻辑

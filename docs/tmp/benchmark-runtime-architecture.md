@@ -13,7 +13,7 @@ The active architecture has four boundaries:
 1. Host owns the kernel, boot state, privileges, `/lib/modules`, `/sys`, bpffs,
    cgroups, and network namespaces.
 2. `runner-runtime.Dockerfile` owns user-space artifact builds, runtime
-   dependencies, and target-arch kinsn modules baked into the image.
+   dependencies, and target-arch kop modules baked into the image.
 3. `runner-host-artifacts` owns host-coupled kernel image and `/lib/modules`
    export through
    `docker build --output`.
@@ -41,7 +41,7 @@ host make
        -> COPY stable benchmark data
        -> COPY and build the daemon artifact
        -> COPY runtime Python scripts and config last
-       -> COPY full kernel/module sources and build in-image kinsn .ko
+       -> COPY full kernel/module sources and build in-image kop .ko
        -> delete kernel/module build inputs, Go toolchain files, and build
           intermediates
   -> docker save .cache/container-images/<arch>-runner-runtime.image.tar
@@ -91,14 +91,14 @@ module/x86/build/...
 module/arm64/build/...
 ```
 
-Kinsn modules are built into the runtime image from the same kernel build tree:
+KOperation modules are built into the runtime image from the same kernel build tree:
 
 ```text
 make -C <kernel> O=<kernel-build> M=<module-source> MO=<export-dir> modules
 ```
 
 Module source is not mirrored or staged into a transfer directory. AWS transfers
-the saved runner image tar for suite execution; kinsn `.ko` files are already in
+the saved runner image tar for suite execution; kop `.ko` files are already in
 that image.
 
 AWS kernel installation still mutates the target host, but the mutation is

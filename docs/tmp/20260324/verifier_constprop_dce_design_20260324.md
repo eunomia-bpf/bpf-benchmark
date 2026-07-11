@@ -62,7 +62,7 @@
 
 因此 #424 和 #443 不应该孤立设计，而应该被视为一条连续链：
 
-`runtime facts (#423/#424) -> branch folding -> DCE (#443) -> later kinsn passes`
+`runtime facts (#423/#424) -> branch folding -> DCE (#443) -> later kop passes`
 
 ### 1.2 仓库里已经有的基础设施
 

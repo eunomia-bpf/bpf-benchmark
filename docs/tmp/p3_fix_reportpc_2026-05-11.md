@@ -37,7 +37,7 @@
 
 - `const_prop`: replaced `site_pc` report construction with `SiteSkipReason`; ALU fold skips retain `InsnSite`.
 - `wide_mem`: converted all skip records to `SiteSkipReason`; added a local skip helper to keep the migration smaller.
-- `bulk_memory`: converted scan/admission skips to `SiteSkipReason`; kinsn admission uses the report-site helper.
+- `bulk_memory`: converted scan/admission skips to `SiteSkipReason`; kop admission uses the report-site helper.
 - `rotate`: converted tmp/provenance and admission skips to `SiteSkipReason`.
 - `extract`: converted cross-block skip and admission skip records to `SiteSkipReason`; removed the extra safe-site struct.
 - `endian_fusion`: converted narrow-window and cross-block skips to `SiteSkipReason`; removed a redundant kfunc lookup helper to keep the file below its starting LOC.

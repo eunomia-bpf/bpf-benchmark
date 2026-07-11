@@ -4,14 +4,14 @@ Status: archived experiment, 2026-05-18.
 
 This directory keeps the native-asm-to-handcraft experiment artifacts out of the
 normal `micro/programs` build surface. The converter path is not the current
-production direction for kinsn work.
+production direction for kop work.
 
 Contents:
 
 - `*.md`: generated per-benchmark code-comparison reports used as converter
   input. The `## Native ASM` section was the source of truth.
 - `*.handcraft.c`: generated handcraft BPF programs containing raw BPF plus
-  machine-level kinsn calls.
+  machine-level kop calls.
 - `native_asm_to_handcraft.py`: earlier strict converter prototype.
 - `native_asm_to_handcraft_bpf_cf.py`: later converter variant that kept
   program-level control flow as ordinary BPF.
@@ -21,14 +21,14 @@ Contents:
 The experiment tested whether native x86 generated from the micro C programs
 could be mechanically translated into handcraft BPF:
 
-- non-control-flow x86 instructions become machine-level kinsns;
-- final x86 emission is one named x86 instruction per kinsn;
+- non-control-flow x86 instructions become machine-level koperation;
+- final x86 emission is one named x86 instruction per kop;
 - verifier-facing `instantiate_insn()` proves enough BPF semantics for load;
 - program-level control flow remains verifier-visible ordinary BPF branch,
   call, and exit instructions.
 
 The broader question was whether this could replace or bypass bpfopt by running
-"native-like" code through kinsns.
+"native-like" code through koperation.
 
 ## Result
 
@@ -69,14 +69,14 @@ variable-shift/scalar proof (`r6 <<= r7`).
 
 ## Lessons
 
-### kinsn Is Not an x86 VM
+### kop Is Not an x86 VM
 
-The main conclusion is that kinsn should not be treated as a complete x86
+The main conclusion is that kop should not be treated as a complete x86
 execution model. It works best as a local machine-level extension for BPF IR:
 small, basic-block-local instruction forms that the normal BPF JIT does not
 recover from ordinary BPF bytecode.
 
-Good kinsn targets:
+Good kop targets:
 
 - `lea`
 - rotate
@@ -87,7 +87,7 @@ Good kinsn targets:
 - narrow local `cmov` / `setcc` only when the producer and consumer can be
   proven locally without global flag state
 
-Bad kinsn targets for the current ABI:
+Bad kop targets for the current ABI:
 
 - whole-function native x86 execution
 - program-level `jcc` / `jmp`
@@ -113,7 +113,7 @@ BPF branch relocation.
 
 ### Raw BPF Control Flow Was Necessary
 
-Branch kinsns and proof-offset payloads were the wrong direction for this
+Branch koperation and proof-offset payloads were the wrong direction for this
 experiment. Userspace would have to provide verifier-facing branch offsets that
 are not x86 operands. That creates an unsafe and hard-to-maintain boundary.
 
@@ -122,7 +122,7 @@ The safer boundary is:
 - `jcc`, `jmp`, local `call`, and `ret` are ordinary BPF control-flow
   instructions;
 - userspace only patches ordinary BPF branch `off` fields;
-- kinsn payloads never carry verifier proof offsets, target PCs, abstract
+- kop payloads never carry verifier proof offsets, target PCs, abstract
   states, liveness, or scratch choices.
 
 This gives up final `cmp/test; jcc` parity, but keeps the verifier CFG visible.
@@ -135,7 +135,7 @@ state in a tight loop. Converting visible `cmov` to ordinary BPF conditional
 move fixed that specific pressure, but it also lost final x86 `cmp; cmov`
 parity.
 
-Any future flag-producing kinsn should be limited to local, tightly bounded
+Any future flag-producing kop should be limited to local, tightly bounded
 patterns or redesigned so it does not create loop-carried precise stack state.
 
 ### Pointer Proof and Scalar Proof Need Different Precision
@@ -152,7 +152,7 @@ if (!flag)
 
 Pure scalar values do not always need exact verifier proof. The bcc variable
 shift failure suggests that exact scalar simulation in loops can overwhelm the
-verifier even when memory safety is not at stake. A future kinsn proof model
+verifier even when memory safety is not at stake. A future kop proof model
 should distinguish:
 
 - safety-critical pointer/range/provenance facts, which need precise verifier
@@ -177,12 +177,12 @@ Use it as an archived oracle for:
 
 - seeing which native x86 instruction forms matter;
 - checking what final JIT parity might buy;
-- understanding verifier failure modes for candidate kinsns.
+- understanding verifier failure modes for candidate koperation.
 
-The active kinsn direction should be:
+The active kop direction should be:
 
-- bpfopt or LLVM backend emits kinsns only for basic-block-local patterns;
-- no branch kinsns in the default model;
+- bpfopt or LLVM backend emits koperation only for basic-block-local patterns;
+- no branch koperation in the default model;
 - no whole-function x86 emulation;
 - no global shadow flags as a default proof mechanism;
 - verifier-facing proofs stay small and local.

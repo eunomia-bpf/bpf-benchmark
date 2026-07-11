@@ -82,7 +82,7 @@ Relevant code:
 
 ### 6. Unknown enabled pass errors are less useful than before
 
-`build_execute_plan_payload` indexes `pass_metas[p]` before `build_kinsn_probes` can produce its explicit `"pass ... not found"` error (`runner/libs/rejit_plan.py:116-127`, `runner/libs/rejit_plan.py:80-85`). Unknown pass names therefore raise a raw Python `KeyError`, which is fail-fast but poor for runner debugging.
+`build_execute_plan_payload` indexes `pass_metas[p]` before `build_kop_probes` can produce its explicit `"pass ... not found"` error (`runner/libs/rejit_plan.py:116-127`, `runner/libs/rejit_plan.py:80-85`). Unknown pass names therefore raise a raw Python `KeyError`, which is fail-fast but poor for runner debugging.
 
 Relevant code:
 - `runner/libs/rejit_plan.py:80-85`
@@ -159,7 +159,7 @@ The test `try_apply_programs_converts_failures_to_program_results` still covers 
 
 ### C. Design rules
 
-`daemon/src/server.rs` references `crate::bpf::KinsnProbeTarget` only to parse runner-supplied target probe requests (`daemon/src/server.rs:157-211`). That is still inside the daemon-owned live discovery/target probing boundary described by `daemon/src/bpf.rs:1-7`.
+`daemon/src/server.rs` references `crate::bpf::KopProbeTarget` only to parse runner-supplied target probe requests (`daemon/src/server.rs:157-211`). That is still inside the daemon-owned live discovery/target probing boundary described by `daemon/src/bpf.rs:1-7`.
 
 No daemon compile-time dependency on bpfopt was found. The Cargo dependencies point standalone CLIs only at `kernel-sys`, not each other (`daemon/Cargo.toml:24-27`, `bpfopt/crates/bpfopt/Cargo.toml:11-16`, `bpfopt/crates/bpfprof/Cargo.toml:11-19`). BPF syscall access from daemon code goes through `kernel_sys` (`daemon/src/bpf.rs:67-81`, `daemon/src/commands.rs:187-200`), matching the syscall-boundary rule in `CLAUDE.md:118-123`.
 
@@ -173,7 +173,7 @@ If a step writes `${OUTPUT}` and exits nonzero, the daemon checks status first a
 
 If a step succeeds without non-empty `${OUTPUT}`, the daemon records `ok` and leaves input and verifier states unchanged (`daemon/src/commands.rs:629-654`). A step cannot update the verifier-state chain this way; current design says verifier states come from successful ReJIT logs, so that is consistent.
 
-`kinsn_probes` are request-global and passed to every program (`daemon/src/server.rs:150-154`, `daemon/src/commands.rs:406-423`). That is reasonable because kernel BTF/module kinsn availability is global for the daemon session.
+`kop_probes` are request-global and passed to every program (`daemon/src/server.rs:150-154`, `daemon/src/commands.rs:406-423`). That is reasonable because kernel BTF/module kop availability is global for the daemon session.
 
 The initial verifier-state placeholder is not reasonable for state-dependent passes; see finding 2.
 
@@ -184,7 +184,7 @@ Do not add trivial tests, but these would catch real bugs:
 - A report-handling test where a step references `${REPORT}` and writes corrupt JSON. Current code would silently return `null` (`daemon/src/commands.rs:609-613`).
 - A state-readiness test for a first step requiring verifier states or a prior successful non-output step followed by `map_inline`; current code feeds the empty placeholder (`daemon/src/commands.rs:548-554`, `daemon/src/commands.rs:570-581`).
 
-`parse_execute_plan_parses_kinsn_probes` covers the basic happy path but not duplicate/malformed alias payloads beyond empty aliases (`daemon/src/server.rs:436-460`). That is adequate for now; the more meaningful parser gap is empty programs/steps being accepted, which is covered but codifies the wrong behavior.
+`parse_execute_plan_parses_kop_probes` covers the basic happy path but not duplicate/malformed alias payloads beyond empty aliases (`daemon/src/server.rs:436-460`). That is adequate for now; the more meaningful parser gap is empty programs/steps being accepted, which is covered but codifies the wrong behavior.
 
 ### F. Adapter quality
 

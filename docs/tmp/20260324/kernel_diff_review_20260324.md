@@ -27,8 +27,8 @@ Core kernel files (excluding tests/tools):
 ## include/uapi/linux/bpf.h
 
 ### Severity: Minor
-- **Lines**: BPF_PSEUDO_KINSN_CALL=4, BPF_PSEUDO_KINSN_SIDECAR=3
-- **Issue**: The numbering gap (KFUNC_CALL=2, SIDECAR=3, KINSN_CALL=4) is fine, but the ordering is confusing -- SIDECAR (3) is defined after KINSN_CALL (4) in the source. Convention is sequential definition.
+- **Lines**: BPF_PSEUDO_KOP_CALL=4, BPF_PSEUDO_KOP_SIDECAR=3
+- **Issue**: The numbering gap (KFUNC_CALL=2, SIDECAR=3, KOP_CALL=4) is fine, but the ordering is confusing -- SIDECAR (3) is defined after KOP_CALL (4) in the source. Convention is sequential definition.
 - **Fix**: Reorder the definitions to match numerical order.
 
 ### Severity: Minor
@@ -46,12 +46,12 @@ Core kernel files (excluding tests/tools):
 ## include/linux/bpf.h
 
 ### Severity: Major
-- **Lines**: `bpf_kinsn_sidecar_payload()` packing
+- **Lines**: `bpf_kop_sidecar_payload()` packing
 - **Issue**: The payload encoding packs `dst_reg` (4 bits), `off` (16 bits shifted left by 4), and `imm` (32 bits shifted left by 20). Total: 4+16+32 = 52 bits, fitting in u64. However, `dst_reg` is defined as `__u8` in `struct bpf_insn` but only 4 bits are used (values 0-15). The cast `(u64)insn->dst_reg` would include all 8 bits. If a malicious program sets `dst_reg` to a value > 15, the high 4 bits would overlap with the `off` field. The verifier checks for `dst_reg == 0` for the sidecar case (in `do_check_insn`), but there's no explicit range check before payload extraction in the JIT path.
-- **Fix**: Either mask dst_reg to 4 bits in `bpf_kinsn_sidecar_payload()`: `(u64)(insn->dst_reg & 0xF)`, or add an explicit check in the verifier. Currently the verifier skips the sidecar instruction via `check_kinsn_sidecar_insn` which does NOT validate dst_reg range.
+- **Fix**: Either mask dst_reg to 4 bits in `bpf_kop_sidecar_payload()`: `(u64)(insn->dst_reg & 0xF)`, or add an explicit check in the verifier. Currently the verifier skips the sidecar instruction via `check_kop_sidecar_insn` which does NOT validate dst_reg range.
 
 ### Severity: Minor
-- **Lines**: `struct bpf_kinsn` definition
+- **Lines**: `struct bpf_kop` definition
 - **Issue**: The `api_version` and `flags` fields are defined but never checked anywhere in the code. Dead fields.
 - **Fix**: Remove or document intended future use.
 
@@ -65,8 +65,8 @@ Core kernel files (excluding tests/tools):
 ## include/linux/bpf_verifier.h
 
 ### Severity: Minor (fixed in working tree)
-- **Lines**: `struct bpf_kinsn_region kinsn_regions[MAX_KINSN_REGIONS]` (committed HEAD)
-- **Issue**: The committed HEAD has a 256-element fixed array of `bpf_kinsn_region` (each ~16 bytes) embedded in `bpf_verifier_env`, adding ~4KB to a stack/heap-allocated struct. The working tree fixes this with dynamic allocation.
+- **Lines**: `struct bpf_kop_region kop_regions[MAX_KOP_REGIONS]` (committed HEAD)
+- **Issue**: The committed HEAD has a 256-element fixed array of `bpf_kop_region` (each ~16 bytes) embedded in `bpf_verifier_env`, adding ~4KB to a stack/heap-allocated struct. The working tree fixes this with dynamic allocation.
 - **Verdict**: Fixed in working tree, but uncommitted.
 
 ---
@@ -74,9 +74,9 @@ Core kernel files (excluding tests/tools):
 ## kernel/bpf/syscall.c
 
 ### Severity: Critical
-- **Lines**: `bpf_prog_rejit()` -- missing `kinsn_tab` swap
-- **Issue**: In `bpf_prog_rejit_swap()`, `kfunc_tab` is swapped but `kinsn_tab` is NOT swapped. After JIT, `bpf_prog_jit_attempt_done()` frees both `kfunc_tab` and `kinsn_tab` and sets them to NULL. So `tmp->aux->kinsn_tab` is already NULL when we reach the swap. The swap of `kfunc_tab` transfers prog's still-valid `kfunc_tab` to tmp (where it will be freed on tmp destruction), and gives prog the NULL. This is correct because kfunc_tab is only needed during verification/JIT, not at runtime. However, `kinsn_tab` is NOT swapped, meaning prog's old `kinsn_tab` will be freed when prog itself is eventually freed via `__bpf_prog_put_noref`, and tmp's NULL kinsn_tab is harmless. This is actually correct but inconsistent -- `kfunc_tab` is swapped (giving prog NULL) while `kinsn_tab` is not swapped (prog keeps its old pointer). The old `kinsn_tab` was already freed in `bpf_prog_jit_attempt_done` at initial load time, so prog->aux->kinsn_tab should already be NULL.
-- **Verdict**: After analysis, this is likely correct because both tabs are freed post-JIT. But it's fragile -- if kinsn_tab survives past JIT for any reason, there would be a double-free. The asymmetry with kfunc_tab is suspicious. **Recommend making the kinsn_tab handling explicit** (either swap it too, or add a comment explaining why not).
+- **Lines**: `bpf_prog_rejit()` -- missing `kop_tab` swap
+- **Issue**: In `bpf_prog_rejit_swap()`, `kfunc_tab` is swapped but `kop_tab` is NOT swapped. After JIT, `bpf_prog_jit_attempt_done()` frees both `kfunc_tab` and `kop_tab` and sets them to NULL. So `tmp->aux->kop_tab` is already NULL when we reach the swap. The swap of `kfunc_tab` transfers prog's still-valid `kfunc_tab` to tmp (where it will be freed on tmp destruction), and gives prog the NULL. This is correct because kfunc_tab is only needed during verification/JIT, not at runtime. However, `kop_tab` is NOT swapped, meaning prog's old `kop_tab` will be freed when prog itself is eventually freed via `__bpf_prog_put_noref`, and tmp's NULL kop_tab is harmless. This is actually correct but inconsistent -- `kfunc_tab` is swapped (giving prog NULL) while `kop_tab` is not swapped (prog keeps its old pointer). The old `kop_tab` was already freed in `bpf_prog_jit_attempt_done` at initial load time, so prog->aux->kop_tab should already be NULL.
+- **Verdict**: After analysis, this is likely correct because both tabs are freed post-JIT. But it's fragile -- if kop_tab survives past JIT for any reason, there would be a double-free. The asymmetry with kfunc_tab is suspicious. **Recommend making the kop_tab handling explicit** (either swap it too, or add a comment explaining why not).
 
 ### Severity: Major
 - **Lines**: `bpf_prog_rejit_swap()` -- insn copy size check
@@ -133,35 +133,35 @@ Core kernel files (excluding tests/tools):
 ## kernel/bpf/verifier.c
 
 ### Severity: Critical
-- **Lines**: `validate_kinsn_proof_seq()` -- line 3916
+- **Lines**: `validate_kop_proof_seq()` -- line 3916
 - **Issue**: The condition `if (op == BPF_JA || BPF_OP(insn->code) != BPF_CALL)` is logically always true after the previous check. The previous `if` already returns for `op == BPF_CALL`, so at this point `BPF_OP(insn->code) != BPF_CALL` is always true. This means the jump range check applies to ALL JMP/JMP32 instructions (except CALL/EXIT which are already excluded). This is actually the intended behavior (check all conditional jumps), but the condition is misleadingly written. It should just be a fallthrough without the redundant `BPF_OP(insn->code) != BPF_CALL` check. More importantly, for conditional jumps (`BPF_JEQ`, `BPF_JGT`, etc.), the fall-through path (`i+1`) should also be validated (it always is valid since `i+1 <= cnt`). But the `tgt <= i` check prevents back-edges while allowing `tgt == i+1` (fall-through alias for `off=0`). This is fine.
-- **Real bug**: For `BPF_JMP32 | BPF_JA` (the 32-bit unconditional jump), the offset is in `insn->imm`, not `insn->off`. This function only checks `insn->off`. If a kinsn proof sequence contains a JMP32|JA, the target calculation would be wrong.
+- **Real bug**: For `BPF_JMP32 | BPF_JA` (the 32-bit unconditional jump), the offset is in `insn->imm`, not `insn->off`. This function only checks `insn->off`. If a kop proof sequence contains a JMP32|JA, the target calculation would be wrong.
 - **Fix**: Add a case for `BPF_JMP32 | BPF_JA` using `insn->imm` as the offset. Or forbid JMP32 in proof sequences.
 
 ### Severity: Major
 - **Lines**: `__find_kfunc_desc_btf()` -- lazy init of `kfunc_btf_tab`
-- **Issue**: The original code assumed `kfunc_btf_tab` was already allocated before this function is called (it's normally set up in `add_kfunc_call`). The new code adds lazy initialization: if `tab` is NULL, allocate it. This was added to support kinsn calls which might need `find_kfunc_desc_btf` before any kfunc is added. However, the `bsearch` on the next line still runs with `tab->descs` and `tab->nr_descs` (both zeroed from kzalloc), which is harmless (bsearch with nr_descs=0 returns NULL immediately). This is correct.
-- **Verdict**: OK, but the lazy init changes the invariant for all callers of this function, not just kinsn. This could mask bugs where `kfunc_btf_tab` was expected to already exist. Add a comment.
+- **Issue**: The original code assumed `kfunc_btf_tab` was already allocated before this function is called (it's normally set up in `add_kfunc_call`). The new code adds lazy initialization: if `tab` is NULL, allocate it. This was added to support kop calls which might need `find_kfunc_desc_btf` before any kfunc is added. However, the `bsearch` on the next line still runs with `tab->descs` and `tab->nr_descs` (both zeroed from kzalloc), which is harmless (bsearch with nr_descs=0 returns NULL immediately). This is correct.
+- **Verdict**: OK, but the lazy init changes the invariant for all callers of this function, not just kop. This could mask bugs where `kfunc_btf_tab` was expected to already exist. Add a comment.
 
 ### Severity: Major
-- **Lines**: `fetch_kinsn_desc_meta()` -- `kallsyms_lookup_name(sym_name)` to get kinsn address
-- **Issue**: Using `kallsyms_lookup_name()` to resolve a BTF symbol name to a `struct bpf_kinsn *` is fragile. If two modules export symbols with the same name, the wrong one could be resolved. Additionally, there's no validation that the returned address actually points to a valid `struct bpf_kinsn` -- the code dereferences `(*kinsn)->owner` etc. without any bounds checking or type validation beyond the BTF type check. A malicious module could export a BTF_KIND_VAR with the right type but with garbage data. However, since this requires `CAP_BPF` and module loading requires `CAP_SYS_MODULE`, the trust model is acceptable.
+- **Lines**: `fetch_kop_desc_meta()` -- `kallsyms_lookup_name(sym_name)` to get kop address
+- **Issue**: Using `kallsyms_lookup_name()` to resolve a BTF symbol name to a `struct bpf_kop *` is fragile. If two modules export symbols with the same name, the wrong one could be resolved. Additionally, there's no validation that the returned address actually points to a valid `struct bpf_kop` -- the code dereferences `(*kop)->owner` etc. without any bounds checking or type validation beyond the BTF type check. A malicious module could export a BTF_KIND_VAR with the right type but with garbage data. However, since this requires `CAP_BPF` and module loading requires `CAP_SYS_MODULE`, the trust model is acceptable.
 - **Fix**: Consider using `btf_id_set8` registration mechanism similar to kfunc registration to avoid `kallsyms_lookup_name` reliance.
 
 ### Severity: Major
-- **Lines**: `check_kinsn_sidecar_insn()` -- verifier handling
-- **Issue**: The sidecar instruction check advances `env->insn_idx` by 1 (skipping the next kinsn call). But it does NOT actually verify the kinsn call's effects on register state. The kinsn call is processed via `lower_kinsn_proof_regions` (pre-verification) which replaces the sidecar+call pair with the proof sequence. After verification, `restore_kinsn_proof_regions` puts them back. This means the verifier verifies the *proof sequence* (the BPF equivalent), not the native kinsn. This is the correct design -- the proof sequence IS the verifier's model of the kinsn. However, the sidecar check in `do_check_insn` should never be reached if lowering works correctly, since the sidecar is replaced before verification. The code IS reached only during the restore phase or if lowering is incomplete.
+- **Lines**: `check_kop_sidecar_insn()` -- verifier handling
+- **Issue**: The sidecar instruction check advances `env->insn_idx` by 1 (skipping the next kop call). But it does NOT actually verify the kop call's effects on register state. The kop call is processed via `lower_kop_proof_regions` (pre-verification) which replaces the sidecar+call pair with the proof sequence. After verification, `restore_kop_proof_regions` puts them back. This means the verifier verifies the *proof sequence* (the BPF equivalent), not the native kop. This is the correct design -- the proof sequence IS the verifier's model of the kop. However, the sidecar check in `do_check_insn` should never be reached if lowering works correctly, since the sidecar is replaced before verification. The code IS reached only during the restore phase or if lowering is incomplete.
 - **Verdict**: The architecture is sound, but the unreachable-in-normal-flow sidecar handler could mask lowering bugs. Add a `WARN_ON_ONCE` instead of silently advancing.
 
 ### Severity: Major
-- **Lines**: `lower_kinsn_proof_regions()` / `restore_kinsn_proof_regions()` ordering
-- **Issue**: `lower_kinsn_proof_regions` iterates from the end of the program backward (i = prog->len-1 to 0), patching as it goes. Each patch changes instruction indices. The code uses `verifier_remove_insns` then `bpf_patch_insn_data`. Since it iterates backward, earlier indices are not affected by patches to later indices. This is correct.
-- **Issue**: `restore_kinsn_proof_regions` iterates from region 0 to kinsn_region_cnt-1 (forward). Regions were added during backward iteration, so region[0] has the highest `start` index. Restoring from highest to lowest index is correct since each restoration changes only instructions at/after `region->start`. Wait -- actually regions were added in backward order, so `regions[0]` has the LAST (smallest) start index found during backward iteration. No -- the backward loop finds kinsn calls from end to start, so the first one found (added to regions[0]) has the highest start. The second one found has a lower start, etc. So `regions[0].start > regions[1].start > ...`. Restoring in forward order (0, 1, 2...) means we restore the highest-start region first, which is correct (doesn't affect lower indices).
+- **Lines**: `lower_kop_proof_regions()` / `restore_kop_proof_regions()` ordering
+- **Issue**: `lower_kop_proof_regions` iterates from the end of the program backward (i = prog->len-1 to 0), patching as it goes. Each patch changes instruction indices. The code uses `verifier_remove_insns` then `bpf_patch_insn_data`. Since it iterates backward, earlier indices are not affected by patches to later indices. This is correct.
+- **Issue**: `restore_kop_proof_regions` iterates from region 0 to kop_region_cnt-1 (forward). Regions were added during backward iteration, so region[0] has the highest `start` index. Restoring from highest to lowest index is correct since each restoration changes only instructions at/after `region->start`. Wait -- actually regions were added in backward order, so `regions[0]` has the LAST (smallest) start index found during backward iteration. No -- the backward loop finds kop calls from end to start, so the first one found (added to regions[0]) has the highest start. The second one found has a lower start, etc. So `regions[0].start > regions[1].start > ...`. Restoring in forward order (0, 1, 2...) means we restore the highest-start region first, which is correct (doesn't affect lower indices).
 - **Verdict**: Correct.
 
 ### Severity: Minor
 - **Lines**: `bpf_check()` -- moved `check_btf_info_early` and `add_subprog_and_kfunc` before `explored_states` allocation
-- **Issue**: These were moved to run before `explored_states` allocation so that `lower_kinsn_proof_regions` can run before the verifier main loop. But the error goto now jumps to `skip_full_check` which tries to `kvfree(env->explored_states)`. Since `explored_states` is not yet allocated (still NULL), `kvfree(NULL)` is a no-op, which is safe.
+- **Issue**: These were moved to run before `explored_states` allocation so that `lower_kop_proof_regions` can run before the verifier main loop. But the error goto now jumps to `skip_full_check` which tries to `kvfree(env->explored_states)`. Since `explored_states` is not yet allocated (still NULL), `kvfree(NULL)` is a no-op, which is safe.
 - **Verdict**: OK.
 
 ### Severity: Minor
@@ -173,25 +173,25 @@ Core kernel files (excluding tests/tools):
           env->explored_states = NULL;    // extra tab
 
           if (ret == 0)                   // extra tab
-                  ret = restore_kinsn_proof_regions(env);
+                  ret = restore_kop_proof_regions(env);
 
       /* might decrease stack depth... */  // correct indent
   ```
 - **Fix**: Remove the extra tab indentation after `skip_full_check:`.
 
 ### Severity: Minor
-- **Lines**: `jit_subprogs()` -- `func[i]->aux->kinsn_tab = prog->aux->kinsn_tab`
-- **Issue**: Shares the kinsn_tab pointer between the main prog and all subfunctions, same as kfunc_tab. This is correct -- all subprogs need access to the same kinsn descriptors for JIT emission.
+- **Lines**: `jit_subprogs()` -- `func[i]->aux->kop_tab = prog->aux->kop_tab`
+- **Issue**: Shares the kop_tab pointer between the main prog and all subfunctions, same as kfunc_tab. This is correct -- all subprogs need access to the same kop descriptors for JIT emission.
 - **Verdict**: OK.
 
 ### Severity: Minor
-- **Lines**: `do_misc_fixups()` -- kinsn lowering for non-JIT
-- **Issue**: When `bpf_kinsn_has_native_emit` returns true and JIT is requested, the sidecar+call pair is kept for the JIT. Otherwise, the proof sequence replaces the pair. This is the correct fallback behavior.
+- **Lines**: `do_misc_fixups()` -- kop lowering for non-JIT
+- **Issue**: When `bpf_kop_has_native_emit` returns true and JIT is requested, the sidecar+call pair is kept for the JIT. Otherwise, the proof sequence replaces the pair. This is the correct fallback behavior.
 - **Verdict**: OK.
 
 ### Severity: Nit
 - **Lines**: `disasm_call_name()` (renamed from `disasm_kfunc_name`)
-- **Issue**: Good cleanup. Handles both kfunc and kinsn calls, with NULL check on btf_type_by_id result.
+- **Issue**: Good cleanup. Handles both kfunc and kop calls, with NULL check on btf_type_by_id result.
 - **Verdict**: OK.
 
 ### Severity: Nit
@@ -204,13 +204,13 @@ Core kernel files (excluding tests/tools):
 ## arch/x86/net/bpf_jit_comp.c
 
 ### Severity: Major
-- **Lines**: `emit_kinsn_desc_call()` -- emit vs non-emit pass
-- **Issue**: The x86 JIT runs two passes: first with `emit=false` (size calculation), then `emit=true` (actual emission). The code passes `!!rw_image` as the `emit` flag. The kinsn's `emit_x86` callback receives `prog` and `off` by pointer. When `emit=false`, `prog` points to the writable buffer (NULL in first pass). The module's emit function must handle `image=NULL` correctly when `emit=false`. This is a contract that module authors must follow but is not enforced.
-- **Fix**: Document this contract in the `struct bpf_kinsn` definition.
+- **Lines**: `emit_kop_desc_call()` -- emit vs non-emit pass
+- **Issue**: The x86 JIT runs two passes: first with `emit=false` (size calculation), then `emit=true` (actual emission). The code passes `!!rw_image` as the `emit` flag. The kop's `emit_x86` callback receives `prog` and `off` by pointer. When `emit=false`, `prog` points to the writable buffer (NULL in first pass). The module's emit function must handle `image=NULL` correctly when `emit=false`. This is a contract that module authors must follow but is not enforced.
+- **Fix**: Document this contract in the `struct bpf_kop` definition.
 
 ### Severity: Major
-- **Lines**: `emit_kinsn_desc_call()` -- size validation
-- **Issue**: The check `if (ret != off || ret > kinsn->max_emit_bytes)` validates that the returned count matches the offset delta and doesn't exceed max. However, `off` is initialized to 0 and the callback is expected to advance it. If the callback writes more bytes than `max_emit_bytes`, the overflow has already happened by the time the check runs.
+- **Lines**: `emit_kop_desc_call()` -- size validation
+- **Issue**: The check `if (ret != off || ret > kop->max_emit_bytes)` validates that the returned count matches the offset delta and doesn't exceed max. However, `off` is initialized to 0 and the callback is expected to advance it. If the callback writes more bytes than `max_emit_bytes`, the overflow has already happened by the time the check runs.
 - **Fix**: The `max_emit_bytes` should be used to limit the buffer space available to the callback, not just as a post-hoc check. This requires coordination with the JIT's memory layout.
 
 ### Severity: Minor
@@ -220,7 +220,7 @@ Core kernel files (excluding tests/tools):
 
 ### Severity: Minor
 - **Lines**: `BPF_ALU64 | BPF_MOV | BPF_K` case -- sidecar skip
-- **Issue**: When the instruction is a sidecar, the JIT breaks out of the case without emitting anything. This is correct since the sidecar's payload is consumed by the following kinsn call emission.
+- **Issue**: When the instruction is a sidecar, the JIT breaks out of the case without emitting anything. This is correct since the sidecar's payload is consumed by the following kop call emission.
 - **Verdict**: OK.
 
 ---
@@ -228,8 +228,8 @@ Core kernel files (excluding tests/tools):
 ## arch/arm64/net/bpf_jit_comp.c
 
 ### Severity: Major
-- **Lines**: `emit_kinsn_desc_call_arm64()` -- `n_insns` variable reuse
-- **Issue**: `n_insns` is first assigned the return value of `bpf_jit_get_kinsn_payload()` (which returns 0 on success, negative on error). Then it's reused for the `emit_arm64` callback return value. The initial check `if (n_insns)` catches errors from the first call (non-zero = error). Then `n_insns = kinsn->emit_arm64(...)` overwrites it with the actual instruction count. This works but the variable name is misleading for the first usage.
+- **Lines**: `emit_kop_desc_call_arm64()` -- `n_insns` variable reuse
+- **Issue**: `n_insns` is first assigned the return value of `bpf_jit_get_kop_payload()` (which returns 0 on success, negative on error). Then it's reused for the `emit_arm64` callback return value. The initial check `if (n_insns)` catches errors from the first call (non-zero = error). Then `n_insns = kop->emit_arm64(...)` overwrites it with the actual instruction count. This works but the variable name is misleading for the first usage.
 - **Fix**: Use a separate `ret` variable for the first call's return value for clarity.
 
 ### Severity: Minor
@@ -312,7 +312,7 @@ Core kernel files (excluding tests/tools):
 - **Verdict**: Correct and necessary.
 
 ### Severity: Minor
-- **Lines**: `bpf_prog_jit_attempt_done()` -- `bpf_free_kfunc_desc_tab()` / `bpf_free_kinsn_desc_tab()`
+- **Lines**: `bpf_prog_jit_attempt_done()` -- `bpf_free_kfunc_desc_tab()` / `bpf_free_kop_desc_tab()`
 - **Issue**: Changed from `kfree(prog->aux->kfunc_tab)` to `bpf_free_kfunc_desc_tab()`. The new free function handles the dynamically allocated `descs` array inside the tab (working tree). This is correct.
 - **Verdict**: OK.
 
@@ -321,8 +321,8 @@ Core kernel files (excluding tests/tools):
 ## kernel/bpf/disasm.c
 
 ### Severity: Nit
-- **Lines**: New `BPF_PSEUDO_KINSN_CALL` disassembly string
-- **Issue**: Shows "kinsn-descriptor" for kinsn calls. Clear and consistent.
+- **Lines**: New `BPF_PSEUDO_KOP_CALL` disassembly string
+- **Issue**: Shows "kop-descriptor" for kop calls. Clear and consistent.
 - **Verdict**: OK.
 
 ---
@@ -349,7 +349,7 @@ Core kernel files (excluding tests/tools):
 
 ### Severity: Minor
 - **Lines**: `global_var` BTF feature for external modules
-- **Issue**: Adds `,global_var` to pahole's `--btf_features` when building external modules (`KBUILD_EXTMOD`). This enables BTF generation for global variables in kinsn modules, which is needed for the verifier to resolve `struct bpf_kinsn` descriptors. This is a clean integration.
+- **Issue**: Adds `,global_var` to pahole's `--btf_features` when building external modules (`KBUILD_EXTMOD`). This enables BTF generation for global variables in kop modules, which is needed for the verifier to resolve `struct bpf_kop` descriptors. This is a clean integration.
 - **Verdict**: OK.
 
 ---
@@ -357,7 +357,7 @@ Core kernel files (excluding tests/tools):
 ## include/linux/filter.h
 
 ### Severity: Nit
-- **Lines**: `BPF_CALL_KINSN()` macro
+- **Lines**: `BPF_CALL_KOP()` macro
 - **Issue**: Clean instruction builder macro, consistent with existing patterns.
 - **Verdict**: OK.
 
@@ -366,8 +366,8 @@ Core kernel files (excluding tests/tools):
 ## include/linux/btf.h
 
 ### Severity: Minor
-- **Lines**: `KF_KINSN (1 << 17)`
-- **Issue**: New kfunc flag defined but never checked in the codebase. This appears to be dead code -- the kinsn mechanism uses BTF_KIND_VAR resolution, not KF_KINSN flag.
+- **Lines**: `KF_KOP (1 << 17)`
+- **Issue**: New kfunc flag defined but never checked in the codebase. This appears to be dead code -- the kop mechanism uses BTF_KIND_VAR resolution, not KF_KOP flag.
 - **Fix**: Remove if unused, or implement the check.
 
 ---
@@ -385,42 +385,42 @@ Core kernel files (excluding tests/tools):
 1. REJIT requires `CAP_BPF + CAP_SYS_ADMIN` -- strongest privilege level
 2. Full verifier re-verification of new bytecode -- no bypass
 3. Proper `rejit_mutex` serialization of concurrent REJIT on same prog
-4. kinsn proof sequence validation prevents arbitrary code injection
+4. kop proof sequence validation prevents arbitrary code injection
 5. UAPI design is backward-compatible
 
 **Concerns:**
-1. `kallsyms_lookup_name` for kinsn resolution is fragile (symbol collisions)
-2. `bpf_kinsn_sidecar_payload` field overlap when dst_reg > 15 (needs masking)
+1. `kallsyms_lookup_name` for kop resolution is fragile (symbol collisions)
+2. `bpf_kop_sidecar_payload` field overlap when dst_reg > 15 (needs masking)
 3. `find_call_site` byte-scanning could false-positive (unlikely in practice)
-4. `validate_kinsn_proof_seq` doesn't handle `BPF_JMP32|BPF_JA` offset correctly
+4. `validate_kop_proof_seq` doesn't handle `BPF_JMP32|BPF_JA` offset correctly
 5. Swap-without-realloc for insns means bpftool can show stale bytecode
 
 ### Upstream Readiness: **Not yet**
 The code is functionally complete but has several issues that would block upstream:
 1. The indentation error at `skip_full_check` would fail checkpatch
-2. The `KF_KINSN` flag is dead code
+2. The `KF_KOP` flag is dead code
 3. The `tnum.h` include in bpf.h appears unnecessary
-4. The `api_version` and `flags` fields in `struct bpf_kinsn` are unused
+4. The `api_version` and `flags` fields in `struct bpf_kop` are unused
 5. The `find_call_site` byte-scanning approach would be rejected for upstream (too fragile)
-6. The `validate_kinsn_proof_seq` has a correctness bug with JMP32|JA
+6. The `validate_kop_proof_seq` has a correctness bug with JMP32|JA
 
 ### Must-Fix Blockers
 
 | # | Severity | File | Issue |
 |---|----------|------|-------|
-| 1 | Critical | verifier.c | `validate_kinsn_proof_seq` does not handle `BPF_JMP32\|BPF_JA` offset (uses `insn->off` instead of `insn->imm`) |
-| 2 | Major | bpf.h | `bpf_kinsn_sidecar_payload()` doesn't mask `dst_reg` to 4 bits -- overlaps with `off` field |
+| 1 | Critical | verifier.c | `validate_kop_proof_seq` does not handle `BPF_JMP32\|BPF_JA` offset (uses `insn->off` instead of `insn->imm`) |
+| 2 | Major | bpf.h | `bpf_kop_sidecar_payload()` doesn't mask `dst_reg` to 4 bits -- overlaps with `off` field |
 | 3 | Major | syscall.c | `bpf_prog_rejit_swap()` silently drops xlated insns if new prog is larger |
 | 4 | Major | bpf_struct_ops.c | `find_call_site()` byte-scanning for CALL opcode could false-positive |
-| 5 | Major | x86 JIT | `emit_kinsn_desc_call()` -- buffer overflow possible if module's `emit_x86` writes more than `max_emit_bytes` before post-hoc check |
+| 5 | Major | x86 JIT | `emit_kop_desc_call()` -- buffer overflow possible if module's `emit_x86` writes more than `max_emit_bytes` before post-hoc check |
 | 6 | Minor | verifier.c | Uncommitted working tree changes (dynamic allocation) should be committed |
 | 7 | Minor | verifier.c | `skip_full_check` indentation is broken |
 
 ### Recommended Improvements (Non-blocking)
 
 1. Add reverse index for PROG_ARRAY -> prog (avoid O(N_maps) scan)
-2. Replace `kallsyms_lookup_name` with proper kinsn registration API
+2. Replace `kallsyms_lookup_name` with proper kop registration API
 3. Add `WARN_ON_ONCE` to sidecar handler in `do_check_insn` (should be unreachable)
 4. Document `emit` flag contract for `emit_x86`/`emit_arm64` callbacks
 5. Make `emit_arm64` take `const struct bpf_prog *`
-6. Remove dead `KF_KINSN`, `api_version`, `flags`, `tnum.h` include
+6. Remove dead `KF_KOP`, `api_version`, `flags`, `tnum.h` include

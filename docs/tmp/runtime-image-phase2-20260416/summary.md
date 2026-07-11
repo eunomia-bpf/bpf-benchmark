@@ -37,12 +37,12 @@ Validated by `docker load` followed by `docker run --rm bpf-benchmark/runner-run
 
 - Kernel image: `/artifacts/kernel/bzImage`
 - Kernel modules: `/artifacts/modules/7.0.0-rc2/...`
-- Kinsn modules:
-  - `/artifacts/kinsn/bpf_bulk_memory.ko`
-  - `/artifacts/kinsn/bpf_endian.ko`
-  - `/artifacts/kinsn/bpf_extract.ko`
-  - `/artifacts/kinsn/bpf_rotate.ko`
-  - `/artifacts/kinsn/bpf_select.ko`
+- KOperation modules:
+  - `/artifacts/kop/bpf_bulk_memory.ko`
+  - `/artifacts/kop/bpf_endian.ko`
+  - `/artifacts/kop/bpf_extract.ko`
+  - `/artifacts/kop/bpf_rotate.ko`
+  - `/artifacts/kop/bpf_select.ko`
 - Manifest: `/artifacts/manifest.json`
   - `kernel_release`: `7.0.0-rc2`
   - `target_arch`: `x86_64`

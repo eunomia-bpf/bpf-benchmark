@@ -130,47 +130,47 @@ Grep verification:
 Estimated deleted lines:
 - about 45 (rename churn; mostly delete+add of the old name)
 
-## 5. Delete pending kinsn metadata overlay
+## 5. Delete pending kop metadata overlay
 
 Changed:
 - `runner/libs/case_common.py:21-24,142-158`
-  - deleted `_PENDING_KINSN_METADATA`
+  - deleted `_PENDING_KOP_METADATA`
   - deleted `reset_pending_result_metadata()`
   - deleted `attach_pending_result_metadata()`
-  - deleted `_append_pending_kinsn_metadata()`
+  - deleted `_append_pending_kop_metadata()`
   - `prepare_daemon_session()` / `_clone_daemon_metadata()` now keep only static metadata and `daemon_binary`
 - `runner/libs/case_common.py:357-480`
   - `run_case_lifecycle()` no longer writes `captured_at`, `status`, `abort_phase`, queue metadata, or lifecycle overlays
-  - metadata passthrough is now plain `{"kinsn_modules": ...}` when enabled
+  - metadata passthrough is now plain `{"kop_modules": ...}` when enabled
 - `runner/libs/rejit.py:827-837`
-  - `DaemonSession.start()` no longer writes `daemon_kinsn_discovery` / `status`; keeps `daemon_binary`
+  - `DaemonSession.start()` no longer writes `daemon_kop_discovery` / `status`; keeps `daemon_binary`
 - `e2e/driver.py:73-75,506-590`
   - removed pending-metadata attach/reset calls from single-case artifact path
 - `corpus/driver.py:22-31,1041-1057,1139-1431`
   - removed pending overlay imports/calls
-  - removed per-session `kinsn_metadata` / `kinsn_recorded`
-  - kept only top-level `payload["kinsn_modules"] = dict(prepared_daemon_session.metadata)`
+  - removed per-session `kop_metadata` / `kop_recorded`
+  - kept only top-level `payload["kop_modules"] = dict(prepared_daemon_session.metadata)`
 
 Deleted fields/functions/constants:
-- constant: `_PENDING_KINSN_METADATA`
+- constant: `_PENDING_KOP_METADATA`
 - function: `reset_pending_result_metadata`
 - function: `attach_pending_result_metadata`
-- function: `_append_pending_kinsn_metadata`
+- function: `_append_pending_kop_metadata`
 - metadata writes: `captured_at`
 - metadata writes: `lifecycle_index`
 - metadata writes: `count`
 - metadata writes: `lifecycle_runs`
-- metadata writes: `daemon_kinsn_discovery`
+- metadata writes: `daemon_kop_discovery`
 - metadata writes: `abort_phase`
-- corpus session fields: `kinsn_metadata`, `kinsn_recorded`
+- corpus session fields: `kop_metadata`, `kop_recorded`
 
 Rename:
 - no
 
 Grep verification:
-- pattern: `attach_pending_result_metadata|reset_pending_result_metadata|_append_pending_kinsn_metadata|lifecycle_runs|lifecycle_index|abort_phase|daemon_kinsn_discovery|captured_at`
+- pattern: `attach_pending_result_metadata|reset_pending_result_metadata|_append_pending_kop_metadata|lifecycle_runs|lifecycle_index|abort_phase|daemon_kop_discovery|captured_at`
 - result: no output
-- retained grep: `\bkinsn_modules\b|daemon_binary`
+- retained grep: `\bkop_modules\b|daemon_binary`
 - remaining hits are only the static keepers:
   - `runner/libs/rejit.py:834`
   - `runner/libs/case_common.py:153,398`
@@ -228,7 +228,7 @@ Estimated deleted lines:
 ## Breakage And Fixes
 
 - Removing synthetic apply-side `counts` would have left some consumers with no aggregate site total when only `summary.total_sites_applied` remained. Fixed by teaching `runner/libs/rejit.py:515-546` to fall back to `summary.total_sites_applied` inside `applied_site_totals_from_rejit_result()`.
-- Removing the kinsn lifecycle overlay would have dropped all metadata if `kinsn_modules` were deleted wholesale. Fixed by keeping only static passthrough metadata plus `daemon_binary` (`runner/libs/rejit.py:834`, `runner/libs/case_common.py:153,398`, `corpus/driver.py:1431`).
+- Removing the kop lifecycle overlay would have dropped all metadata if `kop_modules` were deleted wholesale. Fixed by keeping only static passthrough metadata plus `daemon_binary` (`runner/libs/rejit.py:834`, `runner/libs/case_common.py:153,398`, `corpus/driver.py:1431`).
 - No additional code/test breakage surfaced after the final static checks.
 
 ## Totals

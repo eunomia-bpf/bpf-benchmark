@@ -27,7 +27,7 @@ make[7]: 'fs/netfs/netfs.mod' is up to date.
   MODPOST Module.symvers
 make[3]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework'
 make[2]: Leaving directory '/home/yunwei37/workspace/bpf-benchmark'
-make -C "/home/yunwei37/workspace/bpf-benchmark" kinsn-modules BZIMAGE="vendor/linux-framework/arch/x86/boot/bzImage"
+make -C "/home/yunwei37/workspace/bpf-benchmark" kop-modules BZIMAGE="vendor/linux-framework/arch/x86/boot/bzImage"
 make[2]: Entering directory '/home/yunwei37/workspace/bpf-benchmark'
   SKIP    kernel-build (bzImage already exists)
 make -C "/home/yunwei37/workspace/bpf-benchmark/module/x86" KDIR="/home/yunwei37/workspace/bpf-benchmark/vendor/linux-framework"
@@ -53,7 +53,7 @@ Loaded bpf_endian
 Loaded bpf_extract
 Loaded bpf_rotate
 Loaded bpf_select
-kinsn modules: 6/6 loaded
+kop modules: 6/6 loaded
 === tracepoint ===
 command: ./tests/unittest/build/rejit_hotswap_tracepoint ./tests/unittest/build/progs
 started_at: 2026-03-26T14:18:04-07:00
@@ -212,7 +212,7 @@ Loaded bpf_endian
 Loaded bpf_extract
 Loaded bpf_rotate
 Loaded bpf_select
-kinsn modules: 6/6 loaded
+kop modules: 6/6 loaded
 === tracepoint ===
 command: ./tests/unittest/build/rejit_hotswap_tracepoint ./tests/unittest/build/progs
 started_at: 2026-03-26T14:18:04-07:00

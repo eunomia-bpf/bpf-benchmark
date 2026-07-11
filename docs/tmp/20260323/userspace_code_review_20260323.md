@@ -30,11 +30,11 @@
 **位置**：`daemon/src/pass.rs:281`
 **建议**：删除整个 `new()` 方法。
 
-#### H3：`BPF_KINSN_SIDECAR_PAYLOAD_BITS` 常量从未使用
-`insn.rs:62` 定义了 `pub const BPF_KINSN_SIDECAR_PAYLOAD_BITS: u32 = 52`，clippy 报告从未使用。该常量在 `kinsn_sidecar()` 构造函数内没有被引用（直接用了硬编码的位移）。
+#### H3：`BPF_KOP_SIDECAR_PAYLOAD_BITS` 常量从未使用
+`insn.rs:62` 定义了 `pub const BPF_KOP_SIDECAR_PAYLOAD_BITS: u32 = 52`，clippy 报告从未使用。该常量在 `kop_sidecar()` 构造函数内没有被引用（直接用了硬编码的位移）。
 
 **位置**：`daemon/src/insn.rs:62`
-**建议**：删除该常量，或在 `kinsn_sidecar()` 实现中引用它替代 hardcoded masks。
+**建议**：删除该常量，或在 `kop_sidecar()` 实现中引用它替代 hardcoded masks。
 
 #### H4：`KfuncRegistry` 保留 legacy `module_fd` 字段
 `pass.rs:401` 注释 `"Legacy single module FD (kept for backward compat; prefer per-kfunc FDs)"`。该字段在 `kfunc_discovery.rs:450` 被设置（注释也写明是 legacy），但在测试外仍然参与 `all_module_fds()` 逻辑。**按照 CLAUDE.md 的 No dead code 原则，这应该删除**。
@@ -278,7 +278,7 @@ helpers/ hold_bpf_prog/ integration/ kernel/ negative/ python/ unittest/
 
 **建议**：在 `module/x86/.gitignore` 和 `module/arm64/.gitignore` 中添加 `*.ko *.o *.mod.c *.mod modules.order Module.symvers`。
 
-#### L2：`module/include/kinsn_common.h` 整洁，无问题
+#### L2：`module/include/kop_common.h` 整洁，无问题
 
 ---
 
@@ -304,7 +304,7 @@ helpers/ hold_bpf_prog/ integration/ kernel/ negative/ python/ unittest/
 
 | 文件 | 位置 | 内容 | 建议 |
 |------|------|------|------|
-| `daemon/src/insn.rs` | 62 | `BPF_KINSN_SIDECAR_PAYLOAD_BITS` 常量未使用 | 删除 |
+| `daemon/src/insn.rs` | 62 | `BPF_KOP_SIDECAR_PAYLOAD_BITS` 常量未使用 | 删除 |
 | `daemon/src/insn.rs` | 200, 296 | `mov64_imm()`, `nop()` 仅测试用 | 加 `#[cfg(test)]` |
 | `daemon/src/pass.rs` | 281-297 | `PassResult::new()` 未被调用 | 删除 |
 | `daemon/src/pass.rs` | 317-327 | `PassCategory` 枚举及 `category()` 方法未被读取 | 删除或推迟 |

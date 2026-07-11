@@ -13,7 +13,7 @@
 | smp_wmb → smp_store_release | **已修** | syscall.c:3455 |
 | tail_call_reachable 未 swap | **已修** | syscall.c swap 函数 |
 | arena 未 swap | **已修** | syscall.c swap 函数 |
-| bpf_kinsn_has_native_emit 未定义 | **已修** | include/linux/bpf.h:981 |
+| bpf_kop_has_native_emit 未定义 | **已修** | include/linux/bpf.h:981 |
 | prog_flags 不完整 | **已修** | syscall.c:3558 aux->prog_flags |
 
 ## 仍存在的 Bug

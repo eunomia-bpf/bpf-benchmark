@@ -326,7 +326,7 @@ ARM64 并不是“x86 LEA 的另一个 emitter”而已；它其实提示我们�
 
 ---
 
-## 5. kinsn module 设计：`bpf_lea64`
+## 5. kop module 设计：`bpf_lea64`
 
 ### 5.1 建议语义
 
@@ -386,7 +386,7 @@ if disp != 0: add dst, disp
 
 - verifier 看到的是非常普通的 BPF ALU 序列
 - 不需要给 module 暴露 `bpf_reg_state`
-- 和现有 kinsn “kernel 保安全、userspace 保正确性”的模型完全一致
+- 和现有 kop “kernel 保安全、userspace 保正确性”的模型完全一致
 
 ### 5.4 x86 emitter 设计
 
@@ -405,7 +405,7 @@ lea x86_dst, [x86_base + x86_index * scale + disp]
 
 一个对当前代码有利的小事实：
 
-- `module/include/kinsn_common.h` 的 x86 BPF reg 映射没有把任何 BPF reg 放到 SIB index 不可编码的 code `4`
+- `module/include/kop_common.h` 的 x86 BPF reg 映射没有把任何 BPF reg 放到 SIB index 不可编码的 code `4`
 - 所以本项目当前寄存器分配下，不需要为了 “RSP 不能做 index” 再额外加一个 verifier 限制
 
 ### 5.5 ARM64 emitter 设计
@@ -424,7 +424,7 @@ MVP：
 
 ### 5.6 代码接入点
 
-最小接入面和现有 kinsn 完全一致：
+最小接入面和现有 kop 完全一致：
 
 - `module/x86/bpf_lea.c`
 - `module/arm64/bpf_lea.c`

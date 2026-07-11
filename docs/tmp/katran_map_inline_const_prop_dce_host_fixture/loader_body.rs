@@ -53,7 +53,7 @@ struct Cli {
     /// Pass to run via the daemon's per-pass yaml.
     #[arg(long, value_name = "NAME")]
     pass: Option<String>,
-    /// Target.json passed to the pass yaml (only needed by kinsn-class passes).
+    /// Target.json passed to the pass yaml (only needed by kop-class passes).
     #[arg(long, value_name = "FILE")]
     target: Option<PathBuf>,
     /// Workdir to use. If omitted, a tmp dir is created and removed on exit.

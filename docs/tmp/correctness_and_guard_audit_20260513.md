@@ -4,9 +4,9 @@
 
 | file:line | class | severity | description | recommended action |
 |---|---|---:|---|---|
-| `bpfopt/crates/bpfopt/src/passes/rotate.rs:18` | A | med | `bpf_rotate{32,64}` claims uses `{src}` and defs `{dst}`, but the payload also carries `tmp_reg` and the kernel instantiate path writes it. | Add payload offset 16 to `register_defs`, or remove the verifier-visible tmp operand from the rotate kinsn semantics and module instantiate path. |
+| `bpfopt/crates/bpfopt/src/passes/rotate.rs:18` | A | med | `bpf_rotate{32,64}` claims uses `{src}` and defs `{dst}`, but the payload also carries `tmp_reg` and the kernel instantiate path writes it. | Add payload offset 16 to `register_defs`, or remove the verifier-visible tmp operand from the rotate kop semantics and module instantiate path. |
 | `bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:13` | A | med | `bpf_bulk_memcpy` claims uses `{dst_base, src_base}` and empty defs, but both module instantiate paths write `tmp_reg` from payload offset 48. | Add `tmp_reg` offset 48 to memcpy `register_defs`; keep the existing live-out check until native/module semantics are changed to preserve tmp. |
-| `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:1399` | A | med | Linear lifted facts treat every kinsn call as a generic helper call and clear `r0..r5` plus packet facts, ignoring descriptor defs/uses. | Make `advance_lifted_regs` kinsn-aware: read the packed sidecar and descriptor, clear only descriptor defs, preserve unaffected facts, and fail if the descriptor is unavailable. |
+| `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:1399` | A | med | Linear lifted facts treat every kop call as a generic helper call and clear `r0..r5` plus packet facts, ignoring descriptor defs/uses. | Make `advance_lifted_regs` kop-aware: read the packed sidecar and descriptor, clear only descriptor defs, preserve unaffected facts, and fail if the descriptor is unavailable. |
 | `bpfopt/crates/bpfopt/src/pass.rs:647` | A | med | Empty/missing verifier state is explicitly accepted and consumers fall back to unknown reg classification. | Add a pass-level verifier-state requirement for verifier-guided passes and fail the pass when log-level/state data is missing. |
 | `bpfopt/crates/bpfopt/src/passes/const_prop.rs:31` | A | med | `const_prop` reads `reg_kind()` and `reg_known_constant()`; absent verifier state turns into `None` and silently disables the optimization. | Treat missing verifier state as a pass error for `const_prop`; keep `None` only for a present state that proves no constant. |
 | `bpfopt/crates/bpfopt/src/passes/bulk_memory.rs:187` | C | med | Same-base overlap guard still rejects bulk memcpy candidates, while the module does not reject overlap and Tier B policy trusts LLVM/app byte-ladders. | Delete the guard and the alias-skip test, or move overlap rejection to a documented semantic check with corpus evidence. |
@@ -31,8 +31,8 @@
   - x86 instantiate writes `tmp_reg` with `BPF_MOV{32,64}_REG(tmp_reg, src_reg)` and shifts it (`module/x86/bpf_rotate.c:71`, `module/x86/bpf_rotate.c:95`).
   - arm64 instantiate does the same (`module/arm64/bpf_rotate.c:71`, `module/arm64/bpf_rotate.c:95`).
   - Native x86/arm64 emit ignores `tmp_reg` and writes only `dst`, but the verifier/fallback expansion is still a valid semantic model for liveness.
-- Impact: liveness after an existing rotate kinsn believes `tmp_reg` survives. The pass has a pre-rewrite live-out guard (`rotate.rs:47`) that prevents the immediate replacement from clobbering a live tmp, so this is not an obvious current miscompile, but later use-def/liveness consumers will have the wrong fact for programs already containing rotate kinsns.
-- Proposed fix: add payload offset 16 to `register_defs`, or redesign the rotate kinsn so both native and instantiate semantics preserve/no longer expose `tmp_reg`.
+- Impact: liveness after an existing rotate kop believes `tmp_reg` survives. The pass has a pre-rewrite live-out guard (`rotate.rs:47`) that prevents the immediate replacement from clobbering a live tmp, so this is not an obvious current miscompile, but later use-def/liveness consumers will have the wrong fact for programs already containing rotate koperation.
+- Proposed fix: add payload offset 16 to `register_defs`, or redesign the rotate kop so both native and instantiate semantics preserve/no longer expose `tmp_reg`.
 
 ### A2. `bulk_memory` memcpy descriptor omits the tmp-register def
 
@@ -45,13 +45,13 @@
 - Impact: same shape as rotate. The pass checks tmp live-out for the replacement window (`bulk_memory.rs:195`), but any subsequent liveness/use-def pass sees an existing `bpf_bulk_memcpy` call as preserving the tmp register.
 - Proposed fix: add offset 48 to memcpy `register_defs`.
 
-### A3. Lifted reg facts are not kinsn-aware
+### A3. Lifted reg facts are not kop-aware
 
 - File: `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:1399`
-- Claimed behavior: `ProgramCFG` has a `KinsnRegistry`, and use-def facts already call `descriptor.register_uses` and `descriptor.register_defs` (`bbprogram_use_def.rs:185`).
+- Claimed behavior: `ProgramCFG` has a `KopRegistry`, and use-def facts already call `descriptor.register_uses` and `descriptor.register_defs` (`bbprogram_use_def.rs:185`).
 - Actual behavior: `advance_lifted_regs()` treats any `insn.is_call()` as an opaque helper, clearing `r0..r5`, packet facts, and `last_data_load` (`bbprogram.rs:1399`).
-- Impact: after an earlier pass inserts a kinsn, later passes that use `reg_fact_at()` (`bounds_check_merge`, `skb_load_bytes_spec`, `map_inline` alias recovery) lose facts across the kinsn even when the descriptor says the kinsn only writes one destination register. This silently rejects legitimate follow-on optimizations.
-- Proposed fix: split normal helper calls from `is_call_kinsn()`. For kinsn calls, decode the preceding sidecar, look up the descriptor, set descriptor defs to `Unknown`, preserve non-def facts, and fail on missing sidecar/descriptor.
+- Impact: after an earlier pass inserts a kop, later passes that use `reg_fact_at()` (`bounds_check_merge`, `skb_load_bytes_spec`, `map_inline` alias recovery) lose facts across the kop even when the descriptor says the kop only writes one destination register. This silently rejects legitimate follow-on optimizations.
+- Proposed fix: split normal helper calls from `is_call_kop()`. For kop calls, decode the preceding sidecar, look up the descriptor, set descriptor defs to `Unknown`, preserve non-def facts, and fail on missing sidecar/descriptor.
 
 ### A4. Verifier-state absence is modeled as “unknown” instead of a pass error
 
@@ -61,7 +61,7 @@
 - Impact: a daemon/log-level bug can reduce `const_prop`, `map_inline`, and other verifier-guided passes to no-op behavior while still returning success. This is the same failure mode as stale/missing dataflow facts: measurable apply-count loss is hidden as normal “no candidate” behavior.
 - Proposed fix: add explicit pass metadata such as `requires_verifier_states()`. If a pass requires verifier states and none were parsed, exit 1 with a clear error. Preserve site-level skip reasons only when verifier states exist but do not prove the needed fact.
 
-### Kinsn descriptors checked with no mismatch found
+### KOperation descriptors checked with no mismatch found
 
 - `cond_select`: uses offsets 4/8/12 and def offset 0 (`cond_select.rs:17`). x86/arm64 instantiate reads `cond`, `true`, `false` and writes `dst` (`module/x86/bpf_select.c:48`, `module/arm64/bpf_select.c:48`). The x86 native path skips `cond` when `true == false`, but the instantiate semantics still read it, so the descriptor is conservative and correct.
 - `endian`: uses base offset 4 and def offset 0 (`endian.rs:34`). x86/arm64 instantiate loads from base and bswaps/writes dst.
@@ -84,7 +84,7 @@
 - File: `bpfopt/crates/bpfopt/src/insn.rs:7`
 - What it is: local public constants re-export upstream `libbpf_sys` constants (`BPF_LD`, `BPF_ALU64`, `BPF_JEQ`, `BPF_REG_0..10`, pseudo tags, etc.).
 - Why it is dead/legacy: these wrappers are used, but they are compatibility aliases around upstream UAPI values. The design rule says to use `libbpf-rs`/`libbpf-sys` and not re-wrap upstream APIs.
-- Action: replace public upstream aliases with direct `libbpf_sys::*` imports or private local aliases. Keep only project-specific pseudo constants (`BPF_PSEUDO_KINSN_SIDECAR`, `BPF_PSEUDO_KINSN_CALL`) and values not exposed upstream.
+- Action: replace public upstream aliases with direct `libbpf_sys::*` imports or private local aliases. Keep only project-specific pseudo constants (`BPF_PSEUDO_KOP_SIDECAR`, `BPF_PSEUDO_KOP_CALL`) and values not exposed upstream.
 
 ### B3. Helper-id wrappers duplicate `libbpf_sys`
 
@@ -197,7 +197,7 @@
 - Checked worktree status read-only: `git status --short`.
 - Enumerated relevant files: `rg --files`, `rg --files bpfopt daemon module`, and `find module -maxdepth 2 -type f`.
 - Searched descriptors and use-def wiring:
-  - `rg -n "register_uses|register_defs|KINSN_TARGETS" bpfopt/crates/bpfopt/src/passes/{cond_select,rotate,endian,extract,bulk_memory,prefetch,ccmp,lea}.rs -S`
+  - `rg -n "register_uses|register_defs|KOP_TARGETS" bpfopt/crates/bpfopt/src/passes/{cond_select,rotate,endian,extract,bulk_memory,prefetch,ccmp,lea}.rs -S`
   - `nl -ba bpfopt/crates/bpfopt/src/analysis/bbprogram_use_def.rs | sed -n '150,205p'`
   - `nl -ba bpfopt/crates/bpfopt/src/analysis/bbprogram.rs | sed -n '285,420p;1385,1480p'`
 - Cross-checked module emission under `module/x86/*.c` and `module/arm64/*.c` with `nl -ba ... | sed ...` for `bpf_select`, `bpf_rotate`, `bpf_endian`, `bpf_extract`, `bpf_bulk_memory`, `bpf_prefetch`, `bpf_ccmp`, `bpf_lea`, and `bpf_ldp`.

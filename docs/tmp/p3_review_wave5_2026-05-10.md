@@ -126,7 +126,7 @@ No convergence blockers were found in the cross-pass scan. Cleanup candidates fo
 
 5. Dedup the remaining CLI-local JSON reader. Passes now share `read_json_file()` from `bbprogram_helpers.rs:80-82`, and `map_inline` imports it at `map_inline.rs:12`. `main.rs` still has a local duplicate at `main.rs:1048-1052`; this is outside the per-pass migration path but is a straightforward cleanup.
 
-6. Consider a small kinsn-proof helper audit. Several kinsn passes have similar proof decode / length / register-use boilerplate: `cond_select.rs:16-31`, `ccmp.rs:20-60`, `rotate.rs:24-60`, `extract.rs:17-31`, `endian.rs:53-63`, `prefetch.rs:30-45`, and `bulk_memory.rs:34-112`. The formats differ enough that this is not urgent, but the repetition is visible.
+6. Consider a small kop-proof helper audit. Several kop passes have similar proof decode / length / register-use boilerplate: `cond_select.rs:16-31`, `ccmp.rs:20-60`, `rotate.rs:24-60`, `extract.rs:17-31`, `endian.rs:53-63`, `prefetch.rs:30-45`, and `bulk_memory.rs:34-112`. The formats differ enough that this is not urgent, but the repetition is visible.
 
 7. Review diagnostic `unwrap_or(...)` defaults in `map_inline`. There are no production `unwrap()` / `expect()` / `panic!()` hits in pass implementations; the panic-family `rg` hits are tests or `#[cfg(test)]`. Separate from that, `map_inline` uses diagnostic fallbacks like `site_pc(...).unwrap_or(usize::MAX)` at `map_inline.rs:1706`, `map_inline.rs:1719`, `map_inline.rs:1738`, `map_inline.rs:3557`, and `map_inline.rs:3944`. These do not change behavior, but the fail-fast audit phase should decide whether invariant failures should be propagated even for diagnostics.
 

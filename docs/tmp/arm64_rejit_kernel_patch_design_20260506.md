@@ -698,13 +698,13 @@ cd vendor/linux-framework/tools/testing/selftests/bpf
 ./test_progs -t ksyms_module
 ```
 
-Run repo REJIT tests that stress swap, tail calls, private stack, and kinsn:
+Run repo REJIT tests that stress swap, tail calls, private stack, and kop:
 
 ```sh
 tests/unittest/build-arm64/rejit_swap_tests
 tests/unittest/build-arm64/rejit_tail_call
 tests/unittest/build-arm64/rejit_private_stack
-tests/unittest/build-arm64/rejit_kinsn
+tests/unittest/build-arm64/rejit_kop
 tests/unittest/build-arm64/rejit_regression
 tests/unittest/build-arm64/rejit_hotswap_xdp
 ```

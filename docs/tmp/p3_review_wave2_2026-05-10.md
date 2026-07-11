@@ -145,8 +145,8 @@ emitted no grep lines in this tree. That command does not include test targets. 
    - Fix: delete unchecked APIs or make them `#[cfg(test)]`; use checked variants in tests and production.
    - Estimated LOC delta: -20 to -40.
 
-4. Kinsn registry duplicate registration still panics.
-   - Evidence: `assert!(previous.is_none(), "duplicate kinsn target name {name}")` at `bpfopt/crates/bpfopt/src/pass.rs:812-820`.
+4. KOperation registry duplicate registration still panics.
+   - Evidence: `assert!(previous.is_none(), "duplicate kop target name {name}")` at `bpfopt/crates/bpfopt/src/pass.rs:812-820`.
    - Fix: return `Result` from registration/construction and `bail!` with the duplicate name.
    - Estimated LOC delta: +10 to +25.
 
@@ -206,7 +206,7 @@ emitted no grep lines in this tree. That command does not include test targets. 
    - Estimated LOC delta: -250 to -350.
 
 6. Slim `bbprogram.rs`.
-   - Evidence: BTF/query/view/liveness APIs are mixed in one file: BTF view starts at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:302`, current/linear views at `bbprogram.rs:352-470`, kinsn subprog checks at `bbprogram.rs:477-544`, liveness implementation starts around `bbprogram.rs:1028`.
+   - Evidence: BTF/query/view/liveness APIs are mixed in one file: BTF view starts at `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:302`, current/linear views at `bbprogram.rs:352-470`, kop subprog checks at `bbprogram.rs:477-544`, liveness implementation starts around `bbprogram.rs:1028`.
    - Fix: split into focused modules. Net LOC may not drop, but `bbprogram.rs` should shrink by 250-400 LOC for auditability.
    - Estimated LOC delta: net neutral, file-local -250 to -400.
 

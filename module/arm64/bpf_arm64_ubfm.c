@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT arm64 kinsn: UBFM - bit-field extraction via UBFM
+ * BpfReJIT arm64 kop: UBFM - bit-field extraction via UBFM
  */
 
-#include "kinsn_common.h"
+#include "kop_common.h"
 
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_arm64_ubfm_x(void) {}
@@ -18,9 +18,9 @@ static __always_inline int decode_extract_payload(u64 payload,
 						  u8 *start,
 						  u8 *bit_len)
 {
-	*dst_reg = kinsn_payload_reg(payload, 0);
-	*start = kinsn_payload_u8(payload, 8);
-	*bit_len = kinsn_payload_u8(payload, 16);
+	*dst_reg = kop_payload_reg(payload, 0);
+	*start = kop_payload_u8(payload, 8);
+	*bit_len = kop_payload_u8(payload, 16);
 
 	if (*dst_reg > BPF_REG_10)
 		return -EINVAL;
@@ -76,15 +76,15 @@ static int emit_ubfm_x_arm64(u32 *image, int *idx, bool emit,
 	if (err)
 		return err;
 
-	dst_reg = kinsn_arm64_reg(dst_reg);
+	dst_reg = kop_arm64_reg(dst_reg);
 	if (dst_reg == 0xff)
 		return -EINVAL;
 
 	insn = a64_ubfm_x(dst_reg, dst_reg, start, start + bit_len - 1);
-	return kinsn_arm64_emit_one(image, idx, emit, insn);
+	return kop_arm64_emit_one(image, idx, emit, insn);
 }
 
-const struct bpf_kinsn bpf_arm64_ubfm_x_desc = {
+const struct bpf_kop bpf_arm64_ubfm_x_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 2,
 	.max_emit_bytes = 4,
@@ -92,9 +92,9 @@ const struct bpf_kinsn bpf_arm64_ubfm_x_desc = {
 	.emit_arm64 = emit_ubfm_x_arm64,
 };
 
-static const struct bpf_kinsn * const bpf_arm64_ubfm_kinsn_descs[] = {
+static const struct bpf_kop * const bpf_arm64_ubfm_kop_descs[] = {
 	&bpf_arm64_ubfm_x_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_arm64_ubfm, "BpfReJIT arm64 kinsn: UBFM",
-		       bpf_arm64_ubfm_kfunc_ids, bpf_arm64_ubfm_kinsn_descs);
+DEFINE_KOP_V2_MODULE(bpf_arm64_ubfm, "BpfReJIT arm64 kop: UBFM",
+		       bpf_arm64_ubfm_kfunc_ids, bpf_arm64_ubfm_kop_descs);

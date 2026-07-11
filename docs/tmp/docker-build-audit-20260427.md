@@ -6,7 +6,7 @@
 
 当前 runtime image 里混合了三类工作：
 
-1. 必要源码构建：自定义 Linux kernel、kinsn kernel module、`bpfrejit-daemon`、`micro_exec`、micro benchmark `.bpf.o`、测试 artifacts、Katran artifacts。
+1. 必要源码构建：自定义 Linux kernel、kop kernel module、`bpfrejit-daemon`、`micro_exec`、micro benchmark `.bpf.o`、测试 artifacts、Katran artifacts。
 2. 主要由构建方式导致的源码构建：多次 libbpf 构建、vendored `bpftool`、Katran 的 folly/gRPC/protobuf 依赖栈，以及 Katran 的 googletest 依赖。
 3. 直接安装或复制：Ubuntu apt 包、Go/Rust binary toolchain、Tracee/Tetragon/Cilium/Calico upstream image、repo 内预编译 corpus object、`otelcol-ebpf-profiler` release tarball。
 
@@ -32,7 +32,7 @@
 - runtime image tar 输出是 `.cache/container-images/x86_64-runner-runtime.image.tar` 和 `.cache/container-images/arm64-runner-runtime.image.tar`（`runner/mk/build.mk:44-48`）。
 - image 内 kernel build root 是 `/tmp/bpf-benchmark-build/<arch>.../kernel-build`（`runner/mk/build.mk:12-17`，`runner/mk/build.mk:54-59`）。
 - Katran 必需输出是 `bin/katran_server_grpc`、`bpf/balancer.bpf.o`、`bpf/healthchecking_ipip.bpf.o`、`bpf/xdp_root.bpf.o`（`runner/mk/build.mk:60`）。
-- source dependency set 覆盖 daemon、runner、tests、micro programs、kinsn module、Katran、libbpf、vendored Linux runtime files、Python/YAML/env runtime files、kernel metadata 和 kernel source（`runner/mk/build.mk:64-104`）。
+- source dependency set 覆盖 daemon、runner、tests、micro programs、kop module、Katran、libbpf、vendored Linux runtime files、Python/YAML/env runtime files、kernel metadata 和 kernel source（`runner/mk/build.mk:64-104`）。
 
 主要 target：
 
@@ -40,10 +40,10 @@
 - x86 image tar：`docker build --platform linux/amd64 --target runner-runtime ...` 后 `docker save`（`runner/mk/build.mk:117-125`）。
 - arm64 image tar：`docker build --platform linux/arm64 --target runner-runtime ...` 后 `docker save`（`runner/mk/build.mk:127-135`）。
 - `$(X86_RUNTIME_KERNEL_IMAGE)` 依赖 x86 image tar 和 install script，只从 image 中抽取 kernel（`runner/mk/build.mk:140-144`）。
-- `image-kernel-artifacts` 构建 kernel、install modules、构建 kinsn modules、复制 kernel image、写 manifest（`runner/mk/build.mk:148-161`）。
+- `image-kernel-artifacts` 构建 kernel、install modules、构建 kop modules、复制 kernel image、写 manifest（`runner/mk/build.mk:148-161`）。
 - `image-kernel-build` 执行 Linux `olddefconfig` 并构建 `bzImage/modules` 或 `Image/vmlinuz.efi/modules`（`runner/mk/build.mk:163-180`）。
 - `image-kernel-modules-artifacts` 执行 `modules_install`、`depmod`，并 staging `/lib/modules/<release>`（`runner/mk/build.mk:184-200`）。
-- `image-kinsn-artifacts` 用 `M=<module source>` 构建 out-of-tree kinsn module（`runner/mk/build.mk:202-205`）。
+- `image-kop-artifacts` 用 `M=<module source>` 构建 out-of-tree kop module（`runner/mk/build.mk:202-205`）。
 - Docker-only artifact target 由 `BPFREJIT_IMAGE_BUILD=1` 保护（`runner/mk/build.mk:207-218`）。
 - `image-runner-artifacts` 构建 `runner/build-llvmbpf/micro_exec` 或 `runner/build-arm64-llvmbpf/micro_exec`（`runner/mk/build.mk:215`，`runner/mk/build.mk:231-243`）。
 - `image-daemon-artifact` 构建 Rust daemon（`runner/mk/build.mk:216`，`runner/mk/build.mk:227-230`）。
@@ -95,7 +95,7 @@ Go 目前不是用于本 repo 的 Go 代码编译，而是满足 Katran `get_grp
 
 - 通过 apt 安装 `bsdextrautils`（`runner/containers/runner-runtime.Dockerfile:230-232`）。
 - 复制 Makefile、`runner/mk`、defconfig、module sources，并把 `vendor/linux-framework` symlink 到 bind-mounted source tree（`runner/containers/runner-runtime.Dockerfile:234-252`）。
-- 执行 `make image-kernel-artifacts`，进而构建自定义 kernel、modules、kinsn modules（`runner/containers/runner-runtime.Dockerfile:253-256`）。
+- 执行 `make image-kernel-artifacts`，进而构建自定义 kernel、modules、kop modules（`runner/containers/runner-runtime.Dockerfile:253-256`）。
 - 删除临时 source/build inputs（`runner/containers/runner-runtime.Dockerfile:257-262`）。
 
 ### `runner-runtime`
@@ -133,15 +133,15 @@ Go 目前不是用于本 repo 的 Go 代码编译，而是满足 Katran `get_grp
 - 为什么编译：benchmark 需要 vendored `vendor/linux-framework` kernel，包含 BPF ReJIT 支持和匹配的 modules。stock Ubuntu kernel package 不能替代。
 - 是否必须在每次 Docker build 中编译：不必须。需要的是 artifact，不一定要在 runtime image build 过程中编。
 - 替代方案：按架构预构建 kernel image、modules、manifest，key 包括 `vendor/linux-framework`、defconfig、compiler、module source。
-- 缓存/预构建：最高优先级之一。把 `kernel/`、`modules/`、`kinsn/`、`manifest.json` 发布为 OCI layer 或 CI artifact；只有 kernel/config/module sources 变更时重建。
+- 缓存/预构建：最高优先级之一。把 `kernel/`、`modules/`、`kop/`、`manifest.json` 发布为 OCI layer 或 CI artifact；只有 kernel/config/module sources 变更时重建。
 
-### 2. kinsn out-of-tree kernel modules
+### 2. kop out-of-tree kernel modules
 
 - 语言：C/Kbuild。
 - 构建路径：`make ... M=<module source> MO=<artifact dir> modules`（`runner/mk/build.mk:202-205`）。
 - 规模：`module/` 下 C/H/Makefile 约 3.4k 行。
 - 复杂度：中等，但强绑定 exact kernel build。
-- 为什么编译：daemon 启动时发现 exported kinsn stubs（`daemon/src/main.rs:46-72`），module 必须匹配自定义 kernel。
+- 为什么编译：daemon 启动时发现 exported kop stubs（`daemon/src/main.rs:46-72`），module 必须匹配自定义 kernel。
 - 替代方案：只能和 exact kernel release 一起预构建。
 - 缓存/预构建：和 kernel 一起做。
 
@@ -193,7 +193,7 @@ Go 目前不是用于本 repo 的 Go 代码编译，而是满足 Katran `get_grp
 - 构建路径：`make -C daemon release`（`runner/mk/build.mk:227-230`），内部执行 `cargo build --release`（`daemon/Makefile:10-11`）。
 - crates：`anyhow`、`clap`、`goblin`、`libc`、`serde`、`serde_json`（`daemon/Cargo.toml:11-17`），release profile 使用 `opt-level=3` 和 LTO（`daemon/Cargo.toml:19-21`）。
 - 规模：production Rust 约 24k 行，含 tests 约 33k 行。
-- 做什么：ReJIT control plane，扫描 live BPF programs 并通过 `BPF_PROG_REJIT` 应用 rewrite（`daemon/README.md:3-5`）。当前 CLI 只有 `serve`（`daemon/src/main.rs:33-41`），启动时做 kinsn discovery 和 platform capability detection（`daemon/src/main.rs:43-75`）。server 处理 `optimize`、`optimize-all`、`status` 等 JSON commands（`daemon/src/server.rs:459-789`）。核心 apply path 是 `commands::try_apply_one`（`daemon/src/commands.rs:440-452`）。
+- 做什么：ReJIT control plane，扫描 live BPF programs 并通过 `BPF_PROG_REJIT` 应用 rewrite（`daemon/README.md:3-5`）。当前 CLI 只有 `serve`（`daemon/src/main.rs:33-41`），启动时做 kop discovery 和 platform capability detection（`daemon/src/main.rs:43-75`）。server 处理 `optimize`、`optimize-all`、`status` 等 JSON commands（`daemon/src/server.rs:459-789`）。核心 apply path 是 `commands::try_apply_one`（`daemon/src/commands.rs:440-452`）。
 - 为什么编译：这是 pass pipeline 和 ReJIT 控制面，不是 wrapper。
 - 能否用 Python 替代：不适合。等价于 port verifier/rewrite logic、syscall structs、analysis passes、invalidation 和 server protocol。
 - 能否预编译：可以。daemon 编译期不强绑定某个 kernel build；它运行时发现 capability/kfunc/BTF 状态。需要保留兼容性测试，但这是最安全的预构建候选之一。
@@ -353,7 +353,7 @@ final runtime apt 安装：
 daemon 是 ReJIT control plane：
 
 - Unix socket JSON protocol（`daemon/README.md:31-82`）。
-- 启动时 kinsn discovery 和 platform capability detection（`daemon/src/main.rs:46-72`）。
+- 启动时 kop discovery 和 platform capability detection（`daemon/src/main.rs:46-72`）。
 - `optimize`、`optimize-all`、`status` commands（`daemon/src/server.rs:459-789`）。
 - `try_apply_one` 执行 pass pipeline 和最终 ReJIT（`daemon/src/commands.rs:440-452`）。
 
@@ -391,9 +391,9 @@ daemon 是 ReJIT control plane：
 - final Katran CMake 已 `-DBUILD_TESTS=OFF`，应避免 `build_katran.sh` 仍 clone/install googletest。
 - 避免 Katran 再 clone/build 一份 libbpf；复用 vendored libbpf 或 system libbpf。
 
-### P1: 按架构预构建 custom kernel/modules/kinsn
+### P1: 按架构预构建 custom kernel/modules/kop
 
-stock apt kernel 不能替代 BPF ReJIT kernel，但 kernel image、modules、kinsn modules、manifest 可以预构建并复制。这对 AWS arm64 尤其重要，因为 `docker build --platform linux/arm64` 在 x86 builder 上通常会走 emulation。
+stock apt kernel 不能替代 BPF ReJIT kernel，但 kernel image、modules、kop modules、manifest 可以预构建并复制。这对 AWS arm64 尤其重要，因为 `docker build --platform linux/arm64` 在 x86 builder 上通常会走 emulation。
 
 ### P1: 预构建或缓存 `bpfrejit-daemon`
 

@@ -312,7 +312,7 @@ This indicates extensive agentic exploration of different optimization strategie
 | [empty/default] | 115 | 98 | 10 | May 22 - Jun 22 |
 | lea only | 102 | 13 | 76 | May 31 - Jun 3 |
 | ARM64 pipeline (10 passes) | 97 | 43 | 16 | Jun 14-17 |
-| kinsn only | 50 | 37 | 9 | Jun 3-8 |
+| kop only | 50 | 37 | 9 | Jun 3-8 |
 | rotate only | 35 | 8 | 21 | Jun 2-3 |
 | map_inline only | 33 | 22 | 11 | May 21-22 |
 
@@ -322,7 +322,7 @@ Aggregated from all report files across post-May-20 sessions:
 
 | Pass | Sessions | Sites Applied | Sites Matched | Sites Skipped |
 |------|-------:|-------------:|-------------:|-------------:|
-| **kinsn** | 30 | **305,449** | 305,449 | 0 |
+| **kop** | 30 | **305,449** | 305,449 | 0 |
 | **rotate** | 40 | **222,547** | 222,547 | 0 |
 | **lea** | 10 | **46,749** | 46,749 | 0 |
 | **cond_select** | 13 | **6,578** | 6,578 | 0 |
@@ -341,9 +341,9 @@ Aggregated from all report files across post-May-20 sessions:
 
 ### Key Findings and Interesting Facts
 
-#### 1. kinsn is the Most Impactful Pass
-With 305,449 sites applied, `kinsn` dominates the optimization landscape. This
-aligns with the paper's emphasis on kinsn (kernel instruction lowering) as a
+#### 1. kop is the Most Impactful Pass
+With 305,449 sites applied, `kop` dominates the optimization landscape. This
+aligns with the paper's emphasis on kop (kernel instruction lowering) as a
 major optimization opportunity.
 
 #### 2. High Error Rate During Exploration
@@ -394,7 +394,7 @@ numbers (April 2026 run) remain the authoritative source for geomean calculation
 
 ### Recommendations from Post-May-20 Data
 
-1. **kinsn validation**: The 305K applied sites need runtime performance
+1. **kop validation**: The 305K applied sites need runtime performance
    validation to confirm speedup claims.
 
 2. **lea debugging needed**: 85% failure rate suggests active issues with the

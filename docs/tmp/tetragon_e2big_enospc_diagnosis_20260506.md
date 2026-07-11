@@ -44,7 +44,7 @@ So this is an in-place object-capacity limit. It is not a generic "raise fd_arra
 
 The map counts come from `daemon.stderr.log` `map_snapshot prog_id=...` lines. Those lines are produced by `write_bpftool_map_snapshots()` iterating `snapshot.maps`: `daemon/src/commands.rs:810-832`; `snapshot.maps` comes from `prog_info.map_ids`: `daemon/src/bpf.rs:67-80` and `daemon/src/bpf.rs:130-147`.
 
-The daemon fd_array is built from `snapshot.info.map_ids` plus probed kinsn module fds at `daemon/src/commands.rs:458-460`. Counts 16 and 9 are well below the kernel ReJIT fd_array cap of 64 at `vendor/linux-framework/kernel/bpf/syscall.c:3607-3608`, so fd_array is not the trigger.
+The daemon fd_array is built from `snapshot.info.map_ids` plus probed kop module fds at `daemon/src/commands.rs:458-460`. Counts 16 and 9 are well below the kernel ReJIT fd_array cap of 64 at `vendor/linux-framework/kernel/bpf/syscall.c:3607-3608`, so fd_array is not the trigger.
 
 The distinguishing feature is page-boundary pressure plus a positive-size `cond_select` rewrite:
 

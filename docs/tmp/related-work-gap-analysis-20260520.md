@@ -2,7 +2,7 @@
 
 日期: 2026-05-20
 范围: `docs/rejit-speculative-optimization-ebpf_idea.md` (idea #1) /
-`docs/kinsn_idea.md` (idea #2) / `docs/nativebpf_idea.md` (idea #3)
+`docs/kop_idea.md` (idea #2) / `docs/nativebpf_idea.md` (idea #3)
 方法: web 检索 eBPF 优化/验证/JIT/native-code 文献 + 对比三篇现有引用
 
 ---
@@ -18,7 +18,7 @@ speculation),但**每篇都缺 2–4 个直接相关、审稿人一定会问的�
   重编译 + guard。必须引用并明确划清差异,否则审稿人会直接说"这不是
   Morpheus 吗"。
 - **idea #2 最大缺口**:**hXDP (OSDI'20) + eBPF Program Warping (ATC'22)** ——
-  用优化过的硬件实现替换 eBPF 指令序列、扩展 eBPF ISA,和 kinsn "拓宽 emit
+  用优化过的硬件实现替换 eBPF 指令序列、扩展 eBPF ISA,和 kop "拓宽 emit
   vocabulary" 思路同构(只是 target 是 FPGA 而非 host JIT)。
 - **idea #3 最大缺口**:**WebAssembly 沙箱一条线 (RLBox / VeriWasm Sec'21 /
   Provably-Safe Multilingual Sandboxing Sec'22 / WasmBoxC)** —— "把不可信代码
@@ -122,7 +122,7 @@ speculation),但**每篇都缺 2–4 个直接相关、审稿人一定会问的�
   [Sec'25]。这些都改 verifier/换 verifier;idea #1 的卖点恰恰是 **stock
   verifier、零内核改动**,放一句"与这些改内核的路线正交"能强化定位。
 
-### Idea #2 — Kinsn (`kinsn_idea.md`)
+### Idea #2 — KOperation (`kop_idea.md`)
 
 现有引用(§8):
 - ✅ kfuncs (upstream),JIT peepholes (arm64 LDP fusion),JVM intrinsics,
@@ -131,19 +131,19 @@ speculation),但**每篇都缺 2–4 个直接相关、审稿人一定会问的�
 **建议新增**:
 - ⚠️ **hXDP [OSDI'20] + eBPF Program Warping [ATC'22]**:Program Warping 用
   peephole 把一串 eBPF 指令替换成**优化过的硬件实现**,hXDP 给 eBPF 扩
-  ISA。这跟 kinsn 的核心("把一段 BPF 模式识别出来,emit 成更接近硬件的单条
+  ISA。这跟 kop 的核心("把一段 BPF 模式识别出来,emit 成更接近硬件的单条
   原语,拓宽 emit vocabulary")是同构的,只是 target 是 FPGA overlay 而非
   host x86/arm64 JIT。审稿人极可能拿这两篇对标 —— 应主动加入 §8,差异点是
-  kinsn 在 stock host JIT 上做、module 边界、verifier 见 instantiate_insn。
+  kop 在 stock host JIT 上做、module 边界、verifier 见 instantiate_insn。
 - ➕ **JIT 形式化验证一条线**:Jitterbug [OSDI'20]、Synthesizing JIT Compilers
-  [CAV'20]。kinsn 的 soundness 论证(declarative effect 必须忠实建模 native
-  emit,见 §9 + `kinsn-formal-semantics.md`)正是"JIT emit 正确性"问题。引用
+  [CAV'20]。kop 的 soundness 论证(declarative effect 必须忠实建模 native
+  emit,见 §9 + `kop-formal-semantics.md`)正是"JIT emit 正确性"问题。引用
   这些是为 §9 风险点(declarative effect 不忠实 = 静默违反 verifier soundness)
   提供方法论锚点 —— translation validation / verified JIT 是 mitigation 的
   既有范式。
 - ➕(可选)**BeeBox/MOAT/Hive [Sec'24]**:§6/§7 讲"kernel surface / TCB
-  随 kinsn 数量增长"。这三篇是"给 eBPF 加硬件/SFI 隔离"的对照组,可用于
-  论证 kinsn 的 TCB 增量 vs. 这些路线。优先级低于上面两条。
+  随 kop 数量增长"。这三篇是"给 eBPF 加硬件/SFI 隔离"的对照组,可用于
+  论证 kop 的 TCB 增量 vs. 这些路线。优先级低于上面两条。
 
 ### Idea #3 — NativeBPF (`nativebpf_idea.md`)
 
@@ -231,8 +231,8 @@ related work。
 | KShot: Live Kernel Patching (SMM+SGX) | DSN'20 | 运行中内核原子换码先例 | `92-kshot-...pdf` |
 | bpftime (EIM) | OSDI'25 | 用户态 eBPF 运行时,正式引 | 已在 `47-cache-ext`/bpftime 库内 |
 
-### Idea #2 — Kinsn(§8 新增 "peephole/超优化正确性谱系")
-kinsn soundness("声明式 effect ≡ native emit")= peephole 正确性问题,这条线原先一篇没引:
+### Idea #2 — KOperation(§8 新增 "peephole/超优化正确性谱系")
+kop soundness("声明式 effect ≡ native emit")= peephole 正确性问题,这条线原先一篇没引:
 | 论文 | venue | 作用 | PDF |
 |---|---|---|---|
 | Alive: Provably Correct Peephole Optimizations | PLDI'15 | DSL+SMT 证 peephole 等价(⚠️ 方法论直系) | `85b-alive-...pdf` |
@@ -255,7 +255,7 @@ kinsn soundness("声明式 effect ≡ native emit")= peephole 正确性问题,�
 
 ### 最该立刻用的 4 个
 1. **Islaris [PLDI'22]**(idea#3)—— 锚定核心难题,最高价值。
-2. **Alive [PLDI'15] + STOKE [ASPLOS'13]**(idea#2)—— 补 kinsn 缺失的 peephole-correctness 谱系。
+2. **Alive [PLDI'15] + STOKE [ASPLOS'13]**(idea#2)—— 补 kop 缺失的 peephole-correctness 谱系。
 3. **Deoptless [PLDI'22]**(idea#1)—— 对标 two-tier deopt。
 
 (注:`docs/reference/papers/manifest.csv` 已删除;元数据脏的问题随之消失。`manifest.json` 保留。)

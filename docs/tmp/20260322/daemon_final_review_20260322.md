@@ -140,7 +140,7 @@
 - `branch_flip` 对 annotation remap 和 PGO profile 的位置最敏感：`daemon/src/passes/branch_flip.rs:119-145`
 - `spectre` 也不是独立 pass，它依赖 kfunc discovery、module FD 和 branch fixup：`daemon/src/passes/spectre.rs:53-148`
 
-### 3. kfunc 注册流程：新增一个 kinsn 需要改多少代码？
+### 3. kfunc 注册流程：新增一个 kop 需要改多少代码？
 
 结论：**现在还是手工多点修改。新增一个 kfunc，保守估计至少 4 个生产代码点 + 4 个测试/默认初始化点。**
 

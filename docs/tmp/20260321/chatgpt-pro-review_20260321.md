@@ -10,7 +10,7 @@
 
 广泛应用性我觉得是高的。因为 eBPF 今天本来就横跨 networking、observability、security 多个子系统，而且生产案例已经不仅限于单一 hook 或单一公司；你如果真的做到对现有 loader、bpftool/libbpf 和子系统 attachment 足够透明，它理论上就不是只服务 XDP/tc 的优化器，而是一个更通用的 deployed eBPF specialization layer。([eBPF][1])
 
-但 full vision 的 upstream 概率，我觉得不高，尤其是你提的 **kinsn**。Linux 官方 BPF 设计文档写得很直接：core BPF functionality（program types、maps、helpers）不能通过 module 扩展；module 更适合暴露的是 kfunc/kptr。文档还明确说，未来可接受的新 BPF 指令，前提是它和原生 CPU 指令有良好的一对一映射；缺乏这种映射的新指令不会被接受。所以“允许模块注册新 ISA 指令并让 JIT 发射它”这件事，几乎正好踩在 upstream 最敏感的红线上。更现实的替代是尽量复用 kfunc 这类既有扩展面，而不是扩张 BPF ISA 本身。([Kernel Documentation][4])
+但 full vision 的 upstream 概率，我觉得不高，尤其是你提的 **kop**。Linux 官方 BPF 设计文档写得很直接：core BPF functionality（program types、maps、helpers）不能通过 module 扩展；module 更适合暴露的是 kfunc/kptr。文档还明确说，未来可接受的新 BPF 指令，前提是它和原生 CPU 指令有良好的一对一映射；缺乏这种映射的新指令不会被接受。所以“允许模块注册新 ISA 指令并让 JIT 发射它”这件事，几乎正好踩在 upstream 最敏感的红线上。更现实的替代是尽量复用 kfunc 这类既有扩展面，而不是扩张 BPF ISA 本身。([Kernel Documentation][4])
 
 而且 upstream 社区对 verifier/JIT 复杂度天然高度敏感，这不是空想。Jitterbug 在 OSDI’20 里验证 BPF JIT，找出了 5 个已部署 JIT 中的 16 个未知 bug，并把修复 upstream 了；State Embedding 在 OSDI’24 又在一个月内挖出 15 个 verifier logic bug，其中一些可导致本地提权。换句话说，任何会增加 JIT、verifier、或者 transformation surface 的机制，maintainers 都会先想到“这会不会破坏我们已经很脆弱的信任基础”。所以如果没有非常强的最小 TCB 论证、pass 隔离、proof/certificate，upstream 阻力会非常大。([USENIX][5])
 
@@ -21,7 +21,7 @@
 1. **把题目从“extensible compiler framework”收敛成“transparent online specialization for deployed eBPF”。**
    这样你的主贡献就从“又一个 framework”变成“online + transparent + runtime-guided + safe hot swap”，更容易和 K2/Merlin/ePass 拉开。([Rutgers University][2])
 
-2. **把 kinsn 从主线挪掉，最多做成 optional prototype。**
+2. **把 kop 从主线挪掉，最多做成 optional prototype。**
    你现在最不 upstream 的就是它；如果真要扩展能力，优先走 kfunc / freplace / existing link model，而不是扩 BPF ISA。([Kernel Documentation][4])
 
 3. **把 safety story 从“userspace 尽量保证 correctness”升级成“certificate-backed transform”。**
@@ -40,7 +40,7 @@
    至少要和 kernel baseline、K2、Merlin 比；如果可能，也要说明和 ePass public prototype 的关系。工作负载别只跑 toy XDP，最好上 Cilium/Katran 类 XDP/tc 程序，以及 Tetragon/Tracee/Sysdig 这类 tracing/security 程序，外加 hot-swap latency、rollback、verification time、steady-state overhead。([Rutgers University][2])
 
 所以我的判断是：**这题不是没新意，而是你得把“大而全 framework”改成“透明在线 specialization + 极小 kernel trust core + 可证明/可回滚的 hot-swap protocol”。**
-按现在的写法，我觉得它更像“把几个正确方向捆在一起”的 ambitious system；改完以后，我会认为它有真实的 OSDI/SOSP 机会。upstream 方面，**full system 我给低概率；去掉 kinsn、收敛成通用 introspection/swap hooks 的最小 patchset，我给中等概率。** ([Kernel Documentation][4])
+按现在的写法，我觉得它更像“把几个正确方向捆在一起”的 ambitious system；改完以后，我会认为它有真实的 OSDI/SOSP 机会。upstream 方面，**full system 我给低概率；去掉 kop、收敛成通用 introspection/swap hooks 的最小 patchset，我给中等概率。** ([Kernel Documentation][4])
 
 我下一条可以直接把它改写成一版更像 OSDI/SOSP 投稿摘要的 framing。
 

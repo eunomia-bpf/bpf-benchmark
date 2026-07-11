@@ -139,4 +139,4 @@ cargo test --manifest-path daemon/Cargo.toml -- --ignored test_discover_kfuncs_r
 
 2. **Map FD relocation end-to-end**: `relocate_map_fds` is only tested with synthetic instructions. No test creates a real BPF program with maps and validates the relocation.
 
-3. **kinsn pass integration**: No automated test loads kinsn modules -> daemon discovers kfuncs -> applies passes -> REJIT with kfunc calls -> verifies correctness. This is covered by `make vm-micro` benchmarks but not by a dedicated correctness test.
+3. **kop pass integration**: No automated test loads kop modules -> daemon discovers kfuncs -> applies passes -> REJIT with kfunc calls -> verifies correctness. This is covered by `make vm-micro` benchmarks but not by a dedicated correctness test.

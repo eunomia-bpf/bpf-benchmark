@@ -9,10 +9,10 @@
 	url = https://github.com/eunomia-bpf/linux.git
 [submodule "docs/paper"]
 	path = docs/paper
-	url = https://github.com/yunwei37/eurosys27-kinsn-old
+	url = https://github.com/yunwei37/eurosys27-koperation
 [submodule "llvm-backend/llvm"]
 	path = llvm-backend/llvm
-	url = https://github.com/eunomia-bpf/bpf-kinsn-llvm.git
+	url = https://github.com/eunomia-bpf/bpf-kop-llvm.git
 	branch = main
 [submodule "vendor/repos/katran"]
 	path = vendor/repos/katran
@@ -41,7 +41,7 @@
 	url = https://github.com/eunomia-bpf/ebpf.git
 [submodule "vendor/repos/deepflow"]
 	path = vendor/repos/deepflow
-	url = https://github.com/eunomia-bpf/deepflow-kinsn.git
+	url = https://github.com/eunomia-bpf/deepflow-kop.git
 [submodule "docs/ebpf27-bpfoptbench"]
 	path = docs/ebpf27-bpfoptbench
 	url = https://github.com/yunwei37/ebpf27-bpfoptbench.git

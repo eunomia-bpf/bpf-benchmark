@@ -59,8 +59,8 @@ This transition explains the 2,874 sessions:
 Two scripts in `/home/yunwei37/workspace/bpf-benchmark/scripts/`:
 
 1. `run_isolated_passes_20260508.sh` - 3-configuration ablation:
-   - K5: 5-pass kinsn (rotate, cond_select, extract, endian_fusion, bulk_memory)
-   - K6: 6-pass kinsn (+prefetch)
+   - K5: 5-pass kop (rotate, cond_select, extract, endian_fusion, bulk_memory)
+   - K6: 6-pass kop (+prefetch)
    - BR: bytecode-rewriting only (noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec)
 
 2. `rerun_widemem_after_queue_20260507.sh` - Watchdog script that waits for queue completion then re-runs wide_mem
@@ -87,7 +87,7 @@ Grid search would enumerate all combinations:
 
 The exploration is **sparse and targeted**, focusing on:
 1. Individual passes (e.g., `noop`, `map_inline only`, `rotate only`)
-2. Family groupings (e.g., "kinsn 5-pass", "bytecode-rewriting only")
+2. Family groupings (e.g., "kop 5-pass", "bytecode-rewriting only")
 3. Full pipeline (11 passes)
 
 ### 3.2 Adaptive Iteration Pattern
@@ -104,7 +104,7 @@ The session timeline reveals reactive exploration:
    - 94 sessions, 77 errors (82% failure rate)
    - This is clearly debugging iteration, not batch job failure
 
-3. **June 3 Kinsn Breakthrough**:
+3. **June 3 KOperation Breakthrough**:
    - Session: `x86_kvm_corpus_20260603_175429_964295`
    - Result: 0.938x geomean (6.2% improvement)
    - Response: ARM64 expansion prioritized
@@ -153,7 +153,7 @@ The Makefile is the **execution primitive**, but **parameter selection** comes f
 
 | Aspect | Human-Driven | Agent-Driven |
 |--------|--------------|--------------|
-| Pass selection | User says "test kinsn" | Agent picks after observing failure |
+| Pass selection | User says "test kop" | Agent picks after observing failure |
 | Sample count | User sets SAMPLES=3 | Agent uses defaults |
 | Failure response | User reads log | Agent diagnoses, modifies code, re-runs |
 | Configuration combinations | User enumerates | Agent explores adaptively |
@@ -182,7 +182,7 @@ A Gantt-style chart showing:
 - X-axis: Time (March 2026 - June 2026)
 - Y-axis: Stacked by platform (x86 KVM, AWS ARM64, QEMU ARM64)
 - Color: Pass configuration cluster
-- Annotations: Key discoveries (noise floor, LEA crash, kinsn breakthrough)
+- Annotations: Key discoveries (noise floor, LEA crash, kop breakthrough)
 
 ### 5.2 Configuration Space Heatmap
 

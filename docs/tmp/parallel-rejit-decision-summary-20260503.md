@@ -30,7 +30,7 @@ because in-place mutation of `prog->bpf_func` makes cached
 - In-flight at crash: 6 otel progs concurrently in `kernel.rejit()` (120, 126,
   127, 129, 130, 131)
 - Modules tainted: `bpf_select`, `bpf_rotate`, `bpf_prefetch`, `bpf_extract`,
-  `bpf_endian`, `bpf_bulk_memory` (kinsn modules)
+  `bpf_endian`, `bpf_bulk_memory` (kop modules)
 
 ### Root cause (deduced from evidence)
 
