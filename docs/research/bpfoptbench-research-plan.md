@@ -12,7 +12,7 @@ BPFOptBench evaluates whether agents can tune existing eBPF programs under real 
 
 - Type: benchmark/tooling plus measurement study.
 - Target venue: eBPF workshop or systems workshop first; a larger systems venue would require stronger agent wins and broader backend coverage.
-- Implementation status: partial infrastructure exists for bytecode/ReJIT/kinds of kinsn optimization; source-level and LLVM-backend adapters are currently a design target, not demonstrated infrastructure.
+- Implementation status: partial infrastructure exists for bytecode/ReJIT/kinds of kop optimization; source-level and LLVM-backend adapters are currently a design target, not demonstrated infrastructure.
 - Main reviewer risk: current historical data proves the problem is hard and noisy, but does not yet prove that an agent can reliably improve eBPF programs.
 - Scope discipline: the current repository is an execution substrate, not by itself an agent benchmark. BPFOptBench must add frozen tasks, base snapshots, hidden evaluator checks, protected workloads/scoring, task splits, and agent traces.
 
@@ -26,7 +26,7 @@ BPFOptBench should model eBPF optimization as four artifact layers plus one cont
 |---|---|---|---:|---:|---|
 | Producer-side optimization | Source and LLVM backend | C/Rust eBPF source, Clang flags, LLVM IR/MIR/BPF backend passes | yes | usually no | adapter/future |
 | Artifact-side optimization | Pre-load and live bytecode | `.bpf.o` or `struct bpf_insn[]` rewrites, pass order, pass params, per-program policy | no | pre-load no; live yes | primary |
-| Consumer-side optimization | Kernel JIT and kinsn/native lowering | JIT lowering choices, kernel extension capabilities, kinsn use/gating | no | yes | primary when kinsn exists |
+| Consumer-side optimization | Kernel JIT and kop/native lowering | JIT lowering choices, kernel extension capabilities, kop use/gating | no | yes | primary when kop exists |
 
 ### Layer L0: Source-Level Transform
 
@@ -52,11 +52,11 @@ The agent tunes already loaded or app-loaded BPF programs using bytecode rewrite
 
 This is the strongest first-paper layer because it matches the core question: can an agent improve existing eBPF programs under real verifier/JIT/workload feedback? It also lets the benchmark use app-level loaders and real production-like workloads without requiring source or custom loaders.
 
-### Layer L4: Kernel/JIT/Kinsn Transform
+### Layer L4: Kernel/JIT/KOperation Transform
 
 The agent chooses or gates kernel-side capabilities that let bytecode express native operations unavailable in the base BPF ISA. Examples: `rotate`, `cond_select`, `extract`, `endian_fusion`, `bulk_memory`, `prefetch`, and future JIT-lowering choices.
 
-This layer should be presented carefully. BPFOptBench should not depend on kinsn as its defining mechanism; kinsn is one backend that enlarges the action space. The benchmark claim is broader: agents should be evaluated against the real kernel acceptance path and final JIT/workload behavior, whether the action backend is source, LLVM, bytecode, ReJIT, or kinsn.
+This layer should be presented carefully. BPFOptBench should not depend on kop as its defining mechanism; kop is one backend that enlarges the action space. The benchmark claim is broader: agents should be evaluated against the real kernel acceptance path and final JIT/workload behavior, whether the action backend is source, LLVM, bytecode, ReJIT, or kop.
 
 ### Control Plane: Agent Decisions
 
@@ -78,12 +78,12 @@ The first BPFOptBench paper should focus on A1-A3 over L3/L4, with L0-L2/L1 desc
 
 | ID | Claim | Scope | Metric/evidence needed | Status |
 |----|-------|-------|------------------------|--------|
-| C1 | BPFOptBench defines a backend-agnostic benchmark interface for agentic eBPF optimization. | Existing eBPF apps, real loaders, verifier/JIT/workload feedback; first implementation may instantiate only bytecode/ReJIT/kinsn. | Task spec, action schema, feedback schema, oracle definition, trace/provenance format. | planned |
+| C1 | BPFOptBench defines a backend-agnostic benchmark interface for agentic eBPF optimization. | Existing eBPF apps, real loaders, verifier/JIT/workload feedback; first implementation may instantiate only bytecode/ReJIT/kop. | Task spec, action schema, feedback schema, oracle definition, trace/provenance format. | planned |
 | C2 | eBPF optimization is a hard closed-loop tuning problem; static pass policies and local rewrite counts are insufficient. | Current corpus and historical runs. | Noop floors, noise intervals, pass-signal audit, policy comparison, examples where applied sites do not imply speedup. | partially supported |
 | C3 | Real verifier, app, workload, and performance oracles must be composed; verifier acceptance alone is not enough. | Six supported corpus apps and selected microbenchmarks. | Failure taxonomy showing verifier rejection, app failure, workload failure, no-signal, regression, and noise chasing. | planned |
 | C4 | Agents can be compared meaningfully using success, regret, and cost metrics under the same oracle. | Agent variants over A1-A3 action levels. | Controlled runs for scripted baseline, random/grid baseline, human policy, and LLM agent variants. | unsupported until run |
 | C5 | Structured feedback should improve agent decisions over raw logs or one-shot prompting. | Same task split and model set. | Raw prompt vs structured feedback vs closed-loop feedback ablation, with identical run budget. | unsupported until run |
-| C6 | The benchmark is not tied to kinsn/kprog; those are optional action backends. | Design plus at least one non-kinsn action path. | Demonstrate noop/bytecode-only policy tasks; optionally a pre-load bytecode or LLVM-backend adapter smoke test. | planned |
+| C6 | The benchmark is not tied to kop/kprog; those are optional action backends. | Design plus at least one non-kop action path. | Demonstrate noop/bytecode-only policy tasks; optionally a pre-load bytecode or LLVM-backend adapter smoke test. | planned |
 | C7 | BPFOptBench prevents and measures benchmark invalidation under performance incentives. | Frozen tasks with hidden evaluator and protected paths. | Integrity audit for workload mutation, reduced run counts, hidden failure filtering, loader bypass, result fabrication, and protected-path edits. | planned |
 
 ## Claim-To-Experiment Map
@@ -95,12 +95,12 @@ The first BPFOptBench paper should focus on A1-A3 over L3/L4, with L0-L2/L1 desc
 | C3 | Component oracles disagree in real runs. | B3 | Verifier acceptance, app success, workload correctness, and performance always agree. | "For evaluated workloads, performance/noise remains the main extra oracle beyond acceptance." |
 | C4 | Agent variants can be ranked by accepted/correct/faster outcomes, regret, and cost. | B4 | All agents collapse to random/no-op under fair budget. | "BPFOptBench exposes measurable gaps; current agents do not yet solve the task." |
 | C5 | Structured feedback beats raw or one-shot feedback. | B5 | Structured feedback has no effect or worsens decisions. | "Feedback design is a variable BPFOptBench can measure; no universal win yet." |
-| C6 | At least one task works without kinsn; kinsn appears as an optional backend. | B6 | All meaningful tasks require kinsn. | "This artifact evaluates bytecode/ReJIT/kindsn actions; broader adapters are future work." |
+| C6 | At least one task works without kop; kop appears as an optional backend. | B6 | All meaningful tasks require kop. | "This artifact evaluates bytecode/ReJIT/kindsn actions; broader adapters are future work." |
 | C7 | Hidden evaluator catches reward hacking and invalid measurements. | B8 | Agents never try invalid actions, or checks cannot distinguish invalid from valid actions. | "BPFOptBench specifies integrity checks; measured reward-hacking prevalence is future work." |
 
 ## System-Under-Test Model
 
-- Components: corpus runner, app-level loaders, workload drivers, kernel verifier, kernel JIT, `bpfopt` bytecode passes, optional `bpfrejit-daemon`, optional kinsn modules, external analysis scripts, and agent harness.
+- Components: corpus runner, app-level loaders, workload drivers, in-app BPFReJIT shim, kernel verifier, kernel JIT, `bpfopt` bytecode passes, optional kop modules, external analysis scripts, and agent harness.
 - Durable state: run artifacts under `corpus/results/`, app payload JSON, workload stdout/stderr, verifier logs, pass reports, agent traces, prompt manifests, model/toolchain versions.
 - Trust/failure boundaries: agents are untrusted optimizers; the kernel verifier enforces safety; app/workload oracles enforce functional behavior; analysis scripts compute performance claims outside the framework.
 - Safety/liveness guarantees: no bypass of Linux verifier; no direct `.bpf.o` custom loading in corpus benchmarks; failed ReJIT/load attempts surface as errors; benchmark does not hide failures or filter programs.
@@ -112,12 +112,12 @@ The first BPFOptBench paper should focus on A1-A3 over L3/L4, with L0-L2/L1 desc
 
 | Block | Claim | Experiment | Baselines/variants | Metric(s) | Oracle | Figure/table | Priority |
 |-------|-------|------------|--------------------|-----------|--------|--------------|----------|
-| B1 | C1,C6 | Benchmark schema and task instantiation | bytecode-only, ReJIT, kinsn-capable task configs | task coverage, trace completeness | schema validation and replayability | Table 1 | must |
+| B1 | C1,C6 | Benchmark schema and task instantiation | bytecode-only, ReJIT, kop-capable task configs | task coverage, trace completeness | schema validation and replayability | Table 1 | must |
 | B2 | C2 | Historical difficulty study | noop, skip-ReJIT floor, static policies, tuned policy | Method B geomean, W/L/T, noise intervals, applied-vs-speed mismatch | post-hoc analysis over existing artifacts | Fig. 2 | must |
 | B3 | C3 | Oracle disagreement taxonomy | accepted-only vs full oracle | rejection/app/workload/perf failure counts | verifier + app status + workload + performance oracle | Table 2 | must |
 | B4 | C4 | Closed-loop agent tuning | no-op, default static, random/grid, human policy, LLM agents | `bpfopt_success_p`, geomean ratio, regret, attempts, time/cost | full oracle | Fig. 3 | must |
 | B5 | C5 | Feedback ablation | raw logs, structured summaries, closed-loop feedback, expert prompt | success rate, regret, invalid-action rate | same task split and run budget | Fig. 4 | should |
-| B6 | C6 | Layer/backend ablation | bytecode-only, kinsn-enabled, optional pre-load adapter | success by layer, failure modes | same workload oracle | Table 3 | should |
+| B6 | C6 | Layer/backend ablation | bytecode-only, kop-enabled, optional pre-load adapter | success by layer, failure modes | same workload oracle | Table 3 | should |
 | B7 | C4,C5 | Generalization split | train/dev historical tasks vs heldout apps/runs | heldout success, overfit gap | hidden heldout oracle | Fig. 5 | should |
 | B8 | C7 | Integrity and anti-gaming audit | public-only checks vs hidden evaluator | invalid-action rate, protected-path violations, workload hash drift | hidden evaluator and fresh-VM replay | Table 4 | must |
 
@@ -126,10 +126,10 @@ The first BPFOptBench paper should focus on A1-A3 over L3/L4, with L0-L2/L1 desc
 ### B1. Benchmark Interface And Tasks
 
 - Claim tested: C1, C6.
-- Hypothesis: A single benchmark interface can describe eBPF optimization tasks without hard-coding kinsn or ReJIT as the only mechanism.
+- Hypothesis: A single benchmark interface can describe eBPF optimization tasks without hard-coding kop or ReJIT as the only mechanism.
 - Why this block exists: reviewers need to see BPFOptBench as a benchmark, not as another name for the existing optimizer.
 - Workload: frozen task manifests over selected corpus app/program/pass combinations.
-- Compared systems: bytecode-only task, live ReJIT task, kinsn-capable task; optional source/LLVM adapter specs.
+- Compared systems: bytecode-only task, live ReJIT task, kop-capable task; optional source/LLVM adapter specs.
 - Metrics: number of tasks expressible, required oracle fields, replay success, trace completeness.
 - Setup/config: use app-level loaders and `make <target>` benchmark entrypoints; no custom direct loaders.
 - Run budget: smoke first, then one release-quality replay per task family.
@@ -207,15 +207,15 @@ The first BPFOptBench paper should focus on A1-A3 over L3/L4, with L0-L2/L1 desc
 
 - Claim tested: C6.
 - Hypothesis: BPFOptBench can separate action-layer effects from agent quality.
-- Why this block exists: it prevents the paper from being perceived as only a kinsn benchmark.
-- Workload: matched tasks where possible across bytecode-only and kinsn-enabled pass sets; optional pre-load object rewrite smoke.
-- Compared systems: bytecode-only actions, kinsn-enabled actions, optional source/LLVM/pre-load adapters.
+- Why this block exists: it prevents the paper from being perceived as only a kop benchmark.
+- Workload: matched tasks where possible across bytecode-only and kop-enabled pass sets; optional pre-load object rewrite smoke.
+- Compared systems: bytecode-only actions, kop-enabled actions, optional source/LLVM/pre-load adapters.
 - Metrics: task success by layer, failure mode by layer, cost per layer, portability to x86/arm64 where available.
-- Setup/config: use the same corpus oracle; do not require kinsn for bytecode-only task validity.
-- Run budget: release-quality for bytecode-only vs kinsn-enabled; smoke for source/LLVM adapter unless already implemented.
+- Setup/config: use the same corpus oracle; do not require kop for bytecode-only task validity.
+- Run budget: release-quality for bytecode-only vs kop-enabled; smoke for source/LLVM adapter unless already implemented.
 - Oracle: same full oracle, plus layer-specific build/reload success.
-- Success criterion: at least one meaningful benchmark track runs without kinsn.
-- Failure interpretation: if only kinsn-enabled tasks produce signal, rename first paper scope to "agentic ReJIT/kinsn tuning" and leave BPFOptBench broadening to follow-up work.
+- Success criterion: at least one meaningful benchmark track runs without kop.
+- Failure interpretation: if only kop-enabled tasks produce signal, rename first paper scope to "agentic ReJIT/kop tuning" and leave BPFOptBench broadening to follow-up work.
 - Figure/table target: Table 3 layer comparison.
 - Reproducibility files: layer-specific task manifests and backend configs.
 
@@ -300,7 +300,7 @@ Baselines intentionally not first-paper primary:
 | R008 | hardening | Integrity smoke. | public-only vs hidden evaluator on 5-10 tasks | fixed budget | invalid shortcuts detected | medium | evaluator gaps |
 | R009 | release | B4 full scoreboard. | frozen split, fixed models, fixed budget | fixed by budget | stable ranking and trace completeness | high | insufficient signal |
 | R010 | release | B5 feedback ablation. | same split/model, feedback modes | fixed by budget | structured feedback effect measurable | high | no difference |
-| R011 | release | B6 layer/backend ablation. | bytecode-only vs kinsn-enabled | fixed by budget | at least one non-kinsn track valid | medium | adapter gaps |
+| R011 | release | B6 layer/backend ablation. | bytecode-only vs kop-enabled | fixed by budget | at least one non-kop track valid | medium | adapter gaps |
 
 All benchmark execution must use `make <target>` entrypoints. Analysis scripts may run post-hoc over raw artifacts.
 
@@ -339,12 +339,12 @@ Recommended figures/tables:
 | Artifact | Message |
 |---|---|
 | Fig. 1 benchmark loop | Agent observes feedback, proposes an action, executor runs app-level benchmark, verifier/JIT/workload oracle returns feedback. |
-| Table 1 optimization space | Source, LLVM, pre-load bytecode, live bytecode, kernel/JIT/kinsn layers and their oracles. |
+| Table 1 optimization space | Source, LLVM, pre-load bytecode, live bytecode, kernel/JIT/kop layers and their oracles. |
 | Fig. 2 historical difficulty | Noop floors, static-policy instability, and applied-count mismatch. |
 | Table 2 failure taxonomy | Verifier rejection, app failure, workload failure, no performance signal, regression, noise chasing. |
 | Fig. 3 scoreboard | Agent/baseline success, geomean ratio, regret, cost. |
 | Fig. 4 feedback ablation | Raw vs structured vs closed-loop feedback. |
-| Table 3 backend ablation | Bytecode-only vs kinsn-enabled, optional adapter smoke. |
+| Table 3 backend ablation | Bytecode-only vs kop-enabled, optional adapter smoke. |
 | Table 4 integrity audit | Workload mutation, run-budget changes, protected-path edits, loader bypass, and result-provenance failures. |
 
 Possible title:
@@ -355,7 +355,7 @@ The name is reasonable. It signals "optimization benchmark" and connects to the 
 
 ## Reproducibility
 
-- Hardware/software versions: record kernel fork, LLVM/Clang, libbpf, architecture, platform, app versions, kinsn module versions.
+- Hardware/software versions: record kernel fork, LLVM/Clang, libbpf, architecture, platform, app versions, kop module versions.
 - Seeds/repetitions: freeze agent seeds where available; benchmark performance should follow the existing corpus methodology rather than increasing samples ad hoc.
 - Workload generation: use existing corpus workload drivers and raw workload fields.
 - Data/traces: preserve raw `result.json`, app payloads, stdout/stderr, verifier logs, pass reports, prompt manifests, and agent action traces.
@@ -381,5 +381,5 @@ The name is reasonable. It signals "optimization benchmark" and connects to the 
 | C3 | failure taxonomy output | planned | "A composed oracle is necessary to avoid false success." |
 | C4 | agent scoreboard | unsupported until run | "Agents can/cannot outperform static and random baselines under this budget." |
 | C5 | feedback ablation | unsupported until run | "Structured feedback improves/does not improve agent decisions in this setting." |
-| C6 | backend/layer ablation | planned | "The benchmark is independent of kinsn in design and includes at least one non-kinsn task track." |
+| C6 | backend/layer ablation | planned | "The benchmark is independent of kop in design and includes at least one non-kop task track." |
 | C7 | integrity audit and hidden evaluator replay | planned | "BPFOptBench detects invalid benchmark manipulation under performance incentives." |

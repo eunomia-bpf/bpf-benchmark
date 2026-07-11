@@ -1,5 +1,10 @@
 # LLVM BPF Backend 现状调研
 
+> **架构注记（2026-07-10）**：LLVM backend 调研本身仍有效;其中把当前
+> bpfopt 描述为 daemon orchestration + per-pass `BPF_PROG_REJIT` 的段落已
+> 过期。当前 bpfopt 是由 in-app shim 调用的纯 bytecode CLI,candidate 经
+> stock `BPF_PROG_LOAD` 接受。
+
 调研基准：
 
 - LLVM checkout：`/tmp/llvm-research/llvm-project`，commit `30546911`。
@@ -117,7 +122,7 @@ New Pass Manager callback：
 |---|---|---|---|
 | if-conversion / cmov conversion | 没有 BPF target if-converter 或 cmov conversion；`select` 展开为 branch diamond。 | X86 有 `X86CmovConversion`，AArch64 有 conditional compare / branch tuning。 | BPF ISA 没有 cmov、predication、ccmp。LLVM AOT 无法凭空生成宿主 JIT 指令，只能发 BPF bytecode。 |
 | MachineCombiner / target ILP opts | BPF 没有覆盖 `addILPOpts()`，只跑默认 machine SSA 优化。 | X86/AArch64 都有 target combiner/ILP pass。 | BPF 指令集简单、无复杂 addressing/vector/pairing，且 verifier 限制使 aggressive reassociation 风险更高。 |
-| target loop data prefetch | BPF backend 没有插入 prefetch pass，也没有 prefetch lowering。 | AArch64 有 loop data prefetch 相关 pass。 | BPF ISA 没有 prefetch opcode；需要 helper/kfunc/kinsn 级 ABI 才能表达。 |
+| target loop data prefetch | BPF backend 没有插入 prefetch pass，也没有 prefetch lowering。 | AArch64 有 loop data prefetch 相关 pass。 | BPF ISA 没有 prefetch opcode；需要 helper/kfunc/kop 级 ABI 才能表达。 |
 | vector/interleaved access lowering | BPF 没有 vector register/向量 load-store 优化。 | AArch64/X86 有 interleaved/vector 相关 lowering。 | BPF 是 scalar ISA。 |
 | load/store pair combine | BPF 没有 AArch64 风格 LDP/STP 或 X86 风格复杂 memory op combine。 | AArch64 有 load/store optimizer。 | BPF memory op 是简单 `LDX/STX`，没有 pair op；verifier 还要求部分访问形态保持显式。 |
 | MachineOutliner | BPF 没有像 X86/AArch64 那样默认启用 outliner。 | X86/AArch64 target machine 显式支持 outliner。 | BPF subprog/call、verifier、stack/call-clobber 约束和 code-size tradeoff 更敏感；源码没有显式注释说明。 |
@@ -167,13 +172,13 @@ New Pass Manager callback：
 
 | bpfopt pass | LLVM BPF backend 做不做 | LLVM 位置/形态 | 重叠程度 | bpfopt 额外价值 |
 |---|---|---|---|---|
-| `rotate` | LLVM 能在 IR/DAG 中识别 rotate/funnel-shift 概念，但 BPF lowering 把 `ROTR/ROTL` 标成 `Expand`。 | `BPFISelLowering.cpp`。 | 低。LLVM 最终只能生成 shift/or 序列。 | bpfopt 把 bytecode shift/or rotate pattern 改成 `bpf_rotate{32,64}` kfunc/kinsn，内核 JIT 可降成 native rotate。 |
-| `cond_select` | LLVM 有 `select`，BPF 有 `SELECT_CC` custom lowering，但最终展开为 branch diamond。 | `BPFISelLowering.cpp` custom inserter。 | 中。都识别 select 语义，但 LLVM 无 branchless BPF 表达。 | bpfopt 用 `bpf_select64`/kinsn 映射到 x86 CMOV 或 arm64 CSEL，绕过 BPF ISA 没有 cmov 的限制。 |
-| `ccmp` | LLVM AArch64 有 conditional-compare 相关优化；BPF target 没有。 | AArch64 target pass；BPF 无对应 pass。 | 低。 | bpfopt 只在 arm64 kinsn 路径表达 native CCMP 类优化，属于 post-load/host-JIT 维度。 |
-| `bulk_memory` | LLVM 会把常量大小 memcpy 生成 BPF `MEMCPY` pseudo，再展开成 load/store 对；不会生成 REP MOVS/kfunc。 | `BPFSelectionDAGInfo.cpp`、`BPFInstrInfo.cpp`。 | 中。都处理 memcpy，但 LLVM 是 scalar expansion。 | bpfopt 可在 bytecode scalar copy 已形成后重新识别 bulk copy/memset，并替换为 `bpf_bulk_memcpy/memset` kinsn。 |
+| `rotate` | LLVM 能在 IR/DAG 中识别 rotate/funnel-shift 概念，但 BPF lowering 把 `ROTR/ROTL` 标成 `Expand`。 | `BPFISelLowering.cpp`。 | 低。LLVM 最终只能生成 shift/or 序列。 | bpfopt 把 bytecode shift/or rotate pattern 改成 `bpf_rotate{32,64}` kfunc/kop，内核 JIT 可降成 native rotate。 |
+| `cond_select` | LLVM 有 `select`，BPF 有 `SELECT_CC` custom lowering，但最终展开为 branch diamond。 | `BPFISelLowering.cpp` custom inserter。 | 中。都识别 select 语义，但 LLVM 无 branchless BPF 表达。 | bpfopt 用 `bpf_select64`/kop 映射到 x86 CMOV 或 arm64 CSEL，绕过 BPF ISA 没有 cmov 的限制。 |
+| `ccmp` | LLVM AArch64 有 conditional-compare 相关优化；BPF target 没有。 | AArch64 target pass；BPF 无对应 pass。 | 低。 | bpfopt 只在 arm64 kop 路径表达 native CCMP 类优化，属于 post-load/host-JIT 维度。 |
+| `bulk_memory` | LLVM 会把常量大小 memcpy 生成 BPF `MEMCPY` pseudo，再展开成 load/store 对；不会生成 REP MOVS/kfunc。 | `BPFSelectionDAGInfo.cpp`、`BPFInstrInfo.cpp`。 | 中。都处理 memcpy，但 LLVM 是 scalar expansion。 | bpfopt 可在 bytecode scalar copy 已形成后重新识别 bulk copy/memset，并替换为 `bpf_bulk_memcpy/memset` kop。 |
 | `endian_fusion` | LLVM 有 BSWAP/endian pattern；v4 有 `BSWAP` 指令 pattern。没有 load+bswap 融合成 MOVBE，因为 BPF ISA 不表达 memory-endian fused op。 | `BPFInstrInfo.td`、`BPFISelLowering.cpp`。 | 中。LLVM 处理 endian op，但不做 native fused memory op。 | bpfopt 把 load + endian ladder 改成 `bpf_endian_loadXX`，JIT 可降成 x86 MOVBE 或 arm64 LDR+REV。 |
-| `prefetch` | BPF backend 不 lower `llvm.prefetch` 到 BPF op，也没有 loop prefetch pass。 | BPF 无对应实现。 | 低。 | bpfopt 基于 packet/map access pattern 和可选 PMU 数据插入 `bpf_prefetch` kinsn，属于运行时/JIT 语义。 |
-| `extract` | LLVM 通用 combine 可识别 bitfield extract，但 BPF 没有 BEXTR-like opcode；BPF target 没有把 shift+and 映射为 helper/kfunc。 | BPF lowering/tablegen 无 BEXTR pattern。 | 低。 | bpfopt 将 `rsh + and contiguous mask` 改成 `bpf_extract64` kinsn，JIT 可降成 native bit extract。 |
+| `prefetch` | BPF backend 不 lower `llvm.prefetch` 到 BPF op，也没有 loop prefetch pass。 | BPF 无对应实现。 | 低。 | bpfopt 基于 packet/map access pattern 和可选 PMU 数据插入 `bpf_prefetch` kop，属于运行时/JIT 语义。 |
+| `extract` | LLVM 通用 combine 可识别 bitfield extract，但 BPF 没有 BEXTR-like opcode；BPF target 没有把 shift+and 映射为 helper/kfunc。 | BPF lowering/tablegen 无 BEXTR pattern。 | 低。 | bpfopt 将 `rsh + and contiguous mask` 改成 `bpf_extract64` kop，JIT 可降成 native bit extract。 |
 | `map_inline` | LLVM 不能做。BPF map 是运行时 kernel object，AOT 编译期没有 map fd/value snapshot。 | 无。 | 无。 | bpfopt/daemon 可在程序加载后读取 map side input，结合 verifier/ReJIT 接受性做 map value inline。 |
 | `const_prop` | LLVM 有 SCCP/InstCombine/ConstProp/GVN 等编译期常量传播；BPF 默认也跑 generic IR/machine cleanup。 | middle-end + default CodeGen。 | 中。只重叠静态常量。 | bpfopt 使用 ReJIT verifier state、map_inline 后的 runtime 常量、bytecode-level defs 做 post-load const propagation。 |
 | `dce` | LLVM 有 IR DCE 和 MachineDCE。 | middle-end + `TargetPassConfig::addMachineSSAOptimization()`。 | 中。 | bpfopt 在每轮 runtime rewrite/ReJIT 后做 bytecode-level DCE，可删除 LLVM 编译期看不到的死定义或 rewrite 后变死的代码。 |
@@ -201,7 +206,7 @@ New Pass Manager callback：
 - 依赖 verifier log/state 的 pass：verifier-state `const_prop`、ReJIT 后的 `dce`、部分 bounds reasoning。
 - 依赖 helper/program type runtime 语义的 pass：`skb_load_bytes_spec`、packet bounds-check merge。
 - 依赖外部 PMU profile 的 pass：`branch_flip`。
-- 依赖 fork-only kinsn/ReJIT ABI 的 pass：`rotate`、`cond_select`、`ccmp`、`extract`、`endian_fusion`、`bulk_memory`、`prefetch`。除非这些能力先变成上游 Linux BPF ISA/helper/kfunc 的稳定 ABI，否则 LLVM upstream 不能合理默认生成它们。
+- 依赖 fork-only kop/ReJIT ABI 的 pass：`rotate`、`cond_select`、`ccmp`、`extract`、`endian_fusion`、`bulk_memory`、`prefetch`。除非这些能力先变成上游 Linux BPF ISA/helper/kfunc 的稳定 ABI，否则 LLVM upstream 不能合理默认生成它们。
 
 贡献路径：
 
@@ -218,12 +223,14 @@ LLVM BPF backend 的优化层级是：
 3. MachineInstr：MachineDCE/CSE/LICM、BPF peephole、branch relaxation、CORE pseudo simplification。
 4. MC/AsmPrinter/BTF：生成 ELF/BTF/relocation。
 
-bpfopt 的层级更低：它处理已经编译出的 `struct bpf_insn[]`，并且在 daemon orchestration 下每个 pass 后立刻 `BPF_PROG_REJIT(log_level=2)`。这带来几个 LLVM AOT backend 没有的维度：
+bpfopt 的层级更低：它处理已经编译出的 `struct bpf_insn[]`,由 upstream
+application 进程内的 shim 调用,并把 candidate 交给 stock
+`BPF_PROG_LOAD` verifier/JIT。这带来几个 LLVM AOT backend 没有的维度：
 
 - **运行时对象可见性**：bpfopt 能看到 map value、loaded program、actual program type、helper id、verifier state。LLVM 只能看到源码/IR/ELF relocation。
-- **verifier feedback loop**：LLVM 只能静态猜测 verifier 是否接受；bpfopt 可以以 ReJIT 成功/失败和 verifier log 作为每轮 pass 的事实边界。
-- **宿主 JIT/kinsn 能力**：LLVM BPF backend 必须输出可移植 BPF bytecode；bpfopt 可以通过 kinsn 把 BPF bytecode pattern 映射到 x86/arm64 的 native 指令能力。
+- **verifier feedback loop**：LLVM 只能静态猜测 verifier 是否接受；shim 可以以 candidate `BPF_PROG_LOAD` 成功/失败和 verifier log 作为事实边界。
+- **宿主能力**：LLVM BPF backend 必须在 AOT 编译时做决定；bpfopt 可以在目标机器上选择普通 BPF-to-BPF 变换。KOperation 是另一论文线,不属于 speculative stock-kernel path。
 - **post-load profile**：LLVM PGO 依赖编译期 profile 输入；bpfopt 的 `branch_flip` 可以消费真实 BPF program/site 的 PMU profile。
 - **不改变 app build chain**：很多真实 corpus app 的 BPF 程序来自上游二进制或已有 build artifact；bpfopt 可以优化这些已存在 bytecode，而 LLVM upstream 只能影响重新编译路径。
 
-因此，LLVM upstream 的最佳定位是让 AOT BPF 输出更 verifier-friendly、更少冗余、更好维护 CO-RE/BTF 语义；bpfopt 的最佳定位是 runtime/post-load specialization，特别是 map/verifier/profile/kinsn 这四类 LLVM 编译期不可见的信息。
+因此，LLVM upstream 的最佳定位是让 AOT BPF 输出更 verifier-friendly、更少冗余、更好维护 CO-RE/BTF 语义；bpfopt 的最佳定位是 deployment-aware specialization，特别是 map/profile 与 loader-state 这几类 LLVM 编译期不可见的信息。

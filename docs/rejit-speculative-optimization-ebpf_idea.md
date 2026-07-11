@@ -11,7 +11,7 @@
 > - **构建+修改+运行不拆分**：一个 subagent 负责完整流程（改代码→构建→运行→发现 bug→修复→再运行），不要拆成多个 agent。
 > - **⚠️ 同一时间只能有一个 agent 修改内核代码（vendor/linux-framework），也只能有一个 agent 跑测试（VM benchmark / selftest）。** 多个 agent 同时改内核代码会产生 git 冲突；多个 agent 同时跑 VM 测试会竞争资源、结果不可靠。调度时必须串行化内核改动和测试任务。
 > - **⚠️ codex 默认不要 commit/push，除非 prompt 明确要求。** 改完代码就停，由 Claude 统一 commit。
-> - **⚠️ 如果需要 commit，必须在 main 分支直接做，不要开新分支。** 开分支导致合并冲突。
+> - **⚠️ 如果需要 commit，必须在 master 分支直接做，不要开新分支。** 开分支导致合并冲突。
 > - **⚠️ 暂时性性能数据和实验计划只能出现在两个地方：(1) 开头摘要区域的权威数据行；(2) §7 任务追踪表格的条目。** §1-§6 的正文不得包含会过期的具体数字或待办计划。如果 §1-§6 需要引用性能数据，只引用任务编号（如"见 #256"），不内联数据本身。
 > - **⚠️ 禁止死代码和防御性编程**：替换子系统时（如 v1→v2）必须删除旧代码，不保留 `if v1 / else v2` 分支。内核代码中不保留"以防万一"的检查——只在有具体失败场景时才加 guard。每行内核代码都是审核负担，越少越好。
 > - **⚠️ 零静默失败（Zero Silent Failure）**：所有错误必须传播和报告。禁止 `unwrap_or_default()`、`.ok()`、`except: pass`、`let _ = result` 等静默吞错模式。禁止 `compile_only` 等标注来掩盖运行时失败——每个 corpus 程序要么跑出测量结果，要么明确报错说明原因。
@@ -19,16 +19,15 @@
 > - **⚠️ 禁止 sudo**：VM 内已是 root（vng），主机不跑 BPF。
 > - **⚠️ VM 测试每个 target 一个 agent**：`make test` / `make micro` / `make corpus` 串行跑，平台用 `PLATFORM` / `ARCH` 选择。
 > - **⚠️ Unit test 质量标准见 `CLAUDE.md` 的 "Unit Test Quality"**：非必要不加 unit test。新增测试必须能说明失败时定位哪一类 bug。合理测试覆盖逻辑分支、状态变化、计算/转换、边界、错误路径、外部 ABI/layout/序列化约定或 bug 回归。ABI/layout 测试不能只验 `size_of`，必须验字段 offset 或编码格式。禁止 trivial getter/setter、std/upstream lib 行为、自身重言、mock 测 mock、可读性测试、纯 const alias 和重复覆盖率测试。慢测试或真实系统依赖测试应放到集成/端到端层级，不要伪装成 unit test。
-> - **bpfopt-suite v3 设计约束见 §4.6，Benchmark 设计约束见 §5.35。**
-> **v1 权威数据**（#256 rerun，native-level rewrite 架构）：micro **1.057x** / applied-only **1.193x**；corpus **0.983x**；Tracee **+8.1%**；Tetragon **+20.3%/+32.2%**；Katran BPF **1.108-1.168x**；gap **0.581x**。`make selftest` **35/35**。v1 代码保存在 `v1-native-rewrite` 分支。
-> **v2 当前权威数据**（#644，2026-04-02 本地重跑，artifact 时间戳为 2026-04-03 UTC）：benchmark 默认尝试当前全部 in-scope performance passes，报告只统计**实际 applied sites**。`make corpus` **20/20 app ok**，applied-only / all-comparable geomean **1.033x**，applied sample **61**；apply-side site totals：bpftrace **33**、BCC **961**、SCX **359**。`make selftest`、`make test`、`make negative-test`、`make micro` 全通过。**2026-04-03 再验证**：private-stack 覆盖迁移到 repo-owned tests 后，`make all`、`make check`、`make test` 仍全部通过。
-> **2026-04-21/22 Wave 1 后三目标 corpus 权威重跑**（见 #663）：`x86_kvm_corpus_20260421_232916_947372`（30 samples）all-comparable geomean **1.010x**，applied sample **12**，20/20 app ok；`aws_x86_corpus_20260422_012001_472335`（1 sample）**0.983x**，applied sample **10**，20/20 app ok；`aws_arm64_corpus_20260422_044304_037607`（1 sample）**0.986x**，applied sample **10**，20/20 app ok。三目标 `no_programs_changed_in_loader` 统一 **36**。**注意**：该 reason 并非 bytes_jited/xlated same-size gap（`corpus/driver.py:471-540` 根本没比 bytes）。它是命名不准的历史 observability bucket，混了 "0 site 命中"、"pass 命中但 verifier 全 rollback"、"apply 成功但最终 bytecode 无差异" 三类情况，属 corpus 侧 taxonomy 过粗，非 apply correctness bug。详情见 #664。
+> - **当前架构约束见 §4，Benchmark 设计约束见 §5.35。** `docs/tmp/bpfopt_design_v3.md` 是已淘汰的 daemon/ReJIT 设计，不再是规范。
+> **当前数据状态（2026-07-10）**：stock-kernel shim 的 `branch_flip` 六应用结果尚不可复现为稳定收益。2026-07-01 完整运行的 per-program geomean 为 **1.054x speedup**，但 2026-07-04 的六应用拼接复跑为 **0.899x**，Tracee 与 Tetragon 明显回退；详见 `docs/tmp/20260710/speculative-optimization-branch-flip-rerun.md`。因此论文当前不能声称稳定加速。
+> **历史数据（非当前 speculative 论文证据）**：v1 native-rewrite、2026-04 v2 daemon/ReJIT、20-app、bpftrace/SCX 和 kop 数据均属于旧架构或其他论文线，只保留作实验沿革，不得用于当前摘要或贡献结论。
 
 ---
 
 ## 0. Abstract
 
-eBPF is widely adopted in production for observability, networking, and customizable kernel extensions, yet its just-in-time (JIT) compilers remain rigid, platform-agnostic, and under-optimized compared to mature runtimes such as JVM, WASM, or LLVM. More fundamentally, each program is compiled once at load time and never revisited, even as its runtime context — map contents, branch profile, helper-call patterns — only becomes known after the program is live. This paper presents BpfReJIT, a dynamic, transparent, and **fully userspace** framework that speculatively re-optimizes already-loaded eBPF programs on a **stock Linux kernel with zero kernel patches** (no new syscall, no verifier or JIT changes, no out-of-tree daemon). An `LD_PRELOAD` shim intercepts the BPF syscalls of unmodified upstream applications, captures each program's original bytecode, and exposes a per-process control socket; a userspace CLI toolchain (`bpfopt`) applies profile-guided BPF-to-BPF rewrite passes and reloads the optimized candidate through the stock `BPF_PROG_LOAD` path, so the existing kernel verifier re-certifies safety exactly as it did for the original program. Optimized versions are installed through the kernel's existing atomic-or-near-atomic attachment-update mechanisms and protected by inline guards with an in-program slow path, avoiding on-stack replacement entirely thanks to eBPF's run-to-completion execution model. Because the verifier remains the sole safety oracle and nothing in the kernel is modified, BpfReJIT runs on any 6.x kernel and preserves BTF/CO-RE and all existing eBPF tooling, loaders, and subsystems. We evaluate BpfReJIT across diverse hardware platforms and representative workloads (network monitoring, security enforcement, and observability tracing) and report guard-protected, profile-driven speedups on real programs while preserving the kernel's safety guarantees. [评测数值待 authoritative rerun 填入;旧 abstract 的 40%/50% 来自含 kinsn / llvmbpf 上界的旧设计,不属于本篇纯 BPF-to-BPF stock-kernel 范围。]
+eBPF is widely adopted in production for observability, networking, and customizable kernel extensions, yet profitable optimization facts such as stable map entries and biased branches often become visible only under a deployed workload. This paper presents BpfReJIT, a fully userspace framework that keeps real application loaders in control while applying profile- and state-guided BPF-to-BPF transformations on a stock Linux kernel. An `LD_PRELOAD` shim captures each application's normal `BPF_PROG_LOAD` context and attachment state; a standalone `bpfopt` CLI rewrites raw bytecode; and the shim submits every candidate through the ordinary kernel verifier and JIT. The same boundary supports load-time specialization and an implemented running-process reload/reattach path using existing attachment APIs. The current corpus evaluation measures the load-time path by comparing two starts of the same upstream application; live-swap and phase-change claims require separate lifecycle evidence. Existing branch-profile results are mixed and do not yet support a stable speedup claim.
 
 ---
 
@@ -37,12 +36,12 @@ eBPF is widely adopted in production for observability, networking, and customiz
 | Topic | File | Purpose |
 | --- | --- | --- |
 | **Plan + design hub (this doc)** | `docs/rejit-speculative-optimization-ebpf_idea.md` | paper plan, architecture, methodology, task tracking |
-| Sister idea hubs (separate paper lines) | `docs/kinsn_idea.md`, `docs/nativebpf_idea.md` | idea #2 / #3 framing |
+| Sister idea hubs (separate paper lines) | `docs/kop_idea.md`, `docs/nativebpf_idea.md` | idea #2 / #3 framing |
 | Task history | `git log` | retired task tables and superseded plan snapshots are recovered from git history |
-| Shim implementation | `bpfopt/shim/README.md` | LD_PRELOAD shim + per-pid socket + execute_step RPC |
+| Shim implementation | `bpfopt/shim/README.md` | LD_PRELOAD shim, load-time plan, per-pid `execute_plan`, reload/reattach |
 | Userspace-only design notes | `docs/tmp/userspace_speculative_opt_design.md`, `docs/tmp/poc_a_katran_pidfd_swap.md`, `docs/tmp/poc_b_bcc_perf_event_swap.md`, `docs/tmp/poc_c_v2_shim_only_design.md`, `docs/tmp/poc_e_vendor_replace_x_sys_design.md` | per-attach-type swap recipes, static-Go fallback |
-| Benchmark runtime | `docs/benchmark-runtime-architecture.md` | corpus / micro 执行架构 + container/VM runtime model |
-| Story / pitch | `docs/bpfrejit-story.md` | high-level narrative |
+| Benchmark runtime | `runner/containers/README.md`, `corpus/driver.py` | current container/runtime and measured lifecycle |
+| Historical story / pitch | `docs/tmp/bpfrejit-story.md` | superseded kernel-daemon narrative; history only |
 | eBPF research plan | `docs/tmp/ebpf-bench-research-plan.md` | research methodology + 项目目标 |
 | GHCR image cache | `docs/tmp/ghcr-image-cache.md` | base image strategy |
 | Docker build cache | `docs/tmp/docker-build-cache-gc.md` | local docker cache 生命周期 |
@@ -91,8 +90,8 @@ BpfReJIT 的设计基于三个层次的 insight：
 
 > bpfopt 系统**完全在用户态**,内核改动为零。三个角色严格 dumb-executor 边界:
 >
-> - **Runner**(yaml 阅读者 + orchestrator):读 `runner/config/passes/<pass>/default.yaml`,把命令模板里的 `${INPUT}/${OUTPUT}/${REPORT}/${PROG_TYPE}/...` 由 runner 解析或交给 shim 替换,通过 per-pid unix 套接字向 shim 发 `execute_step` 命令。决定"什么时候优化"。
-> - **Shim**(LD_PRELOAD 注入 app 的 `.so`):透明拦截 app 的 BPF syscall,落 bytecode + 维护 prog/map/link/perf state table。收到 runner 命令后**无条件 `/bin/sh -c <command>`**(env 里删 LD_PRELOAD 避免自递归)。决定"在 app 进程内怎么执行命令"。
+> - **Runner**(yaml 阅读者 + orchestrator):读 `runner/config/passes/<pass>/default.yaml`,把命令模板组装成 load-time plan 或 per-pid `execute_plan` 请求。决定"什么时候优化"。
+> - **Shim**(LD_PRELOAD 注入 app 的 `.so`):透明拦截 app 的 BPF syscall,落 bytecode + 维护 prog/map/link/perf state table。它在 load-time 或收到 `execute_plan` 后执行 runner 提供的命令(env 里删 LD_PRELOAD 避免自递归),并负责 stock `BPF_PROG_LOAD` 与 attachment replacement。决定"在 app 进程内怎么执行和安装 candidate"。
 > - **bpfopt CLI**(纯 bytecode 重写器):stdin/stdout 传 `struct bpf_insn[]`,跑一个 `--pass <name>`,无 syscall 依赖,无 kernel 知识。决定"怎么改 bytecode"。
 >
 > 新增优化 = 新写一个 `bpfopt` pass + 在 `runner/config/passes/<pass>/default.yaml` 描述命令模板。**零 shim 改动、零内核改动**。这是让 LLVM pass 基础设施成功的可扩展性模型,搬到 stock-kernel + 用户态的 form。
@@ -119,7 +118,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 
 ### 1.6 设计目标
 
-1. **零内核改动**:stock kernel,没有 REJIT syscall,没有 out-of-tree daemon,没有 kinsn 内核模块,BTF/CO-RE 全保留。新增优化 = 新 `bpfopt` pass + 新 yaml,完全用户态。
+1. **零内核改动**:stock kernel,没有 REJIT syscall,没有 out-of-tree daemon,没有 kop 内核模块,BTF/CO-RE 全保留。新增优化 = 新 `bpfopt` pass + 新 yaml,完全用户态。
 2. **可扩展(Extensible)**:每个 pass 是一个独立 CLI 调用,pass 间用 file pipeline 串接。Runner 通过 yaml 描述命令模板,shim 不需要任何 pass 知识。
 3. **透明(Transparent)**:对所有 eBPF 应用、loader 和其他 eBPF 工具完全透明 — `LD_PRELOAD=libbpfrejit_shim.so` 注入 + 控制 app 启动。不需要 .bpf.o,不需要改应用代码。(静态 Go 二进制 fallback 见 PoC-E。)
 4. **安全(Safe)**:每次重新提交都过 stock verifier。bpfopt 不影响内核安全模型。
@@ -133,8 +132,8 @@ BpfReJIT 的设计基于三个层次的 insight：
 
 注入到 app 进程的 dumb executor。三件事:
 - **拦截** libc 的 `syscall(SYS_bpf, ...)`、`perf_event_open(2)`、`ioctl(2)`、`close(2)`,捕获每次 `BPF_PROG_LOAD` 的原始 bytecode + attr,落盘成 `<dir>/bpfrejit_<pid>_<hash>.bpf`,在 in-process state table 里跟 `kernel_prog_id`(via `OBJ_GET_INFO_BY_FD`)关联。
-- **bind** per-pid 套接字 `/var/run/bpfrejit/shim-<pid>.sock`,实现 `list_progs` / `execute_step` / `dump_state` 三个 RPC(协议沿用原 daemon 时期定义的 JSON 形态;daemon 已移除,shim 是唯一持久用户态组件)。
-- **执行**:`execute_step` 收到 runner 发的 shell command 模板,替换 `${VAR}` 后 `posix_spawn("/bin/sh", "-c", ...)`,subprocess env 里删 `LD_PRELOAD` 避免自递归。
+- **bind** per-pid 套接字 `/var/run/bpfrejit/shim-<pid>.sock`,实现 `list_progs` / `execute_plan` / `dump_state` 三个 RPC;daemon 已移除,shim 是唯一持久用户态组件。
+- **执行**:读取 `BPFREJIT_SHIM_LOADTIME_PLAN` 或接收 runner 的 `execute_plan`,替换 `${VAR}` 后运行 `/bin/sh -c`,subprocess env 里删 `LD_PRELOAD` 避免自递归;candidate 通过 stock `BPF_PROG_LOAD` 后才进入 load-time install 或 reload/reattach。
 
 shim 不知道 yaml,不知道有哪些 pass,不知道 `bpfopt` 是什么 — 就是一个**通用 syscall hook + state table + shell executor**。语言 C,~1000 行 + musl 变体。
 
@@ -144,7 +143,7 @@ stdin/stdout 传 raw `struct bpf_insn[]`,一次跑一个 `--pass <name>`,零 sys
 
 **组件 3:Runner Python orchestration**
 
-读 `runner/config/passes/<pass>/default.yaml` 中的命令模板,通过 per-pid shim socket 发 `execute_step`。负责 yaml 解析、profile lifecycle、measurement、pass 序列。**不写新代码** — 沿用现有 `runner/libs/rejit_plan.py:build_execute_plan_payload()` 的 yaml→JSON 协议,只是把原 daemon 的 socket 换成 shim 的 per-pid socket(daemon 已移除;router 转发或 runner 直接枚举,见 PoC-C v2 §6)。
+读 `runner/config/passes/<pass>/default.yaml` 中的命令模板,生成 load-time plan 或通过 per-pid shim socket 发 `execute_plan`。负责 yaml 解析、profile lifecycle、measurement、pass 序列。当前 corpus 使用 `corpus/driver.py` 的两次 application-start load-time 路径;运行中 socket 路径由 `runner/libs/rejit_plan.py` 与 shim 共同实现。
 
 > **谁知道什么**:
 > - shim:对单个 app 进程的拦截 + state 完整知识;不知 yaml、不知 pass 名字
@@ -229,7 +228,7 @@ bpfopt 的 Insight 3(吃 verifier 已算出来的 tnum/range 当 ground truth、
 ### 1.11 核心设计约束
 
 1. **Safety / correctness 架构分离**:stock kernel verifier 是 safety 的唯一 authority。bpfopt 不写 validator,不证 pass 正确性 — verifier 接受即 safety 保证(§1.4 Insight 3)。
-2. **零内核改动**:不加 syscall、不动 verifier、不加 kinsn 模块。任何 6.x stock kernel 都能跑。
+2. **零内核改动**:不加 syscall、不动 verifier、不加 kop 模块。任何 6.x stock kernel 都能跑。
 3. **透明 LD_PRELOAD shim**:不需要 .bpf.o、不需要改应用/loader,不需要 detach/reattach。静态 Go 二进制走 vendor-replace fallback(PoC-E)。
 4. **稳态零开销**:inline guard 1-2 条 BPF 指令,verifier 接受后跟原始 program 同样路径执行;guard miss 才走 inline slow path。
 5. **Fail-safe**:每次 candidate `BPF_PROG_LOAD` 走 stock verifier。失败就丢弃,保留上一次成功版本;原程序持续运行,不破坏 in-flight invocation。
@@ -243,7 +242,7 @@ bpfopt 的 Insight 3(吃 verifier 已算出来的 tnum/range 当 ground truth、
 
 ### 3.1 性能优化变换
 
-> **范围说明**:本表只列**纯 BPF-to-BPF rewrite pass**(即不依赖任何内核 patch / kinsn 框架的 pass)。所有依赖 kinsn 的变换(`rotate`、`cond_select`、`extract`、`endian_fusion`、`prefetch`、`ldp_stp`、`bulk_memory`、`ccmp`、`lea` 等)属于 idea #2,见 `docs/kinsn_idea.md`,**不在本论文范围**。
+> **范围说明**:本表只列**纯 BPF-to-BPF rewrite pass**(即不依赖任何内核 patch / kop 框架的 pass)。所有依赖 kop 的变换(`rotate`、`cond_select`、`extract`、`endian_fusion`、`prefetch`、`ldp_stp`、`bulk_memory`、`ccmp`、`lea` 等)属于 idea #2,见 `docs/kop_idea.md`,**不在本论文范围**。
 
 #### Speculative 分类(本论文 framing)
 
@@ -307,84 +306,37 @@ C 类是本论文跟所有 prior eBPF 优化(K2/Merlin/EPSO)的关键差异:**�
 ### 4.1 系统架构 — 全用户态 stock-kernel
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  Runner (Python, 现有 corpus/micro 框架不变)                    │
-│                                                                 │
-│  - 读 runner/config/passes/<pass>/default.yaml                  │
-│  - rejit_plan.build_execute_plan_payload() 把 yaml.command      │
-│    塞进 JSON                                                    │
-│  - 通过 per-pid socket 发 execute_step 给目标 app 的 shim       │
-│  - 原 daemon 时期的 socket 协议复用,socket path 变成 per-pid    │
-└──────────────────┬──────────────────────────────────────────────┘
-                   │  unix socket: /var/run/bpfrejit/shim-<pid>.sock
-                   │  {"cmd":"execute_step","prog_id":N,
-                   │   "command":"timeout 6000 bpfopt --pass noop
-                   │              --input ${INPUT} --output ${OUTPUT}
-                   │              --report ${REPORT} ..."}
-                   ↓
-┌─────────────────────────────────────────────────────────────────┐
-│  App process (Tracee / Tetragon / Katran / Cilium / bpftrace /  │
-│               BCC / otelcol-ebpf-profiler 等真实 upstream 二进制) │
-│                                                                 │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │  libbpfrejit_shim.so  (LD_PRELOAD-inject, ~1000 行 C)     │  │
-│  │                                                           │  │
-│  │  intercept thread (同步 syscall path):                    │  │
-│  │    syscall(SYS_bpf, BPF_PROG_LOAD, ...) ── 落 bytecode    │  │
-│  │      ── OBJ_GET_INFO_BY_FD → kernel_prog_id              │  │
-│  │      ── obj_insert into prog/map/link/perf state table   │  │
-│  │    perf_event_open(2), ioctl(2), close(2) 同样拦截       │  │
-│  │                                                           │  │
-│  │  socket thread:                                          │  │
-│  │    /var/run/bpfrejit/shim-<pid>.sock                     │  │
-│  │    execute_step → 替换 ${VAR} → posix_spawn /bin/sh -c   │  │
-│  │      (env 删 LD_PRELOAD,避免 bpfopt 自己被 shim 拦截)    │  │
-│  │                                                           │  │
-│  └───────────────────────────────────────────────────────────┘  │
-│              │                                                  │
-│              │  fork+exec(/bin/sh -c "bpfopt --pass ...")       │
-│              ↓                                                  │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │  bpfopt (pure bytecode CLI, 零 syscall)                  │  │
-│  │  stdin: struct bpf_insn[]   stdout: rewritten insn[]     │  │
-│  │  --pass <name>  --input  --output  --report              │  │
-│  └───────────────────────────────────────────────────────────┘  │
-│              │                                                  │
-│              │  rewritten bytecode → shim 后续做 candidate      │
-│              │  BPF_PROG_LOAD(stock) → 成功后 link_update /      │
-│              │  PERF_EVENT_IOC_SET_BPF 等 swap recipe(详 PoC-C v2)│
-│              ↓                                                  │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │  Stock kernel — verifier + JIT + attach 接口             │  │
-│  │  零 patch:无 BPF_PROG_REJIT / 无 GET_ORIGINAL syscall    │  │
-│  │  无 kinsn 模块。candidate prog 跟原始 prog 经同一         │  │
-│  │  bpf_check() + bpf_int_jit_compile() 路径                │  │
-│  └───────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+Runner (policy + measurement)
+  │ reads runner/config/passes/<pass>/*.yaml
+  ├── current corpus: BPFREJIT_SHIM_LOADTIME_PLAN
+  └── running process: /var/run/bpfrejit/shim-<pid>.sock execute_plan
+  ▼
+Real upstream application + libbpfrejit_shim.so
+  │ captures BPF_PROG_LOAD, maps, links, perf fds, raw tracepoints,
+  │ program-array slots, and XDP attachment state
+  ├── exec bpfopt --pass <name>         (pure bytecode CLI)
+  ▼
+Stock BPF_PROG_LOAD → verifier → JIT
+  ├── load-time path: optimized bytecode becomes the application's load
+  └── live path: reload_and_reattach() uses stock attachment APIs
 ```
 
-**所有 BPF syscall(包括 candidate `BPF_PROG_LOAD`、`BPF_LINK_UPDATE`、`PERF_EVENT_IOC_SET_BPF`)都从 app 进程内发出**,因为这些操作需要触及 app 进程的 fd table。Runner / 外部进程在 stock kernel 下无法跨进程拿 app 的 fd ownership(详 `docs/tmp/poc_b_bcc_perf_event_swap.md`),这是 shim 必须在 app 进程内的根本原因。
+**所有 BPF syscall(包括 candidate `BPF_PROG_LOAD`、`BPF_LINK_UPDATE`、`PERF_EVENT_IOC_SET_BPF`)都从 app 进程内发出**,因为这些操作需要触及 app 进程的 fd table。Runner / 外部进程在 stock kernel 下无法跨进程拿 app 的 fd ownership,这是 shim 必须在 app 进程内的根本原因。
 
 ### 4.2 工作流
 
-```
-1. App 启动(LD_PRELOAD=libbpfrejit_shim.so)
-   shim_init → 建 state table → bind socket → 起 worker 线程
-2. App 自然加载 BPF
-   shim 拦截每次 BPF_PROG_LOAD,落原始 bytecode + 关联 kernel_prog_id
-3. Runner 决定 optimize
-   读 yaml,sequence pass(默认 policy 见 runner/config/passes/)
-4. 每个 pass:
-   runner ───execute_step(prog_id, shell command)──► shim socket
-   shim:替换 ${INPUT}=<bytecode_path>, ${OUTPUT}=workdir/out.bin,
-         ${REPORT}=workdir/report.json, ${PROG_TYPE}=..., ${TARGET}=...
-   shim:/bin/sh -c <substituted> → 内部 fork bpfopt CLI
-   bpfopt:读 stdin/--input,跑 --pass,写 stdout/--output + --report
-5. (Phase 2 swap,待实现):
-   shim 用 candidate bytecode 调 stock BPF_PROG_LOAD
-   按 attach 类型走 swap recipe(LINK_UPDATE / SET_BPF / map_update_elem)
-6. Runner 读 bpf_stats 测 exec_ns,记 logical_id ↔ {old, new} prog_id 映射
-```
+**当前 corpus 评测路径(load-time)。** Runner 先启动 upstream app 测量
+baseline,停止并等待 BPF 对象清理,再生成 load-time plan 后第二次启动同一
+app。Shim 在第二次启动的每个 `BPF_PROG_LOAD` 上运行 pass pipeline,
+逐步用 stock verifier probe candidate,最终把接受的 bytecode 放回原 load
+调用。Baseline 与 optimized 是两个独立 application lifetime。
+
+**已实现但需要单独结果门槛的 live 路径。** App 启动后 shim 在
+`/var/run/bpfrejit/shim-<pid>.sock` 接收 `execute_plan`;每个改变后的
+candidate 经 stock `BPF_PROG_LOAD` 后由 `reload_and_reattach()` 按实际
+attachment 类型切换。任何 verifier rejection 或 partial attach 都返回
+错误。只有 lifecycle 明确记录该路径的实验才能支撑 live-swap /
+re-specialization claim。
 
 `runner/config/passes/noop/default.yaml` 的真实 command(已在仓库):
 
@@ -396,7 +348,7 @@ command: |
                        --target ${TARGET}
 ```
 
-Shim 把 yaml 的 `command` 字段视作 opaque shell text,只替换 `${VAR}` 然后 `/bin/sh -c`。**Shim 不知道 `bpfopt` 是什么、也不知道 `noop` 是什么**;新 pass 加进来只需要写一个 yaml + 一个 `bpfopt` pass,shim/Makefile/Dockerfile 零改动。
+Shim 把 yaml 的 `command` 字段视作 opaque shell text,只替换 `${VAR}` 然后 `/bin/sh -c`。Shim 不内置 pass policy;新 pass 加进来只需要写一个 yaml + 一个 `bpfopt` pass。
 
 ### 4.3 安全模型
 
@@ -431,21 +383,24 @@ bpfopt 是 speculative optimizer,**每个 speculative specialization 必须配�
 >
 > 这层处理 **per-packet / per-invocation** 的特化失效 — guard 极便宜、miss 极罕见时就划算。
 
-**Tier 2 — Async respecialization(phase-shift)**
+**Tier 2 — Async respecialization(phase-shift,尚未实现/评估)**
 
-> Shim worker 线程后台监控 guard miss rate。如果 invariant 真的长时间漂移(workload phase 变化、配置更新、新 hot key 出现),累积的 miss 信号触发 runner 重发 `execute_step`,**异步重 specialize**:
+> 当前 shim 已实现显式 `execute_plan` reload/reattach,但没有 guard-miss
+> counter、threshold policy 或自动 phase-shift detector。下面是 future
+> mechanism,不能写成当前贡献或已评估功能:
 >
 > ```
 > shim 观测 guard miss rate > threshold
 >   → 通过 socket 告知 runner / runner 主动 poll
->   → runner 重发 execute_step(同一 prog,新 profile)
+>   → runner 发送 execute_plan(同一 prog,新 profile)
 >   → shim 拿 candidate bytecode 调 stock BPF_PROG_LOAD
 >   → kernel verifier 重过(safety 重新认证)
 >   → 按 attach 类型走 swap recipe(LINK_UPDATE / SET_BPF detach+reopen /
 >      MAP_UPDATE_ELEM PROG_ARRAY slot 等,详 PoC-C v2)
 > ```
 >
-> 这层处理 **phase-level** 的特化失效。延迟是 ms-100ms 级,**只有 miss rate 真升上来才触发**,稳态零开销。
+> 该层若实现,用于处理 **phase-level** 的特化失效;其触发延迟与稳态开销
+> 目前没有测量数据。
 
 **为什么不需要 OSR**
 
@@ -461,11 +416,10 @@ Tier 1 的 fast/slow path 都在**同一个 verifier-accepted program version** 
 
 ### 5.1 Required Baselines
 
-1. Stock kernel JIT
-2. `kernel-fixed-cmov/wide/rotate/lea` peephole（固定策略）
-3. `advisor-static`（CPU DB only）
-4. `advisor-profiled`（CPU DB + workload profile）
-5. llvmbpf 作为上界参考
+1. Unchanged upstream application load (`noop`/identity control)
+2. Static BPF-to-BPF pass list without runtime profile input
+3. The same pass family with map-value or real per-site PMU input
+4. Per-pass ablations for every performance claim
 
 ### 5.2 Required Questions
 
@@ -487,17 +441,17 @@ Tier 1 的 fast/slow path 都在**同一个 verifier-accepted program version** 
 
 - **Mechanism isolation**：load_byte_recompose, binary_search, switch_dispatch, branch_layout
 - **Policy-sensitivity**：cmov_select vs log2_fold（见 #20, #38）
-- **Real programs**：.bpf.o corpus（Cilium/Katran/loxilb/Calico/xdp-tools/selftests，见 #32-#36）
-- **App-native deployment workload**：至少一个（Cilium/Katran 级别）🔄 未完成
+- **Real programs**：六应用 production corpus(BCC/Cilium/Katran/OTel/Tetragon/Tracee),全部由 upstream application loader 加载
+- **App-native deployment workload**：每个 supported app 使用其配置的真实 workload
 
 ### 5.35 Benchmark 设计约束
 
 - **每个 corpus 程序必须有 exec_ns**。没有 "code size only" fallback。不能测 exec_ns 的程序不进 corpus。
-- **BPF 程序用它在生产中被使用的方式来测量**。有原生应用的程序（Tracee/Tetragon/Katran/BCC/bpftrace/scx/KubeArmor）必须用 app-native loader，不用 generic libbpf。
+- **BPF 程序用它在生产中被使用的方式来测量**。六个 supported app(Tracee/Tetragon/Katran/BCC/Cilium/OTel profiler)必须用 app-native loader,不用 generic libbpf。
 - **两种测量路径，没有第三种**：(1) App-native：真实应用加载+触发 BPF，`bpf_enable_stats` 读 per-program exec_ns；(2) TEST_RUN：`BPF_PROG_TEST_RUN` 直接测，仅限 XDP/TC/socket_filter 等支持的 prog_type。
 - **ARM64 默认走 AWS 远端**（t4g.small bench / t4g.micro test），不在本地 QEMU 跑 Python。
 - **AWS 成本约束**（硬性规则）：所有 AWS 跑（smoke + authoritative）默认 `t3.small` x86 / `t4g.small` arm64（2 vCPU/2GB），test suite 用 `t3.micro` / `t4g.micro`。**`medium` 是绝对上限，仅允许作为 OOM 修复手段；禁止升级到 medium 以上**（不允许 c5/c6g、不允许 xlarge/2xlarge、不允许为 variance/并行/任何 SAMPLES 而升级）。variance 噪声 / 吞吐限制 / CPU credit throttling 必须通过代码优化（缩 workload、减少 tracing、降低并发 pass）解决，**不能换大机器**。spot instance 优先用于非时间敏感 run。SAMPLES 上限 = 3，paper-grade 由 per-program `min_runs ≥ 100` filter 决定，不靠 SAMPLES 拉到 30。
-- **统计要求**：报告必须同时给 applied-only geomean 和 all-comparable geomean + sample count + comparison exclusion reasons。repeat ≥ 50，论文级 ≥ 500。
+- **统计要求**：框架只收集 raw counter/workload data。外部分析使用 per-program ratio、`min_runs >= 100` filter、per-program geomean 和 W/L/T;不得把旧的 repeat≥50/500 规则重新引入 runner。
 
 ### 5.4 Required Hardware
 
@@ -506,6 +460,9 @@ Tier 1 的 fast/slow path 都在**同一个 verifier-accepted program version** 
 3. arm64 系统 🔄（CI 有，性能数据有限）
 
 ### 5.6 Benchmark Framework 架构
+
+**当前实现以 `corpus/driver.py` 为准。** 它使用六个 app runner,先完成
+baseline lifetime,stop+quiesce,再用 load-time plan 启动 optimized lifetime。
 
 #### 设计原则
 
@@ -516,7 +473,7 @@ Tier 1 的 fast/slow path 都在**同一个 verifier-accepted program version** 
   - **Loader**（谁加载 BPF）：原生 app（tracee, bcc/execsnoop, katran_server, libbpf-bootstrap/minimal, systemd, ...）。每个 repo 的程序必须由该 repo 自己的可执行文件加载。
   - **Workload driver**（什么触发 BPF 执行）：app 自身事件、exec_storm、fio、network_traffic 等。Workload 是独立维度，可叠加。
   - **Measurement**（读什么指标）：bpf_stats per-program exec_ns（corpus）以及原始 app throughput/latency/error counters
-- **生命周期单元是 loader instance**：一个 loader instance = 一个可执行进程加载的所有 BPF 程序。Tracee 是一个 loader（启动一次加载 30+ BPF 程序）；BCC 的每个 tool（execsnoop, opensnoop, ...）是独立 loader（各加载 1-2 个 BPF 程序）；Katran 是一个 loader。Orchestrator 按 loader instance 分组，每个 instance 一次 start→measure→optimize→measure→stop 生命周期(optimize 由 runner 通过 per-pid shim socket 触发,见 §4)。
+- **生命周期单元是 loader instance**：一个 loader instance = 一个可执行进程加载的所有 BPF 程序。当前每个比较由 baseline 与 optimized 两个独立 loader lifetime 组成;optimized start 通过 load-time plan 应用 pass。
 - **缺 runner 的 repo 必须补 runner**：不能标"不可测"然后跳过。没有 runner 是实现缺口，不是分类问题。
 - **禁止在 object (.bpf.o) 层级做规划/分流/调度**：object 是编译产物的打包格式，对测量无意义。Orchestrator 的调度单元是 loader instance（app），不是 object。YAML 里不出现 .bpf.o 路径。program 通过 bpf_stats/get_next_id 在运行时自动发现，不需要预先枚举。
 - **YAML 只列 app，不列 object/program**：YAML 定义 app（loader instance），每个 app 指定 runner + workload。启动 app 后通过 `list_progs` shim socket RPC 自动发现该 app 加载的 BPF 程序并测量,不需要在 YAML 里枚举 .bpf.o 或 program name。Object 只是编译产物的打包格式,和调度/测量无关。
@@ -544,9 +501,12 @@ Tier 1 的 fast/slow path 都在**同一个 verifier-accepted program version** 
 - **每个测量单元是一个 loader instance**：没有跨 loader 的共享 state
 - **并行在 orchestrator 层**：不同 loader instance 之间可并行（prepare 阶段），测量阶段串行避免 CPU 竞争噪声
 - **Makefile 是唯一入口**：所有 benchmark 从 `make <suite>` 触发，平台由 `PLATFORM` / `ARCH` 选择
-- **Same-image paired measurement**:load→baseline exec_ns→shim execute_step optimize→post exec_ns,同一加载实例上对比
+- **Two-start comparison**:baseline start→measure→stop/quiesce→optimized start with load-time plan→measure→stop。当前 corpus 不是 same-image live-swap paired measurement。
 
-#### 组件职责
+#### 历史组件图(已淘汰)
+
+下图保留早期规划用语用于追溯,其中 `macro_corpus.yaml`、bpftool corpus
+loader、same-lifetime measurement 与 `execute_step` 均不是当前接口。
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -569,7 +529,7 @@ Tier 1 的 fast/slow path 都在**同一个 verifier-accepted program version** 
 │    workload.run(seconds=10)                              │
 │    baseline = read_bpf_stats(prog_ids)                   │
 │                                                          │
-│    shim_socket.execute_step(prog_ids, command)            │
+│    restart with BPFREJIT_SHIM_LOADTIME_PLAN               │
 │    workload.run(seconds=10)                              │
 │    post = read_bpf_stats(prog_ids)                       │
 │                                                          │
@@ -598,28 +558,19 @@ Tier 1 的 fast/slow path 都在**同一个 verifier-accepted program version** 
 #### App-native 测量流程
 
 ```
-Orchestrator              App + shim                                  bpf_stats
-    │                       │                                            │
-    ├── start(repo) ───────►│ LD_PRELOAD=shim.so, app starts             │
-    │                       │ (shim binds /var/run/bpfrejit/shim-<pid>.sock)
-    │                       │ app loads BPF; shim intercepts + tracks   │
-    │◄── list_progs ────────┤                                            │
-    │                       │                                            │
-    ├── enable_bpf_stats ───────────────────────────────────────────────►│
-    ├── workload.run(10s) ─►│ app drives events                          │
-    ├── read_stats ─────────────────────────────────────────────────────►│ baseline exec_ns
-    │                       │                                            │
-    ├── execute_step(...) ─►│ shim: subst ${VAR} → /bin/sh -c bpfopt    │
-    │                       │ shim: candidate BPF_PROG_LOAD + swap      │
-    │                       │ (Phase 2 swap recipe per attach type)      │
-    │                       │                                            │
-    ├── workload.run(10s) ─►│                                            │
-    ├── read_stats ─────────────────────────────────────────────────────►│ post exec_ns
-    │                       │                                            │
-    ├── stop() ────────────►│ cleanup                                    │
-    │                       │                                            │
-    ├── report(baseline, post)                                           │
+baseline lifetime                      optimized lifetime
+start upstream app                     set BPFREJIT_SHIM_LOADTIME_PLAN
+  → app loads BPF through shim         start same upstream app
+  → run workload                         → shim runs bpfopt during PROG_LOAD
+  → collect raw run counters             → stock verifier/JIT accepts candidate
+stop app + wait for quiescence            → run same workload
+                                          → collect raw run counters
+                                        stop app
 ```
+
+`result.json` 只保留 raw deltas、workload payload、lifecycle 与 error。
+ratio/geomean/CI 等全部由外部 analysis script 计算。运行中 `execute_plan`
+是另一条机制路径,不得与上述 load-time corpus protocol 混写。
 
 #### Corpus App Runner Layer
 
@@ -632,8 +583,8 @@ runner/libs/app_runners/        ← Corpus app lifecycle layer
   tetragon.py                     class TetragonRunner: ...
   katran.py                       class KatranRunner: ...
   bcc.py                          class BCCRunner: ...
-  bpftrace.py                     class BpftraceRunner: ...
-  scx.py                          class ScxRunner: ...
+  cilium.py                      class CiliumRunner: ...
+  otel_profiler.py               class OtelProfilerRunner: ...
 
 corpus/driver.py                使用 app_runners + bpftool + bpf_stats → per-program exec_ns
 ```
@@ -649,24 +600,23 @@ runner/                     # 共享基础设施
       katran.py
       bcc.py
       ...
-    results.py              #     JSON result 解析/聚合
-    statistics.py           #     median/geomean/CI/Wilcoxon
+    results.py              #     raw JSON result schema/helpers
     vm.py                   #     vng boot/exec helpers
-    rejit.py                #     per-pid shim socket 通信(沿用原 daemon 时期的 JSON 协议)
+    rejit_plan.py           #     pass YAML → load-time/execute_plan JSON
     bpf_stats.py            #     bpf_enable_stats + read per-program stats
   src/                      #   C++ micro_exec(仅 TEST_RUN + llvmbpf)
   scripts/                  #   AWS/ARM64 远端脚本
 
 corpus/                     # Corpus 评估层
-  config/macro_corpus.yaml  #   程序列表 + 测量方式(app_native | test_run)
-  driver.py                 #   调度:app_runner 或 micro_exec → 聚合结果
+  config/macro_apps.yaml    #   supported upstream applications
+  driver.py                 #   two-start load-time lifecycle + raw collection
 
 micro/                      # Micro 评估层
   programs/                 #   62 个 BPF .bpf.c
   driver.py                 #   调度 micro_exec
 
-bpfopt/shim/                # LD_PRELOAD shim(C)+ musl variant
-bpfopt/crates/bpfopt/       # bpfopt CLI(Rust,纯 bytecode rewriter)
+bpfopt/shim/                # LD_PRELOAD shim(C), loadtime + live reload paths
+bpfopt/llvm/                # bpfopt CLI(C++/LLVM,纯 bytecode rewriter)
 runner/config/passes/       # 每个 pass 的 yaml 命令模板
 ```
 

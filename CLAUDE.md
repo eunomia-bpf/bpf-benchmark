@@ -66,7 +66,7 @@ Report `wins/losses/ties` counts as supplemental.
 
 **Tail-call accounting caveat (important for paper interpretation)**: BPF programs entered via `bpf_tail_call(ctx, &progs, key)` are jumped to at `bpf_func + X86_TAIL_CALL_OFFSET` (and the equivalent on arm64), which **skips the prologue that increments `bpf_prog->stats.cnt`/`nsecs`**. Consequently `bpftool prog show` reports `run_cnt = 0` and `run_time_ns = 0` for every tail-called program, even when the program executes on every dispatch. Per-program `run_cnt_delta` filtering at the framework level systematically under-counts these tail targets to zero. Concrete examples: OTEL `perf_unwind_<lang>` (×8) routed from `native_tracer_entry`; pre-fix katran `balancer_ingress` routed from `xdp_root` (now bypassed by switching katran to standalone attach mode); cilium NodePort/CT/policy `tail_*` programs; tetragon `generic_kprobe_event` → `process_event/filter_arg/actions/output` chain; tracee `lkm_seeker_*` and `vfs_*_tail` chains. When evaluating coverage of tail-called programs, verify program execution through profiler-side telemetry (e.g. OTEL debug exporter sample dump showing interpreter frame names) or by re-attaching the program directly so it becomes the entry point (the katran standalone-mode pattern). Do not interpret `run_cnt = 0` for a tail target as "program not running".
 
-**Optimizations of tail-called programs are measured at the caller, NOT the tail target.** The caller's `run_time_ns` already includes the time spent in every tail-called descendant (the tail call jumps inline; control does not return). So when `map_inline`/`kinsn`/etc. apply to a tail target like `perf_unwind_python` or `cil_lxc_policy`, the runtime savings show up in the directly-attached caller's `run_time_ns_delta` (e.g. `native_tracer_entry`, `cil_xdp_entry`, `cil_from_netdev`, `generic_kprobe_event`). The right way to filter the qualified-and-affected population is **"caller's `applied>0` OR any tail-call descendant has `applied>0`"** — never restrict to "this program self-applied". The corpus framework's `run_cnt_delta` filter on the caller still gates statistical confidence, but program selection must follow the call tree. Do not kernel-patch the tail-call prologue: the time accounting at the caller is correct.
+**Optimizations of tail-called programs are measured at the caller, NOT the tail target.** The caller's `run_time_ns` already includes the time spent in every tail-called descendant (the tail call jumps inline; control does not return). So when `map_inline`/`kop`/etc. apply to a tail target like `perf_unwind_python` or `cil_lxc_policy`, the runtime savings show up in the directly-attached caller's `run_time_ns_delta` (e.g. `native_tracer_entry`, `cil_xdp_entry`, `cil_from_netdev`, `generic_kprobe_event`). The right way to filter the qualified-and-affected population is **"caller's `applied>0` OR any tail-call descendant has `applied>0`"** — never restrict to "this program self-applied". The corpus framework's `run_cnt_delta` filter on the caller still gates statistical confidence, but program selection must follow the call tree. Do not kernel-patch the tail-call prologue: the time accounting at the caller is correct.
 
 ### BranchFlip Requires Real Per-Site PGO
 `branch_flip` is the Paper B profile-guided branch-layout pass. It is production code but remains outside the runner benchmark default policy until Paper B benchmark results decide policy. It must consume real per-site PMU profile data from the external profiling toolchain (now archived under `bpfperf`): every candidate site needs `branch_count`, `branch_misses`, `miss_rate`, `taken`, and `not_taken`. Placeholder PMU fields, heuristic fallback, missing-site success, and optional per-site profile fields are forbidden; missing program/site PMU data must exit 1.
@@ -112,41 +112,37 @@ ABI/layout tests must verify field offsets or encoded format, not just `size_of`
 Do not test trivial getters/setters, standard library or upstream library behavior, self-equality tautologies, mocks-only behavior, readability/documentation examples, pure const aliases, or duplicate coverage.
 Before adding a test, be able to answer: what specific bug would this failure identify?
 
-### bpfopt-suite v3 Architecture
-`docs/tmp/bpfopt_design_v3.md` is the authoritative design document for bpfopt-suite. Keep implementation and documentation aligned with that design:
-- The daemon must not maintain `PassManager`, do profiling internally, transform bytecode in-process, or maintain a default pass list. It owns the runner-provided per-pass orchestration loop, but every bytecode transform is a separate `bpfopt --pass <name>` CLI invocation followed immediately by `BPF_PROG_REJIT(log_level=2)`.
-- The daemon watches for new BPF programs, detects map invalidation, preserves the runner socket + JSON protocol, and owns in-process live discovery, map-value side-input preparation, minimal fd-array construction from `prog_info.used_maps`, and per-pass `BPF_PROG_REJIT`.
-- `bpfopt` is a pure bytecode CLI tool with zero kernel syscall dependency. It may use `libbpf-sys` for UAPI types, constants, and `struct bpf_insn`.
-- Bytecode transforms remain `bpfopt` CLI invocations. The daemon does not accept candidates through `BPF_PROG_LOAD` dry-runs; the kernel re-verifies each pass candidate during `BPF_PROG_REJIT`.
-- Benchmark runner Python stays on the existing daemon socket boundary during the v3 migration.
-- stdin/stdout carry raw binary bytecode (`struct bpf_insn[]`) for `bpfopt`; side-inputs and side-outputs use files only at the `bpfopt` CLI boundary.
+### Stock-Kernel Shim Architecture
+The active bpfopt-suite architecture is the stock-kernel userspace path implemented in `bpfopt/shim/`. Historical daemon/ReJIT designs under `docs/tmp/` are not authoritative.
+- Real upstream applications load their own BPF programs. The framework never replaces an application loader with a synthetic `.bpf.o` loader.
+- `libbpfrejit_shim.so` is injected into supported application processes and intercepts their BPF-related syscalls. It captures the original `BPF_PROG_LOAD` context, map references, attachment state, and per-program bytecode needed by later optimization steps.
+- The benchmark runner owns policy. It reads `runner/config/passes/<pass>/default.yaml`, builds an ordered plan, and either supplies it through `BPFREJIT_SHIM_LOADTIME_PLAN` or sends it to a per-process shim socket as an `execute_plan` request.
+- `bpfopt` is a pure bytecode CLI with zero BPF syscall dependency. Each invocation performs one named pass over raw `struct bpf_insn[]`; side inputs and reports cross the CLI boundary through explicit files.
+- The shim runs every configured `bpfopt` step, submits candidate bytecode through the stock `BPF_PROG_LOAD` verifier/JIT path, and either installs the optimized program at load time or reloads and reattaches it with existing stock-kernel APIs.
+- Live replacement uses the attachment-specific mechanisms implemented in `shim_reload.h`, including `BPF_LINK_UPDATE`, link recreation, `BPF_PROG_ATTACH`, raw tracepoint reopen, perf-event replacement, and program-array updates. Partial replacement is an explicit error/result, not success.
+- The active architecture has no `bpfrejit-daemon`, no `BPF_PROG_REJIT`, no `BPF_PROG_GET_ORIGINAL`, and no project-fork syscall dependency.
 
-#### Daemon Owns Kernel Calls; Runner Stays Untouched
-- v3 §8 option B: runner Python (`runner/libs/`, `corpus/`, `micro/`) is the stable boundary; do not refactor it for v3 migration.
-- The daemon retains the socket + JSON protocol. It invokes `bpfopt --canonicalize-map-refs` once for snapshot initialization and `bpfopt --pass <name>` as external pure-bytecode CLI calls. Live discovery, BTF probing, map helpers, `BPF_PROG_GET_ORIGINAL`, and every `BPF_PROG_REJIT` call go through daemon-owned `src/syscall.rs` using `libbpf-sys` plus fork-only syscall wrappers.
-- Daemon internal `PassManager`, pass code, profiler, thin dry-run module, LoadAttr rebuilds, BTF metadata replay, and pseudo-map fd rewriting are removed. Verifier states for `map_inline` / `const_prop` come only from the previous successful per-pass `BPF_PROG_REJIT(log_level=2)` verifier log.
-- Main `BPF_PROG_REJIT` is a synchronous syscall with no daemon-side timeout; a kernel verifier hang can block the daemon. This limitation is accepted and documented rather than hidden behind a fallback.
-- The only allowed runner Python changes during v3 migration are bug fixes (for example, micro driver baseline regression) and stale test data updates.
+#### Evaluated Path vs Implemented Path
+- The current corpus comparison is a two-start load-time experiment: run and stop the baseline upstream application, then restart the same application with `BPFREJIT_SHIM_LOADTIME_PLAN` so optimized bytecode is verified during its normal `BPF_PROG_LOAD` calls.
+- The shim also implements running-process `execute_plan` plus reload/reattach. Do not describe a result as a live-swap result unless its recorded lifecycle used that path.
+- Load-time results establish transparent loader interception and stock-verifier acceptance, but by themselves do not establish post-deployment re-specialization or phase-change recovery.
 
 ### No CLI Cross-Dependencies
-The remaining standalone CLI binary crates (`bpfopt`, `bpfrejit-daemon`) must not depend on each other:
-- Runtime composition happens through stdin/stdout pipelines and bash orchestration.
-- Compile-time dependencies between CLI binary crates are forbidden; do not add path-dependencies from one CLI crate to another.
-- `bpfget`, `bpfverify`, `bpfrejit`, `bpfprof`, and `kernel-sys` crates have been removed. Per-pass ReJIT orchestration lives inside `bpfrejit-daemon` and calls daemon-owned `src/syscall.rs`.
-- `bpfrejit-daemon` must not depend on `bpfopt`'s lib portion; runtime composition stays at the CLI bytecode boundary.
+- Runtime composition happens through bytecode files/stdin/stdout, explicit side-input files, runner plan JSON, and shim orchestration.
+- Do not add a compile-time dependency from `bpfopt` to the shim or from the shim to a `bpfopt` library. The shim executes the `bpfopt` binary.
+- `bpfget`, `bpfverify`, `bpfrejit`, `bpfprof`, `kernel-sys`, and `bpfrejit-daemon` have been removed. Do not restore them as compatibility layers.
 
 ### Use libbpf-rs/libbpf-sys, Don't Re-Wrap
 Use `libbpf-rs`/`libbpf-sys` instead of custom wrappers whenever upstream libbpf exposes the needed API or type:
 - BPF syscall wrappers (`PROG_LOAD`, `GET_NEXT_ID`, `GET_INFO`, `bpf_enable_stats`, etc.) should use `libbpf-rs`/`libbpf-sys`.
 - `struct bpf_insn`, BPF opcode constants, and program type enums should use `libbpf-sys` re-exports.
 - Hand-written wrappers are error-prone because `bpf_attr` layouts and kernel ABI details can drift.
-- The only required custom wrappers are project-fork syscalls not supported upstream: `BPF_PROG_REJIT` and `BPF_PROG_GET_ORIGINAL`.
-- The v3 §11 "direct libbpf linking, future fork+exec" limit was an early conservative constraint and is superseded; implementation code may link `libbpf-rs` directly.
+- The shim must preserve the intercepted loader ABI exactly when reconstructing `BPF_PROG_LOAD` and attachment operations.
 
-### Daemon Syscall Boundary
-`kernel-sys` has been removed. `bpfopt` must remain a pure bytecode tool and must not call `libc::syscall(SYS_bpf, ...)` or otherwise invoke BPF syscalls directly. It may depend on `libbpf-sys` for UAPI data such as `struct bpf_insn`, opcode constants, map types, helper IDs, and program type enums.
+### Shim Syscall Boundary
+`bpfopt` must remain a pure bytecode tool and must not call `libc::syscall(SYS_bpf, ...)` or otherwise invoke BPF syscalls directly. It may use `libbpf-sys` for UAPI data such as `struct bpf_insn`, opcode constants, map types, helper IDs, and program type enums.
 
-`bpfrejit-daemon` owns BPF kernel interaction in `daemon/src/syscall.rs`: standard BPF commands go through `libbpf-sys`, and fork-only commands (`BPF_PROG_REJIT`, `BPF_PROG_GET_ORIGINAL` via fork-extended `bpf_prog_info`) use local wrappers. The daemon imports `libbpf_sys::bpf_insn` directly and does not carry map-reference bytecode parsing; snapshot map-reference canonicalization is the first `bpfopt --canonicalize-map-refs --map-ids ...` CLI step.
+All kernel interaction for speculative optimization stays inside the intercepted application process through `bpfopt/shim/`. Use stock BPF commands and attachment APIs; do not add fork-only syscall wrappers or move application-owned fd operations into an external process.
 
 ### Default Config Must Work
 `make corpus`, `make test`, `PLATFORM=aws ARCH=x86 make test`, `PLATFORM=aws ARCH=arm64 make test` must work with zero manual environment variables beyond `PLATFORM`/`ARCH`. Defaults live in `runner/targets/*.env` files and are overridable via env vars.
@@ -183,11 +179,11 @@ Override knobs (env vars passed to `make`):
 | `AWS_<ARM64\|X86>_{REGION,PROFILE,SUBNET_ID,SECURITY_GROUP_ID,KEY_NAME,KEY_PATH}` | PLATFORM=aws | AWS deploy params | `AWS_ARM64_REGION=us-east-1 PLATFORM=aws ARCH=arm64 make test` |
 
 Pass list reference (current `corpus/config/benchmark_config.yaml`):
-- **kinsn-class** (replace bytecode with a kfunc call lowered by an in-kernel kinsn module): `rotate`, `cond_select`, `ccmp` (arm64-only), `extract`, `endian_fusion`, `bulk_memory`, `prefetch`. Kinsn module `bpf_ldp` exists but has no bpfopt pass consuming it yet.
+- **kop-class** (replace bytecode with a kfunc call lowered by an in-kernel kop module): `rotate`, `cond_select`, `ccmp` (arm64-only), `extract`, `endian_fusion`, `bulk_memory`, `prefetch`. KOperation module `bpf_ldp` exists but has no bpfopt pass consuming it yet.
 - **bytecode rewriting** (pure BPF→BPF, no kfunc): `noop` (verifier-state producer), `wide_mem` (collapse byte-ladder into wide `LDX_MEM`), `map_inline`, `const_prop`, `dce`, `bounds_check_merge`, `skb_load_bytes_spec`
 - **profile-guided** (not in default policy): `branch_flip`
 
-Per-pass + per-app combinations are how isolated benchmarks (e.g., "tetragon kinsn-only SAMPLES=3") are run. Compose env vars on a single `make` invocation; do not bypass the Makefile.
+Per-pass + per-app combinations are how isolated benchmarks (e.g., "tetragon kop-only SAMPLES=3") are run. Compose env vars on a single `make` invocation; do not bypass the Makefile.
 
 ### Cost-Conscious AWS Defaults
 All AWS runs (smoke and authoritative) use `t3.small` (x86) / `t4g.small` (arm64) for bench suites and `t3.micro` / `t4g.micro` for the kernel test suite. **`medium` is the absolute upper cap and only allowed as documented OOM mitigation. Never escalate beyond medium — not for variance, not for parallelism, not for SAMPLES=3 authoritative runs.** Variance noise, throughput limits, and CPU-credit throttling must be solved by optimizing code (smaller workloads, lighter tracing, fewer concurrent passes) rather than by upgrading the instance. c5/c6g, xlarge, 2xlarge, and larger sizes are forbidden as defaults. Spot instances are allowed for non-time-critical runs.
@@ -199,12 +195,12 @@ Container must NOT bind mount host workspace (`-v workspace:workspace`). All fil
 Docker image layers must be ordered by change frequency (bottom = stable, top = frequent):
 1. Base OS + apt packages (rarely changes)
 2. App artifacts — pre-built images via `FROM`/`COPY --from` (rarely changes)
-3. Kernel + kinsn modules (rarely changes)
+3. Kernel + kop modules (rarely changes)
 4. C++ runner + micro .bpf.o + test artifacts (moderate)
-5. Rust daemon (frequently changes)
+5. C shim + bpfopt CLI (frequently changes)
 6. Python code + configs + corpus data (most frequently changes)
 
-Changing Python must NOT trigger recompilation of apps, kernel, or daemon. `RUNNER_RUNTIME_IMAGE_SOURCE_FILES` in build.mk must only include files that participate in compilation, not runtime Python/YAML/config files.
+Changing Python must NOT trigger recompilation of apps, kernel, shim, or bpfopt. `RUNNER_RUNTIME_IMAGE_SOURCE_FILES` in build.mk must only include files that participate in compilation, not runtime Python/YAML/config files.
 
 ## Supported Apps (6)
 tracee, tetragon, bcc, katran, cilium, otelcol-ebpf-profiler

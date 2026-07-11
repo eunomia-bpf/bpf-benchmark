@@ -2,6 +2,11 @@
 
 调研日期：2026-05-10
 
+> **架构注记（2026-07-10）**：论文综述与 prior-work 摘要仍可使用,但文中
+> 把 BpfReJIT 定位成 daemon + `BPF_PROG_REJIT` 的段落已被 stock-kernel
+> shim 路线取代。当前系统边界见
+> `docs/rejit-speculative-optimization-ebpf_idea.md`;旧定位只作历史记录。
+
 ## 1. 摘要：现有 eBPF 优化研究的层次分布
 
 近五年的 eBPF 优化研究大致集中在四类位置：
@@ -11,7 +16,13 @@
 3. **verifier 研究很活跃**：PREVAIL、Agni、State Embedding、BCF、VEP、KFlex、Rex 等都围绕 verifier 精度、正确性、可用性或替代安全机制展开。它们给 BpfReJIT 的启发是：复杂推理尽量外置，kernel 保持小而可检查；但它们多数不以性能优化为主。
 4. **runtime/sandbox 和应用论文在暴露瓶颈**：HIVE/MOAT/Rex/bpftime 从隔离或用户态 runtime 角度绕开 verifier/JIT 限制；BMC/DINT/SPRIGHT/eNetSTL/Demystifying Performance 等应用论文反复显示 eBPF 的 verifier 限制、tail-call 切分、map/helper 开销、JIT 代码质量和缺少硬件特化是实际性能瓶颈。
 
-BpfReJIT 的独特位置是：**post-load in-kernel re-JIT**。它从已经加载、已经 verify 的 live BPF program 出发，读取原始 bytecode 和 deployment facts，运行 userspace bytecode optimizer，然后通过 `BPF_PROG_REJIT` 让 kernel 重新 verify、重新 JIT，并在原 `struct bpf_prog` 上原地替换 native image。这个位置和 K2/Merlin/EPSO 的 pre-load optimizer、KFuse 的链融合、BCF 的 proof-guided verifier 都相邻，但不重合。
+BpfReJIT 当前的独特位置是：**application-local, stock-kernel
+deployment-aware optimization**。In-app shim 在 upstream loader 的
+`BPF_PROG_LOAD` 边界捕获 bytecode、map 和 attach state,运行 userspace
+bytecode optimizer,再通过普通 verifier/JIT 接受 candidate。当前 corpus
+评估 load-time specialization;running-process reload/reattach 已实现但需要
+独立 coverage 结果。这个位置和 K2/Merlin/EPSO 的 pre-load optimizer、
+KFuse 的链融合、BCF 的 proof-guided verifier 都相邻,但不重合。
 
 ## 2. 关键论文列表
 
@@ -89,7 +100,7 @@ BpfReJIT 的独特位置是：**post-load in-kernel re-JIT**。它从已经加�
 
 - **核心 contribution**：多层 eBPF 优化框架，在 LLVM IR 和 BPF bytecode 两层做定制优化，提升 compactness 和 runtime performance，并与 K2 比较。
 - **优化层次**：source/LLVM IR/BPF bytecode，pre-load。
-- **和 BpfReJIT 的关系**：Merlin 的“multi-tier”直接支持我们论点：单靠 LLVM 默认 BPF backend 不够。BpfReJIT 的差异是 late optimization，可以利用 map values、verifier states、profile 和 target kinsn capability。
+- **和 BpfReJIT 的关系**：Merlin 的“multi-tier”直接支持我们论点：单靠 LLVM 默认 BPF backend 不够。BpfReJIT 的差异是 late optimization，可以利用 map values、verifier states、profile 和 target kop capability。
 
 ### Understanding Performance of eBPF Maps, eBPF@SIGCOMM 2024
 
@@ -101,7 +112,7 @@ BpfReJIT 的独特位置是：**post-load in-kernel re-JIT**。它从已经加�
 
 - **核心 contribution**：将网络函数中共享的高成本行为抽象为稳定 in-kernel library，用 Rust 和 metadata-assisted verifier 降低 eBPF 实现复杂度和交互开销。
 - **优化层次**：in-kernel library/API，应用侧重写。
-- **和 BpfReJIT 的关系**：eNetSTL 是“扩展 kernel primitive”路线，BpfReJIT 是“优化已加载程序”路线。kinsn 与 eNetSTL 类似，都把平台/内核侧能力做成小接口，但 kinsn 是 codegen target 而不是通用 NF library。
+- **和 BpfReJIT 的关系**：eNetSTL 是“扩展 kernel primitive”路线，BpfReJIT 是“优化已加载程序”路线。kop 与 eNetSTL 类似，都把平台/内核侧能力做成小接口，但 kop 是 codegen target 而不是通用 NF library。
 
 ### Demystifying Performance of eBPF Network Applications, PACMNET/CoNEXT 2025
 
@@ -149,7 +160,10 @@ BpfReJIT 的独特位置是：**post-load in-kernel re-JIT**。它从已经加�
 
 - **核心 contribution**：构造能满足 verifier 语义和依赖的 eBPF runtime fuzzing 输入，覆盖 load/attach/execute 路径。
 - **优化层次**：verifier-aware runtime fuzzing。
-- **和 BpfReJIT 的关系**：BpfReJIT 的风险面包括 `BPF_PROG_REJIT` syscall、fd_array、map/kfunc side input、JIT image replacement；BRF 的方法可扩展为 ReJIT-aware fuzzing。
+- **和 BpfReJIT 的关系**：当前风险面包括 shim syscall interposition、
+  load-attribute replay、map/profile side input、candidate `BPF_PROG_LOAD`
+  和 attachment replacement;BRF 的方法可扩展为 shim/load/reattach-aware
+  fuzzing。
 
 ### KFlex, SOSP 2024
 
@@ -191,13 +205,13 @@ BpfReJIT 的独特位置是：**post-load in-kernel re-JIT**。它从已经加�
 
 - **核心 contribution**：在 AArch64 上用硬件特性隔离 BPF 程序，试图以 isolation-based approach 支撑复杂 BPF。
 - **优化层次**：hardware-assisted runtime isolation。
-- **和 BpfReJIT 的关系**：HIVE 是替代安全模型；BpfReJIT 是保留 Linux verifier。HIVE 给 kinsn 的启发是硬件特性应当有明确、可验证的共享语义。
+- **和 BpfReJIT 的关系**：HIVE 是替代安全模型；BpfReJIT 是保留 Linux verifier。HIVE 给 kop 的启发是硬件特性应当有明确、可验证的共享语义。
 
 ### VeriFence, RAID 2024
 
 - **核心 contribution**：扩展 BPF verifier，在检测到 Spectre-PHT/STL 风险时插入 speculation barriers，并让 JIT 后端按架构 lower 或删除。
 - **优化层次**：verifier-cooperative bytecode instrumentation + JIT lowering。
-- **和 BpfReJIT 的关系**：这是 “verifier-aware rewrite + arch-aware lowering” 的安全版。BpfReJIT 的 kinsn/pass 可以看作性能版：userspace 选择 rewrite，kernel verifier/JIT 决定是否可执行。
+- **和 BpfReJIT 的关系**：这是 “verifier-aware rewrite + arch-aware lowering” 的安全版。BpfReJIT 的 kop/pass 可以看作性能版：userspace 选择 rewrite，kernel verifier/JIT 决定是否可执行。
 
 ### BMC, NSDI 2021
 
@@ -245,7 +259,7 @@ BpfReJIT 的独特位置是：**post-load in-kernel re-JIT**。它从已经加�
 | LLVM IR | Merlin | 能利用 SSA、高级 CFG、LLVM pass 生态 | load 前一次性优化；缺少 runtime map/profile/verifier feedback |
 | BPF bytecode, post-LLVM pre-load | K2, Merlin bytecode stage, EPSO | 精确面向 verifier 和 BPF ISA；可做超优化和 peephole | 需要对象文件或重部署；没有 live deployment facts |
 | Post-verification program set | KFuse | 利用已 verify 程序链结构，优化 tail-call/chain overhead | 目标是多程序合并，不是优化单个 program 的内部 codegen |
-| BPF bytecode, post-load in-kernel | BpfReJIT | 可用 runtime profile、map values、verifier states、target kinsn；透明优化 live program | 必须新增 kernel syscall/metadata path；每个候选仍需 verifier 接受 |
+| BPF bytecode, post-load in-kernel | BpfReJIT | 可用 runtime profile、map values、verifier states、target kop；透明优化 live program | 必须新增 kernel syscall/metadata path；每个候选仍需 verifier 接受 |
 | Verifier-inserted rewrite/hardening | VeriFence | verifier 知道安全风险，可插入 barrier 并交给 JIT lower | 主要用于安全；优化策略放 kernel 会增加 upstream/复杂度成本 |
 | Kernel JIT/native code | Jitterbug, BeeBox, arch JIT patches | 最低层、可用具体 ISA | 难移植、难 upstream、正确性风险高；不适合快速迭代策略 |
 | Alternative runtime/sandbox | bpftime, HIVE, MOAT, Rex | 可绕开 kernel JIT 限制或换安全模型 | 改执行模型或 deployment model，不完全透明于 kernel eBPF fast path |
@@ -257,7 +271,7 @@ BpfReJIT 的独特位置是：**post-load in-kernel re-JIT**。它从已经加�
 | 减指令数 / code size | K2, Merlin, EPSO | bytecode peephole、DCE、const_prop 后清理 |
 | 减跳转 / chain overhead | KFuse, K2/Merlin CFG 优化 | branch_flip、tail-call specialization、bounds_check_merge |
 | inline 常量 / stable values | Merlin 部分 IR 优化，BpfReJIT map_inline 设计 | frozen/stable map value inline、verifier-state const propagation |
-| hardware-specific instructions | Program Warping, hXDP, BeeBox/VeriFence JIT lowering | kinsn: rotate/cmov/extract/endian/bulk memory/prefetch |
+| hardware-specific instructions | Program Warping, hXDP, BeeBox/VeriFence JIT lowering | kop: rotate/cmov/extract/endian/bulk memory/prefetch |
 | profile-guided optimization | 通用 PGO 文献，Demystifying 指出 workload sensitivity | branch_flip 必须用真实 per-site PMU profile；hot/cold path selection |
 | specialization | BMC/DINT/SPRIGHT 暴露应用 hot path | 按 app/prog/map/profile 做 post-load specialization |
 | sandbox/hardening | HIVE, MOAT, BeeBox, VeriFence | 用 ReJIT pass 做 runtime hardening 或 emergency neutralization |
@@ -269,33 +283,43 @@ BpfReJIT 的独特位置是：**post-load in-kernel re-JIT**。它从已经加�
 | Verifier-bypassing / verifier-replacing | HIVE, MOAT, Rex | 用隔离、safe language 或 runtime checks 替代部分 verifier 假设 | 有助于表达力，但改变 trust/perf model；BpfReJIT 当前应避免走这条主线 |
 | Verifier-cooperative | BCF, VEP, VeriFence, KFlex | kernel verifier 与外部 proof/runtime/barrier/check 合作 | 最适合 BpfReJIT 叙事：userspace 复杂策略 + kernel 小接受路径 |
 | Verifier-validating | Agni, State Embedding, BRF, EuroSys 2024 verifier fuzzing | 验证/测试 verifier 自身正确性 | BpfReJIT 需要把这些作为 test oracle，尤其是 verifier-state-driven pass |
-| Verifier-as-acceptance | K2, Merlin, EPSO, BpfReJIT | rewrite 后仍交给 verifier 接受 | BpfReJIT 的差异是 post-load 和 in-place replacement |
+| Verifier-as-acceptance | K2, Merlin, EPSO, BpfReJIT | rewrite 后仍交给 verifier 接受 | BpfReJIT 的差异是 application-local loader state 与 runtime side input |
 
 ## 5. BpfReJIT 的独特定位
 
-BpfReJIT 可以定位为：
+BpfReJIT 当前可以定位为：
 
-> **首个面向 Linux live eBPF program 的 post-load, verifier-preserving, in-place re-JIT optimization framework。**
+> **面向真实 upstream loader 的 stock-kernel, deployment-aware eBPF
+> bytecode specialization framework。**
 
 关键边界：
 
-- **输入**：已经加载并通过 verifier 的 BPF program 的 saved original bytecode、`prog_info.used_maps`、map snapshot、target kinsn capabilities、前一轮真实 `BPF_PROG_REJIT(log_level=2)` verifier states、外部 PMU/profile side input。
-- **优化执行位置**：userspace `bpfopt` 纯 bytecode CLI；daemon 只 orchestration，不在进程内维护 pass manager。
-- **接受路径**：每个 pass 立即调用 `BPF_PROG_REJIT`；kernel 复用 live program metadata，重新 verify、重新 JIT、原地替换 image。
+- **输入**：shim 在 application `BPF_PROG_LOAD` 边界捕获的 original
+  bytecode、load attributes、map snapshot、attachment state 和外部 PMU/profile
+  side input。
+- **优化执行位置**：userspace `bpfopt` 纯 bytecode CLI;in-app shim 执行
+  runner-provided plan 并拥有 kernel-facing fd state。
+- **接受路径**：candidate 通过 stock `BPF_PROG_LOAD` 重新 verify/JIT;
+  load-time 路径直接完成原 load,running-process 路径再执行 attachment-specific
+  reload/reattach。
 - **安全模型**：不绕过 verifier；userspace optimizer 负责 semantic correctness，kernel verifier 负责 kernel safety。
-- **kernel-side extension**：kinsn 用小的 kernel/module-side contract 暴露平台指令能力，userspace 选择何时使用。
+- **kernel-side extension**：speculative paper 不需要 kernel extension;
+  KOperation 属于独立论文线。
 
 最接近的论文：
 
-1. **KFuse**：相同点是 post-verification optimization 和动态系统叙事；差异是 KFuse 合并程序链，BpfReJIT 重写同一 live program。
-2. **K2/Merlin/EPSO**：相同点是 BPF bytecode 优化；差异是它们 pre-load，BpfReJIT post-load、runtime-aware、transparent。
+1. **KFuse**：相同点是 deployment-time optimization 和动态系统叙事；差异是 KFuse 合并程序链，BpfReJIT 重写 application-loaded program。
+2. **K2/Merlin/EPSO**：相同点是 BPF bytecode 优化；差异是它们从 pre-load artifact 出发，BpfReJIT 在真实 loader 进程中获得 runtime/load state。
 3. **BCF**：相同点是把复杂推理放用户态，kernel 只做小而可信的接受/检查；差异是 BCF 提升 verifier precision，BpfReJIT 提升 execution performance。
 4. **VeriFence**：相同点是 verifier/JIT cooperation 和 architecture-aware lowering；差异是 VeriFence 主要 hardening，BpfReJIT 主要 optimization。
 5. **bpftime/Rex/HIVE**：相同点是承认现有 eBPF verifier/JIT 模型有限；差异是它们换 runtime 或安全模型，BpfReJIT 保留 kernel eBPF fast path。
 
 一句话 differentiation：
 
-> 现有 optimizer 大多在 **load 前** 优化一个 object；现有 verifier work 大多在 **load 时** 改安全判定；BpfReJIT 在 **load 后** 优化正在运行的 kernel-resident program，并让每个候选重新通过原 kernel verifier/JIT。
+> 现有 optimizer 大多在独立的 **load 前 artifact** 上工作;BpfReJIT 在
+> upstream application 的真实 load boundary 上捕获 deployment state,并让
+> 每个 candidate 重新通过 stock verifier/JIT。运行中 replacement 是需要
+> 单独 attachment-coverage 证据的第二条路径。
 
 ## 6. 学术创新点 brainstorm
 
@@ -303,13 +327,14 @@ BpfReJIT 可以定位为：
 
 | 创新点 | Differentiation | 额外工作量 | 目标会议 |
 |---|---|---:|---|
-| BpfReJIT：post-load live eBPF re-optimizer | 区别于 K2/Merlin/EPSO 的 pre-load；区别于 KFuse 的 chain merge；保持 app/loader 透明 | 中 | OSDI/SOSP/EuroSys |
-| `BPF_PROG_REJIT` + saved original bytecode + in-place image swap | 类似 livepatch 但 verifier-preserving，粒度是 BPF program 而非 kernel function | 中 | OSDI/SOSP |
-| kinsn 架构：可插拔 kernel-side inline emit contract | 区别于直接扩 kernel JIT peephole；新 ISA 能力以 module/contract 暴露 | 中/大 | OSDI/SOSP/ASPLOS |
-| Verifier-feedback-driven optimization loop | 区别于 Merlin/K2 不依赖真实 verifier log；每轮 ReJIT verifier state 反馈下一轮 pass | 中 | OSDI/SOSP/PLDI |
+| BpfReJIT：application-local deployment-aware optimizer | 区别于 K2/Merlin/EPSO 的 detached pre-load artifact；区别于 KFuse 的 chain merge；保持 app loader | 中 | OSDI/SOSP/EuroSys |
+| Stock `BPF_PROG_LOAD` + attachment-specific reload | 无私有 syscall；live coverage 由真实 attach population 决定 | 中 | OSDI/SOSP |
+| kop 架构：可插拔 kernel-side inline emit contract | 区别于直接扩 kernel JIT peephole；新 ISA 能力以 module/contract 暴露 | 中/大 | OSDI/SOSP/ASPLOS |
+| Verifier-gated optimization loop | 每个 candidate 走真实 stock verifier/JIT；失败保留为证据 | 中 | OSDI/SOSP/PLDI |
 | Deployment-aware BPF optimization policy | 用 map values、hardware、profile、app hotness 选择 pass，回应 Demystifying 的 workload sensitivity | 中 | OSDI/SOSP/NSDI |
 
-最强系统叙事：**BpfReJIT 把 JVM/LLVM 式可扩展 optimization loop 带进 kernel-resident eBPF，但不把复杂 optimizer 放进 kernel。**
+最强系统叙事：**BpfReJIT 把 runtime-guided optimization 放进真实 eBPF
+loader 的 deployment boundary,但不把复杂 optimizer 放进 kernel。**
 
 ### 6.2 Compiler / PL 创新
 
@@ -355,22 +380,23 @@ NSDI/SIGCOMM 需要更强网络场景和 production traces；Security 方向需�
 
 ### Linux kernel
 
-- `BPF_PROG_REJIT`：作为受限、privileged、verifier-preserving 的 live BPF replacement 接口。
-- `BPF_PROG_GET_ORIGINAL` 或等价 original-bytecode access：给 post-load optimizer 一个稳定 baseline。
-- kinsn / inline kfunc emit contract：用 module 暴露 architecture-specific lowering，而不是把所有 peephole 写进 kernel JIT。
-- verifier log/state 结构化输出：减少 fragile log parsing，让 verifier feedback 成为稳定 API。
-- JIT backend hooks：允许按 arch lower kinsn/barrier/prefetch/bulk-memory 等 target-specific constructs。
+- 不为 speculative 路线新增 ReJIT/original-bytecode syscall;由 in-app shim
+  捕获 original load context。
+- 改进 verifier log/state 的结构化输出,减少 fragile log parsing。
+- KOperation/JIT backend hooks 属于独立 KOperation 论文线,不得与 stock-kernel
+  speculative contribution 合并。
 
 ### libbpf
 
-- 提供 re-JIT C API wrapper：`bpf_prog_rejit(fd, bytecode, fd_array, log_opts)`。
-- 提供 original bytecode dump API：方便 debugging、analysis 和 userspace tools。
-- 提供 verifier-state/log parse helper，避免各项目重复解析 text log。
+- 提供 verifier-state/log parse helper,避免各项目重复解析 text log。
+- 调研 attachment replacement 与 loader-state introspection 的统一接口;
+  当前实现仍必须按 attach type 处理。
 
 ### bpfopt 开源工具
 
 - 发布 standalone pure-bytecode optimizer：stdin/stdout `struct bpf_insn[]`，side-input 走 JSON/files。
-- 提供 offline mode：开发者可以在 CI 中对 `.bpf.o` 做 pass preview，但不替代 BpfReJIT live path。
+- 提供 offline mode：开发者可以在 CI 中对 `.bpf.o` 做 pass preview,但它
+  不替代真实 application loader path。
 - 提供 pass report schema：记录 rewrite site、applied count、failure reason、verifier dependency。
 - 接入 K2/EPSO 类规则库或 e-graph backend，但以 verifier acceptance 为最终边界。
 

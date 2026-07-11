@@ -1,50 +1,64 @@
 # BpfReJIT Evaluation — Methodology and Infrastructure
 
-TL'DR:
+Current status (2026-07-10): the active speculative-optimization path is the
+stock-kernel `LD_PRELOAD` shim plus the standalone `bpfopt` CLI. The corpus
+currently compares a baseline application start against a second start of the
+same upstream application with a shim load-time plan. The shim also implements
+running-process reload/reattach, but a result is a live-swap result only when
+its lifecycle explicitly records that path.
 
-- Do observe improves, but not sure whether it's noise or benchmark issues.
-- Not significant imrpovements if we exclude noise.
+The older daemon, `BPF_PROG_REJIT`, kop, seven-app, and 20-app measurements
+retained later in this document are historical experiment records. They do not
+describe the current speculative paper's architecture or supported corpus.
 
 ## 1. System Under Test
 
-- **What it does**: re-JIT already-loaded eBPF programs in place: re-generate the BPF bytecode and replace in place transparently and keep all safety model.
-- **Kernel**: forked Linux 7.0-rc2.
-  - Two added syscall commands: `BPF_PROG_REJIT`, `BPF_PROG_GET_ORIGINAL`.
-  - Modify kernel to support kinsn.
-  - Modify kernel to support re-JIT and replace the hooks in place.
-- *kinsn* modules expose arch-specific code sequences (byte-swap `MOVBE`, `cmov`, prefetch, rotate, `BEXTR`, bulk `memcpy`/`memset`) as JIT inline-emit hooks invoked through kfunc calls.
+- **What it does**: optimize programs loaded by real upstream applications
+  without replacing their loaders. The shim captures each normal
+  `BPF_PROG_LOAD`, runs runner-selected `bpfopt` passes, and submits accepted
+  candidates through the stock verifier/JIT path.
+- **Kernel boundary**: ordinary `BPF_PROG_LOAD` plus existing attachment APIs.
+  The speculative bytecode path has no `BPF_PROG_REJIT`,
+  `BPF_PROG_GET_ORIGINAL`, or daemon dependency.
+- **Current measured path**: baseline application start/stop followed by an
+  optimized application start using `BPFREJIT_SHIM_LOADTIME_PLAN`.
+- **Implemented but separately gated path**: per-process `execute_plan` runs
+  against an already-started application and uses `shim_reload.h` to reload and
+  reattach accepted candidates. Its attachment-specific success/partial-failure
+  status must be recorded before it supports a live-swap claim.
+- **Out of scope here**: kop-backed native operations and their kernel
+  modules belong to the KOperation paper line.
 
 ```
-   runner ──socket──▶  bpfrejit-daemon  ──fork+exec──▶  bpfopt --pass <name>
-   (Python)            (Rust)                          (Rust, pure bytecode)
-                          │
-                          │ kernel-sys
-                          ▼
-                       BPF_PROG_REJIT(log_level=2)
+   runner ──plan JSON──▶ upstream application + LD_PRELOAD shim
+   (policy)                           │
+                                      ├──exec──▶ bpfopt --pass <name>
+                                      │          (pure bytecode CLI)
+                                      ▼
+                              stock BPF_PROG_LOAD
+                              verifier + JIT
 ```
 
-- **`bpfrejit-daemon`** (Rust) — only userspace component that calls BPF
-  syscalls.
-  - Live program discovery; side-input preparation (map values, BTF, fd-array
-    from `prog_info.used_maps`).
-  - Per-pass orchestration: `fork+exec bpfopt` → kernel re-JIT.
-  - No in-process bytecode transform; no default pass policy.
-- **`bpfopt`** (Rust) — pure-bytecode CLI.
-  - `stdin = bpf_insn[]`, `stdout = bpf_insn[]`, `--report = JSON`.
+- **Shim** (C) — application-local syscall, loader-state, plan-execution, and
+  reload/reattach boundary.
+- **`bpfopt`** (C++/LLVM) — pure-bytecode CLI.
+  - raw `bpf_insn[]` input/output and JSON report files.
   - One invocation = one named pass.
   - Zero kernel dependency.
 - **Per-pass loop** (per program):
-  1. daemon writes verifier states + side-inputs to files
+  1. shim writes bytecode and required side inputs to a workdir
   2. `bpfopt --pass <name>` rewrites bytecode
-  3. daemon issues `BPF_PROG_REJIT(log_level=2)`; kernel re-verifies + re-emits
-  4. on failure → recorded in result JSON, no fallback, no retry
+  3. shim submits the candidate through `BPF_PROG_LOAD`; the kernel re-verifies
+     and JIT-compiles it
+  4. on failure → record the error and artifacts; do not filter the program or
+     substitute a weaker pass
 
 ## 2. Optimization Passes
 
 Three classes; every benchmark run selects an explicit subset via
 `BPFREJIT_BENCH_PASSES`.
 
-### 2.1 kinsn-class — replace bytecode with a kfunc, lowered by an in-kernel kinsn module via `KFUNC_INLINE_EMIT`
+### 2.1 kop-class — replace bytecode with a kfunc, lowered by an in-kernel kop module via `KFUNC_INLINE_EMIT`
 
 - **`rotate`** — shift+or pair → native rotate (`bpf_rotate{32,64}`)
 - **`cond_select`** — branch+select → `cmov` (`bpf_select64`)
@@ -69,7 +83,12 @@ Three classes; every benchmark run selects an explicit subset via
 - **`skb_load_bytes_spec`** — specialize `bpf_skb_load_bytes` to fixed-width
   loads
 
-## 3. Workload Suite — 7 production eBPF applications
+## 3. Historical Workload Snapshot — 7 Applications
+
+This section preserves the May 2026 seven-app measurement for provenance.
+The active production corpus contains six applications: BCC, Cilium, Katran,
+the OTel eBPF profiler, Tetragon, and Tracee. `bpftrace/set` has been removed,
+so the counts below are not the current paper population.
 
 Selection criteria:
 
@@ -123,22 +142,23 @@ and is replayed identically in `baseline` and `post_rejit`.
   - Guest: Docker-in-VM for app stack
 - **Secondary platform — AWS** (cross-architecture validation only)
   - x86: `t3.small` ; arm64: `t4g.small` ; kernel test: `t3.micro`/`t4g.micro`
-- **Kernel**: forked Linux 7.0-rc2 (`vendor/linux-framework`); same build
-  on KVM and AWS
+- **Kernel used by these historical runs**: forked Linux 7.0-rc2
+  (`vendor/linux-framework`), with the same build on KVM and AWS. The current
+  speculative bytecode mechanism uses stock BPF load and attachment UAPI even
+  when the benchmark image contains unrelated KOperation kernel support.
 
 ### 4.1 Per-run protocol
 
-Three measured phases per app per sample, repeated `SAMPLES` times:
+The active corpus uses two independent upstream-application starts per app:
 
 ```
    ┌──────────────┐    ┌──────────────────────────┐    ┌──────────────┐
-   │  baseline    │ →  │       ReJIT              │ →  │  post_rejit  │
-   │              │    │   for each pass:         │    │              │
-   │  run         │    │     bpfopt --pass X      │    │  run         │
-   │  workload    │    │     | BPF_PROG_REJIT     │    │  workload    │
-   │  for         │    │   per-program            │    │  for         │
-   │  WORKLOAD_   │    │   success/failure        │    │  WORKLOAD_   │
-   │  DURATION s  │    │   captured               │    │  DURATION s  │
+   │ baseline app │ →  │ stop + quiesce + build   │ →  │ optimized app│
+   │ start        │    │ shim load-time plan      │    │ start        │
+   │ run workload │    │                          │    │ shim intercepts
+   │ collect raw  │    │ runner selects ordered   │    │ BPF_PROG_LOAD,
+   │ counters     │    │ bpfopt passes            │    │ runs workload,
+   │ stop app     │    │                          │    │ collects raw data
    └──────┬───────┘    └─────────┬────────────────┘    └──────┬───────┘
           │                      │                            │
           ▼                      ▼                            ▼
@@ -150,8 +170,8 @@ Three measured phases per app per sample, repeated `SAMPLES` times:
 - `bpf_enable_stats(BPF_STATS_RUN_TIME)` is enabled for the whole run;
   per-phase deltas are computed from `bpftool prog show` snapshots taken
   at phase boundaries
-- `BPFREJIT_BENCH_PASSES` selects the pass list; the same list runs in the
-  ReJIT phase of every sample
+- `BPFREJIT_BENCH_PASSES` selects the pass list applied by the shim during the
+  optimized application's normal load operations
 - Default knobs: `SAMPLES=3`, `WORKLOAD_DURATION=30 s`, `min_runs ≥ 100`
   filter applied at analysis time
 
@@ -255,8 +275,8 @@ error, or pass-internal failure). Conditions match §6.2.1.
 | `noop` ReJIT | 7 | 542 | 408 | 134 | **75.3 %** | kernel `failed_rejit` ×134 (≈124 are tetragon tail-call subprograms) |
 | `noop` + `map_inline` | 7 | 542 | 396 | 146 | **73.1 %** | kernel `failed_rejit` ×146 |
 | `prefetch` isolated | 7 | 545 | 530 | 15 | **97.2 %** | kernel `failed_rejit` ×15 |
-| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 7 | 542 | 513 | 29 | **94.6 %** | kernel `failed_rejit` ×29 |
-| 6-pass kinsn + prefetch: above + `prefetch` | 7 | 542 | 510 | 32 | **94.1 %** | kernel `failed_rejit` ×32 |
+| 5-pass kop: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 7 | 542 | 513 | 29 | **94.6 %** | kernel `failed_rejit` ×29 |
+| 6-pass kop + prefetch: above + `prefetch` | 7 | 542 | 510 | 32 | **94.1 %** | kernel `failed_rejit` ×32 |
 | All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` *(partial — 4 / 7 apps)* | 4 | 44 | 0 | 44 | **0.0 %** | `bpfopt_failed[const_prop]` ×44 — bpfopt-level bug, kernel ReJIT not reached for that pass |
 
 Findings:
@@ -269,8 +289,8 @@ Findings:
   loaded) whose kernel re-verification fails even when the bytecode is
   unchanged. This sets a per-program success ceiling of ~75 % that is
   independent of which transform is run.
-- Optimization conditions with non-trivial transforms (5-pass kinsn,
-  6-pass kinsn + prefetch, prefetch) report **higher** all-passes-ok
+- Optimization conditions with non-trivial transforms (5-pass kop,
+  6-pass kop + prefetch, prefetch) report **higher** all-passes-ok
   rates (94–97 %) than the `noop` controls (75 %). The reason: when a
   transform pass returns `skipped_missing_states` (no candidate found
   / verifier state absent), that is counted as `ok`, which absorbs
@@ -356,8 +376,8 @@ pass coverage run produces.
 | `noop` SKIP_REJIT | 0.9836 | 1.0281 | 0.9783 | 0.9957 | 1.1023 | 0.9042 | 0.7888 | **0.8587** | 147 |
 | `noop` + `map_inline` | 1.0097 | 1.0118 | 0.9728 | 0.9915 | **0.6567** | 1.0256 | 0.8150 | 0.8943 | 148 |
 | `prefetch` | 1.0154 | 0.9895 | — (wrk timed out) | 0.9963 | **0.7186** | 1.0175 | 0.8112 | 0.8880 | 142 |
-| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.9896 | 1.0117 | 0.9951 | 0.9639 | 0.9891 | 1.0783 | 0.8171 | 0.9074 | 147 |
-| 6-pass kinsn + prefetch: above + `prefetch` | 1.0289 | 1.0165 | 1.0066 | 0.9423 | 1.0056 | 1.0468 | 0.8067 | 0.9009 | 147 |
+| 5-pass kop: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.9896 | 1.0117 | 0.9951 | 0.9639 | 0.9891 | 1.0783 | 0.8171 | 0.9074 | 147 |
+| 6-pass kop + prefetch: above + `prefetch` | 1.0289 | 1.0165 | 1.0066 | 0.9423 | 1.0056 | 1.0468 | 0.8067 | 0.9009 | 147 |
 | All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | 1.0659 | 1.0155 | 0.9813 | 0.9807 | **0.4713** | 1.0064 | 0.8115 | *pending* | 148 |
 
 ### Findings
@@ -420,8 +440,8 @@ Per-app throughput metric:
 | `noop` SKIP_REJIT | 1.043 | 1.040 | 1.071 | 1.001 | 0.992 | 1.268 | 0.919 |
 | `noop` + `map_inline` | 0.809 | 0.913 | 1.040 | 1.004 | 0.997 | 1.279 | 1.144 |
 | `prefetch` | 1.191 | 0.913 | — | 1.006 | 0.989 | 0.766 | 0.818 |
-| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.925 | 1.093 | 0.940 | 0.995 | 1.001 | 1.242 | 1.051 |
-| 6-pass kinsn + prefetch: above + `prefetch` | 1.126 | 1.058 | 0.969 | 1.013 | 1.001 | 0.977 | 1.139 |
+| 5-pass kop: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 0.925 | 1.093 | 0.940 | 0.995 | 1.001 | 1.242 | 1.051 |
+| 6-pass kop + prefetch: above + `prefetch` | 1.126 | 1.058 | 0.969 | 1.013 | 1.001 | 0.977 | 1.139 |
 | All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | 0.949 | 1.048 | 1.046 | 0.986 | 0.995 | 1.028 | 0.982 |
 
 How to read this:
@@ -447,7 +467,7 @@ How to read this:
 `bytes_xlated` (verifier-translated BPF bytecode) per program. We sum
 across all programs in each app and report `post / baseline`. `< 1.0`
 means ReJIT shrunk total program size; `> 1.0` means ReJIT added code
-(e.g., `prefetch` inserts extra `bpf_prefetch` calls; kinsn passes
+(e.g., `prefetch` inserts extra `bpf_prefetch` calls; kop passes
 replace inlined sequences with kfunc calls that are slightly larger
 in raw bytecode but lower at the machine-code level).
 
@@ -458,16 +478,16 @@ in raw bytecode but lower at the machine-code level).
 | `noop` ReJIT | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | `noop` + `map_inline` | 1.000 | 1.000 | 1.006 | 1.000 | 0.994 | 1.000 | 0.999 |
 | `prefetch` | 1.001 | 1.005 | — | 1.000 | 1.008 | 1.003 | 1.003 |
-| 5-pass kinsn: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 1.021 | 1.015 | 1.013 | 1.001 | 1.001 | 1.009 | 0.999 |
-| 6-pass kinsn + prefetch: above + `prefetch` | 1.022 | 1.020 | 1.018 | 1.001 | 1.008 | 1.011 | 1.002 |
+| 5-pass kop: `rotate, cond_select, extract, endian_fusion, bulk_memory` | 1.021 | 1.015 | 1.013 | 1.001 | 1.001 | 1.009 | 0.999 |
+| 6-pass kop + prefetch: above + `prefetch` | 1.022 | 1.020 | 1.018 | 1.001 | 1.008 | 1.011 | 1.002 |
 | All bytecode-rewriting: `noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec` | 0.997 | 0.974 | 0.966 | 0.951 | 0.985 | 0.995 | 0.999 |
 
 Reading the table:
 
 - `noop` ReJIT: 1.000 everywhere by definition (no transform). Acts as
   the integrity check.
-- `prefetch` and kinsn rows sit slightly **above** 1.0: every applied
-  prefetch adds a `bpf_prefetch` call site; kinsn passes replace 2-4
+- `prefetch` and kop rows sit slightly **above** 1.0: every applied
+  prefetch adds a `bpf_prefetch` call site; kop passes replace 2-4
   inlined BPF instructions with one kfunc call (BTF-typed). The kfunc
   call is larger in `bytes_jited` even though the in-kernel emitter
   (`KFUNC_INLINE_EMIT`) lowers it back to a single x86 `MOVBE` /
@@ -488,7 +508,7 @@ Reading the table:
 
 - improve map inline to make it actaully inline more; fix the 0 % apply rate in 5 of 7 apps (e.g. katran). We can fix it by allowing user provide map content and does not require the map key is const.
 - check more details about otel and tracee's improvement. Is it benchmark framework issue or actual improvement?
-- Why kinsn does not work well? Need futher investigation.
+- Why kop does not work well? Need futher investigation.
    - analysis each prog, check source code and disasm.
 - Sometimes kernel panic still exists.
 
@@ -502,7 +522,7 @@ Reading the table:
 |---|---:|---:|---:|---:|
 | loader test (no `reals` hint) | 10 / 67 | 26 / 168 | 61 / 61 | 2542 → 2454 |
 | **loader test + `--inline-hint=reals:!01000000`** | **16 / 67** | **30 / 150** | **65 / 65** | **2542 → 2391** |
-| **corpus daemon** | **16 / 67** | **30 / 150** | **65 / 65** | **2542 → 2391** |
+| **historical corpus path** | **16 / 67** | **30 / 150** | **65 / 65** | **2542 → 2391** |
 
 Loader's six previously-skipped sites (PC 1041, 1311, 1524, 1702, 1746, 2018) all
 target `reals` lookups; adding `--inline-hint=reals:!01000000` aligns loader to
@@ -545,7 +565,7 @@ corpus byte-for-byte.
 
 min 25.7 ns / median 438.5 ns / mean 693.7 ns / max 7816 ns.
 
-### Pass yaml log_level (corpus daemon orchestration)
+### Historical pass YAML log level
 
 | pass yaml | log_level | meaning |
 |---|---:|---|

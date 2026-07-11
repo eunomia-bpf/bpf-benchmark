@@ -1,5 +1,10 @@
 # Userspace speculative re-optimization design
 
+> **历史迁移分析（2026-07-10 标记）**：本文写于 daemon→userspace shim
+> 迁移之前,其中 `daemon/src/*`、fork-only syscall 和 runner 限制描述仅解释
+> 当时的设计选择。当前实现已采用 `bpfopt/shim/` 的 load-time plan 与
+> running-process reload/reattach;以 `bpfopt/shim/README.md` 为准。
+
 本文评估把当前 in-place `BPF_PROG_REJIT` 路径改成纯 userspace speculative re-optimization:
 
 1. daemon 在程序加载时捕获原始 bytecode 和 load 属性。
@@ -47,7 +52,7 @@ verifier 会在 load 流程中修改指令流。证据:
 - 随后调用 `security_bpf_prog_load()`，再进入 `bpf_check()`: `vendor/linux-framework/kernel/bpf/syscall.c:3084-3090`。
 - verifier 后半段明确标注 “instruction rewrites happen after this point”，然后执行 dead-code rewrite、ctx access conversion 和 misc fixups: `vendor/linux-framework/kernel/bpf/verifier.c:26481-26502`。
 - `convert_ctx_accesses()` 会插入 prologue/nospec/ctx rewrite 指令并调用 `bpf_patch_insn_data()`: `vendor/linux-framework/kernel/bpf/verifier.c:22815-22904`。
-- `do_misc_fixups()` 是“post-verification rewrites”，会 patch helper、ALU、kinsn 等: `vendor/linux-framework/kernel/bpf/verifier.c:23703-23810`。
+- `do_misc_fixups()` 是“post-verification rewrites”，会 patch helper、ALU、kop 等: `vendor/linux-framework/kernel/bpf/verifier.c:23703-23810`。
 - `bpf_patch_insn_data()` 和 `verifier_remove_insns()` 会真正替换/删除指令并维护 aux data: `vendor/linux-framework/kernel/bpf/verifier.c:22347-22377`, `vendor/linux-framework/kernel/bpf/verifier.c:22558-22587`。
 
 当前 daemon 通过自定义布局绕过这个限制:
@@ -213,7 +218,7 @@ The runner starts the daemon, sends a socket JSON request, and then measures bas
 - daemon socket path is fixed in runner: `runner/libs/rejit.py:259-283`。
 - `_daemon_request()` sends newline-delimited JSON over Unix socket: `runner/libs/rejit.py:308-337`。
 - `apply_daemon_rejit()` validates prog ids, builds `execute_plan`, sends request, returns daemon response: `runner/libs/rejit.py:340-390`。
-- `build_execute_plan_payload()` sends `{cmd:"execute_plan", programs:[{prog_id, steps}], kinsn_probes}`: `runner/libs/rejit_plan.py:95-130`。
+- `build_execute_plan_payload()` sends `{cmd:"execute_plan", programs:[{prog_id, steps}], kop_probes}`: `runner/libs/rejit_plan.py:95-130`。
 - corpus driver baseline samples old prog ids, applies daemon ReJIT, then post phase samples `result.state.prog_ids`: `corpus/driver.py:576-582`, `648-654`, `680-686`。
 
 ### 如果不改 runner，userspace swap 会破坏计数
@@ -252,32 +257,32 @@ userspace swap 后需要新的 raw schema 或兼容映射:
 - struct_ops: scx 已排除；其他 7-app 不使用。struct_ops link update 是 map-level，不是单个 BPF program replacement。
 - 无 attach 的 helper prog、unreachable prog、或 app 内部保留 fd 但没有 link/map/cgroup/socket attach metadata 的 prog 无法切流。
 
-### 与 kinsn 的配合
+### 与 kop 的配合
 
-当前 kinsn-class pass 不是“用普通 BPF 指令重写，然后 kernel JIT 自己识别”。它们显式输出 fork-only kinsn pseudo instructions:
+当前 kop-class pass 不是“用普通 BPF 指令重写，然后 kernel JIT 自己识别”。它们显式输出 fork-only kop pseudo instructions:
 
-- `bpfopt` 定义 `BPF_PSEUDO_KINSN_SIDECAR = 3` 和 `BPF_PSEUDO_KINSN_CALL = 4`: `bpfopt/crates/bpfopt/src/insn.rs:57-66`。
-- `call_kinsn_with_off()` 生成 `src_reg = BPF_PSEUDO_KINSN_CALL`，`imm = BTF func id`，`off = fd_array/BTF module slot`: `bpfopt/crates/bpfopt/src/insn.rs:453-469`。
-- `kinsn_sidecar()` 生成紧邻 call 的 payload pseudo-insn: `bpfopt/crates/bpfopt/src/insn.rs:541-555`。
-- `emit_packed_kinsn_call_with_off()` 固定输出 sidecar + call 两条指令: `bpfopt/crates/bpfopt/src/insn.rs:642-653`。
-- `ProgramCFG::kinsn_emit()` 是所有 kinsn pass 的 helper，直接调用上述 emit: `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:625-642`。
-- rotate/cond_select/extract/endian_fusion/prefetch 等 pass 都声明 kinsn targets 并调用 `prog.kinsn_emit()`: `bpfopt/crates/bpfopt/src/passes/rotate.rs:5-26`, `cond_select.rs:11-37`, `extract.rs:5-21`, `endian.rs:5-50`, `prefetch.rs:12-23`。
-- pass YAML 也要求 `--target ${TARGET}` 和 kinsn names: `runner/config/passes/rotate/default.yaml:5-12`, `cond_select/default.yaml:5-14`, `extract/default.yaml:5-10`, `endian_fusion/default.yaml:5-19`。
+- `bpfopt` 定义 `BPF_PSEUDO_KOP_SIDECAR = 3` 和 `BPF_PSEUDO_KOP_CALL = 4`: `bpfopt/crates/bpfopt/src/insn.rs:57-66`。
+- `call_kop_with_off()` 生成 `src_reg = BPF_PSEUDO_KOP_CALL`，`imm = BTF func id`，`off = fd_array/BTF module slot`: `bpfopt/crates/bpfopt/src/insn.rs:453-469`。
+- `kop_sidecar()` 生成紧邻 call 的 payload pseudo-insn: `bpfopt/crates/bpfopt/src/insn.rs:541-555`。
+- `emit_packed_kop_call_with_off()` 固定输出 sidecar + call 两条指令: `bpfopt/crates/bpfopt/src/insn.rs:642-653`。
+- `ProgramCFG::kop_emit()` 是所有 kop pass 的 helper，直接调用上述 emit: `bpfopt/crates/bpfopt/src/analysis/bbprogram.rs:625-642`。
+- rotate/cond_select/extract/endian_fusion/prefetch 等 pass 都声明 kop targets 并调用 `prog.kop_emit()`: `bpfopt/crates/bpfopt/src/passes/rotate.rs:5-26`, `cond_select.rs:11-37`, `extract.rs:5-21`, `endian.rs:5-50`, `prefetch.rs:12-23`。
+- pass YAML 也要求 `--target ${TARGET}` 和 kop names: `runner/config/passes/rotate/default.yaml:5-12`, `cond_select/default.yaml:5-14`, `extract/default.yaml:5-10`, `endian_fusion/default.yaml:5-19`。
 
-kernel-side kinsn support is a separate patch from REJIT:
+kernel-side kop support is a separate patch from REJIT:
 
-- fork UAPI adds `BPF_PSEUDO_KINSN_SIDECAR` and `BPF_PSEUDO_KINSN_CALL`: `vendor/linux-framework/include/uapi/linux/bpf.h:1380-1393`; stock `vendor/libbpf/include/uapi/linux/bpf.h` has no such symbols (`rg BPF_PSEUDO_KINSN` only hits `vendor/linux-framework`).
-- verifier recognizes kinsn calls: `vendor/linux-framework/kernel/bpf/verifier.c:275-279`。
-- verifier resolves kinsn BTF descriptors and rejects unregistered/incomplete kinsns: `vendor/linux-framework/kernel/bpf/verifier.c:3440-3550`。
+- fork UAPI adds `BPF_PSEUDO_KOP_SIDECAR` and `BPF_PSEUDO_KOP_CALL`: `vendor/linux-framework/include/uapi/linux/bpf.h:1380-1393`; stock `vendor/libbpf/include/uapi/linux/bpf.h` has no such symbols (`rg BPF_PSEUDO_KOP` only hits `vendor/linux-framework`).
+- verifier recognizes kop calls: `vendor/linux-framework/kernel/bpf/verifier.c:275-279`。
+- verifier resolves kop BTF descriptors and rejects unregistered/incomplete koperation: `vendor/linux-framework/kernel/bpf/verifier.c:3440-3550`。
 - verifier lowers proof regions before full check and restores them afterwards: `vendor/linux-framework/kernel/bpf/verifier.c:3707-3784`, `26392-26472`。
-- non-JITed programs reject kinsn calls: `vendor/linux-framework/kernel/bpf/verifier.c:23430-23439`。
-- x86/arm64 JITs inline native kinsn emit callbacks: `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:579-602`, `2524-2535`; `vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c:1201-1228`, `1638-1648`。
+- non-JITed programs reject kop calls: `vendor/linux-framework/kernel/bpf/verifier.c:23430-23439`。
+- x86/arm64 JITs inline native kop emit callbacks: `vendor/linux-framework/arch/x86/net/bpf_jit_comp.c:579-602`, `2524-2535`; `vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c:1201-1228`, `1638-1648`。
 
 Implication:
 
-- 如果“stock kernel”严格表示 upstream 无 kinsn patch，则 kinsn-class pass 不能用于 userspace candidate load；candidate 会含 stock kernel 不认识的 pseudo src_reg。
-- 如果保留 kinsn patch（用户背景中的目标），`BPF_PROG_LOAD` 可以成为 kinsn candidate 的 verifier/JIT 入口，而且当前 UAPI/verifier 已经支持 load-time `fd_array`。当前 `call_kinsn_with_off()` 的注释把 `off` 定义为 load/REJIT `fd_array` slot: `bpfopt/crates/bpfopt/src/insn.rs:453-458`；verifier 中 kfunc/kinn offset > 0 会从 `env->fd_array` 读取 BTF fd: `vendor/linux-framework/kernel/bpf/verifier.c:3289-3294`。需要确认目标 stock+kinsn kernel 保留这套 load-time fd_array 语义；否则只能使用 vmlinux-resident kinsn 或把 kinsn modules 注册成 vmlinux-visible IDs。
-- 非 kinsn bytecode rewriting pass（`wide_mem`, `map_inline`, `const_prop`, `dce`, `bounds_check_merge`, `skb_load_bytes_spec`, `branch_flip`）更适合 userspace path，因为它们输出普通 BPF bytecode。
+- 如果“stock kernel”严格表示 upstream 无 kop patch，则 kop-class pass 不能用于 userspace candidate load；candidate 会含 stock kernel 不认识的 pseudo src_reg。
+- 如果保留 kop patch（用户背景中的目标），`BPF_PROG_LOAD` 可以成为 kop candidate 的 verifier/JIT 入口，而且当前 UAPI/verifier 已经支持 load-time `fd_array`。当前 `call_kop_with_off()` 的注释把 `off` 定义为 load/REJIT `fd_array` slot: `bpfopt/crates/bpfopt/src/insn.rs:453-458`；verifier 中 kfunc/kinn offset > 0 会从 `env->fd_array` 读取 BTF fd: `vendor/linux-framework/kernel/bpf/verifier.c:3289-3294`。需要确认目标 stock+kop kernel 保留这套 load-time fd_array 语义；否则只能使用 vmlinux-resident kop 或把 kop modules 注册成 vmlinux-visible IDs。
+- 非 kop bytecode rewriting pass（`wide_mem`, `map_inline`, `const_prop`, `dce`, `bounds_check_merge`, `skb_load_bytes_spec`, `branch_flip`）更适合 userspace path，因为它们输出普通 BPF bytecode。
 
 ### Paper 故事的收窄和卖点
 
@@ -286,7 +291,7 @@ Implication:
 userspace path 的新故事应改为:
 
 - “userspace speculative reoptimizer for live eBPF”: candidate 必须先通过 stock `BPF_PROG_LOAD` verifier；失败只记录错误，不影响 live traffic。
-- “minimal kernel surface”: 去掉 `BPF_PROG_REJIT`、`orig_prog_insns` 暴露和相关 kernel syscall patch；可选保留小型 kinsn JIT emit patch。
+- “minimal kernel surface”: 去掉 `BPF_PROG_REJIT`、`orig_prog_insns` 暴露和相关 kernel syscall patch；可选保留小型 kop JIT emit patch。
 - “state-preserving replacement”: candidate 复用原 map object，保留 app state；切流通过 kernel 已有 attach/link/map update primitive。
 - “attachment-aware, not universal”: paper 必须诚实说明 replacement coverage 受 attach type 限制。网络类 XDP/TCX/PROG_ARRAY 最强；perf/tracing/security 类目前主要是 limitation。
 - “measurement impact is first-class”: 因为 candidate 有新 prog id，benchmark framework/analysis 必须处理 logical id mapping；这不是实现细节，而是 methodology change。

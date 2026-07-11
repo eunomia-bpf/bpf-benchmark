@@ -1,5 +1,9 @@
 # BpfReJIT Paper Story
 
+> **已淘汰（2026-07-10）**：本文的 kernel patch、daemon、in-place
+> `BPF_PROG_REJIT` 与 40%/50% 数字属于旧架构,不能用于当前 speculative
+> 论文。当前 story hub 是 `docs/rejit-speculative-optimization-ebpf_idea.md`。
+>
 > 本文档从 `rejit-speculative-optimization-ebpf.md` 提取论文叙事相关内容，聚焦 principle、story 结构和证据链。
 > 不含任务追踪、编辑规则等工程信息。
 
@@ -49,7 +53,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 
 > 类似微内核将机制与策略分离，BpfReJIT 将 JIT 编译分为两个关注点：
 >
-> - **内核组件**（最小化，~550 行代码（不含注释））：通过轻量级内核模块为每个平台定义**"什么能被优化"**——平台特定的指令定义，包含验证语义和 native 发射回调（**kinsn**）。这是**机制**。
+> - **内核组件**（最小化，~550 行代码（不含注释））：通过轻量级内核模块为每个平台定义**"什么能被优化"**——平台特定的指令定义，包含验证语义和 native 发射回调（**kop**）。这是**机制**。
 > - **用户态 daemon**（完整功能）：通过编译 pass 定义**"如何优化"**——基于静态分析、平台能力和运行时 profiling 数据（类似 JVM 的动态 JIT 重编译 + PGO）。这是**策略**。
 >
 > 新优化 = 新 module + daemon 更新，零内核改动。这是让 LLVM pass 基础设施成功的可扩展性模型，现在应用到 OS 内核。
@@ -78,10 +82,10 @@ BpfReJIT 的设计基于三个层次的 insight：
 - 增加和修改内核 BPF syscall 功能，允许**获取 BPF bytecode**（`BPF_PROG_GET_ORIGINAL`）和**重新验证编译一个 BPF 程序并原地替换**（`BPF_PROG_REJIT`）。
 - REJIT 接受**完整的新 BPF bytecode**（不是 patch）→ 内核运行完整的 `bpf_check()` + JIT → 在同一个 `struct bpf_prog` 上原子替换 image。
 
-**组件 2：kinsn —— 平台特定指令扩展机制**（内核源码改动，Patch 2 + 内核模块）
-- 允许注册 **kinsn**：一种为平台特定指令或扩展定义验证语义并让 JIT 发射它们的方式。
-- **实现**：kinsn 复用已有的 kfunc 基础设施：新的 `KF_INLINE_EMIT` flag 使 JIT 调用 module 提供的 emit 回调，而不是生成普通函数调用。复用了 kfunc 已有的 verifier 验证、BTF 类型系统和 module 生命周期管理。
-- 最小内核模块为每个平台定义 kfunc 风格的 kinsn，包含验证函数和 JIT emit 函数（x86、arm64 等）。
+**组件 2：kop —— 平台特定指令扩展机制**（内核源码改动，Patch 2 + 内核模块）
+- 允许注册 **kop**：一种为平台特定指令或扩展定义验证语义并让 JIT 发射它们的方式。
+- **实现**：kop 复用已有的 kfunc 基础设施：新的 `KF_INLINE_EMIT` flag 使 JIT 调用 module 提供的 emit 回调，而不是生成普通函数调用。复用了 kfunc 已有的 verifier 验证、BTF 类型系统和 module 生命周期管理。
+- 最小内核模块为每个平台定义 kfunc 风格的 kop，包含验证函数和 JIT emit 函数（x86、arm64 等）。
 
 **组件 3：用户态 daemon**
 - 监控/profiling 内核中的 eBPF 程序
@@ -171,20 +175,20 @@ BpfReJIT 的设计基于三个层次的 insight：
 
 ### 3.1 性能优化变换
 
-| 变换 | kinsn? | 状态 | 说明 |
+| 变换 | kop? | 状态 | 说明 |
 |------|:---:|:---:|------|
 | **WIDE_MEM** | 否 | ✅ | byte load+shift+or → 已有 BPF wide load 指令。占 kernel surplus 50.7% |
-| **ROTATE** | 是 | ✅ | shift+or → `bpf_rotate64()` kinsn → JIT emit RORX |
-| **COND_SELECT** | 是 | ✅ | branch+mov → `bpf_select64()` kinsn → JIT emit CMOV。policy-sensitive |
-| **BITFIELD_EXTRACT** | 是 | ✅ | shift+and → `bpf_extract64()` kinsn → JIT emit BEXTR |
+| **ROTATE** | 是 | ✅ | shift+or → `bpf_rotate64()` kop → JIT emit RORX |
+| **COND_SELECT** | 是 | ✅ | branch+mov → `bpf_select64()` kop → JIT emit CMOV。policy-sensitive |
+| **BITFIELD_EXTRACT** | 是 | ✅ | shift+and → `bpf_extract64()` kop → JIT emit BEXTR |
 | **BRANCH_FLIP** | 否 | ✅ | if/else body 重排。policy-sensitive：依赖 PGO |
-| **ENDIAN_FUSION** | 可选 | ✅ | load+bswap → combined kinsn → JIT emit MOVBE |
+| **ENDIAN_FUSION** | 可选 | ✅ | load+bswap → combined kop → JIT emit MOVBE |
 | **Dynamic map inlining** | 否 | 🔄 | Paper benchmark 模型：snapshot once → inline → ReJIT → measure；不做 production invalidation polling |
 | **Verifier const prop** | 否 | 🔄 设计完成 | `log_level=2` → tnum/range 常量 → `MOV imm` → branch folding |
 | **DCE** | 否 | 🔄 设计完成 | const prop / map inline 后的 unreachable block / dead store 消除 |
 | **Bounds check merge** | 否 | ✅ | guard window merge / hoisting |
-| **128-bit LDP/STP** | 是 | ✅ 设计完成 | **ARM64**：相邻 load/store pair → LDP/STP kinsn |
-| **Bulk memory kinsn** | 是 | ✅ | `rep movsb/stosb` (x86) / `LDP/STP` (ARM64) |
+| **128-bit LDP/STP** | 是 | ✅ 设计完成 | **ARM64**：相邻 load/store pair → LDP/STP kop |
+| **Bulk memory kop** | 是 | ✅ | `rep movsb/stosb` (x86) / `LDP/STP` (ARM64) |
 | **Helper call specialization** | 否/可选 | ✅ | `skb_load_bytes → direct packet access` |
 | **Subprog inline** | 否 | ✅ 调研完成 | REJIT 元数据 blocker |
 | **Tail-call specialization** | 否 | ✅ 调研完成 | dynamic-key PIC，kernel poke_tab blocker |
@@ -193,7 +197,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 
 | 变换 | 状态 | 说明 |
 |------|:---:|------|
-| **Spectre 缓解注入** | ⏸ | 当前没有 in-tree barrier kinsn module |
+| **Spectre 缓解注入** | ⏸ | 当前没有 in-tree barrier kop module |
 | **危险 helper 防火墙** | ✅ | 分级策略：P0 fail-closed，P1 coarseify，audit-only |
 | **BPF 程序漏洞热修复** | ✅ | null-guard / helper 参数净化 / packet pointer refresh / tail-call isolation |
 | **权限收紧** | ✅ 调研完成 | D⊇S⊇N⊇O 模型 |
@@ -226,14 +230,14 @@ BpfReJIT 的设计基于三个层次的 insight：
 │                                                              │
 │  BPF_PROG_REJIT          → 接受完整新 BPF bytecode            │
 │    │  bpf_check()        → 完整 re-verify（标准路径）          │
-│    │  bpf_int_jit_compile() → re-JIT（含 kinsn 展开）         │
+│    │  bpf_int_jit_compile() → re-JIT（含 kop 展开）         │
 │    │  image swap         → 原子替换 JIT image（同一 struct     │
 │    │                       bpf_prog，零 attach 变化）          │
 │    └  fail → 什么都不改，返回 verifier log                     │
 │                                                              │
-│  Component 2: kinsn — Platform-Specific Instruction Modules  │
+│  Component 2: kop — Platform-Specific Instruction Modules  │
 │  Defines "WHAT CAN be optimized" — per-platform capabilities │
-│    Implementation: kinsn via KF_INLINE_EMIT                  │
+│    Implementation: kop via KF_INLINE_EMIT                  │
 │    → verifier: check_kfunc_call()（零改动）                   │
 │    → JIT: emit 自定义 native 序列（而非 CALL）                 │
 │    → fallback: emit 普通 CALL（module 未加载时）               │
@@ -247,7 +251,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 1. BPF_PROG_GET_NEXT_ID      → 枚举所有 live BPF 程序
 2. BPF_PROG_GET_ORIGINAL      → 拿原始 bytecode + map_ids + prog_type
 3. 分析 + 重写                 → 生成完整的新 BPF bytecode
-                                 （可含 kinsn 调用，如 bpf_rotate64）
+                                 （可含 kop 调用，如 bpf_rotate64）
 4. BPF_PROG_REJIT(prog_fd,   → kernel: re-verify → re-JIT → image swap
      new_insns, new_insn_cnt)    失败 → 返回错误 + verifier log，原程序不受影响
 ```
@@ -265,11 +269,11 @@ Correctness（daemon 负责）：
   daemon 有 bug → 程序行为可能变 → 但内核安全不受影响（fail-safe）
 ```
 
-### 4.4 kinsn 机制
+### 4.4 kop 机制
 
-**kinsn** 是 BpfReJIT 引入的平台特定指令扩展机制。kinsn IS-A kfunc，额外绑定 `bpf_kinsn_ops`，定义**执行语义**（JIT emit）和**验证语义**（verifier modeling）。
+**kop** 是 BpfReJIT 引入的平台特定指令扩展机制。kop IS-A kfunc，额外绑定 `bpf_kop_ops`，定义**执行语义**（JIT emit）和**验证语义**（verifier modeling）。
 
-**核心设计**：module 同时定义 "emit 什么 native 指令" 和 "verifier 如何建模这条指令"。verifier 不需要 per-kinsn 特例代码。新增 kinsn = 新 module，零 verifier 改动。
+**核心设计**：module 同时定义 "emit 什么 native 指令" 和 "verifier 如何建模这条指令"。verifier 不需要 per-kop 特例代码。新增 kop = 新 module，零 verifier 改动。
 
 ---
 

@@ -1,6 +1,9 @@
 # bpfopt-suite 设计文档 v3
 
-> 本文档自包含，是 bpfopt-suite v3 的权威设计。实现和其它文档必须与这里保持一致。
+> **已淘汰（2026-07-10）**：本文记录已删除的
+> `bpfrejit-daemon` + fork-only `BPF_PROG_REJIT` 架构,仅用于历史追溯。
+> 当前规范是 `CLAUDE.md` 的 Stock-Kernel Shim Architecture 与
+> `bpfopt/shim/README.md`;不得按本文恢复 daemon 或项目私有 syscall。
 
 ## 1. Overview
 
@@ -9,7 +12,7 @@ bpfopt-suite v3 的稳定边界是：
 - `bpfopt`：standalone pure bytecode CLI，只做 `struct bpf_insn[]` init canonicalization 和单 pass 变换；一次 pass invocation 只跑一个 `--pass <name>`。
 - `bpfrejit-daemon`：runner socket + JSON 边界，负责 live discovery、runner 提供 pass list 的 per-pass orchestration、minimal fd-array 构造、每个 pass 后的 `BPF_PROG_REJIT` acceptance。
 
-`bpfverify`、`bpfrejit`、`bpfprof`、`bpfget`、`kernel-sys` crate 和 daemon thin dry-run module 均已删除。daemon 不调用 `BPF_PROG_LOAD`，不重建 `LoadAttr`，不传 `func_info` / `line_info` / `attach_btf_obj_fd`。所有 program metadata 由 kernel 在 `BPF_PROG_REJIT` 内从原 live `prog->aux` 复用；daemon 只提交新 bytecode、从 `prog_info.used_maps` 打开的 map fd，以及 kinsn module call 所需的 BTF module fd。
+`bpfverify`、`bpfrejit`、`bpfprof`、`bpfget`、`kernel-sys` crate 和 daemon thin dry-run module 均已删除。daemon 不调用 `BPF_PROG_LOAD`，不重建 `LoadAttr`，不传 `func_info` / `line_info` / `attach_btf_obj_fd`。所有 program metadata 由 kernel 在 `BPF_PROG_REJIT` 内从原 live `prog->aux` 复用；daemon 只提交新 bytecode、从 `prog_info.used_maps` 打开的 map fd，以及 kop module call 所需的 BTF module fd。
 
 工具列表：
 
@@ -50,7 +53,7 @@ bpfopt list-passes
 1. runner 发 socket JSON。
 2. daemon snapshot live program，并调用 `bpfopt --canonicalize-map-refs --map-ids ...` 把原始 bytecode 中的 map references canonicalize 为 `BPF_PSEUDO_MAP_IDX(_VALUE)`。
 3. daemon 写 `prog.bin`、`info.json`、可选 `map-values.json`、可选 `target.json` side files。
-4. daemon 从 `target.json` 打开非 vmlinux kinsn 的 BTF module fd，从 `prog_info.map_ids` 打开 map fd，构造 in-memory `fd_array`。
+4. daemon 从 `target.json` 打开非 vmlinux kop 的 BTF module fd，从 `prog_info.map_ids` 打开 map fd，构造 in-memory `fd_array`。
 5. 对 runner 请求中的 `enabled_passes` 逐个执行：
    - fork+exec `bpfopt --pass <name>`，stdin/stdout 传 raw `struct bpf_insn[]`。
    - daemon 立即调用 `daemon/src/syscall.rs` 内的 `prog_rejit()`，传当前 pass 输出、包含所需 BTF module fd 和 map fd 的 fd_array、large verifier log buffer。
@@ -66,7 +69,7 @@ bpfopt list-passes
 ### 2.2 ReJIT Metadata Ownership
 
 1. **零 reconstruction**：daemon 不从字节码反推 map/BTF/attach context，不重建 relocation，不拼 `LoadAttr`。
-2. **只传 minimal fd_array**：daemon 对 `target.json` 中 `call_offset > 0` 的 kinsn BTF module ID 逐个 `BPF_BTF_GET_FD_BY_ID`，并对 `prog_info.used_maps` / `map_ids` 逐个 `BPF_MAP_GET_FD_BY_ID`。fd_array 只包含这些 BTF module fd 和 map fd，不写 `fd_array.json` / `map_fds.json`。
+2. **只传 minimal fd_array**：daemon 对 `target.json` 中 `call_offset > 0` 的 kop BTF module ID 逐个 `BPF_BTF_GET_FD_BY_ID`，并对 `prog_info.used_maps` / `map_ids` 逐个 `BPF_MAP_GET_FD_BY_ID`。fd_array 只包含这些 BTF module fd 和 map fd，不写 `fd_array.json` / `map_fds.json`。
 3. **不传 BTF metadata**：daemon 不传 `func_info`、`line_info`、`attach_btf_obj_fd` 给任何 syscall。`ProgramSnapshot` 不保存这些 bytes，不做 BTF normalize/replay。
 4. **snapshot-time map canonicalization**：daemon 只在 snapshot 后通过 `bpfopt --canonicalize-map-refs --map-ids ...` 做一次 map pseudo 归一化。`PSEUDO_MAP_FD` / `PSEUDO_MAP_VALUE` 根据原始 bytecode first-seen loader fd 顺序映射到 `prog_info.map_ids` index；IDX forms 在可获得 loader fd_array 时重新校准，否则按 map_ids 顺序校验保留。后续 per-pass ReJIT 不再做 fd rewrite。
 5. **无 verifier-state side input**：`map_inline` / `const_prop` 不再接受 verifier-state 文件；所有 pass 都直接走当前字节码的 LLVM/O3 round trip，然后立即由 ReJIT acceptance 决定是否提交。
@@ -112,7 +115,7 @@ live discovery 是 daemon 内部职责。职责限于 snapshot live BPF program�
 - `BPF_PROG_GET_ORIGINAL` 读取原始 bytecode。
 - `BPF_OBJ_GET_INFO_BY_FD` 读取 `prog_info` 和 `map_ids`。
 - `BPF_MAP_GET_FD_BY_ID` 打开 used maps 并读取 map metadata/value snapshot。
-- target probing 为 `bpfopt --target` 生成 kinsn capability JSON。
+- target probing 为 `bpfopt --target` 生成 kop capability JSON。
 
 `ProgramSnapshot` 不包含 BTF `func_info` / `line_info` bytes，不做 BTF normalize，不做 map relocation 反向解析，不做 resolved kernel pointer rewrite。
 
@@ -139,7 +142,7 @@ daemon 是事件源 + runner socket boundary + kernel syscall orchestrator。
 - 不做 thin dry-run。
 - 不传或 normalize/replay BTF func_info/line_info。
 - 不做 per-pass pseudo-map fd rewrite；snapshot 后只通过 bpfopt canonicalize 一次为 map-index form。
-- 不传无关 BTF fd；只把当前 target kinsn call 实际需要的 BTF module fd 塞进 ReJIT fd_array。
+- 不传无关 BTF fd；只把当前 target kop call 实际需要的 BTF module fd 塞进 ReJIT fd_array。
 
 ### 3.5 Daemon syscall.rs
 
@@ -171,11 +174,11 @@ stdin/stdout 是 raw binary `struct bpf_insn[]`，无 header、无 framing。文
 
 daemon 构造 in-memory `fd_array`：
 
-- 如果新 bytecode 可能包含 module kinsn call，daemon 从 `target.json.kinsns[*].call_offset` 收集 `call_offset > 0` 的 BTF module IDs；`call_offset=0` 表示 vmlinux，不需要 fd。
-- Kernel verifier 对 module kfunc/kinsn call 使用 `fd_array[CALL.off]`，而 `CALL.off=0` 保留给 vmlinux。
+- 如果新 bytecode 可能包含 module kop call，daemon 从 `target.json.koperation[*].call_offset` 收集 `call_offset > 0` 的 BTF module IDs；`call_offset=0` 表示 vmlinux，不需要 fd。
+- Kernel verifier 对 module kfunc/kop call 使用 `fd_array[CALL.off]`，而 `CALL.off=0` 保留给 vmlinux。
 - map fd 按 `prog_info.used_maps` / `map_ids` 顺序打开，放在 fd_array 开头；canonical `PSEUDO_MAP_IDX` imm 直接索引这个 map fd 前缀。
 - module BTF fd 放在 map fd 之后。daemon 会把写给 bpfopt 的 target.json module `call_offset` 平移到 map fd 前缀之后；如果没有 map 但存在 module BTF fd，则 `fd_array[0]` 放第一个 module BTF fd 的 duplicate placeholder。
-- 没有 kinsn module BTF 且没有 map 时传空 fd_array。
+- 没有 kop module BTF 且没有 map 时传空 fd_array。
 - 不写 JSON，不传无关 fd，不做 BTF `func_info` / `line_info` replay。
 
 ## 5. Failure Semantics

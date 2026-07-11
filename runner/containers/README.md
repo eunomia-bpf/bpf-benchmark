@@ -8,8 +8,8 @@ Current policy:
    is a precompiled artifact image consumed by the runtime build.
 2. The Dockerfiles own the user-space build graph.
 3. The runtime Dockerfile copies only the source groups needed by each layer:
-   stable app artifacts, kernel/kinsn artifacts, bpftool and native C++/BPF/test
-   artifacts, Rust daemon artifacts, then runtime Python/config/corpus data.
+   stable app artifacts, kernel/kop artifacts, bpftool and native C++/BPF/test
+   artifacts, the C shim and `bpfopt` CLI, then runtime Python/config/corpus data.
    Build-only make rules, source trees, Go/Rust toolchain files, and common
    CMake/Cargo/test intermediates are removed after their artifacts are produced.
 4. `runner/mk/build.mk` keeps the outer host entrypoints for `docker build`,
@@ -26,7 +26,7 @@ Current policy:
    privileged container with the full host root bind-mounted.
 8. Runtime containers use the image workspace directly. They must not
    bind-mount the host repository over that path.
-9. Kinsn modules are inside the runner image. Runtime containers must not
+9. KOperation modules are inside the runner image. Runtime containers must not
    bind-mount host `module/` over the image workspace.
 10. Remote runners load and run this image directly; they do not mirror suite
    source trees or require a directory-sync tool for result collection.

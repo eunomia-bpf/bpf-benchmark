@@ -1,172 +1,121 @@
 # bpfrejit-shim
 
-Minimal LD_PRELOAD shim that intercepts BPF-related syscalls in target apps.
-Foundation for the shim-only userspace speculative optimization architecture
-documented in `docs/tmp/poc_c_bpf_syscall_shim_design.md` and (eventually)
-`docs/tmp/poc_c_v2_shim_only_design.md`.
+`libbpfrejit_shim.so` is the kernel-facing component of the active
+stock-kernel speculative-optimization path. It runs inside the real upstream
+application process, intercepts BPF-related syscalls, preserves loader-owned
+state, executes runner-supplied `bpfopt` plans, and submits optimized bytecode
+through the ordinary `BPF_PROG_LOAD` verifier/JIT path.
 
-## Phase 1 (this directory, current state)
+There is no `bpfrejit-daemon` and no project-specific ReJIT syscall in the
+active architecture.
 
-Observation only. Intercepts `syscall(SYS_bpf, ...)`, `perf_event_open(2)`, and
-`ioctl(2)` on perf_event fds. For each `BPF_PROG_LOAD` it:
+## Responsibilities
 
-- decodes attr (prog_type, name, insn_cnt, license, attach metadata),
-- computes an FNV-1a 64-bit hash of the bytecode,
-- dumps the raw bytecode to `${BPFREJIT_SHIM_DIR:-/tmp}/bpfrejit_<pid>_<hash>.bpf`,
-- logs every call to `${BPFREJIT_SHIM_LOG:-/tmp/bpfrejit_shim.log}` with both
-  pre-call attributes and the post-call return value/errno.
+The shim intercepts `syscall(SYS_bpf, ...)`, `perf_event_open(2)`, `ioctl(2)`,
+`close(2)`, and the netlink operations needed to observe program attachment.
+For each application-loaded program it retains the original bytecode and the
+load, map, link, perf-event, raw-tracepoint, program-array, and XDP state needed
+to optimize the program without replacing the upstream loader.
 
-The shim passes through to the real syscall unchanged. The target app sees no
-behavior difference.
+The runner remains the policy owner. It reads
+`runner/config/passes/<pass>/default.yaml` and gives the shim an ordered list
+of opaque commands. The shim substitutes its runtime variables, executes each
+command with `LD_PRELOAD` removed from the child environment, and treats
+`bpfopt` output as a candidate only after the stock kernel accepts it.
 
-### Build & smoke
+`bpfopt` remains a pure bytecode CLI. It does not own application file
+descriptors and does not issue BPF syscalls.
 
-```bash
-make            # builds libbpfrejit_shim.so + selftest
-make smoke      # LD_PRELOAD against bpftool prog list, asserts log non-empty
-make selftest-run  # synthetic BPF_PROG_LOAD, asserts bytecode dump matches
-```
+## Two Execution Paths
 
-`make selftest-run` works without root. The `BPF_PROG_LOAD` call will fail with
-EPERM (no CAP_BPF), but the shim's interception and bytecode capture path
-exercises completely. The selftest asserts the dumped `.bpf` file is exactly
-16 bytes (2 × `sizeof(struct bpf_insn)`), confirming the intercepted attr
-pointed at the correct bytecode.
+### Load-time plan
 
-### Environment variables
+When `BPFREJIT_SHIM_LOADTIME_PLAN` is set, the shim intercepts each normal
+`BPF_PROG_LOAD`, canonicalizes its map references, runs the configured passes,
+probes verifier acceptance, and substitutes the accepted bytecode into that
+same load operation. Reports are appended to
+`BPFREJIT_SHIM_LOADTIME_REPORTS`.
 
-| variable | default | purpose |
-|---|---|---|
-| `BPFREJIT_SHIM_LOG` | `/tmp/bpfrejit_shim.log` | append-only structured log |
-| `BPFREJIT_SHIM_DIR` | `/tmp` | dir for per-load bytecode dumps |
+The current corpus comparison uses this path. It runs and stops a baseline
+application, then starts the same upstream application again with the
+load-time plan enabled. Consequently, corpus results from this path are
+load-time specialization results, not evidence of an in-place live swap.
 
-## Empirical per-app coverage
+### Running-process execute plan
 
-| App | Binary | Result |
-|---|---|---|
-| `bpftrace` | glibc dyn | ✅ Captured |
-| `bcc/*-bpfcc` | py+libbcc glibc | ✅ Captured |
-| `tracee` | **musl** dyn | ✅ Captured (use `libbpfrejit_shim_musl.so`) |
-| `katran` | glibc dyn | ✅ Shim loads (needs real workload to exercise BPF) |
-| `tetragon` | **static** Go | ❌ LD_PRELOAD impossible; see PoC-E vendor-replace |
-| `cilium-agent` | **static** Go | ❌ same |
+Each shim instance exposes a per-process Unix socket:
 
-**5 of 7 corpus apps reachable via stock LD_PRELOAD**. The 2 static Go
-binaries need the vendor-replace path documented in
-`docs/tmp/poc_e_vendor_replace_x_sys_design.md`.
-
-### Lessons learned
-
-- **musl-linked apps need a musl-built shim**. `make musl` builds it inside
-  an alpine container. Glibc shim into musl app fails with
-  `__snprintf_chk: symbol not found`.
-- **Don't wrap musl-target apps in glibc `timeout(1)`**. `timeout` itself
-  inherits `LD_PRELOAD`, fails to load the musl shim, and segfaults before
-  forking the target. Use bash background-pid + `sleep N && kill -TERM`.
-- **Forward all 6 syscall args via `va_arg`** even for short-arg syscalls.
-  x86_64 sysv ABI puts syscall args in registers, so reading 6 longs always
-  works.
-- **Skip `<sys/ioctl.h>`** — glibc and musl have conflicting signatures.
-  Include only `<linux/ioctl.h>` for IOC macros and self-declare the function.
-
-## Phase 2 (active — app-level shim socket, runner-driven)
-
-The shim is a **dumb shell executor** for BPF apps launched under
-`LD_PRELOAD`:
-
-- the **runner** parses `runner/config/passes/<pass>/default.yaml` and ships
-  pass steps to the shim over the socket
-- the **shim** substitutes shim-owned vars (`${INPUT}`, `${OUTPUT}`,
-  `${REPORT}`, `${PROG_ID}`, `${PROG_HASH}`, `${PROG_TYPE}`, `${WORKDIR}`,
-  `${TARGET}`) and runs `/bin/sh -c <command>` with `LD_PRELOAD` stripped
-  from the subprocess env (so bpfopt is not itself shimmed)
-
-The shim ships **no** auto-tick / hardcoded pass logic. Optimization is
-runner-driven over the socket; the shim is responsible only for interception
-+ state tracking + executing whatever shell command the runner sends.
-
-### Socket — app-level plan
-
-Each shim instance binds a per-pid unix socket:
-
-```
+```text
 ${BPFREJIT_SHIM_SOCK_DIR:-/var/run/bpfrejit}/shim-<pid>.sock
 ```
 
-Line-delimited JSON. Commands:
+The `execute_plan` request runs passes against programs already tracked by the
+shim. For every changed candidate, `reload_and_reattach()` performs a stock
+`BPF_PROG_LOAD` and then updates each captured attachment using the applicable
+stock-kernel mechanism. Implemented mechanisms include `BPF_LINK_UPDATE`, link
+recreation, `BPF_PROG_ATTACH` replacement, perf-event replacement, raw
+tracepoint reopen, program-array updates, and XDP netlink reattachment.
+
+A verifier rejection leaves the old program installed. A partial attachment
+replacement is reported as `RELOAD_PARTIAL_ATTACH`; it is not silently treated
+as success. Results should be described as live-swap results only when their
+lifecycle record shows this path was used.
+
+## Socket Protocol
+
+Requests and responses are newline-delimited JSON. The main commands are:
 
 ```json
-// list_progs — enumerate all tracked BPF programs
-{"cmd": "list_progs"}
-// → {"ok": true, "progs": [{"id": <kernel_prog_id>, "name": "...",
-//                            "type": <prog_type>, "insn_cnt": ...,
-//                            "hash": "...", "bytecode_path": "..."}]}
-
-// execute_plan — run runner-supplied pass steps against every tracked prog
-{"cmd": "execute_plan",
- "steps": [{"name": "noop",
-            "command": "bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
-            "log_level": 1}]}
-// → {"status": "ok", "per_program": {"4669": {"status": "ok", "passes": [...]}}}
-
-// dump_state — write state JSON to disk and return path
-{"cmd": "dump_state"}
-// → {"ok": true, "path": "/tmp/dumps/state_<pid>.json"}
+{"cmd":"list_progs"}
+{"cmd":"dump_state"}
+{"cmd":"execute_plan","steps":[{"name":"noop","command":"bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}","log_level":1}]}
 ```
 
-The runner is expected to enumerate `${BPFREJIT_SHIM_SOCK_DIR}/shim-*.sock`
-or use a small `bpfrejit-router` process at the existing daemon path
-`/var/tmp/bpfrejit-daemon.sock` that routes by `app_pid` (see
-`docs/tmp/poc_c_v2_shim_only_design.md` §6 / Socket Plan A). Routing is out
-of scope for this directory.
+The runner enumerates the per-process sockets directly. The removed daemon
+socket `/var/tmp/bpfrejit-daemon.sock` is not part of the current protocol.
 
-### What Phase 2 in this directory does NOT yet do
+## Environment
 
-- Submit a candidate `BPF_PROG_LOAD` with rewritten bytecode (the bpfopt
-  output exists on disk but is not re-loaded into the kernel).
-- Apply per-attach swap recipes (`BPF_LINK_UPDATE`,
-  `PERF_EVENT_IOC_SET_BPF` with detach-and-reopen, `BPF_MAP_UPDATE_ELEM` for
-  PROG_ARRAY).
-- Emit `.swaps.jsonl` swap log mapping `logical_id ↔ {old, new}` prog ids.
-- Cover static Go binaries (tetragon, cilium-agent, otel-profiler). See
-  `docs/tmp/poc_e_vendor_replace_x_sys_design.md` for the planned
-  vendor-replace path.
-
-## Environment variables
-
-| variable | default | purpose |
+| Variable | Default | Purpose |
 |---|---|---|
-| `BPFREJIT_SHIM_LOG` | `/tmp/bpfrejit_shim.log` | append-only structured log |
-| `BPFREJIT_SHIM_DIR` | `/tmp` | dir for per-load bytecode dumps + workdirs |
-| `BPFREJIT_TARGET` | `x86` | substituted as `${TARGET}` in runner commands |
-| `BPFREJIT_SHIM_PERIODIC_DUMP_MS` | `0` | periodic state JSON dump (0=off) |
-| `BPFREJIT_SHIM_SOCK_DIR` | `/var/run/bpfrejit` | per-pid socket dir |
-| `BPFREJIT_SHIM_SOCK_DISABLE` | (unset) | set to `1` to disable socket server |
+| `BPFREJIT_SHIM_LOG` | `/tmp/bpfrejit_shim.log` | Structured shim log |
+| `BPFREJIT_SHIM_DIR` | `/tmp` | Bytecode dumps and work directories |
+| `BPFREJIT_SHIM_SOCK_DIR` | `/var/run/bpfrejit` | Per-process socket directory |
+| `BPFREJIT_SHIM_SOCK_DISABLE` | unset | Disable the socket server when set to `1` |
+| `BPFREJIT_SHIM_LOADTIME_PLAN` | unset | Runner-generated load-time plan JSON |
+| `BPFREJIT_SHIM_LOADTIME_REPORTS` | unset | Load-time per-program report stream |
+| `KEEP_WORKDIRS` | unset | Preserve failure workdirs when set to `1` |
 
-Design references:
-- `docs/tmp/poc_c_bpf_syscall_shim_design.md` (v1: daemon + shim).
-- `docs/tmp/poc_c_v2_shim_only_design.md` (v2: shim-only, daemon eliminated).
-- `docs/tmp/poc_e_vendor_replace_x_sys_design.md` (Tier 4: static Go).
-- `docs/rejit-speculative-optimization-ebpf_idea.md` (idea #1 paper-line hub).
+Application runners select the appropriate injection mechanism for each of the
+six supported corpus applications. Do not infer current coverage from the
+binary's dynamic/static linkage alone; use the runner configuration and a
+recorded corpus lifecycle.
 
-## Non-goals (Phase 1 + Phase 2)
+## Build and Tests
 
-- Fully atomic swap. Microsecond-scale gap between detach and re-attach is
-  acceptable for benchmark measurement.
-- Preserving `prog_id` across swap. Stock `BPF_PROG_LOAD` always returns a new
-  id; the runner must merge counters via the logical-id mapping the shim
-  records.
-- Capturing programs loaded before the shim is installed. If the bytecode dump
-  for an existing `prog_id` is missing, that program is ineligible for
-  optimization in this lifetime.
-- Replacing upstream apps. The shim is loaded into the real upstream binary
-  (Tracee, Tetragon, Katran, Cilium, bpftrace, BCC, OTel) via `LD_PRELOAD` or
-  (for Go binaries) the planned vendor-replace path.
+Benchmark runs must use the root `make <target>` entrypoints. Component-local
+development targets are:
 
-## Files
+```bash
+make -C bpfopt/shim
+make -C bpfopt/shim selftest-run
+make -C bpfopt/shim host-selftest
+```
 
-| file | purpose |
+`host-selftest` requires the privileges documented in the component Makefile.
+
+## Source Map
+
+| File | Responsibility |
 |---|---|
-| `libbpfrejit_shim.c` | LD_PRELOAD library (intercept + state + execute_plan socket) |
-| `selftest.c` | synthetic-load PoC, exercises capture path without root |
-| `Makefile` | `all` / `musl` / `smoke` / `selftest-run` |
+| `libbpfrejit_shim.c` | Interposition entrypoints and captured application state |
+| `shim_loadtime.h` | Load-time plan execution and candidate `BPF_PROG_LOAD` |
+| `shim_execute_plan.h` | Per-process socket plan execution |
+| `shim_reload.h` | Running-process reload and attachment replacement |
+| `shim_snapshot.h` | Map/value and bytecode side-input preparation |
+| `shim_state.h` | Program, map, link, perf, and attachment state |
+| `shim_measure.h` | Raw measurement support |
+
+The paper-line design hub is
+`docs/rejit-speculative-optimization-ebpf_idea.md`. Historical daemon and early
+shim PoCs under `docs/tmp/` are background records, not current specifications.
