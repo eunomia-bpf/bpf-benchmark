@@ -1,0 +1,83 @@
+\documentclass[12pt]{article}
+\input{preamble}
+\newif\ifdraft
+% For final version, replace next line by \draftfalse
+\drafttrue %for draft version
+%\draftfalse
+
+\usepackage{xspace}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{makecell}
+% \usepackage{todonotes}
+\usepackage{enumitem}
+\usepackage{url}
+\usepackage{epsfig}
+\usepackage{savetrees}
+\usepackage{ulem}
+
+% \usepackage{tikz}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+% \usepackage{algorithm2e}
+\usepackage{listings}
+
+% \usetikzlibrary{arrows.meta,fit}
+% \tikzset{%
+%   >={Latex[width=2mm,length=2mm]},
+%   % Specifications for style of nodes:
+%             base/.style = {rectangle, rounded corners, draw=black,
+%                           minimum height=.8cm,
+%                           text centered},
+%   %activityStarts/.style = {base, fill=blue!30},
+%   %    startstop/.style = {base, fill=red!30},
+%   %  activityRuns/.style = {base, fill=green!30},
+%   %       process/.style = {base, minimum width=2.5cm, fill=orange!15,
+%   %                         font=\ttfamily},
+% }
+
+\newcommand{\ys}[1]{\ifdraft{\color{olive}\{YZ: #1\}}\fi}
+\newcommand{\arq}[1]{\ifdraft{\color{red}\{ARQ: #1\}}\fi}
+
+\newcommand{\sys}{\textsc{Squint}\xspace}
+\newcommand{\stt}[1]{\texttt{\small #1}\xspace}
+
+\algnewcommand{\LeftComment}[1]{\Statex \(\triangleright\) #1}
+
+\begin{document}
+
+\setcounter{page}{1}
+
+\begin{center}
+{\large Extending Extended Berkeley Packet Filters for LLM Serving Observability 
+\\
+Budget
+}
+\end{center}
+
+
+\noindent \textbf{PI.} Andi Quinn (Assistant Professor, UC Santa Cruz), Email: aquinn1@ucsc.edu, Address: 1156 High Street, Santa Cruz CA 95060
+
+\noindent \textbf{Grad Student Researcher.} Yusheng Zheng (Graduate Student, UC Santa Cruz), Email: yzhen165@ucsc.edu, Address: 1156 High Street, Santa Cruz CA 95060
+
+\vspace{2em}
+The PI requests \$50,000 for the proposed project.  The budget will be used to support a single graduate student researcher, Yusheng Zheng, for the duration of the project.  The current cost for a graduate student at UC Santa Cruz for the academic year 2025-2026 is \$71,510, consisting of \$44,971 for salary, \$2,572 for benefits, and \$23,967 for tuition and fees.  The PI will supplement the support providing by this research gift to provide full-time support for the graduate student researcher.
+
+
+% \input{thrust2.tex}
+% \input{evaluation.tex}
+% \input{education.tex}
+% \input{broader.tex}
+% \input{prior-nsf-results.tex}
+% \def\bibfont{\scriptsize}
+
+% \let\OLDthebibliography\thebibliography
+% \renewcommand\thebibliography[1]{
+%   \OLDthebibliography{#1}
+%   \setlength{\parskip}{0pt}
+%   \setlength{\itemsep}{0pt plus 0.3ex}
+% }
+%\bibliographystyle{natbib}
+
+
+\end{document}

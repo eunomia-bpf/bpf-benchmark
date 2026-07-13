@@ -1,0 +1,93 @@
+\usepackage[T1]{fontenc}
+\usepackage{verbatim}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage{booktabs}
+\usepackage{units}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+%\usepackage{fixltx2e}
+\usepackage{mathdots}
+\usepackage{graphicx}
+\usepackage{esint}
+\usepackage{color}
+\usepackage{wrapfig}
+\usepackage[margin=1in]{geometry}
+%\usepackage{natbib}
+
+\usepackage{multirow}
+\usepackage[table,xcdraw,dvipsnames]{xcolor}
+\usepackage{hyperref}
+\usepackage{doi}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.3} % need \usepackage{color}
+\hypersetup{colorlinks,breaklinks,
+  linkcolor=darkblue,urlcolor=darkblue,
+  anchorcolor=darkblue,citecolor=darkblue}
+
+% For \email{ADDRESS}, links ADDRESS to the url mailto:ADDRESS
+\providecommand*\email[1]{\href{mailto:#1}{#1}} % needs \usepackage{hyperref}
+\providecommand*\mytitle[1]{\begin{center}\Large \bf #1\end{center}}
+
+% customize the captions
+\usepackage[font={bf,it,small},labelsep=colon]{caption}
+% \usepackage[font=normalsize]{caption}
+%\usepackage[font=footnotesize]{subcaption} % seems to conflict with subfig
+
+\newcommand{\Matlab}{\textsc{Matlab}}
+
+% improve hyphenation
+\RequirePackage[english=usenglishmax]{hyphsubst}
+% squeeze space between letters
+%\usepackage{microtype}
+
+% Adjust section spacing and text
+% Provide a definition to \subparagraph to keep titlesec happy
+\let\subparagraph\paragraph
+\usepackage[compact]{titlesec}
+% usage: \titlespacing{command}{left}{before}{after}[right]
+% note: \titlespacing* is the same but kills the indent after the section
+% note: if section is a runin then {after} controls horizontal space after
+\titlespacing*{\section}{0pt}{5pt}{5pt}
+\titlespacing*{\subsection}{0pt}{5pt}{5pt}
+\titlespacing*{\subsubsection}{0pt}{1pt}{10pt}
+\titlespacing*{\paragraph}{0pt}{1pt}{10pt}
+\let\subparagraph\relax % You don't want to use \subparagraph
+%\titleformat*{\section}{\large\bfseries}
+%\titleformat*{\subsection}{\normalsize\bfseries}
+%\titleformat*{\subsubsection}{\normalsize\bfseries}
+%\titleformat*{\paragraph}{\small\bfseries}
+%\titleformat*{\subparagraph}{\small\bfseries}
+%% More compact titles
+% {<command>}[<shape>]{<format>}{<label>}{<sep>}{<before>}{<after>}
+\titleformat{\section}[hang]{\normalfont\bfseries\large}{\thesection}{5pt}{}[]
+%\titleformat{\subsection}[runin]{\normalfont\bfseries}{\thesubsection}{5pt}{}[:\quad]
+%\titleformat{\subsection}[runin]{\normalfont\bfseries\large}{\thesubsection}{5pt}{\normalfont\underline}[\quad]
+%\titleformat{\subsection}[runin]{\normalfont\bfseries\large}{\thesubsection}{5pt}{}[:]
+\titleformat{\subsection}[hang]{\normalfont\bfseries\large}{\thesubsection}{5pt}{}[]
+\titleformat{\subsubsection}[runin]{\normalfont\bfseries}{\thesubsubsection}{5pt}{}[.]
+\titleformat{\paragraph}[runin]{\normalfont\bfseries\small}{\theparagraph}{5pt}{}[]
+
+% used to change spacing around lists
+\usepackage{enumitem}
+%\setlist[itemize]{noitemsep,topsep=0pt,parsep=0pt,partopsep=0pt}
+\setlist[itemize]{leftmargin=7.5mm,noitemsep,topsep=0pt,parsep=0pt,partopsep=0pt}
+\setlist[enumerate]{noitemsep,topsep=0pt,parsep=0pt,partopsep=0pt}
+%\setlist[description]{noitemsep,topsep=0pt,parsep=0pt,partopsep=0pt}
+\setlist[description]{leftmargin=7.5mm,itemindent=-2.5mm,noitemsep,topsep=0pt,parsep=0pt,partopsep=0pt}
+
+% squeeze spacing around maths etc.
+\usepackage{setspace}%\onehalfspacing
+\AtBeginDocument{%
+\addtolength\abovedisplayskip{-0.2\baselineskip}%
+\addtolength\belowdisplayskip{-0.2\baselineskip}%
+\addtolength\abovedisplayshortskip{-0.2\baselineskip}%
+\addtolength\belowdisplayshortskip{-0.2\baselineskip}%
+}
+
+\usepackage{xcolor}
+\newcommand\crule[3][black]{\textcolor{#1}{\rule{#2}{#3}}}
+
+\newcommand{\eg}{{e.g.,}\xspace}
+\newcommand{\ie}{{i.e.,}\xspace}
+

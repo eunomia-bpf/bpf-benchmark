@@ -1,0 +1,105 @@
+\documentclass{article}
+\usepackage{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{fancyvrb}
+\usepackage[latin1]{inputenc}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+
+\newcommand*\proptitle{CAREER: Leveraging Everyday Usage of Programs to Eliminate Bugs}
+\pagestyle{fancy}
+\lhead{\proptitle}
+\rhead{}
+\renewcommand{\footrulewidth}{0.4pt}
+\lfoot{Baris Kasikci (University of Michigan)}
+\cfoot{}
+\rfoot{\thepage}
+% The NSF grant proposal guide is clear, margins must be 1 in on all sides.
+\geometry{verbose, papersize={8.5in,11in}, margin=1in, headheight=14pt}
+
+%\renewcommand{\baselinestretch}{0.90}
+
+%\renewcommand{\thepage}{J-\arabic{page}}
+
+\begin{document}
+\begin{center}
+\Large
+\bfseries
+Data Management Plan
+\end{center}
+
+\vspace{1em}
+
+In this document we discuss the types of data that will be produced, the format of the data, and how data will be disseminated and archived.
+
+\subsubsection*{Types of Data Produced}
+
+We expect that during the course of this project, data of various types will be
+produced:
+
+\begin{itemize}
+\item Project-specific web sites to provide an overview.
+
+\item Source code of research prototype software and corresponding
+  documentation.
+
+\item Data sets and test cases used to evaluate our prototypes.
+
+\item A bug database/framework that can be used to reproduce all the bugs in our study, to enable further studies by other researchers. This framework will use the container technology to facilitate reproduction of bugs in diverse environments.
+
+\item Academic conference papers, journal papers, workshop papers, and technical reports.
+
+\item Presentation materials prepared for the purpose of conference and workshop presentations as well as colloquium-style talks.
+
+\item Curriculum materials, including class-specific web sites.
+\end{itemize}
+
+We will make all of these publicly-available using open formats.
+
+\subsubsection*{Data Standards and Formats}
+
+We will use existing and non-proprietary data formats. In
+particular, we will make available all human-readable material in HTML and/or
+PDF formats, and source code in unencrypted text format on open platforms. For
+any custom data formats, we will release the full details of the data
+format.
+
+
+
+\subsubsection*{Data Access, Sharing, and Policies}
+
+All software and data developed under this project will be released under an
+open-source license. We will follow Mozilla's lead and, whenever
+possible, give the licensee the choice of one of the three following sets of free software/open
+source licensing terms: (i) Mozilla Public License, version 1.1 or later, (ii)
+GNU General Public License, version 2.0 or later, or (iii) GNU Lesser General
+Public License, version 2.1 or later.
+
+By pursuing a strategy of open-source licensing, we will enable the use of our
+resulting code and reproducibility of our results in as wide a variety of
+software projects as possible. We also set the stage to facilitate a widespread
+adoption/standardization of our technology, since the technology is created
+under licensing terms that the open-source community is already very familiar
+and comfortable with. We will also explore an open-source model in our collaboration with Microsoft, which has been publishing and developing many of their projects openly in the last few years.
+
+The real-world deployments of our bug reproduction system will gather data from users that opt to use our infrastructure. Such data (e.g., core dump contents) can contain private and sensitive information, and therefore will not be distributed. Instead, we will generate a large amount of synthetic data using our bug reproduction framework, which contains many heavily-used mature systems with extensive test suites that we will use in order to generate the data. 
+
+Any matters related to IP protection and patent disclosures will go through the standard procedures set by the University of Michigan's Office of Technology Licensing.
+
+
+\textbf{Institutional Review Board (IRB) Review.} We do not intend to involve human subjects, therefore none of the data that will be collected will be subject to an IRB review.
+
+
+\subsubsection*{Data Archiving and Preservation}
+
+We will strive to ensure long-term access to the data we generate. Wherever
+possible, this will be achieved by hosting data on established open-access
+repositories such as GitHub or BitBucket. Data will be retained for at least three years beyond the award period, as required by NSF guidelines. We will impose no restrictions on
+others wishing to replicate our data, except when prohibited by transfer of
+copyright to a publisher. When publishing papers, we will favor low-cost
+publishers such as the professional societies ACM and IEEE that provide
+reasonable online access to their respective digital libraries.
+
+\end{document}

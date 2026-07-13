@@ -1,0 +1,355 @@
+% Upper-case    A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+% Lower-case    a b c d e f g h i j k l m n o p q r s t u v w x y z
+% Digits        0 1 2 3 4 5 6 7 8 9
+% Exclamation   !           Double quote "          Hash (number) #
+% Dollar        $           Percent      %          Ampersand     &
+% Acute accent  '           Left paren   (          Right paren   )
+% Asterisk      *           Plus         +          Comma         ,
+% Minus         -           Point        .          Solidus       /
+% Colon         :           Semicolon    ;          Less than     <
+% Equals        =           Greater than >          Question mark ?
+% At            @           Left bracket [          Backslash     \
+% Right bracket ]           Circumflex   ^          Underscore    _
+% Grave accent  `           Left brace   {          Vertical bar  |
+% Right brace   }           Tilde        ~
+
+%
+% NSF Biographical Sketch: Dr. Theodore P. Pavlic
+%
+% Copyright (c) 2013 by Theodore P. Pavlic
+% All rights reserved.
+%
+
+\documentclass[svgnames,11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{times}
+\renewcommand\thesection{(\alph{section})}
+\renewcommand\thesubsection{(\alph{subsection})}
+
+\usepackage{calc}
+
+\usepackage{lastpage}
+%\newcommand{\pageoflastpage}{Page {\thepage} of \pageref*{LastPage}}
+%\newcommand{\pageoflastpage}{{\thepage} of \pageref*{LastPage}}
+\newcommand{\pageoflastpage}{}
+
+% Redefine the plain pagestyle for the title page
+\makeatletter
+\let\oldps@plain\ps@plain
+\renewcommand{\ps@plain}{\oldps@plain%
+\renewcommand{\@evenfoot}{\hfil\pageoflastpage\hfil}%
+\renewcommand{\@oddfoot}{\@evenfoot}}
+\makeatother
+
+% Use fancy for non-title pages
+\usepackage{fancyhdr}
+\fancyhead{}
+\fancyfoot{}
+\cfoot{\pageoflastpage}
+\pagestyle{fancy}
+
+\usepackage{xspace}
+
+\usepackage[shortlabels]{enumitem}
+\usepackage{graphicx}
+\usepackage{varioref}
+\usepackage[%
+        colorlinks=true,urlcolor=,
+        pdfpagelabels=true,hypertexnames=true,
+        plainpages=false,naturalnames=true,
+        ]{hyperref}
+%
+\usepackage{url}
+\newcommand\doilink[1]{\href{http://dx.doi.org/#1}{#1}}
+\newcommand\doi[1]{doi:\doilink{#1}}
+
+\makeatletter
+\newlength{\bibhang}
+\setlength{\bibhang}{1em}
+\newlength{\bibsep}
+ {\@listi \global\bibsep\itemsep \global\advance\bibsep by\parsep}
+\newlist{bibsection}{itemize}{3}
+\setlist[bibsection]{label=,leftmargin={\bibhang+\widthof{[9]}},%
+        itemindent=-\bibhang,
+        itemsep=\bibsep,parsep=\z@,partopsep=0pt,
+        topsep=0pt}
+\newlist{bibenum}{enumerate}{3}
+\setlist[bibenum]{label=\textbf{\arabic*.},leftmargin={\bibhang+\widthof{[999]}},%
+        itemindent=-\bibhang,
+        itemsep=\bibsep,parsep=\z@,partopsep=0pt,
+        topsep=0pt}
+\let\oldendbibenum\endbibenum
+\def\endbibenum{\oldendbibenum\vspace{-.6\baselineskip}}
+\let\oldendbibsection\endbibsection
+\def\endbibsection{\oldendbibsection\vspace{-.6\baselineskip}}
+\makeatother
+
+\title{%
+        \vspace{-2\baselineskip}
+            \normalsize
+            Biographical Sketch\\
+            {\large\textbf{Baris Kasikci}}\\
+            \vspace{0.5\baselineskip}
+            \hrule
+            \vspace{0.5\baselineskip}
+            EECS, University of Michigan,
+            e-mail: \href{mailto:barisk@umich.edu}{barisk@umich.edu},
+            tel: +1-734-763-1560
+        \vspace{-1.5ex}
+        }
+\date{}
+\author{}
+
+\hypersetup{%
+        pdfsubject={NSF Biographical Sketch of Baris Kasikci},
+        pdfauthor={Baris Kasikci},
+        pdftitle={NSF Biographical Sketch of Baris Kasikci},
+        pdfkeywords={}
+        }
+
+\newcommand{\ie}{i.e.\xspace}
+\newcommand{\eg}{e.g.\xspace}
+
+\begin{document}
+
+\maketitle
+\vspace{-4\baselineskip}
+
+\subsection{Professional Preparation}
+
+    Middle East Technical University, Ankara;
+        Electrical \& Electronics Engineering;
+        B.Sc., 2006
+        \\
+    Middle East Technical University, Ankara;
+        Electrical \& Electronics Engineering;
+        M.Sc., 2009
+        \\
+    \'Ecole Polytechnique F\'ed\'erale, Lausanne;
+        Computer Science;
+        Ph.D., 2015
+        \\
+    \'Ecole Polytechnique F\'ed\'erale, Lausanne;
+        Computer Science;
+        Postdoc, 2016
+
+
+\subsection{Appointments}
+
+\begin{itemize}[label={\quad 9999--9999:},leftmargin=*,itemsep=0pt]
+
+    \item[2017--present:]
+        \textbf{Assistant Professor},
+        EECS Department, University of Michigan, MI
+
+    \item[2010--2012:]
+        \textbf{Postdoctoral Researcher},
+        The Ohio State University,
+        Columbus, OH
+
+    \item[2002, 2003:]
+        \textbf{Hardware R\&D Intern},
+        National Instruments,
+        Austin, TX
+
+    \item[2001:]
+        \textbf{Core Systems Software Developer},
+        IBM Network Storage,
+        Research Triangle Park, NC
+
+    \item[1997--2001:]
+        \textbf{Information Technology Systems Engineer},
+        CallTech Communications,
+        Columbus, OH
+
+    \item[1995--1997:]
+        \textbf{Web Developer},
+        MegaLinx Communications,
+        Dublin, OH
+
+\end{itemize}
+
+\subsection{Products}
+
+\begin{bibenum}[itemsep=5pt]
+
+    \item \textbf{Pavlic, T.P.}, S.~Wilson, G.P.~Kumar, and S.~Berman.
+        An enzyme-inspired approach to stochastic allocation of robotic
+        swarms around boundaries. In: \emph{Proceedings of the 16th
+        International Symposium on Robotics Research},
+        December 16--19. 2013. Accepted.
+
+    \item \textbf{Pavlic, T.P.}, and K.M.~Passino. Distributed and
+        cooperative task processing: Cournot oligopolies on a graph.
+        \emph{IEEE Transactions on Cybernetics}. 2013. In press.
+        \doi{10.1109/TCYB.2013.2271776}
+
+    \item Kumar, G.P., A.~Buffin, \textbf{T.P.~Pavlic}, S.C.~Pratt, and
+        S.M.~Berman. A stochastic hybrid system model of collective
+        transport in the desert ant \emph{Aphaenogaster cockerelli}. In:
+        \emph{Proceedings of the 16th International Conference on Hybrid
+        Systems: Communication and Control}, April 8--11,
+        2013.
+
+    \item \textbf{Pavlic, T.P.} Physical Stigmergy for decentralized
+        constrained optimization: an intelligent lighting example. In:
+        \emph{Proceedings of the 4th International Conference on
+        Cyber-Physical Systems}, April 8--11, 2013.
+        Poster abstract.
+
+    \item \textbf{Pavlic, T.P.}, S.~P.~Peddi, P.A.G.~Sivilotti, and B.W.~Weide.
+        Getting Out of the Way--Safety Verification without Compromise.
+        In: \emph{Proceedings of the 2012 IEEE/ACM Third International
+        Conference on Cyber-Physical Systems}, April
+        17--19, 2012. Poster abstract.
+
+    \item \textbf{Pavlic, T.P.}, and K.M.~Passino. Generalizing foraging theory
+        for analysis and design. \emph{The International Journal of
+        Robotics Research [Special Issue on Stochasticity in Robotics
+        and Bio-Systems Part 1]}. 30(5):505--523. 2011.
+        \doi{10.1177/0278364910396551}
+
+    \item \textbf{Pavlic, T.P.}, and K.M.~Passino. The sunk-cost effect as an
+        optimal rate-maximizing behavior. \emph{Acta Biotheoretica},
+        59(1):53--66. 2011. \doi{10.1007/s10441-010-9107-8}
+
+    \item \textbf{Pavlic, T.P.}, and K.M.~Passino. When rate maximization is
+        impulsive. \emph{Behavioral Ecology and Sociobiology},
+        64(8):1255--1265. August 2010. \doi{10.1007/s00265-010-0940-1}
+
+    \item \textbf{Pavlic, T.P.}, and K.M.~Passino. Foraging theory for
+        autonomous vehicle speed choice. \emph{Engineering Applications
+        of Artificial Intelligence}, 22:482--489, April 2009.
+        \doi{10.1016/j.engappai.2008.10.017}
+
+    \item Freuler, R.J., M.J.~Hoffmann, \textbf{T.P.~Pavlic}, J.M.~Beams,
+        J.P.~Radigan, P.K.~Dutta, J.T.~Demel, and E.D.~Justen.
+        Experiences with a Comprehensive Freshman Hands-On Course~--
+        Designing, Building, and Testing Small Autonomous Robots. In:
+        \emph{Proceedings of the 2003 American Society for Engineering
+        Education Annual Conference \& Exposition}, 2003.
+
+\end{bibenum}
+
+\subsection{Synergistic Activities}
+
+\begin{bibenum}[itemsep=4pt]
+
+    \item \textbf{Conference service:}
+        (i) Organizer and associate editor for invited session:
+        ``Correctness by Verification and Design'',
+        14\textsuperscript{th} IEEE Conference on Intelligent
+        Transportation Systems, Washington, DC, October
+        5--7, 2011.
+        (ii) Organizer for proposed mini-symposium: ``Optimization and
+        Rationality in Eusocial Insects'', 2013 Society for Mathematical
+        Biology Annual Meeting and Conference, Tempe, AZ,
+        June 10--13, 2013
+        (iii) Co-organizer for technical session: ``Complex Systems of
+        Social Insects in Research and Education'', 2013 Biomathematics
+        and Ecology: Education and Research, Arlington, VA,
+        October 11--13, 2013.
+
+    \item \textbf{University service:} Chair of committee for the
+        development of biomimicry and bio-inspired research and education
+        initiatives at Arizona State University, 2013.
+
+    \item \textbf{Community service:}
+        (i) As NSF GK-12 fellow, developed and implemented science
+        lessons for local inner-city public school, 2006--2007.
+        (ii) Recognized in \emph{Wired} magazine for OSS work Linux
+        Virtual Server project, 2000.
+
+    \item \textbf{Mentoring:}
+        (i) Founding faculty co-adviser for Interdisciplinary Complexity
+        Science Student Organization at Arizona State University, 2013.
+        (ii) Founding mentor of 2002 FIRST high-school robotics team
+        that received regional honor for inspiration in engineering,
+        Dublin, OH.
+        (iii) Founding mentor of 2001 FIRST LEGO League all-girls
+        middle-school robotics team, Columbus, OH
+
+    \item \textbf{Teaching:}
+        (i) Authored hundreds of pages of Creative-Commons-licensed
+        course material for courses in analog electronics and control
+        for undergraduate and graduate students, The Ohio State
+        University, 2007--2009.
+        (ii) Developed and implemented Electrical and Computer
+        Engineering undergraduate student design project on
+        retrofittable vehicle-to-vehicle communications system for
+        adaptive cruise control in mixed-traffic environments, The Ohio
+        State University, 2012.
+        (iii) Mathematical modeling guest lecturer, Research Strategies
+        for Animal Behavior, Arizona State University, 2013.
+
+\end{bibenum}
+
+\subsection{Collaborators \& Other Affiliations}
+
+\begin{bibsection}
+
+    \item \textbf{Collaborators and Co-Editors:}
+        \emph{The Ohio State University}:
+            Manas Agrawal;
+            Emrah Adamey;
+            Vijay Gadepally;
+            Arda Kurt;
+            Ashok K.~Krishnamurthy;
+            \"{U}mit \"{O}zg\"{u}ner;
+            Jaeyong Park;
+            Kevin M.~Passino;
+            Sai Prathyusha Peddi;
+            Keith A.~Redmill;
+            Paolo A.~G.~Sivilotti;
+            Michael Vernier;
+            Alan D.~Weide;
+            Bruce W.~Weide;
+        \emph{Arizona State University}:
+            Dieter Armbruster;
+            Spring Berman;
+            Aur{\'{e}}lie Buffin;
+            Hinsby Cadillo-Quiroz;
+            Luis Cisneros;
+            Paul Davies;
+            Jessica D.~Ebie;
+            James J.~Elser;
+            Georgios E.~Fainekos;
+            Jennifer Fewell;
+            Jon F.~Harrison;
+            Christal Johnson;
+            Yun Kang;
+            Yang Kuang;
+            Ganesh P.~Kumar;
+            Alex Nachman;
+            Susan Neuer;
+            Stephen C.~Pratt;
+            Hana Putnam;
+            Jason Raymond;
+            P.~Logan Rogers;
+            Takao Sasaki;
+            Zachary Shaffer;
+            Oyita Udiani;
+            Taylor Vance;
+            Sara Imari Walker;
+            Sean Wilson;
+        \emph{New Jersey Institute of Technology}:
+            Simon Garnier;
+            Chris Reid
+
+    \item \textbf{Graduate Advisers and Postdoctoral Sponsors:}
+        \emph{The Ohio State University}:
+            Kevin M.~Passino;
+            Paolo A.~G.~Sivilotti;
+        \emph{Arizona State University}:
+            Stephen C.~Pratt (Arizona State University)
+
+    \item \textbf{Thesis Adviser and Postgraduate-Scholar Sponsor:}
+        \emph{Undergraduate honors thesis students:}
+            Christal Johnson (Arizona State University).
+        Total graduate students: 0; Total postgraduate scholars: 0.
+
+
+\end{bibsection}
+
+\end{document}

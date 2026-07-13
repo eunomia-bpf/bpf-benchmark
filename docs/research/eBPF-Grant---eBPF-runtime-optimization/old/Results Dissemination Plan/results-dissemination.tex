@@ -1,0 +1,43 @@
+\documentclass{article}
+\usepackage{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{fancyvrb}
+\usepackage[latin1]{inputenc}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+
+\newcommand*\proptitle{Lightweight Record and Replay Debugging for Large-Scale IoT Systems}
+\pagestyle{fancy}
+\lhead{\proptitle}
+\rhead{}
+\renewcommand{\footrulewidth}{0.4pt}
+\lfoot{Baris Kasikci (University of Michigan), Saurabh Bagchi (Purdue University)}
+\cfoot{}
+\rfoot{\thepage}
+% The NSF grant proposal guide is clear, margins must be 1 in on all sides.
+\geometry{verbose, papersize={8.5in,11in}, margin=1in, headheight=14pt}
+
+%\renewcommand{\baselinestretch}{0.90}
+
+%\renewcommand{\thepage}{J-\arabic{page}}
+
+\begin{document}
+\begin{center}
+\Large
+\bfseries
+Results Dissemination Plan
+\end{center}
+The proposed research aims to explore lightweight record/replay debugging techniques for large scale IoT systems. The results of this research will include our proposed methodologies for such record and replay techniques, data gathered and analyzed with the purpose of debugging in-production software failures in IoT systems, as well as the source code for the prototype that will implement our ideas. Finally, we plan to evaluate our solutions using multiple metrics, including the runtime performance overhead incurred due to our recording techniques, the accuracy of the recorded and reconstructed program state, and the effectiveness of the approximate replay infrastructure. 
+
+The results of this research will be disseminated through a number of channels. 
+\begin{itemize}
+\item The primary avenue for dissemination will be through publication at the top conferences in the related areas; e.g. SOSP, OSDI, NSDI, PLDI, EuroSys, Usenix ATC, DSN, as well as prestigious journals; e.g. TOCS. 
+\item We will also disseminate our results through presentations and posters at conferences, invited talks at companies and other universities
+\item We will create a dedicated web site, hosted by the University of Michigan, with specific descriptions of the work done as part of this NSF-sponsored project. 
+\item We intend to make all our code and configuration files as well as our experimental data publicly available on online code-sharing platforms like GitHub. Our key goal is to enable other researchers to confirm and reproduce our findings and also to extend our work.
+\item	We intend to organize a workshop on the reliability of IoT systems, to be held in conjunction with a major systems conference (e.g. SOSP or OSDI), to foster in-depth discussions about this topic among researchers in the systems community. Given that the workshop will be held jointly with a major conference, we do not expect any costs associated with the event. 
+\end{itemize}
+
+\end{document}

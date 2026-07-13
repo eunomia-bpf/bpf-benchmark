@@ -1,0 +1,368 @@
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: not available (project website)
+% ABSTRACT: Cilium is an open-source eBPF-based networking, observability,
+%   and security solution for Kubernetes and other container orchestration platforms.
+% USED_FOR: Example of eBPF in production networking/observability/security
+@misc{cilium,
+  author       = {{Cilium Authors}},
+  title        = {{Cilium}: {eBPF}-based Networking, Observability, and Security},
+  howpublished = {\url{https://cilium.io}},
+  year         = {2024},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: not available (project repository)
+% ABSTRACT: Katran is Meta's high-performance layer-4 load balancer built on
+%   XDP/eBPF, serving production traffic at scale.
+% USED_FOR: Example of eBPF in production networking (load balancing)
+@misc{katran,
+  author       = {{Meta}},
+  title        = {Katran: A high performance layer 4 load balancer},
+  howpublished = {\url{https://github.com/facebookincubator/katran}},
+  year         = {2018},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: not available (project repository)
+% ABSTRACT: BCC is a toolkit for creating BPF-based Linux kernel tracing and
+%   performance analysis tools, providing C and Python frontends.
+% STATUS: unused
+@misc{bcc,
+  author       = {{IO Visor Project}},
+  title        = {{BCC}: Toolkit for {BPF}-based {Linux} Tracing and Performance Analysis},
+  howpublished = {\url{https://github.com/iovisor/bcc}},
+  year         = {2015},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: not available (project repository)
+% ABSTRACT: bpftrace is a high-level tracing language for Linux using eBPF,
+%   inspired by awk and DTrace.
+% STATUS: unused
+@misc{bpftrace,
+  author       = {{bpftrace Authors}},
+  title        = {bpftrace: High-level Tracing Language for {Linux}},
+  howpublished = {\url{https://github.com/bpftrace/bpftrace}},
+  year         = {2019},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: not available (project repository)
+% ABSTRACT: Tracee is Aqua Security's runtime security and forensics tool
+%   using eBPF to trace system events in Linux.
+% STATUS: unused
+@misc{tracee,
+  author       = {{Aqua Security}},
+  title        = {{Tracee}: Runtime Security and Forensics using {eBPF}},
+  year         = {2026},
+  howpublished = {\url{https://github.com/aquasecurity/tracee}},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: not available (LWN article)
+% ABSTRACT: LWN article describing sched_ext, the extensible scheduler class
+%   that allows BPF programs to implement scheduling policies.
+% USED_FOR: Example of eBPF in production scheduling
+@misc{sched_ext_lwn,
+  author       = {Jonathan Corbet},
+  title        = {The {extensible} scheduler class},
+  year         = {2023},
+  howpublished = {LWN.net, \url{https://lwn.net/Articles/922405/}},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: not available (LWN article)
+% ABSTRACT: LWN article describing KRSI (Kernel Runtime Security
+%   Instrumentation), a BPF-based LSM framework.
+% STATUS: unused
+@misc{krsi_lwn,
+  author       = {Jonathan Corbet},
+  title        = {{KRSI}---the other {BPF} security module},
+  year         = {2019},
+  howpublished = {LWN.net, \url{https://lwn.net/Articles/808048/}},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: not available (kernel source)
+% ABSTRACT: The Linux kernel's x86-64 BPF JIT compiler source code,
+%   translating verified BPF bytecode to native x86-64 machine code.
+% STATUS: unused
+@misc{linux_bpf_jit,
+  author       = {{Linux kernel contributors}},
+  title        = {{Linux} Kernel {BPF} {JIT} Compiler for x86-64},
+  year         = {2026},
+  howpublished = {\url{https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/x86/net/bpf_jit_comp.c}},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: not available (kernel documentation)
+% ABSTRACT: Official Linux kernel documentation for the eBPF verifier,
+%   describing its safety analysis and verification rules.
+% STATUS: unused
+@misc{verifier,
+  author       = {{Linux kernel contributors}},
+  title        = {{eBPF} Verifier},
+  year         = {2026},
+  howpublished = {\url{https://docs.kernel.org/bpf/verifier.html}},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: docs/reference/k2_sigcomm2021.pdf
+% ABSTRACT: K2 is a program-synthesis-based compiler that optimizes BPF bytecode
+%   programs for size and performance with formal correctness and safety guarantees.
+%   Achieves 6-26% size reduction and 1.36-55% lower latency vs clang output.
+% USED_FOR: Related work — prior eBPF optimizer that rewrites within the ISA before load
+@inproceedings{xu2021synthesizing,
+  author = {Xu, Qiongwen and Wong, Michael D. and Wagle, Tanvi and Narayana, Srinivas and Sivaraman, Anirudh},
+  title = {Synthesizing safe and efficient kernel extensions for packet processing},
+  year = {2021},
+  url = {https://anirudhsk.github.io/papers/k2_sigcomm.pdf},
+  doi = {10.1145/3452296.3472929},
+  booktitle = {SIGCOMM '21},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: docs/reference/merlin_asplos2024.pdf
+% ABSTRACT: Merlin is a multi-tier eBPF optimization framework using customized
+%   LLVM passes and bytecode rewriting for IR transformations, targeting both
+%   performance and code compactness.
+% USED_FOR: Related work — prior eBPF optimizer that rewrites within the ISA before load
+@inproceedings{mao2024merlin,
+  author = {Mao, Jinsong and Ding, Hailun and Zhai, Juan and Ma, Shiqing},
+  title = {Merlin: Multi-tier Optimization of eBPF Code for Performance and Compactness},
+  year = {2024},
+  url = {https://people.cs.umass.edu/~juanzhai/papers/asplos24.pdf},
+  doi = {10.1145/3620666.3651387},
+  booktitle = {ASPLOS '24},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: docs/reference/epso_ase2025.pdf
+% ABSTRACT: EPSO is a caching-based superoptimizer for BPF bytecode that
+%   offloads expensive superoptimization to an offline phase, collecting rewrite
+%   rules applied later via efficient matching. Achieves up to 68.87% size reduction
+%   and 6.60% average runtime reduction.
+% USED_FOR: Related work — prior eBPF optimizer that rewrites within the ISA before load
+@inproceedings{zhu2025epso,
+  author = {Zhu, Qian and Liu, Yuxuan and Zhu, Ziyuan and Liu, Shangqing and Bu, Lei},
+  title = {EPSO: A Caching-Based Efficient Superoptimizer for BPF Bytecode},
+  year = {2025},
+  url = {https://doi.org/10.1109/ASE63991.2025.00242},
+  booktitle = {ASE '25},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: docs/reference/jitterbug_osdi2020.pdf
+% ABSTRACT: Jitterbug is a framework for specifying and verifying BPF JIT
+%   compilers in the Linux kernel using Lean/Z3. Found and fixed 16 previously
+%   unknown bugs in the x86-32, x86-64, arm32, arm64, and riscv32 JITs.
+% USED_FOR: (1) Prior formal verification of JIT — does not extend the pipeline;
+%   (2) TCB hardening context — years of formal-methods work
+@inproceedings{nelson2020specification,
+  author = {Luke Nelson and Jacob Van Geffen and Emina Torlak and Xi Wang},
+  title = {Specification and Verification in the Field: Applying Formal Methods to {BPF} Just-in-Time Compilers in the Linux Kernel},
+  booktitle = {OSDI '20},
+  year = {2020},
+  url = {https://www.usenix.org/conference/osdi20/presentation/nelson},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: docs/reference/agni_cav2023.pdf
+% ABSTRACT: Agni proposes an automated method to verify the correctness of
+%   range analysis in the Linux kernel's eBPF verifier, generating verification
+%   conditions directly from the kernel C source. Found and fixed bugs in the verifier.
+% USED_FOR: (1) Prior formal verification of verifier — does not extend the pipeline;
+%   (2) TCB hardening context
+@inproceedings{vishwanathan2023verifying,
+  author = {Vishwanathan, Harishankar and Shachnai, Matan and Narayana, Srinivas and Nagarakatte, Santosh},
+  title = {Verifying the Verifier: eBPF Range Analysis Verification},
+  year = {2023},
+  url = {https://doi.org/10.1007/978-3-031-37709-9_12},
+  booktitle = {CAV '23},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: docs/reference/gershuni_pldi2019.pdf
+% ABSTRACT: Designs a sound static analyzer for eBPF using abstract interpretation,
+%   formalizing and improving the kernel verifier's safety analysis for memory safety,
+%   bounded execution, and valid helper usage.
+% USED_FOR: Citation for "the kernel verifier proves memory safety and termination"
+@inproceedings{gershuni2019simple,
+  author = {Gershuni, Elazar and Amit, Nadav and Gurfinkel, Arie and Narodytska, Nina and Navas, Jorge A. and Rinetzky, Noam and Ryzhyk, Leonid and Sagiv, Mooly},
+  title = {Simple and precise static analysis of untrusted Linux kernel extensions},
+  year = {2019},
+  url = {https://pldi19.sigplan.org/details/pldi-2019-papers/44/Simple-and-Precise-Static-Analysis-of-Untrusted-Linux-Kernel-Extensions},
+  doi = {10.1145/3314221.3314590},
+  booktitle = {PLDI '19},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: docs/reference/rex_atc2025.pdf
+% ABSTRACT: Rex enables writing kernel extensions in safe Rust, closing the
+%   "language-verifier gap" by enforcing safe Rust (no unsafe) and dropping
+%   the eBPF verifier. Rex extensions match eBPF performance.
+% USED_FOR: Related work — alternative approach that trusts the Rust toolchain
+%   instead of independent verifier checking
+@inproceedings{jia2025rex,
+  author = {Jinghao Jia and Ruowen Qin and Milo Craun and Egor Lukiyanov and Ayush Bansal and Minh Phan and Michael V. Le and Hubertus Franke and Hani Jamjoom and Tianyin Xu and Dan Williams},
+  title = {Rex: Closing the Language-Verifier Gap with Safe and Usable Kernel Extensions},
+  booktitle = {USENIX ATC '25},
+  year = {2025},
+  url = {https://www.usenix.org/conference/atc25/presentation/jia},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: docs/reference/bolt_cgo2019.pdf
+% ABSTRACT: BOLT is a post-link binary optimizer for data centers that uses
+%   hardware performance counters (PMU) to reorder code for improved I-cache
+%   and branch prediction. Achieves up to 8.0% speedup on large binaries.
+% USED_FOR: Related work — profile-guided binary optimization; no eBPF counterpart exists
+@inproceedings{panchenko2019bolt,
+  author = {Panchenko, Maksim and Auler, Rafael and Nell, Bill and Ottoni, Guilherme},
+  title = {{BOLT}: A Practical Binary Optimizer for Data Centers and Beyond},
+  year = {2019},
+  booktitle = {CGO '19},
+  url = {https://research.facebook.com/publications/bolt-a-practical-binary-optimizer-for-data-centers-and-beyond/},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: not available
+% ABSTRACT: Describes the development and formal verification of CompCert,
+%   a compiler from Clight to PowerPC assembly, proving semantic preservation
+%   using the Coq proof assistant.
+% STATUS: unused
+@article{leroy2009compcert,
+  author    = {Leroy, Xavier},
+  title     = {Formal Verification of a Realistic Compiler},
+  journal   = {Communications of the ACM},
+  volume    = {52},
+  number    = {7},
+  pages     = {107--115},
+  year      = {2009},
+  url       = {https://doi.org/10.1145/1538788.1538814},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: docs/reference/zheng_osdi2025.pdf
+% ABSTRACT: Presents bpftime, enabling safe and efficient userspace application
+%   extensions using eBPF-style programs, extending the eBPF model beyond the kernel.
+% USED_FOR: PI/student prior work — extending eBPF to new domains
+@inproceedings{zheng2025extending,
+  title={Extending Applications Safely and Efficiently},
+  author={Zheng, Yusheng and Yu, Tong and Yang, Yiwei and Hu, Yanpeng and Lai, Xiaozheng and Williams, Dan and Quinn, Andi},
+  booktitle={OSDI '25},
+  year={2025},
+  url={https://www.usenix.org/conference/osdi25/presentation/zheng-yusheng},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: docs/reference/yang_hcds2025.pdf
+% ABSTRACT: eGPU is the first framework extending eBPF programmability and
+%   observability to GPUs via dynamic PTX injection, enabling real-time GPU
+%   telemetry and eBPF-based instrumentation.
+% USED_FOR: PI/student prior work — extending eBPF to new domains (GPUs)
+@inproceedings{yang2025egpu,
+  title={eGPU: Extending eBPF Programmability and Observability to GPUs},
+  author={Yang, Yiwei and Yu, Tong and Zheng, Yusheng and Quinn, Andrew},
+  booktitle={HCDS '25},
+  year={2025},
+  url={https://camps.aptaracorp.com/ACM_PMS/PMS/ACM/HCDS25/10/13a8f7c0-0a7e-11f0-ada9-16bb50361d1f/OUT/hcds25-10.html},
+  doi={10.1145/3723851.3726984},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: not available
+% ABSTRACT: Presents OmniTable, a debugging approach that records hardware and
+%   software events to enable flexible post-hoc queries over program execution.
+% STATUS: unused (PI prior work, available for CV reference)
+@inproceedings {Quinn_2022_omnitable,
+  author = {Andi Quinn and Jason Flinn and Michael Cafarella and Baris Kasikci},
+  title = {Debugging the {OmniTable} Way},
+  booktitle = {OSDI '22},
+  year = {2022},
+  url = {https://www.usenix.org/conference/osdi22/presentation/quinn},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: not available
+% ABSTRACT: Sledgehammer uses cluster resources to accelerate debugging by
+%   exploring many hypotheses in parallel.
+% STATUS: unused (PI prior work, available for CV reference)
+@inproceedings {Quinn_2018_sledgehammer,
+  author = {Andi Quinn and Jason Flinn and Michael Cafarella},
+  title = {Sledgehammer: {Cluster-Fueled} Debugging},
+  booktitle = {OSDI '18},
+  year = {2018},
+  url = {https://www.usenix.org/conference/osdi18/presentation/quinn},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: not available
+% ABSTRACT: Addresses debugging challenges in FPGA/reconfigurable hardware,
+%   characterizing hardware bugs and proposing debugging techniques.
+% STATUS: unused (PI prior work, available for CV reference)
+@inproceedings{Ma_2022_bnw,
+  author = {Ma, Jiacheng and Zuo, Gefei and Loughlin, Kevin and Zhang, Haoyang and Quinn, Andi and Kasikci, Baris},
+  title = {Debugging in the brave new world of reconfigurable hardware},
+  year = {2022},
+  url = {https://doi.org/10.1145/3503222.3507701},
+  booktitle = {ASPLOS '22},
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: docs/reference/kops_arxiv2026.pdf
+% ABSTRACT: Kops is an extension interface for the eBPF pipeline that adds new
+%   native operations via kernel modules. Each operation has a proof sequence
+%   (checked by the stock verifier) and a native emit (proven equivalent via Lean 4).
+%   Seven hardware-idiom operations recover 42% of the eBPF-to-native gap on
+%   microbenchmarks (1.242x x86, 1.222x ARM64), improve Cilium/Katran throughput
+%   by up to 12%, and shrink native code by 12-23%.
+% USED_FOR: Primary prior work — Kops mechanism, characterization data (1.57x gap),
+%   preliminary results
+@misc{zheng2026kops,
+  author       = {Zheng, Yusheng and Ji, Zhengjie and Tao, Weichen and Sun, Hao and Zhang, Wei and Williams, Dan and Quinn, Andi},
+  title        = {Kops: Safely Extending the {eBPF} Compilation Pipeline with Native Operations},
+  year         = {2026},
+  howpublished = {arXiv preprint arXiv:2606.24213},
+  url          = {https://arxiv.org/abs/2606.24213}
+}
+
+% VERIFIED: 2026-07-13
+% REAL: yes
+% PDF: not available (GitHub project page)
+% ABSTRACT: EPASS is a 2025 eBPF Foundation-funded project that transforms eBPF
+%   programs at load time through verifier-cooperative instrumentation, targeting
+%   programmability (fixing false verifier rejections) and safety (runtime checks).
+%   Resolved 91% of previously rejected-but-safe programs.
+% USED_FOR: Related work — complementary project targeting programmability/safety
+%   within the ISA, whereas this proposal targets performance below the ISA
+@misc{huang2025epass,
+  author       = {Huang, Ryan},
+  title        = {{EPASS}: Enhancing Flexibility and Safety of {eBPF} Programs through Verifier-Cooperative Instrumentation},
+  year         = {2025},
+  howpublished = {eBPF Foundation Research Grant project, \url{https://github.com/OrderLab/ePass}}
+}

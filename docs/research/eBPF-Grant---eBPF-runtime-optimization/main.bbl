@@ -1,0 +1,66 @@
+\begin{thebibliography}{10}
+
+\bibitem{cilium}
+{Cilium Authors}.
+\newblock {Cilium}: {eBPF}-based networking, observability, and security.
+\newblock \url{https://cilium.io}, 2024.
+
+\bibitem{sched_ext_lwn}
+J.~Corbet.
+\newblock The {extensible} scheduler class.
+\newblock LWN.net, \url{https://lwn.net/Articles/922405/}, 2023.
+
+\bibitem{gershuni2019simple}
+E.~Gershuni, N.~Amit, A.~Gurfinkel, N.~Narodytska, J.~A. Navas, N.~Rinetzky,
+  L.~Ryzhyk, and M.~Sagiv.
+\newblock Simple and precise static analysis of untrusted linux kernel
+  extensions.
+\newblock In {\em PLDI '19}, 2019.
+
+\bibitem{huang2025epass}
+R.~Huang.
+\newblock {EPASS}: Enhancing flexibility and safety of {eBPF} programs through
+  verifier-cooperative instrumentation.
+\newblock eBPF Foundation Research Grant project,
+  \url{https://github.com/OrderLab/ePass}, 2025.
+
+\bibitem{mao2024merlin}
+J.~Mao, H.~Ding, J.~Zhai, and S.~Ma.
+\newblock Merlin: Multi-tier optimization of ebpf code for performance and
+  compactness.
+\newblock In {\em ASPLOS '24}, 2024.
+
+\bibitem{katran}
+{Meta}.
+\newblock Katran: A high performance layer 4 load balancer.
+\newblock \url{https://github.com/facebookincubator/katran}, 2018.
+
+\bibitem{nelson2020specification}
+L.~Nelson, J.~V. Geffen, E.~Torlak, and X.~Wang.
+\newblock Specification and verification in the field: Applying formal methods
+  to {BPF} just-in-time compilers in the linux kernel.
+\newblock In {\em OSDI '20}, 2020.
+
+\bibitem{vishwanathan2023verifying}
+H.~Vishwanathan, M.~Shachnai, S.~Narayana, and S.~Nagarakatte.
+\newblock Verifying the verifier: ebpf range analysis verification.
+\newblock In {\em CAV '23}, 2023.
+
+\bibitem{xu2021synthesizing}
+Q.~Xu, M.~D. Wong, T.~Wagle, S.~Narayana, and A.~Sivaraman.
+\newblock Synthesizing safe and efficient kernel extensions for packet
+  processing.
+\newblock In {\em SIGCOMM '21}, 2021.
+
+\bibitem{zheng2026kops}
+Y.~Zheng, Z.~Ji, W.~Tao, H.~Sun, W.~Zhang, D.~Williams, and A.~Quinn.
+\newblock Kops: Safely extending the {eBPF} compilation pipeline with native
+  operations.
+\newblock arXiv preprint arXiv:2606.24213, 2026.
+
+\bibitem{zhu2025epso}
+Q.~Zhu, Y.~Liu, Z.~Zhu, S.~Liu, and L.~Bu.
+\newblock Epso: A caching-based efficient superoptimizer for bpf bytecode.
+\newblock In {\em ASE '25}, 2025.
+
+\end{thebibliography}

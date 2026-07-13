@@ -1,0 +1,23 @@
+Overview:
+
+IoT systems are all around us, either in the forefront or in the background. IoT devices are increasingly deployed in mission-critical and life-critical applications---from industrial control systems to pharmaceutical drug production to smart agriculture. The reliability of such IoT systems is of paramount importance as failures in such critical systems might have dire consequences. This proposal involves providing system support for debugging failures that occur in IoT devices in the field. There are key characteristics of IoT systems that pose new challenges for post-deployment debugging. First, there is the constraint on resources available on each node, primarily, energy, computation, and memory. Second are the constraints on network resources connecting multiple nodes, such as, low bandwidth, high latency, and even periods of disconnected operation. Finally, there is the large scale of the networks and heterogeneity of the systems. This project's overarching goal is to develop effective and efficient record and replay techniques (a widely used post-deployment debugging technique for server-class systems) given the constraints of IoT systems. 
+
+Keywords: [Distributed Systems, Wireless Networks] [Application Services] [Reliability, Robustness] [Record and replay] IoT, Failure Diagnosis
+
+Intellectual merit
+
+In this proposed project, we seek to develop techniques for one form of post-deployment debugging of IoT systems, namely, record and replay. Record and replay has been successfully explored and adopted in traditional server systems, but these solutions broadly do not address the constraints and the requirements mentioned above. The project's overarching goal is to develop effective record/replay techniques given the constraints of IoT systems and leveraging the simpler code and execution patterns of IoT applications. The key contribution of this project will be the first system-wide record-and-replay technique for IoT systems. 
+
+Our research agenda will be structured around the following three thrusts:
+
+- Local Recording: In this thrust, we will develop lightweight techniques for recording control and data traces on each individual device. The recording will be geared toward typical software design patterns in IoT applications, such as (1) sense, compute, and send (2) receive, verify, and actuate.
+
+- Distributed Recording: In this thrust, we will develop techniques to record traces across multiple nodes, considering that nodes may be many in number but fall in a few functional equivalence classes. This will be used to partially aggregate and compress traces that are then communicated to a central server for replay.
+
+- Approximate Replay: In this thrust, we will develop methods to perform approximate replay with the collected traces. The key contributions will lie in (1) reconstructing as much of the execution state as possible using the recording infrastructure built in Thrusts 1 and 2, and (2) performing root cause diagnosis, including support for manual debugging, through the partially reconstructed traces.
+
+% techniques that determine what to record, when to record, how to transfer the trace, and the level of replay support (granularity, speed, fidelity, etc.).
+
+Broader impacts 
+
+The proposed project targets broader impacts on IoT systems that are critical in digital agriculture and manufacturing, through the resultant technology innovations and the released open source software. Our proposed solution can significantly increase the resilience and usability of IoT systems as they are being deployed in critical application areas. We will make our research software and data open source, as we have a strong record in the past. We will leverage our collaborations with industry leaders, including ARM and AWS (IoT arm), to foster a timely technology transfer to industry. We will incorporate IoT-reliability topics (both research and practical development aspects) into our courses. Finally, we will pursue our activities for broadening participation through special programs at Michigan (GirlsEncoded) and Purdue (EPICS).

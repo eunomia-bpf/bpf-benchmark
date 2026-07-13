@@ -1,0 +1,34 @@
+\section{Related Work and Challenges}
+\label{sec:related}
+
+%We now summarize key related work and discuss four main challenges of bug reproduction: (1) \textit{Effectiveness} is the ability to reproduce different kinds of bugs (such as complex concurrency bugs or latent bugs, where the failure (e.g., a crash) and the bug (e.g., overflow) are distant), (2) Given a reproduced bug, \textit{Accuracy} is the ability to correctly recover the data and control flow of the buggy execution, (3) \textit{Efficiency} is the ability to incur low overhead and use few resources, and (4) \textit{Non-invasiveness} is the ability to function with minimal modifications to the existing environment (e.g., source code, operating systems). 
+
+% \subsection{Record and Replay}
+% \label{subsec:rr}
+
+% Record/replay systems~\cite{altekarodr,bondrr,gdb-reverse,honarmandrr,honarmandrr2,mhillrr,clap,ireplayer,pengrr,castor,delorean,mozillarr,kendo,intel:mrr,ronsserr,undodb,doubleplay} record executions and later replay them with high accuracy to reproduce bugs. Most existing record/replay systems are not very efficient~(\S\ref{sec:preliminary}). Doubleplay~\cite{doubleplay} is a state-of-the-art record/replay system that works for arbitrary programs and incurs up to 200\% performance overhead, which makes it impractical for deployment in production. Recent record/replay systems~\cite{arnold,ireplayer,castor} make certain assumptions about programs (data-race-freedom, no custom synchronization primitives) or the environment (using a custom memory allocator) to reduce runtime overhead (up to 20-50\%), however, these assumptions may not hold in production systems. Other record/replay systems rely on custom hardware support~\cite{honarmandrr,mhillrr,delorean} that is not available. 
+
+% \textit{In sum, existing record/replay systems are effective and accurate, but they can be inefficient and invasive}. Due to these limitations, to our knowledge, record/replay techniques are not used in real-world systems. 
+
+% \subsection{Bug Reproduction}
+% \label{subsec:repro}
+
+% Bug reproduction techniques use a combination of execution monitoring and program analysis to recreate failing executions. Certain techniques~\cite{pedroski,pres,conseq} expose bugs. For instance, PRES~\cite{pres} records program inputs and other information (with 59\%-31$\times$ overheads) to perform state-space exploration during replay to reproduce bugs. H3~\cite{h3} records the control flow of programs (e.g., branches) (with overheads ranging between 1.4\%-14.7\%) and uses this information to determine thread interleavings leading to a concurrency bug. Execution synthesis~\cite{esd} uses a core dump, static analysis, and symbolic execution to recreate a failing execution. I am familiar with execution synthesis, as I extended it to do bug classification in multithreaded programs~\cite{portend}. Execution synthesis does not scale to large programs and complex bugs~(\S\ref{sec:preliminary}). 
+
+%H3's analysis is limited to the hardware trace which is kept in a circular buffer of 4MB (corresponding to 0.01 seconds of execution). As the authors point out, H3
+
+% \noindent \textit{\textbf{Prior work:}} I co-designed and implemented REPT, which uses a coredump and the control flow recording of a program~\cite{intelpt} to infer the data values accessed during the recorded trace. To my knowledge, REPT is the most-widely deployed production failure analysis system, because it is very efficient and non-invasive. However, REPT is not effective in reproducing latent bugs (similar to H3~\cite{h3}, it can recover values in a short window) or bugs in highly-multithreaded programs. REPT also suffers from poor accuracy if programs overwrite memory frequently, since it can no longer rely on the coredump to recover values. 
+
+
+
+% \subsection{Failure Diagnosis and Statistical Debugging}
+% \label{subsec:diagstat}
+
+% Failure diagnosis tries to identify the root causes of failures either by relying on a record/replay system~\cite{abreu:ochiai,tarantula,triage,giri,drdebug}, or by targeting bugs that can be reproduced with test cases~\cite{deltaDebugging}, or by performing statistical analysis~\cite{arulraj:pbi,jin:cci,snorlax,gist,liblit:cbi}. Record/replay is expensive, many bugs are not easily reproducible, and statistical techniques assume precise knowledge of the types of bugs they are trying to diagnose. Due to these limitations, these techniques have not been used in production systems. 
+
+% \textit{In sum, fully-automated failure diagnosis is still an open research problem} that hinges on the ability to reproduce bugs with high fidelity, which is the key focus of this proposal. 
+
+%Therefore, this proposal focuses on the open problem of bug reproduction, which should directly benefit the area of failure diagnosis, a topic I will pursue in the longer term.
+
+%Statistical debugging (CBI~\cite{liblit:cbi}, CCI~\cite{jin:cci}, PBI~\cite{arulraj:pbi}, and LBRA/LCRA~\cite{arulraj:lbr}, Gist~\cite{gist}, Snorlax~\cite{snorlax}, ReTracer~\cite{retracer}) rely on a combination of execution monitoring and program analysis to find bugs. Some of these techniques incur high overheads~\cite{jin:cci} and some require custom hardware support that is not available~\cite{arulraj:pbi}. More importantly, all these techniques assume knowledge of the types of bugs they are trying to diagnose (e.g., atomicity violations, order violations etc.). Based on the type of the bug, they employ heuristics to monitor failing and successful executions and infer the likely causes of failures. To my knowledge, only ReTracer~\cite{retracer} was used in production systems, but was later phased out in favor of REPT, which does bug reproduction. This is mainly because the root cause diagnosis heuristics of ReTracer incurs false positives, whereas REPT, partially reproduces the buggy execution, which the developers find more useful.
+
