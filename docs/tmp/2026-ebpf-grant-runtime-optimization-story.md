@@ -147,7 +147,34 @@ grant 主张必须落在"eBPF 生态收益"上，AI-for-systems 当主线会把�
 5. **格式复用**：直接复用现 repo 的 main.tex/preamble/budget.tex 骨架，overview.tex 换内容；
    budget 文案只需改项目名（结构与金额逻辑不变，按 2026-27 学年费用更新数字）。
 
-## 六、候选标题
+## 六、eBPF Foundation Research Fund 实际要求（2026-07-13 核实）
+
+- **2026 周期：6/15 开放，7/15 截止；9/1 公布**；进度汇报 2026-12-01 和 2027-05-01；要求 2 篇 blog post。
+- 材料：Project Summary ≤2 页（focus/techniques/prior work/timeline+milestones）+ Budget ≤1 页 + 全员 CV + 机构信息；Google Form 提交；$50K/项，unrestricted gift 付给学校。
+- Topics 直接命中我们：Program optimization techniques、In-kernel JIT compiler improvements、
+  formal verification of the verifier and JITs、verifier limitations、application efficiency。
+- 评审 = eBPF Steering Committee（内核 maintainer）。2024 年 25 份提案资助 5 份；2025 年
+  27 份资助 2 份（EPASS/Michigan、eBPF Governors/UCR）。
+- **官方页面挂出两份 2025 获奖 proposal 原文**（已存 scratchpad sample1/2.pdf）：结构 =
+  编号 section + 动机图/架构图 + Proof-of-concept 数字 + GitHub 链接 + Tasks 1..N +
+  按基金会日期排的 Milestones + refs 全部塞进 2 页（约 10-11pt）。
+- **EPASS（2025 获奖）与 BpfReJIT 同在 load-time 变换空间**：它做 programmability/safety
+  （ISA 内 + 运行时检查），我们做 performance（ISA 之下 native emit + 部署后 workload 事实）。
+  Related work 必须主动区分——已写进两版草稿。
+
+## 七、当前文件布局（grant 目录）
+
+- `main.tex / overview.tex / budget.tex / biblio.bib` — 2026 现行版，**格式与 2025 版完全一致**
+  （main.tex 除标题外与 2025 逐字节相同；overview 为段落式：PI 头/Introduction/Related Work/
+  Research Plan+3 Thrust/Timeline Q1-Q4）。标题 "eBPF Runtime Optimization: Safely Closing
+  the Performance Gap to Native Code"。24+1 条真实 bib（含 Kops arXiv:2606.24213、EPASS）。
+- `2025/` — 2025 LLM serving observability 版原件四份（未改动）。
+- `old/2026-draft-winning-sample-style-overview.tex` — 获奖样例式备选稿（编号 section、
+  双图 figs/sec-3-perf-gap-fig.pdf + figs/sec-4-pipeline-fig.pdf、Tasks 1-5、带日期
+  Milestones）；启用需 main.tex 配 10pt + margin 0.8in + multicol scriptsize refs。
+- 待办：正文 ~3 页 > 2 页上限，需删减；budget 学年数字待 Andi 更新；CV 另备。
+
+## 八、候选标题
 
 - Closing the Native-Performance Gap of eBPF, Safely
 - An Optimizing Runtime for eBPF: Verified Native Operations and Workload-Guided Re-Optimization
