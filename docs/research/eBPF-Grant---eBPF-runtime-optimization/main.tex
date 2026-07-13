@@ -14,6 +14,8 @@
 \usepackage{url}
 \usepackage{epsfig}
 \geometry{margin=1in}
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{1.5ex plus 0.5ex minus 0.2ex}{0.8ex plus 0.2ex}
 \usepackage{multicol}
 \usepackage[font=small,skip=3pt]{caption}
 \usepackage{ulem}
@@ -70,8 +72,15 @@ Grad Student Researcher: Yusheng Zheng, UC Santa Cruz
 %   \setlength{\parskip}{0pt}
 %   \setlength{\itemsep}{0pt plus 0.3ex}
 % }
-\vspace{-2mm}
-{\scriptsize
+\vspace{-4mm}
+\let\OLDthebibliography\thebibliography
+\renewcommand\thebibliography[1]{
+  \OLDthebibliography{#1}
+  \setlength{\parskip}{0pt}
+  \setlength{\itemsep}{0pt plus 0.2ex}
+}
+{\tiny
+\setlength{\columnsep}{8pt}
 \begin{multicols}{2}
 \bibliography{biblio}
 \end{multicols}

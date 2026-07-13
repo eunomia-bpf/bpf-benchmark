@@ -1,14 +1,4 @@
-\begin{thebibliography}{10}
-
-\bibitem{cilium}
-{Cilium Authors}.
-\newblock {Cilium}: {eBPF}-based networking, observability, and security.
-\newblock \url{https://cilium.io}, 2024.
-
-\bibitem{sched_ext_lwn}
-J.~Corbet.
-\newblock The {extensible} scheduler class.
-\newblock LWN.net, \url{https://lwn.net/Articles/922405/}, 2023.
+\begin{thebibliography}{1}
 
 \bibitem{gershuni2019simple}
 E.~Gershuni, N.~Amit, A.~Gurfinkel, N.~Narodytska, J.~A. Navas, N.~Rinetzky,
@@ -29,11 +19,6 @@ J.~Mao, H.~Ding, J.~Zhai, and S.~Ma.
 \newblock Merlin: Multi-tier optimization of ebpf code for performance and
   compactness.
 \newblock In {\em ASPLOS '24}, 2024.
-
-\bibitem{katran}
-{Meta}.
-\newblock Katran: A high performance layer 4 load balancer.
-\newblock \url{https://github.com/facebookincubator/katran}, 2018.
 
 \bibitem{nelson2020specification}
 L.~Nelson, J.~V. Geffen, E.~Torlak, and X.~Wang.
