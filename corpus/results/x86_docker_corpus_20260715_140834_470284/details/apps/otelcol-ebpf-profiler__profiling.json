@@ -1,0 +1,439 @@
+{
+  "app": "otelcol-ebpf-profiler/profiling",
+  "baseline": {
+    "bpf": {
+      "1893": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 1893,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "1894": {
+        "bytes_jited": 184,
+        "bytes_xlated": 304,
+        "id": 1894,
+        "name": "read_task_struc",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "1895": {
+        "bytes_jited": 3615,
+        "bytes_xlated": 6112,
+        "id": 1895,
+        "name": "perf_unwind_sto",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1896": {
+        "bytes_jited": 21863,
+        "bytes_xlated": 37024,
+        "id": 1896,
+        "name": "perf_unwind_nat",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1897": {
+        "bytes_jited": 18419,
+        "bytes_xlated": 28080,
+        "id": 1897,
+        "name": "perf_unwind_hot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1898": {
+        "bytes_jited": 18244,
+        "bytes_xlated": 29624,
+        "id": 1898,
+        "name": "perf_unwind_per",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1899": {
+        "bytes_jited": 14978,
+        "bytes_xlated": 24736,
+        "id": 1899,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1900": {
+        "bytes_jited": 19585,
+        "bytes_xlated": 33192,
+        "id": 1900,
+        "name": "perf_unwind_pyt",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1901": {
+        "bytes_jited": 17820,
+        "bytes_xlated": 30264,
+        "id": 1901,
+        "name": "perf_unwind_rub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1902": {
+        "bytes_jited": 20210,
+        "bytes_xlated": 33448,
+        "id": 1902,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1903": {
+        "bytes_jited": 22792,
+        "bytes_xlated": 37440,
+        "id": 1903,
+        "name": "perf_unwind_dot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1904": {
+        "bytes_jited": 1569,
+        "bytes_xlated": 2504,
+        "id": 1904,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1905": {
+        "bytes_jited": 789,
+        "bytes_xlated": 1320,
+        "id": 1905,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 196068,
+        "run_time_ns_delta": 50444618,
+        "type": "tracepoint"
+      },
+      "1906": {
+        "bytes_jited": 3795,
+        "bytes_xlated": 5888,
+        "id": 1906,
+        "name": "native_tracer_e",
+        "run_cnt_delta": 721768,
+        "run_time_ns_delta": 2179085209,
+        "type": "perf_event"
+      },
+      "1907": {
+        "bytes_jited": 3659,
+        "bytes_xlated": 5696,
+        "id": 1907,
+        "name": "custom__generic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "1908": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1908,
+        "name": "probe_bpf_perf_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "components": [
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "30",
+              "0"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 30.010512140001083,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=233872293 elapsed_s=30.000004 worker=0 sink=912520466",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "30",
+              "1"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 30.01060191400029,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=235476573 elapsed_s=30.000003 worker=1 sink=386042903",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "30",
+              "0"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 30.047449701000005,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=636797333 elapsed_s=30.000004 worker=0 sink=1572614498",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "30",
+              "1"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 30.047702820000268,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=494751381 elapsed_s=30.000004 worker=1 sink=2787730399",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "30",
+              "0"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 30.075069210997754,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=549294950 elapsed_s=30.000192 worker=0 sink=4208551936",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "30",
+              "1"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 30.079002018999745,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=403349403 elapsed_s=30.000165 worker=1 sink=4106482176",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "30",
+              "0"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 30.079083411998,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=275155887 elapsed_s=30.000001 worker=0 sink=4098755064",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "30",
+              "1"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 30.079124550000415,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=272752215 elapsed_s=30.000001 worker=1 sink=3277699381",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "30",
+              "0"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 30.079179369000485,
+            "returncode": 0,
+            "stderr": "php int_loop ops=1367626795 elapsed_s=30.000001 worker=0 sink=2214834828",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "30",
+              "1"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 30.079225154000596,
+            "returncode": 0,
+            "stderr": "php int_loop ops=1367225100 elapsed_s=30.000001 worker=1 sink=2599671334",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/stress-ng",
+              "--cpu",
+              "1",
+              "--timeout",
+              "30s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/d65101d0"
+            ],
+            "config": {
+              "stressors": [
+                "cpu"
+              ],
+              "tool": "stress-ng"
+            },
+            "duration_s": 30.079274423998868,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [3336013] setting to a 30 secs run per stressor\nstress-ng: info:  [3336013] dispatching hogs: 1 cpu\nstress-ng: info:  [3336013] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [3336013] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [3336013]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [3336013] cpu               48731     30.00     30.00      0.00      1624.33        1624.37\nstress-ng: info:  [3336013] skipped: 0\nstress-ng: info:  [3336013] passed: 1: cpu (1)\nstress-ng: info:  [3336013] failed: 0\nstress-ng: info:  [3336013] metrics untrustworthy: 0\nstress-ng: info:  [3336013] successful run completed in 30.00 secs",
+            "workload_name": "otel_stress_ng_cpu"
+          },
+          {
+            "command": [
+              "/usr/bin/stress-ng",
+              "--fork",
+              "2",
+              "--timeout",
+              "30s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/d65101d0"
+            ],
+            "config": {
+              "stressors": [
+                "fork"
+              ],
+              "tool": "stress-ng-fork"
+            },
+            "duration_s": 30.079327847000968,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [3336014] setting to a 30 secs run per stressor\nstress-ng: info:  [3336014] dispatching hogs: 2 fork\nstress-ng: info:  [3336014] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [3336014] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [3336014]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [3336014] fork             191389     30.00     24.23     36.54      6379.60        3149.30\nstress-ng: info:  [3336014] skipped: 0\nstress-ng: info:  [3336014] passed: 2: fork (2)\nstress-ng: info:  [3336014] failed: 0\nstress-ng: info:  [3336014] metrics untrustworthy: 0\nstress-ng: info:  [3336014] successful run completed in 30.00 secs",
+            "workload_name": "otel_stress_ng_process_exit"
+          }
+        ],
+        "config": {
+          "process_exit_stressors": 2,
+          "specialization_pass": "branch_flip"
+        },
+        "workload_name": "otel_branch_flip_process_exit_workload"
+      }
+    ]
+  },
+  "error": "live execute_plan failed for programs: {\"1906\": \"reload_and_reattach internal error\"}",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "otelcol-ebpf-profiler",
+  "runner_details": {
+    "command_used": [
+      "/usr/local/bin/otelcol-ebpf-profiler",
+      "--feature-gates=+service.profilesSupport",
+      "--config",
+      "/var/tmp/bpfrejit-runtime/d65101d0/otelcol-ebpf-profiler-tep_h52b/config.yaml"
+    ],
+    "process_output": {
+      "returncode": 0,
+      "stderr_tail": "2026-07-15T14:09:07.194Z\twarn\tfailed to visit symbols: failed to read .symtab: section not present\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:09.098Z\twarn\tFailed to get executable of process 3347965: readlink /proc/3347965/exe: no such file or directory\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.737Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 12583}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 272:3059 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 8:33983 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 24:4321 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 10:142440 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 11:130941 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 68:11450 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 17:5 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 47:49 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 115:2000 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 117:2000 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 19:2321 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 76:2000 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 77:3415 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 48:2 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 108:1999 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 109:920 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 136:6004 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 137:27324 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 213:19 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 226:22 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 229:7 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 236:2319 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:11.999Z\twarn\tMetric ID 247:2347 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 272:19161 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 8:33629 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 24:4014 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 10:138208 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 11:126937 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 68:11264 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 17:1 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 47:9 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 115:2000 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 117:2000 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 19:2014 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 76:2000 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 77:3427 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 48:3 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 108:1998 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 109:936 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 136:5995 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 137:27296 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 139:3 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 213:16 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 226:16 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 236:2014 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:14.999Z\twarn\tMetric ID 247:2043 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:17.289Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 12323}\n2026-07-15T14:09:21.964Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 6, \"sample records\": 10645}\n2026-07-15T14:09:21.965Z\twarn\tMetric ID 85:5 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:21.965Z\twarn\tMetric ID 156:41 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:21.965Z\twarn\tMetric ID 207:45 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:21.965Z\twarn\tMetric ID 205:1895 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:21.965Z\twarn\tMetric ID 84:41 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:21.965Z\twarn\tMetric ID 206:58 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:21.965Z\twarn\tMetric ID 277:8 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:21.965Z\twarn\tMetric ID 276:58 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:21.965Z\twarn\tMetric ID 218:303 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:21.965Z\twarn\tMetric ID 220:711 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:21.965Z\twarn\tMetric ID 43:637 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:21.965Z\twarn\tMetric ID 133:7801 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:21.965Z\twarn\tMetric ID 44:8688 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:21.965Z\twarn\tMetric ID 134:20317 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:21.965Z\twarn\tMetric ID 271:4 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:22.999Z\twarn\tMetric ID 272:5402 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 272:14300 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 8:33592 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 24:4007 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 10:138119 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 11:126886 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 68:11227 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 17:3 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 47:8 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 115:1998 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 117:1998 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 19:2011 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 76:1998 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 77:3417 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 48:1 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 108:1997 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 109:872 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 136:5991 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 137:27230 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 139:1 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:24.999Z\twarn\tMetric ID 213:19 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:25.000Z\twarn\tMetric ID 226:19 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:25.000Z\twarn\tMetric ID 236:2011 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:25.000Z\twarn\tMetric ID 247:2054 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:26.799Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 10, \"sample records\": 11098}\n2026-07-15T14:09:28.999Z\twarn\tMetric ID 272:6027 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:31.654Z\twarn\tFailed to get executable of process 3493255: readlink /proc/3493255/exe: no such file or directory\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:32.150Z\twarn\tFailed to get executable of process 3496962: readlink /proc/3496962/exe: no such file or directory\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:32.271Z\twarn\tFailed to get executable of process 3497892: readlink /proc/3497892/exe: no such file or directory\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:32.698Z\twarn\tFailed to get executable of process 3501063: readlink /proc/3501063/exe: no such file or directory\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:32.800Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 9, \"sample records\": 13126}\n2026-07-15T14:09:32.999Z\twarn\tMetric ID 272:3911 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:35.257Z\twarn\tFailed to get executable of process 3518970: readlink /proc/3518970/exe: no such file or directory\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:36.319Z\twarn\tFailed to get executable of process 3526148: readlink /proc/3526148/exe: no such file or directory\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:37.721Z\twarn\tfailed to visit symbols: failed to read .symtab: section not present\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:37.738Z\terror\tFailed to load /usr/bin/node (0x53e6ab99af7214f6): unable to read '_ZN2v88internal7Version6major_E': symbol not found\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\ngo.opentelemetry.io/ebpf-profiler/internal/log.Errorf\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/internal/log/logging.go:66\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*executableInfoManagerState).detectAndLoadInterpData\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:333\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*ExecutableInfoManager).AddOrIncRef\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:229\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).handleNewMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:256\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).processNewExecMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:384\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).synchronizeMappings\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:511\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).SynchronizeProcess\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:648\ngo.opentelemetry.io/ebpf-profiler/tracer.(*Tracer).processPIDEvents\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/tracer/events.go:51\n2026-07-15T14:09:38.129Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 9, \"sample records\": 18179}\n2026-07-15T14:09:42.371Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 16562}\n2026-07-15T14:09:44.000Z\twarn\tMetric ID 272:6248 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:45.999Z\twarn\tMetric ID 272:19835 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:48.121Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 18100}\n2026-07-15T14:09:53.770Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 18098}\n2026-07-15T14:09:54.000Z\twarn\tMetric ID 272:5261 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 272:3585 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 8:33821 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 24:4008 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 10:242815 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 11:228603 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 68:14198 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 17:4 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 47:11 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 115:1999 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 117:1999 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 19:2009 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 76:1999 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 77:3528 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 48:1 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 108:2000 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 109:881 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 136:6004 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 137:27473 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 139:1 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 213:24 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:58.999Z\twarn\tMetric ID 226:25 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:59.000Z\twarn\tMetric ID 229:2 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:59.000Z\twarn\tMetric ID 236:2009 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:59.000Z\twarn\tMetric ID 247:2020 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:09:59.362Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 10, \"sample records\": 19526}\n2026-07-15T14:10:00.999Z\twarn\tMetric ID 272:4734 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:02.999Z\twarn\tMetric ID 272:4592 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:03.667Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 14433}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 272:1362 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 8:33861 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 24:3998 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 10:243638 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 11:229387 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 68:14238 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 17:3 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 47:13 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 115:1999 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 117:1999 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 19:1999 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 76:1999 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 77:3537 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 48:4 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 108:1998 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 109:884 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 136:5996 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 137:27443 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 139:3 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 213:25 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 226:26 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 229:9 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 236:1999 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:06.999Z\twarn\tMetric ID 247:2137 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:08.999Z\twarn\tMetric ID 272:10759 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:09.206Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 6, \"sample records\": 18328}\n2026-07-15T14:10:13.469Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 9, \"sample records\": 11535}\n2026-07-15T14:10:17.999Z\twarn\tMetric ID 272:3473 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:17.999Z\twarn\tMetric ID 8:85 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:17.999Z\twarn\tMetric ID 18:5 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:17.999Z\twarn\tMetric ID 24:14 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:17.999Z\twarn\tMetric ID 10:115622 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:17.999Z\twarn\tMetric ID 11:111567 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:18.000Z\twarn\tMetric ID 68:4000 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:18.000Z\twarn\tMetric ID 17:367 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:18.000Z\twarn\tMetric ID 47:55 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:18.000Z\twarn\tMetric ID 19:14 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:18.000Z\twarn\tMetric ID 48:354 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:18.000Z\twarn\tMetric ID 136:34 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:18.000Z\twarn\tMetric ID 137:212 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:18.000Z\twarn\tMetric ID 213:46 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:18.000Z\twarn\tMetric ID 214:46 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:18.000Z\twarn\tMetric ID 215:3 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:18.000Z\twarn\tMetric ID 226:47 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:18.000Z\twarn\tMetric ID 229:10 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:18.000Z\twarn\tMetric ID 236:14 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T14:10:18.000Z\twarn\tMetric ID 247:798 reported multiple times\t{\"resource\": {\"service.instance.id\": \"cd68a63c-65c1-4060-a47a-cc745ba69ed4\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "otel_mixed_workload",
+  "status": "error"
+}
