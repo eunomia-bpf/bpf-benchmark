@@ -1,0 +1,200 @@
+{
+  "app": "otelcol-ebpf-profiler/profiling",
+  "baseline": {
+    "bpf": {
+      "1105": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 1105,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "1106": {
+        "bytes_jited": 184,
+        "bytes_xlated": 304,
+        "id": 1106,
+        "name": "read_task_struc",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "1107": {
+        "bytes_jited": 3615,
+        "bytes_xlated": 6112,
+        "id": 1107,
+        "name": "perf_unwind_sto",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1108": {
+        "bytes_jited": 21863,
+        "bytes_xlated": 37024,
+        "id": 1108,
+        "name": "perf_unwind_nat",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1109": {
+        "bytes_jited": 18419,
+        "bytes_xlated": 28080,
+        "id": 1109,
+        "name": "perf_unwind_hot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1110": {
+        "bytes_jited": 18244,
+        "bytes_xlated": 29624,
+        "id": 1110,
+        "name": "perf_unwind_per",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1111": {
+        "bytes_jited": 14978,
+        "bytes_xlated": 24736,
+        "id": 1111,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1112": {
+        "bytes_jited": 19585,
+        "bytes_xlated": 33192,
+        "id": 1112,
+        "name": "perf_unwind_pyt",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1113": {
+        "bytes_jited": 17820,
+        "bytes_xlated": 30264,
+        "id": 1113,
+        "name": "perf_unwind_rub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1114": {
+        "bytes_jited": 20210,
+        "bytes_xlated": 33448,
+        "id": 1114,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1115": {
+        "bytes_jited": 22792,
+        "bytes_xlated": 37440,
+        "id": 1115,
+        "name": "perf_unwind_dot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1116": {
+        "bytes_jited": 1569,
+        "bytes_xlated": 2504,
+        "id": 1116,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "1117": {
+        "bytes_jited": 789,
+        "bytes_xlated": 1320,
+        "id": 1117,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 1402,
+        "run_time_ns_delta": 1741913,
+        "type": "tracepoint"
+      },
+      "1118": {
+        "bytes_jited": 3795,
+        "bytes_xlated": 5888,
+        "id": 1118,
+        "name": "native_tracer_e",
+        "run_cnt_delta": 719990,
+        "run_time_ns_delta": 808685476,
+        "type": "perf_event"
+      },
+      "1119": {
+        "bytes_jited": 3659,
+        "bytes_xlated": 5696,
+        "id": 1119,
+        "name": "custom__generic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "1120": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1120,
+        "name": "probe_bpf_perf_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/php",
+          "-r",
+          "$x = 1;\nwhile (true) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n}\n"
+        ],
+        "config": {
+          "loop": "integer_lcg",
+          "persistent": true,
+          "pids": [
+            288889,
+            288890,
+            288891,
+            288892,
+            288893,
+            288894,
+            288895,
+            288896
+          ],
+          "specialization_pass": "loop_trip_spec",
+          "tool": "php",
+          "worker_count": 8
+        },
+        "duration_s": 30.000061495999034,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "otel_loop_trip_spec_persistent_php_workload"
+      }
+    ]
+  },
+  "error": "bpfprof failed (1): perf branch-stack sampler was throttled by the kernel; raise PERF_SAMPLE_PERIOD",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "otelcol-ebpf-profiler",
+  "runner_details": {
+    "command_used": [
+      "/usr/local/bin/otelcol-ebpf-profiler",
+      "--feature-gates=+service.profilesSupport",
+      "--config",
+      "/var/tmp/bpfrejit-runtime/2f3e0b7f/otelcol-ebpf-profiler-xyp3hi80/config.yaml"
+    ],
+    "process_output": {
+      "returncode": 0,
+      "stderr_tail": "2026-07-15T11:45:51.062Z\tinfo\totelconftelemetry/metrics.go:24\tInternal metrics telemetry disabled\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-07-15T11:45:51.062Z\tinfo\tbuilders/builders.go:26\tDevelopment component. May change in the future.\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:51.064Z\tinfo\tservice@v0.139.0/service.go:222\tStarting otelcol-ebpf-profiler...\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"Version\": \"0.140.0\", \"NumCPU\": 8}\n2026-07-15T11:45:51.064Z\tinfo\textensions/extensions.go:40\tStarting extensions...\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-07-15T11:45:51.064Z\tinfo\tInterpreter tracers: perl,php,python,hotspot,ruby,v8,dotnet,go,labels\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:51.365Z\tinfo\tFound offsets: task stack 0x20, pt_regs 0x3f48, tpbase 0x25a8\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:51.625Z\tinfo\tLoaded custom__generic program (FD: 80)\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:51.625Z\tinfo\tSupports generic eBPF map batch operations\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:51.625Z\tinfo\tSupports LPM trie eBPF map batch operations\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:51.626Z\tinfo\teBPF tracer loaded\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:51.627Z\tinfo\tAttached tracer program\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:51.632Z\tinfo\tAttached sched monitor\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:51.664Z\tinfo\tservice@v0.139.0/service.go:245\tEverything is ready. Begin running and processing data.\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-07-15T11:45:55.634Z\twarn\tMetric ID 43:319 reported multiple times\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:55.634Z\twarn\tMetric ID 276:124 reported multiple times\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:55.634Z\twarn\tMetric ID 44:5441 reported multiple times\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:55.634Z\twarn\tMetric ID 205:5425 reported multiple times\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:55.634Z\twarn\tMetric ID 218:3956 reported multiple times\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:55.634Z\twarn\tMetric ID 207:21 reported multiple times\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:55.634Z\twarn\tMetric ID 220:15169 reported multiple times\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:55.634Z\twarn\tMetric ID 84:130 reported multiple times\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:55.634Z\twarn\tMetric ID 85:79 reported multiple times\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:55.634Z\twarn\tMetric ID 206:124 reported multiple times\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:55.634Z\twarn\tMetric ID 133:5404 reported multiple times\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:55.634Z\twarn\tMetric ID 134:11101 reported multiple times\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:55.634Z\twarn\tMetric ID 271:24 reported multiple times\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:45:56.067Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 4, \"sample records\": 1202}\n2026-07-15T11:45:57.507Z\terror\tFailed to load /home/yunwei37/.local/opt/gh-2.96.0/bin/gh (0x7c1d5017ea0a0a58): unsupported Go version go1.26.4 (need >= 1.13 and <= 1.25)\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\ngo.opentelemetry.io/ebpf-profiler/internal/log.Errorf\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/internal/log/logging.go:66\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*executableInfoManagerState).detectAndLoadInterpData\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:333\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*ExecutableInfoManager).AddOrIncRef\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:229\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).handleNewMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:256\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).processNewExecMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:384\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).synchronizeMappings\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:511\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).SynchronizeProcess\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:648\ngo.opentelemetry.io/ebpf-profiler/tracer.(*Tracer).processPIDEvents\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/tracer/events.go:51\n2026-07-15T11:46:00.887Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 4, \"sample records\": 1598}\n2026-07-15T11:46:05.129Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 1377}\n2026-07-15T11:46:08.167Z\terror\tFailed to load /home/yunwei37/.local/opt/gh-2.96.0/bin/gh (0x7c1d5017ea0a0a58): unsupported Go version go1.26.4 (need >= 1.13 and <= 1.25)\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\ngo.opentelemetry.io/ebpf-profiler/internal/log.Errorf\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/internal/log/logging.go:66\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*executableInfoManagerState).detectAndLoadInterpData\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:333\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*ExecutableInfoManager).AddOrIncRef\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:229\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).handleNewMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:256\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).processNewExecMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:384\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).synchronizeMappings\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:511\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).SynchronizeProcess\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:648\ngo.opentelemetry.io/ebpf-profiler/tracer.(*Tracer).processPIDEvents\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/tracer/events.go:51\n2026-07-15T11:46:10.685Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 1734}\n2026-07-15T11:46:16.222Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 1133}\n2026-07-15T11:46:20.600Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 4, \"sample records\": 1199}\n2026-07-15T11:46:26.576Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 1193}\n2026-07-15T11:46:31.670Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 927}\n2026-07-15T11:46:37.028Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 900}\n2026-07-15T11:46:42.943Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 969}\n2026-07-15T11:46:47.578Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 6, \"sample records\": 1622}\n2026-07-15T11:46:53.360Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 9, \"sample records\": 1821}\n2026-07-15T11:46:57.511Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 6, \"sample records\": 1055}\n2026-07-15T11:47:02.460Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 6, \"sample records\": 993}\n2026-07-15T11:47:08.105Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 1172}\n2026-07-15T11:47:12.864Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 764}\n2026-07-15T11:47:14.245Z\terror\tFailed to load /snap/snapd/27406/usr/lib/snapd/snapd (0x3c327b5f3afdbc0a): not a Go executable\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\ngo.opentelemetry.io/ebpf-profiler/internal/log.Errorf\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/internal/log/logging.go:66\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*executableInfoManagerState).detectAndLoadInterpData\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:333\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*ExecutableInfoManager).AddOrIncRef\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:229\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).handleNewMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:256\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).processNewExecMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:384\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).synchronizeMappings\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:511\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).SynchronizeProcess\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:648\ngo.opentelemetry.io/ebpf-profiler/tracer.(*Tracer).processPIDEvents\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/tracer/events.go:51\n2026-07-15T11:47:14.245Z\terror\tFailed to load /snap/snapd/27406/usr/lib/snapd/snapd (0x3c327b5f3afdbc0a): not a Go executable\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\ngo.opentelemetry.io/ebpf-profiler/internal/log.Errorf\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/internal/log/logging.go:66\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*executableInfoManagerState).detectAndLoadInterpData\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:333\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*ExecutableInfoManager).AddOrIncRef\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:229\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).handleNewMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:256\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).processNewExecMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:384\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).synchronizeMappings\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:511\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).SynchronizeProcess\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:648\ngo.opentelemetry.io/ebpf-profiler/tracer.(*Tracer).processPIDEvents\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/tracer/events.go:51\n2026-07-15T11:47:17.554Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 598}\n2026-07-15T11:47:21.873Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"bbf0746b-9d2f-4d87-8c80-e9a998416b30\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 4, \"sample records\": 874}",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "otel_mixed_workload",
+  "status": "error"
+}
