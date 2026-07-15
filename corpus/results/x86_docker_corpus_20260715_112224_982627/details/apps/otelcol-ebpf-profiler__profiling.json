@@ -1,0 +1,1056 @@
+{
+  "app": "otelcol-ebpf-profiler/profiling",
+  "baseline": {
+    "bpf": {
+      "980": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 980,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "981": {
+        "bytes_jited": 184,
+        "bytes_xlated": 304,
+        "id": 981,
+        "name": "read_task_struc",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "982": {
+        "bytes_jited": 3615,
+        "bytes_xlated": 6112,
+        "id": 982,
+        "name": "perf_unwind_sto",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "983": {
+        "bytes_jited": 21863,
+        "bytes_xlated": 37024,
+        "id": 983,
+        "name": "perf_unwind_nat",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "984": {
+        "bytes_jited": 18419,
+        "bytes_xlated": 28080,
+        "id": 984,
+        "name": "perf_unwind_hot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "985": {
+        "bytes_jited": 18244,
+        "bytes_xlated": 29624,
+        "id": 985,
+        "name": "perf_unwind_per",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "986": {
+        "bytes_jited": 14978,
+        "bytes_xlated": 24736,
+        "id": 986,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "987": {
+        "bytes_jited": 19585,
+        "bytes_xlated": 33192,
+        "id": 987,
+        "name": "perf_unwind_pyt",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "988": {
+        "bytes_jited": 17820,
+        "bytes_xlated": 30264,
+        "id": 988,
+        "name": "perf_unwind_rub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "989": {
+        "bytes_jited": 20210,
+        "bytes_xlated": 33448,
+        "id": 989,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "990": {
+        "bytes_jited": 22792,
+        "bytes_xlated": 37440,
+        "id": 990,
+        "name": "perf_unwind_dot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "991": {
+        "bytes_jited": 1569,
+        "bytes_xlated": 2504,
+        "id": 991,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "992": {
+        "bytes_jited": 789,
+        "bytes_xlated": 1320,
+        "id": 992,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 554,
+        "run_time_ns_delta": 388082,
+        "type": "tracepoint"
+      },
+      "993": {
+        "bytes_jited": 3795,
+        "bytes_xlated": 5888,
+        "id": 993,
+        "name": "native_tracer_e",
+        "run_cnt_delta": 719989,
+        "run_time_ns_delta": 956673388,
+        "type": "perf_event"
+      },
+      "994": {
+        "bytes_jited": 3659,
+        "bytes_xlated": 5696,
+        "id": 994,
+        "name": "custom__generic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "995": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 995,
+        "name": "probe_bpf_perf_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/php",
+          "-r",
+          "$x = 1;\nwhile (true) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n}\n"
+        ],
+        "config": {
+          "loop": "integer_lcg",
+          "persistent": true,
+          "pids": [
+            243280,
+            243281,
+            243282,
+            243283,
+            243284,
+            243285,
+            243286,
+            243287
+          ],
+          "tool": "php",
+          "worker_count": 8
+        },
+        "duration_s": 30.00006509599916,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "otel_hot_region_persistent_php_workload"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "980": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 980,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "981": {
+        "bytes_jited": 184,
+        "bytes_xlated": 304,
+        "id": 981,
+        "name": "read_task_struc",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "982": {
+        "bytes_jited": 3615,
+        "bytes_xlated": 6112,
+        "id": 982,
+        "name": "perf_unwind_sto",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "983": {
+        "bytes_jited": 21863,
+        "bytes_xlated": 37024,
+        "id": 983,
+        "name": "perf_unwind_nat",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "984": {
+        "bytes_jited": 18419,
+        "bytes_xlated": 28080,
+        "id": 984,
+        "name": "perf_unwind_hot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "985": {
+        "bytes_jited": 18244,
+        "bytes_xlated": 29624,
+        "id": 985,
+        "name": "perf_unwind_per",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "987": {
+        "bytes_jited": 19585,
+        "bytes_xlated": 33192,
+        "id": 987,
+        "name": "perf_unwind_pyt",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "988": {
+        "bytes_jited": 17820,
+        "bytes_xlated": 30264,
+        "id": 988,
+        "name": "perf_unwind_rub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "989": {
+        "bytes_jited": 20210,
+        "bytes_xlated": 33448,
+        "id": 989,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "990": {
+        "bytes_jited": 22792,
+        "bytes_xlated": 37440,
+        "id": 990,
+        "name": "perf_unwind_dot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "991": {
+        "bytes_jited": 1569,
+        "bytes_xlated": 2504,
+        "id": 991,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "992": {
+        "bytes_jited": 789,
+        "bytes_xlated": 1320,
+        "id": 992,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 585,
+        "run_time_ns_delta": 467718,
+        "type": "tracepoint"
+      },
+      "993": {
+        "bytes_jited": 3795,
+        "bytes_xlated": 5888,
+        "id": 993,
+        "name": "native_tracer_e",
+        "run_cnt_delta": 719987,
+        "run_time_ns_delta": 790287533,
+        "type": "perf_event"
+      },
+      "994": {
+        "bytes_jited": 3659,
+        "bytes_xlated": 5696,
+        "id": 994,
+        "name": "custom__generic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "995": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 995,
+        "name": "probe_bpf_perf_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "996": {
+        "bytes_jited": 17190,
+        "bytes_xlated": 27768,
+        "id": 996,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/php",
+          "-r",
+          "$x = 1;\nwhile (true) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n}\n"
+        ],
+        "config": {
+          "loop": "integer_lcg",
+          "persistent": true,
+          "pids": [
+            243280,
+            243281,
+            243282,
+            243283,
+            243284,
+            243285,
+            243286,
+            243287
+          ],
+          "tool": "php",
+          "worker_count": 8
+        },
+        "duration_s": 30.00006499200026,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "otel_hot_region_persistent_php_workload"
+      }
+    ]
+  },
+  "rejit_result": {
+    "deployment_specialization": {
+      "enabled_passes": [
+        "hot_region_version"
+      ],
+      "profile_root": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260715_112224_982627/details/deployment-specialization/otelcol-ebpf-profiler__profiling/profiles",
+      "raw_profile_dir": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260715_112224_982627/details/deployment-specialization/otelcol-ebpf-profiler__profiling/raw",
+      "training_workload": {
+        "command": [
+          "/usr/bin/php",
+          "-r",
+          "$x = 1;\nwhile (true) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n}\n"
+        ],
+        "config": {
+          "loop": "integer_lcg",
+          "persistent": true,
+          "pids": [
+            243280,
+            243281,
+            243282,
+            243283,
+            243284,
+            243285,
+            243286,
+            243287
+          ],
+          "tool": "php",
+          "worker_count": 8
+        },
+        "duration_s": 30.000057429999288,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "otel_hot_region_persistent_php_workload"
+      },
+      "training_workloads": {
+        "pmu_profile": {
+          "command": [
+            "/usr/bin/php",
+            "-r",
+            "$x = 1;\nwhile (true) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n}\n"
+          ],
+          "config": {
+            "loop": "integer_lcg",
+            "persistent": true,
+            "pids": [
+              243280,
+              243281,
+              243282,
+              243283,
+              243284,
+              243285,
+              243286,
+              243287
+            ],
+            "tool": "php",
+            "worker_count": 8
+          },
+          "duration_s": 30.000057429999288,
+          "stderr": "",
+          "stdout": "",
+          "workload_name": "otel_hot_region_persistent_php_workload"
+        }
+      }
+    },
+    "mode": "live_swap",
+    "per_program": {
+      "980": {
+        "passes": [
+          {
+            "bpfopt_ms": 5,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 6,
+              "insn_count_before": 6,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 980,
+        "program": {
+          "final_insn_count": 6,
+          "orig_insn_count": 6,
+          "prog_id": 980,
+          "prog_name": "",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "981": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 56,
+              "insn_count_before": 56,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 981,
+        "program": {
+          "final_insn_count": 56,
+          "orig_insn_count": 56,
+          "prog_id": 981,
+          "prog_name": "read_task_struc",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "982": {
+        "passes": [
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 1631,
+              "insn_count_before": 1631,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "no_acyclic_hot_merge": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 789,
+                  "reason": "no_acyclic_hot_merge"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 982,
+        "program": {
+          "final_insn_count": 1631,
+          "orig_insn_count": 1631,
+          "prog_id": 982,
+          "prog_name": "perf_unwind_sto",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "983": {
+        "passes": [
+          {
+            "bpfopt_ms": 54,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 6972,
+              "insn_count_before": 6972,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "no_acyclic_hot_merge": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 315,
+                  "reason": "no_acyclic_hot_merge"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 983,
+        "program": {
+          "final_insn_count": 6972,
+          "orig_insn_count": 6972,
+          "prog_id": 983,
+          "prog_name": "perf_unwind_nat",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "984": {
+        "passes": [
+          {
+            "bpfopt_ms": 8,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 7593,
+              "insn_count_before": 7593,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 984,
+        "program": {
+          "final_insn_count": 7593,
+          "orig_insn_count": 7593,
+          "prog_id": 984,
+          "prog_name": "perf_unwind_hot",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "985": {
+        "passes": [
+          {
+            "bpfopt_ms": 5,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 7475,
+              "insn_count_before": 7475,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 985,
+        "program": {
+          "final_insn_count": 7475,
+          "orig_insn_count": 7475,
+          "prog_id": 985,
+          "prog_name": "perf_unwind_per",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "986": {
+        "passes": [
+          {
+            "bpfopt_ms": 954,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 7212,
+              "insn_count_before": 6899,
+              "insn_delta": 313,
+              "pass": "hot_region_version",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 8,
+            "status": "ok",
+            "step": {
+              "command": "set -eu; profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; source_prog_id=$(jq -er '.source_prog_id | select(type == \"number\")' \"${profile}\"); raw=\"${profile_root}/../raw/${source_prog_id}.json\"; candidates=\"${REPORT}.candidates.txt\"; jq -er ' .per_site | to_entries | map(select( (.value.branch_count | type) == \"number\" and (.value.taken | type) == \"number\" and (.value.not_taken | type) == \"number\" and .value.branch_count >= 100 and .value.taken + .value.not_taken == .value.branch_count and .value.taken != .value.not_taken and (([.value.taken, .value.not_taken] | max) * 1000 >= .value.branch_count * 800) )) | sort_by(.value.branch_count) | reverse | .[].key ' \"${raw}\" > \"${candidates}\"; test -s \"${candidates}\"; best_pc=\"\"; best_after=\"\"; while IFS= read -r pc; do candidate_profile=\"${REPORT}.candidate-${pc}.profile.json\"; candidate_report=\"${REPORT}.candidate-${pc}.report.json\"; candidate_output=\"${REPORT}.candidate-${pc}.bpf\"; jq --arg pc \"${pc}\" --slurpfile raw \"${raw}\" ' .per_site = { ($pc): ($raw[0].per_site[$pc] | {branch_count, taken, not_taken}) } ' \"${profile}\" > \"${candidate_profile}\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${candidate_output}\" --report \"${candidate_report}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${candidate_profile}\" --program-hash \"${PROG_HASH}\"; applied=$(jq -er '.sites_applied | select(type == \"number\")' \"${candidate_report}\"); if [ \"${applied}\" -eq 0 ]; then continue; fi; test \"${applied}\" -eq 1; after=$(jq -er '.insn_count_after | select(type == \"number\" and . > 0)' \"${candidate_report}\"); if [ -z \"${best_after}\" ] || [ \"${after}\" -lt \"${best_after}\" ]; then cp \"${candidate_output}\" \"${OUTPUT}\"; cp \"${candidate_report}\" \"${REPORT}\"; cp \"${candidate_profile}\" \"${REPORT}.selected-profile.json\"; best_pc=\"${pc}\"; best_after=\"${after}\"; fi; done < \"${candidates}\"; test -n \"${best_pc}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 986,
+        "program": {
+          "final_insn_count": 7212,
+          "orig_insn_count": 6899,
+          "prog_id": 996,
+          "prog_name": "perf_unwind_php",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "987": {
+        "passes": [
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 5894,
+              "insn_count_before": 5894,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 987,
+        "program": {
+          "final_insn_count": 5894,
+          "orig_insn_count": 5894,
+          "prog_id": 987,
+          "prog_name": "perf_unwind_pyt",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "988": {
+        "passes": [
+          {
+            "bpfopt_ms": 5,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 5458,
+              "insn_count_before": 5458,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 988,
+        "program": {
+          "final_insn_count": 5458,
+          "orig_insn_count": 5458,
+          "prog_id": 988,
+          "prog_name": "perf_unwind_rub",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "989": {
+        "passes": [
+          {
+            "bpfopt_ms": 5,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 7817,
+              "insn_count_before": 7817,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 989,
+        "program": {
+          "final_insn_count": 7817,
+          "orig_insn_count": 7817,
+          "prog_id": 989,
+          "prog_name": "perf_unwind_v8",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "990": {
+        "passes": [
+          {
+            "bpfopt_ms": 6,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 7974,
+              "insn_count_before": 7974,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 990,
+        "program": {
+          "final_insn_count": 7974,
+          "orig_insn_count": 7974,
+          "prog_id": 990,
+          "prog_name": "perf_unwind_dot",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "991": {
+        "passes": [
+          {
+            "bpfopt_ms": 6,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 683,
+              "insn_count_before": 683,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 991,
+        "program": {
+          "final_insn_count": 683,
+          "orig_insn_count": 683,
+          "prog_id": 991,
+          "prog_name": "perf_go_labels",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "992": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 283,
+              "insn_count_before": 283,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 992,
+        "program": {
+          "final_insn_count": 283,
+          "orig_insn_count": 283,
+          "prog_id": 992,
+          "prog_name": "tracepoint__sch",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "993": {
+        "passes": [
+          {
+            "bpfopt_ms": 13,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 1322,
+              "insn_count_before": 1322,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "no_acyclic_hot_merge": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 215,
+                  "reason": "no_acyclic_hot_merge"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 993,
+        "program": {
+          "final_insn_count": 1322,
+          "orig_insn_count": 1322,
+          "prog_id": 993,
+          "prog_name": "native_tracer_e",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "994": {
+        "passes": [
+          {
+            "bpfopt_ms": 6,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 1253,
+              "insn_count_before": 1253,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 994,
+        "program": {
+          "final_insn_count": 1253,
+          "orig_insn_count": 1253,
+          "prog_id": 994,
+          "prog_name": "custom__generic",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "995": {
+        "passes": [
+          {
+            "bpfopt_ms": 5,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 995,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 995,
+          "prog_name": "probe_bpf_perf_",
+          "prog_type": 2
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "otelcol-ebpf-profiler",
+  "runner_details": {
+    "command_used": [
+      "/usr/local/bin/otelcol-ebpf-profiler",
+      "--feature-gates=+service.profilesSupport",
+      "--config",
+      "/var/tmp/bpfrejit-runtime/f89e9cf1/otelcol-ebpf-profiler-1azbc2wp/config.yaml"
+    ],
+    "process_output": {
+      "returncode": 0,
+      "stderr_tail": "2026-07-15T11:22:25.012Z\tinfo\totelconftelemetry/metrics.go:24\tInternal metrics telemetry disabled\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-07-15T11:22:25.012Z\tinfo\tbuilders/builders.go:26\tDevelopment component. May change in the future.\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:22:25.017Z\tinfo\tservice@v0.139.0/service.go:222\tStarting otelcol-ebpf-profiler...\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"Version\": \"0.140.0\", \"NumCPU\": 8}\n2026-07-15T11:22:25.017Z\tinfo\textensions/extensions.go:40\tStarting extensions...\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-07-15T11:22:25.017Z\tinfo\tInterpreter tracers: perl,php,python,hotspot,ruby,v8,dotnet,go,labels\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:22:25.306Z\tinfo\tFound offsets: task stack 0x20, pt_regs 0x3f48, tpbase 0x25a8\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:22:25.574Z\tinfo\tLoaded custom__generic program (FD: 78)\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:22:25.574Z\tinfo\tSupports generic eBPF map batch operations\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:22:25.574Z\tinfo\tSupports LPM trie eBPF map batch operations\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:22:25.575Z\tinfo\teBPF tracer loaded\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:22:25.579Z\tinfo\tAttached tracer program\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:22:25.579Z\tinfo\tAttached sched monitor\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:22:25.612Z\tinfo\tservice@v0.139.0/service.go:245\tEverything is ready. Begin running and processing data.\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-07-15T11:22:29.963Z\terror\tFailed to load /home/yunwei37/.local/opt/gh-2.96.0/bin/gh (0x7c1d5017ea0a0a58): unsupported Go version go1.26.4 (need >= 1.13 and <= 1.25)\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\ngo.opentelemetry.io/ebpf-profiler/internal/log.Errorf\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/internal/log/logging.go:66\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*executableInfoManagerState).detectAndLoadInterpData\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:333\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*ExecutableInfoManager).AddOrIncRef\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:229\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).handleNewMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:256\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).processNewExecMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:384\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).synchronizeMappings\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:511\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).SynchronizeProcess\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:648\ngo.opentelemetry.io/ebpf-profiler/tracer.(*Tracer).processPIDEvents\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/tracer/events.go:51\n2026-07-15T11:22:30.044Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 5, \"sample records\": 3510}\n2026-07-15T11:22:34.519Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 3182}\n2026-07-15T11:22:39.837Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 6, \"sample records\": 5872}\n2026-07-15T11:22:44.283Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 6, \"sample records\": 3509}\n2026-07-15T11:22:50.255Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 3590}\n2026-07-15T11:22:54.344Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 2596}\n2026-07-15T11:22:59.619Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 3439}\n2026-07-15T11:23:05.154Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 3124}\n2026-07-15T11:23:09.600Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 1033}\n2026-07-15T11:23:14.191Z\terror\tFailed to load /snap/snapd/27406/usr/lib/snapd/snapd (0x3c327b5f3afdbc0a): not a Go executable\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\ngo.opentelemetry.io/ebpf-profiler/internal/log.Errorf\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/internal/log/logging.go:66\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*executableInfoManagerState).detectAndLoadInterpData\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:333\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*ExecutableInfoManager).AddOrIncRef\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:229\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).handleNewMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:256\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).processNewExecMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:384\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).synchronizeMappings\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:511\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).SynchronizeProcess\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:648\ngo.opentelemetry.io/ebpf-profiler/tracer.(*Tracer).processPIDEvents\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/tracer/events.go:51\n2026-07-15T11:23:14.192Z\terror\tFailed to load /snap/snapd/27406/usr/lib/snapd/snapd (0x3c327b5f3afdbc0a): not a Go executable\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\ngo.opentelemetry.io/ebpf-profiler/internal/log.Errorf\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/internal/log/logging.go:66\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*executableInfoManagerState).detectAndLoadInterpData\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:333\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*ExecutableInfoManager).AddOrIncRef\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:229\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).handleNewMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:256\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).processNewExecMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:384\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).synchronizeMappings\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:511\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).SynchronizeProcess\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:648\ngo.opentelemetry.io/ebpf-profiler/tracer.(*Tracer).processPIDEvents\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/tracer/events.go:51\n2026-07-15T11:23:14.212Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 6, \"sample records\": 3479}\n2026-07-15T11:23:18.408Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 5, \"sample records\": 2775}\n2026-07-15T11:23:24.181Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 3486}\n2026-07-15T11:23:28.973Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 3174}\n2026-07-15T11:23:33.970Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 6, \"sample records\": 3252}\n2026-07-15T11:23:39.819Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 3475}\n2026-07-15T11:23:44.604Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 3007}\n2026-07-15T11:23:49.420Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 2894}\n2026-07-15T11:23:54.943Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 3023}\n2026-07-15T11:24:00.718Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 4623}\n2026-07-15T11:24:06.100Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 2374}\n2026-07-15T11:24:11.538Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 3436}\n2026-07-15T11:24:17.279Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 3052}\n2026-07-15T11:24:23.283Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 2272}\n2026-07-15T11:24:28.868Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 2339}\n2026-07-15T11:24:34.129Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 6, \"sample records\": 1296}\n2026-07-15T11:24:38.519Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 6, \"sample records\": 585}\n2026-07-15T11:24:42.157Z\twarn\tFailed to get executable of process 245644: readlink /proc/245644/exe: no such file or directory\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-15T11:24:43.832Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 1061}\n2026-07-15T11:24:48.575Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 1136}\n2026-07-15T11:24:52.970Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 6, \"sample records\": 929}\n2026-07-15T11:24:57.547Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 6, \"sample records\": 979}\n2026-07-15T11:25:02.674Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"aabd6510-59b6-425f-b7ad-710526322334\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 8, \"sample records\": 1646}",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "otel_mixed_workload",
+  "status": "ok"
+}
