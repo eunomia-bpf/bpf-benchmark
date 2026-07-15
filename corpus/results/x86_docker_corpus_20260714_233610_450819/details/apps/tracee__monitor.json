@@ -1,0 +1,3030 @@
+{
+  "app": "tracee/monitor",
+  "baseline": {
+    "bpf": {
+      "22909": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 22909,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "22910": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 22910,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22911": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 22911,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "22912": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 22912,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "22913": {
+        "bytes_jited": 40,
+        "bytes_xlated": 32,
+        "id": 22913,
+        "name": "det_arg_ctx",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22914": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 22914,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "22915": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 22915,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "22916": {
+        "bytes_jited": 220,
+        "bytes_xlated": 248,
+        "id": 22916,
+        "name": "tracepoint__raw",
+        "run_cnt_delta": 275490224,
+        "run_time_ns_delta": 15702896238,
+        "type": "raw_tracepoint"
+      },
+      "22917": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 22917,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "22918": {
+        "bytes_jited": 2502,
+        "bytes_xlated": 4536,
+        "id": 22918,
+        "name": "sys_enter_init",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22919": {
+        "bytes_jited": 17596,
+        "bytes_xlated": 29976,
+        "id": 22919,
+        "name": "sys_enter_submi",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22920": {
+        "bytes_jited": 249,
+        "bytes_xlated": 304,
+        "id": 22920,
+        "name": "tracepoint__raw",
+        "run_cnt_delta": 275490270,
+        "run_time_ns_delta": 53954993986,
+        "type": "raw_tracepoint"
+      },
+      "22921": {
+        "bytes_jited": 2081,
+        "bytes_xlated": 3784,
+        "id": 22921,
+        "name": "sys_exit_init",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22922": {
+        "bytes_jited": 12067,
+        "bytes_xlated": 20488,
+        "id": 22922,
+        "name": "sys_exit_submit",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22923": {
+        "bytes_jited": 22766,
+        "bytes_xlated": 33600,
+        "id": 22923,
+        "name": "syscall__execve",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22924": {
+        "bytes_jited": 22901,
+        "bytes_xlated": 33792,
+        "id": 22924,
+        "name": "syscall__execve",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22925": {
+        "bytes_jited": 23042,
+        "bytes_xlated": 34000,
+        "id": 22925,
+        "name": "syscall__execve",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22926": {
+        "bytes_jited": 23177,
+        "bytes_xlated": 34192,
+        "id": 22926,
+        "name": "syscall__execve",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22927": {
+        "bytes_jited": 12268,
+        "bytes_xlated": 18640,
+        "id": 22927,
+        "name": "sys_dup_exit_ta",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22928": {
+        "bytes_jited": 20710,
+        "bytes_xlated": 33680,
+        "id": 22928,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 17768,
+        "run_time_ns_delta": 50420414,
+        "type": "raw_tracepoint"
+      },
+      "22929": {
+        "bytes_jited": 4506,
+        "bytes_xlated": 7584,
+        "id": 22929,
+        "name": "sched_process_f",
+        "run_cnt_delta": 17768,
+        "run_time_ns_delta": 51171719,
+        "type": "raw_tracepoint"
+      },
+      "22930": {
+        "bytes_jited": 55768,
+        "bytes_xlated": 104000,
+        "id": 22930,
+        "name": "lkm_seeker_modt",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22931": {
+        "bytes_jited": 154,
+        "bytes_xlated": 248,
+        "id": 22931,
+        "name": "heartbeat_captu",
+        "run_cnt_delta": 30,
+        "run_time_ns_delta": 118177,
+        "type": "kprobe"
+      },
+      "22932": {
+        "bytes_jited": 58811,
+        "bytes_xlated": 108528,
+        "id": 22932,
+        "name": "lkm_seeker_kset",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22933": {
+        "bytes_jited": 656,
+        "bytes_xlated": 1048,
+        "id": 22933,
+        "name": "lkm_seeker_mod_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22934": {
+        "bytes_jited": 52691,
+        "bytes_xlated": 97544,
+        "id": 22934,
+        "name": "lkm_seeker_proc",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22935": {
+        "bytes_jited": 3763,
+        "bytes_xlated": 6272,
+        "id": 22935,
+        "name": "lkm_seeker_new_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22936": {
+        "bytes_jited": 20242,
+        "bytes_xlated": 34872,
+        "id": 22936,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 573,
+        "run_time_ns_delta": 4457137,
+        "type": "raw_tracepoint"
+      },
+      "22937": {
+        "bytes_jited": 24410,
+        "bytes_xlated": 40152,
+        "id": 22937,
+        "name": "sched_process_e",
+        "run_cnt_delta": 573,
+        "run_time_ns_delta": 3967585,
+        "type": "raw_tracepoint"
+      },
+      "22938": {
+        "bytes_jited": 22737,
+        "bytes_xlated": 37400,
+        "id": 22938,
+        "name": "sched_process_e",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22939": {
+        "bytes_jited": 8712,
+        "bytes_xlated": 14568,
+        "id": 22939,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 17761,
+        "run_time_ns_delta": 30794936,
+        "type": "raw_tracepoint"
+      },
+      "22940": {
+        "bytes_jited": 1185,
+        "bytes_xlated": 2024,
+        "id": 22940,
+        "name": "sched_process_e",
+        "run_cnt_delta": 17761,
+        "run_time_ns_delta": 54589151,
+        "type": "raw_tracepoint"
+      },
+      "22941": {
+        "bytes_jited": 252,
+        "bytes_xlated": 440,
+        "id": 22941,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 17761,
+        "run_time_ns_delta": 15608768,
+        "type": "raw_tracepoint"
+      },
+      "22942": {
+        "bytes_jited": 9256,
+        "bytes_xlated": 13976,
+        "id": 22942,
+        "name": "syscall__accept",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22943": {
+        "bytes_jited": 950,
+        "bytes_xlated": 1568,
+        "id": 22943,
+        "name": "send_bin",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22944": {
+        "bytes_jited": 950,
+        "bytes_xlated": 1568,
+        "id": 22944,
+        "name": "send_bin_tp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22945": {
+        "bytes_jited": 28452,
+        "bytes_xlated": 49808,
+        "id": 22945,
+        "name": "trace_ret_vfs_w",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22946": {
+        "bytes_jited": 28614,
+        "bytes_xlated": 50064,
+        "id": 22946,
+        "name": "trace_ret_vfs_w",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22947": {
+        "bytes_jited": 28452,
+        "bytes_xlated": 49808,
+        "id": 22947,
+        "name": "trace_ret_kerne",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22948": {
+        "bytes_jited": 16647,
+        "bytes_xlated": 29040,
+        "id": 22948,
+        "name": "trace_ret_vfs_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22949": {
+        "bytes_jited": 16681,
+        "bytes_xlated": 29160,
+        "id": 22949,
+        "name": "trace_ret_vfs_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22950": {
+        "bytes_jited": 625,
+        "bytes_xlated": 1000,
+        "id": 22950,
+        "name": "syscall__init_m",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22951": {
+        "bytes_jited": 18169,
+        "bytes_xlated": 29896,
+        "id": 22951,
+        "name": "trace_load_elf_",
+        "run_cnt_delta": 1142,
+        "run_time_ns_delta": 1979951,
+        "type": "kprobe"
+      },
+      "22952": {
+        "bytes_jited": 11624,
+        "bytes_xlated": 19424,
+        "id": 22952,
+        "name": "process_execute",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22953": {
+        "bytes_jited": 14869,
+        "bytes_xlated": 24128,
+        "id": 22953,
+        "name": "syscall_checker",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22954": {
+        "bytes_jited": 943,
+        "bytes_xlated": 1608,
+        "id": 22954,
+        "name": "cgroup_mkdir_si",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22955": {
+        "bytes_jited": 925,
+        "bytes_xlated": 1568,
+        "id": 22955,
+        "name": "cgroup_rmdir_si",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22956": {
+        "bytes_jited": 2004,
+        "bytes_xlated": 3480,
+        "id": 22956,
+        "name": "uprobe__feature",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22957": {
+        "bytes_jited": 2004,
+        "bytes_xlated": 3480,
+        "id": 22957,
+        "name": "uprobe__feature",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22958": {
+        "bytes_jited": 2004,
+        "bytes_xlated": 3480,
+        "id": 22958,
+        "name": "uprobe__feature",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22959": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 22959,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sigfd",
+          "1",
+          "--eventfd",
+          "1",
+          "--kill",
+          "1",
+          "--futex",
+          "1",
+          "--prctl",
+          "1",
+          "--timeout",
+          "30s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/09b17bd0"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "set",
+            "sigfd",
+            "eventfd",
+            "kill",
+            "futex",
+            "prctl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 30.028208667994477,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [2491269] setting to a 30 secs run per stressor\nstress-ng: info:  [2491269] dispatching hogs: 1 cap, 1 set, 1 sigfd, 1 eventfd, 1 kill, 1 futex, 1 prctl\nstress-ng: info:  [2491269] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [2491269] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2491269]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2491269] cap             3899425     30.00      1.57     24.42    129980.78      150067.02\nstress-ng: metrc: [2491269] set              269825     30.00      0.92     26.98      8994.16        9670.56\nstress-ng: metrc: [2491269] sigfd          36777072     30.00      5.19     35.61   1225890.19      901407.44\nstress-ng: metrc: [2491269] eventfd         2774139     30.00      1.58     13.24     92470.62      187240.78\nstress-ng: metrc: [2491269] kill             263439     30.00      0.35     28.65      8781.23        9081.85\nstress-ng: metrc: [2491269] futex           5466088     60.00      1.70     37.68     91100.68      138786.62\nstress-ng: metrc: [2491269] prctl             16355     30.00      4.92      3.68       545.16        1903.34\nstress-ng: info:  [2491269] skipped: 0\nstress-ng: info:  [2491269] passed: 7: cap (1) set (1) sigfd (1) eventfd (1) kill (1) futex (1) prctl (1)\nstress-ng: info:  [2491269] failed: 0\nstress-ng: info:  [2491269] metrics untrustworthy: 0\nstress-ng: info:  [2491269] successful run completed in 30.00 secs",
+        "workload_name": "stress_ng_tracee_syscall_hot"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "22960": {
+        "bytes_jited": 22901,
+        "bytes_xlated": 33792,
+        "id": 22960,
+        "name": "syscall__execve",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22961": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 22961,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "22962": {
+        "bytes_jited": 2081,
+        "bytes_xlated": 3784,
+        "id": 22962,
+        "name": "sys_exit_init",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22963": {
+        "bytes_jited": 2004,
+        "bytes_xlated": 3480,
+        "id": 22963,
+        "name": "uprobe__feature",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22964": {
+        "bytes_jited": 950,
+        "bytes_xlated": 1568,
+        "id": 22964,
+        "name": "send_bin",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22965": {
+        "bytes_jited": 55768,
+        "bytes_xlated": 104000,
+        "id": 22965,
+        "name": "lkm_seeker_modt",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22966": {
+        "bytes_jited": 16681,
+        "bytes_xlated": 29160,
+        "id": 22966,
+        "name": "trace_ret_vfs_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22967": {
+        "bytes_jited": 220,
+        "bytes_xlated": 248,
+        "id": 22967,
+        "name": "tracepoint__raw",
+        "run_cnt_delta": 265295130,
+        "run_time_ns_delta": 13459045211,
+        "type": "raw_tracepoint"
+      },
+      "22968": {
+        "bytes_jited": 20242,
+        "bytes_xlated": 34872,
+        "id": 22968,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 310,
+        "run_time_ns_delta": 2309608,
+        "type": "raw_tracepoint"
+      },
+      "22969": {
+        "bytes_jited": 22766,
+        "bytes_xlated": 33600,
+        "id": 22969,
+        "name": "syscall__execve",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22970": {
+        "bytes_jited": 2502,
+        "bytes_xlated": 4536,
+        "id": 22970,
+        "name": "sys_enter_init",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22971": {
+        "bytes_jited": 40,
+        "bytes_xlated": 32,
+        "id": 22971,
+        "name": "det_arg_ctx",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22972": {
+        "bytes_jited": 925,
+        "bytes_xlated": 1568,
+        "id": 22972,
+        "name": "cgroup_rmdir_si",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 2177,
+        "type": "raw_tracepoint"
+      },
+      "22973": {
+        "bytes_jited": 9256,
+        "bytes_xlated": 13976,
+        "id": 22973,
+        "name": "syscall__accept",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22974": {
+        "bytes_jited": 4506,
+        "bytes_xlated": 7584,
+        "id": 22974,
+        "name": "sched_process_f",
+        "run_cnt_delta": 16297,
+        "run_time_ns_delta": 45343711,
+        "type": "raw_tracepoint"
+      },
+      "22975": {
+        "bytes_jited": 16647,
+        "bytes_xlated": 29040,
+        "id": 22975,
+        "name": "trace_ret_vfs_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22976": {
+        "bytes_jited": 3763,
+        "bytes_xlated": 6272,
+        "id": 22976,
+        "name": "lkm_seeker_new_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22977": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 22977,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "22978": {
+        "bytes_jited": 943,
+        "bytes_xlated": 1608,
+        "id": 22978,
+        "name": "cgroup_mkdir_si",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 5025,
+        "type": "raw_tracepoint"
+      },
+      "22979": {
+        "bytes_jited": 203,
+        "bytes_xlated": 344,
+        "id": 22979,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 16280,
+        "run_time_ns_delta": 14238837,
+        "type": "raw_tracepoint"
+      },
+      "22980": {
+        "bytes_jited": 20710,
+        "bytes_xlated": 33680,
+        "id": 22980,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 16297,
+        "run_time_ns_delta": 46220554,
+        "type": "raw_tracepoint"
+      },
+      "22981": {
+        "bytes_jited": 28452,
+        "bytes_xlated": 49808,
+        "id": 22981,
+        "name": "trace_ret_kerne",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22982": {
+        "bytes_jited": 52691,
+        "bytes_xlated": 97544,
+        "id": 22982,
+        "name": "lkm_seeker_proc",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22983": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 22983,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22984": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 22984,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "22985": {
+        "bytes_jited": 249,
+        "bytes_xlated": 304,
+        "id": 22985,
+        "name": "tracepoint__raw",
+        "run_cnt_delta": 265295138,
+        "run_time_ns_delta": 43076965782,
+        "type": "raw_tracepoint"
+      },
+      "22986": {
+        "bytes_jited": 14869,
+        "bytes_xlated": 24128,
+        "id": 22986,
+        "name": "syscall_checker",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22987": {
+        "bytes_jited": 1185,
+        "bytes_xlated": 2024,
+        "id": 22987,
+        "name": "sched_process_e",
+        "run_cnt_delta": 16289,
+        "run_time_ns_delta": 50190085,
+        "type": "raw_tracepoint"
+      },
+      "22988": {
+        "bytes_jited": 12268,
+        "bytes_xlated": 18640,
+        "id": 22988,
+        "name": "sys_dup_exit_ta",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22989": {
+        "bytes_jited": 12067,
+        "bytes_xlated": 20488,
+        "id": 22989,
+        "name": "sys_exit_submit",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22990": {
+        "bytes_jited": 28614,
+        "bytes_xlated": 50064,
+        "id": 22990,
+        "name": "trace_ret_vfs_w",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22991": {
+        "bytes_jited": 656,
+        "bytes_xlated": 1048,
+        "id": 22991,
+        "name": "lkm_seeker_mod_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22992": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 22992,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "22993": {
+        "bytes_jited": 11624,
+        "bytes_xlated": 19424,
+        "id": 22993,
+        "name": "process_execute",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22994": {
+        "bytes_jited": 8712,
+        "bytes_xlated": 14568,
+        "id": 22994,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 16289,
+        "run_time_ns_delta": 25733668,
+        "type": "raw_tracepoint"
+      },
+      "22995": {
+        "bytes_jited": 23177,
+        "bytes_xlated": 34192,
+        "id": 22995,
+        "name": "syscall__execve",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "22996": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 22996,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "22997": {
+        "bytes_jited": 2004,
+        "bytes_xlated": 3480,
+        "id": 22997,
+        "name": "uprobe__feature",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22998": {
+        "bytes_jited": 28452,
+        "bytes_xlated": 49808,
+        "id": 22998,
+        "name": "trace_ret_vfs_w",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "22999": {
+        "bytes_jited": 58811,
+        "bytes_xlated": 108528,
+        "id": 22999,
+        "name": "lkm_seeker_kset",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "23000": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 23000,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23001": {
+        "bytes_jited": 18169,
+        "bytes_xlated": 29896,
+        "id": 23001,
+        "name": "trace_load_elf_",
+        "run_cnt_delta": 617,
+        "run_time_ns_delta": 1056014,
+        "type": "kprobe"
+      },
+      "23002": {
+        "bytes_jited": 22737,
+        "bytes_xlated": 37400,
+        "id": 23002,
+        "name": "sched_process_e",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "23003": {
+        "bytes_jited": 23042,
+        "bytes_xlated": 34000,
+        "id": 23003,
+        "name": "syscall__execve",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "23004": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 23004,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23005": {
+        "bytes_jited": 2004,
+        "bytes_xlated": 3480,
+        "id": 23005,
+        "name": "uprobe__feature",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "23006": {
+        "bytes_jited": 950,
+        "bytes_xlated": 1568,
+        "id": 23006,
+        "name": "send_bin_tp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "23007": {
+        "bytes_jited": 154,
+        "bytes_xlated": 248,
+        "id": 23007,
+        "name": "heartbeat_captu",
+        "run_cnt_delta": 30,
+        "run_time_ns_delta": 117412,
+        "type": "kprobe"
+      },
+      "23008": {
+        "bytes_jited": 17596,
+        "bytes_xlated": 29976,
+        "id": 23008,
+        "name": "sys_enter_submi",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "23009": {
+        "bytes_jited": 625,
+        "bytes_xlated": 1000,
+        "id": 23009,
+        "name": "syscall__init_m",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "23010": {
+        "bytes_jited": 24410,
+        "bytes_xlated": 40152,
+        "id": 23010,
+        "name": "sched_process_e",
+        "run_cnt_delta": 310,
+        "run_time_ns_delta": 2070537,
+        "type": "raw_tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sigfd",
+          "1",
+          "--eventfd",
+          "1",
+          "--kill",
+          "1",
+          "--futex",
+          "1",
+          "--prctl",
+          "1",
+          "--timeout",
+          "30s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/09b17bd0"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "set",
+            "sigfd",
+            "eventfd",
+            "kill",
+            "futex",
+            "prctl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 30.03542757199466,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [2544131] setting to a 30 secs run per stressor\nstress-ng: info:  [2544131] dispatching hogs: 1 cap, 1 set, 1 sigfd, 1 eventfd, 1 kill, 1 futex, 1 prctl\nstress-ng: info:  [2544131] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [2544131] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2544131]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2544131] cap             3847517     30.00      1.59     24.30    128250.54      148576.63\nstress-ng: metrc: [2544131] set              278075     30.00      0.94     26.81      9269.16       10021.81\nstress-ng: metrc: [2544131] sigfd          36775414     30.00      5.13     35.00   1225793.60      916353.34\nstress-ng: metrc: [2544131] eventfd         2892392     30.00      1.66     13.59     96410.91      189588.62\nstress-ng: metrc: [2544131] kill             263703     30.00      0.37     28.37      8790.05        9175.71\nstress-ng: metrc: [2544131] futex           5565302     60.00      1.64     37.90     92754.64      140755.96\nstress-ng: metrc: [2544131] prctl             15713     30.00      4.79      3.43       523.76        1910.81\nstress-ng: info:  [2544131] skipped: 0\nstress-ng: info:  [2544131] passed: 7: cap (1) set (1) sigfd (1) eventfd (1) kill (1) futex (1) prctl (1)\nstress-ng: info:  [2544131] failed: 0\nstress-ng: info:  [2544131] metrics untrustworthy: 0\nstress-ng: info:  [2544131] successful run completed in 30.01 secs",
+        "workload_name": "stress_ng_tracee_syscall_hot"
+      }
+    ]
+  },
+  "rejit_result": {
+    "deployment_specialization": {
+      "enabled_passes": [
+        "map_inline"
+      ],
+      "training_workload": {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sigfd",
+          "1",
+          "--eventfd",
+          "1",
+          "--kill",
+          "1",
+          "--futex",
+          "1",
+          "--prctl",
+          "1",
+          "--timeout",
+          "30s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/09b17bd0"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "set",
+            "sigfd",
+            "eventfd",
+            "kill",
+            "futex",
+            "prctl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 30.033079815999372,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [2509038] setting to a 30 secs run per stressor\nstress-ng: info:  [2509038] dispatching hogs: 1 cap, 1 set, 1 sigfd, 1 eventfd, 1 kill, 1 futex, 1 prctl\nstress-ng: info:  [2509038] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [2509038] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2509038]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2509038] cap             4173059     30.00      1.73     24.41    139101.98      159663.59\nstress-ng: metrc: [2509038] set              271014     30.00      0.87     26.83      9033.79        9782.72\nstress-ng: metrc: [2509038] sigfd          42399420     30.00      5.83     36.33   1413296.85     1005707.99\nstress-ng: metrc: [2509038] eventfd         2926659     30.00      1.59     13.06     97553.39      199854.04\nstress-ng: metrc: [2509038] kill             257370     30.00      0.40     28.41      8578.93        8933.32\nstress-ng: metrc: [2509038] futex           5859596     60.00      1.89     38.02     97659.14      146827.27\nstress-ng: metrc: [2509038] prctl             16618     30.00      4.85      3.53       553.93        1981.75\nstress-ng: info:  [2509038] skipped: 0\nstress-ng: info:  [2509038] passed: 7: cap (1) set (1) sigfd (1) eventfd (1) kill (1) futex (1) prctl (1)\nstress-ng: info:  [2509038] failed: 0\nstress-ng: info:  [2509038] metrics untrustworthy: 0\nstress-ng: info:  [2509038] successful run completed in 30.01 secs",
+        "workload_name": "stress_ng_tracee_syscall_hot"
+      },
+      "training_workloads": {
+        "state_observation": {
+          "command": [
+            "/usr/bin/stress-ng",
+            "--cap",
+            "1",
+            "--set",
+            "1",
+            "--sigfd",
+            "1",
+            "--eventfd",
+            "1",
+            "--kill",
+            "1",
+            "--futex",
+            "1",
+            "--prctl",
+            "1",
+            "--timeout",
+            "30s",
+            "--metrics-brief",
+            "--temp-path",
+            "/var/tmp/bpfrejit-runtime/09b17bd0"
+          ],
+          "config": {
+            "stressors": [
+              "cap",
+              "set",
+              "sigfd",
+              "eventfd",
+              "kill",
+              "futex",
+              "prctl"
+            ],
+            "tool": "stress-ng"
+          },
+          "duration_s": 30.033079815999372,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "stress-ng: info:  [2509038] setting to a 30 secs run per stressor\nstress-ng: info:  [2509038] dispatching hogs: 1 cap, 1 set, 1 sigfd, 1 eventfd, 1 kill, 1 futex, 1 prctl\nstress-ng: info:  [2509038] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [2509038] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2509038]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2509038] cap             4173059     30.00      1.73     24.41    139101.98      159663.59\nstress-ng: metrc: [2509038] set              271014     30.00      0.87     26.83      9033.79        9782.72\nstress-ng: metrc: [2509038] sigfd          42399420     30.00      5.83     36.33   1413296.85     1005707.99\nstress-ng: metrc: [2509038] eventfd         2926659     30.00      1.59     13.06     97553.39      199854.04\nstress-ng: metrc: [2509038] kill             257370     30.00      0.40     28.41      8578.93        8933.32\nstress-ng: metrc: [2509038] futex           5859596     60.00      1.89     38.02     97659.14      146827.27\nstress-ng: metrc: [2509038] prctl             16618     30.00      4.85      3.53       553.93        1981.75\nstress-ng: info:  [2509038] skipped: 0\nstress-ng: info:  [2509038] passed: 7: cap (1) set (1) sigfd (1) eventfd (1) kill (1) futex (1) prctl (1)\nstress-ng: info:  [2509038] failed: 0\nstress-ng: info:  [2509038] metrics untrustworthy: 0\nstress-ng: info:  [2509038] successful run completed in 30.01 secs",
+          "workload_name": "stress_ng_tracee_syscall_hot"
+        }
+      }
+    },
+    "mode": "live_swap",
+    "per_program": {
+      "22909": {
+        "passes": [
+          {
+            "bpfopt_ms": 6,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22909,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 23004,
+          "prog_name": "",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "22910": {
+        "passes": [
+          {
+            "bpfopt_ms": 5,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22910,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 22983,
+          "prog_name": "",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22911": {
+        "passes": [
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22911,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 22961,
+          "prog_name": "",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "22912": {
+        "passes": [
+          {
+            "bpfopt_ms": 5,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22912,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 22992,
+          "prog_name": "libbpf_nametest",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "22913": {
+        "passes": [
+          {
+            "bpfopt_ms": 5,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 4,
+              "insn_count_before": 4,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22913,
+        "program": {
+          "final_insn_count": 4,
+          "orig_insn_count": 4,
+          "prog_id": 22971,
+          "prog_name": "det_arg_ctx",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22914": {
+        "passes": [
+          {
+            "bpfopt_ms": 5,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 5,
+              "insn_count_before": 5,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22914,
+        "program": {
+          "final_insn_count": 5,
+          "orig_insn_count": 5,
+          "prog_id": 23000,
+          "prog_name": "",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "22915": {
+        "passes": [
+          {
+            "bpfopt_ms": 5,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 6,
+              "insn_count_before": 6,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22915,
+        "program": {
+          "final_insn_count": 6,
+          "orig_insn_count": 6,
+          "prog_id": 22977,
+          "prog_name": "",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "22916": {
+        "passes": [
+          {
+            "bpfopt_ms": 7,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 29,
+              "insn_count_before": 29,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 15,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22916,
+        "program": {
+          "final_insn_count": 29,
+          "orig_insn_count": 29,
+          "prog_id": 22967,
+          "prog_name": "tracepoint__raw",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22917": {
+        "passes": [
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22917,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 22984,
+          "prog_name": "",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "22918": {
+        "passes": [
+          {
+            "bpfopt_ms": 9,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 579,
+              "insn_count_before": 579,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22918,
+        "program": {
+          "final_insn_count": 579,
+          "orig_insn_count": 579,
+          "prog_id": 22970,
+          "prog_name": "sys_enter_init",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22919": {
+        "passes": [
+          {
+            "bpfopt_ms": 24,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 3731,
+              "insn_count_before": 3731,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 6,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22919,
+        "program": {
+          "final_insn_count": 3731,
+          "orig_insn_count": 3731,
+          "prog_id": 23008,
+          "prog_name": "sys_enter_submi",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22920": {
+        "passes": [
+          {
+            "bpfopt_ms": 9,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 36,
+              "insn_count_before": 36,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 22,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22920,
+        "program": {
+          "final_insn_count": 36,
+          "orig_insn_count": 36,
+          "prog_id": 22985,
+          "prog_name": "tracepoint__raw",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22921": {
+        "passes": [
+          {
+            "bpfopt_ms": 10,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 482,
+              "insn_count_before": 482,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22921,
+        "program": {
+          "final_insn_count": 482,
+          "orig_insn_count": 482,
+          "prog_id": 22962,
+          "prog_name": "sys_exit_init",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22922": {
+        "passes": [
+          {
+            "bpfopt_ms": 18,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2553,
+              "insn_count_before": 2553,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 4,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22922,
+        "program": {
+          "final_insn_count": 2553,
+          "orig_insn_count": 2553,
+          "prog_id": 22989,
+          "prog_name": "sys_exit_submit",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22923": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 4165,
+              "insn_count_before": 4165,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 5,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22923,
+        "program": {
+          "final_insn_count": 4165,
+          "orig_insn_count": 4165,
+          "prog_id": 22969,
+          "prog_name": "syscall__execve",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22924": {
+        "passes": [
+          {
+            "bpfopt_ms": 26,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 4191,
+              "insn_count_before": 4191,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 4,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22924,
+        "program": {
+          "final_insn_count": 4191,
+          "orig_insn_count": 4191,
+          "prog_id": 22960,
+          "prog_name": "syscall__execve",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22925": {
+        "passes": [
+          {
+            "bpfopt_ms": 24,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 4219,
+              "insn_count_before": 4219,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 4,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22925,
+        "program": {
+          "final_insn_count": 4219,
+          "orig_insn_count": 4219,
+          "prog_id": 23003,
+          "prog_name": "syscall__execve",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22926": {
+        "passes": [
+          {
+            "bpfopt_ms": 24,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 4245,
+              "insn_count_before": 4245,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 3,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22926,
+        "program": {
+          "final_insn_count": 4245,
+          "orig_insn_count": 4245,
+          "prog_id": 22995,
+          "prog_name": "syscall__execve",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22927": {
+        "passes": [
+          {
+            "bpfopt_ms": 15,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2353,
+              "insn_count_before": 2353,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22927,
+        "program": {
+          "final_insn_count": 2353,
+          "orig_insn_count": 2353,
+          "prog_id": 22988,
+          "prog_name": "sys_dup_exit_ta",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22928": {
+        "passes": [
+          {
+            "bpfopt_ms": 24,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 4268,
+              "insn_count_before": 4268,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 17,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22928,
+        "program": {
+          "final_insn_count": 4268,
+          "orig_insn_count": 4268,
+          "prog_id": 22980,
+          "prog_name": "tracepoint__sch",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22929": {
+        "passes": [
+          {
+            "bpfopt_ms": 9,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 1036,
+              "insn_count_before": 1036,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 18,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22929,
+        "program": {
+          "final_insn_count": 1036,
+          "orig_insn_count": 1036,
+          "prog_id": 22974,
+          "prog_name": "sched_process_f",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22930": {
+        "passes": [
+          {
+            "bpfopt_ms": 80,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 13815,
+              "insn_count_before": 13815,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 134,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22930,
+        "program": {
+          "final_insn_count": 13815,
+          "orig_insn_count": 13815,
+          "prog_id": 22965,
+          "prog_name": "lkm_seeker_modt",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22931": {
+        "passes": [
+          {
+            "bpfopt_ms": 6,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 27,
+              "insn_count_before": 27,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 24,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22931,
+        "program": {
+          "final_insn_count": 27,
+          "orig_insn_count": 27,
+          "prog_id": 23007,
+          "prog_name": "heartbeat_captu",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22932": {
+        "passes": [
+          {
+            "bpfopt_ms": 88,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 14602,
+              "insn_count_before": 14602,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 293,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22932,
+        "program": {
+          "final_insn_count": 14602,
+          "orig_insn_count": 14602,
+          "prog_id": 22999,
+          "prog_name": "lkm_seeker_kset",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22933": {
+        "passes": [
+          {
+            "bpfopt_ms": 7,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 218,
+              "insn_count_before": 218,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22933,
+        "program": {
+          "final_insn_count": 218,
+          "orig_insn_count": 218,
+          "prog_id": 22991,
+          "prog_name": "lkm_seeker_mod_",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22934": {
+        "passes": [
+          {
+            "bpfopt_ms": 77,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 13343,
+              "insn_count_before": 13343,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 219,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22934,
+        "program": {
+          "final_insn_count": 13343,
+          "orig_insn_count": 13343,
+          "prog_id": 22982,
+          "prog_name": "lkm_seeker_proc",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22935": {
+        "passes": [
+          {
+            "bpfopt_ms": 8,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 888,
+              "insn_count_before": 888,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 6,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22935,
+        "program": {
+          "final_insn_count": 888,
+          "orig_insn_count": 888,
+          "prog_id": 22976,
+          "prog_name": "lkm_seeker_new_",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22936": {
+        "passes": [
+          {
+            "bpfopt_ms": 25,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 4301,
+              "insn_count_before": 4301,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 25,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22936,
+        "program": {
+          "final_insn_count": 4301,
+          "orig_insn_count": 4301,
+          "prog_id": 22968,
+          "prog_name": "tracepoint__sch",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22937": {
+        "passes": [
+          {
+            "bpfopt_ms": 27,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 5041,
+              "insn_count_before": 5041,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 13,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22937,
+        "program": {
+          "final_insn_count": 5041,
+          "orig_insn_count": 5041,
+          "prog_id": 23010,
+          "prog_name": "sched_process_e",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22938": {
+        "passes": [
+          {
+            "bpfopt_ms": 26,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 4672,
+              "insn_count_before": 4672,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 6,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22938,
+        "program": {
+          "final_insn_count": 4672,
+          "orig_insn_count": 4672,
+          "prog_id": 23002,
+          "prog_name": "sched_process_e",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22939": {
+        "passes": [
+          {
+            "bpfopt_ms": 15,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 1833,
+              "insn_count_before": 1833,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 33,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22939,
+        "program": {
+          "final_insn_count": 1833,
+          "orig_insn_count": 1833,
+          "prog_id": 22994,
+          "prog_name": "tracepoint__sch",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22940": {
+        "passes": [
+          {
+            "bpfopt_ms": 6,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 268,
+              "insn_count_before": 268,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 1,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22940,
+        "program": {
+          "final_insn_count": 268,
+          "orig_insn_count": 268,
+          "prog_id": 22987,
+          "prog_name": "sched_process_e",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22941": {
+        "passes": [
+          {
+            "bpfopt_ms": 9,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [
+                {
+                  "key_hex": "00000000",
+                  "map_id": 12975,
+                  "stability": "phase-stable",
+                  "value_hex": "88bf250000020000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000001000000000000000100000000000000010000000000000001000000000000000100000000000000010000000000000001000000000000000100000000000000010000000000000001000000000000000100000000000000010000000000000001000000000000000000000000000000ffffffffffffffff0000000000000000ffffffffffffffff"
+                }
+              ],
+              "insn_count_after": 40,
+              "insn_count_before": 46,
+              "insn_delta": -6,
+              "pass": "map_inline",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 22,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability phase-stable --only-hinted --inline-hint=config_map:00000000",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22941,
+        "program": {
+          "final_insn_count": 40,
+          "orig_insn_count": 46,
+          "prog_id": 22979,
+          "prog_name": "tracepoint__sch",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22942": {
+        "passes": [
+          {
+            "bpfopt_ms": 12,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 1713,
+              "insn_count_before": 1713,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22942,
+        "program": {
+          "final_insn_count": 1713,
+          "orig_insn_count": 1713,
+          "prog_id": 22973,
+          "prog_name": "syscall__accept",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22943": {
+        "passes": [
+          {
+            "bpfopt_ms": 6,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 180,
+              "insn_count_before": 180,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 1,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22943,
+        "program": {
+          "final_insn_count": 180,
+          "orig_insn_count": 180,
+          "prog_id": 22964,
+          "prog_name": "send_bin",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22944": {
+        "passes": [
+          {
+            "bpfopt_ms": 6,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 180,
+              "insn_count_before": 180,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 1,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22944,
+        "program": {
+          "final_insn_count": 180,
+          "orig_insn_count": 180,
+          "prog_id": 23006,
+          "prog_name": "send_bin_tp",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22945": {
+        "passes": [
+          {
+            "bpfopt_ms": 36,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 6288,
+              "insn_count_before": 6288,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 18,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22945,
+        "program": {
+          "final_insn_count": 6288,
+          "orig_insn_count": 6288,
+          "prog_id": 22998,
+          "prog_name": "trace_ret_vfs_w",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22946": {
+        "passes": [
+          {
+            "bpfopt_ms": 35,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 6311,
+              "insn_count_before": 6311,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 20,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22946,
+        "program": {
+          "final_insn_count": 6311,
+          "orig_insn_count": 6311,
+          "prog_id": 22990,
+          "prog_name": "trace_ret_vfs_w",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22947": {
+        "passes": [
+          {
+            "bpfopt_ms": 36,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 6288,
+              "insn_count_before": 6288,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 18,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22947,
+        "program": {
+          "final_insn_count": 6288,
+          "orig_insn_count": 6288,
+          "prog_id": 22981,
+          "prog_name": "trace_ret_kerne",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22948": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 3725,
+              "insn_count_before": 3725,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 10,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22948,
+        "program": {
+          "final_insn_count": 3725,
+          "orig_insn_count": 3725,
+          "prog_id": 22975,
+          "prog_name": "trace_ret_vfs_r",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22949": {
+        "passes": [
+          {
+            "bpfopt_ms": 22,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 3740,
+              "insn_count_before": 3740,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 10,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22949,
+        "program": {
+          "final_insn_count": 3740,
+          "orig_insn_count": 3740,
+          "prog_id": 22966,
+          "prog_name": "trace_ret_vfs_r",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22950": {
+        "passes": [
+          {
+            "bpfopt_ms": 6,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 101,
+              "insn_count_before": 101,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22950,
+        "program": {
+          "final_insn_count": 101,
+          "orig_insn_count": 101,
+          "prog_id": 23009,
+          "prog_name": "syscall__init_m",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22951": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 3749,
+              "insn_count_before": 3749,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 56,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22951,
+        "program": {
+          "final_insn_count": 3749,
+          "orig_insn_count": 3749,
+          "prog_id": 23001,
+          "prog_name": "trace_load_elf_",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22952": {
+        "passes": [
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2441,
+              "insn_count_before": 2441,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22952,
+        "program": {
+          "final_insn_count": 2441,
+          "orig_insn_count": 2441,
+          "prog_id": 22993,
+          "prog_name": "process_execute",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22953": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 4728,
+              "insn_count_before": 4728,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 6,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22953,
+        "program": {
+          "final_insn_count": 4728,
+          "orig_insn_count": 4728,
+          "prog_id": 22986,
+          "prog_name": "syscall_checker",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22954": {
+        "passes": [
+          {
+            "bpfopt_ms": 6,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 200,
+              "insn_count_before": 200,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 18,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22954,
+        "program": {
+          "final_insn_count": 200,
+          "orig_insn_count": 200,
+          "prog_id": 22978,
+          "prog_name": "cgroup_mkdir_si",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22955": {
+        "passes": [
+          {
+            "bpfopt_ms": 6,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 195,
+              "insn_count_before": 195,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 13,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22955,
+        "program": {
+          "final_insn_count": 195,
+          "orig_insn_count": 195,
+          "prog_id": 22972,
+          "prog_name": "cgroup_rmdir_si",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "22956": {
+        "passes": [
+          {
+            "bpfopt_ms": 7,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 454,
+              "insn_count_before": 454,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22956,
+        "program": {
+          "final_insn_count": 454,
+          "orig_insn_count": 454,
+          "prog_id": 22963,
+          "prog_name": "uprobe__feature",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22957": {
+        "passes": [
+          {
+            "bpfopt_ms": 8,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 454,
+              "insn_count_before": 454,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22957,
+        "program": {
+          "final_insn_count": 454,
+          "orig_insn_count": 454,
+          "prog_id": 23005,
+          "prog_name": "uprobe__feature",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22958": {
+        "passes": [
+          {
+            "bpfopt_ms": 7,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 454,
+              "insn_count_before": 454,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22958,
+        "program": {
+          "final_insn_count": 454,
+          "orig_insn_count": 454,
+          "prog_id": 22997,
+          "prog_name": "uprobe__feature",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22959": {
+        "passes": [
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22959,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 22996,
+          "prog_name": "",
+          "prog_type": 5
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "tracee",
+  "runner_details": {
+    "command_used": [
+      "/artifacts/tracee/bin/tracee",
+      "--events",
+      "capget,capset,setuid,setgid,setresuid,setresgid,setreuid,setregid,signalfd4,eventfd2,kill,tgkill,futex,prctl",
+      "--output",
+      "none",
+      "--server",
+      "healthz",
+      "--server",
+      "http-address=:3366",
+      "--signatures-dir",
+      "/var/tmp/bpfrejit-runtime/09b17bd0/tracee/signatures",
+      "--capabilities",
+      "bypass=true"
+    ],
+    "process_output": {
+      "returncode": -9,
+      "stderr_tail": "{\"level\":\"warn\",\"ts\":1784072331.1328373,\"msg\":\"Lost 56097 events\"}\n{\"level\":\"warn\",\"ts\":1784072331.139425,\"msg\":\"Lost 655500 events\"}\n{\"level\":\"warn\",\"ts\":1784072331.202695,\"msg\":\"Lost 101198 events\"}\n{\"level\":\"warn\",\"ts\":1784072331.2950807,\"msg\":\"Lost 34775 events\"}\n{\"level\":\"warn\",\"ts\":1784072331.362525,\"msg\":\"Lost 295767 events\"}\n{\"level\":\"warn\",\"ts\":1784072331.4112277,\"msg\":\"Lost 226943 events\"}\n{\"level\":\"warn\",\"ts\":1784072331.4854817,\"msg\":\"Lost 44255 events\"}\n{\"level\":\"warn\",\"ts\":1784072331.5690842,\"msg\":\"Lost 12546 events\"}\n{\"level\":\"warn\",\"ts\":1784072331.6290894,\"msg\":\"Lost 175731 events\"}\n{\"level\":\"warn\",\"ts\":1784072331.7128532,\"msg\":\"Lost 261605 events\"}\n{\"level\":\"warn\",\"ts\":1784072331.7760127,\"msg\":\"Lost 39464 events\"}\n{\"level\":\"warn\",\"ts\":1784072331.8656368,\"msg\":\"Lost 9046 events\"}\n{\"level\":\"warn\",\"ts\":1784072331.921921,\"msg\":\"Lost 191960 events\"}\n{\"level\":\"warn\",\"ts\":1784072331.976906,\"msg\":\"Lost 272690 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.043705,\"msg\":\"Lost 43440 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.12781,\"msg\":\"Lost 13482 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.1784985,\"msg\":\"Lost 169248 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.2427893,\"msg\":\"Lost 211706 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.3016663,\"msg\":\"Lost 38275 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.363283,\"msg\":\"Lost 36 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.401099,\"msg\":\"Lost 7355 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.4617734,\"msg\":\"Lost 166658 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.531478,\"msg\":\"Lost 254557 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.5873883,\"msg\":\"Lost 39754 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.7215905,\"msg\":\"Lost 12307 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.7804408,\"msg\":\"Lost 181420 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.8368833,\"msg\":\"Lost 80890 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.8489852,\"msg\":\"Lost 40093 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.9004424,\"msg\":\"Lost 84 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.9106731,\"msg\":\"Lost 273603 events\"}\n{\"level\":\"warn\",\"ts\":1784072332.9818778,\"msg\":\"Lost 16852 events\"}\n{\"level\":\"warn\",\"ts\":1784072333.0342114,\"msg\":\"Lost 193020 events\"}\n{\"level\":\"warn\",\"ts\":1784072333.111553,\"msg\":\"Lost 40009 events\"}\n{\"level\":\"warn\",\"ts\":1784072333.1917076,\"msg\":\"Lost 233582 events\"}\n{\"level\":\"warn\",\"ts\":1784072333.2484617,\"msg\":\"Lost 9225 events\"}\n{\"level\":\"warn\",\"ts\":1784072333.3211532,\"msg\":\"Lost 171164 events\"}\n{\"level\":\"warn\",\"ts\":1784072333.381079,\"msg\":\"Lost 41655 events\"}\n{\"level\":\"warn\",\"ts\":1784072333.455397,\"msg\":\"Lost 274310 events\"}\n{\"level\":\"warn\",\"ts\":1784072333.503078,\"msg\":\"Lost 13181 events\"}\n{\"level\":\"warn\",\"ts\":1784072333.5635746,\"msg\":\"Lost 165435 events\"}\n{\"level\":\"warn\",\"ts\":1784072333.6406338,\"msg\":\"Lost 40553 events\"}\n{\"level\":\"warn\",\"ts\":1784072333.7146988,\"msg\":\"Lost 230334 events\"}\n{\"level\":\"warn\",\"ts\":1784072333.7778144,\"msg\":\"Lost 6836 events\"}\n{\"level\":\"warn\",\"ts\":1784072333.832514,\"msg\":\"Lost 156467 events\"}\n{\"level\":\"warn\",\"ts\":1784072333.8932233,\"msg\":\"Lost 35286 events\"}\n{\"level\":\"warn\",\"ts\":1784072333.9765623,\"msg\":\"Lost 280719 events\"}\n{\"level\":\"warn\",\"ts\":1784072334.0467844,\"msg\":\"Lost 11025 events\"}\n{\"level\":\"warn\",\"ts\":1784072334.09355,\"msg\":\"Lost 160404 events\"}\n{\"level\":\"warn\",\"ts\":1784072334.168352,\"msg\":\"Lost 37223 events\"}\n{\"level\":\"warn\",\"ts\":1784072334.243717,\"msg\":\"Lost 238970 events\"}\n{\"level\":\"warn\",\"ts\":1784072334.3007112,\"msg\":\"Lost 10731 events\"}\n{\"level\":\"warn\",\"ts\":1784072334.3505912,\"msg\":\"Lost 167921 events\"}\n{\"level\":\"warn\",\"ts\":1784072334.4262128,\"msg\":\"Lost 39523 events\"}\n{\"level\":\"warn\",\"ts\":1784072334.50067,\"msg\":\"Lost 246908 events\"}\n{\"level\":\"warn\",\"ts\":1784072334.550665,\"msg\":\"Lost 8672 events\"}\n{\"level\":\"warn\",\"ts\":1784072334.6105947,\"msg\":\"Lost 160504 events\"}\n{\"level\":\"warn\",\"ts\":1784072334.692389,\"msg\":\"Lost 39931 events\"}\n{\"level\":\"warn\",\"ts\":1784072334.7477615,\"msg\":\"Lost 206036 events\"}\n{\"level\":\"warn\",\"ts\":1784072334.8213491,\"msg\":\"Lost 12599 events\"}\n{\"level\":\"warn\",\"ts\":1784072334.8826923,\"msg\":\"Lost 153125 events\"}\n{\"level\":\"warn\",\"ts\":1784072334.9457395,\"msg\":\"Lost 39468 events\"}\n{\"level\":\"warn\",\"ts\":1784072335.0226228,\"msg\":\"Lost 272268 events\"}\n{\"level\":\"warn\",\"ts\":1784072335.0756185,\"msg\":\"Lost 10873 events\"}\n{\"level\":\"warn\",\"ts\":1784072335.1404264,\"msg\":\"Lost 158684 events\"}\n{\"level\":\"warn\",\"ts\":1784072335.2080855,\"msg\":\"Lost 43494 events\"}\n{\"level\":\"warn\",\"ts\":1784072335.2726195,\"msg\":\"Lost 266106 events\"}\n{\"level\":\"warn\",\"ts\":1784072335.3412771,\"msg\":\"Lost 6743 events\"}\n{\"level\":\"warn\",\"ts\":1784072335.4025857,\"msg\":\"Lost 150829 events\"}\n{\"level\":\"warn\",\"ts\":1784072335.4953425,\"msg\":\"Lost 43125 events\"}\n{\"level\":\"warn\",\"ts\":1784072335.5586035,\"msg\":\"Lost 15 events\"}\n{\"level\":\"warn\",\"ts\":1784072335.5670674,\"msg\":\"Lost 258477 events\"}\n{\"level\":\"warn\",\"ts\":1784072335.633028,\"msg\":\"Lost 7040 events\"}\n{\"level\":\"warn\",\"ts\":1784072335.6897113,\"msg\":\"Lost 188772 events\"}\n{\"level\":\"warn\",\"ts\":1784072335.7659411,\"msg\":\"Lost 47235 events\"}\n{\"level\":\"warn\",\"ts\":1784072335.8515232,\"msg\":\"Lost 307633 events\"}\n{\"level\":\"warn\",\"ts\":1784072335.9189987,\"msg\":\"Lost 12466 events\"}\n{\"level\":\"warn\",\"ts\":1784072335.97056,\"msg\":\"Lost 162305 events\"}\n{\"level\":\"warn\",\"ts\":1784072336.045369,\"msg\":\"Lost 37204 events\"}\n{\"level\":\"warn\",\"ts\":1784072336.1145732,\"msg\":\"Lost 241827 events\"}\n{\"level\":\"warn\",\"ts\":1784072336.1821644,\"msg\":\"Lost 12715 events\"}\n{\"level\":\"warn\",\"ts\":1784072336.2328582,\"msg\":\"Lost 171847 events\"}\n{\"level\":\"warn\",\"ts\":1784072336.321484,\"msg\":\"Lost 43598 events\"}\n{\"level\":\"warn\",\"ts\":1784072336.3966515,\"msg\":\"Lost 260106 events\"}\n{\"level\":\"warn\",\"ts\":1784072336.4474208,\"msg\":\"Lost 8632 events\"}\n{\"level\":\"warn\",\"ts\":1784072336.5132565,\"msg\":\"Lost 172327 events\"}\n{\"level\":\"warn\",\"ts\":1784072336.573856,\"msg\":\"Lost 37409 events\"}\n{\"level\":\"warn\",\"ts\":1784072336.650331,\"msg\":\"Lost 292231 events\"}\n{\"level\":\"warn\",\"ts\":1784072336.715157,\"msg\":\"Lost 11425 events\"}\n{\"level\":\"warn\",\"ts\":1784072336.7771082,\"msg\":\"Lost 160942 events\"}\n{\"level\":\"warn\",\"ts\":1784072336.8548813,\"msg\":\"Lost 37707 events\"}\n{\"level\":\"warn\",\"ts\":1784072336.9391644,\"msg\":\"Lost 278351 events\"}\n{\"level\":\"warn\",\"ts\":1784072337.011132,\"msg\":\"Lost 9237 events\"}\n{\"level\":\"warn\",\"ts\":1784072337.082754,\"msg\":\"Lost 170710 events\"}\n{\"level\":\"warn\",\"ts\":1784072337.1671677,\"msg\":\"Lost 43006 events\"}\n{\"level\":\"warn\",\"ts\":1784072337.2282913,\"msg\":\"Lost 293334 events\"}\n{\"level\":\"warn\",\"ts\":1784072337.2819414,\"msg\":\"Lost 16787 events\"}\n{\"level\":\"warn\",\"ts\":1784072337.34672,\"msg\":\"Lost 182855 events\"}\n{\"level\":\"warn\",\"ts\":1784072337.4247036,\"msg\":\"Lost 44145 events\"}\n{\"level\":\"warn\",\"ts\":1784072337.501821,\"msg\":\"Lost 289092 events\"}\n{\"level\":\"warn\",\"ts\":1784072337.55567,\"msg\":\"Lost 8094 events\"}\n{\"level\":\"warn\",\"ts\":1784072337.6134863,\"msg\":\"Lost 175884 events\"}\n{\"level\":\"warn\",\"ts\":1784072337.6866083,\"msg\":\"Lost 35577 events\"}\n{\"level\":\"warn\",\"ts\":1784072337.7746172,\"msg\":\"Lost 270866 events\"}\n{\"level\":\"warn\",\"ts\":1784072337.8446507,\"msg\":\"Lost 11674 events\"}\n{\"level\":\"warn\",\"ts\":1784072337.902588,\"msg\":\"Lost 159993 events\"}\n{\"level\":\"warn\",\"ts\":1784072337.9709682,\"msg\":\"Lost 44325 events\"}\n{\"level\":\"warn\",\"ts\":1784072338.0344687,\"msg\":\"Lost 274297 events\"}\n{\"level\":\"warn\",\"ts\":1784072338.1076424,\"msg\":\"Lost 14016 events\"}\n{\"level\":\"warn\",\"ts\":1784072338.1831315,\"msg\":\"Lost 177750 events\"}\n{\"level\":\"warn\",\"ts\":1784072338.264099,\"msg\":\"Lost 41023 events\"}\n{\"level\":\"warn\",\"ts\":1784072338.3488362,\"msg\":\"Lost 268596 events\"}\n{\"level\":\"warn\",\"ts\":1784072338.407652,\"msg\":\"Lost 12409 events\"}\n{\"level\":\"warn\",\"ts\":1784072338.4733608,\"msg\":\"Lost 182347 events\"}\n{\"level\":\"warn\",\"ts\":1784072338.595825,\"msg\":\"Lost 44713 events\"}\n{\"level\":\"warn\",\"ts\":1784072338.6759243,\"msg\":\"Lost 324042 events\"}\n{\"level\":\"warn\",\"ts\":1784072338.7409618,\"msg\":\"Lost 12522 events\"}\n{\"level\":\"warn\",\"ts\":1784072338.8111107,\"msg\":\"Lost 178291 events\"}\n{\"level\":\"warn\",\"ts\":1784072338.8930051,\"msg\":\"Lost 50634 events\"}\n{\"level\":\"warn\",\"ts\":1784072338.9655693,\"msg\":\"Lost 351414 events\"}\n{\"level\":\"warn\",\"ts\":1784072339.0228603,\"msg\":\"Lost 19004 events\"}\n{\"level\":\"warn\",\"ts\":1784072339.0967216,\"msg\":\"Lost 225159 events\"}\n{\"level\":\"warn\",\"ts\":1784072339.1753533,\"msg\":\"Lost 46676 events\"}\n{\"level\":\"warn\",\"ts\":1784072339.2498739,\"msg\":\"Lost 300465 events\"}\n{\"level\":\"warn\",\"ts\":1784072339.2970996,\"msg\":\"Lost 12512 events\"}\n{\"level\":\"warn\",\"ts\":1784072339.3562527,\"msg\":\"Lost 180942 events\"}\n{\"level\":\"warn\",\"ts\":1784072339.4295707,\"msg\":\"Lost 39589 events\"}\n{\"level\":\"warn\",\"ts\":1784072339.4963593,\"msg\":\"Lost 288390 events\"}\n{\"level\":\"warn\",\"ts\":1784072339.555508,\"msg\":\"Lost 8344 events\"}\n{\"level\":\"warn\",\"ts\":1784072339.6230547,\"msg\":\"Lost 166080 events\"}\n{\"level\":\"warn\",\"ts\":1784072339.9595296,\"msg\":\"Lost 37821 events\"}\n{\"level\":\"warn\",\"ts\":1784072340.047176,\"msg\":\"Lost 258288 events\"}\n{\"level\":\"warn\",\"ts\":1784072340.118684,\"msg\":\"Lost 11969 events\"}\n{\"level\":\"warn\",\"ts\":1784072340.1716557,\"msg\":\"Lost 158550 events\"}\n{\"level\":\"warn\",\"ts\":1784072340.2819881,\"msg\":\"Lost 109785 events\"}\n{\"level\":\"warn\",\"ts\":1784072340.3584514,\"msg\":\"Lost 598876 events\"}\n{\"level\":\"warn\",\"ts\":1784072340.4271872,\"msg\":\"Lost 49357 events\"}\n{\"level\":\"warn\",\"ts\":1784072340.4772255,\"msg\":\"Lost 381262 events\"}\n{\"level\":\"warn\",\"ts\":1784072340.545104,\"msg\":\"Lost 52403 events\"}\n{\"level\":\"warn\",\"ts\":1784072340.6031058,\"msg\":\"Lost 311581 events\"}\n{\"level\":\"warn\",\"ts\":1784072340.6661675,\"msg\":\"Lost 16542 events\"}\n{\"level\":\"warn\",\"ts\":1784072340.7214458,\"msg\":\"Lost 173236 events\"}\n{\"level\":\"warn\",\"ts\":1784072340.7935464,\"msg\":\"Lost 39293 events\"}\n{\"level\":\"warn\",\"ts\":1784072340.8688905,\"msg\":\"Lost 222415 events\"}\n{\"level\":\"warn\",\"ts\":1784072340.9228976,\"msg\":\"Lost 6 events\"}\n{\"level\":\"warn\",\"ts\":1784072340.9229658,\"msg\":\"Lost 6968 events\"}\n{\"level\":\"warn\",\"ts\":1784072340.9768825,\"msg\":\"Lost 153423 events\"}\n{\"level\":\"warn\",\"ts\":1784072341.0955732,\"msg\":\"Lost 32460 events\"}\n{\"level\":\"warn\",\"ts\":1784072341.1664503,\"msg\":\"Lost 240232 events\"}\n{\"level\":\"warn\",\"ts\":1784072341.2196553,\"msg\":\"Lost 8955 events\"}\n{\"level\":\"warn\",\"ts\":1784072341.2903426,\"msg\":\"Lost 158093 events\"}\n{\"level\":\"warn\",\"ts\":1784072341.3455596,\"msg\":\"Lost 51545 events\"}\n{\"level\":\"warn\",\"ts\":1784072341.423841,\"msg\":\"Lost 315007 events\"}\n{\"level\":\"warn\",\"ts\":1784072341.5051062,\"msg\":\"Lost 16749 events\"}\n{\"level\":\"warn\",\"ts\":1784072341.5559022,\"msg\":\"Lost 176930 events\"}\n{\"level\":\"warn\",\"ts\":1784072341.6388273,\"msg\":\"Lost 35755 events\"}\n{\"level\":\"warn\",\"ts\":1784072341.714139,\"msg\":\"Lost 288222 events\"}\n{\"level\":\"warn\",\"ts\":1784072341.7660115,\"msg\":\"Lost 11029 events\"}\n{\"level\":\"warn\",\"ts\":1784072341.8285768,\"msg\":\"Lost 186579 events\"}\n{\"level\":\"warn\",\"ts\":1784072341.8857396,\"msg\":\"Lost 42337 events\"}\n{\"level\":\"warn\",\"ts\":1784072341.9653509,\"msg\":\"Lost 273239 events\"}\n{\"level\":\"warn\",\"ts\":1784072342.090715,\"msg\":\"Lost 11693 events\"}\n{\"level\":\"warn\",\"ts\":1784072342.1522632,\"msg\":\"Lost 154078 events\"}\n{\"level\":\"warn\",\"ts\":1784072342.2370756,\"msg\":\"Lost 38359 events\"}\n{\"level\":\"warn\",\"ts\":1784072342.3251925,\"msg\":\"Lost 15333 events\"}\n{\"level\":\"warn\",\"ts\":1784072342.3269455,\"msg\":\"Lost 264617 events\"}\n{\"level\":\"warn\",\"ts\":1784072342.398244,\"msg\":\"Lost 16724 events\"}\n{\"level\":\"warn\",\"ts\":1784072342.4541469,\"msg\":\"Lost 200259 events\"}\n{\"level\":\"warn\",\"ts\":1784072342.536103,\"msg\":\"Lost 59576 events\"}\n{\"level\":\"warn\",\"ts\":1784072342.6245534,\"msg\":\"Lost 311332 events\"}\n{\"level\":\"warn\",\"ts\":1784072342.677279,\"msg\":\"Lost 13644 events\"}\n{\"level\":\"warn\",\"ts\":1784072342.744734,\"msg\":\"Lost 197214 events\"}\n{\"level\":\"warn\",\"ts\":1784072342.8739104,\"msg\":\"Lost 43216 events\"}\n{\"level\":\"warn\",\"ts\":1784072342.9800844,\"msg\":\"Lost 272237 events\"}\n{\"level\":\"warn\",\"ts\":1784072343.0283618,\"msg\":\"Lost 12045 events\"}\n{\"level\":\"warn\",\"ts\":1784072343.0866375,\"msg\":\"Lost 202244 events\"}\n{\"level\":\"warn\",\"ts\":1784072343.1497023,\"msg\":\"Lost 58484 events\"}\n{\"level\":\"warn\",\"ts\":1784072343.2295191,\"msg\":\"Lost 367592 events\"}\n{\"level\":\"warn\",\"ts\":1784072343.2874973,\"msg\":\"Lost 19735 events\"}\n{\"level\":\"warn\",\"ts\":1784072343.3421822,\"msg\":\"Lost 197501 events\"}\n{\"level\":\"warn\",\"ts\":1784072343.4160154,\"msg\":\"Lost 34743 events\"}\n{\"level\":\"warn\",\"ts\":1784072343.503711,\"msg\":\"Lost 254665 events\"}\n{\"level\":\"warn\",\"ts\":1784072343.5572937,\"msg\":\"Lost 7283 events\"}\n{\"level\":\"warn\",\"ts\":1784072343.6285532,\"msg\":\"Lost 165851 events\"}\n{\"level\":\"warn\",\"ts\":1784072343.685275,\"msg\":\"Lost 9714 events\"}\n{\"level\":\"warn\",\"ts\":1784072343.6891432,\"msg\":\"Lost 37153 events\"}\n{\"level\":\"warn\",\"ts\":1784072343.7791219,\"msg\":\"Lost 275902 events\"}\n{\"level\":\"warn\",\"ts\":1784072343.834416,\"msg\":\"Lost 11178 events\"}\n{\"level\":\"warn\",\"ts\":1784072343.8909888,\"msg\":\"Lost 158964 events\"}\n{\"level\":\"warn\",\"ts\":1784072343.983336,\"msg\":\"Lost 35467 events\"}\n{\"level\":\"warn\",\"ts\":1784072344.0572574,\"msg\":\"Lost 280708 events\"}\n{\"level\":\"warn\",\"ts\":1784072344.103808,\"msg\":\"Lost 8187 events\"}\n{\"level\":\"warn\",\"ts\":1784072344.146248,\"msg\":\"Lost 177295 events\"}\n{\"level\":\"warn\",\"ts\":1784072344.2171824,\"msg\":\"Lost 41770 events\"}\n{\"level\":\"warn\",\"ts\":1784072344.2996323,\"msg\":\"Lost 273848 events\"}\n{\"level\":\"warn\",\"ts\":1784072344.3518353,\"msg\":\"Lost 7377 events\"}\n{\"level\":\"warn\",\"ts\":1784072344.4048405,\"msg\":\"Lost 153669 events\"}\n{\"level\":\"warn\",\"ts\":1784072344.4938867,\"msg\":\"Lost 30777 events\"}\n{\"level\":\"warn\",\"ts\":1784072344.5857031,\"msg\":\"Lost 224354 events\"}\n{\"level\":\"warn\",\"ts\":1784072344.6662571,\"msg\":\"Lost 9027 events\"}\n{\"level\":\"warn\",\"ts\":1784072344.731485,\"msg\":\"Lost 173572 events\"}",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "stress_ng_tracee_syscall_hot",
+  "status": "ok"
+}
