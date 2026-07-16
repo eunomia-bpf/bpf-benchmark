@@ -1,0 +1,771 @@
+{
+  "app": "bcc/set",
+  "baseline": {
+    "bpf": {
+      "356": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 356,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "357": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 357,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "358": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 358,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "359": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 359,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "360": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 360,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "361": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 361,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "362": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 362,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "363": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 363,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "364": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 364,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "365": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 365,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "366": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 366,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "367": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 367,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "368": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 368,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "369": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 369,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "370": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 370,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "371": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 371,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "372": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 372,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "373": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 373,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "374": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 374,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "375": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 375,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "376": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 376,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "377": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 377,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "378": {
+        "bytes_jited": 140,
+        "bytes_xlated": 232,
+        "id": 378,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 29869061,
+        "run_time_ns_delta": 1312629015,
+        "type": "kprobe"
+      },
+      "379": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 379,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "380": {
+        "bytes_jited": 380,
+        "bytes_xlated": 616,
+        "id": 380,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 29869062,
+        "run_time_ns_delta": 3756065716,
+        "type": "kprobe"
+      },
+      "381": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 381,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "382": {
+        "bytes_jited": 138,
+        "bytes_xlated": 240,
+        "id": 382,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 28958,
+        "run_time_ns_delta": 1838528,
+        "type": "tracepoint"
+      },
+      "383": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 383,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "384": {
+        "bytes_jited": 138,
+        "bytes_xlated": 240,
+        "id": 384,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 8717969,
+        "run_time_ns_delta": 360494894,
+        "type": "tracepoint"
+      },
+      "385": {
+        "bytes_jited": 599,
+        "bytes_xlated": 792,
+        "id": 385,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 28958,
+        "run_time_ns_delta": 18277291,
+        "type": "tracepoint"
+      },
+      "386": {
+        "bytes_jited": 599,
+        "bytes_xlated": 792,
+        "id": 386,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 8717969,
+        "run_time_ns_delta": 6000833442,
+        "type": "tracepoint"
+      },
+      "387": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 387,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "388": {
+        "bytes_jited": 1498,
+        "bytes_xlated": 2240,
+        "id": 388,
+        "name": "inet_sock_set_s",
+        "run_cnt_delta": 517826,
+        "run_time_ns_delta": 198443847,
+        "type": "tracepoint"
+      },
+      "389": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 389,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "390": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 390,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "391": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 391,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "392": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 392,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "393": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 393,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "394": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 394,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "395": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 395,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "396": {
+        "bytes_jited": 118,
+        "bytes_xlated": 200,
+        "id": 396,
+        "name": "blk_account_io_",
+        "run_cnt_delta": 6715,
+        "run_time_ns_delta": 504939,
+        "type": "kprobe"
+      },
+      "397": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 397,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "398": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 398,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "399": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 399,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "400": {
+        "bytes_jited": 351,
+        "bytes_xlated": 648,
+        "id": 400,
+        "name": "block_rq_insert",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "401": {
+        "bytes_jited": 437,
+        "bytes_xlated": 824,
+        "id": 401,
+        "name": "block_rq_issue",
+        "run_cnt_delta": 8773,
+        "run_time_ns_delta": 3977113,
+        "type": "tracing"
+      },
+      "402": {
+        "bytes_jited": 434,
+        "bytes_xlated": 712,
+        "id": 402,
+        "name": "block_rq_comple",
+        "run_cnt_delta": 8845,
+        "run_time_ns_delta": 11637315,
+        "type": "tracing"
+      },
+      "403": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 403,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "404": {
+        "bytes_jited": 107,
+        "bytes_xlated": 184,
+        "id": 404,
+        "name": "tcp_v4_connect",
+        "run_cnt_delta": 51785,
+        "run_time_ns_delta": 7184693,
+        "type": "kprobe"
+      },
+      "405": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 405,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "406": {
+        "bytes_jited": 490,
+        "bytes_xlated": 752,
+        "id": 406,
+        "name": "tcp_v4_connect_",
+        "run_cnt_delta": 51785,
+        "run_time_ns_delta": 74171844,
+        "type": "kprobe"
+      },
+      "407": {
+        "bytes_jited": 107,
+        "bytes_xlated": 184,
+        "id": 407,
+        "name": "tcp_v6_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "408": {
+        "bytes_jited": 493,
+        "bytes_xlated": 752,
+        "id": 408,
+        "name": "tcp_v6_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "409": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 409,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "410": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 410,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "411": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 411,
+        "name": "fentry_vfs_read",
+        "run_cnt_delta": 1650724,
+        "run_time_ns_delta": 79190778,
+        "type": "tracing"
+      },
+      "412": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 412,
+        "name": "fentry_vfs_writ",
+        "run_cnt_delta": 2131169,
+        "run_time_ns_delta": 110945972,
+        "type": "tracing"
+      },
+      "413": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 413,
+        "name": "fentry_vfs_fsyn",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "414": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 414,
+        "name": "fentry_vfs_open",
+        "run_cnt_delta": 8841763,
+        "run_time_ns_delta": 239041910,
+        "type": "tracing"
+      },
+      "415": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 415,
+        "name": "fentry_vfs_crea",
+        "run_cnt_delta": 13049,
+        "run_time_ns_delta": 672061,
+        "type": "tracing"
+      },
+      "416": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 416,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "417": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 417,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "418": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 418,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "419": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 419,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "420": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 420,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "421": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 421,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "422": {
+        "bytes_jited": 118,
+        "bytes_xlated": 184,
+        "id": 422,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 9934151,
+        "run_time_ns_delta": 698941572,
+        "type": "tracing"
+      },
+      "423": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 423,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "424": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 424,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "425": {
+        "bytes_jited": 118,
+        "bytes_xlated": 184,
+        "id": 425,
+        "name": "sched_wakeup_ne",
+        "run_cnt_delta": 151404,
+        "run_time_ns_delta": 29813556,
+        "type": "tracing"
+      },
+      "426": {
+        "bytes_jited": 105,
+        "bytes_xlated": 168,
+        "id": 426,
+        "name": "sys_enter",
+        "run_cnt_delta": 324121001,
+        "run_time_ns_delta": 33310735050,
+        "type": "tracepoint"
+      },
+      "427": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 427,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "428": {
+        "bytes_jited": 403,
+        "bytes_xlated": 656,
+        "id": 428,
+        "name": "sys_exit",
+        "run_cnt_delta": 324121042,
+        "run_time_ns_delta": 6420752871,
+        "type": "tracepoint"
+      },
+      "429": {
+        "bytes_jited": 929,
+        "bytes_xlated": 1632,
+        "id": 429,
+        "name": "sched_switch",
+        "run_cnt_delta": 19475498,
+        "run_time_ns_delta": 1608857682,
+        "type": "tracing"
+      },
+      "430": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 430,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "431": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 431,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "432": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 432,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--syscall",
+          "1",
+          "--syscall-method",
+          "fast75",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--fork",
+          "1",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--sock",
+          "1",
+          "--sock-msgs",
+          "1",
+          "--sock-port",
+          "41077",
+          "--sockfd-port",
+          "41177",
+          "--timeout",
+          "30s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/1c8f4d61"
+        ],
+        "config": {
+          "stressors": [
+            "syscall",
+            "cap",
+            "set",
+            "sockfd",
+            "fork",
+            "open",
+            "hdd",
+            "sock"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 32.029869692000375,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [617772] setting to a 30 secs run per stressor\nstress-ng: info:  [617772] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd, 1 fork, 4 open, 4 hdd, 1 sock\nstress-ng: info:  [617772] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [617772] note: 24 cpus have scaling governors set to powersave and this can impact on performance; setting /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor to 'performance' may improve performance\nstress-ng: info:  [617774] syscall: using method 'fast75'\nstress-ng: info:  [617779] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [617774] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [617774] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [617774] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [617774] syscall:                  pkey_get       31.5         27\nstress-ng: info:  [617774] syscall:                  pkey_set       34.5         33\nstress-ng: info:  [617774] syscall:              gettimeofday       53.0         33\nstress-ng: info:  [617774] syscall:                      time      161.0         45\nstress-ng: info:  [617774] syscall:                 pkey_free      272.5        266\nstress-ng: info:  [617774] syscall:                    getuid      286.0        279\nstress-ng: info:  [617774] syscall:    sched_get_priority_min      298.0        293\nstress-ng: info:  [617774] syscall:                    getgid      299.0        274\nstress-ng: info:  [617774] syscall:                      iopl      300.0        295\nstress-ng: info:  [617774] syscall:                    getcpu      305.5        191\nstress-ng: metrc: [617772] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [617772]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [617772] syscall             514     32.00      0.01      0.04        16.06        9830.36\nstress-ng: metrc: [617772] cap            12748555     30.00      2.96     26.99    424951.91      425669.03\nstress-ng: metrc: [617772] set              953291     30.00      2.20     27.69     31776.38       31903.20\nstress-ng: metrc: [617772] sockfd          8531792     30.03      2.04     37.97    284121.55      213266.96\nstress-ng: metrc: [617772] fork             151099     30.00     11.20     16.93      5036.63        5372.52\nstress-ng: metrc: [617772] open              29696     30.70      0.02      0.38       967.21       74177.88\nstress-ng: metrc: [617772] hdd               44544     30.31      0.29      1.17      1469.80       30466.75\nstress-ng: metrc: [617772] sock              51766     30.00      1.22     35.86      1725.50        1395.93\nstress-ng: info:  [617772] skipped: 0\nstress-ng: info:  [617772] passed: 14: syscall (1) cap (1) set (1) sockfd (1) fork (1) open (4) hdd (4) sock (1)\nstress-ng: info:  [617772] failed: 0\nstress-ng: info:  [617772] metrics untrustworthy: 0\nstress-ng: info:  [617772] successful run completed in 32.01 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      }
+    ]
+  },
+  "error": "specialization profile builder failed (1): build_specialization_profiles: branch_flip PMU profile has zero branch observations despite run_cnt_delta=50044",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "bcc_set",
+  "runner_details": {
+    "command_used": [],
+    "process_output": {
+      "stderr_tail": "lost 4339 events on CPU #9\nlost 1085 events on CPU #9\nlost 4594 events on CPU #9\nlost 5212 events on CPU #9\nlost 4460 events on CPU #9\nlost 5198 events on CPU #9\nlost 4660 events on CPU #9\nlost 508 events on CPU #9\nlost 4248 events on CPU #9\nlost 5559 events on CPU #9\nlost 4004 events on CPU #9\nlost 5755 events on CPU #9\nlost 4412 events on CPU #9\nlost 693 events on CPU #9\nlost 2765 events on CPU #9\nlost 7020 events on CPU #9\nlost 2700 events on CPU #9\nlost 6998 events on CPU #9\nlost 2847 events on CPU #9\nlost 2482 events on CPU #9\nlost 2937 events on CPU #9\nlost 6610 events on CPU #9\nlost 2858 events on CPU #9\nlost 6588 events on CPU #9\nlost 3063 events on CPU #9\nlost 2729 events on CPU #9\nlost 1593 events on CPU #9\nlost 7949 events on CPU #9\nlost 1688 events on CPU #9\nlost 8218 events on CPU #9\nlost 1602 events on CPU #9\nlost 3889 events on CPU #9\nlost 4839 events on CPU #9\nlost 4835 events on CPU #9\nlost 4729 events on CPU #9\nlost 5182 events on CPU #9\nlost 5600 events on CPU #9\nlost 8116 events on CPU #9\nlost 2397 events on CPU #9\nopensnoop:\nLost 286 events on CPU #6!\nLost 892 events on CPU #6!\nLost 271 events on CPU #4!\nLost 481 events on CPU #3!\nLost 71 events on CPU #1!\nLost 623 events on CPU #3!\nLost 53 events on CPU #6!\nLost 201 events on CPU #4!\nLost 175 events on CPU #4!\nLost 263 events on CPU #0!\nLost 33 events on CPU #2!\nLost 136 events on CPU #5!\nLost 1602 events on CPU #5!\nLost 28 events on CPU #0!\nLost 338 events on CPU #0!\nLost 64 events on CPU #0!\nLost 777 events on CPU #0!\nLost 682 events on CPU #1!\nLost 479 events on CPU #2!\nLost 44 events on CPU #6!\nLost 578 events on CPU #0!\nLost 135 events on CPU #0!\nLost 27 events on CPU #0!\nLost 84 events on CPU #3!\nLost 406 events on CPU #6!\nLost 2769 events on CPU #4!\nLost 475 events on CPU #1!\nLost 491 events on CPU #1!\nLost 264 events on CPU #6!\nLost 580 events on CPU #1!\nLost 919 events on CPU #6!\nLost 269 events on CPU #4!\nLost 278 events on CPU #5!\nLost 129 events on CPU #5!\nLost 276 events on CPU #1!\nLost 599 events on CPU #4!\nLost 148 events on CPU #6!\nLost 718 events on CPU #6!\nLost 593 events on CPU #6!\nLost 175 events on CPU #6!",
+      "stdout_tail": "769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n769198 stress-ng-so 4  127.0.0.1        127.0.0.1        41589\n8922   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\ntcplife:\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       34950 2044.00 0.00   0.42\n769198  stress-ng-sock   127.0.0.1       34950 127.0.0.1       41589 0.00   2044.00 0.43\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       34960 2044.00 0.00   0.56\n769198  stress-ng-sock   127.0.0.1       34960 127.0.0.1       41589 0.00   2044.00 0.58\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       34962 2044.00 0.00   0.53\n769198  stress-ng-sock   127.0.0.1       34962 127.0.0.1       41589 0.00   2044.00 0.54\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       34970 2044.00 0.00   0.46\n769198  stress-ng-sock   127.0.0.1       34970 127.0.0.1       41589 0.00   2044.00 0.61\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       34982 2044.00 0.00   0.46\n769198  stress-ng-sock   127.0.0.1       34982 127.0.0.1       41589 0.00   2044.00 0.46\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       34992 2044.00 0.00   0.41\n769198  stress-ng-sock   127.0.0.1       34992 127.0.0.1       41589 0.00   2044.00 0.42\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       35006 2044.00 0.00   0.52\n769198  stress-ng-sock   127.0.0.1       35006 127.0.0.1       41589 0.00   2044.00 0.65\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       35018 2044.00 0.00   0.57\n769198  stress-ng-sock   127.0.0.1       35018 127.0.0.1       41589 0.00   2044.00 0.58\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       35020 2044.00 0.00   0.46\n769198  stress-ng-sock   127.0.0.1       35020 127.0.0.1       41589 0.00   2044.00 0.59\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       35032 2044.00 0.00   0.39\n769198  stress-ng-sock   127.0.0.1       35032 127.0.0.1       41589 0.00   2044.00 0.50\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       35046 2044.00 0.00   0.46\n769198  stress-ng-sock   127.0.0.1       35046 127.0.0.1       41589 0.00   2044.00 0.46\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       35052 2044.00 0.00   0.42\n769198  stress-ng-sock   127.0.0.1       35052 127.0.0.1       41589 0.00   2044.00 0.53\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       35058 2044.00 0.00   0.56\n769198  stress-ng-sock   127.0.0.1       35058 127.0.0.1       41589 0.00   2044.00 0.57\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       35074 2044.00 0.00   0.62\n769198  stress-ng-sock   127.0.0.1       35074 127.0.0.1       41589 0.00   2044.00 0.63\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       35076 2044.00 0.00   0.58\n769198  stress-ng-sock   127.0.0.1       35076 127.0.0.1       41589 0.00   2044.00 0.58\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       35084 2044.00 0.00   0.57\n769198  stress-ng-sock   127.0.0.1       35084 127.0.0.1       41589 0.00   2044.00 0.57\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       35086 2044.00 0.00   0.60\n769198  stress-ng-sock   127.0.0.1       35086 127.0.0.1       41589 0.00   2044.00 0.60\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       35098 2044.00 0.00   0.62\n769198  stress-ng-sock   127.0.0.1       35098 127.0.0.1       41589 0.00   2044.00 0.62\n769198  stress-ng-sock   127.0.0.1       41589 127.0.0.1       35100 2044.00 0.00   0.57\n769198  stress-ng-sock   127.0.0.1       35100 127.0.0.1       41589 0.00   2044.00 0.57\n769198  stress-ng-sock   127.0.0.1       35108 127.0.0.1       41589 0.00   0.00   0.18\n8922    tokio-rt-worker  128.114.59.195  34832 172.64.155.209  443   5.54   5.11   131.35\nrunqlat:\nTracing run queue latency... Hit Ctrl-C to end.\n     usecs               : count    distribution\n         0 -> 1          : 26347130 |****************************************|\n         2 -> 3          : 429127   |                                        |\n         4 -> 7          : 898625   |*                                       |\n         8 -> 15         : 566071   |                                        |\n        16 -> 31         : 416441   |                                        |\n        32 -> 63         : 144310   |                                        |\n        64 -> 127        : 212684   |                                        |\n       128 -> 255        : 107939   |                                        |\n       256 -> 511        : 74964    |                                        |\n       512 -> 1023       : 31856    |                                        |\n      1024 -> 2047       : 12993    |                                        |\n      2048 -> 4095       : 7812     |                                        |\n      4096 -> 8191       : 203      |                                        |\n      8192 -> 16383      : 33       |                                        |"
+    }
+  },
+  "selected_workload": "stress_ng_bcc_hook_hot",
+  "status": "error"
+}
