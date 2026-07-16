@@ -1,0 +1,4484 @@
+{
+  "app": "bcc/set",
+  "baseline": {
+    "bpf": {
+      "1385": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1385,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1386": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1386,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1387": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1387,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1388": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1388,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1389": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1389,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1390": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1390,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1391": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1391,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1392": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1392,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1393": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1393,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1394": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1394,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1395": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1395,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1396": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1396,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1397": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1397,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1398": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1398,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1399": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1399,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1400": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1400,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "1401": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1401,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1402": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1402,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1403": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1403,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1404": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1404,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1405": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1405,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1406": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1406,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1407": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1407,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1408": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 1408,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1409": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 1409,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1410": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 1410,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1411": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 1411,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1412": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1412,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1413": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 1413,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1414": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 1414,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1415": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 1415,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1416": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1416,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1417": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 1417,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1418": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 1418,
+        "name": "fentry_vfs_read",
+        "run_cnt_delta": 2090101,
+        "run_time_ns_delta": 90192247,
+        "type": "tracing"
+      },
+      "1419": {
+        "bytes_jited": 140,
+        "bytes_xlated": 232,
+        "id": 1419,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 12606331,
+        "run_time_ns_delta": 530768804,
+        "type": "kprobe"
+      },
+      "1420": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1420,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1421": {
+        "bytes_jited": 380,
+        "bytes_xlated": 616,
+        "id": 1421,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 12606331,
+        "run_time_ns_delta": 2393042638,
+        "type": "kprobe"
+      },
+      "1422": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 1422,
+        "name": "fentry_vfs_writ",
+        "run_cnt_delta": 2235951,
+        "run_time_ns_delta": 120453560,
+        "type": "tracing"
+      },
+      "1423": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 1423,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1424": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 1424,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1425": {
+        "bytes_jited": 138,
+        "bytes_xlated": 240,
+        "id": 1425,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 1083,
+        "run_time_ns_delta": 721652,
+        "type": "tracepoint"
+      },
+      "1426": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 1426,
+        "name": "fentry_vfs_fsyn",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "1427": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1427,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1428": {
+        "bytes_jited": 105,
+        "bytes_xlated": 168,
+        "id": 1428,
+        "name": "sys_enter",
+        "run_cnt_delta": 297883904,
+        "run_time_ns_delta": 13032011319,
+        "type": "tracepoint"
+      },
+      "1429": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 1429,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1430": {
+        "bytes_jited": 138,
+        "bytes_xlated": 240,
+        "id": 1430,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 7499082,
+        "run_time_ns_delta": 289738987,
+        "type": "tracepoint"
+      },
+      "1431": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1431,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1432": {
+        "bytes_jited": 599,
+        "bytes_xlated": 792,
+        "id": 1432,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 1083,
+        "run_time_ns_delta": 4555335,
+        "type": "tracepoint"
+      },
+      "1433": {
+        "bytes_jited": 403,
+        "bytes_xlated": 656,
+        "id": 1433,
+        "name": "sys_exit",
+        "run_cnt_delta": 297883909,
+        "run_time_ns_delta": 16436104794,
+        "type": "tracepoint"
+      },
+      "1434": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 1434,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1435": {
+        "bytes_jited": 599,
+        "bytes_xlated": 792,
+        "id": 1435,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 7499082,
+        "run_time_ns_delta": 6541084688,
+        "type": "tracepoint"
+      },
+      "1436": {
+        "bytes_jited": 1498,
+        "bytes_xlated": 2240,
+        "id": 1436,
+        "name": "inet_sock_set_s",
+        "run_cnt_delta": 156,
+        "run_time_ns_delta": 349052,
+        "type": "tracepoint"
+      },
+      "1437": {
+        "bytes_jited": 107,
+        "bytes_xlated": 184,
+        "id": 1437,
+        "name": "tcp_v4_connect",
+        "run_cnt_delta": 24,
+        "run_time_ns_delta": 42111,
+        "type": "kprobe"
+      },
+      "1438": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1438,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1439": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1439,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1440": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 1440,
+        "name": "fentry_vfs_open",
+        "run_cnt_delta": 7405933,
+        "run_time_ns_delta": 219789042,
+        "type": "tracing"
+      },
+      "1441": {
+        "bytes_jited": 490,
+        "bytes_xlated": 752,
+        "id": 1441,
+        "name": "tcp_v4_connect_",
+        "run_cnt_delta": 24,
+        "run_time_ns_delta": 150056,
+        "type": "kprobe"
+      },
+      "1442": {
+        "bytes_jited": 107,
+        "bytes_xlated": 184,
+        "id": 1442,
+        "name": "tcp_v6_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "1443": {
+        "bytes_jited": 493,
+        "bytes_xlated": 752,
+        "id": 1443,
+        "name": "tcp_v6_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "1444": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 1444,
+        "name": "fentry_vfs_crea",
+        "run_cnt_delta": 14,
+        "run_time_ns_delta": 1901,
+        "type": "tracing"
+      },
+      "1445": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1445,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1446": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1446,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1447": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1447,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1448": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 1448,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1449": {
+        "bytes_jited": 118,
+        "bytes_xlated": 200,
+        "id": 1449,
+        "name": "blk_account_io_",
+        "run_cnt_delta": 3256,
+        "run_time_ns_delta": 708327,
+        "type": "kprobe"
+      },
+      "1450": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1450,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1451": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 1451,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1452": {
+        "bytes_jited": 351,
+        "bytes_xlated": 648,
+        "id": 1452,
+        "name": "block_rq_insert",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "1453": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1453,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1454": {
+        "bytes_jited": 118,
+        "bytes_xlated": 184,
+        "id": 1454,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 22343340,
+        "run_time_ns_delta": 1370457511,
+        "type": "tracing"
+      },
+      "1455": {
+        "bytes_jited": 437,
+        "bytes_xlated": 824,
+        "id": 1455,
+        "name": "block_rq_issue",
+        "run_cnt_delta": 3955,
+        "run_time_ns_delta": 3044418,
+        "type": "tracing"
+      },
+      "1456": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1456,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1457": {
+        "bytes_jited": 118,
+        "bytes_xlated": 184,
+        "id": 1457,
+        "name": "sched_wakeup_ne",
+        "run_cnt_delta": 690,
+        "run_time_ns_delta": 439697,
+        "type": "tracing"
+      },
+      "1458": {
+        "bytes_jited": 434,
+        "bytes_xlated": 712,
+        "id": 1458,
+        "name": "block_rq_comple",
+        "run_cnt_delta": 4518,
+        "run_time_ns_delta": 4506335,
+        "type": "tracing"
+      },
+      "1459": {
+        "bytes_jited": 929,
+        "bytes_xlated": 1632,
+        "id": 1459,
+        "name": "sched_switch",
+        "run_cnt_delta": 44669929,
+        "run_time_ns_delta": 3338000573,
+        "type": "tracing"
+      },
+      "1460": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1460,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1461": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1461,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--syscall",
+          "1",
+          "--syscall-method",
+          "fast75",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockfd-port",
+          "45920",
+          "--timeout",
+          "30s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/3147e695"
+        ],
+        "config": {
+          "stressors": [
+            "syscall",
+            "cap",
+            "set",
+            "sockfd"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 31.032506503999684,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [574535] setting to a 30 secs run per stressor\nstress-ng: info:  [574535] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [574535] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [574535] note: 24 cpus have scaling governors set to powersave and this can impact on performance; setting /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor to 'performance' may improve performance\nstress-ng: info:  [574536] syscall: using method 'fast75'\nstress-ng: info:  [574536] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [574536] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [574536] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [574536] syscall:                  pkey_get       35.0         33\nstress-ng: info:  [574536] syscall:                  pkey_set       42.5         37\nstress-ng: info:  [574536] syscall:              gettimeofday       58.5         40\nstress-ng: info:  [574536] syscall:                 pkey_free      234.5        206\nstress-ng: info:  [574536] syscall:                      time      289.0         33\nstress-ng: info:  [574536] syscall:           set_robust_list      300.5        287\nstress-ng: info:  [574536] syscall:              timer_delete      309.0        306\nstress-ng: info:  [574536] syscall:                epoll_wait      339.0        312\nstress-ng: info:  [574536] syscall:                    msgsnd      344.0        314\nstress-ng: info:  [574536] syscall:                       dup      357.5        310\nstress-ng: metrc: [574535] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [574535]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [574535] syscall             514     31.01      0.01      0.02        16.58       19389.64\nstress-ng: metrc: [574535] cap            14312458     30.00      3.44     26.56    477081.90      477098.43\nstress-ng: metrc: [574535] set             1022693     30.00      2.49     27.22     34089.75       34420.35\nstress-ng: metrc: [574535] sockfd          7034514     30.07      2.10     45.14    233956.89      148895.59\nstress-ng: info:  [574535] skipped: 0\nstress-ng: info:  [574535] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [574535] failed: 0\nstress-ng: info:  [574535] metrics untrustworthy: 0\nstress-ng: info:  [574535] successful run completed in 31.01 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "1385": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1385,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1386": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1386,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1387": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1387,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1388": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1388,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1389": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1389,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1390": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1390,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1391": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1391,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1392": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1392,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1393": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1393,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1394": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1394,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1395": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1395,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1396": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1396,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1397": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1397,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1398": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1398,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1399": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1399,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1400": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1400,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "1401": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1401,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1402": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1402,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1403": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1403,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1404": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1404,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1405": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1405,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1406": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1406,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1407": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1407,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1408": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 1408,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1409": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 1409,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1410": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 1410,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1411": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 1411,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1412": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1412,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1413": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 1413,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1414": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 1414,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1415": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 1415,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1416": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1416,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1417": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 1417,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1418": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 1418,
+        "name": "fentry_vfs_read",
+        "run_cnt_delta": 2229686,
+        "run_time_ns_delta": 90826386,
+        "type": "tracing"
+      },
+      "1419": {
+        "bytes_jited": 140,
+        "bytes_xlated": 232,
+        "id": 1419,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 12807049,
+        "run_time_ns_delta": 515402141,
+        "type": "kprobe"
+      },
+      "1420": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1420,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1421": {
+        "bytes_jited": 380,
+        "bytes_xlated": 616,
+        "id": 1421,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 12807049,
+        "run_time_ns_delta": 2376824307,
+        "type": "kprobe"
+      },
+      "1422": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 1422,
+        "name": "fentry_vfs_writ",
+        "run_cnt_delta": 2260328,
+        "run_time_ns_delta": 117239335,
+        "type": "tracing"
+      },
+      "1423": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 1423,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1424": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 1424,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1425": {
+        "bytes_jited": 138,
+        "bytes_xlated": 240,
+        "id": 1425,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 1388,
+        "run_time_ns_delta": 829459,
+        "type": "tracepoint"
+      },
+      "1426": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 1426,
+        "name": "fentry_vfs_fsyn",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "1427": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1427,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1428": {
+        "bytes_jited": 105,
+        "bytes_xlated": 168,
+        "id": 1428,
+        "name": "sys_enter",
+        "run_cnt_delta": 302278564,
+        "run_time_ns_delta": 13178762513,
+        "type": "tracepoint"
+      },
+      "1429": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 1429,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1430": {
+        "bytes_jited": 138,
+        "bytes_xlated": 240,
+        "id": 1430,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 7617306,
+        "run_time_ns_delta": 296451918,
+        "type": "tracepoint"
+      },
+      "1431": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1431,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1432": {
+        "bytes_jited": 599,
+        "bytes_xlated": 792,
+        "id": 1432,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 1388,
+        "run_time_ns_delta": 5259660,
+        "type": "tracepoint"
+      },
+      "1433": {
+        "bytes_jited": 403,
+        "bytes_xlated": 656,
+        "id": 1433,
+        "name": "sys_exit",
+        "run_cnt_delta": 302278664,
+        "run_time_ns_delta": 16900047849,
+        "type": "tracepoint"
+      },
+      "1434": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 1434,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1435": {
+        "bytes_jited": 599,
+        "bytes_xlated": 792,
+        "id": 1435,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 7617306,
+        "run_time_ns_delta": 6710520331,
+        "type": "tracepoint"
+      },
+      "1436": {
+        "bytes_jited": 1498,
+        "bytes_xlated": 2240,
+        "id": 1436,
+        "name": "inet_sock_set_s",
+        "run_cnt_delta": 196,
+        "run_time_ns_delta": 443771,
+        "type": "tracepoint"
+      },
+      "1437": {
+        "bytes_jited": 107,
+        "bytes_xlated": 184,
+        "id": 1437,
+        "name": "tcp_v4_connect",
+        "run_cnt_delta": 31,
+        "run_time_ns_delta": 52953,
+        "type": "kprobe"
+      },
+      "1438": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1438,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1439": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1439,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1440": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 1440,
+        "name": "fentry_vfs_open",
+        "run_cnt_delta": 7498061,
+        "run_time_ns_delta": 225819835,
+        "type": "tracing"
+      },
+      "1441": {
+        "bytes_jited": 490,
+        "bytes_xlated": 752,
+        "id": 1441,
+        "name": "tcp_v4_connect_",
+        "run_cnt_delta": 31,
+        "run_time_ns_delta": 194652,
+        "type": "kprobe"
+      },
+      "1442": {
+        "bytes_jited": 107,
+        "bytes_xlated": 184,
+        "id": 1442,
+        "name": "tcp_v6_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "1443": {
+        "bytes_jited": 493,
+        "bytes_xlated": 752,
+        "id": 1443,
+        "name": "tcp_v6_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "1444": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 1444,
+        "name": "fentry_vfs_crea",
+        "run_cnt_delta": 13,
+        "run_time_ns_delta": 2567,
+        "type": "tracing"
+      },
+      "1445": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1445,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1446": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1446,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1447": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1447,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1448": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 1448,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1449": {
+        "bytes_jited": 118,
+        "bytes_xlated": 200,
+        "id": 1449,
+        "name": "blk_account_io_",
+        "run_cnt_delta": 3129,
+        "run_time_ns_delta": 684004,
+        "type": "kprobe"
+      },
+      "1450": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1450,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1451": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 1451,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1452": {
+        "bytes_jited": 351,
+        "bytes_xlated": 648,
+        "id": 1452,
+        "name": "block_rq_insert",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "1453": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1453,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1454": {
+        "bytes_jited": 118,
+        "bytes_xlated": 184,
+        "id": 1454,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 23330919,
+        "run_time_ns_delta": 1472277326,
+        "type": "tracing"
+      },
+      "1455": {
+        "bytes_jited": 437,
+        "bytes_xlated": 824,
+        "id": 1455,
+        "name": "block_rq_issue",
+        "run_cnt_delta": 8989,
+        "run_time_ns_delta": 4820075,
+        "type": "tracing"
+      },
+      "1456": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1456,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1457": {
+        "bytes_jited": 118,
+        "bytes_xlated": 184,
+        "id": 1457,
+        "name": "sched_wakeup_ne",
+        "run_cnt_delta": 1060,
+        "run_time_ns_delta": 598851,
+        "type": "tracing"
+      },
+      "1458": {
+        "bytes_jited": 434,
+        "bytes_xlated": 712,
+        "id": 1458,
+        "name": "block_rq_comple",
+        "run_cnt_delta": 9467,
+        "run_time_ns_delta": 6986666,
+        "type": "tracing"
+      },
+      "1459": {
+        "bytes_jited": 929,
+        "bytes_xlated": 1632,
+        "id": 1459,
+        "name": "sched_switch",
+        "run_cnt_delta": 46645732,
+        "run_time_ns_delta": 3534090661,
+        "type": "tracing"
+      },
+      "1460": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1460,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "1461": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1461,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--syscall",
+          "1",
+          "--syscall-method",
+          "fast75",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockfd-port",
+          "47456",
+          "--timeout",
+          "30s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/3147e695"
+        ],
+        "config": {
+          "stressors": [
+            "syscall",
+            "cap",
+            "set",
+            "sockfd"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 34.029301393000424,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [579475] setting to a 30 secs run per stressor\nstress-ng: info:  [579475] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [579475] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [579475] note: 24 cpus have scaling governors set to powersave and this can impact on performance; setting /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor to 'performance' may improve performance\nstress-ng: info:  [579476] syscall: using method 'fast75'\nstress-ng: info:  [579476] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [579476] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [579476] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [579476] syscall:                  pkey_get       35.0         29\nstress-ng: info:  [579476] syscall:                  pkey_set       37.0         35\nstress-ng: info:  [579476] syscall:              gettimeofday       49.0         35\nstress-ng: info:  [579476] syscall:                      time      171.0         38\nstress-ng: info:  [579476] syscall:                 pkey_free      209.0        203\nstress-ng: info:  [579476] syscall:                mq_setattr      292.5        277\nstress-ng: info:  [579476] syscall:              timer_delete      301.0        293\nstress-ng: info:  [579476] syscall:           set_robust_list      310.0        300\nstress-ng: info:  [579476] syscall:                    msgsnd      330.5        320\nstress-ng: info:  [579476] syscall:                    getpid      342.0        277\nstress-ng: metrc: [579475] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [579475]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [579475] syscall             514     34.00      0.01      0.02        15.12       17935.03\nstress-ng: metrc: [579475] cap            14527175     30.00      3.37     26.63    484239.45      484259.34\nstress-ng: metrc: [579475] set             1028532     30.00      2.48     27.26     34283.80       34584.35\nstress-ng: metrc: [579475] sockfd          7070482     30.08      2.14     45.28    235059.41      149121.44\nstress-ng: info:  [579475] skipped: 0\nstress-ng: info:  [579475] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [579475] failed: 0\nstress-ng: info:  [579475] metrics untrustworthy: 0\nstress-ng: info:  [579475] successful run completed in 34.01 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      }
+    ]
+  },
+  "rejit_result": {
+    "deployment_specialization": {
+      "enabled_passes": [
+        "context_specialize"
+      ],
+      "profile_root": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260716_044801_141913/details/deployment-specialization/bcc__set/profiles",
+      "raw_profile_dir": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260716_044801_141913/details/deployment-specialization/bcc__set/raw",
+      "training_workload": {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--syscall",
+          "1",
+          "--syscall-method",
+          "fast75",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockfd-port",
+          "46432",
+          "--timeout",
+          "30s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/3147e695"
+        ],
+        "config": {
+          "stressors": [
+            "syscall",
+            "cap",
+            "set",
+            "sockfd"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 31.03328660599982,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [575229] setting to a 30 secs run per stressor\nstress-ng: info:  [575229] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [575229] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [575229] note: 24 cpus have scaling governors set to powersave and this can impact on performance; setting /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor to 'performance' may improve performance\nstress-ng: info:  [575230] syscall: using method 'fast75'\nstress-ng: info:  [575230] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [575230] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [575230] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [575230] syscall:                  pkey_get       28.5         28\nstress-ng: info:  [575230] syscall:                  pkey_set       31.0         31\nstress-ng: info:  [575230] syscall:              gettimeofday       82.0         68\nstress-ng: info:  [575230] syscall:                 pkey_free      195.5        180\nstress-ng: info:  [575230] syscall:                      time      220.5         32\nstress-ng: info:  [575230] syscall:              timer_delete      271.5        254\nstress-ng: info:  [575230] syscall:           set_robust_list      280.5        271\nstress-ng: info:  [575230] syscall:                    getcpu      281.0        224\nstress-ng: info:  [575230] syscall:                       dup      287.0        265\nstress-ng: info:  [575230] syscall:                    getpid      288.0        280\nstress-ng: metrc: [575229] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [575229]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [575229] syscall             514     31.01      0.01      0.02        16.58       18616.44\nstress-ng: metrc: [575229] cap            14017312     30.00      3.40     26.60    467243.64      467263.64\nstress-ng: metrc: [575229] set              994417     30.00      2.42     27.35     33147.23       33397.24\nstress-ng: metrc: [575229] sockfd          7116718     30.08      2.12     46.27    236624.24      147077.28\nstress-ng: info:  [575229] skipped: 0\nstress-ng: info:  [575229] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [575229] failed: 0\nstress-ng: info:  [575229] metrics untrustworthy: 0\nstress-ng: info:  [575229] successful run completed in 31.01 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      },
+      "training_workloads": {
+        "pmu_profile": {
+          "command": [
+            "/usr/bin/stress-ng",
+            "--syscall",
+            "1",
+            "--syscall-method",
+            "fast75",
+            "--cap",
+            "1",
+            "--set",
+            "1",
+            "--sockfd",
+            "1",
+            "--sockfd-port",
+            "46432",
+            "--timeout",
+            "30s",
+            "--metrics-brief",
+            "--temp-path",
+            "/var/tmp/bpfrejit-runtime/3147e695"
+          ],
+          "config": {
+            "stressors": [
+              "syscall",
+              "cap",
+              "set",
+              "sockfd"
+            ],
+            "tool": "stress-ng"
+          },
+          "duration_s": 31.03328660599982,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "stress-ng: info:  [575229] setting to a 30 secs run per stressor\nstress-ng: info:  [575229] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [575229] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [575229] note: 24 cpus have scaling governors set to powersave and this can impact on performance; setting /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor to 'performance' may improve performance\nstress-ng: info:  [575230] syscall: using method 'fast75'\nstress-ng: info:  [575230] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [575230] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [575230] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [575230] syscall:                  pkey_get       28.5         28\nstress-ng: info:  [575230] syscall:                  pkey_set       31.0         31\nstress-ng: info:  [575230] syscall:              gettimeofday       82.0         68\nstress-ng: info:  [575230] syscall:                 pkey_free      195.5        180\nstress-ng: info:  [575230] syscall:                      time      220.5         32\nstress-ng: info:  [575230] syscall:              timer_delete      271.5        254\nstress-ng: info:  [575230] syscall:           set_robust_list      280.5        271\nstress-ng: info:  [575230] syscall:                    getcpu      281.0        224\nstress-ng: info:  [575230] syscall:                       dup      287.0        265\nstress-ng: info:  [575230] syscall:                    getpid      288.0        280\nstress-ng: metrc: [575229] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [575229]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [575229] syscall             514     31.01      0.01      0.02        16.58       18616.44\nstress-ng: metrc: [575229] cap            14017312     30.00      3.40     26.60    467243.64      467263.64\nstress-ng: metrc: [575229] set              994417     30.00      2.42     27.35     33147.23       33397.24\nstress-ng: metrc: [575229] sockfd          7116718     30.08      2.12     46.27    236624.24      147077.28\nstress-ng: info:  [575229] skipped: 0\nstress-ng: info:  [575229] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [575229] failed: 0\nstress-ng: info:  [575229] metrics untrustworthy: 0\nstress-ng: info:  [575229] successful run completed in 31.01 secs",
+          "workload_name": "stress_ng_bcc_hook_hot"
+        }
+      }
+    },
+    "mode": "live_swap",
+    "shim_responses": [
+      {
+        "pid": 573698,
+        "response": {
+          "per_program": {
+            "1385": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1385,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1385,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1386": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1386,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1386,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1402": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1402,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1402,
+                "prog_name": "libbpf_nametest",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1414": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 5,
+                    "insn_count_before": 5,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1414,
+              "program": {
+                "final_insn_count": 5,
+                "orig_insn_count": 5,
+                "prog_id": 1414,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1419": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 38,
+                    "insn_count_before": 38,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1419,
+              "program": {
+                "final_insn_count": 38,
+                "orig_insn_count": 38,
+                "prog_id": 1419,
+                "prog_name": "kprobe__cap_cap",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "1420": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1420,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1420,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1421": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 142,
+                    "insn_count_before": 142,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1421,
+              "program": {
+                "final_insn_count": 142,
+                "orig_insn_count": 142,
+                "prog_id": 1421,
+                "prog_name": "kprobe__cap_cap",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "1460": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1460,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1460,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 573703,
+        "response": {
+          "per_program": {
+            "1387": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1387,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1387,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1388": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1388,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1388,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1403": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1403,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1403,
+                "prog_name": "libbpf_nametest",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1408": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 5,
+                    "insn_count_before": 5,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1408,
+              "program": {
+                "final_insn_count": 5,
+                "orig_insn_count": 5,
+                "prog_id": 1408,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1448": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1448,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 1448,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "1449": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 31,
+                    "insn_count_before": 31,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1449,
+              "program": {
+                "final_insn_count": 31,
+                "orig_insn_count": 31,
+                "prog_id": 1449,
+                "prog_name": "blk_account_io_",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "1450": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1450,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1450,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1452": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 165,
+                    "insn_count_before": 165,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1452,
+              "program": {
+                "final_insn_count": 165,
+                "orig_insn_count": 165,
+                "prog_id": 1452,
+                "prog_name": "block_rq_insert",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "1455": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 117,
+                    "insn_count_before": 117,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1455,
+              "program": {
+                "final_insn_count": 117,
+                "orig_insn_count": 117,
+                "prog_id": 1455,
+                "prog_name": "block_rq_issue",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "1458": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 114,
+                    "insn_count_before": 114,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1458,
+              "program": {
+                "final_insn_count": 114,
+                "orig_insn_count": 114,
+                "prog_id": 1458,
+                "prog_name": "block_rq_comple",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "1461": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1461,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1461,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 573708,
+        "response": {
+          "per_program": {
+            "1397": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1397,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1397,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1398": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1398,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1398,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1412": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1412,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1412,
+                "prog_name": "libbpf_nametest",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1413": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 5,
+                    "insn_count_before": 5,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1413,
+              "program": {
+                "final_insn_count": 5,
+                "orig_insn_count": 5,
+                "prog_id": 1413,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1418": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1418,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 1418,
+                "prog_name": "fentry_vfs_read",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "1422": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1422,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 1422,
+                "prog_name": "fentry_vfs_writ",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "1426": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1426,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 1426,
+                "prog_name": "fentry_vfs_fsyn",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "1440": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1440,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 1440,
+                "prog_name": "fentry_vfs_open",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "1444": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1444,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 1444,
+                "prog_name": "fentry_vfs_crea",
+                "prog_type": 26
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 573711,
+        "response": {
+          "per_program": {
+            "1389": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1389,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1389,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1390": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1390,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1390,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1404": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1404,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1404,
+                "prog_name": "libbpf_nametest",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1409": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 5,
+                    "insn_count_before": 5,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1409,
+              "program": {
+                "final_insn_count": 5,
+                "orig_insn_count": 5,
+                "prog_id": 1409,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1423": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1423,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 1423,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "1425": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 46,
+                    "insn_count_before": 46,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1425,
+              "program": {
+                "final_insn_count": 46,
+                "orig_insn_count": 46,
+                "prog_id": 1425,
+                "prog_name": "tracepoint__sys",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "1427": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1427,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1427,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1430": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 46,
+                    "insn_count_before": 46,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1430,
+              "program": {
+                "final_insn_count": 46,
+                "orig_insn_count": 46,
+                "prog_id": 1430,
+                "prog_name": "tracepoint__sys",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "1432": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 102,
+                    "insn_count_before": 102,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1432,
+              "program": {
+                "final_insn_count": 102,
+                "orig_insn_count": 102,
+                "prog_id": 1432,
+                "prog_name": "tracepoint__sys",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "1435": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 102,
+                    "insn_count_before": 102,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1435,
+              "program": {
+                "final_insn_count": 102,
+                "orig_insn_count": 102,
+                "prog_id": 1435,
+                "prog_name": "tracepoint__sys",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "1446": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1446,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1446,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 573716,
+        "response": {
+          "per_program": {
+            "1395": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1395,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1395,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1396": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1396,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1396,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1406": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1406,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1406,
+                "prog_name": "libbpf_nametest",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1410": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 5,
+                    "insn_count_before": 5,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1410,
+              "program": {
+                "final_insn_count": 5,
+                "orig_insn_count": 5,
+                "prog_id": 1410,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1424": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1424,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 1424,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "1428": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 31,
+                    "insn_count_before": 31,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1428,
+              "program": {
+                "final_insn_count": 31,
+                "orig_insn_count": 31,
+                "prog_id": 1428,
+                "prog_name": "sys_enter",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "1431": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1431,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1431,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1433": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 116,
+                    "insn_count_before": 116,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1433,
+              "program": {
+                "final_insn_count": 116,
+                "orig_insn_count": 116,
+                "prog_id": 1433,
+                "prog_name": "sys_exit",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "1445": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1445,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1445,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 573722,
+        "response": {
+          "per_program": {
+            "1391": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1391,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1391,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1393": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1393,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1393,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1407": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1407,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1407,
+                "prog_name": "libbpf_nametest",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1415": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 5,
+                    "insn_count_before": 5,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1415,
+              "program": {
+                "final_insn_count": 5,
+                "orig_insn_count": 5,
+                "prog_id": 1415,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1434": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1434,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 1434,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "1437": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 32,
+                    "insn_count_before": 32,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1437,
+              "program": {
+                "final_insn_count": 32,
+                "orig_insn_count": 32,
+                "prog_id": 1437,
+                "prog_name": "tcp_v4_connect",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "1439": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1439,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1439,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1441": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 167,
+                    "insn_count_before": 167,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1441,
+              "program": {
+                "final_insn_count": 167,
+                "orig_insn_count": 167,
+                "prog_id": 1441,
+                "prog_name": "tcp_v4_connect_",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "1442": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 32,
+                    "insn_count_before": 32,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1442,
+              "program": {
+                "final_insn_count": 32,
+                "orig_insn_count": 32,
+                "prog_id": 1442,
+                "prog_name": "tcp_v6_connect",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "1443": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 170,
+                    "insn_count_before": 170,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1443,
+              "program": {
+                "final_insn_count": 170,
+                "orig_insn_count": 170,
+                "prog_id": 1443,
+                "prog_name": "tcp_v6_connect_",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "1453": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1453,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1453,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 573727,
+        "response": {
+          "per_program": {
+            "1392": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1392,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1392,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1394": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1394,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1394,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1405": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1405,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1405,
+                "prog_name": "libbpf_nametest",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1411": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 5,
+                    "insn_count_before": 5,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1411,
+              "program": {
+                "final_insn_count": 5,
+                "orig_insn_count": 5,
+                "prog_id": 1411,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1429": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1429,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 1429,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "1436": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 309,
+                    "insn_count_before": 309,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1436,
+              "program": {
+                "final_insn_count": 309,
+                "orig_insn_count": 309,
+                "prog_id": 1436,
+                "prog_name": "inet_sock_set_s",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "1438": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1438,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1438,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1447": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1447,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1447,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 573732,
+        "response": {
+          "per_program": {
+            "1399": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1399,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1399,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1400": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1400,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1400,
+                "prog_name": "",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "1401": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1401,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1401,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1416": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1416,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1416,
+                "prog_name": "libbpf_nametest",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1417": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 5,
+                    "insn_count_before": 5,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1417,
+              "program": {
+                "final_insn_count": 5,
+                "orig_insn_count": 5,
+                "prog_id": 1417,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1451": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1451,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 1451,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "1454": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 32,
+                    "insn_count_before": 32,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1454,
+              "program": {
+                "final_insn_count": 32,
+                "orig_insn_count": 32,
+                "prog_id": 1454,
+                "prog_name": "sched_wakeup",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "1456": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1456,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 1456,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "1457": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 32,
+                    "insn_count_before": 32,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1457,
+              "program": {
+                "final_insn_count": 32,
+                "orig_insn_count": 32,
+                "prog_id": 1457,
+                "prog_name": "sched_wakeup_ne",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "1459": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 257,
+                    "insn_count_before": 257,
+                    "insn_delta": 0,
+                    "pass": "context_specialize",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "context_specialize"
+                  }
+                }
+              ],
+              "prog_id": 1459,
+              "program": {
+                "final_insn_count": 257,
+                "orig_insn_count": 257,
+                "prog_id": 1459,
+                "prog_name": "sched_switch",
+                "prog_type": 26
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      }
+    ],
+    "status": "ok"
+  },
+  "runner": "bcc_set",
+  "runner_details": {
+    "command_used": [],
+    "process_output": {
+      "stderr_tail": "capable:\nlost 2315 events on CPU #5\nlost 496 events on CPU #10\nlost 4546 events on CPU #5\nlost 7722 events on CPU #5\nlost 2197 events on CPU #5\nlost 3039 events on CPU #5\nlost 1676 events on CPU #5\nlost 1166 events on CPU #5\nlost 283 events on CPU #5\nlost 591 events on CPU #5\nlost 2926 events on CPU #5\nlost 1232 events on CPU #5\nlost 2655 events on CPU #5\nlost 1407 events on CPU #5\nlost 2022 events on CPU #5\nlost 2039 events on CPU #5\nlost 2160 events on CPU #5\nlost 2224 events on CPU #5\nlost 2525 events on CPU #5\nlost 2332 events on CPU #5\nlost 1643 events on CPU #5\nlost 1201 events on CPU #5\nlost 2331 events on CPU #5\nlost 20 events on CPU #5\nlost 1346 events on CPU #9\nlost 3224 events on CPU #5\nlost 1293 events on CPU #9\nlost 6546 events on CPU #5\nlost 2357 events on CPU #5\nlost 1965 events on CPU #5\nlost 1346 events on CPU #23\nlost 1754 events on CPU #5\nlost 3283 events on CPU #3\nlost 1346 events on CPU #21\nlost 52 events on CPU #10\nlost 2214 events on CPU #1\nlost 961 events on CPU #6\nlost 41 events on CPU #20\nlost 935 events on CPU #4\nlost 243 events on CPU #13\nopensnoop:\nLost 248 events on CPU #5!\nLost 424 events on CPU #4!\nLost 278 events on CPU #1!\nLost 235 events on CPU #5!\nLost 915 events on CPU #5!\nLost 268 events on CPU #5!\nLost 192 events on CPU #2!\nLost 53 events on CPU #0!\nLost 179 events on CPU #2!\nLost 286 events on CPU #7!\nLost 240 events on CPU #4!\nLost 210 events on CPU #3!\nLost 435 events on CPU #7!",
+      "stdout_tail": "8567   celery       4  172.18.0.10      172.18.0.8       5432\n9270   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n9270   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n9270   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n9270   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n561770 HTTP Client  4  127.0.0.1        127.0.0.1        8012\n8567   celery       4  172.18.0.10      172.18.0.8       5432\n9270   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n9270   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n9270   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n9270   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n9270   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n8567   celery       4  172.18.0.10      172.18.0.8       5432\n580273 git-remote-h 4  128.114.59.195   20.29.134.23     443\n9270   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n9270   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n9270   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n9270   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n9270   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n8567   celery       4  172.18.0.10      172.18.0.8       5432\n2756   node         4  128.114.59.195   149.154.166.110  443\ntcplife:\n579369  postgres         172.18.0.8      5432  172.18.0.10     43838 0.66   0.43   5009.56\n9270    tokio-rt-worker  128.114.59.195  33626 172.64.155.209  443   5.16   5.11   162.61\n9270    tokio-rt-worker  128.114.59.195  33636 172.64.155.209  443   5.53   5.11   118.98\n2756    node             128.114.59.195  33954 149.154.166.110 443   2.74   6.46   60472.72\n8567    celery           172.18.0.10     52152 172.18.0.8      5432  0.43   0.66   5009.88\n579487  postgres         172.18.0.8      5432  172.18.0.10     52152 0.66   0.43   5009.88\n9270    tokio-rt-worker  128.114.59.195  33642 172.64.155.209  443   5.16   5.11   112.99\n9270    tokio-rt-worker  128.114.59.195  57030 172.64.155.209  443   5.53   5.12   136.55\n8567    celery           172.18.0.10     52158 172.18.0.8      5432  0.43   0.66   5009.56\n579604  postgres         172.18.0.8      5432  172.18.0.10     52158 0.66   0.43   5009.56\n9270    tokio-rt-worker  128.114.59.195  57044 172.64.155.209  443   5.53   5.11   126.10\n9270    tokio-rt-worker  128.114.59.195  57054 172.64.155.209  443   5.16   5.11   112.08\n8567    celery           172.18.0.10     59950 172.18.0.8      5432  0.43   0.66   5010.15\n579678  postgres         172.18.0.8      5432  172.18.0.10     59950 0.66   0.43   5010.15\n9270    tokio-rt-worker  128.114.59.195  57058 172.64.155.209  443   5.53   5.12   160.20\n9270    tokio-rt-worker  128.114.59.195  57074 172.64.155.209  443   5.16   5.11   129.46\n9270    tokio-rt-worker  128.114.59.195  57082 172.64.155.209  443   5.53   5.11   138.66\n9270    tokio-rt-worker  128.114.59.195  34964 172.64.155.209  443   5.53   5.11   113.88\n561770  HTTP Client      127.0.0.1       41966 127.0.0.1       8012  34.24  10.79  19484.82\n561770  HTTP Client      127.0.0.1       8012  127.0.0.1       41966 10.78  34.24  19484.83\n8567    celery           172.18.0.10     59964 172.18.0.8      5432  0.43   0.66   5009.59\n579774  postgres         172.18.0.8      5432  172.18.0.10     59964 0.66   0.43   5009.59\n9270    tokio-rt-worker  128.114.59.195  34980 172.64.155.209  443   5.16   5.11   118.42\n9270    tokio-rt-worker  128.114.59.195  34982 172.64.155.209  443   5.54   5.12   161.64\n9270    tokio-rt-worker  128.114.59.195  34992 172.64.155.209  443   5.16   5.11   135.11\n9270    tokio-rt-worker  128.114.59.195  34996 172.64.155.209  443   5.54   5.11   127.05\n9270    tokio-rt-worker  128.114.59.195  35008 172.64.155.209  443   5.16   5.12   218.11\n8567    celery           172.18.0.10     51752 172.18.0.8      5432  0.43   0.66   5009.19\n579928  postgres         172.18.0.8      5432  172.18.0.10     51752 0.66   0.43   5009.18\n580273  git-remote-http  128.114.59.195  53490 20.29.134.23    443   2.01   21.60  1792.24\n9270    tokio-rt-worker  128.114.59.195  33880 172.64.155.209  443   5.54   5.11   184.25\n9270    tokio-rt-worker  128.114.59.195  33892 172.64.155.209  443   5.53   5.11   142.05\n9270    tokio-rt-worker  128.114.59.195  33904 172.64.155.209  443   5.16   5.11   189.59\n9270    tokio-rt-worker  128.114.59.195  33912 172.64.155.209  443   5.54   5.11   177.40\n9270    tokio-rt-worker  128.114.59.195  33926 172.64.155.209  443   5.16   5.11   131.59\n8567    celery           172.18.0.10     51768 172.18.0.8      5432  0.43   0.66   5009.74\n580266  postgres         172.18.0.8      5432  172.18.0.10     51768 0.66   0.43   5009.75\n2756    node             128.114.59.195  32950 149.154.166.110 443   2.74   6.46   60470.25\n8567    celery           172.18.0.10     40358 172.18.0.8      5432  0.43   0.66   5010.21\n580461  postgres         172.18.0.8      5432  172.18.0.10     40358 0.66   0.43   5010.21\nrunqlat:\nTracing run queue latency... Hit Ctrl-C to end.\n     usecs               : count    distribution\n         0 -> 1          : 106167312 |****************************************|\n         2 -> 3          : 224651   |                                        |\n         4 -> 7          : 96173    |                                        |\n         8 -> 15         : 42813    |                                        |\n        16 -> 31         : 44300    |                                        |\n        32 -> 63         : 13738    |                                        |\n        64 -> 127        : 6347     |                                        |\n       128 -> 255        : 5125     |                                        |\n       256 -> 511        : 4333     |                                        |\n       512 -> 1023       : 8780     |                                        |\n      1024 -> 2047       : 2759     |                                        |\n      2048 -> 4095       : 1310     |                                        |\n      4096 -> 8191       : 67       |                                        |\n      8192 -> 16383      : 8        |                                        |\n     16384 -> 32767      : 1        |                                        |"
+    }
+  },
+  "selected_workload": "stress_ng_bcc_hook_hot",
+  "status": "ok"
+}
