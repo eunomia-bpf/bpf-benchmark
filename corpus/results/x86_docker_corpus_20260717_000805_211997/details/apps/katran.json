@@ -1,0 +1,1070 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "1093": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1093,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1094": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1094,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1095": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1095,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1096": {
+        "bytes_jited": 40,
+        "bytes_xlated": 32,
+        "id": 1096,
+        "name": "det_arg_ctx",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "1097": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1097,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      },
+      "1098": {
+        "bytes_jited": 13663,
+        "bytes_xlated": 23888,
+        "id": 1098,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 73928253,
+        "run_time_ns_delta": 8494601390,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@0",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 0,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.083155256000282,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 24030233  errors: 41550566\n     started: 5276709002us  stopped: 5306659755us idle: 12993us\n     seq_num: 24030234  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 46800\n     cur_queue_map: 0\n     flows: 32806761\nResult: OK: 29950753(c29937760+d12993) usec, 24030233 (64byte,-1frags)\n  802324pps 410Mb/sec (410789888bps) errors: 41550566",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@1",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 1,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.083155256000282,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@1\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 24727191  errors: 41300654\n     started: 5276709002us  stopped: 5306659755us idle: 10556us\n     seq_num: 24727192  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 35108\n     cur_queue_map: 0\n     flows: 33030246\nResult: OK: 29950753(c29940196+d10556) usec, 24727191 (64byte,-1frags)\n  825594pps 422Mb/sec (422704128bps) errors: 41300654",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@2",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 2,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.083155256000282,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@2\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 25111215  errors: 40122783\n     started: 5276709002us  stopped: 5306659755us idle: 10949us\n     seq_num: 25111216  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 27669\n     cur_queue_map: 0\n     flows: 32633483\nResult: OK: 29950752(c29939803+d10949) usec, 25111215 (64byte,-1frags)\n  838416pps 429Mb/sec (429268992bps) errors: 40122783",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@3",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 3,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.083155256000282,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@3\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 59614  errors: 634\n     started: 5276709002us  stopped: 5306659817us idle: 14983430us\n     seq_num: 59615  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 60249\n     cur_queue_map: 0\n     flows: 43877\nResult: OK: 29950814(c14967383+d14983430) usec, 59614 (64byte,-1frags)\n  1990pps 1Mb/sec (1018880bps) errors: 634",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "threads": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 30.083155256000282,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "1093": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 1093,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1094": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1094,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1095": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1095,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "1096": {
+        "bytes_jited": 40,
+        "bytes_xlated": 32,
+        "id": 1096,
+        "name": "det_arg_ctx",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "1097": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 1097,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      },
+      "1099": {
+        "bytes_jited": 12137,
+        "bytes_xlated": 20808,
+        "id": 1099,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 78852674,
+        "run_time_ns_delta": 7706406741,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@0",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 0,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.084936483000092,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 25642490  errors: 36995416\n     started: 5378860004us  stopped: 5408818211us idle: 14681us\n     seq_num: 25642491  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 52937\n     cur_queue_map: 0\n     flows: 31335274\nResult: OK: 29958207(c29943525+d14681) usec, 25642490 (64byte,-1frags)\n  855942pps 438Mb/sec (438242304bps) errors: 36995416",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@1",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 1,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.084936483000092,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@1\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 26491350  errors: 36816759\n     started: 5378861003us  stopped: 5408818211us idle: 13640us\n     seq_num: 26491351  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 2266\n     cur_queue_map: 0\n     flows: 31670385\nResult: OK: 29957208(c29943567+d13640) usec, 26491350 (64byte,-1frags)\n  884306pps 452Mb/sec (452764672bps) errors: 36816759",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@2",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 2,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.084936483000092,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@2\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 13  errors: 65820\n     started: 5378860004us  stopped: 5408818368us idle: 14989154us\n     seq_num: 14  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 300\n     cur_queue_map: 0\n     flows: 47077\nResult: OK: 29958364(c14969210+d14989154) usec, 13 (64byte,-1frags)\n  0pps 0Mb/sec (0bps) errors: 65820",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@3",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 3,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.084936483000092,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@3\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 26718821  errors: 36283523\n     started: 5378861003us  stopped: 5408818211us idle: 15841us\n     seq_num: 26718822  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 24171\n     cur_queue_map: 0\n     flows: 31517460\nResult: OK: 29957207(c29941365+d15841) usec, 26718821 (64byte,-1frags)\n  891899pps 456Mb/sec (456652288bps) errors: 36283523",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "threads": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 30.084936483000092,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "rejit_result": {
+    "deployment_specialization": {
+      "enabled_passes": [
+        "map_inline"
+      ],
+      "training_workload": {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@0",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 0,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.082949813000596,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 30  errors: 63411\n     started: 5307597002us  stopped: 5337548282us idle: 15024325us\n     seq_num: 31  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 63442\n     cur_queue_map: 0\n     flows: 45740\nResult: OK: 29951279(c14926953+d15024325) usec, 30 (64byte,-1frags)\n  1pps 0Mb/sec (512bps) errors: 63411",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@1",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 1,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.082949813000596,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@1\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 25636467  errors: 40440331\n     started: 5307597002us  stopped: 5337548160us idle: 12888us\n     seq_num: 25636468  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 18527\n     cur_queue_map: 0\n     flows: 33054745\nResult: OK: 29951157(c29938268+d12888) usec, 25636467 (64byte,-1frags)\n  855942pps 438Mb/sec (438242304bps) errors: 40440331",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@2",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 2,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.082949813000596,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@2\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 25987277  errors: 39079818\n     started: 5307597003us  stopped: 5337548160us idle: 14343us\n     seq_num: 25987278  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 57368\n     cur_queue_map: 0\n     flows: 32549956\nResult: OK: 29951157(c29936813+d14343) usec, 25987277 (64byte,-1frags)\n  867655pps 444Mb/sec (444239360bps) errors: 39079818",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@3",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 3,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.082949813000596,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@3\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 25894373  errors: 39855569\n     started: 5307597002us  stopped: 5337548160us idle: 13408us\n     seq_num: 25894374  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 19341\n     cur_queue_map: 0\n     flows: 32891366\nResult: OK: 29951158(c29937749+d13408) usec, 25894373 (64byte,-1frags)\n  864553pps 442Mb/sec (442651136bps) errors: 39855569",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "threads": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 30.082949813000596,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      },
+      "training_workloads": {
+        "state_observation": {
+          "command": [
+            "/usr/sbin/ip",
+            "netns",
+            "exec",
+            "katran-router",
+            "sh",
+            "-c",
+            "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+          ],
+          "components": [
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@0",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "thread_id": 0,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 30.082949813000596,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 30  errors: 63411\n     started: 5307597002us  stopped: 5337548282us idle: 15024325us\n     seq_num: 31  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 63442\n     cur_queue_map: 0\n     flows: 45740\nResult: OK: 29951279(c14926953+d15024325) usec, 30 (64byte,-1frags)\n  1pps 0Mb/sec (512bps) errors: 63411",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            },
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@1",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "thread_id": 1,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 30.082949813000596,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@1\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 25636467  errors: 40440331\n     started: 5307597002us  stopped: 5337548160us idle: 12888us\n     seq_num: 25636468  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 18527\n     cur_queue_map: 0\n     flows: 33054745\nResult: OK: 29951157(c29938268+d12888) usec, 25636467 (64byte,-1frags)\n  855942pps 438Mb/sec (438242304bps) errors: 40440331",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            },
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@2",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "thread_id": 2,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 30.082949813000596,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@2\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 25987277  errors: 39079818\n     started: 5307597003us  stopped: 5337548160us idle: 14343us\n     seq_num: 25987278  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 57368\n     cur_queue_map: 0\n     flows: 32549956\nResult: OK: 29951157(c29936813+d14343) usec, 25987277 (64byte,-1frags)\n  867655pps 444Mb/sec (444239360bps) errors: 39079818",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            },
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@3",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "thread_id": 3,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 30.082949813000596,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@3\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 25894373  errors: 39855569\n     started: 5307597002us  stopped: 5337548160us idle: 13408us\n     seq_num: 25894374  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 19341\n     cur_queue_map: 0\n     flows: 32891366\nResult: OK: 29951158(c29937749+d13408) usec, 25894373 (64byte,-1frags)\n  864553pps 442Mb/sec (442651136bps) errors: 39855569",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            }
+          ],
+          "config": {
+            "clone_skb": 0,
+            "dst_ip": "10.100.1.1",
+            "dst_port": 8080,
+            "iface": "rtlb0",
+            "namespace": "katran-router",
+            "pkt_size": 64,
+            "proto": 17,
+            "shared_skb": false,
+            "src_ip": "10.0.0.2",
+            "threads": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "tool": "kernel_pktgen",
+            "xmit_mode": "start_xmit"
+          },
+          "duration_s": 30.082949813000596,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "",
+          "workload_name": "katran_kernel_pktgen_l2_udp"
+        }
+      }
+    },
+    "mode": "live_swap",
+    "per_program": {
+      "1093": {
+        "passes": [
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 1093,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 1093,
+          "prog_name": "",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "1094": {
+        "passes": [
+          {
+            "bpfopt_ms": 5,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 1094,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 1094,
+          "prog_name": "libbpf_nametest",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "1095": {
+        "passes": [
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 1095,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 1095,
+          "prog_name": "",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "1096": {
+        "passes": [
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 4,
+              "insn_count_before": 4,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 1096,
+        "program": {
+          "final_insn_count": 4,
+          "orig_insn_count": 4,
+          "prog_id": 1096,
+          "prog_name": "det_arg_ctx",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "1097": {
+        "passes": [
+          {
+            "bpfopt_ms": 5,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 1097,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 1097,
+          "prog_name": "",
+          "prog_type": 9
+        },
+        "status": "ok"
+      },
+      "1098": {
+        "passes": [
+          {
+            "bpfopt_ms": 157,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [
+                {
+                  "key_hex": "0a6401010000000000000000000000001f901100",
+                  "map_id": 386,
+                  "stability": "phase-stable",
+                  "value_hex": "c403000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f901100",
+                  "map_id": 386,
+                  "stability": "phase-stable",
+                  "value_hex": "c403000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f901100",
+                  "map_id": 386,
+                  "stability": "phase-stable",
+                  "value_hex": "c403000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f901100",
+                  "map_id": 386,
+                  "stability": "phase-stable",
+                  "value_hex": "c403000000000000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 385,
+                  "stability": "phase-stable",
+                  "value_hex": "02000000000b0000"
+                },
+                {
+                  "key_hex": "",
+                  "map_id": 389,
+                  "stability": "phase-stable",
+                  "value_hex": "01000000"
+                },
+                {
+                  "key_hex": "",
+                  "map_id": 397,
+                  "stability": "phase-stable",
+                  "value_hex": "00000000"
+                },
+                {
+                  "key_hex": "",
+                  "map_id": 397,
+                  "stability": "phase-stable",
+                  "value_hex": "00000000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 385,
+                  "stability": "phase-stable",
+                  "value_hex": "02000000000b0000"
+                },
+                {
+                  "key_hex": "",
+                  "map_id": 389,
+                  "stability": "phase-stable",
+                  "value_hex": "01000000"
+                }
+              ],
+              "insn_count_after": 2277,
+              "insn_count_before": 2542,
+              "insn_delta": -265,
+              "pass": "map_inline",
+              "sites_applied": 10,
+              "sites_matched": 10,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 104,
+            "status": "ok",
+            "step": {
+              "command": "OVERLAY_DIR=${BPFREJIT_IMAGE_WORKSPACE}/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; VIP=; for f in ${MAP_VALUES}/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \",${MAP_IDS},\" in *,$i,*) ;; *) continue ;; esac; case \"$n\" in vip_map) VIP=$i ;; ch_rings|reals|server_id_map) d=${MAP_VALUES}/map-$i.dump.json; if jq -e '.skipped == true' \"$d\" >/dev/null; then case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; esac; fi ;; esac; done; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end)' > ${MAP_VALUES}/overlays.json; VIP_TCP=0a6401010000000000000000000000001f900600; VIP_UDP=0a6401010000000000000000000000001f901100; VIP_DUMP=${MAP_VALUES}/map-$VIP.dump.json; if jq -e --arg key \"$VIP_TCP\" 'any(.[]?; ((.key // []) | map(sub(\"^0x\"; \"\") | ascii_downcase) | join(\"\")) == $key)' \"$VIP_DUMP\" >/dev/null; then VIP_KEY=$VIP_TCP; elif jq -e --arg key \"$VIP_UDP\" 'any(.[]?; ((.key // []) | map(sub(\"^0x\"; \"\") | ascii_downcase) | join(\"\")) == $key)' \"$VIP_DUMP\" >/dev/null; then VIP_KEY=$VIP_UDP; else echo \"katran map_inline: neither TCP nor UDP benchmark VIP key is present in $VIP_DUMP\" >&2; exit 1; fi; bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability phase-stable --include-map=ctl_array --include-map=vip_map --include-map=ch_rings --include-map=server_id_map --inline-hint=vip_map:$VIP_KEY --assume-hint-key # lpm_src_v4/v6 hints commented: katran is built without # -DLPM_SRC_LOOKUP, so these maps are guarded out of the program # by `#ifdef LPM_SRC_LOOKUP` in balancer_maps.h. bpfopt fail-fasts # on hint anchor not in metadata (correct: catches typos and # mis-applied hints early). Uncomment if a future build turns on # source-IP routing. # --inline-hint=lpm_src_v4:00000000 # --inline-hint=lpm_src_v6:00000000 # lru_mapping/global_lru_maps outer-only hints commented: katran # benchmark uses F_LRU_BYPASS + no `-forwarding_cores`, so the outer # ARRAY_OF_MAPS stays empty (every slot ENOENT). #265 root-caused this: # `attachLrus()` iterates empty forwardingCores_ \u0092 zero update_elem. # bpfopt fail-fasts when hinted outer key has no live inner map # (correct: hint claims something kernel snapshot disproves). # Uncomment only if benchmark configures forwarding cores OR an # alternative test deploys populated map-in-map. # --inline-hint=lru_mapping:00000000 # --inline-hint=global_lru_maps:00000000",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 1098,
+        "program": {
+          "final_insn_count": 2277,
+          "orig_insn_count": 2542,
+          "prog_id": 1099,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "runner_details": {
+    "command_used": [
+      "/artifacts/user/repo-artifacts/x86_64/katran/bin/katran_server_grpc",
+      "-balancer_prog=/artifacts/user/repo-artifacts/x86_64/katran/bpf/balancer.bpf.o",
+      "-healthchecker_prog=/artifacts/user/repo-artifacts/x86_64/katran/bpf/healthchecking_ipip.bpf.o",
+      "-default_mac=02:00:00:00:00:0b",
+      "-intf=katran0",
+      "-ipip_intf=ipip0",
+      "-ipip6_intf=ipip60",
+      "-hc_forwarding=false",
+      "-logtostderr",
+      "-alsologtostderr"
+    ],
+    "process_output": {
+      "returncode": -2,
+      "stderr_tail": "I20260717 00:08:05.566819 372954 KatranGrpcService.cpp:69] Starting Katran\nE20260717 00:08:05.566998 372954 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260717 00:08:05.567006 372954 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260717 00:08:05.567186 372954 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260717 00:08:05.567193 372954 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260717 00:08:05.579766 372954 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260717 00:08:05.579780 372954 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "xdp_pktgen",
+  "status": "ok"
+}
