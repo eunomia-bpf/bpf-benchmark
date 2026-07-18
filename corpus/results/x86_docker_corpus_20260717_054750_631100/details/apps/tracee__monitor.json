@@ -1,0 +1,1538 @@
+{
+  "app": "tracee/monitor",
+  "baseline": {
+    "bpf": {
+      "6078": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 6078,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "6079": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 6079,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6080": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 6080,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6081": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 6081,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "6082": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 6082,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "6083": {
+        "bytes_jited": 40,
+        "bytes_xlated": 32,
+        "id": 6083,
+        "name": "det_arg_ctx",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6084": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 6084,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "6085": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 6085,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "6086": {
+        "bytes_jited": 220,
+        "bytes_xlated": 248,
+        "id": 6086,
+        "name": "tracepoint__raw",
+        "run_cnt_delta": 72099926,
+        "run_time_ns_delta": 12450169489,
+        "type": "raw_tracepoint"
+      },
+      "6087": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 6087,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "6088": {
+        "bytes_jited": 2502,
+        "bytes_xlated": 4536,
+        "id": 6088,
+        "name": "sys_enter_init",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6089": {
+        "bytes_jited": 17596,
+        "bytes_xlated": 29976,
+        "id": 6089,
+        "name": "sys_enter_submi",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6090": {
+        "bytes_jited": 249,
+        "bytes_xlated": 304,
+        "id": 6090,
+        "name": "tracepoint__raw",
+        "run_cnt_delta": 72099934,
+        "run_time_ns_delta": 33859134347,
+        "type": "raw_tracepoint"
+      },
+      "6091": {
+        "bytes_jited": 2081,
+        "bytes_xlated": 3784,
+        "id": 6091,
+        "name": "sys_exit_init",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6092": {
+        "bytes_jited": 12067,
+        "bytes_xlated": 20488,
+        "id": 6092,
+        "name": "sys_exit_submit",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6093": {
+        "bytes_jited": 8147,
+        "bytes_xlated": 13704,
+        "id": 6093,
+        "name": "trace_sys_enter",
+        "run_cnt_delta": 72099926,
+        "run_time_ns_delta": 26252976667,
+        "type": "raw_tracepoint"
+      },
+      "6094": {
+        "bytes_jited": 8180,
+        "bytes_xlated": 13760,
+        "id": 6094,
+        "name": "trace_sys_exit",
+        "run_cnt_delta": 72099908,
+        "run_time_ns_delta": 26784034842,
+        "type": "raw_tracepoint"
+      },
+      "6095": {
+        "bytes_jited": 2345,
+        "bytes_xlated": 4408,
+        "id": 6095,
+        "name": "trace_ptrace",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6096": {
+        "bytes_jited": 11718,
+        "bytes_xlated": 19824,
+        "id": 6096,
+        "name": "trace_ret_ptrac",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6097": {
+        "bytes_jited": 2345,
+        "bytes_xlated": 4408,
+        "id": 6097,
+        "name": "trace_process_v",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6098": {
+        "bytes_jited": 11718,
+        "bytes_xlated": 19824,
+        "id": 6098,
+        "name": "trace_ret_proce",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6099": {
+        "bytes_jited": 2345,
+        "bytes_xlated": 4408,
+        "id": 6099,
+        "name": "trace_arch_prct",
+        "run_cnt_delta": 2751725,
+        "run_time_ns_delta": 198587643,
+        "type": "kprobe"
+      },
+      "6100": {
+        "bytes_jited": 11718,
+        "bytes_xlated": 19824,
+        "id": 6100,
+        "name": "trace_ret_arch_",
+        "run_cnt_delta": 2751725,
+        "run_time_ns_delta": 973291598,
+        "type": "kprobe"
+      },
+      "6101": {
+        "bytes_jited": 2345,
+        "bytes_xlated": 4408,
+        "id": 6101,
+        "name": "trace_dup",
+        "run_cnt_delta": 8,
+        "run_time_ns_delta": 4332,
+        "type": "kprobe"
+      },
+      "6102": {
+        "bytes_jited": 11718,
+        "bytes_xlated": 19824,
+        "id": 6102,
+        "name": "trace_ret_dup",
+        "run_cnt_delta": 8,
+        "run_time_ns_delta": 26040,
+        "type": "kprobe"
+      },
+      "6103": {
+        "bytes_jited": 2345,
+        "bytes_xlated": 4408,
+        "id": 6103,
+        "name": "trace_dup2",
+        "run_cnt_delta": 368,
+        "run_time_ns_delta": 209133,
+        "type": "kprobe"
+      },
+      "6104": {
+        "bytes_jited": 11718,
+        "bytes_xlated": 19824,
+        "id": 6104,
+        "name": "trace_ret_dup2",
+        "run_cnt_delta": 368,
+        "run_time_ns_delta": 1177267,
+        "type": "kprobe"
+      },
+      "6105": {
+        "bytes_jited": 2345,
+        "bytes_xlated": 4408,
+        "id": 6105,
+        "name": "trace_dup3",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6106": {
+        "bytes_jited": 11718,
+        "bytes_xlated": 19824,
+        "id": 6106,
+        "name": "trace_ret_dup3",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6107": {
+        "bytes_jited": 22766,
+        "bytes_xlated": 33600,
+        "id": 6107,
+        "name": "syscall__execve",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6108": {
+        "bytes_jited": 22901,
+        "bytes_xlated": 33792,
+        "id": 6108,
+        "name": "syscall__execve",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6109": {
+        "bytes_jited": 23042,
+        "bytes_xlated": 34000,
+        "id": 6109,
+        "name": "syscall__execve",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6110": {
+        "bytes_jited": 23177,
+        "bytes_xlated": 34192,
+        "id": 6110,
+        "name": "syscall__execve",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6111": {
+        "bytes_jited": 12268,
+        "bytes_xlated": 18640,
+        "id": 6111,
+        "name": "sys_dup_exit_ta",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6112": {
+        "bytes_jited": 20710,
+        "bytes_xlated": 33680,
+        "id": 6112,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 10763,
+        "run_time_ns_delta": 28832449,
+        "type": "raw_tracepoint"
+      },
+      "6113": {
+        "bytes_jited": 4506,
+        "bytes_xlated": 7584,
+        "id": 6113,
+        "name": "sched_process_f",
+        "run_cnt_delta": 10763,
+        "run_time_ns_delta": 32503100,
+        "type": "raw_tracepoint"
+      },
+      "6114": {
+        "bytes_jited": 55768,
+        "bytes_xlated": 104000,
+        "id": 6114,
+        "name": "lkm_seeker_modt",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6115": {
+        "bytes_jited": 154,
+        "bytes_xlated": 248,
+        "id": 6115,
+        "name": "heartbeat_captu",
+        "run_cnt_delta": 30,
+        "run_time_ns_delta": 128331,
+        "type": "kprobe"
+      },
+      "6116": {
+        "bytes_jited": 6105,
+        "bytes_xlated": 10128,
+        "id": 6116,
+        "name": "uprobe_lkm_seek",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6117": {
+        "bytes_jited": 4289,
+        "bytes_xlated": 7736,
+        "id": 6117,
+        "name": "uprobe_lkm_seek",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 57213,
+        "type": "kprobe"
+      },
+      "6118": {
+        "bytes_jited": 58811,
+        "bytes_xlated": 108528,
+        "id": 6118,
+        "name": "lkm_seeker_kset",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6119": {
+        "bytes_jited": 656,
+        "bytes_xlated": 1048,
+        "id": 6119,
+        "name": "lkm_seeker_mod_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6120": {
+        "bytes_jited": 52691,
+        "bytes_xlated": 97544,
+        "id": 6120,
+        "name": "lkm_seeker_proc",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6121": {
+        "bytes_jited": 3763,
+        "bytes_xlated": 6272,
+        "id": 6121,
+        "name": "lkm_seeker_new_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6122": {
+        "bytes_jited": 20242,
+        "bytes_xlated": 34872,
+        "id": 6122,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 219,
+        "run_time_ns_delta": 1146670,
+        "type": "raw_tracepoint"
+      },
+      "6123": {
+        "bytes_jited": 24410,
+        "bytes_xlated": 40152,
+        "id": 6123,
+        "name": "sched_process_e",
+        "run_cnt_delta": 219,
+        "run_time_ns_delta": 1626670,
+        "type": "raw_tracepoint"
+      },
+      "6124": {
+        "bytes_jited": 22737,
+        "bytes_xlated": 37400,
+        "id": 6124,
+        "name": "sched_process_e",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6125": {
+        "bytes_jited": 8712,
+        "bytes_xlated": 14568,
+        "id": 6125,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 10761,
+        "run_time_ns_delta": 13680840,
+        "type": "raw_tracepoint"
+      },
+      "6126": {
+        "bytes_jited": 1185,
+        "bytes_xlated": 2024,
+        "id": 6126,
+        "name": "sched_process_e",
+        "run_cnt_delta": 10761,
+        "run_time_ns_delta": 36585464,
+        "type": "raw_tracepoint"
+      },
+      "6127": {
+        "bytes_jited": 252,
+        "bytes_xlated": 440,
+        "id": 6127,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 10754,
+        "run_time_ns_delta": 9308115,
+        "type": "raw_tracepoint"
+      },
+      "6128": {
+        "bytes_jited": 9256,
+        "bytes_xlated": 13976,
+        "id": 6128,
+        "name": "syscall__accept",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6129": {
+        "bytes_jited": 8980,
+        "bytes_xlated": 14960,
+        "id": 6129,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 8894094,
+        "run_time_ns_delta": 4499584398,
+        "type": "raw_tracepoint"
+      },
+      "6130": {
+        "bytes_jited": 8210,
+        "bytes_xlated": 13816,
+        "id": 6130,
+        "name": "trace_filldir64",
+        "run_cnt_delta": 2121619,
+        "run_time_ns_delta": 26596361,
+        "type": "kprobe"
+      },
+      "6131": {
+        "bytes_jited": 25488,
+        "bytes_xlated": 38712,
+        "id": 6131,
+        "name": "trace_call_user",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6132": {
+        "bytes_jited": 8066,
+        "bytes_xlated": 13584,
+        "id": 6132,
+        "name": "trace_do_exit",
+        "run_cnt_delta": 10761,
+        "run_time_ns_delta": 11038800,
+        "type": "kprobe"
+      },
+      "6133": {
+        "bytes_jited": 55695,
+        "bytes_xlated": 96584,
+        "id": 6133,
+        "name": "uprobe_syscall_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6134": {
+        "bytes_jited": 6817,
+        "bytes_xlated": 11248,
+        "id": 6134,
+        "name": "uprobe_seq_ops_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6135": {
+        "bytes_jited": 8686,
+        "bytes_xlated": 14496,
+        "id": 6135,
+        "name": "tracepoint__cgr",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6136": {
+        "bytes_jited": 8649,
+        "bytes_xlated": 14464,
+        "id": 6136,
+        "name": "tracepoint__cgr",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6137": {
+        "bytes_jited": 8649,
+        "bytes_xlated": 14464,
+        "id": 6137,
+        "name": "tracepoint__cgr",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6138": {
+        "bytes_jited": 35510,
+        "bytes_xlated": 53656,
+        "id": 6138,
+        "name": "trace_security_",
+        "run_cnt_delta": 249,
+        "run_time_ns_delta": 1035495,
+        "type": "kprobe"
+      },
+      "6139": {
+        "bytes_jited": 22742,
+        "bytes_xlated": 36600,
+        "id": 6139,
+        "name": "trace_security_",
+        "run_cnt_delta": 806996,
+        "run_time_ns_delta": 637320413,
+        "type": "kprobe"
+      },
+      "6140": {
+        "bytes_jited": 17904,
+        "bytes_xlated": 29640,
+        "id": 6140,
+        "name": "trace_security_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6141": {
+        "bytes_jited": 9969,
+        "bytes_xlated": 16352,
+        "id": 6141,
+        "name": "trace_security_",
+        "run_cnt_delta": 23,
+        "run_time_ns_delta": 101807,
+        "type": "kprobe"
+      },
+      "6142": {
+        "bytes_jited": 10766,
+        "bytes_xlated": 16992,
+        "id": 6142,
+        "name": "trace_commit_cr",
+        "run_cnt_delta": 866438,
+        "run_time_ns_delta": 273865757,
+        "type": "kprobe"
+      },
+      "6143": {
+        "bytes_jited": 10066,
+        "bytes_xlated": 16584,
+        "id": 6143,
+        "name": "trace_switch_ta",
+        "run_cnt_delta": 10761,
+        "run_time_ns_delta": 12994032,
+        "type": "kprobe"
+      },
+      "6144": {
+        "bytes_jited": 8189,
+        "bytes_xlated": 13784,
+        "id": 6144,
+        "name": "trace_cap_capab",
+        "run_cnt_delta": 26070555,
+        "run_time_ns_delta": 8498099217,
+        "type": "kprobe"
+      },
+      "6145": {
+        "bytes_jited": 8495,
+        "bytes_xlated": 14208,
+        "id": 6145,
+        "name": "trace_security_",
+        "run_cnt_delta": 392,
+        "run_time_ns_delta": 584925,
+        "type": "kprobe"
+      },
+      "6146": {
+        "bytes_jited": 9139,
+        "bytes_xlated": 15328,
+        "id": 6146,
+        "name": "trace_security_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6147": {
+        "bytes_jited": 8315,
+        "bytes_xlated": 13944,
+        "id": 6147,
+        "name": "trace_proc_crea",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6148": {
+        "bytes_jited": 9438,
+        "bytes_xlated": 15784,
+        "id": 6148,
+        "name": "trace___debugfs",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6149": {
+        "bytes_jited": 9131,
+        "bytes_xlated": 15328,
+        "id": 6149,
+        "name": "trace_debugfs_c",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6150": {
+        "bytes_jited": 10807,
+        "bytes_xlated": 16576,
+        "id": 6150,
+        "name": "trace_security_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6151": {
+        "bytes_jited": 10109,
+        "bytes_xlated": 15496,
+        "id": 6151,
+        "name": "trace_security_",
+        "run_cnt_delta": 51,
+        "run_time_ns_delta": 99399,
+        "type": "kprobe"
+      },
+      "6152": {
+        "bytes_jited": 11350,
+        "bytes_xlated": 17384,
+        "id": 6152,
+        "name": "trace_security_",
+        "run_cnt_delta": 7,
+        "run_time_ns_delta": 27779,
+        "type": "kprobe"
+      },
+      "6153": {
+        "bytes_jited": 10631,
+        "bytes_xlated": 16168,
+        "id": 6153,
+        "name": "trace_security_",
+        "run_cnt_delta": 12,
+        "run_time_ns_delta": 44164,
+        "type": "kprobe"
+      },
+      "6154": {
+        "bytes_jited": 11109,
+        "bytes_xlated": 17040,
+        "id": 6154,
+        "name": "trace_security_",
+        "run_cnt_delta": 821,
+        "run_time_ns_delta": 1070541,
+        "type": "kprobe"
+      },
+      "6155": {
+        "bytes_jited": 950,
+        "bytes_xlated": 1568,
+        "id": 6155,
+        "name": "send_bin",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6156": {
+        "bytes_jited": 950,
+        "bytes_xlated": 1568,
+        "id": 6156,
+        "name": "send_bin_tp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6157": {
+        "bytes_jited": 153,
+        "bytes_xlated": 232,
+        "id": 6157,
+        "name": "trace_vfs_write",
+        "run_cnt_delta": 1682429,
+        "run_time_ns_delta": 126609292,
+        "type": "kprobe"
+      },
+      "6158": {
+        "bytes_jited": 280,
+        "bytes_xlated": 432,
+        "id": 6158,
+        "name": "vfs_write_magic",
+        "run_cnt_delta": 1682429,
+        "run_time_ns_delta": 52289513,
+        "type": "kprobe"
+      },
+      "6159": {
+        "bytes_jited": 18980,
+        "bytes_xlated": 31456,
+        "id": 6159,
+        "name": "trace_ret_vfs_w",
+        "run_cnt_delta": 1682429,
+        "run_time_ns_delta": 1168744851,
+        "type": "kprobe"
+      },
+      "6160": {
+        "bytes_jited": 23636,
+        "bytes_xlated": 36384,
+        "id": 6160,
+        "name": "vfs_write_magic",
+        "run_cnt_delta": 1682429,
+        "run_time_ns_delta": 50521578,
+        "type": "kprobe"
+      },
+      "6161": {
+        "bytes_jited": 28452,
+        "bytes_xlated": 49808,
+        "id": 6161,
+        "name": "trace_ret_vfs_w",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6162": {
+        "bytes_jited": 153,
+        "bytes_xlated": 232,
+        "id": 6162,
+        "name": "trace_vfs_write",
+        "run_cnt_delta": 46,
+        "run_time_ns_delta": 39887,
+        "type": "kprobe"
+      },
+      "6163": {
+        "bytes_jited": 280,
+        "bytes_xlated": 432,
+        "id": 6163,
+        "name": "vfs_writev_magi",
+        "run_cnt_delta": 46,
+        "run_time_ns_delta": 39441,
+        "type": "kprobe"
+      },
+      "6164": {
+        "bytes_jited": 18979,
+        "bytes_xlated": 31448,
+        "id": 6164,
+        "name": "trace_ret_vfs_w",
+        "run_cnt_delta": 46,
+        "run_time_ns_delta": 228830,
+        "type": "kprobe"
+      },
+      "6165": {
+        "bytes_jited": 23730,
+        "bytes_xlated": 36472,
+        "id": 6165,
+        "name": "vfs_writev_magi",
+        "run_cnt_delta": 46,
+        "run_time_ns_delta": 140164,
+        "type": "kprobe"
+      },
+      "6166": {
+        "bytes_jited": 28614,
+        "bytes_xlated": 50064,
+        "id": 6166,
+        "name": "trace_ret_vfs_w",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6167": {
+        "bytes_jited": 153,
+        "bytes_xlated": 232,
+        "id": 6167,
+        "name": "trace_kernel_wr",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6168": {
+        "bytes_jited": 280,
+        "bytes_xlated": 432,
+        "id": 6168,
+        "name": "kernel_write_ma",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6169": {
+        "bytes_jited": 18983,
+        "bytes_xlated": 31456,
+        "id": 6169,
+        "name": "trace_ret_kerne",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6170": {
+        "bytes_jited": 23636,
+        "bytes_xlated": 36384,
+        "id": 6170,
+        "name": "kernel_write_ma",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6171": {
+        "bytes_jited": 28452,
+        "bytes_xlated": 49808,
+        "id": 6171,
+        "name": "trace_ret_kerne",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6172": {
+        "bytes_jited": 153,
+        "bytes_xlated": 232,
+        "id": 6172,
+        "name": "trace_vfs_read",
+        "run_cnt_delta": 8057313,
+        "run_time_ns_delta": 451231051,
+        "type": "kprobe"
+      },
+      "6173": {
+        "bytes_jited": 18983,
+        "bytes_xlated": 31456,
+        "id": 6173,
+        "name": "trace_ret_vfs_r",
+        "run_cnt_delta": 8057313,
+        "run_time_ns_delta": 4893398195,
+        "type": "kprobe"
+      },
+      "6174": {
+        "bytes_jited": 16647,
+        "bytes_xlated": 29040,
+        "id": 6174,
+        "name": "trace_ret_vfs_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6175": {
+        "bytes_jited": 153,
+        "bytes_xlated": 232,
+        "id": 6175,
+        "name": "trace_vfs_readv",
+        "run_cnt_delta": 1193,
+        "run_time_ns_delta": 128990,
+        "type": "kprobe"
+      },
+      "6176": {
+        "bytes_jited": 18979,
+        "bytes_xlated": 31448,
+        "id": 6176,
+        "name": "trace_ret_vfs_r",
+        "run_cnt_delta": 1193,
+        "run_time_ns_delta": 1543278,
+        "type": "kprobe"
+      },
+      "6177": {
+        "bytes_jited": 16681,
+        "bytes_xlated": 29160,
+        "id": 6177,
+        "name": "trace_ret_vfs_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6178": {
+        "bytes_jited": 20468,
+        "bytes_xlated": 32312,
+        "id": 6178,
+        "name": "trace_mmap_aler",
+        "run_cnt_delta": 8867,
+        "run_time_ns_delta": 2707937,
+        "type": "kprobe"
+      },
+      "6179": {
+        "bytes_jited": 153,
+        "bytes_xlated": 232,
+        "id": 6179,
+        "name": "trace_do_mmap",
+        "run_cnt_delta": 8180,
+        "run_time_ns_delta": 1360234,
+        "type": "kprobe"
+      },
+      "6180": {
+        "bytes_jited": 20207,
+        "bytes_xlated": 31392,
+        "id": 6180,
+        "name": "trace_ret_do_mm",
+        "run_cnt_delta": 8180,
+        "run_time_ns_delta": 11493285,
+        "type": "kprobe"
+      },
+      "6181": {
+        "bytes_jited": 36668,
+        "bytes_xlated": 59872,
+        "id": 6181,
+        "name": "trace_security_",
+        "run_cnt_delta": 8180,
+        "run_time_ns_delta": 8655446,
+        "type": "kprobe"
+      },
+      "6182": {
+        "bytes_jited": 34152,
+        "bytes_xlated": 58272,
+        "id": 6182,
+        "name": "trace_security_",
+        "run_cnt_delta": 1024,
+        "run_time_ns_delta": 2128551,
+        "type": "kprobe"
+      },
+      "6183": {
+        "bytes_jited": 625,
+        "bytes_xlated": 1000,
+        "id": 6183,
+        "name": "syscall__init_m",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6184": {
+        "bytes_jited": 153,
+        "bytes_xlated": 232,
+        "id": 6184,
+        "name": "trace_register_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6185": {
+        "bytes_jited": 8825,
+        "bytes_xlated": 14752,
+        "id": 6185,
+        "name": "trace_ret_regis",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6186": {
+        "bytes_jited": 18280,
+        "bytes_xlated": 30032,
+        "id": 6186,
+        "name": "trace_security_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6187": {
+        "bytes_jited": 16820,
+        "bytes_xlated": 29832,
+        "id": 6187,
+        "name": "trace_security_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6188": {
+        "bytes_jited": 9135,
+        "bytes_xlated": 15304,
+        "id": 6188,
+        "name": "trace_security_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6189": {
+        "bytes_jited": 8717,
+        "bytes_xlated": 14496,
+        "id": 6189,
+        "name": "trace_device_ad",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6190": {
+        "bytes_jited": 153,
+        "bytes_xlated": 232,
+        "id": 6190,
+        "name": "trace___registe",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6191": {
+        "bytes_jited": 8810,
+        "bytes_xlated": 14688,
+        "id": 6191,
+        "name": "trace_ret__regi",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6192": {
+        "bytes_jited": 153,
+        "bytes_xlated": 232,
+        "id": 6192,
+        "name": "trace_do_splice",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6193": {
+        "bytes_jited": 19411,
+        "bytes_xlated": 31872,
+        "id": 6193,
+        "name": "trace_ret_do_sp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6194": {
+        "bytes_jited": 19599,
+        "bytes_xlated": 32168,
+        "id": 6194,
+        "name": "tracepoint__mod",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6195": {
+        "bytes_jited": 9048,
+        "bytes_xlated": 15080,
+        "id": 6195,
+        "name": "tracepoint__mod",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6196": {
+        "bytes_jited": 153,
+        "bytes_xlated": 232,
+        "id": 6196,
+        "name": "trace_do_init_m",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6197": {
+        "bytes_jited": 14694,
+        "bytes_xlated": 24296,
+        "id": 6197,
+        "name": "trace_ret_do_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6198": {
+        "bytes_jited": 18169,
+        "bytes_xlated": 29896,
+        "id": 6198,
+        "name": "trace_load_elf_",
+        "run_cnt_delta": 438,
+        "run_time_ns_delta": 1055216,
+        "type": "kprobe"
+      },
+      "6199": {
+        "bytes_jited": 8727,
+        "bytes_xlated": 14624,
+        "id": 6199,
+        "name": "trace_security_",
+        "run_cnt_delta": 9746829,
+        "run_time_ns_delta": 374072542,
+        "type": "kprobe"
+      },
+      "6200": {
+        "bytes_jited": 8509,
+        "bytes_xlated": 14192,
+        "id": 6200,
+        "name": "tracepoint__tas",
+        "run_cnt_delta": 10731,
+        "run_time_ns_delta": 11257002,
+        "type": "raw_tracepoint"
+      },
+      "6201": {
+        "bytes_jited": 9710,
+        "bytes_xlated": 16328,
+        "id": 6201,
+        "name": "trace_security_",
+        "run_cnt_delta": 22,
+        "run_time_ns_delta": 112357,
+        "type": "kprobe"
+      },
+      "6202": {
+        "bytes_jited": 153,
+        "bytes_xlated": 232,
+        "id": 6202,
+        "name": "trace_kallsyms_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6203": {
+        "bytes_jited": 8445,
+        "bytes_xlated": 14144,
+        "id": 6203,
+        "name": "trace_ret_kalls",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6204": {
+        "bytes_jited": 10180,
+        "bytes_xlated": 16328,
+        "id": 6204,
+        "name": "trace_do_sigact",
+        "run_cnt_delta": 25247,
+        "run_time_ns_delta": 24332289,
+        "type": "kprobe"
+      },
+      "6205": {
+        "bytes_jited": 18260,
+        "bytes_xlated": 30064,
+        "id": 6205,
+        "name": "trace_vfs_utime",
+        "run_cnt_delta": 122,
+        "run_time_ns_delta": 603491,
+        "type": "kprobe"
+      },
+      "6206": {
+        "bytes_jited": 18260,
+        "bytes_xlated": 30064,
+        "id": 6206,
+        "name": "trace_utimes_co",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6207": {
+        "bytes_jited": 9537,
+        "bytes_xlated": 15824,
+        "id": 6207,
+        "name": "trace_do_trunca",
+        "run_cnt_delta": 20,
+        "run_time_ns_delta": 90035,
+        "type": "kprobe"
+      },
+      "6208": {
+        "bytes_jited": 153,
+        "bytes_xlated": 232,
+        "id": 6208,
+        "name": "trace_inotify_f",
+        "run_cnt_delta": 110,
+        "run_time_ns_delta": 48404,
+        "type": "kprobe"
+      },
+      "6209": {
+        "bytes_jited": 17707,
+        "bytes_xlated": 29472,
+        "id": 6209,
+        "name": "trace_ret_inoti",
+        "run_cnt_delta": 110,
+        "run_time_ns_delta": 435230,
+        "type": "kprobe"
+      },
+      "6210": {
+        "bytes_jited": 11624,
+        "bytes_xlated": 19424,
+        "id": 6210,
+        "name": "process_execute",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6211": {
+        "bytes_jited": 16221,
+        "bytes_xlated": 28448,
+        "id": 6211,
+        "name": "trace_exec_binp",
+        "run_cnt_delta": 219,
+        "run_time_ns_delta": 103388,
+        "type": "kprobe"
+      },
+      "6212": {
+        "bytes_jited": 16429,
+        "bytes_xlated": 28616,
+        "id": 6212,
+        "name": "trace_security_",
+        "run_cnt_delta": 219,
+        "run_time_ns_delta": 1010762,
+        "type": "kprobe"
+      },
+      "6213": {
+        "bytes_jited": 26611,
+        "bytes_xlated": 40552,
+        "id": 6213,
+        "name": "trace_execute_f",
+        "run_cnt_delta": 307,
+        "run_time_ns_delta": 1285247,
+        "type": "kprobe"
+      },
+      "6214": {
+        "bytes_jited": 18443,
+        "bytes_xlated": 30080,
+        "id": 6214,
+        "name": "trace_security_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6215": {
+        "bytes_jited": 18740,
+        "bytes_xlated": 30464,
+        "id": 6215,
+        "name": "trace_set_fs_pw",
+        "run_cnt_delta": 17,
+        "run_time_ns_delta": 69647,
+        "type": "kprobe"
+      },
+      "6216": {
+        "bytes_jited": 8647,
+        "bytes_xlated": 14456,
+        "id": 6216,
+        "name": "trace_security_",
+        "run_cnt_delta": 1280715,
+        "run_time_ns_delta": 500766040,
+        "type": "kprobe"
+      },
+      "6217": {
+        "bytes_jited": 8638,
+        "bytes_xlated": 14480,
+        "id": 6217,
+        "name": "trace_security_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6218": {
+        "bytes_jited": 17257,
+        "bytes_xlated": 28736,
+        "id": 6218,
+        "name": "trace_chmod_com",
+        "run_cnt_delta": 4,
+        "run_time_ns_delta": 9032,
+        "type": "kprobe"
+      },
+      "6219": {
+        "bytes_jited": 45409,
+        "bytes_xlated": 74480,
+        "id": 6219,
+        "name": "trace_security_",
+        "run_cnt_delta": 973121,
+        "run_time_ns_delta": 407352523,
+        "type": "kprobe"
+      },
+      "6220": {
+        "bytes_jited": 14869,
+        "bytes_xlated": 24128,
+        "id": 6220,
+        "name": "syscall_checker",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6221": {
+        "bytes_jited": 9420,
+        "bytes_xlated": 15784,
+        "id": 6221,
+        "name": "trace_security_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6222": {
+        "bytes_jited": 332,
+        "bytes_xlated": 528,
+        "id": 6222,
+        "name": "trace_sock_allo",
+        "run_cnt_delta": 399,
+        "run_time_ns_delta": 104334,
+        "type": "kprobe"
+      },
+      "6223": {
+        "bytes_jited": 8653,
+        "bytes_xlated": 13504,
+        "id": 6223,
+        "name": "trace_ret_sock_",
+        "run_cnt_delta": 399,
+        "run_time_ns_delta": 285706,
+        "type": "kprobe"
+      },
+      "6224": {
+        "bytes_jited": 345,
+        "bytes_xlated": 592,
+        "id": 6224,
+        "name": "trace_security_",
+        "run_cnt_delta": 6,
+        "run_time_ns_delta": 3939,
+        "type": "kprobe"
+      },
+      "6225": {
+        "bytes_jited": 8901,
+        "bytes_xlated": 13744,
+        "id": 6225,
+        "name": "trace_security_",
+        "run_cnt_delta": 24506,
+        "run_time_ns_delta": 31716895,
+        "type": "kprobe"
+      },
+      "6226": {
+        "bytes_jited": 8901,
+        "bytes_xlated": 13744,
+        "id": 6226,
+        "name": "trace_security_",
+        "run_cnt_delta": 16720,
+        "run_time_ns_delta": 22589783,
+        "type": "kprobe"
+      },
+      "6227": {
+        "bytes_jited": 5707,
+        "bytes_xlated": 8912,
+        "id": 6227,
+        "name": "cgroup_bpf_run_",
+        "run_cnt_delta": 32709,
+        "run_time_ns_delta": 42472187,
+        "type": "kprobe"
+      },
+      "6228": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 6228,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      },
+      "6229": {
+        "bytes_jited": 19471,
+        "bytes_xlated": 31080,
+        "id": 6229,
+        "name": "cgroup_skb_ingr",
+        "run_cnt_delta": 16169,
+        "run_time_ns_delta": 15093674,
+        "type": "cgroup_skb"
+      },
+      "6230": {
+        "bytes_jited": 19471,
+        "bytes_xlated": 31080,
+        "id": 6230,
+        "name": "cgroup_skb_egre",
+        "run_cnt_delta": 16525,
+        "run_time_ns_delta": 17648238,
+        "type": "cgroup_skb"
+      },
+      "6231": {
+        "bytes_jited": 943,
+        "bytes_xlated": 1608,
+        "id": 6231,
+        "name": "cgroup_mkdir_si",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6232": {
+        "bytes_jited": 925,
+        "bytes_xlated": 1568,
+        "id": 6232,
+        "name": "cgroup_rmdir_si",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "6233": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 6233,
+        "name": "empty_kprobe",
+        "run_cnt_delta": 249,
+        "run_time_ns_delta": 72627,
+        "type": "kprobe"
+      },
+      "6234": {
+        "bytes_jited": 58686,
+        "bytes_xlated": 96272,
+        "id": 6234,
+        "name": "tracepoint__exe",
+        "run_cnt_delta": 219,
+        "run_time_ns_delta": 196225,
+        "type": "raw_tracepoint"
+      },
+      "6235": {
+        "bytes_jited": 3367,
+        "bytes_xlated": 6032,
+        "id": 6235,
+        "name": "uprobe__feature",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6236": {
+        "bytes_jited": 2004,
+        "bytes_xlated": 3480,
+        "id": 6236,
+        "name": "uprobe__feature",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6237": {
+        "bytes_jited": 2004,
+        "bytes_xlated": 3480,
+        "id": 6237,
+        "name": "uprobe__feature",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6238": {
+        "bytes_jited": 2004,
+        "bytes_xlated": 3480,
+        "id": 6238,
+        "name": "uprobe__feature",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6239": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 6239,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sigfd",
+          "1",
+          "--eventfd",
+          "1",
+          "--kill",
+          "1",
+          "--futex",
+          "1",
+          "--prctl",
+          "1",
+          "--timeout",
+          "30s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/b6559cb4"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "set",
+            "sigfd",
+            "eventfd",
+            "kill",
+            "futex",
+            "prctl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 30.04540198199902,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1453572] setting to a 30 secs run per stressor\nstress-ng: info:  [1453572] dispatching hogs: 1 cap, 1 set, 1 sigfd, 1 eventfd, 1 kill, 1 futex, 1 prctl\nstress-ng: info:  [1453572] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [1453572] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1453572]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1453572] cap             2023803     30.00      0.86     24.97     67460.08       78342.30\nstress-ng: metrc: [1453572] set               91471     30.00      0.40     26.48      3049.03        3402.72\nstress-ng: metrc: [1453572] sigfd           4944617     30.00      0.82     35.01    164809.80      138004.15\nstress-ng: metrc: [1453572] eventfd          724662     30.00      0.57     17.41     24155.01       40291.81\nstress-ng: metrc: [1453572] kill             102643     30.00      0.15     29.10      3421.40        3509.45\nstress-ng: metrc: [1453572] futex           3813370     60.00      0.96     38.24     63555.83       97298.71\nstress-ng: metrc: [1453572] prctl             10462     30.00      5.73      6.99       348.72         822.44\nstress-ng: info:  [1453572] skipped: 0\nstress-ng: info:  [1453572] passed: 7: cap (1) set (1) sigfd (1) eventfd (1) kill (1) futex (1) prctl (1)\nstress-ng: info:  [1453572] failed: 0\nstress-ng: info:  [1453572] metrics untrustworthy: 0\nstress-ng: info:  [1453572] successful run completed in 30.00 secs",
+        "workload_name": "stress_ng_tracee_syscall_hot"
+      }
+    ]
+  },
+  "error": "bpfprof failed (1, sample_period=100000000): perf branch-stack sampler was throttled by the kernel; raise PERF_SAMPLE_PERIOD",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "tracee",
+  "runner_details": {
+    "command_used": [
+      "/artifacts/tracee/bin/tracee",
+      "--events",
+      "*",
+      "--events",
+      "-net_packet_raw,-print_mem_dump,-net_packet_ipv4,-net_packet_ipv6,-net_packet_tcp,-net_packet_udp,-net_packet_icmp,-net_packet_icmpv6,-net_packet_dns,-net_packet_dns_request,-net_packet_dns_response,-net_packet_http,-net_packet_http_request,-net_packet_http_response,-anti_debugging,-aslr_inspection,-cgroup_notify_on_release,-cgroup_release_agent,-core_pattern_modification,-default_loader_mod,-disk_mount,-docker_abuse,-dropped_executable,-dynamic_code_loading,-file_modification,-fileless_execution,-hidden_file_created,-hooked_seq_ops_detector,-hooked_syscall_detector,-illegitimate_shell,-k8s_service_account_token,-kernel_module_loading,-k8s_api_connection,-k8s_cert_theft,-ld_preload,-lsm_test,-proc_fops_hooking,-proc_kcore_read,-proc_mem_access,-proc_mem_code_injection,-process_vm_write_inject,-ptrace_code_injection,-rcd_modification,-sched_debug_recon,-scheduled_task_mod,-stack_pivot,-bpf_attach,-security_bpf,-security_bpf_map,-security_bpf_prog,-stdio_over_socket,-sudoers_modification,-syscall_hooking,-system_request_key_mod",
+      "--output",
+      "none",
+      "--server",
+      "healthz",
+      "--server",
+      "http-address=:3366",
+      "--signatures-dir",
+      "/var/tmp/bpfrejit-runtime/b6559cb4/tracee/signatures",
+      "--capabilities",
+      "bypass=true"
+    ],
+    "process_output": {
+      "returncode": -9,
+      "stderr_tail": "{\"level\":\"warn\",\"ts\":1784267358.0329201,\"msg\":\"Lost 1216636 events\"}\n{\"level\":\"warn\",\"ts\":1784267358.096068,\"msg\":\"Lost 1511512 events\"}\n{\"level\":\"warn\",\"ts\":1784267358.1327293,\"msg\":\"Lost 819997 events\"}\n{\"level\":\"warn\",\"ts\":1784267358.192789,\"msg\":\"Lost 400378 events\"}\n{\"level\":\"warn\",\"ts\":1784267358.4552925,\"msg\":\"Lost 1456308 events\"}\n{\"level\":\"warn\",\"ts\":1784267358.5412529,\"msg\":\"Lost 335518 events\"}\n{\"level\":\"warn\",\"ts\":1784267358.628104,\"msg\":\"Lost 823287 events\"}\n{\"level\":\"warn\",\"ts\":1784267358.7414048,\"msg\":\"Lost 611932 events\"}\n{\"level\":\"warn\",\"ts\":1784267358.9606771,\"msg\":\"Lost 1254477 events\"}\n{\"level\":\"warn\",\"ts\":1784267359.012845,\"msg\":\"Lost 1391987 events\"}\n{\"level\":\"warn\",\"ts\":1784267359.076967,\"msg\":\"Lost 854455 events\"}\n{\"level\":\"warn\",\"ts\":1784267359.130779,\"msg\":\"Lost 368708 events\"}\n{\"level\":\"warn\",\"ts\":1784267359.289905,\"msg\":\"Lost 644 events\"}\n{\"level\":\"warn\",\"ts\":1784267359.3947442,\"msg\":\"Lost 1755852 events\"}\n{\"level\":\"warn\",\"ts\":1784267359.471641,\"msg\":\"Lost 339357 events\"}\n{\"level\":\"warn\",\"ts\":1784267359.5748541,\"msg\":\"Lost 844123 events\"}\n{\"level\":\"warn\",\"ts\":1784267359.6810117,\"msg\":\"Lost 484907 events\"}\n{\"level\":\"warn\",\"ts\":1784267359.7874515,\"msg\":\"Lost 1640 events\"}\n{\"level\":\"warn\",\"ts\":1784267359.8520243,\"msg\":\"Lost 1360807 events\"}\n{\"level\":\"warn\",\"ts\":1784267359.9063377,\"msg\":\"Lost 1681466 events\"}\n{\"level\":\"warn\",\"ts\":1784267359.9674997,\"msg\":\"Lost 938141 events\"}\n{\"level\":\"warn\",\"ts\":1784267360.0129497,\"msg\":\"Lost 804092 events\"}\n{\"level\":\"warn\",\"ts\":1784267360.110459,\"msg\":\"Lost 70206 events\"}\n{\"level\":\"warn\",\"ts\":1784267360.225629,\"msg\":\"Lost 1182489 events\"}\n{\"level\":\"warn\",\"ts\":1784267360.294,\"msg\":\"Lost 475982 events\"}\n{\"level\":\"warn\",\"ts\":1784267360.3738105,\"msg\":\"Lost 892859 events\"}\n{\"level\":\"warn\",\"ts\":1784267360.4764001,\"msg\":\"Lost 852262 events\"}\n{\"level\":\"warn\",\"ts\":1784267360.620776,\"msg\":\"Lost 1 events\"}\n{\"level\":\"warn\",\"ts\":1784267360.6208591,\"msg\":\"Lost 5179 events\"}\n{\"level\":\"warn\",\"ts\":1784267360.6720252,\"msg\":\"Lost 1306755 events\"}\n{\"level\":\"warn\",\"ts\":1784267360.7287824,\"msg\":\"Lost 1515725 events\"}\n{\"level\":\"warn\",\"ts\":1784267360.772664,\"msg\":\"Lost 875706 events\"}\n{\"level\":\"warn\",\"ts\":1784267360.8262243,\"msg\":\"Lost 786415 events\"}\n{\"level\":\"warn\",\"ts\":1784267361.0699723,\"msg\":\"Lost 348000 events\"}\n{\"level\":\"warn\",\"ts\":1784267361.133403,\"msg\":\"Lost 453544 events\"}\n{\"level\":\"warn\",\"ts\":1784267361.249836,\"msg\":\"Lost 770105 events\"}\n{\"level\":\"warn\",\"ts\":1784267361.3533728,\"msg\":\"Lost 1507400 events\"}\n{\"level\":\"warn\",\"ts\":1784267361.4314957,\"msg\":\"Lost 6973 events\"}\n{\"level\":\"warn\",\"ts\":1784267361.4934518,\"msg\":\"Lost 7413 events\"}\n{\"level\":\"warn\",\"ts\":1784267361.5564017,\"msg\":\"Lost 1207218 events\"}\n{\"level\":\"warn\",\"ts\":1784267361.6209183,\"msg\":\"Lost 1488475 events\"}\n{\"level\":\"warn\",\"ts\":1784267361.6773672,\"msg\":\"Lost 802147 events\"}\n{\"level\":\"warn\",\"ts\":1784267361.7371452,\"msg\":\"Lost 401416 events\"}\n{\"level\":\"warn\",\"ts\":1784267361.7877145,\"msg\":\"Lost 58882 events\"}\n{\"level\":\"warn\",\"ts\":1784267361.9046128,\"msg\":\"Lost 437360 events\"}\n{\"level\":\"warn\",\"ts\":1784267361.9692655,\"msg\":\"Lost 283089 events\"}\n{\"level\":\"warn\",\"ts\":1784267362.0677552,\"msg\":\"Lost 822668 events\"}\n{\"level\":\"warn\",\"ts\":1784267362.1529043,\"msg\":\"Lost 1621544 events\"}\n{\"level\":\"warn\",\"ts\":1784267362.2766788,\"msg\":\"Lost 1 events\"}\n{\"level\":\"warn\",\"ts\":1784267362.2767007,\"msg\":\"Lost 4576 events\"}\n{\"level\":\"warn\",\"ts\":1784267362.33497,\"msg\":\"Lost 4096 events\"}\n{\"level\":\"warn\",\"ts\":1784267362.3797383,\"msg\":\"Lost 1317565 events\"}\n{\"level\":\"warn\",\"ts\":1784267362.439612,\"msg\":\"Lost 1698043 events\"}\n{\"level\":\"warn\",\"ts\":1784267362.4996586,\"msg\":\"Lost 899147 events\"}\n{\"level\":\"warn\",\"ts\":1784267362.5530777,\"msg\":\"Lost 516697 events\"}\n{\"level\":\"warn\",\"ts\":1784267362.7766159,\"msg\":\"Lost 431519 events\"}\n{\"level\":\"warn\",\"ts\":1784267362.8623245,\"msg\":\"Lost 295454 events\"}\n{\"level\":\"warn\",\"ts\":1784267362.9464784,\"msg\":\"Lost 807096 events\"}\n{\"level\":\"warn\",\"ts\":1784267363.0686831,\"msg\":\"Lost 1526347 events\"}\n{\"level\":\"warn\",\"ts\":1784267363.1445768,\"msg\":\"Lost 68983 events\"}\n{\"level\":\"warn\",\"ts\":1784267363.183649,\"msg\":\"Lost 18875 events\"}\n{\"level\":\"warn\",\"ts\":1784267363.245009,\"msg\":\"Lost 1190576 events\"}\n{\"level\":\"warn\",\"ts\":1784267363.3039646,\"msg\":\"Lost 1535815 events\"}\n{\"level\":\"warn\",\"ts\":1784267363.3699434,\"msg\":\"Lost 808861 events\"}\n{\"level\":\"warn\",\"ts\":1784267363.4187589,\"msg\":\"Lost 557868 events\"}\n{\"level\":\"warn\",\"ts\":1784267363.5979447,\"msg\":\"Lost 1533 events\"}\n{\"level\":\"warn\",\"ts\":1784267363.6817937,\"msg\":\"Lost 476012 events\"}\n{\"level\":\"warn\",\"ts\":1784267363.7542202,\"msg\":\"Lost 333758 events\"}\n{\"level\":\"warn\",\"ts\":1784267363.8379788,\"msg\":\"Lost 869244 events\"}\n{\"level\":\"warn\",\"ts\":1784267363.95168,\"msg\":\"Lost 1741796 events\"}\n{\"level\":\"warn\",\"ts\":1784267364.1333559,\"msg\":\"Lost 1268518 events\"}\n{\"level\":\"warn\",\"ts\":1784267364.2088528,\"msg\":\"Lost 1582889 events\"}\n{\"level\":\"warn\",\"ts\":1784267364.2621317,\"msg\":\"Lost 855222 events\"}\n{\"level\":\"warn\",\"ts\":1784267364.3206532,\"msg\":\"Lost 566711 events\"}\n{\"level\":\"warn\",\"ts\":1784267364.4285762,\"msg\":\"Lost 31531 events\"}\n{\"level\":\"warn\",\"ts\":1784267364.5244005,\"msg\":\"Lost 422969 events\"}\n{\"level\":\"warn\",\"ts\":1784267364.611324,\"msg\":\"Lost 570506 events\"}\n{\"level\":\"warn\",\"ts\":1784267364.7175171,\"msg\":\"Lost 874733 events\"}\n{\"level\":\"warn\",\"ts\":1784267364.8070734,\"msg\":\"Lost 1607813 events\"}\n{\"level\":\"warn\",\"ts\":1784267364.8825662,\"msg\":\"Lost 62511 events\"}\n{\"level\":\"warn\",\"ts\":1784267365.0159533,\"msg\":\"Lost 1326511 events\"}\n{\"level\":\"warn\",\"ts\":1784267365.0783463,\"msg\":\"Lost 1507310 events\"}\n{\"level\":\"warn\",\"ts\":1784267365.1411684,\"msg\":\"Lost 907219 events\"}\n{\"level\":\"warn\",\"ts\":1784267365.2062173,\"msg\":\"Lost 568568 events\"}\n{\"level\":\"warn\",\"ts\":1784267365.4413073,\"msg\":\"Lost 531754 events\"}\n{\"level\":\"warn\",\"ts\":1784267365.5028162,\"msg\":\"Lost 1 events\"}\n{\"level\":\"warn\",\"ts\":1784267365.5114605,\"msg\":\"Lost 485401 events\"}\n{\"level\":\"warn\",\"ts\":1784267365.6441798,\"msg\":\"Lost 827179 events\"}\n{\"level\":\"warn\",\"ts\":1784267365.7441523,\"msg\":\"Lost 1649534 events\"}\n{\"level\":\"warn\",\"ts\":1784267365.8978033,\"msg\":\"Lost 7490 events\"}\n{\"level\":\"warn\",\"ts\":1784267365.944757,\"msg\":\"Lost 2222 events\"}\n{\"level\":\"warn\",\"ts\":1784267365.9700377,\"msg\":\"Lost 1273978 events\"}\n{\"level\":\"warn\",\"ts\":1784267366.0286798,\"msg\":\"Lost 1411255 events\"}\n{\"level\":\"warn\",\"ts\":1784267366.0906034,\"msg\":\"Lost 889276 events\"}\n{\"level\":\"warn\",\"ts\":1784267366.154293,\"msg\":\"Lost 352855 events\"}\n{\"level\":\"warn\",\"ts\":1784267366.2367988,\"msg\":\"Lost 3314 events\"}\n{\"level\":\"warn\",\"ts\":1784267366.3741047,\"msg\":\"Lost 624170 events\"}\n{\"level\":\"warn\",\"ts\":1784267366.4577365,\"msg\":\"Lost 954034 events\"}\n{\"level\":\"warn\",\"ts\":1784267366.6061306,\"msg\":\"Lost 909856 events\"}\n{\"level\":\"warn\",\"ts\":1784267366.7294476,\"msg\":\"Lost 1368318 events\"}\n{\"level\":\"warn\",\"ts\":1784267366.8040428,\"msg\":\"Lost 11604 events\"}\n{\"level\":\"warn\",\"ts\":1784267366.8714013,\"msg\":\"Lost 1398581 events\"}\n{\"level\":\"warn\",\"ts\":1784267366.947697,\"msg\":\"Lost 1154503 events\"}\n{\"level\":\"warn\",\"ts\":1784267367.007169,\"msg\":\"Lost 944471 events\"}\n{\"level\":\"warn\",\"ts\":1784267367.0601337,\"msg\":\"Lost 405076 events\"}\n{\"level\":\"warn\",\"ts\":1784267367.1900637,\"msg\":\"Lost 56854 events\"}\n{\"level\":\"warn\",\"ts\":1784267367.2377706,\"msg\":\"Lost 1174346 events\"}\n{\"level\":\"warn\",\"ts\":1784267367.3202844,\"msg\":\"Lost 1753363 events\"}\n{\"level\":\"warn\",\"ts\":1784267367.4317656,\"msg\":\"Lost 945252 events\"}\n{\"level\":\"warn\",\"ts\":1784267367.5676355,\"msg\":\"Lost 371043 events\"}\n{\"level\":\"warn\",\"ts\":1784267367.7336648,\"msg\":\"Lost 1336279 events\"}\n{\"level\":\"warn\",\"ts\":1784267367.800622,\"msg\":\"Lost 657232 events\"}\n{\"level\":\"warn\",\"ts\":1784267367.8527043,\"msg\":\"Lost 903394 events\"}\n{\"level\":\"warn\",\"ts\":1784267367.9126303,\"msg\":\"Lost 487046 events\"}\n{\"level\":\"warn\",\"ts\":1784267368.0619636,\"msg\":\"Lost 1596378 events\"}\n{\"level\":\"warn\",\"ts\":1784267368.1577873,\"msg\":\"Lost 1623216 events\"}\n{\"level\":\"warn\",\"ts\":1784267368.2629755,\"msg\":\"Lost 797823 events\"}\n{\"level\":\"warn\",\"ts\":1784267368.3926108,\"msg\":\"Lost 416483 events\"}\n{\"level\":\"warn\",\"ts\":1784267368.5307689,\"msg\":\"Lost 1249575 events\"}\n{\"level\":\"warn\",\"ts\":1784267368.5843024,\"msg\":\"Lost 415201 events\"}\n{\"level\":\"warn\",\"ts\":1784267368.6423979,\"msg\":\"Lost 846987 events\"}\n{\"level\":\"warn\",\"ts\":1784267368.710519,\"msg\":\"Lost 384760 events\"}\n{\"level\":\"warn\",\"ts\":1784267368.9328313,\"msg\":\"Lost 1568213 events\"}\n{\"level\":\"warn\",\"ts\":1784267369.0298824,\"msg\":\"Lost 1129262 events\"}\n{\"level\":\"warn\",\"ts\":1784267369.1320126,\"msg\":\"Lost 794663 events\"}\n{\"level\":\"warn\",\"ts\":1784267369.273728,\"msg\":\"Lost 1044734 events\"}\n{\"level\":\"warn\",\"ts\":1784267369.4093792,\"msg\":\"Lost 1139789 events\"}\n{\"level\":\"warn\",\"ts\":1784267369.483824,\"msg\":\"Lost 343863 events\"}\n{\"level\":\"warn\",\"ts\":1784267369.5354016,\"msg\":\"Lost 792970 events\"}\n{\"level\":\"warn\",\"ts\":1784267369.5870416,\"msg\":\"Lost 537460 events\"}\n{\"level\":\"warn\",\"ts\":1784267369.6300154,\"msg\":\"Lost 1 events\"}\n{\"level\":\"warn\",\"ts\":1784267369.677836,\"msg\":\"Lost 58761 events\"}\n{\"level\":\"warn\",\"ts\":1784267369.7424898,\"msg\":\"Lost 1475963 events\"}\n{\"level\":\"warn\",\"ts\":1784267369.8110528,\"msg\":\"Lost 392894 events\"}\n{\"level\":\"warn\",\"ts\":1784267369.9377139,\"msg\":\"Lost 770135 events\"}\n{\"level\":\"warn\",\"ts\":1784267370.0166934,\"msg\":\"Lost 1595061 events\"}\n{\"level\":\"warn\",\"ts\":1784267370.1602,\"msg\":\"Lost 1316157 events\"}\n{\"level\":\"warn\",\"ts\":1784267370.2228577,\"msg\":\"Lost 1398112 events\"}\n{\"level\":\"warn\",\"ts\":1784267370.2953093,\"msg\":\"Lost 876073 events\"}\n{\"level\":\"warn\",\"ts\":1784267370.3502192,\"msg\":\"Lost 374024 events\"}\n{\"level\":\"warn\",\"ts\":1784267370.4483964,\"msg\":\"Lost 671279 events\"}\n{\"level\":\"warn\",\"ts\":1784267370.5767944,\"msg\":\"Lost 460193 events\"}\n{\"level\":\"warn\",\"ts\":1784267370.7083294,\"msg\":\"Lost 360344 events\"}\n{\"level\":\"warn\",\"ts\":1784267370.857896,\"msg\":\"Lost 1382227 events\"}\n{\"level\":\"warn\",\"ts\":1784267370.995886,\"msg\":\"Lost 1079629 events\"}\n{\"level\":\"warn\",\"ts\":1784267371.0573716,\"msg\":\"Lost 1394292 events\"}\n{\"level\":\"warn\",\"ts\":1784267371.105749,\"msg\":\"Lost 759114 events\"}\n{\"level\":\"warn\",\"ts\":1784267371.1530223,\"msg\":\"Lost 248656 events\"}\n{\"level\":\"warn\",\"ts\":1784267371.3200397,\"msg\":\"Lost 698051 events\"}\n{\"level\":\"warn\",\"ts\":1784267371.3918135,\"msg\":\"Lost 443604 events\"}\n{\"level\":\"warn\",\"ts\":1784267371.5059805,\"msg\":\"Lost 472980 events\"}\n{\"level\":\"warn\",\"ts\":1784267371.6466932,\"msg\":\"Lost 1452980 events\"}\n{\"level\":\"warn\",\"ts\":1784267371.80046,\"msg\":\"Lost 1228231 events\"}\n{\"level\":\"warn\",\"ts\":1784267371.8628585,\"msg\":\"Lost 1517138 events\"}\n{\"level\":\"warn\",\"ts\":1784267371.9213874,\"msg\":\"Lost 796566 events\"}\n{\"level\":\"warn\",\"ts\":1784267371.9746537,\"msg\":\"Lost 525674 events\"}\n{\"level\":\"warn\",\"ts\":1784267372.177188,\"msg\":\"Lost 850047 events\"}\n{\"level\":\"warn\",\"ts\":1784267372.2686698,\"msg\":\"Lost 347878 events\"}\n{\"level\":\"warn\",\"ts\":1784267372.362379,\"msg\":\"Lost 285342 events\"}\n{\"level\":\"warn\",\"ts\":1784267372.4958277,\"msg\":\"Lost 1438037 events\"}\n{\"level\":\"warn\",\"ts\":1784267372.6615596,\"msg\":\"Lost 1185910 events\"}\n{\"level\":\"warn\",\"ts\":1784267372.7156737,\"msg\":\"Lost 1479363 events\"}\n{\"level\":\"warn\",\"ts\":1784267372.7753038,\"msg\":\"Lost 806336 events\"}\n{\"level\":\"warn\",\"ts\":1784267372.8281364,\"msg\":\"Lost 621458 events\"}\n{\"level\":\"warn\",\"ts\":1784267373.0622382,\"msg\":\"Lost 62707 events\"}\n{\"level\":\"warn\",\"ts\":1784267373.106598,\"msg\":\"Lost 860781 events\"}\n{\"level\":\"warn\",\"ts\":1784267373.1685472,\"msg\":\"Lost 367509 events\"}\n{\"level\":\"warn\",\"ts\":1784267373.2781389,\"msg\":\"Lost 295907 events\"}\n{\"level\":\"warn\",\"ts\":1784267373.4062188,\"msg\":\"Lost 1551949 events\"}\n{\"level\":\"warn\",\"ts\":1784267373.4798589,\"msg\":\"Lost 14539 events\"}\n{\"level\":\"warn\",\"ts\":1784267373.5171936,\"msg\":\"Lost 1250982 events\"}\n{\"level\":\"warn\",\"ts\":1784267373.57208,\"msg\":\"Lost 1559893 events\"}\n{\"level\":\"warn\",\"ts\":1784267373.6251326,\"msg\":\"Lost 859293 events\"}\n{\"level\":\"warn\",\"ts\":1784267373.6677845,\"msg\":\"Lost 498136 events\"}\n{\"level\":\"warn\",\"ts\":1784267373.8878965,\"msg\":\"Lost 2225 events\"}\n{\"level\":\"warn\",\"ts\":1784267373.9160008,\"msg\":\"Lost 893035 events\"}\n{\"level\":\"warn\",\"ts\":1784267373.9858391,\"msg\":\"Lost 500315 events\"}\n{\"level\":\"warn\",\"ts\":1784267374.0977883,\"msg\":\"Lost 418681 events\"}\n{\"level\":\"warn\",\"ts\":1784267374.231703,\"msg\":\"Lost 1686629 events\"}\n{\"level\":\"warn\",\"ts\":1784267374.3657458,\"msg\":\"Lost 1258125 events\"}\n{\"level\":\"warn\",\"ts\":1784267374.4295394,\"msg\":\"Lost 1519490 events\"}\n{\"level\":\"warn\",\"ts\":1784267374.4929605,\"msg\":\"Lost 832440 events\"}\n{\"level\":\"warn\",\"ts\":1784267374.5494947,\"msg\":\"Lost 462168 events\"}\n{\"level\":\"warn\",\"ts\":1784267374.615805,\"msg\":\"Lost 6057 events\"}\n{\"level\":\"warn\",\"ts\":1784267374.6546807,\"msg\":\"Lost 14602 events\"}\n{\"level\":\"warn\",\"ts\":1784267374.765509,\"msg\":\"Lost 815897 events\"}\n{\"level\":\"warn\",\"ts\":1784267374.8373542,\"msg\":\"Lost 464433 events\"}\n{\"level\":\"warn\",\"ts\":1784267374.975567,\"msg\":\"Lost 450481 events\"}\n{\"level\":\"warn\",\"ts\":1784267375.074972,\"msg\":\"Lost 1527584 events\"}\n{\"level\":\"warn\",\"ts\":1784267375.2743986,\"msg\":\"Lost 1259013 events\"}\n{\"level\":\"warn\",\"ts\":1784267375.336067,\"msg\":\"Lost 1607045 events\"}\n{\"level\":\"warn\",\"ts\":1784267375.3863115,\"msg\":\"Lost 875037 events\"}\n{\"level\":\"warn\",\"ts\":1784267375.439006,\"msg\":\"Lost 559201 events\"}\n{\"level\":\"warn\",\"ts\":1784267375.6139994,\"msg\":\"Lost 834580 events\"}\n{\"level\":\"warn\",\"ts\":1784267375.722495,\"msg\":\"Lost 387063 events\"}\n{\"level\":\"warn\",\"ts\":1784267375.7799919,\"msg\":\"Lost 58367 events\"}\n{\"level\":\"warn\",\"ts\":1784267375.8568647,\"msg\":\"Lost 349533 events\"}\n{\"level\":\"warn\",\"ts\":1784267375.9398034,\"msg\":\"Lost 1503809 events\"}\n{\"level\":\"warn\",\"ts\":1784267375.9935582,\"msg\":\"Lost 15103 events\"}\n{\"level\":\"warn\",\"ts\":1784267376.0624683,\"msg\":\"Lost 1331243 events\"}",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "stress_ng_tracee_syscall_hot",
+  "status": "error"
+}
