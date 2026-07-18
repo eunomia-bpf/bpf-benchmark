@@ -1,0 +1,2136 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "4022": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 4022,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "4023": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 4023,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "4024": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 4024,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "4025": {
+        "bytes_jited": 40,
+        "bytes_xlated": 32,
+        "id": 4025,
+        "name": "det_arg_ctx",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4026": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 4026,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      },
+      "4027": {
+        "bytes_jited": 16579,
+        "bytes_xlated": 28568,
+        "id": 4027,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 71090887,
+        "run_time_ns_delta": 7046738751,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "python3",
+              "-c",
+              "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+              "rtlb0",
+              "02000000000a02000000000b080045000040400100004004b6b5c0000201c00002024500002c000100004011655a0a0000020a64010127101f90001800006b617472616e2d7461696c2d63616c6c",
+              "30"
+            ],
+            "config": {
+              "iface": "rtlb0",
+              "inner_dst_ip": "10.100.1.1",
+              "inner_dst_port": 8080,
+              "inner_proto": 17,
+              "inner_src_ip": "10.0.0.2",
+              "namespace": "katran-router",
+              "outer_dst_ip": "192.0.2.2",
+              "outer_src_ip": "192.0.2.1",
+              "tool": "python_af_packet",
+              "worker": 0
+            },
+            "duration_s": 30.024560350000684,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "{\"enobufs\": 294159, \"sent\": 17839601}",
+            "workload_name": "katran_af_packet_ipip_worker"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "python3",
+              "-c",
+              "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+              "rtlb0",
+              "02000000000a02000000000b080045000040400200004004b6b4c0000201c00002024500002c00020000401165590a0000020a64010127111f90001800006b617472616e2d7461696c2d63616c6c",
+              "30"
+            ],
+            "config": {
+              "iface": "rtlb0",
+              "inner_dst_ip": "10.100.1.1",
+              "inner_dst_port": 8080,
+              "inner_proto": 17,
+              "inner_src_ip": "10.0.0.2",
+              "namespace": "katran-router",
+              "outer_dst_ip": "192.0.2.2",
+              "outer_src_ip": "192.0.2.1",
+              "tool": "python_af_packet",
+              "worker": 1
+            },
+            "duration_s": 30.024560350000684,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "{\"enobufs\": 294272, \"sent\": 17868672}",
+            "workload_name": "katran_af_packet_ipip_worker"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "python3",
+              "-c",
+              "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+              "rtlb0",
+              "02000000000a02000000000b080045000040400300004004b6b3c0000201c00002024500002c00030000401165580a0000020a64010127121f90001800006b617472616e2d7461696c2d63616c6c",
+              "30"
+            ],
+            "config": {
+              "iface": "rtlb0",
+              "inner_dst_ip": "10.100.1.1",
+              "inner_dst_port": 8080,
+              "inner_proto": 17,
+              "inner_src_ip": "10.0.0.2",
+              "namespace": "katran-router",
+              "outer_dst_ip": "192.0.2.2",
+              "outer_src_ip": "192.0.2.1",
+              "tool": "python_af_packet",
+              "worker": 2
+            },
+            "duration_s": 30.024560350000684,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "{\"enobufs\": 294375, \"sent\": 17611289}",
+            "workload_name": "katran_af_packet_ipip_worker"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "python3",
+              "-c",
+              "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+              "rtlb0",
+              "02000000000a02000000000b080045000040400400004004b6b2c0000201c00002024500002c00040000401165570a0000020a64010127131f90001800006b617472616e2d7461696c2d63616c6c",
+              "30"
+            ],
+            "config": {
+              "iface": "rtlb0",
+              "inner_dst_ip": "10.100.1.1",
+              "inner_dst_port": 8080,
+              "inner_proto": 17,
+              "inner_src_ip": "10.0.0.2",
+              "namespace": "katran-router",
+              "outer_dst_ip": "192.0.2.2",
+              "outer_src_ip": "192.0.2.1",
+              "tool": "python_af_packet",
+              "worker": 3
+            },
+            "duration_s": 30.024560350000684,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "{\"enobufs\": 294339, \"sent\": 17771325}",
+            "workload_name": "katran_af_packet_ipip_worker"
+          }
+        ],
+        "config": {
+          "iface": "rtlb0",
+          "inner_proto": 17,
+          "namespace": "katran-router",
+          "outer_proto": 4,
+          "tool": "python_af_packet",
+          "workers": 4
+        },
+        "duration_s": 30.024560350000684,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_af_packet_ipip"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "4022": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 4022,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "4023": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 4023,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "4024": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 4024,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "4025": {
+        "bytes_jited": 40,
+        "bytes_xlated": 32,
+        "id": 4025,
+        "name": "det_arg_ctx",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "4026": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 4026,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      },
+      "4028": {
+        "bytes_jited": 16890,
+        "bytes_xlated": 28248,
+        "id": 4028,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 70945909,
+        "run_time_ns_delta": 7125328221,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "python3",
+              "-c",
+              "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+              "rtlb0",
+              "02000000000a02000000000b080045000040400100004004b6b5c0000201c00002024500002c000100004011655a0a0000020a64010127101f90001800006b617472616e2d7461696c2d63616c6c",
+              "30"
+            ],
+            "config": {
+              "iface": "rtlb0",
+              "inner_dst_ip": "10.100.1.1",
+              "inner_dst_port": 8080,
+              "inner_proto": 17,
+              "inner_src_ip": "10.0.0.2",
+              "namespace": "katran-router",
+              "outer_dst_ip": "192.0.2.2",
+              "outer_src_ip": "192.0.2.1",
+              "tool": "python_af_packet",
+              "worker": 0
+            },
+            "duration_s": 30.027031263001845,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "{\"enobufs\": 296585, \"sent\": 17819767}",
+            "workload_name": "katran_af_packet_ipip_worker"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "python3",
+              "-c",
+              "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+              "rtlb0",
+              "02000000000a02000000000b080045000040400200004004b6b4c0000201c00002024500002c00020000401165590a0000020a64010127111f90001800006b617472616e2d7461696c2d63616c6c",
+              "30"
+            ],
+            "config": {
+              "iface": "rtlb0",
+              "inner_dst_ip": "10.100.1.1",
+              "inner_dst_port": 8080,
+              "inner_proto": 17,
+              "inner_src_ip": "10.0.0.2",
+              "namespace": "katran-router",
+              "outer_dst_ip": "192.0.2.2",
+              "outer_src_ip": "192.0.2.1",
+              "tool": "python_af_packet",
+              "worker": 1
+            },
+            "duration_s": 30.027031263001845,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "{\"enobufs\": 296050, \"sent\": 17524622}",
+            "workload_name": "katran_af_packet_ipip_worker"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "python3",
+              "-c",
+              "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+              "rtlb0",
+              "02000000000a02000000000b080045000040400300004004b6b3c0000201c00002024500002c00030000401165580a0000020a64010127121f90001800006b617472616e2d7461696c2d63616c6c",
+              "30"
+            ],
+            "config": {
+              "iface": "rtlb0",
+              "inner_dst_ip": "10.100.1.1",
+              "inner_dst_port": 8080,
+              "inner_proto": 17,
+              "inner_src_ip": "10.0.0.2",
+              "namespace": "katran-router",
+              "outer_dst_ip": "192.0.2.2",
+              "outer_src_ip": "192.0.2.1",
+              "tool": "python_af_packet",
+              "worker": 2
+            },
+            "duration_s": 30.027031263001845,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "{\"enobufs\": 296216, \"sent\": 17756392}",
+            "workload_name": "katran_af_packet_ipip_worker"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "python3",
+              "-c",
+              "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+              "rtlb0",
+              "02000000000a02000000000b080045000040400400004004b6b2c0000201c00002024500002c00040000401165570a0000020a64010127131f90001800006b617472616e2d7461696c2d63616c6c",
+              "30"
+            ],
+            "config": {
+              "iface": "rtlb0",
+              "inner_dst_ip": "10.100.1.1",
+              "inner_dst_port": 8080,
+              "inner_proto": 17,
+              "inner_src_ip": "10.0.0.2",
+              "namespace": "katran-router",
+              "outer_dst_ip": "192.0.2.2",
+              "outer_src_ip": "192.0.2.1",
+              "tool": "python_af_packet",
+              "worker": 3
+            },
+            "duration_s": 30.027031263001845,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "{\"enobufs\": 296313, \"sent\": 17845127}",
+            "workload_name": "katran_af_packet_ipip_worker"
+          }
+        ],
+        "config": {
+          "iface": "rtlb0",
+          "inner_proto": 17,
+          "namespace": "katran-router",
+          "outer_proto": 4,
+          "tool": "python_af_packet",
+          "workers": 4
+        },
+        "duration_s": 30.027031263001845,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_af_packet_ipip"
+      }
+    ]
+  },
+  "rejit_result": {
+    "deployment_specialization": {
+      "enabled_passes": [
+        "branch_flip"
+      ],
+      "profile_root": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260717_040939_677313/details/deployment-specialization/katran/profiles",
+      "raw_profile_dir": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260717_040939_677313/details/deployment-specialization/katran/raw",
+      "training_workload": {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "python3",
+              "-c",
+              "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+              "rtlb0",
+              "02000000000a02000000000b080045000040400100004004b6b5c0000201c00002024500002c000100004011655a0a0000020a64010127101f90001800006b617472616e2d7461696c2d63616c6c",
+              "30"
+            ],
+            "config": {
+              "iface": "rtlb0",
+              "inner_dst_ip": "10.100.1.1",
+              "inner_dst_port": 8080,
+              "inner_proto": 17,
+              "inner_src_ip": "10.0.0.2",
+              "namespace": "katran-router",
+              "outer_dst_ip": "192.0.2.2",
+              "outer_src_ip": "192.0.2.1",
+              "tool": "python_af_packet",
+              "worker": 0
+            },
+            "duration_s": 30.0316424119992,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "{\"enobufs\": 292298, \"sent\": 17561398}",
+            "workload_name": "katran_af_packet_ipip_worker"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "python3",
+              "-c",
+              "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+              "rtlb0",
+              "02000000000a02000000000b080045000040400200004004b6b4c0000201c00002024500002c00020000401165590a0000020a64010127111f90001800006b617472616e2d7461696c2d63616c6c",
+              "30"
+            ],
+            "config": {
+              "iface": "rtlb0",
+              "inner_dst_ip": "10.100.1.1",
+              "inner_dst_port": 8080,
+              "inner_proto": 17,
+              "inner_src_ip": "10.0.0.2",
+              "namespace": "katran-router",
+              "outer_dst_ip": "192.0.2.2",
+              "outer_src_ip": "192.0.2.1",
+              "tool": "python_af_packet",
+              "worker": 1
+            },
+            "duration_s": 30.0316424119992,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "{\"enobufs\": 292498, \"sent\": 17817454}",
+            "workload_name": "katran_af_packet_ipip_worker"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "python3",
+              "-c",
+              "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+              "rtlb0",
+              "02000000000a02000000000b080045000040400300004004b6b3c0000201c00002024500002c00030000401165580a0000020a64010127121f90001800006b617472616e2d7461696c2d63616c6c",
+              "30"
+            ],
+            "config": {
+              "iface": "rtlb0",
+              "inner_dst_ip": "10.100.1.1",
+              "inner_dst_port": 8080,
+              "inner_proto": 17,
+              "inner_src_ip": "10.0.0.2",
+              "namespace": "katran-router",
+              "outer_dst_ip": "192.0.2.2",
+              "outer_src_ip": "192.0.2.1",
+              "tool": "python_af_packet",
+              "worker": 2
+            },
+            "duration_s": 30.0316424119992,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "{\"enobufs\": 292277, \"sent\": 17710411}",
+            "workload_name": "katran_af_packet_ipip_worker"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "python3",
+              "-c",
+              "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+              "rtlb0",
+              "02000000000a02000000000b080045000040400400004004b6b2c0000201c00002024500002c00040000401165570a0000020a64010127131f90001800006b617472616e2d7461696c2d63616c6c",
+              "30"
+            ],
+            "config": {
+              "iface": "rtlb0",
+              "inner_dst_ip": "10.100.1.1",
+              "inner_dst_port": 8080,
+              "inner_proto": 17,
+              "inner_src_ip": "10.0.0.2",
+              "namespace": "katran-router",
+              "outer_dst_ip": "192.0.2.2",
+              "outer_src_ip": "192.0.2.1",
+              "tool": "python_af_packet",
+              "worker": 3
+            },
+            "duration_s": 30.0316424119992,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "{\"enobufs\": 292250, \"sent\": 17827942}",
+            "workload_name": "katran_af_packet_ipip_worker"
+          }
+        ],
+        "config": {
+          "iface": "rtlb0",
+          "inner_proto": 17,
+          "namespace": "katran-router",
+          "outer_proto": 4,
+          "tool": "python_af_packet",
+          "workers": 4
+        },
+        "duration_s": 30.0316424119992,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_af_packet_ipip"
+      },
+      "training_workloads": {
+        "pmu_profile": {
+          "command": [],
+          "components": [
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "python3",
+                "-c",
+                "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+                "rtlb0",
+                "02000000000a02000000000b080045000040400100004004b6b5c0000201c00002024500002c000100004011655a0a0000020a64010127101f90001800006b617472616e2d7461696c2d63616c6c",
+                "30"
+              ],
+              "config": {
+                "iface": "rtlb0",
+                "inner_dst_ip": "10.100.1.1",
+                "inner_dst_port": 8080,
+                "inner_proto": 17,
+                "inner_src_ip": "10.0.0.2",
+                "namespace": "katran-router",
+                "outer_dst_ip": "192.0.2.2",
+                "outer_src_ip": "192.0.2.1",
+                "tool": "python_af_packet",
+                "worker": 0
+              },
+              "duration_s": 30.0316424119992,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "{\"enobufs\": 292298, \"sent\": 17561398}",
+              "workload_name": "katran_af_packet_ipip_worker"
+            },
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "python3",
+                "-c",
+                "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+                "rtlb0",
+                "02000000000a02000000000b080045000040400200004004b6b4c0000201c00002024500002c00020000401165590a0000020a64010127111f90001800006b617472616e2d7461696c2d63616c6c",
+                "30"
+              ],
+              "config": {
+                "iface": "rtlb0",
+                "inner_dst_ip": "10.100.1.1",
+                "inner_dst_port": 8080,
+                "inner_proto": 17,
+                "inner_src_ip": "10.0.0.2",
+                "namespace": "katran-router",
+                "outer_dst_ip": "192.0.2.2",
+                "outer_src_ip": "192.0.2.1",
+                "tool": "python_af_packet",
+                "worker": 1
+              },
+              "duration_s": 30.0316424119992,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "{\"enobufs\": 292498, \"sent\": 17817454}",
+              "workload_name": "katran_af_packet_ipip_worker"
+            },
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "python3",
+                "-c",
+                "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+                "rtlb0",
+                "02000000000a02000000000b080045000040400300004004b6b3c0000201c00002024500002c00030000401165580a0000020a64010127121f90001800006b617472616e2d7461696c2d63616c6c",
+                "30"
+              ],
+              "config": {
+                "iface": "rtlb0",
+                "inner_dst_ip": "10.100.1.1",
+                "inner_dst_port": 8080,
+                "inner_proto": 17,
+                "inner_src_ip": "10.0.0.2",
+                "namespace": "katran-router",
+                "outer_dst_ip": "192.0.2.2",
+                "outer_src_ip": "192.0.2.1",
+                "tool": "python_af_packet",
+                "worker": 2
+              },
+              "duration_s": 30.0316424119992,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "{\"enobufs\": 292277, \"sent\": 17710411}",
+              "workload_name": "katran_af_packet_ipip_worker"
+            },
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "python3",
+                "-c",
+                "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+                "rtlb0",
+                "02000000000a02000000000b080045000040400400004004b6b2c0000201c00002024500002c00040000401165570a0000020a64010127131f90001800006b617472616e2d7461696c2d63616c6c",
+                "30"
+              ],
+              "config": {
+                "iface": "rtlb0",
+                "inner_dst_ip": "10.100.1.1",
+                "inner_dst_port": 8080,
+                "inner_proto": 17,
+                "inner_src_ip": "10.0.0.2",
+                "namespace": "katran-router",
+                "outer_dst_ip": "192.0.2.2",
+                "outer_src_ip": "192.0.2.1",
+                "tool": "python_af_packet",
+                "worker": 3
+              },
+              "duration_s": 30.0316424119992,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "{\"enobufs\": 292250, \"sent\": 17827942}",
+              "workload_name": "katran_af_packet_ipip_worker"
+            }
+          ],
+          "config": {
+            "iface": "rtlb0",
+            "inner_proto": 17,
+            "namespace": "katran-router",
+            "outer_proto": 4,
+            "tool": "python_af_packet",
+            "workers": 4
+          },
+          "duration_s": 30.0316424119992,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "",
+          "workload_name": "katran_af_packet_ipip"
+        }
+      }
+    },
+    "mode": "live_swap",
+    "per_program": {
+      "4022": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "branch_flip",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_BRANCH_PROFILE_ROOT:?BPFREJIT_BRANCH_PROFILE_ROOT is required for branch_flip}\"; profile=\"${profile_root}/hash-${PROG_BRANCH_PROFILE_HASH}.json\"; bpfopt --pass branch_flip --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\"",
+              "log_level": 1,
+              "name": "branch_flip"
+            }
+          }
+        ],
+        "prog_id": 4022,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 4022,
+          "prog_name": "",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "4023": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "branch_flip",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_BRANCH_PROFILE_ROOT:?BPFREJIT_BRANCH_PROFILE_ROOT is required for branch_flip}\"; profile=\"${profile_root}/hash-${PROG_BRANCH_PROFILE_HASH}.json\"; bpfopt --pass branch_flip --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\"",
+              "log_level": 1,
+              "name": "branch_flip"
+            }
+          }
+        ],
+        "prog_id": 4023,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 4023,
+          "prog_name": "libbpf_nametest",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "4024": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "branch_flip",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_BRANCH_PROFILE_ROOT:?BPFREJIT_BRANCH_PROFILE_ROOT is required for branch_flip}\"; profile=\"${profile_root}/hash-${PROG_BRANCH_PROFILE_HASH}.json\"; bpfopt --pass branch_flip --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\"",
+              "log_level": 1,
+              "name": "branch_flip"
+            }
+          }
+        ],
+        "prog_id": 4024,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 4024,
+          "prog_name": "",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "4025": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 4,
+              "insn_count_before": 4,
+              "insn_delta": 0,
+              "pass": "branch_flip",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_BRANCH_PROFILE_ROOT:?BPFREJIT_BRANCH_PROFILE_ROOT is required for branch_flip}\"; profile=\"${profile_root}/hash-${PROG_BRANCH_PROFILE_HASH}.json\"; bpfopt --pass branch_flip --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\"",
+              "log_level": 1,
+              "name": "branch_flip"
+            }
+          }
+        ],
+        "prog_id": 4025,
+        "program": {
+          "final_insn_count": 4,
+          "orig_insn_count": 4,
+          "prog_id": 4025,
+          "prog_name": "det_arg_ctx",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "4026": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "branch_flip",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_BRANCH_PROFILE_ROOT:?BPFREJIT_BRANCH_PROFILE_ROOT is required for branch_flip}\"; profile=\"${profile_root}/hash-${PROG_BRANCH_PROFILE_HASH}.json\"; bpfopt --pass branch_flip --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\"",
+              "log_level": 1,
+              "name": "branch_flip"
+            }
+          }
+        ],
+        "prog_id": 4026,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 4026,
+          "prog_name": "",
+          "prog_type": 9
+        },
+        "status": "ok"
+      },
+      "4027": {
+        "passes": [
+          {
+            "bpfopt_ms": 82,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2973,
+              "insn_count_before": 3026,
+              "insn_delta": -53,
+              "pass": "branch_flip",
+              "sites_applied": 2,
+              "sites_matched": 297,
+              "sites_skipped": 295,
+              "skip_reasons": {
+                "site_budget": 17,
+                "target_not_hot": 52,
+                "zero_branch_count": 226
+              },
+              "skipped_sites": [
+                {
+                  "pc": 6,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 14,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 26,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 27,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 45,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 48,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 56,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 58,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 64,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 68,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 70,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 71,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 73,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 78,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 169,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 179,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 181,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 203,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 208,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 210,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 212,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 237,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 242,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 247,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 309,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 311,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 312,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 314,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 319,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 321,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 323,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 346,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 351,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 356,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 366,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 372,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 381,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 407,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 408,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 410,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 416,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 424,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 429,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 434,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 438,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 443,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 445,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 457,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 470,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 475,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 482,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 484,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 490,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 500,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 506,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 516,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 519,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 537,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 546,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 557,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 562,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 598,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 607,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 615,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 618,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 621,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 629,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 640,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 651,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 687,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 696,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 704,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 707,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 710,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 718,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 721,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 731,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 737,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 747,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 750,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 780,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 790,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 794,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 801,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 811,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 819,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 832,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 840,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 851,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 854,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 862,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 869,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 882,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 888,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 897,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 923,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 924,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 926,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 932,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 940,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 945,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 950,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 954,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 959,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 961,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 975,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 990,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 995,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 1002,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1004,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1016,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1025,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 1029,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1030,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 1032,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1050,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1069,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1075,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1081,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1117,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1125,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1133,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1136,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1140,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1148,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1164,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1175,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1211,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1219,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1227,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1230,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1234,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1242,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1280,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1284,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1291,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1301,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1309,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 1322,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1330,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1340,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1343,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 1351,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1357,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1370,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1375,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1381,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1385,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1389,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1391,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1394,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1404,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1414,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1418,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 1422,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1424,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1427,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1439,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1442,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1450,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1452,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1459,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1472,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1475,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1484,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1490,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 1499,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 1504,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1512,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1521,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1525,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1526,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1527,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1540,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1542,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 1551,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1557,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1571,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1583,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 1590,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1595,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1598,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1653,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1661,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1665,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1685,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1692,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1700,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1706,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1729,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1732,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1740,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1754,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1759,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1762,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1832,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1837,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 1842,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 1860,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1866,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1870,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1871,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1872,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 1891,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1918,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1919,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1920,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1921,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1942,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1945,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1953,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1970,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1973,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1978,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1981,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1989,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2003,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2006,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2016,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2022,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2032,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2037,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2045,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2054,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2056,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2066,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2072,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2087,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2100,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2107,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2112,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2115,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2181,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2189,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2193,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2214,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2221,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2229,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2234,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2259,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2262,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2270,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2279,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2287,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2294,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2297,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2299,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2318,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2321,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2324,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2327,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2331,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2337,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2339,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2340,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2348,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2366,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2371,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2374,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2443,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2448,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2453,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2462,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2471,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2483,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2491,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2503,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2506,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2508,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2526,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2532,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2534,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2535,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2543,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2559,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2568,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2571,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2588,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2615,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 2616,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 2617,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 2618,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2630,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2636,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2665,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2687,
+                  "reason": "target_not_hot"
+                },
+                {
+                  "pc": 2690,
+                  "reason": "site_budget"
+                },
+                {
+                  "pc": 2698,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2714,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2717,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2728,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2747,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2753,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2781,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2790,
+                  "reason": "zero_branch_count"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 466,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_BRANCH_PROFILE_ROOT:?BPFREJIT_BRANCH_PROFILE_ROOT is required for branch_flip}\"; profile=\"${profile_root}/hash-${PROG_BRANCH_PROFILE_HASH}.json\"; bpfopt --pass branch_flip --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --max-sites 2",
+              "log_level": 1,
+              "name": "branch_flip"
+            }
+          }
+        ],
+        "prog_id": 4027,
+        "program": {
+          "final_insn_count": 2973,
+          "orig_insn_count": 3026,
+          "prog_id": 4028,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "runner_details": {
+    "command_used": [
+      "/artifacts/user/repo-artifacts/x86_64/katran/bin/katran_server_grpc",
+      "-balancer_prog=/artifacts/user/repo-artifacts/x86_64/katran/bpf/balancer.bpf.o",
+      "-healthchecker_prog=/artifacts/user/repo-artifacts/x86_64/katran/bpf/healthchecking_ipip.bpf.o",
+      "-default_mac=02:00:00:00:00:0b",
+      "-intf=katran0",
+      "-ipip_intf=ipip0",
+      "-ipip6_intf=ipip60",
+      "-hc_forwarding=false",
+      "-logtostderr",
+      "-alsologtostderr"
+    ],
+    "process_output": {
+      "returncode": -2,
+      "stderr_tail": "I20260717 04:09:40.057238 1051911 KatranGrpcService.cpp:69] Starting Katran\nE20260717 04:09:40.057394 1051911 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260717 04:09:40.057400 1051911 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260717 04:09:40.057562 1051911 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260717 04:09:40.057567 1051911 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260717 04:09:40.071755 1051911 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260717 04:09:40.071770 1051911 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "xdp_ipip",
+  "status": "ok"
+}
