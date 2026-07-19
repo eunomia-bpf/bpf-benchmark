@@ -1,0 +1,847 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "23696": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 23696,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23697": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23697,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23698": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23698,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23699": {
+        "bytes_jited": 40,
+        "bytes_xlated": 32,
+        "id": 23699,
+        "name": "det_arg_ctx",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "23700": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23700,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      },
+      "23701": {
+        "bytes_jited": 16579,
+        "bytes_xlated": 28568,
+        "id": 23701,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@6",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "queue_id": 0,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "src_port": 10000,
+              "thread_id": 6,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 3.0461801740020746,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@6\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 10000  udp_src_max: 10000  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: NO_TIMESTAMP  SHARED\nCurrent:\n     pkts-sofar: 1410460  errors: 10129402\n     started: 85522118176us  stopped: 85525108178us idle: 7601us\n     seq_num: 1410461  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 10000\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 2990002(c2982400+d7601) usec, 1410460 (64byte,0frags)\n  471725pps 241Mb/sec (241523200bps) errors: 10129402",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "src_ports": [
+            10000
+          ],
+          "threads": [
+            6
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 3.0461801740020746,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "{\"ingress_packets\": 1410461, \"packet_stats\": {\"client\": {\"rx\": 10, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 2, \"tx_dropped\": 0, \"tx_errors\": 0}, \"lb\": {\"rx\": 1410461, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 1410465, \"tx_dropped\": 0, \"tx_errors\": 0}, \"real\": {\"rx\": 1410461, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 9, \"tx_dropped\": 0, \"tx_errors\": 0}, \"router_client\": {\"rx\": 2, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 10, \"tx_dropped\": 0, \"tx_errors\": 0}, \"router_lb\": {\"rx\": 1410465, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 1410461, \"tx_dropped\": 10129402, \"tx_errors\": 0}, \"router_real\": {\"rx\": 9, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 1410461, \"tx_dropped\": 0, \"tx_errors\": 0}}, \"received_packets\": 1410461}",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "23696": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 23696,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23697": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23697,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23698": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23698,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23699": {
+        "bytes_jited": 40,
+        "bytes_xlated": 32,
+        "id": 23699,
+        "name": "det_arg_ctx",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "23700": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23700,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      },
+      "23703": {
+        "bytes_jited": 4402,
+        "bytes_xlated": 7232,
+        "id": 23703,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@6",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "queue_id": 0,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "src_port": 10000,
+              "thread_id": 6,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 3.043515908997506,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@6\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 10000  udp_src_max: 10000  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: NO_TIMESTAMP  SHARED\nCurrent:\n     pkts-sofar: 1431989  errors: 0\n     started: 85538190147us  stopped: 85541150455us idle: 15019us\n     seq_num: 1431990  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 10000\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 2960308(c2945288+d15019) usec, 1431989 (64byte,0frags)\n  483729pps 247Mb/sec (247669248bps) errors: 0",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "src_ports": [
+            10000
+          ],
+          "threads": [
+            6
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 3.043515908997506,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "{\"ingress_packets\": 1431989, \"packet_stats\": {\"client\": {\"rx\": 8, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 0, \"tx_dropped\": 0, \"tx_errors\": 0}, \"lb\": {\"rx\": 1431989, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 1431990, \"tx_dropped\": 0, \"tx_errors\": 0}, \"real\": {\"rx\": 1431989, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 8, \"tx_dropped\": 0, \"tx_errors\": 0}, \"router_client\": {\"rx\": 0, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 8, \"tx_dropped\": 0, \"tx_errors\": 0}, \"router_lb\": {\"rx\": 1431990, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 1431989, \"tx_dropped\": 0, \"tx_errors\": 0}, \"router_real\": {\"rx\": 8, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 1431989, \"tx_dropped\": 0, \"tx_errors\": 0}}, \"received_packets\": 1431989}",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "rejit_result": {
+    "deployment_specialization": {
+      "enabled_passes": [
+        "context_specialize",
+        "map_inline"
+      ],
+      "profile_root": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260719_195725_227911/details/deployment-specialization/katran/profiles",
+      "raw_profile_dir": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260719_195725_227911/details/deployment-specialization/katran/raw",
+      "training_workload": {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@6",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "queue_id": 0,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "src_port": 10000,
+              "thread_id": 6,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 3.0471073610096937,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@6\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 10000  udp_src_max: 10000  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: NO_TIMESTAMP  SHARED\nCurrent:\n     pkts-sofar: 1427978  errors: 0\n     started: 85525630140us  stopped: 85528618860us idle: 19647us\n     seq_num: 1427979  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 10000\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 2988719(c2969072+d19647) usec, 1427978 (64byte,0frags)\n  477789pps 244Mb/sec (244627968bps) errors: 0",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "src_ports": [
+            10000
+          ],
+          "threads": [
+            6
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 3.0471073610096937,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "{\"ingress_packets\": 1427978, \"packet_stats\": {\"client\": {\"rx\": 4, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 0, \"tx_dropped\": 0, \"tx_errors\": 0}, \"lb\": {\"rx\": 1427978, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 1417410, \"tx_dropped\": 10569, \"tx_errors\": 0}, \"real\": {\"rx\": 1417409, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 4, \"tx_dropped\": 0, \"tx_errors\": 0}, \"router_client\": {\"rx\": 0, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 4, \"tx_dropped\": 0, \"tx_errors\": 0}, \"router_lb\": {\"rx\": 1417410, \"rx_dropped\": 10569, \"rx_errors\": 0, \"tx\": 1427978, \"tx_dropped\": 0, \"tx_errors\": 0}, \"router_real\": {\"rx\": 4, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 1417409, \"tx_dropped\": 0, \"tx_errors\": 0}}, \"received_packets\": 1417409}",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      },
+      "training_workloads": {
+        "pmu_profile": {
+          "command": [
+            "/usr/sbin/ip",
+            "netns",
+            "exec",
+            "katran-router",
+            "sh",
+            "-c",
+            "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+          ],
+          "components": [
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@6",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "queue_id": 0,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "src_port": 10000,
+                "thread_id": 6,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 3.0471073610096937,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@6\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 10000  udp_src_max: 10000  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: NO_TIMESTAMP  SHARED\nCurrent:\n     pkts-sofar: 1427978  errors: 0\n     started: 85525630140us  stopped: 85528618860us idle: 19647us\n     seq_num: 1427979  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 10000\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 2988719(c2969072+d19647) usec, 1427978 (64byte,0frags)\n  477789pps 244Mb/sec (244627968bps) errors: 0",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            }
+          ],
+          "config": {
+            "clone_skb": 0,
+            "dst_ip": "10.100.1.1",
+            "dst_port": 8080,
+            "iface": "rtlb0",
+            "namespace": "katran-router",
+            "pkt_size": 64,
+            "proto": 17,
+            "shared_skb": false,
+            "src_ip": "10.0.0.2",
+            "src_ports": [
+              10000
+            ],
+            "threads": [
+              6
+            ],
+            "tool": "kernel_pktgen",
+            "xmit_mode": "start_xmit"
+          },
+          "duration_s": 3.0471073610096937,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "{\"ingress_packets\": 1427978, \"packet_stats\": {\"client\": {\"rx\": 4, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 0, \"tx_dropped\": 0, \"tx_errors\": 0}, \"lb\": {\"rx\": 1427978, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 1417410, \"tx_dropped\": 10569, \"tx_errors\": 0}, \"real\": {\"rx\": 1417409, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 4, \"tx_dropped\": 0, \"tx_errors\": 0}, \"router_client\": {\"rx\": 0, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 4, \"tx_dropped\": 0, \"tx_errors\": 0}, \"router_lb\": {\"rx\": 1417410, \"rx_dropped\": 10569, \"rx_errors\": 0, \"tx\": 1427978, \"tx_dropped\": 0, \"tx_errors\": 0}, \"router_real\": {\"rx\": 4, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 1417409, \"tx_dropped\": 0, \"tx_errors\": 0}}, \"received_packets\": 1417409}",
+          "workload_name": "katran_kernel_pktgen_l2_udp"
+        }
+      }
+    },
+    "mode": "live_swap",
+    "per_program": {
+      "23696": {
+        "passes": [
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "context_specialize",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "context_specialize"
+            }
+          },
+          {
+            "bpfopt_ms": 5,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 23696,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 23696,
+          "prog_name": "",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "23697": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "context_specialize",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "context_specialize"
+            }
+          },
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 23697,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 23697,
+          "prog_name": "libbpf_nametest",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "23698": {
+        "passes": [
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "context_specialize",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "context_specialize"
+            }
+          },
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 23698,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 23698,
+          "prog_name": "",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "23699": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 4,
+              "insn_count_before": 4,
+              "insn_delta": 0,
+              "pass": "context_specialize",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "context_specialize"
+            }
+          },
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 4,
+              "insn_count_before": 4,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 23699,
+        "program": {
+          "final_insn_count": 4,
+          "orig_insn_count": 4,
+          "prog_id": 23699,
+          "prog_name": "det_arg_ctx",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "23700": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "context_specialize",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "context_specialize"
+            }
+          },
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability guarded",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 23700,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 23700,
+          "prog_name": "",
+          "prog_type": 9
+        },
+        "status": "ok"
+      },
+      "23701": {
+        "passes": [
+          {
+            "bpfopt_ms": 64,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 1059,
+              "insn_count_before": 3026,
+              "insn_delta": -1967,
+              "pass": "context_specialize",
+              "sites_applied": 9,
+              "sites_matched": 9,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 45,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for context_specialize}\"; profile=\"${profile_root}/context_specialize/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "context_specialize"
+            }
+          },
+          {
+            "bpfopt_ms": 121,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [
+                {
+                  "key_hex": "0a6401010000000000000000000000001f901100",
+                  "map_id": 31680,
+                  "stability": "phase-stable",
+                  "value_hex": "c403000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f901100",
+                  "map_id": 31680,
+                  "stability": "phase-stable",
+                  "value_hex": "c403000000000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 31684,
+                  "stability": "phase-stable",
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                },
+                {
+                  "key_hex": "",
+                  "map_id": 31683,
+                  "stability": "phase-stable",
+                  "value_hex": "01000000"
+                },
+                {
+                  "key_hex": "",
+                  "map_id": 31691,
+                  "stability": "phase-stable",
+                  "value_hex": "00000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 31684,
+                  "stability": "phase-stable",
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 31684,
+                  "stability": "phase-stable",
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                }
+              ],
+              "insn_count_after": 886,
+              "insn_count_before": 1059,
+              "insn_delta": -173,
+              "pass": "map_inline",
+              "sites_applied": 7,
+              "sites_matched": 7,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 17,
+            "status": "ok",
+            "step": {
+              "command": "OVERLAY_DIR=${BPFREJIT_IMAGE_WORKSPACE}/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; VIP=; for f in ${MAP_VALUES}/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \",${MAP_IDS},\" in *,$i,*) ;; *) continue ;; esac; case \"$n\" in vip_map) VIP=$i ;; ch_rings|reals|server_id_map) d=${MAP_VALUES}/map-$i.dump.json; if jq -e '.skipped == true' \"$d\" >/dev/null; then case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; esac; fi ;; esac; done; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end)' > ${MAP_VALUES}/overlays.json; VIP_TCP=0a6401010000000000000000000000001f900600; VIP_UDP=0a6401010000000000000000000000001f901100; VIP_DUMP=${MAP_VALUES}/map-$VIP.dump.json; if jq -e --arg key \"$VIP_TCP\" 'any(.[]?; ((.key // []) | map(sub(\"^0x\"; \"\") | ascii_downcase) | join(\"\")) == $key)' \"$VIP_DUMP\" >/dev/null; then VIP_KEY=$VIP_TCP; elif jq -e --arg key \"$VIP_UDP\" 'any(.[]?; ((.key // []) | map(sub(\"^0x\"; \"\") | ascii_downcase) | join(\"\")) == $key)' \"$VIP_DUMP\" >/dev/null; then VIP_KEY=$VIP_UDP; else echo \"katran map_inline: neither TCP nor UDP benchmark VIP key is present in $VIP_DUMP\" >&2; exit 1; fi; bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability phase-stable --include-map=ctl_array --include-map=vip_map --include-map=ch_rings --include-map=decap_dst --include-map=reals --include-map=server_id_map --inline-hint=decap_dst:c0000202000000000000000000000000 --inline-hint=vip_map:$VIP_KEY --inline-hint=reals:01000000 --assume-hint-key # lpm_src_v4/v6 hints commented: katran is built without # -DLPM_SRC_LOOKUP, so these maps are guarded out of the program # by `#ifdef LPM_SRC_LOOKUP` in balancer_maps.h. bpfopt fail-fasts # on hint anchor not in metadata (correct: catches typos and # mis-applied hints early). Uncomment if a future build turns on # source-IP routing. # --inline-hint=lpm_src_v4:00000000 # --inline-hint=lpm_src_v6:00000000 # lru_mapping/global_lru_maps outer-only hints commented: katran # benchmark uses F_LRU_BYPASS + no `-forwarding_cores`, so the outer # ARRAY_OF_MAPS stays empty (every slot ENOENT). #265 root-caused this: # `attachLrus()` iterates empty forwardingCores_ \u0092 zero update_elem. # bpfopt fail-fasts when hinted outer key has no live inner map # (correct: hint claims something kernel snapshot disproves). # Uncomment only if benchmark configures forwarding cores OR an # alternative test deploys populated map-in-map. # --inline-hint=lru_mapping:00000000 # --inline-hint=global_lru_maps:00000000",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 23701,
+        "program": {
+          "final_insn_count": 886,
+          "orig_insn_count": 3026,
+          "prog_id": 23703,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "runner_details": {
+    "command_used": [
+      "/artifacts/user/repo-artifacts/x86_64/katran/bin/katran_server_grpc",
+      "-balancer_prog=/artifacts/user/repo-artifacts/x86_64/katran/bpf/balancer.bpf.o",
+      "-healthchecker_prog=/artifacts/user/repo-artifacts/x86_64/katran/bpf/healthchecking_ipip.bpf.o",
+      "-default_mac=02:00:00:00:00:0b",
+      "-intf=katran0",
+      "-ipip_intf=ipip0",
+      "-ipip6_intf=ipip60",
+      "-hc_forwarding=false",
+      "-logtostderr",
+      "-alsologtostderr"
+    ],
+    "process_output": {
+      "returncode": -2,
+      "stderr_tail": "I20260719 19:57:25.633847 2396532 KatranGrpcService.cpp:69] Starting Katran\nE20260719 19:57:25.634073 2396532 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 19:57:25.634084 2396532 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260719 19:57:25.634298 2396532 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 19:57:25.634308 2396532 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260719 19:57:25.645084 2396532 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 19:57:25.645100 2396532 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "xdp_pktgen",
+  "status": "ok"
+}
