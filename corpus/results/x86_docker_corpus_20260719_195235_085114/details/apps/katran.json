@@ -1,0 +1,191 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "23673": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 23673,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23674": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23674,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23675": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23675,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23676": {
+        "bytes_jited": 40,
+        "bytes_xlated": 32,
+        "id": 23676,
+        "name": "det_arg_ctx",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "23677": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23677,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      },
+      "23678": {
+        "bytes_jited": 16579,
+        "bytes_xlated": 28568,
+        "id": 23678,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@6",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "queue_id": 0,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "src_port": 10000,
+              "thread_id": 6,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 3.0455916649952997,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@6\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 10000  udp_src_max: 10000  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: NO_TIMESTAMP  SHARED\nCurrent:\n     pkts-sofar: 5802158  errors: 0\n     started: 85232174133us  stopped: 85235140478us idle: 3298us\n     seq_num: 5802159  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 10000\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 2966345(c2963047+d3298) usec, 5802158 (64byte,0frags)\n  1955995pps 1001Mb/sec (1001469440bps) errors: 0",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@7",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "queue_id": 1,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "src_port": 10001,
+              "thread_id": 7,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 3.0455916649952997,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@7\n     flows: 0 flowlen: 0\n     queue_map_min: 1  queue_map_max: 1\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 10001  udp_src_max: 10001  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: NO_TIMESTAMP  SHARED\nCurrent:\n     pkts-sofar: 4959363  errors: 0\n     started: 85232174133us  stopped: 85235140478us idle: 10784us\n     seq_num: 4959364  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 10001\n     cur_queue_map: 1\n     flows: 0\nResult: OK: 2966344(c2955560+d10784) usec, 4959363 (64byte,0frags)\n  1671876pps 856Mb/sec (856000512bps) errors: 0",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "src_ports": [
+            10000,
+            10001
+          ],
+          "threads": [
+            6,
+            7
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 3.0455916649952997,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "{\"ingress_packets\": 10761522, \"packet_stats\": {\"client\": {\"rx\": 10, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 2, \"tx_dropped\": 0, \"tx_errors\": 0}, \"lb\": {\"rx\": 10761522, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 3784832, \"tx_dropped\": 6976694, \"tx_errors\": 0}, \"real\": {\"rx\": 3784831, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 9, \"tx_dropped\": 0, \"tx_errors\": 0}, \"router_client\": {\"rx\": 2, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 10, \"tx_dropped\": 0, \"tx_errors\": 0}, \"router_lb\": {\"rx\": 3784832, \"rx_dropped\": 6976691, \"rx_errors\": 0, \"tx\": 10761522, \"tx_dropped\": 0, \"tx_errors\": 0}, \"router_real\": {\"rx\": 9, \"rx_dropped\": 0, \"rx_errors\": 0, \"tx\": 3784831, \"tx_dropped\": 0, \"tx_errors\": 0}}, \"received_packets\": 3784831}",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "error": "live execute_plan failed for programs: {\"23678\": \"ar_off=(0x0; 0xff))\\n83: (54) w8 &= 255                    ; R8_w=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\\n84: (16) if w8 == 0x0 goto pc+1       ; R8_w=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\\n85: (b4) w7 = 0                       ; R7_w=0\\n86: (4c) w1 |= w5                     ; R1_w=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R5_w=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\\n87: (b4) w8 = 1                       ; R8_w=1\\n88: (16) if w6 == 0x0 goto pc+1       ; R6_w=scalar(smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\\n89: (b4) w8 = 0                       ; R8=0\\n90: (54) w1 &= 255                    ; R1_w=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\\n91: (61) r5 = *(u32 *)(r10 -24)       ; R5_w=1 R10=fp0 fp-24=????1\\n92: (b4) w6 = 1                       ; R6_w=1\\n93: (16) if w1 == 0x0 goto pc+1 95: R0=1 R1=0 R2=1 R3=pkt(r=38) R4=1 R5=1 R6=1 R7=0 R8=0 R9=1 R10=fp0 fp-8=????1 fp-16=ctx() fp-24=????1 fp-32=????1 fp-40=????1 fp-48=????0 fp-56=????1 fp-64=????0 fp-72=????1 fp-80=????0\\n95: (61) r1 = *(u32 *)(r10 -8)        ; R1_w=1 R10=fp0 fp-8=????1\\n96: (5c) w4 &= w1                     ; R1_w=1 R4_w=1\\n97: (61) r1 = *(u32 *)(r10 -72)       ; R1_w=1 R10=fp0 fp-72=????1\\n98: (5c) w4 &= w1                     ; R1_w=1 R4_w=1\\n99: (5c) w4 &= w6\\nBPF program is too large. Processed 1000001 insn\\nprocessed 1000001 insns (limit 1000000) max_states_per_insn 4 total_states 30086 peak_states 65 mark_read 5\\n\\nBPF_PROG_LOAD errno=7 (post-verifier)\\nctx: prog_btf_fd=57 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=16 prog_type=6 fd_array_n=17 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2083\\n\"}",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "katran",
+  "runner_details": {
+    "command_used": [
+      "/artifacts/user/repo-artifacts/x86_64/katran/bin/katran_server_grpc",
+      "-balancer_prog=/artifacts/user/repo-artifacts/x86_64/katran/bpf/balancer.bpf.o",
+      "-healthchecker_prog=/artifacts/user/repo-artifacts/x86_64/katran/bpf/healthchecking_ipip.bpf.o",
+      "-default_mac=02:00:00:00:00:0b",
+      "-intf=katran0",
+      "-ipip_intf=ipip0",
+      "-ipip6_intf=ipip60",
+      "-hc_forwarding=false",
+      "-logtostderr",
+      "-alsologtostderr"
+    ],
+    "process_output": {
+      "returncode": -2,
+      "stderr_tail": "I20260719 19:52:35.495682 2393864 KatranGrpcService.cpp:69] Starting Katran\nE20260719 19:52:35.495900 2393864 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 19:52:35.495913 2393864 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260719 19:52:35.496124 2393864 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 19:52:35.496134 2393864 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260719 19:52:35.506811 2393864 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 19:52:35.506829 2393864 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "xdp_pktgen",
+  "status": "error"
+}
