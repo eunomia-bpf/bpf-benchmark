@@ -1,0 +1,196 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "20618": {
+        "bytes_jited": 16579,
+        "bytes_xlated": 28568,
+        "id": 20618,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "/usr/bin/taskset",
+              "--cpu-list",
+              "0",
+              "python3",
+              "-c",
+              "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+              "rtlb0",
+              "02000000000a02000000000b080045000040400100004004b6b5c0000201c00002024500002c000100004011655a0a0000020a64010127101f90001800006b617472616e2d7461696c2d63616c6c",
+              "30"
+            ],
+            "config": {
+              "cpu": 0,
+              "iface": "rtlb0",
+              "inner_dst_ip": "10.100.1.1",
+              "inner_dst_port": 8080,
+              "inner_proto": 17,
+              "inner_src_ip": "10.0.0.2",
+              "namespace": "katran-router",
+              "outer_dst_ip": "192.0.2.2",
+              "outer_src_ip": "192.0.2.1",
+              "tool": "python_af_packet",
+              "worker": 0
+            },
+            "duration_s": 30.037505309999688,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "{\"enobufs\": 237358, \"sent\": 24952018}",
+            "workload_name": "katran_af_packet_ipip_worker"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "/usr/bin/taskset",
+              "--cpu-list",
+              "1",
+              "python3",
+              "-c",
+              "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+              "rtlb0",
+              "02000000000a02000000000b080045000040400200004004b6b4c0000201c00002024500002c00020000401165590a0000020a64010127111f90001800006b617472616e2d7461696c2d63616c6c",
+              "30"
+            ],
+            "config": {
+              "cpu": 1,
+              "iface": "rtlb0",
+              "inner_dst_ip": "10.100.1.1",
+              "inner_dst_port": 8080,
+              "inner_proto": 17,
+              "inner_src_ip": "10.0.0.2",
+              "namespace": "katran-router",
+              "outer_dst_ip": "192.0.2.2",
+              "outer_src_ip": "192.0.2.1",
+              "tool": "python_af_packet",
+              "worker": 1
+            },
+            "duration_s": 30.037505309999688,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "{\"enobufs\": 983, \"sent\": 23081}",
+            "workload_name": "katran_af_packet_ipip_worker"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "/usr/bin/taskset",
+              "--cpu-list",
+              "2",
+              "python3",
+              "-c",
+              "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+              "rtlb0",
+              "02000000000a02000000000b080045000040400300004004b6b3c0000201c00002024500002c00030000401165580a0000020a64010127121f90001800006b617472616e2d7461696c2d63616c6c",
+              "30"
+            ],
+            "config": {
+              "cpu": 2,
+              "iface": "rtlb0",
+              "inner_dst_ip": "10.100.1.1",
+              "inner_dst_port": 8080,
+              "inner_proto": 17,
+              "inner_src_ip": "10.0.0.2",
+              "namespace": "katran-router",
+              "outer_dst_ip": "192.0.2.2",
+              "outer_src_ip": "192.0.2.1",
+              "tool": "python_af_packet",
+              "worker": 2
+            },
+            "duration_s": 30.037505309999688,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "{\"enobufs\": 237249, \"sent\": 25034303}",
+            "workload_name": "katran_af_packet_ipip_worker"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "/usr/bin/taskset",
+              "--cpu-list",
+              "3",
+              "python3",
+              "-c",
+              "\nimport errno\nimport json\nimport socket\nimport sys\nimport time\n\niface, frame_hex, duration_raw = sys.argv[1:]\nframe = bytes.fromhex(frame_hex)\ndeadline = time.monotonic() + float(duration_raw)\ncount = 0\nenobufs = 0\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nwhile True:\n    for _ in range(256):\n        try:\n            sock.send(frame)\n            count += 1\n        except OSError as error:\n            if error.errno != errno.ENOBUFS:\n                raise\n            enobufs += 1\n            time.sleep(0)\n    if time.monotonic() >= deadline:\n        break\nprint(json.dumps({\"sent\": count, \"enobufs\": enobufs}, sort_keys=True))\n",
+              "rtlb0",
+              "02000000000a02000000000b080045000040400400004004b6b2c0000201c00002024500002c00040000401165570a0000020a64010127131f90001800006b617472616e2d7461696c2d63616c6c",
+              "30"
+            ],
+            "config": {
+              "cpu": 3,
+              "iface": "rtlb0",
+              "inner_dst_ip": "10.100.1.1",
+              "inner_dst_port": 8080,
+              "inner_proto": 17,
+              "inner_src_ip": "10.0.0.2",
+              "namespace": "katran-router",
+              "outer_dst_ip": "192.0.2.2",
+              "outer_src_ip": "192.0.2.1",
+              "tool": "python_af_packet",
+              "worker": 3
+            },
+            "duration_s": 30.037505309999688,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "{\"enobufs\": 238020, \"sent\": 25087804}",
+            "workload_name": "katran_af_packet_ipip_worker"
+          }
+        ],
+        "config": {
+          "iface": "rtlb0",
+          "inner_proto": 17,
+          "namespace": "katran-router",
+          "outer_proto": 4,
+          "tool": "python_af_packet",
+          "worker_cpus": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "workers": 4
+        },
+        "duration_s": 30.037505309999688,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_af_packet_ipip"
+      }
+    ]
+  },
+  "error": "native app exited before BPF programs were tracked by shim\nstderr tail:\nI20260719 08:30:59.577036 1889873 KatranGrpcService.cpp:69] Starting Katran\nE20260719 08:30:59.577215 1889873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 08:30:59.577224 1889873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260719 08:30:59.577394 1889873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 08:30:59.577400 1889873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260719 08:30:59.577886 1889873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 08:30:59.577895 1889873 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260719 08:30:59.954331 1889873 BaseBpfAdapter.cpp:144] libbpf: prog 'balancer_ingress': BPF program load failed: -EINVAL\nE20260719 08:30:59.954496 1889873 BaseBpfAdapter.cpp:144] libbpf: prog 'balancer_ingress': failed to load: -EINVAL\nE20260719 08:30:59.954532 1889873 BaseBpfAdapter.cpp:144] libbpf: failed to load object '/artifacts/user/repo-artifacts/x86_64/katran/bpf/balancer.bpf.o'\nE20260719 08:30:59.954535 1889873 BpfLoader.cpp:326] error while trying to load bpf object: /artifacts/user/repo-artifacts/x86_64/katran/bpf/balancer.bpf.o\nterminate called after throwing an instance of 'std::invalid_argument'\n  what():  can't load main bpf program\n*** Aborted at 1784449859 (Unix time, try 'date -d @1784449859') ***\n*** Signal 6 (SIGABRT) (0x1cd651) received by PID 1889873 (pthread TID 0x7918d9957440) (linux TID 1889873) (maybe from PID 1889873, UID 0) (code: sent by tkill or tgkill), stack trace: ***\n    @ 000000000010f558 (unknown)\n    @ 000000000004532f (unknown)\n    @ 000000000009eb2c pthread_kill\n    @ 000000000004527d gsignal\n    @ 00000000000288fe abort\n    @ 00000000000a5ff4 (unknown)\n    @ 00000000000bb0d9 (unknown)\n    @ 00000000000a5a54 std::terminate()\n    @ 00000000000bb390 __cxa_throw\n    @ 00000000000a3930 __cxa_throw\n    @ 00000000002e01f2 (unknown)\n    @ 000000000017c977 (unknown)\n    @ 000000000009895b (unknown)\n    @ 00000000000996ca (unknown)\n    @ 000000000002a1c9 (unknown)\n    @ 000000000002a28a __libc_start_main\n    @ 0000000000098594 (unknown)",
+  "post_rejit": null,
+  "rejit_result": {
+    "enabled_passes": [
+      "branch_flip"
+    ],
+    "mode": "loadtime",
+    "plan_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260719_082950_464018/details/loadtime-plans/katran.json",
+    "report_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260719_082950_464018/details/loadtime-reports/katran.jsonl",
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_ipip",
+  "status": "error"
+}
