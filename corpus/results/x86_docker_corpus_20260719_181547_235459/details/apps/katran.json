@@ -1,0 +1,737 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "23199": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 23199,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23200": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23200,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23201": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23201,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23202": {
+        "bytes_jited": 40,
+        "bytes_xlated": 32,
+        "id": 23202,
+        "name": "det_arg_ctx",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "23203": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23203,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      },
+      "23204": {
+        "bytes_jited": 16579,
+        "bytes_xlated": 28568,
+        "id": 23204,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d10s",
+          "--timeout",
+          "2s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 10.10451988200657,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 10s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   457.31us  259.09us   4.43ms   78.81%\n    Req/Sec     4.48k   360.02     5.73k    70.30%\n  Latency Distribution\n     50%  401.00us\n     75%  565.00us\n     90%  765.00us\n     99%    1.40ms\n  180240 requests in 10.10s, 28.02MB read\nRequests/sec:  17845.26\nTransfer/sec:      2.77MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "23199": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 23199,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23200": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23200,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23201": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23201,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23202": {
+        "bytes_jited": 40,
+        "bytes_xlated": 32,
+        "id": 23202,
+        "name": "det_arg_ctx",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "23203": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23203,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      },
+      "23205": {
+        "bytes_jited": 11910,
+        "bytes_xlated": 19616,
+        "id": 23205,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d10s",
+          "--timeout",
+          "2s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 10.103203831997234,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 10s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   457.11us  256.52us   4.45ms   78.34%\n    Req/Sec     4.48k   343.75     5.87k    67.33%\n  Latency Distribution\n     50%  402.00us\n     75%  564.00us\n     90%  765.00us\n     99%    1.39ms\n  180160 requests in 10.10s, 28.01MB read\nRequests/sec:  17838.65\nTransfer/sec:      2.77MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "deployment_specialization": {
+      "enabled_passes": [
+        "hot_region_version"
+      ],
+      "profile_root": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260719_181547_235459/details/deployment-specialization/katran/profiles",
+      "raw_profile_dir": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260719_181547_235459/details/deployment-specialization/katran/raw",
+      "training_workload": {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d10s",
+          "--timeout",
+          "2s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 10.103920198002015,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 10s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   466.43us  276.98us   5.23ms   77.71%\n    Req/Sec     4.41k   331.82     5.42k    69.80%\n  Latency Distribution\n     50%  406.00us\n     75%  588.00us\n     90%  804.00us\n     99%    1.45ms\n  177091 requests in 10.10s, 27.53MB read\nRequests/sec:  17534.17\nTransfer/sec:      2.73MB",
+        "workload_name": "katran_wrk_http"
+      },
+      "training_workloads": {
+        "pmu_profile": {
+          "command": [
+            "ip",
+            "netns",
+            "exec",
+            "katran-client",
+            "/usr/bin/wrk",
+            "-t4",
+            "-c10",
+            "-d10s",
+            "--timeout",
+            "2s",
+            "--latency",
+            "http://10.100.1.1:8080/"
+          ],
+          "config": {
+            "connections": 10,
+            "threads": 4,
+            "tool": "wrk",
+            "url": "http://10.100.1.1:8080/"
+          },
+          "duration_s": 10.103920198002015,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "Running 10s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   466.43us  276.98us   5.23ms   77.71%\n    Req/Sec     4.41k   331.82     5.42k    69.80%\n  Latency Distribution\n     50%  406.00us\n     75%  588.00us\n     90%  804.00us\n     99%    1.45ms\n  177091 requests in 10.10s, 27.53MB read\nRequests/sec:  17534.17\nTransfer/sec:      2.73MB",
+          "workload_name": "katran_wrk_http"
+        }
+      }
+    },
+    "mode": "live_swap",
+    "per_program": {
+      "23199": {
+        "passes": [
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 23199,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 23199,
+          "prog_name": "",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "23200": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 23200,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 23200,
+          "prog_name": "libbpf_nametest",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "23201": {
+        "passes": [
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 23201,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 23201,
+          "prog_name": "",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "23202": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 4,
+              "insn_count_before": 4,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 23202,
+        "program": {
+          "final_insn_count": 4,
+          "orig_insn_count": 4,
+          "prog_id": 23202,
+          "prog_name": "det_arg_ctx",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "23203": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "hot_region_version",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 23203,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 23203,
+          "prog_name": "",
+          "prog_type": 9
+        },
+        "status": "ok"
+      },
+      "23204": {
+        "passes": [
+          {
+            "bpfopt_ms": 858,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [
+                {
+                  "key_hex": "c0000202000000000000000000000000",
+                  "map_id": 31139,
+                  "stability": "phase-stable",
+                  "value_hex": "00000000"
+                },
+                {
+                  "key_hex": "c0000202000000000000000000000000",
+                  "map_id": 31139,
+                  "stability": "phase-stable",
+                  "value_hex": "00000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 31141,
+                  "stability": "phase-stable",
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 31141,
+                  "stability": "phase-stable",
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "c0000202000000000000000000000000",
+                  "map_id": 31139,
+                  "stability": "phase-stable",
+                  "value_hex": "00000000"
+                },
+                {
+                  "key_hex": "c0000202000000000000000000000000",
+                  "map_id": 31139,
+                  "stability": "phase-stable",
+                  "value_hex": "00000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 31141,
+                  "stability": "phase-stable",
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 31141,
+                  "stability": "phase-stable",
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 31145,
+                  "stability": "phase-stable",
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                },
+                {
+                  "key_hex": "",
+                  "map_id": 31144,
+                  "stability": "phase-stable",
+                  "value_hex": "01000000"
+                },
+                {
+                  "key_hex": "",
+                  "map_id": 31152,
+                  "stability": "phase-stable",
+                  "value_hex": "00000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 31145,
+                  "stability": "phase-stable",
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 31145,
+                  "stability": "phase-stable",
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                },
+                {
+                  "key_hex": "",
+                  "map_id": 31144,
+                  "stability": "phase-stable",
+                  "value_hex": "01000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 31145,
+                  "stability": "phase-stable",
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 31145,
+                  "stability": "phase-stable",
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                },
+                {
+                  "key_hex": "",
+                  "map_id": 31152,
+                  "stability": "phase-stable",
+                  "value_hex": "00000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 31145,
+                  "stability": "phase-stable",
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                }
+              ],
+              "insn_count_after": 2802,
+              "insn_count_before": 3026,
+              "insn_delta": -224,
+              "pass": "hot_region_version",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": [],
+              "stages": {
+                "hot_region_version": {
+                  "diagnostics": [],
+                  "inlined_map_entries": [],
+                  "insn_count_after": 3017,
+                  "insn_count_before": 3026,
+                  "insn_delta": -9,
+                  "pass": "hot_region_version",
+                  "sites_applied": 1,
+                  "sites_matched": 1,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "skipped_sites": []
+                },
+                "map_inline": {
+                  "diagnostics": [],
+                  "inlined_map_entries": [
+                    {
+                      "key_hex": "c0000202000000000000000000000000",
+                      "map_id": 31139,
+                      "stability": "phase-stable",
+                      "value_hex": "00000000"
+                    },
+                    {
+                      "key_hex": "c0000202000000000000000000000000",
+                      "map_id": 31139,
+                      "stability": "phase-stable",
+                      "value_hex": "00000000"
+                    },
+                    {
+                      "key_hex": "0a6401010000000000000000000000001f900600",
+                      "map_id": 31141,
+                      "stability": "phase-stable",
+                      "value_hex": "0200000000000000"
+                    },
+                    {
+                      "key_hex": "0a6401010000000000000000000000001f900600",
+                      "map_id": 31141,
+                      "stability": "phase-stable",
+                      "value_hex": "0200000000000000"
+                    },
+                    {
+                      "key_hex": "c0000202000000000000000000000000",
+                      "map_id": 31139,
+                      "stability": "phase-stable",
+                      "value_hex": "00000000"
+                    },
+                    {
+                      "key_hex": "c0000202000000000000000000000000",
+                      "map_id": 31139,
+                      "stability": "phase-stable",
+                      "value_hex": "00000000"
+                    },
+                    {
+                      "key_hex": "0a6401010000000000000000000000001f900600",
+                      "map_id": 31141,
+                      "stability": "phase-stable",
+                      "value_hex": "0200000000000000"
+                    },
+                    {
+                      "key_hex": "0a6401010000000000000000000000001f900600",
+                      "map_id": 31141,
+                      "stability": "phase-stable",
+                      "value_hex": "0200000000000000"
+                    },
+                    {
+                      "key_hex": "01000000",
+                      "map_id": 31145,
+                      "stability": "phase-stable",
+                      "value_hex": "0ac8000200000000000000000000000000000000"
+                    },
+                    {
+                      "key_hex": "",
+                      "map_id": 31144,
+                      "stability": "phase-stable",
+                      "value_hex": "01000000"
+                    },
+                    {
+                      "key_hex": "",
+                      "map_id": 31152,
+                      "stability": "phase-stable",
+                      "value_hex": "00000000"
+                    },
+                    {
+                      "key_hex": "01000000",
+                      "map_id": 31145,
+                      "stability": "phase-stable",
+                      "value_hex": "0ac8000200000000000000000000000000000000"
+                    },
+                    {
+                      "key_hex": "01000000",
+                      "map_id": 31145,
+                      "stability": "phase-stable",
+                      "value_hex": "0ac8000200000000000000000000000000000000"
+                    },
+                    {
+                      "key_hex": "",
+                      "map_id": 31144,
+                      "stability": "phase-stable",
+                      "value_hex": "01000000"
+                    },
+                    {
+                      "key_hex": "01000000",
+                      "map_id": 31145,
+                      "stability": "phase-stable",
+                      "value_hex": "0ac8000200000000000000000000000000000000"
+                    },
+                    {
+                      "key_hex": "01000000",
+                      "map_id": 31145,
+                      "stability": "phase-stable",
+                      "value_hex": "0ac8000200000000000000000000000000000000"
+                    },
+                    {
+                      "key_hex": "",
+                      "map_id": 31152,
+                      "stability": "phase-stable",
+                      "value_hex": "00000000"
+                    },
+                    {
+                      "key_hex": "01000000",
+                      "map_id": 31145,
+                      "stability": "phase-stable",
+                      "value_hex": "0ac8000200000000000000000000000000000000"
+                    }
+                  ],
+                  "insn_count_after": 2802,
+                  "insn_count_before": 3017,
+                  "insn_delta": -215,
+                  "pass": "map_inline",
+                  "sites_applied": 18,
+                  "sites_matched": 18,
+                  "sites_skipped": 0,
+                  "skip_reasons": {},
+                  "skipped_sites": []
+                }
+              }
+            },
+            "error": null,
+            "rejit_syscall_ms": 15,
+            "status": "ok",
+            "step": {
+              "command": "set -eu; profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}\"; profile=\"${profile_root}/hot_region_version/hash-${PROG_HASH}.json\"; source_prog_id=$(jq -er '.source_prog_id | select(type == \"number\")' \"${profile}\"); raw=\"${profile_root}/../raw/${source_prog_id}.json\"; candidates=$(jq -er --argjson verifier_rejected '[]' ' [.per_site | to_entries[] | . as $entry | select( (.value.branch_count | type) == \"number\" and (.value.taken | type) == \"number\" and (.value.not_taken | type) == \"number\" and .value.branch_count >= 20 and .value.taken + .value.not_taken == .value.branch_count and .value.taken != .value.not_taken and (($verifier_rejected | index($entry.key | tonumber)) == null) )] | sort_by([-.value.branch_count, (.key | tonumber)]) | map(.key) | if length == 0 then error(\"no biased PMU branch candidates\") else join(\" \") end ' \"${raw}\"); selected=0; best_after=999999999; for pc in ${candidates}; do jq --arg pc \"${pc}\" --slurpfile raw \"${raw}\" ' .per_site = { ($pc): ($raw[0].per_site[$pc] | {branch_count, taken, not_taken}) } ' \"${profile}\" > \"${REPORT}.candidate-profile.json\"; bpfopt --pass hot_region_version --input \"${INPUT}\" --output \"${OUTPUT}.candidate\" --report \"${REPORT}.candidate\" --prog-type \"${PROG_TYPE}\" -- --profile \"${REPORT}.candidate-profile.json\" --program-hash \"${PROG_HASH}\"; applied=$(jq -er '.sites_applied | select(type == \"number\")' \"${REPORT}.candidate\"); skipped=$(jq -er '.sites_skipped | select(type == \"number\")' \"${REPORT}.candidate\"); if test \"${applied}\" -eq 1 && test \"${skipped}\" -eq 0; then after=$(jq -er '.insn_count_after | select(type == \"number\")' \"${REPORT}.candidate\"); if test \"${after}\" -lt \"${best_after}\"; then install -m 0644 \"${OUTPUT}.candidate\" \"${OUTPUT}\"; install -m 0644 \"${REPORT}.candidate\" \"${REPORT}\"; install -m 0644 \"${REPORT}.candidate-profile.json\" \"${REPORT}.selected-profile.json\"; best_after=\"${after}\"; selected=1; fi; continue; fi; test \"${applied}\" -eq 0 && test \"${skipped}\" -eq 1; done; test \"${selected}\" -eq 1 || { echo \"katran hot_region_version: no PMU-ranked branch has an eligible acyclic hot region\" >&2; exit 1; }; install -m 0644 \"${REPORT}\" \"${REPORT}.hot-region.json\"; OVERLAY_DIR=${BPFREJIT_IMAGE_WORKSPACE}/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; VIP=; for f in ${MAP_VALUES}/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \",${MAP_IDS},\" in *,$i,*) ;; *) continue ;; esac; case \"$n\" in vip_map) VIP=$i ;; ch_rings|reals|server_id_map) d=${MAP_VALUES}/map-$i.dump.json; if jq -e '.skipped == true' \"$d\" >/dev/null; then case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; esac; fi ;; esac; done; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end)' > ${MAP_VALUES}/overlays.json; VIP_TCP=0a6401010000000000000000000000001f900600; VIP_UDP=0a6401010000000000000000000000001f901100; VIP_DUMP=${MAP_VALUES}/map-$VIP.dump.json; if jq -e --arg key \"$VIP_TCP\" 'any(.[]?; ((.key // []) | map(sub(\"^0x\"; \"\") | ascii_downcase) | join(\"\")) == $key)' \"$VIP_DUMP\" >/dev/null; then VIP_KEY=$VIP_TCP; elif jq -e --arg key \"$VIP_UDP\" 'any(.[]?; ((.key // []) | map(sub(\"^0x\"; \"\") | ascii_downcase) | join(\"\")) == $key)' \"$VIP_DUMP\" >/dev/null; then VIP_KEY=$VIP_UDP; else echo \"katran hot_region_version: benchmark VIP key missing from $VIP_DUMP\" >&2; exit 1; fi; bpfopt --pass map_inline --input \"${OUTPUT}\" --output \"${OUTPUT}.map-inline\" --report \"${REPORT}.map-inline.json\" --prog-type \"${PROG_TYPE}\" -- --map-values \"${MAP_VALUES}\" --map-ids \"${MAP_IDS}\" --stability phase-stable --include-map=ctl_array --include-map=vip_map --include-map=ch_rings --include-map=decap_dst --include-map=reals --include-map=server_id_map --inline-hint=decap_dst:c0000202000000000000000000000000 --inline-hint=vip_map:$VIP_KEY --inline-hint=reals:01000000 --assume-hint-key; install -m 0644 \"${OUTPUT}.map-inline\" \"${OUTPUT}\"; jq -n --slurpfile hot \"${REPORT}.hot-region.json\" --slurpfile map \"${REPORT}.map-inline.json\" ' $hot[0] + { insn_count_after: $map[0].insn_count_after, insn_delta: ($map[0].insn_count_after - $hot[0].insn_count_before), inlined_map_entries: $map[0].inlined_map_entries, stages: { hot_region_version: $hot[0], map_inline: $map[0] } } ' > \"${REPORT}.combined.json\"; install -m 0644 \"${REPORT}.combined.json\" \"${REPORT}\"",
+              "log_level": 1,
+              "name": "hot_region_version"
+            }
+          }
+        ],
+        "prog_id": 23204,
+        "program": {
+          "final_insn_count": 2802,
+          "orig_insn_count": 3026,
+          "prog_id": 23205,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "runner_details": {
+    "command_used": [
+      "/artifacts/user/repo-artifacts/x86_64/katran/bin/katran_server_grpc",
+      "-balancer_prog=/artifacts/user/repo-artifacts/x86_64/katran/bpf/balancer.bpf.o",
+      "-healthchecker_prog=/artifacts/user/repo-artifacts/x86_64/katran/bpf/healthchecking_ipip.bpf.o",
+      "-default_mac=02:00:00:00:00:0b",
+      "-intf=katran0",
+      "-ipip_intf=ipip0",
+      "-ipip6_intf=ipip60",
+      "-hc_forwarding=false",
+      "-logtostderr",
+      "-alsologtostderr"
+    ],
+    "process_output": {
+      "returncode": -2,
+      "stderr_tail": "I20260719 18:15:47.669531 2334168 KatranGrpcService.cpp:69] Starting Katran\nE20260719 18:15:47.669754 2334168 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 18:15:47.669766 2334168 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260719 18:15:47.669986 2334168 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 18:15:47.669996 2334168 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260719 18:15:47.677757 2334168 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 18:15:47.677773 2334168 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}
