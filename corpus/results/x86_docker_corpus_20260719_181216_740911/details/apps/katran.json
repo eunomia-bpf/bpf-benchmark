@@ -1,0 +1,115 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "23179": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 23179,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23180": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23180,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23181": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23181,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "23182": {
+        "bytes_jited": 40,
+        "bytes_xlated": 32,
+        "id": 23182,
+        "name": "det_arg_ctx",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "23183": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 23183,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      },
+      "23184": {
+        "bytes_jited": 16579,
+        "bytes_xlated": 28568,
+        "id": 23184,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d10s",
+          "--timeout",
+          "2s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 10.10312191399862,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 10s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   458.90us  259.77us   5.27ms   78.99%\n    Req/Sec     4.47k   342.37     5.72k    71.78%\n  Latency Distribution\n     50%  402.00us\n     75%  565.00us\n     90%  765.00us\n     99%    1.40ms\n  179637 requests in 10.10s, 27.92MB read\nRequests/sec:  17786.61\nTransfer/sec:      2.76MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "live execute_plan failed for programs: {\"23184\": \"error: context_specialize load pc is not LDX memory\\n\"}",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "katran",
+  "runner_details": {
+    "command_used": [
+      "/artifacts/user/repo-artifacts/x86_64/katran/bin/katran_server_grpc",
+      "-balancer_prog=/artifacts/user/repo-artifacts/x86_64/katran/bpf/balancer.bpf.o",
+      "-healthchecker_prog=/artifacts/user/repo-artifacts/x86_64/katran/bpf/healthchecking_ipip.bpf.o",
+      "-default_mac=02:00:00:00:00:0b",
+      "-intf=katran0",
+      "-ipip_intf=ipip0",
+      "-ipip6_intf=ipip60",
+      "-hc_forwarding=false",
+      "-logtostderr",
+      "-alsologtostderr"
+    ],
+    "process_output": {
+      "returncode": -2,
+      "stderr_tail": "I20260719 18:12:17.168550 2331961 KatranGrpcService.cpp:69] Starting Katran\nE20260719 18:12:17.168771 2331961 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 18:12:17.168782 2331961 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260719 18:12:17.169003 2331961 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 18:12:17.169013 2331961 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260719 18:12:17.184446 2331961 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 18:12:17.184463 2331961 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "xdp_traffic",
+  "status": "error"
+}
