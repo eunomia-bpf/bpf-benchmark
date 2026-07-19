@@ -1,0 +1,10 @@
+{
+  "app": "katran",
+  "baseline": null,
+  "error": "command failed (234): /usr/sbin/ip netns exec katran-router /usr/local/bin/bpftool net attach xdp pinned /sys/fs/bpf/bpfrejit-katran-peer-xdp dev rtlb0\nError: bpf obj get (/sys/fs/bpf/bpfrejit-katran-peer-xdp): No such file or directory",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "error"
+}
