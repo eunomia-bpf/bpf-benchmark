@@ -1,0 +1,59 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "19": {
+        "bytes_jited": 16545,
+        "bytes_xlated": 28520,
+        "id": 19,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d1s",
+          "--timeout",
+          "2s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 1.1016921780000075,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 1s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   357.53us  269.25us   3.11ms   80.21%\n    Req/Sec     5.93k   256.34     6.48k    68.18%\n  Latency Distribution\n     50%  283.00us\n     75%  475.00us\n     90%  695.00us\n     99%    1.30ms\n  25957 requests in 1.10s, 4.04MB read\nRequests/sec:  23610.37\nTransfer/sec:      3.67MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "native app exited before BPF programs were tracked by shim\nstderr tail:\nI20260719 17:40:16.935582  2727 KatranGrpcService.cpp:69] Starting Katran\nE20260719 17:40:16.935778  2727 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 17:40:16.935787  2727 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260719 17:40:16.935966  2727 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 17:40:16.935971  2727 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260719 17:40:16.954022  2727 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260719 17:40:16.954042  2727 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260719 17:40:16.967824  2727 BaseBpfAdapter.cpp:144] libbpf: Error in bpf_object__probe_loading(): -EINVAL. Couldn't load trivial BPF program. Make sure your kernel supports BPF (CONFIG_BPF_SYSCALL=y) and/or that RLIMIT_MEMLOCK is set to big enough value.\nE20260719 17:40:16.967876  2727 BpfLoader.cpp:326] error while trying to load bpf object: /artifacts/user/repo-artifacts/x86_64/katran/bpf/balancer.bpf.o\nterminate called after throwing an instance of 'std::invalid_argument'\n  what():  can't load main bpf program\n*** Aborted at 1784482816 (Unix time, try 'date -d @1784482816') ***\n*** Signal 6 (SIGABRT) (0xaa7) received by PID 2727 (pthread TID 0x7f3db7b14440) (linux TID 2727) (maybe from PID 2727, UID 0) (code: sent by tkill or tgkill), stack trace: ***\n    @ 000000000010f558 (unknown)\n    @ 000000000004532f (unknown)\n    @ 000000000009eb2c pthread_kill\n    @ 000000000004527d gsignal\n    @ 00000000000288fe abort\n    @ 00000000000a5ff4 (unknown)\n    @ 00000000000bb0d9 (unknown)\n    @ 00000000000a5a54 std::terminate()\n    @ 00000000000bb390 __cxa_throw\n    @ 00000000000a3930 __cxa_throw\n    @ 00000000002e01f2 (unknown)\n    @ 000000000017c977 (unknown)\n    @ 000000000009895b (unknown)\n    @ 00000000000996ca (unknown)\n    @ 000000000002a1c9 (unknown)\n    @ 000000000002a28a __libc_start_main\n    @ 0000000000098594 (unknown)",
+  "post_rejit": null,
+  "rejit_result": {
+    "enabled_passes": [
+      "context_specialize"
+    ],
+    "mode": "loadtime",
+    "plan_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260719_174003_978422/details/loadtime-plans/katran.json",
+    "report_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260719_174003_978422/details/loadtime-reports/katran.jsonl",
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "error"
+}
