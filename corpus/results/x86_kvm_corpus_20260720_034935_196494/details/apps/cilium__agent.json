@@ -1,0 +1,10 @@
+{
+  "app": "cilium/agent",
+  "baseline": null,
+  "error": "Cilium endpoint creation must add exactly one live tail_handle_ipv context target; endpoint=1107 added=[48, 75]",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "cilium",
+  "selected_workload": "cilium_endpoint_pktgen",
+  "status": "error"
+}
