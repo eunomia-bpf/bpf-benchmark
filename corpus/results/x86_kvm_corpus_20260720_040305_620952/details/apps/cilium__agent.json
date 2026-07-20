@@ -1,0 +1,10 @@
+{
+  "app": "cilium/agent",
+  "baseline": null,
+  "error": "Cilium endpoint creation must add exactly one tail_handle_ipv target from the endpoint policy BTF object; endpoint=3735 btf_id=215 added=[157] matches=[]",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "cilium",
+  "selected_workload": "cilium_endpoint_pktgen",
+  "status": "error"
+}
