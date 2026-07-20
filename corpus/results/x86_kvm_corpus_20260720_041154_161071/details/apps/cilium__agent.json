@@ -1,0 +1,1305 @@
+{
+  "app": "cilium/agent",
+  "baseline": {
+    "bpf": {
+      "10": {
+        "bytes_jited": 16,
+        "bytes_xlated": 24,
+        "id": 10,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "100": {
+        "bytes_jited": 3945,
+        "bytes_xlated": 7040,
+        "id": 100,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "101": {
+        "bytes_jited": 5222,
+        "bytes_xlated": 8912,
+        "id": 101,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "102": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 102,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "103": {
+        "bytes_jited": 859,
+        "bytes_xlated": 1512,
+        "id": 103,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "104": {
+        "bytes_jited": 5222,
+        "bytes_xlated": 8912,
+        "id": 104,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "105": {
+        "bytes_jited": 3945,
+        "bytes_xlated": 7040,
+        "id": 105,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "106": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 106,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "107": {
+        "bytes_jited": 8254,
+        "bytes_xlated": 14392,
+        "id": 107,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "108": {
+        "bytes_jited": 5760,
+        "bytes_xlated": 10104,
+        "id": 108,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "109": {
+        "bytes_jited": 6566,
+        "bytes_xlated": 11024,
+        "id": 109,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "11": {
+        "bytes_jited": 21,
+        "bytes_xlated": 32,
+        "id": 11,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "110": {
+        "bytes_jited": 405,
+        "bytes_xlated": 752,
+        "id": 110,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "111": {
+        "bytes_jited": 1262,
+        "bytes_xlated": 2112,
+        "id": 111,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "112": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 112,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "113": {
+        "bytes_jited": 5802,
+        "bytes_xlated": 10368,
+        "id": 113,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "114": {
+        "bytes_jited": 1888,
+        "bytes_xlated": 3224,
+        "id": 114,
+        "name": "cil_to_containe",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "115": {
+        "bytes_jited": 382,
+        "bytes_xlated": 696,
+        "id": 115,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "116": {
+        "bytes_jited": 5580,
+        "bytes_xlated": 9904,
+        "id": 116,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "117": {
+        "bytes_jited": 8881,
+        "bytes_xlated": 15112,
+        "id": 117,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "118": {
+        "bytes_jited": 5210,
+        "bytes_xlated": 9224,
+        "id": 118,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "119": {
+        "bytes_jited": 1089,
+        "bytes_xlated": 1720,
+        "id": 119,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "12": {
+        "bytes_jited": 16,
+        "bytes_xlated": 24,
+        "id": 12,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "120": {
+        "bytes_jited": 3386,
+        "bytes_xlated": 5936,
+        "id": 120,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "121": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 121,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "122": {
+        "bytes_jited": 6398,
+        "bytes_xlated": 11104,
+        "id": 122,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "123": {
+        "bytes_jited": 5375,
+        "bytes_xlated": 9592,
+        "id": 123,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "124": {
+        "bytes_jited": 12954,
+        "bytes_xlated": 21584,
+        "id": 124,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "125": {
+        "bytes_jited": 859,
+        "bytes_xlated": 1512,
+        "id": 125,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "126": {
+        "bytes_jited": 6566,
+        "bytes_xlated": 11024,
+        "id": 126,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "127": {
+        "bytes_jited": 405,
+        "bytes_xlated": 752,
+        "id": 127,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "128": {
+        "bytes_jited": 6216,
+        "bytes_xlated": 10984,
+        "id": 128,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "129": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 129,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "13": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 13,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "130": {
+        "bytes_jited": 3622,
+        "bytes_xlated": 6368,
+        "id": 130,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "131": {
+        "bytes_jited": 8881,
+        "bytes_xlated": 15112,
+        "id": 131,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "132": {
+        "bytes_jited": 12981,
+        "bytes_xlated": 21632,
+        "id": 132,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "133": {
+        "bytes_jited": 3945,
+        "bytes_xlated": 7040,
+        "id": 133,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "134": {
+        "bytes_jited": 8242,
+        "bytes_xlated": 14312,
+        "id": 134,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "135": {
+        "bytes_jited": 1262,
+        "bytes_xlated": 2112,
+        "id": 135,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "136": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 136,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "14": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 14,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "15": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 15,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "16": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 16,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "17": {
+        "bytes_jited": 16,
+        "bytes_xlated": 24,
+        "id": 17,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "18": {
+        "bytes_jited": 16,
+        "bytes_xlated": 24,
+        "id": 18,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "19": {
+        "bytes_jited": 21,
+        "bytes_xlated": 32,
+        "id": 19,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "20": {
+        "bytes_jited": 21,
+        "bytes_xlated": 32,
+        "id": 20,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "21": {
+        "bytes_jited": 21,
+        "bytes_xlated": 24,
+        "id": 21,
+        "name": "test",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "22": {
+        "bytes_jited": 21,
+        "bytes_xlated": 32,
+        "id": 22,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "23": {
+        "bytes_jited": 20494,
+        "bytes_xlated": 32776,
+        "id": 23,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "24": {
+        "bytes_jited": 31,
+        "bytes_xlated": 40,
+        "id": 24,
+        "name": "adjust_mac_room",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "25": {
+        "bytes_jited": 16,
+        "bytes_xlated": 24,
+        "id": 25,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "26": {
+        "bytes_jited": 27,
+        "bytes_xlated": 48,
+        "id": 26,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      },
+      "27": {
+        "bytes_jited": 27,
+        "bytes_xlated": 48,
+        "id": 27,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "28": {
+        "bytes_jited": 27,
+        "bytes_xlated": 48,
+        "id": 28,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "29": {
+        "bytes_jited": 27,
+        "bytes_xlated": 48,
+        "id": 29,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "30": {
+        "bytes_jited": 21,
+        "bytes_xlated": 32,
+        "id": 30,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      },
+      "31": {
+        "bytes_jited": 21,
+        "bytes_xlated": 32,
+        "id": 31,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "32": {
+        "bytes_jited": 21,
+        "bytes_xlated": 32,
+        "id": 32,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "33": {
+        "bytes_jited": 113,
+        "bytes_xlated": 192,
+        "id": 33,
+        "name": "probe_fib_looku",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "34": {
+        "bytes_jited": 113,
+        "bytes_xlated": 192,
+        "id": 34,
+        "name": "probe_fib_looku",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "35": {
+        "bytes_jited": 113,
+        "bytes_xlated": 192,
+        "id": 35,
+        "name": "probe_fib_looku",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "36": {
+        "bytes_jited": 113,
+        "bytes_xlated": 192,
+        "id": 36,
+        "name": "probe_fib_looku",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "37": {
+        "bytes_jited": 113,
+        "bytes_xlated": 192,
+        "id": 37,
+        "name": "probe_fib_looku",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "38": {
+        "bytes_jited": 113,
+        "bytes_xlated": 192,
+        "id": 38,
+        "name": "probe_fib_looku",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "39": {
+        "bytes_jited": 25,
+        "bytes_xlated": 32,
+        "id": 39,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "40": {
+        "bytes_jited": 509,
+        "bytes_xlated": 880,
+        "id": 40,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "xdp"
+      },
+      "41": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 41,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "42": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 42,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "43": {
+        "bytes_jited": 5210,
+        "bytes_xlated": 9224,
+        "id": 43,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "44": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 44,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "45": {
+        "bytes_jited": 5802,
+        "bytes_xlated": 10368,
+        "id": 45,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "46": {
+        "bytes_jited": 5760,
+        "bytes_xlated": 10104,
+        "id": 46,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "47": {
+        "bytes_jited": 3622,
+        "bytes_xlated": 6368,
+        "id": 47,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "48": {
+        "bytes_jited": 382,
+        "bytes_xlated": 696,
+        "id": 48,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "49": {
+        "bytes_jited": 5580,
+        "bytes_xlated": 9904,
+        "id": 49,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "50": {
+        "bytes_jited": 1888,
+        "bytes_xlated": 3224,
+        "id": 50,
+        "name": "cil_to_containe",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "51": {
+        "bytes_jited": 6566,
+        "bytes_xlated": 11024,
+        "id": 51,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "52": {
+        "bytes_jited": 3386,
+        "bytes_xlated": 5936,
+        "id": 52,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "53": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 53,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "54": {
+        "bytes_jited": 6398,
+        "bytes_xlated": 11104,
+        "id": 54,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "55": {
+        "bytes_jited": 12954,
+        "bytes_xlated": 21584,
+        "id": 55,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "56": {
+        "bytes_jited": 6216,
+        "bytes_xlated": 10984,
+        "id": 56,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "57": {
+        "bytes_jited": 1089,
+        "bytes_xlated": 1720,
+        "id": 57,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "58": {
+        "bytes_jited": 5375,
+        "bytes_xlated": 9592,
+        "id": 58,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "59": {
+        "bytes_jited": 8254,
+        "bytes_xlated": 14392,
+        "id": 59,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "60": {
+        "bytes_jited": 1262,
+        "bytes_xlated": 2112,
+        "id": 60,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "61": {
+        "bytes_jited": 405,
+        "bytes_xlated": 752,
+        "id": 61,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "62": {
+        "bytes_jited": 859,
+        "bytes_xlated": 1512,
+        "id": 62,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "63": {
+        "bytes_jited": 3945,
+        "bytes_xlated": 7040,
+        "id": 63,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "64": {
+        "bytes_jited": 8881,
+        "bytes_xlated": 15112,
+        "id": 64,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "65": {
+        "bytes_jited": 5222,
+        "bytes_xlated": 8912,
+        "id": 65,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "66": {
+        "bytes_jited": 6398,
+        "bytes_xlated": 11104,
+        "id": 66,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "67": {
+        "bytes_jited": 382,
+        "bytes_xlated": 696,
+        "id": 67,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "68": {
+        "bytes_jited": 5580,
+        "bytes_xlated": 9904,
+        "id": 68,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "69": {
+        "bytes_jited": 5760,
+        "bytes_xlated": 10104,
+        "id": 69,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "7": {
+        "bytes_jited": 16,
+        "bytes_xlated": 24,
+        "id": 7,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      },
+      "70": {
+        "bytes_jited": 5210,
+        "bytes_xlated": 9224,
+        "id": 70,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "71": {
+        "bytes_jited": 5375,
+        "bytes_xlated": 9592,
+        "id": 71,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "72": {
+        "bytes_jited": 1888,
+        "bytes_xlated": 3224,
+        "id": 72,
+        "name": "cil_to_containe",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "73": {
+        "bytes_jited": 3622,
+        "bytes_xlated": 6368,
+        "id": 73,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "74": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 74,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "75": {
+        "bytes_jited": 6216,
+        "bytes_xlated": 10984,
+        "id": 75,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "76": {
+        "bytes_jited": 1089,
+        "bytes_xlated": 1720,
+        "id": 76,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "77": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 77,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "78": {
+        "bytes_jited": 5802,
+        "bytes_xlated": 10368,
+        "id": 78,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "79": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 79,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "8": {
+        "bytes_jited": 40,
+        "bytes_xlated": 48,
+        "id": 8,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "80": {
+        "bytes_jited": 405,
+        "bytes_xlated": 752,
+        "id": 80,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "81": {
+        "bytes_jited": 859,
+        "bytes_xlated": 1512,
+        "id": 81,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "82": {
+        "bytes_jited": 8242,
+        "bytes_xlated": 14312,
+        "id": 82,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "83": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 83,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "84": {
+        "bytes_jited": 3945,
+        "bytes_xlated": 7040,
+        "id": 84,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "85": {
+        "bytes_jited": 1262,
+        "bytes_xlated": 2112,
+        "id": 85,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "86": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 86,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "87": {
+        "bytes_jited": 12981,
+        "bytes_xlated": 21632,
+        "id": 87,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "88": {
+        "bytes_jited": 6566,
+        "bytes_xlated": 11024,
+        "id": 88,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "89": {
+        "bytes_jited": 8881,
+        "bytes_xlated": 15112,
+        "id": 89,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "9": {
+        "bytes_jited": 21,
+        "bytes_xlated": 32,
+        "id": 9,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      },
+      "90": {
+        "bytes_jited": 5222,
+        "bytes_xlated": 8912,
+        "id": 90,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "91": {
+        "bytes_jited": 3386,
+        "bytes_xlated": 5936,
+        "id": 91,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "92": {
+        "bytes_jited": 12981,
+        "bytes_xlated": 21632,
+        "id": 92,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "93": {
+        "bytes_jited": 3386,
+        "bytes_xlated": 5936,
+        "id": 93,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "94": {
+        "bytes_jited": 8881,
+        "bytes_xlated": 15112,
+        "id": 94,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "95": {
+        "bytes_jited": 1262,
+        "bytes_xlated": 2112,
+        "id": 95,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "96": {
+        "bytes_jited": 405,
+        "bytes_xlated": 752,
+        "id": 96,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "97": {
+        "bytes_jited": 6566,
+        "bytes_xlated": 11024,
+        "id": 97,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "98": {
+        "bytes_jited": 8242,
+        "bytes_xlated": 14312,
+        "id": 98,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "99": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 99,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "components": [
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepa",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.162",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepa",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.91",
+              "thread_index": 0,
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 30.088053258000016,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.162  dst_max: 10.244.0.162\n     src_min: 10.244.0.91  src_max: 10.244.0.91\n     src_mac: 06:ef:83:06:70:22 dst_mac: 42:c4:f0:51:c9:e9\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 19908798  errors: 0\n     started: 125060306us  stopped: 154985199us idle: 0us\n     seq_num: 19908799  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.91  cur_daddr: 10.244.0.162\n     cur_udp_dst: 51997  cur_udp_src: 51997\n     cur_queue_map: 0\n     flows: 9970745\nResult: OK: 29924892(c29924892+d0) usec, 19908798 (64byte,-1frags)\n  665292pps 340Mb/sec (340629504bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_forward"
+          },
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepb",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.91",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepb",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.162",
+              "thread_index": 1,
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 30.08763368000001,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.91  dst_max: 10.244.0.91\n     src_min: 10.244.0.162  src_max: 10.244.0.162\n     src_mac: f2:f2:3d:6a:4d:53 dst_mac: 0a:d0:51:e7:6b:2c\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 19908784  errors: 0\n     started: 125060131us  stopped: 154985173us idle: 0us\n     seq_num: 19908785  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.162  cur_daddr: 10.244.0.91\n     cur_udp_dst: 51983  cur_udp_src: 51983\n     cur_queue_map: 0\n     flows: 9970692\nResult: OK: 29925041(c29925041+d0) usec, 19908784 (64byte,-1frags)\n  665288pps 340Mb/sec (340627456bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_reverse"
+          }
+        ],
+        "config": {
+          "path": "bidirectional-endpoint-to-endpoint"
+        },
+        "workload_name": "cilium_endpoint_pktgen"
+      }
+    ]
+  },
+  "error": "bpfprof exited before sampling became ready (1): open kernel LBR perf event on CPU 0: perf_event_open: No such file or directory (os error 2)",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "cilium",
+  "runner_details": {
+    "command_used": [
+      "/usr/local/bin/cilium-agent",
+      "--enable-k8s=false",
+      "--agent-health-require-k8s-connectivity=false",
+      "--enable-ipv4=true",
+      "--enable-ipv6=false",
+      "--enable-l7-proxy=false",
+      "--enable-health-checking=false",
+      "--enable-endpoint-health-checking=false",
+      "--enable-drift-checker=false",
+      "--enable-dynamic-config=false",
+      "--enable-dynamic-lifecycle-manager=false",
+      "--endpoint-bpf-prog-watchdog-interval=0",
+      "--endpoint-regen-interval=0",
+      "--enable-monitor=false",
+      "--enable-hubble=false",
+      "--enable-l2-neigh-discovery=false",
+      "--enable-policy=always",
+      "--policy-audit-mode=true",
+      "--enable-bpf-masquerade=true",
+      "--enable-bpf-clock-probe=true",
+      "--enable-ipv4-fragment-tracking=true",
+      "--enable-pmtu-discovery=true",
+      "--enable-extended-ip-protocols=true",
+      "--bpf-conntrack-accounting=true",
+      "--enable-xdp-prefilter=true",
+      "--bpf-lb-acceleration=native",
+      "--ipam=cluster-pool",
+      "--ipv4-range=10.244.0.0/24",
+      "--ipv4-native-routing-cidr=10.244.0.0/24",
+      "--kvstore=etcd",
+      "--kvstore-opt=etcd.address=127.0.0.1:48833",
+      "--cluster-name=default",
+      "--cluster-id=0",
+      "--routing-mode=native",
+      "--bpf-root=/var/tmp/ciliumrunner_gzjxb6i4/bpffs",
+      "--state-dir=/var/tmp/ciliumrunner_gzjxb6i4/state",
+      "--socket-path=/var/tmp/ciliumrunner_gzjxb6i4/state/cilium.sock",
+      "--devices=bpfbench0",
+      "--direct-routing-device=bpfbench0"
+    ],
+    "process_output": {
+      "returncode": 0,
+      "stderr_tail": "{\"level\":\"warn\",\"ts\":\"2026-07-20T04:12:32.694967Z\",\"logger\":\"etcd-client\",\"caller\":\"v3/retry_interceptor.go:68\",\"msg\":\"retrying of unary invoker failed\",\"target\":\"etcd-endpoints://0x39b729822d20/127.0.0.1:48833\",\"peer\":\"Peer{Addr: '127.0.0.1:48833', LocalAddr: '127.0.0.1:51070', AuthInfo: 'insecure'}\",\"method\":\"/etcdserverpb.KV/Txn\",\"attempt\":0,\"error\":\"rpc error: code = NotFound desc = etcdserver: requested lease not found\"}",
+      "stdout_tail": "time=2026-07-20T04:11:55.525056876Z level=warn msg=\"are restarted. Ensure that the BPF filesystem is mounted in the host.\"\ntime=2026-07-20T04:11:55.525059603Z level=warn msg=https://docs.cilium.io/en/stable/operations/system_requirements/#mounted-ebpf-filesystem\ntime=2026-07-20T04:11:55.525061882Z level=warn msg=\"====================================================================================\"\ntime=2026-07-20T04:11:55.525064352Z level=info msg=\"Mounting BPF filesystem\" bpffsRoot=/var/tmp/ciliumrunner_gzjxb6i4/bpffs\ntime=2026-07-20T04:11:55.559823008Z level=info msg=\"Mounted cgroupv2 filesystem\" location=/run/cilium/cgroupv2\ntime=2026-07-20T04:11:55.559849456Z level=warn msg=\"PolicyAuditMode is enabled. Network policy will not be enforced.\"\ntime=2026-07-20T04:11:55.559855663Z level=info msg=\"Parsing base label prefixes from default label list\"\ntime=2026-07-20T04:11:55.559991942Z level=info msg=\"Parsing node label prefixes from user inputs\" prefix=[]\ntime=2026-07-20T04:11:55.559999797Z level=info msg=\"Parsing additional label prefixes from user inputs\" prefix=[]\ntime=2026-07-20T04:11:55.560003327Z level=info msg=\"Final label prefixes to be used for identity evaluation:\"\ntime=2026-07-20T04:11:55.560011129Z level=info msg=\" - reserved:.*\"\ntime=2026-07-20T04:11:55.56001481Z level=info msg=\" - :io\\\\.kubernetes\\\\.pod\\\\.namespace\"\ntime=2026-07-20T04:11:55.560017138Z level=info msg=\" - :io\\\\.cilium\\\\.k8s\\\\.namespace\\\\.labels\"\ntime=2026-07-20T04:11:55.560019262Z level=info msg=\" - :app\\\\.kubernetes\\\\.io\"\ntime=2026-07-20T04:11:55.560021309Z level=info msg=\" - :io\\\\.cilium\\\\.k8s\\\\.policy\\\\.cluster\"\ntime=2026-07-20T04:11:55.560023394Z level=info msg=\" - :io\\\\.cilium\\\\.k8s\\\\.policy\\\\.serviceaccount\"\ntime=2026-07-20T04:11:55.560025581Z level=info msg=\" - !:io\\\\.kubernetes\"\ntime=2026-07-20T04:11:55.560028948Z level=info msg=\" - !:kubernetes\\\\.io\"\ntime=2026-07-20T04:11:55.560030844Z level=info msg=\" - !:statefulset\\\\.kubernetes\\\\.io/pod-name\"\ntime=2026-07-20T04:11:55.560032963Z level=info msg=\" - !:apps\\\\.kubernetes\\\\.io/pod-index\"\ntime=2026-07-20T04:11:55.560034798Z level=info msg=\" - !:batch\\\\.kubernetes\\\\.io/job-completion-index\"\ntime=2026-07-20T04:11:55.56003703Z level=info msg=\" - !:batch\\\\.kubernetes\\\\.io/controller-uid\"\ntime=2026-07-20T04:11:55.560040227Z level=info msg=\" - !:.*beta\\\\.kubernetes\\\\.io\"\ntime=2026-07-20T04:11:55.560042436Z level=info msg=\" - !:k8s\\\\.io\"\ntime=2026-07-20T04:11:55.560044282Z level=info msg=\" - !:pod-template-generation\"\ntime=2026-07-20T04:11:55.560046181Z level=info msg=\" - !:pod-template-hash\"\ntime=2026-07-20T04:11:55.560048004Z level=info msg=\" - !:controller-revision-hash\"\ntime=2026-07-20T04:11:55.560050609Z level=info msg=\" - !:controller-uid\"\ntime=2026-07-20T04:11:55.560052435Z level=info msg=\" - !:annotation.*\"\ntime=2026-07-20T04:11:55.560054362Z level=info msg=\" - !:etcd_node\"\ntime=2026-07-20T04:11:55.56005649Z level=info msg=\" - !:topology\\\\.kubernetes\\\\.io\"\ntime=2026-07-20T04:11:55.560059043Z level=info msg=\"Final node label prefixes to be used for identity evaluation:\"\ntime=2026-07-20T04:11:55.664595045Z level=info msg=\"Memory available for map entries (0.250% of 67422785536B): 168556963B\" module=agent.controlplane\ntime=2026-07-20T04:11:55.664608799Z level=info msg=\"Option set by dynamic sizing\" module=agent.controlplane option=bpf-sock-rev-map-max value=295713\ntime=2026-07-20T04:11:55.665996188Z level=info msg=\"Underlay protocol ipv4 automatically selected\" module=agent.datapath.datapath-tunnel-config\ntime=2026-07-20T04:11:55.70775919Z level=info msg=\"L7 proxies are disabled\" module=agent.controlplane.l7-proxy\ntime=2026-07-20T04:11:55.83615224Z level=info msg=\"Probed kernel support for BIG TCP for UDP tunnels\" module=agent.datapath.bigtcp state=false\ntime=2026-07-20T04:11:55.83675098Z level=info msg=\"Datapath connector ready\" module=agent.datapath.connector datapathMode=veth\ntime=2026-07-20T04:11:55.836792076Z level=info msg=\"Datapath plugins are disabled.\" module=agent.datapath.datapath-plugins\ntime=2026-07-20T04:11:55.839652837Z level=info msg=\"Spire Delegate API Client is disabled as no socket path is configured\" module=agent.controlplane.auth.spire-delegate\ntime=2026-07-20T04:11:55.839665768Z level=info msg=\"Mutual authentication handler is disabled as no port is configured\" module=agent.controlplane.auth\ntime=2026-07-20T04:11:55.83967893Z level=info msg=\"Authentication processing is disabled\" module=agent.controlplane.auth\ntime=2026-07-20T04:11:55.848588601Z level=info msg=\"Certloader TLS watcher disabled\" module=agent.controlplane.hubble config=certloader-server-tls\ntime=2026-07-20T04:11:55.8486807Z level=info msg=\"The Hubble static exporter is disabled\" module=agent.controlplane.hubble.hubble-exporters\ntime=2026-07-20T04:11:55.848688309Z level=info msg=\"The Hubble dynamic exporter is disabled\" module=agent.controlplane.hubble.hubble-exporters\ntime=2026-07-20T04:11:55.848739905Z level=info msg=\"The Hubble packet drop events emitter is disabled\" module=agent.controlplane.hubble.hubble-dropeventemitter\ntime=2026-07-20T04:11:55.848924978Z level=info msg=\"Certloader TLS watcher disabled\" module=agent.controlplane.hubble.hubble-metrics config=certloader-server-tls\ntime=2026-07-20T04:11:55.849043429Z level=info msg=\"The Hubble metrics server is disabled\" module=agent.controlplane.hubble.hubble-metrics\ntime=2026-07-20T04:11:55.859589205Z level=info msg=Invoked duration=187.605235ms function=\"cmd.configureAPIServer (cmd/cells.go:385)\"\ntime=2026-07-20T04:11:55.865578245Z level=info msg=\"Init procedure to clean up stale CiliumEndpoint disabled\" module=agent.controlplane.stale-endpoint-cleanup\ntime=2026-07-20T04:11:55.895052655Z level=info msg=\"Determined final XDP mode\" module=agent.datapath.datapath-xdp-config accelarationMode=native mode=xdpdrv\ntime=2026-07-20T04:11:55.900317434Z level=info msg=\"Starting hive\"\ntime=2026-07-20T04:11:55.900344345Z level=info msg=\"Started gops server\" module=agent.infra.gops address=127.0.0.1:9890\ntime=2026-07-20T04:11:55.901127413Z level=info msg=\"Local boot ID\" module=agent.controlplane.local-node-sync bootID=757e5721-5dd8-4021-ab23-cc241d588844\ntime=2026-07-20T04:11:55.901163743Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"sync-local-node (node.NewLocalNodeStore.func1.1 (pkg/node/local_node_store.go:118))\" duration=2.499\u00b5s\ntime=2026-07-20T04:11:55.90257453Z level=info msg=\"No identity checkpoint file found, skipping restoration\" module=agent.controlplane.identity.identity file-path=/var/tmp/ciliumrunner_gzjxb6i4/state/state/local_allocator_state.json\ntime=2026-07-20T04:11:55.902602083Z level=info msg=\"Removed map pin, recreating and re-pinning map\" bpfMapPath=cilium_ipcache_v2 bpfMapName=cilium_ipcache_v2\ntime=2026-07-20T04:11:55.905865735Z level=info msg=\"Devices changed\" module=agent.datapath.devices-controller devices=[bpfbench0]\ntime=2026-07-20T04:11:55.905962451Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"backgroundSync (manager.(*manager).backgroundSync)\" duration=1.608\u00b5s\ntime=2026-07-20T04:11:55.905994382Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), ::1 (primary)\" device=*\ntime=2026-07-20T04:11:55.906015279Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary, nodeport)\" device=bpfbench0\ntime=2026-07-20T04:11:55.90604697Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), ::1 (primary)\" device=*\ntime=2026-07-20T04:11:55.906070322Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"node-address-update (tables.(*nodeAddressController).register.func1.1 (.../datapath/tables/node_address.go:249))\" duration=787ns\ntime=2026-07-20T04:11:55.906081813Z level=info msg=\"Establishing connection to kvstore\" module=agent.infra.kvstore-client backendName=etcd\ntime=2026-07-20T04:11:55.906101221Z level=info msg=\"Creating etcd client\" module=agent.infra.kvstore-client backendName=etcd configPath=\"\" keepAliveHeartbeat=15s keepAliveTimeout=25s rateLimit=20 maxInflight=20 listLimit=256\ntime=2026-07-20T04:11:55.906392134Z level=info msg=\"Connecting to etcd server...\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\"\ntime=2026-07-20T04:11:55.907638618Z level=info msg=\"New lease successfully acquired\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\" leaseID=3423192554104677126 ttl=25s\ntime=2026-07-20T04:11:55.907695551Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\" prefix=cilium/.heartbeat\ntime=2026-07-20T04:11:55.908062358Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\" prefix=cilium/.heartbeat count=0 revision=1\ntime=2026-07-20T04:11:55.908077214Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\" prefix=cilium/.heartbeat revision=2\ntime=2026-07-20T04:11:55.908138054Z level=info msg=\"Initial etcd connection established\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\"\ntime=2026-07-20T04:11:55.908205856Z level=info msg=\"Connection to kvstore successfully established\" module=agent.infra.kvstore-client backendName=etcd\ntime=2026-07-20T04:11:56.038231605Z level=info msg=\"Start hook executed\" function=\"*iptables.manager.Start (agent.datapath.iptables)\" duration=121.429197ms\ntime=2026-07-20T04:11:57.006491795Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c7a:68ff:febe:4c6 (primary)\" device=*\ntime=2026-07-20T04:11:57.006557297Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary, nodeport), fe80::c7a:68ff:febe:4c6\" device=bpfbench0\ntime=2026-07-20T04:11:57.008366297Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c7a:68ff:febe:4c6 (primary)\" device=*\ntime=2026-07-20T04:11:57.728709202Z level=info msg=\"Start hook executed\" function=\"prefilter.newPreFilter.func1 (.../datapath/prefilter/prefilter.go:258) (agent.datapath.prefilter)\" duration=1.668764127s\ntime=2026-07-20T04:11:57.765282849Z level=info msg=\"Starting IP identity watcher\" module=agent.controlplane.ipcache\ntime=2026-07-20T04:11:57.76531521Z level=info msg=\"Starting restartable watch store\" module=agent.infra.kvstore-utils clusterName=default prefix=cilium/state/ip/v1/default/\ntime=2026-07-20T04:11:57.765353539Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\" prefix=cilium/state/ip/v1/default/\ntime=2026-07-20T04:11:57.765806236Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\" prefix=cilium/state/ip/v1/default/ count=0 revision=3\ntime=2026-07-20T04:11:57.765837097Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\" prefix=cilium/state/ip/v1/default/ revision=4\ntime=2026-07-20T04:11:57.924306406Z level=info msg=\"Start hook executed\" function=\"nat.init.func1.1 (.../maps/nat/cell.go:44) (agent.datapath.maps.nat-maps)\" duration=100.052313ms\ntime=2026-07-20T04:11:58.123448034Z level=info msg=\"Start hook executed\" function=\"ctmap.newCTMaps.func1 (.../maps/ctmap/cell.go:42) (agent.datapath.maps.ct-map)\" duration=199.097318ms\ntime=2026-07-20T04:11:58.126903585Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"mtu-updater (mtu.(*MTUManager).Updater)\" duration=1.262\u00b5s\ntime=2026-07-20T04:11:58.140093784Z level=info msg=\"BPF host routing requires kube-proxy-replacement. Falling back to legacy host routing (enable-host-legacy-routing=true).\" module=agent.controlplane.kube-proxy-replacement-init\ntime=2026-07-20T04:11:58.140105358Z level=info msg=\"kube-proxy replacement starting with the following config\" module=agent.controlplane.kube-proxy-replacement-init kprConfiguration=\"{KubeProxyReplacement:false EnableSocketLB:false}\"\ntime=2026-07-20T04:11:58.140130782Z level=info msg=\"Datapath signal listener running\" module=agent.controlplane.signal\ntime=2026-07-20T04:11:58.140352442Z level=info msg=\"Starting connection tracking garbage collector\" module=agent.datapath.maps.ct-nat-map-gc\ntime=2026-07-20T04:11:58.141650367Z level=info msg=\"Restored node IDs from the BPF map\" module=agent.datapath count=0\ntime=2026-07-20T04:11:58.141675952Z level=info msg=\"Removing stale endpoint interfaces\" module=agent.controlplane.endpoint-restore\ntime=2026-07-20T04:11:58.141782687Z level=info msg=\"Reading old endpoints...\" module=agent.controlplane.endpoint-restore\ntime=2026-07-20T04:11:58.141821927Z level=info msg=\"No old endpoints found.\" module=agent.controlplane.endpoint-restore\ntime=2026-07-20T04:11:58.141853765Z level=info msg=\"Initializing daemon\" module=agent.controlplane.daemon\ntime=2026-07-20T04:11:58.14186236Z level=info msg=\"Direct routing device detected\" module=agent.controlplane.daemon direct-routing-device=bpfbench0\ntime=2026-07-20T04:11:58.141967732Z level=info msg=\"Initializing node addressing\" module=agent.controlplane.ipam\ntime=2026-07-20T04:11:58.141982187Z level=info msg=\"Initializing IPAM\" module=agent.controlplane.ipam mode=cluster-pool v4Prefix=10.244.0.0/24 v6Prefix=<nil>\ntime=2026-07-20T04:11:58.14199521Z level=info msg=\"Restoring endpoints...\" module=agent.controlplane.endpoint-restore\ntime=2026-07-20T04:11:58.142074487Z level=info msg=\"Endpoints restored\" module=agent.controlplane.endpoint-restore restored=0 failed=0\ntime=2026-07-20T04:11:58.142326976Z level=info msg=\"Node updated\" module=agent.controlplane.node-manager clusterName=default nodeName=virtme-ng spi=0\ntime=2026-07-20T04:11:58.142334824Z level=info msg=\"Adding local node to cluster\" module=agent.controlplane.nodediscovery node=virtme-ng\ntime=2026-07-20T04:11:58.142395432Z level=info msg=\"Initializing identity allocator\" module=agent.controlplane.identity.identity\ntime=2026-07-20T04:11:58.142401399Z level=info msg=\"Allocating identities between range\" module=agent.controlplane.identity.identity min=256 max=65535 clusterID=0\ntime=2026-07-20T04:11:58.142408191Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\" prefix=cilium/state/nodes/v1\ntime=2026-07-20T04:11:58.142593513Z level=info msg=\"Validating configured node address ranges\" module=agent.controlplane.daemon\ntime=2026-07-20T04:11:58.142604862Z level=info msg=\"Daemon initialization completed\" module=agent.controlplane.daemon\ntime=2026-07-20T04:11:58.142743006Z level=info msg=\"Hubble server is disabled\" module=agent.controlplane.hubble\ntime=2026-07-20T04:11:58.142758772Z level=info msg=\"Serving cilium API at unix:///var/tmp/ciliumrunner_gzjxb6i4/state/cilium.sock\" module=agent.infra.cilium-api-server\ntime=2026-07-20T04:11:58.142858291Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\" prefix=cilium/state/nodes/v1 count=0 revision=3\ntime=2026-07-20T04:11:58.142880157Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\" prefix=cilium/state/nodes/v1 revision=4\ntime=2026-07-20T04:11:58.143131549Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"nat-stats (stats.(*Stats).countNat)\" duration=671ns\ntime=2026-07-20T04:11:58.143494314Z level=info msg=\"Regenerating restored endpoints\" module=agent.controlplane.endpoint-restore restored=0\ntime=2026-07-20T04:11:58.143698352Z level=info msg=\"Processing queued deletion requests\" module=agent.controlplane.endpoint-api lenEndpoints=0\ntime=2026-07-20T04:11:58.143699295Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"reconcile (reconciler.Register[...].func2 (.../statedb/reconciler/builder.go:84))\" duration=2.069\u00b5s\ntime=2026-07-20T04:11:58.14373143Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"refresh (reconciler.Register[...].func3 (.../statedb/reconciler/builder.go:86))\" duration=9.239\u00b5s\ntime=2026-07-20T04:11:58.143811565Z level=info msg=\"Fence waiting\" module=agent.controlplane.endpoint-api name=cni-deletion-queue remaining=1\ntime=2026-07-20T04:11:58.143820939Z level=info msg=\"Fence done\" module=agent.controlplane.endpoint-api name=cni-deletion-queue remaining=1 duration=12.072\u00b5s\ntime=2026-07-20T04:11:58.14382625Z level=info msg=\"Finished regenerating restored endpoints\" module=agent.controlplane.endpoint-restore regenerated=0 failed=0 total=0\ntime=2026-07-20T04:11:58.143944401Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=true\ntime=2026-07-20T04:11:58.146232324Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\" prefix=cilium/state/identities/v1/id\ntime=2026-07-20T04:11:58.146370196Z level=info msg=\"New lease successfully acquired\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\" leaseID=3423192554104677134 ttl=15m0s\ntime=2026-07-20T04:11:58.146527687Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\" prefix=cilium/state/identities/v1/id count=0 revision=3\ntime=2026-07-20T04:11:58.146589792Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\" prefix=cilium/state/identities/v1/id revision=4\ntime=2026-07-20T04:11:58.146600603Z level=info msg=\"Shell listening\" module=agent.infra.shell socket=/var/run/cilium/shell.sock\ntime=2026-07-20T04:11:58.146533332Z level=info msg=\"initial gc of ct and nat maps completed\" module=agent.datapath.maps.ct-nat-map-gc duration=2.589535ms\ntime=2026-07-20T04:11:58.146549749Z level=info msg=\"Initial scan of connection tracking completed, starting ctmap pressure metrics controller\" module=agent.datapath.maps.ct-nat-map-gc\ntime=2026-07-20T04:11:58.146679262Z level=info msg=\"Starting healthz status API server\" module=agent.infra.agent-healthz address=127.0.0.1:9879\ntime=2026-07-20T04:11:58.146838759Z level=info msg=\"Creating host endpoint\" module=agent.controlplane.agent-infra-endpoints\ntime=2026-07-20T04:11:58.146998126Z level=info msg=\"New endpoint\" k8sPodName=/ ipv4=\"\" containerID=\"\" ipv6=\"\" containerInterface=\"\" endpointID=503 ciliumEndpointName=/ subsys=endpoint\ntime=2026-07-20T04:11:58.147081156Z level=info msg=\"Resolving identity labels (blocking)\" k8sPodName=/ ipv4=\"\" containerID=\"\" ipv6=\"\" containerInterface=\"\" endpointID=503 ciliumEndpointName=/ subsys=endpoint identityLabels=reserved:host\ntime=2026-07-20T04:11:58.147118696Z level=info msg=\"Identity of endpoint changed\" k8sPodName=/ ipv4=\"\" containerID=\"\" ipv6=\"\" containerInterface=\"\" endpointID=503 ciliumEndpointName=/ subsys=endpoint new-identity=1 old-identity=\"no identity\" identityLabels=\"map[host:{Key:host Value: Source:reserved cidr:<nil>}]\"\ntime=2026-07-20T04:11:58.147741945Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"dns-garbage-collector-job (namemanager.(*manager).doGC)\" duration=1.976\u00b5s\ntime=2026-07-20T04:11:58.148133031Z level=info msg=\"Removed stale bpf map\" module=agent.datapath.map-sweeper file-path=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/tc/globals/cilium_cidr_v6_dyn\ntime=2026-07-20T04:11:58.148148187Z level=info msg=\"Removed stale bpf map\" module=agent.datapath.map-sweeper file-path=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/tc/globals/cilium_cidr_v6_fix\ntime=2026-07-20T04:11:58.148157941Z level=info msg=\"Removed stale bpf map\" module=agent.datapath.map-sweeper file-path=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/tc/globals/cilium_lb4_maglev\ntime=2026-07-20T04:11:58.206033955Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c7a:68ff:febe:4c6 (primary)\" device=*\ntime=2026-07-20T04:11:58.290682886Z level=info msg=\"Start hook executed\" function=\"datapath.initDatapath.func1 (pkg/datapath/cells.go:175) (agent.datapath)\" duration=147.090794ms\ntime=2026-07-20T04:11:58.291390136Z level=info msg=\"Started hive\" duration=2.391062787s\ntime=2026-07-20T04:11:58.406962851Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c7a:68ff:febe:4c6 (primary)\" device=*\ntime=2026-07-20T04:11:58.483505272Z level=info msg=\"Create endpoint request\" module=agent.controlplane.endpoint-api addressing=\"&{IPv4:10.244.0.91 IPv4ExpirationUUID: IPv4PoolName:default IPv6: IPv6ExpirationUUID: IPv6PoolName:}\" containerID=bpfbench-cepa containerInterface=eth0 datapathConfiguration=\"&{DisableSipVerification:false ExternalIpam:false InstallEndpointRoute:false RequireArpPassthrough:false RequireEgressProg:false RequireRouting:<nil>}\" interface=lxcbench0 k8sPodName=/ k8sUID=\"\" labels=\"[container:app=bpfbench-cilium container:instance=a]\" sync-build=true\ntime=2026-07-20T04:11:58.483612968Z level=info msg=\"New endpoint\" ipv6=\"\" endpointID=466 k8sPodName=/ containerInterface=\"\" ciliumEndpointName=/ containerID=bpfbench-c ipv4=10.244.0.91 subsys=endpoint\ntime=2026-07-20T04:11:58.483650006Z level=info msg=\"Resolving identity labels (blocking)\" ipv6=\"\" endpointID=466 k8sPodName=/ containerInterface=\"\" ciliumEndpointName=/ containerID=bpfbench-c ipv4=10.244.0.91 subsys=endpoint identityLabels=\"container:app=bpfbench-cilium,container:instance=a\"\ntime=2026-07-20T04:11:58.48634003Z level=info msg=\"Identity of endpoint changed\" ipv6=\"\" endpointID=466 k8sPodName=/ containerInterface=\"\" ciliumEndpointName=/ containerID=bpfbench-c ipv4=10.244.0.91 subsys=endpoint new-identity=20727 old-identity=\"no identity\" identityLabels=\"map[app:{Key:app Value:bpfbench-cilium Source:container cidr:<nil>} instance:{Key:instance Value:a Source:container cidr:<nil>}]\"\ntime=2026-07-20T04:11:58.486376845Z level=info msg=\"Waiting for endpoint to be generated\" ipv6=\"\" endpointID=466 k8sPodName=/ containerInterface=\"\" ciliumEndpointName=/ containerID=bpfbench-c ipv4=10.244.0.91 identity=20727 subsys=endpoint\ntime=2026-07-20T04:11:58.607379186Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c7a:68ff:febe:4c6 (primary)\" device=*\ntime=2026-07-20T04:11:58.607424187Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"10.244.0.209 (primary)\" device=cilium_host\ntime=2026-07-20T04:11:59.15635966Z level=info msg=\"No existing link found for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/cilium/devices/bpfbench0/links/cil_xdp_entry progName=cil_xdp_entry\ntime=2026-07-20T04:11:59.200524811Z level=info msg=\"Program attached using bpf_link\" module=agent.datapath.loader progName=cil_xdp_entry\ntime=2026-07-20T04:11:59.206770922Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c7a:68ff:febe:4c6 (primary)\" device=*\ntime=2026-07-20T04:11:59.206814806Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"10.244.0.209 (primary), fe80::a09d:99ff:fe35:4806\" device=cilium_host\ntime=2026-07-20T04:12:00.307128549Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c7a:68ff:febe:4c6 (primary)\" device=*\ntime=2026-07-20T04:12:00.955320544Z level=info msg=\"Compiled new BPF template\" module=agent.datapath.loader file-path=/var/tmp/ciliumrunner_gzjxb6i4/state/state/templates/8c906907add65bab571ba526e4f81fc6e9c5d626907d7087062528e131307ce3/bpf_host.o BPFCompilationTime=1.466151012s\ntime=2026-07-20T04:12:01.006856381Z level=info msg=\"Compiled new BPF template\" module=agent.datapath.loader file-path=/var/tmp/ciliumrunner_gzjxb6i4/state/state/templates/60cc5131c8b322e7b6d9a15d489addfe2d7b7b37ef21c72f91189a9886b53255/bpf_lxc.o BPFCompilationTime=1.519072419s\ntime=2026-07-20T04:12:01.160570633Z level=info msg=\"Program attached to device using tcx\" module=agent.datapath.loader progName=cil_from_container device=lxcbench0\ntime=2026-07-20T04:12:01.160759191Z level=info msg=\"Reloaded endpoint BPF program\" ipv6=\"\" endpointID=466 k8sPodName=/ containerInterface=\"\" ciliumEndpointName=/ containerID=bpfbench-c ipv4=10.244.0.91 identity=20727 subsys=endpoint\ntime=2026-07-20T04:12:01.160970921Z level=info msg=\"Successful endpoint creation\" ipv6=\"\" endpointID=466 k8sPodName=/ containerInterface=\"\" ciliumEndpointName=/ containerID=bpfbench-c ipv4=10.244.0.91 identity=20727 subsys=endpoint-api\ntime=2026-07-20T04:12:01.220580102Z level=info msg=\"Program attached to device using tcx\" module=agent.datapath.loader progName=cil_to_host device=cilium_host\ntime=2026-07-20T04:12:01.300526966Z level=info msg=\"Program attached to device using tcx\" module=agent.datapath.loader progName=cil_from_host device=cilium_host\ntime=2026-07-20T04:12:01.301992688Z level=info msg=\"Updated link for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/cilium/endpoints/466/links/cil_from_container progName=cil_from_container\ntime=2026-07-20T04:12:01.30216478Z level=info msg=\"Reloaded endpoint BPF program\" ipv6=\"\" endpointID=466 k8sPodName=/ containerInterface=\"\" ciliumEndpointName=/ containerID=bpfbench-c ipv4=10.244.0.91 identity=20727 subsys=endpoint\ntime=2026-07-20T04:12:01.450054874Z level=info msg=\"Program attached to device using tcx\" module=agent.datapath.loader progName=cil_to_host device=cilium_net\ntime=2026-07-20T04:12:01.589863752Z level=info msg=\"Program attached to device using tcx\" module=agent.datapath.loader progName=cil_from_netdev device=bpfbench0\ntime=2026-07-20T04:12:01.606937995Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c7a:68ff:febe:4c6 (primary)\" device=*\ntime=2026-07-20T04:12:01.629849412Z level=info msg=\"Program attached to device using tcx\" module=agent.datapath.loader progName=cil_to_netdev device=bpfbench0\ntime=2026-07-20T04:12:01.630498399Z level=info msg=\"Reloaded endpoint BPF program\" k8sPodName=/ ipv4=\"\" identity=1 containerID=\"\" ipv6=\"\" containerInterface=\"\" endpointID=503 ciliumEndpointName=/ subsys=endpoint\ntime=2026-07-20T04:12:01.640970338Z level=info msg=\"Create endpoint request\" module=agent.controlplane.endpoint-api addressing=\"&{IPv4:10.244.0.162 IPv4ExpirationUUID: IPv4PoolName:default IPv6: IPv6ExpirationUUID: IPv6PoolName:}\" containerID=bpfbench-cepb containerInterface=eth0 datapathConfiguration=\"&{DisableSipVerification:false ExternalIpam:false InstallEndpointRoute:false RequireArpPassthrough:false RequireEgressProg:false RequireRouting:<nil>}\" interface=lxcbench1 k8sPodName=/ k8sUID=\"\" labels=\"[container:app=bpfbench-cilium container:instance=b]\" sync-build=true\ntime=2026-07-20T04:12:01.64106945Z level=info msg=\"New endpoint\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c endpointID=2114 ipv4=10.244.0.162 k8sPodName=/ containerInterface=\"\" subsys=endpoint\ntime=2026-07-20T04:12:01.641104021Z level=info msg=\"Resolving identity labels (blocking)\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c endpointID=2114 ipv4=10.244.0.162 k8sPodName=/ containerInterface=\"\" subsys=endpoint identityLabels=\"container:app=bpfbench-cilium,container:instance=b\"\ntime=2026-07-20T04:12:01.643257178Z level=info msg=\"Identity of endpoint changed\" ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c endpointID=2114 ipv4=10.244.0.162 k8sPodName=/ containerInterface=\"\" subsys=endpoint new-identity=7750 old-identity=\"no identity\" identityLabels=\"map[app:{Key:app Value:bpfbench-cilium Source:container cidr:<nil>} instance:{Key:instance Value:b Source:container cidr:<nil>}]\"\ntime=2026-07-20T04:12:01.643303094Z level=info msg=\"Waiting for endpoint to be generated\" identity=7750 ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c endpointID=2114 ipv4=10.244.0.162 k8sPodName=/ containerInterface=\"\" subsys=endpoint\ntime=2026-07-20T04:12:01.698075316Z level=info msg=\"Updated link for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/cilium/devices/cilium_host/links/cil_to_host progName=cil_to_host\ntime=2026-07-20T04:12:01.698420574Z level=info msg=\"Updated link for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/cilium/devices/cilium_host/links/cil_from_host progName=cil_from_host\ntime=2026-07-20T04:12:01.707080651Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c7a:68ff:febe:4c6 (primary)\" device=*\ntime=2026-07-20T04:12:01.750054573Z level=info msg=\"Program attached to device using tcx\" module=agent.datapath.loader progName=cil_from_container device=lxcbench1\ntime=2026-07-20T04:12:01.750200963Z level=info msg=\"Reloaded endpoint BPF program\" identity=7750 ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c endpointID=2114 ipv4=10.244.0.162 k8sPodName=/ containerInterface=\"\" subsys=endpoint\ntime=2026-07-20T04:12:01.750370802Z level=info msg=\"Successful endpoint creation\" identity=7750 ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c endpointID=2114 ipv4=10.244.0.162 k8sPodName=/ containerInterface=\"\" subsys=endpoint-api\ntime=2026-07-20T04:12:32.693441006Z level=warn msg=\"Lease expired\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:48833] config=\"\" leaseID=3423192554104677126\ntime=2026-07-20T04:13:03.639805824Z level=info msg=\"Updated link for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/cilium/devices/cilium_net/links/cil_to_host progName=cil_to_host\ntime=2026-07-20T04:13:03.714461049Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c7a:68ff:febe:4c6 (primary)\" device=*\ntime=2026-07-20T04:13:03.715623808Z level=info msg=\"Updated link for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/cilium/devices/bpfbench0/links/cil_from_netdev progName=cil_from_netdev\ntime=2026-07-20T04:13:03.715893302Z level=info msg=\"Updated link for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/cilium/devices/bpfbench0/links/cil_to_netdev progName=cil_to_netdev\ntime=2026-07-20T04:13:03.716112269Z level=info msg=\"Reloaded endpoint BPF program\" k8sPodName=/ ipv4=\"\" identity=1 containerID=\"\" ipv6=\"\" containerInterface=\"\" endpointID=503 ciliumEndpointName=/ subsys=endpoint\ntime=2026-07-20T04:13:03.90669747Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c7a:68ff:febe:4c6 (primary)\" device=*\ntime=2026-07-20T04:13:04.370264944Z level=info msg=\"Updated link for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/cilium/devices/bpfbench0/links/cil_xdp_entry progName=cil_xdp_entry\ntime=2026-07-20T04:13:04.72690656Z level=info msg=\"Updated link for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/cilium/endpoints/2114/links/cil_from_container progName=cil_from_container\ntime=2026-07-20T04:13:04.727064136Z level=info msg=\"Reloaded endpoint BPF program\" identity=7750 ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c endpointID=2114 ipv4=10.244.0.162 k8sPodName=/ containerInterface=\"\" subsys=endpoint\ntime=2026-07-20T04:13:04.72718707Z level=info msg=\"Updated link for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/cilium/endpoints/466/links/cil_from_container progName=cil_from_container\ntime=2026-07-20T04:13:04.727312648Z level=info msg=\"Reloaded endpoint BPF program\" ipv6=\"\" endpointID=466 k8sPodName=/ containerInterface=\"\" ciliumEndpointName=/ containerID=bpfbench-c ipv4=10.244.0.91 identity=20727 subsys=endpoint\ntime=2026-07-20T04:13:04.739049025Z level=info msg=\"Updated link for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/cilium/devices/cilium_host/links/cil_to_host progName=cil_to_host\ntime=2026-07-20T04:13:04.739340945Z level=info msg=\"Updated link for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/cilium/devices/cilium_host/links/cil_from_host progName=cil_from_host\ntime=2026-07-20T04:13:04.801908405Z level=info msg=\"Updated link for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/cilium/devices/cilium_net/links/cil_to_host progName=cil_to_host\ntime=2026-07-20T04:13:04.950242878Z level=info msg=\"Updated link for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/cilium/devices/bpfbench0/links/cil_from_netdev progName=cil_from_netdev\ntime=2026-07-20T04:13:04.950639247Z level=info msg=\"Updated link for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_gzjxb6i4/bpffs/cilium/devices/bpfbench0/links/cil_to_netdev progName=cil_to_netdev\ntime=2026-07-20T04:13:04.950841803Z level=info msg=\"Reloaded endpoint BPF program\" k8sPodName=/ ipv4=\"\" identity=1 containerID=\"\" ipv6=\"\" containerInterface=\"\" endpointID=503 ciliumEndpointName=/ subsys=endpoint\ntime=2026-07-20T04:13:05.545714354Z level=info msg=\"Delete endpoint request\" module=agent.controlplane.endpoint-api containerID=bpfbench-c endpointID=2114 k8sPodName=\"\" k8sNamespace=\"\"\ntime=2026-07-20T04:13:05.54640387Z level=info msg=\"Released last local use of key, invoking global release\" module=agent.controlplane.identity.identity subsys=kvstorebackend key=\"[container:app=bpfbench-cilium container:instance=b]\"\ntime=2026-07-20T04:13:05.707347906Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::c7a:68ff:febe:4c6 (primary)\" device=*\ntime=2026-07-20T04:13:05.982301921Z level=info msg=\"Removed endpoint\" identity=7750 ipv6=\"\" ciliumEndpointName=/ containerID=bpfbench-c endpointID=2114 ipv4=10.244.0.162 k8sPodName=/ containerInterface=\"\" subsys=endpoint\ntime=2026-07-20T04:13:05.982952697Z level=info msg=\"Delete endpoint request\" module=agent.controlplane.endpoint-api containerID=bpfbench-c endpointID=466 k8sPodName=\"\" k8sNamespace=\"\"\ntime=2026-07-20T04:13:05.984044873Z level=info msg=\"Released last local use of key, invoking global release\" module=agent.controlplane.identity.identity subsys=kvstorebackend key=\"[container:app=bpfbench-cilium container:instance=a]\""
+    }
+  },
+  "selected_workload": "cilium_endpoint_pktgen",
+  "status": "error"
+}
