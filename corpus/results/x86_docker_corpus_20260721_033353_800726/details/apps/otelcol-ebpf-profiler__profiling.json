@@ -1,0 +1,2897 @@
+{
+  "app": "otelcol-ebpf-profiler/profiling",
+  "baseline": {
+    "bpf": {
+      "43965": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 43965,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "43966": {
+        "bytes_jited": 184,
+        "bytes_xlated": 304,
+        "id": 43966,
+        "name": "read_task_struc",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "43967": {
+        "bytes_jited": 3615,
+        "bytes_xlated": 6112,
+        "id": 43967,
+        "name": "perf_unwind_sto",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43968": {
+        "bytes_jited": 21863,
+        "bytes_xlated": 37024,
+        "id": 43968,
+        "name": "perf_unwind_nat",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43969": {
+        "bytes_jited": 18419,
+        "bytes_xlated": 28080,
+        "id": 43969,
+        "name": "perf_unwind_hot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43970": {
+        "bytes_jited": 18244,
+        "bytes_xlated": 29624,
+        "id": 43970,
+        "name": "perf_unwind_per",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43971": {
+        "bytes_jited": 14978,
+        "bytes_xlated": 24736,
+        "id": 43971,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43972": {
+        "bytes_jited": 19585,
+        "bytes_xlated": 33192,
+        "id": 43972,
+        "name": "perf_unwind_pyt",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43973": {
+        "bytes_jited": 17820,
+        "bytes_xlated": 30264,
+        "id": 43973,
+        "name": "perf_unwind_rub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43974": {
+        "bytes_jited": 20210,
+        "bytes_xlated": 33448,
+        "id": 43974,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43975": {
+        "bytes_jited": 22792,
+        "bytes_xlated": 37440,
+        "id": 43975,
+        "name": "perf_unwind_dot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43976": {
+        "bytes_jited": 1569,
+        "bytes_xlated": 2504,
+        "id": 43976,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43977": {
+        "bytes_jited": 789,
+        "bytes_xlated": 1320,
+        "id": 43977,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "43978": {
+        "bytes_jited": 3795,
+        "bytes_xlated": 5888,
+        "id": 43978,
+        "name": "native_tracer_e",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43979": {
+        "bytes_jited": 3659,
+        "bytes_xlated": 5696,
+        "id": 43979,
+        "name": "custom__generic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "43980": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 43980,
+        "name": "probe_bpf_perf_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/python3",
+          "-u",
+          "-c",
+          "import os\nimport signal\nimport time\n\ncounter_fd = int(os.environ[\"BPFREJIT_OTEL_COUNTER_FD\"])\nx = 1\nn = 0\n\ndef report_counter(_signum, _frame):\n    payload = f\"counter={n} monotonic_ns={time.monotonic_ns()} sink={x}\\n\"\n    os.write(counter_fd, payload.encode(\"ascii\"))\n\nsignal.signal(signal.SIGUSR1, report_counter)\nos.write(counter_fd, b\"ready\\n\")\nwhile True:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\n"
+        ],
+        "config": {
+          "counter_end": 392231010,
+          "counter_monotonic_ns_end": 199338549795357,
+          "counter_monotonic_ns_start": 199308549664275,
+          "counter_start": 34022020,
+          "loop": "integer_lcg",
+          "ops_total": 358208990,
+          "otel_profile_exporter_delta": {
+            "events": [
+              {
+                "capture_offset_s": 2.181897124,
+                "raw_line": "2026-07-21T03:33:58.873Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 978}",
+                "sample_records": 978
+              },
+              {
+                "capture_offset_s": 7.054270459,
+                "raw_line": "2026-07-21T03:34:03.745Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 15, \"sample records\": 2013}",
+                "sample_records": 2013
+              },
+              {
+                "capture_offset_s": 12.197177163,
+                "raw_line": "2026-07-21T03:34:08.888Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 14, \"sample records\": 3086}",
+                "sample_records": 3086
+              },
+              {
+                "capture_offset_s": 17.759740153,
+                "raw_line": "2026-07-21T03:34:14.450Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 2018}",
+                "sample_records": 2018
+              },
+              {
+                "capture_offset_s": 22.428065584,
+                "raw_line": "2026-07-21T03:34:19.119Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 12, \"sample records\": 1788}",
+                "sample_records": 1788
+              },
+              {
+                "capture_offset_s": 27.604454107,
+                "raw_line": "2026-07-21T03:34:24.295Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 16, \"sample records\": 1623}",
+                "sample_records": 1623
+              }
+            ],
+            "window_duration_s": 30.000257014
+          },
+          "persistent": true,
+          "pid": 324017,
+          "sink_end": 608535175,
+          "sink_start": 2140351677,
+          "specialization_pass": "map_inline",
+          "tool": "python3",
+          "worker_elapsed_s": 30.000131082
+        },
+        "duration_s": 30.000047434994485,
+        "stderr": "",
+        "stdout": "counter=34022020 monotonic_ns=199308549664275 sink=2140351677\ncounter=392231010 monotonic_ns=199338549795357 sink=608535175\n",
+        "workload_name": "otel_map_inline_persistent_python_workload"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "43981": {
+        "bytes_jited": 14978,
+        "bytes_xlated": 24736,
+        "id": 43981,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43982": {
+        "bytes_jited": 789,
+        "bytes_xlated": 1320,
+        "id": 43982,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "43983": {
+        "bytes_jited": 18244,
+        "bytes_xlated": 29624,
+        "id": 43983,
+        "name": "perf_unwind_per",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43984": {
+        "bytes_jited": 1569,
+        "bytes_xlated": 2504,
+        "id": 43984,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43985": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 43985,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "43986": {
+        "bytes_jited": 18419,
+        "bytes_xlated": 28080,
+        "id": 43986,
+        "name": "perf_unwind_hot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43987": {
+        "bytes_jited": 22792,
+        "bytes_xlated": 37440,
+        "id": 43987,
+        "name": "perf_unwind_dot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43988": {
+        "bytes_jited": 21863,
+        "bytes_xlated": 37024,
+        "id": 43988,
+        "name": "perf_unwind_nat",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43989": {
+        "bytes_jited": 20210,
+        "bytes_xlated": 33448,
+        "id": 43989,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43990": {
+        "bytes_jited": 3615,
+        "bytes_xlated": 6112,
+        "id": 43990,
+        "name": "perf_unwind_sto",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43991": {
+        "bytes_jited": 17820,
+        "bytes_xlated": 30264,
+        "id": 43991,
+        "name": "perf_unwind_rub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43992": {
+        "bytes_jited": 3659,
+        "bytes_xlated": 5696,
+        "id": 43992,
+        "name": "custom__generic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "43993": {
+        "bytes_jited": 18894,
+        "bytes_xlated": 31776,
+        "id": 43993,
+        "name": "perf_unwind_pyt",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43994": {
+        "bytes_jited": 184,
+        "bytes_xlated": 304,
+        "id": 43994,
+        "name": "read_task_struc",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "43995": {
+        "bytes_jited": 3795,
+        "bytes_xlated": 5888,
+        "id": 43995,
+        "name": "native_tracer_e",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43996": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 43996,
+        "name": "probe_bpf_perf_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/python3",
+          "-u",
+          "-c",
+          "import os\nimport signal\nimport time\n\ncounter_fd = int(os.environ[\"BPFREJIT_OTEL_COUNTER_FD\"])\nx = 1\nn = 0\n\ndef report_counter(_signum, _frame):\n    payload = f\"counter={n} monotonic_ns={time.monotonic_ns()} sink={x}\\n\"\n    os.write(counter_fd, payload.encode(\"ascii\"))\n\nsignal.signal(signal.SIGUSR1, report_counter)\nos.write(counter_fd, b\"ready\\n\")\nwhile True:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\n"
+        ],
+        "config": {
+          "counter_end": 1224155983,
+          "counter_monotonic_ns_end": 199409247423320,
+          "counter_monotonic_ns_start": 199379247278876,
+          "counter_start": 874368594,
+          "loop": "integer_lcg",
+          "ops_total": 349787389,
+          "otel_profile_exporter_delta": {
+            "events": [
+              {
+                "capture_offset_s": 0.811312034,
+                "raw_line": "2026-07-21T03:35:08.200Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 2245}",
+                "sample_records": 2245
+              },
+              {
+                "capture_offset_s": 6.250370412,
+                "raw_line": "2026-07-21T03:35:13.639Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 16, \"sample records\": 1506}",
+                "sample_records": 1506
+              },
+              {
+                "capture_offset_s": 11.216180462,
+                "raw_line": "2026-07-21T03:35:18.604Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 19, \"sample records\": 3371}",
+                "sample_records": 3371
+              },
+              {
+                "capture_offset_s": 16.170133589,
+                "raw_line": "2026-07-21T03:35:23.558Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 1404}",
+                "sample_records": 1404
+              },
+              {
+                "capture_offset_s": 20.728041484,
+                "raw_line": "2026-07-21T03:35:28.116Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 16, \"sample records\": 995}",
+                "sample_records": 995
+              },
+              {
+                "capture_offset_s": 26.677326834,
+                "raw_line": "2026-07-21T03:35:34.066Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 18, \"sample records\": 1292}",
+                "sample_records": 1292
+              }
+            ],
+            "window_duration_s": 30.000242744
+          },
+          "persistent": true,
+          "pid": 324017,
+          "sink_end": 2126635736,
+          "sink_start": 1376112535,
+          "specialization_pass": "map_inline",
+          "tool": "python3",
+          "worker_elapsed_s": 30.000144444
+        },
+        "duration_s": 30.000077581004007,
+        "stderr": "",
+        "stdout": "counter=874368594 monotonic_ns=199379247278876 sink=1376112535\ncounter=1224155983 monotonic_ns=199409247423320 sink=2126635736\n",
+        "workload_name": "otel_map_inline_persistent_python_workload"
+      }
+    ]
+  },
+  "rejit_result": {
+    "deployment_specialization": {
+      "enabled_passes": [
+        "map_inline"
+      ],
+      "pmu_collection": {
+        "command": [
+          "bpfprof",
+          "--prog-ids",
+          "43965,43966,43967,43968,43969,43970,43971,43972,43973,43974,43975,43976,43977,43978,43979,43980",
+          "--per-site",
+          "--no-run-stats",
+          "--duration",
+          "30000ms",
+          "--sample-period",
+          "1000000",
+          "--source-bytecode-map",
+          "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260721_033353_800726/details/deployment-specialization/otelcol-ebpf-profiler__profiling/control/source-bytecode-map.json",
+          "--output-dir",
+          "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260721_033353_800726/details/deployment-specialization/otelcol-ebpf-profiler__profiling/raw",
+          "--ready-file",
+          "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260721_033353_800726/details/deployment-specialization/otelcol-ebpf-profiler__profiling/control/bpfprof.ready",
+          "--cgroup",
+          "/sys/fs/cgroup/system.slice/docker-d4b1e3e1def580b4fbddb840b31d22226702aec2ac22f91f8fa976d33a471ce3.scope",
+          "--tail-target-key-map",
+          "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260721_033353_800726/details/deployment-specialization/otelcol-ebpf-profiler__profiling/control/tail-target-key-map.json",
+          "--tail-only"
+        ],
+        "duration_ms": 30000,
+        "run_stats": false,
+        "sample_period": 1000000,
+        "system_wide": false
+      },
+      "prog_array_slots_before": [
+        {
+          "key": 0,
+          "map_id": 50134,
+          "prog_id": 43967,
+          "shim_pid": 324018
+        },
+        {
+          "key": 1,
+          "map_id": 50134,
+          "prog_id": 43968,
+          "shim_pid": 324018
+        },
+        {
+          "key": 2,
+          "map_id": 50134,
+          "prog_id": 43969,
+          "shim_pid": 324018
+        },
+        {
+          "key": 3,
+          "map_id": 50134,
+          "prog_id": 43970,
+          "shim_pid": 324018
+        },
+        {
+          "key": 4,
+          "map_id": 50134,
+          "prog_id": 43972,
+          "shim_pid": 324018
+        },
+        {
+          "key": 5,
+          "map_id": 50134,
+          "prog_id": 43971,
+          "shim_pid": 324018
+        },
+        {
+          "key": 6,
+          "map_id": 50134,
+          "prog_id": 43973,
+          "shim_pid": 324018
+        },
+        {
+          "key": 7,
+          "map_id": 50134,
+          "prog_id": 43974,
+          "shim_pid": 324018
+        },
+        {
+          "key": 8,
+          "map_id": 50134,
+          "prog_id": 43975,
+          "shim_pid": 324018
+        },
+        {
+          "key": 9,
+          "map_id": 50134,
+          "prog_id": 43976,
+          "shim_pid": 324018
+        }
+      ],
+      "programs_before": [
+        {
+          "branch_profile_hash": "873c32c9e7033afd",
+          "bytecode_path": "/tmp/bpfrejit_324018_7e4864ff1af3e9d4.bpf",
+          "hash": "7e4864ff1af3e9d4",
+          "id": 43965,
+          "insn_cnt": 6,
+          "name": "",
+          "policy_hash": "7e4864ff1af3e9d4",
+          "shim_pid": 324018,
+          "type": 2
+        },
+        {
+          "branch_profile_hash": "2655369bff269423",
+          "bytecode_path": "/tmp/bpfrejit_324018_97c62c0e60ca9dc0.bpf",
+          "hash": "97c62c0e60ca9dc0",
+          "id": 43966,
+          "insn_cnt": 56,
+          "name": "read_task_struc",
+          "policy_hash": "7418639c245bfba1",
+          "shim_pid": 324018,
+          "type": 17
+        },
+        {
+          "branch_profile_hash": "e2b9b48a9276dd71",
+          "bytecode_path": "/tmp/bpfrejit_324018_eef2fe305446b42d.bpf",
+          "hash": "eef2fe305446b42d",
+          "id": 43967,
+          "insn_cnt": 1631,
+          "name": "perf_unwind_sto",
+          "policy_hash": "e13bc0dae1ea26b0",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "6c108a02ba85e3c0",
+          "bytecode_path": "/tmp/bpfrejit_324018_85467bfee47a580f.bpf",
+          "hash": "85467bfee47a580f",
+          "id": 43968,
+          "insn_cnt": 6972,
+          "name": "perf_unwind_nat",
+          "policy_hash": "b639766e5dc5968d",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "2dd5bb9ce437e41a",
+          "bytecode_path": "/tmp/bpfrejit_324018_5de809381f84f278.bpf",
+          "hash": "5de809381f84f278",
+          "id": 43969,
+          "insn_cnt": 7593,
+          "name": "perf_unwind_hot",
+          "policy_hash": "94e58d62a0ad3a5c",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "c7aba7a40cbde3d0",
+          "bytecode_path": "/tmp/bpfrejit_324018_02712692696cdbe6.bpf",
+          "hash": "02712692696cdbe6",
+          "id": 43970,
+          "insn_cnt": 7475,
+          "name": "perf_unwind_per",
+          "policy_hash": "bceebe32b6a28bb9",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "5fd36b48fa2a170d",
+          "bytecode_path": "/tmp/bpfrejit_324018_12d1799f997e2e7c.bpf",
+          "hash": "12d1799f997e2e7c",
+          "id": 43971,
+          "insn_cnt": 6899,
+          "name": "perf_unwind_php",
+          "policy_hash": "856bb507fc8fe709",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "1cf3b583ae514ba7",
+          "bytecode_path": "/tmp/bpfrejit_324018_580c215e25b378eb.bpf",
+          "hash": "580c215e25b378eb",
+          "id": 43972,
+          "insn_cnt": 5894,
+          "name": "perf_unwind_pyt",
+          "policy_hash": "f2b5b11afb620097",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "6006994c440724ea",
+          "bytecode_path": "/tmp/bpfrejit_324018_e4da0c8c919183f6.bpf",
+          "hash": "e4da0c8c919183f6",
+          "id": 43973,
+          "insn_cnt": 5458,
+          "name": "perf_unwind_rub",
+          "policy_hash": "acdb44a24c870dd1",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "c17cfa0dbdd4cbb6",
+          "bytecode_path": "/tmp/bpfrejit_324018_4aac61030d1f0108.bpf",
+          "hash": "4aac61030d1f0108",
+          "id": 43974,
+          "insn_cnt": 7817,
+          "name": "perf_unwind_v8",
+          "policy_hash": "607c8cddc3bd4b36",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "a56248526f426ab5",
+          "bytecode_path": "/tmp/bpfrejit_324018_8e8be87844c1625d.bpf",
+          "hash": "8e8be87844c1625d",
+          "id": 43975,
+          "insn_cnt": 7974,
+          "name": "perf_unwind_dot",
+          "policy_hash": "9c9e7cdf3616ae88",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "6dcc07923c23da8f",
+          "bytecode_path": "/tmp/bpfrejit_324018_162b91c381ff7d23.bpf",
+          "hash": "162b91c381ff7d23",
+          "id": 43976,
+          "insn_cnt": 683,
+          "name": "perf_go_labels",
+          "policy_hash": "7f1efd965742f1d6",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "6f10f2d794afbdb0",
+          "bytecode_path": "/tmp/bpfrejit_324018_437d3ce19ac8abbf.bpf",
+          "hash": "437d3ce19ac8abbf",
+          "id": 43977,
+          "insn_cnt": 283,
+          "name": "tracepoint__sch",
+          "policy_hash": "84dad4823fb581cd",
+          "shim_pid": 324018,
+          "type": 5
+        },
+        {
+          "branch_profile_hash": "ee07a6be2f6cb8f9",
+          "bytecode_path": "/tmp/bpfrejit_324018_0d12091e0b958631.bpf",
+          "hash": "0d12091e0b958631",
+          "id": 43978,
+          "insn_cnt": 1322,
+          "name": "native_tracer_e",
+          "policy_hash": "82df1485f3ede153",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "43bc6895cabe2bd5",
+          "bytecode_path": "/tmp/bpfrejit_324018_4557f70f69ecf898.bpf",
+          "hash": "4557f70f69ecf898",
+          "id": 43979,
+          "insn_cnt": 1253,
+          "name": "custom__generic",
+          "policy_hash": "1d4b19e3e8cb7829",
+          "shim_pid": 324018,
+          "type": 2
+        },
+        {
+          "branch_profile_hash": "4fa0771bcdb0ef13",
+          "bytecode_path": "/tmp/bpfrejit_324018_58255400910d7827.bpf",
+          "hash": "58255400910d7827",
+          "id": 43980,
+          "insn_cnt": 2,
+          "name": "probe_bpf_perf_",
+          "policy_hash": "58255400910d7827",
+          "shim_pid": 324018,
+          "type": 2
+        }
+      ],
+      "raw_activity_profiles": {
+        "43965.json": {
+          "branch_instructions": 0,
+          "branch_miss_rate": 0.0,
+          "branch_misses": 0,
+          "duration_ms": 30000,
+          "per_site": {},
+          "prog_id": 43965,
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "tail_call_sites": {}
+        },
+        "43966.json": {
+          "branch_instructions": 0,
+          "branch_miss_rate": 0.0,
+          "branch_misses": 0,
+          "duration_ms": 30000,
+          "per_site": {},
+          "prog_id": 43966,
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "tail_call_sites": {}
+        },
+        "43967.json": {
+          "branch_instructions": 0,
+          "branch_miss_rate": 0.0,
+          "branch_misses": 0,
+          "duration_ms": 30000,
+          "per_site": {},
+          "prog_id": 43967,
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "tail_call_sites": {}
+        },
+        "43968.json": {
+          "branch_instructions": 0,
+          "branch_miss_rate": 0.0,
+          "branch_misses": 0,
+          "duration_ms": 30000,
+          "per_site": {},
+          "prog_id": 43968,
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "tail_call_sites": {
+            "6761": {
+              "key_counts": {
+                "0": 1
+              },
+              "observations": 1,
+              "pid_key_counts": {
+                "324017": {
+                  "0": 1
+                }
+              },
+              "tid_key_counts": {
+                "324017": {
+                  "0": 1
+                }
+              }
+            }
+          }
+        },
+        "43969.json": {
+          "branch_instructions": 0,
+          "branch_miss_rate": 0.0,
+          "branch_misses": 0,
+          "duration_ms": 30000,
+          "per_site": {},
+          "prog_id": 43969,
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "tail_call_sites": {}
+        },
+        "43970.json": {
+          "branch_instructions": 0,
+          "branch_miss_rate": 0.0,
+          "branch_misses": 0,
+          "duration_ms": 30000,
+          "per_site": {},
+          "prog_id": 43970,
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "tail_call_sites": {}
+        },
+        "43971.json": {
+          "branch_instructions": 0,
+          "branch_miss_rate": 0.0,
+          "branch_misses": 0,
+          "duration_ms": 30000,
+          "per_site": {},
+          "prog_id": 43971,
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "tail_call_sites": {}
+        },
+        "43972.json": {
+          "branch_instructions": 0,
+          "branch_miss_rate": 0.0,
+          "branch_misses": 0,
+          "duration_ms": 30000,
+          "per_site": {},
+          "prog_id": 43972,
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "tail_call_sites": {
+            "5861": {
+              "key_counts": {
+                "1": 4
+              },
+              "observations": 4,
+              "pid_key_counts": {
+                "324017": {
+                  "1": 4
+                }
+              },
+              "tid_key_counts": {
+                "324017": {
+                  "1": 4
+                }
+              }
+            }
+          }
+        },
+        "43973.json": {
+          "branch_instructions": 0,
+          "branch_miss_rate": 0.0,
+          "branch_misses": 0,
+          "duration_ms": 30000,
+          "per_site": {},
+          "prog_id": 43973,
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "tail_call_sites": {}
+        },
+        "43974.json": {
+          "branch_instructions": 0,
+          "branch_miss_rate": 0.0,
+          "branch_misses": 0,
+          "duration_ms": 30000,
+          "per_site": {},
+          "prog_id": 43974,
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "tail_call_sites": {}
+        },
+        "43975.json": {
+          "branch_instructions": 0,
+          "branch_miss_rate": 0.0,
+          "branch_misses": 0,
+          "duration_ms": 30000,
+          "per_site": {},
+          "prog_id": 43975,
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "tail_call_sites": {}
+        },
+        "43976.json": {
+          "branch_instructions": 0,
+          "branch_miss_rate": 0.0,
+          "branch_misses": 0,
+          "duration_ms": 30000,
+          "per_site": {},
+          "prog_id": 43976,
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "tail_call_sites": {}
+        },
+        "43977.json": {
+          "branch_instructions": 0,
+          "branch_miss_rate": 0.0,
+          "branch_misses": 0,
+          "duration_ms": 30000,
+          "per_site": {},
+          "prog_id": 43977,
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "tail_call_sites": {}
+        },
+        "43978.json": {
+          "branch_instructions": 0,
+          "branch_miss_rate": 0.0,
+          "branch_misses": 0,
+          "duration_ms": 30000,
+          "per_site": {},
+          "prog_id": 43978,
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "tail_call_sites": {
+            "287": {
+              "key_counts": {
+                "1": 2,
+                "4": 1
+              },
+              "observations": 3,
+              "pid_key_counts": {
+                "324017": {
+                  "1": 2,
+                  "4": 1
+                }
+              },
+              "tid_key_counts": {
+                "324017": {
+                  "1": 2,
+                  "4": 1
+                }
+              }
+            }
+          }
+        },
+        "43979.json": {
+          "branch_instructions": 0,
+          "branch_miss_rate": 0.0,
+          "branch_misses": 0,
+          "duration_ms": 30000,
+          "per_site": {},
+          "prog_id": 43979,
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "tail_call_sites": {}
+        },
+        "43980.json": {
+          "branch_instructions": 0,
+          "branch_miss_rate": 0.0,
+          "branch_misses": 0,
+          "duration_ms": 30000,
+          "per_site": {},
+          "prog_id": 43980,
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "tail_call_sites": {}
+        }
+      },
+      "training_workload": {
+        "command": [
+          "/usr/bin/python3",
+          "-u",
+          "-c",
+          "import os\nimport signal\nimport time\n\ncounter_fd = int(os.environ[\"BPFREJIT_OTEL_COUNTER_FD\"])\nx = 1\nn = 0\n\ndef report_counter(_signum, _frame):\n    payload = f\"counter={n} monotonic_ns={time.monotonic_ns()} sink={x}\\n\"\n    os.write(counter_fd, payload.encode(\"ascii\"))\n\nsignal.signal(signal.SIGUSR1, report_counter)\nos.write(counter_fd, b\"ready\\n\")\nwhile True:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\n"
+        ],
+        "config": {
+          "counter_end": 752556554,
+          "counter_monotonic_ns_end": 199369016068323,
+          "counter_monotonic_ns_start": 199339015965953,
+          "counter_start": 397784128,
+          "loop": "integer_lcg",
+          "ops_total": 354772426,
+          "otel_profile_exporter_delta": {
+            "events": [
+              {
+                "capture_offset_s": 2.954329608,
+                "raw_line": "2026-07-21T03:34:30.111Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 15, \"sample records\": 2091}",
+                "sample_records": 2091
+              },
+              {
+                "capture_offset_s": 7.088014677,
+                "raw_line": "2026-07-21T03:34:34.245Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 1446}",
+                "sample_records": 1446
+              },
+              {
+                "capture_offset_s": 12.484596074,
+                "raw_line": "2026-07-21T03:34:39.642Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 1790}",
+                "sample_records": 1790
+              },
+              {
+                "capture_offset_s": 17.492629215,
+                "raw_line": "2026-07-21T03:34:44.650Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 14, \"sample records\": 707}",
+                "sample_records": 707
+              },
+              {
+                "capture_offset_s": 21.712904903,
+                "raw_line": "2026-07-21T03:34:48.870Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 11, \"sample records\": 1256}",
+                "sample_records": 1256
+              },
+              {
+                "capture_offset_s": 27.142092355,
+                "raw_line": "2026-07-21T03:34:54.299Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 1406}",
+                "sample_records": 1406
+              }
+            ],
+            "window_duration_s": 30.000208777
+          },
+          "persistent": true,
+          "pid": 324017,
+          "sink_end": 1510431711,
+          "sink_start": 2109489601,
+          "specialization_pass": "map_inline",
+          "tool": "python3",
+          "worker_elapsed_s": 30.00010237
+        },
+        "duration_s": 30.00003138501779,
+        "stderr": "",
+        "stdout": "counter=397784128 monotonic_ns=199339015965953 sink=2109489601\ncounter=752556554 monotonic_ns=199369016068323 sink=1510431711\n",
+        "workload_name": "otel_map_inline_persistent_python_workload"
+      },
+      "training_workloads": {
+        "state_observation_pmu": {
+          "command": [
+            "/usr/bin/python3",
+            "-u",
+            "-c",
+            "import os\nimport signal\nimport time\n\ncounter_fd = int(os.environ[\"BPFREJIT_OTEL_COUNTER_FD\"])\nx = 1\nn = 0\n\ndef report_counter(_signum, _frame):\n    payload = f\"counter={n} monotonic_ns={time.monotonic_ns()} sink={x}\\n\"\n    os.write(counter_fd, payload.encode(\"ascii\"))\n\nsignal.signal(signal.SIGUSR1, report_counter)\nos.write(counter_fd, b\"ready\\n\")\nwhile True:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\n"
+          ],
+          "config": {
+            "counter_end": 752556554,
+            "counter_monotonic_ns_end": 199369016068323,
+            "counter_monotonic_ns_start": 199339015965953,
+            "counter_start": 397784128,
+            "loop": "integer_lcg",
+            "ops_total": 354772426,
+            "otel_profile_exporter_delta": {
+              "events": [
+                {
+                  "capture_offset_s": 2.954329608,
+                  "raw_line": "2026-07-21T03:34:30.111Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 15, \"sample records\": 2091}",
+                  "sample_records": 2091
+                },
+                {
+                  "capture_offset_s": 7.088014677,
+                  "raw_line": "2026-07-21T03:34:34.245Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 1446}",
+                  "sample_records": 1446
+                },
+                {
+                  "capture_offset_s": 12.484596074,
+                  "raw_line": "2026-07-21T03:34:39.642Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 1790}",
+                  "sample_records": 1790
+                },
+                {
+                  "capture_offset_s": 17.492629215,
+                  "raw_line": "2026-07-21T03:34:44.650Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 14, \"sample records\": 707}",
+                  "sample_records": 707
+                },
+                {
+                  "capture_offset_s": 21.712904903,
+                  "raw_line": "2026-07-21T03:34:48.870Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 11, \"sample records\": 1256}",
+                  "sample_records": 1256
+                },
+                {
+                  "capture_offset_s": 27.142092355,
+                  "raw_line": "2026-07-21T03:34:54.299Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 1406}",
+                  "sample_records": 1406
+                }
+              ],
+              "window_duration_s": 30.000208777
+            },
+            "persistent": true,
+            "pid": 324017,
+            "sink_end": 1510431711,
+            "sink_start": 2109489601,
+            "specialization_pass": "map_inline",
+            "tool": "python3",
+            "worker_elapsed_s": 30.00010237
+          },
+          "duration_s": 30.00003138501779,
+          "stderr": "",
+          "stdout": "counter=397784128 monotonic_ns=199339015965953 sink=2109489601\ncounter=752556554 monotonic_ns=199369016068323 sink=1510431711\n",
+          "workload_name": "otel_map_inline_persistent_python_workload"
+        }
+      }
+    },
+    "mode": "live_swap",
+    "per_program": {
+      "43965": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "control=byte_for_byte_copy",
+                "bytecode=unchanged"
+              ],
+              "inlined_map_entries": [],
+              "insn_count_after": 6,
+              "insn_count_before": 6,
+              "insn_delta": 0,
+              "observed_map_entries": [],
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 43965,
+        "program": {
+          "final_insn_count": 6,
+          "orig_insn_count": 6,
+          "prog_id": 43985,
+          "prog_name": "",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "43966": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "control=byte_for_byte_copy",
+                "bytecode=unchanged"
+              ],
+              "inlined_map_entries": [],
+              "insn_count_after": 56,
+              "insn_count_before": 56,
+              "insn_delta": 0,
+              "observed_map_entries": [],
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 43966,
+        "program": {
+          "final_insn_count": 56,
+          "orig_insn_count": 56,
+          "prog_id": 43994,
+          "prog_name": "read_task_struc",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "43967": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "control=byte_for_byte_copy",
+                "bytecode=unchanged"
+              ],
+              "inlined_map_entries": [],
+              "insn_count_after": 1631,
+              "insn_count_before": 1631,
+              "insn_delta": 0,
+              "observed_map_entries": [],
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 43967,
+        "program": {
+          "final_insn_count": 1631,
+          "orig_insn_count": 1631,
+          "prog_id": 43990,
+          "prog_name": "perf_unwind_sto",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "43968": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "control=byte_for_byte_copy",
+                "bytecode=unchanged"
+              ],
+              "inlined_map_entries": [],
+              "insn_count_after": 6972,
+              "insn_count_before": 6972,
+              "insn_delta": 0,
+              "observed_map_entries": [],
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 41,
+            "status": "ok",
+            "step": {
+              "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 43968,
+        "program": {
+          "final_insn_count": 6972,
+          "orig_insn_count": 6972,
+          "prog_id": 43988,
+          "prog_name": "perf_unwind_nat",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "43969": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "control=byte_for_byte_copy",
+                "bytecode=unchanged"
+              ],
+              "inlined_map_entries": [],
+              "insn_count_after": 7593,
+              "insn_count_before": 7593,
+              "insn_delta": 0,
+              "observed_map_entries": [],
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 11,
+            "status": "ok",
+            "step": {
+              "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 43969,
+        "program": {
+          "final_insn_count": 7593,
+          "orig_insn_count": 7593,
+          "prog_id": 43986,
+          "prog_name": "perf_unwind_hot",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "43970": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "control=byte_for_byte_copy",
+                "bytecode=unchanged"
+              ],
+              "inlined_map_entries": [],
+              "insn_count_after": 7475,
+              "insn_count_before": 7475,
+              "insn_delta": 0,
+              "observed_map_entries": [],
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 7,
+            "status": "ok",
+            "step": {
+              "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 43970,
+        "program": {
+          "final_insn_count": 7475,
+          "orig_insn_count": 7475,
+          "prog_id": 43983,
+          "prog_name": "perf_unwind_per",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "43971": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "control=byte_for_byte_copy",
+                "bytecode=unchanged"
+              ],
+              "inlined_map_entries": [],
+              "insn_count_after": 6899,
+              "insn_count_before": 6899,
+              "insn_delta": 0,
+              "observed_map_entries": [],
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 6,
+            "status": "ok",
+            "step": {
+              "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 43971,
+        "program": {
+          "final_insn_count": 6899,
+          "orig_insn_count": 6899,
+          "prog_id": 43981,
+          "prog_name": "perf_unwind_php",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "43972": {
+        "passes": [
+          {
+            "bpfopt_ms": 162,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [
+                {
+                  "key_hex": "b1f10400",
+                  "map_id": 50162,
+                  "stability": "phase-stable",
+                  "value_hex": "cc69b3000000000000000000000000000c031803100038000800384603343c3044c0010100000000"
+                }
+              ],
+              "insn_count_after": 5808,
+              "insn_count_before": 5894,
+              "insn_delta": -86,
+              "pass": "map_inline",
+              "sites_applied": 1,
+              "sites_matched": 1,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 7,
+            "status": "ok",
+            "step": {
+              "command": "PID=${BPFREJIT_OTEL_MAP_INLINE_PID:?OTEL map_inline worker PID is required}; PY_MAP=; for f in ${MAP_VALUES}/map-*.show.json; do if [ \"$(jq -r .name \"$f\")\" = py_procs ]; then PY_MAP=$(jq -r .id \"$f\"); break; fi; done; if [ -z \"$PY_MAP\" ]; then echo \"OTEL map_inline: py_procs map is missing\" >&2; exit 1; fi; PY_KEY=$(printf '%02x%02x%02x%02x' $((PID & 255)) $(((PID >> 8) & 255)) $(((PID >> 16) & 255)) $(((PID >> 24) & 255))); PY_DUMP=${MAP_VALUES}/map-${PY_MAP}.dump.json; PY_VALUE=$(jq -r --arg key \"$PY_KEY\" 'first(.[]? | select(((.key // []) | map(tostring | sub(\"^0x\"; \"\") | ascii_downcase) | join(\"\")) == $key) | ((.value // []) | map(tostring | sub(\"^0x\"; \"\") | ascii_downcase) | join(\"\"))) // empty' \"$PY_DUMP\"); EXPECTED_VALUE=cc69b3000000000000000000000000000c031803100038000800384603343c3044c0010100000000; if [ \"$PY_VALUE\" != \"$EXPECTED_VALUE\" ]; then echo \"OTEL map_inline: worker PID $PID key $PY_KEY has unexpected value $PY_VALUE\" >&2; exit 1; fi; bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability phase-stable --only-hinted --inline-hint=py_procs:$PY_KEY",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 43972,
+        "program": {
+          "final_insn_count": 5808,
+          "orig_insn_count": 5894,
+          "prog_id": 43993,
+          "prog_name": "perf_unwind_pyt",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "43973": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "control=byte_for_byte_copy",
+                "bytecode=unchanged"
+              ],
+              "inlined_map_entries": [],
+              "insn_count_after": 5458,
+              "insn_count_before": 5458,
+              "insn_delta": 0,
+              "observed_map_entries": [],
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 8,
+            "status": "ok",
+            "step": {
+              "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 43973,
+        "program": {
+          "final_insn_count": 5458,
+          "orig_insn_count": 5458,
+          "prog_id": 43991,
+          "prog_name": "perf_unwind_rub",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "43974": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "control=byte_for_byte_copy",
+                "bytecode=unchanged"
+              ],
+              "inlined_map_entries": [],
+              "insn_count_after": 7817,
+              "insn_count_before": 7817,
+              "insn_delta": 0,
+              "observed_map_entries": [],
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 9,
+            "status": "ok",
+            "step": {
+              "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 43974,
+        "program": {
+          "final_insn_count": 7817,
+          "orig_insn_count": 7817,
+          "prog_id": 43989,
+          "prog_name": "perf_unwind_v8",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "43975": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "control=byte_for_byte_copy",
+                "bytecode=unchanged"
+              ],
+              "inlined_map_entries": [],
+              "insn_count_after": 7974,
+              "insn_count_before": 7974,
+              "insn_delta": 0,
+              "observed_map_entries": [],
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 7,
+            "status": "ok",
+            "step": {
+              "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 43975,
+        "program": {
+          "final_insn_count": 7974,
+          "orig_insn_count": 7974,
+          "prog_id": 43987,
+          "prog_name": "perf_unwind_dot",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "43976": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "control=byte_for_byte_copy",
+                "bytecode=unchanged"
+              ],
+              "inlined_map_entries": [],
+              "insn_count_after": 683,
+              "insn_count_before": 683,
+              "insn_delta": 0,
+              "observed_map_entries": [],
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 14,
+            "status": "ok",
+            "step": {
+              "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 43976,
+        "program": {
+          "final_insn_count": 683,
+          "orig_insn_count": 683,
+          "prog_id": 43984,
+          "prog_name": "perf_go_labels",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "43977": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "control=byte_for_byte_copy",
+                "bytecode=unchanged"
+              ],
+              "inlined_map_entries": [],
+              "insn_count_after": 283,
+              "insn_count_before": 283,
+              "insn_delta": 0,
+              "observed_map_entries": [],
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 34,
+            "status": "ok",
+            "step": {
+              "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 43977,
+        "program": {
+          "final_insn_count": 283,
+          "orig_insn_count": 283,
+          "prog_id": 43982,
+          "prog_name": "tracepoint__sch",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "43978": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "control=byte_for_byte_copy",
+                "bytecode=unchanged"
+              ],
+              "inlined_map_entries": [],
+              "insn_count_after": 1322,
+              "insn_count_before": 1322,
+              "insn_delta": 0,
+              "observed_map_entries": [],
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 1,
+            "status": "ok",
+            "step": {
+              "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 43978,
+        "program": {
+          "final_insn_count": 1322,
+          "orig_insn_count": 1322,
+          "prog_id": 43995,
+          "prog_name": "native_tracer_e",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "43979": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "control=byte_for_byte_copy",
+                "bytecode=unchanged"
+              ],
+              "inlined_map_entries": [],
+              "insn_count_after": 1253,
+              "insn_count_before": 1253,
+              "insn_delta": 0,
+              "observed_map_entries": [],
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 43979,
+        "program": {
+          "final_insn_count": 1253,
+          "orig_insn_count": 1253,
+          "prog_id": 43992,
+          "prog_name": "custom__generic",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "43980": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "control=byte_for_byte_copy",
+                "bytecode=unchanged"
+              ],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "observed_map_entries": [],
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 43980,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 43996,
+          "prog_name": "probe_bpf_perf_",
+          "prog_type": 2
+        },
+        "status": "ok"
+      }
+    },
+    "post_live_state": {
+      "prog_array_slots": [
+        {
+          "key": 0,
+          "map_id": 50134,
+          "prog_id": 43990,
+          "shim_pid": 324018
+        },
+        {
+          "key": 1,
+          "map_id": 50134,
+          "prog_id": 43988,
+          "shim_pid": 324018
+        },
+        {
+          "key": 2,
+          "map_id": 50134,
+          "prog_id": 43986,
+          "shim_pid": 324018
+        },
+        {
+          "key": 3,
+          "map_id": 50134,
+          "prog_id": 43983,
+          "shim_pid": 324018
+        },
+        {
+          "key": 4,
+          "map_id": 50134,
+          "prog_id": 43993,
+          "shim_pid": 324018
+        },
+        {
+          "key": 5,
+          "map_id": 50134,
+          "prog_id": 43981,
+          "shim_pid": 324018
+        },
+        {
+          "key": 6,
+          "map_id": 50134,
+          "prog_id": 43991,
+          "shim_pid": 324018
+        },
+        {
+          "key": 7,
+          "map_id": 50134,
+          "prog_id": 43989,
+          "shim_pid": 324018
+        },
+        {
+          "key": 8,
+          "map_id": 50134,
+          "prog_id": 43987,
+          "shim_pid": 324018
+        },
+        {
+          "key": 9,
+          "map_id": 50134,
+          "prog_id": 43984,
+          "shim_pid": 324018
+        }
+      ],
+      "programs": [
+        {
+          "branch_profile_hash": "5fd36b48fa2a170d",
+          "bytecode_path": "/tmp/bpfrejit_324018_12d1799f997e2e7c.bpf",
+          "hash": "12d1799f997e2e7c",
+          "id": 43981,
+          "insn_cnt": 6899,
+          "name": "perf_unwind_php",
+          "policy_hash": "856bb507fc8fe709",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "6f10f2d794afbdb0",
+          "bytecode_path": "/tmp/bpfrejit_324018_437d3ce19ac8abbf.bpf",
+          "hash": "437d3ce19ac8abbf",
+          "id": 43982,
+          "insn_cnt": 283,
+          "name": "tracepoint__sch",
+          "policy_hash": "84dad4823fb581cd",
+          "shim_pid": 324018,
+          "type": 5
+        },
+        {
+          "branch_profile_hash": "c7aba7a40cbde3d0",
+          "bytecode_path": "/tmp/bpfrejit_324018_02712692696cdbe6.bpf",
+          "hash": "02712692696cdbe6",
+          "id": 43983,
+          "insn_cnt": 7475,
+          "name": "perf_unwind_per",
+          "policy_hash": "bceebe32b6a28bb9",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "6dcc07923c23da8f",
+          "bytecode_path": "/tmp/bpfrejit_324018_162b91c381ff7d23.bpf",
+          "hash": "162b91c381ff7d23",
+          "id": 43984,
+          "insn_cnt": 683,
+          "name": "perf_go_labels",
+          "policy_hash": "7f1efd965742f1d6",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "873c32c9e7033afd",
+          "bytecode_path": "/tmp/bpfrejit_324018_7e4864ff1af3e9d4.bpf",
+          "hash": "7e4864ff1af3e9d4",
+          "id": 43985,
+          "insn_cnt": 6,
+          "name": "",
+          "policy_hash": "7e4864ff1af3e9d4",
+          "shim_pid": 324018,
+          "type": 2
+        },
+        {
+          "branch_profile_hash": "2dd5bb9ce437e41a",
+          "bytecode_path": "/tmp/bpfrejit_324018_5de809381f84f278.bpf",
+          "hash": "5de809381f84f278",
+          "id": 43986,
+          "insn_cnt": 7593,
+          "name": "perf_unwind_hot",
+          "policy_hash": "94e58d62a0ad3a5c",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "a56248526f426ab5",
+          "bytecode_path": "/tmp/bpfrejit_324018_8e8be87844c1625d.bpf",
+          "hash": "8e8be87844c1625d",
+          "id": 43987,
+          "insn_cnt": 7974,
+          "name": "perf_unwind_dot",
+          "policy_hash": "9c9e7cdf3616ae88",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "6c108a02ba85e3c0",
+          "bytecode_path": "/tmp/bpfrejit_324018_85467bfee47a580f.bpf",
+          "hash": "85467bfee47a580f",
+          "id": 43988,
+          "insn_cnt": 6972,
+          "name": "perf_unwind_nat",
+          "policy_hash": "b639766e5dc5968d",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "c17cfa0dbdd4cbb6",
+          "bytecode_path": "/tmp/bpfrejit_324018_4aac61030d1f0108.bpf",
+          "hash": "4aac61030d1f0108",
+          "id": 43989,
+          "insn_cnt": 7817,
+          "name": "perf_unwind_v8",
+          "policy_hash": "607c8cddc3bd4b36",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "e2b9b48a9276dd71",
+          "bytecode_path": "/tmp/bpfrejit_324018_eef2fe305446b42d.bpf",
+          "hash": "eef2fe305446b42d",
+          "id": 43990,
+          "insn_cnt": 1631,
+          "name": "perf_unwind_sto",
+          "policy_hash": "e13bc0dae1ea26b0",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "6006994c440724ea",
+          "bytecode_path": "/tmp/bpfrejit_324018_e4da0c8c919183f6.bpf",
+          "hash": "e4da0c8c919183f6",
+          "id": 43991,
+          "insn_cnt": 5458,
+          "name": "perf_unwind_rub",
+          "policy_hash": "acdb44a24c870dd1",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "43bc6895cabe2bd5",
+          "bytecode_path": "/tmp/bpfrejit_324018_4557f70f69ecf898.bpf",
+          "hash": "4557f70f69ecf898",
+          "id": 43992,
+          "insn_cnt": 1253,
+          "name": "custom__generic",
+          "policy_hash": "1d4b19e3e8cb7829",
+          "shim_pid": 324018,
+          "type": 2
+        },
+        {
+          "branch_profile_hash": "1cf3b583ae514ba7",
+          "bytecode_path": "/tmp/bpfrejit_324018_580c215e25b378eb.bpf",
+          "hash": "580c215e25b378eb",
+          "id": 43993,
+          "insn_cnt": 5894,
+          "name": "perf_unwind_pyt",
+          "policy_hash": "f2b5b11afb620097",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "2655369bff269423",
+          "bytecode_path": "/tmp/bpfrejit_324018_97c62c0e60ca9dc0.bpf",
+          "hash": "97c62c0e60ca9dc0",
+          "id": 43994,
+          "insn_cnt": 56,
+          "name": "read_task_struc",
+          "policy_hash": "7418639c245bfba1",
+          "shim_pid": 324018,
+          "type": 17
+        },
+        {
+          "branch_profile_hash": "ee07a6be2f6cb8f9",
+          "bytecode_path": "/tmp/bpfrejit_324018_0d12091e0b958631.bpf",
+          "hash": "0d12091e0b958631",
+          "id": 43995,
+          "insn_cnt": 1322,
+          "name": "native_tracer_e",
+          "policy_hash": "82df1485f3ede153",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "4fa0771bcdb0ef13",
+          "bytecode_path": "/tmp/bpfrejit_324018_58255400910d7827.bpf",
+          "hash": "58255400910d7827",
+          "id": 43996,
+          "insn_cnt": 2,
+          "name": "probe_bpf_perf_",
+          "policy_hash": "58255400910d7827",
+          "shim_pid": 324018,
+          "type": 2
+        }
+      ]
+    },
+    "post_measurement_state": {
+      "prog_array_slots": [
+        {
+          "key": 0,
+          "map_id": 50134,
+          "prog_id": 43990,
+          "shim_pid": 324018
+        },
+        {
+          "key": 1,
+          "map_id": 50134,
+          "prog_id": 43988,
+          "shim_pid": 324018
+        },
+        {
+          "key": 2,
+          "map_id": 50134,
+          "prog_id": 43986,
+          "shim_pid": 324018
+        },
+        {
+          "key": 3,
+          "map_id": 50134,
+          "prog_id": 43983,
+          "shim_pid": 324018
+        },
+        {
+          "key": 4,
+          "map_id": 50134,
+          "prog_id": 43993,
+          "shim_pid": 324018
+        },
+        {
+          "key": 5,
+          "map_id": 50134,
+          "prog_id": 43981,
+          "shim_pid": 324018
+        },
+        {
+          "key": 6,
+          "map_id": 50134,
+          "prog_id": 43991,
+          "shim_pid": 324018
+        },
+        {
+          "key": 7,
+          "map_id": 50134,
+          "prog_id": 43989,
+          "shim_pid": 324018
+        },
+        {
+          "key": 8,
+          "map_id": 50134,
+          "prog_id": 43987,
+          "shim_pid": 324018
+        },
+        {
+          "key": 9,
+          "map_id": 50134,
+          "prog_id": 43984,
+          "shim_pid": 324018
+        }
+      ],
+      "programs": [
+        {
+          "branch_profile_hash": "5fd36b48fa2a170d",
+          "bytecode_path": "/tmp/bpfrejit_324018_12d1799f997e2e7c.bpf",
+          "hash": "12d1799f997e2e7c",
+          "id": 43981,
+          "insn_cnt": 6899,
+          "name": "perf_unwind_php",
+          "policy_hash": "856bb507fc8fe709",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "6f10f2d794afbdb0",
+          "bytecode_path": "/tmp/bpfrejit_324018_437d3ce19ac8abbf.bpf",
+          "hash": "437d3ce19ac8abbf",
+          "id": 43982,
+          "insn_cnt": 283,
+          "name": "tracepoint__sch",
+          "policy_hash": "84dad4823fb581cd",
+          "shim_pid": 324018,
+          "type": 5
+        },
+        {
+          "branch_profile_hash": "c7aba7a40cbde3d0",
+          "bytecode_path": "/tmp/bpfrejit_324018_02712692696cdbe6.bpf",
+          "hash": "02712692696cdbe6",
+          "id": 43983,
+          "insn_cnt": 7475,
+          "name": "perf_unwind_per",
+          "policy_hash": "bceebe32b6a28bb9",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "6dcc07923c23da8f",
+          "bytecode_path": "/tmp/bpfrejit_324018_162b91c381ff7d23.bpf",
+          "hash": "162b91c381ff7d23",
+          "id": 43984,
+          "insn_cnt": 683,
+          "name": "perf_go_labels",
+          "policy_hash": "7f1efd965742f1d6",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "873c32c9e7033afd",
+          "bytecode_path": "/tmp/bpfrejit_324018_7e4864ff1af3e9d4.bpf",
+          "hash": "7e4864ff1af3e9d4",
+          "id": 43985,
+          "insn_cnt": 6,
+          "name": "",
+          "policy_hash": "7e4864ff1af3e9d4",
+          "shim_pid": 324018,
+          "type": 2
+        },
+        {
+          "branch_profile_hash": "2dd5bb9ce437e41a",
+          "bytecode_path": "/tmp/bpfrejit_324018_5de809381f84f278.bpf",
+          "hash": "5de809381f84f278",
+          "id": 43986,
+          "insn_cnt": 7593,
+          "name": "perf_unwind_hot",
+          "policy_hash": "94e58d62a0ad3a5c",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "a56248526f426ab5",
+          "bytecode_path": "/tmp/bpfrejit_324018_8e8be87844c1625d.bpf",
+          "hash": "8e8be87844c1625d",
+          "id": 43987,
+          "insn_cnt": 7974,
+          "name": "perf_unwind_dot",
+          "policy_hash": "9c9e7cdf3616ae88",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "6c108a02ba85e3c0",
+          "bytecode_path": "/tmp/bpfrejit_324018_85467bfee47a580f.bpf",
+          "hash": "85467bfee47a580f",
+          "id": 43988,
+          "insn_cnt": 6972,
+          "name": "perf_unwind_nat",
+          "policy_hash": "b639766e5dc5968d",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "c17cfa0dbdd4cbb6",
+          "bytecode_path": "/tmp/bpfrejit_324018_4aac61030d1f0108.bpf",
+          "hash": "4aac61030d1f0108",
+          "id": 43989,
+          "insn_cnt": 7817,
+          "name": "perf_unwind_v8",
+          "policy_hash": "607c8cddc3bd4b36",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "e2b9b48a9276dd71",
+          "bytecode_path": "/tmp/bpfrejit_324018_eef2fe305446b42d.bpf",
+          "hash": "eef2fe305446b42d",
+          "id": 43990,
+          "insn_cnt": 1631,
+          "name": "perf_unwind_sto",
+          "policy_hash": "e13bc0dae1ea26b0",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "6006994c440724ea",
+          "bytecode_path": "/tmp/bpfrejit_324018_e4da0c8c919183f6.bpf",
+          "hash": "e4da0c8c919183f6",
+          "id": 43991,
+          "insn_cnt": 5458,
+          "name": "perf_unwind_rub",
+          "policy_hash": "acdb44a24c870dd1",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "43bc6895cabe2bd5",
+          "bytecode_path": "/tmp/bpfrejit_324018_4557f70f69ecf898.bpf",
+          "hash": "4557f70f69ecf898",
+          "id": 43992,
+          "insn_cnt": 1253,
+          "name": "custom__generic",
+          "policy_hash": "1d4b19e3e8cb7829",
+          "shim_pid": 324018,
+          "type": 2
+        },
+        {
+          "branch_profile_hash": "1cf3b583ae514ba7",
+          "bytecode_path": "/tmp/bpfrejit_324018_580c215e25b378eb.bpf",
+          "hash": "580c215e25b378eb",
+          "id": 43993,
+          "insn_cnt": 5894,
+          "name": "perf_unwind_pyt",
+          "policy_hash": "f2b5b11afb620097",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "2655369bff269423",
+          "bytecode_path": "/tmp/bpfrejit_324018_97c62c0e60ca9dc0.bpf",
+          "hash": "97c62c0e60ca9dc0",
+          "id": 43994,
+          "insn_cnt": 56,
+          "name": "read_task_struc",
+          "policy_hash": "7418639c245bfba1",
+          "shim_pid": 324018,
+          "type": 17
+        },
+        {
+          "branch_profile_hash": "ee07a6be2f6cb8f9",
+          "bytecode_path": "/tmp/bpfrejit_324018_0d12091e0b958631.bpf",
+          "hash": "0d12091e0b958631",
+          "id": 43995,
+          "insn_cnt": 1322,
+          "name": "native_tracer_e",
+          "policy_hash": "82df1485f3ede153",
+          "shim_pid": 324018,
+          "type": 7
+        },
+        {
+          "branch_profile_hash": "4fa0771bcdb0ef13",
+          "bytecode_path": "/tmp/bpfrejit_324018_58255400910d7827.bpf",
+          "hash": "58255400910d7827",
+          "id": 43996,
+          "insn_cnt": 2,
+          "name": "probe_bpf_perf_",
+          "policy_hash": "58255400910d7827",
+          "shim_pid": 324018,
+          "type": 2
+        }
+      ]
+    },
+    "post_state_validation": {
+      "per_program": {
+        "43981": {
+          "passes": [
+            {
+              "bpfopt_ms": 23,
+              "bpfopt_summary": {
+                "diagnostics": [
+                  "control=byte_for_byte_copy",
+                  "bytecode=unchanged"
+                ],
+                "inlined_map_entries": [],
+                "insn_count_after": 6899,
+                "insn_count_before": 6899,
+                "insn_delta": 0,
+                "observed_map_entries": [],
+                "pass": "map_inline_validate",
+                "sites_applied": 0,
+                "sites_matched": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "skipped_sites": []
+              },
+              "error": null,
+              "rejit_syscall_ms": 0,
+              "status": "ok",
+              "step": {
+                "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline_validate",
+                "log_level": 1,
+                "name": "map_inline_validate"
+              }
+            }
+          ],
+          "prog_id": 43981,
+          "program": {
+            "final_insn_count": 6899,
+            "orig_insn_count": 6899,
+            "prog_id": 43981,
+            "prog_name": "perf_unwind_php",
+            "prog_type": 7
+          },
+          "status": "ok"
+        },
+        "43982": {
+          "passes": [
+            {
+              "bpfopt_ms": 23,
+              "bpfopt_summary": {
+                "diagnostics": [
+                  "control=byte_for_byte_copy",
+                  "bytecode=unchanged"
+                ],
+                "inlined_map_entries": [],
+                "insn_count_after": 283,
+                "insn_count_before": 283,
+                "insn_delta": 0,
+                "observed_map_entries": [],
+                "pass": "map_inline_validate",
+                "sites_applied": 0,
+                "sites_matched": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "skipped_sites": []
+              },
+              "error": null,
+              "rejit_syscall_ms": 0,
+              "status": "ok",
+              "step": {
+                "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline_validate",
+                "log_level": 1,
+                "name": "map_inline_validate"
+              }
+            }
+          ],
+          "prog_id": 43982,
+          "program": {
+            "final_insn_count": 283,
+            "orig_insn_count": 283,
+            "prog_id": 43982,
+            "prog_name": "tracepoint__sch",
+            "prog_type": 5
+          },
+          "status": "ok"
+        },
+        "43983": {
+          "passes": [
+            {
+              "bpfopt_ms": 23,
+              "bpfopt_summary": {
+                "diagnostics": [
+                  "control=byte_for_byte_copy",
+                  "bytecode=unchanged"
+                ],
+                "inlined_map_entries": [],
+                "insn_count_after": 7475,
+                "insn_count_before": 7475,
+                "insn_delta": 0,
+                "observed_map_entries": [],
+                "pass": "map_inline_validate",
+                "sites_applied": 0,
+                "sites_matched": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "skipped_sites": []
+              },
+              "error": null,
+              "rejit_syscall_ms": 0,
+              "status": "ok",
+              "step": {
+                "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline_validate",
+                "log_level": 1,
+                "name": "map_inline_validate"
+              }
+            }
+          ],
+          "prog_id": 43983,
+          "program": {
+            "final_insn_count": 7475,
+            "orig_insn_count": 7475,
+            "prog_id": 43983,
+            "prog_name": "perf_unwind_per",
+            "prog_type": 7
+          },
+          "status": "ok"
+        },
+        "43984": {
+          "passes": [
+            {
+              "bpfopt_ms": 23,
+              "bpfopt_summary": {
+                "diagnostics": [
+                  "control=byte_for_byte_copy",
+                  "bytecode=unchanged"
+                ],
+                "inlined_map_entries": [],
+                "insn_count_after": 683,
+                "insn_count_before": 683,
+                "insn_delta": 0,
+                "observed_map_entries": [],
+                "pass": "map_inline_validate",
+                "sites_applied": 0,
+                "sites_matched": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "skipped_sites": []
+              },
+              "error": null,
+              "rejit_syscall_ms": 0,
+              "status": "ok",
+              "step": {
+                "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline_validate",
+                "log_level": 1,
+                "name": "map_inline_validate"
+              }
+            }
+          ],
+          "prog_id": 43984,
+          "program": {
+            "final_insn_count": 683,
+            "orig_insn_count": 683,
+            "prog_id": 43984,
+            "prog_name": "perf_go_labels",
+            "prog_type": 7
+          },
+          "status": "ok"
+        },
+        "43985": {
+          "passes": [
+            {
+              "bpfopt_ms": 23,
+              "bpfopt_summary": {
+                "diagnostics": [
+                  "control=byte_for_byte_copy",
+                  "bytecode=unchanged"
+                ],
+                "inlined_map_entries": [],
+                "insn_count_after": 6,
+                "insn_count_before": 6,
+                "insn_delta": 0,
+                "observed_map_entries": [],
+                "pass": "map_inline_validate",
+                "sites_applied": 0,
+                "sites_matched": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "skipped_sites": []
+              },
+              "error": null,
+              "rejit_syscall_ms": 0,
+              "status": "ok",
+              "step": {
+                "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline_validate",
+                "log_level": 1,
+                "name": "map_inline_validate"
+              }
+            }
+          ],
+          "prog_id": 43985,
+          "program": {
+            "final_insn_count": 6,
+            "orig_insn_count": 6,
+            "prog_id": 43985,
+            "prog_name": "",
+            "prog_type": 2
+          },
+          "status": "ok"
+        },
+        "43986": {
+          "passes": [
+            {
+              "bpfopt_ms": 22,
+              "bpfopt_summary": {
+                "diagnostics": [
+                  "control=byte_for_byte_copy",
+                  "bytecode=unchanged"
+                ],
+                "inlined_map_entries": [],
+                "insn_count_after": 7593,
+                "insn_count_before": 7593,
+                "insn_delta": 0,
+                "observed_map_entries": [],
+                "pass": "map_inline_validate",
+                "sites_applied": 0,
+                "sites_matched": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "skipped_sites": []
+              },
+              "error": null,
+              "rejit_syscall_ms": 0,
+              "status": "ok",
+              "step": {
+                "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline_validate",
+                "log_level": 1,
+                "name": "map_inline_validate"
+              }
+            }
+          ],
+          "prog_id": 43986,
+          "program": {
+            "final_insn_count": 7593,
+            "orig_insn_count": 7593,
+            "prog_id": 43986,
+            "prog_name": "perf_unwind_hot",
+            "prog_type": 7
+          },
+          "status": "ok"
+        },
+        "43987": {
+          "passes": [
+            {
+              "bpfopt_ms": 23,
+              "bpfopt_summary": {
+                "diagnostics": [
+                  "control=byte_for_byte_copy",
+                  "bytecode=unchanged"
+                ],
+                "inlined_map_entries": [],
+                "insn_count_after": 7974,
+                "insn_count_before": 7974,
+                "insn_delta": 0,
+                "observed_map_entries": [],
+                "pass": "map_inline_validate",
+                "sites_applied": 0,
+                "sites_matched": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "skipped_sites": []
+              },
+              "error": null,
+              "rejit_syscall_ms": 0,
+              "status": "ok",
+              "step": {
+                "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline_validate",
+                "log_level": 1,
+                "name": "map_inline_validate"
+              }
+            }
+          ],
+          "prog_id": 43987,
+          "program": {
+            "final_insn_count": 7974,
+            "orig_insn_count": 7974,
+            "prog_id": 43987,
+            "prog_name": "perf_unwind_dot",
+            "prog_type": 7
+          },
+          "status": "ok"
+        },
+        "43988": {
+          "passes": [
+            {
+              "bpfopt_ms": 23,
+              "bpfopt_summary": {
+                "diagnostics": [
+                  "control=byte_for_byte_copy",
+                  "bytecode=unchanged"
+                ],
+                "inlined_map_entries": [],
+                "insn_count_after": 6972,
+                "insn_count_before": 6972,
+                "insn_delta": 0,
+                "observed_map_entries": [],
+                "pass": "map_inline_validate",
+                "sites_applied": 0,
+                "sites_matched": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "skipped_sites": []
+              },
+              "error": null,
+              "rejit_syscall_ms": 0,
+              "status": "ok",
+              "step": {
+                "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline_validate",
+                "log_level": 1,
+                "name": "map_inline_validate"
+              }
+            }
+          ],
+          "prog_id": 43988,
+          "program": {
+            "final_insn_count": 6972,
+            "orig_insn_count": 6972,
+            "prog_id": 43988,
+            "prog_name": "perf_unwind_nat",
+            "prog_type": 7
+          },
+          "status": "ok"
+        },
+        "43989": {
+          "passes": [
+            {
+              "bpfopt_ms": 23,
+              "bpfopt_summary": {
+                "diagnostics": [
+                  "control=byte_for_byte_copy",
+                  "bytecode=unchanged"
+                ],
+                "inlined_map_entries": [],
+                "insn_count_after": 7817,
+                "insn_count_before": 7817,
+                "insn_delta": 0,
+                "observed_map_entries": [],
+                "pass": "map_inline_validate",
+                "sites_applied": 0,
+                "sites_matched": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "skipped_sites": []
+              },
+              "error": null,
+              "rejit_syscall_ms": 0,
+              "status": "ok",
+              "step": {
+                "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline_validate",
+                "log_level": 1,
+                "name": "map_inline_validate"
+              }
+            }
+          ],
+          "prog_id": 43989,
+          "program": {
+            "final_insn_count": 7817,
+            "orig_insn_count": 7817,
+            "prog_id": 43989,
+            "prog_name": "perf_unwind_v8",
+            "prog_type": 7
+          },
+          "status": "ok"
+        },
+        "43990": {
+          "passes": [
+            {
+              "bpfopt_ms": 23,
+              "bpfopt_summary": {
+                "diagnostics": [
+                  "control=byte_for_byte_copy",
+                  "bytecode=unchanged"
+                ],
+                "inlined_map_entries": [],
+                "insn_count_after": 1631,
+                "insn_count_before": 1631,
+                "insn_delta": 0,
+                "observed_map_entries": [],
+                "pass": "map_inline_validate",
+                "sites_applied": 0,
+                "sites_matched": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "skipped_sites": []
+              },
+              "error": null,
+              "rejit_syscall_ms": 0,
+              "status": "ok",
+              "step": {
+                "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline_validate",
+                "log_level": 1,
+                "name": "map_inline_validate"
+              }
+            }
+          ],
+          "prog_id": 43990,
+          "program": {
+            "final_insn_count": 1631,
+            "orig_insn_count": 1631,
+            "prog_id": 43990,
+            "prog_name": "perf_unwind_sto",
+            "prog_type": 7
+          },
+          "status": "ok"
+        },
+        "43991": {
+          "passes": [
+            {
+              "bpfopt_ms": 23,
+              "bpfopt_summary": {
+                "diagnostics": [
+                  "control=byte_for_byte_copy",
+                  "bytecode=unchanged"
+                ],
+                "inlined_map_entries": [],
+                "insn_count_after": 5458,
+                "insn_count_before": 5458,
+                "insn_delta": 0,
+                "observed_map_entries": [],
+                "pass": "map_inline_validate",
+                "sites_applied": 0,
+                "sites_matched": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "skipped_sites": []
+              },
+              "error": null,
+              "rejit_syscall_ms": 0,
+              "status": "ok",
+              "step": {
+                "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline_validate",
+                "log_level": 1,
+                "name": "map_inline_validate"
+              }
+            }
+          ],
+          "prog_id": 43991,
+          "program": {
+            "final_insn_count": 5458,
+            "orig_insn_count": 5458,
+            "prog_id": 43991,
+            "prog_name": "perf_unwind_rub",
+            "prog_type": 7
+          },
+          "status": "ok"
+        },
+        "43992": {
+          "passes": [
+            {
+              "bpfopt_ms": 24,
+              "bpfopt_summary": {
+                "diagnostics": [
+                  "control=byte_for_byte_copy",
+                  "bytecode=unchanged"
+                ],
+                "inlined_map_entries": [],
+                "insn_count_after": 1253,
+                "insn_count_before": 1253,
+                "insn_delta": 0,
+                "observed_map_entries": [],
+                "pass": "map_inline_validate",
+                "sites_applied": 0,
+                "sites_matched": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "skipped_sites": []
+              },
+              "error": null,
+              "rejit_syscall_ms": 0,
+              "status": "ok",
+              "step": {
+                "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline_validate",
+                "log_level": 1,
+                "name": "map_inline_validate"
+              }
+            }
+          ],
+          "prog_id": 43992,
+          "program": {
+            "final_insn_count": 1253,
+            "orig_insn_count": 1253,
+            "prog_id": 43992,
+            "prog_name": "custom__generic",
+            "prog_type": 2
+          },
+          "status": "ok"
+        },
+        "43993": {
+          "passes": [
+            {
+              "bpfopt_ms": 38,
+              "bpfopt_summary": {
+                "diagnostics": [
+                  "control=byte_for_byte_copy",
+                  "bytecode=unchanged"
+                ],
+                "inlined_map_entries": [],
+                "insn_count_after": 5894,
+                "insn_count_before": 5894,
+                "insn_delta": 0,
+                "observed_map_entries": [
+                  {
+                    "key_hex": "b1f10400",
+                    "map_id": 50162,
+                    "map_name": "py_procs",
+                    "value_hex": "cc69b3000000000000000000000000000c031803100038000800384603343c3044c0010100000000"
+                  }
+                ],
+                "pass": "map_inline_validate",
+                "sites_applied": 0,
+                "sites_matched": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "skipped_sites": []
+              },
+              "error": null,
+              "rejit_syscall_ms": 0,
+              "status": "ok",
+              "step": {
+                "command": "PID=${BPFREJIT_OTEL_MAP_INLINE_PID:?OTEL map_inline worker PID is required}; PY_MAP=; for f in ${MAP_VALUES}/map-*.show.json; do if [ \"$(jq -r .name \"$f\")\" = py_procs ]; then PY_MAP=$(jq -r .id \"$f\"); break; fi; done; if [ -z \"$PY_MAP\" ]; then echo \"OTEL post-workload map validation: py_procs map is missing\" >&2; exit 1; fi; PY_KEY=$(printf '%02x%02x%02x%02x' $((PID & 255)) $(((PID >> 8) & 255)) $(((PID >> 16) & 255)) $(((PID >> 24) & 255))); PY_DUMP=${MAP_VALUES}/map-${PY_MAP}.dump.json; PY_VALUE=$(jq -r --arg key \"$PY_KEY\" 'first(.[]? | select(((.key // []) | map(tostring | sub(\"^0x\"; \"\") | ascii_downcase) | join(\"\")) == $key) | ((.value // []) | map(tostring | sub(\"^0x\"; \"\") | ascii_downcase) | join(\"\"))) // empty' \"$PY_DUMP\"); EXPECTED_VALUE=cc69b3000000000000000000000000000c031803100038000800384603343c3044c0010100000000; if [ \"$PY_VALUE\" != \"$EXPECTED_VALUE\" ]; then echo \"OTEL post-workload map validation: worker PID $PID key $PY_KEY has unexpected value $PY_VALUE\" >&2; exit 1; fi; python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline_validate --observed-map-name py_procs --observed-map-id \"$PY_MAP\" --observed-key-hex \"$PY_KEY\" --observed-value-hex \"$PY_VALUE\"",
+                "log_level": 1,
+                "name": "map_inline_validate"
+              }
+            }
+          ],
+          "prog_id": 43993,
+          "program": {
+            "final_insn_count": 5894,
+            "orig_insn_count": 5894,
+            "prog_id": 43993,
+            "prog_name": "perf_unwind_pyt",
+            "prog_type": 7
+          },
+          "status": "ok"
+        },
+        "43994": {
+          "passes": [
+            {
+              "bpfopt_ms": 23,
+              "bpfopt_summary": {
+                "diagnostics": [
+                  "control=byte_for_byte_copy",
+                  "bytecode=unchanged"
+                ],
+                "inlined_map_entries": [],
+                "insn_count_after": 56,
+                "insn_count_before": 56,
+                "insn_delta": 0,
+                "observed_map_entries": [],
+                "pass": "map_inline_validate",
+                "sites_applied": 0,
+                "sites_matched": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "skipped_sites": []
+              },
+              "error": null,
+              "rejit_syscall_ms": 0,
+              "status": "ok",
+              "step": {
+                "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline_validate",
+                "log_level": 1,
+                "name": "map_inline_validate"
+              }
+            }
+          ],
+          "prog_id": 43994,
+          "program": {
+            "final_insn_count": 56,
+            "orig_insn_count": 56,
+            "prog_id": 43994,
+            "prog_name": "read_task_struc",
+            "prog_type": 17
+          },
+          "status": "ok"
+        },
+        "43995": {
+          "passes": [
+            {
+              "bpfopt_ms": 23,
+              "bpfopt_summary": {
+                "diagnostics": [
+                  "control=byte_for_byte_copy",
+                  "bytecode=unchanged"
+                ],
+                "inlined_map_entries": [],
+                "insn_count_after": 1322,
+                "insn_count_before": 1322,
+                "insn_delta": 0,
+                "observed_map_entries": [],
+                "pass": "map_inline_validate",
+                "sites_applied": 0,
+                "sites_matched": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "skipped_sites": []
+              },
+              "error": null,
+              "rejit_syscall_ms": 0,
+              "status": "ok",
+              "step": {
+                "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline_validate",
+                "log_level": 1,
+                "name": "map_inline_validate"
+              }
+            }
+          ],
+          "prog_id": 43995,
+          "program": {
+            "final_insn_count": 1322,
+            "orig_insn_count": 1322,
+            "prog_id": 43995,
+            "prog_name": "native_tracer_e",
+            "prog_type": 7
+          },
+          "status": "ok"
+        },
+        "43996": {
+          "passes": [
+            {
+              "bpfopt_ms": 23,
+              "bpfopt_summary": {
+                "diagnostics": [
+                  "control=byte_for_byte_copy",
+                  "bytecode=unchanged"
+                ],
+                "inlined_map_entries": [],
+                "insn_count_after": 2,
+                "insn_count_before": 2,
+                "insn_delta": 0,
+                "observed_map_entries": [],
+                "pass": "map_inline_validate",
+                "sites_applied": 0,
+                "sites_matched": 0,
+                "sites_skipped": 0,
+                "skip_reasons": {},
+                "skipped_sites": []
+              },
+              "error": null,
+              "rejit_syscall_ms": 0,
+              "status": "ok",
+              "step": {
+                "command": "python3 \"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/context_specialize_noop/bytecopy_control.py\" --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --pass-name map_inline_validate",
+                "log_level": 1,
+                "name": "map_inline_validate"
+              }
+            }
+          ],
+          "prog_id": 43996,
+          "program": {
+            "final_insn_count": 2,
+            "orig_insn_count": 2,
+            "prog_id": 43996,
+            "prog_name": "probe_bpf_perf_",
+            "prog_type": 2
+          },
+          "status": "ok"
+        }
+      },
+      "status": "ok"
+    },
+    "status": "ok"
+  },
+  "runner": "otelcol-ebpf-profiler",
+  "runner_details": {
+    "command_used": [
+      "/usr/local/bin/otelcol-ebpf-profiler",
+      "--feature-gates=+service.profilesSupport",
+      "--config",
+      "/var/tmp/bpfrejit-runtime/416a997b/otelcol-ebpf-profiler-w4l18lla/config.yaml"
+    ],
+    "loader_binary": {
+      "path": "/usr/local/bin/otelcol-ebpf-profiler",
+      "sha256": "c1ee0323319daaa815cadffe79521d84b70b4db1f79ef72f10a20874f4e3e401",
+      "size_bytes": 44689304
+    },
+    "process_output": {
+      "returncode": 0,
+      "stderr_tail": "2026-07-21T03:33:53.866Z\tinfo\totelconftelemetry/metrics.go:24\tInternal metrics telemetry disabled\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-07-21T03:33:53.866Z\tinfo\tbuilders/builders.go:26\tDevelopment component. May change in the future.\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T03:33:53.867Z\tinfo\tservice@v0.139.0/service.go:222\tStarting otelcol-ebpf-profiler...\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"Version\": \"0.140.0\", \"NumCPU\": 8}\n2026-07-21T03:33:53.867Z\tinfo\textensions/extensions.go:40\tStarting extensions...\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-07-21T03:33:53.867Z\tinfo\tInterpreter tracers: perl,php,python,hotspot,ruby,v8,dotnet,go,labels\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T03:33:54.376Z\tinfo\tFound offsets: task stack 0x20, pt_regs 0x3f48, tpbase 0x25a8\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T03:33:54.593Z\tinfo\tLoaded custom__generic program (FD: 80)\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T03:33:54.593Z\tinfo\tSupports generic eBPF map batch operations\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T03:33:54.593Z\tinfo\tSupports LPM trie eBPF map batch operations\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T03:33:54.594Z\tinfo\teBPF tracer loaded\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T03:33:54.595Z\tinfo\tAttached tracer program\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T03:33:54.595Z\tinfo\tAttached sched monitor\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T03:33:54.623Z\tinfo\tservice@v0.139.0/service.go:245\tEverything is ready. Begin running and processing data.\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-07-21T03:33:58.873Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 7, \"sample records\": 978}\n2026-07-21T03:34:03.745Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 15, \"sample records\": 2013}\n2026-07-21T03:34:08.888Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 14, \"sample records\": 3086}\n2026-07-21T03:34:14.450Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 2018}\n2026-07-21T03:34:19.119Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 12, \"sample records\": 1788}\n2026-07-21T03:34:24.295Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 16, \"sample records\": 1623}\n2026-07-21T03:34:30.111Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 15, \"sample records\": 2091}\n2026-07-21T03:34:34.245Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 1446}\n2026-07-21T03:34:39.642Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 1790}\n2026-07-21T03:34:44.650Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 14, \"sample records\": 707}\n2026-07-21T03:34:48.870Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 11, \"sample records\": 1256}\n2026-07-21T03:34:54.299Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 1406}\n2026-07-21T03:34:58.328Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 15, \"sample records\": 1305}\n2026-07-21T03:35:02.536Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 15, \"sample records\": 408}\n2026-07-21T03:35:08.200Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 2245}\n2026-07-21T03:35:13.639Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 16, \"sample records\": 1506}\n2026-07-21T03:35:18.604Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 19, \"sample records\": 3371}\n2026-07-21T03:35:23.558Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 1404}\n2026-07-21T03:35:28.116Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 16, \"sample records\": 995}\n2026-07-21T03:35:34.066Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"5e03113c-e17e-4ee8-bc56-6defc8ad69bd\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 18, \"sample records\": 1292}",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "otel_mixed_workload",
+  "status": "ok"
+}
