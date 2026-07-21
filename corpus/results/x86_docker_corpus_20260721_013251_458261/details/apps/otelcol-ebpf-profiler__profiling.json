@@ -1,0 +1,236 @@
+{
+  "app": "otelcol-ebpf-profiler/profiling",
+  "baseline": {
+    "bpf": {
+      "43808": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 43808,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "43809": {
+        "bytes_jited": 184,
+        "bytes_xlated": 304,
+        "id": 43809,
+        "name": "read_task_struc",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "43810": {
+        "bytes_jited": 3615,
+        "bytes_xlated": 6112,
+        "id": 43810,
+        "name": "perf_unwind_sto",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43811": {
+        "bytes_jited": 21863,
+        "bytes_xlated": 37024,
+        "id": 43811,
+        "name": "perf_unwind_nat",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43812": {
+        "bytes_jited": 18419,
+        "bytes_xlated": 28080,
+        "id": 43812,
+        "name": "perf_unwind_hot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43813": {
+        "bytes_jited": 18244,
+        "bytes_xlated": 29624,
+        "id": 43813,
+        "name": "perf_unwind_per",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43814": {
+        "bytes_jited": 14978,
+        "bytes_xlated": 24736,
+        "id": 43814,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43815": {
+        "bytes_jited": 19585,
+        "bytes_xlated": 33192,
+        "id": 43815,
+        "name": "perf_unwind_pyt",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43816": {
+        "bytes_jited": 17820,
+        "bytes_xlated": 30264,
+        "id": 43816,
+        "name": "perf_unwind_rub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43817": {
+        "bytes_jited": 20210,
+        "bytes_xlated": 33448,
+        "id": 43817,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43818": {
+        "bytes_jited": 22792,
+        "bytes_xlated": 37440,
+        "id": 43818,
+        "name": "perf_unwind_dot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43819": {
+        "bytes_jited": 1569,
+        "bytes_xlated": 2504,
+        "id": 43819,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43820": {
+        "bytes_jited": 789,
+        "bytes_xlated": 1320,
+        "id": 43820,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "43821": {
+        "bytes_jited": 3795,
+        "bytes_xlated": 5888,
+        "id": 43821,
+        "name": "native_tracer_e",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "43822": {
+        "bytes_jited": 3659,
+        "bytes_xlated": 5696,
+        "id": 43822,
+        "name": "custom__generic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "43823": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 43823,
+        "name": "probe_bpf_perf_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "components": [
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "30",
+              "0"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 0,
+              "workers_per_language": 1
+            },
+            "duration_s": 30.00964652901166,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=227106807 elapsed_s=30.000005 worker=0 sink=2622331088",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_0"
+          }
+        ],
+        "config": {
+          "otel_profile_exporter_delta": {
+            "events": [
+              {
+                "capture_offset_s": 0.097609866,
+                "raw_line": "2026-07-21T01:33:24.394Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 4754}",
+                "sample_records": 4754
+              },
+              {
+                "capture_offset_s": 4.747958631,
+                "raw_line": "2026-07-21T01:33:29.044Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 3015}",
+                "sample_records": 3015
+              },
+              {
+                "capture_offset_s": 10.68965456,
+                "raw_line": "2026-07-21T01:33:34.986Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 16, \"sample records\": 3130}",
+                "sample_records": 3130
+              },
+              {
+                "capture_offset_s": 16.626886296,
+                "raw_line": "2026-07-21T01:33:40.923Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 18, \"sample records\": 2402}",
+                "sample_records": 2402
+              },
+              {
+                "capture_offset_s": 22.054212326,
+                "raw_line": "2026-07-21T01:33:46.351Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 18, \"sample records\": 3608}",
+                "sample_records": 3608
+              },
+              {
+                "capture_offset_s": 27.220933564,
+                "raw_line": "2026-07-21T01:33:51.517Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 16, \"sample records\": 3144}",
+                "sample_records": 3144
+              }
+            ],
+            "window_duration_s": 30.009753559
+          }
+        },
+        "workload_name": "otel_tail_call_icache_python_workload"
+      }
+    ]
+  },
+  "error": "bpfprof failed (1, sample_period=200000): perf branch-stack sampler was throttled by the kernel; raise PERF_SAMPLE_PERIOD",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "otelcol-ebpf-profiler",
+  "runner_details": {
+    "command_used": [
+      "/usr/local/bin/otelcol-ebpf-profiler",
+      "--feature-gates=+service.profilesSupport",
+      "--config",
+      "/var/tmp/bpfrejit-runtime/76a39880/otelcol-ebpf-profiler-m2r90ccz/config.yaml"
+    ],
+    "process_output": {
+      "returncode": 0,
+      "stderr_tail": "2026-07-21T01:32:51.481Z\tinfo\totelconftelemetry/metrics.go:24\tInternal metrics telemetry disabled\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-07-21T01:32:51.481Z\tinfo\tbuilders/builders.go:26\tDevelopment component. May change in the future.\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T01:32:51.483Z\tinfo\tservice@v0.139.0/service.go:222\tStarting otelcol-ebpf-profiler...\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"Version\": \"0.140.0\", \"NumCPU\": 8}\n2026-07-21T01:32:51.483Z\tinfo\textensions/extensions.go:40\tStarting extensions...\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-07-21T01:32:51.483Z\tinfo\tInterpreter tracers: perl,php,python,hotspot,ruby,v8,dotnet,go,labels\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T01:32:52.012Z\tinfo\tFound offsets: task stack 0x20, pt_regs 0x3f48, tpbase 0x25a8\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T01:32:52.230Z\tinfo\tLoaded custom__generic program (FD: 80)\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T01:32:52.230Z\tinfo\tSupports generic eBPF map batch operations\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T01:32:52.230Z\tinfo\tSupports LPM trie eBPF map batch operations\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T01:32:52.231Z\tinfo\teBPF tracer loaded\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T01:32:52.232Z\tinfo\tAttached tracer program\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T01:32:52.232Z\tinfo\tAttached sched monitor\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\n2026-07-21T01:32:52.256Z\tinfo\tservice@v0.139.0/service.go:245\tEverything is ready. Begin running and processing data.\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}}\n2026-07-21T01:32:56.487Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 4, \"sample records\": 951}\n2026-07-21T01:33:00.890Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 12, \"sample records\": 3052}\n2026-07-21T01:33:04.998Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 16, \"sample records\": 3007}\n2026-07-21T01:33:10.072Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 14, \"sample records\": 3098}\n2026-07-21T01:33:14.300Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 11, \"sample records\": 1818}\n2026-07-21T01:33:18.572Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 14, \"sample records\": 2453}\n2026-07-21T01:33:24.394Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 4754}\n2026-07-21T01:33:29.044Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 3015}\n2026-07-21T01:33:34.986Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 16, \"sample records\": 3130}\n2026-07-21T01:33:36.423Z\terror\tFailed to load /snap/snapd/27406/usr/lib/snapd/snapd (0x3c327b5f3afdbc0a): not a Go executable\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\ngo.opentelemetry.io/ebpf-profiler/internal/log.Errorf\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/internal/log/logging.go:66\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*executableInfoManagerState).detectAndLoadInterpData\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:333\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*ExecutableInfoManager).AddOrIncRef\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:229\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).handleNewMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:256\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).processNewExecMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:384\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).synchronizeMappings\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:511\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).SynchronizeProcess\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:648\ngo.opentelemetry.io/ebpf-profiler/tracer.(*Tracer).processPIDEvents\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/tracer/events.go:51\n2026-07-21T01:33:36.423Z\terror\tFailed to load /snap/snapd/27406/usr/lib/snapd/snapd (0x3c327b5f3afdbc0a): not a Go executable\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"profiling\", \"otelcol.component.kind\": \"receiver\", \"otelcol.signal\": \"profiles\"}\ngo.opentelemetry.io/ebpf-profiler/internal/log.Errorf\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/internal/log/logging.go:66\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*executableInfoManagerState).detectAndLoadInterpData\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:333\ngo.opentelemetry.io/ebpf-profiler/processmanager/execinfomanager.(*ExecutableInfoManager).AddOrIncRef\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/execinfomanager/manager.go:229\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).handleNewMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:256\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).processNewExecMapping\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:384\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).synchronizeMappings\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:511\ngo.opentelemetry.io/ebpf-profiler/processmanager.(*ProcessManager).SynchronizeProcess\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/processmanager/processinfo.go:648\ngo.opentelemetry.io/ebpf-profiler/tracer.(*Tracer).processPIDEvents\n\tgo.opentelemetry.io/ebpf-profiler@v0.0.0/tracer/events.go:51\n2026-07-21T01:33:40.923Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 18, \"sample records\": 2402}\n2026-07-21T01:33:46.351Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 18, \"sample records\": 3608}\n2026-07-21T01:33:51.517Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 16, \"sample records\": 3144}\n2026-07-21T01:33:56.915Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 17, \"sample records\": 4466}\n2026-07-21T01:34:01.233Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 13, \"sample records\": 4850}\n2026-07-21T01:34:07.201Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 18, \"sample records\": 6451}\n2026-07-21T01:34:12.947Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 16, \"sample records\": 8127}\n2026-07-21T01:34:17.215Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 15, \"sample records\": 4084}\n2026-07-21T01:34:21.394Z\tinfo\tProfiles\t{\"resource\": {\"service.instance.id\": \"7c170b67-dcf0-4975-bf73-94923e38ffb9\", \"service.name\": \"otelcol-ebpf-profiler\", \"service.version\": \"0.140.0\"}, \"otelcol.component.id\": \"debug\", \"otelcol.component.kind\": \"exporter\", \"otelcol.signal\": \"profiles\", \"resource profiles\": 18, \"sample records\": 9746}",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "otel_mixed_workload",
+  "status": "error"
+}
