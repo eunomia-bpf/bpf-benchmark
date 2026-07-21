@@ -1,0 +1,69 @@
+{
+  "bpf_stats": false,
+  "config": {
+    "enabled_passes": [
+      "hot_region_version_noop"
+    ],
+    "runtime_cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "corpus suite reported errors",
+  "generated_at": "2026-07-21T10:15:29.258657+00:00",
+  "last_updated_at": "2026-07-21T10:15:29.258653+00:00",
+  "launcher_boot_id": "f271d497-66c1-4c16-a7dc-2ee393c27433",
+  "launcher_pid": 300513,
+  "launcher_start_ticks": 1870735,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "run_type": "x86_docker_corpus",
+  "runtime_artifacts": {
+    "binaries": {
+      "bpfopt": {
+        "path": "/usr/local/bin/bpfopt",
+        "sha256": "f60ae9562e15c52d1d5fb8d8ffb7d56618202ff9bdaa184f776820cc300dda91",
+        "size_bytes": 76776488
+      },
+      "bpfprof": {
+        "path": "/usr/local/bin/bpfprof",
+        "sha256": "e3bc9e74809ded38f3e0e1f5ef7dba967f13cbeea7cfee386267eacaceba860f",
+        "size_bytes": 1483840
+      },
+      "shim": {
+        "path": "/usr/local/lib/bpfrejit/libbpfrejit_shim.so",
+        "sha256": "445868ff3e08fa17ed41958438df6c0e965ad2924d2f83c317f1ecb9668e2204",
+        "size_bytes": 555608
+      }
+    },
+    "image_id": "sha256:668893eee2c65ea865505d6b772fb90f054ba61954279f30ad46597d02863195"
+  },
+  "samples": 1,
+  "started_at": "2026-07-21T10:13:21.719378+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_only": false,
+  "workload_seconds": 30.0
+}
