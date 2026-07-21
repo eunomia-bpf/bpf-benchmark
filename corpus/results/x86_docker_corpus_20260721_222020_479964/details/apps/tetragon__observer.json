@@ -1,0 +1,10 @@
+{
+  "app": "tetragon/observer",
+  "baseline": null,
+  "error": "Tetragon policy 'rawtp' event counter did not increase above 0; last value was 0",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "tetragon",
+  "selected_workload": "stress_ng_tetragon_policy_hot",
+  "status": "error"
+}
