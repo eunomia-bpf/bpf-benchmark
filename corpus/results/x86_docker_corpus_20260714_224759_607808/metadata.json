@@ -1,0 +1,49 @@
+{
+  "bpf_stats": true,
+  "config": {
+    "enabled_passes": [
+      "hot_region_version"
+    ],
+    "runtime_cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "corpus suite reported errors",
+  "generated_at": "2026-07-14T22:50:00.561512+00:00",
+  "last_updated_at": "2026-07-14T22:50:00.561508+00:00",
+  "launcher_boot_id": "a754d1dd-539e-4fd7-a5cb-6d791b4ae287",
+  "launcher_pid": 2014019,
+  "launcher_start_ticks": 4482826,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "run_type": "x86_docker_corpus",
+  "samples": 1,
+  "started_at": "2026-07-14T22:47:59.607808+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_only": false,
+  "workload_seconds": 30.0
+}

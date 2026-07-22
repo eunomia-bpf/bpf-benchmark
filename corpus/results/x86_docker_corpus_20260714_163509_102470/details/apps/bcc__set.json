@@ -1,0 +1,4484 @@
+{
+  "app": "bcc/set",
+  "baseline": {
+    "bpf": {
+      "18835": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 18835,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18836": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18836,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18837": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 18837,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18838": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18838,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18839": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 18839,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18840": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 18840,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18841": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18841,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18842": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18842,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18843": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 18843,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18844": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18844,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18845": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 18845,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18846": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18846,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18847": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18847,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18848": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 18848,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18849": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18849,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18850": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18850,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18851": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 18851,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18852": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 18852,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18853": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 18853,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18854": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18854,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18855": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 18855,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18856": {
+        "bytes_jited": 138,
+        "bytes_xlated": 240,
+        "id": 18856,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 2144,
+        "run_time_ns_delta": 616978,
+        "type": "tracepoint"
+      },
+      "18857": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18857,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18858": {
+        "bytes_jited": 138,
+        "bytes_xlated": 240,
+        "id": 18858,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 6740479,
+        "run_time_ns_delta": 372681370,
+        "type": "tracepoint"
+      },
+      "18859": {
+        "bytes_jited": 599,
+        "bytes_xlated": 792,
+        "id": 18859,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 2144,
+        "run_time_ns_delta": 4904425,
+        "type": "tracepoint"
+      },
+      "18860": {
+        "bytes_jited": 140,
+        "bytes_xlated": 232,
+        "id": 18860,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 9078569,
+        "run_time_ns_delta": 483132632,
+        "type": "kprobe"
+      },
+      "18861": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18861,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18862": {
+        "bytes_jited": 599,
+        "bytes_xlated": 792,
+        "id": 18862,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 6740479,
+        "run_time_ns_delta": 7309138637,
+        "type": "tracepoint"
+      },
+      "18863": {
+        "bytes_jited": 380,
+        "bytes_xlated": 616,
+        "id": 18863,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 9078569,
+        "run_time_ns_delta": 2227375001,
+        "type": "kprobe"
+      },
+      "18864": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 18864,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18865": {
+        "bytes_jited": 107,
+        "bytes_xlated": 184,
+        "id": 18865,
+        "name": "tcp_v4_connect",
+        "run_cnt_delta": 34,
+        "run_time_ns_delta": 54859,
+        "type": "kprobe"
+      },
+      "18866": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 18866,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18867": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18867,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18868": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18868,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "18869": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18869,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18870": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18870,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18871": {
+        "bytes_jited": 490,
+        "bytes_xlated": 752,
+        "id": 18871,
+        "name": "tcp_v4_connect_",
+        "run_cnt_delta": 34,
+        "run_time_ns_delta": 189139,
+        "type": "kprobe"
+      },
+      "18872": {
+        "bytes_jited": 107,
+        "bytes_xlated": 184,
+        "id": 18872,
+        "name": "tcp_v6_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "18873": {
+        "bytes_jited": 493,
+        "bytes_xlated": 752,
+        "id": 18873,
+        "name": "tcp_v6_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "18874": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18874,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18875": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18875,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18876": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 18876,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18877": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18877,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18878": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18878,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18879": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 18879,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18880": {
+        "bytes_jited": 105,
+        "bytes_xlated": 168,
+        "id": 18880,
+        "name": "sys_enter",
+        "run_cnt_delta": 226479406,
+        "run_time_ns_delta": 13803510530,
+        "type": "tracepoint"
+      },
+      "18881": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18881,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18882": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18882,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18883": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 18883,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18884": {
+        "bytes_jited": 403,
+        "bytes_xlated": 656,
+        "id": 18884,
+        "name": "sys_exit",
+        "run_cnt_delta": 226479409,
+        "run_time_ns_delta": 15883047340,
+        "type": "tracepoint"
+      },
+      "18885": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 18885,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18886": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 18886,
+        "name": "fentry_vfs_read",
+        "run_cnt_delta": 1183315,
+        "run_time_ns_delta": 69703524,
+        "type": "tracing"
+      },
+      "18887": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18887,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18888": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 18888,
+        "name": "fentry_vfs_writ",
+        "run_cnt_delta": 1713515,
+        "run_time_ns_delta": 127016411,
+        "type": "tracing"
+      },
+      "18889": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 18889,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18890": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18890,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18891": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 18891,
+        "name": "fentry_vfs_fsyn",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "18892": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 18892,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18893": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 18893,
+        "name": "fentry_vfs_open",
+        "run_cnt_delta": 6713356,
+        "run_time_ns_delta": 245329571,
+        "type": "tracing"
+      },
+      "18894": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 18894,
+        "name": "fentry_vfs_crea",
+        "run_cnt_delta": 14,
+        "run_time_ns_delta": 1484,
+        "type": "tracing"
+      },
+      "18895": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 18895,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18896": {
+        "bytes_jited": 1498,
+        "bytes_xlated": 2240,
+        "id": 18896,
+        "name": "inet_sock_set_s",
+        "run_cnt_delta": 194,
+        "run_time_ns_delta": 390824,
+        "type": "tracepoint"
+      },
+      "18897": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18897,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18898": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18898,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18899": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 18899,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18900": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 18900,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18901": {
+        "bytes_jited": 118,
+        "bytes_xlated": 200,
+        "id": 18901,
+        "name": "blk_account_io_",
+        "run_cnt_delta": 266,
+        "run_time_ns_delta": 45614,
+        "type": "kprobe"
+      },
+      "18902": {
+        "bytes_jited": 118,
+        "bytes_xlated": 184,
+        "id": 18902,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 11891074,
+        "run_time_ns_delta": 967555950,
+        "type": "tracing"
+      },
+      "18903": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18903,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18904": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18904,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18905": {
+        "bytes_jited": 118,
+        "bytes_xlated": 184,
+        "id": 18905,
+        "name": "sched_wakeup_ne",
+        "run_cnt_delta": 419,
+        "run_time_ns_delta": 157175,
+        "type": "tracing"
+      },
+      "18906": {
+        "bytes_jited": 351,
+        "bytes_xlated": 648,
+        "id": 18906,
+        "name": "block_rq_insert",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "18907": {
+        "bytes_jited": 437,
+        "bytes_xlated": 824,
+        "id": 18907,
+        "name": "block_rq_issue",
+        "run_cnt_delta": 644,
+        "run_time_ns_delta": 255106,
+        "type": "tracing"
+      },
+      "18908": {
+        "bytes_jited": 434,
+        "bytes_xlated": 712,
+        "id": 18908,
+        "name": "block_rq_comple",
+        "run_cnt_delta": 668,
+        "run_time_ns_delta": 377037,
+        "type": "tracing"
+      },
+      "18909": {
+        "bytes_jited": 929,
+        "bytes_xlated": 1632,
+        "id": 18909,
+        "name": "sched_switch",
+        "run_cnt_delta": 23776655,
+        "run_time_ns_delta": 2383432154,
+        "type": "tracing"
+      },
+      "18910": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18910,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18911": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18911,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--syscall",
+          "1",
+          "--syscall-method",
+          "fast75",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockfd-port",
+          "45742",
+          "--timeout",
+          "30s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/0e2e7669"
+        ],
+        "config": {
+          "stressors": [
+            "syscall",
+            "cap",
+            "set",
+            "sockfd"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 30.10839670000132,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1016445] setting to a 30 secs run per stressor\nstress-ng: info:  [1016445] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [1016445] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [1016446] syscall: using method 'fast75'\nstress-ng: info:  [1016446] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [1016446] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [1016446] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [1016446] syscall:                  pkey_get       50.0         46\nstress-ng: info:  [1016446] syscall:              gettimeofday       52.0         45\nstress-ng: info:  [1016446] syscall:                  pkey_set       61.5         56\nstress-ng: info:  [1016446] syscall:                      time      173.5         47\nstress-ng: info:  [1016446] syscall:                    getcpu      262.0        215\nstress-ng: info:  [1016446] syscall:           set_robust_list      345.5        321\nstress-ng: info:  [1016446] syscall:                 pkey_free      357.5        338\nstress-ng: info:  [1016446] syscall:                    getgid      400.5        353\nstress-ng: info:  [1016446] syscall:                       dup      410.0        397\nstress-ng: info:  [1016446] syscall:              timer_delete      416.0        415\nstress-ng: metrc: [1016445] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1016445]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1016445] syscall             514     30.00      0.01      0.02        17.13       21009.61\nstress-ng: metrc: [1016445] cap            10646126     30.00      4.17     25.83    354871.07      354850.07\nstress-ng: metrc: [1016445] set              789878     30.00      2.89     27.07     26329.27       26358.23\nstress-ng: metrc: [1016445] sockfd          6593963     30.08      2.98     47.36    219233.14      130986.02\nstress-ng: info:  [1016445] skipped: 0\nstress-ng: info:  [1016445] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [1016445] failed: 0\nstress-ng: info:  [1016445] metrics untrustworthy: 0\nstress-ng: info:  [1016445] successful run completed in 30.08 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "18912": {
+        "bytes_jited": 140,
+        "bytes_xlated": 232,
+        "id": 18912,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 9039510,
+        "run_time_ns_delta": 521159503,
+        "type": "kprobe"
+      },
+      "18913": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18913,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18914": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 18914,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18915": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 18915,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18916": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18916,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18917": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18917,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18918": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18918,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18919": {
+        "bytes_jited": 380,
+        "bytes_xlated": 616,
+        "id": 18919,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 9039510,
+        "run_time_ns_delta": 2170600922,
+        "type": "kprobe"
+      },
+      "18920": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18920,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18921": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 18921,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18922": {
+        "bytes_jited": 118,
+        "bytes_xlated": 200,
+        "id": 18922,
+        "name": "blk_account_io_",
+        "run_cnt_delta": 291,
+        "run_time_ns_delta": 43748,
+        "type": "kprobe"
+      },
+      "18923": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18923,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18924": {
+        "bytes_jited": 351,
+        "bytes_xlated": 648,
+        "id": 18924,
+        "name": "block_rq_insert",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "18925": {
+        "bytes_jited": 434,
+        "bytes_xlated": 712,
+        "id": 18925,
+        "name": "block_rq_comple",
+        "run_cnt_delta": 335,
+        "run_time_ns_delta": 272384,
+        "type": "tracing"
+      },
+      "18926": {
+        "bytes_jited": 437,
+        "bytes_xlated": 824,
+        "id": 18926,
+        "name": "block_rq_issue",
+        "run_cnt_delta": 316,
+        "run_time_ns_delta": 200070,
+        "type": "tracing"
+      },
+      "18927": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 18927,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18928": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18928,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18929": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18929,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18930": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 18930,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18931": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 18931,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18932": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 18932,
+        "name": "fentry_vfs_crea",
+        "run_cnt_delta": 14,
+        "run_time_ns_delta": 1283,
+        "type": "tracing"
+      },
+      "18933": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18933,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18934": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 18934,
+        "name": "fentry_vfs_open",
+        "run_cnt_delta": 6623485,
+        "run_time_ns_delta": 247919794,
+        "type": "tracing"
+      },
+      "18935": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 18935,
+        "name": "fentry_vfs_read",
+        "run_cnt_delta": 1171784,
+        "run_time_ns_delta": 73313226,
+        "type": "tracing"
+      },
+      "18936": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18936,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18937": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 18937,
+        "name": "fentry_vfs_fsyn",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "18938": {
+        "bytes_jited": 37,
+        "bytes_xlated": 48,
+        "id": 18938,
+        "name": "fentry_vfs_writ",
+        "run_cnt_delta": 1706261,
+        "run_time_ns_delta": 130430462,
+        "type": "tracing"
+      },
+      "18939": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 18939,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18940": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 18940,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18941": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 18941,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18942": {
+        "bytes_jited": 138,
+        "bytes_xlated": 240,
+        "id": 18942,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 6648215,
+        "run_time_ns_delta": 386229270,
+        "type": "tracepoint"
+      },
+      "18943": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18943,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18944": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18944,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18945": {
+        "bytes_jited": 599,
+        "bytes_xlated": 792,
+        "id": 18945,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 6648215,
+        "run_time_ns_delta": 7417071747,
+        "type": "tracepoint"
+      },
+      "18946": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18946,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18947": {
+        "bytes_jited": 599,
+        "bytes_xlated": 792,
+        "id": 18947,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 628,
+        "run_time_ns_delta": 2459010,
+        "type": "tracepoint"
+      },
+      "18948": {
+        "bytes_jited": 138,
+        "bytes_xlated": 240,
+        "id": 18948,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 628,
+        "run_time_ns_delta": 354145,
+        "type": "tracepoint"
+      },
+      "18949": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18949,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18950": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 18950,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18951": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18951,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18952": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18952,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18953": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 18953,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18954": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 18954,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18955": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18955,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18956": {
+        "bytes_jited": 403,
+        "bytes_xlated": 656,
+        "id": 18956,
+        "name": "sys_exit",
+        "run_cnt_delta": 225087005,
+        "run_time_ns_delta": 15795891938,
+        "type": "tracepoint"
+      },
+      "18957": {
+        "bytes_jited": 105,
+        "bytes_xlated": 168,
+        "id": 18957,
+        "name": "sys_enter",
+        "run_cnt_delta": 225087001,
+        "run_time_ns_delta": 13843845981,
+        "type": "tracepoint"
+      },
+      "18958": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18958,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18959": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 18959,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18960": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18960,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18961": {
+        "bytes_jited": 107,
+        "bytes_xlated": 184,
+        "id": 18961,
+        "name": "tcp_v4_connect",
+        "run_cnt_delta": 18,
+        "run_time_ns_delta": 25851,
+        "type": "kprobe"
+      },
+      "18962": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18962,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18963": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 18963,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18964": {
+        "bytes_jited": 490,
+        "bytes_xlated": 752,
+        "id": 18964,
+        "name": "tcp_v4_connect_",
+        "run_cnt_delta": 18,
+        "run_time_ns_delta": 100121,
+        "type": "kprobe"
+      },
+      "18965": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 18965,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18966": {
+        "bytes_jited": 493,
+        "bytes_xlated": 752,
+        "id": 18966,
+        "name": "tcp_v6_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "18967": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18967,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18968": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18968,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18969": {
+        "bytes_jited": 107,
+        "bytes_xlated": 184,
+        "id": 18969,
+        "name": "tcp_v6_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "18970": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 18970,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18971": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 18971,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18972": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 18972,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18973": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 18973,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18974": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18974,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18975": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18975,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18976": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18976,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18977": {
+        "bytes_jited": 1498,
+        "bytes_xlated": 2240,
+        "id": 18977,
+        "name": "inet_sock_set_s",
+        "run_cnt_delta": 120,
+        "run_time_ns_delta": 229569,
+        "type": "tracepoint"
+      },
+      "18978": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18978,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18979": {
+        "bytes_jited": 118,
+        "bytes_xlated": 184,
+        "id": 18979,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 11735353,
+        "run_time_ns_delta": 969326986,
+        "type": "tracing"
+      },
+      "18980": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18980,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18981": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18981,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18982": {
+        "bytes_jited": 118,
+        "bytes_xlated": 184,
+        "id": 18982,
+        "name": "sched_wakeup_ne",
+        "run_cnt_delta": 235,
+        "run_time_ns_delta": 95402,
+        "type": "tracing"
+      },
+      "18983": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 18983,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18984": {
+        "bytes_jited": 35,
+        "bytes_xlated": 40,
+        "id": 18984,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "18985": {
+        "bytes_jited": 41,
+        "bytes_xlated": 48,
+        "id": 18985,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "18986": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18986,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "18987": {
+        "bytes_jited": 929,
+        "bytes_xlated": 1632,
+        "id": 18987,
+        "name": "sched_switch",
+        "run_cnt_delta": 23464165,
+        "run_time_ns_delta": 2384515668,
+        "type": "tracing"
+      },
+      "18988": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 18988,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--syscall",
+          "1",
+          "--syscall-method",
+          "fast75",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockfd-port",
+          "47278",
+          "--timeout",
+          "30s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/0e2e7669"
+        ],
+        "config": {
+          "stressors": [
+            "syscall",
+            "cap",
+            "set",
+            "sockfd"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 31.035951724999904,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1017950] setting to a 30 secs run per stressor\nstress-ng: info:  [1017950] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [1017950] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [1017952] syscall: using method 'fast75'\nstress-ng: info:  [1017952] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [1017952] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [1017952] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [1017952] syscall:                  pkey_set       41.5         41\nstress-ng: info:  [1017952] syscall:                  pkey_get       46.5         46\nstress-ng: info:  [1017952] syscall:              gettimeofday       73.0         46\nstress-ng: info:  [1017952] syscall:                      time      245.5         39\nstress-ng: info:  [1017952] syscall:                    getcpu      256.5        202\nstress-ng: info:  [1017952] syscall:                 pkey_free      324.0        310\nstress-ng: info:  [1017952] syscall:                    getpid      394.5        351\nstress-ng: info:  [1017952] syscall:                epoll_wait      420.0        406\nstress-ng: info:  [1017952] syscall:                       dup      425.5        423\nstress-ng: info:  [1017952] syscall:              timer_delete      435.0        422\nstress-ng: metrc: [1017950] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1017950]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1017950] syscall             514     31.01      0.01      0.02        16.58       18145.87\nstress-ng: metrc: [1017950] cap            10641615     30.00      3.61     26.38    354720.55      354750.77\nstress-ng: metrc: [1017950] set              787915     30.00      2.73     27.24     26263.82       26291.22\nstress-ng: metrc: [1017950] sockfd          6507823     30.05      2.59     47.67    216536.21      129488.09\nstress-ng: info:  [1017950] skipped: 0\nstress-ng: info:  [1017950] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [1017950] failed: 0\nstress-ng: info:  [1017950] metrics untrustworthy: 0\nstress-ng: info:  [1017950] successful run completed in 31.01 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      }
+    ]
+  },
+  "rejit_result": {
+    "deployment_specialization": {
+      "enabled_passes": [
+        "tail_call_icache"
+      ],
+      "profile_root": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260714_163509_102470/details/deployment-specialization/bcc__set/profiles",
+      "raw_profile_dir": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260714_163509_102470/details/deployment-specialization/bcc__set/raw",
+      "training_workload": {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--syscall",
+          "1",
+          "--syscall-method",
+          "fast75",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockfd-port",
+          "46254",
+          "--timeout",
+          "30s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/0e2e7669"
+        ],
+        "config": {
+          "stressors": [
+            "syscall",
+            "cap",
+            "set",
+            "sockfd"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 31.037931381997623,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1016866] setting to a 30 secs run per stressor\nstress-ng: info:  [1016866] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [1016866] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [1016867] syscall: using method 'fast75'\nstress-ng: info:  [1016867] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [1016867] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [1016867] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [1016867] syscall:                  pkey_get       47.5         47\nstress-ng: info:  [1016867] syscall:              gettimeofday       48.5         46\nstress-ng: info:  [1016867] syscall:                  pkey_set       49.5         48\nstress-ng: info:  [1016867] syscall:                      time      177.5         49\nstress-ng: info:  [1016867] syscall:                    getcpu      229.0        200\nstress-ng: info:  [1016867] syscall:                 pkey_free      292.5        289\nstress-ng: info:  [1016867] syscall:           set_robust_list      378.5        374\nstress-ng: info:  [1016867] syscall:                epoll_wait      388.0        371\nstress-ng: info:  [1016867] syscall:                    getuid      389.5        340\nstress-ng: info:  [1016867] syscall:                    getpid      390.0        375\nstress-ng: metrc: [1016866] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1016866]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1016866] syscall             514     31.00      0.01      0.01        16.58       20452.83\nstress-ng: metrc: [1016866] cap            10245913     30.00      3.61     26.39    341530.75      341562.54\nstress-ng: metrc: [1016866] set              767278     30.00      2.73     27.23     25575.91       25614.56\nstress-ng: metrc: [1016866] sockfd          6708546     30.10      2.63     48.77    222890.25      130514.60\nstress-ng: info:  [1016866] skipped: 0\nstress-ng: info:  [1016866] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [1016866] failed: 0\nstress-ng: info:  [1016866] metrics untrustworthy: 0\nstress-ng: info:  [1016866] successful run completed in 31.01 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      },
+      "training_workloads": {
+        "pmu_profile": {
+          "command": [
+            "/usr/bin/stress-ng",
+            "--syscall",
+            "1",
+            "--syscall-method",
+            "fast75",
+            "--cap",
+            "1",
+            "--set",
+            "1",
+            "--sockfd",
+            "1",
+            "--sockfd-port",
+            "46254",
+            "--timeout",
+            "30s",
+            "--metrics-brief",
+            "--temp-path",
+            "/var/tmp/bpfrejit-runtime/0e2e7669"
+          ],
+          "config": {
+            "stressors": [
+              "syscall",
+              "cap",
+              "set",
+              "sockfd"
+            ],
+            "tool": "stress-ng"
+          },
+          "duration_s": 31.037931381997623,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "stress-ng: info:  [1016866] setting to a 30 secs run per stressor\nstress-ng: info:  [1016866] dispatching hogs: 1 syscall, 1 cap, 1 set, 1 sockfd\nstress-ng: info:  [1016866] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [1016867] syscall: using method 'fast75'\nstress-ng: info:  [1016867] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [1016867] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [1016867] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [1016867] syscall:                  pkey_get       47.5         47\nstress-ng: info:  [1016867] syscall:              gettimeofday       48.5         46\nstress-ng: info:  [1016867] syscall:                  pkey_set       49.5         48\nstress-ng: info:  [1016867] syscall:                      time      177.5         49\nstress-ng: info:  [1016867] syscall:                    getcpu      229.0        200\nstress-ng: info:  [1016867] syscall:                 pkey_free      292.5        289\nstress-ng: info:  [1016867] syscall:           set_robust_list      378.5        374\nstress-ng: info:  [1016867] syscall:                epoll_wait      388.0        371\nstress-ng: info:  [1016867] syscall:                    getuid      389.5        340\nstress-ng: info:  [1016867] syscall:                    getpid      390.0        375\nstress-ng: metrc: [1016866] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1016866]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1016866] syscall             514     31.00      0.01      0.01        16.58       20452.83\nstress-ng: metrc: [1016866] cap            10245913     30.00      3.61     26.39    341530.75      341562.54\nstress-ng: metrc: [1016866] set              767278     30.00      2.73     27.23     25575.91       25614.56\nstress-ng: metrc: [1016866] sockfd          6708546     30.10      2.63     48.77    222890.25      130514.60\nstress-ng: info:  [1016866] skipped: 0\nstress-ng: info:  [1016866] passed: 4: syscall (1) cap (1) set (1) sockfd (1)\nstress-ng: info:  [1016866] failed: 0\nstress-ng: info:  [1016866] metrics untrustworthy: 0\nstress-ng: info:  [1016866] successful run completed in 31.01 secs",
+          "workload_name": "stress_ng_bcc_hook_hot"
+        }
+      }
+    },
+    "mode": "live_swap",
+    "shim_responses": [
+      {
+        "pid": 1015884,
+        "response": {
+          "per_program": {
+            "18835": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18835,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18915,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18836": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18836,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18913,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18849": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18849,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18917,
+                "prog_name": "libbpf_nametest",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18852": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 5,
+                    "insn_count_before": 5,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18852,
+              "program": {
+                "final_insn_count": 5,
+                "orig_insn_count": 5,
+                "prog_id": 18914,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18860": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 38,
+                    "insn_count_before": 38,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 27,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18860,
+              "program": {
+                "final_insn_count": 38,
+                "orig_insn_count": 38,
+                "prog_id": 18912,
+                "prog_name": "kprobe__cap_cap",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "18861": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18861,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18916,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18863": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 142,
+                    "insn_count_before": 142,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 32,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18863,
+              "program": {
+                "final_insn_count": 142,
+                "orig_insn_count": 142,
+                "prog_id": 18919,
+                "prog_name": "kprobe__cap_cap",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "18910": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18910,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18918,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 1015889,
+        "response": {
+          "per_program": {
+            "18839": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18839,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18930,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18841": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18841,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18920,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18877": {
+              "passes": [
+                {
+                  "bpfopt_ms": 4,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18877,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18928,
+                "prog_name": "libbpf_nametest",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18889": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 5,
+                    "insn_count_before": 5,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18889,
+              "program": {
+                "final_insn_count": 5,
+                "orig_insn_count": 5,
+                "prog_id": 18927,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18900": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18900,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 18921,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "18901": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 31,
+                    "insn_count_before": 31,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 21,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18901,
+              "program": {
+                "final_insn_count": 31,
+                "orig_insn_count": 31,
+                "prog_id": 18922,
+                "prog_name": "blk_account_io_",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "18903": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18903,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18929,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18906": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 165,
+                    "insn_count_before": 165,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18906,
+              "program": {
+                "final_insn_count": 165,
+                "orig_insn_count": 165,
+                "prog_id": 18924,
+                "prog_name": "block_rq_insert",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "18907": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 117,
+                    "insn_count_before": 117,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 28,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18907,
+              "program": {
+                "final_insn_count": 117,
+                "orig_insn_count": 117,
+                "prog_id": 18926,
+                "prog_name": "block_rq_issue",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "18908": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 114,
+                    "insn_count_before": 114,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 25,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18908,
+              "program": {
+                "final_insn_count": 114,
+                "orig_insn_count": 114,
+                "prog_id": 18925,
+                "prog_name": "block_rq_comple",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "18911": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18911,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18923,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 1015892,
+        "response": {
+          "per_program": {
+            "18853": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18853,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18939,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18854": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18854,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18933,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18882": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18882,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18936,
+                "prog_name": "libbpf_nametest",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18885": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 5,
+                    "insn_count_before": 5,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18885,
+              "program": {
+                "final_insn_count": 5,
+                "orig_insn_count": 5,
+                "prog_id": 18931,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18886": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 2,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18886,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 18935,
+                "prog_name": "fentry_vfs_read",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "18888": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 2,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18888,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 18938,
+                "prog_name": "fentry_vfs_writ",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "18891": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 3,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18891,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 18937,
+                "prog_name": "fentry_vfs_fsyn",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "18893": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 3,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18893,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 18934,
+                "prog_name": "fentry_vfs_open",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "18894": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 4,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18894,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 18932,
+                "prog_name": "fentry_vfs_crea",
+                "prog_type": 26
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 1015895,
+        "response": {
+          "per_program": {
+            "18837": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18837,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18950,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18838": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18838,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18946,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18847": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18847,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18949,
+                "prog_name": "libbpf_nametest",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18848": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 5,
+                    "insn_count_before": 5,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18848,
+              "program": {
+                "final_insn_count": 5,
+                "orig_insn_count": 5,
+                "prog_id": 18940,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18855": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18855,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 18941,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "18856": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 46,
+                    "insn_count_before": 46,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 20,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18856,
+              "program": {
+                "final_insn_count": 46,
+                "orig_insn_count": 46,
+                "prog_id": 18948,
+                "prog_name": "tracepoint__sys",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "18857": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18857,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18944,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18858": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 46,
+                    "insn_count_before": 46,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 21,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18858,
+              "program": {
+                "final_insn_count": 46,
+                "orig_insn_count": 46,
+                "prog_id": 18942,
+                "prog_name": "tracepoint__sys",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "18859": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 102,
+                    "insn_count_before": 102,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 27,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18859,
+              "program": {
+                "final_insn_count": 102,
+                "orig_insn_count": 102,
+                "prog_id": 18947,
+                "prog_name": "tracepoint__sys",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "18862": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 102,
+                    "insn_count_before": 102,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 28,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18862,
+              "program": {
+                "final_insn_count": 102,
+                "orig_insn_count": 102,
+                "prog_id": 18945,
+                "prog_name": "tracepoint__sys",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "18869": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18869,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18943,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 1015898,
+        "response": {
+          "per_program": {
+            "18845": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18845,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18954,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18846": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18846,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18958,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18874": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18874,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18951,
+                "prog_name": "libbpf_nametest",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18876": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 5,
+                    "insn_count_before": 5,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18876,
+              "program": {
+                "final_insn_count": 5,
+                "orig_insn_count": 5,
+                "prog_id": 18953,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18879": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18879,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 18959,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "18880": {
+              "passes": [
+                {
+                  "bpfopt_ms": 4,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 31,
+                    "insn_count_before": 31,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 22,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18880,
+              "program": {
+                "final_insn_count": 31,
+                "orig_insn_count": 31,
+                "prog_id": 18957,
+                "prog_name": "sys_enter",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "18881": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18881,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18952,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18884": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 116,
+                    "insn_count_before": 116,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 24,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18884,
+              "program": {
+                "final_insn_count": 116,
+                "orig_insn_count": 116,
+                "prog_id": 18956,
+                "prog_name": "sys_exit",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "18887": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18887,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18955,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 1015901,
+        "response": {
+          "per_program": {
+            "18840": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18840,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18965,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18842": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18842,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18967,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18850": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18850,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18962,
+                "prog_name": "libbpf_nametest",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18851": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 5,
+                    "insn_count_before": 5,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18851,
+              "program": {
+                "final_insn_count": 5,
+                "orig_insn_count": 5,
+                "prog_id": 18970,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18864": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18864,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 18963,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "18865": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 32,
+                    "insn_count_before": 32,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 21,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18865,
+              "program": {
+                "final_insn_count": 32,
+                "orig_insn_count": 32,
+                "prog_id": 18961,
+                "prog_name": "tcp_v4_connect",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "18867": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18867,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18960,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18871": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 167,
+                    "insn_count_before": 167,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 23,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18871,
+              "program": {
+                "final_insn_count": 167,
+                "orig_insn_count": 167,
+                "prog_id": 18964,
+                "prog_name": "tcp_v4_connect_",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "18872": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 32,
+                    "insn_count_before": 32,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 27,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18872,
+              "program": {
+                "final_insn_count": 32,
+                "orig_insn_count": 32,
+                "prog_id": 18969,
+                "prog_name": "tcp_v6_connect",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "18873": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 170,
+                    "insn_count_before": 170,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 20,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18873,
+              "program": {
+                "final_insn_count": 170,
+                "orig_insn_count": 170,
+                "prog_id": 18966,
+                "prog_name": "tcp_v6_connect_",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "18875": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18875,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18968,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 1015904,
+        "response": {
+          "per_program": {
+            "18843": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18843,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18971,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18844": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18844,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18976,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18878": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18878,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18975,
+                "prog_name": "libbpf_nametest",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18883": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 5,
+                    "insn_count_before": 5,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18883,
+              "program": {
+                "final_insn_count": 5,
+                "orig_insn_count": 5,
+                "prog_id": 18973,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18895": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18895,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 18972,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "18896": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 309,
+                    "insn_count_before": 309,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 27,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18896,
+              "program": {
+                "final_insn_count": 309,
+                "orig_insn_count": 309,
+                "prog_id": 18977,
+                "prog_name": "inet_sock_set_s",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "18897": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18897,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18974,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18898": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18898,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18978,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 1015907,
+        "response": {
+          "per_program": {
+            "18866": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18866,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18983,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18868": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18868,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18986,
+                "prog_name": "",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "18870": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18870,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18988,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18890": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18890,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18980,
+                "prog_name": "libbpf_nametest",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18892": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 5,
+                    "insn_count_before": 5,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18892,
+              "program": {
+                "final_insn_count": 5,
+                "orig_insn_count": 5,
+                "prog_id": 18984,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18899": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 6,
+                    "insn_count_before": 6,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18899,
+              "program": {
+                "final_insn_count": 6,
+                "orig_insn_count": 6,
+                "prog_id": 18985,
+                "prog_name": "",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "18902": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 32,
+                    "insn_count_before": 32,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18902,
+              "program": {
+                "final_insn_count": 32,
+                "orig_insn_count": 32,
+                "prog_id": 18979,
+                "prog_name": "sched_wakeup",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "18904": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 2,
+                    "insn_count_before": 2,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18904,
+              "program": {
+                "final_insn_count": 2,
+                "orig_insn_count": 2,
+                "prog_id": 18981,
+                "prog_name": "",
+                "prog_type": 1
+              },
+              "status": "ok"
+            },
+            "18905": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 32,
+                    "insn_count_before": 32,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18905,
+              "program": {
+                "final_insn_count": 32,
+                "orig_insn_count": 32,
+                "prog_id": 18982,
+                "prog_name": "sched_wakeup_ne",
+                "prog_type": 26
+              },
+              "status": "ok"
+            },
+            "18909": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "inlined_map_entries": [],
+                    "insn_count_after": 257,
+                    "insn_count_before": 257,
+                    "insn_delta": 0,
+                    "pass": "tail_call_icache",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {},
+                    "skipped_sites": []
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "profile_root=\"${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}\"; profile=\"${profile_root}/tail_call_icache/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+                    "log_level": 1,
+                    "name": "tail_call_icache"
+                  }
+                }
+              ],
+              "prog_id": 18909,
+              "program": {
+                "final_insn_count": 257,
+                "orig_insn_count": 257,
+                "prog_id": 18987,
+                "prog_name": "sched_switch",
+                "prog_type": 26
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      }
+    ],
+    "status": "ok"
+  },
+  "runner": "bcc_set",
+  "runner_details": {
+    "command_used": [],
+    "process_output": {
+      "stderr_tail": "capable:\nlost 3270 events on CPU #6\nlost 4155 events on CPU #6\nlost 3233 events on CPU #6\nlost 4120 events on CPU #6\nlost 2139 events on CPU #6\nlost 4356 events on CPU #6\nlost 2477 events on CPU #6\nlost 4103 events on CPU #6\nlost 3766 events on CPU #6\nlost 2944 events on CPU #6\nlost 4272 events on CPU #6\nlost 4114 events on CPU #6\nlost 3002 events on CPU #6\nlost 3164 events on CPU #6\nlost 3491 events on CPU #6\nlost 3221 events on CPU #6\nlost 4153 events on CPU #6\nlost 3688 events on CPU #6\nlost 3434 events on CPU #6\nlost 3353 events on CPU #6\nlost 3544 events on CPU #6\nlost 3964 events on CPU #6\nlost 4353 events on CPU #6\nlost 4045 events on CPU #6\nlost 3333 events on CPU #6\nlost 4001 events on CPU #6\nlost 4012 events on CPU #6\nlost 3941 events on CPU #6\nlost 3224 events on CPU #6\nlost 4128 events on CPU #6\nlost 167 events on CPU #6\nlost 3262 events on CPU #6\nlost 882 events on CPU #6\nlost 2616 events on CPU #6\nlost 1544 events on CPU #6\nlost 2300 events on CPU #6\nlost 1211 events on CPU #6\nlost 1792 events on CPU #6\nlost 1312 events on CPU #6\nlost 338 events on CPU #6\nopensnoop:\nLost 299 events on CPU #7!\nLost 291 events on CPU #3!\nLost 36 events on CPU #2!",
+      "stdout_tail": "5501   celery       4  172.18.0.5       172.18.0.9       5432\n6457   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n6457   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n5501   celery       4  172.18.0.5       172.18.0.9       5432\n5501   celery       4  172.18.0.5       172.18.0.9       5432\n5501   celery       4  172.18.0.5       172.18.0.9       5432\n2744   node         4  128.114.59.195   149.154.166.110  443\n6457   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n6457   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n6457   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n5501   celery       4  172.18.0.5       172.18.0.9       5432\n5501   celery       4  172.18.0.5       172.18.0.9       5432\n6457   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n6457   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n5501   celery       4  172.18.0.5       172.18.0.9       5432\n6457   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n6457   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n6457   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n5501   celery       4  172.18.0.5       172.18.0.9       5432\n6457   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n6457   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n6457   tokio-rt-wor 4  128.114.59.195   172.64.155.209   443\n5501   celery       4  172.18.0.5       172.18.0.9       5432\n5501   celery       4  172.18.0.5       172.18.0.9       5432\ntcplife:\n1017748 postgres         172.18.0.9      5432  172.18.0.5      49434 0.66   0.43   5011.88\n6457    tokio-rt-worker  128.114.59.195  46992 172.64.155.209  443   5.59   5.11   383.17\n5501    celery           172.18.0.5      42836 172.18.0.9      5432  0.43   0.66   5011.63\n1017817 postgres         172.18.0.9      5432  172.18.0.5      42836 0.66   0.43   5011.63\n6457    tokio-rt-worker  128.114.59.195  47004 172.64.155.209  443   5.59   5.11   333.09\n6457    tokio-rt-worker  128.114.59.195  48956 172.64.155.209  443   5.17   5.11   321.73\n5501    celery           172.18.0.5      42842 172.18.0.9      5432  0.43   0.66   5011.68\n1017842 postgres         172.18.0.9      5432  172.18.0.5      42842 0.66   0.43   5011.68\n6457    tokio-rt-worker  128.114.59.195  48962 172.64.155.209  443   5.59   5.12   338.20\n6457    tokio-rt-worker  128.114.59.195  48976 172.64.155.209  443   5.59   5.11   331.32\n5501    celery           172.18.0.5      41120 172.18.0.9      5432  0.43   0.66   5012.07\n1017878 postgres         172.18.0.9      5432  172.18.0.5      41120 0.66   0.43   5012.07\n5501    celery           172.18.0.5      41122 172.18.0.9      5432  0.43   0.66   5011.58\n1017915 postgres         172.18.0.9      5432  172.18.0.5      41122 0.66   0.43   5011.58\n5501    celery           172.18.0.5      36938 172.18.0.9      5432  0.43   0.66   5011.60\n1017916 postgres         172.18.0.9      5432  172.18.0.5      36938 0.66   0.43   5011.60\n2744    node             128.114.59.195  48686 149.154.166.110 443   2.74   6.46   60469.39\n6457    tokio-rt-worker  128.114.59.195  47324 172.64.155.209  443   5.42   5.11   373.56\n6457    tokio-rt-worker  128.114.59.195  47338 172.64.155.209  443   5.16   5.11   355.79\n5501    celery           172.18.0.5      36948 172.18.0.9      5432  0.43   0.66   5011.31\n1017973 postgres         172.18.0.9      5432  172.18.0.5      36948 0.66   0.43   5011.31\n6457    tokio-rt-worker  128.114.59.195  47344 172.64.155.209  443   5.17   5.11   333.72\n5501    celery           172.18.0.5      52182 172.18.0.9      5432  0.43   0.66   5011.36\n1018023 postgres         172.18.0.9      5432  172.18.0.5      52182 0.66   0.43   5011.37\n6457    tokio-rt-worker  128.114.59.195  47352 172.64.155.209  443   5.42   5.11   325.62\n6457    tokio-rt-worker  128.114.59.195  47354 172.64.155.209  443   5.16   5.11   347.29\n5501    celery           172.18.0.5      52188 172.18.0.9      5432  0.43   0.66   5011.84\n1018025 postgres         172.18.0.9      5432  172.18.0.5      52188 0.66   0.43   5011.84\n6457    tokio-rt-worker  128.114.59.195  43274 172.64.155.209  443   5.42   5.11   464.30\n6457    tokio-rt-worker  128.114.59.195  43286 172.64.155.209  443   5.16   5.12   341.40\n6457    tokio-rt-worker  128.114.59.195  43302 172.64.155.209  443   5.17   5.11   328.50\n5501    celery           172.18.0.5      41718 172.18.0.9      5432  0.43   0.66   5012.37\n1018059 postgres         172.18.0.9      5432  172.18.0.5      41718 0.66   0.43   5012.37\n6457    tokio-rt-worker  128.114.59.195  43306 172.64.155.209  443   4.36   275.69 379.94\n6457    tokio-rt-worker  128.114.59.195  43318 172.64.155.209  443   5.42   5.11   366.44\n6457    tokio-rt-worker  128.114.59.195  49732 172.64.155.209  443   5.17   5.11   352.36\n5501    celery           172.18.0.5      41728 172.18.0.9      5432  0.43   0.66   5012.01\n1018111 postgres         172.18.0.9      5432  172.18.0.5      41728 0.66   0.43   5012.01\n5501    celery           172.18.0.5      56002 172.18.0.9      5432  0.43   0.66   5011.33\n1018161 postgres         172.18.0.9      5432  172.18.0.5      56002 0.66   0.43   5011.34\nrunqlat:\nTracing run queue latency... Hit Ctrl-C to end.\n     usecs               : count    distribution\n         0 -> 1          : 55794873 |****************************************|\n         2 -> 3          : 290248   |                                        |\n         4 -> 7          : 48041    |                                        |\n         8 -> 15         : 8721     |                                        |\n        16 -> 31         : 12830    |                                        |\n        32 -> 63         : 8197     |                                        |\n        64 -> 127        : 2163     |                                        |\n       128 -> 255        : 2286     |                                        |\n       256 -> 511        : 3002     |                                        |\n       512 -> 1023       : 5178     |                                        |\n      1024 -> 2047       : 994      |                                        |\n      2048 -> 4095       : 330      |                                        |"
+    }
+  },
+  "selected_workload": "stress_ng_bcc_hook_hot",
+  "status": "ok"
+}

@@ -1,0 +1,51 @@
+{
+  "bpf_stats": false,
+  "config": {
+    "enabled_passes": [
+      "loop_trip_spec"
+    ],
+    "runtime_cpu_affinity": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "corpus run terminated by SIGTERM",
+  "generated_at": "2026-07-22T22:49:29.171401+00:00",
+  "last_updated_at": "2026-07-22T22:49:29.171395+00:00",
+  "launcher_boot_id": "4c38f1c3-b403-4b5c-9d1e-bc8c48b47297",
+  "launcher_pid": 681256,
+  "launcher_start_ticks": 4508716,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "run_type": "x86_docker_corpus",
+  "runtime_artifacts": {
+    "binaries": {
+      "bpfopt": {
+        "path": "/usr/local/bin/bpfopt",
+        "sha256": "bf971d746b7e5dfaa8f262fc05118a052042270784d0cf4c9d53886831ef4808",
+        "size_bytes": 76776488
+      },
+      "bpfprof": {
+        "path": "/usr/local/bin/bpfprof",
+        "sha256": "e3bc9e74809ded38f3e0e1f5ef7dba967f13cbeea7cfee386267eacaceba860f",
+        "size_bytes": 1483840
+      },
+      "shim": {
+        "path": "/usr/local/lib/bpfrejit/libbpfrejit_shim.so",
+        "sha256": "de05795f3c3b40ccad837fbf96f5702ce326b846acf5afd90681cd76b4beb98b",
+        "size_bytes": 557152
+      }
+    },
+    "image_id": "sha256:a04473630e0cb2f68cfaf09f7d1c2a1face88fc308a901d82509784e6ab3e977"
+  },
+  "samples": 1,
+  "started_at": "2026-07-22T22:44:38.528695+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_only": false,
+  "workload_seconds": 30.0
+}

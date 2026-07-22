@@ -1,0 +1,23 @@
+{
+  "bpf_stats": true,
+  "config": {
+    "enabled_passes": [
+      "branch_flip"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "failed to load bpf_x86_native_lab: insmod: ERROR: could not insert module /artifacts/kop/bpf_x86_native_lab.ko: Invalid parameters",
+  "generated_at": "2026-07-14T11:34:55.658405+00:00",
+  "last_updated_at": "2026-07-14T11:34:55.658399+00:00",
+  "launcher_boot_id": "214138c7-5a18-4bd2-9c97-c74603e88a0e",
+  "launcher_pid": 2712,
+  "launcher_start_ticks": 2084,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "run_type": "aws_x86_corpus",
+  "samples": 1,
+  "started_at": "2026-07-14T11:34:55.290133+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_only": false,
+  "workload_seconds": 5.0
+}

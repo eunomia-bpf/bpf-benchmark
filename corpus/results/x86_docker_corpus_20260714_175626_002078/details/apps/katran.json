@@ -1,0 +1,1906 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "19892": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 19892,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "19893": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 19893,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "19894": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 19894,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "19895": {
+        "bytes_jited": 40,
+        "bytes_xlated": 32,
+        "id": 19895,
+        "name": "det_arg_ctx",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "19896": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 19896,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      },
+      "19897": {
+        "bytes_jited": 13663,
+        "bytes_xlated": 23888,
+        "id": 19897,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 74902745,
+        "run_time_ns_delta": 8424276874,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@0",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 0,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.082256016001338,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 24823891  errors: 38933121\n     started: 27371330227us  stopped: 27401274894us idle: 33530us\n     seq_num: 24823892  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 57965\n     cur_queue_map: 0\n     flows: 31894885\nResult: OK: 29944667(c29911136+d33530) usec, 24823891 (64byte,-1frags)\n  828992pps 424Mb/sec (424443904bps) errors: 38933121",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@1",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 1,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.082256016001338,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@1\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 1505  errors: 59570\n     started: 27371330173us  stopped: 27401274979us idle: 14973209us\n     seq_num: 1506  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 61076\n     cur_queue_map: 0\n     flows: 44368\nResult: OK: 29944806(c14971597+d14973209) usec, 1505 (64byte,-1frags)\n  50pps 0Mb/sec (25600bps) errors: 59570",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@2",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 2,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.082256016001338,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@2\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 24993034  errors: 39267485\n     started: 27371330177us  stopped: 27401274894us idle: 6020us\n     seq_num: 24993035  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 37200\n     cur_queue_map: 0\n     flows: 32146662\nResult: OK: 29944717(c29938697+d6020) usec, 24993034 (64byte,-1frags)\n  834639pps 427Mb/sec (427335168bps) errors: 39267485",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@3",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 3,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.082256016001338,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@3\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 25084315  errors: 39261056\n     started: 27371330180us  stopped: 27401274894us idle: 4157us\n     seq_num: 25084316  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 56518\n     cur_queue_map: 0\n     flows: 32188950\nResult: OK: 29944714(c29940556+d4157) usec, 25084315 (64byte,-1frags)\n  837687pps 428Mb/sec (428895744bps) errors: 39261056",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "threads": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 30.082256016001338,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "19898": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 19898,
+        "name": "libbpf_nametest",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "19899": {
+        "bytes_jited": 40,
+        "bytes_xlated": 32,
+        "id": 19899,
+        "name": "det_arg_ctx",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "19900": {
+        "bytes_jited": 14356,
+        "bytes_xlated": 24352,
+        "id": 19900,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 75158653,
+        "run_time_ns_delta": 8433480607,
+        "type": "xdp"
+      },
+      "19901": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 19901,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "19902": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 19902,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "19903": {
+        "bytes_jited": 17,
+        "bytes_xlated": 16,
+        "id": 19903,
+        "name": "",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_sock"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@0",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 0,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.083310359997995,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 24874358  errors: 39028018\n     started: 27472810150us  stopped: 27502754051us idle: 32010us\n     seq_num: 24874359  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 6727\n     cur_queue_map: 0\n     flows: 31967534\nResult: OK: 29943900(c29911890+d32010) usec, 24874358 (64byte,-1frags)\n  830698pps 425Mb/sec (425317376bps) errors: 39028018",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@1",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 1,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.083310359997995,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@1\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 60631  errors: 364\n     started: 27472810112us  stopped: 27502754189us idle: 14973935us\n     seq_num: 60632  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 60996\n     cur_queue_map: 0\n     flows: 44341\nResult: OK: 29944077(c14970142+d14973935) usec, 60631 (64byte,-1frags)\n  2024pps 1Mb/sec (1036288bps) errors: 364",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@2",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 2,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.083310359997995,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@2\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 25078471  errors: 39493620\n     started: 27472810120us  stopped: 27502754051us idle: 4112us\n     seq_num: 25078472  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 21102\n     cur_queue_map: 0\n     flows: 32302509\nResult: OK: 29943930(c29939817+d4112) usec, 25078471 (64byte,-1frags)\n  837514pps 428Mb/sec (428807168bps) errors: 39493620",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@3",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 3,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.083310359997995,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@3\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 25145193  errors: 39440779\n     started: 27472810130us  stopped: 27502754051us idle: 3873us\n     seq_num: 25145194  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 34983\n     cur_queue_map: 0\n     flows: 32309303\nResult: OK: 29943920(c29940047+d3873) usec, 25145193 (64byte,-1frags)\n  839742pps 429Mb/sec (429947904bps) errors: 39440779",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "threads": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 30.083310359997995,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "rejit_result": {
+    "deployment_specialization": {
+      "enabled_passes": [
+        "branch_flip"
+      ],
+      "profile_root": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260714_175626_002078/details/deployment-specialization/katran/profiles",
+      "raw_profile_dir": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_docker_corpus_20260714_175626_002078/details/deployment-specialization/katran/raw",
+      "training_workload": {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@0",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 0,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.079945741999836,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 24212916  errors: 37517173\n     started: 27402314206us  stopped: 27432213016us idle: 39633us\n     seq_num: 24212917  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 62596\n     cur_queue_map: 0\n     flows: 30881395\nResult: OK: 29898810(c29859177+d39633) usec, 24212916 (64byte,-1frags)\n  809828pps 414Mb/sec (414631936bps) errors: 37517173",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@1",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 1,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.079945741999836,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@1\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 24339558  errors: 37668034\n     started: 27402314162us  stopped: 27432213017us idle: 9928us\n     seq_num: 24339559  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 12429\n     cur_queue_map: 0\n     flows: 31020173\nResult: OK: 29898854(c29888925+d9928) usec, 24339558 (64byte,-1frags)\n  814063pps 416Mb/sec (416800256bps) errors: 37668034",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@2",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 2,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.079945741999836,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@2\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 52784  errors: 6767\n     started: 27402314157us  stopped: 27432213100us idle: 14964398us\n     seq_num: 52785  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 59552\n     cur_queue_map: 0\n     flows: 43384\nResult: OK: 29898942(c14934544+d14964398) usec, 52784 (64byte,-1frags)\n  1765pps 0Mb/sec (903680bps) errors: 6767",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          },
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@3",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 3,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 30.079945741999836,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@3\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 24429878  errors: 37782718\n     started: 27402314061us  stopped: 27432213017us idle: 9577us\n     seq_num: 24429879  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 20831\n     cur_queue_map: 0\n     flows: 31122727\nResult: OK: 29898955(c29889377+d9577) usec, 24429878 (64byte,-1frags)\n  817081pps 418Mb/sec (418345472bps) errors: 37782718",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "threads": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 30.079945741999836,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      },
+      "training_workloads": {
+        "pmu_profile": {
+          "command": [
+            "/usr/sbin/ip",
+            "netns",
+            "exec",
+            "katran-router",
+            "sh",
+            "-c",
+            "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+          ],
+          "components": [
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@0",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "thread_id": 0,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 30.079945741999836,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 24212916  errors: 37517173\n     started: 27402314206us  stopped: 27432213016us idle: 39633us\n     seq_num: 24212917  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 62596\n     cur_queue_map: 0\n     flows: 30881395\nResult: OK: 29898810(c29859177+d39633) usec, 24212916 (64byte,-1frags)\n  809828pps 414Mb/sec (414631936bps) errors: 37517173",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            },
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@1",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "thread_id": 1,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 30.079945741999836,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@1\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 24339558  errors: 37668034\n     started: 27402314162us  stopped: 27432213017us idle: 9928us\n     seq_num: 24339559  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 12429\n     cur_queue_map: 0\n     flows: 31020173\nResult: OK: 29898854(c29888925+d9928) usec, 24339558 (64byte,-1frags)\n  814063pps 416Mb/sec (416800256bps) errors: 37668034",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            },
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@2",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "thread_id": 2,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 30.079945741999836,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@2\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 52784  errors: 6767\n     started: 27402314157us  stopped: 27432213100us idle: 14964398us\n     seq_num: 52785  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 59552\n     cur_queue_map: 0\n     flows: 43384\nResult: OK: 29898942(c14934544+d14964398) usec, 52784 (64byte,-1frags)\n  1765pps 0Mb/sec (903680bps) errors: 6767",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            },
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@3",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "thread_id": 3,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 30.079945741999836,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@3\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 24429878  errors: 37782718\n     started: 27402314061us  stopped: 27432213017us idle: 9577us\n     seq_num: 24429879  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 20831\n     cur_queue_map: 0\n     flows: 31122727\nResult: OK: 29898955(c29889377+d9577) usec, 24429878 (64byte,-1frags)\n  817081pps 418Mb/sec (418345472bps) errors: 37782718",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            }
+          ],
+          "config": {
+            "clone_skb": 0,
+            "dst_ip": "10.100.1.1",
+            "dst_port": 8080,
+            "iface": "rtlb0",
+            "namespace": "katran-router",
+            "pkt_size": 64,
+            "proto": 17,
+            "shared_skb": false,
+            "src_ip": "10.0.0.2",
+            "threads": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "tool": "kernel_pktgen",
+            "xmit_mode": "start_xmit"
+          },
+          "duration_s": 30.079945741999836,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "",
+          "workload_name": "katran_kernel_pktgen_l2_udp"
+        }
+      }
+    },
+    "mode": "live_swap",
+    "per_program": {
+      "19892": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "branch_flip",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_BRANCH_PROFILE_ROOT:?BPFREJIT_BRANCH_PROFILE_ROOT is required for branch_flip}\"; profile=\"${profile_root}/hash-${PROG_BRANCH_PROFILE_HASH}.json\"; bpfopt --pass branch_flip --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\"",
+              "log_level": 1,
+              "name": "branch_flip"
+            }
+          }
+        ],
+        "prog_id": 19892,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 19901,
+          "prog_name": "",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "19893": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "branch_flip",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_BRANCH_PROFILE_ROOT:?BPFREJIT_BRANCH_PROFILE_ROOT is required for branch_flip}\"; profile=\"${profile_root}/hash-${PROG_BRANCH_PROFILE_HASH}.json\"; bpfopt --pass branch_flip --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\"",
+              "log_level": 1,
+              "name": "branch_flip"
+            }
+          }
+        ],
+        "prog_id": 19893,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 19898,
+          "prog_name": "libbpf_nametest",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "19894": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "branch_flip",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_BRANCH_PROFILE_ROOT:?BPFREJIT_BRANCH_PROFILE_ROOT is required for branch_flip}\"; profile=\"${profile_root}/hash-${PROG_BRANCH_PROFILE_HASH}.json\"; bpfopt --pass branch_flip --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\"",
+              "log_level": 1,
+              "name": "branch_flip"
+            }
+          }
+        ],
+        "prog_id": 19894,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 19902,
+          "prog_name": "",
+          "prog_type": 1
+        },
+        "status": "ok"
+      },
+      "19895": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 4,
+              "insn_count_before": 4,
+              "insn_delta": 0,
+              "pass": "branch_flip",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_BRANCH_PROFILE_ROOT:?BPFREJIT_BRANCH_PROFILE_ROOT is required for branch_flip}\"; profile=\"${profile_root}/hash-${PROG_BRANCH_PROFILE_HASH}.json\"; bpfopt --pass branch_flip --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\"",
+              "log_level": 1,
+              "name": "branch_flip"
+            }
+          }
+        ],
+        "prog_id": 19895,
+        "program": {
+          "final_insn_count": 4,
+          "orig_insn_count": 4,
+          "prog_id": 19899,
+          "prog_name": "det_arg_ctx",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "19896": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "branch_flip",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {},
+              "skipped_sites": []
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_BRANCH_PROFILE_ROOT:?BPFREJIT_BRANCH_PROFILE_ROOT is required for branch_flip}\"; profile=\"${profile_root}/hash-${PROG_BRANCH_PROFILE_HASH}.json\"; bpfopt --pass branch_flip --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\"",
+              "log_level": 1,
+              "name": "branch_flip"
+            }
+          }
+        ],
+        "prog_id": 19896,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 19903,
+          "prog_name": "",
+          "prog_type": 9
+        },
+        "status": "ok"
+      },
+      "19897": {
+        "passes": [
+          {
+            "bpfopt_ms": 73,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "inlined_map_entries": [],
+              "insn_count_after": 2590,
+              "insn_count_before": 2542,
+              "insn_delta": 48,
+              "pass": "branch_flip",
+              "sites_applied": 26,
+              "sites_matched": 249,
+              "sites_skipped": 223,
+              "skip_reasons": {
+                "zero_branch_count": 223
+              },
+              "skipped_sites": [
+                {
+                  "pc": 6,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 14,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 27,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 28,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 45,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 48,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 56,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 58,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 68,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 70,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 71,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 73,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 78,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 168,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 178,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 181,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 203,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 208,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 210,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 212,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 237,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 242,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 247,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 309,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 311,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 312,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 314,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 319,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 321,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 323,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 346,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 351,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 356,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 366,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 372,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 380,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 406,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 408,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 412,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 420,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 425,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 430,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 433,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 440,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 447,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 449,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 455,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 465,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 471,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 480,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 483,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 513,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 523,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 526,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 533,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 542,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 550,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 563,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 571,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 582,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 585,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 593,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 601,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 607,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 617,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 623,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 633,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 636,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 655,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 661,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 670,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 698,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 703,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 711,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 716,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 721,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 725,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 739,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 741,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 773,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 777,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 784,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 794,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 816,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 824,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 834,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 845,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 851,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 864,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 868,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 874,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 878,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 882,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 884,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 887,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 897,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 907,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 911,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 915,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 917,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 920,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 926,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 931,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 932,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 934,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 947,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 952,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 953,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 985,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 986,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 987,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 988,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1002,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1011,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1014,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1019,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1021,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1032,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1045,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1048,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1058,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1064,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1074,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1079,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1087,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1096,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1098,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1108,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1114,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1129,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1142,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1149,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1154,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1157,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1214,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1222,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1226,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1248,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1255,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1263,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1268,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1293,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1296,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1304,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1313,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1321,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1328,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1331,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1333,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1352,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1355,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1358,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1361,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1365,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1371,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1373,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1374,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1382,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1400,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1405,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1408,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1477,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1482,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1487,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1496,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1515,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1518,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1526,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1532,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1552,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1574,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1577,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1594,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1623,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1624,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1636,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1642,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1671,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1704,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1719,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1722,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1730,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1737,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1750,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1753,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1762,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1782,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1790,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1810,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1816,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1830,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1849,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1854,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1857,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1928,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1932,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1952,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1973,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 1996,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2007,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2028,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2040,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2043,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2045,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2063,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2071,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2072,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2080,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2097,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2102,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2105,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2180,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2185,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2203,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2215,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2224,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2233,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2236,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2246,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2265,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2271,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2299,
+                  "reason": "zero_branch_count"
+                },
+                {
+                  "pc": 2308,
+                  "reason": "zero_branch_count"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 257,
+            "status": "ok",
+            "step": {
+              "command": "profile_root=\"${BPFREJIT_BRANCH_PROFILE_ROOT:?BPFREJIT_BRANCH_PROFILE_ROOT is required for branch_flip}\"; profile=\"${profile_root}/hash-${PROG_BRANCH_PROFILE_HASH}.json\"; bpfopt --pass branch_flip --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\"",
+              "log_level": 1,
+              "name": "branch_flip"
+            }
+          }
+        ],
+        "prog_id": 19897,
+        "program": {
+          "final_insn_count": 2590,
+          "orig_insn_count": 2542,
+          "prog_id": 19900,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "runner_details": {
+    "command_used": [
+      "/artifacts/user/repo-artifacts/x86_64/katran/bin/katran_server_grpc",
+      "-balancer_prog=/artifacts/user/repo-artifacts/x86_64/katran/bpf/balancer.bpf.o",
+      "-healthchecker_prog=/artifacts/user/repo-artifacts/x86_64/katran/bpf/healthchecking_ipip.bpf.o",
+      "-default_mac=02:00:00:00:00:0b",
+      "-intf=katran0",
+      "-ipip_intf=ipip0",
+      "-ipip6_intf=ipip60",
+      "-hc_forwarding=false",
+      "-logtostderr",
+      "-alsologtostderr"
+    ],
+    "process_output": {
+      "returncode": -2,
+      "stderr_tail": "I20260714 17:56:26.349887 1091360 KatranGrpcService.cpp:69] Starting Katran\nE20260714 17:56:26.350029 1091360 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260714 17:56:26.350037 1091360 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260714 17:56:26.350180 1091360 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260714 17:56:26.350186 1091360 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260714 17:56:26.360144 1091360 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260714 17:56:26.360155 1091360 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame",
+      "stdout_tail": ""
+    }
+  },
+  "selected_workload": "xdp_pktgen",
+  "status": "ok"
+}
