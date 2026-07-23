@@ -401,10 +401,38 @@ static int run_canonicalize(const char *input_path, const char *out_path,
                           (char *const *)argv, clean_env ? clean_env : environ);
     if (fa_inited) posix_spawn_file_actions_destroy(&fa);
     free(clean_env);
-    if (rc != 0) return -1;
+    if (rc != 0) {
+        if (log_path) {
+            int fd = open(log_path, O_WRONLY | O_CREAT | O_APPEND, 0644);
+            if (fd >= 0) {
+                dprintf(fd, "failed to spawn bpfopt: %s (rc=%d)\n",
+                        strerror(rc), rc);
+                real_close(fd);
+            }
+        }
+        return -1;
+    }
     int st = 0;
-    waitpid(pid, &st, 0);
-    return (WIFEXITED(st) && WEXITSTATUS(st) == 0) ? 0 : -1;
+    pid_t waited;
+    do {
+        waited = waitpid(pid, &st, 0);
+    } while (waited < 0 && errno == EINTR);
+    if (waited == pid && WIFEXITED(st) && WEXITSTATUS(st) == 0)
+        return 0;
+    if (log_path) {
+        int fd = open(log_path, O_WRONLY | O_CREAT | O_APPEND, 0644);
+        if (fd >= 0) {
+            if (waited < 0)
+                dprintf(fd, "waitpid for bpfopt failed: %s\n", strerror(errno));
+            else if (WIFSIGNALED(st))
+                dprintf(fd, "bpfopt terminated by signal %d\n", WTERMSIG(st));
+            else
+                dprintf(fd, "bpfopt exited with status %d\n",
+                        WIFEXITED(st) ? WEXITSTATUS(st) : -1);
+            real_close(fd);
+        }
+    }
+    return -1;
 }
 
 /* Parse target.json for the (btf_id, call_offset) pairs of BTF modules that

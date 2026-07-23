@@ -1,0 +1,33 @@
+{
+  "fields": [
+    {
+      "hot_value": 64,
+      "kind": "context",
+      "load_pcs": [
+        127,
+        273,
+        336,
+        704,
+        853,
+        1178,
+        1376,
+        1553
+      ],
+      "offset": 0,
+      "source": "deployment_hint",
+      "width": 4
+    }
+  ],
+  "pass": "context_specialize",
+  "program_hash": "77172dccdc980c3b",
+  "schema_version": 1,
+  "source_prog_id": 53,
+  "source_prog_ids": [
+    53,
+    73,
+    91,
+    106,
+    131,
+    139
+  ]
+}

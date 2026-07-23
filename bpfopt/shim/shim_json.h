@@ -240,4 +240,8 @@ static int buf_appendf(char **buf, size_t *cap, size_t *len, const char *fmt, ..
     }
 }
 
+#define SHIM_PLAN_COMMAND_MAX 16384
+#define SHIM_PLAN_RESOLVED_MAX 32768
+#define SHIM_PLAN_COMMAND_JSON_MAX 65536
+
 #endif /* BPFREJIT_SHIM_JSON_H */

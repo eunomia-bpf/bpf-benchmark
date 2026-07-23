@@ -8,15 +8,18 @@
 #include <deque>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <iterator>
 #include <limits>
 #include <map>
 #include <optional>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -24,8 +27,10 @@
 #include "llvm_jit_context.hpp"
 
 #include "llvm/Analysis/CGSCCPassManager.h"
+#include "llvm/Analysis/LoopInfo.h"
 #include "llvm/Config/llvm-config.h"
 #include "llvm/IR/Constants.h"
+#include "llvm/IR/CFG.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/GlobalVariable.h"
@@ -35,6 +40,7 @@
 #include "llvm/IR/MDBuilder.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/PassManager.h"
+#include "llvm/IR/Verifier.h"
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Object/ObjectFile.h"
 #include "llvm/Passes/PassBuilder.h"
@@ -50,7 +56,10 @@
 #include "llvm/Transforms/InstCombine/InstCombine.h"
 #include "llvm/Transforms/Scalar/DCE.h"
 #include "llvm/Transforms/Scalar/SROA.h"
+#include "llvm/Transforms/Utils/Cloning.h"
 #include "llvm/Transforms/Utils/Mem2Reg.h"
+#include "llvm/Transforms/Utils/SSAUpdater.h"
+#include "llvm/Transforms/Utils/ValueMapper.h"
 
 extern "C" void LLVMInitializeBPFAsmPrinter();
 extern "C" void LLVMInitializeBPFTarget();
@@ -159,6 +168,7 @@ struct KopPassOptions {
 
 struct BranchFlipOptions {
 	std::optional<std::filesystem::path> profile;
+	std::optional<size_t> max_sites;
 };
 
 struct BranchFlipProfileSite {
@@ -184,6 +194,8 @@ struct PassReportCounts {
 struct BranchFlipIrSite {
 	size_t pc = 0;
 	size_t block_start_pc = 0;
+	size_t target_pc = 0;
+	size_t fallthrough_pc = 0;
 };
 
 bool bytecode_kop_family_enabled(std::string_view pass, std::string_view family,
@@ -275,6 +287,8 @@ void write_text(const std::filesystem::path &path, std::string_view text)
 #include "bpf_bytecode.hpp"
 
 #include "llvm_mapinline.hpp"
+
+#include "llvm_specialization.hpp"
 
 void shift_target_call_offsets(const std::filesystem::path &input,
 			       const std::filesystem::path &output,
@@ -507,6 +521,23 @@ BranchFlipOptions parse_branch_flip_pass_args(const std::vector<std::string> &ar
 		const auto &arg = args[i];
 		if (arg == "--profile" || arg.starts_with("--profile=")) {
 			options.profile = pass_arg_value(args, i, "--profile");
+		} else if (arg == "--max-sites" ||
+			   arg.starts_with("--max-sites=")) {
+			const std::string value =
+				pass_arg_value(args, i, "--max-sites");
+			try {
+				size_t consumed = 0;
+				const unsigned long long raw =
+					std::stoull(value, &consumed, 10);
+				if (consumed != value.size() || raw == 0 ||
+				    raw > std::numeric_limits<size_t>::max()) {
+					throw std::runtime_error("invalid");
+				}
+				options.max_sites = static_cast<size_t>(raw);
+			} catch (const std::exception &) {
+				throw std::runtime_error(
+					"branch_flip --max-sites requires a positive integer");
+			}
 		} else {
 			throw std::runtime_error(
 				"branch_flip unknown pass-local arg: " + arg);
@@ -1490,22 +1521,20 @@ BranchFlipProfile read_branch_flip_profile(const std::filesystem::path &path)
 			site_obj, "branch_count", "per_site[" + pc_key + "]");
 		site.branch_misses = branch_flip_u64_field(
 			site_obj, "branch_misses", "per_site[" + pc_key + "]");
-		if (site.branch_misses > site.branch_count) {
-			throw std::runtime_error(
-				"profile per_site[" + pc_key +
-				"] branch_misses exceeds branch_count");
-		}
 		site.miss_rate = branch_flip_probability_field(
 			site_obj, "miss_rate", "per_site[" + pc_key + "]");
 		const double computed_miss_rate =
-			site.branch_count == 0
+			site.branch_misses == 0
 				? 0.0
+				: site.branch_count == 0 ||
+					  site.branch_misses >= site.branch_count
+				? 1.0
 				: static_cast<double>(site.branch_misses) /
 					  static_cast<double>(site.branch_count);
 		if (std::fabs(site.miss_rate - computed_miss_rate) > 1e-6) {
 			throw std::runtime_error(
 				"profile per_site[" + pc_key +
-				"] miss_rate disagrees with branch_misses/branch_count");
+				"] miss_rate disagrees with constrained PMU estimate");
 		}
 		site.taken = branch_flip_u64_field(
 			site_obj, "taken", "per_site[" + pc_key + "]");
@@ -1606,7 +1635,20 @@ branch_flip_lifted_conditional_sites(const std::vector<uint8_t> &bytes)
 			current_block_start = pc;
 		}
 		if (is_conditional_jump(bytes[pc * INSN_SIZE])) {
-			sites.push_back(BranchFlipIrSite{ pc, current_block_start });
+			const auto target = checked_branch_flip_target(
+				pc, read_off(bytes, pc), insn_count,
+				"conditional branch");
+			if (pc + 1 >= codegen_end) {
+				throw std::runtime_error(
+					"branch_flip conditional fallthrough is outside the lifted entry function at pc " +
+					std::to_string(pc));
+			}
+			sites.push_back(BranchFlipIrSite{
+				pc,
+				current_block_start,
+				static_cast<size_t>(target),
+				pc + 1,
+			});
 		}
 	}
 	return sites;
@@ -1670,9 +1712,47 @@ branch_flip_weights(const BranchFlipProfileSite &site)
 		 branch_flip_scale_weight(site.not_taken, max_count) };
 }
 
+std::array<uint32_t, 2>
+branch_flip_successor_weights(const llvm::BranchInst &branch,
+			      const BranchFlipIrSite &site,
+			      const BranchFlipProfileSite &profile_site)
+{
+	const auto [taken_weight, not_taken_weight] =
+		branch_flip_weights(profile_site);
+	const std::string target_name =
+		"bb_inst_" + std::to_string(site.target_pc);
+	const std::string fallthrough_name =
+		"bb_inst_" + std::to_string(site.fallthrough_pc);
+	std::array<uint32_t, 2> weights{};
+	bool saw_target = false;
+	bool saw_fallthrough = false;
+	for (unsigned i = 0; i < 2; i++) {
+		const llvm::StringRef name = branch.getSuccessor(i)->getName();
+		if (name == target_name) {
+			weights[i] = taken_weight;
+			saw_target = true;
+		} else if (name == fallthrough_name) {
+			weights[i] = not_taken_weight;
+			saw_fallthrough = true;
+		} else {
+			throw std::runtime_error(
+				"branch_flip lifted branch at pc " +
+				std::to_string(site.pc) + " has unexpected successor " +
+				name.str());
+		}
+	}
+	if (!saw_target || !saw_fallthrough) {
+		throw std::runtime_error(
+			"branch_flip could not map taken/not-taken edges at pc " +
+			std::to_string(site.pc));
+	}
+	return weights;
+}
+
 int64_t annotate_branch_flip_ir(llvm::Module &module,
 				const std::vector<uint8_t> &input,
 				const BranchFlipProfile &profile,
+				std::optional<size_t> max_sites,
 				PassReportCounts &report_counts)
 {
 	auto *function = module.getFunction("bpf_main");
@@ -1707,6 +1787,53 @@ int64_t annotate_branch_flip_ir(llvm::Module &module,
 	int64_t skipped = 0;
 	constexpr const char *zero_count_reason = "zero_branch_count";
 	constexpr const char *tail_reason = "unsupported_subprog_tail";
+	constexpr const char *target_not_hot_reason = "target_not_hot";
+	constexpr const char *site_budget_reason = "site_budget";
+	std::vector<std::pair<size_t, const BranchFlipProfileSite *>> candidates;
+	for (const auto &[pc, profile_site] : profile.per_site) {
+		if (sites_by_pc.contains(pc) && profile_site.branch_count > 0 &&
+		    profile_site.taken > profile_site.not_taken) {
+			candidates.emplace_back(pc, &profile_site);
+		}
+	}
+	std::sort(candidates.begin(), candidates.end(),
+		  [&sites_by_pc](const auto &lhs, const auto &rhs) {
+			  const auto &left = *lhs.second;
+			  const auto &right = *rhs.second;
+			  const uint64_t left_bias = left.taken - left.not_taken;
+			  const uint64_t right_bias = right.taken - right.not_taken;
+			  const auto distance = [&sites_by_pc](size_t pc) {
+				  const auto &site = sites_by_pc.at(pc);
+				  return site.target_pc > site.fallthrough_pc
+						 ? site.target_pc - site.fallthrough_pc
+						 : site.fallthrough_pc - site.target_pc;
+			  };
+			  const size_t left_distance = distance(lhs.first);
+			  const size_t right_distance = distance(rhs.first);
+			  const unsigned __int128 left_score =
+				  static_cast<unsigned __int128>(left_bias) *
+				  right_distance;
+			  const unsigned __int128 right_score =
+				  static_cast<unsigned __int128>(right_bias) *
+				  left_distance;
+			  if (left_score != right_score) {
+				  return left_score > right_score;
+			  }
+			  if (left.branch_misses != right.branch_misses) {
+				  return left.branch_misses > right.branch_misses;
+			  }
+			  if (left.branch_count != right.branch_count) {
+				  return left.branch_count > right.branch_count;
+			  }
+			  return lhs.first < rhs.first;
+		  });
+	if (max_sites && candidates.size() > *max_sites) {
+		candidates.resize(*max_sites);
+	}
+	std::set<size_t> selected_pcs;
+	for (const auto &[pc, _] : candidates) {
+		selected_pcs.insert(pc);
+	}
 	for (const auto &[pc, profile_site] : profile.per_site) {
 		if (!sites_by_pc.contains(pc)) {
 			report_counts.skipped_sites.emplace_back(pc, tail_reason);
@@ -1717,6 +1844,20 @@ int64_t annotate_branch_flip_ir(llvm::Module &module,
 		if (profile_site.branch_count == 0) {
 			report_counts.skipped_sites.emplace_back(pc, zero_count_reason);
 			report_counts.skip_reasons[zero_count_reason]++;
+			skipped++;
+			continue;
+		}
+		if (profile_site.taken <= profile_site.not_taken) {
+			report_counts.skipped_sites.emplace_back(pc,
+								 target_not_hot_reason);
+			report_counts.skip_reasons[target_not_hot_reason]++;
+			skipped++;
+			continue;
+		}
+		if (!selected_pcs.contains(pc)) {
+			report_counts.skipped_sites.emplace_back(pc,
+								 site_budget_reason);
+			report_counts.skip_reasons[site_budget_reason]++;
 			skipped++;
 			continue;
 		}
@@ -1743,12 +1884,11 @@ int64_t annotate_branch_flip_ir(llvm::Module &module,
 				" is not a conditional branch");
 		}
 
-		const auto &[taken_weight, not_taken_weight] =
-			branch_flip_weights(profile_site);
+		const auto weights = branch_flip_successor_weights(
+			*branch, site, profile_site);
 		branch->setMetadata(
 			llvm::LLVMContext::MD_prof,
-			metadata.createBranchWeights(taken_weight,
-						     not_taken_weight));
+			metadata.createBranchWeights(weights[0], weights[1]));
 		annotated++;
 	}
 	report_counts.sites_applied = annotated;
@@ -1809,6 +1949,7 @@ std::vector<uint8_t> run_branch_flip_roundtrip(
 	return module.withModuleDo([&](llvm::Module &module) {
 		const int64_t sites_applied =
 			annotate_branch_flip_ir(module, input, profile,
+						options.max_sites,
 						report_counts);
 		if (sites_applied == 0) {
 			return input;
@@ -3029,6 +3170,7 @@ void write_report(const Cli &cli, const std::vector<uint8_t> &input,
 			{ "map_id", static_cast<int64_t>(record.map_id) },
 			{ "key_hex", bytes_hex(record.key) },
 			{ "value_hex", bytes_hex(record.value) },
+			{ "stability", record.stability },
 		});
 	}
 	for (const auto &diagnostic : diagnostics) {
@@ -3112,10 +3254,18 @@ void run_pass(Cli &cli)
 	}
 	const bool kop_pass = is_kop_pass(*cli.pass);
 	const bool branch_flip_pass = *cli.pass == "branch_flip";
+	const bool tail_call_icache_pass = *cli.pass == "tail_call_icache";
+	const bool hot_region_version_pass = *cli.pass == "hot_region_version";
+	const bool loop_trip_spec_pass = *cli.pass == "loop_trip_spec";
+	const bool context_specialize_pass = *cli.pass == "context_specialize";
+	const bool specialization_profile_pass = tail_call_icache_pass ||
+		hot_region_version_pass || loop_trip_spec_pass ||
+		context_specialize_pass;
 	KopTargetMap kop_targets;
 	KopTargetArch kop_target_arch = KopTargetArch::Unknown;
 	KopPassOptions kop_options;
 	BranchFlipOptions branch_flip_options;
+	SpecializationProfileOptions specialization_options;
 	if (kop_pass) {
 		if (!cli.target) {
 			throw std::runtime_error("--pass " + *cli.pass +
@@ -3134,6 +3284,9 @@ void run_pass(Cli &cli)
 						    kop_target_arch);
 	} else if (branch_flip_pass) {
 		branch_flip_options = parse_branch_flip_pass_args(cli.pass_args);
+	} else if (specialization_profile_pass) {
+		specialization_options = parse_specialization_profile_args(
+			*cli.pass, cli.pass_args);
 	} else if (*cli.pass != "map_inline" && !cli.pass_args.empty()) {
 		throw std::runtime_error("--pass " + *cli.pass +
 					 " does not accept pass-local args");
@@ -3149,6 +3302,19 @@ void run_pass(Cli &cli)
 	if (branch_flip_pass) {
 		output = run_branch_flip_roundtrip(input, branch_flip_options,
 						   pass_report_counts);
+	} else if (tail_call_icache_pass) {
+		output = run_tail_call_icache_roundtrip(
+			input, specialization_options, pass_report_counts);
+	} else if (hot_region_version_pass) {
+		output = run_hot_region_version_roundtrip(
+			input, specialization_options, pass_report_counts);
+	} else if (loop_trip_spec_pass) {
+		output = run_loop_trip_spec_roundtrip(
+			input, specialization_options, pass_report_counts);
+	} else if (context_specialize_pass) {
+		output = run_context_specialize_roundtrip(
+			input, specialization_options, pass_report_counts);
+		compact_unreachable_insns(output);
 	} else if (*cli.pass == "map_inline") {
 		output = run_map_inline_roundtrip(input, cli, inlined);
 	} else {
@@ -3190,8 +3356,10 @@ void run_pass(Cli &cli)
 	}
 	write_all(cli.output, output);
 	const PassReportCounts *report_counts =
-		(branch_flip_pass || sites_applied) ? &pass_report_counts :
-						      nullptr;
+		(branch_flip_pass || specialization_profile_pass ||
+		 sites_applied)
+			? &pass_report_counts
+			: nullptr;
 	write_report(cli, input, output, inlined, report_counts, diagnostics,
 		     kop_pass ? &kop_targets : nullptr,
 		     kop_pass ? &kop_options : nullptr);

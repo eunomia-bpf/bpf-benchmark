@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 //! bpfprof CLI entry point.
 //!
-//! Per-site profiling uses PMU branch-stack samples and maps JIT instruction
-//! addresses back to BPF bytecode PCs. Missing JIT line metadata, missing LBR
-//! events, or perf ring loss are hard errors.
+//! Per-site profiling maps PMU samples at JIT instruction addresses back to
+//! BPF bytecode PCs. LBR samples provide path and tail-call observations;
+//! precise retired-branch samples provide real taken/not-taken direction.
+//! Missing JIT metadata, unavailable PMU events, or perf ring loss are hard
+//! errors.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs::{self, File};
@@ -17,22 +19,33 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use anyhow::{anyhow, bail, Context, Result};
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use serde::Serialize;
 
 const POLL_SLICE: Duration = Duration::from_millis(10);
 const PERF_RING_DATA_PAGES: usize = 1024;
-const DEFAULT_PERF_SAMPLE_PERIOD: u64 = 1_000_000;
+/* BPF JIT execution is a small fraction of all kernel branches.  A million
+ * branch period can therefore produce a valid global LBR stream while
+ * yielding no BPF-mapped samples, even for programs that run millions of
+ * times during the training window. */
+const DEFAULT_PERF_SAMPLE_PERIOD: u64 = 200_000;
 const PERF_EVENT_HEADER_SIZE: usize = 8;
 const PERF_RECORD_LOST: u32 = 2;
 const PERF_RECORD_THROTTLE: u32 = 5;
 const PERF_RECORD_UNTHROTTLE: u32 = 6;
 const PERF_RECORD_SAMPLE: u32 = 9;
+const PERF_RECORD_MISC_EXACT_IP: u16 = 1 << 14;
 const PERF_BRANCH_ENTRY_SIZE: usize = std::mem::size_of::<kernel_sys::perf_branch_entry>();
 const PERF_BRANCH_ENTRY_TYPE_SHIFT: u64 = 20;
 const PERF_BRANCH_ENTRY_TYPE_MASK: u64 = 0xf;
 const PERF_BR_UNKNOWN: u64 = 0;
 const PERF_BR_COND: u64 = 1;
+
+#[derive(Clone, Copy, Debug, ValueEnum)]
+enum PrecisePmuSource {
+    CpuCore,
+    Cpu,
+}
 
 #[derive(Parser, Debug)]
 #[command(name = "bpfprof", version, about = "Profile live BPF programs")]
@@ -49,6 +62,15 @@ struct Cli {
     /// Collect real per-site branch profile data using PMU branch-stack samples.
     #[arg(long)]
     per_site: bool,
+    /// Leave BPF run-count/runtime accounting disabled during PMU sampling.
+    #[arg(long)]
+    no_run_stats: bool,
+    /// Use precise taken/not-taken retired-branch events instead of LBR edges.
+    #[arg(long, conflicts_with = "tail_target_key_map")]
+    precise_branch_direction: bool,
+    /// PMU event source for precise taken/not-taken sampling.
+    #[arg(long, value_enum, default_value = "cpu-core")]
+    precise_pmu_source: PrecisePmuSource,
     /// Sampling window, such as 500ms, 1s, or 250ms.
     #[arg(long, value_parser = parse_duration, value_name = "TIME")]
     duration: Duration,
@@ -61,6 +83,16 @@ struct Cli {
     /// JSON object mapping live prog_id to shim-dumped source bytecode path.
     #[arg(long, value_name = "FILE")]
     source_bytecode_map: Option<PathBuf>,
+    /// JSON object mapping tail-call target prog_id to its unique program-array key.
+    #[arg(long, value_name = "FILE", requires = "source_bytecode_map")]
+    tail_target_key_map: Option<PathBuf>,
+    /// Collect tail-call edges without mapping unrelated conditional branch sites.
+    #[arg(
+        long,
+        requires = "tail_target_key_map",
+        conflicts_with = "precise_branch_direction"
+    )]
+    tail_only: bool,
     /// Discover live BPF programs from periodic bpfrejit shim state JSON files.
     #[arg(long, value_name = "DIR")]
     discover_shim_state_dir: Option<PathBuf>,
@@ -70,6 +102,9 @@ struct Cli {
     /// Output directory for --all; writes one <prog_id>.json per program.
     #[arg(long, value_name = "DIR")]
     output_dir: Option<PathBuf>,
+    /// Create this file only after PMU rings are enabled and sampling is live.
+    #[arg(long, value_name = "FILE")]
+    ready_file: Option<PathBuf>,
 }
 
 #[derive(Debug)]
@@ -94,6 +129,8 @@ struct ProfileJson {
     branch_misses: u64,
     branch_instructions: u64,
     per_site: BTreeMap<String, PerSiteProfile>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tail_call_sites: Option<BTreeMap<String, TailCallSiteProfile>>,
 }
 
 #[derive(Clone, Debug, Serialize, PartialEq)]
@@ -103,6 +140,16 @@ struct PerSiteProfile {
     miss_rate: f64,
     taken: u64,
     not_taken: u64,
+}
+
+#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
+struct TailCallSiteProfile {
+    observations: u64,
+    key_counts: BTreeMap<u32, u64>,
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    pid_key_counts: BTreeMap<u32, BTreeMap<u32, u64>>,
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    tid_key_counts: BTreeMap<u32, BTreeMap<u32, u64>>,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -117,6 +164,13 @@ struct SiteCounters {
 struct TargetSamples {
     sample_records: u64,
     sites: BTreeMap<usize, SiteCounters>,
+    tail_call_sites: BTreeMap<usize, BTreeMap<u32, u64>>,
+    tail_call_pid_key_counts: BTreeMap<usize, BTreeMap<u32, BTreeMap<u32, u64>>>,
+    tail_call_tid_key_counts: BTreeMap<usize, BTreeMap<u32, BTreeMap<u32, u64>>>,
+    precise_in_jit: u64,
+    precise_nonconditional_pc: u64,
+    precise_no_native_site: u64,
+    precise_profile_pc_miss: u64,
 }
 
 #[derive(Clone, Debug)]
@@ -134,11 +188,14 @@ struct JitFuncRange {
 
 #[derive(Clone, Copy, Debug)]
 struct NativeBranchSite {
+    pebs_start_addr: u64,
     start_addr: u64,
     end_addr: u64,
     fallthrough_addr: u64,
     jump_target_addr: u64,
+    condition: u8,
     pc: usize,
+    jump_is_bpf_target: bool,
 }
 
 struct TargetProfiler {
@@ -146,6 +203,8 @@ struct TargetProfiler {
     pc_map: JitPcMap,
     conditional_pcs: BTreeSet<usize>,
     profile_pcs: BTreeSet<usize>,
+    tail_call_pcs: BTreeSet<usize>,
+    profile_tail_call_pcs: BTreeSet<usize>,
     source_pc_by_xlated_pc: BTreeMap<usize, usize>,
 }
 
@@ -180,6 +239,7 @@ struct ResolvedBranch {
 #[derive(Clone, Debug)]
 struct JitIpResolver {
     ranges: Vec<JitIpRange>,
+    tail_target_keys: BTreeMap<u32, u32>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -195,12 +255,23 @@ struct LbrPerfEvents {
     _cgroup: Option<File>,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum PerfSampleKind {
+    Lbr { sample_tid: bool },
+    PreciseBranch {
+        native_taken: bool,
+        mispredicted: bool,
+    },
+}
+
 struct ProfileBuildInput {
     prog_id: u32,
     run_cnt_delta: u64,
     run_time_ns_delta: u64,
     expected_sites: BTreeSet<usize>,
     sites: BTreeMap<usize, SiteCounters>,
+    tail_collection_enabled: bool,
+    tail_call_sites: BTreeMap<usize, BTreeMap<u32, u64>>,
 }
 
 #[repr(C)]
@@ -239,6 +310,7 @@ struct PerfEventMmapPage {
 
 struct PerfSampleRing {
     fd: OwnedFd,
+    kind: PerfSampleKind,
     mapping: NonNull<u8>,
     mapping_len: usize,
     data_offset: usize,
@@ -264,19 +336,51 @@ fn run() -> Result<()> {
         return write_empty_outputs(&cli);
     }
     let source_bytecode_paths = read_source_bytecode_map(cli.source_bytecode_map.as_deref())?;
+    let tail_target_keys = read_tail_target_key_map(cli.tail_target_key_map.as_deref())?;
 
-    let _stats_fd = kernel_sys::enable_stats(kernel_sys::BPF_STATS_RUN_TIME)
-        .context("BPF_ENABLE_STATS(BPF_STATS_RUN_TIME)")?;
+    let _stats_fd = if cli.no_run_stats {
+        None
+    } else {
+        Some(
+            kernel_sys::enable_stats(kernel_sys::BPF_STATS_RUN_TIME)
+                .context("BPF_ENABLE_STATS(BPF_STATS_RUN_TIME)")?,
+        )
+    };
     let mut profilers = Vec::new();
     let mut before = BTreeMap::new();
     for target in targets {
         let source_bytecode = source_bytecode_paths
             .get(&target.prog_id)
             .map(PathBuf::as_path);
-        add_target_profiler(&mut profilers, &mut before, target, source_bytecode)?;
+        add_target_profiler(
+            &mut profilers,
+            &mut before,
+            target,
+            source_bytecode,
+            !tail_target_keys.is_empty(),
+            cli.tail_only,
+        )?;
     }
-    let mut lbr_events = LbrPerfEvents::open(cli.sample_period, cli.cgroup.as_deref())?;
+    let mut lbr_events = LbrPerfEvents::open(
+        cli.sample_period,
+        cli.cgroup.as_deref(),
+        cli.precise_branch_direction,
+        cli.precise_pmu_source,
+    )?;
     lbr_events.reset_and_enable()?;
+    if let Some(path) = &cli.ready_file {
+        if path.exists() {
+            bail!("--ready-file already exists: {}", path.display());
+        }
+        let mut ready =
+            File::create(path).with_context(|| format!("create ready file {}", path.display()))?;
+        ready
+            .write_all(b"ready\n")
+            .with_context(|| format!("write ready file {}", path.display()))?;
+        ready
+            .sync_all()
+            .with_context(|| format!("sync ready file {}", path.display()))?;
+    }
     let mut samples = BTreeMap::new();
     collect_lbr_samples(
         cli.duration,
@@ -285,12 +389,13 @@ fn run() -> Result<()> {
         &mut profilers,
         &mut before,
         &mut samples,
+        &tail_target_keys,
     )?;
     lbr_events.disable()?;
     if cli.discover_shim_state_dir.is_some() {
         discover_new_shim_state_targets(&cli, &mut profilers, &mut before)?;
     }
-    let resolver = JitIpResolver::from_profilers(&profilers)?;
+    let resolver = JitIpResolver::from_profilers(&profilers, &tail_target_keys)?;
     lbr_events.drain(&resolver, &profilers, &mut samples)?;
     let after = read_snapshots(&profilers)?;
 
@@ -380,8 +485,11 @@ fn add_target_profiler(
     before: &mut BTreeMap<u32, ProgStats>,
     target: Target,
     source_bytecode: Option<&Path>,
+    tail_collection_enabled: bool,
+    tail_only: bool,
 ) -> Result<()> {
-    let profiler = TargetProfiler::open(target, source_bytecode)?;
+    let profiler =
+        TargetProfiler::open(target, source_bytecode, tail_collection_enabled, tail_only)?;
     let stats = read_snapshot(&profiler)?;
     before.insert(profiler.target.prog_id, stats);
     profilers.push(profiler);
@@ -415,6 +523,8 @@ fn discover_new_shim_state_targets(
             before,
             target,
             Some(program.bytecode_path.as_path()),
+            cli.tail_target_key_map.is_some(),
+            cli.tail_only,
         )?;
         known.insert(program.prog_id);
     }
@@ -451,7 +561,12 @@ fn open_target(prog_id: u32) -> Result<Target> {
 }
 
 impl TargetProfiler {
-    fn open(target: Target, source_bytecode: Option<&Path>) -> Result<Self> {
+    fn open(
+        target: Target,
+        source_bytecode: Option<&Path>,
+        tail_collection_enabled: bool,
+        tail_only: bool,
+    ) -> Result<Self> {
         let xlated_insns = kernel_sys::prog_xlated_insns(target.fd.as_fd()).with_context(|| {
             format!(
                 "read translated bytecode for BPF program id {}",
@@ -464,32 +579,54 @@ impl TargetProfiler {
                 target.prog_id
             );
         }
-        let conditional_pcs = conditional_branch_pcs(&xlated_insns);
+        let conditional_pcs = if tail_only {
+            BTreeSet::new()
+        } else {
+            conditional_branch_pcs(&xlated_insns)
+        };
+        let tail_call_pcs = tail_call_helper_pcs(&xlated_insns);
         let pc_map = JitPcMap::from_prog(target.fd.as_fd(), &xlated_insns, &conditional_pcs)
             .with_context(|| format!("read JIT PC map for BPF program id {}", target.prog_id))?;
-        let (profile_pcs, source_pc_by_xlated_pc) = match source_bytecode {
+        if tail_collection_enabled && tail_call_pcs.len() > 1 && pc_map.lines.is_empty() {
+            bail!(
+                "BPF program id {} contains {} tail-call sites but has no JIT line info; exact BPF-PC attribution for tail-call LBR edges is unavailable",
+                target.prog_id,
+                tail_call_pcs.len(),
+            );
+        }
+        let (profile_pcs, profile_tail_call_pcs, source_pc_by_xlated_pc) = match source_bytecode {
             Some(path) => {
                 let source_insns = read_source_bytecode(path)
                     .with_context(|| format!("read source bytecode {}", path.display()))?;
-                let profile_pcs = conditional_branch_pcs(&source_insns);
+                let profile_pcs = if tail_only {
+                    BTreeSet::new()
+                } else {
+                    conditional_branch_pcs(&source_insns)
+                };
+                let profile_tail_call_pcs = tail_call_helper_pcs(&source_insns);
                 let source_pc_by_xlated_pc =
-                    build_xlated_to_source_pc_remap(&xlated_insns, &source_insns).with_context(
-                        || {
+                    build_xlated_to_source_pc_remap(&xlated_insns, &source_insns, !tail_only)
+                        .with_context(|| {
                             format!(
                                 "map translated PCs to source bytecode PCs for BPF program id {}",
                                 target.prog_id
                             )
-                        },
-                    )?;
-                (profile_pcs, source_pc_by_xlated_pc)
+                        })?;
+                (profile_pcs, profile_tail_call_pcs, source_pc_by_xlated_pc)
             }
-            None => (conditional_pcs.clone(), BTreeMap::new()),
+            None => (
+                conditional_pcs.clone(),
+                tail_call_pcs.clone(),
+                BTreeMap::new(),
+            ),
         };
         Ok(Self {
             target,
             pc_map,
             conditional_pcs,
             profile_pcs,
+            tail_call_pcs,
+            profile_tail_call_pcs,
             source_pc_by_xlated_pc,
         })
     }
@@ -499,6 +636,41 @@ impl TargetProfiler {
             return Some(xlated_pc);
         }
         self.source_pc_by_xlated_pc.get(&xlated_pc).copied()
+    }
+
+    fn tail_call_pc_for_native_ip(&self, ip: u64) -> Result<Option<usize>> {
+        if self.pc_map.lines.is_empty() {
+            if !self.pc_map.contains_ip(ip) {
+                return Ok(None);
+            }
+            return match self.tail_call_pcs.len() {
+                0 => Ok(None),
+                1 => Ok(self.tail_call_pcs.first().copied()),
+                count => bail!(
+                    "native tail-call branch for program id {} has no JIT line info and {} candidate translated tail-call sites",
+                    self.target.prog_id,
+                    count,
+                ),
+            };
+        }
+        let Some((line_start, line_end)) =
+            jited_line_pc_range_for_ip(&self.pc_map.ranges, &self.pc_map.lines, ip)
+        else {
+            return Ok(None);
+        };
+        let mut candidates = self.tail_call_pcs.range(line_start..line_end);
+        let first = candidates.next().copied();
+        if let Some(second) = candidates.next() {
+            bail!(
+                "native tail-call branch for program id {} maps to source-line PC range {}..{} containing multiple translated tail-call sites ({}, {})",
+                self.target.prog_id,
+                line_start,
+                line_end,
+                first.expect("second candidate requires a first candidate"),
+                second,
+            );
+        }
+        Ok(first)
     }
 }
 
@@ -537,6 +709,36 @@ fn read_source_bytecode_map(path: Option<&Path>) -> Result<BTreeMap<u32, PathBuf
             bail!("source bytecode map value for prog_id {prog_id} is empty");
         }
         out.insert(prog_id, PathBuf::from(path));
+    }
+    Ok(out)
+}
+
+fn read_tail_target_key_map(path: Option<&Path>) -> Result<BTreeMap<u32, u32>> {
+    let Some(path) = path else {
+        return Ok(BTreeMap::new());
+    };
+    let value: serde_json::Value = serde_json::from_slice(
+        &fs::read(path).with_context(|| format!("read {}", path.display()))?,
+    )
+    .with_context(|| format!("parse {}", path.display()))?;
+    let object = value
+        .as_object()
+        .ok_or_else(|| anyhow!("{} root must be a JSON object", path.display()))?;
+    let mut out = BTreeMap::new();
+    for (raw_prog_id, raw_key) in object {
+        let prog_id = raw_prog_id
+            .parse::<u32>()
+            .with_context(|| format!("parse tail target prog_id key {raw_prog_id:?}"))?;
+        if prog_id == 0 {
+            bail!("tail target prog_id keys must be positive");
+        }
+        let key = raw_key
+            .as_u64()
+            .ok_or_else(|| anyhow!("tail target key for prog_id {prog_id} must be u32"))?;
+        let key: u32 = key
+            .try_into()
+            .with_context(|| format!("tail target key for prog_id {prog_id} exceeds u32"))?;
+        out.insert(prog_id, key);
     }
     Ok(out)
 }
@@ -610,7 +812,9 @@ fn discover_shim_state_programs(dir: &Path) -> Result<Vec<ShimStateProgram>> {
             let source_insns = read_source_bytecode(&bytecode_path).with_context(|| {
                 format!("read source bytecode for discovered BPF program id {prog_id}")
             })?;
-            if conditional_branch_pcs(&source_insns).is_empty() {
+            if conditional_branch_pcs(&source_insns).is_empty()
+                && tail_call_helper_pcs(&source_insns).is_empty()
+            {
                 continue;
             }
             programs.insert(
@@ -647,6 +851,7 @@ fn read_source_bytecode(path: &Path) -> Result<Vec<kernel_sys::bpf_insn>> {
 fn build_xlated_to_source_pc_remap(
     xlated: &[kernel_sys::bpf_insn],
     source: &[kernel_sys::bpf_insn],
+    include_conditional_sites: bool,
 ) -> Result<BTreeMap<usize, usize>> {
     if source.is_empty() {
         bail!("source bytecode is empty");
@@ -654,14 +859,30 @@ fn build_xlated_to_source_pc_remap(
     let xlated_keys = normalized_insns(xlated);
     let source_keys = normalized_insns(source);
     let lcs_map = lcs_pc_map(&xlated_keys, &source_keys);
-    let source_conditional_pcs = conditional_branch_pcs(source);
+    let source_conditional_pcs = if include_conditional_sites {
+        conditional_branch_pcs(source)
+    } else {
+        BTreeSet::new()
+    };
+    let source_tail_call_pcs = tail_call_helper_pcs(source);
+    let xlated_conditional_pcs = if include_conditional_sites {
+        conditional_branch_pcs(xlated)
+    } else {
+        BTreeSet::new()
+    };
+    let xlated_tail_call_pcs = tail_call_helper_pcs(xlated);
+    let mut xlated_profile_pcs = xlated_conditional_pcs.clone();
+    xlated_profile_pcs.extend(xlated_tail_call_pcs.iter().copied());
     let mut out = BTreeMap::new();
-    for pc in conditional_branch_pcs(xlated) {
+    for pc in xlated_profile_pcs {
         let Some(source_pc) = lcs_map.get(&pc).copied() else {
             continue;
         };
-        if !source_conditional_pcs.contains(&source_pc) {
+        if xlated_conditional_pcs.contains(&pc) && !source_conditional_pcs.contains(&source_pc) {
             bail!("translated conditional pc {pc} maps to non-conditional source pc {source_pc}");
+        }
+        if xlated_tail_call_pcs.contains(&pc) && !source_tail_call_pcs.contains(&source_pc) {
+            bail!("translated tail-call pc {pc} maps to non-tail-call source pc {source_pc}");
         }
         out.insert(pc, source_pc);
     }
@@ -766,7 +987,22 @@ fn conditional_branch_pcs(insns: &[kernel_sys::bpf_insn]) -> BTreeSet<usize> {
     insns
         .iter()
         .enumerate()
-        .filter_map(|(pc, insn)| is_conditional_branch_opcode(insn.code).then_some(pc))
+        .filter_map(|(pc, insn)| {
+            (is_conditional_branch_opcode(insn.code) && insn.off != 0).then_some(pc)
+        })
+        .collect()
+}
+
+fn tail_call_helper_pcs(insns: &[kernel_sys::bpf_insn]) -> BTreeSet<usize> {
+    insns
+        .iter()
+        .enumerate()
+        .filter_map(|(pc, insn)| {
+            (insn.code == 0x85
+                && insn.src_reg() != kernel_sys::BPF_PSEUDO_CALL as u8
+                && insn.imm == 12)
+                .then_some(pc)
+        })
         .collect()
 }
 
@@ -782,6 +1018,7 @@ fn is_conditional_branch_opcode(code: u8) -> bool {
 fn native_branch_sites_from_jit(
     fd: std::os::fd::BorrowedFd<'_>,
     ranges: &[JitFuncRange],
+    lines: Option<&[kernel_sys::JitedLineInfo]>,
     xlated_insns: &[kernel_sys::bpf_insn],
     conditional_pcs: &BTreeSet<usize>,
 ) -> Result<Vec<NativeBranchSite>> {
@@ -820,46 +1057,366 @@ fn native_branch_sites_from_jit(
         )?);
         offset += len;
     }
-    if sites.len() != conditional_pcs.len() {
-        bail!(
-            "target BPF program has no line info and decoded {} native conditional branches, expected {} translated BPF conditional sites",
-            sites.len(),
-            conditional_pcs.len()
-        );
-    }
-    for (site, pc) in sites.iter_mut().zip(conditional_pcs) {
-        let insn = xlated_insns
-            .get(*pc)
-            .ok_or_else(|| anyhow!("translated BPF branch pc {pc} is outside bytecode"))?;
-        if insn.off == 0 {
-            bail!("translated BPF branch pc {pc} has zero offset");
-        }
-        let bpf_forward = insn.off > 0;
-        let native_forward = site.jump_target_addr > site.fallthrough_addr;
-        if bpf_forward != native_forward {
+    let mut mapped = BTreeMap::new();
+    if let Some(lines) = lines {
+        mapped = align_native_branch_sites_with_lines(
+            sites,
+            ranges,
+            lines,
+            xlated_insns,
+            conditional_pcs,
+            &image,
+        )?;
+    } else {
+        if sites.len() != conditional_pcs.len() {
             bail!(
-                "target BPF program has no line info and native branch direction for pc {pc} does not match BPF branch offset {}",
-                insn.off
+                "target BPF program has no line info and decoded {} native conditional branches, expected {} translated BPF conditional sites",
+                sites.len(),
+                conditional_pcs.len()
             );
         }
-        if site.fallthrough_starts_unconditional_jump(func_addr_slice(
+        for (mut site, pc) in sites.into_iter().zip(conditional_pcs) {
+            site.pc = *pc;
+            mapped.insert(*pc, site);
+        }
+    }
+
+    let mut sites = Vec::with_capacity(mapped.len());
+    for (pc, mut site) in mapped {
+        let insn = xlated_insns
+            .get(pc)
+            .ok_or_else(|| anyhow!("translated BPF branch pc {pc} is outside bytecode"))?;
+        let bpf_forward = insn.off > 0;
+        let native_forward = site.jump_target_addr > site.fallthrough_addr;
+        let fallthrough_is_jump = site.fallthrough_starts_unconditional_jump(func_addr_slice(
             &image,
             ranges,
             site.fallthrough_addr,
-        )?) {
+        )?);
+        let raw_fallthrough_is_jump = xlated_insns
+            .get(pc + 1)
+            .is_some_and(|next| matches!(next.code, 0x05 | 0x06));
+        let inverted_jcc = fallthrough_is_jump && !raw_fallthrough_is_jump;
+        if !inverted_jcc && bpf_forward != native_forward {
             bail!(
-                "target BPF program has no line info and native branch for pc {pc} falls through to an unconditional jump"
+                "native branch direction for BPF pc {pc} does not match BPF branch offset {} and has no inverted-Jcc jump sequence",
+                insn.off
             );
         }
-        site.pc = *pc;
+        /* The x86 JIT may invert the conditional and emit Jcc to the raw
+         * fallthrough followed by an unconditional jump to the raw target.
+         * Preserve that semantic mapping so native Jcc direction is not
+         * mistaken for raw BPF taken/not-taken direction. */
+        site.jump_is_bpf_target = !inverted_jcc;
+        sites.push(site);
     }
     Ok(sites)
+}
+
+#[cfg(target_arch = "x86_64")]
+#[derive(Clone, Copy)]
+struct NativeBranchAlignmentCell {
+    score: i64,
+    ways: u8,
+}
+
+#[cfg(target_arch = "x86_64")]
+fn align_native_branch_sites_with_lines(
+    native_sites: Vec<NativeBranchSite>,
+    ranges: &[JitFuncRange],
+    lines: &[kernel_sys::JitedLineInfo],
+    xlated_insns: &[kernel_sys::bpf_insn],
+    conditional_pcs: &BTreeSet<usize>,
+    image: &[u8],
+) -> Result<BTreeMap<usize, NativeBranchSite>> {
+    let raw_pcs = conditional_pcs.iter().copied().collect::<Vec<_>>();
+    let line_ranges = native_sites
+        .iter()
+        .map(|site| {
+            jited_line_pc_range_for_ip(ranges, lines, site.start_addr).ok_or_else(|| {
+                anyhow!(
+                    "native conditional branch at 0x{:x} has no JIT line mapping",
+                    site.start_addr
+                )
+            })
+        })
+        .collect::<Result<Vec<_>>>()?;
+    let raw_count = raw_pcs.len();
+    let native_count = native_sites.len();
+    let width = raw_count + 1;
+    let action_len = (native_count + 1)
+        .checked_mul(width)
+        .ok_or_else(|| anyhow!("native branch alignment matrix size overflow"))?;
+    let mut actions = vec![0u8; action_len];
+    let unreachable = i64::MIN / 4;
+    let mut previous = vec![
+        NativeBranchAlignmentCell {
+            score: unreachable,
+            ways: 0,
+        };
+        width
+    ];
+    previous[0] = NativeBranchAlignmentCell { score: 0, ways: 1 };
+
+    for native_idx in 1..=native_count {
+        let mut current = vec![
+            NativeBranchAlignmentCell {
+                score: unreachable,
+                ways: 0,
+            };
+            width
+        ];
+        for raw_matched in 0..=raw_count {
+            let skip = previous[raw_matched];
+            if skip.ways > 0 {
+                current[raw_matched] = skip;
+                actions[native_idx * width + raw_matched] = 1;
+            }
+            if raw_matched == 0 {
+                continue;
+            }
+            let predecessor = previous[raw_matched - 1];
+            if predecessor.ways == 0 {
+                continue;
+            }
+            let raw_pc = raw_pcs[raw_matched - 1];
+            let Some(branch_score) = native_branch_candidate_score(
+                &native_sites[native_idx - 1],
+                raw_pc,
+                xlated_insns,
+                ranges,
+                lines,
+                image,
+            )?
+            else {
+                continue;
+            };
+            let (line_start, line_end) = line_ranges[native_idx - 1];
+            let distance: i64 = raw_pc
+                .abs_diff(line_start)
+                .try_into()
+                .map_err(|_| anyhow!("native branch alignment PC distance exceeds i64"))?;
+            /* Kernel jited_line_info points at source-line transitions, and
+             * the native Jcc can sit just outside the nominal raw-PC interval
+             * at the end of the translated instruction. Treat line metadata
+             * as a ranking signal rather than a false exact boundary. Exact
+             * raw PCs dominate same-line matches, which dominate out-of-line
+             * matches; the final full alignment must still be unique. */
+            let match_score = if raw_pc == line_start {
+                1_000_000
+            } else if raw_pc >= line_start && raw_pc < line_end {
+                100_000 - distance.min(99_999)
+            } else {
+                -distance
+            };
+            let score = predecessor
+                .score
+                .checked_add(match_score)
+                .and_then(|score| score.checked_add(branch_score))
+                .ok_or_else(|| anyhow!("native branch alignment score overflow"))?;
+            let candidate = NativeBranchAlignmentCell {
+                score,
+                ways: predecessor.ways,
+            };
+            if candidate.score > current[raw_matched].score {
+                current[raw_matched] = candidate;
+                actions[native_idx * width + raw_matched] = 2;
+            } else if candidate.score == current[raw_matched].score {
+                current[raw_matched].ways = current[raw_matched]
+                    .ways
+                    .saturating_add(candidate.ways)
+                    .min(2);
+                actions[native_idx * width + raw_matched] = 3;
+            }
+        }
+        previous = current;
+    }
+
+    let result = previous[raw_count];
+    if result.ways == 0 {
+        bail!(
+            "no order-preserving JIT branch mapping covers all {} translated BPF conditional sites from {} native conditionals",
+            raw_count,
+            native_count
+        );
+    }
+    if result.ways != 1 {
+        bail!(
+            "ambiguous JIT branch mapping for {} translated BPF conditional sites across {} native conditionals",
+            raw_count,
+            native_count
+        );
+    }
+
+    let mut native_idx = native_count;
+    let mut raw_matched = raw_count;
+    let mut mapped = BTreeMap::new();
+    while native_idx > 0 {
+        match actions[native_idx * width + raw_matched] {
+            1 => native_idx -= 1,
+            2 => {
+                let raw_pc = raw_pcs[raw_matched - 1];
+                let mut site = native_sites[native_idx - 1];
+                site.pc = raw_pc;
+                mapped.insert(raw_pc, site);
+                native_idx -= 1;
+                raw_matched -= 1;
+            }
+            action => {
+                bail!(
+                    "invalid native branch alignment reconstruction action {action} at native index {native_idx} raw count {raw_matched}"
+                );
+            }
+        }
+    }
+    if raw_matched != 0 || mapped.len() != raw_count {
+        bail!("native branch alignment reconstruction did not cover every raw conditional");
+    }
+    Ok(mapped)
+}
+
+#[cfg(target_arch = "x86_64")]
+fn native_branch_candidate_score(
+    site: &NativeBranchSite,
+    raw_pc: usize,
+    xlated_insns: &[kernel_sys::bpf_insn],
+    ranges: &[JitFuncRange],
+    lines: &[kernel_sys::JitedLineInfo],
+    image: &[u8],
+) -> Result<Option<i64>> {
+    let insn = xlated_insns
+        .get(raw_pc)
+        .ok_or_else(|| anyhow!("translated BPF branch pc {raw_pc} is outside bytecode"))?;
+    if !is_conditional_branch_opcode(insn.code) || insn.off == 0 {
+        bail!("translated BPF branch pc {raw_pc} is not a conditional site");
+    }
+
+    let fallthrough_bytes = func_addr_slice(image, ranges, site.fallthrough_addr)?;
+    let fallthrough_is_jump = site.fallthrough_starts_unconditional_jump(fallthrough_bytes);
+    let raw_fallthrough_is_jump = xlated_insns
+        .get(raw_pc + 1)
+        .is_some_and(|next| matches!(next.code, 0x05 | 0x06));
+    let inverted_jcc = fallthrough_is_jump && !raw_fallthrough_is_jump;
+    let expected_condition = bpf_x86_condition(insn.code)
+        .ok_or_else(|| anyhow!("unsupported BPF conditional opcode 0x{:02x}", insn.code))?;
+    let expected_condition = if inverted_jcc {
+        expected_condition ^ 1
+    } else {
+        expected_condition
+    };
+    if site.condition != expected_condition {
+        return Ok(None);
+    }
+    let bpf_forward = insn.off > 0;
+    let native_forward = site.jump_target_addr > site.fallthrough_addr;
+    if !inverted_jcc && bpf_forward != native_forward {
+        return Ok(None);
+    }
+
+    let raw_fallthrough_pc = raw_pc
+        .checked_add(1)
+        .ok_or_else(|| anyhow!("translated BPF fallthrough pc overflow"))?;
+    let raw_target_signed = (raw_fallthrough_pc as i128) + (insn.off as i128);
+    if raw_target_signed < 0 || raw_target_signed > usize::MAX as i128 {
+        bail!("translated BPF branch pc {raw_pc} has out-of-range target");
+    }
+    let raw_target_pc = raw_target_signed as usize;
+
+    let (jump_expected, fallthrough_expected, fallthrough_successor) = if inverted_jcc {
+        let Some(target) = x86_unconditional_jump_target(fallthrough_bytes, site.fallthrough_addr)?
+        else {
+            bail!(
+                "native branch at 0x{:x} has inverted-Jcc shape without a decodable fallthrough jump",
+                site.start_addr
+            );
+        };
+        (raw_fallthrough_pc, raw_target_pc, target)
+    } else {
+        (raw_target_pc, raw_fallthrough_pc, site.fallthrough_addr)
+    };
+
+    let jump_score =
+        native_successor_line_score(ranges, lines, site.jump_target_addr, jump_expected);
+    let fallthrough_score =
+        native_successor_line_score(ranges, lines, fallthrough_successor, fallthrough_expected);
+    Ok(Some(jump_score + fallthrough_score))
+}
+
+#[cfg(target_arch = "x86_64")]
+fn bpf_x86_condition(code: u8) -> Option<u8> {
+    match code & 0xf0 {
+        0x10 => Some(0x4), // JEQ -> E
+        0x20 => Some(0x7), // JGT -> A
+        0x30 => Some(0x3), // JGE -> AE
+        0x40 => Some(0x5), // JSET -> NE
+        0x50 => Some(0x5), // JNE -> NE
+        0x60 => Some(0xf), // JSGT -> G
+        0x70 => Some(0xd), // JSGE -> GE
+        0xa0 => Some(0x2), // JLT -> B
+        0xb0 => Some(0x6), // JLE -> BE
+        0xc0 => Some(0xc), // JSLT -> L
+        0xd0 => Some(0xe), // JSLE -> LE
+        _ => None,
+    }
+}
+
+#[cfg(target_arch = "x86_64")]
+fn native_successor_line_score(
+    ranges: &[JitFuncRange],
+    lines: &[kernel_sys::JitedLineInfo],
+    addr: u64,
+    expected_pc: usize,
+) -> i64 {
+    let Some((line_start, line_end)) = jited_line_pc_range_for_ip(ranges, lines, addr) else {
+        return 0;
+    };
+    if expected_pc == line_start {
+        return 10_000;
+    }
+    if expected_pc >= line_start && expected_pc < line_end {
+        return 1_000;
+    }
+    let distance = if expected_pc < line_start {
+        line_start - expected_pc
+    } else if line_end == usize::MAX {
+        expected_pc - line_start
+    } else {
+        expected_pc - line_end.saturating_sub(1)
+    };
+    -(distance.min(999) as i64)
+}
+
+#[cfg(target_arch = "x86_64")]
+fn x86_unconditional_jump_target(bytes: &[u8], addr: u64) -> Result<Option<u64>> {
+    let (len, rel) = match bytes.first().copied() {
+        Some(0xeb) => {
+            require_x86_len(bytes, 2)?;
+            (2u64, i8::from_ne_bytes([bytes[1]]) as i64)
+        }
+        Some(0xe9) => {
+            require_x86_len(bytes, 5)?;
+            (
+                5u64,
+                i32::from_ne_bytes([bytes[1], bytes[2], bytes[3], bytes[4]]) as i64,
+            )
+        }
+        _ => return Ok(None),
+    };
+    let fallthrough = addr
+        .checked_add(len)
+        .ok_or_else(|| anyhow!("native unconditional jump fallthrough overflow"))?;
+    let target = (fallthrough as i128) + (rel as i128);
+    if target < 0 || target > u64::MAX as i128 {
+        bail!("native unconditional jump target overflow");
+    }
+    Ok(Some(target as u64))
 }
 
 #[cfg(not(target_arch = "x86_64"))]
 fn native_branch_sites_from_jit(
     _fd: std::os::fd::BorrowedFd<'_>,
     _ranges: &[JitFuncRange],
+    _lines: Option<&[kernel_sys::JitedLineInfo]>,
     _xlated_insns: &[kernel_sys::bpf_insn],
     _conditional_pcs: &BTreeSet<usize>,
 ) -> Result<Vec<NativeBranchSite>> {
@@ -888,16 +1445,32 @@ fn scan_x86_conditional_branches(
 ) -> Result<Vec<NativeBranchSite>> {
     let mut sites = Vec::new();
     let mut idx = 0usize;
+    let mut previous = None;
     while idx < bytes.len() {
-        let decoded = decode_x86_instruction_at(&bytes[idx..])
-            .with_context(|| format!("decode x86 JIT instruction at +0x{idx:x}"))?;
-        let Some((insn_len, rel)) = decoded.branch else {
+        let decoded = decode_x86_instruction_at(&bytes[idx..]).with_context(|| {
+            let window_start = idx.saturating_sub(64);
+            let window_end = idx.saturating_add(32).min(bytes.len());
+            let window = bytes[window_start..window_end]
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect::<Vec<_>>()
+                .join(" ");
+            format!(
+                "decode x86 JIT instruction at +0x{idx:x}; bytes +0x{window_start:x}..+0x{window_end:x}: {window}"
+            )
+        })?;
+        let insn_addr = start_addr
+            .checked_add(idx as u64)
+            .ok_or_else(|| anyhow!("native instruction address overflow"))?;
+        let Some((insn_len, rel, condition)) = decoded.branch else {
+            let insn_end = insn_addr
+                .checked_add(decoded.len as u64)
+                .ok_or_else(|| anyhow!("native instruction end overflow"))?;
+            previous = Some((insn_addr, insn_end));
             idx += decoded.len;
             continue;
         };
-        let branch_addr = start_addr
-            .checked_add(idx as u64)
-            .ok_or_else(|| anyhow!("native branch address overflow"))?;
+        let branch_addr = insn_addr;
         let fallthrough_addr = branch_addr
             .checked_add(insn_len as u64)
             .ok_or_else(|| anyhow!("native branch fallthrough overflow"))?;
@@ -909,14 +1482,22 @@ fn scan_x86_conditional_branches(
         }
         let target_addr = target_addr as u64;
         if start_addr <= target_addr && target_addr < end_addr && fallthrough_addr <= end_addr {
+            let pebs_start_addr = previous
+                .filter(|(_, previous_end)| *previous_end == branch_addr)
+                .map(|(previous_start, _)| previous_start)
+                .unwrap_or(branch_addr);
             sites.push(NativeBranchSite {
+                pebs_start_addr,
                 start_addr: branch_addr,
                 end_addr: fallthrough_addr,
                 fallthrough_addr,
                 jump_target_addr: target_addr,
+                condition,
                 pc: 0,
+                jump_is_bpf_target: true,
             });
         }
+        previous = Some((branch_addr, fallthrough_addr));
         idx += decoded.len;
     }
     Ok(sites)
@@ -926,7 +1507,7 @@ fn scan_x86_conditional_branches(
 #[derive(Clone, Copy, Debug)]
 struct DecodedX86Insn {
     len: usize,
-    branch: Option<(usize, i64)>,
+    branch: Option<(usize, i64, u8)>,
 }
 
 #[cfg(target_arch = "x86_64")]
@@ -966,8 +1547,20 @@ fn decode_x86_instruction_at(bytes: &[u8]) -> Result<DecodedX86Insn> {
         let len = idx + 1;
         return Ok(DecodedX86Insn {
             len,
-            branch: Some((len, i8::from_ne_bytes([bytes[idx]]) as i64)),
+            branch: Some((len, i8::from_ne_bytes([bytes[idx]]) as i64, op & 0x0f)),
         });
+    }
+    if op == 0xc4 {
+        require_x86_len(bytes, idx + 3)?;
+        let opcode_map = bytes[idx] & 0x1f;
+        idx += 2;
+        let vex_opcode = bytes[idx];
+        idx += 1;
+        if opcode_map == 2 && vex_opcode == 0xf7 {
+            let len = idx + parse_x86_modrm_len(bytes, idx)?;
+            return Ok(DecodedX86Insn { len, branch: None });
+        }
+        bail!("unsupported x86 VEX3 opcode map {opcode_map} opcode 0x{vex_opcode:02x}");
     }
     if op == 0x0f {
         require_x86_len(bytes, idx + 1)?;
@@ -981,14 +1574,14 @@ fn decode_x86_instruction_at(bytes: &[u8]) -> Result<DecodedX86Insn> {
             let len = idx + 4;
             return Ok(DecodedX86Insn {
                 len,
-                branch: Some((len, rel)),
+                branch: Some((len, rel, op2 & 0x0f)),
             });
         }
         let modrm = match op2 {
             0x1f | 0x40..=0x4f | 0x90..=0x9f | 0xaf | 0xb6 | 0xb7 | 0xbe | 0xbf => {
                 Some(parse_x86_modrm_len(bytes, idx)?)
             }
-            0x05 | 0x0b | 0x31 => Some(0),
+            0x05 | 0x0b | 0x31 | 0xc8..=0xcf => Some(0),
             _ => None,
         };
         if let Some(extra) = modrm {
@@ -1027,7 +1620,6 @@ fn decode_x86_instruction_at(bytes: &[u8]) -> Result<DecodedX86Insn> {
         | 0x38..=0x3b
         | 0x63
         | 0x84..=0x8f
-        | 0xc4
         | 0xd0..=0xd3
         | 0xf6
         | 0xf7
@@ -1127,8 +1719,21 @@ impl JitPcMap {
             .collect::<Result<Vec<_>>>()?;
         let info = kernel_sys::obj_get_info_by_fd(fd)?;
         if info.nr_line_info == 0 || info.nr_jited_line_info == 0 {
+            /* A JIT image can contain internal conditional branches even when
+             * the translated BPF program has no conditional sites (for
+             * example, the stats/prologue paths in Tetragon's tiny helper
+             * programs).  There is nothing to attribute in that case.  Keep
+             * the function ranges for IP ownership and avoid treating those
+             * JIT-only branches as missing BPF-PC evidence. */
+            if conditional_pcs.is_empty() {
+                return Ok(Self {
+                    ranges,
+                    lines: Vec::new(),
+                    native_branch_sites: Vec::new(),
+                });
+            }
             let native_branch_sites =
-                native_branch_sites_from_jit(fd, &ranges, xlated_insns, conditional_pcs)?;
+                native_branch_sites_from_jit(fd, &ranges, None, xlated_insns, conditional_pcs)?;
             return Ok(Self {
                 ranges,
                 lines: Vec::new(),
@@ -1148,10 +1753,24 @@ impl JitPcMap {
                 );
             }
         }
+        if conditional_pcs.is_empty() {
+            return Ok(Self {
+                ranges,
+                lines,
+                native_branch_sites: Vec::new(),
+            });
+        }
+        /* jited_line_info is source-line metadata, not an exact native-IP to
+         * BPF-successor map. It is still precise enough at the native branch
+         * instruction to discard JIT-internal guards and associate each
+         * remaining machine branch with its raw BPF conditional. Edge
+         * direction itself comes from the decoded machine successors. */
+        let native_branch_sites =
+            native_branch_sites_from_jit(fd, &ranges, Some(&lines), xlated_insns, conditional_pcs)?;
         Ok(Self {
             ranges,
             lines,
-            native_branch_sites: Vec::new(),
+            native_branch_sites,
         })
     }
 
@@ -1160,21 +1779,23 @@ impl JitPcMap {
     }
 
     fn pc_for_ip(&self, ip: u64) -> Option<usize> {
-        if self.lines.is_empty() {
-            return None;
-        }
-        let range = self.ranges.iter().find(|range| range.contains(ip))?;
+        jited_line_pc_for_ip(&self.ranges, &self.lines, ip)
+    }
+
+    fn is_function_entry_line_ip(&self, ip: u64) -> bool {
+        let Some(range) = self.ranges.iter().find(|range| range.contains(ip)) else {
+            return false;
+        };
         let start = self
             .lines
             .partition_point(|line| line.jited_addr < range.start_addr);
         let end = self
             .lines
             .partition_point(|line| line.jited_addr < range.end_addr);
-        let idx = self.lines[start..end].partition_point(|line| line.jited_addr <= ip);
-        if idx == 0 {
-            return None;
-        }
-        Some(self.lines[start + idx - 1].insn_off as usize)
+        let Some(first) = self.lines.get(start).filter(|_| start < end) else {
+            return false;
+        };
+        self.pc_for_ip(ip) == Some(first.insn_off as usize)
     }
 
     fn native_branch_for_ip(&self, ip: u64) -> Option<(usize, NativeBranchSite)> {
@@ -1185,6 +1806,50 @@ impl JitPcMap {
                 (site.start_addr <= ip && ip < site.end_addr).then_some((idx, *site))
             })
     }
+
+    fn native_branch_for_precise_ip(&self, ip: u64) -> Option<(usize, NativeBranchSite)> {
+        self.native_branch_for_ip(ip).or_else(|| {
+            self.native_branch_sites
+                .iter()
+                .enumerate()
+                .find_map(|(idx, site)| (site.pebs_start_addr == ip).then_some((idx, *site)))
+        })
+    }
+}
+
+fn jited_line_pc_for_ip(
+    ranges: &[JitFuncRange],
+    lines: &[kernel_sys::JitedLineInfo],
+    ip: u64,
+) -> Option<usize> {
+    jited_line_pc_range_for_ip(ranges, lines, ip).map(|(start, _)| start)
+}
+
+fn jited_line_pc_range_for_ip(
+    ranges: &[JitFuncRange],
+    lines: &[kernel_sys::JitedLineInfo],
+    ip: u64,
+) -> Option<(usize, usize)> {
+    if lines.is_empty() {
+        return None;
+    }
+    let range = ranges.iter().find(|range| range.contains(ip))?;
+    let start = lines.partition_point(|line| line.jited_addr < range.start_addr);
+    let end = lines.partition_point(|line| line.jited_addr < range.end_addr);
+    let idx = lines[start..end].partition_point(|line| line.jited_addr <= ip);
+    if idx == 0 {
+        return None;
+    }
+    let line_idx = start + idx - 1;
+    let line_start = lines[line_idx].insn_off as usize;
+    let line_end = lines[line_idx + 1..end]
+        .iter()
+        .find_map(|line| {
+            let pc = line.insn_off as usize;
+            (pc > line_start).then_some(pc)
+        })
+        .unwrap_or(usize::MAX);
+    Some((line_start, line_end))
 }
 
 impl JitFuncRange {
@@ -1194,7 +1859,10 @@ impl JitFuncRange {
 }
 
 impl JitIpResolver {
-    fn from_profilers(profilers: &[TargetProfiler]) -> Result<Self> {
+    fn from_profilers(
+        profilers: &[TargetProfiler],
+        tail_target_keys: &BTreeMap<u32, u32>,
+    ) -> Result<Self> {
         let mut ranges = Vec::new();
         for (target_idx, profiler) in profilers.iter().enumerate() {
             for range in &profiler.pc_map.ranges {
@@ -1220,7 +1888,10 @@ impl JitIpResolver {
                 );
             }
         }
-        Ok(Self { ranges })
+        Ok(Self {
+            ranges,
+            tail_target_keys: tail_target_keys.clone(),
+        })
     }
 
     fn range_for_ip(&self, ip: u64) -> Option<JitIpRange> {
@@ -1265,6 +1936,30 @@ impl JitIpResolver {
         })
     }
 
+    fn precise_branch_source_for_ip(
+        &self,
+        profilers: &[TargetProfiler],
+        ip: u64,
+    ) -> Option<ResolvedBranchSource> {
+        let range = self.range_for_ip(ip)?;
+        let profiler = &profilers[range.target_idx];
+        if let Some((native_branch_idx, site)) = profiler.pc_map.native_branch_for_precise_ip(ip) {
+            return Some(ResolvedBranchSource {
+                prog_id: range.prog_id,
+                target_idx: range.target_idx,
+                pc: site.pc,
+                native_branch_idx: Some(native_branch_idx),
+            });
+        }
+        let pc = profiler.pc_map.pc_for_ip(ip)?;
+        Some(ResolvedBranchSource {
+            prog_id: range.prog_id,
+            target_idx: range.target_idx,
+            pc,
+            native_branch_idx: None,
+        })
+    }
+
     fn resolve_branch_direction(
         &self,
         profilers: &[TargetProfiler],
@@ -1284,7 +1979,23 @@ impl JitIpResolver {
                     source.pc
                 );
             }
-            let taken = to_ip != site.fallthrough_addr;
+            let native_jump_taken = if to_ip == site.jump_target_addr {
+                true
+            } else if to_ip == site.fallthrough_addr {
+                false
+            } else {
+                bail!(
+                    "conditional LBR target 0x{to_ip:x} for source pc {} matches neither native jump target 0x{:x} nor fallthrough 0x{:x}",
+                    source.pc,
+                    site.jump_target_addr,
+                    site.fallthrough_addr
+                );
+            };
+            let taken = if site.jump_is_bpf_target {
+                native_jump_taken
+            } else {
+                !native_jump_taken
+            };
             return Ok(ResolvedBranch {
                 prog_id: source.prog_id,
                 target_idx: source.target_idx,
@@ -1323,7 +2034,12 @@ impl JitIpRange {
 }
 
 impl LbrPerfEvents {
-    fn open(sample_period: u64, cgroup: Option<&Path>) -> Result<Self> {
+    fn open(
+        sample_period: u64,
+        cgroup: Option<&Path>,
+        precise_branch_direction: bool,
+        precise_pmu_source: PrecisePmuSource,
+    ) -> Result<Self> {
         let cgroup_file = match cgroup {
             Some(path) => {
                 Some(File::open(path).with_context(|| format!("open cgroup {}", path.display()))?)
@@ -1339,31 +2055,11 @@ impl LbrPerfEvents {
         } else {
             0
         };
-        let cpus = online_cpus()?;
-        let mut rings = Vec::with_capacity(cpus.len());
-        for cpu in cpus {
-            let mut attr = kernel_sys::perf_event_attr {
-                type_: kernel_sys::PERF_TYPE_HARDWARE,
-                size: std::mem::size_of::<kernel_sys::perf_event_attr>() as u32,
-                config: kernel_sys::PERF_COUNT_HW_BRANCH_INSTRUCTIONS as u64,
-                sample_type: kernel_sys::PERF_SAMPLE_BRANCH_STACK as u64,
-                branch_sample_type: (kernel_sys::PERF_SAMPLE_BRANCH_KERNEL
-                    | kernel_sys::PERF_SAMPLE_BRANCH_ANY
-                    | kernel_sys::PERF_SAMPLE_BRANCH_TYPE_SAVE)
-                    as u64,
-                ..Default::default()
-            };
-            attr.set_disabled(1);
-            attr.set_exclude_user(1);
-            attr.set_exclude_hv(1);
-            attr.__bindgen_anon_1.sample_period = sample_period;
-            let fd = kernel_sys::perf_event_open(&mut attr, pid, cpu, -1, flags)
-                .with_context(|| format!("open kernel LBR perf event on CPU {cpu}"))?;
-            rings.push(
-                PerfSampleRing::new(fd)
-                    .with_context(|| format!("mmap kernel LBR perf event on CPU {cpu}"))?,
-            );
-        }
+        let rings = if precise_branch_direction {
+            open_precise_branch_rings(sample_period, pid, flags, precise_pmu_source)?
+        } else {
+            open_lbr_rings(sample_period, pid, flags)?
+        };
         Ok(Self {
             rings,
             _cgroup: cgroup_file,
@@ -1403,8 +2099,142 @@ impl LbrPerfEvents {
     }
 }
 
+fn open_lbr_rings(
+    sample_period: u64,
+    pid: libc::pid_t,
+    flags: libc::c_ulong,
+) -> Result<Vec<PerfSampleRing>> {
+    let cpus = online_cpus()?;
+    let mut rings = Vec::with_capacity(cpus.len());
+    for cpu in cpus {
+        let mut attr = kernel_sys::perf_event_attr {
+            type_: kernel_sys::PERF_TYPE_HARDWARE,
+            size: std::mem::size_of::<kernel_sys::perf_event_attr>() as u32,
+            config: kernel_sys::PERF_COUNT_HW_BRANCH_INSTRUCTIONS as u64,
+            sample_type: (kernel_sys::PERF_SAMPLE_TID
+                | kernel_sys::PERF_SAMPLE_BRANCH_STACK) as u64,
+            branch_sample_type: (kernel_sys::PERF_SAMPLE_BRANCH_KERNEL
+                | kernel_sys::PERF_SAMPLE_BRANCH_ANY
+                | kernel_sys::PERF_SAMPLE_BRANCH_TYPE_SAVE) as u64,
+            ..Default::default()
+        };
+        attr.set_disabled(1);
+        attr.set_exclude_user(1);
+        attr.set_exclude_hv(1);
+        attr.__bindgen_anon_1.sample_period = sample_period;
+        let fd = kernel_sys::perf_event_open(&mut attr, pid, cpu, -1, flags)
+            .with_context(|| format!("open kernel LBR perf event on CPU {cpu}"))?;
+        rings.push(
+            PerfSampleRing::new(fd, PerfSampleKind::Lbr { sample_tid: true })
+                .with_context(|| format!("mmap kernel LBR perf event on CPU {cpu}"))?,
+        );
+    }
+    Ok(rings)
+}
+
+fn open_precise_branch_rings(
+    sample_period: u64,
+    pid: libc::pid_t,
+    flags: libc::c_ulong,
+    source: PrecisePmuSource,
+) -> Result<Vec<PerfSampleRing>> {
+    require_arrow_lake_core_pmu()?;
+    let (pmu_name, cpus) = match source {
+        PrecisePmuSource::CpuCore => {
+            let cpus_raw = fs::read_to_string("/sys/bus/event_source/devices/cpu_core/cpus")
+                .context("read cpu_core PMU CPU list")?;
+            (
+                "cpu_core",
+                parse_cpu_list(&cpus_raw, "cpu_core PMU CPU list")?,
+            )
+        }
+        PrecisePmuSource::Cpu => ("cpu", online_cpus()?),
+    };
+    let pmu_type = read_u32_file(&format!("/sys/bus/event_source/devices/{pmu_name}/type"))?;
+    let events = [
+        (0xc4, 0x101, true, false, "BR_INST_RETIRED.COND_TAKEN"),
+        (0xc4, 0x010, false, false, "BR_INST_RETIRED.COND_NTAKEN"),
+        (0xc5, 0x101, true, true, "BR_MISP_RETIRED.COND_TAKEN"),
+        (0xc5, 0x010, false, true, "BR_MISP_RETIRED.COND_NTAKEN"),
+    ];
+    let capacity = cpus
+        .len()
+        .checked_mul(events.len())
+        .ok_or_else(|| anyhow!("precise branch PMU ring capacity overflow"))?;
+    let mut rings = Vec::with_capacity(capacity);
+    for cpu in cpus {
+        for (event, umask, native_taken, mispredicted, name) in events {
+            let kind = PerfSampleKind::PreciseBranch {
+                native_taken,
+                mispredicted,
+            };
+            let mut attr = kernel_sys::perf_event_attr {
+                type_: pmu_type,
+                size: std::mem::size_of::<kernel_sys::perf_event_attr>() as u32,
+                config: intel_hybrid_raw_config(event, umask),
+                sample_type: kernel_sys::PERF_SAMPLE_IP as u64,
+                ..Default::default()
+            };
+            attr.set_disabled(1);
+            attr.set_exclude_user(1);
+            attr.set_exclude_hv(1);
+            attr.set_precise_ip(2);
+            attr.__bindgen_anon_1.sample_period = sample_period;
+            let fd =
+                kernel_sys::perf_event_open(&mut attr, pid, cpu, -1, flags).with_context(|| {
+                    format!("open precise {name} {pmu_name} perf event on CPU {cpu}")
+                })?;
+            rings.push(
+                PerfSampleRing::new(fd, kind)
+                    .with_context(|| format!("mmap precise {name} perf event on CPU {cpu}"))?,
+            );
+        }
+    }
+    Ok(rings)
+}
+
+fn intel_hybrid_raw_config(event: u16, umask: u16) -> u64 {
+    u64::from(event & 0xff)
+        | (u64::from(umask & 0xff) << 8)
+        | (u64::from((umask >> 8) & 0xff) << 40)
+}
+
+fn require_arrow_lake_core_pmu() -> Result<()> {
+    let cpuinfo = fs::read_to_string("/proc/cpuinfo").context("read /proc/cpuinfo")?;
+    let first = cpuinfo.split("\n\n").next().unwrap_or_default();
+    let field = |name: &str| {
+        first.lines().find_map(|line| {
+            let (key, value) = line.split_once(':')?;
+            (key.trim() == name).then(|| value.trim())
+        })
+    };
+    let vendor = field("vendor_id").ok_or_else(|| anyhow!("cpuinfo has no vendor_id"))?;
+    let family = field("cpu family")
+        .ok_or_else(|| anyhow!("cpuinfo has no cpu family"))?
+        .parse::<u32>()
+        .context("parse cpu family")?;
+    let model = field("model")
+        .ok_or_else(|| anyhow!("cpuinfo has no model"))?
+        .parse::<u32>()
+        .context("parse CPU model")?;
+    if vendor != "GenuineIntel" || family != 6 || !matches!(model, 0xc5 | 0xc6) {
+        bail!(
+            "precise branch-direction PMU encoding requires Intel Arrow Lake family 6 model 0xc5/0xc6; found vendor={vendor} family={family} model=0x{model:x}"
+        );
+    }
+    Ok(())
+}
+
+fn read_u32_file(path: &str) -> Result<u32> {
+    fs::read_to_string(path)
+        .with_context(|| format!("read {path}"))?
+        .trim()
+        .parse::<u32>()
+        .with_context(|| format!("parse u32 from {path}"))
+}
+
 impl PerfSampleRing {
-    fn new(fd: OwnedFd) -> Result<Self> {
+    fn new(fd: OwnedFd, kind: PerfSampleKind) -> Result<Self> {
         let page_size = page_size()?;
         let data_pages = PERF_RING_DATA_PAGES
             .checked_next_power_of_two()
@@ -1458,6 +2288,7 @@ impl PerfSampleRing {
         }
         Ok(Self {
             fd,
+            kind,
             mapping,
             mapping_len,
             data_offset,
@@ -1502,7 +2333,7 @@ impl PerfSampleRing {
                 );
             }
             let record = self.read_ring_bytes(tail, record_size)?;
-            process_perf_record(&record, resolver, profilers, samples)?;
+            process_perf_record_for_kind(&record, self.kind, resolver, profilers, samples)?;
             tail = tail
                 .checked_add(record_size as u64)
                 .ok_or_else(|| anyhow!("perf ring tail overflow"))?;
@@ -1560,28 +2391,35 @@ impl Drop for PerfSampleRing {
 fn online_cpus() -> Result<Vec<i32>> {
     let raw = fs::read_to_string("/sys/devices/system/cpu/online")
         .context("read /sys/devices/system/cpu/online")?;
+    parse_cpu_list(&raw, "online CPU list")
+}
+
+fn parse_cpu_list(raw: &str, label: &str) -> Result<Vec<i32>> {
     let mut cpus = Vec::new();
     for part in raw.trim().split(',') {
+        if part.is_empty() {
+            bail!("{label} contains an empty CPU entry");
+        }
         if let Some((start, end)) = part.split_once('-') {
             let start = start
                 .parse::<i32>()
-                .with_context(|| format!("parse online CPU range start: {part}"))?;
+                .with_context(|| format!("parse {label} range start: {part}"))?;
             let end = end
                 .parse::<i32>()
-                .with_context(|| format!("parse online CPU range end: {part}"))?;
+                .with_context(|| format!("parse {label} range end: {part}"))?;
             if start > end {
-                bail!("invalid online CPU range: {part}");
+                bail!("invalid {label} range: {part}");
             }
             cpus.extend(start..=end);
         } else {
             cpus.push(
                 part.parse::<i32>()
-                    .with_context(|| format!("parse online CPU id: {part}"))?,
+                    .with_context(|| format!("parse {label} CPU id: {part}"))?,
             );
         }
     }
     if cpus.is_empty() {
-        bail!("no online CPUs found in /sys/devices/system/cpu/online");
+        bail!("{label} is empty");
     }
     Ok(cpus)
 }
@@ -1610,13 +2448,14 @@ fn collect_lbr_samples(
     profilers: &mut Vec<TargetProfiler>,
     before: &mut BTreeMap<u32, ProgStats>,
     samples: &mut BTreeMap<u32, TargetSamples>,
+    tail_target_keys: &BTreeMap<u32, u32>,
 ) -> Result<()> {
     let start = Instant::now();
     loop {
         if cli.discover_shim_state_dir.is_some() {
             discover_new_shim_state_targets(cli, profilers, before)?;
         }
-        let resolver = JitIpResolver::from_profilers(profilers)?;
+        let resolver = JitIpResolver::from_profilers(profilers, tail_target_keys)?;
         lbr_events.drain(&resolver, profilers, samples)?;
         let elapsed = start.elapsed();
         if elapsed >= duration {
@@ -1628,8 +2467,25 @@ fn collect_lbr_samples(
     Ok(())
 }
 
+#[cfg(test)]
 fn process_perf_record(
     record: &[u8],
+    resolver: &JitIpResolver,
+    profilers: &[TargetProfiler],
+    samples: &mut BTreeMap<u32, TargetSamples>,
+) -> Result<()> {
+    process_perf_record_for_kind(
+        record,
+        PerfSampleKind::Lbr { sample_tid: false },
+        resolver,
+        profilers,
+        samples,
+    )
+}
+
+fn process_perf_record_for_kind(
+    record: &[u8],
+    kind: PerfSampleKind,
     resolver: &JitIpResolver,
     profilers: &[TargetProfiler],
     samples: &mut BTreeMap<u32, TargetSamples>,
@@ -1646,12 +2502,27 @@ fn process_perf_record(
         );
     }
     match header.type_ {
-        PERF_RECORD_SAMPLE => process_perf_sample(
-            &record[PERF_EVENT_HEADER_SIZE..],
-            resolver,
-            profilers,
-            samples,
-        ),
+        PERF_RECORD_SAMPLE => match kind {
+            PerfSampleKind::Lbr { sample_tid } => process_perf_sample(
+                &record[PERF_EVENT_HEADER_SIZE..],
+                sample_tid,
+                resolver,
+                profilers,
+                samples,
+            ),
+            PerfSampleKind::PreciseBranch {
+                native_taken,
+                mispredicted,
+            } => process_precise_branch_sample(
+                &header,
+                &record[PERF_EVENT_HEADER_SIZE..],
+                native_taken,
+                mispredicted,
+                resolver,
+                profilers,
+                samples,
+            ),
+        },
         PERF_RECORD_LOST => bail!("perf ring reported lost PMU branch-stack records"),
         PERF_RECORD_THROTTLE | PERF_RECORD_UNTHROTTLE => {
             bail!("perf branch-stack sampler was throttled by the kernel; raise PERF_SAMPLE_PERIOD")
@@ -1660,38 +2531,268 @@ fn process_perf_record(
     }
 }
 
-fn process_perf_sample(
+fn process_precise_branch_sample(
+    header: &PerfEventHeader,
     sample: &[u8],
+    native_taken: bool,
+    mispredicted: bool,
     resolver: &JitIpResolver,
     profilers: &[TargetProfiler],
     samples: &mut BTreeMap<u32, TargetSamples>,
 ) -> Result<()> {
-    let entry_count = read_u64(sample, 0, "sample.branch_stack.nr")?;
+    if header.misc & PERF_RECORD_MISC_EXACT_IP == 0 {
+        bail!("precise branch PMU sample is missing PERF_RECORD_MISC_EXACT_IP");
+    }
+    if sample.len() != std::mem::size_of::<u64>() {
+        bail!(
+            "precise branch PMU sample has {} bytes, expected {}",
+            sample.len(),
+            std::mem::size_of::<u64>()
+        );
+    }
+    let ip = read_u64(sample, 0, "sample.ip")?;
+    let Some(range) = resolver.range_for_ip(ip) else {
+        return Ok(());
+    };
+    let in_jit = &mut samples.entry(range.prog_id).or_default().precise_in_jit;
+    *in_jit = in_jit
+        .checked_add(1)
+        .ok_or_else(|| anyhow!("precise in-JIT sample counter overflow"))?;
+    let Some(source) = resolver.precise_branch_source_for_ip(profilers, ip) else {
+        return Ok(());
+    };
+    let profiler = &profilers[source.target_idx];
+    if !profiler.conditional_pcs.contains(&source.pc) {
+        let count = &mut samples
+            .entry(source.prog_id)
+            .or_default()
+            .precise_nonconditional_pc;
+        *count = count
+            .checked_add(1)
+            .ok_or_else(|| anyhow!("precise non-conditional-PC sample counter overflow"))?;
+        return Ok(());
+    }
+    let Some(native_branch_idx) = source.native_branch_idx else {
+        /* A single BPF instruction can cover JIT-internal conditional
+         * branches in its line interval.  They are real PMU samples but not
+         * raw BPF branch sites, so they must not be attributed to source.pc. */
+        let count = &mut samples
+            .entry(source.prog_id)
+            .or_default()
+            .precise_no_native_site;
+        *count = count
+            .checked_add(1)
+            .ok_or_else(|| anyhow!("precise no-native-site sample counter overflow"))?;
+        return Ok(());
+    };
+    let site = profiler
+        .pc_map
+        .native_branch_sites
+        .get(native_branch_idx)
+        .ok_or_else(|| {
+            anyhow!("native branch index disappeared while processing precise PMU sample")
+        })?;
+    let taken = if site.jump_is_bpf_target {
+        native_taken
+    } else {
+        !native_taken
+    };
+    let Some(profile_pc) = profiler.profile_pc_for_xlated_pc(source.pc) else {
+        let count = &mut samples
+            .entry(source.prog_id)
+            .or_default()
+            .precise_profile_pc_miss;
+        *count = count
+            .checked_add(1)
+            .ok_or_else(|| anyhow!("precise profile-PC-miss sample counter overflow"))?;
+        return Ok(());
+    };
+    let target_samples = samples.entry(source.prog_id).or_default();
+    let counter = target_samples.sites.entry(profile_pc).or_default();
+    if mispredicted {
+        counter.branch_misses = counter
+            .branch_misses
+            .checked_add(1)
+            .ok_or_else(|| anyhow!("branch miss sample counter overflow"))?;
+    } else {
+        counter.branch_count = counter
+            .branch_count
+            .checked_add(1)
+            .ok_or_else(|| anyhow!("branch sample counter overflow"))?;
+        if taken {
+            counter.taken = counter
+                .taken
+                .checked_add(1)
+                .ok_or_else(|| anyhow!("taken branch sample counter overflow"))?;
+        } else {
+            counter.not_taken = counter
+                .not_taken
+                .checked_add(1)
+                .ok_or_else(|| anyhow!("not-taken branch sample counter overflow"))?;
+        }
+    }
+    target_samples.sample_records = target_samples
+        .sample_records
+        .checked_add(1)
+        .ok_or_else(|| anyhow!("PMU sample record counter overflow"))?;
+    Ok(())
+}
+
+fn process_perf_sample(
+    sample: &[u8],
+    sample_tid: bool,
+    resolver: &JitIpResolver,
+    profilers: &[TargetProfiler],
+    samples: &mut BTreeMap<u32, TargetSamples>,
+) -> Result<()> {
+    let (pid, tid, branch_stack_offset) = if sample_tid {
+        (
+            read_u32(sample, 0, "sample.pid")?,
+            read_u32(sample, 4, "sample.tid")?,
+            8usize,
+        )
+    } else {
+        (0, 0, 0usize)
+    };
+    let entry_count = read_u64(
+        sample,
+        branch_stack_offset,
+        "sample.branch_stack.nr",
+    )?;
     let entry_count: usize = entry_count
         .try_into()
         .map_err(|_| anyhow!("sample.branch_stack.nr does not fit usize"))?;
     let entries_bytes = entry_count
         .checked_mul(PERF_BRANCH_ENTRY_SIZE)
         .ok_or_else(|| anyhow!("sample branch stack byte length overflow"))?;
-    if sample.len() != 8 + entries_bytes {
+    let expected_bytes = branch_stack_offset
+        .checked_add(8)
+        .and_then(|size| size.checked_add(entries_bytes))
+        .ok_or_else(|| anyhow!("perf branch-stack sample byte length overflow"))?;
+    if sample.len() != expected_bytes {
         bail!(
             "perf branch-stack sample has {} bytes, expected {} for {} entries",
             sample.len(),
-            8 + entries_bytes,
+            expected_bytes,
             entry_count
         );
     }
 
     let mut touched_progs = Vec::new();
     for idx in 0..entry_count {
-        let base = 8 + idx * PERF_BRANCH_ENTRY_SIZE;
+        let base = branch_stack_offset + 8 + idx * PERF_BRANCH_ENTRY_SIZE;
         let from_ip = read_u64(sample, base, "branch.from")?;
         let to_ip = read_u64(sample, base + 8, "branch.to")?;
         let flags = read_u64(sample, base + 16, "branch.flags")?;
+        let Some(source_range) = resolver.range_for_ip(from_ip) else {
+            continue;
+        };
+        let profiler = &profilers[source_range.target_idx];
+        let source = resolver.branch_source_for_ip(profilers, from_ip);
+        let keyed_target = resolver.range_for_ip(to_ip).and_then(|target_range| {
+            if !resolver
+                .tail_target_keys
+                .contains_key(&target_range.prog_id)
+            {
+                return None;
+            }
+            let target_profiler = &profilers[target_range.target_idx];
+            let is_tail_entry = if target_profiler.pc_map.lines.is_empty() {
+                /* A cross-program BPF-to-BPF edge can only be a tail call.
+                 * This remains exact without line info.  A same-program edge
+                 * could instead be a local subprogram call and stays
+                 * unclassified. */
+                target_range.prog_id != source_range.prog_id
+            } else {
+                target_profiler.pc_map.is_function_entry_line_ip(to_ip)
+            };
+            is_tail_entry.then_some(target_range.prog_id)
+        });
+        let tail_call_pc = if branch_entry_type(flags) != PERF_BR_COND {
+            keyed_target
+        } else {
+            None
+        }
+        .map(|_| profiler.tail_call_pc_for_native_ip(from_ip))
+        .transpose()?
+        .flatten();
+        if let Some(tail_call_pc) = tail_call_pc {
+            let Some(profile_pc) = profiler.profile_pc_for_xlated_pc(tail_call_pc) else {
+                continue;
+            };
+            if profiler.profile_tail_call_pcs.contains(&profile_pc) {
+                let Some(target_prog_id) = keyed_target else {
+                    continue;
+                };
+                let key = resolver.tail_target_keys.get(&target_prog_id).ok_or_else(|| {
+                    anyhow!(
+                        "tail-call edge from program id {} pc {} reached untracked target program id {}",
+                        source_range.prog_id,
+                        profile_pc,
+                        target_prog_id
+                    )
+                })?;
+                let target_samples = samples.entry(source_range.prog_id).or_default();
+                let count = target_samples
+                    .tail_call_sites
+                    .entry(profile_pc)
+                    .or_default()
+                    .entry(*key)
+                    .or_default();
+                *count = count.checked_add(1).ok_or_else(|| {
+                    anyhow!(
+                        "tail-call sample counter overflow for program id {} pc {} key {}",
+                        source_range.prog_id,
+                        profile_pc,
+                        key
+                    )
+                })?;
+                if sample_tid {
+                    let pid_count = target_samples
+                        .tail_call_pid_key_counts
+                        .entry(profile_pc)
+                        .or_default()
+                        .entry(pid)
+                        .or_default()
+                        .entry(*key)
+                        .or_default();
+                    *pid_count = pid_count.checked_add(1).ok_or_else(|| {
+                        anyhow!(
+                            "tail-call PID sample counter overflow for program id {} pc {} pid {} key {}",
+                            source_range.prog_id,
+                            profile_pc,
+                            pid,
+                            key
+                        )
+                    })?;
+                    let tid_count = target_samples
+                        .tail_call_tid_key_counts
+                        .entry(profile_pc)
+                        .or_default()
+                        .entry(tid)
+                        .or_default()
+                        .entry(*key)
+                        .or_default();
+                    *tid_count = tid_count.checked_add(1).ok_or_else(|| {
+                        anyhow!(
+                            "tail-call TID sample counter overflow for program id {} pc {} tid {} key {}",
+                            source_range.prog_id,
+                            profile_pc,
+                            tid,
+                            key
+                        )
+                    })?;
+                }
+                if !touched_progs.contains(&source_range.prog_id) {
+                    touched_progs.push(source_range.prog_id);
+                }
+                continue;
+            }
+        }
         if !branch_entry_is_conditional(flags) {
             continue;
         }
-        let Some(source) = resolver.branch_source_for_ip(profilers, from_ip) else {
+        let Some(source) = source else {
             continue;
         };
         if !profilers[source.target_idx]
@@ -1786,10 +2887,33 @@ fn build_profiles(
             .get(&profiler.target.prog_id)
             .cloned()
             .unwrap_or_default();
+        if cli.precise_branch_direction {
+            eprintln!(
+                "precise-debug prog_id={} in_jit={} attributed={} nonconditional_pc={} no_native_site={} profile_pc_miss={} native_sites={} conditional_sites={}",
+                profiler.target.prog_id,
+                samples.precise_in_jit,
+                samples.sample_records,
+                samples.precise_nonconditional_pc,
+                samples.precise_no_native_site,
+                samples.precise_profile_pc_miss,
+                profiler.pc_map.native_branch_sites.len(),
+                profiler.conditional_pcs.len(),
+            );
+            if !profiler.conditional_pcs.is_empty() {
+                eprintln!(
+                    "precise-remap-debug prog_id={} xlated_conditional_pcs={:?} source_conditional_pcs={:?} source_pc_by_xlated_pc={:?}",
+                    profiler.target.prog_id,
+                    profiler.conditional_pcs,
+                    profiler.profile_pcs,
+                    profiler.source_pc_by_xlated_pc,
+                );
+            }
+        }
         if cli.all
             && cli.discover_shim_state_dir.is_none()
             && delta.run_cnt == 0
             && samples.sites.is_empty()
+            && samples.tail_call_sites.is_empty()
         {
             continue;
         }
@@ -1799,9 +2923,35 @@ fn build_profiles(
             run_time_ns_delta: delta.run_time_ns,
             expected_sites: profiler.profile_pcs,
             sites: samples.sites,
+            tail_collection_enabled: cli.tail_target_key_map.is_some(),
+            tail_call_sites: samples.tail_call_sites,
         });
     }
-    build_profile_rows(inputs, duration_ms)
+    let mut rows = build_profile_rows(inputs, duration_ms)?;
+    for row in &mut rows {
+        let Some(sampled) = samples_by_prog.get(&row.prog_id) else {
+            continue;
+        };
+        let Some(sites) = row.tail_call_sites.as_mut() else {
+            continue;
+        };
+        for (pc_text, site) in sites {
+            let pc = pc_text.parse::<usize>().with_context(|| {
+                format!("parse tail-call site PC {pc_text} for program {}", row.prog_id)
+            })?;
+            site.pid_key_counts = sampled
+                .tail_call_pid_key_counts
+                .get(&pc)
+                .cloned()
+                .unwrap_or_default();
+            site.tid_key_counts = sampled
+                .tail_call_tid_key_counts
+                .get(&pc)
+                .cloned()
+                .unwrap_or_default();
+        }
+    }
+    Ok(rows)
 }
 
 fn stats_delta(prog_id: u32, before: &ProgStats, after: &ProgStats) -> Result<ProgStats> {
@@ -1828,6 +2978,16 @@ fn stats_delta(prog_id: u32, before: &ProgStats, after: &ProgStats) -> Result<Pr
     })
 }
 
+fn constrained_branch_miss_rate(branch_samples: u64, miss_samples: u64) -> f64 {
+    if miss_samples == 0 {
+        return 0.0;
+    }
+    if branch_samples == 0 || miss_samples >= branch_samples {
+        return 1.0;
+    }
+    miss_samples as f64 / branch_samples as f64
+}
+
 fn build_profile_rows(
     inputs: Vec<ProfileBuildInput>,
     duration_ms: u64,
@@ -1849,14 +3009,6 @@ fn build_profile_rows(
             .sum::<u64>();
         let mut per_site = BTreeMap::new();
         for (pc, site) in input.sites {
-            if site.branch_misses > site.branch_count {
-                bail!(
-                    "site {pc} in BPF program id {} has branch_misses {} but branch_count {}",
-                    input.prog_id,
-                    site.branch_misses,
-                    site.branch_count
-                );
-            }
             let direction_total = site.taken.checked_add(site.not_taken).ok_or_else(|| {
                 anyhow!(
                     "site {pc} in BPF program id {} direction counters overflow",
@@ -1871,11 +3023,12 @@ fn build_profile_rows(
                     direction_total
                 );
             }
-            let miss_rate = if site.branch_count == 0 {
-                0.0
-            } else {
-                site.branch_misses as f64 / site.branch_count as f64
-            };
+            /* Direction and mispredict events are independent fixed-period
+             * PEBS streams, not nested exact counters.  Their low-frequency
+             * sample totals can therefore cross.  The constrained Poisson
+             * MLE preserves both raw PMU sample counts while keeping the
+             * physical miss-rate estimate in [0, 1]. */
+            let miss_rate = constrained_branch_miss_rate(site.branch_count, site.branch_misses);
             per_site.insert(
                 pc.to_string(),
                 PerSiteProfile {
@@ -1887,19 +3040,48 @@ fn build_profile_rows(
                 },
             );
         }
+        let tail_call_sites = if input.tail_collection_enabled {
+            let mut sites = BTreeMap::new();
+            for (pc, key_counts) in input.tail_call_sites {
+                if key_counts.is_empty() {
+                    bail!(
+                        "tail-call site {pc} in BPF program id {} has no key samples",
+                        input.prog_id
+                    );
+                }
+                let observations = key_counts.values().try_fold(0u64, |sum, count| {
+                    sum.checked_add(*count).ok_or_else(|| {
+                        anyhow!(
+                            "tail-call observation count overflow for program id {} pc {}",
+                            input.prog_id,
+                            pc
+                        )
+                    })
+                })?;
+                sites.insert(
+                    pc.to_string(),
+                    TailCallSiteProfile {
+                        observations,
+                        key_counts,
+                        pid_key_counts: BTreeMap::new(),
+                        tid_key_counts: BTreeMap::new(),
+                    },
+                );
+            }
+            Some(sites)
+        } else {
+            None
+        };
         rows.push(ProfileJson {
             prog_id: input.prog_id,
             duration_ms,
             run_cnt_delta: input.run_cnt_delta,
             run_time_ns_delta: input.run_time_ns_delta,
-            branch_miss_rate: if branch_instructions == 0 {
-                0.0
-            } else {
-                branch_misses as f64 / branch_instructions as f64
-            },
+            branch_miss_rate: constrained_branch_miss_rate(branch_instructions, branch_misses),
             branch_misses,
             branch_instructions,
             per_site,
+            tail_call_sites,
         });
     }
     rows.sort_by(|a, b| {
@@ -2039,6 +3221,39 @@ mod tests {
         record
     }
 
+    fn sample_record_with_tid(pid: u32, tid: u32, branches: &[(u64, u64, u64)]) -> Vec<u8> {
+        let payload_len = 8 + 8 + branches.len() * PERF_BRANCH_ENTRY_SIZE;
+        let record_len = PERF_EVENT_HEADER_SIZE + payload_len;
+        let mut record = vec![0u8; record_len];
+        record[0..4].copy_from_slice(&PERF_RECORD_SAMPLE.to_ne_bytes());
+        record[6..8].copy_from_slice(&(record_len as u16).to_ne_bytes());
+        record[PERF_EVENT_HEADER_SIZE..PERF_EVENT_HEADER_SIZE + 4]
+            .copy_from_slice(&pid.to_ne_bytes());
+        record[PERF_EVENT_HEADER_SIZE + 4..PERF_EVENT_HEADER_SIZE + 8]
+            .copy_from_slice(&tid.to_ne_bytes());
+        let count = branches.len() as u64;
+        record[PERF_EVENT_HEADER_SIZE + 8..PERF_EVENT_HEADER_SIZE + 16]
+            .copy_from_slice(&count.to_ne_bytes());
+        for (idx, (from, to, flags)) in branches.iter().enumerate() {
+            let base = PERF_EVENT_HEADER_SIZE + 16 + idx * PERF_BRANCH_ENTRY_SIZE;
+            record[base..base + 8].copy_from_slice(&from.to_ne_bytes());
+            record[base + 8..base + 16].copy_from_slice(&to.to_ne_bytes());
+            record[base + 16..base + 24].copy_from_slice(&flags.to_ne_bytes());
+        }
+        record
+    }
+
+    fn precise_sample_record(ip: u64, exact: bool) -> Vec<u8> {
+        let record_len = PERF_EVENT_HEADER_SIZE + std::mem::size_of::<u64>();
+        let mut record = vec![0u8; record_len];
+        record[0..4].copy_from_slice(&PERF_RECORD_SAMPLE.to_ne_bytes());
+        let misc = if exact { PERF_RECORD_MISC_EXACT_IP } else { 0 };
+        record[4..6].copy_from_slice(&misc.to_ne_bytes());
+        record[6..8].copy_from_slice(&(record_len as u16).to_ne_bytes());
+        record[PERF_EVENT_HEADER_SIZE..].copy_from_slice(&ip.to_ne_bytes());
+        record
+    }
+
     fn lost_record() -> Vec<u8> {
         let mut record = vec![0u8; PERF_EVENT_HEADER_SIZE];
         record[0..4].copy_from_slice(&PERF_RECORD_LOST.to_ne_bytes());
@@ -2091,9 +3306,11 @@ mod tests {
             pc_map: fake_pc_map(),
             conditional_pcs: BTreeSet::from([10]),
             profile_pcs: BTreeSet::from([10]),
+            tail_call_pcs: BTreeSet::new(),
+            profile_tail_call_pcs: BTreeSet::new(),
             source_pc_by_xlated_pc: BTreeMap::new(),
         }];
-        let resolver = JitIpResolver::from_profilers(&profilers).unwrap();
+        let resolver = JitIpResolver::from_profilers(&profilers, &BTreeMap::new()).unwrap();
         (profilers, resolver)
     }
 
@@ -2145,9 +3362,47 @@ mod tests {
             insn(0x95, 0, 0, 0, 0),
         ];
 
-        let map = build_xlated_to_source_pc_remap(&xlated, &source).unwrap();
+        let map = build_xlated_to_source_pc_remap(&xlated, &source, true).unwrap();
 
         assert_eq!(map.get(&2), Some(&1));
+    }
+
+    #[test]
+    fn remaps_translated_tail_call_pc_to_source_bytecode_pc() {
+        let source = vec![
+            insn(0xb7, 3, 0, 0, 7),
+            insn(0x85, 0, 0, 0, 12),
+            insn(0x95, 0, 0, 0, 0),
+        ];
+        let xlated = vec![
+            insn(0xbf, 9, 9, 0, 0),
+            insn(0xb7, 3, 0, 0, 7),
+            insn(0x85, 0, 0, 0, 12),
+            insn(0x95, 0, 0, 0, 0),
+        ];
+
+        let map = build_xlated_to_source_pc_remap(&xlated, &source, true).unwrap();
+
+        assert_eq!(map.get(&2), Some(&1));
+    }
+
+    #[test]
+    fn tail_only_remap_excludes_conditional_sites_but_keeps_tail_call_sites() {
+        let source = vec![
+            insn(0x15, 1, 0, 1, 0),
+            insn(0x85, 0, 0, 0, 12),
+            insn(0x95, 0, 0, 0, 0),
+        ];
+        let xlated = vec![
+            insn(0xbf, 9, 9, 0, 0),
+            insn(0x15, 1, 0, 1, 0),
+            insn(0x85, 0, 0, 0, 12),
+            insn(0x95, 0, 0, 0, 0),
+        ];
+
+        let map = build_xlated_to_source_pc_remap(&xlated, &source, false).unwrap();
+
+        assert_eq!(map, BTreeMap::from([(2, 1)]));
     }
 
     #[test]
@@ -2246,9 +3501,200 @@ mod tests {
         .unwrap();
 
         assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].pebs_start_addr, 0x1000);
         assert_eq!(sites[0].start_addr, 0x1003);
         assert_eq!(sites[0].fallthrough_addr, 0x1005);
         assert_eq!(sites[0].jump_target_addr, 0x1008);
+    }
+
+    #[test]
+    fn excludes_zero_offset_conditional_without_distinct_successors() {
+        let pcs = conditional_branch_pcs(&[
+            insn(0x15, 1, 0, 0, 7),
+            insn(0x15, 1, 0, 1, 7),
+            insn(0x55, 1, 0, -1, 9),
+        ]);
+
+        assert_eq!(pcs, BTreeSet::from([1, 2]));
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn decodes_x86_bswap_without_losing_instruction_alignment() {
+        let bswap32 = decode_x86_instruction_at(&[0x0f, 0xce]).unwrap();
+        assert_eq!(bswap32.len, 2);
+        assert!(bswap32.branch.is_none());
+
+        let bswap64 = decode_x86_instruction_at(&[0x48, 0x0f, 0xcf]).unwrap();
+        assert_eq!(bswap64.len, 3);
+        assert!(bswap64.branch.is_none());
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn decodes_x86_bmi2_shift_without_losing_instruction_alignment() {
+        let sites = scan_x86_conditional_branches(
+            &[
+                0xc4, 0xe2, 0x89, 0xf7, 0xff, // shlx %r14,%rdi,%rdi
+                0x75, 0x00, // jne +0
+                0xc3,
+            ],
+            0x1000,
+            0x1008,
+        )
+        .unwrap();
+
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].start_addr, 0x1005);
+        assert_eq!(sites[0].fallthrough_addr, 0x1007);
+        assert_eq!(sites[0].jump_target_addr, 0x1007);
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn line_constrained_alignment_skips_jit_internal_branch() {
+        let native = vec![
+            NativeBranchSite {
+                pebs_start_addr: 0x100f,
+                start_addr: 0x1010,
+                end_addr: 0x1012,
+                fallthrough_addr: 0x1012,
+                jump_target_addr: 0x1050,
+                condition: 0x4,
+                pc: 0,
+                jump_is_bpf_target: true,
+            },
+            NativeBranchSite {
+                pebs_start_addr: 0x101f,
+                start_addr: 0x1020,
+                end_addr: 0x1022,
+                fallthrough_addr: 0x1022,
+                jump_target_addr: 0x1060,
+                condition: 0x4,
+                pc: 0,
+                jump_is_bpf_target: true,
+            },
+            NativeBranchSite {
+                pebs_start_addr: 0x102f,
+                start_addr: 0x1030,
+                end_addr: 0x1032,
+                fallthrough_addr: 0x1032,
+                jump_target_addr: 0x1070,
+                condition: 0x4,
+                pc: 0,
+                jump_is_bpf_target: true,
+            },
+        ];
+        let ranges = vec![JitFuncRange {
+            start_addr: 0x1000,
+            end_addr: 0x1100,
+        }];
+        let lines = vec![
+            kernel_sys::JitedLineInfo {
+                insn_off: 1,
+                jited_addr: 0x1010,
+            },
+            kernel_sys::JitedLineInfo {
+                insn_off: 2,
+                jited_addr: 0x1020,
+            },
+            kernel_sys::JitedLineInfo {
+                insn_off: 3,
+                jited_addr: 0x1030,
+            },
+            kernel_sys::JitedLineInfo {
+                insn_off: 4,
+                jited_addr: 0x1040,
+            },
+        ];
+
+        let xlated = vec![
+            insn(0xb7, 0, 0, 0, 0),
+            insn(0x15, 1, 0, 1, 7),
+            insn(0xb7, 0, 0, 0, 0),
+            insn(0x15, 1, 0, 1, 9),
+            insn(0xb7, 0, 0, 0, 0),
+            insn(0x95, 0, 0, 0, 0),
+        ];
+        let image = vec![0u8; 0x100];
+        let mapped = align_native_branch_sites_with_lines(
+            native,
+            &ranges,
+            &lines,
+            &xlated,
+            &BTreeSet::from([1, 3]),
+            &image,
+        )
+        .unwrap();
+
+        assert_eq!(mapped.len(), 2);
+        assert_eq!(mapped[&1].start_addr, 0x1010);
+        assert_eq!(mapped[&3].start_addr, 0x1030);
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn branch_alignment_rejects_same_line_jit_guard_with_wrong_direction() {
+        let native = vec![
+            NativeBranchSite {
+                pebs_start_addr: 0x100f,
+                start_addr: 0x1010,
+                end_addr: 0x1012,
+                fallthrough_addr: 0x1012,
+                jump_target_addr: 0x1008,
+                condition: 0x4,
+                pc: 0,
+                jump_is_bpf_target: true,
+            },
+            NativeBranchSite {
+                pebs_start_addr: 0x101f,
+                start_addr: 0x1020,
+                end_addr: 0x1022,
+                fallthrough_addr: 0x1022,
+                jump_target_addr: 0x1050,
+                condition: 0x4,
+                pc: 0,
+                jump_is_bpf_target: true,
+            },
+        ];
+        let ranges = vec![JitFuncRange {
+            start_addr: 0x1000,
+            end_addr: 0x1100,
+        }];
+        let lines = vec![
+            kernel_sys::JitedLineInfo {
+                insn_off: 1,
+                jited_addr: 0x1000,
+            },
+            kernel_sys::JitedLineInfo {
+                insn_off: 2,
+                jited_addr: 0x1040,
+            },
+            kernel_sys::JitedLineInfo {
+                insn_off: 3,
+                jited_addr: 0x1050,
+            },
+        ];
+        let xlated = vec![
+            insn(0xb7, 0, 0, 0, 0),
+            insn(0x15, 1, 0, 1, 7),
+            insn(0xb7, 0, 0, 0, 0),
+            insn(0x95, 0, 0, 0, 0),
+        ];
+        let image = vec![0u8; 0x100];
+
+        let mapped = align_native_branch_sites_with_lines(
+            native,
+            &ranges,
+            &lines,
+            &xlated,
+            &BTreeSet::from([1]),
+            &image,
+        )
+        .unwrap();
+
+        assert_eq!(mapped.len(), 1);
+        assert_eq!(mapped[&1].start_addr, 0x1020);
     }
 
     #[test]
@@ -2264,23 +3710,28 @@ mod tests {
             },
             pc_map: JitPcMap {
                 ranges: vec![JitFuncRange {
-                    start_addr: 0x1100,
+                    start_addr: 0x10f0,
                     end_addr: 0x1120,
                 }],
                 lines: Vec::new(),
                 native_branch_sites: vec![NativeBranchSite {
+                    pebs_start_addr: 0x10fe,
                     start_addr: 0x1100,
                     end_addr: 0x1102,
                     fallthrough_addr: 0x1102,
                     jump_target_addr: 0x1110,
+                    condition: 0x4,
                     pc: 10,
+                    jump_is_bpf_target: true,
                 }],
             },
             conditional_pcs: BTreeSet::from([10]),
             profile_pcs: BTreeSet::from([10]),
+            tail_call_pcs: BTreeSet::new(),
+            profile_tail_call_pcs: BTreeSet::new(),
             source_pc_by_xlated_pc: BTreeMap::new(),
         }];
-        let resolver = JitIpResolver::from_profilers(&profilers).unwrap();
+        let resolver = JitIpResolver::from_profilers(&profilers, &BTreeMap::new()).unwrap();
         let mut samples = BTreeMap::new();
 
         process_perf_record(&record, &resolver, &profilers, &mut samples).unwrap();
@@ -2290,6 +3741,187 @@ mod tests {
         assert_eq!(site.branch_misses, 1);
         assert_eq!(site.not_taken, 1);
         assert_eq!(site.taken, 1);
+    }
+
+    #[test]
+    fn lbr_sample_inverts_native_direction_for_inverted_jcc() {
+        let record = sample_record(&[
+            (0x1100, 0x1110, branch_flags(PERF_BR_COND, false)),
+            (0x1100, 0x1110, branch_flags(PERF_BR_COND, false)),
+            (0x1100, 0x1102, branch_flags(PERF_BR_COND, false)),
+        ]);
+        let profilers = vec![TargetProfiler {
+            target: Target {
+                prog_id: 7,
+                fd: File::open("/dev/null").unwrap().into(),
+            },
+            pc_map: JitPcMap {
+                ranges: vec![JitFuncRange {
+                    start_addr: 0x1100,
+                    end_addr: 0x1120,
+                }],
+                lines: Vec::new(),
+                native_branch_sites: vec![NativeBranchSite {
+                    pebs_start_addr: 0x10fe,
+                    start_addr: 0x1100,
+                    end_addr: 0x1102,
+                    fallthrough_addr: 0x1102,
+                    jump_target_addr: 0x1110,
+                    condition: 0x4,
+                    pc: 10,
+                    jump_is_bpf_target: false,
+                }],
+            },
+            conditional_pcs: BTreeSet::from([10]),
+            profile_pcs: BTreeSet::from([10]),
+            tail_call_pcs: BTreeSet::new(),
+            profile_tail_call_pcs: BTreeSet::new(),
+            source_pc_by_xlated_pc: BTreeMap::new(),
+        }];
+        let resolver = JitIpResolver::from_profilers(&profilers, &BTreeMap::new()).unwrap();
+        let mut samples = BTreeMap::new();
+
+        process_perf_record(&record, &resolver, &profilers, &mut samples).unwrap();
+
+        let site = samples.get(&7).unwrap().sites.get(&10).unwrap();
+        assert_eq!(site.branch_count, 3);
+        assert_eq!(site.not_taken, 2);
+        assert_eq!(site.taken, 1);
+    }
+
+    #[test]
+    fn precise_branch_samples_record_real_direction_and_misses() {
+        let profilers = vec![TargetProfiler {
+            target: Target {
+                prog_id: 7,
+                fd: File::open("/dev/null").unwrap().into(),
+            },
+            pc_map: JitPcMap {
+                ranges: vec![JitFuncRange {
+                    start_addr: 0x10f0,
+                    end_addr: 0x1120,
+                }],
+                lines: Vec::new(),
+                native_branch_sites: vec![NativeBranchSite {
+                    pebs_start_addr: 0x10fe,
+                    start_addr: 0x1100,
+                    end_addr: 0x1102,
+                    fallthrough_addr: 0x1102,
+                    jump_target_addr: 0x1110,
+                    condition: 0x4,
+                    pc: 10,
+                    jump_is_bpf_target: true,
+                }],
+            },
+            conditional_pcs: BTreeSet::from([10]),
+            profile_pcs: BTreeSet::from([10]),
+            tail_call_pcs: BTreeSet::new(),
+            profile_tail_call_pcs: BTreeSet::new(),
+            source_pc_by_xlated_pc: BTreeMap::new(),
+        }];
+        let resolver = JitIpResolver::from_profilers(&profilers, &BTreeMap::new()).unwrap();
+        let taken_record = precise_sample_record(0x1100, true);
+        let not_taken_record = precise_sample_record(0x10fe, true);
+        let mut samples = BTreeMap::new();
+
+        process_perf_record_for_kind(
+            &taken_record,
+            PerfSampleKind::PreciseBranch {
+                native_taken: true,
+                mispredicted: false,
+            },
+            &resolver,
+            &profilers,
+            &mut samples,
+        )
+        .unwrap();
+        process_perf_record_for_kind(
+            &not_taken_record,
+            PerfSampleKind::PreciseBranch {
+                native_taken: false,
+                mispredicted: false,
+            },
+            &resolver,
+            &profilers,
+            &mut samples,
+        )
+        .unwrap();
+        process_perf_record_for_kind(
+            &not_taken_record,
+            PerfSampleKind::PreciseBranch {
+                native_taken: false,
+                mispredicted: true,
+            },
+            &resolver,
+            &profilers,
+            &mut samples,
+        )
+        .unwrap();
+
+        let site = &samples[&7].sites[&10];
+        assert_eq!(site.branch_count, 2);
+        assert_eq!(site.taken, 1);
+        assert_eq!(site.not_taken, 1);
+        assert_eq!(site.branch_misses, 1);
+    }
+
+    #[test]
+    fn precise_branch_sample_requires_exact_ip() {
+        let (profilers, resolver) = fake_profile_context();
+        let record = precise_sample_record(0x1100, false);
+        let mut samples = BTreeMap::new();
+
+        let err = process_perf_record_for_kind(
+            &record,
+            PerfSampleKind::PreciseBranch {
+                native_taken: true,
+                mispredicted: false,
+            },
+            &resolver,
+            &profilers,
+            &mut samples,
+        )
+        .unwrap_err();
+
+        assert!(err.to_string().contains("PERF_RECORD_MISC_EXACT_IP"));
+    }
+
+    #[test]
+    fn precise_branch_sample_ignores_jit_internal_conditional() {
+        let (profilers, resolver) = fake_profile_context();
+        let record = precise_sample_record(0x1100, true);
+        let mut samples = BTreeMap::new();
+
+        process_perf_record_for_kind(
+            &record,
+            PerfSampleKind::PreciseBranch {
+                native_taken: true,
+                mispredicted: false,
+            },
+            &resolver,
+            &profilers,
+            &mut samples,
+        )
+        .unwrap();
+
+        assert!(samples[&7].sites.is_empty());
+        assert_eq!(samples[&7].precise_in_jit, 1);
+        assert_eq!(samples[&7].precise_no_native_site, 1);
+    }
+
+    #[test]
+    fn arrow_lake_extended_umask_uses_hybrid_config_bits() {
+        assert_eq!(intel_hybrid_raw_config(0xc4, 0x101), 0x100000001c4);
+        assert_eq!(intel_hybrid_raw_config(0xc4, 0x010), 0x10c4);
+    }
+
+    #[test]
+    fn parses_hybrid_pmu_cpu_list() {
+        assert_eq!(
+            parse_cpu_list("0-3,6,8-9\n", "test").unwrap(),
+            vec![0, 1, 2, 3, 6, 8, 9]
+        );
+        assert!(parse_cpu_list("3-1", "test").is_err());
     }
 
     #[test]
@@ -2324,9 +3956,11 @@ mod tests {
             pc_map: fake_pc_map(),
             conditional_pcs: BTreeSet::from([10]),
             profile_pcs: BTreeSet::from([200]),
+            tail_call_pcs: BTreeSet::new(),
+            profile_tail_call_pcs: BTreeSet::new(),
             source_pc_by_xlated_pc: BTreeMap::from([(20, 200)]),
         }];
-        let resolver = JitIpResolver::from_profilers(&profilers).unwrap();
+        let resolver = JitIpResolver::from_profilers(&profilers, &BTreeMap::new()).unwrap();
         let mut samples = BTreeMap::new();
 
         process_perf_record(&record, &resolver, &profilers, &mut samples).unwrap();
@@ -2347,6 +3981,284 @@ mod tests {
         process_perf_record(&record, &resolver, &profilers, &mut samples).unwrap();
 
         assert!(samples.get(&7).is_none());
+    }
+
+    #[test]
+    fn lbr_cross_program_tail_edge_records_program_array_key() {
+        let record = sample_record(&[(0x1044, 0x2000, branch_flags(PERF_BR_UNKNOWN, false))]);
+        let profilers = vec![
+            TargetProfiler {
+                target: Target {
+                    prog_id: 7,
+                    fd: File::open("/dev/null").unwrap().into(),
+                },
+                pc_map: JitPcMap {
+                    ranges: vec![JitFuncRange {
+                        start_addr: 0x1000,
+                        end_addr: 0x1100,
+                    }],
+                    lines: vec![kernel_sys::JitedLineInfo {
+                        insn_off: 4,
+                        jited_addr: 0x1040,
+                    }],
+                    native_branch_sites: Vec::new(),
+                },
+                conditional_pcs: BTreeSet::new(),
+                profile_pcs: BTreeSet::new(),
+                tail_call_pcs: BTreeSet::from([4]),
+                profile_tail_call_pcs: BTreeSet::from([4]),
+                source_pc_by_xlated_pc: BTreeMap::new(),
+            },
+            TargetProfiler {
+                target: Target {
+                    prog_id: 8,
+                    fd: File::open("/dev/null").unwrap().into(),
+                },
+                pc_map: JitPcMap {
+                    ranges: vec![JitFuncRange {
+                        start_addr: 0x2000,
+                        end_addr: 0x2100,
+                    }],
+                    lines: vec![kernel_sys::JitedLineInfo {
+                        insn_off: 0,
+                        jited_addr: 0x2000,
+                    }],
+                    native_branch_sites: Vec::new(),
+                },
+                conditional_pcs: BTreeSet::new(),
+                profile_pcs: BTreeSet::new(),
+                tail_call_pcs: BTreeSet::new(),
+                profile_tail_call_pcs: BTreeSet::new(),
+                source_pc_by_xlated_pc: BTreeMap::new(),
+            },
+        ];
+        let resolver =
+            JitIpResolver::from_profilers(&profilers, &BTreeMap::from([(8, 7)])).unwrap();
+        let mut samples = BTreeMap::new();
+
+        process_perf_record(&record, &resolver, &profilers, &mut samples).unwrap();
+
+        assert_eq!(samples[&7].tail_call_sites[&4][&7], 1);
+        assert_eq!(samples[&7].sample_records, 1);
+    }
+
+    #[test]
+    fn lbr_tid_sample_records_tail_key_for_exact_worker_pid_and_tid() {
+        const WORKER_PID: u32 = 4242;
+        const WORKER_TID: u32 = 4243;
+        let record = sample_record_with_tid(
+            WORKER_PID,
+            WORKER_TID,
+            &[(0x1044, 0x2000, branch_flags(PERF_BR_UNKNOWN, false))],
+        );
+        let profilers = vec![
+            TargetProfiler {
+                target: Target {
+                    prog_id: 7,
+                    fd: File::open("/dev/null").unwrap().into(),
+                },
+                pc_map: JitPcMap {
+                    ranges: vec![JitFuncRange {
+                        start_addr: 0x1000,
+                        end_addr: 0x1100,
+                    }],
+                    lines: vec![kernel_sys::JitedLineInfo {
+                        insn_off: 4,
+                        jited_addr: 0x1040,
+                    }],
+                    native_branch_sites: Vec::new(),
+                },
+                conditional_pcs: BTreeSet::new(),
+                profile_pcs: BTreeSet::new(),
+                tail_call_pcs: BTreeSet::from([4]),
+                profile_tail_call_pcs: BTreeSet::from([4]),
+                source_pc_by_xlated_pc: BTreeMap::new(),
+            },
+            TargetProfiler {
+                target: Target {
+                    prog_id: 8,
+                    fd: File::open("/dev/null").unwrap().into(),
+                },
+                pc_map: JitPcMap {
+                    ranges: vec![JitFuncRange {
+                        start_addr: 0x2000,
+                        end_addr: 0x2100,
+                    }],
+                    lines: vec![kernel_sys::JitedLineInfo {
+                        insn_off: 0,
+                        jited_addr: 0x2000,
+                    }],
+                    native_branch_sites: Vec::new(),
+                },
+                conditional_pcs: BTreeSet::new(),
+                profile_pcs: BTreeSet::new(),
+                tail_call_pcs: BTreeSet::new(),
+                profile_tail_call_pcs: BTreeSet::new(),
+                source_pc_by_xlated_pc: BTreeMap::new(),
+            },
+        ];
+        let resolver =
+            JitIpResolver::from_profilers(&profilers, &BTreeMap::from([(8, 1)])).unwrap();
+        let mut samples = BTreeMap::new();
+
+        process_perf_record_for_kind(
+            &record,
+            PerfSampleKind::Lbr { sample_tid: true },
+            &resolver,
+            &profilers,
+            &mut samples,
+        )
+        .unwrap();
+
+        assert_eq!(samples[&7].tail_call_sites[&4][&1], 1);
+        assert_eq!(
+            samples[&7].tail_call_pid_key_counts[&4][&WORKER_PID][&1],
+            1
+        );
+        assert_eq!(
+            samples[&7].tail_call_tid_key_counts[&4][&WORKER_TID][&1],
+            1
+        );
+        assert_eq!(samples[&7].sample_records, 1);
+    }
+
+    #[test]
+    fn lbr_without_line_info_attributes_edge_to_only_tail_call_site() {
+        let record = sample_record(&[(0x1044, 0x2000, branch_flags(PERF_BR_UNKNOWN, false))]);
+        let profilers = vec![
+            TargetProfiler {
+                target: Target {
+                    prog_id: 7,
+                    fd: File::open("/dev/null").unwrap().into(),
+                },
+                pc_map: JitPcMap {
+                    ranges: vec![JitFuncRange {
+                        start_addr: 0x1000,
+                        end_addr: 0x1100,
+                    }],
+                    lines: Vec::new(),
+                    native_branch_sites: Vec::new(),
+                },
+                conditional_pcs: BTreeSet::new(),
+                profile_pcs: BTreeSet::new(),
+                tail_call_pcs: BTreeSet::from([4]),
+                profile_tail_call_pcs: BTreeSet::from([4]),
+                source_pc_by_xlated_pc: BTreeMap::new(),
+            },
+            TargetProfiler {
+                target: Target {
+                    prog_id: 8,
+                    fd: File::open("/dev/null").unwrap().into(),
+                },
+                pc_map: JitPcMap {
+                    ranges: vec![JitFuncRange {
+                        start_addr: 0x2000,
+                        end_addr: 0x2100,
+                    }],
+                    lines: Vec::new(),
+                    native_branch_sites: Vec::new(),
+                },
+                conditional_pcs: BTreeSet::new(),
+                profile_pcs: BTreeSet::new(),
+                tail_call_pcs: BTreeSet::new(),
+                profile_tail_call_pcs: BTreeSet::new(),
+                source_pc_by_xlated_pc: BTreeMap::new(),
+            },
+        ];
+        let resolver =
+            JitIpResolver::from_profilers(&profilers, &BTreeMap::from([(8, 7)])).unwrap();
+        let mut samples = BTreeMap::new();
+
+        process_perf_record(&record, &resolver, &profilers, &mut samples).unwrap();
+
+        assert_eq!(samples[&7].tail_call_sites[&4][&7], 1);
+        assert_eq!(samples[&7].sample_records, 1);
+    }
+
+    #[test]
+    fn lbr_self_tail_edge_records_program_array_key() {
+        let record = sample_record(&[(0x1044, 0x1000, branch_flags(PERF_BR_UNKNOWN, false))]);
+        let profilers = vec![TargetProfiler {
+            target: Target {
+                prog_id: 7,
+                fd: File::open("/dev/null").unwrap().into(),
+            },
+            pc_map: JitPcMap {
+                ranges: vec![JitFuncRange {
+                    start_addr: 0x1000,
+                    end_addr: 0x1100,
+                }],
+                lines: vec![
+                    kernel_sys::JitedLineInfo {
+                        insn_off: 0,
+                        jited_addr: 0x1000,
+                    },
+                    kernel_sys::JitedLineInfo {
+                        insn_off: 4,
+                        jited_addr: 0x1040,
+                    },
+                ],
+                native_branch_sites: Vec::new(),
+            },
+            conditional_pcs: BTreeSet::new(),
+            profile_pcs: BTreeSet::new(),
+            tail_call_pcs: BTreeSet::from([4]),
+            profile_tail_call_pcs: BTreeSet::from([4]),
+            source_pc_by_xlated_pc: BTreeMap::new(),
+        }];
+        let resolver =
+            JitIpResolver::from_profilers(&profilers, &BTreeMap::from([(7, 0)])).unwrap();
+        let mut samples = BTreeMap::new();
+
+        process_perf_record(&record, &resolver, &profilers, &mut samples).unwrap();
+
+        assert_eq!(samples[&7].tail_call_sites[&4][&0], 1);
+        assert_eq!(samples[&7].sample_records, 1);
+    }
+
+    #[test]
+    fn lbr_sparse_line_info_attributes_native_tail_edge_to_unique_helper_site() {
+        let record = sample_record(&[(0x1044, 0x100c, branch_flags(PERF_BR_UNKNOWN, false))]);
+        let profilers = vec![TargetProfiler {
+            target: Target {
+                prog_id: 7,
+                fd: File::open("/dev/null").unwrap().into(),
+            },
+            pc_map: JitPcMap {
+                ranges: vec![JitFuncRange {
+                    start_addr: 0x1000,
+                    end_addr: 0x1100,
+                }],
+                lines: vec![
+                    kernel_sys::JitedLineInfo {
+                        insn_off: 0,
+                        jited_addr: 0x1000,
+                    },
+                    kernel_sys::JitedLineInfo {
+                        insn_off: 4,
+                        jited_addr: 0x1040,
+                    },
+                    kernel_sys::JitedLineInfo {
+                        insn_off: 12,
+                        jited_addr: 0x1080,
+                    },
+                ],
+                native_branch_sites: Vec::new(),
+            },
+            conditional_pcs: BTreeSet::new(),
+            profile_pcs: BTreeSet::new(),
+            tail_call_pcs: BTreeSet::from([8]),
+            profile_tail_call_pcs: BTreeSet::from([8]),
+            source_pc_by_xlated_pc: BTreeMap::new(),
+        }];
+        let resolver =
+            JitIpResolver::from_profilers(&profilers, &BTreeMap::from([(7, 0)])).unwrap();
+        let mut samples = BTreeMap::new();
+
+        process_perf_record(&record, &resolver, &profilers, &mut samples).unwrap();
+
+        assert_eq!(samples[&7].tail_call_sites[&8][&0], 1);
+        assert_eq!(samples[&7].sample_records, 1);
     }
 
     #[test]
@@ -2420,6 +4332,8 @@ mod tests {
                         not_taken: 3,
                     },
                 )]),
+                tail_collection_enabled: false,
+                tail_call_sites: BTreeMap::new(),
             }],
             500,
         )
@@ -2435,6 +4349,76 @@ mod tests {
         assert_eq!(value["per_site"]["42"]["branch_count"], 10);
         assert_eq!(value["per_site"]["42"]["miss_rate"], 0.2);
         assert!(value.get("per_insn").is_none());
+    }
+
+    #[test]
+    fn profile_json_preserves_crossing_independent_pmu_samples() {
+        let rows = build_profile_rows(
+            vec![ProfileBuildInput {
+                prog_id: 123,
+                run_cnt_delta: 10,
+                run_time_ns_delta: 2_000,
+                expected_sites: BTreeSet::from([42]),
+                sites: BTreeMap::from([(
+                    42,
+                    SiteCounters {
+                        branch_count: 0,
+                        branch_misses: 1,
+                        taken: 0,
+                        not_taken: 0,
+                    },
+                )]),
+                tail_collection_enabled: false,
+                tail_call_sites: BTreeMap::new(),
+            }],
+            500,
+        )
+        .unwrap();
+
+        let site = rows[0].per_site.get("42").unwrap();
+        assert_eq!(site.branch_count, 0);
+        assert_eq!(site.branch_misses, 1);
+        assert_eq!(site.miss_rate, 1.0);
+        assert_eq!(rows[0].branch_miss_rate, 1.0);
+    }
+
+    #[test]
+    fn profile_json_serializes_tail_key_histogram_when_collected() {
+        let rows = build_profile_rows(
+            vec![ProfileBuildInput {
+                prog_id: 7,
+                run_cnt_delta: 100,
+                run_time_ns_delta: 1_000,
+                expected_sites: BTreeSet::new(),
+                sites: BTreeMap::new(),
+                tail_collection_enabled: true,
+                tail_call_sites: BTreeMap::from([(4, BTreeMap::from([(7, 90), (9, 10)]))]),
+            }],
+            500,
+        )
+        .unwrap();
+
+        let mut rows = rows;
+        let site = rows[0]
+            .tail_call_sites
+            .as_mut()
+            .unwrap()
+            .get_mut("4")
+            .unwrap();
+        site.pid_key_counts = BTreeMap::from([(4242, BTreeMap::from([(7, 3)]))]);
+        site.tid_key_counts = BTreeMap::from([(4243, BTreeMap::from([(7, 2)]))]);
+
+        let value = serde_json::to_value(&rows[0]).unwrap();
+        assert_eq!(value["tail_call_sites"]["4"]["observations"], 100);
+        assert_eq!(value["tail_call_sites"]["4"]["key_counts"]["7"], 90);
+        assert_eq!(
+            value["tail_call_sites"]["4"]["pid_key_counts"]["4242"]["7"],
+            3
+        );
+        assert_eq!(
+            value["tail_call_sites"]["4"]["tid_key_counts"]["4243"]["7"],
+            2
+        );
     }
 
     #[test]
@@ -2454,6 +4438,8 @@ mod tests {
                             ..SiteCounters::default()
                         },
                     )]),
+                    tail_collection_enabled: false,
+                    tail_call_sites: BTreeMap::new(),
                 },
                 ProfileBuildInput {
                     prog_id: 1,
@@ -2468,6 +4454,8 @@ mod tests {
                             ..SiteCounters::default()
                         },
                     )]),
+                    tail_collection_enabled: false,
+                    tail_call_sites: BTreeMap::new(),
                 },
             ],
             100,
@@ -2495,6 +4483,8 @@ mod tests {
                         ..SiteCounters::default()
                     },
                 )]),
+                tail_collection_enabled: false,
+                tail_call_sites: BTreeMap::new(),
             }],
             250,
         )
@@ -2512,6 +4502,8 @@ mod tests {
                 run_time_ns_delta: 80,
                 expected_sites: BTreeSet::new(),
                 sites: BTreeMap::new(),
+                tail_collection_enabled: false,
+                tail_call_sites: BTreeMap::new(),
             }],
             250,
         )
@@ -2532,6 +4524,8 @@ mod tests {
                 run_time_ns_delta: 80,
                 expected_sites: BTreeSet::from([42]),
                 sites: BTreeMap::new(),
+                tail_collection_enabled: false,
+                tail_call_sites: BTreeMap::new(),
             }],
             250,
         )

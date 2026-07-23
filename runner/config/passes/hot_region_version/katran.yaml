@@ -1,0 +1,6 @@
+log_level: 1
+programs:
+  default:
+    command: |
+      profile="${BPFREJIT_IMAGE_WORKSPACE}/runner/config/passes/hot_region_version/profiles/katran/hash-${PROG_HASH}.json";
+      bpfopt --pass hot_region_version --input "${INPUT}" --output "${OUTPUT}" --report "${REPORT}" --prog-type "${PROG_TYPE}" -- --profile "${profile}" --program-hash "${PROG_HASH}"

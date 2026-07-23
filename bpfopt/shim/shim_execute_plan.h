@@ -2,9 +2,9 @@
 #define BPFREJIT_SHIM_EXECUTE_PLAN_H
 
 /* Substitute ${VAR} occurrences in `in` to `out`. Vars known: PROG_ID,
- * PROG_HASH, PROG_BRANCH_PROFILE_HASH, PROG_TYPE, INPUT, OUTPUT, REPORT,
- * WORKDIR, TARGET. Unknown vars stay as literal ${VAR} (so /bin/sh's own
- * expansion can still see them via env). */
+ * PROG_ORIGINAL_ID, PROG_HASH, PROG_BRANCH_PROFILE_HASH, PROG_TYPE, INPUT,
+ * OUTPUT, REPORT, WORKDIR, TARGET. Unknown vars stay as literal ${VAR} (so
+ * /bin/sh's own expansion can still see them via env). */
 static void substitute_vars(char *out, size_t out_sz, const char *in,
                             const char *vars[][2], size_t n_vars) {
     size_t o = 0;
@@ -55,6 +55,73 @@ struct step_result {
     char output_path[320];
     char *report_json;              /* raw validated JSON from ${REPORT}, or NULL */
 };
+
+/* Return 1 when both files contain exactly the same bytes, 0 when they
+ * differ, and -1 on any I/O error.  Optimization passes commonly decide
+ * that a program has no admissible site; reloading identical bytecode in
+ * that case only exercises unrelated attachment migration. */
+static int files_equal_exact(const char *lhs, const char *rhs) {
+    int lhs_fd = open(lhs, O_RDONLY);
+    if (lhs_fd < 0)
+        return -1;
+    int rhs_fd = open(rhs, O_RDONLY);
+    if (rhs_fd < 0) {
+        int saved_errno = errno;
+        real_close(lhs_fd);
+        errno = saved_errno;
+        return -1;
+    }
+    struct stat lhs_st, rhs_st;
+    if (fstat(lhs_fd, &lhs_st) != 0 || fstat(rhs_fd, &rhs_st) != 0) {
+        int saved_errno = errno;
+        real_close(lhs_fd);
+        real_close(rhs_fd);
+        errno = saved_errno;
+        return -1;
+    }
+    if (lhs_st.st_size != rhs_st.st_size) {
+        real_close(lhs_fd);
+        real_close(rhs_fd);
+        return 0;
+    }
+    unsigned char lhs_buf[8192], rhs_buf[8192];
+    off_t offset = 0;
+    while (offset < lhs_st.st_size) {
+        size_t want = (size_t)(lhs_st.st_size - offset);
+        if (want > sizeof(lhs_buf))
+            want = sizeof(lhs_buf);
+        ssize_t lhs_n = pread(lhs_fd, lhs_buf, want, offset);
+        if (lhs_n < 0 && errno == EINTR)
+            continue;
+        if (lhs_n <= 0) {
+            int saved_errno = lhs_n == 0 ? EIO : errno;
+            real_close(lhs_fd);
+            real_close(rhs_fd);
+            errno = saved_errno;
+            return -1;
+        }
+        ssize_t rhs_n;
+        do {
+            rhs_n = pread(rhs_fd, rhs_buf, (size_t)lhs_n, offset);
+        } while (rhs_n < 0 && errno == EINTR);
+        if (rhs_n != lhs_n) {
+            int saved_errno = rhs_n < 0 ? errno : EIO;
+            real_close(lhs_fd);
+            real_close(rhs_fd);
+            errno = saved_errno;
+            return -1;
+        }
+        if (memcmp(lhs_buf, rhs_buf, (size_t)lhs_n) != 0) {
+            real_close(lhs_fd);
+            real_close(rhs_fd);
+            return 0;
+        }
+        offset += lhs_n;
+    }
+    real_close(lhs_fd);
+    real_close(rhs_fd);
+    return 1;
+}
 
 static const char *step_status(const struct step_result *sr) {
     if (sr->ok) return "ok";
@@ -347,32 +414,35 @@ static char *read_report_json_or_null(const char *path, char *err,
  * `step_seq` on success and after successful reload_and_reattach. */
 static void run_step(struct prog_entry *pd,
                      const char *workdir, const char *prog_type_name,
-                     const char *prog_id_str, const char *prog_hash_str,
+                     const char *prog_id_str,
+                     const char *prog_original_id_str,
+                     const char *prog_hash_str,
                      const char *prog_branch_profile_hash_str,
                      const char *target_json, const char *map_ids_csv,
                      const char *map_values_dir, uint32_t *local_kernel_ids,
                      uint32_t nr_maps, char *cur, const char *nxt,
                      const char *report, int *step_seq,
-                     const char *step_name, const char *command,
+                     const char *command, int reload_unchanged,
                      struct step_result *out) {
     memset(out, 0, sizeof(*out));
-    (void)step_name;
     snprintf(out->report_path, sizeof(out->report_path), "%s", report);
     snprintf(out->output_path, sizeof(out->output_path), "%s", cur);
 
     unlink(nxt);
     unlink(report);
 
-    const char *vars[11][2] = {
-        {"PROG_ID", prog_id_str}, {"PROG_HASH", prog_hash_str},
+    const char *vars[12][2] = {
+        {"PROG_ID", prog_id_str},
+        {"PROG_ORIGINAL_ID", prog_original_id_str},
+        {"PROG_HASH", prog_hash_str},
         {"PROG_BRANCH_PROFILE_HASH", prog_branch_profile_hash_str},
         {"PROG_TYPE", prog_type_name},
         {"INPUT", cur}, {"OUTPUT", nxt}, {"REPORT", report},
         {"WORKDIR", workdir}, {"TARGET", target_json},
         {"MAP_IDS", map_ids_csv}, {"MAP_VALUES", map_values_dir},
     };
-    char resolved[4200];
-    substitute_vars(resolved, sizeof(resolved), command, vars, 11);
+    char resolved[SHIM_PLAN_RESOLVED_MAX];
+    substitute_vars(resolved, sizeof(resolved), command, vars, 12);
 
     /* /bin/sh -c <resolved> with LD_PRELOAD stripped, stdout+stderr to log */
     char **clean_env = env_without_ld_preload();
@@ -433,6 +503,26 @@ static void run_step(struct prog_entry *pd,
         out->failure_kind = 1;
         snprintf(out->err_msg, sizeof(out->err_msg),
                  "bpfopt step produced no output bytecode");
+        return;
+    }
+
+    int unchanged = files_equal_exact(cur, nxt);
+    if (unchanged < 0) {
+        out->failure_kind = 1;
+        snprintf(out->err_msg, sizeof(out->err_msg),
+                 "compare input/output bytecode failed errno=%d", errno);
+        return;
+    }
+    int report_reload_unchanged =
+        out->report_json &&
+        json_get_int(out->report_json, "reload_unchanged") == 1;
+    if (unchanged && !reload_unchanged && !report_reload_unchanged) {
+        unlink(nxt);
+        pthread_mutex_lock(&state_mutex);
+        pd->step_seq = *step_seq + 1;
+        pthread_mutex_unlock(&state_mutex);
+        (*step_seq)++;
+        out->ok = 1;
         return;
     }
 
@@ -527,7 +617,6 @@ static int prog_workdir_init(struct prog_entry *pd, uint32_t want_id,
             fd2id_n = 0;
         }
     }
-    int canonicalized = pd->canonicalized;
     int map_refs_are_kernel_ids = pd->map_refs_are_kernel_ids;
     char bytecode_path[256];
     snprintf(bytecode_path, sizeof(bytecode_path), "%s", pd->bytecode_path);
@@ -603,34 +692,32 @@ static int prog_workdir_init(struct prog_entry *pd, uint32_t want_id,
 
     format_map_ids_csv(*out_local_ids, *out_nr_maps, map_ids_csv, map_ids_csv_sz);
 
-    if (!canonicalized) {
-        char canon_log[320], fd_to_id_path[320];
-        snprintf(canon_log, sizeof(canon_log), "%s/canonicalize.log", w->workdir);
-        snprintf(fd_to_id_path, sizeof(fd_to_id_path), "%s/fd-to-id.json", w->workdir);
-        if (!map_refs_are_kernel_ids &&
-            write_fd_to_id_json(fd_to_id_path, fd2id_fds, fd2id_kids, fd2id_n) != 0) {
-            snprintf(err_out, err_sz,
-                     "failed to write fd-to-id map %s errno=%d",
-                     fd_to_id_path, errno);
-            free(fd2id_fds); free(fd2id_kids);
-            return -1;
-        }
-        if (run_canonicalize(bytecode_path, w->cur, w->target_json, map_ids_csv,
-                             map_refs_are_kernel_ids ? NULL : fd_to_id_path,
-                             canon_log) != 0) {
-            char err_tail[1024] = {0};
-            read_tail_escaped(canon_log, err_tail, sizeof(err_tail));
-            snprintf(err_out, err_sz,
-                     "bpfopt --canonicalize-map-refs failed: %s", err_tail);
-            free(fd2id_fds); free(fd2id_kids);
-            return -1;
-        }
-        write_map_snapshots(w->map_values_dir, *out_local_ids, *out_local_types,
-                            *out_nr_maps);
-        pthread_mutex_lock(&state_mutex);
-        pd->canonicalized = 1;
-        pthread_mutex_unlock(&state_mutex);
+    /* Every live plan starts from the application's captured original
+     * bytecode. Reusing output.bin from a prior plan would stack stale
+     * specializations and make phase-change re-profiling non-reproducible. */
+    char canon_log[320], fd_to_id_path[320];
+    snprintf(canon_log, sizeof(canon_log), "%s/canonicalize.log", w->workdir);
+    snprintf(fd_to_id_path, sizeof(fd_to_id_path), "%s/fd-to-id.json", w->workdir);
+    if (!map_refs_are_kernel_ids &&
+        write_fd_to_id_json(fd_to_id_path, fd2id_fds, fd2id_kids, fd2id_n) != 0) {
+        snprintf(err_out, err_sz,
+                 "failed to write fd-to-id map %s errno=%d",
+                 fd_to_id_path, errno);
+        free(fd2id_fds); free(fd2id_kids);
+        return -1;
     }
+    if (run_canonicalize(bytecode_path, w->cur, w->target_json, map_ids_csv,
+                         map_refs_are_kernel_ids ? NULL : fd_to_id_path,
+                         canon_log) != 0) {
+        char err_tail[1024] = {0};
+        read_tail_escaped(canon_log, err_tail, sizeof(err_tail));
+        snprintf(err_out, err_sz,
+                 "bpfopt --canonicalize-map-refs failed: %s", err_tail);
+        free(fd2id_fds); free(fd2id_kids);
+        return -1;
+    }
+    write_map_snapshots(w->map_values_dir, *out_local_ids, *out_local_types,
+                        *out_nr_maps);
     free(fd2id_fds); free(fd2id_kids);
     return 0;
 }
@@ -692,7 +779,10 @@ static void emit_execute_plan(int cli, const char *json) {
     while (all_prog_i < all_prog_n) {
         uint32_t want_id = all_prog_ids[all_prog_i++];
         char prog_id_str[32];
+        char prog_original_id_str[32];
         snprintf(prog_id_str, sizeof(prog_id_str), "%u", want_id);
+        snprintf(prog_original_id_str, sizeof(prog_original_id_str), "%u",
+                 want_id);
 
         pthread_mutex_lock(&state_mutex);
         struct prog_entry *pd = prog_find_by_kernel_id(want_id);
@@ -796,11 +886,11 @@ static void emit_execute_plan(int cli, const char *json) {
             if (!so) continue;
             memcpy(so, so_s, slen); so[slen] = 0;
             char name[64] = {0};
-            char cmdbuf[4096] = {0};
+            char cmdbuf[SHIM_PLAN_COMMAND_MAX] = {0};
             json_get_str(so, "name", name, sizeof(name));
             json_get_str(so, "command", cmdbuf, sizeof(cmdbuf));
             char command_key[96];
-            char override_cmd[4096] = {0};
+            char override_cmd[SHIM_PLAN_COMMAND_MAX] = {0};
             command_key_for_prog(prog_name, command_key, sizeof(command_key));
             if (json_get_str(so, command_key, override_cmd,
                              sizeof(override_cmd)))
@@ -816,14 +906,17 @@ static void emit_execute_plan(int cli, const char *json) {
                 snprintf(cmdbuf, sizeof(cmdbuf), "%s", override_cmd);
             long log_level = json_get_int(so, "log_level");
             if (log_level <= 0) log_level = 1;
+            int reload_unchanged = json_get_int(so, "reload_unchanged") > 0;
             free(so);
 
             struct step_result sr;
+            memset(&sr, 0, sizeof(sr));
             run_step(pd, w.workdir, prog_type_name, prog_id_str,
+                     prog_original_id_str,
                      prog_hash_str, prog_branch_profile_hash_str,
-                     w.target_json, map_ids_csv,
-                     w.map_values_dir, local_ids, nr_maps, w.cur, w.nxt,
-                     w.report, &step_seq, name, cmdbuf, &sr);
+                     w.target_json, map_ids_csv, w.map_values_dir, local_ids,
+                     nr_maps, w.cur, w.nxt, w.report, &step_seq, cmdbuf,
+                     reload_unchanged, &sr);
             pthread_mutex_lock(&state_mutex);
             if (pd && pd->kernel_prog_id)
                 snprintf(prog_id_str, sizeof(prog_id_str), "%u",
@@ -836,7 +929,7 @@ static void emit_execute_plan(int cli, const char *json) {
                 final_insn_count = (uint32_t)(cst.st_size / sizeof(struct bpf_insn));
 
             if (!sr.ok) prog_any_failed = 1;
-            char name_json[160], cmd_json[8192];
+            char name_json[160], cmd_json[SHIM_PLAN_COMMAND_JSON_MAX];
             json_escape_into(name, strlen(name), name_json, sizeof(name_json));
             json_escape_into(cmdbuf, strlen(cmdbuf), cmd_json, sizeof(cmd_json));
             buf_appendf(&resp, &cap, &len,

@@ -1,0 +1,26 @@
+{
+  "pass": "tail_call_icache",
+  "per_site": {
+    "403": {
+      "hot_count": 11360,
+      "hot_key": 4,
+      "observations": 11360
+    },
+    "420": {
+      "hot_count": 2400,
+      "hot_key": 3,
+      "observations": 2400
+    }
+  },
+  "program_hash": "00a889ebf78dfc90",
+  "schema_version": 1,
+  "source_prog_id": 1706,
+  "source_prog_ids": [
+    1706,
+    1712,
+    1722,
+    1734,
+    1765,
+    1804
+  ]
+}

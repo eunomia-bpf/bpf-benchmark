@@ -9,6 +9,10 @@
 #define BPF_PSEUDO_CALL 1
 #endif
 
+#ifndef CONTEXT_FALLBACK_MAP_MARKER
+#define CONTEXT_FALLBACK_MAP_MARKER 0x7ffffffeU
+#endif
+
 #define LOADTIME_ATTR_HAS_FIELD(ATTR_SIZE, FIELD) \
     ((ATTR_SIZE) >= (offsetof(union bpf_attr, FIELD) + sizeof(((union bpf_attr *)0)->FIELD)))
 
@@ -580,7 +584,7 @@ static int loadtime_plan_needs_target(const char *steps,
         memcpy(obj, obj_start, len);
         obj[len] = 0;
         char name[64] = {0};
-        char command[4096] = {0};
+        char command[SHIM_PLAN_COMMAND_MAX] = {0};
         int needs = json_get_str(obj, "name", name, sizeof(name)) &&
                     loadtime_step_needs_target(name);
         if (!needs && json_get_str(obj, "command", command, sizeof(command)) &&
@@ -873,6 +877,130 @@ static int loadtime_bytecode_needs_fd_array(const struct bpf_insn *insns,
     return 0;
 }
 
+/* context_specialize keeps the generic program out of the optimized
+ * candidate's verifier state space.  Its guarded miss path contains a private
+ * PSEUDO_MAP_IDX marker for a one-entry PROG_ARRAY.  At load time, load the
+ * application-supplied original bytecode as the hidden slow target, populate
+ * that array, append it to the candidate fd_array, and rewrite every marker to
+ * the real fd_array index.  The optimized program retains the map and the map
+ * retains the original program after these temporary fds are closed. */
+static int loadtime_prepare_context_fallback_map(
+    const union bpf_attr *orig_attr, unsigned int attr_size,
+    struct bpf_insn *insns, uint32_t insn_cnt,
+    int **fd_array_ptr, uint32_t *fd_array_n_ptr) {
+    uint32_t marker_count = 0;
+    for (uint32_t i = 0; i < insn_cnt; i++) {
+        struct bpf_insn *insn = &insns[i];
+        if (insn->code != (BPF_LD | BPF_DW | BPF_IMM) ||
+            insn->src_reg != BPF_PSEUDO_MAP_IDX ||
+            (uint32_t)insn->imm != CONTEXT_FALLBACK_MAP_MARKER)
+            continue;
+        if (i + 1 >= insn_cnt || insns[i + 1].code != 0 ||
+            insns[i + 1].dst_reg != 0 || insns[i + 1].src_reg != 0 ||
+            insns[i + 1].off != 0 || insns[i + 1].imm != 0) {
+            log_line("loadtime context fallback marker has malformed "
+                     "LD_IMM64 tail at pc=%u", i);
+            errno = EINVAL;
+            return -1;
+        }
+        marker_count++;
+        i++;
+    }
+    if (marker_count == 0)
+        return 0;
+    if (!orig_attr || !orig_attr->insns || orig_attr->insn_cnt == 0 ||
+        attr_size == 0 || attr_size > 256) {
+        log_line("loadtime context fallback has invalid original "
+                 "BPF_PROG_LOAD attr");
+        errno = EINVAL;
+        return -1;
+    }
+    if (*fd_array_n_ptr == UINT32_MAX) {
+        log_line("loadtime context fallback fd_array index overflow");
+        errno = EOVERFLOW;
+        return -1;
+    }
+
+    char original_attr_buf[256] = {0};
+    memcpy(original_attr_buf, orig_attr, attr_size);
+    union bpf_attr *original_attr =
+        (union bpf_attr *)(void *)original_attr_buf;
+    original_attr->log_level = 0;
+    original_attr->log_buf = 0;
+    original_attr->log_size = 0;
+    long original_fd = real_syscall(SYS_bpf, BPF_PROG_LOAD,
+                                    original_attr_buf, attr_size);
+    if (original_fd < 0) {
+        int saved_errno = errno;
+        log_line("loadtime context fallback original BPF_PROG_LOAD "
+                 "failed errno=%d", saved_errno);
+        errno = saved_errno;
+        return -1;
+    }
+
+    union bpf_attr create = {0};
+    create.map_type = BPF_MAP_TYPE_PROG_ARRAY;
+    create.key_size = sizeof(uint32_t);
+    create.value_size = sizeof(uint32_t);
+    create.max_entries = 1;
+    long map_fd = real_syscall(SYS_bpf, BPF_MAP_CREATE, &create,
+                               sizeof(create));
+    if (map_fd < 0) {
+        int saved_errno = errno;
+        log_line("loadtime context fallback BPF_MAP_CREATE failed "
+                 "errno=%d", saved_errno);
+        real_close((int)original_fd);
+        errno = saved_errno;
+        return -1;
+    }
+
+    uint32_t key = 0;
+    uint32_t original_fd_u32 = (uint32_t)original_fd;
+    union bpf_attr update = {0};
+    update.map_fd = (uint32_t)map_fd;
+    update.key = (uintptr_t)&key;
+    update.value = (uintptr_t)&original_fd_u32;
+    update.flags = BPF_ANY;
+    if (real_syscall(SYS_bpf, BPF_MAP_UPDATE_ELEM, &update,
+                     sizeof(update)) < 0) {
+        int saved_errno = errno;
+        log_line("loadtime context fallback BPF_MAP_UPDATE_ELEM "
+                 "failed errno=%d", saved_errno);
+        real_close((int)map_fd);
+        real_close((int)original_fd);
+        errno = saved_errno;
+        return -1;
+    }
+    real_close((int)original_fd);
+
+    uint32_t old_n = *fd_array_n_ptr;
+    int *expanded = (int *)realloc(*fd_array_ptr,
+                                   (size_t)(old_n + 1) * sizeof(int));
+    if (!expanded) {
+        int saved_errno = errno;
+        log_line("loadtime context fallback fd_array allocation failed");
+        real_close((int)map_fd);
+        errno = saved_errno;
+        return -1;
+    }
+    expanded[old_n] = (int)map_fd;
+    *fd_array_ptr = expanded;
+    *fd_array_n_ptr = old_n + 1;
+
+    for (uint32_t i = 0; i < insn_cnt; i++) {
+        struct bpf_insn *insn = &insns[i];
+        if (insn->code == (BPF_LD | BPF_DW | BPF_IMM) &&
+            insn->src_reg == BPF_PSEUDO_MAP_IDX &&
+            (uint32_t)insn->imm == CONTEXT_FALLBACK_MAP_MARKER) {
+            insn->imm = (int32_t)old_n;
+            i++;
+        }
+    }
+    log_line("loadtime context fallback map prepared "
+             "fd_array_index=%u markers=%u", old_n, marker_count);
+    return 0;
+}
+
 static int loadtime_write_fd_to_id_json(const char *path,
                                         const struct shim_map_ref *refs,
                                         uint32_t ref_n) {
@@ -936,6 +1064,13 @@ static int loadtime_probe_bytecode_acceptance(const union bpf_attr *orig_attr,
             errno = EINVAL;
             return -1;
         }
+    }
+    if (loadtime_prepare_context_fallback_map(
+            orig_attr, attr_size, insns, insn_cnt,
+            &fd_array, &fd_array_n) != 0) {
+        free_full_fd_array(fd_array, fd_array_n);
+        free(insns);
+        return -1;
     }
 
     char attr_buf[256] = {0};
@@ -1244,10 +1379,10 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         memcpy(so, so_s, slen);
         so[slen] = 0;
         char name[64] = {0};
-        char cmdbuf[4096] = {0};
+        char cmdbuf[SHIM_PLAN_COMMAND_MAX] = {0};
         json_get_str(so, "name", name, sizeof(name));
         json_get_str(so, "command", cmdbuf, sizeof(cmdbuf));
-        char command_key[96], override_cmd[4096] = {0};
+        char command_key[96], override_cmd[SHIM_PLAN_COMMAND_MAX] = {0};
         loadtime_command_key_for_prog(prog_name, command_key, sizeof(command_key));
         if (json_get_str(so, command_key, override_cmd, sizeof(override_cmd)))
             snprintf(cmdbuf, sizeof(cmdbuf), "%s", override_cmd);
@@ -1296,16 +1431,18 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         unlink(nxt);
         unlink(report);
 
-        const char *vars[11][2] = {
-            {"PROG_ID", prog_id_str}, {"PROG_HASH", prog_hash_str},
+        const char *vars[12][2] = {
+            {"PROG_ID", prog_id_str},
+            {"PROG_ORIGINAL_ID", prog_id_str},
+            {"PROG_HASH", prog_hash_str},
             {"PROG_BRANCH_PROFILE_HASH", prog_branch_profile_hash_str},
             {"PROG_TYPE", prog_type_name},
             {"INPUT", cur}, {"OUTPUT", nxt}, {"REPORT", report},
             {"WORKDIR", workdir}, {"TARGET", target_json},
             {"MAP_IDS", map_ids_csv}, {"MAP_VALUES", map_values_dir},
         };
-        char resolved[4200];
-        loadtime_substitute_vars(resolved, sizeof(resolved), cmdbuf, vars, 11);
+        char resolved[SHIM_PLAN_RESOLVED_MAX];
+        loadtime_substitute_vars(resolved, sizeof(resolved), cmdbuf, vars, 12);
         char step_log[360];
         snprintf(step_name_buf, sizeof(step_name_buf), "step%d.log", step_seq);
         if (loadtime_join_path(step_log, sizeof(step_log), workdir,
@@ -1436,6 +1573,19 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
             free(plan_json);
             return -1;
         }
+    }
+    if (loadtime_prepare_context_fallback_map(
+            attr, attr_size, optimized, out_insn_cnt,
+            &fd_array, &fd_array_n) != 0) {
+        snprintf(err, err_sz,
+                 "failed to prepare loadtime context fallback map");
+        free_full_fd_array(fd_array, fd_array_n);
+        free(optimized);
+        free(map_refs);
+        free(map_ids);
+        free(map_types);
+        free(plan_json);
+        return -1;
     }
 
     memset(out->attr_buf, 0, sizeof(out->attr_buf));

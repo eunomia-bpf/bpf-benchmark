@@ -1,0 +1,5 @@
+log_level: 1
+command: |
+  profile_root="${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for hot_region_version}";
+  profile="${profile_root}/hot_region_version/hash-${PROG_HASH}.json";
+  bpfopt --pass hot_region_version --input "${INPUT}" --output "${OUTPUT}" --report "${REPORT}" --prog-type "${PROG_TYPE}" -- --profile "${profile}" --program-hash "${PROG_HASH}"

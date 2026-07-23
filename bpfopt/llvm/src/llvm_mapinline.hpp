@@ -213,8 +213,12 @@ struct MapInfo {
 	std::string map_type;
 	uint32_t key_size = 0;
 	uint32_t value_size = 0;
+	uint32_t max_entries = 0;
+	uint32_t flags = 0;
 	bool data_path_mutable = false;
 };
+
+constexpr uint32_t BPF_F_RDONLY_PROG_VALUE = 1U << 7;
 
 // Map types whose value is an ordinary fixed-layout blob that map_inline can
 // fold a constant into. Excludes map-in-map, prog/perf arrays, ringbuf, sock
@@ -231,6 +235,7 @@ struct InlineRecord {
 	uint32_t map_id = 0;
 	std::vector<uint8_t> key;
 	std::vector<uint8_t> value;
+	std::string stability;
 };
 
 // Optional CLI entry hint: for map `map_name`, the hex bytes identify the
@@ -240,10 +245,35 @@ struct InlineHint {
 	std::vector<uint8_t> key;
 };
 
+enum class MapInlineStability {
+	Unspecified,
+	Guarded,
+	PhaseStable,
+};
+
+std::string_view map_inline_stability_name(MapInlineStability stability)
+{
+	switch (stability) {
+	case MapInlineStability::Guarded:
+		return "guarded";
+	case MapInlineStability::PhaseStable:
+		return "phase-stable";
+	case MapInlineStability::Unspecified:
+		break;
+	}
+	return "unspecified";
+}
+
 struct MapInlineArgs {
 	std::filesystem::path map_values;
 	std::vector<uint32_t> map_ids;
 	std::vector<InlineHint> hints;
+	std::set<std::string> included_maps;
+	std::set<std::string> excluded_maps;
+	std::set<std::string> direct_array_maps;
+	MapInlineStability stability = MapInlineStability::Unspecified;
+	bool only_hinted = false;
+	bool assume_hint_key = false;
 };
 
 struct MapSnapshot {
@@ -450,6 +480,83 @@ MapInlineArgs parse_map_inline_args(const std::vector<std::string> &args)
 			auto key_text = value.substr(colon + 1);
 			parsed.hints.push_back({ value.substr(0, colon),
 						  parse_hex_bytes(key_text) });
+		} else if (arg == "--stability") {
+			if (++i >= args.size()) {
+				throw std::runtime_error(
+					"--stability requires guarded or phase-stable");
+			}
+			if (args[i] == "guarded") {
+				parsed.stability = MapInlineStability::Guarded;
+			} else if (args[i] == "phase-stable") {
+				parsed.stability = MapInlineStability::PhaseStable;
+			} else {
+				throw std::runtime_error(
+					"map_inline --stability must be guarded or phase-stable");
+			}
+		} else if (arg == "--only-hinted") {
+			parsed.only_hinted = true;
+		} else if (arg == "--assume-hint-key") {
+			parsed.assume_hint_key = true;
+		} else if (arg == "--direct-array-map" ||
+			   arg.starts_with("--direct-array-map=")) {
+			std::string value;
+			if (arg == "--direct-array-map") {
+				if (++i >= args.size()) {
+					throw std::runtime_error(
+						"--direct-array-map requires MAP_NAME");
+				}
+				value = args[i];
+			} else {
+				value = arg.substr(std::strlen("--direct-array-map="));
+			}
+			if (value.empty()) {
+				throw std::runtime_error(
+					"--direct-array-map requires non-empty MAP_NAME");
+			}
+			if (!parsed.direct_array_maps.insert(value).second) {
+				throw std::runtime_error(
+					"duplicate map_inline --direct-array-map " + value);
+			}
+		} else if (arg == "--include-map" ||
+			   arg.starts_with("--include-map=")) {
+			std::string value;
+			if (arg == "--include-map") {
+				if (++i >= args.size()) {
+					throw std::runtime_error(
+						"--include-map requires MAP_NAME");
+				}
+				value = args[i];
+			} else {
+				value = arg.substr(std::strlen("--include-map="));
+			}
+			if (value.empty()) {
+				throw std::runtime_error(
+					"--include-map requires non-empty MAP_NAME");
+			}
+			if (!parsed.included_maps.insert(value).second) {
+				throw std::runtime_error(
+					"duplicate map_inline --include-map " + value);
+			}
+		} else if (arg == "--exclude-map" ||
+			   arg.starts_with("--exclude-map=")) {
+			std::string value;
+			if (arg == "--exclude-map") {
+				if (++i >= args.size()) {
+					throw std::runtime_error(
+						"--exclude-map requires MAP_NAME");
+				}
+				value = args[i];
+			} else {
+				value = arg.substr(std::strlen("--exclude-map="));
+			}
+			if (value.empty()) {
+				throw std::runtime_error(
+					"--exclude-map requires non-empty MAP_NAME");
+			}
+			if (!parsed.excluded_maps.insert(value).second) {
+				throw std::runtime_error(
+					"duplicate map_inline --exclude-map " + value);
+			}
 		} else {
 			throw std::runtime_error("map_inline unknown pass-local arg: " +
 						 arg);
@@ -461,7 +568,69 @@ MapInlineArgs parse_map_inline_args(const std::vector<std::string> &args)
 	if (parsed.map_ids.empty()) {
 		throw std::runtime_error("map_inline requires --map-ids");
 	}
+	if (parsed.stability == MapInlineStability::Unspecified) {
+		throw std::runtime_error(
+			"map_inline requires explicit --stability guarded or phase-stable");
+	}
+	if (parsed.only_hinted && parsed.hints.empty()) {
+		throw std::runtime_error(
+			"map_inline --only-hinted requires at least one --inline-hint");
+	}
+	if (parsed.only_hinted && !parsed.included_maps.empty()) {
+		throw std::runtime_error(
+			"map_inline --only-hinted and --include-map are mutually exclusive");
+	}
+	if (!parsed.included_maps.empty() && !parsed.excluded_maps.empty()) {
+		throw std::runtime_error(
+			"map_inline --include-map and --exclude-map are mutually exclusive");
+	}
+	if (parsed.assume_hint_key && parsed.hints.empty()) {
+		throw std::runtime_error(
+			"map_inline --assume-hint-key requires at least one --inline-hint");
+	}
+	if (parsed.assume_hint_key &&
+	    parsed.stability != MapInlineStability::PhaseStable) {
+		throw std::runtime_error(
+			"map_inline --assume-hint-key requires --stability phase-stable");
+	}
 	return parsed;
+}
+
+bool map_inline_map_is_selected(const MapInlineArgs &args,
+				const std::string &map_name)
+{
+	if (args.excluded_maps.contains(map_name)) {
+		return false;
+	}
+	if (!args.included_maps.empty()) {
+		return args.included_maps.contains(map_name);
+	}
+	if (args.only_hinted) {
+		return std::any_of(args.hints.begin(), args.hints.end(),
+				   [&map_name](const InlineHint &hint) {
+					   return hint.map_name == map_name;
+				   });
+	}
+	return true;
+}
+
+void validate_map_inline_included_maps(const MapInlineArgs &args,
+				       const MapSnapshot &snapshot)
+{
+	for (const auto &map_name : args.included_maps) {
+		if (!snapshot.map_id_by_name.contains(map_name)) {
+			throw std::runtime_error(
+				"map_inline --include-map references unknown map " +
+				map_name);
+		}
+	}
+	for (const auto &map_name : args.direct_array_maps) {
+		if (!snapshot.map_id_by_name.contains(map_name)) {
+			throw std::runtime_error(
+				"map_inline --direct-array-map references unknown map " +
+				map_name);
+		}
+	}
 }
 
 MapSnapshot read_map_snapshot(const MapInlineArgs &args)
@@ -482,6 +651,21 @@ MapSnapshot read_map_snapshot(const MapInlineArgs &args)
 		info.map_type = json_string_field(show, "type");
 		info.key_size = json_u32_field(show, "bytes_key");
 		info.value_size = json_u32_field(show, "bytes_value");
+		if (auto max_entries = show.getInteger("max_entries")) {
+			if (*max_entries < 0 ||
+			    *max_entries > std::numeric_limits<uint32_t>::max()) {
+				throw std::runtime_error(
+					"map show max_entries is not a u32");
+			}
+			info.max_entries = static_cast<uint32_t>(*max_entries);
+		}
+		if (auto flags = show.getInteger("flags")) {
+			if (*flags < 0 ||
+			    *flags > std::numeric_limits<uint32_t>::max()) {
+				throw std::runtime_error("map show flags is not a u32");
+			}
+			info.flags = static_cast<uint32_t>(*flags);
+		}
 		if (info.id != map_id) {
 			throw std::runtime_error("map show id mismatch");
 		}
@@ -657,6 +841,40 @@ llvm::Value *build_key_match(llvm::IRBuilder<> &b, llvm::Value *key_arg,
 	return match;
 }
 
+// Compare the current map value against the profiled bytes. The caller must
+// branch on a non-NULL lookup result before entering the block that emits these
+// loads. Loads use alignment one because map values may contain packed fields.
+llvm::Value *build_value_match(llvm::IRBuilder<> &b, llvm::Value *value_arg,
+			       const std::vector<uint8_t> &value)
+{
+	auto *value_ptr = b.CreateIntToPtr(value_arg, b.getPtrTy());
+	llvm::Value *match = b.getTrue();
+	size_t off = 0;
+	for (; off + 4 <= value.size(); off += 4) {
+		auto *pointer = b.CreateGEP(b.getInt8Ty(), value_ptr,
+					    b.getInt64(off));
+		auto *current = b.CreateLoad(b.getInt32Ty(), pointer,
+					     "mapinline.current.word");
+		current->setAlignment(llvm::Align(1));
+		uint32_t constant = 0;
+		std::memcpy(&constant, value.data() + off, sizeof(constant));
+		match = b.CreateAnd(
+			match, b.CreateICmpEQ(current, b.getInt32(constant)),
+			"mapinline.value.words.match");
+	}
+	for (; off < value.size(); off++) {
+		auto *pointer = b.CreateGEP(b.getInt8Ty(), value_ptr,
+					    b.getInt64(off));
+		auto *current = b.CreateLoad(b.getInt8Ty(), pointer,
+					     "mapinline.current.byte");
+		current->setAlignment(llvm::Align(1));
+		match = b.CreateAnd(
+			match, b.CreateICmpEQ(current, b.getInt8(value[off])),
+			"mapinline.value.bytes.match");
+	}
+	return match;
+}
+
 // Allocate a fresh entry-block stack buffer of `size` bytes (so no constant
 // global / .rodata map is introduced for the value).
 llvm::AllocaInst *alloc_value_buf(llvm::Function *fn, size_t size)
@@ -710,10 +928,12 @@ llvm::Value *materialize_value_ptr(llvm::IRBuilder<> &b,
 // A select would still run the (expensive, e.g. HASH) lookup every dispatch;
 // this branch skips it on the fast path. Replacing the result at the call
 // boundary handles every downstream use uniformly (loads, null checks, PHIs).
-// Soundness: the snapshot constant is used ONLY when the runtime key equals K;
-// every other key and a miss take the slow path with the real lookup result
-// (so its live value and any write-through pointer are preserved). When K is a
-// provable constant O3 folds the branch away and DCEs the call.
+// The key guard preserves all other keys and misses, but it does not prove that
+// K's snapshotted value remains current. The pass therefore requires the
+// caller's explicit `--stability phase-stable` contract: the selected map
+// values must not change while this program version is installed. A later map
+// update requires installing a new version before the changed value is used.
+// When K is a provable constant O3 folds the branch away and DCEs the call.
 //
 // NOTE: the fast path gives the verifier a known-constant value where the slow
 // path has an unknown live value; these are distinct value-abstractions, so the
@@ -751,6 +971,82 @@ void fold_guarded_branch(llvm::Module &module, llvm::CallInst *call,
 	auto *phi = llvm::PHINode::Create(call->getType(), 2, "mapinline.r0",
 					  &*merge->getFirstInsertionPt());
 	call->replaceAllUsesWith(phi);
+	phi->addIncoming(fast_ptr, fast);
+	phi->addIncoming(call, slow);
+}
+
+// Guarded-freshness mode always performs the real lookup. It substitutes the
+// profiled constant only when the selected key (if any), non-NULL result, and
+// every current value byte match the snapshot:
+//
+//   r = map_lookup_elem(map, key)
+//   if selected_key(key) && r != NULL && *r == snapshot:
+//       use snapshot constant
+//   else:
+//       use r
+//
+// This provides immediate per-invocation fallback when a deployment phase
+// changes. It deliberately does not claim lookup elimination; phase-stable
+// mode below is the stronger contract that permits skipping the helper.
+void fold_value_guarded_branch(llvm::Module &module, llvm::CallInst *call,
+			       const std::vector<uint8_t> &selected_key,
+			       const std::vector<uint8_t> &value)
+{
+	llvm::LLVMContext &context = module.getContext();
+	llvm::BasicBlock *lookup = call->getParent();
+	llvm::Function *function = lookup->getParent();
+	llvm::Instruction *continuation = call->getNextNode();
+	if (!continuation) {
+		throw std::runtime_error(
+			"map_inline lookup has no continuation for guarded mode");
+	}
+
+	// Preserve only the uses that existed before the guard is built. New guard
+	// uses must keep referring to the real helper result, not the merge PHI.
+	std::vector<llvm::Use *> original_uses;
+	for (llvm::Use &use : call->uses()) {
+		original_uses.push_back(&use);
+	}
+
+	llvm::BasicBlock *merge = lookup->splitBasicBlock(
+		continuation, "mapinline.merge");
+	llvm::BasicBlock *compare = llvm::BasicBlock::Create(
+		context, "mapinline.compare", function, merge);
+	llvm::BasicBlock *fast = llvm::BasicBlock::Create(
+		context, "mapinline.fast", function, merge);
+	llvm::BasicBlock *slow = llvm::BasicBlock::Create(
+		context, "mapinline.slow", function, merge);
+
+	llvm::IRBuilder<> lookup_builder(lookup->getTerminator());
+	llvm::Value *eligible = lookup_builder.CreateICmpNE(
+		call, llvm::ConstantInt::get(call->getType(), 0),
+		"mapinline.nonnull");
+	if (!selected_key.empty()) {
+		eligible = lookup_builder.CreateAnd(
+			eligible,
+			build_key_match(lookup_builder, call->getArgOperand(1),
+					selected_key),
+			"mapinline.selected.current");
+	}
+	lookup->getTerminator()->eraseFromParent();
+	llvm::BranchInst::Create(compare, slow, eligible, lookup);
+
+	llvm::IRBuilder<> compare_builder(compare);
+	auto *fresh = build_value_match(compare_builder, call, value);
+	compare_builder.CreateCondBr(fresh, fast, slow);
+
+	llvm::IRBuilder<> fast_builder(fast);
+	auto *fast_ptr = materialize_value_ptr(
+		fast_builder, value, call->getType());
+	fast_builder.CreateBr(merge);
+	llvm::IRBuilder<>(slow).CreateBr(merge);
+
+	auto *phi = llvm::PHINode::Create(call->getType(), 2,
+					  "mapinline.r0",
+					  &*merge->getFirstInsertionPt());
+	for (llvm::Use *use : original_uses) {
+		use->set(phi);
+	}
 	phi->addIncoming(fast_ptr, fast);
 	phi->addIncoming(call, slow);
 }
@@ -877,8 +1173,8 @@ resolve_const_key(llvm::CallInst *call, size_t key_size, llvm::DominatorTree &dt
 // priority order:
 //   1. constant key (recovered via resolve_const_key) -> UNCONDITIONAL fold:
 //      replace the result with a stack copy of the value and delete the lookup.
-//      A proven-constant key is sound with no guard, and (no result phi) the
-//      value const-propagates like a uniform fold. This is "if the key is
+//      Under the explicit phase-stable value contract, no key guard is needed,
+//      and (no result phi) the value const-propagates like a uniform fold. This is "if the key is
 //      constant, skip the call" — done by us, since O3 can't see the constant
 //      through llvmbpf's ptrtoint frame arithmetic.
 //   2. uniform map -> UNCONDITIONAL fold (value is key-independent).
@@ -888,9 +1184,515 @@ struct FoldDecision {
 	llvm::CallInst *call;
 	std::vector<uint8_t> key;
 	std::vector<uint8_t> value;
-	bool guarded;
+	bool guard_key;
+	bool sparse_scalar;
 	uint32_t map_id;
 };
+
+struct SparseScalarFoldPlan {
+	std::vector<std::pair<llvm::LoadInst *, uint64_t>> loads;
+	std::vector<std::pair<llvm::ICmpInst *, bool>> null_checks;
+	std::vector<std::pair<llvm::PHINode *, unsigned>> null_edge_phis;
+	std::vector<llvm::Instruction *> derived_pointers;
+};
+
+bool is_null_constant(llvm::Value *value)
+{
+	if (auto *integer = llvm::dyn_cast<llvm::ConstantInt>(value)) {
+		return integer->isZero();
+	}
+	return llvm::isa<llvm::ConstantPointerNull>(value);
+}
+
+std::optional<bool> null_comparison_nonnull_result(llvm::ICmpInst *compare,
+						    llvm::Value *value)
+{
+	const unsigned operand = compare->getOperand(0) == value ? 0 :
+				 compare->getOperand(1) == value ? 1 : 2;
+	if (operand == 2 ||
+	    !is_null_constant(compare->getOperand(1 - operand)) ||
+	    (compare->getPredicate() != llvm::CmpInst::ICMP_EQ &&
+	     compare->getPredicate() != llvm::CmpInst::ICMP_NE)) {
+		return std::nullopt;
+	}
+	return compare->getPredicate() == llvm::CmpInst::ICMP_NE;
+}
+
+bool collect_sparse_scalar_uses(
+	llvm::Value *value, int64_t offset, size_t value_size,
+	const llvm::DataLayout &layout, SparseScalarFoldPlan &plan,
+	std::map<llvm::Value *, int64_t> &visited)
+{
+	if (auto found = visited.find(value); found != visited.end()) {
+		return found->second == offset;
+	}
+	visited.emplace(value, offset);
+
+	for (llvm::Use &use : value->uses()) {
+		auto *user = llvm::dyn_cast<llvm::Instruction>(use.getUser());
+		if (!user) {
+			return false;
+		}
+		if (auto *load = llvm::dyn_cast<llvm::LoadInst>(user)) {
+			if (load->getPointerOperand() != value || load->isVolatile() ||
+			    load->isAtomic() || !load->getType()->isIntegerTy()) {
+				return false;
+			}
+			const unsigned bits = load->getType()->getIntegerBitWidth();
+			if (bits == 0 || bits > 64 || bits % 8 != 0 || offset < 0 ||
+			    static_cast<uint64_t>(offset) > value_size ||
+			    bits / 8 > value_size - static_cast<uint64_t>(offset)) {
+				return false;
+			}
+			plan.loads.emplace_back(load, static_cast<uint64_t>(offset));
+			continue;
+		}
+		if (auto *compare = llvm::dyn_cast<llvm::ICmpInst>(user)) {
+			const auto nonnull_result =
+				null_comparison_nonnull_result(compare, value);
+			if (!nonnull_result) {
+				return false;
+			}
+			plan.null_checks.emplace_back(compare, *nonnull_result);
+			continue;
+		}
+		if (auto *phi = llvm::dyn_cast<llvm::PHINode>(user)) {
+			const unsigned incoming_index = use.getOperandNo();
+			if (incoming_index >= phi->getNumIncomingValues()) {
+				return false;
+			}
+			auto *incoming = phi->getIncomingBlock(incoming_index);
+			auto *branch = llvm::dyn_cast<llvm::BranchInst>(
+				incoming->getTerminator());
+			if (!branch || !branch->isConditional()) {
+				return false;
+			}
+			auto *compare = llvm::dyn_cast<llvm::ICmpInst>(
+				branch->getCondition());
+			const auto nonnull_when_true = compare ?
+				null_comparison_nonnull_result(compare, value) :
+				std::nullopt;
+			if (!nonnull_when_true) {
+				return false;
+			}
+			const bool edge_is_true =
+				branch->getSuccessor(0) == phi->getParent();
+			const bool edge_is_false =
+				branch->getSuccessor(1) == phi->getParent();
+			if (edge_is_true == edge_is_false ||
+			    edge_is_true == *nonnull_when_true) {
+				return false;
+			}
+			plan.null_edge_phis.emplace_back(phi, incoming_index);
+			continue;
+		}
+		if (auto *gep = llvm::dyn_cast<llvm::GetElementPtrInst>(user)) {
+			if (gep->getPointerOperand() != value) {
+				return false;
+			}
+			llvm::APInt delta(64, 0);
+			if (!gep->accumulateConstantOffset(layout, delta)) {
+				return false;
+			}
+			if (!collect_sparse_scalar_uses(
+				    gep, offset + delta.getSExtValue(), value_size,
+				    layout, plan, visited)) {
+				return false;
+			}
+			plan.derived_pointers.push_back(gep);
+			continue;
+		}
+		if (llvm::isa<llvm::IntToPtrInst>(user) ||
+		    llvm::isa<llvm::PtrToIntInst>(user) ||
+		    llvm::isa<llvm::BitCastInst>(user) ||
+		    llvm::isa<llvm::AddrSpaceCastInst>(user)) {
+			if (user->getOperand(0) != value) {
+				return false;
+			}
+			if (!collect_sparse_scalar_uses(
+				    user, offset, value_size, layout, plan, visited)) {
+				return false;
+			}
+			plan.derived_pointers.push_back(user);
+			continue;
+		}
+		return false;
+	}
+	return true;
+}
+
+std::optional<SparseScalarFoldPlan>
+sparse_scalar_fold_plan(llvm::CallInst *call,
+			const std::vector<uint8_t> &value,
+			const llvm::DataLayout &layout)
+{
+	if (call->use_empty()) {
+		return std::nullopt;
+	}
+	SparseScalarFoldPlan plan;
+	std::map<llvm::Value *, int64_t> visited;
+	if (!collect_sparse_scalar_uses(
+		    call, 0, value.size(), layout, plan, visited) ||
+	    (plan.loads.empty() && plan.null_checks.empty())) {
+		return std::nullopt;
+	}
+	return plan;
+}
+
+void fold_sparse_scalar_lookup(llvm::CallInst *call,
+			       const std::vector<uint8_t> &value,
+			       const llvm::DataLayout &layout)
+{
+	auto plan = sparse_scalar_fold_plan(call, value, layout);
+	if (!plan) {
+		throw std::runtime_error(
+			"map_inline sparse scalar use graph changed during application");
+	}
+	for (const auto &[load, offset] : plan->loads) {
+		const unsigned bits = load->getType()->getIntegerBitWidth();
+		uint64_t constant = 0;
+		for (unsigned byte = 0; byte < bits / 8; byte++) {
+			constant |= static_cast<uint64_t>(
+				value[static_cast<size_t>(offset) + byte]) <<
+				(byte * 8);
+		}
+		load->replaceAllUsesWith(
+			llvm::ConstantInt::get(load->getType(), constant));
+	}
+	for (const auto &[compare, nonnull_result] : plan->null_checks) {
+		compare->replaceAllUsesWith(llvm::ConstantInt::get(
+			compare->getType(), nonnull_result));
+	}
+	for (const auto &[phi, incoming_index] : plan->null_edge_phis) {
+		phi->setIncomingValue(
+			incoming_index,
+			llvm::ConstantInt::get(call->getType(), 0));
+	}
+	for (const auto &[load, _] : plan->loads) {
+		load->eraseFromParent();
+	}
+	for (const auto &[compare, _] : plan->null_checks) {
+		compare->eraseFromParent();
+	}
+	for (llvm::Instruction *pointer : plan->derived_pointers) {
+		if (!pointer->use_empty()) {
+			throw std::runtime_error(
+				"map_inline sparse derived pointer remains live");
+		}
+		pointer->eraseFromParent();
+	}
+	if (!call->use_empty()) {
+		throw std::runtime_error(
+			"map_inline sparse lookup remains live after scalar folding");
+	}
+	call->eraseFromParent();
+}
+
+// Materialized folds consume BPF stack so downstream pointer uses remain
+// valid. Account for the existing static frame before choosing such a site.
+// A phase-stable exact entry whose uses are only fixed-offset scalar loads
+// takes the sparse path above and needs no value-sized stack allocation.
+uint64_t static_alloca_bytes(const llvm::Function &function,
+			     const llvm::DataLayout &layout)
+{
+	uint64_t bytes = 0;
+	for (const llvm::BasicBlock &block : function) {
+		for (const llvm::Instruction &instruction : block) {
+			auto *alloca = llvm::dyn_cast<llvm::AllocaInst>(
+				&instruction);
+			if (!alloca) {
+				continue;
+			}
+			auto *count = llvm::dyn_cast<llvm::ConstantInt>(
+				alloca->getArraySize());
+			if (!count) {
+				return 512;
+			}
+			const auto type_size =
+				layout.getTypeAllocSize(alloca->getAllocatedType());
+			if (type_size.isScalable()) {
+				return 512;
+			}
+			const uint64_t alignment = alloca->getAlign().value();
+			bytes = llvm::alignTo(bytes, alignment);
+			const uint64_t count_value = count->getZExtValue();
+			const uint64_t element_size = type_size.getFixedValue();
+			if (count_value != 0 &&
+			    element_size >
+				    (std::numeric_limits<uint64_t>::max() - bytes) /
+					    count_value) {
+				return 512;
+			}
+			bytes += element_size * count_value;
+		}
+	}
+	return bytes;
+}
+
+struct PseudoMapValueSymbol {
+	uint32_t map_index;
+	uint32_t base_offset;
+};
+
+std::optional<PseudoMapValueSymbol>
+parse_pseudo_map_value_symbol(llvm::StringRef name)
+{
+	const llvm::StringRef prefix =
+		"__llvmbpf_pseudo_map_idx_value_";
+	const llvm::StringRef separator = "_off_";
+	if (!name.starts_with(prefix)) {
+		return std::nullopt;
+	}
+	name = name.drop_front(prefix.size());
+	if (name.size() != 8 + separator.size() + 8 ||
+	    name.substr(8, separator.size()) != separator) {
+		throw std::runtime_error("malformed pseudo map-value symbol");
+	}
+	return PseudoMapValueSymbol{
+		parse_hex_u32(name.substr(0, 8).str()),
+		parse_hex_u32(name.substr(8 + separator.size(), 8).str()),
+	};
+}
+
+struct PseudoMapValuePointer {
+	llvm::GlobalVariable *symbol;
+	PseudoMapValueSymbol reference;
+	int64_t derived_offset;
+};
+
+std::optional<PseudoMapValuePointer>
+pseudo_map_value_pointer(llvm::Value *pointer, const llvm::DataLayout &layout)
+{
+	llvm::APInt offset(layout.getPointerSizeInBits(), 0, true);
+	llvm::Value *root = pointer->stripAndAccumulateConstantOffsets(
+		layout, offset, true);
+	auto *symbol = llvm::dyn_cast<llvm::GlobalVariable>(root);
+	if (!symbol) {
+		return std::nullopt;
+	}
+	auto reference = parse_pseudo_map_value_symbol(symbol->getName());
+	if (!reference) {
+		return std::nullopt;
+	}
+	return PseudoMapValuePointer{
+		symbol, *reference, offset.getSExtValue()
+	};
+}
+
+// libbpf global data accesses are relocated as BPF_PSEUDO_MAP_VALUE pointers,
+// not map_lookup_elem calls.  A program-read-only array (for example an
+// application's .rodata configuration map) cannot be changed by any BPF data
+// path.  Under the explicit phase-stable contract, fixed-width loads from its
+// snapshotted value can therefore be folded exactly like fixed-key lookups.
+// Writable .data/.bss maps and guarded mode remain untouched.
+std::vector<InlineRecord>
+fold_pseudo_map_value_loads_ir(llvm::Module &module,
+			       const MapInlineArgs &args)
+{
+	std::vector<InlineRecord> records;
+	if (args.stability != MapInlineStability::PhaseStable) {
+		return records;
+	}
+	auto *main_fn = module.getFunction("bpf_main");
+	if (!main_fn) {
+		return records;
+	}
+	const auto snapshot = read_map_snapshot(args);
+	validate_map_inline_included_maps(args, snapshot);
+	const auto &layout = module.getDataLayout();
+	std::set<llvm::GlobalVariable *> written_symbols;
+	for (llvm::BasicBlock &block : *main_fn) {
+		for (llvm::Instruction &instruction : block) {
+			llvm::Value *pointer = nullptr;
+			if (auto *store = llvm::dyn_cast<llvm::StoreInst>(&instruction)) {
+				pointer = store->getPointerOperand();
+			} else if (auto *atomic =
+					   llvm::dyn_cast<llvm::AtomicRMWInst>(&instruction)) {
+				pointer = atomic->getPointerOperand();
+			} else if (auto *compare =
+					   llvm::dyn_cast<llvm::AtomicCmpXchgInst>(&instruction)) {
+				pointer = compare->getPointerOperand();
+			}
+			if (pointer) {
+				if (auto target = pseudo_map_value_pointer(pointer, layout)) {
+					written_symbols.insert(target->symbol);
+				}
+			}
+		}
+	}
+
+	struct Fold {
+		llvm::LoadInst *load;
+		uint32_t map_id;
+		std::vector<uint8_t> key;
+		std::vector<uint8_t> bytes;
+	};
+	std::vector<Fold> folds;
+	for (llvm::BasicBlock &block : *main_fn) {
+		for (llvm::Instruction &instruction : block) {
+			auto *load = llvm::dyn_cast<llvm::LoadInst>(&instruction);
+			if (!load || load->isVolatile() || load->isAtomic() ||
+			    !load->getType()->isIntegerTy()) {
+				continue;
+			}
+			const unsigned bits = load->getType()->getIntegerBitWidth();
+			if (bits == 0 || bits > 64 || bits % 8 != 0) {
+				continue;
+			}
+			auto target = pseudo_map_value_pointer(
+				load->getPointerOperand(), layout);
+			if (!target || written_symbols.count(target->symbol) ||
+			    target->reference.map_index >= args.map_ids.size()) {
+				continue;
+			}
+			const uint32_t map_id =
+				args.map_ids[target->reference.map_index];
+			const auto info_it = snapshot.maps.find(map_id);
+			if (map_id == 0 || info_it == snapshot.maps.end()) {
+				continue;
+			}
+			const MapInfo &info = info_it->second;
+			if (info.map_type != "array" ||
+			    !(info.flags & BPF_F_RDONLY_PROG_VALUE)) {
+				continue;
+			}
+			if (!map_inline_map_is_selected(args, info.name)) {
+				continue;
+			}
+			std::vector<uint8_t> key(info.key_size, 0);
+			const auto value_it = snapshot.values.find(
+				{ map_id, bytes_hex(key) });
+			if (value_it == snapshot.values.end()) {
+				continue;
+			}
+			const int64_t absolute_offset =
+				static_cast<int64_t>(target->reference.base_offset) +
+				target->derived_offset;
+			const size_t width = bits / 8;
+			if (absolute_offset < 0 ||
+			    static_cast<uint64_t>(absolute_offset) >
+				    value_it->second.size() ||
+			    width > value_it->second.size() -
+					    static_cast<size_t>(absolute_offset)) {
+				continue;
+			}
+			const auto begin = value_it->second.begin() + absolute_offset;
+			folds.push_back({
+				load, map_id, std::move(key),
+				std::vector<uint8_t>(begin, begin + width),
+			});
+		}
+	}
+
+	for (Fold &fold : folds) {
+		uint64_t constant = 0;
+		for (size_t i = 0; i < fold.bytes.size(); i++) {
+			constant |= static_cast<uint64_t>(fold.bytes[i]) << (8 * i);
+		}
+		fold.load->replaceAllUsesWith(
+			llvm::ConstantInt::get(fold.load->getType(), constant));
+		fold.load->eraseFromParent();
+		records.push_back({
+			fold.map_id, std::move(fold.key), std::move(fold.bytes),
+			std::string(map_inline_stability_name(args.stability)),
+		});
+	}
+	return records;
+}
+
+llvm::Constant *direct_array_value_argument(llvm::Module &module,
+					    uint32_t map_index,
+					    uint32_t value_offset,
+					    llvm::Type *result_type)
+{
+	if (!result_type->isIntegerTy(64)) {
+		throw std::runtime_error(
+			"map_inline lookup helper has unexpected result type");
+	}
+	char symbol_name[96];
+	std::snprintf(symbol_name, sizeof(symbol_name),
+		      "__llvmbpf_pseudo_map_idx_value_%08x_off_%08x",
+		      map_index, value_offset);
+	auto *symbol = module.getNamedGlobal(symbol_name);
+	if (!symbol) {
+		symbol = new llvm::GlobalVariable(
+			module, llvm::Type::getInt8Ty(module.getContext()), false,
+			llvm::GlobalValue::ExternalLinkage, nullptr, symbol_name);
+	}
+	return llvm::ConstantExpr::getPtrToInt(symbol, result_type);
+}
+
+// A stock-kernel ARRAY with one element has a stable direct value address for
+// the lifetime of the map.  When the key is proven to be zero, explicitly
+// requested deployment specialization can replace map_lookup_elem with that
+// live address.  This does not snapshot or freeze the value: subsequent loads
+// and atomic writes still access the real map value.  The one-entry restriction
+// mirrors array_map_direct_value_addr() in the stock kernel verifier.
+std::vector<InlineRecord>
+direct_array_lookups_ir(llvm::Module &module, const MapInlineArgs &args)
+{
+	std::vector<InlineRecord> records;
+	if (args.direct_array_maps.empty()) {
+		return records;
+	}
+	auto *lookup = module.getFunction("_bpf_helper_ext_0001");
+	auto *main_fn = module.getFunction("bpf_main");
+	if (!lookup || !main_fn) {
+		return records;
+	}
+	const auto snapshot = read_map_snapshot(args);
+	validate_map_inline_included_maps(args, snapshot);
+	const auto &layout = module.getDataLayout();
+	llvm::DominatorTree dominators(*main_fn);
+	struct Decision {
+		llvm::CallInst *call;
+		uint32_t map_index;
+		uint32_t map_id;
+		std::vector<uint8_t> key;
+	};
+	std::vector<Decision> decisions;
+	for (llvm::BasicBlock &block : *main_fn) {
+		for (llvm::Instruction &instruction : block) {
+			auto *call = llvm::dyn_cast<llvm::CallInst>(&instruction);
+			if (!call || call->getCalledFunction() != lookup ||
+			    call->arg_size() < 1) {
+				continue;
+			}
+			const auto map_index =
+				resolve_map_idx_ir(call->getArgOperand(0));
+			if (!map_index || *map_index >= args.map_ids.size()) {
+				continue;
+			}
+			const uint32_t map_id = args.map_ids[*map_index];
+			const auto map_it = snapshot.maps.find(map_id);
+			if (map_id == 0 || map_it == snapshot.maps.end()) {
+				continue;
+			}
+			const MapInfo &info = map_it->second;
+			if (!args.direct_array_maps.contains(info.name) ||
+			    info.map_type != "array" || info.key_size != sizeof(uint32_t) ||
+			    info.max_entries != 1) {
+				continue;
+			}
+			auto key = resolve_const_key(call, info.key_size, dominators,
+						     layout);
+			if (!key || key->size() != sizeof(uint32_t) ||
+			    std::any_of(key->begin(), key->end(),
+					[](uint8_t byte) { return byte != 0; })) {
+				continue;
+			}
+			decisions.push_back({ call, *map_index, map_id, std::move(*key) });
+		}
+	}
+	for (Decision &decision : decisions) {
+		decision.call->replaceAllUsesWith(direct_array_value_argument(
+			module, decision.map_index, 0, decision.call->getType()));
+		decision.call->eraseFromParent();
+		records.push_back({ decision.map_id, std::move(decision.key), {},
+				    "direct-location" });
+	}
+	return records;
+}
 
 std::vector<InlineRecord> fold_map_lookups_ir(llvm::Module &module,
 					      const MapInlineArgs &args)
@@ -902,13 +1704,34 @@ std::vector<InlineRecord> fold_map_lookups_ir(llvm::Module &module,
 		return records;
 	}
 	const auto snapshot = read_map_snapshot(args);
+	validate_map_inline_included_maps(args, snapshot);
 	const auto mutable_maps = ir_mutable_maps(module, args.map_ids);
 	std::map<std::string, std::vector<uint8_t>> hint_key;
 	for (const auto &h : args.hints) {
+		const auto map = snapshot.map_id_by_name.find(h.map_name);
+		if (map == snapshot.map_id_by_name.end()) {
+			throw std::runtime_error(
+				"map_inline hint references unknown map " + h.map_name);
+		}
+		if (h.key.size() != snapshot.maps.at(map->second).key_size) {
+			throw std::runtime_error(
+				"map_inline hint key size mismatch for map " + h.map_name);
+		}
 		hint_key[h.map_name] = h.key;
 	}
 	const auto &dl = module.getDataLayout();
 	llvm::DominatorTree dt(*main_fn);
+	uint64_t materialized_bytes = static_alloca_bytes(*main_fn, dl);
+	// llvmbpf's lifted register machine needs backend spill space in addition
+	// to explicit IR allocas.  A materialized value larger than half the BPF
+	// stack cannot leave bounded room for those spills; Tracee's 272-byte
+	// config_map demonstrates the failure even for a 46-instruction input.
+	/* Guarded freshness retains the lookup and adds a bytewise live-value
+	 * comparison, so large values quickly cost more instructions and verifier
+	 * states than the lookup can save.  Phase-stable versions may still use the
+	 * wider limit because their hot path removes the lookup entirely. */
+	const uint64_t max_materialized_value_bytes =
+		args.stability == MapInlineStability::Guarded ? 64 : 256;
 
 	// Phase 1 — analysis only (no IR mutation), so the dominator tree stays
 	// valid for resolve_const_key across every site.
@@ -928,8 +1751,11 @@ std::vector<InlineRecord> fold_map_lookups_ir(llvm::Module &module,
 			    !map_type_supports_value_inline(mi->second.map_type)) {
 				continue;
 			}
+			if (!map_inline_map_is_selected(args, mi->second.name)) {
+				continue;
+			}
 			std::optional<std::vector<uint8_t>> value;
-			bool guarded = false;
+			bool guard_key = false;
 			std::vector<uint8_t> key;
 			if (auto ck = resolve_const_key(call, mi->second.key_size,
 							dt, dl)) {
@@ -953,24 +1779,47 @@ std::vector<InlineRecord> fold_map_lookups_ir(llvm::Module &module,
 						value = snapshot.uniform_values.at(
 							*map_id);
 					}
-					guarded = true;
+					guard_key = !args.assume_hint_key;
 				} else if (snapshot.truly_uniform.count(*map_id)) {
 					value = snapshot.uniform_values.at(*map_id);
 				}
 			}
 			if (!value || value->size() != mi->second.value_size ||
-			    (guarded && key.size() != mi->second.key_size)) {
+			    (guard_key && key.size() != mi->second.key_size)) {
 				continue;
 			}
+			const bool sparse_scalar =
+				args.stability == MapInlineStability::PhaseStable &&
+				!guard_key && !key.empty() &&
+				sparse_scalar_fold_plan(call, *value, dl).has_value();
+			if (!sparse_scalar) {
+				if (value->size() > max_materialized_value_bytes) {
+					continue;
+				}
+				const uint64_t aligned = llvm::alignTo(
+					materialized_bytes, uint64_t{8});
+				if (value->size() > 512 ||
+				    aligned > 512 - value->size()) {
+					continue;
+				}
+				materialized_bytes = aligned + value->size();
+			}
 			decisions.push_back(
-				{ call, key, *value, guarded, *map_id });
+				{ call, key, *value, guard_key, sparse_scalar, *map_id });
 		}
 	}
 
 	// Phase 2 — apply. Guarded folds split blocks (invalidating the dominator
 	// tree), but phase 1 made all dominance queries already.
 	for (auto &d : decisions) {
-		if (d.guarded) {
+		if (d.sparse_scalar) {
+			fold_sparse_scalar_lookup(d.call, d.value, dl);
+		} else if (args.stability == MapInlineStability::Guarded) {
+			fold_value_guarded_branch(
+				module, d.call,
+				d.guard_key ? d.key : std::vector<uint8_t>{},
+				d.value);
+		} else if (d.guard_key) {
 			fold_guarded_branch(module, d.call, d.key, d.value);
 		} else {
 			// Unconditional: replace the result with a stack copy of
@@ -983,7 +1832,9 @@ std::vector<InlineRecord> fold_map_lookups_ir(llvm::Module &module,
 			d.call->replaceAllUsesWith(ptr);
 			d.call->eraseFromParent();
 		}
-		records.push_back({ d.map_id, d.key, d.value });
+		records.push_back({
+			d.map_id, d.key, d.value,
+			std::string(map_inline_stability_name(args.stability)) });
 	}
 	return records;
 }
@@ -1009,9 +1860,20 @@ std::vector<uint8_t> run_map_inline_roundtrip(const std::vector<uint8_t> &input,
 		if (std::getenv("BPFOPT_DUMP_IR")) {
 			module.print(llvm::errs(), nullptr);
 		}
-		records = fold_map_lookups_ir(module, args);
+		records = fold_pseudo_map_value_loads_ir(module, args);
+		auto direct_records = direct_array_lookups_ir(module, args);
+		records.insert(records.end(),
+			       std::make_move_iterator(direct_records.begin()),
+			       std::make_move_iterator(direct_records.end()));
+		auto lookup_records = fold_map_lookups_ir(module, args);
+		records.insert(records.end(),
+			       std::make_move_iterator(lookup_records.begin()),
+			       std::make_move_iterator(lookup_records.end()));
 		if (records.empty()) {
 			return input;
+		}
+		if (std::getenv("BPFOPT_DUMP_IR")) {
+			module.print(llvm::errs(), nullptr);
 		}
 		return extract_relocated_text(emit_bpf_object(module), input,
 					      nullptr);

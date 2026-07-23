@@ -1,0 +1,46 @@
+{
+  "fields": [
+    {
+      "hot_value": 64,
+      "kind": "context",
+      "load_pcs": [
+        105,
+        176,
+        586,
+        969,
+        1035,
+        1128,
+        1270,
+        1480
+      ],
+      "offset": 0,
+      "source": "deployment_hint",
+      "width": 4
+    },
+    {
+      "hot_value": 8,
+      "kind": "context",
+      "load_pcs": [
+        1803
+      ],
+      "offset": 16,
+      "source": "deployment_hint",
+      "width": 4
+    }
+  ],
+  "pass": "context_specialize",
+  "program_hash": "e7f88e9c11988377",
+  "schema_version": 1,
+  "source_prog_id": 50,
+  "source_prog_ids": [
+    50,
+    52,
+    68,
+    81,
+    87,
+    100,
+    119,
+    130,
+    138
+  ]
+}

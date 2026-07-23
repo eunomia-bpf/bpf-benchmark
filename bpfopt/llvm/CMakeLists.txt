@@ -3,6 +3,7 @@ project(bpfopt_llvm LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+option(BPFOPT_BUILD_TESTS "Build bpfopt specialization CLI tests" OFF)
 
 find_package(LLVM REQUIRED CONFIG)
 find_package(PkgConfig REQUIRED)
@@ -68,3 +69,14 @@ target_include_directories(bpfopt-llvm
 )
 target_compile_definitions(bpfopt-llvm PRIVATE ${LLVM_DEFINITIONS})
 target_link_libraries(bpfopt-llvm PRIVATE llvmbpf_vm ${LLVM_LINK_FLAGS})
+
+if(BPFOPT_BUILD_TESTS)
+  enable_testing()
+  find_package(Python3 REQUIRED COMPONENTS Interpreter)
+  add_test(
+    NAME bpfopt-specialization-cli
+    COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/tests/specialization_cli_test.py
+            $<TARGET_FILE:bpfopt-llvm>
+  )
+endif()

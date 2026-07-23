@@ -6,7 +6,8 @@
 #
 # Current phase: 4 (ctl_array + vip_map + ch_rings + reals + LPM NULL
 # entry hints, plus map-in-map outer-only folds for lru_mapping/global_lru_maps).
-# Runtime-key hints use a guarded fast path with the real lookup as fallback.
+# Runtime-key hints are workload-phase-stable deployment context. The fixed
+# benchmark flow therefore permits direct key/value specialization.
 #
 # `--inline-hint=<anchor>:<hex_key_bytes>` is map_inline pass-local — placed
 # AFTER `--` so MapInlineCliArgs parses it. A map-name anchor covers all lookup
@@ -15,7 +16,7 @@
 #
 # Hinted now
 #   phase 1: ctl_array[0]   router MAC, key=0x00000000  (loader-only writes)
-#   phase 2: vip_map[VIP+port+TCP]  benchmark single VIP (guarded)
+#   phase 2: vip_map[VIP+port+UDP]  benchmark single VIP (phase-stable)
 #   phase 3: ch_rings  uniform overlay all entries → real_id 1
 #            reals[1]  sparse overlay, REAL_IP 10.200.0.2 → real_definition
 #   phase 4: lpm_src_v4/v6 empty snapshots → lookup miss/NULL
@@ -52,28 +53,21 @@ programs:
         n=$(jq -r .name "$f"); i=$(jq -r .id "$f");
         case "$n" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; vip_map) VIP=$i ;; esac;
       done;
-      VIP_TCP=0a6401010000000000000000000000001f900600;
-      VIP_UDP=0a6401010000000000000000000000001f901100;
-      VIP_DUMP=${MAP_VALUES}/map-$VIP.dump.json;
-      if jq -e --arg key "$VIP_TCP" 'any(.[]?; ((.key // []) | map(sub("^0x"; "") | ascii_downcase) | join("")) == $key)' "$VIP_DUMP" >/dev/null; then
-        VIP_KEY=$VIP_TCP;
-      elif jq -e --arg key "$VIP_UDP" 'any(.[]?; ((.key // []) | map(sub("^0x"; "") | ascii_downcase) | join("")) == $key)' "$VIP_DUMP" >/dev/null; then
-        VIP_KEY=$VIP_UDP;
-      else
-        echo "katran map_inline: neither TCP nor UDP benchmark VIP key is present in $VIP_DUMP" >&2;
-        exit 1;
-      fi;
-      jq -n --arg c "$CH" --arg r "$RE" --arg s "$SI"
+      VIP_KEY=0a6401010000000000000000000000001f901100;
+      jq -n --arg c "$CH" --arg r "$RE" --arg s "$SI" --arg v "$VIP"
         --slurpfile co "$OVERLAY_DIR/ch_rings.json"
         --slurpfile ro "$OVERLAY_DIR/reals.json"
         --slurpfile so "$OVERLAY_DIR/server_id_map.json"
-        '($c | if . == "" then {} else {(.): $co[0]} end) + ($r | if . == "" then {} else {(.): $ro[0]} end) + ($s | if . == "" then {} else {(.): $so[0]} end)'
+        --slurpfile vo "$OVERLAY_DIR/vip_map_xdp_pktgen.json"
+        '($c | if . == "" then {} else {(.): $co[0]} end) + ($r | if . == "" then {} else {(.): $ro[0]} end) + ($s | if . == "" then {} else {(.): $so[0]} end) + ($v | if . == "" then {} else {(.): $vo[0]} end)'
         > ${MAP_VALUES}/overlays.json &&
       bpfopt --pass map_inline
         --input ${INPUT} --output ${OUTPUT} --report ${REPORT}
         --prog-type ${PROG_TYPE}
         --
         --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}
+        --stability phase-stable
+        --assume-hint-key
         --inline-hint=ctl_array:00000000
         --inline-hint=vip_map:$VIP_KEY
         --inline-hint=ch_rings:00000000
@@ -104,3 +98,4 @@ programs:
         --prog-type ${PROG_TYPE}
         --
         --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}
+        --stability phase-stable

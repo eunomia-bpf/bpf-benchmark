@@ -19,7 +19,11 @@
  *                     the shim's iteration cap (4096); ensure
  *                     write_inner_map_ids_supplement returns within ≈ 1s
  *                     instead of looping forever.
- *
+ *   t6_prog_array_tracking: update a program-array slot and verify list_progs
+ *                           exposes the map/key/target attachment topology.
+ *   t7_prog_array_fd_reuse: replace a tracked small-map fd with a duplicate
+ *                           of a larger map without an observed close, then
+ *                           verify tracking uses the fd's current kernel id.
  * Requires CAP_BPF + CAP_PERFMON (run via sudo). Skips gracefully if BPF
  * is unavailable.
  */
@@ -105,6 +109,29 @@ static int create_array_of_maps_outer(int inner_fd, uint32_t max_entries) {
     return (int)fd;
 }
 
+static int create_prog_array(uint32_t max_entries) {
+    union bpf_attr a = {0};
+    a.map_type = BPF_MAP_TYPE_PROG_ARRAY;
+    a.key_size = 4;
+    a.value_size = 4;
+    a.max_entries = max_entries;
+    strncpy(a.map_name, "shim_st_pa", sizeof(a.map_name) - 1);
+    return (int)bpf(BPF_MAP_CREATE, &a, sizeof(a));
+}
+
+static uint32_t bpf_object_id(int fd) {
+    struct {
+        uint32_t type;
+        uint32_t id;
+        uint8_t padding[256];
+    } info = {0};
+    union bpf_attr a = {0};
+    a.info.bpf_fd = (uint32_t)fd;
+    a.info.info_len = sizeof(info);
+    a.info.info = (uintptr_t)&info;
+    return bpf(BPF_OBJ_GET_INFO_BY_FD, &a, sizeof(a)) == 0 ? info.id : 0;
+}
+
 static int shim_socket_path(char *out, size_t out_sz) {
     const char *dir = getenv("BPFREJIT_SHIM_SOCK_DIR");
     if (!dir || !*dir) dir = "/var/run/bpfrejit";
@@ -181,15 +208,11 @@ static void t2_prog_load_captured(int prog_fd) {
 
 static void t3_map_capture(int prog_fd, int map_fd) {
     if (prog_fd < 0 || map_fd < 0) { FAIL("t3_map_capture", "fds missing"); return; }
-    /* Query list_progs and look for a non-zero map count for the prog. The
-     * exact JSON layout depends on shim, but the bytes "snap_n" or similar
-     * should show >0 maps. We don't strictly enforce field name; instead we
-     * check the dump_state RPC if available, otherwise pass weakly. */
+    /* Query list_progs and look for the prog whose internal snapshot is
+     * exercised by the execute_plan test below. */
     char resp[8192];
     int n = shim_request("{\"cmd\":\"list_progs\"}", resp, sizeof(resp));
     if (n <= 0) { FAIL("t3_map_capture", "list_progs failed (%d)", n); return; }
-    /* Weaker assertion: response must mention the prog we loaded. The map
-     * snapshot is internal; t5 indirectly verifies it via execute_plan. */
     if (!strstr(resp, "shim_st_p1")) {
         FAIL("t3_map_capture", "prog absent from list_progs");
         return;
@@ -201,15 +224,16 @@ static void t4_list_progs_json(void) {
     char resp[4096];
     int n = shim_request("{\"cmd\":\"list_progs\"}", resp, sizeof(resp));
     if (n <= 0) { FAIL("t4_list_progs_json", "no response (%d)", n); return; }
-    /* Verify the response starts with '{' and contains either "progs" or
-     * "ok". This is a smoke check; the shim's JSON encoder is hand-rolled
-     * so we don't want to depend on its exact field layout. */
+    /* list_progs is a runner-facing serialization contract. Verify the
+     * topology arrays needed for live replacement validation are present. */
     if (resp[0] != '{') {
         FAIL("t4_list_progs_json", "not JSON object: %.80s", resp);
         return;
     }
-    if (!strstr(resp, "\"progs\"") && !strstr(resp, "\"ok\"")) {
-        FAIL("t4_list_progs_json", "missing progs/ok field: %.200s", resp);
+    if (!strstr(resp, "\"progs\":[") ||
+        !strstr(resp, "\"prog_array_slots\":[") ||
+        !strstr(resp, "\"raw_tracepoints\":[")) {
+        FAIL("t4_list_progs_json", "missing topology array: %.300s", resp);
         return;
     }
     PASS("t4_list_progs_json");
@@ -252,6 +276,149 @@ static void t5_inner_map_cap(void) {
     PASS("t5_inner_map_cap");
 }
 
+static void t6_prog_array_tracking(int prog_fd) {
+    if (prog_fd < 0) {
+        FAIL("t6_prog_array_tracking", "no target prog fd");
+        return;
+    }
+    int map_fd = create_prog_array(8);
+    if (map_fd < 0) {
+        FAIL("t6_prog_array_tracking", "prog array create errno=%d", errno);
+        return;
+    }
+    uint32_t key = 7;
+    uint32_t value = (uint32_t)prog_fd;
+    union bpf_attr update = {0};
+    update.map_fd = (uint32_t)map_fd;
+    update.key = (uintptr_t)&key;
+    update.value = (uintptr_t)&value;
+    update.flags = BPF_ANY;
+    if (bpf(BPF_MAP_UPDATE_ELEM, &update, sizeof(update)) < 0) {
+        FAIL("t6_prog_array_tracking", "slot update errno=%d", errno);
+        close(map_fd);
+        return;
+    }
+    uint32_t map_id = bpf_object_id(map_fd);
+    uint32_t prog_id = bpf_object_id(prog_fd);
+    char expected[160];
+    snprintf(expected, sizeof(expected),
+             "{\"map_id\":%u,\"key\":7,\"prog_id\":%u}",
+             map_id, prog_id);
+    char resp[8192];
+    int n = shim_request("{\"cmd\":\"list_progs\"}", resp, sizeof(resp));
+    if (n <= 0) {
+        FAIL("t6_prog_array_tracking", "list_progs failed (%d)", n);
+        close(map_fd);
+        return;
+    }
+    if (!strstr(resp, "\"prog_array_slots\"") || !strstr(resp, expected)) {
+        FAIL("t6_prog_array_tracking", "missing slot %s in %.500s",
+             expected, resp);
+        close(map_fd);
+        return;
+    }
+    PASS("t6_prog_array_tracking");
+    close(map_fd);
+}
+
+static void t7_prog_array_fd_reuse(int prog_fd) {
+    if (prog_fd < 0) {
+        FAIL("t7_prog_array_fd_reuse", "no target prog fd");
+        return;
+    }
+    int stale_fd = create_prog_array(8);
+    int live_fd = create_prog_array(2048);
+    if (stale_fd < 0 || live_fd < 0) {
+        FAIL("t7_prog_array_fd_reuse", "map create errno=%d", errno);
+        if (stale_fd >= 0) close(stale_fd);
+        if (live_fd >= 0) close(live_fd);
+        return;
+    }
+    uint32_t stale_map_id = bpf_object_id(stale_fd);
+    uint32_t live_map_id = bpf_object_id(live_fd);
+    if (stale_map_id == 0 || live_map_id == 0 ||
+        dup3(live_fd, stale_fd, O_CLOEXEC) < 0) {
+        FAIL("t7_prog_array_fd_reuse", "dup3/id setup errno=%d", errno);
+        close(stale_fd);
+        close(live_fd);
+        return;
+    }
+    close(live_fd);
+
+    uint32_t key = 767;
+    uint32_t value = (uint32_t)prog_fd;
+    union bpf_attr update = {0};
+    update.map_fd = (uint32_t)stale_fd;
+    update.key = (uintptr_t)&key;
+    update.value = (uintptr_t)&value;
+    update.flags = BPF_ANY;
+    if (bpf(BPF_MAP_UPDATE_ELEM, &update, sizeof(update)) < 0) {
+        FAIL("t7_prog_array_fd_reuse", "slot update errno=%d", errno);
+        close(stale_fd);
+        return;
+    }
+
+    uint32_t prog_id = bpf_object_id(prog_fd);
+    char expected[160];
+    char stale[160];
+    snprintf(expected, sizeof(expected),
+             "{\"map_id\":%u,\"key\":767,\"prog_id\":%u}",
+             live_map_id, prog_id);
+    snprintf(stale, sizeof(stale),
+             "{\"map_id\":%u,\"key\":767,\"prog_id\":%u}",
+             stale_map_id, prog_id);
+    char resp[8192];
+    int n = shim_request("{\"cmd\":\"list_progs\"}", resp, sizeof(resp));
+    if (n <= 0 || !strstr(resp, expected) || strstr(resp, stale)) {
+        FAIL("t7_prog_array_fd_reuse",
+             "expected current slot %s and no stale slot %s in %.500s",
+             expected, stale, resp);
+        close(stale_fd);
+        return;
+    }
+    PASS("t7_prog_array_fd_reuse");
+    close(stale_fd);
+}
+
+static void t8_report_scoped_reload_unchanged(int prog_fd) {
+    if (prog_fd < 0) {
+        FAIL("t8_report_scoped_reload_unchanged", "no target prog fd");
+        return;
+    }
+    uint32_t before_id = bpf_object_id(prog_fd);
+    if (before_id == 0) {
+        FAIL("t8_report_scoped_reload_unchanged", "missing pre-reload id");
+        return;
+    }
+    const char *request =
+        "{\"cmd\":\"execute_plan\",\"steps\":[{"
+        "\"name\":\"matched_control\","
+        "\"command\":\"cp ${INPUT} ${OUTPUT}; printf "
+        "'{\\\"pass\\\":\\\"matched_control\\\","
+        "\\\"reload_unchanged\\\":1}' > ${REPORT}\","
+        "\"log_level\":1}]}";
+    char resp[16384];
+    int n = shim_request(request, resp, sizeof(resp));
+    char per_program_ok[96];
+    snprintf(per_program_ok, sizeof(per_program_ok),
+             "\"%u\":{\"prog_id\":%u,\"passes\":[", before_id, before_id);
+    if (n <= 0 || !strstr(resp, per_program_ok) ||
+        strstr(resp, "\"failed_bpfopt\"") ||
+        strstr(resp, "\"failed_rejit\"")) {
+        FAIL("t8_report_scoped_reload_unchanged",
+             "execute_plan failed (%d): %.500s", n, n > 0 ? resp : "");
+        return;
+    }
+    uint32_t after_id = bpf_object_id(prog_fd);
+    if (after_id == 0 || after_id == before_id) {
+        FAIL("t8_report_scoped_reload_unchanged",
+             "byte-identical control was not reloaded: before=%u after=%u "
+             "response=%.500s", before_id, after_id, resp);
+        return;
+    }
+    PASS("t8_report_scoped_reload_unchanged");
+}
+
 int main(void) {
     /* Trigger the shim by issuing a bpf() syscall before any sub-test. */
     int map_a = create_hash_map(16);
@@ -273,7 +440,10 @@ int main(void) {
     t2_prog_load_captured(prog1);
     t3_map_capture(prog1, map_a);
     t4_list_progs_json();
+    t8_report_scoped_reload_unchanged(prog1);
     t5_inner_map_cap();
+    t6_prog_array_tracking(prog1);
+    t7_prog_array_fd_reuse(prog1);
 
     if (prog1 >= 0) close(prog1);
     if (map_a >= 0) close(map_a);

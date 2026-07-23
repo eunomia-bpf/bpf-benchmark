@@ -13,6 +13,495 @@ enum reload_status {
     RELOAD_INTERNAL,       /* OOM / I/O before any kernel call */
 };
 
+/* Recreated links must retain the descriptor number owned by the application.
+ * Many stock-kernel link types implement neither BPF_LINK_UPDATE nor
+ * BPF_LINK_DETACH, so closing the old link is their only detach operation.
+ * dup3 then installs the replacement at the same number so libbpf/Go cleanup
+ * paths keep referring to the live link. */
+static int preserve_recreated_link_fd(long *link_fd, int desired_fd,
+                                      int descriptor_flags) {
+    if (!link_fd || *link_fd < 0 || desired_fd < 0) {
+        errno = EINVAL;
+        return -1;
+    }
+    if (*link_fd == desired_fd) {
+        if (real_syscall(SYS_fcntl, desired_fd, F_SETFD,
+                         descriptor_flags & FD_CLOEXEC) < 0)
+            return -1;
+        return 0;
+    }
+    int dup_flags = (descriptor_flags & FD_CLOEXEC) ? O_CLOEXEC : 0;
+    if (real_syscall(SYS_dup3, (int)*link_fd, desired_fd, dup_flags) < 0)
+        return -1;
+    real_close((int)*link_fd);
+    *link_fd = desired_fd;
+    return 0;
+}
+
+/* context_specialize emits this impossible fd-array index as a private
+ * contract with the live-swap shim.  The shim replaces it with a fresh
+ * one-entry PROG_ARRAY containing the retained original program.  Guard
+ * misses can therefore tail-call the verifier-approved generic program
+ * without putting both the generic and specialized CFGs in one verifier
+ * state space. */
+#ifndef CONTEXT_FALLBACK_MAP_MARKER
+#define CONTEXT_FALLBACK_MAP_MARKER 0x7ffffffeU
+#endif
+
+static int prepare_context_fallback_map(struct prog_entry *p,
+                                        struct bpf_insn *insns,
+                                        uint32_t insn_cnt,
+                                        int **fd_array_ptr,
+                                        uint32_t *fd_array_n_ptr) {
+    uint32_t marker_count = 0;
+    for (uint32_t i = 0; i < insn_cnt; i++) {
+        struct bpf_insn *insn = &insns[i];
+        if (insn->code != (BPF_LD | BPF_DW | BPF_IMM) ||
+            insn->src_reg != BPF_PSEUDO_MAP_IDX ||
+            (uint32_t)insn->imm != CONTEXT_FALLBACK_MAP_MARKER)
+            continue;
+        if (i + 1 >= insn_cnt || insns[i + 1].code != 0 ||
+            insns[i + 1].dst_reg != 0 || insns[i + 1].src_reg != 0 ||
+            insns[i + 1].off != 0 || insns[i + 1].imm != 0) {
+            log_line("context fallback marker has malformed LD_IMM64 tail "
+                     "at pc=%u", i);
+            return -1;
+        }
+        marker_count++;
+        i++;
+    }
+    if (marker_count == 0)
+        return 0;
+    if (p->profile_hold_fd < 0) {
+        log_line("context fallback marker requires retained original prog "
+                 "fd for kid=%u", p->kernel_prog_id);
+        return -1;
+    }
+
+    uint32_t old_n = *fd_array_n_ptr;
+    if (old_n == UINT32_MAX) {
+        log_line("context fallback fd_array index overflow for kid=%u",
+                 p->kernel_prog_id);
+        return -1;
+    }
+    int *expanded = (int *)realloc(*fd_array_ptr,
+                                   (size_t)(old_n + 1) * sizeof(int));
+    if (!expanded) {
+        log_line("context fallback fd_array allocation failed for kid=%u",
+                 p->kernel_prog_id);
+        return -1;
+    }
+    *fd_array_ptr = expanded;
+
+    union bpf_attr create = {0};
+    create.map_type = BPF_MAP_TYPE_PROG_ARRAY;
+    create.key_size = sizeof(uint32_t);
+    create.value_size = sizeof(uint32_t);
+    create.max_entries = 1;
+    long map_fd = real_syscall(SYS_bpf, BPF_MAP_CREATE, &create,
+                               sizeof(create));
+    if (map_fd < 0) {
+        int saved_errno = errno;
+        log_line("context fallback BPF_MAP_CREATE failed for kid=%u: "
+                 "errno=%d", p->kernel_prog_id, saved_errno);
+        return -1;
+    }
+
+    uint32_t key = 0;
+    uint32_t prog_fd = (uint32_t)p->profile_hold_fd;
+    union bpf_attr update = {0};
+    update.map_fd = (uint32_t)map_fd;
+    update.key = (uintptr_t)&key;
+    update.value = (uintptr_t)&prog_fd;
+    update.flags = BPF_ANY;
+    if (real_syscall(SYS_bpf, BPF_MAP_UPDATE_ELEM, &update,
+                     sizeof(update)) < 0) {
+        int saved_errno = errno;
+        log_line("context fallback BPF_MAP_UPDATE_ELEM failed for kid=%u "
+                 "held_fd=%d: errno=%d", p->kernel_prog_id,
+                 p->profile_hold_fd, saved_errno);
+        real_close((int)map_fd);
+        return -1;
+    }
+
+    expanded[old_n] = (int)map_fd;
+    *fd_array_n_ptr = old_n + 1;
+    for (uint32_t i = 0; i < insn_cnt; i++) {
+        struct bpf_insn *insn = &insns[i];
+        if (insn->code == (BPF_LD | BPF_DW | BPF_IMM) &&
+            insn->src_reg == BPF_PSEUDO_MAP_IDX &&
+            (uint32_t)insn->imm == CONTEXT_FALLBACK_MAP_MARKER) {
+            insn->imm = (int32_t)old_n;
+            i++;
+        }
+    }
+    log_line("context fallback map prepared kid=%u held_fd=%d "
+             "fd_array_index=%u markers=%u", p->kernel_prog_id,
+             p->profile_hold_fd, old_n, marker_count);
+    return 0;
+}
+
+struct declared_perf_fd {
+    int fd;
+    uint64_t event_id;
+};
+
+static int declared_perf_fd_cmp(const void *lhs, const void *rhs) {
+    const struct declared_perf_fd *a =
+        (const struct declared_perf_fd *)lhs;
+    const struct declared_perf_fd *b =
+        (const struct declared_perf_fd *)rhs;
+    if (a->event_id < b->event_id) return -1;
+    if (a->event_id > b->event_id) return 1;
+    return 0;
+}
+
+static int read_online_cpu_ids(int **cpu_ids_out, uint32_t *cpu_count_out) {
+    *cpu_ids_out = NULL;
+    *cpu_count_out = 0;
+    FILE *fp = fopen("/sys/devices/system/cpu/online", "r");
+    if (!fp) {
+        log_line("declared perf discovery: cannot open online CPU list: "
+                 "errno=%d", errno);
+        return -1;
+    }
+    char buf[4096];
+    if (!fgets(buf, sizeof(buf), fp)) {
+        int saved_errno = errno;
+        fclose(fp);
+        log_line("declared perf discovery: cannot read online CPU list: "
+                 "errno=%d", saved_errno);
+        return -1;
+    }
+    fclose(fp);
+
+    int *ids = NULL;
+    uint32_t count = 0, capacity = 0;
+    const char *cursor = buf;
+    while (*cursor != '\0' && *cursor != '\n') {
+        errno = 0;
+        char *end = NULL;
+        long first = strtol(cursor, &end, 10);
+        if (errno != 0 || end == cursor || first < 0 || first > INT_MAX) {
+            free(ids);
+            log_line("declared perf discovery: malformed online CPU list: %s",
+                     buf);
+            return -1;
+        }
+        long last = first;
+        cursor = end;
+        if (*cursor == '-') {
+            cursor++;
+            errno = 0;
+            last = strtol(cursor, &end, 10);
+            if (errno != 0 || end == cursor || last < first ||
+                last > INT_MAX) {
+                free(ids);
+                log_line("declared perf discovery: malformed online CPU "
+                         "range: %s", buf);
+                return -1;
+            }
+            cursor = end;
+        }
+        for (long cpu = first; cpu <= last; cpu++) {
+            if (count == capacity) {
+                uint32_t new_capacity = capacity == 0 ? 16 : capacity * 2;
+                if (new_capacity < capacity) {
+                    free(ids);
+                    return -1;
+                }
+                int *expanded =
+                    (int *)realloc(ids, (size_t)new_capacity * sizeof(*ids));
+                if (!expanded) {
+                    free(ids);
+                    return -1;
+                }
+                ids = expanded;
+                capacity = new_capacity;
+            }
+            ids[count++] = (int)cpu;
+        }
+        if (*cursor == ',') {
+            cursor++;
+            continue;
+        }
+        if (*cursor != '\0' && *cursor != '\n') {
+            free(ids);
+            log_line("declared perf discovery: malformed online CPU "
+                     "separator: %s", buf);
+            return -1;
+        }
+    }
+    if (count == 0) {
+        free(ids);
+        log_line("declared perf discovery: online CPU list is empty");
+        return -1;
+    }
+    *cpu_ids_out = ids;
+    *cpu_count_out = count;
+    return 0;
+}
+
+static int declared_perf_fd_is_reserved(int fd, uint64_t event_id) {
+    int reserved = 0;
+    pthread_mutex_lock(&state_mutex);
+    if (perf_find(fd)) {
+        reserved = 1;
+        log_line("declared perf scan: fd=%d event_id=%llu reserved=perf_table",
+                 fd, (unsigned long long)event_id);
+    } else {
+        for (int bucket = 0; bucket < BPF_STATE_BUCKETS && !reserved;
+             bucket++) {
+            for (struct link_entry *link = link_table[bucket]; link;
+                 link = link->next) {
+                if (link->attach_type != BPF_PERF_EVENT) continue;
+                int targets[2] = {
+                    (int)link->target_fd,
+                    link->target_hold_fd,
+                };
+                for (uint32_t i = 0; i < 2; i++) {
+                    if (targets[i] < 0) continue;
+                    if (targets[i] == fd) {
+                        reserved = 1;
+                        log_line("declared perf scan: fd=%d event_id=%llu "
+                                 "reserved=link_target_fd", fd,
+                                 (unsigned long long)event_id);
+                        break;
+                    }
+                    uint64_t target_event_id = 0;
+                    if (real_ioctl(targets[i], PERF_EVENT_IOC_ID,
+                                   &target_event_id) == 0 &&
+                        target_event_id == event_id) {
+                        reserved = 1;
+                        log_line("declared perf scan: fd=%d event_id=%llu "
+                                 "reserved=link_target_event_id target_fd=%d",
+                                 fd, (unsigned long long)event_id, targets[i]);
+                        break;
+                    }
+                }
+                if (reserved) break;
+            }
+        }
+    }
+    pthread_mutex_unlock(&state_mutex);
+    return reserved;
+}
+
+/* Go issues perf_event_open and PERF_EVENT_IOC_SET_BPF through raw assembly
+ * syscalls, which cannot cross an LD_PRELOAD boundary. Apps with that ABI
+ * provide an explicit program:frequency contract. OTEL creates one CPU-clock
+ * event per online CPU in a single ascending-CPU loop before it creates its
+ * scheduler and perf-output events. We therefore require the earliest N
+ * unreserved kernel event IDs to form one consecutive creation block, where
+ * N is the online-CPU count. Later application perf events are outside that
+ * declared block. Missing, interleaved, or aliased state is an error; no
+ * guessed attachment is accepted. */
+static int discover_declared_cpu_clock_perfs(struct prog_entry *p) {
+    const char *spec = getenv("BPFREJIT_SHIM_PERF_CPU_CLOCK_SPEC");
+    if (!spec || !spec[0]) return 0;
+
+    char prog_name[BPF_OBJ_NAME_LEN] = {0};
+    unsigned long long frequency = 0;
+    int consumed = 0;
+    if (sscanf(spec, "%15[^:]:%llu%n", prog_name, &frequency,
+               &consumed) != 2 || spec[consumed] != '\0' || frequency == 0) {
+        log_line("declared perf discovery: invalid CPU-clock spec: %s", spec);
+        return -1;
+    }
+    if (strcmp(p->name, prog_name) != 0) return 0;
+
+    pthread_mutex_lock(&state_mutex);
+    uint32_t already_captured = p->n_perfs;
+    pthread_mutex_unlock(&state_mutex);
+    if (already_captured > 0) {
+        log_line("declared perf discovery: prog=%s already has %u captured "
+                 "perf events", p->name, already_captured);
+        return 0;
+    }
+
+    int *cpu_ids = NULL;
+    uint32_t cpu_count = 0;
+    if (read_online_cpu_ids(&cpu_ids, &cpu_count) != 0) return -1;
+
+    struct declared_perf_fd *events = NULL;
+    uint32_t event_count = 0, event_capacity = 0;
+    DIR *fd_dir = opendir("/proc/self/fd");
+    if (!fd_dir) {
+        int saved_errno = errno;
+        free(events);
+        free(cpu_ids);
+        log_line("declared perf discovery: cannot scan /proc/self/fd: "
+                 "errno=%d", saved_errno);
+        return -1;
+    }
+
+    struct dirent *de;
+    while ((de = readdir(fd_dir)) != NULL) {
+        if (de->d_name[0] < '0' || de->d_name[0] > '9') continue;
+        int fd = atoi(de->d_name);
+        if (fd < 0) continue;
+        char fdpath[64], target[64];
+        snprintf(fdpath, sizeof(fdpath), "/proc/self/fd/%d", fd);
+        ssize_t len = readlink(fdpath, target, sizeof(target) - 1);
+        if (len <= 0) continue;
+        target[len] = '\0';
+        if (strcmp(target, "anon_inode:[perf_event]") != 0) continue;
+        uint64_t event_id = 0;
+        if (real_ioctl(fd, PERF_EVENT_IOC_ID, &event_id) != 0 ||
+            event_id == 0) {
+            int saved_errno = errno;
+            closedir(fd_dir);
+            free(events);
+            free(cpu_ids);
+            log_line("declared perf discovery: PERF_EVENT_IOC_ID fd=%d "
+                     "failed: errno=%d", fd, saved_errno);
+            return -1;
+        }
+        /* Perf events already captured by libc interception, plus retained
+         * BPF_PERF_EVENT link targets, have independent attachment records.
+         * The declaration covers only raw-syscall events absent from those
+         * tables. */
+        if (declared_perf_fd_is_reserved(fd, event_id)) continue;
+        if (event_count == event_capacity) {
+            uint32_t new_capacity =
+                event_capacity == 0 ? 32 : event_capacity * 2;
+            if (new_capacity < event_capacity) {
+                closedir(fd_dir);
+                free(events);
+                free(cpu_ids);
+                log_line("declared perf discovery: event capacity overflow "
+                         "for prog=%s", p->name);
+                return -1;
+            }
+            struct declared_perf_fd *expanded =
+                (struct declared_perf_fd *)realloc(
+                    events, (size_t)new_capacity * sizeof(*events));
+            if (!expanded) {
+                closedir(fd_dir);
+                free(events);
+                free(cpu_ids);
+                return -1;
+            }
+            events = expanded;
+            event_capacity = new_capacity;
+        }
+        events[event_count].fd = fd;
+        events[event_count].event_id = event_id;
+        event_count++;
+    }
+    closedir(fd_dir);
+    if (event_count < cpu_count) {
+        log_line("declared perf discovery: prog=%s expected at least %u "
+                 "CPU-clock events, found %u", p->name, cpu_count,
+                 event_count);
+        free(events);
+        free(cpu_ids);
+        return -1;
+    }
+    qsort(events, event_count, sizeof(*events), declared_perf_fd_cmp);
+
+    for (uint32_t i = 1; i < cpu_count; i++) {
+        if (events[i - 1].event_id == UINT64_MAX ||
+            events[i].event_id != events[i - 1].event_id + 1) {
+            log_line("declared perf discovery: prog=%s CPU-clock creation "
+                     "block is not consecutive at index=%u prev_id=%llu "
+                     "event_id=%llu", p->name, i,
+                     (unsigned long long)events[i - 1].event_id,
+                     (unsigned long long)events[i].event_id);
+            free(events);
+            free(cpu_ids);
+            return -1;
+        }
+    }
+    if (event_count > cpu_count &&
+        events[cpu_count].event_id <= events[cpu_count - 1].event_id) {
+        log_line("declared perf discovery: prog=%s event alias overlaps "
+                 "CPU-clock creation block at event_id=%llu", p->name,
+                 (unsigned long long)events[cpu_count].event_id);
+        free(events);
+        free(cpu_ids);
+        return -1;
+    }
+    if (event_count > cpu_count) {
+        log_line("declared perf discovery: prog=%s excluded %u later perf "
+                 "events after CPU-clock block", p->name,
+                 event_count - cpu_count);
+    }
+
+    uint32_t selected_count = cpu_count;
+
+    struct perf_entry **entries =
+        (struct perf_entry **)calloc(selected_count, sizeof(*entries));
+    int *perf_fds = (int *)calloc(selected_count, sizeof(*perf_fds));
+    if (!entries || !perf_fds) {
+        free(entries);
+        free(perf_fds);
+        free(events);
+        free(cpu_ids);
+        return -1;
+    }
+    for (uint32_t i = 0; i < selected_count; i++) {
+        struct perf_event_attr attr;
+        memset(&attr, 0, sizeof(attr));
+        attr.type = PERF_TYPE_SOFTWARE;
+        attr.size = sizeof(attr);
+        attr.config = PERF_COUNT_SW_CPU_CLOCK;
+        attr.sample_freq = (uint64_t)frequency;
+        attr.freq = 1;
+
+        struct perf_entry *entry =
+            (struct perf_entry *)calloc(1, sizeof(*entry));
+        if (!entry) {
+            for (uint32_t k = 0; k < i; k++) free(entries[k]);
+            free(entries);
+            free(perf_fds);
+            free(events);
+            free(cpu_ids);
+            return -1;
+        }
+        entry->fd = events[i].fd;
+        entry->type = attr.type;
+        entry->config = attr.config;
+        entry->pid = -1;
+        entry->cpu = cpu_ids[i];
+        entry->group_fd = -1;
+        entry->open_flags = PERF_FLAG_FD_CLOEXEC;
+        entry->attached_prog_fd = p->fd;
+        memcpy(entry->attr_blob, &attr, sizeof(attr));
+        entry->attr_size = sizeof(attr);
+        entries[i] = entry;
+        perf_fds[i] = events[i].fd;
+    }
+
+    pthread_mutex_lock(&state_mutex);
+    if (p->n_perfs != 0) {
+        pthread_mutex_unlock(&state_mutex);
+        for (uint32_t i = 0; i < selected_count; i++) free(entries[i]);
+        free(entries);
+        free(perf_fds);
+        free(events);
+        free(cpu_ids);
+        log_line("declared perf discovery: attachment state changed during "
+                 "scan for prog=%s", p->name);
+        return -1;
+    }
+    for (uint32_t i = 0; i < selected_count; i++) perf_insert(entries[i]);
+    p->attached_perf_fds = perf_fds;
+    p->n_perfs = selected_count;
+    pthread_mutex_unlock(&state_mutex);
+
+    log_line("declared perf discovery: prog=%s frequency=%llu events=%u "
+             "event_id_first=%llu event_id_last=%llu cpu_first=%d "
+             "cpu_last=%d", p->name, frequency, selected_count,
+             (unsigned long long)events[0].event_id,
+             (unsigned long long)events[selected_count - 1].event_id,
+             cpu_ids[0], cpu_ids[selected_count - 1]);
+    free(entries);
+    free(events);
+    free(cpu_ids);
+    return 0;
+}
+
 /* Replace the live kernel BPF program identified by `p` with the bytecode at
  * `new_bytecode_path`. After successful return, every link/perf_event that
  * was attached to the old prog points at the new one, and `p` is updated in
@@ -45,6 +534,9 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
     if (out_rejit_ms) *out_rejit_ms = 0;
     if (verifier_log && log_buf_sz > 0) verifier_log[0] = 0;
 
+    if (discover_declared_cpu_clock_perfs(p) != 0)
+        return RELOAD_INTERNAL;
+
     int bfd = open(new_bytecode_path, O_RDONLY);
     if (bfd < 0) return RELOAD_INTERNAL;
     struct stat st;
@@ -63,8 +555,18 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
     /* Full fd_array: maps + BTF module fds (read from target.json). */
     int *fd_array = NULL;
     uint32_t fd_array_n = 0;
-    (void)build_full_fd_array(target_json_path, map_fds, nr_fds,
-                              &fd_array, &fd_array_n);
+    if (build_full_fd_array(target_json_path, map_fds, nr_fds,
+                            &fd_array, &fd_array_n) != 0) {
+        free(insns);
+        return RELOAD_INTERNAL;
+    }
+    if (prepare_context_fallback_map(
+            p, insns, (uint32_t)(bytes / sizeof(struct bpf_insn)),
+            &fd_array, &fd_array_n) != 0) {
+        free_full_fd_array(fd_array, fd_array_n);
+        free(insns);
+        return RELOAD_INTERNAL;
+    }
 
     /* Use the caller-supplied verifier_log buffer (or a small heap one if
      * absent) for diagnostics on failure. Successful loads run with verifier
@@ -78,7 +580,7 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
         log_buf = owned_log;
         if (!log_buf) {
             if (fd_array) {
-                for (uint32_t i = 0; i < nr_fds; i++)
+                for (uint32_t i = 0; i < fd_array_n; i++)
                     if (fd_array[i] >= 0) real_close(fd_array[i]);
                 free(fd_array);
             }
@@ -145,10 +647,10 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
     a.core_relo_rec_size = 0;
     /* BPF_F_TOKEN_FD requires a live token fd; clear it because the
      * loader's token fd may have been closed and we don't have a kid for
-     * it. Kernel falls back to system-wide capability checks. Hard-coded
-     * bit (1U<<8) so this works even when libbpf-sys is too old to expose
-     * the constant. */
-    a.prog_flags &= ~((uint32_t)(1U << 8));
+     * it. Kernel falls back to system-wide capability checks. Hard-code
+     * the UAPI value (1U << 16) so this still builds against system headers
+     * that predate BPF token support. */
+    a.prog_flags &= ~((uint32_t)(1U << 16));
     log_line("reload prog kid=%u type=%u prog_btf_fd=%u attach_btf_obj_fd=%u "
              "attach_prog_fd=%u attach_btf_id=%u expected_attach=%u "
              "nr_map_fds=%u",
@@ -241,6 +743,13 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
         return RELOAD_FAILED_REJIT;
     }
 
+    uint32_t new_kid = resolve_kernel_id((int)new_pfd);
+    if (!new_kid) {
+        real_close((int)new_pfd);
+        free(owned_log);
+        return RELOAD_INTERNAL;
+    }
+
     /* Swap attaches. BPF_LINK_UPDATE is atomic per-link. */
     int partial = 0;
     pthread_mutex_lock(&state_mutex);
@@ -248,6 +757,11 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
      * via real_syscall (kernel side, not shim re-entry, but be safe). */
     uint32_t nlinks = p->n_links, nperfs = p->n_perfs;
     uint32_t n_prog_attaches = p->n_prog_attaches, n_raw_tps = p->n_raw_tps;
+    uint32_t old_kid = p->kernel_prog_id;
+    uint32_t n_prog_array_slots = 0;
+    struct prog_array_slot_ref *prog_array_refs = NULL;
+    int prog_array_snapshot_rc = prog_array_slots_for_target(
+        old_kid, &prog_array_refs, &n_prog_array_slots);
     int *links = NULL, *perfs = NULL, *raw_tps = NULL;
     struct prog_attach_point *prog_attaches = NULL;
     if (nlinks) {
@@ -276,6 +790,7 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
         else n_raw_tps = 0;
     }
     int old_prog_fd = p->fd;
+    int old_prog_hold_fd = p->profile_hold_fd;
     pthread_mutex_unlock(&state_mutex);
 
     /* Append per-failure detail into verifier_log (which the caller exposes
@@ -291,6 +806,55 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
         if (partial_len >= partial_cap) partial_len = partial_cap - 1;        \
     }                                                                         \
 } while (0)
+    if (prog_array_snapshot_rc != 0) {
+        APPEND_DETAIL("prog_array attachment snapshot allocation failed; ");
+        partial = 1;
+    }
+    /* Program-array slots are attachment points for tail-call targets. Update
+     * every observed slot to the freshly verified program fd. A failed slot
+     * update is an explicit partial replacement, never a successful live
+     * swap. */
+    in_shim = 1;
+    for (uint32_t i = 0; i < n_prog_array_slots; i++) {
+        union bpf_attr get = {0};
+        get.map_id = prog_array_refs[i].map_id;
+        long map_fd = real_syscall(SYS_bpf, BPF_MAP_GET_FD_BY_ID, &get,
+                                   sizeof(get));
+        if (map_fd < 0) {
+            APPEND_DETAIL("prog_array map_id=%u key=%u: get_fd errno=%d; ",
+                          prog_array_refs[i].map_id, prog_array_refs[i].key,
+                          errno);
+            partial = 1;
+            continue;
+        }
+        uint32_t key = prog_array_refs[i].key;
+        uint32_t value = (uint32_t)new_pfd;
+        union bpf_attr update = {0};
+        update.map_fd = (uint32_t)map_fd;
+        update.key = (uintptr_t)&key;
+        update.value = (uintptr_t)&value;
+        update.flags = BPF_ANY;
+        long update_rc = real_syscall(SYS_bpf, BPF_MAP_UPDATE_ELEM, &update,
+                                      sizeof(update));
+        int update_errno = errno;
+        real_close((int)map_fd);
+        if (update_rc < 0) {
+            APPEND_DETAIL("prog_array map_id=%u key=%u: update errno=%d; ",
+                          prog_array_refs[i].map_id, key, update_errno);
+            partial = 1;
+            continue;
+        }
+        pthread_mutex_lock(&state_mutex);
+        prog_array_slot_retarget(prog_array_refs[i].map_id, key, old_kid,
+                                 new_kid);
+        pthread_mutex_unlock(&state_mutex);
+        log_line("reload_and_reattach: prog_array map_id=%u key=%u -> "
+                 "new_prog_id=%u OK",
+                 prog_array_refs[i].map_id, key, new_kid);
+    }
+    in_shim = 0;
+    free(prog_array_refs);
+
     /* Track new fds replacing old ones so the prog's attached_link_fds list
      * stays consistent after fallback-recreate. */
     int *replaced_with = (int *)malloc(nlinks * sizeof(int));
@@ -298,26 +862,50 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
     for (uint32_t i = 0; i < nlinks; i++) {
         union bpf_attr u;
         memset(&u, 0, sizeof(u));
-        u.link_update.link_fd = (uint32_t)links[i];
         u.link_update.new_prog_fd = (uint32_t)new_pfd;
         u.link_update.flags = 0;
-        long r = real_syscall(SYS_bpf, BPF_LINK_UPDATE, &u, sizeof(u));
-        if (r >= 0) continue;
-        int upd_err = errno;
-        /* Most BPF link types don't implement update_prog (only cgroup, tcx,
-         * netns, bpf_iter do — see kernel/bpf/syscall.c). Fall back to:
-         *   1. close(old_link_fd) — destroys the kernel attach
-         *   2. BPF_LINK_CREATE with saved attrs and new prog_fd → new link
-         *   3. record new fd so attached_link_fds reflects new state
-         * The loader's old fd value becomes EBADF on subsequent use; for
-         * benchmarks this is OK since the loader doesn't operate on links
-         * during measurement. */
+        long r = -1;
+        int upd_err = 0;
+        /* Most BPF link types don't implement update_prog.  When UPDATE is
+         * unsupported, close every fd referencing the old link before CREATE:
+         * many link types (including raw tracepoint, tracing, and perf-event)
+         * also implement no BPF_LINK_DETACH operation.  Recreate or roll back
+         * the old program at the application-owned descriptor number. */
         pthread_mutex_lock(&state_mutex);
         struct link_entry *le = link_find(links[i]);
         char saved_blob[80];
+        char saved_perf_attr[256] = {0};
+        char saved_probe_target[128] = {0};
+        uint32_t saved_perf_attr_size = 0;
+        int32_t saved_perf_pid = 0, saved_perf_cpu = 0;
+        int32_t saved_perf_group_fd = -1;
+        uint32_t saved_perf_open_flags = 0;
+        int saved_target_hold_fd = -1;
+        uint32_t saved_create_attr_size = 0;
+        uint32_t saved_link_id = 0;
         int have_blob = 0;
         if (le) {
             memcpy(saved_blob, le->create_attr_blob, sizeof(saved_blob));
+            saved_create_attr_size = le->create_attr_size;
+            if (le->target_perf_attr_size > 0 &&
+                le->target_perf_attr_size <= sizeof(saved_perf_attr)) {
+                saved_perf_attr_size = le->target_perf_attr_size;
+                memcpy(saved_perf_attr, le->target_perf_attr_blob,
+                       saved_perf_attr_size);
+                saved_perf_pid = le->target_perf_pid;
+                saved_perf_cpu = le->target_perf_cpu;
+                saved_perf_group_fd = le->target_perf_group_fd;
+                saved_perf_open_flags = le->target_perf_open_flags;
+                snprintf(saved_probe_target, sizeof(saved_probe_target),
+                         "%s", le->target_perf_probe_target);
+            }
+            if (le->target_hold_fd >= 0) {
+                long duplicate = real_syscall(
+                    SYS_fcntl, le->target_hold_fd, F_DUPFD_CLOEXEC, 3);
+                if (duplicate >= 0)
+                    saved_target_hold_fd = (int)duplicate;
+            }
+            saved_link_id = le->kernel_link_id;
             have_blob = 1;
         }
         pthread_mutex_unlock(&state_mutex);
@@ -330,24 +918,254 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
             partial = 1;
             continue;
         }
+        union bpf_attr get_link = {0};
+        get_link.link_id = saved_link_id;
+        long live_link_fd = real_syscall(SYS_bpf, BPF_LINK_GET_FD_BY_ID,
+                                         &get_link, sizeof(get_link));
+        if (live_link_fd < 0) {
+            int link_get_err = errno;
+            if (saved_target_hold_fd >= 0)
+                real_close(saved_target_hold_fd);
+            APPEND_DETAIL("link_fd=%d link_id=%u: get_fd errno=%d; ",
+                          links[i], saved_link_id, link_get_err);
+            partial = 1;
+            continue;
+        }
+        u.link_update.link_fd = (uint32_t)live_link_fd;
+        r = real_syscall(SYS_bpf, BPF_LINK_UPDATE, &u, sizeof(u));
+        if (r >= 0) {
+            if (saved_target_hold_fd >= 0)
+                real_close(saved_target_hold_fd);
+            real_close((int)live_link_fd);
+            continue;
+        }
+        upd_err = errno;
         union bpf_attr c;
         memset(&c, 0, sizeof(c));
         memcpy(&c.link_create, saved_blob, sizeof(c.link_create));
         c.link_create.prog_fd = (uint32_t)new_pfd;
-        real_close(links[i]);
-        long new_link = real_syscall(SYS_bpf, BPF_LINK_CREATE, &c, sizeof(c));
-        if (new_link < 0) {
-            int cre_err = errno;
-            log_line("reload_and_reattach: LINK_UPDATE failed (errno=%d) and "
-                     "fallback BPF_LINK_CREATE failed (errno=%d) for old_link_fd=%d",
-                     upd_err, cre_err, links[i]);
-            APPEND_DETAIL("link_fd=%d: LINK_UPDATE errno=%d, "
-                          "LINK_CREATE fallback errno=%d (target_fd=%u attach=%u); ",
-                          links[i], upd_err, cre_err,
-                          c.link_create.target_fd, c.link_create.attach_type);
+        if (saved_create_attr_size == 0 ||
+            saved_create_attr_size > sizeof(c)) {
+            if (saved_target_hold_fd >= 0)
+                real_close(saved_target_hold_fd);
+            APPEND_DETAIL("link_fd=%d: invalid saved BPF_LINK_CREATE attr "
+                          "size=%u; ",
+                          links[i], saved_create_attr_size);
+            partial = 1;
+            real_close((int)live_link_fd);
+            continue;
+        }
+
+        long reopened_perf_fd = -1;
+        if (c.link_create.attach_type == BPF_PERF_EVENT) {
+            if (saved_target_hold_fd >= 0) {
+                c.link_create.target_fd = (uint32_t)saved_target_hold_fd;
+            } else if (saved_perf_attr_size == 0) {
+                APPEND_DETAIL("link_fd=%d: BPF_PERF_EVENT target snapshot missing; ",
+                              links[i]);
+                partial = 1;
+                real_close((int)live_link_fd);
+                continue;
+            }
+            pthread_mutex_lock(&state_mutex);
+            int original_target_live =
+                saved_target_hold_fd >= 0 ||
+                perf_find((int)c.link_create.target_fd) != NULL;
+            pthread_mutex_unlock(&state_mutex);
+            if (!original_target_live) {
+                struct perf_event_attr *reopen_attr =
+                    (struct perf_event_attr *)saved_perf_attr;
+                if (saved_probe_target[0])
+                    reopen_attr->config1 = (uintptr_t)saved_probe_target;
+                reopened_perf_fd = real_syscall(
+                    SYS_perf_event_open, (long)(intptr_t)reopen_attr,
+                    (long)saved_perf_pid, (long)saved_perf_cpu,
+                    (long)saved_perf_group_fd,
+                    (long)saved_perf_open_flags, 0);
+                if (reopened_perf_fd < 0) {
+                    APPEND_DETAIL(
+                        "link_fd=%d: perf_event_open fallback errno=%d; ",
+                        links[i], errno);
+                    partial = 1;
+                    real_close((int)live_link_fd);
+                    continue;
+                }
+                c.link_create.target_fd = (uint32_t)reopened_perf_fd;
+            }
+        }
+
+        struct link_entry *replacement =
+            (struct link_entry *)calloc(1, sizeof(*replacement));
+        if (!replacement) {
+            if (saved_target_hold_fd >= 0)
+                real_close(saved_target_hold_fd);
+            if (reopened_perf_fd >= 0)
+                real_close((int)reopened_perf_fd);
+            APPEND_DETAIL("link_fd=%d: replacement state allocation failed; ",
+                          links[i]);
+            partial = 1;
+            real_close((int)live_link_fd);
+            continue;
+        }
+        replacement->target_hold_fd = saved_target_hold_fd;
+        saved_target_hold_fd = -1;
+        int saved_link_fd_flags = 0;
+        saved_link_fd_flags = (int)real_syscall(
+            SYS_fcntl, links[i], F_GETFD, 0);
+        if (saved_link_fd_flags < 0) {
+            int flags_err = errno;
+            APPEND_DETAIL("link_fd=%d link_id=%u: F_GETFD errno=%d; ",
+                          links[i], saved_link_id, flags_err);
+            link_entry_free(replacement);
+            if (reopened_perf_fd >= 0)
+                real_close((int)reopened_perf_fd);
+            real_close((int)live_link_fd);
             partial = 1;
             continue;
         }
+        if (real_close(links[i]) < 0) {
+            int close_err = errno;
+            APPEND_DETAIL("link_fd=%d link_id=%u: close errno=%d; ",
+                          links[i], saved_link_id, close_err);
+            link_entry_free(replacement);
+            if (reopened_perf_fd >= 0)
+                real_close((int)reopened_perf_fd);
+            real_close((int)live_link_fd);
+            partial = 1;
+            continue;
+        }
+        /* BPF_LINK_GET_FD_BY_ID added a second reference.  Both link fds must
+         * close before the unsupported-UPDATE link can be recreated. */
+        real_close((int)live_link_fd);
+        long new_link = real_syscall(SYS_bpf, BPF_LINK_CREATE, &c,
+                                     saved_create_attr_size);
+        int cre_err = new_link < 0 ? errno : 0;
+        if (new_link >= 0 &&
+            preserve_recreated_link_fd(
+                &new_link, links[i], saved_link_fd_flags) != 0) {
+            cre_err = errno;
+            real_close((int)new_link);
+            new_link = -1;
+        }
+        if (new_link < 0) {
+            int rollback_err = 0;
+            long rollback_link = -1;
+            int rollback_prog_fd = old_prog_fd >= 0
+                                       ? old_prog_fd
+                                       : old_prog_hold_fd;
+            if (rollback_prog_fd >= 0) {
+                union bpf_attr old_c = c;
+                old_c.link_create.prog_fd = (uint32_t)rollback_prog_fd;
+                rollback_link = real_syscall(SYS_bpf, BPF_LINK_CREATE,
+                                             &old_c, saved_create_attr_size);
+                if (rollback_link >= 0 &&
+                    preserve_recreated_link_fd(
+                        &rollback_link, links[i], saved_link_fd_flags) != 0) {
+                    rollback_err = errno;
+                    real_close((int)rollback_link);
+                    rollback_link = -1;
+                }
+                if (rollback_link >= 0) {
+                    replacement->fd = (int)rollback_link;
+                    replacement->prog_fd = (uint32_t)rollback_prog_fd;
+                    replacement->target_fd = old_c.link_create.target_fd;
+                    replacement->attach_type = old_c.link_create.attach_type;
+                    replacement->kernel_link_id =
+                        resolve_kernel_id((int)rollback_link);
+                    replacement->create_attr_size = saved_create_attr_size;
+                    memcpy(replacement->create_attr_blob,
+                           &old_c.link_create,
+                           sizeof(old_c.link_create) <
+                                   sizeof(replacement->create_attr_blob)
+                               ? sizeof(old_c.link_create)
+                               : sizeof(replacement->create_attr_blob));
+                }
+                else if (rollback_err == 0)
+                    rollback_err = errno;
+            }
+            log_line("reload_and_reattach: LINK_UPDATE failed (errno=%d) and "
+                     "fallback BPF_LINK_CREATE failed (errno=%d) for "
+                     "old_link_fd=%d; rollback ret=%ld errno=%d",
+                     upd_err, cre_err, links[i], rollback_link,
+                     rollback_err);
+            APPEND_DETAIL("link_fd=%d: LINK_UPDATE errno=%d, "
+                          "LINK_CREATE fallback errno=%d (target_fd=%u "
+                          "attach=%u flags=%u perf_type=%u perf_config=%llu; "
+                          "rollback_ret=%ld rollback_errno=%d); ",
+                          links[i], upd_err, cre_err,
+                          c.link_create.target_fd, c.link_create.attach_type,
+                          c.link_create.flags,
+                          saved_perf_attr_size > 0
+                              ? ((const struct perf_event_attr *)saved_perf_attr)->type
+                              : 0,
+                          saved_perf_attr_size > 0
+                              ? (unsigned long long)((const struct perf_event_attr *)saved_perf_attr)->config
+                              : 0,
+                          rollback_link, rollback_err);
+            if (rollback_link >= 0) {
+                if (saved_perf_attr_size > 0) {
+                    memcpy(replacement->target_perf_attr_blob,
+                           saved_perf_attr, saved_perf_attr_size);
+                    replacement->target_perf_attr_size = saved_perf_attr_size;
+                    replacement->target_perf_pid = saved_perf_pid;
+                    replacement->target_perf_cpu = saved_perf_cpu;
+                    replacement->target_perf_group_fd = saved_perf_group_fd;
+                    replacement->target_perf_open_flags = saved_perf_open_flags;
+                    snprintf(replacement->target_perf_probe_target,
+                             sizeof(replacement->target_perf_probe_target),
+                             "%s", saved_probe_target);
+                }
+                pthread_mutex_lock(&state_mutex);
+                link_remove(links[i]);
+                link_insert(replacement);
+                pthread_mutex_unlock(&state_mutex);
+                if (replaced_with)
+                    replaced_with[i] = (int)rollback_link;
+            } else {
+                link_entry_free(replacement);
+            }
+            if (reopened_perf_fd >= 0) {
+                if (rollback_link >= 0)
+                    (void)real_ioctl((int)reopened_perf_fd,
+                                     PERF_EVENT_IOC_ENABLE, NULL);
+                real_close((int)reopened_perf_fd);
+            }
+            partial = 1;
+            continue;
+        }
+        if (reopened_perf_fd >= 0) {
+            (void)real_ioctl((int)reopened_perf_fd,
+                             PERF_EVENT_IOC_ENABLE, NULL);
+            real_close((int)reopened_perf_fd);
+        }
+
+        replacement->fd = (int)new_link;
+        replacement->prog_fd = (uint32_t)new_pfd;
+        replacement->target_fd = c.link_create.target_fd;
+        replacement->attach_type = c.link_create.attach_type;
+        replacement->kernel_link_id = resolve_kernel_id((int)new_link);
+        replacement->create_attr_size = saved_create_attr_size;
+        memcpy(replacement->create_attr_blob, &c.link_create,
+               sizeof(c.link_create) < sizeof(replacement->create_attr_blob)
+                   ? sizeof(c.link_create)
+                   : sizeof(replacement->create_attr_blob));
+        if (saved_perf_attr_size > 0) {
+            memcpy(replacement->target_perf_attr_blob, saved_perf_attr,
+                   saved_perf_attr_size);
+            replacement->target_perf_attr_size = saved_perf_attr_size;
+            replacement->target_perf_pid = saved_perf_pid;
+            replacement->target_perf_cpu = saved_perf_cpu;
+            replacement->target_perf_group_fd = saved_perf_group_fd;
+            replacement->target_perf_open_flags = saved_perf_open_flags;
+            snprintf(replacement->target_perf_probe_target,
+                     sizeof(replacement->target_perf_probe_target), "%s",
+                     saved_probe_target);
+        }
+
+        pthread_mutex_lock(&state_mutex);
+        link_remove(links[i]);
+        link_insert(replacement);
+        pthread_mutex_unlock(&state_mutex);
         if (replaced_with) replaced_with[i] = (int)new_link;
         log_line("reload_and_reattach: LINK_UPDATE→CREATE fallback OK "
                  "old_fd=%d → new_fd=%ld (errno=%d on update)",
@@ -416,17 +1234,22 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
                       dr < 0 ? detach_err : 0, ar < 0 ? attach_err : 0);
         partial = 1;
     }
-    int *perf_replaced = (int *)malloc(nperfs * sizeof(int));
-    if (perf_replaced) for (uint32_t i = 0; i < nperfs; i++) perf_replaced[i] = -1;
     for (uint32_t i = 0; i < nperfs; i++) {
         int r = real_ioctl(perfs[i], PERF_EVENT_IOC_SET_BPF,
                            (void *)(intptr_t)new_pfd);
-        if (r == 0) continue;
+        if (r == 0) {
+            pthread_mutex_lock(&state_mutex);
+            struct perf_entry *updated = perf_find(perfs[i]);
+            if (updated) updated->attached_prog_fd = (int)new_pfd;
+            pthread_mutex_unlock(&state_mutex);
+            continue;
+        }
         int set_err = errno;
         /* SET_BPF returns EEXIST when the event already has a BPF prog
-         * attached (kernel doesn't support replacement). Fallback: close
-         * old event, perf_event_open a fresh one with saved attrs,
-         * SET_BPF the new prog. */
+         * attached (kernel doesn't support replacement). Build and enable a
+         * fresh event first, then dup3 it over the old fd. Preserving the fd
+         * number is required for app runtimes such as Go that retain the
+         * original integer in their event object. */
         pthread_mutex_lock(&state_mutex);
         struct perf_entry *pe = perf_find(perfs[i]);
         char saved_attr[256];
@@ -448,7 +1271,6 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
             partial = 1;
             continue;
         }
-        real_close(perfs[i]);
         long new_perf_fd = real_syscall(SYS_perf_event_open,
                                          (long)(intptr_t)saved_attr,
                                          (long)saved_pid, (long)saved_cpu,
@@ -462,8 +1284,6 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
             partial = 1;
             continue;
         }
-        /* Enable + attach the new prog. */
-        (void)real_ioctl((int)new_perf_fd, PERF_EVENT_IOC_ENABLE, NULL);
         int sr = real_ioctl((int)new_perf_fd, PERF_EVENT_IOC_SET_BPF,
                             (void *)(intptr_t)new_pfd);
         if (sr != 0) {
@@ -473,45 +1293,47 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
             partial = 1;
             continue;
         }
-        if (perf_replaced) perf_replaced[i] = (int)new_perf_fd;
-        /* The reopen path bypassed the perf_event_open intercept (in_shim=1),
-         * so the new fd isn't in perf_table. Re-insert it with the saved
-         * attrs so the next reload's SET_BPF fallback finds the entry
-         * instead of bailing with "no saved attrs". */
-        struct perf_entry *ne = (struct perf_entry *)calloc(1, sizeof(*ne));
-        if (ne) {
-            ne->fd = (int)new_perf_fd;
-            ne->type = ((const struct perf_event_attr *)saved_attr)->type;
-            ne->config = ((const struct perf_event_attr *)saved_attr)->config;
-            ne->pid = saved_pid;
-            ne->cpu = saved_cpu;
-            ne->group_fd = saved_group;
-            ne->open_flags = saved_flags;
-            ne->attached_prog_fd = (int)new_pfd;
-            memcpy(ne->attr_blob, saved_attr, saved_attr_size);
-            ne->attr_size = saved_attr_size;
-            pthread_mutex_lock(&state_mutex);
-            perf_insert(ne);
-            pthread_mutex_unlock(&state_mutex);
+        if (real_ioctl((int)new_perf_fd, PERF_EVENT_IOC_ENABLE, NULL) != 0) {
+            APPEND_DETAIL("perf_fd=%d: ENABLE on new event errno=%d; ",
+                          perfs[i], errno);
+            real_close((int)new_perf_fd);
+            partial = 1;
+            continue;
+        }
+        int status_flags = fcntl(perfs[i], F_GETFL);
+        int descriptor_flags = fcntl(perfs[i], F_GETFD);
+        if (status_flags < 0 || descriptor_flags < 0 ||
+            fcntl((int)new_perf_fd, F_SETFL, status_flags) != 0) {
+            APPEND_DETAIL("perf_fd=%d: preserve fd flags errno=%d; ",
+                          perfs[i], errno);
+            real_close((int)new_perf_fd);
+            partial = 1;
+            continue;
+        }
+        int dup_flags = (descriptor_flags & FD_CLOEXEC) ? O_CLOEXEC : 0;
+        if (real_syscall(SYS_dup3, (int)new_perf_fd, perfs[i],
+                         dup_flags) < 0) {
+            APPEND_DETAIL("perf_fd=%d: dup3 replacement errno=%d; ",
+                          perfs[i], errno);
+            real_close((int)new_perf_fd);
+            partial = 1;
+            continue;
+        }
+        real_close((int)new_perf_fd);
+        /* dup3 preserved the table key, so only the attached program changes. */
+        pthread_mutex_lock(&state_mutex);
+        struct perf_entry *updated = perf_find(perfs[i]);
+        if (updated) updated->attached_prog_fd = (int)new_pfd;
+        pthread_mutex_unlock(&state_mutex);
+        if (!updated) {
+            APPEND_DETAIL("perf_fd=%d: state disappeared after replacement; ",
+                          perfs[i]);
+            partial = 1;
+            continue;
         }
         log_line("reload_and_reattach: perf SET_BPF→reopen fallback OK "
-                 "old_fd=%d → new_fd=%ld (errno=%d on initial SET_BPF)",
-                 perfs[i], new_perf_fd, set_err);
-    }
-    /* Update attached_perf_fds to the new fds. */
-    if (perf_replaced) {
-        pthread_mutex_lock(&state_mutex);
-        for (uint32_t i = 0; i < nperfs; i++) {
-            if (perf_replaced[i] < 0) continue;
-            for (uint32_t k = 0; k < p->n_perfs; k++) {
-                if (p->attached_perf_fds[k] == perfs[i]) {
-                    p->attached_perf_fds[k] = perf_replaced[i];
-                    break;
-                }
-            }
-        }
-        pthread_mutex_unlock(&state_mutex);
-        free(perf_replaced);
+                 "fd=%d preserved via temp_fd=%ld (errno=%d on initial "
+                 "SET_BPF)", perfs[i], new_perf_fd, set_err);
     }
     int *raw_replaced = (int *)malloc(n_raw_tps * sizeof(int));
     if (raw_replaced) for (uint32_t i = 0; i < n_raw_tps; i++) raw_replaced[i] = -1;
@@ -544,6 +1366,7 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
         if (ne) {
             ne->fd = (int)new_raw;
             ne->prog_fd = (uint32_t)new_pfd;
+            ne->prog_id = new_kid;
             snprintf(ne->name, sizeof(ne->name), "%s", raw_name);
             pthread_mutex_lock(&state_mutex);
             raw_tp_remove(raw_tps[i]);
@@ -787,7 +1610,6 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
     }
 
     /* Resolve the new kernel id and commit the swap into prog_entry. */
-    uint32_t new_kid = resolve_kernel_id(final_prog_fd);
     pthread_mutex_lock(&state_mutex);
     /* Reload p in case state was swapped under us (shouldn't happen during a
      * single execute_plan, but cheap to defensively re-lookup). */

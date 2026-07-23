@@ -1,0 +1,48 @@
+{
+  "fields": [
+    {
+      "context_data_end_offset": 4,
+      "context_data_offset": 0,
+      "hot_bytes_hex": "0800",
+      "kind": "packet",
+      "load_offsets": [
+        12,
+        13,
+        12,
+        13
+      ],
+      "load_pcs": [
+        15,
+        16,
+        163,
+        164
+      ],
+      "offset": 12,
+      "source": "deployment_hint",
+      "width": 2
+    },
+    {
+      "context_data_end_offset": 4,
+      "context_data_offset": 0,
+      "hot_bytes_hex": "45",
+      "kind": "packet",
+      "load_offsets": [
+        14
+      ],
+      "load_pcs": [
+        30
+      ],
+      "offset": 14,
+      "source": "deployment_hint",
+      "width": 1
+    }
+  ],
+  "pass": "context_specialize",
+  "program_hash": "7553fcd85074d673",
+  "schema_version": 1,
+  "source_prog_id": 28361,
+  "source_prog_ids": [
+    28361,
+    28432
+  ]
+}
