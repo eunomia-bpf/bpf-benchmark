@@ -1,0 +1,10 @@
+{
+  "cmd": "execute_plan",
+  "steps": [
+    {
+      "command": "profile=\"${BPFREJIT_IMAGE_WORKSPACE}/runner/config/passes/context_specialize/profiles/bcc/hash-${PROG_HASH}.json\"; bpfopt --pass context_specialize --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+      "log_level": 1,
+      "name": "context_specialize"
+    }
+  ]
+}
