@@ -1,0 +1,26 @@
+{
+  "diagnostics": [],
+  "inlined_map_entries": [
+    {
+      "key_hex": "00000000",
+      "map_id": 5717,
+      "stability": "phase-stable",
+      "value_hex": "01"
+    },
+    {
+      "key_hex": "00000000",
+      "map_id": 5717,
+      "stability": "phase-stable",
+      "value_hex": "01"
+    }
+  ],
+  "insn_count_after": 3755,
+  "insn_count_before": 4051,
+  "insn_delta": -296,
+  "pass": "map_inline",
+  "sites_applied": 2,
+  "sites_matched": 2,
+  "sites_skipped": 0,
+  "skip_reasons": {},
+  "skipped_sites": []
+}

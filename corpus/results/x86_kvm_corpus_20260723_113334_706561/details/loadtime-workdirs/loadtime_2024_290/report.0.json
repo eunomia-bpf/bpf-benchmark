@@ -1,0 +1,50 @@
+{
+  "diagnostics": [],
+  "inlined_map_entries": [
+    {
+      "key_hex": "00000000",
+      "map_id": 6915,
+      "stability": "phase-stable",
+      "value_hex": "01"
+    },
+    {
+      "key_hex": "00000000",
+      "map_id": 6915,
+      "stability": "phase-stable",
+      "value_hex": "01"
+    },
+    {
+      "key_hex": "00000000",
+      "map_id": 6915,
+      "stability": "phase-stable",
+      "value_hex": "00"
+    },
+    {
+      "key_hex": "00000000",
+      "map_id": 6915,
+      "stability": "phase-stable",
+      "value_hex": "01"
+    },
+    {
+      "key_hex": "00000000",
+      "map_id": 3561,
+      "stability": "phase-stable",
+      "value_hex": "0000000000000000"
+    },
+    {
+      "key_hex": "00000000",
+      "map_id": 3561,
+      "stability": "phase-stable",
+      "value_hex": "0000000000000000"
+    }
+  ],
+  "insn_count_after": 2464,
+  "insn_count_before": 2919,
+  "insn_delta": -455,
+  "pass": "map_inline",
+  "sites_applied": 6,
+  "sites_matched": 6,
+  "sites_skipped": 0,
+  "skip_reasons": {},
+  "skipped_sites": []
+}
