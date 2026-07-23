@@ -1,0 +1,32 @@
+{
+  "diagnostics": [],
+  "inlined_map_entries": [],
+  "insn_count_after": 2022,
+  "insn_count_before": 2022,
+  "insn_delta": 0,
+  "pass": "hot_region_version",
+  "sites_applied": 0,
+  "sites_matched": 4,
+  "sites_skipped": 4,
+  "skip_reasons": {
+    "no_acyclic_hot_merge": 4
+  },
+  "skipped_sites": [
+    {
+      "pc": 985,
+      "reason": "no_acyclic_hot_merge"
+    },
+    {
+      "pc": 978,
+      "reason": "no_acyclic_hot_merge"
+    },
+    {
+      "pc": 1105,
+      "reason": "no_acyclic_hot_merge"
+    },
+    {
+      "pc": 851,
+      "reason": "no_acyclic_hot_merge"
+    }
+  ]
+}

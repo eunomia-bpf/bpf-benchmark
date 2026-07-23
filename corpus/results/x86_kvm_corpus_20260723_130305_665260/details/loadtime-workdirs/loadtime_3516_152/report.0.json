@@ -1,0 +1,28 @@
+{
+  "diagnostics": [],
+  "inlined_map_entries": [],
+  "insn_count_after": 1822,
+  "insn_count_before": 1681,
+  "insn_delta": 141,
+  "pass": "hot_region_version",
+  "sites_applied": 1,
+  "sites_matched": 4,
+  "sites_skipped": 3,
+  "skip_reasons": {
+    "no_acyclic_hot_merge": 3
+  },
+  "skipped_sites": [
+    {
+      "pc": 63,
+      "reason": "no_acyclic_hot_merge"
+    },
+    {
+      "pc": 51,
+      "reason": "no_acyclic_hot_merge"
+    },
+    {
+      "pc": 1618,
+      "reason": "no_acyclic_hot_merge"
+    }
+  ]
+}
