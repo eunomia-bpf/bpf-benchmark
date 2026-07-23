@@ -1,22 +1,116 @@
 {
-  "fields": [
-    {
-      "hot_value": 24,
-      "kind": "context",
-      "load_pcs": [
-        12,
-        62
-      ],
-      "offset": 8,
-      "source": "deployment_hint",
-      "width": 8
-    }
-  ],
   "pass": "context_specialize",
   "program_hash": "97c170b804881614",
   "schema_version": 1,
   "source_prog_id": 77,
   "source_prog_ids": [
     77
+  ],
+  "versions": [
+    {
+      "fields": [
+        {
+          "hot_value": 24,
+          "kind": "context",
+          "load_pcs": [
+            12,
+            62
+          ],
+          "offset": 8,
+          "source": "deployment_hint",
+          "width": 8
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "hot_value": 125,
+          "kind": "context",
+          "load_pcs": [
+            12,
+            62
+          ],
+          "offset": 8,
+          "source": "deployment_hint",
+          "width": 8
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "hot_value": 126,
+          "kind": "context",
+          "load_pcs": [
+            12,
+            62
+          ],
+          "offset": 8,
+          "source": "deployment_hint",
+          "width": 8
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "hot_value": 41,
+          "kind": "context",
+          "load_pcs": [
+            12,
+            62
+          ],
+          "offset": 8,
+          "source": "deployment_hint",
+          "width": 8
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "hot_value": 3,
+          "kind": "context",
+          "load_pcs": [
+            12,
+            62
+          ],
+          "offset": 8,
+          "source": "deployment_hint",
+          "width": 8
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "hot_value": 105,
+          "kind": "context",
+          "load_pcs": [
+            12,
+            62
+          ],
+          "offset": 8,
+          "source": "deployment_hint",
+          "width": 8
+        }
+      ]
+    },
+    {
+      "fields": [
+        {
+          "hot_value": 106,
+          "kind": "context",
+          "load_pcs": [
+            12,
+            62
+          ],
+          "offset": 8,
+          "source": "deployment_hint",
+          "width": 8
+        }
+      ]
+    }
   ]
 }
