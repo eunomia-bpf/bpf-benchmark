@@ -1,5 +1,17 @@
 {
-  "fields": [],
+  "fields": [
+    {
+      "hot_value": 202,
+      "kind": "context",
+      "load_pcs": [
+        742,
+        1275
+      ],
+      "offset": 8,
+      "source": "deployment_hint",
+      "width": 8
+    }
+  ],
   "pass": "context_specialize",
   "program_hash": "02269b5fc49c9589",
   "schema_version": 1
