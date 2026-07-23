@@ -225,10 +225,14 @@ llvm::BasicBlock *specialization_find_block(llvm::Function &function,
 
 // --- Dynamic tail-call inline cache ---------------------------------------
 
+struct TailCallIcacheProfileKey {
+	uint32_t key = 0;
+	uint64_t count = 0;
+};
+
 struct TailCallIcacheProfileSite {
-	uint32_t hot_key = 0;
+	std::vector<TailCallIcacheProfileKey> keys;
 	uint64_t observations = 0;
-	uint64_t hot_count = 0;
 };
 
 using TailCallIcacheProfile = std::map<size_t, TailCallIcacheProfileSite>;
@@ -256,25 +260,40 @@ read_tail_call_icache_profile(const SpecializationProfileOptions &options)
 		const auto &site = json_object(
 			entry.getSecond(), "tail_call_icache per_site[" +
 					   std::to_string(pc) + "]");
-		const uint64_t key = specialization_u64_field(
-			site, "hot_key", "tail_call_icache site");
 		const uint64_t observations = specialization_u64_field(
 			site, "observations", "tail_call_icache site");
-		const uint64_t hot_count = specialization_u64_field(
-			site, "hot_count", "tail_call_icache site");
-		if (key > std::numeric_limits<uint32_t>::max()) {
+		const auto *keys = site.getArray("keys");
+		if (observations == 0 || !keys || keys->empty()) {
 			throw std::runtime_error(
-				"tail_call_icache hot_key exceeds u32 at pc " +
+				"tail_call_icache invalid observations/keys at pc " +
 				std::to_string(pc));
 		}
-		if (observations == 0 || hot_count == 0 ||
-		    hot_count > observations) {
-			throw std::runtime_error(
-				"tail_call_icache invalid observations at pc " +
-				std::to_string(pc));
+		TailCallIcacheProfileSite parsed_site;
+		parsed_site.observations = observations;
+		std::set<uint32_t> unique_keys;
+		uint64_t previous_count = std::numeric_limits<uint64_t>::max();
+		uint64_t selected_count = 0;
+		for (const auto &key_entry : *keys) {
+			const auto &key_object = json_object(
+				key_entry, "tail_call_icache key");
+			const uint64_t key = specialization_u64_field(
+				key_object, "key", "tail_call_icache key");
+			const uint64_t count = specialization_u64_field(
+				key_object, "count", "tail_call_icache key");
+			if (key > std::numeric_limits<uint32_t>::max() ||
+			    count == 0 || count > previous_count ||
+			    count > observations - selected_count ||
+			    !unique_keys.insert(static_cast<uint32_t>(key)).second) {
+				throw std::runtime_error(
+					"tail_call_icache invalid ordered key distribution at pc " +
+					std::to_string(pc));
+			}
+			parsed_site.keys.push_back(TailCallIcacheProfileKey{
+				static_cast<uint32_t>(key), count });
+			selected_count += count;
+			previous_count = count;
 		}
-		profile.emplace(pc, TailCallIcacheProfileSite{
-			static_cast<uint32_t>(key), observations, hot_count });
+		profile.emplace(pc, std::move(parsed_site));
 	}
 	return profile;
 }
@@ -384,13 +403,17 @@ std::vector<uint8_t> specialize_tail_call_sites_raw(
 			if (const auto key_pc =
 				    tail_call_replaceable_key_definition(input, pc)) {
 				replacement_keys.emplace(
-					*key_pc, static_cast<int32_t>(site.hot_key));
+					*key_pc,
+					static_cast<int32_t>(site.keys.front().key));
 				calls_with_replaced_keys.insert(pc);
 			}
 		}
 	}
 	std::vector<uint8_t> output;
-	output.reserve(input.size() + profile.size() * 4 * INSN_SIZE);
+	size_t guarded_key_count = 0;
+	for (const auto &[_, site] : profile)
+		guarded_key_count += site.keys.size();
+	output.reserve(input.size() + guarded_key_count * 4 * INSN_SIZE);
 
 	for (size_t pc = 0; pc < insn_count; pc++) {
 		entry_pc[pc] = output.size() / INSN_SIZE;
@@ -406,31 +429,54 @@ std::vector<uint8_t> specialize_tail_call_sites_raw(
 		}
 		auto profiled = profile.find(pc);
 		if (profiled != profile.end()) {
-			const int32_t hot_key = static_cast<int32_t>(profiled->second.hot_key);
-			const auto constant_key = tail_call_icache_insn(
-				bpf_mov32_k, tail_call_key_reg, 0, 0, hot_key);
 			if (phase_stable) {
+				const auto constant_key = tail_call_icache_insn(
+					bpf_mov32_k, tail_call_key_reg, 0, 0,
+					static_cast<int32_t>(
+						profiled->second.keys.front().key));
 				if (!calls_with_replaced_keys.contains(pc)) {
 					output.insert(output.end(), constant_key.begin(),
 						      constant_key.end());
 					instruction_pc[pc]++;
 				}
 			} else {
-				const auto guard = tail_call_icache_insn(
-					bpf_jne32_k, tail_call_key_reg, 0, 3, hot_key);
-				std::array<uint8_t, INSN_SIZE> fast_call{};
-				std::copy_n(input.begin() + pc * INSN_SIZE, INSN_SIZE,
-					    fast_call.begin());
-				const auto skip_slow = tail_call_icache_insn(
-					BPF_JA, 0, 0, 1, 0);
-				output.insert(output.end(), guard.begin(), guard.end());
-				output.insert(output.end(), constant_key.begin(),
-					      constant_key.end());
-				output.insert(output.end(), fast_call.begin(), fast_call.end());
-				output.insert(output.end(), skip_slow.begin(), skip_slow.end());
+				const size_t key_count = profiled->second.keys.size();
+				for (size_t key_index = 0; key_index < key_count;
+				     key_index++) {
+					const auto key =
+						profiled->second.keys[key_index].key;
+					const auto guard = tail_call_icache_insn(
+						bpf_jne32_k, tail_call_key_reg, 0, 3,
+						static_cast<int32_t>(key));
+					const auto constant_key = tail_call_icache_insn(
+						bpf_mov32_k, tail_call_key_reg, 0, 0,
+						static_cast<int32_t>(key));
+					std::array<uint8_t, INSN_SIZE> fast_call{};
+					std::copy_n(
+						input.begin() + pc * INSN_SIZE,
+						INSN_SIZE, fast_call.begin());
+					const int64_t skip =
+						4 * static_cast<int64_t>(
+							    key_count - key_index - 1) +
+						1;
+					if (skip > std::numeric_limits<int16_t>::max()) {
+						throw std::runtime_error(
+							"tail_call_icache PIC skip is out of range");
+					}
+					const auto skip_slow = tail_call_icache_insn(
+						BPF_JA, 0, 0,
+						static_cast<int16_t>(skip), 0);
+					output.insert(output.end(), guard.begin(),
+						      guard.end());
+					output.insert(output.end(), constant_key.begin(),
+						      constant_key.end());
+					output.insert(output.end(), fast_call.begin(),
+						      fast_call.end());
+					output.insert(output.end(), skip_slow.begin(),
+						      skip_slow.end());
+				}
+				instruction_pc[pc] += 4 * key_count;
 			}
-			if (!phase_stable)
-				instruction_pc[pc] += 4;
 		}
 		output.insert(output.end(), input.begin() + pc * INSN_SIZE,
 			      input.begin() + (pc + 1) * INSN_SIZE);
@@ -510,7 +556,8 @@ std::vector<uint8_t> run_tail_call_icache_roundtrip(
 				"tail_call_icache profile pc " + std::to_string(pc) +
 				" does not identify a tail_call helper");
 		}
-		if (tail_call_key_is_immediate_constant(input, pc, site.hot_key)) {
+		if (tail_call_key_is_immediate_constant(
+			    input, pc, site.keys.front().key)) {
 			throw std::runtime_error(
 				"tail_call_icache profile pc " + std::to_string(pc) +
 				" already has the profiled constant key");
@@ -518,10 +565,11 @@ std::vector<uint8_t> run_tail_call_icache_roundtrip(
 	}
 	if (options.phase_stable) {
 		for (const auto &[pc, site] : profile) {
-			if (site.hot_count != site.observations) {
+			if (site.keys.size() != 1 ||
+			    site.keys.front().count != site.observations) {
 				throw std::runtime_error(
-					"tail_call_icache --phase-stable requires a perfect "
-					"training distribution at pc " +
+					"tail_call_icache --phase-stable requires one perfect "
+					"training key at pc " +
 					std::to_string(pc));
 			}
 		}
@@ -686,7 +734,7 @@ struct HotRegionProfile {
 	uint64_t not_taken = 0;
 };
 
-std::optional<HotRegionProfile>
+std::vector<HotRegionProfile>
 read_hot_region_profile(const SpecializationProfileOptions &options)
 {
 	const auto &path = options.profile;
@@ -702,33 +750,29 @@ read_hot_region_profile(const SpecializationProfileOptions &options)
 		throw std::runtime_error(
 			"hot_region_version profile requires per_site");
 	}
-	if (per_site->empty()) {
-		return std::nullopt;
+	std::vector<HotRegionProfile> profiles;
+	for (const auto &entry : *per_site) {
+		const size_t root_pc = specialization_parse_pc(
+			entry.getFirst().str(), "hot_region_version per_site");
+		const auto &site = json_object(
+			entry.getSecond(), "hot_region_version per_site[" +
+						   std::to_string(root_pc) + "]");
+		const uint64_t branch_count = specialization_u64_field(
+			site, "branch_count", "hot_region_version profile");
+		const uint64_t taken = specialization_u64_field(
+			site, "taken", "hot_region_version profile");
+		const uint64_t not_taken = specialization_u64_field(
+			site, "not_taken", "hot_region_version profile");
+		if (branch_count == 0 ||
+		    taken > std::numeric_limits<uint64_t>::max() - not_taken ||
+		    taken + not_taken != branch_count || taken == not_taken) {
+			throw std::runtime_error(
+				"hot_region_version profile has invalid root counts");
+		}
+		profiles.push_back(HotRegionProfile{
+			root_pc, branch_count, taken, not_taken });
 	}
-	if (per_site->size() != 1) {
-		throw std::runtime_error(
-			"hot_region_version profile admits at most one root");
-	}
-	const auto &entry = *per_site->begin();
-	const size_t root_pc = specialization_parse_pc(
-		entry.getFirst().str(), "hot_region_version per_site");
-	const auto &site = json_object(
-		entry.getSecond(), "hot_region_version per_site[" +
-					   std::to_string(root_pc) + "]");
-	const uint64_t branch_count = specialization_u64_field(
-		site, "branch_count", "hot_region_version profile");
-	const uint64_t taken = specialization_u64_field(
-		site, "taken", "hot_region_version profile");
-	const uint64_t not_taken = specialization_u64_field(
-		site, "not_taken", "hot_region_version profile");
-	if (branch_count == 0 ||
-	    taken > std::numeric_limits<uint64_t>::max() - not_taken ||
-	    taken + not_taken != branch_count || taken == not_taken) {
-		throw std::runtime_error(
-			"hot_region_version profile has invalid root counts");
-	}
-	return HotRegionProfile{
-		root_pc, branch_count, taken, not_taken };
+	return profiles;
 }
 
 struct SpecializationBranchSite {
@@ -967,14 +1011,18 @@ std::vector<uint8_t> run_hot_region_version_roundtrip(
 	const SpecializationProfileOptions &options,
 	PassReportCounts &report_counts)
 {
-	const auto profile = read_hot_region_profile(options);
-	if (!profile) {
+	const auto profiles = read_hot_region_profile(options);
+	if (profiles.empty()) {
 		report_counts.sites_applied = 0;
 		report_counts.sites_matched = 0;
 		report_counts.sites_skipped = 0;
 		return input;
 	}
-	const auto raw_site = specialization_branch_site(input, profile->root_pc);
+	std::map<size_t, SpecializationBranchSite> raw_sites;
+	for (const auto &profile : profiles)
+		raw_sites.emplace(
+			profile.root_pc,
+			specialization_branch_site(input, profile.root_pc));
 	auto module = generate_llvm_module(input);
 	return module.withModuleDo([&](llvm::Module &llvm_module) {
 		auto machine = create_bpf_target_machine(
@@ -991,52 +1039,86 @@ std::vector<uint8_t> run_hot_region_version_roundtrip(
 			throw std::runtime_error(
 				"hot_region_version could not find bpf_main");
 		}
-		auto *root_block = specialization_find_block(
-			*function, raw_site.block_start_pc);
-		if (!root_block) {
-			throw std::runtime_error(
-				"hot_region_version could not find lifted root block");
-		}
-		auto *root_branch =
-			llvm::dyn_cast<llvm::BranchInst>(root_block->getTerminator());
-		if (!root_branch || !root_branch->isConditional()) {
-			throw std::runtime_error(
-				"hot_region_version lifted root is not conditional");
-		}
-		const bool hot_taken = profile->taken > profile->not_taken;
-		auto *hot_successor = branch_successor_for_raw_pc(
-			*root_branch,
-			hot_taken ? raw_site.target_pc : raw_site.fallthrough_pc,
-			raw_site.pc);
-		llvm::BasicBlock *hot_predecessor = nullptr;
-		auto *merge = find_first_hot_merge(
-			hot_successor, &hot_predecessor);
-		if (!merge || !hot_predecessor) {
-			constexpr const char *reason = "no_acyclic_hot_merge";
-			report_counts.sites_applied = 0;
-			report_counts.sites_matched = 1;
-			report_counts.sites_skipped = 1;
-			report_counts.skip_reasons[reason] = 1;
-			report_counts.skipped_sites.emplace_back(
-				profile->root_pc, reason);
-			return input;
-		}
-		llvm::DominatorTree dominators(*function);
-		if (dominators.dominates(merge, hot_predecessor)) {
-			constexpr const char *reason = "loop_backedge_merge";
-			report_counts.sites_applied = 0;
-			report_counts.sites_matched = 1;
-			report_counts.sites_skipped = 1;
-			report_counts.skip_reasons[reason] = 1;
-				report_counts.skipped_sites.emplace_back(
-					profile->root_pc, reason);
-			return input;
-		}
-		clone_hot_dominated_region(
-			*merge, *hot_predecessor, dominators);
-		report_counts.sites_applied = 1;
-		report_counts.sites_matched = 1;
+		llvm::DominatorTree initial_dominators(*function);
+		std::vector<HotRegionProfile> ordered = profiles;
+		std::sort(ordered.begin(), ordered.end(),
+			  [&](const HotRegionProfile &left,
+			      const HotRegionProfile &right) {
+				  auto *left_block = specialization_find_block(
+					  *function,
+					  raw_sites.at(left.root_pc).block_start_pc);
+				  auto *right_block = specialization_find_block(
+					  *function,
+					  raw_sites.at(right.root_pc).block_start_pc);
+				  const auto *left_node =
+					  initial_dominators.getNode(left_block);
+				  const auto *right_node =
+					  initial_dominators.getNode(right_block);
+				  const unsigned left_level =
+					  left_node ? left_node->getLevel() : 0;
+				  const unsigned right_level =
+					  right_node ? right_node->getLevel() : 0;
+				  if (left_level != right_level)
+					  return left_level > right_level;
+				  if (left.branch_count != right.branch_count)
+					  return left.branch_count > right.branch_count;
+				  return left.root_pc < right.root_pc;
+			  });
+		report_counts.sites_applied = 0;
+		report_counts.sites_matched =
+			static_cast<int64_t>(ordered.size());
 		report_counts.sites_skipped = 0;
+		for (const auto &profile : ordered) {
+			const auto &raw_site = raw_sites.at(profile.root_pc);
+			auto *root_block = specialization_find_block(
+				*function, raw_site.block_start_pc);
+			if (!root_block) {
+				throw std::runtime_error(
+					"hot_region_version could not find lifted root block");
+			}
+			auto *root_branch = llvm::dyn_cast<llvm::BranchInst>(
+				root_block->getTerminator());
+			if (!root_branch || !root_branch->isConditional()) {
+				throw std::runtime_error(
+					"hot_region_version lifted root is not conditional");
+			}
+			const bool hot_taken = profile.taken > profile.not_taken;
+			auto *hot_successor = branch_successor_for_raw_pc(
+				*root_branch,
+				hot_taken ? raw_site.target_pc :
+						    raw_site.fallthrough_pc,
+				raw_site.pc);
+			llvm::BasicBlock *hot_predecessor = nullptr;
+			auto *merge = find_first_hot_merge(
+				hot_successor, &hot_predecessor);
+			if (!merge || !hot_predecessor) {
+				constexpr const char *reason =
+					"no_acyclic_hot_merge";
+				report_counts.sites_skipped =
+					report_counts.sites_skipped.value() + 1;
+				report_counts.skip_reasons[reason]++;
+				report_counts.skipped_sites.emplace_back(
+					profile.root_pc, reason);
+				continue;
+			}
+			llvm::DominatorTree dominators(*function);
+			if (dominators.dominates(merge, hot_predecessor)) {
+				constexpr const char *reason =
+					"loop_backedge_merge";
+				report_counts.sites_skipped =
+					report_counts.sites_skipped.value() + 1;
+				report_counts.skip_reasons[reason]++;
+				report_counts.skipped_sites.emplace_back(
+					profile.root_pc, reason);
+				continue;
+			}
+			clone_hot_dominated_region(
+				*merge, *hot_predecessor, dominators);
+			report_counts.sites_applied =
+				report_counts.sites_applied.value() + 1;
+		}
+		if (report_counts.sites_applied.value() == 0)
+			return input;
 		if (std::getenv("BPFOPT_DUMP_IR")) {
 			llvm_module.print(llvm::errs(), nullptr);
 		}

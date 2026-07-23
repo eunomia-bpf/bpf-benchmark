@@ -2,16 +2,30 @@
   "pass": "hot_region_version",
   "per_site": {
     "1276": {
-      "branch_count": 2543,
+      "branch_count": 1258,
       "not_taken": 0,
-      "taken": 2543
+      "taken": 1258
+    },
+    "1618": {
+      "branch_count": 1159,
+      "not_taken": 0,
+      "taken": 1159
+    },
+    "51": {
+      "branch_count": 980,
+      "not_taken": 0,
+      "taken": 980
+    },
+    "63": {
+      "branch_count": 1017,
+      "not_taken": 0,
+      "taken": 1017
     }
   },
   "program_hash": "7b878848e0fb4f3d",
   "schema_version": 1,
   "source_prog_id": 43601,
   "source_prog_ids": [
-    43601,
-    43618
+    43601
   ]
 }

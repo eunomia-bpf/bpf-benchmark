@@ -1,6 +1,20 @@
 {
   "pass": "tail_call_icache",
-  "per_site": {},
+  "per_site": {
+    "2018": {
+      "keys": [
+        {
+          "count": 1151,
+          "key": 745
+        },
+        {
+          "count": 1097,
+          "key": 3246
+        }
+      ],
+      "observations": 2248
+    }
+  },
   "program_hash": "a361622db01240f5",
   "schema_version": 1,
   "source_prog_id": 30600,

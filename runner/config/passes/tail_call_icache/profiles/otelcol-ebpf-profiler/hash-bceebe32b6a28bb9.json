@@ -2,8 +2,12 @@
   "pass": "tail_call_icache",
   "per_site": {
     "1204": {
-      "hot_count": 40,
-      "hot_key": 1,
+      "keys": [
+        {
+          "count": 40,
+          "key": 1
+        }
+      ],
       "observations": 40
     }
   },

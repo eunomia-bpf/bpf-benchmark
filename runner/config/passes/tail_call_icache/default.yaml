@@ -2,4 +2,4 @@ log_level: 1
 command: |
   profile_root="${BPFREJIT_SPECIALIZATION_PROFILE_ROOT:?BPFREJIT_SPECIALIZATION_PROFILE_ROOT is required for tail_call_icache}";
   profile="${profile_root}/tail_call_icache/hash-${PROG_HASH}.json";
-  bpfopt --pass tail_call_icache --input "${INPUT}" --output "${OUTPUT}" --report "${REPORT}" --prog-type "${PROG_TYPE}" -- --profile "${profile}" --program-hash "${PROG_HASH}" --phase-stable
+  bpfopt --pass tail_call_icache --input "${INPUT}" --output "${OUTPUT}" --report "${REPORT}" --prog-type "${PROG_TYPE}" -- --profile "${profile}" --program-hash "${PROG_HASH}"

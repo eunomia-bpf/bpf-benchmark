@@ -255,7 +255,13 @@ class SpecializationCliTests(unittest.TestCase):
             "schema_version": 1,
             "pass": "tail_call_icache",
             "per_site": {
-                "4": {"hot_key": 7, "observations": 1000, "hot_count": 900}
+                "4": {
+                    "observations": 1000,
+                    "keys": [
+                        {"key": 7, "count": 800},
+                        {"key": 9, "count": 200},
+                    ],
+                }
             },
         }
         with tempfile.TemporaryDirectory() as tmp:
@@ -267,15 +273,20 @@ class SpecializationCliTests(unittest.TestCase):
             for pc in range(0, len(output), 8)
             if output[pc] == BPF_CALL
         ]
-        self.assertEqual(calls.count(12), 2, ir)
-        self.assertEqual(len(output), len(program) * 8 + 4 * 8)
-        self.assertEqual(output[4 * 8], 0x56)  # if w3 != hot_key -> slow
-        self.assertEqual(output[5 * 8], 0xB4)  # w3 = hot_key
+        self.assertEqual(calls.count(12), 3, ir)
+        self.assertEqual(len(output), len(program) * 8 + 8 * 8)
+        self.assertEqual(output[4 * 8], 0x56)  # if w3 != key 7 -> key 9
+        self.assertEqual(output[5 * 8], 0xB4)  # w3 = key 7
         self.assertEqual(output[6 * 8], BPF_CALL)
-        self.assertEqual(output[7 * 8], 0x05)  # skip the dynamic slow call
-        self.assertEqual(output[8 * 8], BPF_CALL)
+        self.assertEqual(output[7 * 8], 0x05)  # skip key 9 and dynamic slow
+        self.assertEqual(output[8 * 8], 0x56)
+        self.assertEqual(output[9 * 8], 0xB4)
+        self.assertEqual(output[10 * 8], BPF_CALL)
+        self.assertEqual(output[11 * 8], 0x05)
+        self.assertEqual(output[12 * 8], BPF_CALL)
         self.assertEqual(struct.unpack_from("<h", output, 4 * 8 + 2)[0], 3)
-        self.assertEqual(struct.unpack_from("<h", output, 7 * 8 + 2)[0], 1)
+        self.assertEqual(struct.unpack_from("<h", output, 7 * 8 + 2)[0], 5)
+        self.assertEqual(struct.unpack_from("<h", output, 11 * 8 + 2)[0], 1)
         self.assertEqual(report["sites_applied"], 1)
         self.assertEqual(report["sites_skipped"], 0)
 
@@ -295,7 +306,10 @@ class SpecializationCliTests(unittest.TestCase):
             "schema_version": 1,
             "pass": "tail_call_icache",
             "per_site": {
-                "5": {"hot_key": 7, "observations": 1000, "hot_count": 900}
+                "5": {
+                    "observations": 1000,
+                    "keys": [{"key": 7, "count": 900}],
+                }
             },
         }
         with tempfile.TemporaryDirectory() as tmp:
@@ -323,7 +337,10 @@ class SpecializationCliTests(unittest.TestCase):
             "schema_version": 1,
             "pass": "tail_call_icache",
             "per_site": {
-                "4": {"hot_key": 7, "observations": 1000, "hot_count": 1000}
+                "4": {
+                    "observations": 1000,
+                    "keys": [{"key": 7, "count": 1000}],
+                }
             },
         }
         with tempfile.TemporaryDirectory() as tmp:
@@ -361,7 +378,10 @@ class SpecializationCliTests(unittest.TestCase):
             "schema_version": 1,
             "pass": "tail_call_icache",
             "per_site": {
-                "5": {"hot_key": 745, "observations": 1000, "hot_count": 1000}
+                "5": {
+                    "observations": 1000,
+                    "keys": [{"key": 745, "count": 1000}],
+                }
             },
         }
         with tempfile.TemporaryDirectory() as tmp:
@@ -391,7 +411,10 @@ class SpecializationCliTests(unittest.TestCase):
             "schema_version": 1,
             "pass": "tail_call_icache",
             "per_site": {
-                "3": {"hot_key": 7, "observations": 1000, "hot_count": 1000}
+                "3": {
+                    "observations": 1000,
+                    "keys": [{"key": 7, "count": 1000}],
+                }
             },
         }
         with tempfile.TemporaryDirectory() as tmp:
@@ -523,6 +546,39 @@ class SpecializationCliTests(unittest.TestCase):
         self.assertEqual(report["sites_matched"], 1)
         self.assertEqual(report["sites_skipped"], 0)
         self.assertIn(".hot", ir)
+
+    def test_hot_region_versions_multiple_roots_inside_out(self) -> None:
+        program = [
+            insn(BPF_LDXW, dst=2, src=1, off=16),
+            insn(BPF_JEQ64_K, dst=2, off=2, imm=7),
+            insn(BPF_MOV64_K, dst=0, imm=10),
+            insn(BPF_JA, off=1),
+            insn(BPF_MOV64_K, dst=0, imm=20),
+            insn(BPF_ADD64_K, dst=0, imm=3),
+            insn(BPF_JEQ64_K, dst=2, off=2, imm=9),
+            insn(BPF_MOV64_K, dst=6, imm=1),
+            insn(BPF_JA, off=1),
+            insn(BPF_MOV64_K, dst=6, imm=2),
+            insn(BPF_ADD64_X, dst=0, src=6),
+            insn(BPF_EXIT),
+        ]
+        profile = {
+            "schema_version": 1,
+            "pass": "hot_region_version",
+            "per_site": {
+                "1": {"branch_count": 1000, "taken": 900, "not_taken": 100},
+                "6": {"branch_count": 800, "taken": 700, "not_taken": 100},
+            },
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            output, report, ir = self.run_pass(
+                Path(tmp), "hot_region_version", profile, program, dump_ir=True
+            )
+        self.assertNotEqual(output, b"".join(program))
+        self.assertEqual(report["sites_applied"], 2)
+        self.assertEqual(report["sites_matched"], 2)
+        self.assertEqual(report["sites_skipped"], 0)
+        self.assertGreaterEqual(ir.count(".hot"), 2)
 
     def test_context_specialize_builds_guarded_fast_and_slow_versions(self) -> None:
         program = [

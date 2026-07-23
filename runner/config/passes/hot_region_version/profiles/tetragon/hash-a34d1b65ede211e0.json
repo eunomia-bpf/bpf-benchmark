@@ -1,17 +1,31 @@
 {
   "pass": "hot_region_version",
   "per_site": {
+    "357": {
+      "branch_count": 1017,
+      "not_taken": 0,
+      "taken": 1017
+    },
+    "75": {
+      "branch_count": 1018,
+      "not_taken": 0,
+      "taken": 1018
+    },
     "91": {
       "branch_count": 1047,
       "not_taken": 0,
       "taken": 1047
+    },
+    "95": {
+      "branch_count": 1011,
+      "not_taken": 0,
+      "taken": 1011
     }
   },
   "program_hash": "a34d1b65ede211e0",
   "schema_version": 1,
   "source_prog_id": 1917,
   "source_prog_ids": [
-    1917,
-    1965
+    1917
   ]
 }

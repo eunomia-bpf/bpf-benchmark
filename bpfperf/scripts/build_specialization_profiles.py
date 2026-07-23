@@ -80,6 +80,8 @@ class Admission:
     max_tail_sites: int
     max_loop_sites: int
     max_context_fields: int
+    max_tail_keys: int = 4
+    max_hot_roots: int = 4
 
     def admits(self, observations: int, hot_count: int) -> bool:
         return (
@@ -1075,7 +1077,7 @@ def common_profile(pass_name: str, program_hash: str, raw: dict[str, Any]) -> di
 def build_tail_profile(
     raw: dict[str, Any], insns: list[Insn], program_hash: str, admission: Admission
 ) -> dict[str, Any]:
-    candidates: list[tuple[int, int, int, int]] = []
+    candidates: list[tuple[int, int, int, list[tuple[int, int]]]] = []
     entry_end = entry_function_end(insns)
     if "tail_call_sites" not in raw:
         raise ProfileError("tail_call_icache requires collected tail_call_sites")
@@ -1094,9 +1096,11 @@ def build_tail_profile(
             raise ProfileError(f"tail_call_sites[{pc}] key counts disagree with observations")
         if pc >= entry_end:
             continue
-        hot_key, hot_count = max(key_counts.items(), key=lambda item: (item[1], -item[0]))
-        if hot_key > 0xFFFFFFFF:
-            raise ProfileError(f"tail_call_sites[{pc}] hot key exceeds u32")
+        ordered_keys = sorted(key_counts.items(), key=lambda item: (-item[1], item[0]))
+        selected_keys = ordered_keys[: admission.max_tail_keys]
+        selected_count = sum(count for _, count in selected_keys)
+        if any(key > 0xFFFFFFFF for key, _ in selected_keys):
+            raise ProfileError(f"tail_call_sites[{pc}] selected key exceeds u32")
         if (
             pc > 0
             and pc < len(insns)
@@ -1116,17 +1120,26 @@ def build_tail_profile(
                 # The stock verifier/JIT already sees a constant program-array
                 # key. Re-emitting the same MOV is not a specialization.
                 continue
-        if admission.admits(observations, hot_count):
-            candidates.append((hot_count, observations, pc, hot_key))
-    candidates.sort(key=lambda item: (-item[0], -item[1], item[2], item[3]))
+        if admission.admits(observations, selected_count):
+            candidates.append(
+                (
+                    selected_count,
+                    observations,
+                    pc,
+                    selected_keys,
+                )
+            )
+    candidates.sort(key=lambda item: (-item[0], -item[1], item[2]))
     profile = common_profile("tail_call_icache", program_hash, raw)
     profile["per_site"] = {
         str(pc): {
-            "hot_key": hot_key,
             "observations": observations,
-            "hot_count": hot_count,
+            "keys": [
+                {"key": key, "count": count}
+                for key, count in keys
+            ],
         }
-        for hot_count, observations, pc, hot_key in candidates[: admission.max_tail_sites]
+        for _, observations, pc, keys in candidates[: admission.max_tail_sites]
     }
     return profile
 
@@ -1149,8 +1162,7 @@ def build_hot_region_profile(
     candidates.sort(key=lambda item: (-item[0], -item[1], item[2]))
     profile = common_profile("hot_region_version", program_hash, raw)
     profile["per_site"] = {}
-    if candidates:
-        _, observations, pc, taken = candidates[0]
+    for _, observations, pc, taken in candidates[: admission.max_hot_roots]:
         profile["per_site"][str(pc)] = {
             "branch_count": observations,
             "taken": taken,
@@ -1495,6 +1507,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--min-observations", type=int, required=True)
     parser.add_argument("--min-hot-permille", type=int, required=True)
     parser.add_argument("--max-tail-sites", type=int, required=True)
+    parser.add_argument("--max-tail-keys", type=int, required=True)
+    parser.add_argument("--max-hot-roots", type=int, required=True)
     parser.add_argument("--max-loop-sites", type=int, required=True)
     parser.add_argument("--max-context-fields", type=int, required=True)
     parser.add_argument("--context-field-hint", action="append", default=[])
@@ -1515,6 +1529,8 @@ def main() -> int:
         limits = (
             args.min_observations,
             args.max_tail_sites,
+            args.max_tail_keys,
+            args.max_hot_roots,
             args.max_loop_sites,
             args.max_context_fields,
         )
@@ -1528,6 +1544,8 @@ def main() -> int:
             args.max_tail_sites,
             args.max_loop_sites,
             args.max_context_fields,
+            args.max_tail_keys,
+            args.max_hot_roots,
         )
         raw = merge_raw_profiles([load_raw_profile(path) for path in args.raw_profile])
         insns = load_bytecode(args.bytecode)

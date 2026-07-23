@@ -85,7 +85,10 @@ class SpecializationProfileBuilderTests(unittest.TestCase):
             self.admission,
         )
 
-        self.assertEqual(profiles["tail_call_icache"]["per_site"]["4"]["hot_key"], 7)
+        self.assertEqual(
+            profiles["tail_call_icache"]["per_site"]["4"]["keys"],
+            [{"key": 7, "count": 900}, {"key": 9, "count": 100}],
+        )
         self.assertEqual(
             profiles["hot_region_version"]["per_site"]["1"]["taken"], 900
         )
@@ -120,6 +123,35 @@ class SpecializationProfileBuilderTests(unittest.TestCase):
             },
         )
 
+    def test_hot_region_profile_admits_multiple_roots(self) -> None:
+        program = self.parse_insns(
+            b"".join(
+                [
+                    insn(0x61, dst=2, src=1, off=16),
+                    insn(0x15, dst=2, off=1, imm=7),
+                    insn(0xB7, dst=0, imm=1),
+                    insn(0xB7, dst=3, imm=0),
+                    insn(0x07, dst=3, imm=1),
+                    insn(0xA5, dst=3, off=-2, imm=4),
+                    insn(0x95),
+                ]
+            )
+        )
+        admission = MODULE.Admission(
+            min_observations=100,
+            min_hot_permille=700,
+            max_tail_sites=2,
+            max_loop_sites=2,
+            max_context_fields=2,
+            max_hot_roots=4,
+        )
+
+        profile = MODULE.build_hot_region_profile(
+            self.raw, program, "0123456789abcdef", admission
+        )
+
+        self.assertEqual(list(profile["per_site"]), ["1", "5"])
+
     def test_tail_profile_omits_already_constant_key(self) -> None:
         program = self.parse_insns(
             b"".join(
@@ -142,6 +174,36 @@ class SpecializationProfileBuilderTests(unittest.TestCase):
         )
 
         self.assertEqual(profile["per_site"], {})
+
+    def test_tail_profile_admits_top_k_by_cumulative_coverage(self) -> None:
+        program = self.parse_insns(
+            b"".join(
+                [
+                    insn(0xB7, dst=3, imm=0),
+                    insn(0x0F, dst=3, src=2),
+                    insn(0x85, imm=12),
+                    insn(0x95),
+                ]
+            )
+        )
+        raw = {
+            "prog_id": 17,
+            "tail_call_sites": {
+                "2": {
+                    "observations": 1000,
+                    "key_counts": {"0": 550, "2": 450},
+                }
+            },
+        }
+
+        profile = MODULE.build_tail_profile(
+            raw, program, "0123456789abcdef", self.admission
+        )
+
+        self.assertEqual(
+            profile["per_site"]["2"]["keys"],
+            [{"key": 0, "count": 550}, {"key": 2, "count": 450}],
+        )
 
     def test_tail_profile_rejects_pmu_key_that_contradicts_static_key(self) -> None:
         program = self.parse_insns(

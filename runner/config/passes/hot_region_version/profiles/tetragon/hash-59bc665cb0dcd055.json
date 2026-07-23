@@ -1,6 +1,21 @@
 {
   "pass": "hot_region_version",
   "per_site": {
+    "12": {
+      "branch_count": 28544,
+      "not_taken": 0,
+      "taken": 28544
+    },
+    "214": {
+      "branch_count": 29008,
+      "not_taken": 0,
+      "taken": 29008
+    },
+    "260": {
+      "branch_count": 29794,
+      "not_taken": 0,
+      "taken": 29794
+    },
     "271": {
       "branch_count": 30067,
       "not_taken": 0,
@@ -11,7 +26,6 @@
   "schema_version": 1,
   "source_prog_id": 1972,
   "source_prog_ids": [
-    1972,
-    1979
+    1972
   ]
 }

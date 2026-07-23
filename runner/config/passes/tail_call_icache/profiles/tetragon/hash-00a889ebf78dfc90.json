@@ -2,13 +2,21 @@
   "pass": "tail_call_icache",
   "per_site": {
     "403": {
-      "hot_count": 11360,
-      "hot_key": 4,
+      "keys": [
+        {
+          "count": 11360,
+          "key": 4
+        }
+      ],
       "observations": 11360
     },
     "420": {
-      "hot_count": 2400,
-      "hot_key": 3,
+      "keys": [
+        {
+          "count": 2400,
+          "key": 3
+        }
+      ],
       "observations": 2400
     }
   },
