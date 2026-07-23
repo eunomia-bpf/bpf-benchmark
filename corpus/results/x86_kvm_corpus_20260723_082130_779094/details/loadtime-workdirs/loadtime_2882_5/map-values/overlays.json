@@ -1,0 +1,27 @@
+{
+  "29": {
+    "compression": "uniform",
+    "value_size": 4,
+    "value_hex": "01000000"
+  },
+  "30": {
+    "compression": "sparse",
+    "value_size": 20,
+    "default_hex": "0000000000000000000000000000000000000000",
+    "entries": {
+      "01000000": "0ac8000200000000000000000000000000000000"
+    }
+  },
+  "37": {
+    "compression": "uniform",
+    "value_size": 4,
+    "value_hex": "00000000"
+  },
+  "26": {
+    "compression": "enumerated",
+    "value_size": 8,
+    "entries": {
+      "0a6401010000000000000000000000001f901100": "c403000000000000"
+    }
+  }
+}
