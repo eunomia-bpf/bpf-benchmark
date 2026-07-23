@@ -84,6 +84,35 @@ class SyncSpecializationProfileCoverageTests(unittest.TestCase):
                     {"tail_call_icache": root / "tail"},
                 )
 
+    def test_adds_explicit_hash_discovered_after_canonical_capture(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            coverage = root / "context"
+            canonical_hash = "0123456789abcdef"
+            new_hash = "1111111111111111"
+            write_profile(
+                coverage / f"hash-{canonical_hash}.json",
+                {
+                    "schema_version": 1,
+                    "pass": "context_specialize",
+                    "program_hash": canonical_hash,
+                    "fields": [],
+                },
+            )
+
+            created = sync_coverage(
+                coverage,
+                {"context_specialize": coverage},
+                (new_hash,),
+            )
+
+            self.assertEqual(
+                created, [coverage / f"hash-{new_hash}.json"]
+            )
+            profile = json.loads(created[0].read_text(encoding="utf-8"))
+            self.assertEqual(profile["fields"], [])
+            self.assertEqual(profile["program_hash"], new_hash)
+
 
 if __name__ == "__main__":
     unittest.main()

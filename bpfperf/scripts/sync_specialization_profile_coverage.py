@@ -19,6 +19,7 @@ from typing import Any
 
 PROGRAM_PROFILE_RE = re.compile(r"hash-([0-9a-f]{16})\.json")
 EMPTY_PAYLOADS: dict[str, dict[str, Any]] = {
+    "context_specialize": {"fields": []},
     "tail_call_icache": {"per_site": {}},
     "hot_region_version": {"per_site": {}},
 }
@@ -56,6 +57,7 @@ def profile_hash(path: Path) -> str:
 def sync_coverage(
     coverage_root: Path,
     pass_roots: dict[str, Path],
+    extra_hashes: tuple[str, ...] = (),
 ) -> list[Path]:
     coverage_files = sorted(coverage_root.glob("hash-*.json"))
     if not coverage_files:
@@ -63,6 +65,14 @@ def sync_coverage(
             f"{coverage_root}: no canonical hash profiles found"
         )
     hashes = [profile_hash(path) for path in coverage_files]
+    for program_hash in extra_hashes:
+        if re.fullmatch(r"[0-9a-f]{16}", program_hash) is None:
+            raise CoverageError(
+                f"invalid explicit program hash {program_hash!r}; "
+                "expected 16 lowercase hexadecimal digits"
+            )
+        hashes.append(program_hash)
+    hashes = sorted(set(hashes))
     created: list[Path] = []
     for pass_name, target_root in pass_roots.items():
         payload = EMPTY_PAYLOADS[pass_name]
@@ -89,6 +99,12 @@ def sync_coverage(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--coverage-root", required=True, type=Path)
+    parser.add_argument(
+        "--program-hash",
+        action="append",
+        default=[],
+        help="additional exact hash observed after the canonical capture",
+    )
     parser.add_argument(
         "--target",
         required=True,
@@ -120,7 +136,11 @@ def main() -> int:
     args = parse_args()
     try:
         targets = parse_targets(args.target)
-        created = sync_coverage(args.coverage_root, targets)
+        created = sync_coverage(
+            args.coverage_root,
+            targets,
+            tuple(args.program_hash),
+        )
     except CoverageError as error:
         print(f"sync_specialization_profile_coverage: {error}", file=sys.stderr)
         return 1
