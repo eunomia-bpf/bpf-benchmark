@@ -7,98 +7,29 @@
     157,
     162
   ],
-  "versions": [
+  "fields": [
     {
-      "fields": [
-        {
-          "hot_value": 64,
-          "kind": "context",
-          "load_pcs": [
-            179,
-            339,
-            420,
-            559,
-            681,
-            941,
-            1080,
-            1127,
-            1337,
-            1401,
-            1799,
-            1875,
-            1934,
-            1979
-          ],
-          "offset": 0,
-          "source": "deployment_hint",
-          "width": 4
-        },
-        {
-          "context_data_end_offset": 80,
-          "context_data_offset": 76,
-          "hot_bytes_hex": "0af400f50af40031",
-          "kind": "packet",
-          "load_offsets": [
-            26,
-            30,
-            30
-          ],
-          "load_pcs": [
-            41,
-            59,
-            74
-          ],
-          "offset": 26,
-          "source": "deployment_hint",
-          "width": 8
-        }
-      ]
-    },
-    {
-      "fields": [
-        {
-          "hot_value": 64,
-          "kind": "context",
-          "load_pcs": [
-            179,
-            339,
-            420,
-            559,
-            681,
-            941,
-            1080,
-            1127,
-            1337,
-            1401,
-            1799,
-            1875,
-            1934,
-            1979
-          ],
-          "offset": 0,
-          "source": "deployment_hint",
-          "width": 4
-        },
-        {
-          "context_data_end_offset": 80,
-          "context_data_offset": 76,
-          "hot_bytes_hex": "0af400310af400f5",
-          "kind": "packet",
-          "load_offsets": [
-            26,
-            30,
-            30
-          ],
-          "load_pcs": [
-            41,
-            59,
-            74
-          ],
-          "offset": 26,
-          "source": "deployment_hint",
-          "width": 8
-        }
-      ]
+      "hot_value": 64,
+      "kind": "context",
+      "load_pcs": [
+        179,
+        339,
+        420,
+        559,
+        681,
+        941,
+        1080,
+        1127,
+        1337,
+        1401,
+        1799,
+        1875,
+        1934,
+        1979
+      ],
+      "offset": 0,
+      "source": "deployment_hint",
+      "width": 4
     }
   ]
 }
