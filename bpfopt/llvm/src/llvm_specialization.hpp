@@ -829,7 +829,8 @@ llvm::Value *hot_region_mapped_value(llvm::Value *value,
 }
 
 llvm::BasicBlock *clone_hot_dominated_region(
-	llvm::BasicBlock &merge, llvm::BasicBlock &predecessor,
+	llvm::BasicBlock &merge,
+	const std::vector<llvm::BasicBlock *> &hot_predecessors,
 	llvm::DominatorTree &dominators)
 {
 	auto *function = merge.getParent();
@@ -837,6 +838,12 @@ llvm::BasicBlock *clone_hot_dominated_region(
 		throw std::runtime_error(
 			"hot_region_version cannot clone the entry block");
 	}
+	if (hot_predecessors.empty()) {
+		throw std::runtime_error(
+			"hot_region_version has no hot merge predecessors");
+	}
+	const std::set<llvm::BasicBlock *> hot_predecessor_set(
+		hot_predecessors.begin(), hot_predecessors.end());
 
 	// Clone the complete single-entry tail controlled by the merge, rather
 	// than only the first merge block.  Rejoining immediately after a
@@ -859,7 +866,7 @@ llvm::BasicBlock *clone_hot_dominated_region(
 
 	llvm::ValueToValueMapTy value_map;
 	std::map<llvm::BasicBlock *, llvm::BasicBlock *> clones;
-	llvm::BasicBlock *layout_after = &predecessor;
+	llvm::BasicBlock *layout_after = hot_predecessors.front();
 	for (llvm::BasicBlock *block : region) {
 		auto *clone = llvm::CloneBasicBlock(
 			block, value_map, ".hot", function);
@@ -878,9 +885,10 @@ llvm::BasicBlock *clone_hot_dominated_region(
 	}
 	auto *clone = clones.at(&merge);
 
-	// The cloned region has only the selected hot entry. Collapse each entry
-	// PHI to that predecessor's incoming value, and remove the hot incoming
-	// edge from the original merge. Internal PHIs retain cloned predecessors.
+	// The cloned region has only entries reached from the profiled hot
+	// successor. Drop cold incoming values from its entry PHIs and remove the
+	// hot incoming values from the original merge. A single hot incoming value
+	// folds immediately; multiple hot-side paths retain a smaller PHI.
 	for (auto original_it = merge.begin();
 	     original_it != merge.end() && llvm::isa<llvm::PHINode>(*original_it);) {
 		auto *original_phi = llvm::cast<llvm::PHINode>(&*original_it++);
@@ -891,17 +899,34 @@ llvm::BasicBlock *clone_hot_dominated_region(
 		}
 		auto *cloned_phi =
 			llvm::cast<llvm::PHINode>(mapped_phi->second);
-		const int incoming = original_phi->getBasicBlockIndex(&predecessor);
-		if (incoming < 0) {
-			throw std::runtime_error(
-				"hot_region_version merge lacks the selected predecessor");
+		for (int incoming =
+			     static_cast<int>(cloned_phi->getNumIncomingValues()) - 1;
+		     incoming >= 0; incoming--) {
+			if (!hot_predecessor_set.contains(
+				    cloned_phi->getIncomingBlock(incoming))) {
+				cloned_phi->removeIncomingValue(incoming, false);
+			}
 		}
-		auto *incoming_value = hot_region_mapped_value(
-			original_phi->getIncomingValue(incoming), value_map);
-		cloned_phi->replaceAllUsesWith(incoming_value);
-		cloned_phi->eraseFromParent();
-		value_map[original_phi] = incoming_value;
-		original_phi->removeIncomingValue(incoming, false);
+		if (cloned_phi->getNumIncomingValues() == 0) {
+			throw std::runtime_error(
+				"hot_region_version merge lacks hot incoming values");
+		}
+		for (llvm::BasicBlock *predecessor : hot_predecessors) {
+			const int incoming =
+				original_phi->getBasicBlockIndex(predecessor);
+			if (incoming < 0) {
+				throw std::runtime_error(
+					"hot_region_version merge lacks a hot predecessor");
+			}
+			original_phi->removeIncomingValue(incoming, false);
+		}
+		if (cloned_phi->getNumIncomingValues() == 1) {
+			auto *incoming_value = hot_region_mapped_value(
+				cloned_phi->getIncomingValue(0), value_map);
+			cloned_phi->replaceAllUsesWith(incoming_value);
+			cloned_phi->eraseFromParent();
+			value_map[original_phi] = incoming_value;
+		}
 	}
 
 	// Every exit from the versioned region needs a corresponding cloned edge
@@ -967,43 +992,62 @@ llvm::BasicBlock *clone_hot_dominated_region(
 		}
 	}
 
-	auto *terminator = predecessor.getTerminator();
-	bool redirected = false;
-	for (unsigned i = 0; i < terminator->getNumSuccessors(); i++) {
-		if (terminator->getSuccessor(i) == &merge) {
-			terminator->setSuccessor(i, clone);
-			redirected = true;
+	for (llvm::BasicBlock *predecessor : hot_predecessors) {
+		auto *terminator = predecessor->getTerminator();
+		bool redirected = false;
+		for (unsigned i = 0; i < terminator->getNumSuccessors(); i++) {
+			if (terminator->getSuccessor(i) == &merge) {
+				terminator->setSuccessor(i, clone);
+				redirected = true;
+			}
 		}
-	}
-	if (!redirected) {
-		throw std::runtime_error(
-			"hot_region_version predecessor does not enter merge");
+		if (!redirected) {
+			throw std::runtime_error(
+				"hot_region_version predecessor does not enter merge");
+		}
 	}
 	return clone;
 }
 
-llvm::BasicBlock *find_first_hot_merge(llvm::BasicBlock *hot_successor,
-				       llvm::BasicBlock **predecessor_out)
+struct HotMerge {
+	llvm::BasicBlock *block = nullptr;
+	std::vector<llvm::BasicBlock *> predecessors;
+};
+
+std::optional<HotMerge>
+find_hot_postdominating_merge(llvm::BasicBlock &root,
+			      llvm::BasicBlock &hot_successor,
+			      llvm::DominatorTree &dominators)
 {
-	llvm::BasicBlock *predecessor = nullptr;
-	llvm::BasicBlock *current = hot_successor;
-	std::set<llvm::BasicBlock *> visited;
-	for (unsigned depth = 0; depth < 32 && current; depth++) {
-		if (!visited.insert(current).second) {
-			return nullptr;
-		}
-		if (predecessor && llvm::pred_size(current) > 1) {
-			*predecessor_out = predecessor;
-			return current;
-		}
-		auto *terminator = current->getTerminator();
-		if (!terminator || terminator->getNumSuccessors() != 1) {
-			return nullptr;
-		}
-		predecessor = current;
-		current = terminator->getSuccessor(0);
+	auto *function = root.getParent();
+	if (!function) {
+		return std::nullopt;
 	}
-	return nullptr;
+	llvm::PostDominatorTree post_dominators(*function);
+	auto *root_node = post_dominators.getNode(&root);
+	if (!root_node || !root_node->getIDom()) {
+		return std::nullopt;
+	}
+	auto *merge = root_node->getIDom()->getBlock();
+	if (!merge || merge == &root || merge == &hot_successor ||
+	    dominators.dominates(&hot_successor, merge)) {
+		return std::nullopt;
+	}
+	std::vector<llvm::BasicBlock *> hot_predecessors;
+	for (llvm::BasicBlock *predecessor : llvm::predecessors(merge)) {
+		if (!dominators.dominates(&hot_successor, predecessor)) {
+			continue;
+		}
+		if (dominators.dominates(merge, predecessor)) {
+			return std::nullopt;
+		}
+		hot_predecessors.push_back(predecessor);
+	}
+	if (hot_predecessors.empty() ||
+	    hot_predecessors.size() == llvm::pred_size(merge)) {
+		return std::nullopt;
+	}
+	return HotMerge{ merge, std::move(hot_predecessors) };
 }
 
 std::vector<uint8_t> run_hot_region_version_roundtrip(
@@ -1088,23 +1132,12 @@ std::vector<uint8_t> run_hot_region_version_roundtrip(
 				hot_taken ? raw_site.target_pc :
 						    raw_site.fallthrough_pc,
 				raw_site.pc);
-			llvm::BasicBlock *hot_predecessor = nullptr;
-			auto *merge = find_first_hot_merge(
-				hot_successor, &hot_predecessor);
-			if (!merge || !hot_predecessor) {
-				constexpr const char *reason =
-					"no_acyclic_hot_merge";
-				report_counts.sites_skipped =
-					report_counts.sites_skipped.value() + 1;
-				report_counts.skip_reasons[reason]++;
-				report_counts.skipped_sites.emplace_back(
-					profile.root_pc, reason);
-				continue;
-			}
 			llvm::DominatorTree dominators(*function);
-			if (dominators.dominates(merge, hot_predecessor)) {
+			auto hot_merge = find_hot_postdominating_merge(
+				*root_block, *hot_successor, dominators);
+			if (!hot_merge) {
 				constexpr const char *reason =
-					"loop_backedge_merge";
+					"no_postdominating_hot_merge";
 				report_counts.sites_skipped =
 					report_counts.sites_skipped.value() + 1;
 				report_counts.skip_reasons[reason]++;
@@ -1113,7 +1146,8 @@ std::vector<uint8_t> run_hot_region_version_roundtrip(
 				continue;
 			}
 			clone_hot_dominated_region(
-				*merge, *hot_predecessor, dominators);
+				*hot_merge->block, hot_merge->predecessors,
+				dominators);
 			report_counts.sites_applied =
 				report_counts.sites_applied.value() + 1;
 		}

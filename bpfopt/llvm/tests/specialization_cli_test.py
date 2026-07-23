@@ -547,6 +547,37 @@ class SpecializationCliTests(unittest.TestCase):
         self.assertEqual(report["sites_skipped"], 0)
         self.assertIn(".hot", ir)
 
+    def test_hot_region_versions_merge_after_nested_hot_branch(self) -> None:
+        program = [
+            insn(BPF_LDXW, dst=2, src=1, off=16),
+            insn(BPF_JEQ64_K, dst=2, off=3, imm=7),
+            insn(BPF_MOV64_K, dst=0, imm=10),
+            insn(BPF_JA, off=5),
+            insn(BPF_MOV64_K, dst=0, imm=0),
+            insn(BPF_JEQ64_K, dst=2, off=2, imm=9),
+            insn(BPF_MOV64_K, dst=0, imm=20),
+            insn(BPF_JA, off=1),
+            insn(BPF_MOV64_K, dst=0, imm=30),
+            insn(BPF_ADD64_K, dst=0, imm=3),
+            insn(BPF_EXIT),
+        ]
+        profile = {
+            "schema_version": 1,
+            "pass": "hot_region_version",
+            "per_site": {
+                "1": {"branch_count": 1000, "taken": 900, "not_taken": 100}
+            },
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            output, report, ir = self.run_pass(
+                Path(tmp), "hot_region_version", profile, program, dump_ir=True
+            )
+        self.assertNotEqual(output, b"".join(program))
+        self.assertEqual(report["sites_applied"], 1)
+        self.assertEqual(report["sites_matched"], 1)
+        self.assertEqual(report["sites_skipped"], 0)
+        self.assertIn(".hot", ir)
+
     def test_hot_region_versions_multiple_roots_inside_out(self) -> None:
         program = [
             insn(BPF_LDXW, dst=2, src=1, off=16),
