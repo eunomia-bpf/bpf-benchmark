@@ -1,0 +1,38 @@
+{
+  "diagnostics": [],
+  "inlined_map_entries": [
+    {
+      "key_hex": "00000000",
+      "map_id": 180,
+      "stability": "phase-stable",
+      "value_hex": "00"
+    },
+    {
+      "key_hex": "00000000",
+      "map_id": 180,
+      "stability": "phase-stable",
+      "value_hex": "00000000"
+    },
+    {
+      "key_hex": "00000000",
+      "map_id": 180,
+      "stability": "phase-stable",
+      "value_hex": "80000000"
+    },
+    {
+      "key_hex": "00000000",
+      "map_id": 180,
+      "stability": "phase-stable",
+      "value_hex": "fc01"
+    }
+  ],
+  "insn_count_after": 68,
+  "insn_count_before": 178,
+  "insn_delta": -110,
+  "pass": "map_inline",
+  "sites_applied": 4,
+  "sites_matched": 4,
+  "sites_skipped": 0,
+  "skip_reasons": {},
+  "skipped_sites": []
+}
