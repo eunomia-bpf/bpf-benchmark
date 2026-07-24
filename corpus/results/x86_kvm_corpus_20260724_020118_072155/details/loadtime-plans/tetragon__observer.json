@@ -1,0 +1,11 @@
+{
+  "cmd": "execute_plan",
+  "steps": [
+    {
+      "command": "profile=\"${BPFREJIT_IMAGE_WORKSPACE}/runner/config/passes/tail_call_icache/profiles/tetragon/hash-${PROG_HASH}.json\"; bpfopt --pass tail_call_icache --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" -- --profile \"${profile}\" --program-hash \"${PROG_HASH}\"",
+      "command_hash_bf127bb656c37be0": "bpfopt --pass noop --input \"${INPUT}\" --output \"${OUTPUT}\" --report \"${REPORT}\" --prog-type \"${PROG_TYPE}\" && false",
+      "log_level": 1,
+      "name": "tail_call_icache"
+    }
+  ]
+}
