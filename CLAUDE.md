@@ -9,6 +9,56 @@ must land on `origin/master`.
 
 ## Design Rules
 
+### No Invented Experiment Gates
+Workload throughput is the primary measurement for speculative-optimization
+experiments.  Assistants must not invent additional validity, admission, or
+publication requirements and then use them to stop the experiment queue,
+discard a completed run, or relabel a measured throughput result as invalid.
+
+Unless the user explicitly requests them, the following must **not** be made
+mandatory:
+- matched/no-op control runs
+- receiver-side delivery checks or zero-drop/zero-error assertions
+- exclusive or completely idle benchmark CPUs
+- BPF run counters or a minimum `run_cnt` threshold
+- a healthy publisher checkout, successful commit, or successful push before
+  the next experiment may run
+
+CPU contention, PMU noise, missing supplementary checks, and temporarily
+unavailable JSON publication may be recorded as analysis caveats, but they are
+not blockers.  Use the least-contended available CPU set, preserve the raw
+result locally, continue the breadth-first experiment queue, and publish the
+JSON backlog when publication becomes available.
+
+Do not retrospectively reject a successful raw workload-throughput result only
+because one of these unrequested supplementary checks was absent.  Do not
+modify an app runner, workload, experiment backend, or common framework to
+enforce a new measurement-validity gate without explicit user authorization.
+App-specific changes that implement or exercise the requested optimization are
+allowed; app-specific changes that merely impose a new proof obligation are
+not.
+
+### Frozen Workloads and Benchmark Launchers
+Do not modify benchmark workloads, upstream application source, app runners,
+`corpus/driver.py`, benchmark Makefiles, or runtime-image launch wiring unless
+the user explicitly authorizes that specific change.
+Do not change stressors, worker counts, packet topology, traffic generation,
+CPU count, duration, or application policy in order to amplify a reported
+speedup.
+
+Pass execution YAML under `runner/config/passes/` is optimization policy, not
+a frozen benchmark launcher.  It may be added or changed freely, including
+per-app context hints, profile paths, guarded/phase-stable choices, and
+aggressive pass parameters.
+
+Permission to make app-specific optimization changes means changes inside the
+optimizer, shim, PMU/profile processing, or bytecode specialization policy.  It
+does not implicitly authorize changing the workload or the application being
+measured.  The accepted performance protocol is the existing two-start
+load-time comparison.  Do not modify `corpus/driver.py` to add same-process PMU
+training, `apply_app_rejit()`, or a live-swap measurement lifecycle; those are
+not required for the speculative-optimization throughput experiments.
+
 ### No ReJIT Filtering
 Never filter, skip, or exclude any BPF program from ReJIT. If a program fails ReJIT (e.g. EINVAL), the error must be recorded in results and surface naturally. Do not implement:
 - `live_rejit_programs()` overrides that filter programs
