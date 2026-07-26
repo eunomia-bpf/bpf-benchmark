@@ -1,0 +1,10 @@
+{
+  "cmd": "execute_plan",
+  "steps": [
+    {
+      "command": "bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --stability phase-stable",
+      "log_level": 1,
+      "name": "map_inline"
+    }
+  ]
+}
