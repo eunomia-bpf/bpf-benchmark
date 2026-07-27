@@ -6,6 +6,7 @@ struct SpecializationProfileOptions {
 	std::filesystem::path profile;
 	std::string program_hash;
 	bool phase_stable = false;
+	bool layout_hot_roots = false;
 };
 
 SpecializationProfileOptions
@@ -44,6 +45,13 @@ parse_specialization_profile_args(std::string_view pass,
 							 " does not accept --phase-stable");
 			}
 			options.phase_stable = true;
+		} else if (arg == "--layout-hot-roots") {
+			if (pass != "hot_region_version") {
+				throw std::runtime_error(
+					std::string(pass) +
+					" does not accept --layout-hot-roots");
+			}
+			options.layout_hot_roots = true;
 		} else {
 			throw std::runtime_error(std::string(pass) +
 						 " unknown pass-local arg: " + arg);
@@ -819,6 +827,59 @@ llvm::BasicBlock *branch_successor_for_raw_pc(llvm::BranchInst &branch,
 		" at pc " + std::to_string(branch_pc));
 }
 
+uint32_t hot_region_scale_weight(uint64_t value, uint64_t max_value)
+{
+	if (value == 0) {
+		return 0;
+	}
+	constexpr uint32_t max_weight =
+		std::numeric_limits<uint32_t>::max();
+	if (max_value <= max_weight) {
+		return static_cast<uint32_t>(value);
+	}
+	const long double scaled =
+		static_cast<long double>(value) *
+		static_cast<long double>(max_weight) /
+		static_cast<long double>(max_value);
+	const auto rounded = static_cast<uint64_t>(std::llround(scaled));
+	return static_cast<uint32_t>(
+		std::clamp<uint64_t>(rounded, 1, max_weight));
+}
+
+void annotate_hot_region_root(
+	llvm::Module &module, llvm::BranchInst &branch,
+	const SpecializationBranchSite &site,
+	const HotRegionProfile &profile)
+{
+	const uint64_t max_count = std::max(profile.taken, profile.not_taken);
+	if (max_count == 0) {
+		throw std::runtime_error(
+			"hot_region_version cannot weight a zero-count root");
+	}
+	auto *target = branch_successor_for_raw_pc(
+		branch, site.target_pc, site.pc);
+	auto *fallthrough = branch_successor_for_raw_pc(
+		branch, site.fallthrough_pc, site.pc);
+	llvm::MDBuilder metadata(module.getContext());
+	std::array<uint32_t, 2> weights{};
+	for (unsigned i = 0; i < branch.getNumSuccessors(); i++) {
+		auto *successor = branch.getSuccessor(i);
+		if (successor == target) {
+			weights[i] = hot_region_scale_weight(
+				profile.taken, max_count);
+		} else if (successor == fallthrough) {
+			weights[i] = hot_region_scale_weight(
+				profile.not_taken, max_count);
+		} else {
+			throw std::runtime_error(
+				"hot_region_version root has an unexpected successor");
+		}
+	}
+	branch.setMetadata(
+		llvm::LLVMContext::MD_prof,
+		metadata.createBranchWeights(weights[0], weights[1]));
+}
+
 llvm::Value *hot_region_mapped_value(llvm::Value *value,
 				     llvm::ValueToValueMapTy &value_map)
 {
@@ -1136,6 +1197,14 @@ std::vector<uint8_t> run_hot_region_version_roundtrip(
 			auto hot_merge = find_hot_postdominating_merge(
 				*root_block, *hot_successor, dominators);
 			if (!hot_merge) {
+				if (options.layout_hot_roots) {
+					annotate_hot_region_root(
+						llvm_module, *root_branch, raw_site,
+						profile);
+					report_counts.sites_applied =
+						report_counts.sites_applied.value() + 1;
+					continue;
+				}
 				constexpr const char *reason =
 					"no_postdominating_hot_merge";
 				report_counts.sites_skipped =
@@ -1144,6 +1213,10 @@ std::vector<uint8_t> run_hot_region_version_roundtrip(
 				report_counts.skipped_sites.emplace_back(
 					profile.root_pc, reason);
 				continue;
+			}
+			if (options.layout_hot_roots) {
+				annotate_hot_region_root(
+					llvm_module, *root_branch, raw_site, profile);
 			}
 			clone_hot_dominated_region(
 				*hot_merge->block, hot_merge->predecessors,
