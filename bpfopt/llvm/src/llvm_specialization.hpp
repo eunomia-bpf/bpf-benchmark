@@ -7,6 +7,7 @@ struct SpecializationProfileOptions {
 	std::string program_hash;
 	bool phase_stable = false;
 	bool layout_hot_roots = false;
+	bool layout_versioned_program_roots = false;
 };
 
 SpecializationProfileOptions
@@ -52,6 +53,13 @@ parse_specialization_profile_args(std::string_view pass,
 					" does not accept --layout-hot-roots");
 			}
 			options.layout_hot_roots = true;
+		} else if (arg == "--layout-versioned-program-roots") {
+			if (pass != "hot_region_version") {
+				throw std::runtime_error(
+					std::string(pass) +
+					" does not accept --layout-versioned-program-roots");
+			}
+			options.layout_versioned_program_roots = true;
 		} else {
 			throw std::runtime_error(std::string(pass) +
 						 " unknown pass-local arg: " + arg);
@@ -1173,6 +1181,46 @@ std::vector<uint8_t> run_hot_region_version_roundtrip(
 		report_counts.sites_matched =
 			static_cast<int64_t>(ordered.size());
 		report_counts.sites_skipped = 0;
+		bool has_versionable_root = false;
+		if (options.layout_versioned_program_roots) {
+			for (const auto &profile : ordered) {
+				const auto &raw_site =
+					raw_sites.at(profile.root_pc);
+				auto *root_block = specialization_find_block(
+					*function, raw_site.block_start_pc);
+				if (!root_block) {
+					throw std::runtime_error(
+						"hot_region_version could not find lifted root block");
+				}
+				auto *root_branch =
+					llvm::dyn_cast<llvm::BranchInst>(
+						root_block->getTerminator());
+				if (!root_branch ||
+				    !root_branch->isConditional()) {
+					throw std::runtime_error(
+						"hot_region_version lifted root is not conditional");
+				}
+				const bool hot_taken =
+					profile.taken > profile.not_taken;
+				auto *hot_successor =
+					branch_successor_for_raw_pc(
+						*root_branch,
+						hot_taken ?
+							raw_site.target_pc :
+							raw_site.fallthrough_pc,
+						raw_site.pc);
+				if (find_hot_postdominating_merge(
+					    *root_block, *hot_successor,
+					    initial_dominators)) {
+					has_versionable_root = true;
+					break;
+				}
+			}
+		}
+		const bool layout_hot_roots =
+			options.layout_hot_roots ||
+			(options.layout_versioned_program_roots &&
+			 has_versionable_root);
 		for (const auto &profile : ordered) {
 			const auto &raw_site = raw_sites.at(profile.root_pc);
 			auto *root_block = specialization_find_block(
@@ -1197,7 +1245,7 @@ std::vector<uint8_t> run_hot_region_version_roundtrip(
 			auto hot_merge = find_hot_postdominating_merge(
 				*root_block, *hot_successor, dominators);
 			if (!hot_merge) {
-				if (options.layout_hot_roots) {
+				if (layout_hot_roots) {
 					annotate_hot_region_root(
 						llvm_module, *root_branch, raw_site,
 						profile);
@@ -1214,7 +1262,7 @@ std::vector<uint8_t> run_hot_region_version_roundtrip(
 					profile.root_pc, reason);
 				continue;
 			}
-			if (options.layout_hot_roots) {
+			if (layout_hot_roots) {
 				annotate_hot_region_root(
 					llvm_module, *root_branch, raw_site, profile);
 			}

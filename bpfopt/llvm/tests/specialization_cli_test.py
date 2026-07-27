@@ -616,8 +616,8 @@ class SpecializationCliTests(unittest.TestCase):
             insn(BPF_LDXW, dst=2, src=1, off=16),
             insn(BPF_JEQ64_K, dst=2, off=2, imm=7),
             insn(BPF_MOV64_K, dst=0, imm=10),
-            insn(BPF_EXIT),
-            insn(BPF_MOV64_K, dst=0, imm=20),
+            insn(BPF_ADD64_K, dst=0, imm=1),
+            insn(BPF_ADD64_K, dst=0, imm=20),
             insn(BPF_EXIT),
         ]
         profile = {
@@ -640,6 +640,74 @@ class SpecializationCliTests(unittest.TestCase):
         self.assertEqual(report["sites_applied"], 1)
         self.assertEqual(report["sites_matched"], 1)
         self.assertEqual(report["sites_skipped"], 0)
+        self.assertIn("branch_weights", ir)
+
+    def test_hot_region_selective_layout_skips_unversionable_program(self) -> None:
+        program = [
+            insn(BPF_LDXW, dst=2, src=1, off=16),
+            insn(BPF_JEQ64_K, dst=2, off=2, imm=7),
+            insn(BPF_MOV64_K, dst=0, imm=10),
+            insn(BPF_ADD64_K, dst=0, imm=1),
+            insn(BPF_ADD64_K, dst=0, imm=20),
+            insn(BPF_EXIT),
+        ]
+        profile = {
+            "schema_version": 1,
+            "pass": "hot_region_version",
+            "per_site": {
+                "1": {"branch_count": 1000, "taken": 1000, "not_taken": 0}
+            },
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            _, report, ir = self.run_pass(
+                Path(tmp),
+                "hot_region_version",
+                profile,
+                program,
+                dump_ir=True,
+                pass_args=("--layout-versioned-program-roots",),
+            )
+        self.assertEqual(report["sites_applied"], 0)
+        self.assertEqual(report["sites_matched"], 1)
+        self.assertEqual(report["sites_skipped"], 1)
+        self.assertNotIn("branch_weights", ir)
+
+    def test_hot_region_selective_layouts_mixed_versionable_program(self) -> None:
+        program = [
+            insn(BPF_LDXW, dst=2, src=1, off=16),
+            insn(BPF_JEQ64_K, dst=2, off=2, imm=7),
+            insn(BPF_MOV64_K, dst=0, imm=10),
+            insn(BPF_JA, off=1),
+            insn(BPF_MOV64_K, dst=0, imm=20),
+            insn(BPF_ADD64_K, dst=0, imm=3),
+            insn(BPF_JEQ64_K, dst=2, off=2, imm=9),
+            insn(BPF_MOV64_K, dst=6, imm=1),
+            insn(BPF_ADD64_K, dst=6, imm=1),
+            insn(BPF_ADD64_X, dst=0, src=6),
+            insn(BPF_EXIT),
+        ]
+        profile = {
+            "schema_version": 1,
+            "pass": "hot_region_version",
+            "per_site": {
+                "1": {"branch_count": 1000, "taken": 900, "not_taken": 100},
+                "6": {"branch_count": 800, "taken": 800, "not_taken": 0},
+            },
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            output, report, ir = self.run_pass(
+                Path(tmp),
+                "hot_region_version",
+                profile,
+                program,
+                dump_ir=True,
+                pass_args=("--layout-versioned-program-roots",),
+            )
+        self.assertNotEqual(output, b"".join(program))
+        self.assertEqual(report["sites_applied"], 2)
+        self.assertEqual(report["sites_matched"], 2)
+        self.assertEqual(report["sites_skipped"], 0)
+        self.assertIn(".hot", ir)
         self.assertIn("branch_weights", ir)
 
     def test_context_specialize_builds_guarded_fast_and_slow_versions(self) -> None:
