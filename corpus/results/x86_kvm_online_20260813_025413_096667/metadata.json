@@ -1,0 +1,26 @@
+{
+  "bpf_stats": false,
+  "config": {
+    "enabled_passes": [
+      "context_specialize"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "execute_plan: ReJIT failed",
+  "generated_at": "2026-08-13T02:54:13.096667+00:00",
+  "last_updated_at": "2026-08-13T03:00:59.204521+00:00",
+  "launcher_boot_id": "2c73867f-c045-4a45-bcd0-bbac5a37d1c9",
+  "launcher_pid": 1876,
+  "launcher_start_ticks": 10570,
+  "lifecycle": "running_process_execute_plan",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "run_type": "x86_kvm_online",
+  "samples": 1,
+  "skip_rejit": false,
+  "started_at": "2026-08-13T02:54:13.096667+00:00",
+  "status": "error",
+  "suite": "online",
+  "warmups": 1,
+  "workload_only": false,
+  "workload_seconds": 180.0
+}
