@@ -1,0 +1,6 @@
+name = "KProgFormal"
+version = "0.1.0"
+defaultTargets = ["KProgFormal"]
+
+[[lean_lib]]
+name = "KProgFormal"

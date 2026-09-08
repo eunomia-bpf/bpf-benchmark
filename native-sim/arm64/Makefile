@@ -5,6 +5,10 @@ BPF_OBJ := $(BUILD_DIR)/arm64_sim_hardcoded.bpf.o
 MICRO_CONFIG ?= $(ROOT_DIR)/micro/config/micro_pure_jit.yaml
 MICRO_PROG_DIR := micro-prog
 PROOF_BUILD_DIR ?= $(MICRO_PROG_DIR)/build
+NEGATIVE_PROOF_BUILD_DIR ?= $(PROOF_BUILD_DIR)/negative
+NEGATIVE_NATIVE_BUILD_DIR ?= build/negative-native
+NEGATIVE_CONFIG := ../test/kprog_negative_stage2.yaml
+NEGATIVE_PROGRAM := unchecked_packet_read
 SIMPLE_INPUT := $(PROOF_BUILD_DIR)/simple.mem
 SIMPLE_OBJ := $(PROOF_BUILD_DIR)/simple.bpf.o
 LOADER_MANIFEST := ../loader/Cargo.toml
@@ -14,8 +18,9 @@ CLANG ?= clang
 CARGO ?= cargo
 PYTHON ?= python3
 BPF_STACK_SIZE ?= 4096
+SYS_INCLUDE_FLAGS ?= -I/usr/aarch64-linux-gnu/include -I$(ROOT_DIR)/.cache/aarch64-sysroot/usr/include -I$(ROOT_DIR)/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu
 
-.PHONY: build run micro-proofs-generate micro-proofs-build micro-proofs-run app-proofs-build simple-proof-build simple-proof clean
+.PHONY: build run micro-proofs-generate micro-proofs-build micro-proofs-run kprog-negative-proof-build app-proofs-build simple-proof-build simple-proof clean
 
 build: $(BPF_OBJ)
 	$(CARGO) build --manifest-path $(LOADER_MANIFEST)
@@ -53,11 +58,25 @@ $(PROOF_BUILD_DIR)/%.bpf.o: $(MICRO_PROG_DIR)/%.bpf.c arm64_sim_local_bpf.h arm6
 $(SIMPLE_INPUT): | $(PROOF_BUILD_DIR)
 	dd if=/dev/zero of="$@" bs=64 count=1 status=none
 
-micro-proofs-build:
+micro-proofs-build: kprog-negative-proof-build
 	$(PYTHON) ../run_micro_sim_batch.py --arch arm64 --build-only \
 		--build-dir "$(PROOF_BUILD_DIR)" \
 		--config "$(MICRO_CONFIG)" \
 		$(MICRO_SIM_PROOF_ARGS)
+
+kprog-negative-proof-build:
+	$(MAKE) -C ../test \
+		OUTPUT_DIR="$(abspath $(NEGATIVE_NATIVE_BUILD_DIR))" \
+		KERNEL_OFFSETS_DIR="$(abspath $(ROOT_DIR)/micro/programs/build-arm64)" \
+		NATIVE_TARGET=aarch64-linux-gnu \
+		NATIVE_ARCH=arm64 \
+		SYS_INCLUDE_FLAGS="$(SYS_INCLUDE_FLAGS)" \
+		"$(abspath $(NEGATIVE_NATIVE_BUILD_DIR))/$(NEGATIVE_PROGRAM).native.o"
+	$(PYTHON) ../run_micro_sim_batch.py --arch arm64 --build-only \
+		--build-dir "$(NEGATIVE_PROOF_BUILD_DIR)" \
+		--native-build-dir "$(NEGATIVE_NATIVE_BUILD_DIR)" \
+		--config "$(NEGATIVE_CONFIG)" \
+		--jobs 1
 
 micro-proofs-run:
 	$(PYTHON) ../run_micro_sim_batch.py --arch arm64 \

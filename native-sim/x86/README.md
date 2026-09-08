@@ -61,15 +61,15 @@ Architectural state is represented by local variables:
 - `__x86_cf`, `__x86_zf`, `__x86_sf`, `__x86_of`;
 - byte-addressed modeled stack memory when the native program uses stack.
 
-There is no per-register ghost pointer metadata. The old `__x86_p_*`,
-`__x86_tag_*`, `__x86_off_*`, `X86_PTR_PACKET_LEN`, and packet-plus-length to
-packet-end propagation were removed. A GPR is stored as the architectural x86
-register value itself, using `void *` as the C representation so `mov`, `lea`,
-packet pointers, ctx pointers, and stack pointers keep verifier-visible pointer
-shape as long as the actual x86 operation is pointer-shaped. Integer
-instructions still read the same register bits as `(__u64)(long)reg` when the
-x86 semantics require integer arithmetic, flags, shifts, masks, or partial
-register writes.
+Each GPR stores the architectural x86 value plus a provenance tag used to
+select verifier-visible pointer operations for ABI, packet, stack, map, and
+helper values. The tag is proof-side auxiliary state, not native architectural
+state. The current prototype has no machine-checked erasure theorem proving
+that tags are uniquely determined by the native value and ABI or that they
+cannot manufacture a safety fact. Consequently, verifier acceptance is
+evidence for the generated artifact, not yet a proof of simulator-wide native
+fidelity. The removed `__x86_p_*` and `__x86_off_*` paths and the removed
+packet-plus-length to packet-end propagation must remain absent.
 
 The entry ABI is represented by `X86_SIM_ENTRY_XDP(ctx)` /
 `X86_SIM_ENTRY_SKB(ctx)`. These macros build a local guest ABI memory object and

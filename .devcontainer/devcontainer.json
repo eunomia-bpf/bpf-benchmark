@@ -1,4 +1,10 @@
 {
   "name": "bpf-benchmark",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04"
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "containerUser": "root",
+  "remoteUser": "root",
+  "onCreateCommand": "/usr/local/bin/ensure-dockerd.sh",
+  "postStartCommand": "/usr/local/bin/ensure-dockerd.sh"
 }

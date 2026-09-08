@@ -1,0 +1,10 @@
+suite_name: kprog_negative_stage2
+
+benchmark_defaults:
+  expected_retval: 2
+
+benchmarks:
+  - name: unchecked_packet_read
+    input_generator: simple_packet
+    expected_result: 0
+    tags: [stage2, negative, packet]

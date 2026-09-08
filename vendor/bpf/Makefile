@@ -52,6 +52,7 @@ NATIVE_ARCH_CFLAGS := $(if $(filter x86,$(ARCH)),-march=native -mno-red-zone -mg
 		-ffixed-x28)
 NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
 	-D$(TARGET_ARCH_DEFINE) \
+	-fms-extensions \
 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
 	-fno-optimize-sibling-calls \
@@ -469,19 +470,6 @@ native-tetragon: $(TETRAGON_VMLINUX_H) native_compat.h $(NATIVE_LINK)
 		local extra="$${3:-}"; \
 		"$(CLANG)" "$${common_flags[@]}" $${extra} -o "$${native_out}/$${name}.native.o" "$${src}"; \
 	}; \
-	for name in bpf_loader bpf_cgroup bpf_prog_iter \
-		bpf_execve_event bpf_fork bpf_exit bpf_execve_bprm_commit_creds \
-		bpf_generic_kprobe bpf_generic_retkprobe bpf_generic_tracepoint \
-		bpf_generic_uprobe bpf_generic_retuprobe bpf_generic_rawtp \
-		bpf_generic_usdt bpf_generic_fentry bpf_generic_fexit \
-		bpf_execve_map_update; do \
-		compile_native "$${name}" "$(CURDIR)/tetragon/bpf/process/$${name}.c" ""; \
-	done; \
-	compile_native bpf_generic_lsm_core "$(CURDIR)/tetragon/bpf/process/bpf_generic_lsm_core.c" "-D__LARGE_BPF_PROG"; \
-	compile_native bpf_generic_lsm_output "$(CURDIR)/tetragon/bpf/process/bpf_generic_lsm_output.c" "-D__LARGE_BPF_PROG"; \
-	compile_native bpf_enforcer "$(CURDIR)/tetragon/bpf/process/bpf_enforcer.c" "-D__BPF_OVERRIDE_RETURN"; \
-	compile_native bpf_multi_enforcer "$(CURDIR)/tetragon/bpf/process/bpf_enforcer.c" "-D__BPF_OVERRIDE_RETURN -D__MULTI_KPROBE"; \
-	compile_native bpf_fmodret_enforcer "$(CURDIR)/tetragon/bpf/process/bpf_enforcer.c" ""; \
 	for name in bpf_execve_event bpf_exit bpf_fork; do \
 		compile_native "$${name}_v310" "$(CURDIR)/tetragon/bpf/process/$${name}.c" "-D__RHEL7_BPF_PROG"; \
 	done; \
@@ -536,9 +524,6 @@ native-tetragon: $(TETRAGON_VMLINUX_H) native_compat.h $(NATIVE_LINK)
 		"bpf_multi_usdt_v61 bpf_generic_usdt.c"; do \
 		set -- $${pair}; \
 		compile_native "$$1" "$(CURDIR)/tetragon/bpf/process/$$2" "-D__LARGE_BPF_PROG -D__V511_BPF_PROG -D__V61_BPF_PROG -D__MULTI_KPROBE"; \
-	done; \
-	for name in bpf_cgroup_mkdir bpf_cgroup_rmdir bpf_cgroup_release bpf_cgtracker; do \
-		compile_native "$${name}" "$(CURDIR)/tetragon/bpf/cgroup/$${name}.c" ""; \
 	done; \
 	for name in bpf_cgroup_mkdir bpf_cgroup_rmdir bpf_cgroup_release; do \
 		compile_native "$${name}_v511" "$(CURDIR)/tetragon/bpf/cgroup/$${name}.c" "-D__LARGE_BPF_PROG -D__V511_BPF_PROG"; \

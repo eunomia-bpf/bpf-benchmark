@@ -41,37 +41,37 @@ Memory: raw ctx/packet/stack/rodata/native-address memory as expressed by the
 Implementation representation:
 
 ```c
-void *__x86_rax, ..., *__x86_r15;
+union x86_sim_gpr __x86_rax, ..., __x86_r15;
+__u8 __x86_rax_tag, ..., __x86_r15_tag;
 __u8 __x86_cf, __x86_zf, __x86_sf, __x86_of;
 union { __u8 b[N]; __u64 q[(N + 7) / 8]; } __x86_stack_mem;
 ```
 
-The C type `void *` is the storage representation for the architectural 64-bit
-register bits. It is not per-register metadata. A register is read as a pointer
-for pointer-shaped x86 operations such as `mov`, `lea`, stack-pointer updates,
-and memory addressing. The same register is read as `(__u64)(long)reg` for x86
-integer operations, flag computation, shifts, masks, compares, division, and
-partial-width register semantics.
+The union's `void *` member preserves verifier pointer shape for pointer-shaped
+x86 operations, while its integer members expose the same register bits for
+integer operations. Each register also has a proof-side provenance tag. The tag
+selects verifier-visible ABI, packet, stack, map, and helper operations but is
+not native architectural state. A complete refinement proof must therefore
+show that the tag follows from architectural values and the entry ABI and
+cannot introduce a safety fact that native execution lacks.
 
 The stack array is a byte model of the native stack region used by the proof
 artifact. There is no runtime bounds check. If a generated proof expression
 accesses outside the modeled extent, the compiler/verifier/load path should
 fail rather than silently executing a different behavior.
 
-## No Ghost Pointer Metadata
+## Verifier Provenance Metadata
 
-GPR variables carry only architectural x86 values. The active simulator does
-not maintain
-per-register proof metadata such as:
+GPR variables carry architectural x86 values and a proof-side provenance tag:
 
 ```c
-void *__x86_p_<reg>;
 __u8  __x86_tag_<reg>;
-__s32 __x86_off_<reg>;
 ```
 
-The old `PACKET`, `PACKET_END`, `PACKET_LEN`, and `STACK` tags are removed.
-In particular, the simulator must not prove:
+The active tag set includes `ABI`, `PACKET`, `PACKET_END`, `STACK`, `MAP_PTR`,
+`MAP_VALUE`, and `HELPER_ID`. The old parallel pointer/offset state and
+`PACKET_LEN` inference are removed. In particular, the simulator must not
+prove:
 
 ```text
 packet + skb_len == packet_end
@@ -315,8 +315,9 @@ An accepted artifact may be used for direct-native safety only if:
 
 1. The generated instruction sequence is the linked native x86 sequence.
 2. Every emitted macro implements the corresponding x86 state transition.
-3. No hidden pointer metadata, packet-length proof, branch assertion, runtime
-   guard, trap, or fallback appears in the accepted artifact.
+3. Any proof-side provenance metadata has a checked refinement to architectural
+   state and introduces no packet-length proof, branch assertion, runtime
+   guard, trap, or fallback absent from native execution.
 4. The verifier accepts the generated eBPF proof program.
 
 If any item is missing, the result is an experiment result, not a direct-native

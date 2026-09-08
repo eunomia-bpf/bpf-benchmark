@@ -23,14 +23,14 @@ VENDOR_BUILD_DIR := $(ROOT_DIR)/vendor/build
 NATIVE_BPF_ARTIFACTS_X86 := $(VENDOR_BUILD_DIR)/native-bpf/x86/stage
 NATIVE_BPF_ARTIFACTS_ARM64 := $(VENDOR_BUILD_DIR)/native-bpf/arm64/stage
 
-DEFAULT_RUNNER_LLVM_DIR := $(ROOT_DIR)/llvm-backend/build-bpf-kop/lib/cmake/llvm
+DEFAULT_RUNNER_LLVM_DIR := /usr/lib/llvm-18/lib/cmake/llvm
 RUNNER_LLVM_DIR := $(if $(strip $(LLVM_DIR)),$(LLVM_DIR),$(if $(strip $(RUN_LLVM_DIR)),$(RUN_LLVM_DIR),$(DEFAULT_RUNNER_LLVM_DIR)))
 RUNNER_LIBBPF_CFLAGS := -O2 -fPIC -Werror -Wall -std=gnu89
 RUNNER_LIBBPF_OBJ_SUBDIR := vendor/libbpf/pic-obj
 ARM64_RUNNER_LLVM_SYSROOT := $(ROOT_DIR)/.cache/sysroots/arm64-llvm15
-# arm64 uses the in-repo kop LLVM (cross-built for aarch64), matching x86
-# (build.mk:14) so both arches link the same modified LLVM-23. The legacy
-# arm64-llvm15 sysroot is retained only for its -L/rpath link dirs below.
+# arm64 uses the in-repo kop LLVM cross-built for aarch64; x86 uses the
+# devcontainer's LLVM 18. The legacy arm64-llvm15 sysroot is retained only
+# for its -L/rpath link dirs below.
 ARM64_RUNNER_LLVM_DIR := $(ROOT_DIR)/llvm-backend/build-bpf-kop-arm64/lib/cmake/llvm
 ARM64_PKG_CONFIG_LIBDIR = $(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu/pkgconfig
 ARM64_PKG_CONFIG = PKG_CONFIG_LIBDIR="$(ARM64_PKG_CONFIG_LIBDIR)" PKG_CONFIG_SYSROOT_DIR="$(AARCH64_SYSROOT_DIR)"
@@ -260,7 +260,7 @@ host-x86-sim-proofs: host-micro-programs-x86
 	$(MAKE) -C "$(ROOT_DIR)/native-sim/x86" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_X86)/x86_sim_proofs" MICRO_CONFIG="$(MICRO_PROOF_CONFIG)" micro-proofs-build
 
 host-arm64-sim-proofs: host-micro-programs-arm64
-	$(MAKE) -C "$(ARM64_SIM_PROOF_DIR)" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/arm64_sim_proofs" MICRO_CONFIG="$(MICRO_PROOF_CONFIG)" micro-proofs-build
+	$(MAKE) -C "$(ARM64_SIM_PROOF_DIR)" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/arm64_sim_proofs" MICRO_CONFIG="$(MICRO_PROOF_CONFIG)" SYS_INCLUDE_FLAGS="$(ARM64_SYS_INCLUDE_FLAGS)" micro-proofs-build
 
 host-docker-context-x86:
 	test -r /sys/kernel/btf/vmlinux

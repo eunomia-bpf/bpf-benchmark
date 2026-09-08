@@ -10,9 +10,14 @@ Current scope:
 - A hardcoded BPF object that still verifies the basic build/load path.
 - No memory safety guards, no fallback/trap path, no synthetic proof facts.
 
-The simulator state is architectural state only: general-purpose registers plus
-NZCV flags when a covered instruction updates them. Unsupported instructions
-must fail at generation/build time rather than falling back at runtime.
+The simulator stores architectural general-purpose registers and NZCV flags,
+plus proof-side provenance tags used to select verifier-visible pointer
+operations. `../formal` machine-checks tag erasure for a four-operation shared
+fragment, but that model is not mechanically tied to these C macros and does
+not cover the full implemented subset. Verifier acceptance therefore
+establishes safety for the generated BPF artifact but does not by itself prove
+native ISA fidelity. Unsupported instructions must fail at generation/build
+time rather than falling back at runtime.
 
 The generator consumes prebuilt `.proof.o` files emitted by
 `native-link --mode proof`, disassembles them, and emits labels plus simulator

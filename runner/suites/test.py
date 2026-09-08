@@ -250,16 +250,6 @@ def _run_bpf_load_negative_suite(
             ], log_path)
 
 
-def _run_kernel_selftest(workspace: Path, env: dict[str, str]) -> None:
-    kernel_selftest = workspace / "tests" / "kernel" / "build" / "test_recompile"
-    if not kernel_selftest.is_file():
-        print(f"SKIP: test_recompile not found at {kernel_selftest}", file=sys.stderr)
-        return
-    _log_test_section("Kernel selftest (test_recompile)")
-    if not _run_with_status([str(kernel_selftest)], cwd=workspace, env=env):
-        _die("test_recompile failed")
-
-
 def _run_native_proof_micro_smoke(
     workspace: Path,
     args: argparse.Namespace,
@@ -294,6 +284,62 @@ def _run_native_proof_micro_smoke(
     ]
     if not _run_with_status(command, cwd=workspace, env=proof_env, log_path=log_path):
         _die("native_proof micro smoke failed")
+
+
+def _run_native_proof_negative_smoke(
+    workspace: Path,
+    args: argparse.Namespace,
+    env: dict[str, str],
+    *,
+    log_path: Path | None = None,
+) -> None:
+    runner_binary = runner_binary_path(workspace, args.target_arch)
+    proof_object = (
+        sim_proof_root(workspace, args.target_arch)
+        / "negative"
+        / "unchecked_packet_read.bpf.o"
+    )
+    if not proof_object.is_file():
+        _die(f"negative native proof artifact is missing: {proof_object}")
+
+    _log_test_section("native_proof verifier rejection smoke")
+    command = [
+        str(runner_binary),
+        "test-run",
+        "--program", str(proof_object),
+        "--io-mode", "packet",
+        "--input-size", "64",
+        "--inner-repeat", "1",
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=workspace,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        check=False,
+    )
+    output = completed.stdout or ""
+    if log_path is not None:
+        with log_path.open("a", encoding="utf-8") as out:
+            out.write(output)
+    if completed.returncode == 0:
+        _die("unchecked_packet_read: unsafe native proof unexpectedly loaded")
+    verifier_marker = "invalid access to packet"
+    if verifier_marker not in output:
+        if output:
+            sys.stderr.write(output)
+        _die(
+            "unchecked_packet_read: proof failed without the expected verifier "
+            f"diagnostic {verifier_marker!r} (rc={completed.returncode})"
+        )
+    if output:
+        sys.stderr.write(output)
+    _log_negative_line(
+        log_path,
+        f"  PASS  unchecked_packet_read rejected rc={completed.returncode}",
+    )
 
 
 def _run_native_loader_shim_smoke(
@@ -416,6 +462,7 @@ def _run_selftest_mode(workspace: Path, args: argparse.Namespace, env: dict[str,
     _log_test_section("Loading kop modules")
     _load_kop_modules(workspace, args.target_arch)
     _run_native_proof_micro_smoke(workspace, args, env, log_path=log_path)
+    _run_native_proof_negative_smoke(workspace, args, env, log_path=log_path)
     _run_bpf_load_negative_suite(args, fuzz=False, log_path=log_path)
 
 
@@ -430,10 +477,10 @@ def _run_fuzz_mode(args: argparse.Namespace, artifact_dir: Path) -> None:
 
 
 def _run_test_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str]) -> None:
-    _run_kernel_selftest(workspace, env)
     _log_test_section("Loading kop modules")
     _load_kop_modules(workspace, args.target_arch)
     _run_native_proof_micro_smoke(workspace, args, env)
+    _run_native_proof_negative_smoke(workspace, args, env)
     _run_bpf_load_negative_suite(args, fuzz=False)
 
 
