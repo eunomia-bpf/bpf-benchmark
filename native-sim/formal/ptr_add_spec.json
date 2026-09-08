@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "operation": "ptrAdd64",
+  "bits": {
+    "op": "add",
+    "lhs": "src",
+    "rhs": "rhs"
+  },
+  "tag": {
+    "op": "copy",
+    "source": "src"
+  }
+}

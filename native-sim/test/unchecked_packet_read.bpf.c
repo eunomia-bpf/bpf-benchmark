@@ -9,10 +9,7 @@
 SEC("xdp") int unchecked_packet_read(struct xdp_md *ctx)
 {
     u8 *data = (u8 *)(long)ctx->data;
-    u64 value = data[64];
-
-    micro_write_u64_le(data, value);
-    return XDP_PASS;
+    return data[64];
 }
 
 char LICENSE[] SEC("license") = "GPL";

@@ -400,3 +400,157 @@ native payload. A fresh ARM64 QEMU/AWS selftest can then exercise the new
 negative proof on its target verifier. These are remaining research tasks, not
 new mandatory gates for unrelated experiments, and no new optimization
 throughput benchmark is claimed here.
+
+## 2026-09-08 continuation: shared pointer-add semantics and ARM64 guest path
+
+### Implemented formal/implementation correspondence
+
+- A source audit found that the original Lean `addImm64(dst, imm)` model did
+  not match the implementations it named. The provenance-preserving x86 path
+  is `LEA dst, [src + off]`, and the AArch64 path is `ADD dst, src, rhs`;
+  x86 `ADD_IMM` instead goes through a scalarizing arithmetic write. The old
+  theorem was internally consistent but could not substantiate C-handler
+  correspondence.
+- Replaced that operation with `ptrAdd64(dst, src, rhs)` and added
+  `native-sim/formal/ptr_add_spec.json`. Its small generator emits both the
+  Lean bits/tag transition and the C macros actually used by the x86
+  non-stack LEA and AArch64 non-scalar ADD branches. `make -C
+  native-sim/formal check` first rejects stale generated files, then builds the
+  theorem. The check and Lake build exit 0.
+- This is a real but narrow mechanical connection: source-plus-offset bits and
+  copy-source-tag policy now share one declarative AST. The renderer,
+  decoder-to-handler mapping, C compiler, multiply/ABI-load handlers, memory,
+  control flow, helpers, specialization, and artifact binding remain outside
+  this proof slice.
+- `PATH=/opt/go1.26.8/bin:/usr/lib/llvm-18/bin:$PATH JOBS=16 make
+  host-x86-sim-proofs` exits 0 after rebuilding the shared negative proof and
+  all 29 x86 proof artifacts. This is compilation evidence only; it is not a
+  new verifier or performance run.
+
+### ARM64 public-Make bring-up failures retained
+
+- The first QEMU preflight failed before VM launch because
+  `$(ARM64_QEMU_ROOT_READY)` depended on an image-tar pathname with no Make
+  rule. It now depends on the existing `arm64-runner-runtime-image-tar`
+  producer; no runner or benchmark workload was added.
+- The next attempt exposed OTel collector builder host/target conflation:
+  `GOARCH=arm64 go run .../builder` built an AArch64 builder and tried to
+  execute it on x86, yielding `exec format error`. The vendor build now
+  installs the builder as a host tool, then applies `GOOS/GOARCH/CC` only when
+  that tool builds the collector. A subsequent run compiled the AArch64
+  collector successfully.
+- The following attempt reached Tracee and failed because its AArch64 external
+  link omitted the existing cross sysroot (`cannot find -lelf` and `-lz`).
+  Passing the sysroot library/rpath flags through Tracee's upstream
+  `CGO_EXT_LDFLAGS_EBPF` fixed the link; the next run produced an AArch64
+  Tracee binary and passed its `file` check.
+- That run then exposed the same omitted sysroot at the BCC libbpf-tools link.
+  The AArch64 BCC target now receives the same flags through its existing
+  `EXTRA_LDFLAGS` parameter. The raw failed-attempt logs are retained under
+  `/workspaces/.agent-state/bpf-development/kprog-arm64-qemu-preflight-20260908*.log`.
+  Validation of the BCC fix and the first fresh AArch64 guest result is still
+  in progress at this checkpoint; no ARM verifier/runtime success is claimed
+  by this paragraph.
+
+## 2026-09-08 completion of the shared-ABI slice and ARM64 functional experiment
+
+This section supersedes only the in-progress statement immediately above. It
+preserves the failed attempts and their logs as part of the experiment record.
+
+### Implementation and proof correspondence
+
+- Added `native-sim/formal/abi_load_spec.json` and a checked generator for the
+  entry-ABI provenance transition. The same source now emits the Lean policy
+  and the C macro invoked by both simulator implementations. It distinguishes
+  XDP from `__sk_buff`, grants packet provenance only to their concrete
+  `data`/`data_end` offsets, and scalarizes all other 64-bit ABI loads.
+- Compile-time assertions bind the four generated offsets to the concrete x86
+  and ARM simulator ABI structs. The x86 chunked-program generator also stores
+  the selected ABI kind in simulator state, so TC and cgroup-skb programs no
+  longer inherit the XDP offset policy.
+- Lean now models the ABI kind plus an arbitrary signed offset. Its generated
+  implementation transition is checked against an independently stated tag
+  policy for both known fields and all unknown offsets. Together with the
+  earlier shared pointer-add source, this mechanically prevents two observed
+  classes of C/model drift; it remains a bounded register/tag theorem rather
+  than a proof of the complete simulator.
+- The common unsafe fixture now returns only `data[64]`. Its AArch64 native
+  body and generated proof each contain three instructions, with one unique
+  unchecked byte access. The suite requires the exact verifier diagnostic
+  `invalid access to packet, off=64 size=1`, rather than accepting any packet
+  error. This repaired a real false-positive oracle: the prior fixture's
+  result-write helper compiled into an unrelated out-of-bounds store that the
+  ARM verifier encountered first.
+
+### ARM64 public-Make acceptance
+
+- Added the missing cross-execution prerequisites to the project devcontainer
+  and startup hook: static AArch64 user-mode QEMU plus idempotent binfmt
+  registration. A real `linux/arm64` container then reported `aarch64`; this
+  was tooling validation, not an experiment result.
+- Corrected `runner/scripts/qemu-arm64-init` to derive its working directory,
+  `PYTHONPATH`, and `PATH` from `BPFREJIT_IMAGE_WORKSPACE`. The previous
+  hard-coded developer-home path caused the first guest preflight to fail at
+  PID 1; that failure remains in
+  `/workspaces/.agent-state/bpf-development/kprog-arm64-qemu-preflight-20260908-rerun11.log`.
+- The repaired public preflight exited zero and wrote completed metadata at
+  `micro/results/arm64_qemu_micro_19700101_000014_909678/metadata.json`.
+- A first full run completed all 29 positive cases but rejected the unsafe
+  proof at the fixture's unrelated packet store. Its raw metadata is preserved
+  at `tests/results/08063080/native_proof_micro_19700101_000023_397290/metadata.json`;
+  it is recorded as a contradictory negative-control result, not relabeled as
+  successful evidence.
+- After the fixture and exact oracle repair, the public invocation
+  `PLATFORM=qemu ARCH=arm64 JOBS=16 TIMEOUT=1800 make selftest` exited zero.
+  Metadata at
+  `tests/results/e4a8b96d/native_proof_micro_19700101_000021_547969/metadata.json`
+  is `completed` with exactly 29 cases; an independent check confirms every
+  sample's result and return value match its configured expectation. The
+  target verifier reports the exact offset-64 one-byte rejection, the negative
+  smoke passes, and the guest powers down normally. The full log is
+  `/workspaces/.agent-state/bpf-development/kprog-arm64-qemu-selftest-final-20260908.log`.
+- This is a fresh AArch64 verifier/load/test-run result under full-system QEMU,
+  not an ARM hardware or throughput measurement. The guest reports KVM HYP
+  unavailable because the Workspace host is x86.
+
+### Final x86-64 regression and automatic repair
+
+- `JOBS=16 make host-x86-sim-proofs` rebuilt the reduced negative artifact
+  (16 eBPF instructions) and all 29 positive artifacts successfully.
+- The first final-tree `make selftest` attempt then exposed a new native-build
+  collision rather than a verifier failure: the freshly generated x86
+  `vmlinux.h` declares the `bpf_copy_from_user_str` kfunc, while the
+  force-included compatibility header supplied a same-named function macro.
+  The macro expanded the later prototype and Tetragon failed with two syntax
+  errors. The failure is retained at
+  `/workspaces/.agent-state/bpf-development/kprog-x86-kvm-selftest-final-20260908.log`.
+- Native translation now defines the generated header's supported
+  `BPF_NO_KFUNC_PROTOTYPES` boundary before any `vmlinux.h` inclusion. The
+  compatibility header remains the single owner of native helper/kfunc call
+  shims, including the flags-zero string-copy mapping. A preprocessing check
+  removed the conflicting declaration, and the full native Tetragon artifact
+  build then passed.
+- The repaired public `JOBS=16 TIMEOUT=1800 make selftest` run exited zero.
+  Metadata at
+  `tests/results/b5881f99/native_proof_micro_20260908_200540_851719/metadata.json`
+  is `completed` with 29 cases, and an independent check confirms every result
+  and return value. The x86 target verifier rejects the reduced proof at the
+  exact `off=64 size=1` read, all verifier negative smokes pass, and the KVM
+  guest powers down normally. The full log is
+  `/workspaces/.agent-state/bpf-development/kprog-x86-kvm-selftest-final-rerun-20260908.log`.
+
+### Current remaining kprog scope
+
+The implemented 29-program subsets now have fresh target-kernel functional
+smokes on x86-64 KVM and AArch64 full-system QEMU. The shared pointer-add and
+entry-ABI provenance transitions have a narrow C/Lean mechanical connection.
+Still open are general memory and control-flow refinement, helpers and the
+remaining ISA handlers, specialization preservation, and semantic or
+cryptographic binding between the verifier-accepted proof artifact and the
+exact native bytes/entry ABI that execute. ARM hardware reproduction and
+performance of the accepted-and-bound population are also outstanding. No
+performance conclusion or complete-project claim is made from these smokes.
+
+
+### Operator evidence audit 2026-09-08 19:07 UTC
+Outer heartbeat independently verified the final ARM64 result: completed, 29 cases/29 samples with zero result or retval mismatches, exact off=64 size=1 verifier rejection and normal guest power-down in the final QEMU log. This is a real ARM64 QEMU guest functional run, not native ARM hardware or KVM acceleration. The raw metadata currently labels provenance.environment as bare-metal, repo_git_sha/kernel_commit as unknown and timestamps in 1970 (guest clock). Preserve the original raw bytes and prior false-positive evidence; reconcile those provenance gaps in the existing report/manifest and future collection as part of your ongoing evidence work. Do not promote these timings to a hardware performance result. This is an observation for your autonomous next useful boundary, not a new mandatory gate or a request to interrupt the current x86 regression.

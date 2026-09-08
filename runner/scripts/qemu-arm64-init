@@ -26,15 +26,15 @@ ulimit -l unlimited 2>/dev/null || true
 
 export HOME=/root
 export BPFREJIT_INSIDE_RUNTIME_CONTAINER=1
-export BPFREJIT_IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
+export BPFREJIT_IMAGE_WORKSPACE=/workspaces/repository
 export BPFREJIT_REPO_ARTIFACT_ROOT=/artifacts/user/repo-artifacts/arm64
 export BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so
 export BPFREJIT_NATIVE_LOADER_REQUIRE_PREBUILT_PROOF=1
 export BPFREJIT_KERNEL_MODULES_ROOT=/artifacts
-export PYTHONPATH=/home/yunwei37/workspace/bpf-benchmark
-export PATH=/home/yunwei37/workspace/bpf-benchmark/runner/build-arm64-llvmbpf:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PYTHONPATH="$BPFREJIT_IMAGE_WORKSPACE"
+export PATH="$BPFREJIT_IMAGE_WORKSPACE/runner/build-arm64-llvmbpf:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
-cd /home/yunwei37/workspace/bpf-benchmark || exit 127
+cd "$BPFREJIT_IMAGE_WORKSPACE" || exit 127
 
 if [ ! -x /qemu-run.sh ]; then
     echo "missing executable /qemu-run.sh" >&2

@@ -16,8 +16,11 @@ CLANG      ?= clang-18
 LLC        ?= llc-18
 OPT        ?= opt-18
 OCB        := go.opentelemetry.io/collector/cmd/builder@v0.139.0
+OTEL_BUILDER := $(BUILD)/host-tools/builder
 OTEL_VER   := 0.140.0
 OTELCOL_VER:= 0.139.0
+ARM64_SYSROOT ?= $(CACHE)/aarch64-sysroot
+ARM64_CROSS_LDFLAGS := -L$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu
 
 CILIUM     := $(CURDIR)/repos/cilium
 CILIUM_EBPF:= $(CURDIR)/repos/cilium-ebpf
@@ -74,13 +77,17 @@ $(BUILD)/otelcol-ebpf-profiler-%.yaml: Makefile
 	  'exporters:' '  - gomod: go.opentelemetry.io/collector/exporter/debugexporter v$(OTELCOL_VER)' \
 	  'replaces:' '  - go.opentelemetry.io/ebpf-profiler => $(OTEL)' '  - github.com/cilium/ebpf => $(CILIUM_EBPF)' >"$@"
 
+$(OTEL_BUILDER):
+	install -d "$(dir $@)"
+	GOBIN="$(dir $@)" $(GO_ENV) CGO_ENABLED=0 "$(GO)" install "$(OCB)"
+
 otel-x86: GOARCH := amd64
 otel-x86: GOCC := gcc
 otel-arm64: GOARCH := arm64
 otel-arm64: GOCC := aarch64-linux-gnu-gcc
-otel-x86 otel-arm64: otel-%: $(BUILD)/otelcol-ebpf-profiler-%.yaml
+otel-x86 otel-arm64: otel-%: $(BUILD)/otelcol-ebpf-profiler-%.yaml $(OTEL_BUILDER)
 	$(MAKE) -B -C "$(OTEL)/support/ebpf" BPF_CLANG='$(MERLIN_BPF_CLANG)' LLC="$(LLC)" TARGET_ARCH="$(GOARCH)"
-	$(GO_ENV) GOOS=linux GOARCH="$(GOARCH)" CGO_ENABLED=1 CC="$(GOCC)" "$(GO)" run "$(OCB)" --config "$<" --ldflags="$(GO_DYNAMIC_LDFLAGS)"
+	$(GO_ENV) GOOS=linux GOARCH="$(GOARCH)" CGO_ENABLED=1 CC="$(GOCC)" "$(OTEL_BUILDER)" --config "$<" --ldflags="$(GO_DYNAMIC_LDFLAGS)"
 	install -D -m 0755 "$(BUILD)/otelcol-ebpf-profiler-build-$*/otelcol-ebpf-profiler" "$(BUILD)/$*/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
 
 tracee-x86:
@@ -96,20 +103,20 @@ tracee-x86:
 	install -D -m 0755 "$(BUILD)/.tracee-build/$(MERLIN_COMPILETIME_MODE)/x86/dist/tracee" "$(BUILD)/x86/tracee/bin/tracee"
 
 tracee-arm64:
-	CGO_ENABLED=1 $(GO_ENV) $(MAKE) -B -C "$(TRACEE)" OUTPUT_DIR="$(BUILD)/.tracee-build/$(MERLIN_COMPILETIME_MODE)/arm64/dist" GOENV_MK="$(BUILD)/.tracee-build/$(MERLIN_COMPILETIME_MODE)/arm64/dist/goenv.mk" GO_ARCH=arm64 LINUX_ARCH=arm64 ARCH=arm64 CMD_GO="$(TRACEE_GO)" CMD_CLANG="$(CLANG)" CMD_BPF_CLANG='$(MERLIN_BPF_CLANG)' CMD_LIBBPF_CC=aarch64-linux-gnu-gcc CMD_CGO_CC=aarch64-linux-gnu-gcc CMD_GCC=aarch64-linux-gnu-gcc bpf embedded-dirs btfhub signatures
+	CGO_ENABLED=1 $(GO_ENV) $(MAKE) -B -C "$(TRACEE)" OUTPUT_DIR="$(BUILD)/.tracee-build/$(MERLIN_COMPILETIME_MODE)/arm64/dist" GOENV_MK="$(BUILD)/.tracee-build/$(MERLIN_COMPILETIME_MODE)/arm64/dist/goenv.mk" GO_ARCH=arm64 LINUX_ARCH=arm64 ARCH=arm64 CMD_GO="$(TRACEE_GO)" CMD_CLANG="$(CLANG)" CMD_BPF_CLANG='$(MERLIN_BPF_CLANG)' CMD_LIBBPF_CC=aarch64-linux-gnu-gcc CMD_CGO_CC=aarch64-linux-gnu-gcc CMD_GCC=aarch64-linux-gnu-gcc CGO_EXT_LDFLAGS_EBPF="$(ARM64_CROSS_LDFLAGS)" bpf embedded-dirs btfhub signatures
 	rm -rf "$(TRACEE)/dist/lsm_support" "$(TRACEE)/dist/btfhub"
 	install -d "$(TRACEE)/dist/lsm_support" "$(TRACEE)/dist/btfhub"
 	cp "$(BUILD)/.tracee-build/$(MERLIN_COMPILETIME_MODE)/arm64/dist/tracee.bpf.o" "$(TRACEE)/dist/tracee.bpf.o"
 	cp -a "$(BUILD)/.tracee-build/$(MERLIN_COMPILETIME_MODE)/arm64/dist/lsm_support/." "$(TRACEE)/dist/lsm_support/"
 	cp -a "$(BUILD)/.tracee-build/$(MERLIN_COMPILETIME_MODE)/arm64/dist/btfhub/." "$(TRACEE)/dist/btfhub/"
 	rm -f "$(BUILD)/.tracee-build/$(MERLIN_COMPILETIME_MODE)/arm64/dist/tracee"
-	CGO_ENABLED=1 $(GO_ENV) $(MAKE) -C "$(TRACEE)" OUTPUT_DIR="$(BUILD)/.tracee-build/$(MERLIN_COMPILETIME_MODE)/arm64/dist" GOENV_MK="$(BUILD)/.tracee-build/$(MERLIN_COMPILETIME_MODE)/arm64/dist/goenv.mk" GO_ARCH=arm64 LINUX_ARCH=arm64 ARCH=arm64 CMD_GO="$(TRACEE_GO)" CMD_CLANG="$(CLANG)" CMD_BPF_CLANG="$(CLANG)" CMD_LIBBPF_CC=aarch64-linux-gnu-gcc CMD_CGO_CC=aarch64-linux-gnu-gcc CMD_GCC=aarch64-linux-gnu-gcc tracee
+	CGO_ENABLED=1 $(GO_ENV) $(MAKE) -C "$(TRACEE)" OUTPUT_DIR="$(BUILD)/.tracee-build/$(MERLIN_COMPILETIME_MODE)/arm64/dist" GOENV_MK="$(BUILD)/.tracee-build/$(MERLIN_COMPILETIME_MODE)/arm64/dist/goenv.mk" GO_ARCH=arm64 LINUX_ARCH=arm64 ARCH=arm64 CMD_GO="$(TRACEE_GO)" CMD_CLANG="$(CLANG)" CMD_BPF_CLANG="$(CLANG)" CMD_LIBBPF_CC=aarch64-linux-gnu-gcc CMD_CGO_CC=aarch64-linux-gnu-gcc CMD_GCC=aarch64-linux-gnu-gcc CGO_EXT_LDFLAGS_EBPF="$(ARM64_CROSS_LDFLAGS)" tracee
 	file "$(BUILD)/.tracee-build/$(MERLIN_COMPILETIME_MODE)/arm64/dist/tracee" | grep -q 'ARM aarch64'
 	install -D -m 0755 "$(BUILD)/.tracee-build/$(MERLIN_COMPILETIME_MODE)/arm64/dist/tracee" "$(BUILD)/arm64/tracee/bin/tracee"
 
 bcc-x86: BCC_ARCH := x86
 bcc-arm64: BCC_ARCH := arm64
-bcc-arm64: BCC_CROSS := CC=aarch64-linux-gnu-gcc LD=aarch64-linux-gnu-ld BPFTOOL="$(BUILD)/x86/bpftool/bin/bpftool"
+bcc-arm64: BCC_CROSS := CC=aarch64-linux-gnu-gcc LD=aarch64-linux-gnu-ld BPFTOOL="$(BUILD)/x86/bpftool/bin/bpftool" EXTRA_LDFLAGS="$(ARM64_CROSS_LDFLAGS)"
 bcc-arm64: bpftool-x86
 bcc-x86 bcc-arm64: bcc-%:
 	install -d "$(BUILD)/.bcc-libbpf/$(MERLIN_COMPILETIME_MODE)/$*" "$(BUILD)/$*/bcc/bin"
@@ -141,7 +148,7 @@ $(BUILD)/arm64/katran/bpf/%.bpf.o: $(KATRAN)/katran/lib/bpf/%.c $(KATRAN_BPF_DEP
 
 bpftool-x86: BPFTOOL_LLVM := 0
 bpftool-arm64: BPFTOOL_LLVM := 0
-bpftool-arm64: BPFTOOL_CROSS := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- EXTRA_LDFLAGS="-L/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/usr/lib/aarch64-linux-gnu"
+bpftool-arm64: BPFTOOL_CROSS := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- EXTRA_CFLAGS="-idirafter $(ARM64_SYSROOT)/usr/include/aarch64-linux-gnu" EXTRA_LDFLAGS="$(ARM64_CROSS_LDFLAGS)" HOST_LDFLAGS=
 bpftool-x86 bpftool-arm64: bpftool-%:
 	install -d "$(BUILD)/.bpftool/$*" "$(BUILD)/$*/bpftool/bin"
 	$(MAKE) -C "$(BPFTOOL)" OUTPUT="$(BUILD)/.bpftool/$*/" $(BPFTOOL_FLAGS) feature-llvm="$(BPFTOOL_LLVM)" $(BPFTOOL_CROSS) -j"$(JOBS)"

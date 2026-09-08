@@ -7,6 +7,27 @@
 # workspace creation must not be blocked; `docker info` is authoritative.
 set -euo pipefail
 
+if [ "$(uname -m)" != "aarch64" ]; then
+	if ! mountpoint -q /proc/sys/fs/binfmt_misc; then
+		if mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc; then
+			echo "binfmt: mounted"
+		else
+			echo "binfmt: mount failed; ARM64 container builds need a privileged workspace" >&2
+		fi
+	fi
+	if mountpoint -q /proc/sys/fs/binfmt_misc; then
+		if /usr/lib/systemd/systemd-binfmt; then
+			if [ -r /proc/sys/fs/binfmt_misc/qemu-aarch64 ]; then
+				echo "binfmt: qemu-aarch64 registered"
+			else
+				echo "binfmt: qemu-aarch64 registration missing" >&2
+			fi
+		else
+			echo "binfmt: registration failed" >&2
+		fi
+	fi
+fi
+
 if [ -c /dev/kvm ] && [ -w /dev/kvm ]; then
 	echo "kvm: /dev/kvm writable"
 elif [ -c /dev/kvm ]; then

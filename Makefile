@@ -340,7 +340,7 @@ arm64-qemu-root: $(ARM64_QEMU_ROOT)
 
 $(ARM64_QEMU_ROOT): $(ARM64_QEMU_ROOT_READY)
 
-$(ARM64_QEMU_ROOT_READY): $(ARM64_RUNNER_RUNTIME_IMAGE_TAR) $(RUNNER_DIR)/scripts/qemu-arm64-init
+$(ARM64_QEMU_ROOT_READY): arm64-runner-runtime-image-tar $(RUNNER_DIR)/scripts/qemu-arm64-init
 	test -n "$(ARM64_QEMU_BIN)"
 	install -d "$(ARTIFACT_ROOT)"
 	rm -rf "$(ARM64_QEMU_ROOT_TMP)"

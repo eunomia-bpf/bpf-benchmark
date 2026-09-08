@@ -7,8 +7,9 @@ git state is changed only with explicit authorization.
 
 ## Contents
 
-- `Dockerfile` installs the host build toolchain, Docker CE, QEMU, static
-  BusyBox for vng initramfs generation, `vng` and its bundled `virtme-run`
+- `Dockerfile` installs the host build toolchain, Docker CE, QEMU system
+  emulators, static QEMU user-mode emulators, static BusyBox for vng initramfs
+  generation, `vng` and its bundled `virtme-run`
   runtime in one Python environment, udev for vng's virtio-serial I/O links,
   a tmpfiles implementation and rule for the root runtime directory exported into vng guests, Go,
   Rust, Lean's `elan` toolchain manager, and the AWS CLI. The base image is digest-pinned; direct tool downloads
@@ -22,8 +23,10 @@ git state is changed only with explicit authorization.
   supplies the foreign `arm64` packages needed by `make aarch64-sysroot`.
 - `devcontainer.json` uses the envbuilder-supported build, user, and lifecycle
   keys.
-- `scripts/ensure-dockerd.sh` starts dockerd idempotently with ordinary Docker defaults, and
-  reports Docker/KVM readiness without failing workspace startup.
+- `scripts/ensure-dockerd.sh` registers the static AArch64 interpreter with
+  Linux binfmt for cross-architecture image assembly, starts dockerd
+  idempotently with ordinary Docker defaults, and reports Docker/KVM readiness
+  without failing workspace startup.
 
 Coder installs Codex and OpenCode outside this image and mounts their persistent
 configuration and credentials. The image does not install another agent runner,

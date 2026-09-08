@@ -5,6 +5,8 @@
 #include <bpf_helpers.h>
 
 #include "arm64_sim.h"
+#include "../formal/generated/abi_load.h"
+#include "../formal/generated/ptr_add.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -77,6 +79,17 @@ struct arm64_sim_skb_abi {
 	void *data;
 };
 
+_Static_assert(__builtin_offsetof(struct arm64_sim_xdp_abi, data) ==
+	       KPROG_ABI_XDP_DATA_OFF, "xdp data offset disagrees with ABI spec");
+_Static_assert(__builtin_offsetof(struct arm64_sim_xdp_abi, data_end) ==
+	       KPROG_ABI_XDP_DATA_END_OFF,
+	       "xdp data_end offset disagrees with ABI spec");
+_Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data) ==
+	       KPROG_ABI_SKB_DATA_OFF, "skb data offset disagrees with ABI spec");
+_Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
+	       KPROG_ABI_SKB_DATA_END_OFF,
+	       "skb data_end offset disagrees with ABI spec");
+
 #define ARM64_SIM_L_DECLARE_REG(REG, NAME)                                  \
 	union arm64_sim_gpr __a64_##NAME = { .x = 0 };                    \
 	__u8 __a64_##NAME##_tag = ARM64_SIM_TAG_SCALAR;
@@ -115,6 +128,7 @@ struct arm64_sim_skb_abi {
 		.data_end = (void *)(long)(CTX)->data_end,                 \
 	};                                                               \
 	struct __sk_buff *__a64_sim_skb_ctx = (struct __sk_buff *)0;      \
+	__u8 __a64_sim_abi_kind = KPROG_ABI_KIND_XDP;                    \
 	ARM64_SIM_L_DECLARE_STATE();                                      \
 	ARM64_SIM_L_DECLARE_STACK();                                      \
 	__a64_x0.ptr = &__a64_sim_abi;                                    \
@@ -126,6 +140,7 @@ struct arm64_sim_skb_abi {
 		.data = (void *)(long)(CTX)->data,                         \
 	};                                                               \
 	struct __sk_buff *__a64_sim_skb_ctx = (CTX);                      \
+	__u8 __a64_sim_abi_kind = KPROG_ABI_KIND_SKB;                    \
 	ARM64_SIM_L_DECLARE_STATE();                                      \
 	ARM64_SIM_L_DECLARE_STACK();                                      \
 	__a64_x0.ptr = &__a64_sim_abi;                                    \
@@ -492,8 +507,10 @@ struct arm64_sim_skb_abi {
 				__a64_mrt_base + __a64_mrt_off, (WIDTH));\
 		} else if (__a64_mrt_tag == ARM64_SIM_TAG_ABI &&          \
 			   (WIDTH) == ARM64_WIDTH_64) {                  \
-			__a64_mrt_value_tag = __a64_mrt_off == 8 ?        \
-				ARM64_SIM_TAG_PACKET_END : ARM64_SIM_TAG_PACKET;\
+			__a64_mrt_value_tag = KPROG_ABI_LOAD_TAG(          \
+				__a64_sim_abi_kind, __a64_mrt_off,           \
+				ARM64_SIM_TAG_SCALAR, ARM64_SIM_TAG_PACKET,   \
+				ARM64_SIM_TAG_PACKET_END);                    \
 		} else if (__a64_mrt_tag == ARM64_SIM_TAG_RELOC_ADDR &&    \
 			   (WIDTH) == ARM64_WIDTH_64) {                    \
 			if (__a64_mrt_off != 0)                            \
@@ -647,8 +664,10 @@ struct arm64_sim_skb_abi {
 		    __a64_alu_op == ARM64_ALU_ADD && (DST) != ARM64_SP && \
 		    __a64_alu_src_tag != ARM64_SIM_TAG_SCALAR)            \
 			ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),              \
-				(__u8 *)ARM64_SIM_L_READ_REG_PTR(SRC) + __a64_alu_rhs,\
-				__a64_alu_src_tag);                       \
+				KPROG_PTR_ADD64_BITS(                      \
+					ARM64_SIM_L_READ_REG_PTR(SRC),       \
+					__a64_alu_rhs),                     \
+				KPROG_PTR_ADD64_TAG(__a64_alu_src_tag));   \
 		else                                                       \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_alu_result, __a64_alu_width);\
 	} while (0)

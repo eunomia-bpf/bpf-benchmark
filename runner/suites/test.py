@@ -326,7 +326,7 @@ def _run_native_proof_negative_smoke(
             out.write(output)
     if completed.returncode == 0:
         _die("unchecked_packet_read: unsafe native proof unexpectedly loaded")
-    verifier_marker = "invalid access to packet"
+    verifier_marker = "invalid access to packet, off=64 size=1"
     if verifier_marker not in output:
         if output:
             sys.stderr.write(output)

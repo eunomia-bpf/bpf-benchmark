@@ -7,6 +7,12 @@
 #define __BPF_TRACING_H__
 #define __BPF_CORE_READ_H__
 #define BPF_NO_PRESERVE_ACCESS_INDEX
+/* Native helper/kfunc shims below own the callable declarations.  Suppress
+ * generated vmlinux kfunc prototypes so a same-named function-like shim does
+ * not rewrite a later prototype while this header is force-included. */
+#ifndef BPF_NO_KFUNC_PROTOTYPES
+#define BPF_NO_KFUNC_PROTOTYPES
+#endif
 
 #ifndef SEC
 #define SEC(NAME) __attribute__((section(NAME), used))
@@ -513,16 +519,25 @@ extern long bpf_skb_load_bytes_relative(void *skb, unsigned int offset,
                                         unsigned int start_header);
 
 #ifdef MICRO_NATIVE_HELPER_MACROS
+#if defined(__aarch64__)
+/* Keep the helper number in a general register until the indirect branch.
+ * native-link recognizes the resulting MOV-immediate plus BR/BLR pair on
+ * AArch64; the x86 path deliberately keeps its existing RAX convention. */
+#define NATIVE_HELPER_ID_CONSTRAINT "+r"
+#else
+#define NATIVE_HELPER_ID_CONSTRAINT "+a"
+#endif
+
 static __always_inline unsigned long native_helper_id0(unsigned long id)
 {
-    asm volatile("" : "+a"(id) : : "memory");
+    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : : "memory");
     return id;
 }
 
 static __always_inline unsigned long native_helper_id1(unsigned long id,
                                                        unsigned long a0)
 {
-    asm volatile("" : "+a"(id) : "r"(a0) : "memory");
+    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : "r"(a0) : "memory");
     return id;
 }
 
@@ -530,7 +545,7 @@ static __always_inline unsigned long native_helper_id2(unsigned long id,
                                                        unsigned long a0,
                                                        unsigned long a1)
 {
-    asm volatile("" : "+a"(id) : "r"(a0), "r"(a1) : "memory");
+    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : "r"(a0), "r"(a1) : "memory");
     return id;
 }
 
@@ -539,7 +554,7 @@ static __always_inline unsigned long native_helper_id3(unsigned long id,
                                                        unsigned long a1,
                                                        unsigned long a2)
 {
-    asm volatile("" : "+a"(id) : "r"(a0), "r"(a1), "r"(a2) : "memory");
+    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : "r"(a0), "r"(a1), "r"(a2) : "memory");
     return id;
 }
 
@@ -549,7 +564,7 @@ static __always_inline unsigned long native_helper_id4(unsigned long id,
                                                        unsigned long a2,
                                                        unsigned long a3)
 {
-    asm volatile("" : "+a"(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3) : "memory");
+    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3) : "memory");
     return id;
 }
 
@@ -560,9 +575,11 @@ static __always_inline unsigned long native_helper_id5(unsigned long id,
                                                        unsigned long a3,
                                                        unsigned long a4)
 {
-    asm volatile("" : "+a"(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(a4) : "memory");
+    asm volatile("" : NATIVE_HELPER_ID_CONSTRAINT(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(a4) : "memory");
     return id;
 }
+
+#undef NATIVE_HELPER_ID_CONSTRAINT
 
 #define native_bpf_helper0(type, id) ((type)native_helper_id0((unsigned long)(id)))
 #define native_bpf_helper1(type, id, a0) \
@@ -687,6 +704,18 @@ static __always_inline unsigned long native_helper_id5(unsigned long id,
     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
                        NATIVE_BPF_FUNC_probe_read_user_str, (dst), (size), (unsafe_ptr))( \
         (dst), (size), (unsafe_ptr))
+/* Tetragon uses the sleepable bpf_copy_from_user_str kfunc with flags=0.
+ * That mode has the same string-copy contract as probe_read_user_str, whose
+ * helper trampoline is available to the native proof path.  Reject every
+ * other mode at compile time instead of silently approximating it. */
+#undef bpf_copy_from_user_str
+#define bpf_copy_from_user_str(dst, size, unsafe_ptr, flags) ({ \
+    _Static_assert(__builtin_constant_p(flags) && (flags) == 0, \
+                   "native bpf_copy_from_user_str requires constant flags=0"); \
+    native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
+                       NATIVE_BPF_FUNC_probe_read_user_str, (dst), (size), (unsafe_ptr))( \
+        (dst), (size), (unsafe_ptr)); \
+})
 #undef bpf_probe_read_str
 #define bpf_probe_read_str(dst, size, unsafe_ptr) \
     native_bpf_helper3(long (*)(void *, unsigned int, const void *), \

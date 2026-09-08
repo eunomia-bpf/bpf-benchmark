@@ -1353,6 +1353,7 @@ def render_chunked_program(name: str, insns: list[NativeInsn],
             "\t__x86_sim_abi.data_end = (void *)(long)ctx->data_end;",
             "\t__x86_sim_abi.data = (void *)(long)ctx->data;",
             "\t__x86_sim_skb_ctx = ctx;",
+            "\t__x86_sim_abi_kind = KPROG_ABI_KIND_SKB;",
         ]
     elif kind == "cgroup_skb":
         section = 'SEC("cgroup_skb/egress")'
@@ -1362,6 +1363,7 @@ def render_chunked_program(name: str, insns: list[NativeInsn],
             "\t__x86_sim_abi.data_end = (void *)(long)ctx->data_end;",
             "\t__x86_sim_abi.data = (void *)(long)ctx->data;",
             "\t__x86_sim_skb_ctx = ctx;",
+            "\t__x86_sim_abi_kind = KPROG_ABI_KIND_SKB;",
         ]
     else:
         section = 'SEC("xdp")'
@@ -1371,6 +1373,7 @@ def render_chunked_program(name: str, insns: list[NativeInsn],
             "\t__x86_sim_abi.data = (void *)(long)ctx->data;",
             "\t__x86_sim_abi.data_end = (void *)(long)ctx->data_end;",
             "\t__x86_sim_skb_ctx = (struct __sk_buff *)0;",
+            "\t__x86_sim_abi_kind = KPROG_ABI_KIND_XDP;",
         ]
     flat = flatten_chunk_insns(insns, subfunctions)
     chunks = [

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "operation": "abiLoad64Tag",
+  "kinds": [
+    {
+      "name": "xdp",
+      "data_offset": 0,
+      "data_end_offset": 8
+    },
+    {
+      "name": "skb",
+      "data_offset": 208,
+      "data_end_offset": 80
+    }
+  ],
+  "unknown_tag": "scalar"
+}

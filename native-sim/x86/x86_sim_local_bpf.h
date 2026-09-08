@@ -5,6 +5,8 @@
 #include <bpf_helpers.h>
 
 #include "x86_sim.h"
+#include "../formal/generated/abi_load.h"
+#include "../formal/generated/ptr_add.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -36,6 +38,17 @@ struct x86_sim_skb_abi {
 	__u8 pad2[X86_SKB_DATA_OFF - X86_SKB_DATA_END_OFF - sizeof(void *)];
 	void *data;
 };
+
+_Static_assert(__builtin_offsetof(struct x86_sim_xdp_abi, data) ==
+	       KPROG_ABI_XDP_DATA_OFF, "xdp data offset disagrees with ABI spec");
+_Static_assert(__builtin_offsetof(struct x86_sim_xdp_abi, data_end) ==
+	       KPROG_ABI_XDP_DATA_END_OFF,
+	       "xdp data_end offset disagrees with ABI spec");
+_Static_assert(__builtin_offsetof(struct x86_sim_skb_abi, data) ==
+	       KPROG_ABI_SKB_DATA_OFF, "skb data offset disagrees with ABI spec");
+_Static_assert(__builtin_offsetof(struct x86_sim_skb_abi, data_end) ==
+	       KPROG_ABI_SKB_DATA_END_OFF,
+	       "skb data_end offset disagrees with ABI spec");
 
 union x86_sim_gpr {
 	void *ptr;
@@ -126,6 +139,7 @@ struct x86_sim_state {
 	struct x86_sim_xdp_abi xdp_abi;
 	struct x86_sim_skb_abi skb_abi;
 	struct __sk_buff *skb_ctx;
+	__u8 abi_kind;
 };
 
 #ifdef X86_SIM_USE_STATE_STRUCT
@@ -175,6 +189,7 @@ struct x86_sim_state {
 #define __x86_sim_call_depth (__x86_state->call_depth)
 #define __x86_stack_mem (__x86_state->stack_mem)
 #define __x86_sim_skb_ctx (__x86_state->skb_ctx)
+#define __x86_sim_abi_kind (__x86_state->abi_kind)
 #endif
 
 #define X86_SIM_L_DECLARE_STATE()                                           \
@@ -225,6 +240,7 @@ struct x86_sim_state {
 		.data_end = (void *)(long)(CTX)->data_end,               \
 	};                                                               \
 	struct __sk_buff *__x86_sim_skb_ctx = (struct __sk_buff *)0;      \
+	__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_XDP;                    \
 	X86_SIM_L_DECLARE_STATE();                                           \
 	X86_SIM_L_DECLARE_STACK();                                           \
 	__x86_rdi.ptr = &__x86_sim_abi;                                     \
@@ -236,6 +252,7 @@ struct x86_sim_state {
 		.data = (void *)(long)(CTX)->data,                       \
 	};                                                               \
 	struct __sk_buff *__x86_sim_skb_ctx = (CTX);                      \
+	__u8 __x86_sim_abi_kind = KPROG_ABI_KIND_SKB;                    \
 	X86_SIM_L_DECLARE_STATE();                                           \
 	X86_SIM_L_DECLARE_STACK();                                           \
 	__x86_rdi.ptr = &__x86_sim_abi;                                     \
@@ -718,8 +735,10 @@ struct x86_sim_state {
 			   __x86_l_mem_width == X86_WIDTH_64 &&          \
 			   __x86_l_write_width == X86_WIDTH_64 &&        \
 			   __x86_l_base_tag == X86_SIM_TAG_ABI) {        \
-			__u8 __x86_l_ptr_tag = __x86_l_disp == 8 ?       \
-				X86_SIM_TAG_PACKET_END : X86_SIM_TAG_PACKET;\
+			__u8 __x86_l_ptr_tag = KPROG_ABI_LOAD_TAG(       \
+				__x86_sim_abi_kind, __x86_l_disp,          \
+				X86_SIM_TAG_SCALAR, X86_SIM_TAG_PACKET,    \
+				X86_SIM_TAG_PACKET_END);                   \
 			X86_SIM_L_WRITE_REG_PTR_TAG((DST),                \
 				X86_SIM_L_LOAD_PTR_ADDR(__x86_l_addr),    \
 				__x86_l_ptr_tag);                        \
@@ -860,7 +879,8 @@ struct x86_sim_state {
 		} else {                                                  \
 			void *__x86_l_result;                            \
 			if (__x86_l_width == X86_WIDTH_64) {              \
-				__u8 __x86_l_dst_tag = __x86_l_src_tag;   \
+				__u8 __x86_l_dst_tag =                 \
+					KPROG_PTR_ADD64_TAG(__x86_l_src_tag);\
 				if ((SRC) == X86_RSP) {                  \
 					__s64 __x86_l_stack_off =          \
 						(__s64)(long)__x86_l_src_ptr + __x86_l_off;\
@@ -869,7 +889,8 @@ struct x86_sim_state {
 					__x86_l_dst_tag = X86_SIM_TAG_STACK;\
 				} else {                                  \
 					__x86_l_result =                  \
-						(__u8 *)__x86_l_src_ptr + __x86_l_off;\
+						KPROG_PTR_ADD64_BITS(          \
+							__x86_l_src_ptr, __x86_l_off);\
 				}                                         \
 				X86_SIM_L_WRITE_REG_PTR_TAG((DST),        \
 					__x86_l_result, __x86_l_dst_tag); \
