@@ -30,9 +30,13 @@ The complete AArch64 condition-code table is generated from
 that all 15 supported predicates select the same next program counter as an
 independent architectural condition specification, for either branch
 direction.
+The supported x86 condition-code table is likewise generated from
+`x86_cond_spec.json` into the C simulator predicate and Lean. Lean proves the
+same next-PC refinement for arbitrary flags and branch targets; parity
+conditions are outside the accepted simulator subset.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
-policy, and now binds the AArch64 flag-to-control-flow decision; flag
+policy, and now binds both ISA flag-to-control-flow decisions; flag
 production, the decoder-to-handler mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
 

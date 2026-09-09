@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "operation": "x86Condition",
+  "conditions": [
+    {"name": "o",  "code": 0,  "predicate": {"op": "flag", "name": "of"}},
+    {"name": "no", "code": 1,  "predicate": {"op": "not", "arg": {"op": "flag", "name": "of"}}},
+    {"name": "b",  "code": 2,  "predicate": {"op": "flag", "name": "cf"}},
+    {"name": "ae", "code": 3,  "predicate": {"op": "not", "arg": {"op": "flag", "name": "cf"}}},
+    {"name": "e",  "code": 4,  "predicate": {"op": "flag", "name": "zf"}},
+    {"name": "ne", "code": 5,  "predicate": {"op": "not", "arg": {"op": "flag", "name": "zf"}}},
+    {"name": "be", "code": 6,  "predicate": {"op": "or", "args": [{"op": "flag", "name": "cf"}, {"op": "flag", "name": "zf"}]}},
+    {"name": "a",  "code": 7,  "predicate": {"op": "and", "args": [{"op": "not", "arg": {"op": "flag", "name": "cf"}}, {"op": "not", "arg": {"op": "flag", "name": "zf"}}]}},
+    {"name": "s",  "code": 8,  "predicate": {"op": "flag", "name": "sf"}},
+    {"name": "ns", "code": 9,  "predicate": {"op": "not", "arg": {"op": "flag", "name": "sf"}}},
+    {"name": "l",  "code": 12, "predicate": {"op": "ne", "lhs": {"op": "flag", "name": "sf"}, "rhs": {"op": "flag", "name": "of"}}},
+    {"name": "ge", "code": 13, "predicate": {"op": "eq", "lhs": {"op": "flag", "name": "sf"}, "rhs": {"op": "flag", "name": "of"}}},
+    {"name": "le", "code": 14, "predicate": {"op": "or", "args": [{"op": "flag", "name": "zf"}, {"op": "ne", "lhs": {"op": "flag", "name": "sf"}, "rhs": {"op": "flag", "name": "of"}}]}},
+    {"name": "g",  "code": 15, "predicate": {"op": "and", "args": [{"op": "not", "arg": {"op": "flag", "name": "zf"}}, {"op": "eq", "lhs": {"op": "flag", "name": "sf"}, "rhs": {"op": "flag", "name": "of"}}]}}
+  ]
+}

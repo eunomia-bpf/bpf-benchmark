@@ -7,6 +7,7 @@
 #include "x86_sim.h"
 #include "../formal/generated/abi_load.h"
 #include "../formal/generated/ptr_add.h"
+#include "../formal/generated/x86_cond.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -646,38 +647,7 @@ struct x86_sim_state {
 	} while (0)
 
 #define X86_SIM_L_EVAL_CC(CC)                                               \
-	({                                                                 \
-		int __x86_l_ret = 0;                                      \
-		if ((CC) == X86_CC_B)                                     \
-			__x86_l_ret = __x86_cf;                           \
-		else if ((CC) == X86_CC_AE)                               \
-			__x86_l_ret = !__x86_cf;                          \
-		else if ((CC) == X86_CC_E)                                \
-			__x86_l_ret = __x86_zf;                           \
-		else if ((CC) == X86_CC_NE)                               \
-			__x86_l_ret = !__x86_zf;                          \
-		else if ((CC) == X86_CC_BE)                               \
-			__x86_l_ret = __x86_cf || __x86_zf;                \
-		else if ((CC) == X86_CC_A)                                \
-			__x86_l_ret = !__x86_cf && !__x86_zf;              \
-		else if ((CC) == X86_CC_S)                                \
-			__x86_l_ret = __x86_sf;                           \
-		else if ((CC) == X86_CC_NS)                               \
-			__x86_l_ret = !__x86_sf;                          \
-		else if ((CC) == X86_CC_L)                                \
-			__x86_l_ret = __x86_sf != __x86_of;                \
-		else if ((CC) == X86_CC_GE)                               \
-			__x86_l_ret = __x86_sf == __x86_of;                \
-		else if ((CC) == X86_CC_LE)                               \
-			__x86_l_ret = __x86_zf || __x86_sf != __x86_of;    \
-		else if ((CC) == X86_CC_G)                                \
-			__x86_l_ret = !__x86_zf && __x86_sf == __x86_of;   \
-		else if ((CC) == X86_CC_O)                                \
-			__x86_l_ret = __x86_of;                           \
-		else if ((CC) == X86_CC_NO)                               \
-			__x86_l_ret = !__x86_of;                          \
-		__x86_l_ret;                                             \
-	})
+	KPROG_X86_EVAL_CC((CC), __x86_cf, __x86_zf, __x86_sf, __x86_of)
 
 #define X86_SIM_L_READ_MEM_VALUE(BASE_REG, AUX, IMM, WIDTH, STORE_DISP)      \
 	({                                                                 \
