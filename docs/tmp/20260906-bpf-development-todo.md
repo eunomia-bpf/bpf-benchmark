@@ -643,3 +643,116 @@ and performance reproduction and production-application accepted-and-bound
 throughput also remain open. The speculative paper separately still needs its
 profile-value and held-out profitability experiments; this kprog run supplies
 no new speculative-optimization performance evidence.
+
+## 2026-09-09 generation-bound native execution milestone
+
+### Runtime implementation
+
+- The native-lab slots on x86-64 and AArch64 now retain the uploaded verifier
+  proof and a non-wrapping 32-bit mutation generation alongside native bytes
+  and relocations. The KOP sidecar carries a 9-bit slot id and the generation;
+  verifier instantiation and native emission both reject a stale generation.
+  Every blob, relocation, or proof write advances the generation before
+  mutation, and exhaustion returns `EOVERFLOW` rather than allowing an ABA
+  match. Generation zero remains the explicitly unbound trusted lower-bound
+  mode for historical comparisons.
+- The loader separately opens and stock-verifier-loads the relocated proof,
+  uploads that same instruction vector to the native slot, reads the resulting
+  generation, and constructs a bound KOP stub. It rejects proof calls, nested
+  KOPs, pseudo `ldimm64`, empty proofs, and proofs above the implemented bound.
+  Every proof `EXIT` is redirected to its KOP-region boundary; for multi-chunk
+  blobs the full CFG is placed on the final chunk and leading chunks use the
+  verifier-safe `r0 = 0` continuation.
+- Successful stub loads no longer request a full verifier trace. A failed
+  silent load is retried only to collect a bounded diagnostic log while
+  preserving the primary errno. This fixed real success-path `ENOSPC` on
+  loop-heavy proofs without hiding actual load failures.
+- The kernel verifier's two KOP proof scratch sites now allocate from the
+  descriptor's `max_insn_cnt`, removing the unrelated fixed 256-instruction
+  ceiling. ARM JIT KOP emission likewise allocates bounded scratch from
+  `max_emit_bytes` instead of rejecting every descriptor above its former
+  fixed 64-instruction/256-byte stack buffer; all return paths free it.
+
+### Preserved failures
+
+- The first x86 full attempt and focused reproducers remain at
+  `micro/results/x86_kvm_micro_20260909_094215_341511/metadata.json`,
+  `micro/results/x86_kvm_micro_20260909_101556_226850/metadata.json`,
+  `micro/results/x86_kvm_micro_20260909_111713_283313/metadata.json`, and
+  `micro/results/x86_kvm_micro_20260909_114315_763230/metadata.json`. They
+  preserve the loop-final-EXIT assumption, proof placement, uninitialized-R0,
+  and verifier-log `ENOSPC` failures; the partial corrected run remains under
+  `micro/results/x86_kvm_micro_20260909_104608_695915/`.
+- ARM attempts under
+  `micro/results/arm64_qemu_micro_19700101_000021_338346/` and
+  `micro/results/arm64_qemu_micro_19700101_000022_284039/` preserve the stale
+  256-proof-buffer failure and the subsequent errno-524 ARM emit-scratch
+  failure. Each was stopped only after multiple cases reproduced the same
+  cause. A separate pre-guest Docker build failed when the host's AArch64
+  binfmt registration disappeared; restoring the installed system registration
+  made a real `docker run --platform linux/arm64 ... /bin/true` exit zero before
+  the final public Make run.
+
+### Repeated x86 performance result
+
+- The public command
+  `RUNTIMES="kernel native_kernel" SAMPLES=15 WARMUPS=1 INNER_REPEAT=100000 TIMEOUT=7200 make micro`
+  exited zero and wrote
+  `micro/results/x86_kvm_micro_20260909_121208_577260/metadata.json`. Strict
+  post-hoc validation found 29 programs, 870 matching result/return-value
+  pairs, and proof/load phases in all 435 native samples.
+- The geometric mean across programs of median `native_kernel / kernel`
+  execution-time ratios is `0.6824347261`, whose reciprocal is
+  `1.4653416096x`; 26 programs win, two tie, and one loses. The 50,000-draw
+  program-population bootstrap ratio interval is
+  `[0.6135276985, 0.7592106567]`, and native/kernel code-size ratio is
+  `0.5377131546`.
+- Load cost is reported with non-interchangeable aggregations. The geometric
+  mean of the 29 per-program load ratios is `54.5205457812x`. Separately, the
+  medians across per-program median loads are 116.192 ms native and 1.869 ms
+  kernel; the proof-open and proof-verifier-load medians are 31.490 us and
+  2.529 ms. Dividing the two load medians does not reproduce the ratio
+  aggregate.
+- This is a real performance result for the generation-consistent test path,
+  not proof of proof/native semantic equivalence, production workload
+  throughput, or a multi-machine result. The previous generation-zero
+  `1.4796224283x` result remains a distinct trusted-native opportunity run; the
+  small difference is descriptive, not a causal binding-overhead estimate.
+
+### ARM64 generation-bound functional acceptance
+
+- After rebuilding the changed kernel and fixing the ARM JIT scratch defect,
+  `PLATFORM=qemu ARCH=arm64 RUNTIMES=native_kernel SAMPLES=1 WARMUPS=0 INNER_REPEAT=1 TIMEOUT=7200 make micro`
+  exited zero and wrote
+  `micro/results/arm64_qemu_micro_19700101_000024_077043/metadata.json`.
+  Independent JSON validation found status `completed`, exactly 29 programs
+  and 29 samples, 29 matching results, 29 matching return values, and positive
+  proof-open/proof-verifier-load phases for all 29 samples. The guest powered
+  down normally.
+- This is AArch64 full-system QEMU TCG functional evidence, not ARM hardware
+  performance. Raw 1970 guest timestamps are preserved and are not used as
+  provenance; the external command/result record supplies the environment
+  interpretation. No ARM timing ratio is reported.
+- `make -C native-sim/formal check` exits zero after these changes, and both
+  manuscripts build with their existing non-fatal layout warnings.
+
+### Remaining scope after this milestone
+
+The module generation now binds proof and native bytes to one immutable load
+snapshot on both implemented architectures, but it does not establish that the
+trusted generator/native-link output semantically refines the verifier-visible
+proof. General memory, control flow, helpers, remaining ISA handlers, and
+specialization preservation remain the primary formal work. ARM hardware
+reproduction, production-application bound execution, and repeated performance
+on those paths remain open. The speculative paper still needs its own real
+profile-value and held-out profitability experiments; neither kprog micro result
+is speculative-optimization evidence.
+
+
+## User priority 2026-09-09: semantic proofs, commit and push each step
+
+用户最新明确指令：“能不能确保语义证明去做, 做一步去 commit push 一步”。
+
+从当前已完成的绑定/跨架构验收继续，实际推进尚缺的语义证明，不再只列为remaining scope。你自主选取有价值且可验证的增量证明单元；每完成一个实质语义证明步骤，完成相应机器检查，说明已证明范围/假设/剩余缺口，就立即精确commit并push并确认远端提交，然后继续下一步。不要攒到整套证明、整个研究项目或无关长实验结束才提交；也不要用空提交、只有TODO或论文措辞代替证明代码。snapshot/version绑定不是语义等价证明，更多benchmark也不是语义证明。当前已经验证的独立实现先及时提交，随后优先推进证明；正在运行的有效实验保留。
+
+内部技术路线、模型分工和合理步骤粒度由你决定。可以使用现有本地模型辅助，不可用就直接继续。保留并发改动和原始证据、按精确路径提交，不等待额外批准。读到这条后请在原会话明确确认并实际执行；外层六小时监督已同步此要求，会核验每步的证明代码、机器检查和远端提交。

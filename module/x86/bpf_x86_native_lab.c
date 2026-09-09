@@ -2,10 +2,11 @@
 /*
  * BpfReJIT x86 native-code lab kop.
  *
- * Test-only escape hatch: lets userspace upload an arbitrary x86-64 byte
- * sequence (a "native blob") and then have a BPF program splat those bytes
- * inline at JIT time via a kop. The verifier sees only a trivial proof
- * (`r0 = blob_id`); the actual emitted x86 is whatever userspace handed in.
+ * Test-only escape hatch: lets userspace upload an x86-64 byte sequence and a
+ * verifier proof, then have a BPF program splat the native bytes inline at JIT
+ * time via a kop. A non-zero generation in the sidecar payload binds both
+ * callbacks to the same immutable upload snapshot. Generation zero retains
+ * the explicitly unbound lower-bound mode used by trusted-native experiments.
  *
  * Use cases:
  *  - Establish a hand-tuned "pure native" performance lower bound to compare
@@ -13,10 +14,11 @@
  *  - Bring up new optimization ideas at the x86 level without going through
  *    bpfopt+kop+REJIT first.
  *
- * Safety: this module disables every verifier guarantee for any BPF program
- * that calls into it. Do NOT load on production kernels. Upload requires
- * CAP_SYS_ADMIN, the debugfs nodes are root-only by default, and the module
- * intentionally has no in-tree Kconfig: build it out-of-tree on purpose.
+ * Safety: generation-zero calls disable verifier guarantees. Bound calls make
+ * the verifier analyze the uploaded proof but still trust the proof generator
+ * to model the uploaded native instructions correctly. Do NOT load on
+ * production kernels. Upload requires CAP_SYS_ADMIN, the debugfs nodes are
+ * root-only by default, and the module intentionally has no in-tree Kconfig.
  *
  * ABI considerations the caller must respect:
  *  - Blob is splatted in the middle of a JITted BPF function. It must reach
@@ -53,6 +55,7 @@
  * back-to-back sidecar/call pairs.
  */
 #define NATIVE_LAB_MAX_BLOB_BYTES	128
+#define NATIVE_LAB_MAX_PROOF_INSNS	4096
 
 /*
  * Stage 2 side-band relocations:
@@ -89,6 +92,9 @@ struct native_blob {
 	size_t len;
 	struct native_lab_reloc_record *relocs;
 	size_t reloc_count;
+	struct bpf_insn *proof;
+	size_t proof_len;
+	u32 generation;
 };
 
 static struct native_blob blobs[NATIVE_LAB_MAX_BLOBS];
@@ -112,7 +118,8 @@ BTF_KFUNCS_START(bpf_x86_native_lab_kfunc_ids)
 BTF_ID_FLAGS(func, bpf_x86_native_lab_emit)
 BTF_KFUNCS_END(bpf_x86_native_lab_kfunc_ids)
 
-static int decode_native_lab_payload(u64 payload, u32 *blob_id, u32 *abi_mask)
+static int decode_native_lab_payload(u64 payload, u32 *blob_id, u32 *abi_mask,
+				     u32 *generation)
 {
 	payload = kop_payload_decode(payload);
 
@@ -120,15 +127,25 @@ static int decode_native_lab_payload(u64 payload, u32 *blob_id, u32 *abi_mask)
 		return -EINVAL;
 	if (((payload >> 4) & 0xf) & ~NATIVE_LAB_ABI_MASK)
 		return -EINVAL;
-	if ((payload >> 8) & 0xfff)
+	if ((payload >> 17) & 0x7)
 		return -EINVAL;
 
-	*blob_id = (u32)(payload >> 20);
+	*blob_id = (u32)((payload >> 8) & 0x1ff);
 	if (*blob_id >= NATIVE_LAB_MAX_BLOBS)
 		return -EINVAL;
 	if (abi_mask)
 		*abi_mask = (u32)((payload >> 4) & 0xf);
+	if (generation)
+		*generation = (u32)(payload >> 20);
 
+	return 0;
+}
+
+static int native_lab_advance_generation(struct native_blob *blob)
+{
+	if (blob->generation == U32_MAX)
+		return -EOVERFLOW;
+	blob->generation++;
 	return 0;
 }
 
@@ -145,34 +162,51 @@ static void native_lab_emit_error(const char *reason, int err, u64 payload,
 }
 
 /*
- * Verifier-side proof. We claim the kop is equivalent to `r0 = 0`.
- * This is a deliberate lie: the blob can produce any value or side
- * effect. validate_kop_proof_seq() accepts single ALU64 writes, and
- * constant 0 is a valid return value for every BPF program type the
- * paper benchmark uses (XDP_ABORTED, TC_ACT_OK, CGROUP_SKB_DROP, plain
- * socket_filter retval, ...). The native blob's actual `rax` value at
- * the rewritten exit decides the real retval at runtime.
+ * Generation-zero is the explicit trusted-native lower-bound mode and retains
+ * the old r0=0 proof. A non-zero generation copies the proof paired with this
+ * blob slot. The ABI marker moves are appended after the proof so verifier/JIT
+ * register-save discovery also covers native-link's callee-saved contract.
  */
 static int instantiate_native_lab(u64 payload, struct bpf_insn *insn_buf)
 {
 	u32 abi_mask = 0;
+	u32 generation = 0;
 	u32 blob_id;
 	int err;
 	int cnt = 0;
 
-	err = decode_native_lab_payload(payload, &blob_id, &abi_mask);
+	err = decode_native_lab_payload(payload, &blob_id, &abi_mask,
+					&generation);
 	if (err)
 		return err;
+	if (generation) {
+		mutex_lock(&blobs_lock);
+		if (blobs[blob_id].generation != generation ||
+		    !blobs[blob_id].proof || !blobs[blob_id].proof_len) {
+			mutex_unlock(&blobs_lock);
+			return -ESTALE;
+		}
+		if (blobs[blob_id].proof_len + hweight32(abi_mask) >
+		    NATIVE_LAB_MAX_PROOF_INSNS) {
+			mutex_unlock(&blobs_lock);
+			return -E2BIG;
+		}
+		memcpy(insn_buf, blobs[blob_id].proof,
+		       blobs[blob_id].proof_len * sizeof(*insn_buf));
+		cnt = blobs[blob_id].proof_len;
+		mutex_unlock(&blobs_lock);
+	}
 
 	if (abi_mask & NATIVE_LAB_ABI_RBX)
-		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_6, BPF_REG_1);
+		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_6, BPF_REG_0);
 	if (abi_mask & NATIVE_LAB_ABI_R13)
-		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_7, BPF_REG_1);
+		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_7, BPF_REG_0);
 	if (abi_mask & NATIVE_LAB_ABI_R14)
-		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_8, BPF_REG_1);
+		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_8, BPF_REG_0);
 	if (abi_mask & NATIVE_LAB_ABI_R15)
-		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_9, BPF_REG_1);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_MOV, BPF_REG_0, 0);
+		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_9, BPF_REG_0);
+	if (!generation)
+		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_MOV, BPF_REG_0, 0);
 	return cnt;
 }
 
@@ -181,12 +215,13 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 			       const u8 *final_ip)
 {
 	size_t snapshot_len = 0;
+	u32 generation = 0;
 	u32 blob_id;
 	int err;
 
 	(void)prog;
 
-	err = decode_native_lab_payload(payload, &blob_id, NULL);
+	err = decode_native_lab_payload(payload, &blob_id, NULL, &generation);
 	if (err) {
 		native_lab_emit_error("decode_payload", err, payload, 0, 0, 0,
 				      0, 0, 0, 0);
@@ -194,6 +229,12 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	}
 
 	mutex_lock(&blobs_lock);
+	if (generation && blobs[blob_id].generation != generation) {
+		mutex_unlock(&blobs_lock);
+		native_lab_emit_error("stale_generation", -ESTALE, payload,
+				      blob_id, 0, 0, 0, 0, 0, 0);
+		return -ESTALE;
+	}
 	if (blobs[blob_id].bytes && blobs[blob_id].len) {
 		snapshot_len = blobs[blob_id].len;
 		if (snapshot_len > NATIVE_LAB_MAX_BLOB_BYTES) {
@@ -312,7 +353,7 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 const struct bpf_kop bpf_x86_native_lab_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 5,
+	.max_insn_cnt = NATIVE_LAB_MAX_PROOF_INSNS,
 	.max_emit_bytes = NATIVE_LAB_MAX_BLOB_BYTES,
 	.instantiate_insn = instantiate_native_lab,
 	.emit_x86 = emit_native_lab_x86,
@@ -343,6 +384,7 @@ static ssize_t blob_write(struct file *file, const char __user *ubuf,
 {
 	struct blob_file_priv *priv = file->private_data;
 	u8 *kbuf = NULL;
+	int err;
 
 	if (!capable(CAP_SYS_ADMIN))
 		return -EPERM;
@@ -364,11 +406,20 @@ static ssize_t blob_write(struct file *file, const char __user *ubuf,
 	}
 
 	mutex_lock(&blobs_lock);
+	err = native_lab_advance_generation(&blobs[priv->id]);
+	if (err) {
+		mutex_unlock(&blobs_lock);
+		kfree(kbuf);
+		return err;
+	}
 	kfree(blobs[priv->id].bytes);
 	/* Reuploading the blob invalidates any previously uploaded relocs. */
 	kfree(blobs[priv->id].relocs);
+	kfree(blobs[priv->id].proof);
 	blobs[priv->id].relocs = NULL;
 	blobs[priv->id].reloc_count = 0;
+	blobs[priv->id].proof = NULL;
+	blobs[priv->id].proof_len = 0;
 	blobs[priv->id].bytes = kbuf;
 	blobs[priv->id].len = len;
 	mutex_unlock(&blobs_lock);
@@ -387,6 +438,7 @@ static ssize_t relocs_write(struct file *file, const char __user *ubuf,
 	struct blob_file_priv *priv = file->private_data;
 	struct native_lab_reloc_record *kbuf = NULL;
 	size_t count;
+	int err;
 
 	if (!capable(CAP_SYS_ADMIN))
 		return -EPERM;
@@ -409,6 +461,12 @@ static ssize_t relocs_write(struct file *file, const char __user *ubuf,
 	}
 
 	mutex_lock(&blobs_lock);
+	err = native_lab_advance_generation(&blobs[priv->id]);
+	if (err) {
+		mutex_unlock(&blobs_lock);
+		kfree(kbuf);
+		return err;
+	}
 	kfree(blobs[priv->id].relocs);
 	blobs[priv->id].relocs = kbuf;
 	blobs[priv->id].reloc_count = count;
@@ -416,6 +474,57 @@ static ssize_t relocs_write(struct file *file, const char __user *ubuf,
 
 	*ppos = len;
 	return len;
+}
+
+static ssize_t proof_write(struct file *file, const char __user *ubuf,
+			   size_t len, loff_t *ppos)
+{
+	struct blob_file_priv *priv = file->private_data;
+	struct bpf_insn *kbuf;
+	size_t count;
+	int err;
+
+	if (!capable(CAP_SYS_ADMIN))
+		return -EPERM;
+	if (*ppos)
+		return -EINVAL;
+	if (!len || len % sizeof(*kbuf))
+		return -EINVAL;
+	count = len / sizeof(*kbuf);
+	if (count > NATIVE_LAB_MAX_PROOF_INSNS)
+		return -E2BIG;
+	kbuf = memdup_user(ubuf, len);
+	if (IS_ERR(kbuf))
+		return PTR_ERR(kbuf);
+
+	mutex_lock(&blobs_lock);
+	err = native_lab_advance_generation(&blobs[priv->id]);
+	if (err) {
+		mutex_unlock(&blobs_lock);
+		kfree(kbuf);
+		return err;
+	}
+	kfree(blobs[priv->id].proof);
+	blobs[priv->id].proof = kbuf;
+	blobs[priv->id].proof_len = count;
+	mutex_unlock(&blobs_lock);
+	*ppos = len;
+	return len;
+}
+
+static ssize_t generation_read(struct file *file, char __user *ubuf,
+			       size_t len, loff_t *ppos)
+{
+	struct blob_file_priv *priv = file->private_data;
+	char buf[16];
+	u32 generation;
+	int n;
+
+	mutex_lock(&blobs_lock);
+	generation = blobs[priv->id].generation;
+	mutex_unlock(&blobs_lock);
+	n = scnprintf(buf, sizeof(buf), "%u\n", generation);
+	return simple_read_from_buffer(ubuf, len, ppos, buf, n);
 }
 
 static ssize_t blob_read(struct file *file, char __user *ubuf, size_t len,
@@ -474,6 +583,22 @@ static const struct file_operations relocs_fops = {
 	.open = blob_open,
 	.release = blob_release,
 	.write = relocs_write,
+	.llseek = default_llseek,
+};
+
+static const struct file_operations proof_fops = {
+	.owner = THIS_MODULE,
+	.open = blob_open,
+	.release = blob_release,
+	.write = proof_write,
+	.llseek = default_llseek,
+};
+
+static const struct file_operations generation_fops = {
+	.owner = THIS_MODULE,
+	.open = blob_open,
+	.release = blob_release,
+	.read = generation_read,
 	.llseek = default_llseek,
 };
 
@@ -632,6 +757,12 @@ static int __init bpf_x86_native_lab_debugfs_init(void)
 		scnprintf(name, sizeof(name), "blob%ld.relocs", i);
 		debugfs_create_file(name, 0600, debugfs_root, (void *)i,
 				    &relocs_fops);
+		scnprintf(name, sizeof(name), "blob%ld.proof", i);
+		debugfs_create_file(name, 0600, debugfs_root, (void *)i,
+				    &proof_fops);
+		scnprintf(name, sizeof(name), "blob%ld.generation", i);
+		debugfs_create_file(name, 0400, debugfs_root, (void *)i,
+				    &generation_fops);
 	}
 	return 0;
 }
@@ -647,10 +778,14 @@ static void bpf_x86_native_lab_debugfs_exit(void)
 	for (i = 0; i < NATIVE_LAB_MAX_BLOBS; i++) {
 		kfree(blobs[i].bytes);
 		kfree(blobs[i].relocs);
+		kfree(blobs[i].proof);
 		blobs[i].bytes = NULL;
 		blobs[i].len = 0;
 		blobs[i].relocs = NULL;
 		blobs[i].reloc_count = 0;
+		blobs[i].proof = NULL;
+		blobs[i].proof_len = 0;
+		blobs[i].generation = 0;
 	}
 	mutex_unlock(&blobs_lock);
 }
@@ -687,7 +822,7 @@ static void __exit bpf_x86_native_lab_exit(void)
 module_init(bpf_x86_native_lab_init);
 module_exit(bpf_x86_native_lab_exit);
 
-MODULE_DESCRIPTION("BpfReJIT x86 native-code lab kop (test only; bypasses verifier guarantees)");
+MODULE_DESCRIPTION("BpfReJIT x86 native-code lab kop (test only; optional bound proof)");
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("BpfReJIT");
 MODULE_IMPORT_NS("BPF_INTERNAL");

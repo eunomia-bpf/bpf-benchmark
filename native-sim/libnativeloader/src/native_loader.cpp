@@ -278,6 +278,8 @@ struct NativeLabTarget {
     const char *debugfs_dir;
     const char *blob_path_fmt;
     const char *relocs_path_fmt;
+    const char *proof_path_fmt;
+    const char *generation_path_fmt;
     const char *map_ptr_path;
     const char *map_value_ptr_path;
     const char *map_update_elem_path;
@@ -292,6 +294,8 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .debugfs_dir = "/sys/kernel/debug/bpf_arm64_native_lab",
     .blob_path_fmt = "/sys/kernel/debug/bpf_arm64_native_lab/blob%u",
     .relocs_path_fmt = "/sys/kernel/debug/bpf_arm64_native_lab/blob%u.relocs",
+    .proof_path_fmt = "/sys/kernel/debug/bpf_arm64_native_lab/blob%u.proof",
+    .generation_path_fmt = "/sys/kernel/debug/bpf_arm64_native_lab/blob%u.generation",
     .map_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_ptr",
     .map_value_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_value_ptr",
     .map_update_elem_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_update_elem",
@@ -305,6 +309,8 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .debugfs_dir = "/sys/kernel/debug/bpf_x86_native_lab",
     .blob_path_fmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u",
     .relocs_path_fmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u.relocs",
+    .proof_path_fmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u.proof",
+    .generation_path_fmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u.generation",
     .map_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_ptr",
     .map_value_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_value_ptr",
     .map_update_elem_path = "/sys/kernel/debug/bpf_x86_native_lab/map_update_elem",
@@ -315,6 +321,7 @@ constexpr NativeLabTarget kNativeLabTarget = {
 constexpr const char *kVmlinuxBtfPath = "/sys/kernel/btf/vmlinux";
 constexpr const char *kDebugfsDir = "/sys/kernel/debug";
 constexpr uint32_t kMaxBlobs = 512;
+constexpr size_t kMaxBoundProofInsns = 4091;
 
 bool native_lab_needs_tail_call_probe()
 {
@@ -988,6 +995,108 @@ void upload_blob(const std::vector<uint8_t> &blob,
     }
 }
 
+std::vector<bpf_insn> bound_proof_sequence(const std::vector<bpf_insn> &program)
+{
+    if (program.empty()) {
+        fail("native_kernel bound proof must not be empty");
+    }
+    if (program.size() > kMaxBoundProofInsns) {
+        fail("native_kernel bound proof body has " +
+             std::to_string(program.size()) + " instructions; maximum is " +
+             std::to_string(kMaxBoundProofInsns));
+    }
+
+    std::vector<bpf_insn> proof = program;
+    size_t exit_count = 0;
+    for (size_t i = 0; i < proof.size(); i++) {
+        bpf_insn &insn = proof[i];
+        const uint8_t cls = BPF_CLASS(insn.code);
+        if (insn.code == (BPF_ALU64 | BPF_MOV | BPF_K) &&
+            insn.src_reg == BPF_PSEUDO_KOP_SIDECAR) {
+            fail("native_kernel bound proof contains a kop sidecar at instruction " +
+                 std::to_string(i));
+        }
+        if ((cls == BPF_JMP || cls == BPF_JMP32) &&
+            BPF_OP(insn.code) == BPF_CALL) {
+            fail("native_kernel bound proof contains a call at instruction " +
+                 std::to_string(i));
+        }
+        if (cls == BPF_JMP && BPF_OP(insn.code) == BPF_EXIT) {
+            insn.code = BPF_JMP | BPF_JA;
+            insn.dst_reg = 0;
+            insn.src_reg = 0;
+            insn.off = static_cast<int16_t>(proof.size() - i - 1);
+            insn.imm = 0;
+            exit_count++;
+        }
+        if (cls == BPF_LD && BPF_MODE(insn.code) == BPF_IMM &&
+            insn.src_reg != 0) {
+            fail("native_kernel bound proof contains pseudo ldimm64 at instruction " +
+                 std::to_string(i));
+        }
+    }
+    if (exit_count == 0) {
+        fail("native_kernel bound proof contains no BPF exit");
+    }
+    return proof;
+}
+
+void upload_proof_chunk(const std::vector<bpf_insn> &proof, uint32_t chunk_id)
+{
+    char path[160];
+    snprintf(path, sizeof(path), kNativeLabTarget.proof_path_fmt, chunk_id);
+    int fd = open(path, O_WRONLY | O_TRUNC);
+    if (fd < 0) {
+        fail(std::string("open ") + path + ": " + std::strerror(errno));
+    }
+    const size_t bytes = proof.size() * sizeof(proof[0]);
+    const ssize_t n = write(fd, proof.data(), bytes);
+    const int saved_errno = errno;
+    close(fd);
+    if (n != static_cast<ssize_t>(bytes)) {
+        fail(std::string("write ") + path + ": " + std::strerror(saved_errno));
+    }
+}
+
+uint32_t read_blob_generation(uint32_t chunk_id)
+{
+    char path[160];
+    snprintf(path, sizeof(path), kNativeLabTarget.generation_path_fmt, chunk_id);
+    std::ifstream input(path);
+    uint64_t generation = 0;
+    if (!(input >> generation) || generation == 0 ||
+        generation > std::numeric_limits<uint32_t>::max()) {
+        fail(std::string("read valid native_lab generation from ") + path);
+    }
+    return static_cast<uint32_t>(generation);
+}
+
+std::vector<uint32_t> upload_bound_proofs(
+    const std::vector<bpf_insn> &proof_program,
+    const std::vector<NativeBlobChunk> &chunks)
+{
+    const std::vector<bpf_insn> proof = bound_proof_sequence(proof_program);
+    const std::vector<bpf_insn> continuation{
+        bpf_insn{
+            .code = BPF_ALU64 | BPF_MOV | BPF_K,
+            .dst_reg = BPF_REG_0,
+            .src_reg = 0,
+            .off = 0,
+            .imm = 0,
+        },
+    };
+    std::vector<uint32_t> generations;
+    generations.reserve(chunks.size());
+    for (uint32_t i = 0; i < chunks.size(); i++) {
+        /* Put the real proof on the final KOP. Every redirected proof EXIT
+         * then reaches the stub's real EXIT without traversing another KOP;
+         * doing the inverse multiplies verifier states for loop-heavy CFGs. */
+        upload_proof_chunk(i + 1 == chunks.size() ? proof : continuation, i);
+        generations.push_back(read_blob_generation(i));
+    }
+    return generations;
+}
+
 bool btf_fd_name_is(int fd, const char *expected_name)
 {
     bpf_btf_info info = {};
@@ -1299,16 +1408,19 @@ int bpf_prog_load_native_stub_raw(uint32_t prog_type_value,
     attr.insn_cnt = static_cast<uint32_t>(insns.size());
     attr.fd_array = ptr_to_u64(fd_array.data());
     attr.fd_array_cnt = static_cast<uint32_t>(fd_array.size());
-    attr.log_level = 2;
+    const bool collect_log = !verifier_log.empty();
+    attr.log_level = collect_log ? 1 : 0;
 
     const unsigned int attr_size =
         static_cast<unsigned int>(offsetof(union bpf_attr, keyring_id) +
                                   sizeof(attr.keyring_id));
     int saved_errno = 0;
     for (int attempt = 0; attempt < 8; attempt++) {
-        std::fill(verifier_log.begin(), verifier_log.end(), '\0');
-        attr.log_size = static_cast<uint32_t>(verifier_log.size());
-        attr.log_buf = ptr_to_u64(verifier_log.data());
+        if (collect_log) {
+            std::fill(verifier_log.begin(), verifier_log.end(), '\0');
+            attr.log_size = static_cast<uint32_t>(verifier_log.size());
+            attr.log_buf = ptr_to_u64(verifier_log.data());
+        }
         attr.log_true_size = 0;
 
         const long rc = syscall(SYS_bpf, BPF_PROG_LOAD, &attr, attr_size);
@@ -1321,7 +1433,7 @@ int bpf_prog_load_native_stub_raw(uint32_t prog_type_value,
         if (saved_errno == EAGAIN) {
             continue;
         }
-        if (saved_errno == ENOSPC &&
+        if (collect_log && saved_errno == ENOSPC &&
             verifier_log_was_truncated(verifier_log, log_true_size)) {
             const size_t next_size =
                 next_verifier_log_size(verifier_log.size(), log_true_size);
@@ -1337,6 +1449,7 @@ int bpf_prog_load_native_stub_raw(uint32_t prog_type_value,
 
 int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
                    uint32_t callee_saved_mask,
+                   const std::vector<uint32_t> &generations,
                    uint32_t prog_type_value,
                    const StubLoadAttrs &attrs,
                    bool tail_call_reachable,
@@ -1348,6 +1461,9 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     }
     if (callee_saved_mask > 0xf) {
         fail("native_kernel callee-saved mask exceeds 4 bits");
+    }
+    if (!generations.empty() && generations.size() != chunks) {
+        fail("native_kernel bound generation count does not match native chunks");
     }
     ScopedFd tail_call_map_fd;
     if (tail_call_reachable) {
@@ -1389,12 +1505,13 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         });
     }
     for (uint32_t i = 0; i < chunks; i++) {
+        const uint32_t generation = generations.empty() ? 0 : generations[i];
         bpf_insn sidecar = {
             .code = BPF_ALU64 | BPF_MOV | BPF_K,
             .dst_reg = 0,
             .src_reg = BPF_PSEUDO_KOP_SIDECAR,
-            .off = static_cast<int16_t>(callee_saved_mask),
-            .imm = static_cast<int32_t>(i),
+            .off = static_cast<int16_t>(callee_saved_mask | (i << 4)),
+            .imm = static_cast<int32_t>(generation),
         };
         insns.push_back(sidecar);
         bpf_insn call = {
@@ -1460,7 +1577,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     ScopedFd attach_prog_fd(open_prog_fd_by_id_required(
         attrs.attach_prog_id, "attach_prog_id"));
 
-    std::vector<char> verifier_log(kInitialVerifierLogSize, '\0');
+    std::vector<char> verifier_log;
     uint32_t log_true_size = 0;
     {
         std::ostringstream msg;
@@ -1468,6 +1585,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
             << " name=" << (prog_name.empty() ? "native_lab_stub" : prog_name)
             << " type=" << prog_type_value
             << " chunks=" << chunks
+            << " proof_bound=" << (!generations.empty() ? 1 : 0)
             << " callee_saved_mask=" << callee_saved_mask
             << " tail_call_reachable=" << (tail_call_reachable ? 1 : 0)
             << " insns=" << insns.size()
@@ -1484,17 +1602,28 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         prog_type_value, attrs, attach_prog_fd.get(), attach_btf_obj_fd.get(),
         prog_name, insns, fd_array, verifier_log, log_true_size);
     if (fd < 0) {
+        const int primary_error = fd;
+        verifier_log.assign(kInitialVerifierLogSize, '\0');
+        const int diagnostic_error = bpf_prog_load_native_stub_raw(
+            prog_type_value, attrs, attach_prog_fd.get(), attach_btf_obj_fd.get(),
+            prog_name, insns, fd_array, verifier_log, log_true_size);
+        if (diagnostic_error >= 0) {
+            return diagnostic_error;
+        }
         {
             std::ostringstream msg;
             msg << "stub-load-syscall-failed"
                 << " name=" << (prog_name.empty() ? "native_lab_stub" : prog_name)
-                << " err=" << fd
+                << " err=" << primary_error
+                << " diagnostic_err=" << diagnostic_error
                 << " log_true_size=" << log_true_size
                 << " log_buf_size=" << verifier_log.size();
             native_loader_kmsg_line(msg.str());
         }
         std::string message = std::string("BPF_PROG_LOAD native_lab stub: ")
-            + libbpf_error_string(fd);
+            + libbpf_error_string(primary_error);
+        message += "\ndiagnostic BPF_PROG_LOAD: "
+            + libbpf_error_string(diagnostic_error);
         message += "\nstub verifier_log_size=" + std::to_string(verifier_log.size())
             + " log_true_size=" + std::to_string(log_true_size);
         message += "\nstub fd_array_cnt=" + std::to_string(fd_array.size())
@@ -4152,6 +4281,7 @@ struct LoadedStub {
 };
 
 LoadedStub upload_and_load_stub(const LinkedBlob &linked,
+                                const std::vector<bpf_insn> &proof_insns,
                                 uint32_t prog_type,
                                 const StubLoadAttrs &attrs,
                                 bool tail_call_reachable,
@@ -4161,6 +4291,7 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
     LoadedStub out{};
     std::vector<NativeLabReloc> relocs;
     std::vector<NativeBlobChunk> chunks;
+    std::vector<uint32_t> generations;
 
     const auto upload_start = std::chrono::steady_clock::now();
     auto upload_end = upload_start;
@@ -4219,6 +4350,9 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
         }
         upload_blob(linked.blob, chunks);
         upload_relocs(relocs, chunks);
+        if (!proof_insns.empty()) {
+            generations = upload_bound_proofs(proof_insns, chunks);
+        }
         upload_end = std::chrono::steady_clock::now();
         {
             std::ostringstream msg;
@@ -4227,6 +4361,7 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
                 << " blob_bytes=" << linked.blob.size()
                 << " reloc_records=" << relocs.size()
                 << " chunks=" << chunks.size()
+                << " proof_bound=" << (!generations.empty() ? 1 : 0)
                 << " upload_ns=" << elapsed_ns(upload_start, upload_end);
             native_loader_kmsg_line(msg.str());
         }
@@ -4250,20 +4385,24 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
                 mod_btf_fd.get(),
                 static_cast<uint32_t>(chunks.size()),
                 linked.callee_saved_mask,
+                generations,
                 prog_type,
                 attrs,
                 tail_call_reachable,
                 prog_name,
                 map_ref_fds);
         } catch (const std::exception &e) {
+            const std::string load_error = e.what();
+            const size_t first_line_end = load_error.find('\n');
             std::ostringstream msg;
-            msg << e.what()
+            msg << load_error
                 << "\nnative_lab stub context:"
                 << " prog_type=" << prog_type
                 << " blob_bytes=" << linked.blob.size()
                 << " reloc_records=" << relocs.size()
                 << " reloc_bytes=" << linked.relocs.size()
                 << " chunks=" << chunks.size()
+                << " proof_bound=" << (!generations.empty() ? 1 : 0)
                 << " callee_saved_mask=" << linked.callee_saved_mask
                 << " tail_call_reachable=" << (tail_call_reachable ? 1 : 0)
                 << " retained_map_fds=" << map_ref_fds.size()
@@ -4314,6 +4453,8 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
                         << std::hex << relocs[i].target << std::dec;
                 }
             }
+            msg << "\nstub_load_error_summary="
+                << load_error.substr(0, first_line_end);
             fail(msg.str());
         }
         try {
@@ -4493,6 +4634,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     try {
             loaded_stub = upload_and_load_stub(
                 linked,
+                options.proof_insns,
                 prog_info.type,
                 stub_attrs,
                 companion.has_tail_call && native_lab_needs_tail_call_probe(),

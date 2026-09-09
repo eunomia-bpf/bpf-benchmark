@@ -55,6 +55,9 @@ struct FdLoadOptions {
     std::string symbol_name;
     std::filesystem::path source_bpf_path;
     std::vector<bpf_insn> source_insns;
+    /* Optional verifier proof program. The loader redirects its EXITs past
+     * the proof region and binds the instructions to the native blob snapshot. */
+    std::vector<bpf_insn> proof_insns;
     std::vector<int> source_fd_array;
     std::filesystem::path native_link_path;
     uint32_t source_btf_id = 0;

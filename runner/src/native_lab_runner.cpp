@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdlib>
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
@@ -64,6 +65,7 @@ using bpf_object_ptr = std::unique_ptr<bpf_object, object_deleter>;
 struct LoadedCompanion {
     bpf_object_ptr object;
     int program_fd = -1;
+    uint32_t prog_type = 0;
     std::vector<bpf_insn> source_insns;
     uint64_t open_ns = 0;
     uint64_t object_load_ns = 0;
@@ -111,6 +113,7 @@ LoadedCompanion load_native_companion_object(const std::filesystem::path &path)
         fail("native_kernel companion entry program has no fd after load: " +
              path.string());
     }
+    out.prog_type = static_cast<uint32_t>(bpf_program__type(entry_prog));
     const bpf_insn *insns = bpf_program__insns(entry_prog);
     const size_t insn_count = bpf_program__insn_cnt(entry_prog);
     if (insns == nullptr || insn_count == 0) {
@@ -157,6 +160,21 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
 
     const auto companion_load_start = std::chrono::steady_clock::now();
     LoadedCompanion companion = load_native_companion_object(options.program);
+    if (companion.prog_type != prog_type_value) {
+        fail("native_kernel companion program type does not match the requested stub type: " +
+             options.program.string());
+    }
+    const char *proof_dir_raw = std::getenv("BPFREJIT_MICRO_PROOF_DIR");
+    if (proof_dir_raw == nullptr || proof_dir_raw[0] == '\0') {
+        fail("native_kernel bound execution requires BPFREJIT_MICRO_PROOF_DIR");
+    }
+    const std::filesystem::path proof_path =
+        std::filesystem::path(proof_dir_raw) / options.program.filename();
+    LoadedCompanion proof = load_native_companion_object(proof_path);
+    if (proof.prog_type != prog_type_value) {
+        fail("native_kernel proof program type does not match the native stub type: " +
+             proof_path.string());
+    }
     const auto companion_load_end = std::chrono::steady_clock::now();
 
     native_loader::FdLoadOptions load_options{
@@ -166,6 +184,7 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
         .symbol_name = symbol,
         .source_bpf_path = {},
         .source_insns = companion.source_insns,
+        .proof_insns = proof.source_insns,
         .source_fd_array = {},
         .native_link_path = options.native_kernel_linker_path,
     };
@@ -185,6 +204,8 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
         elapsed_ns(companion_load_start, companion_load_end);
     const uint64_t companion_open_ns = companion.open_ns;
     const uint64_t companion_object_load_ns = companion.object_load_ns;
+    const uint64_t proof_open_ns = proof.open_ns;
+    const uint64_t proof_verifier_load_ns = proof.object_load_ns;
     const uint64_t companion_map_ptr_extract_ns =
         native_loaded.timings.companion_map_ptr_extract_ns;
     const uint64_t companion_lookup_spec_ns =
@@ -309,6 +330,8 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
         {"companion_load_ns", companion_load_ns},
         {"companion_open_ns", companion_open_ns},
         {"companion_object_load_ns", companion_object_load_ns},
+        {"proof_open_ns", proof_open_ns},
+        {"proof_verifier_load_ns", proof_verifier_load_ns},
         {"companion_map_ptr_extract_ns", companion_map_ptr_extract_ns},
         {"companion_lookup_spec_ns", companion_lookup_spec_ns},
         {"native_link_cache_lookup_ns", native_link_cache_lookup_ns},
