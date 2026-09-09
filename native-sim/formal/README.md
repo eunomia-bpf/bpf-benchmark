@@ -34,10 +34,15 @@ The supported x86 condition-code table is likewise generated from
 `x86_cond_spec.json` into the C simulator predicate and Lean. Lean proves the
 same next-PC refinement for arbitrary flags and branch targets; parity
 conditions are outside the accepted simulator subset.
+The x86 logical-result flag transition is also generated into C and Lean. Its
+composition theorem covers `CF=OF=0`, `ZF=zero`, and `SF=sign` through the
+condition-to-next-PC decision. Width narrowing and the zero/sign observations
+remain explicit trusted premises of this bounded step.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
-policy, and now binds both ISA flag-to-control-flow decisions; flag
-production, the decoder-to-handler mapping, renderer, C compiler, and all other
+policy, both ISA flag-to-control-flow decisions, and x86 logical flag
+production after narrowing; other flag production, the decoder-to-handler
+mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
 
 This is still a deliberately bounded proof. It does not establish full

@@ -8,6 +8,7 @@
 #include "../formal/generated/abi_load.h"
 #include "../formal/generated/ptr_add.h"
 #include "../formal/generated/x86_cond.h"
+#include "../formal/generated/x86_logic_flags.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -506,10 +507,9 @@ struct x86_sim_state {
 		__u64 __x86_fl_value = x86_apply_width((RESULT),          \
 						      __x86_fl_width);    \
 		__u32 __x86_fl_bits = x86_width_bits(__x86_fl_width);     \
-		__x86_cf = 0;                                             \
-		__x86_of = 0;                                             \
-		__x86_zf = __x86_fl_value == 0;                           \
-		__x86_sf = (__x86_fl_value >> (__x86_fl_bits - 1)) & 1;   \
+		KPROG_X86_SET_LOGIC_FLAGS(__x86_cf, __x86_zf, __x86_sf,  \
+			__x86_of, __x86_fl_value == 0,                     \
+			(__x86_fl_value >> (__x86_fl_bits - 1)) & 1);       \
 	} while (0)
 
 #define X86_SIM_L_SET_SUB_FLAGS(LHS, RHS, RESULT, WIDTH)                    \
