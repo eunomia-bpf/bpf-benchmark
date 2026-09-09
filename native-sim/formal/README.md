@@ -25,9 +25,15 @@ maps only the architecture-independent `data` and `data_end` offsets to packet
 tags, and scalarizes all other 64-bit ABI loads. Compile-time assertions bind
 those offsets to both C ABI structs, while the Lean theorem compares the
 generated transition against an independently written tag specification.
+The complete AArch64 condition-code table is generated from
+`arm64_cond_spec.json` into the Lean model and the C branch handler. Lean proves
+that all 15 supported predicates select the same next program counter as an
+independent architectural condition specification, for either branch
+direction.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
-policy; the decoder-to-handler mapping, renderer, C compiler, and all other
+policy, and now binds the AArch64 flag-to-control-flow decision; flag
+production, the decoder-to-handler mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
 
 This is still a deliberately bounded proof. It does not establish full

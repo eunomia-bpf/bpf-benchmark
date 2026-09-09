@@ -6,6 +6,7 @@
 
 #include "arm64_sim.h"
 #include "../formal/generated/abi_load.h"
+#include "../formal/generated/arm64_cond.h"
 #include "../formal/generated/ptr_add.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
@@ -615,21 +616,8 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	} while (0)
 
 #define ARM64_SIM_L_EVAL_COND(COND)                                         \
-	((COND) == ARM64_COND_EQ ? __a64_z :                                  \
-	 (COND) == ARM64_COND_NE ? !__a64_z :                                 \
-	 (COND) == ARM64_COND_CS ? __a64_c :                                  \
-	 (COND) == ARM64_COND_CC ? !__a64_c :                                 \
-	 (COND) == ARM64_COND_MI ? __a64_n :                                  \
-	 (COND) == ARM64_COND_PL ? !__a64_n :                                 \
-	 (COND) == ARM64_COND_VS ? __a64_v :                                  \
-	 (COND) == ARM64_COND_VC ? !__a64_v :                                 \
-	 (COND) == ARM64_COND_HI ? (__a64_c && !__a64_z) :                    \
-	 (COND) == ARM64_COND_LS ? (!__a64_c || __a64_z) :                    \
-	 (COND) == ARM64_COND_GE ? (__a64_n == __a64_v) :                     \
-	 (COND) == ARM64_COND_LT ? (__a64_n != __a64_v) :                     \
-	 (COND) == ARM64_COND_GT ? (!__a64_z && (__a64_n == __a64_v)) :       \
-	 (COND) == ARM64_COND_LE ? (__a64_z || (__a64_n != __a64_v)) :        \
-	 (COND) == ARM64_COND_AL ? 1 : ({ ARM64_SIM_L_UNSUPPORTED_OPCODE(); 0; }))
+	KPROG_ARM64_EVAL_COND((COND), __a64_n, __a64_z, __a64_c, __a64_v,   \
+		ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
 #define ARM64_SIM_L_UNSUPPORTED_OPCODE()                                    \
 	do {                                                               \

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "operation": "arm64Condition",
+  "conditions": [
+    {"name": "eq", "code": 0, "predicate": {"op": "flag", "name": "z"}},
+    {"name": "ne", "code": 1, "predicate": {"op": "not", "arg": {"op": "flag", "name": "z"}}},
+    {"name": "cs", "code": 2, "predicate": {"op": "flag", "name": "c"}},
+    {"name": "cc", "code": 3, "predicate": {"op": "not", "arg": {"op": "flag", "name": "c"}}},
+    {"name": "mi", "code": 4, "predicate": {"op": "flag", "name": "n"}},
+    {"name": "pl", "code": 5, "predicate": {"op": "not", "arg": {"op": "flag", "name": "n"}}},
+    {"name": "vs", "code": 6, "predicate": {"op": "flag", "name": "v"}},
+    {"name": "vc", "code": 7, "predicate": {"op": "not", "arg": {"op": "flag", "name": "v"}}},
+    {"name": "hi", "code": 8, "predicate": {"op": "and", "args": [{"op": "flag", "name": "c"}, {"op": "not", "arg": {"op": "flag", "name": "z"}}]}},
+    {"name": "ls", "code": 9, "predicate": {"op": "or", "args": [{"op": "not", "arg": {"op": "flag", "name": "c"}}, {"op": "flag", "name": "z"}]}},
+    {"name": "ge", "code": 10, "predicate": {"op": "eq", "lhs": {"op": "flag", "name": "n"}, "rhs": {"op": "flag", "name": "v"}}},
+    {"name": "lt", "code": 11, "predicate": {"op": "ne", "lhs": {"op": "flag", "name": "n"}, "rhs": {"op": "flag", "name": "v"}}},
+    {"name": "gt", "code": 12, "predicate": {"op": "and", "args": [{"op": "not", "arg": {"op": "flag", "name": "z"}}, {"op": "eq", "lhs": {"op": "flag", "name": "n"}, "rhs": {"op": "flag", "name": "v"}}]}},
+    {"name": "le", "code": 13, "predicate": {"op": "or", "args": [{"op": "flag", "name": "z"}, {"op": "ne", "lhs": {"op": "flag", "name": "n"}, "rhs": {"op": "flag", "name": "v"}}]}},
+    {"name": "al", "code": 14, "predicate": {"op": "const", "value": true}}
+  ]
+}
