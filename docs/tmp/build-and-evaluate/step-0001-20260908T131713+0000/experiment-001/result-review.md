@@ -62,3 +62,23 @@ It does not establish full ISA coverage, general simulator refinement,
 semantic or cryptographic binding between an accepted proof and executed
 native text, or the paper's complete O1--O4 safety argument. Those remain
 separate implementation and evaluation tasks.
+
+## Raw-provenance reconciliation
+
+The final raw metadata is preserved unchanged, including three inaccurate or
+missing fields: it labels the environment `bare-metal`, records guest times in
+1970, and reports both repository and kernel commits as `unknown`. These fields
+must not be used to identify the execution environment or source revision.
+
+The retained public-Make console log and the raw `host.kernel_cmdline` instead
+identify the execution path: the command used `PLATFORM=qemu ARCH=arm64`, the
+guest booted with `console=ttyAMA0`, `rootfstype=9p`, and `init=/qemu-init`, and
+the log reports unavailable KVM HYP mode on the x86 host. The guest's
+`7.0.0-rc2+` kernel version is recorded, but its exact source commit is not.
+The 1970 timestamps came from the uninitialized guest clock and establish only
+within-guest ordering; the enclosing log filename and operator record date the
+run to September 8, 2026. The application source content is contained in root
+revision `e0b7d35e0ecb1127105410b2b5b637f65f9d8d1f`, committed after the run,
+but the raw artifact itself does not bind that revision. This reconstruction
+closes the misleading environment label for interpretation; it does not
+manufacture provenance absent from the raw result.

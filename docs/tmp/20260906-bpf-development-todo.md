@@ -1,4 +1,4 @@
-# BPF development TODO — 2026-09-06 (updated 2026-09-07)
+# BPF development TODO — 2026-09-06 (updated 2026-09-09)
 
 This is a current handoff for the stock-kernel userspace optimization line. It
 does not replace older experiment logs, and it does not merge the KOperation
@@ -554,3 +554,92 @@ performance conclusion or complete-project claim is made from these smokes.
 
 ### Operator evidence audit 2026-09-08 19:07 UTC
 Outer heartbeat independently verified the final ARM64 result: completed, 29 cases/29 samples with zero result or retval mismatches, exact off=64 size=1 verifier rejection and normal guest power-down in the final QEMU log. This is a real ARM64 QEMU guest functional run, not native ARM hardware or KVM acceleration. The raw metadata currently labels provenance.environment as bare-metal, repo_git_sha/kernel_commit as unknown and timestamps in 1970 (guest clock). Preserve the original raw bytes and prior false-positive evidence; reconcile those provenance gaps in the existing report/manifest and future collection as part of your ongoing evidence work. Do not promote these timings to a hardware performance result. This is an observation for your autonomous next useful boundary, not a new mandatory gate or a request to interrupt the current x86 regression.
+
+## 2026-09-09 current-revision native performance opportunity
+
+### Historical-number and path audit
+
+- The May x86 six-app `1.349x` and ARM six-app `1.056x` values are
+  higher-is-better native/eBPF *workload-throughput* ratios. They do not measure
+  the current proof path.
+- The historical pure-bytecode `1.478x` and helper/map `1.429x` values are the
+  reciprocals of lower-is-better `native_kernel / kernel` execution-time ratios
+  (`0.677` and `0.700`). They use the trusted native-lab preview, not accepted
+  and bound NativeBPF execution.
+- `native_proof`, used by the completed x86 and ARM functional smokes, loads and
+  test-runs the generated verifier-visible eBPF proof. It does not execute the
+  original native program. `native_kernel` installs and test-runs a direct
+  native blob through the test-only native-lab module, but the module's trivial
+  companion proof is not semantically or cryptographically bound to that blob.
+  The paths therefore answer different questions and cannot be combined into a
+  verified-native speedup claim.
+
+### Public-Make performance experiment
+
+The experiment plan, post-hoc analyzer, complete paired values, and review live
+under
+`docs/tmp/build-and-evaluate/step-0002-20260908T235430+0000/experiment-001/`.
+The public preflight
+`BENCH=simple RUNTIMES="kernel native_kernel" SAMPLES=3 WARMUPS=1 INNER_REPEAT=100000 make micro`
+exited zero and wrote
+`micro/results/x86_kvm_micro_20260909_002321_849025/metadata.json`. Its
+three-sample median was 6 ns for kernel and 7 ns for native, useful
+contradictory evidence that the historical aggregate could not simply be
+assumed.
+
+The full public invocation
+`RUNTIMES="kernel native_kernel" SAMPLES=15 WARMUPS=1 INNER_REPEAT=100000 make micro`
+then exited zero and wrote
+`micro/results/x86_kvm_micro_20260909_005014_965526/metadata.json`; the KVM guest
+powered down normally. The complete log is retained at
+`/workspaces/.agent-state/bpf-development/kprog-x86-performance-full-20260909.log`.
+Strict post-hoc validation accepted all 29 benchmarks and all 870 measured
+result/return-value pairs, with the native upload/load/run phases present.
+
+The unweighted geometric mean of per-program median
+`native_kernel.exec_ns / kernel.exec_ns` ratios is `0.6758480953`, or a
+reciprocal direct-native speedup of `1.4796224283x`. A fixed-seed 50,000-draw
+program-population bootstrap gives ratio interval
+`[0.6080548053, 0.7524066802]`; 26 programs are faster, two tie, and one is
+slower. Native code size is `0.5377131546x` the kernel-JIT size by the same
+aggregation. The current load/compile path is instead `47.5423272677x` slower;
+the median of per-program medians is 1.835 ms for kernel loading versus 115.906
+ms for `native_kernel`.
+
+This closely reproduces the old pure-bytecode upper-bound magnitude on the
+current 29-program population, but it remains a trusted-component opportunity,
+not C2 or verified native execution. The sole loss is the 6--7 ns
+`simple_packet` case, where integer per-iteration `BPF_PROG_TEST_RUN` timing is
+visibly quantized. The bootstrap describes variation across the 29 program
+ratios; it does not eliminate timer quantization, CPU-frequency caveats, or the
+need for a second machine.
+
+### Evidence and manuscript updates
+
+- The AArch64 functional result review now preserves and explicitly reconciles
+  its raw provenance defects. `bare-metal`, 1970 guest timestamps, and unknown
+  repository/kernel commits remain untouched in the raw JSON. The public
+  `PLATFORM=qemu ARCH=arm64` command, QEMU-specific kernel command line, x86-host
+  log, and `7.0.0-rc2+` guest version establish full-system emulation, but not
+  the missing exact kernel commit or ARM hardware performance.
+- The kprog evaluation section now reports the new repeated x86 opportunity,
+  code-size result, and load/compile cost while keeping the artifact-binding
+  limitation explicit. The speculative paper now states both ratio directions:
+  execution time below one is faster, whereas workload throughput above one is
+  faster. It does not import kprog measurements into its scientific story.
+- Both manuscripts build successfully with `latexmk`; the existing layout
+  warnings remain non-fatal.
+
+### Remaining high-value scope
+
+The current functional and performance evidence leaves the central NativeBPF
+task unchanged: implement runtime binding between the exact verifier-accepted
+proof and the exact native bytes/entry ABI that execute, extend the C/Lean
+correspondence beyond pointer-add and entry ABI loads to memory, control flow,
+helpers, and remaining handlers, and prove specialization preservation. Rerun
+the same comparison through the accepted-and-bound path rather than treating
+the 1.4796x upper bound as achieved system performance. ARM hardware functional
+and performance reproduction and production-application accepted-and-bound
+throughput also remain open. The speculative paper separately still needs its
+profile-value and held-out profitability experiments; this kprog run supplies
+no new speculative-optimization performance evidence.
