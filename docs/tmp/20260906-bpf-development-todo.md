@@ -756,3 +756,27 @@ is speculative-optimization evidence.
 从当前已完成的绑定/跨架构验收继续，实际推进尚缺的语义证明，不再只列为remaining scope。你自主选取有价值且可验证的增量证明单元；每完成一个实质语义证明步骤，完成相应机器检查，说明已证明范围/假设/剩余缺口，就立即精确commit并push并确认远端提交，然后继续下一步。不要攒到整套证明、整个研究项目或无关长实验结束才提交；也不要用空提交、只有TODO或论文措辞代替证明代码。snapshot/version绑定不是语义等价证明，更多benchmark也不是语义证明。当前已经验证的独立实现先及时提交，随后优先推进证明；正在运行的有效实验保留。
 
 内部技术路线、模型分工和合理步骤粒度由你决定。可以使用现有本地模型辅助，不可用就直接继续。保留并发改动和原始证据、按精确路径提交，不等待额外批准。读到这条后请在原会话明确确认并实际执行；外层六小时监督已同步此要求，会核验每步的证明代码、机器检查和远端提交。
+
+### Semantic-refinement progress, 2026-09-09
+
+- `894f0f0ea` binds all 15 supported AArch64 condition predicates to one
+  generated JSON/Lean/C contract and proves, for arbitrary flags and targets,
+  equality with an independently stated architectural next-PC decision.
+- `5e7581be9` does the same for the 14 x86 conditions implemented by the
+  simulator (codes 0--9 and 12--15). Parity conditions remain outside the
+  accepted subset, matching prior C behavior.
+- `6cade628a` connects the actual x86 logical-result flag handler to a shared
+  generated contract and proves its composition through the condition table:
+  after width narrowing, `CF=OF=0`, `ZF=zero`, and `SF=sign` select the same
+  next PC as the independent specification.
+- Each step passed `make -C native-sim/formal check`. Both C-changing x86
+  steps also passed `make host-x86-sim-proofs`: the preserved negative proof
+  artifact and all 29 workload-derived proof artifacts compiled successfully.
+  Independent read-only review found no blocker in any step.
+
+These are semantic increments, not a full simulator/native equivalence proof.
+The immediate proof gap is x86 width narrowing and zero/sign observation;
+ADD/SUB/shift flag production, AArch64 flag production, decoder-to-handler
+correspondence, general control-flow traces, memory, helpers, and specialization
+preservation remain open. Generation binding and verifier acceptance continue
+to establish different properties from these refinement theorems.
