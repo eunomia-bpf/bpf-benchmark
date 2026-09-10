@@ -3,6 +3,7 @@ import KProgFormal.X86AddResult
 import KProgFormal.X86SubResult
 import KProgFormal.X86Adc
 import KProgFormal.X86SbbFlags
+import KProgFormal.X86RegRead
 
 namespace KProgFormal
 
@@ -38,6 +39,47 @@ theorem x86_add_handler_refines (state : X86RegAluState)
       x86AddHandlerSpec state rhs width := by
   simp only [generatedX86AddHandler, x86AddHandlerSpec]
   rw [x86_add_step_refines, x86_reg_write_refines, x86_add_result_refines]
+
+/-- The register-register ADD slice after decoded byte lanes select both
+operands. For wider operands the lane parameters are architecturally ignored. -/
+def generatedX86AddLaneHandler (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86RegRead.readAt rawRhs width srcLane
+  let result := GeneratedX86Adc.result lhs rhs false
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86AddFlags (GeneratedX86Width.narrow lhs width)
+      (GeneratedX86Width.narrow rhs width)
+      (GeneratedX86Width.narrow result width)
+      (GeneratedX86Width.signMask width) }
+
+def x86AddLaneHandlerSpec (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86RegReadAtSpec rawRhs width srcLane
+  let result := x86AddResultSpec lhs rhs
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := x86AddFlagsSpec (x86NarrowSpec lhs width)
+      (x86NarrowSpec rhs width) (x86NarrowSpec result width)
+      (x86WidthSignMaskSpec width) }
+
+theorem x86_add_lane_handler_refines (state : X86RegAluState)
+    (rawRhs : BitVec 64) (width : X86Width)
+    (dstLane srcLane : X86ByteLane) :
+    generatedX86AddLaneHandler state rawRhs width dstLane srcLane =
+      x86AddLaneHandlerSpec state rawRhs width dstLane srcLane := by
+  simp only [generatedX86AddLaneHandler, x86AddLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_reg_read_at_refines,
+    x86_add_step_refines, x86_reg_write_at_refines,
+    x86_add_result_refines]
+
+theorem x86_add_high8_example :
+    (generatedX86AddLaneHandler
+      { dst := { bits := 0x1122334455667f01, tag := .scalar },
+        flags := { cf := false, zf := false, sf := false, of := false } }
+      0x0000000000000102 .w8 .high .high).dst.bits =
+      0x1122334455668001 := by
+  native_decide
 
 def generatedX86AdcHandler (state : X86RegAluState) (rhs : BitVec 64)
     (width : X86Width) : X86RegAluState :=

@@ -899,10 +899,16 @@ struct x86_sim_state {
 #define X86_SIM_L_EXEC_ALU_IMM(DST, FLAGS, ALU, IMM)                        \
 	do {                                                               \
 		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
-		__u64 __x86_l_lhs = X86_SIM_L_READ_REG(DST);             \
+		__u32 __x86_l_aux = (ALU);                               \
+		__u8 __x86_l_alu =                                      \
+			KPROG_X86_REG_LANE_AUX_PAYLOAD(__x86_l_aux);       \
+		__u8 __x86_l_dst_shift =                                  \
+			KPROG_X86_REG_LANE_AUX_DST_SHIFT(__x86_l_aux);       \
+		__u64 __x86_l_lhs = X86_SIM_L_READ_REG_WIDTH_SHIFT(       \
+			(DST), __x86_l_width, __x86_l_dst_shift);           \
 		__u64 __x86_l_rhs = x86_store_imm_value((IMM), __x86_l_width);\
 		__u64 __x86_l_result;                                    \
-		if ((ALU) == X86_ALU_SBB) {                               \
+		if (__x86_l_alu == X86_ALU_SBB) {                         \
 			__u8 __x86_l_borrow = __x86_cf;                   \
 			__x86_l_result = KPROG_X86_SBB_RESULT(             \
 				__x86_l_lhs, __x86_l_rhs, __x86_l_borrow);  \
@@ -910,9 +916,9 @@ struct x86_sim_state {
 						__x86_l_borrow,          \
 						__x86_l_result,          \
 						__x86_l_width);          \
-			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
-						  __x86_l_width);        \
-		} else if ((ALU) == X86_ALU_ADC) {                         \
+			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), __x86_l_result,\
+				__x86_l_width, __x86_l_dst_shift);           \
+		} else if (__x86_l_alu == X86_ALU_ADC) {                   \
 			__u8 __x86_l_carry = __x86_cf;                    \
 			__x86_l_result = KPROG_X86_ADC_RESULT(             \
 				__x86_l_lhs, __x86_l_rhs, __x86_l_carry);   \
@@ -920,28 +926,36 @@ struct x86_sim_state {
 						__x86_l_carry,        \
 						__x86_l_result,       \
 						__x86_l_width);       \
-			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
-						  __x86_l_width);        \
+			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), __x86_l_result,\
+				__x86_l_width, __x86_l_dst_shift);           \
 		} else {                                                   \
 			__x86_l_result = x86_alu_result(__x86_l_lhs,       \
 							__x86_l_rhs,       \
-							(ALU),             \
+							__x86_l_alu,       \
 							__x86_l_width);    \
 			X86_SIM_L_SET_ALU_FLAGS(__x86_l_lhs, __x86_l_rhs,  \
-						__x86_l_result, (ALU), \
+						__x86_l_result, __x86_l_alu,\
 						__x86_l_width);        \
-			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
-						  __x86_l_width);        \
+			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), __x86_l_result,\
+				__x86_l_width, __x86_l_dst_shift);           \
 		}                                                         \
 	} while (0)
 
 #define X86_SIM_L_EXEC_ALU_REG(DST, SRC, FLAGS, ALU)                        \
 	do {                                                               \
 		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
-		__u64 __x86_l_lhs = X86_SIM_L_READ_REG(DST);             \
-		__u64 __x86_l_rhs = X86_SIM_L_READ_REG(SRC);             \
+		__u32 __x86_l_aux = (ALU);                               \
+		__u8 __x86_l_alu =                                      \
+			KPROG_X86_REG_LANE_AUX_PAYLOAD(__x86_l_aux);       \
+		__u8 __x86_l_dst_shift =                                  \
+			KPROG_X86_REG_LANE_AUX_DST_SHIFT(__x86_l_aux);       \
+		__u64 __x86_l_lhs = X86_SIM_L_READ_REG_WIDTH_SHIFT(       \
+			(DST), __x86_l_width, __x86_l_dst_shift);           \
+		__u64 __x86_l_rhs = X86_SIM_L_READ_REG_WIDTH_SHIFT(       \
+			(SRC), __x86_l_width,                              \
+			KPROG_X86_REG_LANE_AUX_SRC_SHIFT(__x86_l_aux));      \
 		__u64 __x86_l_result;                                    \
-		if ((ALU) == X86_ALU_SBB) {                               \
+		if (__x86_l_alu == X86_ALU_SBB) {                         \
 			__u8 __x86_l_borrow = __x86_cf;                   \
 			__x86_l_result = KPROG_X86_SBB_RESULT(             \
 				__x86_l_lhs, __x86_l_rhs, __x86_l_borrow);  \
@@ -949,9 +963,9 @@ struct x86_sim_state {
 						__x86_l_borrow,          \
 						__x86_l_result,          \
 						__x86_l_width);          \
-			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
-						  __x86_l_width);        \
-		} else if ((ALU) == X86_ALU_ADC) {                         \
+			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), __x86_l_result,\
+				__x86_l_width, __x86_l_dst_shift);           \
+		} else if (__x86_l_alu == X86_ALU_ADC) {                   \
 			__u8 __x86_l_carry = __x86_cf;                    \
 			__x86_l_result = KPROG_X86_ADC_RESULT(             \
 				__x86_l_lhs, __x86_l_rhs, __x86_l_carry);   \
@@ -959,18 +973,18 @@ struct x86_sim_state {
 						__x86_l_carry,        \
 						__x86_l_result,       \
 						__x86_l_width);       \
-			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
-						  __x86_l_width);        \
+			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), __x86_l_result,\
+				__x86_l_width, __x86_l_dst_shift);           \
 		} else {                                                   \
 			__x86_l_result = x86_alu_result(__x86_l_lhs,       \
 							__x86_l_rhs,       \
-							(ALU),             \
+							__x86_l_alu,       \
 							__x86_l_width);    \
 			X86_SIM_L_SET_ALU_FLAGS(__x86_l_lhs, __x86_l_rhs,  \
-						__x86_l_result, (ALU), \
+						__x86_l_result, __x86_l_alu,\
 						__x86_l_width);        \
-			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
-						  __x86_l_width);        \
+			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), __x86_l_result,\
+				__x86_l_width, __x86_l_dst_shift);           \
 		}                                                         \
 	} while (0)
 

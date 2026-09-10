@@ -159,6 +159,12 @@ during artifact generation instead of silently being treated as low-byte
 operands. This closes register-destination lane selection only for those three
 opcode families, not for the remaining ALU, compare, extend, shift,
 memory-load, or specialized handlers.
+Register ADD now consumes that lane metadata in both generated C execution
+paths. The corresponding Lean handler theorem composes lane-aware destination
+and source reads, generated ADD result and flags, and lane-aware writeback for
+all widths and lane choices. ADC/SUB/SBB and compare/test high-byte forms still
+fail at artifact generation; the theorem does not cover immediate decoding,
+instruction dispatch, compiler output, or native bytes.
 The ADD, ADC, SUB, and SBB register-handler slice then composes the generated
 result, width narrowing, flag transition, and register writeback contracts.
 For arbitrary old destination bits and tags, right-hand operand, incoming
