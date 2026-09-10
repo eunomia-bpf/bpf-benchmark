@@ -144,6 +144,17 @@
 #define X86_MEM_AUX_MEM_WIDTH(AUX) ((__u8)(((AUX) >> 16) & 0xffU))
 #define X86_REG_AUX_GET_SRC_SHIFT(AUX) ((__u8)(((AUX) >> 24) & 0xffU))
 #define X86_MEM_AUX_GET_ALU_OP(AUX) ((__u8)(((AUX) >> 24) & 0xffU))
+#include "../formal/generated/x86_reg_lane_aux.h"
+
+_Static_assert(KPROG_X86_REG_LANE_AUX_PAYLOAD(
+	KPROG_X86_REG_LANE_AUX(0xabU, 8U, 0U)) == 0xabU,
+	"x86 register AUX payload drift");
+_Static_assert(KPROG_X86_REG_LANE_AUX_DST_SHIFT(
+	KPROG_X86_REG_LANE_AUX(0U, 8U, 0U)) == 8U,
+	"x86 register AUX destination lane drift");
+_Static_assert(KPROG_X86_REG_LANE_AUX_SRC_SHIFT(
+	KPROG_X86_REG_LANE_AUX(0U, 0U, 8U)) == 8U,
+	"x86 register AUX source lane drift");
 
 static __always_inline __u64 x86_width_mask(__u8 width)
 {

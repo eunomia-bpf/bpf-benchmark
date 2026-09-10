@@ -149,6 +149,16 @@ with an independent fixed-width extraction specification, including a
 concrete AH read regression. The existing full-register C read goes through
 this generated primitive at width 64; passing decoded width/lane metadata at
 each operand handler remains a separate integration obligation.
+For MOV-immediate, MOV-register, and register SETcc, a generated 32-bit AUX
+layout now carries the payload plus destination/source byte-lane shifts from
+the Python artifact encoder into the C handler. Lean proves all three fields
+round-trip without overlap for arbitrary values and both typed lanes; C static
+assertions bind the same layout. The pre-existing `mov [mem], ah/bh/ch/dh`
+source-lane encoding remains supported; other high-byte operand forms fail
+during artifact generation instead of silently being treated as low-byte
+operands. This closes register-destination lane selection only for those three
+opcode families, not for the remaining ALU, compare, extend, shift,
+memory-load, or specialized handlers.
 The ADD, ADC, SUB, and SBB register-handler slice then composes the generated
 result, width narrowing, flag transition, and register writeback contracts.
 For arbitrary old destination bits and tags, right-hand operand, incoming

@@ -13,6 +13,7 @@ from pathlib import Path
 import yaml
 
 from generated_x86_alu_decode import ALU_AUX
+from generated_x86_reg_lane_aux import c_reg_lane_aux
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -465,6 +466,22 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
     op = insn.mnemonic
     ops = insn.operands
 
+    high_regs = [reg_info(operand) for operand in ops]
+    high_positions = [index for index, reg in enumerate(high_regs)
+                      if reg is not None and reg[2] != 0]
+    high_supported = (
+        (op in {"mov", "movabs"} and len(ops) == 2 and (
+            (reg_info(ops[0]) is not None and
+             (is_int(ops[1]) or reg_info(ops[1]) is not None)) or
+            (is_mem(ops[0]) and reg_info(ops[1]) is not None))) or
+        (op.startswith("set") and op in CC_AUX and len(ops) == 1 and
+         reg_info(ops[0]) is not None)
+    )
+    if high_positions and not high_supported:
+        raise ValueError(
+            f"unsupported high-byte register operand(s) {high_positions}: {insn.raw}"
+        )
+
     if op in {"nop", "data16", "cs"}:
         return enc("X86_OP_NOP")
     if op == "ret":
@@ -510,7 +527,8 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                            aux=f"({mem_aux(ops[0], 8)} | X86_REG_AUX_SRC_SHIFT({CC_AUX[op]}))",
                            imm=c_u64(mem_disp(ops[0])))
             raise ValueError(f"cannot encode {insn.raw}")
-        return enc("X86_OP_SETCC", dst=dst[0], flags="X86_WIDTH_8", aux=CC_AUX[op])
+        return enc("X86_OP_SETCC", dst=dst[0], flags="X86_WIDTH_8",
+                   aux=c_reg_lane_aux(CC_AUX[op], dst_shift=dst[2]))
     if op.startswith("cmov") and op in CC_AUX:
         dst = reg_info(ops[0]) if len(ops) > 0 else None
         src = reg_info(ops[1]) if len(ops) > 1 else None
@@ -534,10 +552,14 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
         src_reg = reg_info(src)
         if dst_reg and is_int(src):
             return enc("X86_OP_MOV_IMM", dst=dst_reg[0],
-                       flags=WIDTH_CONST[dst_reg[1]], imm=c_u64(parse_int(src)))
+                       flags=WIDTH_CONST[dst_reg[1]],
+                       aux=c_reg_lane_aux("0", dst_shift=dst_reg[2]),
+                       imm=c_u64(parse_int(src)))
         if dst_reg and src_reg:
             return enc("X86_OP_MOV_REG", dst=dst_reg[0], src=src_reg[0],
-                       flags=WIDTH_CONST[dst_reg[1]])
+                       flags=WIDTH_CONST[dst_reg[1]],
+                       aux=c_reg_lane_aux("0", dst_shift=dst_reg[2],
+                                          src_shift=src_reg[2]))
         if dst_reg and is_mem(src):
             if is_helper_symbol(insn.reloc_symbol):
                 return enc("X86_OP_MOV_LOAD_HELPER_ID", dst=dst_reg[0],
@@ -959,6 +981,16 @@ DIRECT_STEP_MACROS = {
 
 
 def direct_step_statement(encoded: EncodedInsn) -> str | None:
+    if encoded.op == "X86_OP_MOV_IMM" and encoded.aux != "0":
+        return (
+            f"X86_SIM_L_EXEC_MOV_IMM_AUX({encoded.dst}, {encoded.flags}, "
+            f"{encoded.aux}, {encoded.imm})"
+        )
+    if encoded.op == "X86_OP_MOV_REG" and encoded.aux != "0":
+        return (
+            f"X86_SIM_L_EXEC_MOV_REG_AUX({encoded.dst}, {encoded.src}, "
+            f"{encoded.flags}, {encoded.aux})"
+        )
     template = DIRECT_STEP_MACROS.get(encoded.op)
     if template is None:
         return None

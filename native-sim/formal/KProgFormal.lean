@@ -19,3 +19,4 @@ import KProgFormal.X86ShiftFlags
 import KProgFormal.X86RegWrite
 import KProgFormal.X86AluWriteback
 import KProgFormal.X86RegRead
+import KProgFormal.X86RegLaneAux

@@ -1427,13 +1427,17 @@ struct x86_sim_state {
 			__x86_l_width);                                     \
 	} while (0)
 
-#define X86_SIM_L_EXEC_MOV_IMM(DST, FLAGS, IMM)                             \
+#define X86_SIM_L_EXEC_MOV_IMM_AUX(DST, FLAGS, AUX, IMM)                    \
 	do {                                                               \
 		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
-		X86_SIM_L_WRITE_REG_WIDTH((DST), (IMM), __x86_l_width);   \
+		X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), (IMM), __x86_l_width,\
+			KPROG_X86_REG_LANE_AUX_DST_SHIFT(AUX));              \
 	} while (0)
 
-#define X86_SIM_L_EXEC_MOV_REG(DST, SRC, FLAGS)                             \
+#define X86_SIM_L_EXEC_MOV_IMM(DST, FLAGS, IMM)                             \
+	X86_SIM_L_EXEC_MOV_IMM_AUX((DST), (FLAGS), 0U, (IMM))
+
+#define X86_SIM_L_EXEC_MOV_REG_AUX(DST, SRC, FLAGS, AUX)                    \
 	do {                                                               \
 		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
 		if (__x86_l_width == X86_WIDTH_64 && (SRC) == X86_RSP) {  \
@@ -1446,11 +1450,17 @@ struct x86_sim_state {
 				X86_SIM_L_READ_REG_PTR(SRC),              \
 				X86_SIM_L_REG_TAG(SRC));                  \
 		} else {                                                  \
-			__u64 __x86_l_value = X86_SIM_L_READ_REG(SRC);    \
-			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
-						  __x86_l_width);        \
+			__u64 __x86_l_value = X86_SIM_L_READ_REG_WIDTH_SHIFT(\
+				(SRC), __x86_l_width,                         \
+				KPROG_X86_REG_LANE_AUX_SRC_SHIFT(AUX));       \
+			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), __x86_l_value,\
+				__x86_l_width,                                \
+				KPROG_X86_REG_LANE_AUX_DST_SHIFT(AUX));        \
 		}                                                         \
 	} while (0)
+
+#define X86_SIM_L_EXEC_MOV_REG(DST, SRC, FLAGS)                             \
+	X86_SIM_L_EXEC_MOV_REG_AUX((DST), (SRC), (FLAGS), 0U)
 
 #define X86_SIM_L_EXEC_MOVX_REG(OP, DST, SRC, FLAGS, AUX)                   \
 	do {                                                               \
@@ -1525,7 +1535,9 @@ struct x86_sim_state {
 	} while (0)
 
 #define X86_SIM_L_EXEC_SETCC(DST, AUX)                                       \
-	X86_SIM_L_WRITE_REG_WIDTH((DST), X86_SIM_L_EVAL_CC(AUX), X86_WIDTH_8)
+	X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST),                               \
+		X86_SIM_L_EVAL_CC(KPROG_X86_REG_LANE_AUX_PAYLOAD(AUX)),       \
+		X86_WIDTH_8, KPROG_X86_REG_LANE_AUX_DST_SHIFT(AUX))
 
 #define X86_SIM_L_EXEC_SETCC_MEM(DST, AUX, IMM)                              \
 	do {                                                               \
@@ -1586,7 +1598,9 @@ struct x86_sim_state {
 		} else if ((OP) == X86_OP_CALL_REG) {                     \
 			X86_SIM_BPF_CALL_REG((SRC));                      \
 		} else if ((OP) == X86_OP_MOV_IMM) {                       \
-			X86_SIM_L_WRITE_REG_WIDTH((DST), (IMM), __x86_l_width);\
+			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), (IMM),         \
+				__x86_l_width,                                \
+				KPROG_X86_REG_LANE_AUX_DST_SHIFT(AUX));        \
 		} else if ((OP) == X86_OP_MOV_REG) {                       \
 			if (__x86_l_width == X86_WIDTH_64 &&              \
 			    (SRC) == X86_RSP) {                           \
@@ -1600,9 +1614,12 @@ struct x86_sim_state {
 					X86_SIM_L_REG_TAG(SRC));           \
 			else {                                            \
 				__u64 __x86_l_value =                    \
-					X86_SIM_L_READ_REG(SRC);          \
-				X86_SIM_L_WRITE_REG_WIDTH((DST),         \
-					__x86_l_value, __x86_l_width);    \
+					X86_SIM_L_READ_REG_WIDTH_SHIFT(   \
+						(SRC), __x86_l_width,        \
+						KPROG_X86_REG_LANE_AUX_SRC_SHIFT(AUX));\
+				X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST),   \
+					__x86_l_value, __x86_l_width,      \
+					KPROG_X86_REG_LANE_AUX_DST_SHIFT(AUX));\
 			}                                                 \
 		} else if ((OP) == X86_OP_MOVZX_REG ||                    \
 			   (OP) == X86_OP_MOVSX_REG) {                    \
@@ -1697,8 +1714,11 @@ struct x86_sim_state {
 			X86_SIM_L_EXEC_CMOV_MEM((DST), (SRC), (FLAGS),    \
 						(AUX), (IMM));            \
 		} else if ((OP) == X86_OP_SETCC) {                        \
-			X86_SIM_L_WRITE_REG_WIDTH((DST), X86_SIM_L_EVAL_CC(AUX),\
-						  X86_WIDTH_8);          \
+			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST),               \
+				X86_SIM_L_EVAL_CC(                           \
+					KPROG_X86_REG_LANE_AUX_PAYLOAD(AUX)), \
+				X86_WIDTH_8,                                  \
+				KPROG_X86_REG_LANE_AUX_DST_SHIFT(AUX));        \
 		} else if ((OP) == X86_OP_SETCC_MEM) {                    \
 			X86_SIM_L_EXEC_SETCC_MEM((DST), (AUX), (IMM));    \
 		} else if ((OP) == X86_OP_BSWAP) {                        \
