@@ -983,3 +983,48 @@ helper transitions, multi-step control-flow traces, C unsigned semantics
 against Lean `BitVec`, compiler/native-byte correspondence, specialization
 preservation, and AArch64 flag production. The accepted proof and generation
 binding still do not establish semantic equivalence of every native byte.
+
+### Unary-lane and arithmetic-immediate refinement, 2026-09-10
+
+- `34f0e0c27`, `6acb11fd9`, and `675bc5d7a` compose selected-lane reads,
+  generated INC/DEC/NEG results and flags, selected-lane writeback, and tag
+  scalarization. INC/DEC preserve the immutable input CF; NEG replaces CF from
+  the actual `0-a` borrow. Boundary theorems cover high-byte wraparound,
+  signed-min overflow, preservation of all non-selected bits, and provenance
+  scalarization. The artifact encoder now accepts high-byte register forms for
+  all four implemented unary operations (INC/DEC/NOT/NEG).
+- `753ba7c28` replaces the handwritten C arithmetic-immediate cast helper with
+  one generated JSON/C/Lean contract. For every raw 64-bit artifact field and
+  legal width, Lean proves that the generated mask/or implementation truncates
+  to 32 bits and sign-extends bit 31 exactly for 64-bit operations, matching an
+  independent `BitVec.setWidth`/`signExtend` specification. This is encoded-field
+  decoding, not a proof of objdump text parsing or native instruction bytes.
+- `6eb9514a7`, `67228f0f5`, `d8f70ae60`, and `69ad8f71f` compose that decoded
+  immediate through register-destination ADD/ADC/SUB/SBB lane reads, generated
+  results and flags, lane writeback, and tag scalarization. ADC and SBB capture
+  one pre-state CF and use it consistently in both result and flags. The SBB
+  boundary `0 - (-1) - 1` retains CF=true even though the effective
+  subtrahend wraps to zero.
+- `e30f088f9` and `5f937a7f2` compose the same immediate decode through CMP
+  subtraction flags and TEST logic flags. Both prove preservation of the
+  complete destination bits and tag; targeted theorems cover 64-bit signed
+  immediate comparison and high-byte TEST.
+
+Every proof state passed the full `make -C native-sim/formal check`, including
+all generated-source freshness checks and the complete Lean build. The C
+contract state additionally passed `make -C native-sim/x86 micro-proofs-build`:
+the preserved negative artifact and all 29 workload-derived artifacts built.
+Textual probes for `inc ah`, `dec ah`, and `neg ah` selected RAX, width 8,
+destination shift 8, and the intended ALU opcode. Independent read-only review
+found no blocking issue in the final form of each increment. Existing workload
+artifacts contain no high-byte INC/DEC/NEG, so the 29/29 build is integration
+evidence rather than dynamic execution of those newly enabled encoder cases.
+No KVM run or performance experiment was repeated in this proof-only sequence.
+
+The next highest-value boundary is still selection and language refinement:
+prove the objdump/parser/operand/AUX path selects these typed handlers, then
+relate generated C unsigned operations and compiler/native bytes to the Lean
+model. Immediate AND/OR/XOR/shift/IMUL paths, other high-byte extend/shift/load
+forms, memory lanes and stores, helpers, multi-step traces, specialization
+preservation, and AArch64 flag production also remain open. These commits do
+not establish complete native-byte semantic equivalence.
