@@ -477,6 +477,9 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
         (op in {"add", "adc", "sub", "sbb"} and len(ops) == 2 and
          reg_info(ops[0]) is not None and
          (is_int(ops[1]) or reg_info(ops[1]) is not None)) or
+        (op == "cmp" and len(ops) == 2 and
+         reg_info(ops[0]) is not None and
+         (is_int(ops[1]) or reg_info(ops[1]) is not None)) or
         (op.startswith("set") and op in CC_AUX and len(ops) == 1 and
          reg_info(ops[0]) is not None)
     )
@@ -655,10 +658,16 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
         if dst_reg and is_int(ops[1]):
             return enc("X86_OP_CMP_IMM" if op == "cmp" else "X86_OP_TEST_IMM",
                        dst=dst_reg[0], flags=WIDTH_CONST[dst_reg[1]],
+                       aux=c_reg_lane_aux("0", dst_reg[2]),
                        imm=c_u64(parse_int(ops[1])))
         if dst_reg and src_reg:
+            if op == "cmp" and dst_reg[1] != src_reg[1]:
+                raise ValueError(
+                    f"mismatched register operand widths: {insn.raw}"
+                )
             return enc("X86_OP_CMP_REG" if op == "cmp" else "X86_OP_TEST_REG",
-                       dst=dst_reg[0], src=src_reg[0], flags=WIDTH_CONST[dst_reg[1]])
+                       dst=dst_reg[0], src=src_reg[0], flags=WIDTH_CONST[dst_reg[1]],
+                       aux=c_reg_lane_aux("0", dst_reg[2], src_reg[2]))
         if op == "cmp" and dst_reg and is_mem(ops[1]):
             return enc("X86_OP_CMP_REG_MEM",
                        dst=dst_reg[0], src=mem_base_reg(ops[1]),
@@ -999,6 +1008,16 @@ def direct_step_statement(encoded: EncodedInsn) -> str | None:
         return (
             f"X86_SIM_L_EXEC_MOV_REG_AUX({encoded.dst}, {encoded.src}, "
             f"{encoded.flags}, {encoded.aux})"
+        )
+    if encoded.op == "X86_OP_CMP_IMM" and encoded.aux != "0":
+        return (
+            f"X86_SIM_L_EXEC_CMP_IMM_OP_AUX({encoded.op}, {encoded.dst}, "
+            f"{encoded.flags}, {encoded.aux}, {encoded.imm})"
+        )
+    if encoded.op == "X86_OP_CMP_REG" and encoded.aux != "0":
+        return (
+            f"X86_SIM_L_EXEC_CMP_REG_OP_AUX({encoded.op}, {encoded.dst}, "
+            f"{encoded.src}, {encoded.flags}, {encoded.aux})"
         )
     template = DIRECT_STEP_MACROS.get(encoded.op)
     if template is None:

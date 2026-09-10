@@ -300,4 +300,50 @@ theorem x86_sbb_high8_consumes_incoming_borrow :
       0x112233445566fe01 := by
   native_decide
 
+/-- CMP observes the selected register lanes and replaces flags with the
+generated subtraction flags, while preserving the complete destination. -/
+def generatedX86CmpLaneHandler (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86RegRead.readAt rawRhs width srcLane
+  let result := GeneratedX86SbbResult.result lhs rhs false
+  { dst := state.dst
+    flags := generatedX86SubFlags (GeneratedX86Width.narrow lhs width)
+      (GeneratedX86Width.narrow rhs width)
+      (GeneratedX86Width.narrow result width)
+      (GeneratedX86Width.signMask width) }
+
+def x86CmpLaneHandlerSpec (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86RegReadAtSpec rawRhs width srcLane
+  let result := x86SubResultSpec lhs rhs
+  { dst := state.dst
+    flags := x86SubFlagsSpec (x86NarrowSpec lhs width)
+      (x86NarrowSpec rhs width) (x86NarrowSpec result width)
+      (x86WidthSignMaskSpec width) }
+
+theorem x86_cmp_lane_handler_refines (state : X86RegAluState)
+    (rawRhs : BitVec 64) (width : X86Width)
+    (dstLane srcLane : X86ByteLane) :
+    generatedX86CmpLaneHandler state rawRhs width dstLane srcLane =
+      x86CmpLaneHandlerSpec state rawRhs width dstLane srcLane := by
+  simp only [generatedX86CmpLaneHandler, x86CmpLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_reg_read_at_refines,
+    x86_sub_step_refines]
+
+theorem x86_cmp_lane_preserves_destination (state : X86RegAluState)
+    (rawRhs : BitVec 64) (width : X86Width)
+    (dstLane srcLane : X86ByteLane) :
+    (generatedX86CmpLaneHandler state rawRhs width dstLane srcLane).dst =
+      state.dst := by
+  rfl
+
+theorem x86_cmp_high8_observes_high_lanes :
+    (generatedX86CmpLaneHandler
+      { dst := { bits := 0x112233445566aa01, tag := .scalar },
+        flags := { cf := true, zf := false, sf := true, of := true } }
+      0x000000000000aa02 .w8 .high .high).flags.zf = true := by
+  native_decide
+
 end KProgFormal
