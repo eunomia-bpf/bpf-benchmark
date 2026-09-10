@@ -13,3 +13,4 @@ import KProgFormal.X86SubResult
 import KProgFormal.X86AluDecode
 import KProgFormal.X86IncDec
 import KProgFormal.X86Not
+import KProgFormal.X86ShiftCount

@@ -100,6 +100,10 @@ central C handlers and Lean. Lean proves its width-narrowed result and that all
 four incoming flags, including flags observed by the next condition, remain
 unchanged. Register and memory-unary values are covered; memory access/store,
 operand selection, and native compilation remain boundaries.
+The x86 shift-count mask is generated into the central C helper and Lean.
+Lean proves that its bit mask equals the architectural modulo-32 count for
+8/16/32-bit operands and modulo-64 count for 64-bit operands, and proves the
+corresponding count bound. Shift results and flags remain separate obligations.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86

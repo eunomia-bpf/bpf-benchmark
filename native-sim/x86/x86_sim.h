@@ -105,6 +105,7 @@
 #include "../formal/generated/x86_adc.h"
 #include "../formal/generated/x86_sbb_result.h"
 #include "../formal/generated/x86_not.h"
+#include "../formal/generated/x86_shift_count.h"
 
 #define X86_RAX 0U
 #define X86_RCX 1U
@@ -178,9 +179,7 @@ static __always_inline __u64 x86_sign_extend(__u64 value, __u8 width)
 
 static __always_inline __u8 x86_shift_count(__u64 rhs, __u8 width)
 {
-	if (width == X86_WIDTH_64)
-		return rhs & 0x3f;
-	return rhs & 0x1f;
+	return KPROG_X86_SHIFT_COUNT(rhs, width);
 }
 
 static __always_inline __u64 x86_signed_abs_width(__u64 value, __u8 width)
