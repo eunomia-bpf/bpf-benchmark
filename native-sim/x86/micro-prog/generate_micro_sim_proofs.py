@@ -480,7 +480,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
         (op in {"cmp", "test"} and len(ops) == 2 and
          reg_info(ops[0]) is not None and
          (is_int(ops[1]) or reg_info(ops[1]) is not None)) or
-        (op in {"inc", "not"} and len(ops) == 1 and
+        (op in {"dec", "inc", "not"} and len(ops) == 1 and
          reg_info(ops[0]) is not None) or
         (op.startswith("set") and op in CC_AUX and len(ops) == 1 and
          reg_info(ops[0]) is not None)
