@@ -903,3 +903,74 @@ shift result/flag transitions, NOT flag preservation, the remaining
 decoder/operand-selection relation, memory and helper transitions, C-to-Lean
 and compiler/native-byte correspondence, specialization preservation, and
 AArch64 flag production. No new performance measurement was made.
+
+### Shift, register-lane, and handler refinement, 2026-09-10
+
+- `338284376` binds bitwise NOT to one generated C/Lean contract and proves
+  width-local result plus flag preservation. `0823cdd3e` proves the x86 count
+  mask as modulo 32 for 8/16/32-bit operands and modulo 64 for 64-bit operands.
+  `880ef1111` composes that count with SHL/SHR/SAR/ROL results and fixes the
+  previous narrow-width SHR/SAR errors. `99d5443bf` adds their flag transition
+  proofs and fixes 8/16-bit ROL carry when a nonzero masked count is an exact
+  multiple of the operand width. Architecturally undefined carry/overflow
+  cases remain explicitly outside the claim.
+- The public `make selftest` validation for the shift/flag state first failed
+  during image construction with the host Go 1.27.1 because vendored x/net no
+  longer exposed `http2.TrailerPrefix`. The project-pinned Go 1.26.8 path then
+  exited zero through real x86 KVM. Raw metadata is
+  `tests/results/88f4cb2d/native_proof_micro_20260910_111110_837266/metadata.json`:
+  status `completed`, 29 programs, 29 samples, and 29/29 matching result and
+  return value. The offset-64 unsafe packet-read proof was rejected with
+  `EACCES`, and all four other verifier-negative smokes passed. This is a
+  functional smoke, not a new performance result or full native equivalence.
+- `8fb69e6ec` proves 8/16-bit upper-bit preservation, 32-bit zero extension,
+  64-bit replacement, and scalarized provenance for the actual 16-register C
+  writeback switch. `651f26251` composes generated ADD/ADC/SUB/SBB results,
+  narrowing, flags, and low-lane writeback. `51fc7ad82` extends the primitive
+  to typed low/high byte lanes and preserves the concrete review
+  counterexample: writing `0xaa` to AH of `0x1122334455667788` must produce
+  `0x112233445566aa88`, not an AL write. `c1fd32b50` independently proves the
+  matching register observations, including AH extraction.
+- `fad5d3921` adds one strict generated AUX layout with separate payload,
+  destination-lane, and source-lane bytes, proves field/lane round trips, and
+  carries it through MOV-immediate, MOV-register, and register SETcc in both
+  direct and monolithic C paths. The first compatibility build failed all 29
+  existing generated sources after changing the MOV macro arity; retaining
+  the old three-argument wrappers and adding `_AUX` variants restored the
+  preserved negative plus 29/29 build-only artifacts. The existing
+  `mov [mem], ah/bh/ch/dh` source encoding remains a separate supported memory
+  layout.
+- `42075b32a`, `de7d7e6d9`, `d5a7f55dc`, and `cd13d7fa1` incrementally bind
+  register ADD, ADC, SUB, and SBB to lane-aware operand reads and destination
+  writeback. Their Lean theorems generate the result rather than accepting it
+  as a premise; ADC and SBB consume the same immutable pre-state CF in result
+  and flags. The encoder rejects mixed-width register pairs and still rejects
+  high-byte memory forms rather than corrupting the incompatible memory AUX
+  layout. An initially over-broad width check rejected legal `rol r9,cl`; that
+  build failure was fixed by limiting the same-width rule to these arithmetic
+  instruction families.
+- `b3b673cf9` binds lane-aware register CMP in the encoder and both C paths,
+  proves the generated zero-borrow subtraction flags, and separately proves
+  that the complete destination bits/tag are unchanged. `bc23832e3` does the
+  same for register TEST through AND, width narrowing, and generated logic
+  flags. Its first Lean check exposed a missing `X86LogicFlags` import; after
+  fixing that dependency and the proof script, full checks passed. Enabling
+  dynamic CMP/TEST AUX increased `payload_prefix_memcmp_scan` proof bytecode
+  from 360 to 384 instructions in the 29-row build-only corpus. This is an
+  observed code-size/verification cost, not runtime-performance evidence.
+
+Every final state above passed generated-source freshness checks, the complete
+Lean target, the preserved negative proof build, and all 29 workload-derived
+x86 proof-artifact builds. Each diff received independent read-only review,
+was committed separately, pushed to `origin/master`, and verified against the
+remote hash. The current artifacts contain no high-byte arithmetic/compare
+case, so those successful builds are integration evidence rather than targeted
+guest execution of the new lane paths.
+
+Remaining proof scope is still substantial: the decoder/parser and handler
+selection relation, immediate sign-extension and operand legality, high-byte
+lanes for other ALU/extend/shift/load and memory forms, general memory and
+helper transitions, multi-step control-flow traces, C unsigned semantics
+against Lean `BitVec`, compiler/native-byte correspondence, specialization
+preservation, and AArch64 flag production. The accepted proof and generation
+binding still do not establish semantic equivalence of every native byte.
