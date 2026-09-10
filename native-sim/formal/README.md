@@ -139,6 +139,15 @@ In particular, AH/BH/CH/DH destination-lane selection is not carried into the
 current C writeback primitive or modeled by this theorem; the C compatibility
 convention that width zero aliases 64 and behavior for other invalid numeric
 widths are also outside the four-constructor Lean model.
+The ADD, ADC, SUB, and SBB register-handler slice then composes the generated
+result, width narrowing, flag transition, and register writeback contracts.
+For arbitrary old destination bits and tags, right-hand operand, incoming
+flags, and legal width, Lean checks the resulting destination bits/tag and all
+four modeled flags against an independently assembled handler specification.
+This composition covers the common register writeback reached by immediate
+and register operand handlers after their operands are supplied; it does not
+yet prove operand extraction, high-byte lanes, instruction dispatch, or memory
+read/write handlers.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86

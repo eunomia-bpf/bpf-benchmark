@@ -38,3 +38,4 @@ check:
 	lake env lean KProgFormal/X86ShiftResult.lean
 	lake env lean KProgFormal/X86ShiftFlags.lean
 	lake env lean KProgFormal/X86RegWrite.lean
+	lake env lean KProgFormal/X86AluWriteback.lean
