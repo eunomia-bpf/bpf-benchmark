@@ -58,10 +58,15 @@ closes the earlier supplied-result premise for those handler expressions. A
 separate generated SBB flag contract covers borrow-in, zero, sign, and overflow
 and composes the result/subtrahend/narrowing layers as well as the next-PC
 decision. Decoder selection and sign-mask derivation remain open.
+The five x86 ADC binary operand forms use a dedicated generated result and
+flag contract. This preserves carry-in through width overflow instead of
+folding it into an ordinary ADD operand, and Lean composes modular
+`a+b+carry`, per-width narrowing, ADC flags, and next-PC. Decoder selection and
+sign-mask derivation remain outside the theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86
-logical/ADD/SUB flag production; other flag production, the decoder-to-handler
+logical/ADD/SUB/ADC/SBB flag production; other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
 The correspondence between C unsigned bit operations and Lean `BitVec`

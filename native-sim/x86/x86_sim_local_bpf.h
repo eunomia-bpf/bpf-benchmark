@@ -13,6 +13,7 @@
 #include "../formal/generated/x86_add_flags.h"
 #include "../formal/generated/x86_sbb_result.h"
 #include "../formal/generated/x86_sbb_flags.h"
+#include "../formal/generated/x86_adc.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -544,6 +545,20 @@ struct x86_sim_state {
 			__x86_add_sign);                                    \
 	} while (0)
 
+#define X86_SIM_L_SET_ADC_FLAGS(LHS, RHS, CARRY, RESULT, WIDTH)             \
+	do {                                                               \
+		__u8 __x86_adc_width = (WIDTH) ? (WIDTH) : X86_WIDTH_64;  \
+		__u64 __x86_adc_mask = x86_width_mask(__x86_adc_width);   \
+		__u64 __x86_adc_a = (LHS) & __x86_adc_mask;               \
+		__u64 __x86_adc_b = (RHS) & __x86_adc_mask;               \
+		__u64 __x86_adc_r = (RESULT) & __x86_adc_mask;            \
+		__u64 __x86_adc_sign =                                    \
+			1ULL << (x86_width_bits(__x86_adc_width) - 1);      \
+		KPROG_X86_SET_ADC_FLAGS(__x86_cf, __x86_zf, __x86_sf,   \
+			__x86_of, __x86_adc_a, __x86_adc_b, __x86_adc_r, \
+			__x86_adc_sign, (CARRY));                           \
+	} while (0)
+
 #define X86_SIM_L_SET_SBB_FLAGS(LHS, RHS, BORROW, RESULT, WIDTH)            \
 	do {                                                               \
 		__u8 __x86_sbb_width = (WIDTH) ? (WIDTH) : X86_WIDTH_64;  \
@@ -889,10 +904,11 @@ struct x86_sim_state {
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
 						  __x86_l_width);        \
 		} else if ((ALU) == X86_ALU_ADC) {                         \
-			__u64 __x86_l_add_rhs = __x86_l_rhs + __x86_cf;    \
-			__x86_l_result = __x86_l_lhs + __x86_l_add_rhs;   \
-			X86_SIM_L_SET_ADD_FLAGS(__x86_l_lhs,               \
-						__x86_l_add_rhs,      \
+			__u8 __x86_l_carry = __x86_cf;                    \
+			__x86_l_result = KPROG_X86_ADC_RESULT(             \
+				__x86_l_lhs, __x86_l_rhs, __x86_l_carry);   \
+			X86_SIM_L_SET_ADC_FLAGS(__x86_l_lhs, __x86_l_rhs,  \
+						__x86_l_carry,        \
 						__x86_l_result,       \
 						__x86_l_width);       \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
@@ -927,10 +943,11 @@ struct x86_sim_state {
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
 						  __x86_l_width);        \
 		} else if ((ALU) == X86_ALU_ADC) {                         \
-			__u64 __x86_l_add_rhs = __x86_l_rhs + __x86_cf;    \
-			__x86_l_result = __x86_l_lhs + __x86_l_add_rhs;   \
-			X86_SIM_L_SET_ADD_FLAGS(__x86_l_lhs,               \
-						__x86_l_add_rhs,      \
+			__u8 __x86_l_carry = __x86_cf;                    \
+			__x86_l_result = KPROG_X86_ADC_RESULT(             \
+				__x86_l_lhs, __x86_l_rhs, __x86_l_carry);   \
+			X86_SIM_L_SET_ADC_FLAGS(__x86_l_lhs, __x86_l_rhs,  \
+						__x86_l_carry,        \
 						__x86_l_result,       \
 						__x86_l_width);       \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
@@ -962,6 +979,12 @@ struct x86_sim_state {
 				__x86_l_lhs, __x86_l_rhs, __x86_l_borrow);  \
 			X86_SIM_L_SET_SBB_FLAGS(__x86_l_lhs, __x86_l_rhs, \
 				__x86_l_borrow, __x86_l_result, __x86_l_width);\
+		} else if (__x86_l_alu == X86_ALU_ADC) {                   \
+			__u8 __x86_l_carry = __x86_cf;                    \
+			__x86_l_result = KPROG_X86_ADC_RESULT(             \
+				__x86_l_lhs, __x86_l_rhs, __x86_l_carry);   \
+			X86_SIM_L_SET_ADC_FLAGS(__x86_l_lhs, __x86_l_rhs,  \
+				__x86_l_carry, __x86_l_result, __x86_l_width);\
 		} else {                                                   \
 			__x86_l_result = x86_alu_result(__x86_l_lhs,       \
 				__x86_l_rhs, __x86_l_alu, __x86_l_width); \
@@ -1008,14 +1031,22 @@ struct x86_sim_state {
 			(IMM), __x86_l_width, 1);                         \
 		__u64 __x86_l_rhs = x86_store_imm_value((IMM),            \
 			__x86_l_width);                                   \
-		__u64 __x86_l_result = x86_alu_result(__x86_l_lhs,        \
-			__x86_l_rhs, __x86_l_alu, __x86_l_width);         \
+		__u64 __x86_l_result;                                    \
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
 			x86_store_imm_disp(IMM));                         \
 		void *__x86_l_base_ptr = (void *)0;                       \
-		X86_SIM_L_SET_ALU_FLAGS(__x86_l_lhs, __x86_l_rhs,         \
-					__x86_l_result, __x86_l_alu,    \
-					__x86_l_width);                  \
+		if (__x86_l_alu == X86_ALU_ADC) {                         \
+			__u8 __x86_l_carry = __x86_cf;                    \
+			__x86_l_result = KPROG_X86_ADC_RESULT(             \
+				__x86_l_lhs, __x86_l_rhs, __x86_l_carry);   \
+			X86_SIM_L_SET_ADC_FLAGS(__x86_l_lhs, __x86_l_rhs,  \
+				__x86_l_carry, __x86_l_result, __x86_l_width);\
+		} else {                                                   \
+			__x86_l_result = x86_alu_result(__x86_l_lhs,       \
+				__x86_l_rhs, __x86_l_alu, __x86_l_width);    \
+			X86_SIM_L_SET_ALU_FLAGS(__x86_l_lhs, __x86_l_rhs,  \
+				__x86_l_result, __x86_l_alu, __x86_l_width); \
+		}                                                         \
 		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                     \
 		if ((DST) != X86_REG_NONE)                                \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(DST);    \
@@ -1038,14 +1069,22 @@ struct x86_sim_state {
 		__u64 __x86_l_lhs = X86_SIM_L_READ_MEM_VALUE((DST), (AUX),\
 			(IMM), __x86_l_width, 0);                         \
 		__u64 __x86_l_rhs = X86_SIM_L_READ_REG(SRC);             \
-		__u64 __x86_l_result = x86_alu_result(__x86_l_lhs,       \
-			__x86_l_rhs, __x86_l_alu, __x86_l_width);         \
+		__u64 __x86_l_result;                                    \
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
 			x86_simm(IMM));                                    \
 		void *__x86_l_base_ptr = (void *)0;                       \
-		X86_SIM_L_SET_ALU_FLAGS(__x86_l_lhs, __x86_l_rhs,         \
-					__x86_l_result, __x86_l_alu,    \
-					__x86_l_width);                  \
+		if (__x86_l_alu == X86_ALU_ADC) {                         \
+			__u8 __x86_l_carry = __x86_cf;                    \
+			__x86_l_result = KPROG_X86_ADC_RESULT(             \
+				__x86_l_lhs, __x86_l_rhs, __x86_l_carry);   \
+			X86_SIM_L_SET_ADC_FLAGS(__x86_l_lhs, __x86_l_rhs,  \
+				__x86_l_carry, __x86_l_result, __x86_l_width);\
+		} else {                                                   \
+			__x86_l_result = x86_alu_result(__x86_l_lhs,       \
+				__x86_l_rhs, __x86_l_alu, __x86_l_width);    \
+			X86_SIM_L_SET_ALU_FLAGS(__x86_l_lhs, __x86_l_rhs,  \
+				__x86_l_result, __x86_l_alu, __x86_l_width); \
+		}                                                         \
 		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                     \
 		if ((DST) != X86_REG_NONE)                                \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(DST);    \
