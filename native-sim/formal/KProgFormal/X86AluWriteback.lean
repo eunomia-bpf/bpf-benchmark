@@ -311,6 +311,49 @@ theorem x86_sub_high8_example :
       0x112233445566ff01 := by
   native_decide
 
+/-- Register-destination SUB-immediate after lane selection and decoding of the
+raw artifact immediate. -/
+def generatedX86SubImmLaneHandler (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86Immediate.value rawImm width
+  let result := GeneratedX86SbbResult.result lhs rhs false
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86SubFlags (GeneratedX86Width.narrow lhs width)
+      (GeneratedX86Width.narrow rhs width)
+      (GeneratedX86Width.narrow result width)
+      (GeneratedX86Width.signMask width) }
+
+def x86SubImmLaneHandlerSpec (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86ImmediateValueSpec rawImm width
+  let result := x86SubResultSpec lhs rhs
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := x86SubFlagsSpec (x86NarrowSpec lhs width)
+      (x86NarrowSpec rhs width) (x86NarrowSpec result width)
+      (x86WidthSignMaskSpec width) }
+
+theorem x86_sub_imm_lane_handler_refines (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width) (dstLane : X86ByteLane) :
+    generatedX86SubImmLaneHandler state rawImm width dstLane =
+      x86SubImmLaneHandlerSpec state rawImm width dstLane := by
+  simp only [generatedX86SubImmLaneHandler, x86SubImmLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_immediate_value_refines,
+    x86_sub_step_refines, x86_reg_write_at_refines,
+    x86_sub_result_refines]
+
+theorem x86_sub_imm64_sign_extension_example :
+    generatedX86SubImmLaneHandler
+      { dst := { bits := 0, tag := .packet },
+        flags := { cf := false, zf := true, sf := true, of := true } }
+      0xffffffff .w64 .low =
+      { dst := { bits := 1, tag := .scalar },
+        flags := { cf := true, zf := false, sf := false, of := false } } := by
+  native_decide
+
 def generatedX86SbbHandler (state : X86RegAluState) (rhs : BitVec 64)
     (width : X86Width) : X86RegAluState :=
   let lhs := state.dst.bits
