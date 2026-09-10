@@ -162,8 +162,10 @@ memory-load, or specialized handlers.
 Register ADD now consumes that lane metadata in both generated C execution
 paths. The corresponding Lean handler theorem composes lane-aware destination
 and source reads, generated ADD result and flags, and lane-aware writeback for
-all widths and lane choices. ADC/SUB/SBB and compare/test high-byte forms still
-fail at artifact generation; the theorem does not cover immediate decoding,
+all widths and lane choices. ADC has the same composed lane theorem, with the
+incoming CF captured from the pre-state, and is enabled by the artifact
+encoder. SUB/SBB and compare/test high-byte forms still fail at artifact
+generation; the theorems do not cover immediate decoding,
 instruction dispatch, compiler output, or native bytes.
 The ADD, ADC, SUB, and SBB register-handler slice then composes the generated
 result, width narrowing, flag transition, and register writeback contracts.

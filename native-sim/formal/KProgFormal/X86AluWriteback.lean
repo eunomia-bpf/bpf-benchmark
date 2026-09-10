@@ -109,6 +109,49 @@ theorem x86_adc_handler_refines (state : X86RegAluState)
   simp only [generatedX86AdcHandler, x86AdcHandlerSpec]
   rw [x86_adc_step_refines, x86_reg_write_refines, x86_adc_result_refines]
 
+/-- Register-register ADC after lane selection. The incoming carry is captured
+from the pre-state before the result and replacement flags are computed. -/
+def generatedX86AdcLaneHandler (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86RegRead.readAt rawRhs width srcLane
+  let carry := state.flags.cf
+  let result := GeneratedX86Adc.result lhs rhs carry
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86AdcFlags (GeneratedX86Width.narrow lhs width)
+      (GeneratedX86Width.narrow rhs width)
+      (GeneratedX86Width.narrow result width)
+      (GeneratedX86Width.signMask width) carry }
+
+def x86AdcLaneHandlerSpec (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86RegReadAtSpec rawRhs width srcLane
+  let carry := state.flags.cf
+  let result := x86AdcResultSpec lhs rhs carry
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := x86AdcFlagsSpec (x86NarrowSpec lhs width)
+      (x86NarrowSpec rhs width) (x86NarrowSpec result width)
+      (x86WidthSignMaskSpec width) carry }
+
+theorem x86_adc_lane_handler_refines (state : X86RegAluState)
+    (rawRhs : BitVec 64) (width : X86Width)
+    (dstLane srcLane : X86ByteLane) :
+    generatedX86AdcLaneHandler state rawRhs width dstLane srcLane =
+      x86AdcLaneHandlerSpec state rawRhs width dstLane srcLane := by
+  simp only [generatedX86AdcLaneHandler, x86AdcLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_reg_read_at_refines,
+    x86_adc_step_refines, x86_reg_write_at_refines,
+    x86_adc_result_refines]
+
+theorem x86_adc_high8_consumes_incoming_carry :
+    (generatedX86AdcLaneHandler
+      { dst := { bits := 0x1122334455667f01, tag := .scalar },
+        flags := { cf := true, zf := false, sf := false, of := false } }
+      0x0000000000000102 .w8 .high .high).dst.bits =
+      0x1122334455668101 := by
+  native_decide
+
 def generatedX86SubHandler (state : X86RegAluState) (rhs : BitVec 64)
     (width : X86Width) : X86RegAluState :=
   let lhs := state.dst.bits

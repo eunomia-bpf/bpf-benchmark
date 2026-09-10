@@ -474,7 +474,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
             (reg_info(ops[0]) is not None and
              (is_int(ops[1]) or reg_info(ops[1]) is not None)) or
             (is_mem(ops[0]) and reg_info(ops[1]) is not None))) or
-        (op == "add" and len(ops) == 2 and
+        (op in {"add", "adc"} and len(ops) == 2 and
          reg_info(ops[0]) is not None and
          (is_int(ops[1]) or reg_info(ops[1]) is not None)) or
         (op.startswith("set") and op in CC_AUX and len(ops) == 1 and
@@ -729,7 +729,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                        aux=c_reg_lane_aux(ALU_AUX[op], dst_reg[2]),
                        imm=c_u64(parse_int(ops[1])))
         if dst_reg and src_reg:
-            if op == "add" and dst_reg[1] != src_reg[1]:
+            if op in {"add", "adc"} and dst_reg[1] != src_reg[1]:
                 raise ValueError(
                     f"mismatched register operand widths: {insn.raw}"
                 )
