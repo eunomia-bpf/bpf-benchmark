@@ -11,6 +11,8 @@
 #include "../formal/generated/x86_logic_flags.h"
 #include "../formal/generated/x86_sub_flags.h"
 #include "../formal/generated/x86_add_flags.h"
+#include "../formal/generated/x86_sbb_result.h"
+#include "../formal/generated/x86_sbb_flags.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -548,16 +550,14 @@ struct x86_sim_state {
 		__u64 __x86_sbb_mask = x86_width_mask(__x86_sbb_width);   \
 		__u64 __x86_sbb_a = (LHS) & __x86_sbb_mask;               \
 		__u64 __x86_sbb_b = (RHS) & __x86_sbb_mask;               \
-		__u64 __x86_sbb_sub = (__x86_sbb_b + (BORROW)) & __x86_sbb_mask;\
+		__u64 __x86_sbb_sub = KPROG_X86_SBB_SUBTRAHEND(           \
+			__x86_sbb_b, __x86_sbb_mask, (BORROW));             \
 		__u64 __x86_sbb_r = (RESULT) & __x86_sbb_mask;            \
 		__u64 __x86_sbb_sign =                                    \
 			1ULL << (x86_width_bits(__x86_sbb_width) - 1);    \
-		__x86_cf = (__x86_sbb_a < __x86_sbb_b) ||                 \
-			   ((BORROW) && __x86_sbb_a == __x86_sbb_b);      \
-		__x86_zf = __x86_sbb_r == 0;                              \
-		__x86_sf = (__x86_sbb_r & __x86_sbb_sign) != 0;           \
-		__x86_of = ((__x86_sbb_a ^ __x86_sbb_sub) &               \
-			    (__x86_sbb_a ^ __x86_sbb_r) & __x86_sbb_sign) != 0;\
+		KPROG_X86_SET_SBB_FLAGS(__x86_cf, __x86_zf, __x86_sf,   \
+			__x86_of, __x86_sbb_a, __x86_sbb_b, __x86_sbb_sub,\
+			__x86_sbb_r, __x86_sbb_sign, (BORROW));             \
 	} while (0)
 
 #define X86_SIM_L_SET_IMUL_FLAGS(LHS, RHS, WIDTH)                           \
@@ -880,8 +880,8 @@ struct x86_sim_state {
 		__u64 __x86_l_result;                                    \
 		if ((ALU) == X86_ALU_SBB) {                               \
 			__u8 __x86_l_borrow = __x86_cf;                   \
-			__x86_l_result = __x86_l_lhs - __x86_l_rhs -      \
-					 __x86_l_borrow;                  \
+			__x86_l_result = KPROG_X86_SBB_RESULT(             \
+				__x86_l_lhs, __x86_l_rhs, __x86_l_borrow);  \
 			X86_SIM_L_SET_SBB_FLAGS(__x86_l_lhs, __x86_l_rhs, \
 						__x86_l_borrow,          \
 						__x86_l_result,          \
@@ -918,8 +918,8 @@ struct x86_sim_state {
 		__u64 __x86_l_result;                                    \
 		if ((ALU) == X86_ALU_SBB) {                               \
 			__u8 __x86_l_borrow = __x86_cf;                   \
-			__x86_l_result = __x86_l_lhs - __x86_l_rhs -      \
-					 __x86_l_borrow;                  \
+			__x86_l_result = KPROG_X86_SBB_RESULT(             \
+				__x86_l_lhs, __x86_l_rhs, __x86_l_borrow);  \
 			X86_SIM_L_SET_SBB_FLAGS(__x86_l_lhs, __x86_l_rhs, \
 						__x86_l_borrow,          \
 						__x86_l_result,          \
@@ -958,8 +958,8 @@ struct x86_sim_state {
 		__u64 __x86_l_result;                                    \
 		if (__x86_l_alu == X86_ALU_SBB) {                         \
 			__u8 __x86_l_borrow = __x86_cf;                   \
-			__x86_l_result = __x86_l_lhs - __x86_l_rhs -      \
-					 __x86_l_borrow;                  \
+			__x86_l_result = KPROG_X86_SBB_RESULT(             \
+				__x86_l_lhs, __x86_l_rhs, __x86_l_borrow);  \
 			X86_SIM_L_SET_SBB_FLAGS(__x86_l_lhs, __x86_l_rhs, \
 				__x86_l_borrow, __x86_l_result, __x86_l_width);\
 		} else {                                                   \

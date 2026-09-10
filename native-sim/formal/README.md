@@ -51,6 +51,13 @@ already-narrowed operands/result and a sign mask, the shared C/Lean contract
 defines carry, zero, sign, and signed overflow and composes them through the
 next-PC theorem. It does not prove that the supplied result was produced by
 architectural addition.
+The three x86 SBB execution handlers now obtain `a-b-borrow` from one shared
+C/Lean expression contract. Lean proves its 64-bit modular result and the
+per-width narrowing of that result against independent specifications. This
+closes the earlier supplied-result premise for those handler expressions. A
+separate generated SBB flag contract covers borrow-in, zero, sign, and overflow
+and composes the result/subtrahend/narrowing layers as well as the next-PC
+decision. Decoder selection and sign-mask derivation remain open.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86

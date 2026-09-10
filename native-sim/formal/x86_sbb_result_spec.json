@@ -1,0 +1,1 @@
+{"schema_version":1,"operation":"x86SbbResult","expressions":{"result":{"op":"sub","lhs":{"op":"sub","lhs":{"op":"input","name":"a"},"rhs":{"op":"input","name":"b"}},"rhs":{"op":"borrow"}},"subtrahend":{"op":"and","lhs":{"op":"add","lhs":{"op":"input","name":"b"},"rhs":{"op":"borrow"}},"rhs":{"op":"input","name":"mask"}}}}

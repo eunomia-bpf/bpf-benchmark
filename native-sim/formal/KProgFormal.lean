@@ -5,3 +5,5 @@ import KProgFormal.X86LogicFlags
 import KProgFormal.X86Width
 import KProgFormal.X86SubFlags
 import KProgFormal.X86AddFlags
+import KProgFormal.X86SbbResult
+import KProgFormal.X86SbbFlags
