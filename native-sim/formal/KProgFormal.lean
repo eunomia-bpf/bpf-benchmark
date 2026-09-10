@@ -8,3 +8,4 @@ import KProgFormal.X86AddFlags
 import KProgFormal.X86SbbResult
 import KProgFormal.X86SbbFlags
 import KProgFormal.X86Adc
+import KProgFormal.X86AddResult

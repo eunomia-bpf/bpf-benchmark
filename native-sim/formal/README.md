@@ -63,6 +63,10 @@ flag contract. This preserves carry-in through width overflow instead of
 folding it into an ordinary ADD operand, and Lean composes modular
 `a+b+carry`, per-width narrowing, ADC flags, and next-PC. Decoder selection and
 sign-mask derivation remain outside the theorem.
+Plain ADD in the central ALU result helper is the zero-carry specialization of
+the same generated modular-addition contract. Lean composes that concrete
+result, per-width narrowing, and the existing ADD flag transition, eliminating
+ADD's earlier free-result premise while retaining decoder/compiler boundaries.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86
