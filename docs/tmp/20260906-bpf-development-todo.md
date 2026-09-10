@@ -780,3 +780,25 @@ ADD/SUB/shift flag production, AArch64 flag production, decoder-to-handler
 correspondence, general control-flow traces, memory, helpers, and specialization
 preservation remain open. Generation binding and verifier acceptance continue
 to establish different properties from these refinement theorems.
+
+### Width and subtraction refinement, 2026-09-10
+
+- `1f0ac4509` moves x86 width codes, masks, bit counts, narrowing, and
+  zero/sign observations into a shared generated JSON/Lean/C contract. Lean
+  checks all four legal widths and arbitrary 64-bit values against an
+  independent enumeration; C static assertions bind codes 1/2/4/8. The first
+  generated C ternary had an excess closing parenthesis. The build-only proof
+  path rejected it; after fixing the generator, the negative artifact and all
+  29 workload-derived artifacts compiled.
+- `fe993be9d` moves the central x86 SUB flag transition into a shared contract.
+  For arbitrary already-narrowed operands, result, and sign mask, Lean checks
+  borrow, zero, sign, and overflow flags against an independent specification
+  and composes them through every supported condition to the next-PC decision.
+  Formal checks and the negative plus 29/29 build-only artifacts pass.
+
+These theorems do not verify C unsigned operations against Lean `BitVec`, the
+C compiler, decoder/handler selection, native bytes, or that the supplied SUB
+result equals architectural subtraction. Those remain premises, not proved
+facts. The next x86 flag-production units are ADD, ADC/SBB, and shifts;
+AArch64 flag production and broader memory/helper/control-flow refinement
+remain open.
