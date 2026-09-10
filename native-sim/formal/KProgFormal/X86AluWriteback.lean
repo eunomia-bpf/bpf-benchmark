@@ -5,6 +5,7 @@ import KProgFormal.X86Adc
 import KProgFormal.X86SbbFlags
 import KProgFormal.X86RegRead
 import KProgFormal.X86LogicFlags
+import KProgFormal.X86Immediate
 
 namespace KProgFormal
 
@@ -80,6 +81,50 @@ theorem x86_add_high8_example :
         flags := { cf := false, zf := false, sf := false, of := false } }
       0x0000000000000102 .w8 .high .high).dst.bits =
       0x1122334455668001 := by
+  native_decide
+
+/-- Register-destination ADD-immediate after lane selection and decoding of the
+raw artifact immediate. This is the value/flags/writeback slice used by the C
+ALU-immediate handler once opcode, width, lane, and raw field are supplied. -/
+def generatedX86AddImmLaneHandler (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86Immediate.value rawImm width
+  let result := GeneratedX86Adc.result lhs rhs false
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86AddFlags (GeneratedX86Width.narrow lhs width)
+      (GeneratedX86Width.narrow rhs width)
+      (GeneratedX86Width.narrow result width)
+      (GeneratedX86Width.signMask width) }
+
+def x86AddImmLaneHandlerSpec (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86ImmediateValueSpec rawImm width
+  let result := x86AddResultSpec lhs rhs
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := x86AddFlagsSpec (x86NarrowSpec lhs width)
+      (x86NarrowSpec rhs width) (x86NarrowSpec result width)
+      (x86WidthSignMaskSpec width) }
+
+theorem x86_add_imm_lane_handler_refines (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width) (dstLane : X86ByteLane) :
+    generatedX86AddImmLaneHandler state rawImm width dstLane =
+      x86AddImmLaneHandlerSpec state rawImm width dstLane := by
+  simp only [generatedX86AddImmLaneHandler, x86AddImmLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_immediate_value_refines,
+    x86_add_step_refines, x86_reg_write_at_refines,
+    x86_add_result_refines]
+
+theorem x86_add_imm64_sign_extension_example :
+    generatedX86AddImmLaneHandler
+      { dst := { bits := 1, tag := .packet },
+        flags := { cf := false, zf := false, sf := true, of := true } }
+      0xffffffff .w64 .low =
+      { dst := { bits := 0, tag := .scalar },
+        flags := { cf := true, zf := true, sf := false, of := false } } := by
   native_decide
 
 def generatedX86AdcHandler (state : X86RegAluState) (rhs : BitVec 64)
