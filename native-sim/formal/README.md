@@ -46,10 +46,15 @@ and Lean. For already narrowed operands/result and a width sign mask, Lean
 checks carry/borrow, zero, sign, and signed-overflow flags against an
 independent specification and composes them through the condition-to-next-PC
 theorem.
+The x86 addition flag transition follows the same binding: for arbitrary
+already-narrowed operands/result and a sign mask, the shared C/Lean contract
+defines carry, zero, sign, and signed overflow and composes them through the
+next-PC theorem. It does not prove that the supplied result was produced by
+architectural addition.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86
-logical/SUB flag production; other flag production, the decoder-to-handler
+logical/ADD/SUB flag production; other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
 The correspondence between C unsigned bit operations and Lean `BitVec`

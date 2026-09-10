@@ -10,6 +10,7 @@
 #include "../formal/generated/x86_cond.h"
 #include "../formal/generated/x86_logic_flags.h"
 #include "../formal/generated/x86_sub_flags.h"
+#include "../formal/generated/x86_add_flags.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -536,11 +537,9 @@ struct x86_sim_state {
 		__u64 __x86_add_r = (RESULT) & __x86_add_mask;            \
 		__u64 __x86_add_sign =                                    \
 			1ULL << (x86_width_bits(__x86_add_width) - 1);    \
-		__x86_cf = __x86_add_r < __x86_add_a;                     \
-		__x86_zf = __x86_add_r == 0;                              \
-		__x86_sf = (__x86_add_r & __x86_add_sign) != 0;           \
-		__x86_of = ((~(__x86_add_a ^ __x86_add_b) &               \
-			    (__x86_add_a ^ __x86_add_r) & __x86_add_sign) != 0);\
+		KPROG_X86_SET_ADD_FLAGS(__x86_cf, __x86_zf, __x86_sf,   \
+			__x86_of, __x86_add_a, __x86_add_b, __x86_add_r, \
+			__x86_add_sign);                                    \
 	} while (0)
 
 #define X86_SIM_L_SET_SBB_FLAGS(LHS, RHS, BORROW, RESULT, WIDTH)            \
