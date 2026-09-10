@@ -143,6 +143,12 @@ from the artifact encoder into handler calls, so this theorem establishes the
 primitive rather than end-to-end high-byte instruction support. The C
 compatibility convention that width zero aliases 64 and behavior for other
 invalid numeric widths remain outside the typed Lean model.
+Register operand reads now have the matching generated lane contract. Lean
+proves that low/high byte observations and low 16/32/64-bit observations agree
+with an independent fixed-width extraction specification, including a
+concrete AH read regression. The existing full-register C read goes through
+this generated primitive at width 64; passing decoded width/lane metadata at
+each operand handler remains a separate integration obligation.
 The ADD, ADC, SUB, and SBB register-handler slice then composes the generated
 result, width narrowing, flag transition, and register writeback contracts.
 For arbitrary old destination bits and tags, right-hand operand, incoming

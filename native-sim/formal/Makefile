@@ -13,6 +13,7 @@ check:
 	python3 generate_x86_shift_result_spec.py --check
 	python3 generate_x86_shift_flags_spec.py --check
 	python3 generate_x86_reg_write_spec.py --check
+	python3 generate_x86_reg_read_spec.py --check
 	python3 generate_x86_sub_flags_spec.py --check
 	python3 generate_x86_add_flags_spec.py --check
 	python3 generate_x86_sbb_result_spec.py --check
@@ -39,3 +40,4 @@ check:
 	lake env lean KProgFormal/X86ShiftFlags.lean
 	lake env lean KProgFormal/X86RegWrite.lean
 	lake env lean KProgFormal/X86AluWriteback.lean
+	lake env lean KProgFormal/X86RegRead.lean

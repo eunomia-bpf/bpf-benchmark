@@ -16,6 +16,7 @@
 #include "../formal/generated/x86_adc.h"
 #include "../formal/generated/x86_shift_flags.h"
 #include "../formal/generated/x86_reg_write.h"
+#include "../formal/generated/x86_reg_read.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -282,8 +283,21 @@ struct x86_sim_state {
 #define X86_SIM_L_READ_REG_PTR(REG)                                         \
 	X86_SIM_L_REG_VALUE(REG)
 
+#define X86_SIM_L_READ_REG_WIDTH_SHIFT(REG, WIDTH, SRC_SHIFT)               \
+	({                                                                 \
+		__u8 __x86_rd_reg = (REG);                                  \
+		__u8 __x86_rd_raw_width = (WIDTH);                         \
+		__u8 __x86_rd_width = __x86_rd_raw_width ?                 \
+			__x86_rd_raw_width : X86_WIDTH_64;                   \
+		__u8 __x86_rd_shift = (SRC_SHIFT);                          \
+		__u64 __x86_rd_value =                                    \
+			(__u64)(long)X86_SIM_L_READ_REG_PTR(__x86_rd_reg);  \
+		KPROG_X86_READ_REG_AT(__x86_rd_value, __x86_rd_width,      \
+			__x86_rd_shift);                                    \
+	})
+
 #define X86_SIM_L_READ_REG(REG)                                             \
-	((__u64)(long)X86_SIM_L_READ_REG_PTR(REG))
+	X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
 
 #define X86_SIM_L_REG_TAG_CASE(REG, NAME)                                  \
 	case REG:                                                          \
