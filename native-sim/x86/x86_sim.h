@@ -118,6 +118,7 @@
 #define X86_WIDTH_64 8U
 #include "../formal/generated/x86_width.h"
 #include "../formal/generated/x86_adc.h"
+#include "../formal/generated/x86_sbb_result.h"
 
 #define X86_RAX 0U
 #define X86_RCX 1U
@@ -270,7 +271,9 @@ static __always_inline __u64 x86_alu_result(__u64 lhs, __u64 rhs,
 		return KPROG_X86_ADC_RESULT(lhs, rhs, 0);
 	if (alu == X86_ALU_ADC)
 		return lhs + rhs;
-	if (alu == X86_ALU_SUB || alu == X86_ALU_SBB)
+	if (alu == X86_ALU_SUB)
+		return KPROG_X86_SBB_RESULT(lhs, rhs, 0);
+	if (alu == X86_ALU_SBB)
 		return lhs - rhs;
 	if (alu == X86_ALU_XOR)
 		return lhs ^ rhs;

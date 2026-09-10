@@ -67,6 +67,11 @@ Plain ADD in the central ALU result helper is the zero-carry specialization of
 the same generated modular-addition contract. Lean composes that concrete
 result, per-width narrowing, and the existing ADD flag transition, eliminating
 ADD's earlier free-result premise while retaining decoder/compiler boundaries.
+Plain SUB in the central ALU result helper similarly specializes the generated
+SBB result contract to `borrow=false`. Lean composes that concrete result,
+per-width narrowing, the width-derived sign mask, and the SUB flag transition;
+comparison instructions and decoder/compiler boundaries are not covered by
+this central-helper theorem.
 The same generated width contract now supplies the sign-bit mask used by the
 C ADD, SUB, ADC, and SBB flag wrappers. The width-aware ADD, ADC, and SBB step
 theorems derive that mask from operand width rather than accepting a free

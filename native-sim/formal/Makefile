@@ -24,3 +24,4 @@ check:
 	lake env lean KProgFormal/X86SbbFlags.lean
 	lake env lean KProgFormal/X86Adc.lean
 	lake env lean KProgFormal/X86AddResult.lean
+	lake env lean KProgFormal/X86SubResult.lean
