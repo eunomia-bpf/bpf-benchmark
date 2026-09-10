@@ -4,6 +4,7 @@ import KProgFormal.X86SubResult
 import KProgFormal.X86Adc
 import KProgFormal.X86SbbFlags
 import KProgFormal.X86RegRead
+import KProgFormal.X86LogicFlags
 
 namespace KProgFormal
 
@@ -344,6 +345,51 @@ theorem x86_cmp_high8_observes_high_lanes :
       { dst := { bits := 0x112233445566aa01, tag := .scalar },
         flags := { cf := true, zf := false, sf := true, of := true } }
       0x000000000000aa02 .w8 .high .high).flags.zf = true := by
+  native_decide
+
+/-- TEST observes the selected register lanes, derives logic flags from their
+bitwise conjunction, and preserves the complete destination register. -/
+def generatedX86TestLaneHandler (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86RegRead.readAt rawRhs width srcLane
+  let result := GeneratedX86Width.narrow (BitVec.and lhs rhs) width
+  { dst := state.dst
+    flags := generatedX86LogicFlags (result == 0)
+      (BitVec.and result (GeneratedX86Width.signMask width) != 0) }
+
+def x86TestLaneHandlerSpec (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86RegReadAtSpec rawRhs width srcLane
+  let result := x86NarrowSpec (BitVec.and lhs rhs) width
+  { dst := state.dst
+    flags := x86LogicFlagsSpec (result == 0)
+      (BitVec.and result (x86WidthSignMaskSpec width) != 0) }
+
+theorem x86_test_lane_handler_refines (state : X86RegAluState)
+    (rawRhs : BitVec 64) (width : X86Width)
+    (dstLane srcLane : X86ByteLane) :
+    generatedX86TestLaneHandler state rawRhs width dstLane srcLane =
+      x86TestLaneHandlerSpec state rawRhs width dstLane srcLane := by
+  simp only [generatedX86TestLaneHandler, x86TestLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_reg_read_at_refines,
+    x86_narrow_refines, x86_width_sign_mask_refines]
+  rw [x86_logic_flags_refine]
+
+theorem x86_test_lane_preserves_destination (state : X86RegAluState)
+    (rawRhs : BitVec 64) (width : X86Width)
+    (dstLane srcLane : X86ByteLane) :
+    (generatedX86TestLaneHandler state rawRhs width dstLane srcLane).dst =
+      state.dst := by
+  rfl
+
+theorem x86_test_high8_observes_high_lanes :
+    let flags := (generatedX86TestLaneHandler
+      { dst := { bits := 0x112233445566aa01, tag := .scalar },
+        flags := { cf := true, zf := true, sf := false, of := true } }
+      0x000000000000f002 .w8 .high .high).flags
+    flags.zf = false /\ flags.sf = true := by
   native_decide
 
 end KProgFormal

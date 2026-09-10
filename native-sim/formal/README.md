@@ -157,8 +157,8 @@ overlap for arbitrary values and both typed lanes; C static assertions bind
 the same layout. The pre-existing `mov [mem], ah/bh/ch/dh` source-lane encoding
 remains supported; other high-byte operand forms fail during artifact
 generation instead of silently being treated as low-byte operands. This does
-not cover TEST, other ALU operations, compare/ALU memory forms, extend, shift,
-memory-load, or specialized handlers.
+not cover other ALU operations, compare/ALU memory forms, extend, shift,
+memory-load, or specialized handlers. Register TEST uses the same lane layout.
 Register ADD now consumes that lane metadata in both generated C execution
 paths. The corresponding Lean handler theorem composes lane-aware destination
 and source reads, generated ADD result and flags, and lane-aware writeback for
@@ -168,7 +168,8 @@ encoder. SUB now also composes generated subtraction with lane reads and
 writeback. SBB likewise consumes the pre-state CF as borrow in its generated
 result and flags before lane writeback. CMP composes the selected register
 operands with generated subtraction flags and proves that destination bits and
-tag are unchanged; high-byte TEST remains unsupported. The theorems do not
+tag are unchanged. TEST composes the selected operands with the generated
+logic flags and proves the same destination preservation. The theorems do not
 cover immediate decoding, instruction dispatch, compiler output, or native
 bytes.
 The ADD, ADC, SUB, and SBB register-handler slice then composes the generated
