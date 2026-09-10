@@ -828,3 +828,40 @@ ADD still assumes its supplied result rather than proving `a+b`; ADC has not
 yet been separated from ADD to prove carry-in/result formation. Decoder and
 handler selection, sign-mask derivation, C/Lean language correspondence,
 compiler/native bytes, shifts, and AArch64 flag production remain open.
+
+### ADC, arithmetic-result, and compare refinement, 2026-09-10
+
+- `86d81485c` gives all five encoder-reachable ADC operand forms one generated
+  result/flag contract and proves `a+b+carry`, width narrowing, ADC flags, and
+  next-PC refinement. This fixed an implementation bug rather than merely
+  documenting a premise: folding `rhs+CF` into ordinary ADD flags loses carry
+  at boundaries such as `a=0,b=UINT64_MAX,carry=1`, and can also lose signed
+  overflow. The dedicated ADC formulas now preserve the original carry input.
+- `0291b1cfa` specializes that generated modular-addition result to
+  `carry=false` in the central plain-ADD helper. Lean composes the actual result
+  expression with narrowing and ADD flags, closing ADD's earlier free-result
+  premise for all five binary ADD operand forms.
+- `bd6b34428` extends the existing legal-width contract with canonical sign
+  masks, routes the C ADD/SUB/ADC/SBB flag wrappers through it, and removes the
+  free `sign` input from the width-aware ADD, ADC, and SBB step theorems. Lean
+  also proves for every legal width and arbitrary value that testing this mask
+  equals the independently stated sign-bit observation. SUB did not yet have a
+  width-aware step theorem at this commit.
+- `db6fe2d40` specializes the generated SBB result to `borrow=false` in the
+  central plain-SUB helper and composes result, narrowing, width-derived sign
+  mask, and SUB flags. It covers five binary SUB operand forms; CMP, DEC, NEG,
+  and SBB remain distinct paths.
+- `fb5eeab17` binds all five CMP operand forms, in both direct-macro and generic
+  dispatch execution, to the same zero-borrow result and SUB flag contracts.
+  Lean composes that width-aware value transition through every supported
+  condition to next PC. TEST retains its separate logical-flags path.
+
+Every increment passed the full generated-artifact freshness and Lean checks.
+Every C-changing state also passed the existing direct build-only x86 Make
+path: the preserved negative artifact and all 29 workload-derived proof
+artifacts compiled successfully. Independent read-only review found no blocker
+and checked operand-form reachability and claim boundaries. These results do
+not prove parsing/decoder selection, memory operand reads, C unsigned semantics
+against Lean `BitVec`, compiler lowering, or native bytes. Shift and remaining
+unary flags, broader traces, memory/helpers, specialization preservation, and
+AArch64 flag production are still open; no new performance experiment was run.
