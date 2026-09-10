@@ -11,6 +11,7 @@ check:
 	python3 generate_x86_not_spec.py --check
 	python3 generate_x86_shift_count_spec.py --check
 	python3 generate_x86_shift_result_spec.py --check
+	python3 generate_x86_shift_flags_spec.py --check
 	python3 generate_x86_sub_flags_spec.py --check
 	python3 generate_x86_add_flags_spec.py --check
 	python3 generate_x86_sbb_result_spec.py --check
@@ -34,3 +35,4 @@ check:
 	lake env lean KProgFormal/X86Not.lean
 	lake env lean KProgFormal/X86ShiftCount.lean
 	lake env lean KProgFormal/X86ShiftResult.lean
+	lake env lean KProgFormal/X86ShiftFlags.lean

@@ -14,6 +14,7 @@
 #include "../formal/generated/x86_sbb_result.h"
 #include "../formal/generated/x86_sbb_flags.h"
 #include "../formal/generated/x86_adc.h"
+#include "../formal/generated/x86_shift_flags.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -591,40 +592,19 @@ struct x86_sim_state {
 
 #define X86_SIM_L_SET_SHIFT_FLAGS(LHS, RHS, RESULT, ALU, WIDTH)             \
 	do {                                                               \
-		__u8 __x86_sh_width = (WIDTH) ? (WIDTH) : X86_WIDTH_64;   \
+		__u8 __x86_sh_raw_width = (WIDTH);                         \
+		__u8 __x86_sh_width = __x86_sh_raw_width ?                  \
+			__x86_sh_raw_width : X86_WIDTH_64;                    \
 		__u32 __x86_sh_bits = x86_width_bits(__x86_sh_width);     \
 		__u64 __x86_sh_mask = x86_width_mask(__x86_sh_width);     \
 		__u64 __x86_sh_a = (LHS) & __x86_sh_mask;                 \
 		__u64 __x86_sh_r = (RESULT) & __x86_sh_mask;              \
 		__u8 __x86_sh_count = x86_shift_count((RHS), __x86_sh_width);\
 		__u64 __x86_sh_sign = 1ULL << (__x86_sh_bits - 1);        \
-		if ((ALU) == X86_ALU_ROL) {                               \
-			__u8 __x86_sh_amount = __x86_sh_count % __x86_sh_bits;\
-			if (__x86_sh_amount != 0) {                      \
-				__x86_cf = __x86_sh_r & 1;               \
-				if (__x86_sh_amount == 1)                \
-					__x86_of = ((__x86_sh_r & __x86_sh_sign) != 0) ^ __x86_cf;\
-			}                                                   \
-		} else if (__x86_sh_count != 0) {                         \
-			__x86_zf = __x86_sh_r == 0;                       \
-			__x86_sf = (__x86_sh_r & __x86_sh_sign) != 0;     \
-			if ((ALU) == X86_ALU_SHL) {                         \
-				__x86_cf = __x86_sh_count <= __x86_sh_bits ?\
-					(__x86_sh_a >> (__x86_sh_bits - __x86_sh_count)) & 1 : 0;\
-				if (__x86_sh_count == 1)                  \
-					__x86_of = ((__x86_sh_r & __x86_sh_sign) != 0) ^ __x86_cf;\
-			} else if ((ALU) == X86_ALU_SHR) {                  \
-				__x86_cf = __x86_sh_count <= __x86_sh_bits ?\
-					(__x86_sh_a >> (__x86_sh_count - 1)) & 1 : 0;\
-				if (__x86_sh_count == 1)                  \
-					__x86_of = (__x86_sh_a & __x86_sh_sign) != 0;\
-			} else if ((ALU) == X86_ALU_SAR) {                  \
-				__x86_cf = __x86_sh_count <= __x86_sh_bits ?\
-					(__x86_sh_a >> (__x86_sh_count - 1)) & 1 : (__x86_sh_a & __x86_sh_sign) != 0;\
-				if (__x86_sh_count == 1)                  \
-					__x86_of = 0;                         \
-			}                                                   \
-		}                                                         \
+		__u8 __x86_sh_alu = (ALU);                                 \
+		KPROG_X86_SET_SHIFT_FLAGS(__x86_cf, __x86_zf, __x86_sf,   \
+			__x86_of, __x86_sh_a, __x86_sh_count, __x86_sh_r,   \
+			__x86_sh_bits, __x86_sh_sign, __x86_sh_alu);          \
 	} while (0)
 
 #define X86_SIM_L_SET_ALU_FLAGS(LHS, RHS, RESULT, ALU, WIDTH)               \

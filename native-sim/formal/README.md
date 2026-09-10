@@ -110,6 +110,22 @@ checks every width and masked count, including narrowing before SHR and
 width-local sign fill for SAR. This fixes the prior narrow-width SHR/SAR result
 errors. Operand selection, writeback, flags, and native compilation remain
 outside these result theorems; SHLD and SHRD are separate operations.
+Their flag transition is now generated into the central C handler and Lean as
+well. For arbitrary operands, supplied result, incoming flags, legal width, and
+masked count, Lean checks every architecturally defined field: count zero
+preserves all flags; SHL/SHR/SAR update zero and sign, update carry while the
+count is below the operand width for SHL/SHR or with sign saturation for SAR,
+and define overflow at masked count one; ROL
+preserves zero/sign, updates carry for every nonzero masked count, and defines
+overflow at masked count one. The carry rule fixes the
+prior 8/16-bit ROL case where a
+nonzero masked count equal to the width left carry stale even though the
+effective rotate amount was zero. The step theorems compose these flag
+obligations with the independent shift-result theorems. SHL/SHR carry at or
+beyond the operand width and overflow outside masked count one remain
+intentionally unconstrained ISA fields; the generated C/Lean implementation's
+deterministic choices for those fields are not claimed as architectural
+guarantees.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86
