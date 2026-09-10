@@ -252,4 +252,52 @@ theorem x86_sbb_handler_refines (state : X86RegAluState)
   simp only [generatedX86SbbHandler, x86SbbHandlerSpec]
   rw [x86_sbb_step_refines, x86_reg_write_refines, x86_sbb_result_refines]
 
+/-- Register-register SBB after lane selection. The incoming CF is the borrow
+consumed by both the generated result and flag transition. -/
+def generatedX86SbbLaneHandler (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86RegRead.readAt rawRhs width srcLane
+  let borrow := state.flags.cf
+  let result := GeneratedX86SbbResult.result lhs rhs borrow
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86SbbFlags (GeneratedX86Width.narrow lhs width)
+      (GeneratedX86Width.narrow rhs width)
+      (GeneratedX86SbbResult.subtrahend
+        (GeneratedX86Width.narrow rhs width)
+        (GeneratedX86Width.mask width) borrow)
+      (GeneratedX86Width.narrow result width)
+      (GeneratedX86Width.signMask width) borrow }
+
+def x86SbbLaneHandlerSpec (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86RegReadAtSpec rawRhs width srcLane
+  let borrow := state.flags.cf
+  let result := x86SbbResultSpec lhs rhs borrow
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := x86SbbFlagsSpec (x86NarrowSpec lhs width)
+      (x86NarrowSpec rhs width)
+      (x86SbbSubtrahendSpec (x86NarrowSpec rhs width)
+        (x86WidthMaskSpec width) borrow)
+      (x86NarrowSpec result width) (x86WidthSignMaskSpec width) borrow }
+
+theorem x86_sbb_lane_handler_refines (state : X86RegAluState)
+    (rawRhs : BitVec 64) (width : X86Width)
+    (dstLane srcLane : X86ByteLane) :
+    generatedX86SbbLaneHandler state rawRhs width dstLane srcLane =
+      x86SbbLaneHandlerSpec state rawRhs width dstLane srcLane := by
+  simp only [generatedX86SbbLaneHandler, x86SbbLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_reg_read_at_refines,
+    x86_sbb_step_refines, x86_reg_write_at_refines,
+    x86_sbb_result_refines]
+
+theorem x86_sbb_high8_consumes_incoming_borrow :
+    (generatedX86SbbLaneHandler
+      { dst := { bits := 0x1122334455660001, tag := .scalar },
+        flags := { cf := true, zf := false, sf := false, of := false } }
+      0x0000000000000102 .w8 .high .high).dst.bits =
+      0x112233445566fe01 := by
+  native_decide
+
 end KProgFormal
