@@ -958,6 +958,15 @@ AArch64 flag production. No new performance measurement was made.
   dynamic CMP/TEST AUX increased `payload_prefix_memcmp_scan` proof bytecode
   from 360 to 384 instructions in the 29-row build-only corpus. This is an
   observed code-size/verification cost, not runtime-performance evidence.
+- `77921fd1a` binds register NOT to the same lane AUX and shared unary C
+  handler. A new Lean handler theorem composes lane observation, the generated
+  complement, width-limited selected-lane writeback, provenance scalarization,
+  and preservation of CF/ZF/SF/OF. The concrete regression changes AH from
+  `0xaa` to `0x55` while preserving every other bit and all flags. An initial
+  direct `bv_decide` proof exposed private byte-read terms as opaque and
+  reported only potentially spurious counterexamples; the final proof instead
+  composes the existing read, NOT, narrowing-invariant write, and flag
+  refinement theorems. High-byte INC/DEC/NEG remain fail-fast.
 
 Every final state above passed generated-source freshness checks, the complete
 Lean target, the preserved negative proof build, and all 29 workload-derived
