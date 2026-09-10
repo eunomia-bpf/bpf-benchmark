@@ -15,6 +15,7 @@
 #include "../formal/generated/x86_sbb_flags.h"
 #include "../formal/generated/x86_adc.h"
 #include "../formal/generated/x86_shift_flags.h"
+#include "../formal/generated/x86_reg_write.h"
 
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
@@ -63,6 +64,13 @@ union x86_sim_gpr {
 	__u16 w;
 	__u8 b[8];
 };
+
+_Static_assert(sizeof(union x86_sim_gpr) == sizeof(__u64),
+	       "x86 simulator register must hold exactly 64 bits");
+_Static_assert(sizeof(void *) == sizeof(__u64),
+	       "x86 simulator pointer storage must hold exactly 64 bits");
+_Static_assert(__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__,
+	       "x86 partial-register layout requires little endian");
 
 union x86_sim_stack_mem {
 	__u8 b[X86_SIM_STACK_BYTES];
@@ -293,22 +301,28 @@ struct x86_sim_state {
 		__x86_l_tag;                                             \
 	})
 
-#define X86_SIM_L_WRITE_REG_VALUE_CASE(REG, NAME)                           \
+#define X86_SIM_L_WRITE_REG64_VALUE_CASE(REG, NAME)                         \
 	case REG:                                                          \
-		__x86_##NAME.ptr = (void *)(long)__x86_wr_next;          \
-		__x86_##NAME##_tag = X86_SIM_TAG_SCALAR;                 \
+		KPROG_X86_WRITE_REG64(__x86_##NAME, __x86_##NAME##_tag,   \
+			__x86_wr_next, X86_SIM_TAG_SCALAR);                 \
 		break;
 
 #define X86_SIM_L_WRITE_REG8_VALUE_CASE(REG, NAME)                          \
 	case REG:                                                          \
-		__x86_##NAME.b[0] = (__u8)__x86_wr_next;                  \
-		__x86_##NAME##_tag = X86_SIM_TAG_SCALAR;                 \
+		KPROG_X86_WRITE_REG8(__x86_##NAME, __x86_##NAME##_tag,    \
+			__x86_wr_next, X86_SIM_TAG_SCALAR);                 \
 		break;
 
 #define X86_SIM_L_WRITE_REG16_VALUE_CASE(REG, NAME)                         \
 	case REG:                                                          \
-		__x86_##NAME.w = (__u16)__x86_wr_next;                    \
-		__x86_##NAME##_tag = X86_SIM_TAG_SCALAR;                 \
+		KPROG_X86_WRITE_REG16(__x86_##NAME, __x86_##NAME##_tag,   \
+			__x86_wr_next, X86_SIM_TAG_SCALAR);                 \
+		break;
+
+#define X86_SIM_L_WRITE_REG32_VALUE_CASE(REG, NAME)                         \
+	case REG:                                                          \
+		KPROG_X86_WRITE_REG32(__x86_##NAME, __x86_##NAME##_tag,   \
+			__x86_wr_next, X86_SIM_TAG_SCALAR);                 \
 		break;
 
 #define X86_SIM_L_WRITE_REG_PTR_VALUE_CASE(REG, NAME)                       \
@@ -343,7 +357,9 @@ struct x86_sim_state {
 
 #define X86_SIM_L_WRITE_REG_WIDTH(REG, VALUE, WIDTH)                        \
 	do {                                                               \
-		__u8 __x86_wr_width = (WIDTH) ? (WIDTH) : X86_WIDTH_64;   \
+		__u8 __x86_wr_raw_width = (WIDTH);                         \
+		__u8 __x86_wr_width = __x86_wr_raw_width ?                 \
+			__x86_wr_raw_width : X86_WIDTH_64;                   \
 		__u64 __x86_wr_next = (VALUE);                            \
 		if (__x86_wr_width == X86_WIDTH_8) {                      \
 			switch (REG) {                                    \
@@ -358,15 +374,14 @@ struct x86_sim_state {
 				break;                                    \
 			}                                                 \
 		} else if (__x86_wr_width == X86_WIDTH_32) {              \
-			__x86_wr_next = (__u32)__x86_wr_next;             \
 			switch (REG) {                                    \
-			X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG_VALUE_CASE)\
+			X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG32_VALUE_CASE)\
 			default:                                          \
 				break;                                    \
 			}                                                 \
 		} else {                                                  \
 			switch (REG) {                                    \
-			X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG_VALUE_CASE)\
+			X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG64_VALUE_CASE)\
 			default:                                          \
 				break;                                    \
 			}                                                 \

@@ -126,6 +126,19 @@ beyond the operand width and overflow outside masked count one remain
 intentionally unconstrained ISA fields; the generated C/Lean implementation's
 deterministic choices for those fields are not claimed as architectural
 guarantees.
+Register writeback is generated from a shared C/Lean contract as well. Lean
+checks an independent bit-update formulation for all four legal widths: a
+low-byte 8-bit write and a low-word 16-bit write preserve the old upper bits,
+32-bit writes zero-extend, and 64-bit writes replace the register. Every
+integer-width write scalarizes simulator provenance.
+The generated macros are used by the central C register switch for all 16
+general-purpose registers; compile-time assertions bind its union and pointer
+sizes and little-endian partial-write layout. The theorem covers the writeback
+primitive, not selection of a destination register by a decoded instruction.
+In particular, AH/BH/CH/DH destination-lane selection is not carried into the
+current C writeback primitive or modeled by this theorem; the C compatibility
+convention that width zero aliases 64 and behavior for other invalid numeric
+widths are also outside the four-constructor Lean model.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86
