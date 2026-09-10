@@ -301,7 +301,7 @@ static __always_inline __u64 x86_alu_result(__u64 lhs, __u64 rhs,
 	if (alu == X86_ALU_NOT)
 		return ~lhs;
 	if (alu == X86_ALU_NEG)
-		return 0 - lhs;
+		return KPROG_X86_SBB_RESULT(0, lhs, 0);
 	return lhs;
 }
 

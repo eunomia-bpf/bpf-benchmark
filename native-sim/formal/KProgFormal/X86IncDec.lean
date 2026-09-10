@@ -88,4 +88,39 @@ theorem x86_dec_branch_refines (a : BitVec 64) (oldCf : Bool) (width : X86Width)
         (x86WidthSignMaskSpec width) oldCf) cond) fallthrough target := by
   rw [x86_dec_step_refines, x86_condition_sound]
 
+def x86NegResultSpec (a : BitVec 64) : BitVec 64 := 0 - a
+
+def x86NegFlagsSpec (a r sign : BitVec 64) : X86Flags :=
+  { cf := a != 0, zf := r == 0, sf := BitVec.and r sign != 0,
+    of := a == sign }
+
+theorem x86_neg_result_refines (a : BitVec 64) :
+    GeneratedX86SbbResult.result 0 a false = x86NegResultSpec a := by
+  simp [GeneratedX86SbbResult.result, x86NegResultSpec]
+
+theorem x86_neg_step_refines (a : BitVec 64) (width : X86Width) :
+    generatedX86SubFlags 0 (GeneratedX86Width.narrow a width)
+      (GeneratedX86Width.narrow (GeneratedX86SbbResult.result 0 a false) width)
+      (GeneratedX86Width.signMask width) =
+    x86NegFlagsSpec (x86NarrowSpec a width)
+      (x86NarrowSpec (x86NegResultSpec a) width)
+      (x86WidthSignMaskSpec width) := by
+  cases width <;> simp [generatedX86SubFlags, GeneratedX86SubFlags.eval,
+    GeneratedX86SbbResult.result, GeneratedX86Width.narrow,
+    GeneratedX86Width.mask, GeneratedX86Width.signMask, x86NegFlagsSpec,
+    x86NarrowSpec, x86NegResultSpec, x86WidthMaskSpec,
+    x86WidthSignMaskSpec] <;> bv_decide
+
+theorem x86_neg_branch_refines (a : BitVec 64) (width : X86Width)
+    (cond : X86Cond) (fallthrough target : Nat) :
+    branchPc (generatedX86Cond
+      (generatedX86SubFlags 0 (GeneratedX86Width.narrow a width)
+        (GeneratedX86Width.narrow (GeneratedX86SbbResult.result 0 a false) width)
+        (GeneratedX86Width.signMask width)) cond) fallthrough target =
+    branchPc (x86CondSpec
+      (x86NegFlagsSpec (x86NarrowSpec a width)
+        (x86NarrowSpec (x86NegResultSpec a) width)
+        (x86WidthSignMaskSpec width)) cond) fallthrough target := by
+  rw [x86_neg_step_refines, x86_condition_sound]
+
 end KProgFormal

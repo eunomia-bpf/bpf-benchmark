@@ -91,6 +91,10 @@ contracts to one and zero carry/borrow. Lean composes each modular result with
 width narrowing, the generated ADD/SUB flags, explicit preservation of the
 incoming CF, and condition-to-next-PC. This covers register and memory unary
 handler values, but not memory access/store or decoder selection.
+NEG likewise specializes the generated SBB result to `0-a` with no incoming
+borrow and composes the SUB flags through next-PC. Unlike INC/DEC, its CF is
+the architectural borrow from zero rather than a preserved input flag; memory
+access/store and decoder selection remain outside the theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86
