@@ -435,6 +435,57 @@ theorem x86_sbb_high8_consumes_incoming_borrow :
       0x112233445566fe01 := by
   native_decide
 
+/-- Register-destination SBB-immediate after lane selection and raw immediate
+decoding. The borrow used by the result, subtrahend, and flags is captured from
+one pre-state. -/
+def generatedX86SbbImmLaneHandler (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86Immediate.value rawImm width
+  let borrow := state.flags.cf
+  let result := GeneratedX86SbbResult.result lhs rhs borrow
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86SbbFlags (GeneratedX86Width.narrow lhs width)
+      (GeneratedX86Width.narrow rhs width)
+      (GeneratedX86SbbResult.subtrahend
+        (GeneratedX86Width.narrow rhs width)
+        (GeneratedX86Width.mask width) borrow)
+      (GeneratedX86Width.narrow result width)
+      (GeneratedX86Width.signMask width) borrow }
+
+def x86SbbImmLaneHandlerSpec (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86ImmediateValueSpec rawImm width
+  let borrow := state.flags.cf
+  let result := x86SbbResultSpec lhs rhs borrow
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := x86SbbFlagsSpec (x86NarrowSpec lhs width)
+      (x86NarrowSpec rhs width)
+      (x86SbbSubtrahendSpec (x86NarrowSpec rhs width)
+        (x86WidthMaskSpec width) borrow)
+      (x86NarrowSpec result width) (x86WidthSignMaskSpec width) borrow }
+
+theorem x86_sbb_imm_lane_handler_refines (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width) (dstLane : X86ByteLane) :
+    generatedX86SbbImmLaneHandler state rawImm width dstLane =
+      x86SbbImmLaneHandlerSpec state rawImm width dstLane := by
+  simp only [generatedX86SbbImmLaneHandler, x86SbbImmLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_immediate_value_refines,
+    x86_sbb_step_refines, x86_reg_write_at_refines,
+    x86_sbb_result_refines]
+
+theorem x86_sbb_imm64_borrow_boundary_example :
+    generatedX86SbbImmLaneHandler
+      { dst := { bits := 0, tag := .packet },
+        flags := { cf := true, zf := false, sf := true, of := true } }
+      0xffffffff .w64 .low =
+      { dst := { bits := 0, tag := .scalar },
+        flags := { cf := true, zf := true, sf := false, of := false } } := by
+  native_decide
+
 /-- CMP observes the selected register lanes and replaces flags with the
 generated subtraction flags, while preserving the complete destination. -/
 def generatedX86CmpLaneHandler (state : X86RegAluState) (rawRhs : BitVec 64)
