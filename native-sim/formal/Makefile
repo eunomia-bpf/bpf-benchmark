@@ -43,3 +43,4 @@ check:
 	lake env lean KProgFormal/X86AluWriteback.lean
 	lake env lean KProgFormal/X86RegRead.lean
 	lake env lean KProgFormal/X86RegLaneAux.lean
+	lake env lean KProgFormal/X86UnaryWriteback.lean

@@ -138,19 +138,20 @@ primitive, not selection of a destination register by a decoded instruction.
 The generated primitive also accepts the high-byte lane used by AH/BH/CH/DH.
 Lean proves the lane-parametric write and retains the concrete review
 counterexample: writing `0xaa` into the high byte of `0x1122334455667788`
-produces `0x112233445566aa88`. Destination-lane metadata is not yet carried
-from the artifact encoder into handler calls, so this theorem establishes the
-primitive rather than end-to-end high-byte instruction support. The C
+produces `0x112233445566aa88`. This primitive theorem alone does not bind
+artifact metadata to a handler; the named integrated handlers below add that
+composition, while unlisted handlers remain separate obligations. The C
 compatibility convention that width zero aliases 64 and behavior for other
 invalid numeric widths remain outside the typed Lean model.
 Register operand reads now have the matching generated lane contract. Lean
 proves that low/high byte observations and low 16/32/64-bit observations agree
 with an independent fixed-width extraction specification, including a
 concrete AH read regression. The existing full-register C read goes through
-this generated primitive at width 64; passing decoded width/lane metadata at
-each operand handler remains a separate integration obligation.
+this generated primitive at width 64; passing decoded width/lane metadata in
+the remaining unlisted operand handlers is still an integration obligation.
 For MOV-immediate, MOV-register, register SETcc, register-destination
-ADD/ADC/SUB/SBB, and register CMP, a generated 32-bit AUX layout now carries
+ADD/ADC/SUB/SBB, register CMP/TEST, and register NOT, a generated 32-bit AUX
+layout now carries
 the payload plus destination/source byte-lane shifts from the Python artifact
 encoder into the C handler. Lean proves all three fields round-trip without
 overlap for arbitrary values and both typed lanes; C static assertions bind
@@ -158,7 +159,7 @@ the same layout. The pre-existing `mov [mem], ah/bh/ch/dh` source-lane encoding
 remains supported; other high-byte operand forms fail during artifact
 generation instead of silently being treated as low-byte operands. This does
 not cover other ALU operations, compare/ALU memory forms, extend, shift,
-memory-load, or specialized handlers. Register TEST uses the same lane layout.
+memory-load, or specialized handlers.
 Register ADD now consumes that lane metadata in both generated C execution
 paths. The corresponding Lean handler theorem composes lane-aware destination
 and source reads, generated ADD result and flags, and lane-aware writeback for
@@ -172,6 +173,10 @@ tag are unchanged. TEST composes the selected operands with the generated
 logic flags and proves the same destination preservation. The theorems do not
 cover immediate decoding, instruction dispatch, compiler output, or native
 bytes.
+Register NOT also consumes the lane AUX through the shared unary C handler.
+Its Lean handler theorem composes lane observation, the generated complement,
+selected-lane writeback, scalarized provenance, and preservation of all four
+modeled flags. High-byte INC/DEC/NEG remain unsupported.
 The ADD, ADC, SUB, and SBB register-handler slice then composes the generated
 result, width narrowing, flag transition, and register writeback contracts.
 For arbitrary old destination bits and tags, right-hand operand, incoming

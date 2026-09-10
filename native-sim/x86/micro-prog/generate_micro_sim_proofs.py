@@ -480,6 +480,8 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
         (op in {"cmp", "test"} and len(ops) == 2 and
          reg_info(ops[0]) is not None and
          (is_int(ops[1]) or reg_info(ops[1]) is not None)) or
+        (op == "not" and len(ops) == 1 and
+         reg_info(ops[0]) is not None) or
         (op.startswith("set") and op in CC_AUX and len(ops) == 1 and
          reg_info(ops[0]) is not None)
     )
@@ -712,7 +714,8 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                 raise ValueError(f"cannot encode {insn.raw}")
             imm = "1" if op in {"inc", "dec"} else "0"
             return enc("X86_OP_ALU_IMM", dst=dst_reg[0],
-                       flags=WIDTH_CONST[dst_reg[1]], aux=ALU_AUX[op],
+                       flags=WIDTH_CONST[dst_reg[1]],
+                       aux=c_reg_lane_aux(ALU_AUX[op], dst_reg[2]),
                        imm=imm)
         if op == "imul" and len(ops) == 3:
             dst = reg_info(ops[0])

@@ -63,6 +63,15 @@ theorem x86_reg_write_at_refines (old : X86RegValue) (value : BitVec 64)
           GeneratedX86RegWrite.bitsAt, x86RegWriteAtSpec,
           x86RegWriteBitsAtSpec, x86ByteShiftSpec] <;> bv_decide
 
+theorem x86_reg_write_at_narrow_value (old : X86RegValue)
+    (value : BitVec 64) (width : X86Width) (lane : X86ByteLane) :
+    x86RegWriteAtSpec old value width lane =
+      x86RegWriteAtSpec old (x86NarrowSpec value width) width lane := by
+  cases old
+  cases width <;> cases lane <;>
+    simp [x86RegWriteAtSpec, x86RegWriteBitsAtSpec, x86NarrowSpec,
+      x86WidthMaskSpec, x86ByteShiftSpec] <;> bv_decide
+
 def generatedX86RegWrite (old : X86RegValue) (value : BitVec 64)
     (width : X86Width) : X86RegValue :=
   let generated := GeneratedX86RegWrite.write old.bits value width
