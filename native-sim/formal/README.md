@@ -86,6 +86,11 @@ Lean. Lean checks both fields against an independent enumeration. This binds an
 already parsed mnemonic to the C ALU code consumed by the handlers; objdump,
 assembly parsing, operand-form selection, and handler semantics outside the
 separately proved operations remain boundaries.
+INC and DEC in the central result helper specialize the generated ADD and SBB
+contracts to one and zero carry/borrow. Lean composes each modular result with
+width narrowing, the generated ADD/SUB flags, explicit preservation of the
+incoming CF, and condition-to-next-PC. This covers register and memory unary
+handler values, but not memory access/store or decoder selection.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86

@@ -11,3 +11,4 @@ import KProgFormal.X86Adc
 import KProgFormal.X86AddResult
 import KProgFormal.X86SubResult
 import KProgFormal.X86AluDecode
+import KProgFormal.X86IncDec

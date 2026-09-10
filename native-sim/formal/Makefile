@@ -27,3 +27,4 @@ check:
 	lake env lean KProgFormal/X86AddResult.lean
 	lake env lean KProgFormal/X86SubResult.lean
 	lake env lean KProgFormal/X86AluDecode.lean
+	lake env lean KProgFormal/X86IncDec.lean

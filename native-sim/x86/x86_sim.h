@@ -295,9 +295,9 @@ static __always_inline __u64 x86_alu_result(__u64 lhs, __u64 rhs,
 	if (alu == X86_ALU_IMUL)
 		return lhs * rhs;
 	if (alu == X86_ALU_INC)
-		return lhs + 1;
+		return KPROG_X86_ADC_RESULT(lhs, 1, 0);
 	if (alu == X86_ALU_DEC)
-		return lhs - 1;
+		return KPROG_X86_SBB_RESULT(lhs, 1, 0);
 	if (alu == X86_ALU_NOT)
 		return ~lhs;
 	if (alu == X86_ALU_NEG)
