@@ -197,9 +197,10 @@ the artifact field is reduced to 32 bits and sign-extended only for 64-bit
 operations. Lean proves that bitwise implementation against an independent
 `BitVec` truncate/sign-extend specification for every raw field and legal
 width. This covers the C immediate helper after an encoded field is supplied;
-the ADD-immediate lane theorem additionally composes that decoded value through
-the generated ADD result, flags, selected-lane writeback, and tag
-scalarization. Other immediate opcodes and textual parsing remain outside this
+the ADD- and ADC-immediate lane theorems additionally compose that decoded
+value through their generated result, flags, selected-lane writeback, and tag
+scalarization. ADC consumes one immutable pre-state carry in both its result
+and flags. Other immediate opcodes and textual parsing remain outside this
 composition.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag

@@ -198,6 +198,52 @@ theorem x86_adc_high8_consumes_incoming_carry :
       0x1122334455668101 := by
   native_decide
 
+/-- Register-destination ADC-immediate after lane selection and raw immediate
+decoding. The carry used by both result and flags is captured from the same
+pre-state. -/
+def generatedX86AdcImmLaneHandler (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86Immediate.value rawImm width
+  let carry := state.flags.cf
+  let result := GeneratedX86Adc.result lhs rhs carry
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86AdcFlags (GeneratedX86Width.narrow lhs width)
+      (GeneratedX86Width.narrow rhs width)
+      (GeneratedX86Width.narrow result width)
+      (GeneratedX86Width.signMask width) carry }
+
+def x86AdcImmLaneHandlerSpec (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86ImmediateValueSpec rawImm width
+  let carry := state.flags.cf
+  let result := x86AdcResultSpec lhs rhs carry
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := x86AdcFlagsSpec (x86NarrowSpec lhs width)
+      (x86NarrowSpec rhs width) (x86NarrowSpec result width)
+      (x86WidthSignMaskSpec width) carry }
+
+theorem x86_adc_imm_lane_handler_refines (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width) (dstLane : X86ByteLane) :
+    generatedX86AdcImmLaneHandler state rawImm width dstLane =
+      x86AdcImmLaneHandlerSpec state rawImm width dstLane := by
+  simp only [generatedX86AdcImmLaneHandler, x86AdcImmLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_immediate_value_refines,
+    x86_adc_step_refines, x86_reg_write_at_refines,
+    x86_adc_result_refines]
+
+theorem x86_adc_imm64_carry_boundary_example :
+    generatedX86AdcImmLaneHandler
+      { dst := { bits := 0, tag := .packet },
+        flags := { cf := true, zf := false, sf := true, of := true } }
+      0xffffffff .w64 .low =
+      { dst := { bits := 0, tag := .scalar },
+        flags := { cf := true, zf := true, sf := false, of := false } } := by
+  native_decide
+
 def generatedX86SubHandler (state : X86RegAluState) (rhs : BitVec 64)
     (width : X86Width) : X86RegAluState :=
   let lhs := state.dst.bits
