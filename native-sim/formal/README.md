@@ -80,6 +80,12 @@ theorems derive that mask from operand width rather than accepting a free
 `sign` argument, and Lean checks that mask testing equals the independent sign
 observation for every legal width. Decoder-to-handler and C-to-Lean language
 correspondence remain boundaries.
+The 16 accepted ALU mnemonics and numeric operation codes are generated into
+the proof-artifact encoder's Python mapping, the C simulator constants, and
+Lean. Lean checks both fields against an independent enumeration. This binds an
+already parsed mnemonic to the C ALU code consumed by the handlers; objdump,
+assembly parsing, operand-form selection, and handler semantics outside the
+separately proved operations remain boundaries.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86

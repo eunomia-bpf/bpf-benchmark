@@ -7,6 +7,7 @@ check:
 	python3 generate_x86_cond_spec.py --check
 	python3 generate_x86_logic_flags_spec.py --check
 	python3 generate_x86_width_spec.py --check
+	python3 generate_x86_alu_decode_spec.py --check
 	python3 generate_x86_sub_flags_spec.py --check
 	python3 generate_x86_add_flags_spec.py --check
 	python3 generate_x86_sbb_result_spec.py --check
@@ -25,3 +26,4 @@ check:
 	lake env lean KProgFormal/X86Adc.lean
 	lake env lean KProgFormal/X86AddResult.lean
 	lake env lean KProgFormal/X86SubResult.lean
+	lake env lean KProgFormal/X86AluDecode.lean

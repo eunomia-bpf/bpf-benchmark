@@ -12,6 +12,8 @@ from pathlib import Path
 
 import yaml
 
+from generated_x86_alu_decode import ALU_AUX
+
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MICRO_PROGRAMS = REPO_ROOT / "micro" / "programs"
@@ -61,25 +63,6 @@ for base, names in {
             width = 8
         shift = 8 if name in {"ah", "bh", "ch", "dh"} else 0
         REGS[name] = (f"X86_{base}", width, shift)
-
-ALU_AUX = {
-    "add": "X86_ALU_ADD",
-    "sub": "X86_ALU_SUB",
-    "xor": "X86_ALU_XOR",
-    "or": "X86_ALU_OR",
-    "and": "X86_ALU_AND",
-    "adc": "X86_ALU_ADC",
-    "shl": "X86_ALU_SHL",
-    "shr": "X86_ALU_SHR",
-    "sar": "X86_ALU_SAR",
-    "rol": "X86_ALU_ROL",
-    "imul": "X86_ALU_IMUL",
-    "inc": "X86_ALU_INC",
-    "dec": "X86_ALU_DEC",
-    "not": "X86_ALU_NOT",
-    "neg": "X86_ALU_NEG",
-    "sbb": "X86_ALU_SBB",
-}
 
 CC_AUX = {
     "ja": "X86_CC_A",

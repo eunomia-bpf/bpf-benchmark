@@ -80,22 +80,7 @@
 #define X86_OP_ADD_REG64 X86_OP_ADD_REG
 #define X86_OP_XOR_REG32 X86_OP_XOR_REG
 
-#define X86_ALU_ADD 0U
-#define X86_ALU_SUB 1U
-#define X86_ALU_XOR 2U
-#define X86_ALU_OR 3U
-#define X86_ALU_AND 4U
-#define X86_ALU_SHL 5U
-#define X86_ALU_SHR 6U
-#define X86_ALU_SAR 7U
-#define X86_ALU_ROL 8U
-#define X86_ALU_IMUL 9U
-#define X86_ALU_INC 10U
-#define X86_ALU_NOT 11U
-#define X86_ALU_SBB 12U
-#define X86_ALU_DEC 13U
-#define X86_ALU_NEG 14U
-#define X86_ALU_ADC 15U
+#include "../formal/generated/x86_alu_decode.h"
 
 #define X86_CC_O 0U
 #define X86_CC_NO 1U
