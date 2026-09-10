@@ -802,3 +802,29 @@ result equals architectural subtraction. Those remain premises, not proved
 facts. The next x86 flag-production units are ADD, ADC/SBB, and shifts;
 AArch64 flag production and broader memory/helper/control-flow refinement
 remain open.
+
+### ADD and SBB refinement, 2026-09-10
+
+- `88a457063` binds the central x86 ADD flag transition to generated JSON,
+  Lean, and C expressions. For arbitrary already-narrowed operands/result and
+  sign mask, Lean checks carry, zero, sign, and signed overflow and composes
+  them through all supported conditions to next-PC. The direct build-only x86
+  Make target compiled the negative artifact and all 29 workload-derived
+  artifacts without rebuilding the kernel. Independent review additionally
+  compared 100,000 random 64-bit tuples against the old C formulas.
+- `adb50c32a` binds all three imm/reg/mem SBB result paths, the narrowed
+  subtrahend, and the true SBB flag transition. Lean composes raw modular
+  `a-b-borrow`, per-width narrowing, `(narrow(b)+borrow)&mask`, SBB flags, and
+  next-PC. C normalizes borrow with `!!`, matching the Lean `Bool` domain.
+- Review rejected an intermediate composition that incorrectly reused ordinary
+  SUB flags. For `a=0,b=0,borrow=1`, real SBB has an all-ones result with
+  `CF=true,ZF=false`, while that incorrect model produced
+  `CF=false,ZF=true`. The invalid theorem was removed and replaced with the
+  dedicated SBB contract; a second review also required narrowed `b` in the
+  subtrahend to mirror the actual C local data flow. Final formal checks and
+  negative plus 29/29 build-only artifact compilation pass.
+
+ADD still assumes its supplied result rather than proving `a+b`; ADC has not
+yet been separated from ADD to prove carry-in/result formation. Decoder and
+handler selection, sign-mask derivation, C/Lean language correspondence,
+compiler/native bytes, shifts, and AArch64 flag production remain open.
