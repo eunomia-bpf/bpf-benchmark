@@ -51,7 +51,7 @@ already-narrowed operands/result and a sign mask, the shared C/Lean contract
 defines carry, zero, sign, and signed overflow and composes them through the
 next-PC theorem. It does not prove that the supplied result was produced by
 architectural addition.
-The three x86 SBB execution handlers now obtain `a-b-borrow` from one shared
+All five x86 binary SBB operand-form handlers now obtain `a-b-borrow` from one shared
 C/Lean expression contract. Lean proves its 64-bit modular result and the
 per-width narrowing of that result against independent specifications. This
 closes the earlier supplied-result premise for those handler expressions. A

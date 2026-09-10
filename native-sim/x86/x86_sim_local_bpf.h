@@ -1031,7 +1031,13 @@ struct x86_sim_state {
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
 			x86_store_imm_disp(IMM));                         \
 		void *__x86_l_base_ptr = (void *)0;                       \
-		if (__x86_l_alu == X86_ALU_ADC) {                         \
+		if (__x86_l_alu == X86_ALU_SBB) {                         \
+			__u8 __x86_l_borrow = __x86_cf;                   \
+			__x86_l_result = KPROG_X86_SBB_RESULT(             \
+				__x86_l_lhs, __x86_l_rhs, __x86_l_borrow);  \
+			X86_SIM_L_SET_SBB_FLAGS(__x86_l_lhs, __x86_l_rhs, \
+				__x86_l_borrow, __x86_l_result, __x86_l_width);\
+		} else if (__x86_l_alu == X86_ALU_ADC) {                   \
 			__u8 __x86_l_carry = __x86_cf;                    \
 			__x86_l_result = KPROG_X86_ADC_RESULT(             \
 				__x86_l_lhs, __x86_l_rhs, __x86_l_carry);   \
@@ -1069,7 +1075,13 @@ struct x86_sim_state {
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
 			x86_simm(IMM));                                    \
 		void *__x86_l_base_ptr = (void *)0;                       \
-		if (__x86_l_alu == X86_ALU_ADC) {                         \
+		if (__x86_l_alu == X86_ALU_SBB) {                         \
+			__u8 __x86_l_borrow = __x86_cf;                   \
+			__x86_l_result = KPROG_X86_SBB_RESULT(             \
+				__x86_l_lhs, __x86_l_rhs, __x86_l_borrow);  \
+			X86_SIM_L_SET_SBB_FLAGS(__x86_l_lhs, __x86_l_rhs, \
+				__x86_l_borrow, __x86_l_result, __x86_l_width);\
+		} else if (__x86_l_alu == X86_ALU_ADC) {                   \
 			__u8 __x86_l_carry = __x86_cf;                    \
 			__x86_l_result = KPROG_X86_ADC_RESULT(             \
 				__x86_l_lhs, __x86_l_rhs, __x86_l_carry);   \
