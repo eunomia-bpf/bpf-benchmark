@@ -116,6 +116,7 @@
 #define X86_WIDTH_16 2U
 #define X86_WIDTH_32 4U
 #define X86_WIDTH_64 8U
+#include "../formal/generated/x86_width.h"
 
 #define X86_RAX 0U
 #define X86_RCX 1U
@@ -156,29 +157,17 @@
 
 static __always_inline __u64 x86_width_mask(__u8 width)
 {
-	if (width == X86_WIDTH_8)
-		return 0xffULL;
-	if (width == X86_WIDTH_16)
-		return 0xffffULL;
-	if (width == X86_WIDTH_32)
-		return 0xffffffffULL;
-	return 0xffffffffffffffffULL;
+	return KPROG_X86_WIDTH_MASK(width);
 }
 
 static __always_inline __u32 x86_width_bits(__u8 width)
 {
-	if (width == X86_WIDTH_8)
-		return 8;
-	if (width == X86_WIDTH_16)
-		return 16;
-	if (width == X86_WIDTH_32)
-		return 32;
-	return 64;
+	return KPROG_X86_WIDTH_BITS(width);
 }
 
 static __always_inline __u64 x86_apply_width(__u64 value, __u8 width)
 {
-	return value & x86_width_mask(width);
+	return KPROG_X86_APPLY_WIDTH(value, width);
 }
 
 static __always_inline __u64 x86_sign_extend(__u64 value, __u8 width)

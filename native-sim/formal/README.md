@@ -34,16 +34,22 @@ The supported x86 condition-code table is likewise generated from
 `x86_cond_spec.json` into the C simulator predicate and Lean. Lean proves the
 same next-PC refinement for arbitrary flags and branch targets; parity
 conditions are outside the accepted simulator subset.
-The x86 logical-result flag transition is also generated into C and Lean. Its
+The legal x86 width encodings, masks, bit counts, narrowing, and zero/sign
+observations are generated into the actual C helpers and Lean. Lean checks
+their per-width model against an independent enumeration, while C static
+assertions bind the numeric encodings. The x86 logical-result flag
+transition is also generated into C and Lean. Its
 composition theorem covers `CF=OF=0`, `ZF=zero`, and `SF=sign` through the
-condition-to-next-PC decision. Width narrowing and the zero/sign observations
-remain explicit trusted premises of this bounded step.
+condition-to-next-PC decision using those observations.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
-policy, both ISA flag-to-control-flow decisions, and x86 logical flag
-production after narrowing; other flag production, the decoder-to-handler
+policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86
+logical flag production; other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
+The correspondence between C unsigned bit operations and Lean `BitVec`
+operations remains a trusted language-semantics premise; these theorems do not
+verify the C compiler or native instruction bytes.
 
 This is still a deliberately bounded proof. It does not establish full
 equivalence between the model and the C macro implementations, cover memory,
