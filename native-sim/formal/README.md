@@ -67,6 +67,12 @@ Plain ADD in the central ALU result helper is the zero-carry specialization of
 the same generated modular-addition contract. Lean composes that concrete
 result, per-width narrowing, and the existing ADD flag transition, eliminating
 ADD's earlier free-result premise while retaining decoder/compiler boundaries.
+The same generated width contract now supplies the sign-bit mask used by the
+C ADD, SUB, ADC, and SBB flag wrappers. The width-aware ADD, ADC, and SBB step
+theorems derive that mask from operand width rather than accepting a free
+`sign` argument, and Lean checks that mask testing equals the independent sign
+observation for every legal width. Decoder-to-handler and C-to-Lean language
+correspondence remain boundaries.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86

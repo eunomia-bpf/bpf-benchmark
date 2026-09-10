@@ -17,6 +17,11 @@ def mask : Width -> BitVec 64
   | .w16 => BitVec.ofNat 64 0xffff
   | .w32 => BitVec.ofNat 64 0xffffffff
   | .w64 => BitVec.ofNat 64 0xffffffffffffffff
+def signMask : Width -> BitVec 64
+  | .w8 => BitVec.ofNat 64 0x80
+  | .w16 => BitVec.ofNat 64 0x8000
+  | .w32 => BitVec.ofNat 64 0x80000000
+  | .w64 => BitVec.ofNat 64 0x8000000000000000
 def bits : Width -> Nat
   | .w8 => 8
   | .w16 => 16

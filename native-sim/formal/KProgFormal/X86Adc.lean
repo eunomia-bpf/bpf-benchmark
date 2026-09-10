@@ -15,13 +15,15 @@ theorem x86_adc_result_refines (a b : BitVec 64) (carry : Bool) :
     GeneratedX86Adc.result a b carry = x86AdcResultSpec a b carry := by rfl
 theorem x86_adc_flags_refine (a b r sign : BitVec 64) (carry : Bool) :
     generatedX86AdcFlags a b r sign carry = x86AdcFlagsSpec a b r sign carry := by rfl
-theorem x86_adc_step_refines (a b sign : BitVec 64) (carry : Bool) (width:X86Width) :
+theorem x86_adc_step_refines (a b : BitVec 64) (carry : Bool) (width:X86Width) :
     generatedX86AdcFlags (GeneratedX86Width.narrow a width)
       (GeneratedX86Width.narrow b width)
-      (GeneratedX86Width.narrow (GeneratedX86Adc.result a b carry) width) sign carry =
+      (GeneratedX86Width.narrow (GeneratedX86Adc.result a b carry) width)
+      (GeneratedX86Width.signMask width) carry =
     x86AdcFlagsSpec (x86NarrowSpec a width) (x86NarrowSpec b width)
-      (x86NarrowSpec (x86AdcResultSpec a b carry) width) sign carry := by
-  rw [x86_adc_flags_refine, x86_adc_result_refines]
+      (x86NarrowSpec (x86AdcResultSpec a b carry) width)
+      (x86WidthSignMaskSpec width) carry := by
+  rw [x86_adc_flags_refine, x86_adc_result_refines, x86_width_sign_mask_refines]
   repeat rw [x86_narrow_refines]
 theorem x86_adc_branch_refines (a b r sign : BitVec 64) (carry : Bool)
     (cond:X86Cond) (fallthrough target:Nat) :

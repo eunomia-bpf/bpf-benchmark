@@ -166,6 +166,11 @@ static __always_inline __u32 x86_width_bits(__u8 width)
 	return KPROG_X86_WIDTH_BITS(width);
 }
 
+static __always_inline __u64 x86_width_sign_mask(__u8 width)
+{
+	return KPROG_X86_WIDTH_SIGN_MASK(width);
+}
+
 static __always_inline __u64 x86_apply_width(__u64 value, __u8 width)
 {
 	return KPROG_X86_APPLY_WIDTH(value, width);

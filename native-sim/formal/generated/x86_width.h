@@ -10,6 +10,11 @@ _Static_assert(X86_WIDTH_64 == 8U, "x86 width code drift");
 	((WIDTH) == X86_WIDTH_16 ? 0xffffULL : \
 	((WIDTH) == X86_WIDTH_32 ? 0xffffffffULL : \
 	 0xffffffffffffffffULL)))
+#define KPROG_X86_WIDTH_SIGN_MASK(WIDTH)                                    \
+	((WIDTH) == X86_WIDTH_8 ? 0x80ULL : \
+	((WIDTH) == X86_WIDTH_16 ? 0x8000ULL : \
+	((WIDTH) == X86_WIDTH_32 ? 0x80000000ULL : \
+	 0x8000000000000000ULL)))
 #define KPROG_X86_WIDTH_BITS(WIDTH)                                         \
 	((WIDTH) == X86_WIDTH_8 ? 8U : \
 	((WIDTH) == X86_WIDTH_16 ? 16U : \

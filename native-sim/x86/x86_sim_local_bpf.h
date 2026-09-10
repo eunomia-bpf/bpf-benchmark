@@ -524,8 +524,7 @@ struct x86_sim_state {
 		__u64 __x86_sub_a = (LHS) & __x86_sub_mask;               \
 		__u64 __x86_sub_b = (RHS) & __x86_sub_mask;               \
 		__u64 __x86_sub_r = (RESULT) & __x86_sub_mask;            \
-		__u64 __x86_sub_sign =                                    \
-			1ULL << (x86_width_bits(__x86_sub_width) - 1);    \
+		__u64 __x86_sub_sign = x86_width_sign_mask(__x86_sub_width);\
 		KPROG_X86_SET_SUB_FLAGS(__x86_cf, __x86_zf, __x86_sf,   \
 			__x86_of, __x86_sub_a, __x86_sub_b, __x86_sub_r, \
 			__x86_sub_sign);                                    \
@@ -538,8 +537,7 @@ struct x86_sim_state {
 		__u64 __x86_add_a = (LHS) & __x86_add_mask;               \
 		__u64 __x86_add_b = (RHS) & __x86_add_mask;               \
 		__u64 __x86_add_r = (RESULT) & __x86_add_mask;            \
-		__u64 __x86_add_sign =                                    \
-			1ULL << (x86_width_bits(__x86_add_width) - 1);    \
+		__u64 __x86_add_sign = x86_width_sign_mask(__x86_add_width);\
 		KPROG_X86_SET_ADD_FLAGS(__x86_cf, __x86_zf, __x86_sf,   \
 			__x86_of, __x86_add_a, __x86_add_b, __x86_add_r, \
 			__x86_add_sign);                                    \
@@ -552,8 +550,7 @@ struct x86_sim_state {
 		__u64 __x86_adc_a = (LHS) & __x86_adc_mask;               \
 		__u64 __x86_adc_b = (RHS) & __x86_adc_mask;               \
 		__u64 __x86_adc_r = (RESULT) & __x86_adc_mask;            \
-		__u64 __x86_adc_sign =                                    \
-			1ULL << (x86_width_bits(__x86_adc_width) - 1);      \
+		__u64 __x86_adc_sign = x86_width_sign_mask(__x86_adc_width);\
 		KPROG_X86_SET_ADC_FLAGS(__x86_cf, __x86_zf, __x86_sf,   \
 			__x86_of, __x86_adc_a, __x86_adc_b, __x86_adc_r, \
 			__x86_adc_sign, (CARRY));                           \
@@ -568,8 +565,7 @@ struct x86_sim_state {
 		__u64 __x86_sbb_sub = KPROG_X86_SBB_SUBTRAHEND(           \
 			__x86_sbb_b, __x86_sbb_mask, (BORROW));             \
 		__u64 __x86_sbb_r = (RESULT) & __x86_sbb_mask;            \
-		__u64 __x86_sbb_sign =                                    \
-			1ULL << (x86_width_bits(__x86_sbb_width) - 1);    \
+		__u64 __x86_sbb_sign = x86_width_sign_mask(__x86_sbb_width);\
 		KPROG_X86_SET_SBB_FLAGS(__x86_cf, __x86_zf, __x86_sf,   \
 			__x86_of, __x86_sbb_a, __x86_sbb_b, __x86_sbb_sub,\
 			__x86_sbb_r, __x86_sbb_sign, (BORROW));             \
