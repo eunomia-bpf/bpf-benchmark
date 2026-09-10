@@ -179,8 +179,9 @@ selected-lane writeback, scalarized provenance, and preservation of all four
 modeled flags. Register INC now has the same lane-aware composition for its
 generated increment result and writeback, including preservation of the
 incoming carry flag. Register DEC likewise composes the generated decrement,
-selected-lane writeback, and incoming carry preservation. High-byte NEG
-remains unsupported.
+selected-lane writeback, and incoming carry preservation. Register NEG
+composes subtraction from zero with selected-lane writeback and replacement
+arithmetic flags. These register-unary operations now support high-byte lanes.
 The ADD, ADC, SUB, and SBB register-handler slice then composes the generated
 result, width narrowing, flag transition, and register writeback contracts.
 For arbitrary old destination bits and tags, right-hand operand, incoming
