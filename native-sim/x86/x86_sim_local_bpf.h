@@ -645,7 +645,7 @@ struct x86_sim_state {
 		else if ((ALU) == X86_ALU_NEG)                            \
 			X86_SIM_L_SET_SUB_FLAGS(0, (LHS), (RESULT), (WIDTH));\
 		else if ((ALU) == X86_ALU_NOT)                            \
-			(void)0;                                          \
+			KPROG_X86_PRESERVE_FLAGS();                       \
 		else if ((ALU) == X86_ALU_SHL || (ALU) == X86_ALU_SHR ||  \
 			 (ALU) == X86_ALU_SAR || (ALU) == X86_ALU_ROL)    \
 			X86_SIM_L_SET_SHIFT_FLAGS((LHS), (RHS), (RESULT), (ALU), (WIDTH));\

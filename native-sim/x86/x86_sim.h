@@ -104,6 +104,7 @@
 #include "../formal/generated/x86_width.h"
 #include "../formal/generated/x86_adc.h"
 #include "../formal/generated/x86_sbb_result.h"
+#include "../formal/generated/x86_not.h"
 
 #define X86_RAX 0U
 #define X86_RCX 1U
@@ -299,7 +300,7 @@ static __always_inline __u64 x86_alu_result(__u64 lhs, __u64 rhs,
 	if (alu == X86_ALU_DEC)
 		return KPROG_X86_SBB_RESULT(lhs, 1, 0);
 	if (alu == X86_ALU_NOT)
-		return ~lhs;
+		return KPROG_X86_NOT_RESULT(lhs);
 	if (alu == X86_ALU_NEG)
 		return KPROG_X86_SBB_RESULT(0, lhs, 0);
 	return lhs;

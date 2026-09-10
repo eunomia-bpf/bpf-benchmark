@@ -95,6 +95,11 @@ NEG likewise specializes the generated SBB result to `0-a` with no incoming
 borrow and composes the SUB flags through next-PC. Unlike INC/DEC, its CF is
 the architectural borrow from zero rather than a preserved input flag; memory
 access/store and decoder selection remain outside the theorem.
+NOT uses a generated bitwise-result and flag-preservation contract in the
+central C handlers and Lean. Lean proves its width-narrowed result and that all
+four incoming flags, including flags observed by the next condition, remain
+unchanged. Register and memory-unary values are covered; memory access/store,
+operand selection, and native compilation remain boundaries.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86
