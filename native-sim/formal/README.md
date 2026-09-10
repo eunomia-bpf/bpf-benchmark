@@ -41,10 +41,15 @@ assertions bind the numeric encodings. The x86 logical-result flag
 transition is also generated into C and Lean. Its
 composition theorem covers `CF=OF=0`, `ZF=zero`, and `SF=sign` through the
 condition-to-next-PC decision using those observations.
+The x86 subtraction flag transition is generated into the central C handler
+and Lean. For already narrowed operands/result and a width sign mask, Lean
+checks carry/borrow, zero, sign, and signed-overflow flags against an
+independent specification and composes them through the condition-to-next-PC
+theorem.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86
-logical flag production; other flag production, the decoder-to-handler
+logical/SUB flag production; other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
 The correspondence between C unsigned bit operations and Lean `BitVec`

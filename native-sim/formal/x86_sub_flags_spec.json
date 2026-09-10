@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "operation": "x86SubFlags",
+  "flags": {
+    "cf": {"op": "ult", "lhs": {"op": "input", "name": "a"}, "rhs": {"op": "input", "name": "b"}},
+    "zf": {"op": "eq", "lhs": {"op": "input", "name": "a"}, "rhs": {"op": "input", "name": "b"}},
+    "sf": {"op": "nonzero", "arg": {"op": "and", "lhs": {"op": "input", "name": "r"}, "rhs": {"op": "input", "name": "sign"}}},
+    "of": {"op": "nonzero", "arg": {"op": "and", "lhs": {"op": "xor", "lhs": {"op": "input", "name": "a"}, "rhs": {"op": "input", "name": "b"}}, "rhs": {"op": "and", "lhs": {"op": "xor", "lhs": {"op": "input", "name": "a"}, "rhs": {"op": "input", "name": "r"}}, "rhs": {"op": "input", "name": "sign"}}}}
+  }
+}

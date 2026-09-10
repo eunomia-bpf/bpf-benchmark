@@ -3,3 +3,4 @@ import KProgFormal.Arm64ControlFlow
 import KProgFormal.X86ControlFlow
 import KProgFormal.X86LogicFlags
 import KProgFormal.X86Width
+import KProgFormal.X86SubFlags
