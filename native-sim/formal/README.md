@@ -202,8 +202,9 @@ that decoded value through their generated result, flags, selected-lane
 writeback, and tag scalarization. ADC and SBB consume one immutable pre-state
 carry/borrow in both result and flags. CMP-immediate composes the same decode
 through subtraction flags and proves the complete destination bits/tag remain
-unchanged. Other immediate opcodes and textual parsing remain outside this
-composition.
+unchanged. TEST-immediate likewise composes the decode through width-local
+logic flags and destination preservation. Other immediate opcodes and textual
+parsing remain outside this composition.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86

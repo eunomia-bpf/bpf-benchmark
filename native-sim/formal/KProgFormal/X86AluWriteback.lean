@@ -626,4 +626,51 @@ theorem x86_test_high8_observes_high_lanes :
     flags.zf = false /\ flags.sf = true := by
   native_decide
 
+/-- Register-destination TEST-immediate after lane selection and raw immediate
+decoding. It replaces flags from the width-local conjunction and preserves the
+complete destination register value and tag. -/
+def generatedX86TestImmLaneHandler (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86Immediate.value rawImm width
+  let result := GeneratedX86Width.narrow (BitVec.and lhs rhs) width
+  { dst := state.dst
+    flags := generatedX86LogicFlags (result == 0)
+      (BitVec.and result (GeneratedX86Width.signMask width) != 0) }
+
+def x86TestImmLaneHandlerSpec (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86ImmediateValueSpec rawImm width
+  let result := x86NarrowSpec (BitVec.and lhs rhs) width
+  { dst := state.dst
+    flags := x86LogicFlagsSpec (result == 0)
+      (BitVec.and result (x86WidthSignMaskSpec width) != 0) }
+
+theorem x86_test_imm_lane_handler_refines (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width) (dstLane : X86ByteLane) :
+    generatedX86TestImmLaneHandler state rawImm width dstLane =
+      x86TestImmLaneHandlerSpec state rawImm width dstLane := by
+  simp only [generatedX86TestImmLaneHandler, x86TestImmLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_immediate_value_refines,
+    x86_narrow_refines, x86_width_sign_mask_refines]
+  rw [x86_logic_flags_refine]
+
+theorem x86_test_imm_lane_preserves_destination (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width) (dstLane : X86ByteLane) :
+    (generatedX86TestImmLaneHandler state rawImm width dstLane).dst =
+      state.dst := by
+  rfl
+
+theorem x86_test_imm_high8_example :
+    generatedX86TestImmLaneHandler
+      { dst := { bits := 0x1122334455668001, tag := .packet },
+        flags := { cf := true, zf := true, sf := false, of := true } }
+      0x80 .w8 .high =
+      { dst := { bits := 0x1122334455668001, tag := .packet },
+        flags := { cf := false, zf := false, sf := true, of := false } } := by
+  native_decide
+
 end KProgFormal
