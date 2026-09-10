@@ -106,6 +106,7 @@
 #include "../formal/generated/x86_sbb_result.h"
 #include "../formal/generated/x86_not.h"
 #include "../formal/generated/x86_shift_count.h"
+#include "../formal/generated/x86_shift_result.h"
 
 #define X86_RAX 0U
 #define X86_RCX 1U
@@ -192,18 +193,6 @@ static __always_inline __u64 x86_signed_abs_width(__u64 value, __u8 width)
 	return ((~narrowed) + 1) & x86_width_mask(width);
 }
 
-static __always_inline __u64 x86_rol(__u64 value, __u64 shift, __u8 width)
-{
-	__u32 bits = x86_width_bits(width);
-	__u64 mask = x86_width_mask(width);
-	__u64 amount = shift & (bits - 1);
-	__u64 narrowed = value & mask;
-
-	if (amount == 0)
-		return narrowed;
-	return ((narrowed << amount) | (narrowed >> (bits - amount))) & mask;
-}
-
 static __always_inline __u64 x86_ror(__u64 value, __u64 shift, __u8 width)
 {
 	__u32 bits = x86_width_bits(width);
@@ -249,9 +238,6 @@ static __always_inline __u64 x86_popcount64(__u64 value)
 static __always_inline __u64 x86_alu_result(__u64 lhs, __u64 rhs,
 					    __u32 alu, __u8 width)
 {
-	__u32 bits = x86_width_bits(width);
-	__u64 amount = x86_shift_count(rhs, width);
-
 	if (alu == X86_ALU_ADD)
 		return KPROG_X86_ADC_RESULT(lhs, rhs, 0);
 	if (alu == X86_ALU_ADC)
@@ -266,32 +252,14 @@ static __always_inline __u64 x86_alu_result(__u64 lhs, __u64 rhs,
 		return lhs | rhs;
 	if (alu == X86_ALU_AND)
 		return lhs & rhs;
-	if (alu == X86_ALU_SHL) {
-		if (amount >= bits)
-			return 0;
-		return lhs << amount;
-	}
-	if (alu == X86_ALU_SHR) {
-		if (amount >= bits)
-			return 0;
-		return lhs >> amount;
-	}
-	if (alu == X86_ALU_SAR) {
-		if (amount >= bits) {
-			if (width == X86_WIDTH_32)
-				return ((__u32)lhs & 0x80000000U) ?
-					       0xffffffffU :
-					       0;
-			return ((__u64)lhs & 0x8000000000000000ULL) ?
-				       0xffffffffffffffffULL :
-				       0;
-		}
-		if (width == X86_WIDTH_32)
-			return (__u32)((__s32)lhs >> amount);
-		return (__u64)((__s64)lhs >> amount);
-	}
+	if (alu == X86_ALU_SHL)
+		return kprog_x86_shl_result(lhs, rhs, width);
+	if (alu == X86_ALU_SHR)
+		return kprog_x86_shr_result(lhs, rhs, width);
+	if (alu == X86_ALU_SAR)
+		return kprog_x86_sar_result(lhs, rhs, width);
 	if (alu == X86_ALU_ROL)
-		return x86_rol(lhs, rhs, width);
+		return kprog_x86_rol_result(lhs, rhs, width);
 	if (alu == X86_ALU_IMUL)
 		return lhs * rhs;
 	if (alu == X86_ALU_INC)

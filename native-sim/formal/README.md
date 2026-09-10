@@ -104,6 +104,12 @@ The x86 shift-count mask is generated into the central C helper and Lean.
 Lean proves that its bit mask equals the architectural modulo-32 count for
 8/16/32-bit operands and modulo-64 count for 64-bit operands, and proves the
 corresponding count bound. Shift results and flags remain separate obligations.
+SHL, SHR, SAR, and ROL results are generated into the central C result helper
+and Lean. The independent Lean specification uses fixed-width bit vectors and
+checks every width and masked count, including narrowing before SHR and
+width-local sign fill for SAR. This fixes the prior narrow-width SHR/SAR result
+errors. Operand selection, writeback, flags, and native compilation remain
+outside these result theorems; SHLD and SHRD are separate operations.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86
