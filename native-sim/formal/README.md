@@ -192,6 +192,13 @@ operands are supplied. The lane-specific theorems above additionally refine
 register operand observation and high-byte writeback for their named
 operations; neither set proves instruction dispatch, immediate decoding, or
 memory read/write handlers.
+Arithmetic-immediate consumption now has a shared generated C/Lean contract:
+the artifact field is reduced to 32 bits and sign-extended only for 64-bit
+operations. Lean proves that bitwise implementation against an independent
+`BitVec` truncate/sign-extend specification for every raw field and legal
+width. This covers the C immediate helper after an encoded field is supplied;
+it does not yet prove textual parsing or compose the decoded value through
+each opcode handler.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86

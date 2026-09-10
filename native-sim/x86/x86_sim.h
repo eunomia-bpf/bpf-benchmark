@@ -102,6 +102,7 @@
 #define X86_WIDTH_32 4U
 #define X86_WIDTH_64 8U
 #include "../formal/generated/x86_width.h"
+#include "../formal/generated/x86_immediate.h"
 #include "../formal/generated/x86_adc.h"
 #include "../formal/generated/x86_sbb_result.h"
 #include "../formal/generated/x86_not.h"
@@ -323,11 +324,7 @@ static __always_inline __s64 x86_simm(__u64 value)
 
 static __always_inline __u64 x86_store_imm_value(__u64 value, __u8 width)
 {
-	__u32 imm32 = (__u32)value;
-
-	if (width == X86_WIDTH_64)
-		return (__u64)(__s64)(__s32)imm32;
-	return imm32;
+	return KPROG_X86_IMMEDIATE_VALUE(value, width);
 }
 
 static __always_inline __s32 x86_store_imm_disp(__u64 value)
