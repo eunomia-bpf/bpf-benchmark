@@ -164,7 +164,8 @@ paths. The corresponding Lean handler theorem composes lane-aware destination
 and source reads, generated ADD result and flags, and lane-aware writeback for
 all widths and lane choices. ADC has the same composed lane theorem, with the
 incoming CF captured from the pre-state, and is enabled by the artifact
-encoder. SUB/SBB and compare/test high-byte forms still fail at artifact
+encoder. SUB now also composes generated subtraction with lane reads and
+writeback. SBB and compare/test high-byte forms still fail at artifact
 generation; the theorems do not cover immediate decoding,
 instruction dispatch, compiler output, or native bytes.
 The ADD, ADC, SUB, and SBB register-handler slice then composes the generated

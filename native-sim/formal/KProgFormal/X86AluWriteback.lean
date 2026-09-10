@@ -178,6 +178,47 @@ theorem x86_sub_handler_refines (state : X86RegAluState)
   simp only [generatedX86SubHandler, x86SubHandlerSpec]
   rw [x86_sub_step_refines, x86_reg_write_refines, x86_sub_result_refines]
 
+/-- Register-register SUB after lane selection. The result is produced by the
+generated subtraction primitive rather than supplied as a theorem premise. -/
+def generatedX86SubLaneHandler (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86RegRead.readAt rawRhs width srcLane
+  let result := GeneratedX86SbbResult.result lhs rhs false
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86SubFlags (GeneratedX86Width.narrow lhs width)
+      (GeneratedX86Width.narrow rhs width)
+      (GeneratedX86Width.narrow result width)
+      (GeneratedX86Width.signMask width) }
+
+def x86SubLaneHandlerSpec (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86RegReadAtSpec rawRhs width srcLane
+  let result := x86SubResultSpec lhs rhs
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := x86SubFlagsSpec (x86NarrowSpec lhs width)
+      (x86NarrowSpec rhs width) (x86NarrowSpec result width)
+      (x86WidthSignMaskSpec width) }
+
+theorem x86_sub_lane_handler_refines (state : X86RegAluState)
+    (rawRhs : BitVec 64) (width : X86Width)
+    (dstLane srcLane : X86ByteLane) :
+    generatedX86SubLaneHandler state rawRhs width dstLane srcLane =
+      x86SubLaneHandlerSpec state rawRhs width dstLane srcLane := by
+  simp only [generatedX86SubLaneHandler, x86SubLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_reg_read_at_refines,
+    x86_sub_step_refines, x86_reg_write_at_refines,
+    x86_sub_result_refines]
+
+theorem x86_sub_high8_example :
+    (generatedX86SubLaneHandler
+      { dst := { bits := 0x1122334455660001, tag := .scalar },
+        flags := { cf := false, zf := false, sf := false, of := false } }
+      0x0000000000000102 .w8 .high .high).dst.bits =
+      0x112233445566ff01 := by
+  native_decide
+
 def generatedX86SbbHandler (state : X86RegAluState) (rhs : BitVec 64)
     (width : X86Width) : X86RegAluState :=
   let lhs := state.dst.bits
