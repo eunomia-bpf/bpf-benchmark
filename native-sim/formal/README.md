@@ -71,7 +71,9 @@ Plain SUB in the central ALU result helper similarly specializes the generated
 SBB result contract to `borrow=false`. Lean composes that concrete result,
 per-width narrowing, the width-derived sign mask, and the SUB flag transition;
 comparison instructions and decoder/compiler boundaries are not covered by
-this central-helper theorem.
+this central-helper theorem. The five compare operand forms separately use the
+same generated zero-borrow result and SUB flags contracts; Lean composes that
+width-aware compare transition through the condition-to-next-PC decision.
 The same generated width contract now supplies the sign-bit mask used by the
 C ADD, SUB, ADC, and SBB flag wrappers. The width-aware ADD, ADC, and SBB step
 theorems derive that mask from operand width rather than accepting a free

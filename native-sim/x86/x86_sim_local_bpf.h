@@ -1387,7 +1387,8 @@ struct x86_sim_state {
 						  __x86_l_width);        \
 		else                                                      \
 			X86_SIM_L_SET_SUB_FLAGS(__x86_l_lhs, __x86_l_rhs, \
-				__x86_l_lhs - __x86_l_rhs, __x86_l_width);\
+				KPROG_X86_SBB_RESULT(__x86_l_lhs,          \
+					__x86_l_rhs, 0), __x86_l_width);     \
 	} while (0)
 
 #define X86_SIM_L_EXEC_CMP_REG_MEM(DST, SRC, FLAGS, AUX, IMM)               \
@@ -1397,7 +1398,8 @@ struct x86_sim_state {
 		__u64 __x86_l_rhs = X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),\
 			(IMM), __x86_l_width, 0);                         \
 		X86_SIM_L_SET_SUB_FLAGS(__x86_l_lhs, __x86_l_rhs,        \
-			__x86_l_lhs - __x86_l_rhs, __x86_l_width);       \
+			KPROG_X86_SBB_RESULT(__x86_l_lhs, __x86_l_rhs, 0),\
+			__x86_l_width);                                     \
 	} while (0)
 
 #define X86_SIM_L_EXEC_MOV_IMM(DST, FLAGS, IMM)                             \
@@ -1447,7 +1449,8 @@ struct x86_sim_state {
 						  __x86_l_width);        \
 		else                                                      \
 			X86_SIM_L_SET_SUB_FLAGS(__x86_l_lhs, __x86_l_rhs,\
-				__x86_l_lhs - __x86_l_rhs, __x86_l_width);\
+				KPROG_X86_SBB_RESULT(__x86_l_lhs,          \
+					__x86_l_rhs, 0), __x86_l_width);     \
 	} while (0)
 
 #define X86_SIM_L_EXEC_CMP_REG_OP(OP, DST, SRC, FLAGS)                      \
@@ -1460,7 +1463,8 @@ struct x86_sim_state {
 						  __x86_l_width);        \
 		else                                                      \
 			X86_SIM_L_SET_SUB_FLAGS(__x86_l_lhs, __x86_l_rhs,\
-				__x86_l_lhs - __x86_l_rhs, __x86_l_width);\
+				KPROG_X86_SBB_RESULT(__x86_l_lhs,          \
+					__x86_l_rhs, 0), __x86_l_width);     \
 	} while (0)
 
 #define X86_SIM_L_EXEC_CMOV(DST, SRC, FLAGS, AUX)                           \
@@ -1629,7 +1633,8 @@ struct x86_sim_state {
 							  __x86_l_width);    \
 			else                                              \
 				X86_SIM_L_SET_SUB_FLAGS(__x86_l_lhs, __x86_l_rhs,\
-					__x86_l_lhs - __x86_l_rhs, __x86_l_width);\
+					KPROG_X86_SBB_RESULT(__x86_l_lhs,  \
+						__x86_l_rhs, 0), __x86_l_width);\
 		} else if ((OP) == X86_OP_CMP_REG ||                      \
 			   (OP) == X86_OP_TEST_REG) {                    \
 			__u64 __x86_l_lhs = X86_SIM_L_READ_REG(DST);      \
@@ -1639,7 +1644,8 @@ struct x86_sim_state {
 							  __x86_l_width);    \
 			else                                              \
 				X86_SIM_L_SET_SUB_FLAGS(__x86_l_lhs, __x86_l_rhs,\
-					__x86_l_lhs - __x86_l_rhs, __x86_l_width);\
+					KPROG_X86_SBB_RESULT(__x86_l_lhs,  \
+						__x86_l_rhs, 0), __x86_l_width);\
 		} else if ((OP) == X86_OP_CMP_MEM_IMM ||                  \
 			   (OP) == X86_OP_TEST_MEM_IMM ||                 \
 			   (OP) == X86_OP_CMP_MEM_REG ||                  \
