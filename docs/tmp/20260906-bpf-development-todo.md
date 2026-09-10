@@ -865,3 +865,41 @@ not prove parsing/decoder selection, memory operand reads, C unsigned semantics
 against Lean `BitVec`, compiler lowering, or native bytes. Shift and remaining
 unary flags, broader traces, memory/helpers, specialization preservation, and
 AArch64 flag production are still open; no new performance experiment was run.
+
+### ALU decode binding and unary arithmetic refinement, 2026-09-10
+
+- `feb4e0735` moves all 16 accepted ALU mnemonic/name/code mappings into one
+  strict JSON contract. Its generated Python table is consumed by the actual
+  proof-artifact encoder, its generated C constants are consumed by the
+  simulator, and Lean checks mnemonic and numeric code against an independent
+  enumeration. This binds an already parsed mnemonic to the C ALU code; it
+  does not verify objdump, assembly parsing, operand selection, or handler
+  semantics that lack separate proofs.
+- `6f110f90c` fixes a real remaining SBB bug in the encoder-reachable
+  `sbb [mem],imm` and `sbb [mem],reg` handlers. They previously fell through
+  ordinary `lhs-rhs` and supplied `borrow=0` to flags. Both now snapshot CF and
+  use the proved SBB result/flag contracts, completing value/flag binding for
+  all five binary SBB operand forms. The current frozen corpus contains only a
+  register SBB, so formal checks cover the value semantics and 29/29 builds
+  cover integration/compilation; they are not a targeted dynamic regression
+  of the two memory-destination forms.
+- `4513b455f` specializes generated ADD/SBB result contracts for INC/DEC and
+  proves their result, width, ZF/SF/OF, explicit incoming-CF preservation, and
+  next-PC composition. Register and memory-unary handlers share that value
+  path, while memory read/store remains outside the theorem. Current artifacts
+  contain many register INCs but no DEC or memory-unary INC/DEC.
+- `017a53ee2` similarly binds NEG to the generated `0-a` result. Its independent
+  architectural flag specification states `CF=(a!=0)`, `ZF=(r==0)`, result
+  sign, and `OF=(a==sign_mask)`; Lean proves it for the actual result at all
+  four widths and composes it through next-PC. A weaker intermediate
+  arbitrary-result formulation was removed before commit. Current artifacts
+  contain no NEG, so the 29/29 result is compile integration rather than a
+  targeted runtime regression.
+
+All four states passed the full formal target and the direct x86 proof-artifact
+build with the preserved negative plus 29 workload-derived rows. Independent
+read-only review approved the final diffs. The next semantic targets include
+shift result/flag transitions, NOT flag preservation, the remaining
+decoder/operand-selection relation, memory and helper transitions, C-to-Lean
+and compiler/native-byte correspondence, specialization preservation, and
+AArch64 flag production. No new performance measurement was made.
