@@ -5,11 +5,30 @@ structure Result where
   bits : BitVec 64
   scalarizes : Bool
   deriving DecidableEq, Repr
+inductive ByteLane
+  | low
+  | high
+  deriving DecidableEq, Repr
+def byteShift : ByteLane -> Nat
+  | .low => 0
+  | .high => 8
 def bits (old value : BitVec 64) : GeneratedX86Width.Width -> BitVec 64
   | .w8 => BitVec.or (BitVec.and old 0xffffffffffffff00) (BitVec.and value 0xff)
   | .w16 => BitVec.or (BitVec.and old 0xffffffffffff0000) (BitVec.and value 0xffff)
   | .w32 => BitVec.and value 0xffffffff
   | .w64 => value
+def bitsAt (old value : BitVec 64) (width : GeneratedX86Width.Width)
+    (lane : ByteLane) : BitVec 64 :=
+  match width, lane with
+  | .w8, .low => BitVec.or (BitVec.and old 0xffffffffffffff00) (BitVec.and value 0xff)
+  | .w8, .high => BitVec.or (BitVec.and old 0xffffffffffff00ff)
+      (BitVec.shiftLeft (BitVec.and value 0xff) 8)
+  | .w16, _ => BitVec.or (BitVec.and old 0xffffffffffff0000) (BitVec.and value 0xffff)
+  | .w32, _ => BitVec.and value 0xffffffff
+  | .w64, _ => value
+def writeAt (old value : BitVec 64) (width : GeneratedX86Width.Width)
+    (lane : ByteLane) : Result :=
+  { bits := bitsAt old value width lane, scalarizes := true }
 def write (old value : BitVec 64) (width : GeneratedX86Width.Width) : Result :=
   { bits := bits old value width, scalarizes := true }
 end KProgFormal.GeneratedX86RegWrite

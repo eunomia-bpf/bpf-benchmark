@@ -310,7 +310,7 @@ struct x86_sim_state {
 #define X86_SIM_L_WRITE_REG8_VALUE_CASE(REG, NAME)                          \
 	case REG:                                                          \
 		KPROG_X86_WRITE_REG8(__x86_##NAME, __x86_##NAME##_tag,    \
-			__x86_wr_next, X86_SIM_TAG_SCALAR);                 \
+			__x86_wr_next, __x86_wr_shift, X86_SIM_TAG_SCALAR); \
 		break;
 
 #define X86_SIM_L_WRITE_REG16_VALUE_CASE(REG, NAME)                         \
@@ -355,11 +355,12 @@ struct x86_sim_state {
 			(void *)(long)(VALUE), X86_SIM_TAG_HELPER_ID);    \
 	} while (0)
 
-#define X86_SIM_L_WRITE_REG_WIDTH(REG, VALUE, WIDTH)                        \
+#define X86_SIM_L_WRITE_REG_WIDTH_SHIFT(REG, VALUE, WIDTH, DST_SHIFT)       \
 	do {                                                               \
 		__u8 __x86_wr_raw_width = (WIDTH);                         \
 		__u8 __x86_wr_width = __x86_wr_raw_width ?                 \
 			__x86_wr_raw_width : X86_WIDTH_64;                   \
+		__u8 __x86_wr_shift = (DST_SHIFT);                          \
 		__u64 __x86_wr_next = (VALUE);                            \
 		if (__x86_wr_width == X86_WIDTH_8) {                      \
 			switch (REG) {                                    \
@@ -387,6 +388,9 @@ struct x86_sim_state {
 			}                                                 \
 		}                                                         \
 	} while (0)
+
+#define X86_SIM_L_WRITE_REG_WIDTH(REG, VALUE, WIDTH)                        \
+	X86_SIM_L_WRITE_REG_WIDTH_SHIFT((REG), (VALUE), (WIDTH), 0U)
 
 #define X86_SIM_L_MEM_OFFSET(AUX, DISP)                                     \
 	({                                                                 \

@@ -135,10 +135,14 @@ The generated macros are used by the central C register switch for all 16
 general-purpose registers; compile-time assertions bind its union and pointer
 sizes and little-endian partial-write layout. The theorem covers the writeback
 primitive, not selection of a destination register by a decoded instruction.
-In particular, AH/BH/CH/DH destination-lane selection is not carried into the
-current C writeback primitive or modeled by this theorem; the C compatibility
-convention that width zero aliases 64 and behavior for other invalid numeric
-widths are also outside the four-constructor Lean model.
+The generated primitive also accepts the high-byte lane used by AH/BH/CH/DH.
+Lean proves the lane-parametric write and retains the concrete review
+counterexample: writing `0xaa` into the high byte of `0x1122334455667788`
+produces `0x112233445566aa88`. Destination-lane metadata is not yet carried
+from the artifact encoder into handler calls, so this theorem establishes the
+primitive rather than end-to-end high-byte instruction support. The C
+compatibility convention that width zero aliases 64 and behavior for other
+invalid numeric widths remain outside the typed Lean model.
 The ADD, ADC, SUB, and SBB register-handler slice then composes the generated
 result, width narrowing, flag transition, and register writeback contracts.
 For arbitrary old destination bits and tags, right-hand operand, incoming
