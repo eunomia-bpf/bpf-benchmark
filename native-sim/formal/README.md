@@ -176,7 +176,9 @@ bytes.
 Register NOT also consumes the lane AUX through the shared unary C handler.
 Its Lean handler theorem composes lane observation, the generated complement,
 selected-lane writeback, scalarized provenance, and preservation of all four
-modeled flags. High-byte INC/DEC/NEG remain unsupported.
+modeled flags. Register INC now has the same lane-aware composition for its
+generated increment result and writeback, including preservation of the
+incoming carry flag. High-byte DEC/NEG remain unsupported.
 The ADD, ADC, SUB, and SBB register-handler slice then composes the generated
 result, width narrowing, flag transition, and register writeback contracts.
 For arbitrary old destination bits and tags, right-hand operand, incoming
