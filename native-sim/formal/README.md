@@ -225,6 +225,20 @@ the generated logic flags, and the lane writeback; concrete theorems pin a
 high-byte AND, a high-byte OR that sets the width sign bit, and a 64-bit
 XOR. The immediate-decode theorem is not involved because the source lane
 supplies the second operand rather than a raw artifact field.
+The register-register SHL, SHR, SAR, and ROL handlers are the
+register-register logical form with a second read supplying the shift count:
+the C `X86_SIM_L_EXEC_ALU_REG` generic branch observes the destination lane
+and the source register lane, computes the width-local shift result through
+the shared shift-result contract, and replaces the destination lane with the
+width-local shift-flag transition (the generated shift flags seeded with
+the pre-state flags, per the shared shift-flag contract). Each generated
+handler refines an independently assembled specification via the two lane
+reads, the generated shift result, the generated shift flags, and the lane
+writeback; concrete theorems pin a high-byte SHL and a high-byte SAR
+sign-fill. The immediate-decode theorem is not involved because the source
+lane supplies the count rather than a raw artifact field, and the op-parametric
+immediate shift-flag definedness theorem establishes the architectural flag
+contract for these operands.
 The generated ALU decode contract also classifies the two carry-sensitive
 handlers (ADC and SBB). The register-lane AUX theorem proves that packing a
 typed ALU code and extracting its payload selects the same handler as an

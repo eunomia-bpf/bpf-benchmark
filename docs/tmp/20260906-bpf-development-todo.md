@@ -1146,3 +1146,40 @@ not establish complete native-byte semantic equivalence.
   per-arch programs. They were already proven functional by this session's
   two `make -C native-sim/x86 micro-proofs-build` runs (each exercised
   `kprog-negative-proof-build` end-to-end, exit 0).
+
+### Register-register shift handler refinement, 2026-09-11
+
+- `KProgFormal/X86AluWriteback.lean` gains `generatedX86ShiftRegLaneHandler`
+  / `x86ShiftRegLaneHandlerSpec` + one `x86_*_reg_lane_handler_refines`
+  theorem for each of SHL, SHR, SAR, ROL. Each composes the two generated
+  register-lane reads (destination lane and source register lane, the
+  latter supplying the shift count), the `GeneratedX86ShiftResult`
+  transition, the generated lane writeback with tag scalarization, and the
+  generated shift-flag transition seeded with the pre-state flags; each
+  refines the independent specification via the shared per-piece refine
+  lemmas (`x86_reg_read_at_refines` applied to both lane reads, the
+  matching `x86_shl|shr|sar|rol_result_refines`, and
+  `x86_reg_write_at_refines`). The flag field is shared verbatim between
+  generated handler and spec (`generatedX86ShiftFlags` on the spec values),
+  mirroring the immediate form; the op-parametric
+  `x86_shift_imm_flags_defined` already establishes the architectural
+  shift-flag definedness contract for these operands. This mirrors the C
+  `X86_SIM_L_EXEC_ALU_REG` generic branch, which routes shift ALUs through
+  `x86_alu_result` -> `kprog_x86_shl|shr|sar|rol_result` and
+  `X86_SIM_L_SET_SHIFT_FLAGS`; Lean-only increment, no C/JSON diff.
+- Concrete counterexample theorems (`native_decide`): high-byte SHL of
+  `0x01` by the high-byte count `0x03` -> `0x08` (all flags false), and
+  high-byte SAR of `0x80` by the high-byte count `0x01` -> `0xC0`
+  sign-fill (SF set, OF false).
+- Verification: full `make -C native-sim/formal check` passed
+  (freshness + complete Lean build, ~33 s). As integration insurance
+  `make -C native-sim/x86 run` was re-run after installing host clang 18:
+  the BPF object builds and the loader loads `x86_sim_hardcoded_xdp`
+  (fd=4).
+- `native-sim/formal/README.md` gains the matching register-register shift
+  paragraph after the register-register logical one.
+- Open x86 boundary after this increment: IMUL (register-register and
+  immediate), memory lanes and stores, the objdump/parser-to-AUX
+  selection relation, C-to-Lean unsigned-semantics correspondence, and
+  AArch64 flag production. These theorems do not establish native-byte
+  equivalence.

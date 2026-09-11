@@ -1006,4 +1006,93 @@ theorem x86_rol_imm_high8_example :
         flags := { cf := false, zf := true, sf := true, of := true } } := by
   native_decide
 
+/- Register-destination SHL/SHR/SAR/ROL-register: after decoded byte lanes
+select the destination operand and the source operand (the shift count). The
+C handler computes the generated shift result from the selected-lane operand
+and the lane-read count, writes back the selected lane, and replaces the
+flags through the generated shift-flag transition seeded with the pre-state
+flags. This is the immediate form with the count field replaced by a second
+lane read; the shared shift-result and shift-flag contracts are reused, and
+the op-parametric `x86_shift_imm_flags_defined` establishes the architectural
+flag definedness for these operands. -/
+def generatedX86ShiftRegLaneHandler (op : X86ShiftOp)
+    (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86RegRead.readAt rawRhs width srcLane
+  let result := match op with
+    | .shl => GeneratedX86ShiftResult.shl lhs rhs width
+    | .shr => GeneratedX86ShiftResult.shr lhs rhs width
+    | .sar => GeneratedX86ShiftResult.sar lhs rhs width
+    | .rol => GeneratedX86ShiftResult.rol lhs rhs width
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86ShiftFlags op lhs rhs result width state.flags }
+
+def x86ShiftRegLaneHandlerSpec (op : X86ShiftOp)
+    (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86RegReadAtSpec rawRhs width srcLane
+  let result := match op with
+    | .shl => x86ShlResultSpec lhs rhs width
+    | .shr => x86ShrResultSpec lhs rhs width
+    | .sar => x86SarResultSpec lhs rhs width
+    | .rol => x86RolResultSpec lhs rhs width
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := generatedX86ShiftFlags op lhs rhs result width state.flags }
+
+theorem x86_shl_reg_lane_handler_refines (state : X86RegAluState)
+    (rawRhs : BitVec 64) (width : X86Width)
+    (dstLane srcLane : X86ByteLane) :
+    generatedX86ShiftRegLaneHandler .shl state rawRhs width dstLane srcLane =
+      x86ShiftRegLaneHandlerSpec .shl state rawRhs width dstLane srcLane := by
+  simp only [generatedX86ShiftRegLaneHandler, x86ShiftRegLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_reg_read_at_refines,
+    x86_shl_result_refines, x86_reg_write_at_refines]
+
+theorem x86_shr_reg_lane_handler_refines (state : X86RegAluState)
+    (rawRhs : BitVec 64) (width : X86Width)
+    (dstLane srcLane : X86ByteLane) :
+    generatedX86ShiftRegLaneHandler .shr state rawRhs width dstLane srcLane =
+      x86ShiftRegLaneHandlerSpec .shr state rawRhs width dstLane srcLane := by
+  simp only [generatedX86ShiftRegLaneHandler, x86ShiftRegLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_reg_read_at_refines,
+    x86_shr_result_refines, x86_reg_write_at_refines]
+
+theorem x86_sar_reg_lane_handler_refines (state : X86RegAluState)
+    (rawRhs : BitVec 64) (width : X86Width)
+    (dstLane srcLane : X86ByteLane) :
+    generatedX86ShiftRegLaneHandler .sar state rawRhs width dstLane srcLane =
+      x86ShiftRegLaneHandlerSpec .sar state rawRhs width dstLane srcLane := by
+  simp only [generatedX86ShiftRegLaneHandler, x86ShiftRegLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_reg_read_at_refines,
+    x86_sar_result_refines, x86_reg_write_at_refines]
+
+theorem x86_rol_reg_lane_handler_refines (state : X86RegAluState)
+    (rawRhs : BitVec 64) (width : X86Width)
+    (dstLane srcLane : X86ByteLane) :
+    generatedX86ShiftRegLaneHandler .rol state rawRhs width dstLane srcLane =
+      x86ShiftRegLaneHandlerSpec .rol state rawRhs width dstLane srcLane := by
+  simp only [generatedX86ShiftRegLaneHandler, x86ShiftRegLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_reg_read_at_refines,
+    x86_rol_result_refines, x86_reg_write_at_refines]
+
+theorem x86_shl_reg_high8_example :
+    generatedX86ShiftRegLaneHandler .shl
+      { dst := { bits := 0x1122334455660100, tag := .scalar },
+        flags := { cf := false, zf := false, sf := false, of := false } }
+      0x0000000000000300 .w8 .high .high =
+      { dst := { bits := 0x1122334455660800, tag := .scalar },
+        flags := { cf := false, zf := false, sf := false, of := false } } := by
+  native_decide
+
+theorem x86_sar_reg_high8_sign_fill_example :
+    generatedX86ShiftRegLaneHandler .sar
+      { dst := { bits := 0x1122334455668000, tag := .scalar },
+        flags := { cf := false, zf := false, sf := false, of := false } }
+      0x0000000000000100 .w8 .high .high =
+      { dst := { bits := 0x112233445566c000, tag := .scalar },
+        flags := { cf := false, zf := false, sf := true, of := false } } := by
+  native_decide
+
 end KProgFormal

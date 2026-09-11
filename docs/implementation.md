@@ -20,8 +20,11 @@ increment is committed and pushed immediately). Current state:
   JSON/C/Lean contracts: width narrowing, entry ABI loads, pointer add,
   x86/AArch64 condition tables, ALU decode, logical/ADD/SUB/ADC/SBB/INC/DEC/
   NEG/NOT flag and result production, shift results and flags, register-lane
-  AUX layout, and the register-destination immediate handler compositions for
-  ADD/ADC/SUB/SBB/CMP/TEST/AND/OR/XOR/SHL/SHR/SAR/ROL.
+  AUX layout, register-destination immediate handler compositions for
+  ADD/ADC/SUB/SBB/CMP/TEST/AND/OR/XOR/SHL/SHR/SAR/ROL, register-register
+  AND/OR/XOR/SHL/SHR/SAR/ROL handler compositions, and the
+  carry-sensitive handler classification (SBB/ADC routing through
+  generated C predicates).
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag
@@ -30,9 +33,7 @@ increment is committed and pushed immediately). Current state:
 
 ### Current boundary and open work
 
-- Open x86 proof surface: register-register AND/OR/XOR and shift handler
-  compositions (immediate forms are now proven; the register-register path
-  uses the same lane/flag contracts with a second lane read), IMUL, memory
+- Open x86 proof surface: IMUL (immediate and register-register), memory
   lanes and stores, the objdump/parser-to-AUX selection relation, C-to-Lean
   unsigned-semantics correspondence, compiler/native-byte correspondence,
   multi-step control-flow traces, helpers, and specialization preservation.
