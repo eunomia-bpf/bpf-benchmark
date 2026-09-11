@@ -1125,3 +1125,24 @@ not establish complete native-byte semantic equivalence.
   completed here. These theorems do not establish native-byte or
   C-to-Lean unsigned-semantics equivalence; they bind the typed AUX
   payload to handler class.
+
+### Track negative-proof micro-prog fixtures, 2026-09-11
+
+- `native-sim/x86/micro-prog/unchecked_packet_read.bpf.c` and
+  `native-sim/arm64/micro-prog/unchecked_packet_read.bpf.c` were untracked
+  while every one of the 29 workload-derived siblings in each `micro-prog/`
+  is tracked. `run_micro_sim_batch.py` (`source_dir = <arch>/micro-prog`,
+  `src = config.source_dir / f"{bench.name}.bpf.c"`) consumes these as
+  hand-authored source for the `kprog_negative_stage2` suite, and both
+  arch `Makefile`s set `NEGATIVE_PROGRAM := unchecked_packet_read`; the
+  tracked home `native-sim/test/unchecked_packet_read.bpf.c` (added by
+  `179119708`, which wired the micro-prog negative build) was committed
+  without the two arch copies. A fresh clone would therefore break
+  `kprog-negative-proof-build` (the target this chain uses as build
+  insurance). These are hand-authored fixtures (not generator output, not
+  build artifacts, not gitignored), so they are tracked here.
+- Both copies carry the correct arch-local include
+  (`../x86_sim_local_bpf.h` / `../arm64_sim_local_bpf.h`) and are distinct
+  per-arch programs. They were already proven functional by this session's
+  two `make -C native-sim/x86 micro-proofs-build` runs (each exercised
+  `kprog-negative-proof-build` end-to-end, exit 0).
