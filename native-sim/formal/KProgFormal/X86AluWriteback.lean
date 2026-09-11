@@ -674,6 +674,123 @@ theorem x86_test_imm_high8_example :
       { dst := { bits := 0x1122334455668001, tag := .packet },
         flags := { cf := false, zf := false, sf := true, of := false } } := by
   native_decide
+
+/-- Register-register AND after both selected lanes are observed. The C
+`X86_SIM_L_EXEC_ALU_REG` generic branch computes the width-local logical result
+from the two lane observations, replaces the destination lane, and takes
+CF=OF=0 with ZF/SF from the width-narrowed result. The logical result of each
+operation is the corresponding `BitVec` binary connective; the writeback and
+flag contracts are the shared generated ones. -/
+def generatedX86AndRegLaneHandler (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86RegRead.readAt rawRhs width srcLane
+  let result := BitVec.and lhs rhs
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86LogicFlags (GeneratedX86Width.zero result width)
+      (GeneratedX86Width.sign result width) }
+
+def x86AndRegLaneHandlerSpec (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86RegReadAtSpec rawRhs width srcLane
+  let result := BitVec.and lhs rhs
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := x86LogicFlagsSpec (x86ZeroSpec result width)
+      (x86SignSpec result width) }
+
+theorem x86_and_reg_lane_handler_refines (state : X86RegAluState)
+    (rawRhs : BitVec 64) (width : X86Width)
+    (dstLane srcLane : X86ByteLane) :
+    generatedX86AndRegLaneHandler state rawRhs width dstLane srcLane =
+      x86AndRegLaneHandlerSpec state rawRhs width dstLane srcLane := by
+  simp only [generatedX86AndRegLaneHandler, x86AndRegLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_reg_read_at_refines,
+    x86_zero_refines, x86_sign_refines,
+    x86_logic_flags_refine, x86_reg_write_at_refines]
+
+theorem x86_and_reg_high8_example :
+    generatedX86AndRegLaneHandler
+      { dst := { bits := 0x112233445566ff00, tag := .packet },
+        flags := { cf := true, zf := true, sf := false, of := true } }
+      0x0f00 .w8 .high .high =
+      { dst := { bits := 0x1122334455660f00, tag := .scalar },
+        flags := { cf := false, zf := false, sf := false, of := false } } := by
+  native_decide
+
+def generatedX86OrRegLaneHandler (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86RegRead.readAt rawRhs width srcLane
+  let result := BitVec.or lhs rhs
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86LogicFlags (GeneratedX86Width.zero result width)
+      (GeneratedX86Width.sign result width) }
+
+def x86OrRegLaneHandlerSpec (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86RegReadAtSpec rawRhs width srcLane
+  let result := BitVec.or lhs rhs
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := x86LogicFlagsSpec (x86ZeroSpec result width)
+      (x86SignSpec result width) }
+
+theorem x86_or_reg_lane_handler_refines (state : X86RegAluState)
+    (rawRhs : BitVec 64) (width : X86Width)
+    (dstLane srcLane : X86ByteLane) :
+    generatedX86OrRegLaneHandler state rawRhs width dstLane srcLane =
+      x86OrRegLaneHandlerSpec state rawRhs width dstLane srcLane := by
+  simp only [generatedX86OrRegLaneHandler, x86OrRegLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_reg_read_at_refines,
+    x86_zero_refines, x86_sign_refines,
+    x86_logic_flags_refine, x86_reg_write_at_refines]
+
+theorem x86_or_reg_high8_example :
+    generatedX86OrRegLaneHandler
+      { dst := { bits := 0x11223344556600ff, tag := .scalar },
+        flags := { cf := false, zf := false, sf := true, of := true } }
+      0x8000 .w8 .high .high =
+      { dst := { bits := 0x11223344556680ff, tag := .scalar },
+        flags := { cf := false, zf := false, sf := true, of := false } } := by
+  native_decide
+
+def generatedX86XorRegLaneHandler (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86RegRead.readAt rawRhs width srcLane
+  let result := BitVec.xor lhs rhs
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86LogicFlags (GeneratedX86Width.zero result width)
+      (GeneratedX86Width.sign result width) }
+
+def x86XorRegLaneHandlerSpec (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86RegReadAtSpec rawRhs width srcLane
+  let result := BitVec.xor lhs rhs
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := x86LogicFlagsSpec (x86ZeroSpec result width)
+      (x86SignSpec result width) }
+
+theorem x86_xor_reg_lane_handler_refines (state : X86RegAluState)
+    (rawRhs : BitVec 64) (width : X86Width)
+    (dstLane srcLane : X86ByteLane) :
+    generatedX86XorRegLaneHandler state rawRhs width dstLane srcLane =
+      x86XorRegLaneHandlerSpec state rawRhs width dstLane srcLane := by
+  simp only [generatedX86XorRegLaneHandler, x86XorRegLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_reg_read_at_refines,
+    x86_zero_refines, x86_sign_refines,
+    x86_logic_flags_refine, x86_reg_write_at_refines]
+
+theorem x86_xor_reg64_example :
+    generatedX86XorRegLaneHandler
+      { dst := { bits := 0x0000000000123456, tag := .scalar },
+        flags := { cf := true, zf := true, sf := false, of := true } }
+      0x0000000000765432 .w64 .low .low =
+      { dst := { bits := 0x0000000000646064, tag := .scalar },
+        flags := { cf := false, zf := false, sf := false, of := false } } := by
+  native_decide
 /-- Register-destination AND/OR/XOR-immediate after lane selection and raw
 immediate decoding. The C handler computes the width-local logical result from
 the selected-lane operand, replaces the destination lane, and takes the four

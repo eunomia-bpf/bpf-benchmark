@@ -215,6 +215,16 @@ theorems pin a high-byte AND, a high-byte OR that turns the zero/sign pair
 off/on, a 64-bit XOR exercising the immediate sign-extension path, a 64-bit
 SHL whose 96-bit count masks to 32, and a high-byte ROL showing the zero/sign
 preservation of rotate flags.
+The register-register AND, OR, and XOR handlers follow the same lane
+composition with a second read: the C `X86_SIM_L_EXEC_ALU_REG` generic branch
+observes the destination lane and the source register lane, computes the
+width-local bitwise result, replaces the destination lane, and takes
+CF=OF=0 with ZF/SF from the width-narrowed result. Each generated handler
+refines an independently assembled specification via the two lane reads,
+the generated logic flags, and the lane writeback; concrete theorems pin a
+high-byte AND, a high-byte OR that sets the width sign bit, and a 64-bit
+XOR. The immediate-decode theorem is not involved because the source lane
+supplies the second operand rather than a raw artifact field.
 The generated ALU decode contract also classifies the two carry-sensitive
 handlers (ADC and SBB). The register-lane AUX theorem proves that packing a
 typed ALU code and extracting its payload selects the same handler as an

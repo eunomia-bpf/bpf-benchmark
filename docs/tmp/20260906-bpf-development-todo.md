@@ -1064,3 +1064,33 @@ not establish complete native-byte semantic equivalence.
 - These theorems do not establish objdump/text-parsing or
   native-byte-level equivalence; they close the immediate-form AND/OR/XOR
   handler-composition gap and pin the shift flag-preservation examples.
+
+### Register-register logical handler refinement, 2026-09-11
+
+- `KProgFormal/X86AluWriteback.lean` gains `generatedX86AndRegLaneHandler` /
+  `x86AndRegLaneHandlerSpec` + `x86_and_reg_lane_handler_refines`, and the
+  matching OR and XOR pairs. Each composes the two generated register-lane
+  reads (destination lane and source register lane), the `BitVec`
+  binary connective, the generated lane writeback, and the generated
+  logic-flag transition (CF=OF=0, ZF/SF from the width-narrowed result);
+  each refines the independent specification via the shared per-piece
+  refine lemmas. This mirrors the C `X86_SIM_L_EXEC_ALU_REG` generic
+  branch, which supplies the second operand from the source register lane
+  rather than a raw immediate artifact field.
+- Concrete counterexample theorems (`native_decide`): high-byte AND of
+  `0xff` with `0x0f` → `0x0f`, high-byte OR of `0x00` with `0x80` →
+  `0x80` setting the width sign bit, and 64-bit XOR of `0x123456` with
+  `0x765432` → `0x646064`.
+- Verification: full `make -C native-sim/formal check` passed
+  (freshness + complete Lean build, ~34 s). Lean-only step (no C/JSON
+  diff); as integration insurance `make -C native-sim/x86
+  micro-proofs-build` was re-run with the host clang at
+  `/usr/lib/llvm-18/bin`: negative artifact + all 29 workload-derived
+  artifacts built.
+- `native-sim/formal/README.md` gains the matching register-register
+  paragraph after the logical-immediate one.
+- Open x86 boundary after this increment: register-register shift
+  handlers (second lane read feeding the count), IMUL immediate, memory
+  lanes and stores, the objdump/parser-to-AUX selection relation, C-to-Lean
+  unsigned-semantics correspondence, and AArch64 flag production. These
+  theorems do not establish native-byte equivalence.
