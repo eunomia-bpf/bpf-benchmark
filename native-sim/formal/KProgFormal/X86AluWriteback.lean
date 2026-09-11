@@ -6,6 +6,8 @@ import KProgFormal.X86SbbFlags
 import KProgFormal.X86RegRead
 import KProgFormal.X86LogicFlags
 import KProgFormal.X86Immediate
+import KProgFormal.X86ShiftResult
+import KProgFormal.X86ShiftFlags
 
 namespace KProgFormal
 
@@ -671,6 +673,220 @@ theorem x86_test_imm_high8_example :
       0x80 .w8 .high =
       { dst := { bits := 0x1122334455668001, tag := .packet },
         flags := { cf := false, zf := false, sf := true, of := false } } := by
+  native_decide
+/-- Register-destination AND/OR/XOR-immediate after lane selection and raw
+immediate decoding. The C handler computes the width-local logical result from
+the selected-lane operand, replaces the destination lane, and takes the four
+flags from the width-local zero/sign observation. The logical result of each
+operation is the corresponding `BitVec` binary connective; the writeback and
+flag contracts are the shared generated ones. -/
+def generatedX86AndImmLaneHandler (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86Immediate.value rawImm width
+  let result := BitVec.and lhs rhs
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86LogicFlags (GeneratedX86Width.zero result width)
+      (GeneratedX86Width.sign result width) }
+
+def x86AndImmLaneHandlerSpec (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86ImmediateValueSpec rawImm width
+  let result := BitVec.and lhs rhs
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := x86LogicFlagsSpec (x86ZeroSpec result width)
+      (x86SignSpec result width) }
+
+theorem x86_and_imm_lane_handler_refines (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width) (dstLane : X86ByteLane) :
+    generatedX86AndImmLaneHandler state rawImm width dstLane =
+      x86AndImmLaneHandlerSpec state rawImm width dstLane := by
+  simp only [generatedX86AndImmLaneHandler, x86AndImmLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_immediate_value_refines,
+    x86_zero_refines, x86_sign_refines,
+    x86_logic_flags_refine, x86_reg_write_at_refines]
+
+def generatedX86OrImmLaneHandler (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86Immediate.value rawImm width
+  let result := BitVec.or lhs rhs
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86LogicFlags (GeneratedX86Width.zero result width)
+      (GeneratedX86Width.sign result width) }
+
+def x86OrImmLaneHandlerSpec (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86ImmediateValueSpec rawImm width
+  let result := BitVec.or lhs rhs
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := x86LogicFlagsSpec (x86ZeroSpec result width)
+      (x86SignSpec result width) }
+
+theorem x86_or_imm_lane_handler_refines (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width) (dstLane : X86ByteLane) :
+    generatedX86OrImmLaneHandler state rawImm width dstLane =
+      x86OrImmLaneHandlerSpec state rawImm width dstLane := by
+  simp only [generatedX86OrImmLaneHandler, x86OrImmLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_immediate_value_refines,
+    x86_zero_refines, x86_sign_refines,
+    x86_logic_flags_refine, x86_reg_write_at_refines]
+
+def generatedX86XorImmLaneHandler (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86Immediate.value rawImm width
+  let result := BitVec.xor lhs rhs
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86LogicFlags (GeneratedX86Width.zero result width)
+      (GeneratedX86Width.sign result width) }
+
+def x86XorImmLaneHandlerSpec (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86ImmediateValueSpec rawImm width
+  let result := BitVec.xor lhs rhs
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := x86LogicFlagsSpec (x86ZeroSpec result width)
+      (x86SignSpec result width) }
+
+theorem x86_xor_imm_lane_handler_refines (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width) (dstLane : X86ByteLane) :
+    generatedX86XorImmLaneHandler state rawImm width dstLane =
+      x86XorImmLaneHandlerSpec state rawImm width dstLane := by
+  simp only [generatedX86XorImmLaneHandler, x86XorImmLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_immediate_value_refines,
+    x86_zero_refines, x86_sign_refines,
+    x86_logic_flags_refine, x86_reg_write_at_refines]
+
+theorem x86_and_imm_high8_example :
+    generatedX86AndImmLaneHandler
+      { dst := { bits := 0x112233445566ff00, tag := .packet },
+        flags := { cf := true, zf := true, sf := false, of := true } }
+      0x0f .w8 .high =
+      { dst := { bits := 0x1122334455660f00, tag := .scalar },
+        flags := { cf := false, zf := false, sf := false, of := false } } := by
+  native_decide
+
+theorem x86_or_imm_high8_example :
+    generatedX86OrImmLaneHandler
+      { dst := { bits := 0x11223344556600ff, tag := .scalar },
+        flags := { cf := false, zf := false, sf := true, of := true } }
+      0x80 .w8 .high =
+      { dst := { bits := 0x11223344556680ff, tag := .scalar },
+        flags := { cf := false, zf := false, sf := true, of := false } } := by
+  native_decide
+
+theorem x86_xor_imm64_sign_extension_example :
+    generatedX86XorImmLaneHandler
+      { dst := { bits := 0x55555555, tag := .scalar },
+        flags := { cf := true, zf := false, sf := false, of := true } }
+      0xffffffff .w64 .low =
+      { dst := { bits := 0xffffffffaaaaaaaa, tag := .scalar },
+        flags := { cf := false, zf := false, sf := true, of := false } } := by
+  native_decide
+
+/-- Register-destination SHL/SHR/SAR/ROL-immediate after lane selection and
+raw immediate decoding. The C handler computes the generated shift result
+from the selected-lane operand and the raw count field, writes back the
+selected lane, and replaces the flags through the generated shift-flag
+transition seeded with the pre-state flags. Undefined CF/OF cases remain
+architecturally unconstrained; the shared definedness contract proves the
+generated transition satisfies the architectural choice whenever the case
+is defined. -/
+def generatedX86ShiftImmLaneHandler (op : X86ShiftOp)
+    (state : X86RegAluState) (rawImm : BitVec 64)
+    (width : X86Width) (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let result := match op with
+    | .shl => GeneratedX86ShiftResult.shl lhs rawImm width
+    | .shr => GeneratedX86ShiftResult.shr lhs rawImm width
+    | .sar => GeneratedX86ShiftResult.sar lhs rawImm width
+    | .rol => GeneratedX86ShiftResult.rol lhs rawImm width
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86ShiftFlags op lhs rawImm result width state.flags }
+
+def x86ShiftImmLaneHandlerSpec (op : X86ShiftOp)
+    (state : X86RegAluState) (rawImm : BitVec 64)
+    (width : X86Width) (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let result := match op with
+    | .shl => x86ShlResultSpec lhs rawImm width
+    | .shr => x86ShrResultSpec lhs rawImm width
+    | .sar => x86SarResultSpec lhs rawImm width
+    | .rol => x86RolResultSpec lhs rawImm width
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := generatedX86ShiftFlags op lhs rawImm result width state.flags }
+
+theorem x86_shl_imm_lane_handler_refines (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width) (dstLane : X86ByteLane) :
+    generatedX86ShiftImmLaneHandler .shl state rawImm width dstLane =
+      x86ShiftImmLaneHandlerSpec .shl state rawImm width dstLane := by
+  simp only [generatedX86ShiftImmLaneHandler, x86ShiftImmLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_shl_result_refines,
+    x86_reg_write_at_refines]
+
+theorem x86_shr_imm_lane_handler_refines (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width) (dstLane : X86ByteLane) :
+    generatedX86ShiftImmLaneHandler .shr state rawImm width dstLane =
+      x86ShiftImmLaneHandlerSpec .shr state rawImm width dstLane := by
+  simp only [generatedX86ShiftImmLaneHandler, x86ShiftImmLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_shr_result_refines,
+    x86_reg_write_at_refines]
+
+theorem x86_sar_imm_lane_handler_refines (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width) (dstLane : X86ByteLane) :
+    generatedX86ShiftImmLaneHandler .sar state rawImm width dstLane =
+      x86ShiftImmLaneHandlerSpec .sar state rawImm width dstLane := by
+  simp only [generatedX86ShiftImmLaneHandler, x86ShiftImmLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_sar_result_refines,
+    x86_reg_write_at_refines]
+
+theorem x86_rol_imm_lane_handler_refines (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width) (dstLane : X86ByteLane) :
+    generatedX86ShiftImmLaneHandler .rol state rawImm width dstLane =
+      x86ShiftImmLaneHandlerSpec .rol state rawImm width dstLane := by
+  simp only [generatedX86ShiftImmLaneHandler, x86ShiftImmLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_rol_result_refines,
+    x86_reg_write_at_refines]
+
+/-- For every shift opcode, the generated shift-flag transition used by the
+immediate handler satisfies the architectural shift-flag definedness contract
+for arbitrary operands, results, widths, and pre-state flags. This composes
+the generated result with the generated flags at the handler level. -/
+theorem x86_shift_imm_flags_defined (op : X86ShiftOp)
+    (lhs rawImm result : BitVec 64) (width : X86Width)
+    (old : X86Flags) :
+    x86ShiftFlagsDefinedSpec op lhs rawImm result width old
+      (generatedX86ShiftFlags op lhs rawImm result width old) = true := by
+  cases op <;>
+    (try exact x86_shl_flags_defined lhs rawImm width result old);
+  (try exact x86_shr_flags_defined lhs rawImm width result old);
+  (try exact x86_sar_flags_defined lhs rawImm width result old);
+  (try exact x86_rol_flags_defined lhs rawImm width result old)
+
+theorem x86_shl_imm64_wide_count_example :
+    let s := { dst := { bits := 0x0000000000000001, tag := .scalar },
+               flags := { cf := false, zf := false, sf := false, of := false } }
+    (generatedX86ShiftImmLaneHandler .shl s 96 .w64 .low).dst.bits =
+      0x100000000 := by
+  native_decide
+
+theorem x86_rol_imm_high8_example :
+    generatedX86ShiftImmLaneHandler .rol
+      { dst := { bits := 0x1122334455660100, tag := .scalar },
+        flags := { cf := false, zf := true, sf := true, of := true } }
+      2 .w8 .high =
+      { dst := { bits := 0x1122334455660400, tag := .scalar },
+        flags := { cf := false, zf := true, sf := true, of := true } } := by
   native_decide
 
 end KProgFormal

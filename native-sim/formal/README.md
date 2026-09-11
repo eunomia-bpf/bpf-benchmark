@@ -205,6 +205,23 @@ through subtraction flags and proves the complete destination bits/tag remain
 unchanged. TEST-immediate likewise composes the decode through width-local
 logic flags and destination preservation. Other immediate opcodes and textual
 parsing remain outside this composition.
+Logical-immediate consumption now has the matching shared contract: the same
+generated immediate-decode theorem applies to AND, OR, and XOR, and each
+generated lane handler refines an independently assembled specification that
+composes the selected register-lane read, the decoded immediate, the generated
+bitwise result, the generated logic-flag transition (CF=OF=0, ZF=zero, SF=sign),
+selected-lane writeback, and tag scalarization. Concrete counterexample
+theorems pin a high-byte AND, a high-byte OR that turns the zero/sign pair
+off/on, a 64-bit XOR exercising the immediate sign-extension path, a 64-bit
+SHL whose 96-bit count masks to 32, and a high-byte ROL showing the zero/sign
+preservation of rotate flags.
+The generated ALU decode contract also classifies the two carry-sensitive
+handlers (ADC and SBB). The register-lane AUX theorem proves that packing a
+typed ALU code and extracting its payload selects the same handler as an
+independent operation mapping. The C immediate, register, and memory ALU paths
+consume the generated predicates for those two special branches. This binds
+typed AUX payload extraction to handler class, but not native-byte or textual
+mnemonic parsing to that typed operation.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86

@@ -1028,3 +1028,39 @@ model. Immediate AND/OR/XOR/shift/IMUL paths, other high-byte extend/shift/load
 forms, memory lanes and stores, helpers, multi-step traces, specialization
 preservation, and AArch64 flag production also remain open. These commits do
 not establish complete native-byte semantic equivalence.
+
+### Logical-immediate handler refinement (AND/OR/XOR + SHL/ROL examples), 2026-09-11
+
+- New section in `KProgFormal/X86AluWriteback.lean` (file now ~892 lines):
+  `generatedX86AndImmLaneHandler` / `x86AndImmLaneHandlerSpec` +
+  `x86_and_imm_lane_handler_refines`, and the matching OR and XOR pairs.
+  Each generated handler composes the generated register-lane read
+  (`GeneratedX86RegRead.readAt`), the generated immediate decode
+  (`GeneratedX86Immediate.value`, i.e. 32-bit truncation with 64-bit
+  sign-extension), the bitwise result, the generated lane writeback
+  (`generatedX86RegWriteAt`), the generated logic-flag transition
+  (`generatedX86LogicFlags`), and the generated zero/sign observations
+  (`GeneratedX86Width.zero`/`.sign`). Each refine theorem ties the
+  generated composition to an independently written spec using only the
+  shared per-piece refine lemmas
+  (`x86_reg_read_at_refines`, `x86_immediate_value_refines`,
+  `x86_zero_refines`, `x86_sign_refines`, `x86_logic_flags_refine`,
+  `x86_reg_write_at_refines`).
+- Five counterexample theorems (`native_decide` on the generated handler):
+  high-byte AND `0xff & 0x0f` on `...ff00` → `...0f00`, all logic flags
+  cleared; high-byte OR `0x00 | 0x80` on `...00ff` → `...80ff` with
+  SF=true; 64-bit XOR of `0x55555555` with the sign-extended immediate
+  `0xffffffff` → `0xffffffffaaaaaaaa`, SF=true; 64-bit SHL of `1` by the
+  96-bit immediate (count masks to 32) → `0x100000000`; and high-byte ROL
+  of `0x01` by 2 → `0x04` with the rotate flag transition preserving
+  ZF/SF and keeping OF at its old value for masked count ≠ 1.
+- Verification: full `make -C native-sim/formal check` passed (freshness +
+  complete Lean build, ~33 s). The step is Lean-only (no C diff), but as
+  integration insurance `make -C native-sim/x86 micro-proofs-build` was
+  re-run with the host clang at `/usr/lib/llvm-18/bin` (not on default
+  PATH): negative artifact + all 29 workload-derived artifacts built.
+- `native-sim/formal/README.md` gains the matching paragraph after the
+  arithmetic-immediate composition paragraph.
+- These theorems do not establish objdump/text-parsing or
+  native-byte-level equivalence; they close the immediate-form AND/OR/XOR
+  handler-composition gap and pin the shift flag-preservation examples.
