@@ -908,7 +908,7 @@ struct x86_sim_state {
 			(DST), __x86_l_width, __x86_l_dst_shift);           \
 		__u64 __x86_l_rhs = x86_store_imm_value((IMM), __x86_l_width);\
 		__u64 __x86_l_result;                                    \
-		if (__x86_l_alu == X86_ALU_SBB) {                         \
+		if (KPROG_X86_ALU_USES_SBB_HANDLER(__x86_l_alu)) {        \
 			__u8 __x86_l_borrow = __x86_cf;                   \
 			__x86_l_result = KPROG_X86_SBB_RESULT(             \
 				__x86_l_lhs, __x86_l_rhs, __x86_l_borrow);  \
@@ -918,7 +918,7 @@ struct x86_sim_state {
 						__x86_l_width);          \
 			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), __x86_l_result,\
 				__x86_l_width, __x86_l_dst_shift);           \
-		} else if (__x86_l_alu == X86_ALU_ADC) {                   \
+		} else if (KPROG_X86_ALU_USES_ADC_HANDLER(__x86_l_alu)) {  \
 			__u8 __x86_l_carry = __x86_cf;                    \
 			__x86_l_result = KPROG_X86_ADC_RESULT(             \
 				__x86_l_lhs, __x86_l_rhs, __x86_l_carry);   \
@@ -955,7 +955,7 @@ struct x86_sim_state {
 			(SRC), __x86_l_width,                              \
 			KPROG_X86_REG_LANE_AUX_SRC_SHIFT(__x86_l_aux));      \
 		__u64 __x86_l_result;                                    \
-		if (__x86_l_alu == X86_ALU_SBB) {                         \
+		if (KPROG_X86_ALU_USES_SBB_HANDLER(__x86_l_alu)) {        \
 			__u8 __x86_l_borrow = __x86_cf;                   \
 			__x86_l_result = KPROG_X86_SBB_RESULT(             \
 				__x86_l_lhs, __x86_l_rhs, __x86_l_borrow);  \
@@ -965,7 +965,7 @@ struct x86_sim_state {
 						__x86_l_width);          \
 			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), __x86_l_result,\
 				__x86_l_width, __x86_l_dst_shift);           \
-		} else if (__x86_l_alu == X86_ALU_ADC) {                   \
+		} else if (KPROG_X86_ALU_USES_ADC_HANDLER(__x86_l_alu)) {  \
 			__u8 __x86_l_carry = __x86_cf;                    \
 			__x86_l_result = KPROG_X86_ADC_RESULT(             \
 				__x86_l_lhs, __x86_l_rhs, __x86_l_carry);   \
@@ -996,13 +996,13 @@ struct x86_sim_state {
 		__u64 __x86_l_rhs = X86_SIM_L_READ_MEM_VALUE((SRC), (AUX),\
 			(IMM), __x86_l_width, 0);                         \
 		__u64 __x86_l_result;                                    \
-		if (__x86_l_alu == X86_ALU_SBB) {                         \
+		if (KPROG_X86_ALU_USES_SBB_HANDLER(__x86_l_alu)) {        \
 			__u8 __x86_l_borrow = __x86_cf;                   \
 			__x86_l_result = KPROG_X86_SBB_RESULT(             \
 				__x86_l_lhs, __x86_l_rhs, __x86_l_borrow);  \
 			X86_SIM_L_SET_SBB_FLAGS(__x86_l_lhs, __x86_l_rhs, \
 				__x86_l_borrow, __x86_l_result, __x86_l_width);\
-		} else if (__x86_l_alu == X86_ALU_ADC) {                   \
+		} else if (KPROG_X86_ALU_USES_ADC_HANDLER(__x86_l_alu)) {  \
 			__u8 __x86_l_carry = __x86_cf;                    \
 			__x86_l_result = KPROG_X86_ADC_RESULT(             \
 				__x86_l_lhs, __x86_l_rhs, __x86_l_carry);   \
@@ -1058,13 +1058,13 @@ struct x86_sim_state {
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
 			x86_store_imm_disp(IMM));                         \
 		void *__x86_l_base_ptr = (void *)0;                       \
-		if (__x86_l_alu == X86_ALU_SBB) {                         \
+		if (KPROG_X86_ALU_USES_SBB_HANDLER(__x86_l_alu)) {        \
 			__u8 __x86_l_borrow = __x86_cf;                   \
 			__x86_l_result = KPROG_X86_SBB_RESULT(             \
 				__x86_l_lhs, __x86_l_rhs, __x86_l_borrow);  \
 			X86_SIM_L_SET_SBB_FLAGS(__x86_l_lhs, __x86_l_rhs, \
 				__x86_l_borrow, __x86_l_result, __x86_l_width);\
-		} else if (__x86_l_alu == X86_ALU_ADC) {                   \
+		} else if (KPROG_X86_ALU_USES_ADC_HANDLER(__x86_l_alu)) {  \
 			__u8 __x86_l_carry = __x86_cf;                    \
 			__x86_l_result = KPROG_X86_ADC_RESULT(             \
 				__x86_l_lhs, __x86_l_rhs, __x86_l_carry);   \
@@ -1102,13 +1102,13 @@ struct x86_sim_state {
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
 			x86_simm(IMM));                                    \
 		void *__x86_l_base_ptr = (void *)0;                       \
-		if (__x86_l_alu == X86_ALU_SBB) {                         \
+		if (KPROG_X86_ALU_USES_SBB_HANDLER(__x86_l_alu)) {        \
 			__u8 __x86_l_borrow = __x86_cf;                   \
 			__x86_l_result = KPROG_X86_SBB_RESULT(             \
 				__x86_l_lhs, __x86_l_rhs, __x86_l_borrow);  \
 			X86_SIM_L_SET_SBB_FLAGS(__x86_l_lhs, __x86_l_rhs, \
 				__x86_l_borrow, __x86_l_result, __x86_l_width);\
-		} else if (__x86_l_alu == X86_ALU_ADC) {                   \
+		} else if (KPROG_X86_ALU_USES_ADC_HANDLER(__x86_l_alu)) {  \
 			__u8 __x86_l_carry = __x86_cf;                    \
 			__x86_l_result = KPROG_X86_ADC_RESULT(             \
 				__x86_l_lhs, __x86_l_rhs, __x86_l_carry);   \

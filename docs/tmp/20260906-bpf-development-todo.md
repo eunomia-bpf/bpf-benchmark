@@ -1094,3 +1094,34 @@ not establish complete native-byte semantic equivalence.
   lanes and stores, the objdump/parser-to-AUX selection relation, C-to-Lean
   unsigned-semantics correspondence, and AArch64 flag production. These
   theorems do not establish native-byte equivalence.
+
+### Carry-sensitive handler classification (SBB/ADC), 2026-09-11
+
+- `x86_alu_decode_spec.json` gains a per-opcode `handler` field: `.sbb` and
+  `.adc` map to their own carry-sensitive handler classes; all other ALU
+  ops are `.generic`. `generate_x86_alu_decode_spec.py` now validates the
+  field, emits a generated `Handler` inductive (`generic | sbb | adc`) plus
+  `handlerForCode : BitVec 32 -> Handler` in the Lean side and two C
+  predicates `KPROG_X86_ALU_USES_{SBB,ADC}_HANDLER` in
+  `generated/x86_alu_decode.h`, and the generator's `--check` target stays
+  green.
+- `KProgFormal/X86AluDecode.lean` composes the classification against the
+  typed register-lane AUX: `x86_alu_handler_refines` proves the generated
+  handler function refines the independent operation mapping, and
+  `x86_alu_aux_handler_refines` proves packing a typed ALU code into the
+  AUX and extracting its payload selects the same handler via the committed
+  `x86_reg_lane_aux_payload_roundtrip`.
+- `native-sim/x86/x86_sim_local_bpf.h` routes its four SBB/ADC sites
+  (immediate, register, memory, and the ADD-flag shared paths) through the
+  generated predicates instead of open-coded `== X86_ALU_SBB/ADC` compares;
+  behaviour is unchanged, the C now derives handler selection from the
+  same artifact as the Lean side.
+- Verification: full `make -C native-sim/formal check` passed (freshness +
+  complete Lean build, ~30 s) and `make -C native-sim/x86
+  micro-proofs-build` passed with host clang at `/usr/lib/llvm-18/bin`
+  (negative artifact + all 29 workload-derived artifacts).
+- This increment is a carried-over WIP from an interrupted run of this
+  session chain (stale 08:31 git lock); it was re-verified end-to-end and
+  completed here. These theorems do not establish native-byte or
+  C-to-Lean unsigned-semantics equivalence; they bind the typed AUX
+  payload to handler class.
