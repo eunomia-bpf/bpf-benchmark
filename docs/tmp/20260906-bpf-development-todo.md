@@ -1337,3 +1337,109 @@ not establish complete native-byte semantic equivalence.
   flag-setting handlers, `MADD`/`MSUB`/`UMULH` flag consequences if any,
   condition-to-next-PC beyond the earlier condition contract, and native bytes.
   These theorems do not establish native-byte equivalence.
+
+### AArch64 instruction-decode table refinement, 2026-09-13
+
+- Gap: the AArch64 ALU/shift/modifier/bitfield mnemonic-to-code mapping lived in
+  three independent hand-written copies - the `ARM64_ALU_*`/`ARM64_SHIFT_*`/
+  `ARM64_MOD_*`/`ARM64_BITFIELD_*` `#define`s in `native-sim/arm64/arm64_sim.h`
+  and the `ALU`/`SHIFT`/`MOD`/`BITFIELD` dicts in the arm64 proof generator -
+  with no shared source or proof contract. The previous increment's open
+  AArch64 boundary named "instruction decode into the flag-setting handlers".
+- Generator: `native-sim/formal/generate_arm64_decode_spec.py` reads
+  `arm64_decode_spec.json` and emits the shared contract in four forms:
+  `generated/arm64_decode.h` (`ARM64_ALU_*`/`ARM64_SHIFT_*`/`ARM64_MOD_*`/
+  `ARM64_BITFIELD_*`), `KProgFormal/GeneratedArm64Decode.lean` (four
+  `inductive`+`code`/`mnemonic` modules), and
+  `native-sim/arm64/micro-prog/generated_arm64_decode.py` (the four dicts). It
+  has a `--check` mode and a `make check` line.
+- C wiring: `native-sim/arm64/arm64_sim.h` now `#include`s the generated header
+  instead of the 29 hand-written `#define`s. Behavior is unchanged: the same
+  numeric codes feed `ARM64_SIM_L_EXEC_ALU`, the shift handler, and the
+  bitfield handler. Python: the generator imports the four dicts from the
+  generated module at the top of the file rather than re-declaring them.
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64Decode.lean` states four
+  independent mnemonic/code enumerations and proves each generated table equal
+  to it (`arm64_alu_decode_refines`, `arm64_shift_decode_refines`,
+  `arm64_mod_decode_refines`, `arm64_bitfield_decode_refines`) plus
+  `arm64_alu_codes_distinct`, all by `native_decide`. No `sorry`/`admit`. Both
+  new modules are in the `KProgFormal.lean` root import list and the bridge has
+  a `lean` line in the Makefile.
+- Verification: full `make -C native-sim/formal check` green (generator
+  `--check` line, generated module build, `Arm64Decode.lean` line; ~40 s).
+  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts against the changed header, all `ok`, no failures.
+  Committed and pushed as `970b5ac04`.
+- Open AArch64 boundary after this increment: the register-lane ALU handler
+  composition (`ARM64_SIM_L_EXEC_ALU` value/flags/writeback plus its
+  `ARM64_SIM_L_MOD_VALUE` source-modifier path), bitfield/extract/rev handler
+  compositions, `MADD`/`MSUB`/`UMULH` flag consequences if any,
+  condition-to-next-PC beyond the earlier condition contract, and native bytes.
+  These theorems do not establish native-byte equivalence.
+
+### AArch64 ALU op-step result refinement, 2026-09-13
+
+- Gap: the six ALU result formulas (add/sub/and/bic/eor/orr) were hand-written
+  in the value half of the flag-setting handlers and in `ARM64_SIM_L_EXEC_ALU`,
+  with no shared source or proof contract, while the value half and the flag
+  half of `SUBS`/`ADDS`/`ANDS`/`TST`/`BICS` were produced by two independent
+  expression copies. The previous increment's open AArch64 boundary named "the
+  register-lane ALU handler composition".
+- Generator: `native-sim/formal/generate_arm64_alu_result_spec.py` reads
+  `arm64_alu_result_spec.json` and emits the shared op-step result contract in
+  two forms: `generated/arm64_alu_result.h` (`KPROG_ALU64_RESULT(OP, LHS, RHS,
+  UNSUPPORTED)`, a statement expression switching on the numeric codes
+  `0U..5U`, with `default: UNSUPPORTED`) and
+  `KProgFormal/GeneratedArm64AluResult.lean` (`result : Alu -> BitVec 64 ->
+  BitVec 64 -> BitVec 64`). `load()` re-reads `arm64_decode_spec.json` and
+  exits 1 if the six mnemonic/code pairs drift from the ALU table, so the
+  emitted numeric case labels cannot silently diverge from the generated
+  `arm64_decode.h` `ARM64_ALU_*` constants. It has a `--check` mode and a
+  `make check` line.
+- C wiring: `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated
+  header. `ARM64_SIM_L_EXEC_ALU` computes `__a64_alu_result` through
+  `KPROG_ALU64_RESULT`; the `SUBS`/`ADDS`/`TST`/`TST_BIC`/`BICS`/`ANDS`
+  handlers compute their result through the same macro, so their value and
+  flags now derive from one contract. Behavior is unchanged. The 64-bit ADD
+  pointer-tag fast path in `ARM64_SIM_L_EXEC_ALU` is untouched (tagged ADD never
+  uses the scalar result), and `ORN_REG` plus the flags-only `CMN`/`CMP` remain
+  as before (`ORN` is not one of the six table operations).
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64AluResult.lean` proves
+  `arm64_alu_result_refines` (the generated `result` equals an independently
+  written `arm64AluResultSpec` whose SUB is stated as add-of-two's-complement
+  and whose BIC uses an explicit complement mask), `arm64_alu_result_code_in_range`
+  and `arm64_alu_result_code_dispatch` (the six codes are exactly the macro's
+  case labels), `arm64_alu_result_narrow_refines` (64-bit result then narrowed is
+  the operation on width-narrowed operands narrowed again - what the C writeback
+  relies on), and the composition theorems `arm64_add_step_refines`,
+  `arm64_sub_step_refines`, `arm64_logic_step_refines` that pair the result with
+  the existing independent `arm64AddNzc`/`arm64SubNzc`/`arm64LogicNzc`
+  statements. Canonical examples: `1 - 2` w64 borrow (value all-ones, C clear, N
+  set), BIC `0xff & ~0x0f`, EOR self (zero, Z set), ORR (C/V clear), and
+  `0xffffffffffffffff + 1` w64 (wrap to zero, C and Z set). No `sorry`/`admit`.
+  Both new modules are in the `KProgFormal.lean` root import list and the bridge
+  has a `lean` line in the Makefile.
+- Host cross-check `native-sim/formal/test_arm64_alu_result_host.c`: compiles
+  the generated macro with zero warnings under `-Wall -Wextra` and compares it
+  against an independent oracle over 12 explicit boundary vectors x 6 ops plus a
+  fixed-seed 20000-iteration sweep x 6 ops, and forks a child that evaluates the
+  macro with an unsupported code and an `abort()` argument, requiring
+  `WIFSIGNALED && WTERMSIG == SIGABRT` so the `default` branch cannot silently
+  return zero. Result: `OK (120073 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, `Arm64AluResult.lean` lean line, and the arm64 alu-result host
+  cross-check step; ~33 s), including the pre-existing `arm64 flag host
+  cross-check: OK (60144 cases)` and `x86 memory-access host cross-check: OK
+  (40020 cases)`. `make -C native-sim/arm64 build` produces the BPF object from
+  `arm64_sim_hardcoded.bpf.c` (which includes the changed header) and `make -C
+  native-sim/arm64 run` loads it (`load-only`, fd=4). `make -C
+  native-sim/arm64 micro-proofs-build` rebuilds all 30 workload-derived
+  artifacts, all `ok`.
+- Open AArch64 boundary after this increment: the source-modifier composition
+  (`ARM64_SIM_L_MOD_VALUE` feeding `EXEC_ALU`/`SUBS`/`ADDS`/`ANDS`), the
+  bitfield/extract/rev handler compositions, `MADD`/`MSUB`/`UMULH` flag
+  consequences if any, condition-to-next-PC beyond the earlier condition
+  contract, and native bytes. These theorems do not establish native-byte
+  equivalence, and the Lean result contract is stated over `BitVec 64` while the
+  C macro operates on `__u64`; the host cross-check bridges that C/Lean
+  semantics gap for the tested vectors only.

@@ -29,3 +29,5 @@ import KProgFormal.GeneratedArm64Flags
 import KProgFormal.Arm64Flags
 import KProgFormal.GeneratedArm64Decode
 import KProgFormal.Arm64Decode
+import KProgFormal.GeneratedArm64AluResult
+import KProgFormal.Arm64AluResult
