@@ -8,6 +8,7 @@
 #include "../formal/generated/abi_load.h"
 #include "../formal/generated/arm64_cond.h"
 #include "../formal/generated/ptr_add.h"
+#include "../formal/generated/arm64_flags.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -577,43 +578,16 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	} while (0)
 
 #define ARM64_SIM_L_SET_SUB_FLAGS(LHS, RHS, WIDTH)                          \
-	do {                                                               \
-		__u8 __a64_sub_width = (WIDTH);                           \
-		__u64 __a64_sub_mask = arm64_width_mask(__a64_sub_width); \
-		__u64 __a64_sub_lhs = (LHS) & __a64_sub_mask;             \
-		__u64 __a64_sub_rhs = (RHS) & __a64_sub_mask;             \
-		__u64 __a64_sub_res = (__a64_sub_lhs - __a64_sub_rhs) & __a64_sub_mask;\
-		__u64 __a64_sub_sign = arm64_sign_bit(__a64_sub_width);   \
-		__a64_z = __a64_sub_lhs == __a64_sub_rhs;                 \
-		__a64_n = (__a64_sub_res & __a64_sub_sign) != 0;          \
-		__a64_c = __a64_sub_lhs >= __a64_sub_rhs;                 \
-		__a64_v = ((__a64_sub_lhs ^ __a64_sub_rhs) & (__a64_sub_lhs ^ __a64_sub_res) & __a64_sub_sign) != 0;\
-	} while (0)
+	KPROG_ARM64_SET_SUB_FLAGS(__a64_n, __a64_z, __a64_c, __a64_v,       \
+				  (LHS), (RHS), (WIDTH))
 
 #define ARM64_SIM_L_SET_ADD_FLAGS(LHS, RHS, WIDTH)                          \
-	do {                                                               \
-		__u8 __a64_add_width = (WIDTH);                           \
-		__u64 __a64_add_mask = arm64_width_mask(__a64_add_width); \
-		__u64 __a64_add_lhs = (LHS) & __a64_add_mask;             \
-		__u64 __a64_add_rhs = (RHS) & __a64_add_mask;             \
-		__u64 __a64_add_res = (__a64_add_lhs + __a64_add_rhs) & __a64_add_mask;\
-		__u64 __a64_add_sign = arm64_sign_bit(__a64_add_width);   \
-		__a64_z = __a64_add_res == 0;                             \
-		__a64_n = (__a64_add_res & __a64_add_sign) != 0;          \
-		__a64_c = __a64_add_lhs > __a64_add_mask - __a64_add_rhs; \
-		__a64_v = (~(__a64_add_lhs ^ __a64_add_rhs) & (__a64_add_lhs ^ __a64_add_res) & __a64_add_sign) != 0;\
-	} while (0)
+	KPROG_ARM64_SET_ADD_FLAGS(__a64_n, __a64_z, __a64_c, __a64_v,       \
+				  (LHS), (RHS), (WIDTH))
 
 #define ARM64_SIM_L_SET_LOGIC_FLAGS(VALUE, WIDTH)                           \
-	do {                                                               \
-		__u8 __a64_log_width = (WIDTH);                           \
-		__u64 __a64_log_value = arm64_apply_width((VALUE), __a64_log_width);\
-		__u64 __a64_log_sign = arm64_sign_bit(__a64_log_width);   \
-		__a64_z = __a64_log_value == 0;                            \
-		__a64_n = (__a64_log_value & __a64_log_sign) != 0;         \
-		__a64_c = 0;                                               \
-		__a64_v = 0;                                               \
-	} while (0)
+	KPROG_ARM64_SET_LOGIC_FLAGS(__a64_n, __a64_z, __a64_c, __a64_v,     \
+				    (VALUE), (WIDTH))
 
 #define ARM64_SIM_L_EVAL_COND(COND)                                         \
 	KPROG_ARM64_EVAL_COND((COND), __a64_n, __a64_z, __a64_c, __a64_v,   \

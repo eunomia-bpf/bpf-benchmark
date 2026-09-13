@@ -4,6 +4,8 @@ check:
 	install -d build
 	python3 generate_ptr_add_spec.py --check
 	python3 generate_abi_load_spec.py --check
+	python3 generate_arm64_width_spec.py --check
+	python3 generate_arm64_flags_spec.py --check
 	python3 generate_arm64_cond_spec.py --check
 	python3 generate_x86_cond_spec.py --check
 	python3 generate_x86_logic_flags_spec.py --check
@@ -53,3 +55,6 @@ check:
 	lake env lean KProgFormal/X86MemAccess.lean
 	$(CC) -Wall -Wextra -O2 -I. test_mem_access_host.c -o build/test_mem_access_host
 	./build/test_mem_access_host
+	lake env lean KProgFormal/Arm64Flags.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_flags_host.c -o build/test_arm64_flags_host
+	./build/test_arm64_flags_host

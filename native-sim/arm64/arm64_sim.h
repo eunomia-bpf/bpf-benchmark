@@ -130,6 +130,7 @@
 #define ARM64_WIDTH_16 2U
 #define ARM64_WIDTH_32 4U
 #define ARM64_WIDTH_64 8U
+#include "../formal/generated/arm64_width.h"
 
 #define ARM64_X0 0U
 #define ARM64_X1 1U
@@ -189,24 +190,12 @@
 
 static __always_inline __u64 arm64_width_mask(__u8 width)
 {
-	if (width == ARM64_WIDTH_8)
-		return 0xffULL;
-	if (width == ARM64_WIDTH_16)
-		return 0xffffULL;
-	if (width == ARM64_WIDTH_32)
-		return 0xffffffffULL;
-	return 0xffffffffffffffffULL;
+	return KPROG_ARM64_WIDTH_MASK(width);
 }
 
 static __always_inline __u8 arm64_width_bits(__u8 width)
 {
-	if (width == ARM64_WIDTH_8)
-		return 8U;
-	if (width == ARM64_WIDTH_16)
-		return 16U;
-	if (width == ARM64_WIDTH_32)
-		return 32U;
-	return 64U;
+	return (__u8)KPROG_ARM64_WIDTH_BITS(width);
 }
 
 static __always_inline __u64 arm64_bits_mask(__u8 bits)
@@ -220,12 +209,12 @@ static __always_inline __u64 arm64_bits_mask(__u8 bits)
 
 static __always_inline __u64 arm64_sign_bit(__u8 width)
 {
-	return 1ULL << (arm64_width_bits(width) - 1U);
+	return KPROG_ARM64_WIDTH_SIGN_MASK(width);
 }
 
 static __always_inline __u64 arm64_apply_width(__u64 value, __u8 width)
 {
-	return value & arm64_width_mask(width);
+	return KPROG_ARM64_APPLY_WIDTH(value, width);
 }
 
 static __always_inline __u64 arm64_sign_extend(__u64 value, __u8 bits)

@@ -30,6 +30,28 @@ The complete AArch64 condition-code table is generated from
 that all 15 supported predicates select the same next program counter as an
 independent architectural condition specification, for either branch
 direction.
+The AArch64 simulator width encodings and NZCV flag transitions are likewise
+generated. `arm64_width_spec.json` produces the `KPROG_ARM64_WIDTH_*` /
+`KPROG_ARM64_APPLY_WIDTH` macros and a Lean `GeneratedArm64Width` module; the
+central `arm64_width_mask` / `arm64_width_bits` / `arm64_sign_bit` /
+`arm64_apply_width` helpers now delegate to those macros, so the AArch64
+simulator and the proof contract share one forwarded source for masks, sign
+bits, and narrowing. `arm64_flags_spec.json` produces
+`KPROG_ARM64_SET_{ADD,SUB,LOGIC}_FLAGS` and Lean
+`GeneratedArm64Flags.apply{Add,Sub,Logic}`. Lean proves each generated
+transition equal to an independently written NZCV statement over already
+width-narrowed operands (ADD/SUB: N=sign, Z=zero, C=carry-out or not-borrow,
+V=signed overflow; logical: C=V=0), with concrete theorems pinning an
+AArch64 `0xffffffffffffffff + 1` carry/zero, a `0 + 0` subtract carry, a
+32-bit `0x7fffffff + 1` overflow, a `1 - 2` borrow, and a logical result that
+clears carry/overflow. The previously hand-written
+`ARM64_SIM_L_SET_{ADD,SUB,LOGIC}_FLAGS` macros now delegate to the generated
+primitives. A host C cross-check (`test_arm64_flags_host.c`) validates the
+generated macros against an independent `__int128` carry/overflow oracle over
+explicit boundary vectors and a fixed-seed 20000-case sweep of all four
+widths; `make check` runs it. Instruction decoding, condition-to-next-PC
+selection beyond the earlier condition contract, and native bytes remain
+boundaries.
 The supported x86 condition-code table is likewise generated from
 `x86_cond_spec.json` into the C simulator predicate and Lean. Lean proves the
 same next-PC refinement for arbitrary flags and branch targets; parity
@@ -292,8 +314,9 @@ for the unary/ALU handlers is now shared with this primitive.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
-logical/ADD/SUB/ADC/SBB flag production, and the x86 little-endian memory
-load/store contract; other flag production, the decoder-to-handler
+logical/ADD/SUB/ADC/SBB flag production, the x86 little-endian memory
+load/store contract, and AArch64 width plus ADD/SUB/logical NZCV production;
+other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
 The correspondence between C unsigned bit operations and Lean `BitVec`

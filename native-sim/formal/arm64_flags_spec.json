@@ -1,0 +1,1 @@
+{"schema_version":1,"operation":"arm64Flags","families":{"add":{"n":"sign","z":"zero","c":"unsigned_carry_out","v":"signed_overflow"},"sub":{"n":"sign","z":"zero","c":"not_borrow","v":"signed_overflow"},"logical":{"n":"sign","z":"zero","c":"clear","v":"clear"}},"width_rule":"zero_is_64","overflow":"same_sign_operands_and_result_sign_differs_after_narrowing"}

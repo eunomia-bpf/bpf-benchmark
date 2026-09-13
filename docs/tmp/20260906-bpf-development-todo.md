@@ -1284,3 +1284,56 @@ not establish complete native-byte semantic equivalence.
   objdump/parser-to-AUX selection relation, C-to-Lean unsigned-semantics
   correspondence, and AArch64 flag production. These theorems do not
   establish native-byte equivalence.
+
+### AArch64 width and NZCV flag refinement, 2026-09-13
+
+- Gap: the central ARM64 flag setters `ARM64_SIM_L_SET_ADD_FLAGS`,
+  `ARM64_SIM_L_SET_SUB_FLAGS`, and `ARM64_SIM_L_SET_LOGIC_FLAGS` were
+  hand-written with no shared source or proof contract, and every recent
+  increment ledger listed "AArch64 flag production" as an open boundary. The
+  `arm64_width_mask`/`arm64_width_bits`/`arm64_sign_bit`/`arm64_apply_width`
+  helpers were likewise hand-written.
+- Generators: `native-sim/formal/generate_arm64_width_spec.py` reads
+  `arm64_width_spec.json` and emits `generated/arm64_width.h`
+  (`KPROG_ARM64_WIDTH_MASK`/`_SIGN_MASK`/`_BITS`, `KPROG_ARM64_APPLY_WIDTH`)
+  plus `KProgFormal/GeneratedArm64Width.lean`;
+  `native-sim/formal/generate_arm64_flags_spec.py` reads
+  `arm64_flags_spec.json` and emits `generated/arm64_flags.h`
+  (`KPROG_ARM64_SET_{ADD,SUB,LOGIC}_FLAGS`) plus
+  `KProgFormal/GeneratedArm64Flags.lean` (`applyAdd`/`applySub`/`applyLogic`).
+  Both have `--check` modes and `make check` lines.
+- C wiring: `native-sim/arm64/arm64_sim.h` includes the generated width header
+  and its four helpers now delegate to the generated macros;
+  `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated flags header
+  and the three `ARM64_SIM_L_SET_*_FLAGS` macros now delegate to
+  `KPROG_ARM64_SET_*_FLAGS`. Behavior is unchanged: ADD C is the unsigned
+  carry-out, SUB C is not-borrow (`lhs >= rhs`), logical clears C/V, N/Z from
+  the width-narrowed result, V from the sign-consistent overflow observation.
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64Flags.lean` proves
+  `arm64_add_flags_refines`, `arm64_sub_flags_refines`, and
+  `arm64_logic_flags_refines` equal to an independently written `Arm64NzcSpec`
+  statement over already width-narrowed operands, plus canonical example
+  theorems: `0xffffffffffffffff + 1` w64 (C and Z set), `0 - 0` (C set),
+  `0x7fffffff + 1` w32 (V and N set, no carry-out), `1 - 2` (borrow), and a
+  logical result that clears C/V. No `sorry`/`admit`. The three generated
+  modules plus the bridge are in the `KProgFormal.lean` root import list.
+- Host cross-check `native-sim/formal/test_arm64_flags_host.c`: compiles the
+  generated macros with zero warnings under `-Wall -Wextra` and compares them
+  against an independent `__int128` carry/overflow oracle over 12 explicit
+  boundary vectors x 4 widths x {add, sub, logic} plus a fixed-seed
+  (0x12345678) 20000-case sweep. Result: `OK (60144 cases)`. An oracle
+  regression (changing SUB C from `>=` to `>`) fails 8 vector cases, so the
+  check is real. (Two oracle bugs were found and fixed during bring-up: a
+  `__u64`-width shift before widening, and an incorrect sign extension; the
+  generated macro was correct throughout.)
+- Verification: full `make -C native-sim/formal check` green (two new generator
+  `--check` lines, the `Arm64Flags.lean` lean line, and the arm64 host
+  cross-check step; ~28 s). `make -C native-sim/arm64 build` produces the BPF
+  object from `arm64_sim_hardcoded.bpf.c` (which includes the changed headers)
+  and `make -C native-sim/arm64 run` loads it (`load-only`, fd=4).
+  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts, all `ok`.
+- Open AArch64 boundary after this increment: instruction decode into the
+  flag-setting handlers, `MADD`/`MSUB`/`UMULH` flag consequences if any,
+  condition-to-next-PC beyond the earlier condition contract, and native bytes.
+  These theorems do not establish native-byte equivalence.
