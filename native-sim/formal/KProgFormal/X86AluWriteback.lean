@@ -8,6 +8,7 @@ import KProgFormal.X86LogicFlags
 import KProgFormal.X86Immediate
 import KProgFormal.X86ShiftResult
 import KProgFormal.X86ShiftFlags
+import KProgFormal.X86ImulFlags
 
 namespace KProgFormal
 
@@ -1094,5 +1095,99 @@ theorem x86_sar_reg_high8_sign_fill_example :
       { dst := { bits := 0x112233445566c000, tag := .scalar },
         flags := { cf := false, zf := false, sf := true, of := false } } := by
   native_decide
+
+/-- Register-destination IMUL-immediate after lane selection and raw immediate
+decoding. The full 64-bit product is written back width-narrowed; the overflow
+flag is computed from the width-narrowed signed operands. -/
+def generatedX86ImulImmLaneHandler (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86Immediate.value rawImm width
+  let result := lhs * rhs
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86ImulFlags lhs rhs width state.flags }
+
+def x86ImulImmLaneHandlerSpec (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width)
+    (dstLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86ImmediateValueSpec rawImm width
+  let result := lhs * rhs
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := x86ImulFlagsApplied lhs rhs width state.flags }
+
+theorem x86_imul_imm_lane_handler_refines (state : X86RegAluState)
+    (rawImm : BitVec 64) (width : X86Width) (dstLane : X86ByteLane) :
+    generatedX86ImulImmLaneHandler state rawImm width dstLane =
+      x86ImulImmLaneHandlerSpec state rawImm width dstLane := by
+  simp only [generatedX86ImulImmLaneHandler, x86ImulImmLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_immediate_value_refines,
+    x86_reg_write_at_refines, x86_imul_flags_apply_refines]
+
+theorem x86_imul_imm_w16_overflow_example :
+    let out := generatedX86ImulImmLaneHandler
+      { dst := { bits := 0x7fff, tag := .scalar },
+        flags := { cf := false, zf := false, sf := false, of := false } }
+      2 .w16 .low
+    out.dst.bits = 0xfffe ∧
+      out.flags = { cf := true, zf := false, sf := false, of := true } := by
+  native_decide
+
+theorem x86_imul_imm_w64_in_range_example :
+    let out := generatedX86ImulImmLaneHandler
+      { dst := { bits := 0x100, tag := .scalar },
+        flags := { cf := false, zf := false, sf := false, of := false } }
+      0x10 .w64 .low
+    out.dst.bits = 0x1000 ∧
+      out.flags = { cf := false, zf := false, sf := false, of := false } := by
+  native_decide
+
+/-- The register-register IMUL slice after decoded byte lanes select both
+operands. For wider operands the lane parameters are architecturally ignored;
+the width-narrowed signed operands drive the overflow flag. -/
+def generatedX86ImulRegLaneHandler (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := GeneratedX86RegRead.readAt state.dst.bits width dstLane
+  let rhs := GeneratedX86RegRead.readAt rawRhs width srcLane
+  let result := lhs * rhs
+  { dst := generatedX86RegWriteAt state.dst result width dstLane
+    flags := generatedX86ImulFlags lhs rhs width state.flags }
+
+def x86ImulRegLaneHandlerSpec (state : X86RegAluState) (rawRhs : BitVec 64)
+    (width : X86Width) (dstLane srcLane : X86ByteLane) : X86RegAluState :=
+  let lhs := x86RegReadAtSpec state.dst.bits width dstLane
+  let rhs := x86RegReadAtSpec rawRhs width srcLane
+  let result := lhs * rhs
+  { dst := x86RegWriteAtSpec state.dst result width dstLane
+    flags := x86ImulFlagsApplied lhs rhs width state.flags }
+
+theorem x86_imul_reg_lane_handler_refines (state : X86RegAluState)
+    (rawRhs : BitVec 64) (width : X86Width)
+    (dstLane srcLane : X86ByteLane) :
+    generatedX86ImulRegLaneHandler state rawRhs width dstLane srcLane =
+      x86ImulRegLaneHandlerSpec state rawRhs width dstLane srcLane := by
+  simp only [generatedX86ImulRegLaneHandler, x86ImulRegLaneHandlerSpec]
+  rw [x86_reg_read_at_refines, x86_reg_read_at_refines,
+    x86_reg_write_at_refines, x86_imul_flags_apply_refines]
+
+theorem x86_imul_reg_w16_overflow_example :
+    let out := generatedX86ImulRegLaneHandler
+      { dst := { bits := 0x7fff, tag := .scalar },
+        flags := { cf := false, zf := false, sf := false, of := false } }
+      0x0002 .w16 .low .low
+    out.dst.bits = 0xfffe ∧
+      out.flags = { cf := true, zf := false, sf := false, of := true } := by
+  native_decide
+
+theorem x86_imul_reg_w8_in_range_example :
+    let out := generatedX86ImulRegLaneHandler
+      { dst := { bits := 0x7f, tag := .scalar },
+        flags := { cf := false, zf := false, sf := false, of := false } }
+      0x0002 .w8 .low .low
+    out.dst.bits = 0xfe ∧
+      out.flags = { cf := true, zf := false, sf := false, of := true } := by
+  native_decide
+
 
 end KProgFormal

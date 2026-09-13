@@ -15,6 +15,7 @@
 #include "../formal/generated/x86_sbb_flags.h"
 #include "../formal/generated/x86_adc.h"
 #include "../formal/generated/x86_shift_flags.h"
+#include "../formal/generated/x86_imul_flags.h"
 #include "../formal/generated/x86_reg_write.h"
 #include "../formal/generated/x86_reg_read.h"
 
@@ -616,11 +617,9 @@ struct x86_sim_state {
 			1ULL << (x86_width_bits(__x86_imul_width) - 1);   \
 		__u64 __x86_imul_limit = (((LHS) ^ (RHS)) & __x86_imul_sign) ?\
 				       __x86_imul_sign : __x86_imul_sign - 1;\
-		__u8 __x86_imul_overflow =                                \
-			__x86_imul_a_abs != 0 &&                           \
-			__x86_imul_b_abs > __x86_imul_limit / __x86_imul_a_abs;\
-		__x86_cf = __x86_imul_overflow;                           \
-		__x86_of = __x86_imul_overflow;                           \
+		KPROG_X86_SET_IMUL_FLAGS(__x86_cf, __x86_of,           \
+			__x86_imul_a_abs, __x86_imul_b_abs,          \
+			__x86_imul_limit);                            \
 	} while (0)
 
 #define X86_SIM_L_SET_SHIFT_FLAGS(LHS, RHS, RESULT, ALU, WIDTH)             \

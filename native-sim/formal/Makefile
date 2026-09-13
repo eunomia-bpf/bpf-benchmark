@@ -21,6 +21,7 @@ check:
 	python3 generate_x86_sbb_result_spec.py --check
 	python3 generate_x86_sbb_flags_spec.py --check
 	python3 generate_x86_adc_spec.py --check
+	python3 generate_x86_imul_flags_spec.py --check
 	lake build
 	lake env lean KProgFormal/TagErasure.lean
 	lake env lean KProgFormal/Arm64ControlFlow.lean
@@ -41,6 +42,7 @@ check:
 	lake env lean KProgFormal/X86ShiftCount.lean
 	lake env lean KProgFormal/X86ShiftResult.lean
 	lake env lean KProgFormal/X86ShiftFlags.lean
+	lake env lean KProgFormal/X86ImulFlags.lean
 	lake env lean KProgFormal/X86RegWrite.lean
 	lake env lean KProgFormal/X86AluWriteback.lean
 	lake env lean KProgFormal/X86RegRead.lean

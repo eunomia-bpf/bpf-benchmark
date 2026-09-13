@@ -1,0 +1,1 @@
+{"schema_version":1,"operation":"x86ImulFlags","inputs":["lhs","rhs","width"],"width_rule":"zero_is_64","signed_abs":"narrowed_magnitude_of_signed_width_value","limit":"sign_mask_when_signs_mixed_else_sign_mask_minus_one","overflow":"a_abs_ne_zero_and_b_abs_gt_limit_over_a_abs","fields":{"cf":"overflow","of":"overflow","zf":"preserve","sf":"preserve"}}

@@ -1183,3 +1183,57 @@ not establish complete native-byte semantic equivalence.
   selection relation, C-to-Lean unsigned-semantics correspondence, and
   AArch64 flag production. These theorems do not establish native-byte
   equivalence.
+
+### x86 IMUL immediate and register-register handler refinement, 2026-09-13
+
+- Shared contract: `native-sim/formal/x86_imul_flags_spec.json` (unchanged)
+  generates `KProgFormal/GeneratedX86ImulFlags.lean` and
+  `generated/x86_imul_flags.h` via `generate_x86_imul_flags_spec.py`.
+  `GeneratedX86ImulFlags.signedAbs` expresses the width-narrowed signed
+  magnitude; `mixedSign` expresses the operand sign mismatch; `apply` fixes
+  `limit = signMask` for mixed signs else `signMask - 1` and
+  `overflow = aAbs != 0 && bAbs > limit / aAbs` (64-bit guarded division),
+  with `cf = of = overflow` and ZF/SF preserved.
+- Fixes the three prior defects: the generated Lean called nonexistent
+  `GeneratedX86Width.signedAbs`/`mixedSign` (now local to the generated
+  module), `limit` used `BitVec.not sign` instead of `sign - 1`, and the
+  generated C macro carried a spurious `a_abs < b_abs` conjunct. The Lean
+  render now uses fully-qualified `BitVec.and`/`BitVec.not` (the `&`/`~`
+  infix forms fail to parse) so the generated module compiles.
+- `KProgFormal/X86ImulFlags.lean` (new bridge): `x86SignedAbsSpec`,
+  `x86ImulOverflowSpec`, `x86ImulFlagsApplied`, `generatedX86ImulFlags`,
+  theorem `x86_imul_flags_defined` (independent overflow spec equals the
+  generated `apply`), theorem `x86_imul_flags_apply_refines`, and two
+  `native_decide` boundary theorems (`0x7fff * 2` w16 overflows, `-128 * 1`
+  w8 does not). No `sorry`.
+- `KProgFormal/X86AluWriteback.lean` gains
+  `generatedX86ImulImmLaneHandler` / `x86ImulImmLaneHandlerSpec` +
+  `x86_imul_imm_lane_handler_refines`, and
+  `generatedX86ImulRegLaneHandler` / `x86ImulRegLaneHandlerSpec` +
+  `x86_imul_reg_lane_handler_refines`. Each composes the lane read(s), the
+  decoded immediate (or the second register lane), the 64-bit product, the
+  generated IMUL flags, and the lane writeback with tag scalarization; the
+  refine proofs use `x86_reg_read_at_refines`, `x86_immediate_value_refines`,
+  `x86_reg_write_at_refines`, and `x86_imul_flags_apply_refines`. Concrete
+  `native_decide` examples pin the w16/w8 overflow and in-range cases.
+- `native-sim/x86/x86_sim_local_bpf.h`: adds the generated-header include and
+  rewrites `X86_SIM_L_SET_IMUL_FLAGS` to the house delegation pattern
+  (compute the same locals, then call `KPROG_X86_SET_IMUL_FLAGS`), mirroring
+  the SBB/shift macros above it. Behavior-preserving; all three call sites
+  (register, immediate, memory-immediate) route through the generated macro.
+- Host cross-check `native-sim/formal/test_imul_flags_host.c`: compiles the
+  generated macro with zero warnings under `-Wall -Wextra` and compares it
+  against an independent `__int128` signed-product range oracle over 15
+  explicit boundary vectors plus a fixed-seed (0x12345678) 20000-case sweep
+  across all four widths. Result: `OK (15 vectors + 20000 sweep cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line + `lake build` + new `lake env lean KProgFormal/X86ImulFlags.lean`
+  line; ~26 s). `make -C native-sim/x86 build` produces the BPF object from
+  `x86_sim_hardcoded.bpf.c` (which includes the changed header); the same
+  translation unit also compiles natively. `make -C native-sim/x86
+  micro-proofs-build` rebuilds the negative artifact and all 29
+  workload-derived artifacts, all `ok`.
+- Open x86 boundary after this increment: memory lanes and stores, the
+  objdump/parser-to-AUX selection relation, C-to-Lean unsigned-semantics
+  correspondence, and AArch64 flag production. These theorems do not
+  establish native-byte equivalence.

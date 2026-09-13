@@ -239,6 +239,34 @@ sign-fill. The immediate-decode theorem is not involved because the source
 lane supplies the count rather than a raw artifact field, and the op-parametric
 immediate shift-flag definedness theorem establishes the architectural flag
 contract for these operands.
+The x86 IMUL overflow-flag transition is generated from
+`x86_imul_flags_spec.json` into the C macro `KPROG_X86_SET_IMUL_FLAGS` and
+Lean. The hand-written `X86_SIM_L_SET_IMUL_FLAGS` now computes the
+width-narrowed signed magnitudes, the sign-mask limit, and the mixed-sign
+headroom, then delegates the guarded-division overflow test
+(`a_abs != 0 && b_abs > limit / a_abs`) and the CF/OF assignment to the
+generated macro; ZF and SF are preserved. This removes a spurious
+`a_abs < b_abs` conjunct that had diverged the generated C from both the
+hand-written macro and the Lean model. Lean proves an independent
+overflow specification equal to the generated `apply`, and the applied flag
+transition equal to an independently stated `x86ImulFlagsApplied`. A host C
+cross-check (`test_imul_flags_host.c`) compares the generated macro against
+an independent `__int128` signed-product range oracle for 15 explicit
+boundary vectors (including `INT64_MIN * -1` in range and `-1 * 2` in range)
+and a fixed-seed 20000-case sweep over all four widths.
+The immediate and register-register IMUL lane handlers then compose this
+contract: `generatedX86ImulImmLaneHandler` / `generatedX86ImulRegLaneHandler`
+observe the destination lane (and, for the register form, the source register
+lane), decode the raw artifact immediate or read the second operand, compute
+the full 64-bit product, write back the selected lane with tag scalarization,
+and take CF/OF from the generated IMUL overflow contract while preserving
+ZF/SF. Each refines an independently assembled specification via the lane
+reads, the immediate decode, the writeback, and
+`x86_imul_flags_apply_refines`. Concrete theorems pin a 16-bit overflow
+(`0x7fff * 2 -> 0xfffe` with CF=OF set) and in-range cases. The C ALU
+dispatch routes both IMUL forms through `X86_SIM_L_SET_IMUL_FLAGS`; instruction
+dispatch, operand-form selection, and native bytes remain outside these
+theorems.
 The generated ALU decode contract also classifies the two carry-sensitive
 handlers (ADC and SBB). The register-lane AUX theorem proves that packing a
 typed ALU code and extracting its payload selects the same handler as an
