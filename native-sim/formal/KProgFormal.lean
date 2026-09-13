@@ -27,3 +27,5 @@ import KProgFormal.X86MemAccess
 import KProgFormal.GeneratedArm64Width
 import KProgFormal.GeneratedArm64Flags
 import KProgFormal.Arm64Flags
+import KProgFormal.GeneratedArm64Decode
+import KProgFormal.Arm64Decode

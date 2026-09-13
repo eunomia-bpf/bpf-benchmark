@@ -12,6 +12,8 @@ from pathlib import Path
 
 import yaml
 
+from generated_arm64_decode import ALU, BITFIELD, MOD, SHIFT
+
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 OUT_DIR = Path(__file__).resolve().parent
@@ -21,22 +23,14 @@ CONFIG = REPO_ROOT / "micro" / "config" / "micro_pure_jit.yaml"
 PROOF_OBJECT_DIR = OUT_DIR / "build" / "native-link"
 
 WIDTH_CONST = {1: "ARM64_WIDTH_8", 2: "ARM64_WIDTH_16", 4: "ARM64_WIDTH_32", 8: "ARM64_WIDTH_64"}
-ALU = {"add": "ARM64_ALU_ADD", "sub": "ARM64_ALU_SUB", "and": "ARM64_ALU_AND",
-       "bic": "ARM64_ALU_BIC", "eor": "ARM64_ALU_EOR", "orr": "ARM64_ALU_ORR"}
-SHIFT = {"lsl": "ARM64_SHIFT_LSL", "lsr": "ARM64_SHIFT_LSR", "asr": "ARM64_SHIFT_ASR", "ror": "ARM64_SHIFT_ROR"}
-MOD = {"": "ARM64_MOD_NONE", "lsl": "ARM64_MOD_LSL", "lsr": "ARM64_MOD_LSR",
-       "asr": "ARM64_MOD_ASR", "ror": "ARM64_MOD_ROR", "uxtw": "ARM64_MOD_UXTW",
-       "sxtw": "ARM64_MOD_SXTW", "uxth": "ARM64_MOD_UXTH", "sxth": "ARM64_MOD_SXTH",
-       "uxtb": "ARM64_MOD_UXTB", "sxtb": "ARM64_MOD_SXTB"}
+# ALU/SHIFT/MOD/BITFIELD mnemonic-to-code tables come from the generated
+# module (native-sim/formal/arm64_decode_spec.json), imported at the top.
 COND = {"eq": "ARM64_COND_EQ", "ne": "ARM64_COND_NE", "cs": "ARM64_COND_CS",
         "hs": "ARM64_COND_CS", "cc": "ARM64_COND_CC", "lo": "ARM64_COND_CC",
         "mi": "ARM64_COND_MI", "pl": "ARM64_COND_PL", "vs": "ARM64_COND_VS",
         "vc": "ARM64_COND_VC", "hi": "ARM64_COND_HI", "ls": "ARM64_COND_LS",
         "ge": "ARM64_COND_GE", "lt": "ARM64_COND_LT", "gt": "ARM64_COND_GT",
         "le": "ARM64_COND_LE", "al": "ARM64_COND_AL"}
-BITFIELD = {"ubfx": "ARM64_BITFIELD_UBFX", "sbfx": "ARM64_BITFIELD_SBFX",
-            "ubfiz": "ARM64_BITFIELD_UBFIZ", "bfxil": "ARM64_BITFIELD_BFXIL",
-            "bfi": "ARM64_BITFIELD_BFI"}
 HELPER_IDENTS = {
     1: "bpf_map_lookup_elem",
     2: "bpf_map_update_elem",
