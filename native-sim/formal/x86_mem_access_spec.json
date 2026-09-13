@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "operation": "x86MemAccess",
+  "endianness": "little",
+  "width_rule": "zero_is_64",
+  "load": "assemble_width_bytes_little_endian_then_narrow",
+  "store": "mask_value_then_write_width_bytes_little_endian",
+  "byte_rule": "byte_i_is_bits_8i_to_8i_plus_8",
+  "widths": [
+    {"name": "w8", "bits": 8, "bytes": 1, "mask": "0xff"},
+    {"name": "w16", "bits": 16, "bytes": 2, "mask": "0xffff"},
+    {"name": "w32", "bits": 32, "bytes": 4, "mask": "0xffffffff"},
+    {"name": "w64", "bits": 64, "bytes": 8, "mask": "0xffffffffffffffff"}
+  ]
+}

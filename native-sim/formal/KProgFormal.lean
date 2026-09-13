@@ -23,3 +23,4 @@ import KProgFormal.X86AluWriteback
 import KProgFormal.X86RegRead
 import KProgFormal.X86RegLaneAux
 import KProgFormal.X86UnaryWriteback
+import KProgFormal.X86MemAccess

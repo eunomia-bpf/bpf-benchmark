@@ -1237,3 +1237,50 @@ not establish complete native-byte semantic equivalence.
   objdump/parser-to-AUX selection relation, C-to-Lean unsigned-semantics
   correspondence, and AArch64 flag production. These theorems do not
   establish native-byte equivalence.
+
+### x86 little-endian memory access refinement, 2026-09-13
+
+- Gap: the central C memory primitives `X86_SIM_L_LOAD_ADDR` (hand-written
+  byte ladder using `if (w >= X86_WIDTH_32)` fall-through) and
+  `X86_SIM_L_STORE_ADDR` (typed `__u16`/`__u32`/`__u64` casts) had no shared
+  source with a proof contract, and the earlier unary/ALU ledger listed
+  "memory access/store" as an open boundary.
+- Generator: `native-sim/formal/generate_x86_mem_access_spec.py` reads
+  `x86_mem_access_spec.json` (widths 8/16/32/64 with per-width byte lists) and
+  emits `native-sim/formal/generated/x86_mem_access.h`
+  (`KPROG_X86_MEM_LOAD(ADDR, WIDTH)`, `KPROG_X86_MEM_STORE(ADDR, WIDTH, VALUE)`)
+  and `native-sim/formal/KProgFormal/GeneratedX86MemAccess.lean`
+  (`assemble`/`load`/`storeByte`/`store`/`byteCount` over
+  `GeneratedX86Width.Width`). `--check` diffing plus a `make check` line keep
+  the outputs fresh.
+- C wiring: `native-sim/x86/x86_sim_local_bpf.h` includes the generated header
+  and now defines `X86_SIM_L_LOAD_ADDR`/`X86_SIM_L_STORE_ADDR` as direct
+  delegations to the generated macros, so sim C and the proof contract share
+  one forwarded source. Semantics are unchanged for the four legal widths
+  (byte-wise little-endian load; byte-wise store replacing the typed casts,
+  bit-identical on little-endian and now endian-explicit).
+- Lean bridge: `native-sim/formal/KProgFormal/X86MemAccess.lean` proves
+  `x86_mem_assemble_refines` (generated `assemble` = independent little-endian
+  byte-sum spec), `x86_mem_load_refines` (generated `load` = byte-sum narrowed
+  by the mask, via the width-mask bridge), `x86_mem_store_byte_refines`
+  (generated `storeByte` = independent width-masked extraction), and
+  `x86_mem_byte_count`; concrete example theorems pin known encodings. No
+  `sorry`/`admit`.
+- Host cross-check `native-sim/formal/test_mem_access_host.c`: compiles the
+  generated macros with zero warnings under `-Wall -Wextra` and compares them
+  against an independent byte-level load/store oracle over 5 explicit boundary
+  vectors x 4 widths plus a fixed-seed (0x12345678) 20000-case sweep over all
+  widths (load and store each). Result: `OK (40020 cases)`; a deliberately
+  broken oracle (`8*i+1`) fails, so the check is real.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line + new `lake env lean KProgFormal/X86MemAccess.lean` line + the
+  host cross-check step; ~26 s). `make -C native-sim/x86 build` produces the
+  BPF object from `x86_sim_hardcoded.bpf.c` (which includes the changed header)
+  and the same translation unit compiles natively. `make -C native-sim/x86 run`
+  loads the object (`load-only`, fd=4). `make -C native-sim/x86
+  kprog-negative-proof-build` rebuilds the negative artifact, `ok`.
+- Open x86 boundary after this increment: decoder selection of the access
+  width, operand-form selection into the load/store handlers, the
+  objdump/parser-to-AUX selection relation, C-to-Lean unsigned-semantics
+  correspondence, and AArch64 flag production. These theorems do not
+  establish native-byte equivalence.

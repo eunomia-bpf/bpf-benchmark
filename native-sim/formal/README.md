@@ -274,10 +274,26 @@ independent operation mapping. The C immediate, register, and memory ALU paths
 consume the generated predicates for those two special branches. This binds
 typed AUX payload extraction to handler class, but not native-byte or textual
 mnemonic parsing to that typed operation.
+The x86 little-endian memory access contract is generated from
+`x86_mem_access_spec.json` into the C macros `KPROG_X86_MEM_LOAD` /
+`KPROG_X86_MEM_STORE` and Lean. The central `X86_SIM_L_LOAD_ADDR` /
+`X86_SIM_L_STORE_ADDR` macros now delegate to those generated primitives, so
+the previously hand-written byte-ladder load and typed-cast store share one
+forwarded source. Lean proves the generated `assemble` equal to an independent
+little-endian byte-sum specification, the generated `load` equal to that sum
+narrowed by the width mask, and the generated per-byte store against an
+independent width-masked extraction, for every legal width. A host C
+cross-check (`test_mem_access_host.c`) compares the generated macros against an
+independent byte-level load/store oracle over explicit boundary vectors and a
+fixed-seed 20000-case sweep of all four widths; `make check` runs it. Decoder
+selection of the access width, operand-form selection, the C compiler, and
+native bytes remain boundaries, and the memory access/store integration noted
+for the unary/ALU handlers is now shared with this primitive.
 `make check` rejects stale generated outputs before checking the theorem. This
 mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
-policy, both ISA flag-to-control-flow decisions, x86 width narrowing, and x86
-logical/ADD/SUB/ADC/SBB flag production; other flag production, the decoder-to-handler
+policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
+logical/ADD/SUB/ADC/SBB flag production, and the x86 little-endian memory
+load/store contract; other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
 The correspondence between C unsigned bit operations and Lean `BitVec`
@@ -285,8 +301,8 @@ operations remains a trusted language-semantics premise; these theorems do not
 verify the C compiler or native instruction bytes.
 
 This is still a deliberately bounded proof. It does not establish full
-equivalence between the model and the C macro implementations, cover memory,
-branches, helpers, or the full workload-derived instruction subsets, or prove
+equivalence between the model and the C macro implementations, cover branches,
+helpers, or the full workload-derived instruction subsets, or prove
 the paper's complete O1--O4 obligations. In particular, the multiply model is
 x86-shaped, and the ABI-load model still abstracts away base-register identity,
 width checks, and memory-boundary checks.

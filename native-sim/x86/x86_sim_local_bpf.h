@@ -16,6 +16,7 @@
 #include "../formal/generated/x86_adc.h"
 #include "../formal/generated/x86_shift_flags.h"
 #include "../formal/generated/x86_imul_flags.h"
+#include "../formal/generated/x86_mem_access.h"
 #include "../formal/generated/x86_reg_write.h"
 #include "../formal/generated/x86_reg_read.h"
 
@@ -500,46 +501,12 @@ struct x86_sim_state {
 #define X86_SIM_L_HELPER_ARG_PTR(REG)                                      \
 	X86_SIM_L_READ_REG_PTR(REG)
 
-#define X86_SIM_L_LOAD_ADDR(ADDR, WIDTH)                                    \
-	({                                                                 \
-		volatile const __u8 *__x86_lda_addr =                    \
-			(volatile const __u8 *)(ADDR);                   \
-		__u8 __x86_lda_width = (WIDTH) ? (WIDTH) : X86_WIDTH_64; \
-		__u64 __x86_lda_value = __x86_lda_addr[0];               \
-		if (__x86_lda_width == X86_WIDTH_8)                       \
-			(void)0;                                          \
-		else {                                                    \
-			__x86_lda_value |= (__u64)__x86_lda_addr[1] << 8; \
-			if (__x86_lda_width >= X86_WIDTH_32) {            \
-				__x86_lda_value |= (__u64)__x86_lda_addr[2] << 16;\
-				__x86_lda_value |= (__u64)__x86_lda_addr[3] << 24;\
-			}                                                 \
-			if (__x86_lda_width == X86_WIDTH_64) {            \
-				__x86_lda_value |= (__u64)__x86_lda_addr[4] << 32;\
-				__x86_lda_value |= (__u64)__x86_lda_addr[5] << 40;\
-				__x86_lda_value |= (__u64)__x86_lda_addr[6] << 48;\
-				__x86_lda_value |= (__u64)__x86_lda_addr[7] << 56;\
-			}                                                 \
-		}                                                         \
-		__x86_lda_value;                                          \
-	})
+#define X86_SIM_L_LOAD_ADDR(ADDR, WIDTH) KPROG_X86_MEM_LOAD((ADDR), (WIDTH))
 
 #define X86_SIM_L_LOAD_PTR_ADDR(ADDR) (*(void **)(ADDR))
 
-#define X86_SIM_L_STORE_ADDR(ADDR, WIDTH, VALUE)                            \
-	do {                                                               \
-		__u8 *__x86_sta_addr = (__u8 *)(ADDR);                   \
-		__u8 __x86_sta_width = (WIDTH) ? (WIDTH) : X86_WIDTH_64; \
-		__u64 __x86_sta_value = (VALUE) & x86_width_mask(__x86_sta_width);\
-		if (__x86_sta_width == X86_WIDTH_8)                       \
-			*(__u8 *)__x86_sta_addr = __x86_sta_value;        \
-		else if (__x86_sta_width == X86_WIDTH_16)                 \
-			*(__u16 *)__x86_sta_addr = __x86_sta_value;       \
-		else if (__x86_sta_width == X86_WIDTH_32)                 \
-			*(__u32 *)__x86_sta_addr = __x86_sta_value;       \
-		else                                                      \
-			*(__u64 *)__x86_sta_addr = __x86_sta_value;       \
-	} while (0)
+#define X86_SIM_L_STORE_ADDR(ADDR, WIDTH, VALUE)                           \
+	KPROG_X86_MEM_STORE((ADDR), (WIDTH), (VALUE))
 
 #define X86_SIM_L_SET_LOGIC_FLAGS(RESULT, WIDTH)                            \
 	do {                                                               \
