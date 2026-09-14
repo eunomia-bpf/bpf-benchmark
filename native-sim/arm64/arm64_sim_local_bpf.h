@@ -10,6 +10,7 @@
 #include "../formal/generated/ptr_add.h"
 #include "../formal/generated/arm64_flags.h"
 #include "../formal/generated/arm64_alu_result.h"
+#include "../formal/generated/arm64_mod.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -285,33 +286,17 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_BITFIELD_WIDTH(AUX) (((AUX) >> 16) & 0xffU)
 #define ARM64_SIM_L_CCMP_NZCV(AUX) (((AUX) >> 8) & 0xffU)
 
+/*
+ * Source-modifier (shift/rotate/extend) value. The numeric modifier arms,
+ * their shift-amount masking, and the rotate guards are the generated
+ * AArch64 source-modifier contract in formal/generated/arm64_mod.h, which
+ * KProgFormal/Arm64Mod.lean proves equal to an independent statement over all
+ * eleven modifiers and all four widths. ARM64_SIM_L_READ_REG is evaluated
+ * exactly once.
+ */
 #define ARM64_SIM_L_MOD_VALUE(REG, MOD, SHIFT, WIDTH)                       \
-	({                                                                 \
-		__u64 __a64_l_value = ARM64_SIM_L_READ_REG(REG);          \
-		__u8 __a64_l_mod = (MOD);                                 \
-		__u8 __a64_l_shift = (SHIFT);                             \
-		if (__a64_l_mod == ARM64_MOD_LSL)                         \
-			__a64_l_value = arm64_lsl(__a64_l_value, __a64_l_shift, (WIDTH));\
-		else if (__a64_l_mod == ARM64_MOD_LSR)                    \
-			__a64_l_value = arm64_lsr(__a64_l_value, __a64_l_shift, (WIDTH));\
-		else if (__a64_l_mod == ARM64_MOD_ASR)                    \
-			__a64_l_value = arm64_asr(__a64_l_value, __a64_l_shift, (WIDTH));\
-		else if (__a64_l_mod == ARM64_MOD_ROR)                    \
-			__a64_l_value = arm64_ror(__a64_l_value, __a64_l_shift, (WIDTH));\
-		else if (__a64_l_mod == ARM64_MOD_UXTW)                   \
-			__a64_l_value = ((__u64)(__u32)__a64_l_value) << __a64_l_shift;\
-		else if (__a64_l_mod == ARM64_MOD_SXTW)                   \
-			__a64_l_value = ((__u64)(__s64)(__s32)__a64_l_value) << __a64_l_shift;\
-		else if (__a64_l_mod == ARM64_MOD_UXTH)                   \
-			__a64_l_value = ((__u64)(__u16)__a64_l_value) << __a64_l_shift;\
-		else if (__a64_l_mod == ARM64_MOD_SXTH)                   \
-			__a64_l_value = ((__u64)(__s64)(__s16)__a64_l_value) << __a64_l_shift;\
-		else if (__a64_l_mod == ARM64_MOD_UXTB)                   \
-			__a64_l_value = ((__u64)(__u8)__a64_l_value) << __a64_l_shift;\
-		else if (__a64_l_mod == ARM64_MOD_SXTB)                   \
-			__a64_l_value = ((__u64)(__s64)(__s8)__a64_l_value) << __a64_l_shift;\
-		__a64_l_value;                                            \
-	})
+	KPROG_ARM64_MOD_VALUE((MOD), ARM64_SIM_L_READ_REG(REG), (SHIFT),   \
+			      (WIDTH))
 
 #define ARM64_SIM_L_STACK_INDEX(OFF) ((__u32)(ARM64_SIM_STACK_BIAS + (OFF)))
 

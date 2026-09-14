@@ -1443,3 +1443,99 @@ not establish complete native-byte semantic equivalence.
   equivalence, and the Lean result contract is stated over `BitVec 64` while the
   C macro operates on `__u64`; the host cross-check bridges that C/Lean
   semantics gap for the tested vectors only.
+
+### AArch64 source-modifier value refinement, 2026-09-14
+
+- Gap: the eleven source-modifier arms (no-op, LSL, LSR, ASR, ROR, UXTW, SXTW,
+  UXTH, SXTH, UXTB, SXTB) were a hand-written if/else-if chain inside
+  `ARM64_SIM_L_MOD_VALUE`, consumed by eleven call sites (the memory base-offset
+  path, the `EXEC_ALU` rhs, and the `SUBS`/`ADDS`/`CMN`/`CMP`/`TST`/`TST_BIC`/
+  `BICS`/`ANDS`/`ORN` register-operand paths). The chain had no shared source
+  and no proof contract, and its shift-amount masking and rotate guards were
+  restated separately in the `arm64_lsl`/`arm64_lsr`/`arm64_asr`/`arm64_ror`
+  helpers. The previous increment's open AArch64 boundary named exactly this
+  source-modifier composition.
+- Generator: `native-sim/formal/generate_arm64_mod_spec.py` reads
+  `arm64_mod_spec.json` and emits the shared modifier contract in two forms:
+  `generated/arm64_mod.h` (`KPROG_ARM64_MOD_VALUE(MOD, VALUE, SHIFT, WIDTH)`, a
+  statement expression switching on the numeric codes `0U..10U`, with no
+  `default` and no unsupported arm) and
+  `KProgFormal/GeneratedArm64Mod.lean` (`value : Mod -> BitVec 64 -> BitVec 64
+  -> Width -> BitVec 64`). `load()` re-reads `arm64_decode_spec.json` and exits
+  1 if the eleven mnemonic/code pairs drift from the modifier table, so the
+  emitted numeric case labels cannot silently diverge from the generated
+  `arm64_decode.h` `ARM64_MOD_*` constants (which the emitted `_Static_assert`s
+  pin). The generated header also emits `KPROG_ARM64_MOD_HANDLED(MOD)` plus one
+  coverage assert per code, so a modifier added to the table without an arm is a
+  compile error rather than a runtime fallthrough. It has a `--check` mode and a
+  `make check` line.
+- C wiring: `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated
+  header and `ARM64_SIM_L_MOD_VALUE` now delegates to
+  `KPROG_ARM64_MOD_VALUE((MOD), ARM64_SIM_L_READ_REG(REG), (SHIFT), (WIDTH))`,
+  preserving the `({ … })` statement-expression shape and evaluating
+  `ARM64_SIM_L_READ_REG` exactly once (as the old chain did). Behavior is
+  unchanged: the same eleven arms, the same `(WIDTH) == ARM64_WIDTH_32 ? 31 : 63`
+  amount mask, and the same `amount == 0` rotate guards. The helpers
+  `arm64_lsl`/`arm64_lsr`/`arm64_asr`/`arm64_ror` stay live for the distinct
+  `ARM64_SHIFT_*` `ARG` path and for other callers, so they were not rerouted.
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64Mod.lean` proves
+  `arm64_mod_refines` (the generated `value` equals an independently written
+  `arm64ModValueSpec` that restates the shift arms through `narrow`, the
+  sign-extending arms as a masked complement-and-subtract, the unsigned-extending
+  arms as a shift pair, and the rotate on a narrowed operand in the rotation
+  domain selected by the width code), `arm64_mod_code_in_range` (all eleven codes
+  are inside the macro's case range, so no unsupported arm is needed),
+  `arm64_mod_code_dispatch`, `arm64_mod_shift_magnitude` (the `__u8` shift field's
+  zero extension is the 64-bit shift vector, with magnitude `shift.toNat`),
+  `arm64_mod_shift_amount_masked` (the four shift arms depend on the shift only
+  through its masked low bits, which is how the C macro computes the amount),
+  `arm64_mod_extend_shift_refines` (the six extend arms truncate/sign-extend then
+  apply the raw shift field), and `arm64_mod_fed_alu_refines` (the modifier result
+  feeding the generated ALU op-step result equals the independent modifier
+  statement feeding the independent ALU statement). Canonical examples: UXTB of
+  `0x1ff` is `0xff`, SXTB of `0x80` is `0xffffffffffffff80`, zero-shift SXTW of
+  `0xffffffff` is all ones, `w32` LSL of `1` by `32` is `1` while the `w64` form
+  is `4294967296` (the amount mask), `w64` ROR of `0x0102030405060708` by 8 is
+  `0x0801020304050607`, and the identity arm is untouched. No `sorry`/`admit`.
+  Both new modules are in the `KProgFormal.lean` root import list and the bridge
+  has a `lean` line in the Makefile.
+- Lesson learned (two defects the earlier probe caught, both fixed here): the
+  rotate arm must not mask its rotate distance. C's `arm64_ror32`/`arm64_ror64`
+  guard `amount == 0` and then compute `32 - amount` / `64 - amount`, which lies
+  in `[1,31]`/`[1,63]`; an `&&& 31`/`&&& 63` form of the rotate distance is wrong
+  and produced a spurious counterexample (`value = shift = 0xffff...ff`). Second,
+  the rotate domain is 32 bits exactly for `.w32` and 64 bits otherwise
+  (`arm64_ror` dispatches on `ARM64_WIDTH_32` only), so modelling it with
+  `bits width` is wrong for `.w8`/`.w16`; the spec keys the domain on
+  `width = .w32`. A third modelling constraint: the shift amount is a `BitVec 64`
+  (C's `__u8` field zero-extended), because `BitVec 8` amounts prevent the reifier
+  from synthesizing the shift identities and it abstracts the operands instead.
+- Host cross-check `native-sim/formal/test_arm64_mod_host.c`: compiles the
+  generated macro with zero warnings under `-Wall -Wextra` and compares it
+  against an independent oracle (plain C shifts, the C rotate form with its
+  `amount == 0` guard, and truncating/sign-extending casts) over 15 boundary
+  values x 11 modifiers x 8 boundary shifts x 4 widths, plus a fixed-seed
+  20000-iteration sweep, plus a check that `KPROG_ARM64_MOD_HANDLED` accepts
+  exactly the eleven modifier codes and rejects code 11. Result: `OK (225292
+  cases)`. The extend arms are swept only over the architectural shift domain
+  (`shift < 64`) because C `<<` is undefined above that.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, `Arm64Mod.lean` lean line, and the arm64 mod host cross-check
+  step; ~43 s), alongside the arm64 flags (`OK (60144 cases)`), arm64 ALU result
+  (`OK (120073 cases)`), and x86 memory-access (`OK (40020 cases)`) cross-checks.
+  Mutation checks: changing a modifier code in `arm64_mod_spec.json` makes
+  `--check` exit 1; five independent semantic mutations of
+  `generated/arm64_mod.h` (the 64-bit shift-amount mask, the LSL width mask, the
+  SXTB sign-extension source, the 32-bit rotate domain, and the 64-bit rotate
+  distance) each make the host cross-check exit 1 with a printed mismatch.
+  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30 workload-derived
+  artifacts, all `ok`; `make -C native-sim/arm64 build` produces the BPF object
+  from `arm64_sim_hardcoded.bpf.c` (which includes the changed header) and `make
+  -C native-sim/arm64 run` loads it (`load-only`, fd=4).
+- Open AArch64 boundary after this increment: the bitfield/extract/rev handler
+  compositions (`ARM64_SIM_L_BITFIELD_*`, the `UBFX`/`SBFX`/`UBFIZ`/`BFXIL`/`BFI`
+  decode table already exists), `MADD`/`MSUB`/`UMULH` flag consequences if any,
+  condition-to-next-PC beyond the earlier condition contract, and native bytes.
+  These theorems do not establish native-byte equivalence, and the Lean modifier
+  contract is stated over `BitVec 64` while the C macro operates on `__u64`; the
+  host cross-check bridges that C/Lean semantics gap for the tested vectors only.

@@ -14,7 +14,8 @@ The simulator stores architectural general-purpose registers and NZCV flags,
 plus proof-side provenance tags used to select verifier-visible pointer
 operations. `../formal` machine-checks the shared width/narrowing contract, the
 NZCV flag transitions for the ADD/SUB/logical families, the six-operation ALU
-op-step result contract, the ALU/shift/modifier/bitfield decode tables, the
+op-step result contract, the eleven-arm source-modifier (shift/rotate/extend)
+value contract, the ALU/shift/modifier/bitfield decode tables, the
 condition table, and the pointer-add/ABI-load contracts against independently
 stated specs (`make -C ../formal check`), plus tag erasure for a four-operation
 shared fragment. Those per-step contracts are not yet mechanically tied to every
