@@ -1,4 +1,4 @@
-# Install script for directory: /home/yunwei37/workspace/bpf-benchmark/bpfopt/llvm
+# Install script for directory: /workspaces/repository/bpfopt/llvm
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/yunwei37/workspace/bpf-benchmark/bpfopt/llvm/build-kop/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/workspaces/repository/bpfopt/llvm/build-kop/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
