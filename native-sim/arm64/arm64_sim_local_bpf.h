@@ -11,6 +11,7 @@
 #include "../formal/generated/arm64_flags.h"
 #include "../formal/generated/arm64_alu_result.h"
 #include "../formal/generated/arm64_mod.h"
+#include "../formal/generated/arm64_bitfield.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -285,6 +286,20 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_BITFIELD_LSB(AUX) (((AUX) >> 8) & 0xffU)
 #define ARM64_SIM_L_BITFIELD_WIDTH(AUX) (((AUX) >> 16) & 0xffU)
 #define ARM64_SIM_L_CCMP_NZCV(AUX) (((AUX) >> 8) & 0xffU)
+
+/*
+ * Bitfield-composition (UBFX/SBFX/UBFIZ/BFXIL/BFI) value. The five numeric
+ * kinds, their shared mask/sign-extension locals and their field-placement
+ * guards are the generated AArch64 bitfield contract in
+ * formal/generated/arm64_bitfield.h, which KProgFormal/Arm64Bitfield.lean
+ * proves equal to an independent statement over all five kinds and the whole
+ * architectural field domain. An unhandled kind reaches
+ * ARM64_SIM_L_UNSUPPORTED_OPCODE. ARM64_SIM_L_READ_REG is evaluated exactly
+ * once per source and destination operand.
+ */
+#define ARM64_SIM_L_BITFIELD_VALUE(KIND, SRC, DST, LSB, BITS)               \
+	KPROG_ARM64_BITFIELD_VALUE((KIND), (SRC), (DST), (LSB), (BITS),    \
+				   ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
 /*
  * Source-modifier (shift/rotate/extend) value. The numeric modifier arms,
@@ -686,28 +701,12 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			__u64 __a64_extr_high = __a64_extr_shift ? ARM64_SIM_L_READ_REG(SRC) << (__a64_extr_bits - __a64_extr_shift) : 0;\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_extr_low | __a64_extr_high, __a64_l_width);\
 		} else if ((OP) == ARM64_OP_BITFIELD) {                       \
-			__u8 __a64_bf_kind = (AUX) & 0xffU;                  \
-			__u8 __a64_bf_lsb = ARM64_SIM_L_BITFIELD_LSB(AUX);   \
-			__u8 __a64_bf_bits = ARM64_SIM_L_BITFIELD_WIDTH(AUX);\
-			__u64 __a64_bf_mask = arm64_bits_mask(__a64_bf_bits);\
-			__u64 __a64_bf_src_r = __a64_bf_lsb >= 64 ? 0 : ARM64_SIM_L_READ_REG(SRC) >> __a64_bf_lsb;\
-			__u64 __a64_bf_src_l = __a64_bf_lsb >= 64 ? 0 : ARM64_SIM_L_READ_REG(SRC) << __a64_bf_lsb;\
-			__u64 __a64_bf_result;                               \
-			if (__a64_bf_kind == ARM64_BITFIELD_UBFX)             \
-				__a64_bf_result = __a64_bf_src_r & __a64_bf_mask;\
-			else if (__a64_bf_kind == ARM64_BITFIELD_SBFX)        \
-				__a64_bf_result = arm64_sign_extend(__a64_bf_src_r & __a64_bf_mask, __a64_bf_bits);\
-			else if (__a64_bf_kind == ARM64_BITFIELD_UBFIZ)       \
-				__a64_bf_result = __a64_bf_src_l & (__a64_bf_lsb >= 64 ? 0 : __a64_bf_mask << __a64_bf_lsb);\
-			else if (__a64_bf_kind == ARM64_BITFIELD_BFXIL)       \
-				__a64_bf_result = (ARM64_SIM_L_READ_REG(DST) & ~__a64_bf_mask) | (__a64_bf_src_r & __a64_bf_mask);\
-			else if (__a64_bf_kind == ARM64_BITFIELD_BFI) {       \
-				__u64 __a64_bf_field_mask = __a64_bf_lsb >= 64 ? 0 : __a64_bf_mask << __a64_bf_lsb;\
-				__a64_bf_result = (ARM64_SIM_L_READ_REG(DST) & ~__a64_bf_field_mask) | (__a64_bf_src_l & __a64_bf_field_mask);\
-			} else {                                              \
-				ARM64_SIM_L_UNSUPPORTED_OPCODE();             \
-				__a64_bf_result = 0;                           \
-			}                                                     \
+			__u64 __a64_bf_result =                              \
+				ARM64_SIM_L_BITFIELD_VALUE((AUX) & 0xffU,    \
+					ARM64_SIM_L_READ_REG(SRC),           \
+					ARM64_SIM_L_READ_REG(DST),           \
+					ARM64_SIM_L_BITFIELD_LSB(AUX),       \
+					ARM64_SIM_L_BITFIELD_WIDTH(AUX));    \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_bf_result, __a64_l_width);\
 		} else if ((OP) == ARM64_OP_REV || (OP) == ARM64_OP_REV16 || (OP) == ARM64_OP_SXTB || (OP) == ARM64_OP_SXTH || (OP) == ARM64_OP_SXTW) {\
 			__u64 __a64_l_value = ARM64_SIM_L_READ_REG(SRC);     \

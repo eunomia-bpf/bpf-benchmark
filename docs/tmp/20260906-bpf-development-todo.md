@@ -1539,3 +1539,106 @@ not establish complete native-byte semantic equivalence.
   These theorems do not establish native-byte equivalence, and the Lean modifier
   contract is stated over `BitVec 64` while the C macro operates on `__u64`; the
   host cross-check bridges that C/Lean semantics gap for the tested vectors only.
+
+### AArch64 bitfield-composition refinement, 2026-09-15
+
+- Gap: the five bitfield arms (UBFX, SBFX, UBFIZ, BFXIL, BFI) were a
+  hand-written if/else-if chain inside the `ARM64_OP_BITFIELD` handler in
+  `ARM64_SIM_L_EXEC_ALU`, computing `arm64_bits_mask`/`arm64_sign_extend`
+  locally, reading `ARM64_SIM_L_READ_REG(DST)` twice, and carrying its own
+  `lsb >= 64` guards. Those guards are unreachable under the architectural
+  domain but were restated independently of the decode table's bitfield codes.
+  The previous increment's open AArch64 boundary named exactly this bitfield
+  composition.
+- Generator: `native-sim/formal/generate_arm64_bitfield_spec.py` reads
+  `arm64_bitfield_spec.json` and emits the shared contract in two forms:
+  `generated/arm64_bitfield.h` (`KPROG_ARM64_BITFIELD_VALUE(KIND, SRC, DST, LSB,
+  BITS, UNSUPPORTED)`, a statement expression switching on the numeric codes
+  `0U..4U` with an explicit `default: UNSUPPORTED; break;`) and
+  `KProgFormal/GeneratedArm64Bitfield.lean` (`value : Bitfield -> BitVec 64 ->
+  BitVec 64 -> BitVec 8 -> BitVec 8 -> BitVec 64`, reusing the existing
+  `GeneratedArm64BitfieldDecode.Bitfield` inductive rather than redeclaring it).
+  `load()` re-reads `arm64_decode_spec.json` and exits 1 if the five
+  mnemonic/macro/code triples drift from the decode table's `tables.bitfield`
+  rows, so the emitted numeric case labels cannot silently diverge from the
+  generated `arm64_decode.h` `ARM64_BITFIELD_*` constants (which the emitted
+  `_Static_assert`s pin). It also emits `KPROG_ARM64_BITFIELD_HANDLED(KIND)` plus
+  one coverage assert per code, so a kind added to the table without an arm is a
+  compile error instead of a silent fallthrough. It has a `--check` mode and a
+  `make check` line.
+- C wiring: `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated
+  header and the 24-line handler chain is replaced by a delegation to
+  `ARM64_SIM_L_BITFIELD_VALUE`, which passes `ARM64_SIM_L_UNSUPPORTED_OPCODE()`
+  as the unsupported arm. Behavior is unchanged for the five in-table kinds
+  (same mask, same sign extension, same field placement), and now
+  `ARM64_SIM_L_READ_REG` is evaluated exactly once per operand: the old code
+  read `DST` twice in the BFXIL/BFI arms, so a side-effecting read would have
+  been double-evaluated. The macro takes an explicit unsupported argument
+  (unlike the total `KPROG_ARM64_MOD_VALUE`) because a code outside the table
+  must reach the caller's trap.
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64Bitfield.lean` proves
+  `arm64_bitfield_refines` (the generated `value` equals an independently
+  written `arm64BitfieldValueSpec` over all five kinds and the architectural
+  domain), `arm64_bitfield_mask_refines` (the generated `((1 << bits) - 1)` mask
+  equals the complement-form `~~~(~0 <<< bits)` statement with a 64-bit
+  saturation arm), `arm64_bitfield_lsb_below_width` (in-domain `lsb < 64`, so
+  the C handler's guards never fire), `arm64_bitfield_code_in_range`,
+  `arm64_bitfield_code_dispatch`, and `arm64_bitfield_field_magnitude` (the
+  `__u8` field byte's zero extension carries its magnitude). Canonical examples:
+  UBFX of `0x0000000000abcdef01` at `lsb=8, bits=16` is `0xcdef`, SBFX of a
+  four-bit `1111` field is all ones, UBFIZ of `0xff` at `lsb=8, bits=8` is
+  `0xff00`, BFXIL of `0xaa` into `0xffffffffffff0000` at `lsb=0, bits=8` is
+  `0xffffffffffff00aa`, BFI of `0xb` at `lsb=4, bits=4` is `0xb0`, and a 64-bit
+  UBFX consumes the whole source. No `sorry`/`admit`. Both new modules are in
+  the `KProgFormal.lean` root import list and the bridge has a `lean` line in
+  the Makefile.
+- Lesson learned: the three non-wrapping `BitVec 8` bounds
+  (`1 <= bits`, `bits <= 64`, `lsb <= 64 - bits`) are all mandatory hypotheses.
+  Dropping the lower two makes `arm64_bitfield_refines` false, because without
+  them the modular `64 - lsb - bits` field position no longer denotes the
+  architectural field. A second lesson: `BitVec.signExtend (setWidth
+  bits.toNat …)` is opaque to the reifier, so SBFX must be stated through the
+  left-justified field's `.sshiftRight'` instead. A third: `(64 : BitVec 8)` to
+  `Nat` reasoning needs `bv_omega`; `rw [BitVec.toNat_sub, …]` does not fire and
+  bare `omega` cannot close the modular-subtraction goal. The five-arm theorem
+  needs `set_option maxHeartbeats 4000000 in`, and that option must precede the
+  docstring, not sit between docstring and `theorem`. A narrowing-commutation
+  theorem for bitfield has no true naive form and was deliberately not added.
+- Host cross-check `native-sim/formal/test_arm64_bitfield_host.c`: compiles the
+  generated macro with zero warnings under `-Wall -Wextra` and compares it
+  against an independent oracle written as a pure bit-level model (per-bit
+  extraction/insertion/sign-extension over architectural positions, no
+  `arm64_sim.h` and no reuse of `arm64_bits_mask`/`arm64_sign_extend`). It sweeps
+  16 sources x 8 destinations x 20 in-domain `(lsb, bits)` pairs x 5 kinds, then
+  a 21-entry out-of-domain table that reaches the generated guards (zero width,
+  widths past 64, field positions at or past 64) x 5 kinds, then a fixed-seed
+  20000-iteration sweep over `(lsb, bits)` in `[0, 127]`, then checks that
+  `KPROG_ARM64_BITFIELD_HANDLED` accepts exactly the five codes and rejects code
+  5. Result: `OK (126246 cases)`. The oracle was wrong on its first draft: it
+  modelled UBFIZ/BFI as the bare shifted mask instead of `(src & mask) << lsb`,
+  which reported 41448 mismatches against a correct macro; the model now derives
+  each result bit from the source bit at the corresponding field position.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, two `lean` lines, and the arm64 bitfield host cross-check step;
+  ~51 s), alongside the arm64 mod (`OK (225292 cases)`), arm64 ALU result
+  (`OK (120073 cases)`), arm64 flags (`OK (60144 cases)`), and x86 memory-access
+  (`OK (40020 cases)`) cross-checks. Mutation checks: changing a bitfield code in
+  `arm64_bitfield_spec.json` makes `--check` exit 1, and mutating a decode-table
+  bitfield code makes the drift cross-check exit 1; fourteen independent
+  semantic mutations of `generated/arm64_bitfield.h` each make the host
+  cross-check exit 1 with a printed mismatch (mask width bound, SBFX sign bit,
+  SBFX xor/subtract, mask shift width, field shift amount, the three `lsb >= 64`
+  guard boundaries, both destination-complement masks, the UBFX mask, the
+  subject shift guard, and the `HANDLED` chain), while the pristine header stays
+  `OK`. `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts, all `ok`; `make -C native-sim/arm64 build`
+  produces the BPF object from `arm64_sim_hardcoded.bpf.c` (which includes the
+  changed header) and `make -C native-sim/arm64 run` loads it (`load-only`,
+  fd=4).
+- Open AArch64 boundary after this increment: the `MADD`/`MSUB`/`UMULH` flag
+  consequences if any (the multiply block in
+  `native-sim/arm64/arm64_sim_local_bpf.h`), condition-to-next-PC beyond the
+  earlier condition contract, and native bytes. These theorems do not establish
+  native-byte equivalence, and the Lean bitfield contract is stated over
+  `BitVec 64` while the C macro operates on `__u64`; the host cross-check bridges
+  that C/Lean semantics gap for the tested vectors only.
