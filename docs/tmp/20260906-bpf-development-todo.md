@@ -1642,3 +1642,135 @@ not establish complete native-byte semantic equivalence.
   native-byte equivalence, and the Lean bitfield contract is stated over
   `BitVec 64` while the C macro operates on `__u64`; the host cross-check bridges
   that C/Lean semantics gap for the tested vectors only.
+
+### AArch64 multiply-family refinement, 2026-09-15
+
+- Gap: the eight multiply-family arms (MADD, MSUB, MUL, UMULL, UDIV, UMULH,
+  UMADDL, SMADDL) were two hand-written if/else-if chains inside
+  `ARM64_SIM_L_EXEC_ALU` in `native-sim/arm64/arm64_sim_local_bpf.h`. UMULH
+  additionally called a private `arm64_umulh` helper in
+  `native-sim/arm64/arm64_sim.h`, whose partial-product ladder existed nowhere
+  else and had no independent statement. The two chains read
+  `ARM64_SIM_L_READ_REG(SRC3)` once per condition test in the MADD/MSUB arm, so
+  a side-effecting read could have been evaluated more than once. The previous
+  increment's open AArch64 boundary named the multiply block and its
+  `MADD`/`MSUB`/`UMULH` flag question; the flag question is answered here (see
+  below) and the value contract is now generated and proved.
+- Generator: `native-sim/formal/generate_arm64_mul_spec.py` reads
+  `arm64_mul_spec.json` and emits the shared contract in two forms:
+  `generated/arm64_mul.h` (`KPROG_ARM64_MUL_VALUE(OP, LHS, RHS, ADDEND,
+  UNSUPPORTED)`, a statement expression switching on the eight raw numeric
+  opcodes `10U, 11U, 12U, 13U, 14U, 46U, 59U, 64U` with an explicit
+  `default: UNSUPPORTED; break;`) and `KProgFormal/GeneratedArm64Mul.lean`
+  (a self-contained `namespace GeneratedArm64Mul` with `inductive Mul`, `code`
+  and `value`, deliberately not reusing or extending the decode table's
+  inductive). The family is **not contiguous** in the ARM64_OP_* space, so the C
+  macro uses the raw architectural opcode values as case labels rather than an
+  internal dense kind index; `load()` parses `native-sim/arm64/arm64_sim.h` for
+  `ARM64_OP_*` and exits 1 if the spec's codes drift from the simulator's
+  constants, so the numeric labels cannot silently diverge. The emitted
+  `_Static_assert`s pin the same eight values at compile time and
+  `KPROG_ARM64_MUL_HANDLED(OP)` has one arm and one coverage assert per code.
+  It has a `--check` mode and a `make check` line.
+- C wiring: `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated
+  header, gains the `ARM64_SIM_L_MUL_VALUE(OP, SRC, SRC2, SRC3)` wrapper (which
+  hoists all three register reads exactly once each), and the 20-line two-chain
+  handler is replaced by a single `else if (KPROG_ARM64_MUL_HANDLED(OP))` branch
+  that delegates to the generated macro and hands the result to the unchanged
+  `ARM64_SIM_L_WRITE_REG_WIDTH`. Behavior is unchanged for the eight in-table
+  opcodes. The now-redundant `arm64_umulh` helper is deleted from
+  `arm64_sim.h`; a `grep` over `native-sim/` confirmed it had exactly one caller
+  (the replaced handler) and no doc or test reference, so removing it leaves no
+  dangling caller and no duplicated implementation.
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64Mul.lean` proves
+  `arm64_mul_refines` (the generated `value` equals an independently written
+  `arm64MulValueSpec` over all eight operations and all operand values),
+  `arm64_mul_width_refines` (narrowing commutes with the refinement),
+  `arm64_mul_flags_unchanged` (the multiply family's NZCV transition is the
+  identity), `arm64_mul_code_in_range`, `arm64_mul_code_dispatch`, and a
+  `native_decide` example per operation. The refinement is deliberately stated
+  against structurally different forms: UMULH is compared against the exact
+  128-bit product's high word (`BitVec.setWidth 64 (((lhs.setWidth 128) *
+  (rhs.setWidth 128)) >>> 64)`) rather than the partial-product ladder, SMADDL
+  goes through `arm64MulSignExt32Spec`, MSUB is stated as
+  `addend + ~~~(lhs * rhs) + 1` (two's-complement form) rather than
+  `addend - lhs * rhs`, and UMULL/UMADDL widen through
+  `(lhs.setWidth 32).setWidth 64` rather than a mask. The bridge between the
+  ladder and the 128-bit statement is the `Nat` identity
+  `arm64MulUmulhLadderEqHighWord`, itself proved via
+  `arm64MulUmulhNat`/`arm64MulUmulhHighWordToNat` from the radix-`2^32`
+  decomposition. No `sorry`/`admit`. Both new modules are in the
+  `KProgFormal.lean` root import list and both have `lean` lines in the
+  Makefile.
+- Lesson learned (the hard one): `bv_decide` cannot discharge the UMULH ladder.
+  Unfolded, the SAT query needs 10.89 s; against the bare statement it fails
+  with `It abstracted the following unsupported expressions as opaque
+  variables: [umulhAlg lhs rhs]`; prior attempts ran 600 s, 601.94 s and
+  902.63 s before failing. The working route is an explicit `Nat` chain: prove
+  the operands' 32-bit halves multiply below `2^64`, eliminate the outer
+  `% 2^64` layers with `Nat.mod_eq_of_lt` (`ma1`/`ma2` for the high partial and
+  cross terms, `mb1`/`mb2` for the carry column), and close the last layer with
+  `hbnd2`, whose bound transfers through the radix identity (`hid` =
+  `arm64MulUmulhNat`) and `Nat.div_lt_iff_lt_mul` + `arm64MulProdBound`. Plain
+  `omega` closes neither the division goal nor the normalized `Nat` goal; it is
+  only used for the small side-condition bounds and the `ma1`/`ma2`/`mb1`/`mb2`
+  subgoals. A second lesson: never plain-`rw` a div-mod decomposition lemma
+  (`Nat.div_add_mod`) at a goal containing `a/2^32`/`a%2^32` — it rewrites
+  inside them and recurses (`maximum recursion depth has been reached`, or a
+  stack overflow, exit 134); `set_option maxRecDepth 100000` only makes the
+  overflow worse. Use `congrArg` (as `arm64MulPq` does) or `conv => rhs;
+  rw [...]`. A third: `conv_lhs`/`conv_rhs`/`nth_rewrite` do not exist in this
+  Mathlib-free toolchain. A fourth: the sign-extension arm needs a `by_cases`
+  split on the sign bit before `bv_decide`. A fifth: `BitVec.setWidth` is the
+  truncation (`BitVec.setWidth_eq`); `BitVec.setWidth_self_le` and
+  `BitVec.toNat_div` do not exist, but `BitVec.toNat_udiv` does. A sixth: an
+  `@[simp]` helper (`arm64MulToNatMask32`) must be declared **before** the
+  `simp only` that consumes it, and `simp only [<helper>]` on an already
+  normalized goal errors with `simp made no progress`. A seventh:
+  `arm64MulValueSpec` takes four operands (`op lhs rhs addend`), so every
+  `native_decide` example must pass the `addend` slot explicitly even for
+  operations that ignore it — passing three makes Lean read the literal as the
+  `addend` slot's function type and the example fails with an
+  `OfNat (BitVec 64 → BitVec 64)` synthesis error.
+- Flag obligation: the multiply family writes **no** NZCV and no
+  `ARM64_OP_MADDS`/`MSUBS` variant exists in the opcode table, so
+  `arm64MulFlagsSpec` is the identity transition and
+  `arm64_mul_flags_unchanged` proves the C macro's (absent) flag write matches
+  it. The generated flag contract covers only the ADD/SUB/logical families, so
+  this is a documentary obligation recorded here rather than a new spec family.
+- Host cross-check `native-sim/formal/test_arm64_mul_host.c`: compiles the
+  generated macro with zero warnings under `-Wall -Wextra` and compares it
+  against an independent oracle (no `arm64_sim.h`, no partial-product ladder).
+  The UMULH oracle is architectural: it reads the high word of an
+  `unsigned __int128` product. It sweeps a 20-vector boundary table (zero
+  operands, all-ones, `0xffffffff`, `0x80000000`, `1<<31`, `1<<63`,
+  `0x100000000`, accumulator-carry cases, `addend = ~0`) x all eight ops, then a
+  fixed-seed 20000-iteration LCG sweep (seed `0x9e3779b97f4a7c15`, distinct
+  from the alu-result `0x12345678` and bitfield `0x243f6a8885a308d3` seeds) x
+  all eight ops, then a `fork`/`waitpid` check that an opcode outside the family
+  (`9U`) aborts with `SIGABRT` through the generated `default:` arm. Result:
+  `OK (160161 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, two `lean` lines, and the arm64 mul host cross-check step),
+  alongside the arm64 bitfield (`OK (126246 cases)`), arm64 mod
+  (`OK (225292 cases)`), arm64 ALU result (`OK (120073 cases)`), arm64 flags
+  (`OK (60144 cases)`), and x86 memory-access (`OK (40020 cases)`)
+  cross-checks. Mutation checks: changing a multiply code in
+  `arm64_mul_spec.json` makes `--check` exit 1; changing `ARM64_OP_UMULH` in
+  `arm64_sim.h` makes the generator report `arm64 multiply opcodes drift` and
+  exit 1; seven independent semantic mutations of `generated/arm64_mul.h`
+  (MADD `+`→`-`, MSUB `-`→`+`, UMULL rhs not narrowed, UDIV zero guard `0`→`1`,
+  UMULH carry shift `32`→`31`, UMADDL accumulator dropped, SMADDL lhs
+  sign→zero extension) each make the host cross-check exit 1 with a printed
+  `MISMATCH`, while the pristine header stays `OK`.
+  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts, all `ok`; `make -C native-sim/arm64 build`
+  produces the BPF object from `arm64_sim_hardcoded.bpf.c` (which includes the
+  changed headers) and `make -C native-sim/arm64 run` loads it (`load-only`,
+  fd=4).
+- Open AArch64 boundary after this increment: the extract/reverse/extend
+  (`EXTR`/`REV`/`SXT*`/`UXT*`-style) handler composition, condition-to-next-PC
+  beyond the earlier condition contract, and native bytes. These theorems do
+  not establish native-byte equivalence, and the Lean multiply contract is
+  stated over `BitVec 64` while the C macro operates on `__u64`; the host
+  cross-check bridges that C/Lean semantics gap for the tested vectors only.
