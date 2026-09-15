@@ -18,13 +18,13 @@ increment is committed and pushed immediately). Current state:
 - `native-sim/formal` is a Lean 4 model checked with
   `make -C native-sim/formal check`. It machine-checks the generated
   JSON/C/Lean contracts: width narrowing, entry ABI loads, pointer add,
-  x86/AArch64 condition tables, ALU decode, logical/ADD/SUB/ADC/SBB/INC/DEC/
-  NEG/NOT flag and result production, shift results and flags, register-lane
-  AUX layout, register-destination immediate handler compositions for
-  ADD/ADC/SUB/SBB/CMP/TEST/AND/OR/XOR/SHL/SHR/SAR/ROL, register-register
-  AND/OR/XOR/SHL/SHR/SAR/ROL handler compositions, and the
-  carry-sensitive handler classification (SBB/ADC routing through
-  generated C predicates).
+  x86/AArch64 condition tables, x86/AArch64 ALU decode tables, logical/
+  ADD/SUB/ADC/SBB/INC/DEC/NEG/NOT flag and result production, shift results
+  and flags, register-lane AUX layout, register-destination immediate handler
+  compositions for ADD/ADC/SUB/SBB/CMP/TEST/AND/OR/XOR/SHL/SHR/SAR/ROL,
+  register-register AND/OR/XOR/SHL/SHR/SAR/ROL handler compositions, the
+  carry-sensitive handler classification (SBB/ADC routing through generated C
+  predicates), and the AArch64 NZCV flag and decode-table contracts.
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag
@@ -37,9 +37,11 @@ increment is committed and pushed immediately). Current state:
   lanes and stores, the objdump/parser-to-AUX selection relation, C-to-Lean
   unsigned-semantics correspondence, compiler/native-byte correspondence,
   multi-step control-flow traces, helpers, and specialization preservation.
-- Open on the AArch64 side: flag production and the register-lane handler
-  compositions (the AArch64 condition table and pointer-add/ABI-load
-  contracts are already shared).
+- Open on the AArch64 side: the ALU op-step and register-lane handler
+  compositions (in progress), bitfield/extract/reverse handler compositions,
+  `MADD`/`MSUB`/`UMULH` flag consequences, and condition-to-next-PC beyond the
+  condition contract. The AArch64 condition table, width/NZCV flag contract,
+  decode tables, and pointer-add/ABI-load contracts are already shared.
 - The generation binding (verifier-accepted proof + native bytes bound to one
   immutable load generation) and the functional smokes establish different
   properties from these refinement theorems; none of them claims

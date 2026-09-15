@@ -35,3 +35,5 @@ import KProgFormal.GeneratedArm64Mod
 import KProgFormal.Arm64Mod
 import KProgFormal.GeneratedArm64Bitfield
 import KProgFormal.Arm64Bitfield
+import KProgFormal.GeneratedArm64Mul
+import KProgFormal.Arm64Mul
