@@ -17,9 +17,10 @@ NZCV flag transitions for the ADD/SUB/logical families, the six-operation ALU
 op-step result contract, the eleven-arm source-modifier (shift/rotate/extend)
 value contract, the five-kind bitfield (UBFX/SBFX/UBFIZ/BFXIL/BFI) value
 contract, the eight-operation multiply-family (MADD/MSUB/MUL/UMULL/UDIV/UMULH/
-UMADDL/SMADDL) value contract, the ALU/shift/modifier/bitfield decode tables,
-the condition table, and the pointer-add/ABI-load contracts against
-independently stated specs
+UMADDL/SMADDL) value contract, the six-operation extract/reverse/extend
+(`EXTR`/`REV`/`REV16`/`SXTH`/`SXTW`/`SXTB`) value contract, the
+ALU/shift/modifier/bitfield decode tables, the condition table, and the
+pointer-add/ABI-load contracts against independently stated specs
 (`make -C ../formal check`), plus tag erasure for a four-operation shared
 fragment. Those per-step contracts are not yet mechanically tied to every C
 C macro in this directory and do not cover the full implemented subset. Verifier
