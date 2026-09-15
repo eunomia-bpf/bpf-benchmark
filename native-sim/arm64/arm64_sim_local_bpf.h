@@ -13,6 +13,7 @@
 #include "../formal/generated/arm64_mod.h"
 #include "../formal/generated/arm64_bitfield.h"
 #include "../formal/generated/arm64_mul.h"
+#include "../formal/generated/arm64_extrev.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -328,6 +329,22 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			      ARM64_SIM_L_READ_REG(SRC2),                  \
 			      ARM64_SIM_L_READ_REG(SRC3),                  \
 			      ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
+/*
+ * Extract/reverse/extend value (EXTR/REV/REV16/SXTH/SXTW/SXTB). The six
+ * opcode labels, the EXTR masked-shift composition, the width-selected byte
+ * reversals, and the sign-extension arms are the generated AArch64
+ * extract/reverse/extend contract in formal/generated/arm64_extrev.h, which
+ * KProgFormal/Arm64Extrev.lean proves equal to an independent statement over
+ * all six operations, the architectural EXTR concatenation, and the emitted
+ * REV/REV16 widths. EXTR reads SRC2 and SHIFT; REV/REV16/SXT* use SRC only.
+ * ARM64_SIM_L_READ_REG is evaluated exactly once per source operand, and no
+ * arm writes NZCV.
+ */
+#define ARM64_SIM_L_EXTREV_VALUE(OP, SRC, SRC2, SHIFT, WIDTH)               \
+	KPROG_ARM64_EXTREV_VALUE((OP), ARM64_SIM_L_READ_REG(SRC),          \
+				 ARM64_SIM_L_READ_REG(SRC2), (SHIFT),      \
+				 (WIDTH), ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
 #define ARM64_SIM_L_STACK_INDEX(OFF) ((__u32)(ARM64_SIM_STACK_BIAS + (OFF)))
 
@@ -693,12 +710,10 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			if (ARM64_SIM_L_EVAL_COND(AUX))                      \
 				__a64_l_value = -__a64_l_value;              \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
-		} else if ((OP) == ARM64_OP_EXTR) {                           \
-			__u8 __a64_extr_bits = arm64_width_bits(__a64_l_width);\
-			__u8 __a64_extr_shift = (__u8)(IMM) & (__a64_extr_bits - 1U);\
-			__u64 __a64_extr_low = ARM64_SIM_L_READ_REG(SRC2) >> __a64_extr_shift;\
-			__u64 __a64_extr_high = __a64_extr_shift ? ARM64_SIM_L_READ_REG(SRC) << (__a64_extr_bits - __a64_extr_shift) : 0;\
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_extr_low | __a64_extr_high, __a64_l_width);\
+		} else if (KPROG_ARM64_EXTREV_HANDLED(OP)) {                 \
+			__u64 __a64_l_result =                              \
+				ARM64_SIM_L_EXTREV_VALUE((OP), (SRC), (SRC2), (IMM), __a64_l_width);\
+			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if ((OP) == ARM64_OP_BITFIELD) {                       \
 			__u64 __a64_bf_result =                              \
 				ARM64_SIM_L_BITFIELD_VALUE((AUX) & 0xffU,    \
@@ -707,19 +722,6 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 					ARM64_SIM_L_BITFIELD_LSB(AUX),       \
 					ARM64_SIM_L_BITFIELD_WIDTH(AUX));    \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_bf_result, __a64_l_width);\
-		} else if ((OP) == ARM64_OP_REV || (OP) == ARM64_OP_REV16 || (OP) == ARM64_OP_SXTB || (OP) == ARM64_OP_SXTH || (OP) == ARM64_OP_SXTW) {\
-			__u64 __a64_l_value = ARM64_SIM_L_READ_REG(SRC);     \
-			if ((OP) == ARM64_OP_REV)                             \
-				__a64_l_value = arm64_reverse_bytes(__a64_l_value, __a64_l_width);\
-			else if ((OP) == ARM64_OP_REV16)                      \
-				__a64_l_value = arm64_reverse_bytes16(__a64_l_value, __a64_l_width);\
-			else if ((OP) == ARM64_OP_SXTW)                       \
-				__a64_l_value = arm64_sign_extend(__a64_l_value & 0xffffffffULL, 32);\
-			else if ((OP) == ARM64_OP_SXTB)                       \
-				__a64_l_value = arm64_sign_extend(__a64_l_value & 0xffULL, 8);\
-			else                                                  \
-				__a64_l_value = arm64_sign_extend(__a64_l_value & 0xffffULL, 16);\
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
 		} else if ((OP) == ARM64_OP_SUBS_IMM || (OP) == ARM64_OP_SUBS_REG) {\
 			__u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC);      \
 			__u64 __a64_l_rhs = (OP) == ARM64_OP_SUBS_IMM ? (__u64)(IMM) :\

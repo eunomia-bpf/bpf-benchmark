@@ -214,27 +214,6 @@ static __always_inline __u32 arm64_ror32(__u32 value, __u8 amount)
 	return amount ? ((value >> amount) | (value << (32U - amount))) : value;
 }
 
-static __always_inline __u64 arm64_reverse_bytes(__u64 value, __u8 width)
-{
-	if (width == ARM64_WIDTH_32)
-		return ((__u64)__builtin_bswap32((__u32)value));
-	return __builtin_bswap64(value);
-}
-
-static __always_inline __u64 arm64_reverse_bytes16(__u64 value, __u8 width)
-{
-	__u64 out = 0;
-
-	if (width == ARM64_WIDTH_32) {
-		out |= (value & 0x00ff00ffULL) << 8;
-		out |= (value & 0xff00ff00ULL) >> 8;
-		return out & 0xffffffffULL;
-	}
-	out |= (value & 0x00ff00ff00ff00ffULL) << 8;
-	out |= (value & 0xff00ff00ff00ff00ULL) >> 8;
-	return out;
-}
-
 static __always_inline __u64 arm64_replicate_byte_popcounts(__u64 value)
 {
 	__u64 out = 0;
