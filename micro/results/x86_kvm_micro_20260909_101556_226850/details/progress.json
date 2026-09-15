@@ -1,0 +1,9 @@
+{
+  "completed_benchmarks": 1,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "error_message": "packet_checksum_fold: command failed (1): /workspaces/repository/runner/build-llvmbpf/micro_exec run-native-kernel --program /artifacts/user/micro-programs/x86_64/packet_checksum_fold.bpf.o --native-program /artifacts/user/micro-programs/x86_64/packet_checksum_fold.native.so --memory /workspaces/repository/micro/generated-inputs/packet_checksum_fold.mem --io-mode staged --input-size 1032 --inner-repeat 1 --dump-jit-path /workspaces/repository/micro/results/x86_kvm_micro_20260909_101556_226850/details/jit_dumps/packet_checksum_fold__native_kernel__sample00.jited.bin\n(0) frame 0 insn 0 +written -16,-24,-32,-40\n(0) live stack update done in 2 iterations\nfrom 53 to 134: safe\nfrom 39 to 134: safe\nfrom 25 to 134: safe\nfrom 21 to 134: safe\nfrom 18 to 134: safe\nprocessed 221829 insns (limit 1000000) max_states_per_insn 4 total_states 2053 peak_states 2053 mark_read 0\nnative_lab stub context: prog_type=6 blob_bytes=208 reloc_records=0 reloc_bytes=0 chunks=2 proof_bound=1 callee_saved_mask=0 tail_call_reachable=0 retained_map_fds=0 relocated_map_ids=0 expected_attach_type=0 attach_btf_id=0 attach_btf_obj_id=0 attach_prog_id=0 module_btf_id=46 kfunc_btf_id=129888\nnative_blob_diag: fnv64=7fe996b6357d5299 word_count=52 tail_bytes=0 break_fault_words=0 first_break_fault_offset=none zero_words=0 first_zero_offset=none chunk_range_bad=0 first_bad_chunk=none chunk_alignment_bad=0 first_unaligned_chunk=none chunk_length_bad=0 first_bad_length_chunk=none chunk_contiguous_bad=0 first_noncontiguous_chunk=none final_chunk_end=208 final_size_matches=1\nchunk_bytes=0:128,128:80\nstub_load_error_summary=BPF_PROG_LOAD native_lab stub: No space left on device",
+  "status": "error",
+  "total_benchmarks": 1
+}

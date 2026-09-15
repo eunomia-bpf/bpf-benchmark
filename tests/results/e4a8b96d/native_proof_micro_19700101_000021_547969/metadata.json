@@ -1,0 +1,2411 @@
+{
+  "benchmarks": [
+    {
+      "expected_result": 12345678,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/simple.mem",
+      "io_mode": "staged",
+      "name": "simple",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 152,
+                "native_code_bytes": 144
+              },
+              "compile_ns": 193097616,
+              "exec_ns": 4704,
+              "jited_prog_len": 144,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 178192,
+                "memory_prepare_ns": 21464576,
+                "object_load_ns": 39192000,
+                "object_open_ns": 153905616,
+                "prog_run_wall_ns": 138208,
+                "proof_compile_ns": 1725507793,
+                "result_extract_ns": 88496
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/simple.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/simple.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/simple.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/simple.bpf.c"
+              },
+              "proof_compile_ns": 1725507793,
+              "result": 12345678,
+              "retval": 2,
+              "runner_compile_ns": 193097616,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 152
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "baseline",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 12345678,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/simple_packet.mem",
+      "io_mode": "packet",
+      "name": "simple_packet",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 128,
+                "native_code_bytes": 128
+              },
+              "compile_ns": 63467680,
+              "exec_ns": 3808,
+              "jited_prog_len": 128,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 13246064,
+                "object_load_ns": 12526624,
+                "object_open_ns": 50941056,
+                "packet_prepare_ns": 381568,
+                "prog_run_wall_ns": 112368,
+                "proof_compile_ns": 2080720825,
+                "result_extract_ns": 65392
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/simple_packet.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/simple_packet.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/simple_packet.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/simple_packet.bpf.c"
+              },
+              "proof_compile_ns": 2080720825,
+              "result": 12345678,
+              "retval": 2,
+              "runner_compile_ns": 63467680,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 128
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "baseline",
+        "packet-backed",
+        "helper-free"
+      ]
+    },
+    {
+      "expected_result": 12830754992348206170,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/bitmap_popcount_scan.mem",
+      "io_mode": "staged",
+      "name": "bitmap_popcount_scan",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 744,
+                "native_code_bytes": 520
+              },
+              "compile_ns": 106397776,
+              "exec_ns": 5440,
+              "jited_prog_len": 520,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 170304,
+                "memory_prepare_ns": 18689104,
+                "object_load_ns": 37698400,
+                "object_open_ns": 68699376,
+                "prog_run_wall_ns": 117872,
+                "proof_compile_ns": 3666900433,
+                "result_extract_ns": 74736
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/bitmap_popcount_scan.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/bitmap_popcount_scan.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/bitmap_popcount_scan.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/bitmap_popcount_scan.bpf.c"
+              },
+              "proof_compile_ns": 3666900433,
+              "result": 12830754992348206170,
+              "retval": 2,
+              "runner_compile_ns": 106397776,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 744
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "bitops",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 126,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/sorted_rule_binary_search.mem",
+      "io_mode": "staged",
+      "name": "sorted_rule_binary_search",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1280,
+                "native_code_bytes": 800
+              },
+              "compile_ns": 348466512,
+              "exec_ns": 11216,
+              "jited_prog_len": 800,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 166848,
+                "memory_prepare_ns": 15248400,
+                "object_load_ns": 291918272,
+                "object_open_ns": 56548240,
+                "prog_run_wall_ns": 149584,
+                "proof_compile_ns": 7198168314,
+                "result_extract_ns": 74064
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/sorted_rule_binary_search.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/sorted_rule_binary_search.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/sorted_rule_binary_search.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/sorted_rule_binary_search.bpf.c"
+              },
+              "proof_compile_ns": 7198168314,
+              "result": 126,
+              "retval": 2,
+              "runner_compile_ns": 348466512,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1280
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "branch",
+        "search",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 17790125373615940312,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/bcc_runqlat_log2_histogram_bucket.mem",
+      "io_mode": "staged",
+      "name": "bcc_runqlat_log2_histogram_bucket",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1176,
+                "native_code_bytes": 712
+              },
+              "compile_ns": 1426140192,
+              "exec_ns": 13280,
+              "jited_prog_len": 712,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 163744,
+                "memory_prepare_ns": 13251184,
+                "object_load_ns": 1376952240,
+                "object_open_ns": 49187952,
+                "prog_run_wall_ns": 123232,
+                "proof_compile_ns": 6846125114,
+                "result_extract_ns": 71696
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/bcc_runqlat_log2_histogram_bucket.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/bcc_runqlat_log2_histogram_bucket.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/bcc_runqlat_log2_histogram_bucket.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/bcc_runqlat_log2_histogram_bucket.bpf.c"
+              },
+              "proof_compile_ns": 6846125114,
+              "result": 17790125373615940312,
+              "retval": 2,
+              "runner_compile_ns": 1426140192,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1176
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "bcc",
+        "tracing",
+        "log2",
+        "histogram",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 16,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/trace_event_type_switch_dispatch.mem",
+      "io_mode": "staged",
+      "name": "trace_event_type_switch_dispatch",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 5640,
+                "native_code_bytes": 3488
+              },
+              "compile_ns": 762849168,
+              "exec_ns": 15904,
+              "jited_prog_len": 3488,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 167200,
+                "memory_prepare_ns": 16856384,
+                "object_load_ns": 677194896,
+                "object_open_ns": 85654272,
+                "prog_run_wall_ns": 189120,
+                "proof_compile_ns": 21748155715,
+                "result_extract_ns": 73808
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/trace_event_type_switch_dispatch.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/trace_event_type_switch_dispatch.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/trace_event_type_switch_dispatch.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/trace_event_type_switch_dispatch.bpf.c"
+              },
+              "proof_compile_ns": 21748155715,
+              "result": 16,
+              "retval": 2,
+              "runner_compile_ns": 762849168,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 5640
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "branch",
+        "dispatch",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 0,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/packet_checksum_fold.mem",
+      "io_mode": "staged",
+      "name": "packet_checksum_fold",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 648,
+                "native_code_bytes": 424
+              },
+              "compile_ns": 438582800,
+              "exec_ns": 32112,
+              "jited_prog_len": 424,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 164176,
+                "memory_prepare_ns": 12028480,
+                "object_load_ns": 388963728,
+                "object_open_ns": 49619072,
+                "prog_run_wall_ns": 153328,
+                "proof_compile_ns": 4325471046,
+                "result_extract_ns": 69264
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/packet_checksum_fold.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/packet_checksum_fold.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/packet_checksum_fold.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/packet_checksum_fold.bpf.c"
+              },
+              "proof_compile_ns": 4325471046,
+              "result": 0,
+              "retval": 2,
+              "runner_compile_ns": 438582800,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 648
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "alu",
+        "memory",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 9377358970524074984,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/payload_prefix_memcmp_scan.mem",
+      "io_mode": "staged",
+      "name": "payload_prefix_memcmp_scan",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 976,
+                "native_code_bytes": 632
+              },
+              "compile_ns": 109459952,
+              "exec_ns": 5328,
+              "jited_prog_len": 632,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 151808,
+                "memory_prepare_ns": 23480176,
+                "object_load_ns": 25464352,
+                "object_open_ns": 83995600,
+                "prog_run_wall_ns": 241904,
+                "proof_compile_ns": 10940048906,
+                "result_extract_ns": 75536
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/payload_prefix_memcmp_scan.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/payload_prefix_memcmp_scan.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/payload_prefix_memcmp_scan.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/payload_prefix_memcmp_scan.bpf.c"
+              },
+              "proof_compile_ns": 10940048906,
+              "result": 9377358970524074984,
+              "retval": 2,
+              "runner_compile_ns": 109459952,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 976
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "memory",
+        "compare",
+        "branch",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 7124500222221,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/packet_vlan_tcpopt_parser.mem",
+      "io_mode": "packet",
+      "name": "packet_vlan_tcpopt_parser",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1816,
+                "native_code_bytes": 1152
+              },
+              "compile_ns": 114087520,
+              "exec_ns": 6224,
+              "jited_prog_len": 1152,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 20217792,
+                "object_load_ns": 23960176,
+                "object_open_ns": 90127344,
+                "packet_prepare_ns": 678112,
+                "prog_run_wall_ns": 141616,
+                "proof_compile_ns": 13614461528,
+                "result_extract_ns": 83792
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/packet_vlan_tcpopt_parser.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/packet_vlan_tcpopt_parser.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/packet_vlan_tcpopt_parser.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/packet_vlan_tcpopt_parser.bpf.c"
+              },
+              "proof_compile_ns": 13614461528,
+              "result": 7124500222221,
+              "retval": 2,
+              "runner_compile_ns": 114087520,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1816
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "packet",
+        "parse",
+        "bounds",
+        "variable-offsets",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 1171593469689687806,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/bpf_local_call_fanout_dispatch.mem",
+      "io_mode": "staged",
+      "name": "bpf_local_call_fanout_dispatch",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 3512,
+                "native_code_bytes": 2216
+              },
+              "compile_ns": 81897696,
+              "exec_ns": 4704,
+              "jited_prog_len": 2216,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 164896,
+                "memory_prepare_ns": 10605280,
+                "object_load_ns": 31172496,
+                "object_open_ns": 50725200,
+                "prog_run_wall_ns": 113280,
+                "proof_compile_ns": 18224159089,
+                "result_extract_ns": 70992
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/bpf_local_call_fanout_dispatch.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/bpf_local_call_fanout_dispatch.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/bpf_local_call_fanout_dispatch.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/bpf_local_call_fanout_dispatch.bpf.c"
+              },
+              "proof_compile_ns": 18224159089,
+              "result": 1171593469689687806,
+              "retval": 2,
+              "runner_compile_ns": 81897696,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 3512
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "call",
+        "bpf-to-bpf",
+        "local-call",
+        "reg-pressure",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 11016707074064960918,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/flow_5tuple_rss_hash.mem",
+      "io_mode": "packet",
+      "name": "flow_5tuple_rss_hash",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2112,
+                "native_code_bytes": 1208
+              },
+              "compile_ns": 66528464,
+              "exec_ns": 4288,
+              "jited_prog_len": 1208,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 11362064,
+                "object_load_ns": 15208432,
+                "object_open_ns": 51320032,
+                "packet_prepare_ns": 414240,
+                "prog_run_wall_ns": 114112,
+                "proof_compile_ns": 12153895901,
+                "result_extract_ns": 64736
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/flow_5tuple_rss_hash.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/flow_5tuple_rss_hash.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/flow_5tuple_rss_hash.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/flow_5tuple_rss_hash.bpf.c"
+              },
+              "proof_compile_ns": 12153895901,
+              "result": 11016707074064960918,
+              "retval": 2,
+              "runner_compile_ns": 66528464,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 2112
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "packet",
+        "hash",
+        "endian",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 5895923248507644458,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/katran_lb_consistent_hash_select.mem",
+      "io_mode": "packet",
+      "name": "katran_lb_consistent_hash_select",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 6720,
+                "native_code_bytes": 3840
+              },
+              "compile_ns": 94188880,
+              "exec_ns": 4384,
+              "jited_prog_len": 3840,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 14032304,
+                "object_load_ns": 21471840,
+                "object_open_ns": 72717040,
+                "packet_prepare_ns": 698064,
+                "prog_run_wall_ns": 117088,
+                "proof_compile_ns": 42333360182,
+                "result_extract_ns": 64848
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/katran_lb_consistent_hash_select.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/katran_lb_consistent_hash_select.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/katran_lb_consistent_hash_select.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/katran_lb_consistent_hash_select.bpf.c"
+              },
+              "proof_compile_ns": 42333360182,
+              "result": 5895923248507644458,
+              "retval": 2,
+              "runner_compile_ns": 94188880,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 6720
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "packet",
+        "katran",
+        "hash",
+        "endian",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 5333736376993440184,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/cilium_policy_guard_tree_filter.mem",
+      "io_mode": "staged",
+      "name": "cilium_policy_guard_tree_filter",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1152,
+                "native_code_bytes": 712
+              },
+              "compile_ns": 97563120,
+              "exec_ns": 4720,
+              "jited_prog_len": 712,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 164464,
+                "memory_prepare_ns": 13147584,
+                "object_load_ns": 40324608,
+                "object_open_ns": 57238512,
+                "prog_run_wall_ns": 113360,
+                "proof_compile_ns": 8018416272,
+                "result_extract_ns": 77792
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/cilium_policy_guard_tree_filter.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/cilium_policy_guard_tree_filter.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/cilium_policy_guard_tree_filter.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/cilium_policy_guard_tree_filter.bpf.c"
+              },
+              "proof_compile_ns": 8018416272,
+              "result": 5333736376993440184,
+              "retval": 2,
+              "runner_compile_ns": 97563120,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1152
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "cilium",
+        "branch",
+        "nested",
+        "guards",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 2666935177028490406,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/siphash_rotate64_mixer.mem",
+      "io_mode": "staged",
+      "name": "siphash_rotate64_mixer",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 8000,
+                "native_code_bytes": 4144
+              },
+              "compile_ns": 118897424,
+              "exec_ns": 4800,
+              "jited_prog_len": 4144,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 164816,
+                "memory_prepare_ns": 27887552,
+                "object_load_ns": 24625456,
+                "object_open_ns": 94271968,
+                "prog_run_wall_ns": 124000,
+                "proof_compile_ns": 28581995013,
+                "result_extract_ns": 76160
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/siphash_rotate64_mixer.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/siphash_rotate64_mixer.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/siphash_rotate64_mixer.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/siphash_rotate64_mixer.bpf.c"
+              },
+              "proof_compile_ns": 28581995013,
+              "result": 2666935177028490406,
+              "retval": 2,
+              "runner_compile_ns": 118897424,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 8000
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "compute",
+        "rotate",
+        "hash",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 1610777047308888911,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/packet_record_bounds_window.mem",
+      "io_mode": "packet",
+      "name": "packet_record_bounds_window",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1104,
+                "native_code_bytes": 688
+              },
+              "compile_ns": 125054944,
+              "exec_ns": 4704,
+              "jited_prog_len": 688,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 18470480,
+                "object_load_ns": 31604864,
+                "object_open_ns": 93450080,
+                "packet_prepare_ns": 842944,
+                "prog_run_wall_ns": 114864,
+                "proof_compile_ns": 7530051931,
+                "result_extract_ns": 65152
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/packet_record_bounds_window.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/packet_record_bounds_window.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/packet_record_bounds_window.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/packet_record_bounds_window.bpf.c"
+              },
+              "proof_compile_ns": 7530051931,
+              "result": 1610777047308888911,
+              "retval": 2,
+              "runner_compile_ns": 125054944,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1104
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "packet",
+        "bounds",
+        "redundant-checks",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 9354240374969449171,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/flow_record_field_scan.mem",
+      "io_mode": "staged",
+      "name": "flow_record_field_scan",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1576,
+                "native_code_bytes": 1040
+              },
+              "compile_ns": 143169936,
+              "exec_ns": 6160,
+              "jited_prog_len": 1040,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 171600,
+                "memory_prepare_ns": 22836480,
+                "object_load_ns": 34836800,
+                "object_open_ns": 108333136,
+                "prog_run_wall_ns": 125248,
+                "proof_compile_ns": 7026443887,
+                "result_extract_ns": 79632
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/flow_record_field_scan.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/flow_record_field_scan.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/flow_record_field_scan.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/flow_record_field_scan.bpf.c"
+              },
+              "proof_compile_ns": 7026443887,
+              "result": 9354240374969449171,
+              "retval": 2,
+              "runner_compile_ns": 143169936,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1576
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "memory",
+        "fields",
+        "fixed-offsets",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 12211926182125163441,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/packed_header_bitfield_decode.mem",
+      "io_mode": "staged",
+      "name": "packed_header_bitfield_decode",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1736,
+                "native_code_bytes": 1080
+              },
+              "compile_ns": 82111568,
+              "exec_ns": 5648,
+              "jited_prog_len": 1080,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 175840,
+                "memory_prepare_ns": 12451696,
+                "object_load_ns": 24087488,
+                "object_open_ns": 58024080,
+                "prog_run_wall_ns": 126016,
+                "proof_compile_ns": 18293639353,
+                "result_extract_ns": 73984
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/packed_header_bitfield_decode.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/packed_header_bitfield_decode.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/packed_header_bitfield_decode.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/packed_header_bitfield_decode.bpf.c"
+              },
+              "proof_compile_ns": 18293639353,
+              "result": 12211926182125163441,
+              "retval": 2,
+              "runner_compile_ns": 82111568,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1736
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "memory",
+        "fields",
+        "bitfield",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 15111065535037762995,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/bpftrace_string_search_prefix_scan.mem",
+      "io_mode": "staged",
+      "name": "bpftrace_string_search_prefix_scan",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1376,
+                "native_code_bytes": 904
+              },
+              "compile_ns": 402833424,
+              "exec_ns": 5648,
+              "jited_prog_len": 904,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 162880,
+                "memory_prepare_ns": 15859296,
+                "object_load_ns": 351954624,
+                "object_open_ns": 50878800,
+                "prog_run_wall_ns": 115280,
+                "proof_compile_ns": 11029016809,
+                "result_extract_ns": 71600
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/bpftrace_string_search_prefix_scan.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/bpftrace_string_search_prefix_scan.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/bpftrace_string_search_prefix_scan.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/bpftrace_string_search_prefix_scan.bpf.c"
+              },
+              "proof_compile_ns": 11029016809,
+              "result": 15111065535037762995,
+              "retval": 2,
+              "runner_compile_ns": 402833424,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1376
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "bpftrace",
+        "string",
+        "compare",
+        "loop",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 4063733557757466536,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/tracee_syscall_name_table_lookup.mem",
+      "io_mode": "staged",
+      "name": "tracee_syscall_name_table_lookup",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2128,
+                "native_code_bytes": 1472
+              },
+              "compile_ns": 265371200,
+              "exec_ns": 7152,
+              "jited_prog_len": 1472,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 168432,
+                "memory_prepare_ns": 19286544,
+                "object_load_ns": 184229408,
+                "object_open_ns": 81141792,
+                "prog_run_wall_ns": 127568,
+                "proof_compile_ns": 18945276546,
+                "result_extract_ns": 76608
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/tracee_syscall_name_table_lookup.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/tracee_syscall_name_table_lookup.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/tracee_syscall_name_table_lookup.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/tracee_syscall_name_table_lookup.bpf.c"
+              },
+              "proof_compile_ns": 18945276546,
+              "result": 4063733557757466536,
+              "retval": 2,
+              "runner_compile_ns": 265371200,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 2128
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "tracee",
+        "syscall",
+        "dispatch",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 11562433829591280482,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/tracee_http_method_prefix_detect.mem",
+      "io_mode": "staged",
+      "name": "tracee_http_method_prefix_detect",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1368,
+                "native_code_bytes": 984
+              },
+              "compile_ns": 103281664,
+              "exec_ns": 4144,
+              "jited_prog_len": 984,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 157536,
+                "memory_prepare_ns": 18313584,
+                "object_load_ns": 23076944,
+                "object_open_ns": 80204720,
+                "prog_run_wall_ns": 113600,
+                "proof_compile_ns": 14916612013,
+                "result_extract_ns": 77744
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/tracee_http_method_prefix_detect.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/tracee_http_method_prefix_detect.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/tracee_http_method_prefix_detect.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/tracee_http_method_prefix_detect.bpf.c"
+              },
+              "proof_compile_ns": 14916612013,
+              "result": 11562433829591280482,
+              "retval": 2,
+              "runner_compile_ns": 103281664,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1368
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "tracee",
+        "http",
+        "string",
+        "branch",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 2868565165525030065,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/cilium_socket_lb_service_select.mem",
+      "io_mode": "staged",
+      "name": "cilium_socket_lb_service_select",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1832,
+                "native_code_bytes": 1096
+              },
+              "compile_ns": 222285920,
+              "exec_ns": 6352,
+              "jited_prog_len": 1096,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 169136,
+                "memory_prepare_ns": 23991600,
+                "object_load_ns": 97584656,
+                "object_open_ns": 124701264,
+                "prog_run_wall_ns": 114864,
+                "proof_compile_ns": 8147166167,
+                "result_extract_ns": 69728
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/cilium_socket_lb_service_select.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/cilium_socket_lb_service_select.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/cilium_socket_lb_service_select.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/cilium_socket_lb_service_select.bpf.c"
+              },
+              "proof_compile_ns": 8147166167,
+              "result": 2868565165525030065,
+              "retval": 2,
+              "runner_compile_ns": 222285920,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1832
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "cilium",
+        "socket-lb",
+        "branch",
+        "hash",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 18109187572642697766,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/bcc_tcpconnect_ipv4_tuple_filter.mem",
+      "io_mode": "staged",
+      "name": "bcc_tcpconnect_ipv4_tuple_filter",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2128,
+                "native_code_bytes": 1304
+              },
+              "compile_ns": 126347696,
+              "exec_ns": 5232,
+              "jited_prog_len": 1304,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 165920,
+                "memory_prepare_ns": 12832896,
+                "object_load_ns": 72507152,
+                "object_open_ns": 53840544,
+                "prog_run_wall_ns": 114944,
+                "proof_compile_ns": 12337384865,
+                "result_extract_ns": 72688
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/bcc_tcpconnect_ipv4_tuple_filter.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/bcc_tcpconnect_ipv4_tuple_filter.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/bcc_tcpconnect_ipv4_tuple_filter.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/bcc_tcpconnect_ipv4_tuple_filter.bpf.c"
+              },
+              "proof_compile_ns": 12337384865,
+              "result": 18109187572642697766,
+              "retval": 2,
+              "runner_compile_ns": 126347696,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 2128
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "bcc",
+        "tracing",
+        "tuple",
+        "branch",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 12641586655603153431,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/tetragon_process_event_arg_filter.mem",
+      "io_mode": "staged",
+      "name": "tetragon_process_event_arg_filter",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2344,
+                "native_code_bytes": 1480
+              },
+              "compile_ns": 227606992,
+              "exec_ns": 7840,
+              "jited_prog_len": 1480,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 174480,
+                "memory_prepare_ns": 17211312,
+                "object_load_ns": 163465424,
+                "object_open_ns": 64141568,
+                "prog_run_wall_ns": 129120,
+                "proof_compile_ns": 17258487215,
+                "result_extract_ns": 74224
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/tetragon_process_event_arg_filter.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/tetragon_process_event_arg_filter.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/tetragon_process_event_arg_filter.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/tetragon_process_event_arg_filter.bpf.c"
+              },
+              "proof_compile_ns": 17258487215,
+              "result": 12641586655603153431,
+              "retval": 2,
+              "runner_compile_ns": 227606992,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 2344
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "tetragon",
+        "security",
+        "branch",
+        "string",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 12043289854646947360,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/otel_stack_frame_unwind_scan.mem",
+      "io_mode": "staged",
+      "name": "otel_stack_frame_unwind_scan",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1784,
+                "native_code_bytes": 1168
+              },
+              "compile_ns": 110701008,
+              "exec_ns": 6096,
+              "jited_prog_len": 1168,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 178448,
+                "memory_prepare_ns": 15403568,
+                "object_load_ns": 49575328,
+                "object_open_ns": 61125680,
+                "prog_run_wall_ns": 117792,
+                "proof_compile_ns": 9713488558,
+                "result_extract_ns": 72336
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/otel_stack_frame_unwind_scan.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/otel_stack_frame_unwind_scan.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/otel_stack_frame_unwind_scan.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/otel_stack_frame_unwind_scan.bpf.c"
+              },
+              "proof_compile_ns": 9713488558,
+              "result": 12043289854646947360,
+              "retval": 2,
+              "runner_compile_ns": 110701008,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1784
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "otel",
+        "profiler",
+        "stack",
+        "fields",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 14199193300769829204,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/cilium_ct_nat_tuple_rewrite.mem",
+      "io_mode": "staged",
+      "name": "cilium_ct_nat_tuple_rewrite",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1616,
+                "native_code_bytes": 968
+              },
+              "compile_ns": 130055984,
+              "exec_ns": 5744,
+              "jited_prog_len": 968,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 161040,
+                "memory_prepare_ns": 19787440,
+                "object_load_ns": 68919248,
+                "object_open_ns": 61136736,
+                "prog_run_wall_ns": 116080,
+                "proof_compile_ns": 8592145271,
+                "result_extract_ns": 80864
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/cilium_ct_nat_tuple_rewrite.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/cilium_ct_nat_tuple_rewrite.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/cilium_ct_nat_tuple_rewrite.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/cilium_ct_nat_tuple_rewrite.bpf.c"
+              },
+              "proof_compile_ns": 8592145271,
+              "result": 14199193300769829204,
+              "retval": 2,
+              "runner_compile_ns": 130055984,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1616
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "cilium",
+        "conntrack",
+        "nat",
+        "tuple",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 13526464303109995596,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/packet_toeplitz_rss_hash.mem",
+      "io_mode": "packet",
+      "name": "packet_toeplitz_rss_hash",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2016,
+                "native_code_bytes": 1248
+              },
+              "compile_ns": 111417648,
+              "exec_ns": 7472,
+              "jited_prog_len": 1248,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 17335712,
+                "object_load_ns": 50502032,
+                "object_open_ns": 60915616,
+                "packet_prepare_ns": 1034032,
+                "prog_run_wall_ns": 129312,
+                "proof_compile_ns": 14557636147,
+                "result_extract_ns": 69136
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/packet_toeplitz_rss_hash.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/packet_toeplitz_rss_hash.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/packet_toeplitz_rss_hash.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/packet_toeplitz_rss_hash.bpf.c"
+              },
+              "proof_compile_ns": 14557636147,
+              "result": 13526464303109995596,
+              "retval": 2,
+              "runner_compile_ns": 111417648,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 2016
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "packet",
+        "hash",
+        "toeplitz",
+        "rss",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 8524536671075880526,
+      "expected_retval": 2,
+      "input": "/workspaces/repository/micro/generated-inputs/bpftrace_comm_key_fnv_hash.mem",
+      "io_mode": "staged",
+      "name": "bpftrace_comm_key_fnv_hash",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1680,
+                "native_code_bytes": 1016
+              },
+              "compile_ns": 138949552,
+              "exec_ns": 7424,
+              "jited_prog_len": 1016,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 194096,
+                "memory_prepare_ns": 30394304,
+                "object_load_ns": 47012064,
+                "object_open_ns": 91937488,
+                "prog_run_wall_ns": 155392,
+                "proof_compile_ns": 17228385944,
+                "result_extract_ns": 99024
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/bpftrace_comm_key_fnv_hash.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/bpftrace_comm_key_fnv_hash.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/bpftrace_comm_key_fnv_hash.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/bpftrace_comm_key_fnv_hash.bpf.c"
+              },
+              "proof_compile_ns": 17228385944,
+              "result": 8524536671075880526,
+              "retval": 2,
+              "runner_compile_ns": 138949552,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 1680
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "bpftrace",
+        "tracing",
+        "hash",
+        "string",
+        "pure-jit"
+      ]
+    },
+    {
+      "expected_result": 0,
+      "expected_retval": 0,
+      "input": "/workspaces/repository/micro/generated-inputs/packet_checksum_fold.mem",
+      "io_mode": "staged",
+      "name": "tc_packet_checksum_fold",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 712,
+                "native_code_bytes": 456
+              },
+              "compile_ns": 480518352,
+              "exec_ns": 33040,
+              "jited_prog_len": 456,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 160832,
+                "memory_prepare_ns": 12439024,
+                "object_load_ns": 430789376,
+                "object_open_ns": 49728976,
+                "prog_run_wall_ns": 229520,
+                "proof_compile_ns": 6296137303,
+                "result_extract_ns": 216672
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/tc_packet_checksum_fold.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/tc_packet_checksum_fold.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/tc_packet_checksum_fold.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/tc_packet_checksum_fold.bpf.c"
+              },
+              "proof_compile_ns": 6296137303,
+              "result": 0,
+              "retval": 0,
+              "runner_compile_ns": 480518352,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 712
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "tc",
+        "pure-jit",
+        "non-xdp",
+        "kernel-only"
+      ]
+    },
+    {
+      "expected_result": 12027228624407116210,
+      "expected_retval": 1,
+      "input": "/workspaces/repository/micro/generated-inputs/cgroup_skb_hash_chain.mem",
+      "io_mode": "staged",
+      "name": "cgroup_skb_hash_chain",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 3336,
+                "native_code_bytes": 1896
+              },
+              "compile_ns": 119456352,
+              "exec_ns": 5136,
+              "jited_prog_len": 1896,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 168320,
+                "memory_prepare_ns": 24979504,
+                "object_load_ns": 27782464,
+                "object_open_ns": 91673888,
+                "prog_run_wall_ns": 202800,
+                "proof_compile_ns": 17222576985,
+                "result_extract_ns": 75664
+              },
+              "proof_compile": {
+                "arch": "arm64",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O2",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_arm64",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/workspaces/repository/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/workspaces/repository/native-sim/arm64/micro-prog/cgroup_skb_hash_chain.bpf.c",
+                  "-o",
+                  "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/cgroup_skb_hash_chain.bpf.o"
+                ],
+                "object": "/workspaces/repository/native-sim/test/build-arm64/arm64_sim_proofs/cgroup_skb_hash_chain.bpf.o",
+                "source": "/workspaces/repository/native-sim/arm64/micro-prog/cgroup_skb_hash_chain.bpf.c"
+              },
+              "proof_compile_ns": 17222576985,
+              "result": 12027228624407116210,
+              "retval": 1,
+              "runner_compile_ns": 119456352,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "unavailable",
+              "wall_exec_ns": null,
+              "xlated_prog_len": 3336
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "cgroup-skb",
+        "pure-jit",
+        "non-xdp",
+        "kernel-only"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/workspaces/repository/runner/build-arm64-llvmbpf/micro_exec"
+  },
+  "completed_at": "1970-01-01T00:01:26.868686+00:00",
+  "defaults": {
+    "inner_repeat": 1,
+    "perf_counters": false,
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "details_dir": "details",
+  "generated_at": "1970-01-01T00:00:21.547969+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "(none)",
+    "kernel_cmdline": "console=ttyAMA0 root=/dev/root rootfstype=9p rootflags=trans=virtio,version=9p2000.L,access=any rw init=/qemu-init loglevel=7 panic=30 oops=panic raid=noautodetect",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-aarch64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "last_updated_at": "1970-01-01T00:01:26.868686+00:00",
+  "manifest": "/workspaces/repository/micro/config/micro_pure_jit.yaml",
+  "progress": {
+    "completed_benchmarks": 29,
+    "current_benchmark": null,
+    "current_benchmark_index": null,
+    "total_benchmarks": 29
+  },
+  "provenance": {
+    "cpu_model": "aarch64",
+    "environment": "bare-metal",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 1,
+      "perf_counters": false,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "1970-01-01T00:00:21.679489+00:00"
+  },
+  "run_type": "native_proof_micro",
+  "started_at": "1970-01-01T00:00:21.547969+00:00",
+  "status": "completed",
+  "suite": "micro_staged_codegen"
+}
