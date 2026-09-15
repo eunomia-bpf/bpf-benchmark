@@ -12,6 +12,7 @@
 #include "../formal/generated/arm64_alu_result.h"
 #include "../formal/generated/arm64_mod.h"
 #include "../formal/generated/arm64_bitfield.h"
+#include "../formal/generated/arm64_mul.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -312,6 +313,21 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_MOD_VALUE(REG, MOD, SHIFT, WIDTH)                       \
 	KPROG_ARM64_MOD_VALUE((MOD), ARM64_SIM_L_READ_REG(REG), (SHIFT),   \
 			      (WIDTH))
+
+/*
+ * Multiply-family value (MADD/MSUB/MUL/UMULL/UDIV/UMULH/UMADDL/SMADDL). The
+ * eight opcode labels, the widened-operand and UMULH partial-product arms, and
+ * the divide-by-zero guard are the generated AArch64 multiply contract in
+ * formal/generated/arm64_mul.h, which KProgFormal/Arm64Mul.lean proves equal to
+ * an independent statement over all eight operations. ARM64_SIM_L_READ_REG is
+ * evaluated exactly once per source, second source and accumulator operand. No
+ * arm writes NZCV.
+ */
+#define ARM64_SIM_L_MUL_VALUE(OP, SRC, SRC2, SRC3)                          \
+	KPROG_ARM64_MUL_VALUE((OP), ARM64_SIM_L_READ_REG(SRC),             \
+			      ARM64_SIM_L_READ_REG(SRC2),                  \
+			      ARM64_SIM_L_READ_REG(SRC3),                  \
+			      ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
 #define ARM64_SIM_L_STACK_INDEX(OFF) ((__u32)(ARM64_SIM_STACK_BIAS + (OFF)))
 
@@ -666,25 +682,8 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			else                                             \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE();        \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
-		} else if ((OP) == ARM64_OP_MADD || (OP) == ARM64_OP_MSUB) { \
-			__u64 __a64_l_product = ARM64_SIM_L_READ_REG(SRC) * ARM64_SIM_L_READ_REG(SRC2);\
-			__u64 __a64_l_result = (OP) == ARM64_OP_MADD ? ARM64_SIM_L_READ_REG(SRC3) + __a64_l_product : ARM64_SIM_L_READ_REG(SRC3) - __a64_l_product;\
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
-		} else if ((OP) == ARM64_OP_MUL || (OP) == ARM64_OP_UMULL || (OP) == ARM64_OP_UMULH || (OP) == ARM64_OP_UMADDL || (OP) == ARM64_OP_SMADDL || (OP) == ARM64_OP_UDIV) {\
-			__u64 __a64_l_rhs = ARM64_SIM_L_READ_REG(SRC2);   \
-			__u64 __a64_l_result = 0;                         \
-			if ((OP) == ARM64_OP_UDIV)                         \
-				__a64_l_result = __a64_l_rhs ? ARM64_SIM_L_READ_REG(SRC) / __a64_l_rhs : 0;\
-			else if ((OP) == ARM64_OP_UMULH)                   \
-				__a64_l_result = arm64_umulh(ARM64_SIM_L_READ_REG(SRC), __a64_l_rhs);\
-			else if ((OP) == ARM64_OP_UMADDL)                  \
-				__a64_l_result = (__u64)(__u32)ARM64_SIM_L_READ_REG(SRC) * (__u64)(__u32)__a64_l_rhs + ARM64_SIM_L_READ_REG(SRC3);\
-			else if ((OP) == ARM64_OP_SMADDL)                  \
-				__a64_l_result = (__u64)((__s64)(__s32)ARM64_SIM_L_READ_REG(SRC) * (__s64)(__s32)__a64_l_rhs + (__s64)ARM64_SIM_L_READ_REG(SRC3));\
-			else if ((OP) == ARM64_OP_UMULL)                   \
-				__a64_l_result = (__u64)(__u32)ARM64_SIM_L_READ_REG(SRC) * (__u64)(__u32)__a64_l_rhs;\
-			else                                               \
-				__a64_l_result = ARM64_SIM_L_READ_REG(SRC) * __a64_l_rhs;\
+		} else if (KPROG_ARM64_MUL_HANDLED(OP)) {                    \
+			__u64 __a64_l_result = ARM64_SIM_L_MUL_VALUE((OP), (SRC), (SRC2), (SRC3));\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if ((OP) == ARM64_OP_MVN || (OP) == ARM64_OP_NEG) {    \
 			__u64 __a64_l_value = ARM64_SIM_L_READ_REG(SRC);     \

@@ -202,21 +202,6 @@ static __always_inline __u64 arm64_sign_extend(__u64 value, __u8 bits)
 	return (value ^ sign) - sign;
 }
 
-static __always_inline __u64 arm64_umulh(__u64 lhs, __u64 rhs)
-{
-	__u64 lhs_lo = (__u32)lhs;
-	__u64 lhs_hi = lhs >> 32;
-	__u64 rhs_lo = (__u32)rhs;
-	__u64 rhs_hi = rhs >> 32;
-	__u64 lo = lhs_lo * rhs_lo;
-	__u64 mid1 = lhs_hi * rhs_lo;
-	__u64 mid2 = lhs_lo * rhs_hi;
-	__u64 hi = lhs_hi * rhs_hi;
-	__u64 carry = ((lo >> 32) + (__u32)mid1 + (__u32)mid2) >> 32;
-
-	return hi + (mid1 >> 32) + (mid2 >> 32) + carry;
-}
-
 static __always_inline __u64 arm64_ror64(__u64 value, __u8 amount)
 {
 	amount &= 63U;
