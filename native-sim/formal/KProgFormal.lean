@@ -43,3 +43,5 @@ import KProgFormal.GeneratedArm64Csel
 import KProgFormal.Arm64Csel
 import KProgFormal.GeneratedArm64Branch
 import KProgFormal.Arm64Branch
+import KProgFormal.GeneratedArm64Movk
+import KProgFormal.Arm64Movk

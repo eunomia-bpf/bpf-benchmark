@@ -16,6 +16,7 @@
 #include "../formal/generated/arm64_extrev.h"
 #include "../formal/generated/arm64_csel.h"
 #include "../formal/generated/arm64_branch.h"
+#include "../formal/generated/arm64_movk.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -376,6 +377,19 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	KPROG_ARM64_EXTREV_VALUE((OP), (VALUE), 0, 0, (WIDTH),             \
 				 ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
+/*
+ * Move-wide insertion (MOVK). The four architectural columns and the
+ * destination-preserving insertion are the generated AArch64 move-wide contract
+ * in formal/generated/arm64_movk.h, which KProgFormal/Arm64Movk.lean proves
+ * equal to an independent insertion statement over all four columns. The
+ * column comes from the AUX shift field, which is exactly the architectural
+ * column for ARM64_AUX_MOVK(S). ARM64_SIM_L_READ_REG is evaluated exactly once,
+ * and no arm writes NZCV.
+ */
+#define ARM64_SIM_L_MOVK_VALUE(DST, IMM, SHIFT)                             \
+	KPROG_ARM64_MOVK_INSERT(ARM64_SIM_L_READ_REG(DST), (IMM), (SHIFT), \
+				ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
 #define ARM64_SIM_L_STACK_INDEX(OFF) ((__u32)(ARM64_SIM_STACK_BIAS + (OFF)))
 
 #define ARM64_SIM_L_STACK_READ(OFF, WIDTH)                                  \
@@ -708,9 +722,8 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			else                                               \
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_READ_REG(SRC), __a64_l_width);\
 		} else if ((OP) == ARM64_OP_MOVK) {                        \
-			__u8 __a64_l_shift = ARM64_SIM_L_SHIFT(AUX);       \
-			__u64 __a64_l_mask = 0xffffULL << __a64_l_shift;   \
-			__u64 __a64_l_value = (ARM64_SIM_L_READ_REG(DST) & ~__a64_l_mask) | (((__u64)(IMM) << __a64_l_shift) & __a64_l_mask);\
+			__u64 __a64_l_value =                              \
+				ARM64_SIM_L_MOVK_VALUE((DST), (IMM), ARM64_SIM_L_SHIFT(AUX));\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
 		} else if ((OP) == ARM64_OP_ALU_IMM || (OP) == ARM64_OP_ALU_REG) {\
 			ARM64_SIM_L_EXEC_ALU((OP), (DST), (SRC), (SRC2), __a64_l_width, (AUX), (IMM));\
