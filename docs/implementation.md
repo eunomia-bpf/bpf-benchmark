@@ -138,6 +138,17 @@ increment is committed and pushed immediately). Current state:
   fork-LLVM `bpfopt`. `bcc/set` and `cilium/agent` additionally fail at
   application startup (BCC `capable` skeleton load `-22`; Cilium XDP compile
   canceled); those remain raw failures.
+- With the fork-LLVM `bpfopt` in the runtime image, the default `full-x86`
+  prefix through `kop` now completes a two-start load-time comparison:
+  `BPFREJIT_BENCH_PASSES=noop,map_inline,const_prop,dce,kop` exits 0 and writes
+  `corpus/results/x86_kvm_corpus_20260916_172134_395628/` with suite
+  `status: "completed"` and app `status: "ok"`. Applied sites: `noop: 3`,
+  `map_inline: 16`, `const_prop: 1`, `dce: 1`, `kop: 71`. Raw
+  `balancer_ingres`: 169.00 ns/run -> 146.01 ns/run (ratio 0.864); pktgen
+  throughput 2,620,975 -> 2,799,206 pps (ratio 1.068). Single sample, one app:
+  provenance plus a consistent direction, not paper-grade. The entire
+  `full-x86` group still stops at `wide_mem`, which fails on `kop`-modified
+  bytecode.
 - The katran `map_inline` step previously failed for a separate, fixable reason:
   `runner/config/passes/map_inline/katran.yaml` hardcoded an overlay directory
   under `/home/yunwei37/...` that does not exist here, so the step's `jq`

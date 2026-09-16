@@ -2598,6 +2598,29 @@ not establish complete native-byte semantic equivalence.
   synthetic target map, so this is an indication, not the exact in-VM state).
   Running the same policy without `wide_mem` (i.e. through `kop`) is the next
   measurement to complete.
+- **Completed two-start KVM corpus through `kop`, 2026-09-16.** Running the
+  `full-x86` prefix without `wide_mem`,
+  `BPFREJIT_BENCH_PASSES=noop,map_inline,const_prop,dce,kop`, exits 0 and writes
+  `corpus/results/x86_kvm_corpus_20260916_172134_395628/` with suite
+  `status: "completed"`, app `status: "ok"`, error empty, and
+  `rejit_result.status: "ok"` over passes `[noop, map_inline, const_prop, dce,
+  kop]`. Applied sites: `noop: 3`, `map_inline: 16`, `const_prop: 1`, `dce: 1`,
+  `kop: 71`. This is the first completed two-start corpus in this workspace in
+  which the `kop` koperation pass applies sites under the load-time contract.
+- Raw `balancer_ingres` counters: baseline 169.00 ns/run
+  (`run_cnt_delta = 26,174,496`), post-ReJIT 146.01 ns/run
+  (`run_cnt_delta = 27,903,858`), ratio 0.864 (faster). Raw pktgen thread pps:
+  baseline 894,064 + 869,262 + 857,649 = 2,620,975; post-ReJIT 929,288 +
+  936,350 + 933,568 = 2,799,206; sum ratio 1.068. (The kvm host and container
+  each contribute one non-transmitting pktgen control thread that sometimes
+  reports 0 or a small count; those are excluded by dropping non-transmitter
+  outliers, consistent with the earlier `map_inline` run's treatment.) Single
+  sample, one app, one pass group: provenance plus a consistent direction, not a
+  paper-grade speedup.
+- Next: the `full-x86` group still fails at `wide_mem` on `kop`-modified
+  bytecode. Diagnosing that interaction (the `wide_mem` byte-ladder collapse
+  assuming pre-`kop` instruction shapes) would let the entire default group
+  complete in one two-start comparison.
 
 ### AArch64 memory address-offset refinement, 2026-09-16
 
