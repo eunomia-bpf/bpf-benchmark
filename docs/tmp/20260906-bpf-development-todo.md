@@ -2154,3 +2154,87 @@ not establish complete native-byte semantic equivalence.
 - Concurrency caveat restated: run one corpus invocation at a time. Two of the
   earlier attempts overlapped and raced on
   `.cache/container-images/*.image.tar`.
+
+### AArch64 compare-and-branch predicate refinement, 2026-09-16
+
+- Gap: the `CBZ`/`CBNZ`/`TBZ`/`TBNZ` control transfers in
+  `native-sim/arm64/arm64_sim_local_bpf.h` each restated their taken/not-taken
+  test inline (`(__a64_l_value == 0) == (ZERO)` and
+  `((__a64_l_value >> (BIT)) & 1ULL)`), with the taken sense encoded in a
+  `ZERO` selector argument rather than in a named predicate. These are the
+  most-emitted control transfers in the corpus (35 `CBZ`, 8 `CBNZ`, 5 `TBZ`,
+  3 `TBNZ` sites in the 29 micro kernels) and the remaining half of the
+  condition-to-next-PC boundary the previous increments named.
+- Generator: `native-sim/formal/generate_arm64_branch_spec.py` reads
+  `arm64_branch_spec.json` and emits the shared contract in two forms:
+  `generated/arm64_branch.h` (`KPROG_ARM64_BRANCH_TEST(KIND, VALUE, BIT)`, a
+  statement expression switching on the four contiguous predicate kinds
+  `0U..3U`, with named kind macros and a total `HANDLED` set) and
+  `KProgFormal/GeneratedArm64Branch.lean` (a self-contained
+  `namespace GeneratedArm64Branch` with `inductive Branch`, `code`, `mnemonic`
+  and `value`). Unlike the opcode-family contracts, these kinds are a small
+  contiguous predicate enum, not an architectural opcode table, so the case
+  labels are `0U..3U` and there is no `arm64_sim.h` drift cross-check for them.
+  The bit arms mask `BIT` with `& 63`, matching the 64-bit register domain.
+  It has a `--check` mode and a `make check` line.
+- C wiring: `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated
+  header and the four macros now delegate their predicate to
+  `KPROG_ARM64_BRANCH_TEST` while keeping the exact `goto`/fall-through label
+  structure the generator emits. `CBZ`/`CBNZ` pass `KPROG_ARM64_BRANCH_CBZ`/
+  `CBNZ`; `TBZ`/`TBNZ` pass `TBZ`/`TBNZ` with the bit index. The `ZERO`
+  selector is gone: the taken sense is now the kind. Behavior is unchanged for
+  all four transfers (verified by the 30 recompiled workload artifacts), and the
+  tested register is read exactly once.
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64Branch.lean` proves
+  `arm64_branch_refines` (the generated predicate equals an independent
+  statement over the four kinds, stating the bit arms through `Nat` division and
+  remainder rather than the generated shift/mask pair), `arm64_branch_next_pc_refines`
+  (the predicate selects the same next program counter as the independent
+  statement — the predicate half of the condition-to-next-PC relation, alongside
+  the existing flag-based `arm64_conditional_branch_refines`),
+  `arm64BranchBitMask` (C's `& 63` is the index modulo the register domain),
+  `arm64BranchBitOf` (the generated bit extract reduces to the architectural
+  bit's magnitude), `arm64_branch_code_in_range`, `arm64_branch_code_dispatch`,
+  and four `native_decide` examples. No `sorry`/`admit`. Both new modules are in
+  the `KProgFormal.lean` root import list and both have `lean` lines in the
+  Makefile.
+- Lesson learned: the generated bit arms must shift by a `Nat` index
+  (`value >>> (bit &&& 63).toNat`), not by a `BitVec` index, because
+  `BitVec.toNat_ushiftRight` only fires on the `Nat` form — with a `BitVec`
+  shift amount `simp`/`rw` leaves an unfired goal and `omega` cannot close it.
+  A second lesson: `decide P = decide Q` rewrites are ill-typed under `rw` when
+  the two `Prop`s differ, so the bit-arm proofs go through
+  `decide_eq_decide` (which yields a `Prop` iff) followed by a `BitVec.toNat_eq`
+  bridge and the `arm64BranchBitOf` magnitude lemma. A third: `bv_decide`
+  abstracts the symbolic bit extract (`BitVec.extractLsb' …`) as opaque, so it
+  cannot prove these arms; the `Nat` reduction route is required.
+- Host cross-check `native-sim/formal/test_arm64_branch_host.c`: compiles the
+  generated macro with zero warnings under `-Wall -Wextra` and compares it
+  against an oracle that tests the register directly. It sweeps an 8-value ×
+  8-bit-index table (zero, one, all-ones, `1<<63`, `1<<31`, single bits,
+  out-of-domain indices 64 and 127) over all four kinds, then a fixed-seed
+  20000-iteration LCG sweep (seed `0xfedcba9876543210`), and checks the macro is
+  total over the four contiguous kinds. Result: `OK (80256 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, two `lean` lines, and the arm64 branch host cross-check step;
+  the csel step stays `OK (160161 cases)`, extract/reverse/extend
+  `OK (120145 cases)`, mul `OK (160161 cases)`, bitfield `OK (126246 cases)`,
+  mod `OK (225292 cases)`, ALU result `OK (120073 cases)`, flags
+  `OK (60144 cases)`, x86 memory-access `OK (40020 cases)`). Mutation checks:
+  changing a kind code in `arm64_branch_spec.json` makes `--check` exit 1; five
+  independent semantic mutations of `generated/arm64_branch.h` (CBZ inverted,
+  CBNZ inverted, TBZ inverted, TBNZ inverted, bit mask narrowed to `& 31`) each
+  make the host cross-check exit 1 with a printed `MISMATCH`, while the pristine
+  header stays `OK`. `make -C native-sim/arm64 micro-proofs-build` rebuilds all
+  30 workload-derived artifacts, all `ok` (the first attempt showed 14
+  `compile-fail` because the new `arm64_branch.h` include had not yet been added
+  to `arm64_sim_local_bpf.h`; adding it fixed all 14). `make -C
+  native-sim/arm64 build` produces the BPF object and `make -C native-sim/arm64
+  run` loads it (`load-only`, fd=4).
+- Open AArch64 boundary after this increment: the load/store address and tag
+  paths, the vector/`.D0`/`.Q0` paths, and native-byte equivalence. Both halves
+  of the condition-to-next-PC relation (flag-based and compare-and-branch) are
+  now proved against independent statements over the emitted domain; the
+  remaining bridge is from this predicate level to the generator's actual
+  `goto`/label emission, which the 30 recompiled artifacts exercise but do not
+  formally relate.
