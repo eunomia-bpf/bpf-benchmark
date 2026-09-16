@@ -23,6 +23,7 @@
 #include "../formal/generated/arm64_fmov.h"
 #include "../formal/generated/arm64_load_bytes.h"
 #include "../formal/generated/arm64_byte_lane.h"
+#include "../formal/generated/arm64_mem_dispatch.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -610,25 +611,33 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	({                                                                 \
 		__s64 __a64_mrt_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA);\
 		__u8 __a64_mrt_tag = ARM64_SIM_L_REG_TAG(BASE);          \
-		__u8 __a64_mrt_value_tag = ARM64_SIM_TAG_SCALAR;         \
-		if ((BASE) == ARM64_SP || __a64_mrt_tag == ARM64_SIM_TAG_STACK) {\
+		__u8 __a64_mrt_src = KPROG_ARM64_MEM_READ_TAG(           \
+			((BASE) == ARM64_SP), __a64_mrt_tag, (WIDTH));   \
+		__u8 __a64_mrt_value_tag;                                \
+		switch (__a64_mrt_src) {                                 \
+		case KPROG_ARM64_MEM_TAG_STACK: {                        \
 			__s64 __a64_mrt_base = (BASE) == ARM64_SP ? __a64_sp :\
 				(__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
 			__a64_mrt_value_tag = ARM64_SIM_L_STACK_READ_TAG( \
 				__a64_mrt_base + __a64_mrt_off, (WIDTH));\
-		} else if (__a64_mrt_tag == ARM64_SIM_TAG_ABI &&          \
-			   (WIDTH) == ARM64_WIDTH_64) {                  \
+			break;                                             \
+		}                                                        \
+		case KPROG_ARM64_MEM_TAG_ABI:                            \
 			__a64_mrt_value_tag = KPROG_ABI_LOAD_TAG(          \
 				__a64_sim_abi_kind, __a64_mrt_off,           \
 				ARM64_SIM_TAG_SCALAR, ARM64_SIM_TAG_PACKET,   \
 				ARM64_SIM_TAG_PACKET_END);                    \
-		} else if (__a64_mrt_tag == ARM64_SIM_TAG_RELOC_ADDR &&    \
-			   (WIDTH) == ARM64_WIDTH_64) {                    \
+			break;                                             \
+		case KPROG_ARM64_MEM_TAG_MAP_PTR:                        \
 			if (__a64_mrt_off != 0)                            \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE();          \
 			__a64_mrt_value_tag = ARM64_SIM_TAG_MAP_PTR;       \
-		}                                                         \
-		__a64_mrt_value_tag;                                      \
+			break;                                             \
+		default:                                                 \
+			__a64_mrt_value_tag = ARM64_SIM_TAG_SCALAR;        \
+			break;                                             \
+		}                                                        \
+		__a64_mrt_value_tag;                                     \
 	})
 
 #define ARM64_SIM_L_MEM_WRITE(BASE, INDEX, AUX, IMM, EXTRA, WIDTH, VALUE, TAG)\

@@ -57,3 +57,5 @@ import KProgFormal.GeneratedArm64LoadBytes
 import KProgFormal.Arm64LoadBytes
 import KProgFormal.GeneratedArm64ByteLane
 import KProgFormal.Arm64ByteLane
+import KProgFormal.GeneratedArm64MemDispatch
+import KProgFormal.Arm64MemDispatch
