@@ -586,24 +586,34 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		__s64 __a64_mrd_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA);\
 		__u8 __a64_mrd_tag = ARM64_SIM_L_REG_TAG(BASE);          \
 		__u64 __a64_mrd_value;                                    \
-		if ((BASE) == ARM64_SP || __a64_mrd_tag == ARM64_SIM_TAG_STACK) {\
+		__u8 __a64_mrd_src = KPROG_ARM64_MEM_READ_SRC(           \
+			((BASE) == ARM64_SP), __a64_mrd_tag, (WIDTH));   \
+		switch (__a64_mrd_src) {                                 \
+		case KPROG_ARM64_MEM_SRC_STACK: {                        \
 			__s64 __a64_mrd_base = (BASE) == ARM64_SP ? __a64_sp :\
 				(__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
-			__a64_mrd_value = ARM64_SIM_L_STACK_READ(__a64_mrd_base + __a64_mrd_off, (WIDTH));\
-		} else if (__a64_mrd_tag == ARM64_SIM_TAG_ABI &&          \
-			   (WIDTH) == ARM64_WIDTH_64) {                  \
+			__a64_mrd_value = ARM64_SIM_L_STACK_READ(        \
+				__a64_mrd_base + __a64_mrd_off, (WIDTH));\
+			break;                                             \
+		}                                                        \
+		case KPROG_ARM64_MEM_SRC_ABI_PTR_LOAD: {                 \
 			void *__a64_mrd_addr = (__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_mrd_off;\
-			__a64_mrd_value = (__u64)(long)ARM64_SIM_L_LOAD_PTR_ADDR(__a64_mrd_addr);\
-		} else if (__a64_mrd_tag == ARM64_SIM_TAG_RELOC_ADDR &&    \
-			   (WIDTH) == ARM64_WIDTH_64) {                    \
+			__a64_mrd_value =                                \
+				(__u64)(long)ARM64_SIM_L_LOAD_PTR_ADDR(__a64_mrd_addr);\
+			break;                                             \
+		}                                                        \
+		case KPROG_ARM64_MEM_SRC_RELOC_PTR:                      \
 			if (__a64_mrd_off != 0)                            \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE();          \
-			__a64_mrd_value =                                 \
+			__a64_mrd_value =                                \
 				(__u64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
-		} else {                                                   \
+			break;                                             \
+		default: {                                               \
 			void *__a64_mrd_addr = (__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_mrd_off;\
 			__a64_mrd_value = ARM64_SIM_L_LOAD_ADDR(__a64_mrd_addr, (WIDTH));\
-		}                                                         \
+			break;                                             \
+		}                                                        \
+		}                                                        \
 		__a64_mrd_value;                                          \
 	})
 
