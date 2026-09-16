@@ -165,18 +165,6 @@ static __always_inline __u64 arm64_apply_width(__u64 value, __u8 width)
 	return KPROG_ARM64_APPLY_WIDTH(value, width);
 }
 
-static __always_inline __u64 arm64_ror64(__u64 value, __u8 amount)
-{
-	amount &= 63U;
-	return amount ? ((value >> amount) | (value << (64U - amount))) : value;
-}
-
-static __always_inline __u32 arm64_ror32(__u32 value, __u8 amount)
-{
-	amount &= 31U;
-	return amount ? ((value >> amount) | (value << (32U - amount))) : value;
-}
-
 static __always_inline __u64 arm64_replicate_byte_popcounts(__u64 value)
 {
 	__u64 out = 0;
@@ -202,33 +190,6 @@ static __always_inline __u64 arm64_horizontal_add_u8(__u64 value)
 	       ((value >> 40) & 0xffULL) +
 	       ((value >> 48) & 0xffULL) +
 	       ((value >> 56) & 0xffULL);
-}
-
-static __always_inline __u64 arm64_lsl(__u64 value, __u8 amount, __u8 width)
-{
-	amount &= width == ARM64_WIDTH_32 ? 31U : 63U;
-	return arm64_apply_width(value << amount, width);
-}
-
-static __always_inline __u64 arm64_lsr(__u64 value, __u8 amount, __u8 width)
-{
-	amount &= width == ARM64_WIDTH_32 ? 31U : 63U;
-	return arm64_apply_width(value, width) >> amount;
-}
-
-static __always_inline __u64 arm64_asr(__u64 value, __u8 amount, __u8 width)
-{
-	amount &= width == ARM64_WIDTH_32 ? 31U : 63U;
-	if (width == ARM64_WIDTH_32)
-		return (__u64)((__s32)value >> amount);
-	return (__u64)((__s64)value >> amount);
-}
-
-static __always_inline __u64 arm64_ror(__u64 value, __u8 amount, __u8 width)
-{
-	if (width == ARM64_WIDTH_32)
-		return arm64_ror32((__u32)value, amount);
-	return arm64_ror64(value, amount);
 }
 
 #endif

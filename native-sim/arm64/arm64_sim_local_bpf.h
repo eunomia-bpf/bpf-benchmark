@@ -17,6 +17,7 @@
 #include "../formal/generated/arm64_csel.h"
 #include "../formal/generated/arm64_branch.h"
 #include "../formal/generated/arm64_movk.h"
+#include "../formal/generated/arm64_shift.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -390,6 +391,19 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	KPROG_ARM64_MOVK_INSERT(ARM64_SIM_L_READ_REG(DST), (IMM), (SHIFT), \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
+/*
+ * Shift-by-kind (LSL/LSR/ASR/ROR) applied to an already read value. The four
+ * shift kinds, the width-masked amount and the width narrowing are the
+ * generated AArch64 shift contract in formal/generated/arm64_shift.h, which
+ * KProgFormal/Arm64Shift.lean proves equal to an independent statement over all
+ * four kinds. The kind comes from the AUX shift field; the caller supplies the
+ * raw amount (an immediate or a source register) and the destination width.
+ * ARM64_SIM_L_READ_REG is evaluated exactly once, and no arm writes NZCV.
+ */
+#define ARM64_SIM_L_SHIFT_VALUE(KIND, VALUE, AMOUNT, WIDTH)                 \
+	KPROG_ARM64_SHIFT_VALUE((KIND), (VALUE), (AMOUNT), (WIDTH),        \
+				ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
 #define ARM64_SIM_L_STACK_INDEX(OFF) ((__u32)(ARM64_SIM_STACK_BIAS + (OFF)))
 
 #define ARM64_SIM_L_STACK_READ(OFF, WIDTH)                                  \
@@ -728,19 +742,8 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		} else if ((OP) == ARM64_OP_ALU_IMM || (OP) == ARM64_OP_ALU_REG) {\
 			ARM64_SIM_L_EXEC_ALU((OP), (DST), (SRC), (SRC2), __a64_l_width, (AUX), (IMM));\
 		} else if ((OP) == ARM64_OP_SHIFT_IMM || (OP) == ARM64_OP_SHIFT_REG) {\
-			__u8 __a64_l_shift = (OP) == ARM64_OP_SHIFT_IMM ? (__u8)(IMM) : (__u8)ARM64_SIM_L_READ_REG(SRC2);\
-			__u64 __a64_l_value = ARM64_SIM_L_READ_REG(SRC);  \
-			__u64 __a64_l_result = 0;                       \
-			if ((AUX) == ARM64_SHIFT_LSL)                    \
-				__a64_l_result = arm64_lsl(__a64_l_value, __a64_l_shift, __a64_l_width);\
-			else if ((AUX) == ARM64_SHIFT_LSR)               \
-				__a64_l_result = arm64_lsr(__a64_l_value, __a64_l_shift, __a64_l_width);\
-			else if ((AUX) == ARM64_SHIFT_ASR)               \
-				__a64_l_result = arm64_asr(__a64_l_value, __a64_l_shift, __a64_l_width);\
-			else if ((AUX) == ARM64_SHIFT_ROR)               \
-				__a64_l_result = arm64_ror(__a64_l_value, __a64_l_shift, __a64_l_width);\
-			else                                             \
-				ARM64_SIM_L_UNSUPPORTED_OPCODE();        \
+			__u64 __a64_l_amount = (OP) == ARM64_OP_SHIFT_IMM ? (__u64)(IMM) : ARM64_SIM_L_READ_REG(SRC2);\
+			__u64 __a64_l_result = ARM64_SIM_L_SHIFT_VALUE((AUX), ARM64_SIM_L_READ_REG(SRC), __a64_l_amount, __a64_l_width);\
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if (KPROG_ARM64_MUL_HANDLED(OP)) {                    \
 			__u64 __a64_l_result = ARM64_SIM_L_MUL_VALUE((OP), (SRC), (SRC2), (SRC3));\
