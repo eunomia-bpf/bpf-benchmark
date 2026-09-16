@@ -45,9 +45,10 @@ programs:
     # Phase 3 overlay injection inlined: scan ${MAP_VALUES}/map-*.show.json
     # to resolve ch_rings/reals map_id by name (per-run id changes), then
     # build overlays.json keyed by current run's id from the static templates
-    # under runner/config/passes/map_inline/overlays/katran/.
+    # under runner/config/passes/map_inline/overlays/katran/. The overlay dir is
+    # resolved from the injected workspace root so the step is relocatable.
     command: |
-      OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran;
+      OVERLAY_DIR="${BPFREJIT_REPO_ROOT:?BPFREJIT_REPO_ROOT is required}/runner/config/passes/map_inline/overlays/katran";
       CH=; RE=; SI=; VIP=;
       for f in ${MAP_VALUES}/map-*.show.json; do
         n=$(jq -r .name "$f"); i=$(jq -r .id "$f");
