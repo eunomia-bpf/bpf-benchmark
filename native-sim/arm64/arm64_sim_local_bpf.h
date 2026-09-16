@@ -14,6 +14,7 @@
 #include "../formal/generated/arm64_bitfield.h"
 #include "../formal/generated/arm64_mul.h"
 #include "../formal/generated/arm64_extrev.h"
+#include "../formal/generated/arm64_csel.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -345,6 +346,21 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	KPROG_ARM64_EXTREV_VALUE((OP), ARM64_SIM_L_READ_REG(SRC),          \
 				 ARM64_SIM_L_READ_REG(SRC2), (SHIFT),      \
 				 (WIDTH), ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
+/*
+ * Conditional-select value (CSEL/CINC/CSET/CSETM/CINV/CSINV/CSINC/CSNEG). The
+ * eight opcode labels and the two candidate values per arm are the generated
+ * AArch64 conditional-select contract in formal/generated/arm64_csel.h, which
+ * KProgFormal/Arm64Csel.lean proves equal to an independent bit-mask mux
+ * statement over all eight operations and both condition outcomes, composed
+ * with the already-proven condition contract. TAKEN is that condition result,
+ * computed once by the caller. ARM64_SIM_L_READ_REG is evaluated exactly once
+ * per source operand, and no arm writes NZCV.
+ */
+#define ARM64_SIM_L_CSEL_VALUE(OP, SRC, SRC2, TAKEN)                        \
+	KPROG_ARM64_CSEL_VALUE((OP), ARM64_SIM_L_READ_REG(SRC),            \
+			       ARM64_SIM_L_READ_REG(SRC2), (TAKEN),         \
+			       ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
 #define ARM64_SIM_L_STACK_INDEX(OFF) ((__u32)(ARM64_SIM_STACK_BIAS + (OFF)))
 
@@ -767,37 +783,22 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 				__a64_c = (__a64_l_nzcv >> 1) & 1;           \
 				__a64_v = __a64_l_nzcv & 1;                  \
 			}                                                     \
-		} else if ((OP) == ARM64_OP_CSEL || (OP) == ARM64_OP_CINC || (OP) == ARM64_OP_CSET || (OP) == ARM64_OP_CSETM) {\
-			if ((OP) == ARM64_OP_CSET)                            \
-				ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EVAL_COND(AUX) ? 1 : 0, __a64_l_width);\
-			else if ((OP) == ARM64_OP_CSETM)                      \
-				ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EVAL_COND(AUX) ? ~0ULL : 0, __a64_l_width);\
-			else if ((OP) == ARM64_OP_CINC)                       \
-				ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EVAL_COND(AUX) ? ARM64_SIM_L_READ_REG(SRC) + 1 : ARM64_SIM_L_READ_REG(SRC), __a64_l_width);\
-			else if (__a64_l_width == ARM64_WIDTH_64 && ARM64_SIM_L_EVAL_COND(AUX))\
-				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),       \
-					ARM64_SIM_L_READ_REG_PTR(SRC),     \
-					ARM64_SIM_L_REG_TAG(SRC));         \
-			else if (__a64_l_width == ARM64_WIDTH_64)              \
-				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),       \
-					ARM64_SIM_L_READ_REG_PTR(SRC2),    \
-					ARM64_SIM_L_REG_TAG(SRC2));        \
-			else                                                   \
-				ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EVAL_COND(AUX) ? ARM64_SIM_L_READ_REG(SRC) : ARM64_SIM_L_READ_REG(SRC2), __a64_l_width);\
-		} else if ((OP) == ARM64_OP_CINV) {                         \
-			__u64 __a64_l_value = ARM64_SIM_L_READ_REG(SRC);    \
-			if (ARM64_SIM_L_EVAL_COND(AUX))                     \
-				__a64_l_value = ~__a64_l_value;             \
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
-		} else if ((OP) == ARM64_OP_CSINV) {                        \
-			__u64 __a64_l_value = ARM64_SIM_L_EVAL_COND(AUX) ? ARM64_SIM_L_READ_REG(SRC) : ~ARM64_SIM_L_READ_REG(SRC2);\
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
-		} else if ((OP) == ARM64_OP_CSINC) {                        \
-			__u64 __a64_l_value = ARM64_SIM_L_EVAL_COND(AUX) ? ARM64_SIM_L_READ_REG(SRC) : ARM64_SIM_L_READ_REG(SRC2) + 1;\
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
-		} else if ((OP) == ARM64_OP_CSNEG) {                        \
-			__u64 __a64_l_value = ARM64_SIM_L_EVAL_COND(AUX) ? ARM64_SIM_L_READ_REG(SRC) : -ARM64_SIM_L_READ_REG(SRC2);\
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
+		} else if (KPROG_ARM64_CSEL_HANDLED(OP)) {                   \
+			int __a64_l_taken = ARM64_SIM_L_EVAL_COND(AUX) ? 1 : 0;\
+			if ((OP) == ARM64_OP_CSEL && __a64_l_width == ARM64_WIDTH_64) {\
+				if (__a64_l_taken)                        \
+					ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),\
+						ARM64_SIM_L_READ_REG_PTR(SRC),\
+						ARM64_SIM_L_REG_TAG(SRC));\
+				else                                      \
+					ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),\
+						ARM64_SIM_L_READ_REG_PTR(SRC2),\
+						ARM64_SIM_L_REG_TAG(SRC2));\
+			} else {                                          \
+				__u64 __a64_l_result =                    \
+					ARM64_SIM_L_CSEL_VALUE((OP), (SRC), (SRC2), __a64_l_taken);\
+				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
+			}                                                 \
 		} else if ((OP) == ARM64_OP_LOAD) {                            \
 			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM));              \
 			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, __a64_l_width);\
