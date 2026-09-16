@@ -35,8 +35,9 @@ increment is committed and pushed immediately). Current state:
   (MOVK) insertion contract, the four-kind AArch64 shift
   (LSL/LSR/ASR/ROR) value contract shared with the decode table, the
   two-kind AArch64 byte-lane reduction (CNT/UADDLV) contract, the
-  four-form AArch64 load/store address-offset contract, and the four-direction
-  AArch64 FMOV move contract.
+  four-form AArch64 load/store address-offset contract, the four-direction
+  AArch64 FMOV move contract, and the four-width AArch64 little-endian
+  byte-ladder load contract.
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag
@@ -60,11 +61,11 @@ increment is committed and pushed immediately). Current state:
   independent statements over the emitted domain. The AArch64 condition table,
   width/NZCV flag contract, decode tables, and bitfield/multiply/extract/
   reverse/extend/conditional-select/branch/move-wide/shift/reduction/
-  address-offset contracts, and pointer-add/ABI-load contracts are already
-  shared. The `arm64_umulh`,
+  address-offset/FMOV/load-bytes contracts, and pointer-add/ABI-load contracts
+  are already shared. The `arm64_umulh`,
   `arm64_reverse_bytes`, `arm64_reverse_bytes16`, `arm64_width_mask`,
   `arm64_width_bits`, `arm64_sign_bit`, `arm64_sign_extend`,
-  `arm64_bits_mask`, the shift helpers
+  `arm64_bits_mask`, the `arm64_apply_width` indirection, the shift helpers
   (`arm64_lsl`/`arm64_lsr`/`arm64_asr`/`arm64_ror`/`arm64_ror32`/
   `arm64_ror64`) and the byte-lane helpers
   (`arm64_replicate_byte_popcounts`/`arm64_horizontal_add_u8`) were removed once

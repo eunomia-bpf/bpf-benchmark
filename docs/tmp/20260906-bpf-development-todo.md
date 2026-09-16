@@ -2790,3 +2790,77 @@ not establish complete native-byte semantic equivalence.
   `ARM64_SIM_L_MEM_READ`/`WRITE` tag-dispatch bodies, and native-byte
   equivalence. Every finite-selection handler in the emitted AArch64 dispatch is
   now generated.
+
+### Default `make corpus` completes end to end, 2026-09-16
+
+- With the `full-x86` ordering fix committed (`557a5af54`, `kop` moved after the
+  LLVM-roundtrip passes), the repository default policy now completes with **no
+  `BPFREJIT_BENCH_PASSES` override**:
+  `BPFREJIT_CORPUS_APPS=katran SAMPLES=1 WORKLOAD_DURATION=10 JOBS=8
+  IMAGE_BUILD_JOBS=8 VMLINUX_BTF=<framework vmlinux> LLVM_DIR=<fork LLVM>
+  make corpus` exits 0 and writes
+  `corpus/results/x86_kvm_corpus_20260916_192529_199370/` with suite
+  `status: "completed"` and app `status: "ok"`. The run reports all eleven
+  passes `[noop, map_inline, const_prop, dce, wide_mem, bounds_check_merge,
+  skb_load_bytes_spec, noop, const_prop, dce, kop]` with
+  `rejit_result.status: "ok"`.
+- Applied sites: `noop: 4`, `map_inline: 16`, `const_prop: 2`, `dce: 2`,
+  `wide_mem: 1`, `bounds_check_merge: 1`, `skb_load_bytes_spec: 1`, `kop: 71`.
+  Raw `balancer_ingres`: 170.86 ns/run (`run_cnt_delta = 26,219,225`) ->
+  148.00 ns/run (`run_cnt_delta = 27,925,025`), ratio 0.866; `bytes_xlated`
+  23,840 -> 19,016 and `bytes_jited` 13,641 -> 11,545. pktgen throughput
+  2,626,908 -> 2,798,385 pps (ratio 1.065). Single sample, one app, eleven
+  passes: provenance plus a consistent direction, not a paper-grade speedup.
+- This closes the "default config must work" thread for the corpus suite on
+  x86/KVM in this workspace: the remaining environment inputs are the fork-LLVM
+  `bpfopt` (now built) and the framework-kernel `VMLINUX_BTF` (a documented host
+  workaround for the `mm_struct::user_ns` drift).
+
+### AArch64 byte-ladder load refinement, 2026-09-16
+
+- Gap: `ARM64_SIM_L_LOAD_ADDR` in `native-sim/arm64/arm64_sim_local_bpf.h`
+  assembled a little-endian byte/halfword/word/doubleword from memory with a
+  hand-written width-gated ladder and no independent statement, the last
+  hand-written value computation in the AArch64 memory path.
+- Contract shape: the load width is one of the four `ARM64_WIDTH_*` codes, so
+  the ladder has a closed byte-count set (1, 2, 4, 8) and no unsupported arm.
+- Generator: `native-sim/formal/generate_arm64_load_bytes_spec.py` reads
+  `arm64_load_bytes_spec.json` and emits `generated/arm64_load_bytes.h`
+  (`KPROG_ARM64_LOAD_BYTES(ADDR, WIDTH)`, the unrolled width-gated ladder) and
+  `KProgFormal/GeneratedArm64LoadBytes.lean` (a self-contained namespace with
+  `LoadWidth`, `widthCode`, `byteCount`, `value`). It has a `--check` mode and a
+  `make check` line.
+- C wiring: `arm64_sim_local_bpf.h` includes the generated header and
+  `ARM64_SIM_L_LOAD_ADDR` now delegates to the macro. The emitted ladder is the
+  same unrolled byte-OR sequence as before, so the compiled shape is unchanged.
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64LoadBytes.lean` proves
+  `arm64_load_bytes_refines` (the generated lane assembly equals an independent
+  *masked truncation* of the whole word, not a lane restatement),
+  `arm64_load_bytes_width_dispatch`, `arm64_load_bytes_upper_cleared`, and three
+  `native_decide` examples. No `sorry`/`admit`.
+- Lesson learned: the independent statement for a byte ladder is `value &&&
+  mask width`; the lane-by-lane OR and the mask truncation agree exactly because
+  the lanes are disjoint, and `bv_decide` closes all four widths in one `cases`
+  chain. Generating the C as an unrolled ladder (not a runtime loop) keeps the
+  emitted BPF instruction shape identical to the hand-written form, which matters
+  for the load path's verifier behavior.
+- Host cross-check `native-sim/formal/test_arm64_load_bytes_host.c`: compiles the
+  generated macro with zero warnings under `-Wall -Wextra` and compares it to an
+  oracle that assembles the in-range bytes through a byte pointer, plus a
+  high-bytes-cleared invariant. It sweeps six byte patterns over all four widths,
+  then a fixed-seed 20000-iteration LCG sweep on a heap buffer (seed
+  `0x9a2f5c81e4b70d36`). Result: `OK (20024 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, two `lean` lines, load-bytes host cross-check step; fmov
+  `OK (20145 cases)`). Mutation checks: changing a byte count in
+  `arm64_load_bytes_spec.json` makes `--check` exit 1; four independent semantic
+  mutations of `generated/arm64_load_bytes.h` (byte-2 lane shift, W64 gate
+  widened, W16 gate widened, top byte dropped) each make the host cross-check
+  exit 1 with a printed `MISMATCH`, while the pristine header stays `OK`.
+  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts, all `ok`; `make -C native-sim/arm64 build`/`run`
+  produce and load the BPF object.
+- Open AArch64 boundary after this increment: the remaining memory tag-dispatch
+  bodies (`ARM64_SIM_L_MEM_READ`/`WRITE` tag selection, the pre/post-index
+  writeback and pointer-tag propagation), the stack load/store
+  (`ARM64_SIM_L_STACK_READ`/`WRITE*`), and native-byte equivalence.
