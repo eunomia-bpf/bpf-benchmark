@@ -2649,3 +2649,61 @@ not establish complete native-byte semantic equivalence.
 - Open AArch64 boundary after this increment: the remaining load/store tag paths
   (`ARM64_SIM_L_MEM_PRE`/`POST` writeback and the pointer-tag propagation), the
   vector/`.D0`/`.Q0` move paths (`ARM64_OP_FMOV`), and native-byte equivalence.
+
+### AArch64 FMOV direction refinement, 2026-09-16
+
+- Gap: the `ARM64_OP_FMOV` handler in
+  `native-sim/arm64/arm64_sim_local_bpf.h` selected between the vector register
+  `v0` and the general-purpose register with an inline two-branch if/else over
+  the four `ARM64_FMOV_*` direction codes, with no independent statement.
+- Contract shape: the direction is the only free choice, so the contract is a
+  four-arm selection over the `ARM64_FMOV_D_FROM_X`/`X_FROM_D`/`S_FROM_W`/
+  `W_FROM_S` codes, which `load()` re-checks against
+  `native-sim/arm64/arm64_sim.h`.
+- Generator: `native-sim/formal/generate_arm64_fmov_spec.py` reads
+  `arm64_fmov_spec.json` and emits `generated/arm64_fmov.h`
+  (`KPROG_ARM64_FMOV_VALUE(DIR, V0, SRC, UNSUPPORTED)`, a statement expression
+  switching on the direction with an explicit `default: UNSUPPORTED;`) and
+  `KProgFormal/GeneratedArm64Fmov.lean` (a self-contained namespace with
+  `Fmov`, `code`, `mnemonic`, `writesReg`, `value`). It has a `--check` mode and
+  a `make check` line.
+- C wiring: `arm64_sim_local_bpf.h` includes the generated header, and the
+  `ARM64_OP_FMOV` handler now computes the moved value through the macro and
+  keeps the architectural split: the two vector-destination directions assign
+  `v0`, the two register-destination directions write the destination register
+  at the destination width.
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64Fmov.lean` proves
+  `arm64_fmov_refines` (the generated selection composed with the caller's width
+  write equals an independent statement that narrows the selected value to the
+  destination width), `arm64_fmov_code_in_range`,
+  `arm64_fmov_direction_dispatch`, `arm64_fmov_vector_destination`,
+  `arm64_fmov_register_destination`, and two `native_decide` examples (a
+  D_FROM_X -> X_FROM_D round trip and a 32-bit W_FROM_S narrowing). No
+  `sorry`/`admit`.
+- Independence: the generated contract answers both questions from one arm (it
+  returns the raw `v0`/`src` and defers width), while the independent statement
+  is stated *after* the width write and is driven by a predicate (`dir =
+  .x_from_d ∨ dir = .w_from_s`) rather than by enumeration. The refinement
+  therefore has to relate the generated per-arm selection to a width-applied
+  predicate form, not restate it.
+- Host cross-check `native-sim/formal/test_arm64_fmov_host.c`: compiles the
+  generated macro with zero warnings under `-Wall -Wextra` and compares it to an
+  oracle keyed off a separate `vector_destination[4]` table (never the macro's
+  switch). It sweeps the 4 directions x 6 x 6 value pairs, then a fixed-seed
+  20000-iteration LCG sweep (seed `0x4e8b1d63f2079ac5`), then a `fork`/`waitpid`
+  check that direction `4` aborts with `SIGABRT`. Result: `OK (20145 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, two `lean` lines, fmov host cross-check step; mem offset
+  `OK (20168 cases)`). Mutation checks: changing a code in
+  `arm64_fmov_spec.json` makes `--check` exit 1; five independent semantic
+  mutations of `generated/arm64_fmov.h` (each of the four direction arms
+  selecting the wrong register, and the unsupported direction not aborting) each
+  make the host cross-check exit 1 with a printed `MISMATCH`, while the pristine
+  header stays `OK`. `make -C native-sim/arm64 micro-proofs-build` rebuilds all
+  30 workload-derived artifacts, all `ok`; `make -C native-sim/arm64
+  build`/`run` produce and load the BPF object.
+- Open AArch64 boundary after this increment: the load/store pre/post-index
+  writeback (`ARM64_SIM_L_MEM_PRE`/`POST`) and pointer-tag propagation, the
+  `ARM64_SIM_L_MEM_READ`/`WRITE` tag-dispatch bodies, and native-byte
+  equivalence. Every finite-selection handler in the emitted AArch64 dispatch is
+  now generated.

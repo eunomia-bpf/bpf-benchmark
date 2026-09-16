@@ -34,8 +34,9 @@ increment is committed and pushed immediately). Current state:
   condition-to-next-PC relation, the four-column AArch64 move-wide
   (MOVK) insertion contract, the four-kind AArch64 shift
   (LSL/LSR/ASR/ROR) value contract shared with the decode table, the
-  two-kind AArch64 byte-lane reduction (CNT/UADDLV) contract, and the
-  four-form AArch64 load/store address-offset contract.
+  two-kind AArch64 byte-lane reduction (CNT/UADDLV) contract, the
+  four-form AArch64 load/store address-offset contract, and the four-direction
+  AArch64 FMOV move contract.
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag
