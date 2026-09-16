@@ -20,6 +20,7 @@
 #include "../formal/generated/arm64_shift.h"
 #include "../formal/generated/arm64_reduction.h"
 #include "../formal/generated/arm64_mem_offset.h"
+#include "../formal/generated/arm64_fmov.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -926,12 +927,16 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		} else if ((OP) == ARM64_OP_STORE_Q0) {                        \
 			ARM64_SIM_L_STORE_Q0_MEM((DST), (SRC2), (AUX), (IMM)); \
 		} else if ((OP) == ARM64_OP_FMOV) {                            \
-			if ((AUX) == ARM64_FMOV_D_FROM_X || (AUX) == ARM64_FMOV_S_FROM_W)\
-				__a64_v0 = ARM64_SIM_L_READ_REG(SRC);          \
-			else if ((AUX) == ARM64_FMOV_X_FROM_D || (AUX) == ARM64_FMOV_W_FROM_S)\
-				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_v0, __a64_l_width);\
-			else                                                   \
-				ARM64_SIM_L_UNSUPPORTED_OPCODE();              \
+			__u64 __a64_fmov_result =                          \
+				KPROG_ARM64_FMOV_VALUE((AUX), __a64_v0,     \
+					ARM64_SIM_L_READ_REG(SRC),         \
+					ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
+			if ((AUX) == ARM64_FMOV_D_FROM_X ||                \
+			    (AUX) == ARM64_FMOV_S_FROM_W)                  \
+				__a64_v0 = __a64_fmov_result;              \
+			else                                               \
+				ARM64_SIM_L_WRITE_REG_WIDTH((DST),         \
+					__a64_fmov_result, __a64_l_width); \
 		} else if (KPROG_ARM64_REDUCTION_HANDLED(OP)) {                \
 			__a64_v0 = ARM64_SIM_L_REDUCTION_VALUE((OP), __a64_v0);\
 		} else {                                                       \

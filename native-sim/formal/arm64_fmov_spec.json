@@ -1,0 +1,1 @@
+{"schema_version":1,"operation":"arm64Fmov","directions":[{"name":"d_from_x","code":0,"macro":"ARM64_FMOV_D_FROM_X","writes_reg":false},{"name":"x_from_d","code":1,"macro":"ARM64_FMOV_X_FROM_D","writes_reg":true},{"name":"s_from_w","code":2,"macro":"ARM64_FMOV_S_FROM_W","writes_reg":false},{"name":"w_from_s","code":3,"macro":"ARM64_FMOV_W_FROM_S","writes_reg":true}]}
