@@ -21,6 +21,7 @@
 #include "../formal/generated/arm64_reduction.h"
 #include "../formal/generated/arm64_mem_offset.h"
 #include "../formal/generated/arm64_fmov.h"
+#include "../formal/generated/arm64_load_bytes.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -503,26 +504,16 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 					__a64_v0_hi);                    \
 	} while (0)
 
+/*
+ * Little-endian byte-ladder load. The byte lanes and the width-driven ladder
+ * are the generated AArch64 load-bytes contract in
+ * formal/generated/arm64_load_bytes.h, which KProgFormal/Arm64LoadBytes.lean
+ * proves equal to an independent masked-truncation statement over all four
+ * ARM64_WIDTH_* codes. ADDR is the byte source address and WIDTH the load
+ * width; the macro writes no NZCV.
+ */
 #define ARM64_SIM_L_LOAD_ADDR(ADDR, WIDTH)                                  \
-	({                                                                 \
-		volatile const __u8 *__a64_lda_addr =                    \
-			(volatile const __u8 *)(ADDR);                   \
-		__u8 __a64_lda_width = (WIDTH);                           \
-		__u64 __a64_lda_value = __a64_lda_addr[0];               \
-		if (__a64_lda_width >= ARM64_WIDTH_16)                    \
-			__a64_lda_value |= (__u64)__a64_lda_addr[1] << 8;\
-		if (__a64_lda_width >= ARM64_WIDTH_32) {                  \
-			__a64_lda_value |= (__u64)__a64_lda_addr[2] << 16;\
-			__a64_lda_value |= (__u64)__a64_lda_addr[3] << 24;\
-		}                                                         \
-		if (__a64_lda_width == ARM64_WIDTH_64) {                  \
-			__a64_lda_value |= (__u64)__a64_lda_addr[4] << 32;\
-			__a64_lda_value |= (__u64)__a64_lda_addr[5] << 40;\
-			__a64_lda_value |= (__u64)__a64_lda_addr[6] << 48;\
-			__a64_lda_value |= (__u64)__a64_lda_addr[7] << 56;\
-		}                                                         \
-		__a64_lda_value;                                          \
-	})
+	KPROG_ARM64_LOAD_BYTES((ADDR), (WIDTH))
 
 #define ARM64_SIM_L_LOAD_PTR_ADDR(ADDR) (*(void **)(ADDR))
 
