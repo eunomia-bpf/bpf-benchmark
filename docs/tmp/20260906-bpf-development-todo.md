@@ -2155,6 +2155,43 @@ not establish complete native-byte semantic equivalence.
   earlier attempts overlapped and raced on
   `.cache/container-images/*.image.tar`.
 
+### katran map_inline overlay-path fix, 2026-09-16
+
+- Root cause of the `map_inline` load-time failure is now pinpointed and fixed.
+  `runner/config/passes/map_inline/katran.yaml`'s `balancer_ingress` command
+  built `OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/
+  map_inline/overlays/katran`, an absolute path from a different machine layout.
+  In this workspace (and in the runtime container) the overlays live at
+  `/workspaces/repository/runner/config/passes/map_inline/overlays/katran`, so
+  the step's `jq --slurpfile` calls failed with
+  `Could not open …/ch_rings.json: No such file or directory` (exit 2), the
+  overlay-construction `&&` short-circuited, `bpfopt` never ran, and the shim
+  reported `loadtime bpfopt step map_inline failed`, aborting the app. This was
+  reproduced exactly inside the runtime image: the hardcoded path fails, the
+  workspace path produces a 163-byte `overlays.json`.
+- Fix: the command now resolves the overlay directory from the injected
+  workspace root, `OVERLAY_DIR="${BPFREJIT_REPO_ROOT:?BPFREJIT_REPO_ROOT is
+  required}/runner/config/passes/map_inline/overlays/katran"`.
+  `BPFREJIT_REPO_ROOT` is set by the corpus driver for every load-time step
+  (`corpus/driver.py`), so the path is exact and the `:?` form fails loudly if
+  the variable is ever missing. `runner/config/passes/**` is optimization policy
+  under the repo rules (not a frozen workload, app runner, corpus driver, or
+  benchmark Makefile), so this edit is in scope.
+- The same hardcoded `/home/yunwei37/...` prefix still appears in two other pass
+  policies, `runner/config/passes/const_mod_reduce/default.yaml` and
+  `runner/config/passes/const_mod_reduce_branchless_rejected/default.yaml`.
+  Neither pass is in the default `benchmark_config.yaml` policy, so they do not
+  block the current corpus path, but they will fail the same way if they are ever
+  enabled. They are left unchanged here and recorded as a known follow-up.
+- The remaining default-policy blocker is the `kop` step. It fails because the
+  host `bpfopt` (and the copy baked into the runtime image) is linked against
+  the system LLVM-18, which does not carry the `-bpf-enable-kop-select` /
+  `-bpf-kop-mode` options the kop pass needs; those live in the experimental
+  `llvm-backend/llvm` fork under `llvm-backend/build-bpf-kop`, which is only
+  partially built (no `libLLVM`). Building that fork and pointing
+  `LLVM_DIR`/`RUN_LLVM_DIR` at it is the environment prerequisite for the
+  default policy; it is a long build and was not completed in this session.
+
 ### AArch64 compare-and-branch predicate refinement, 2026-09-16
 
 - Gap: the `CBZ`/`CBNZ`/`TBZ`/`TBNZ` control transfers in
@@ -2238,3 +2275,84 @@ not establish complete native-byte semantic equivalence.
   remaining bridge is from this predicate level to the generator's actual
   `goto`/label emission, which the 30 recompiled artifacts exercise but do not
   formally relate.
+
+### AArch64 move-wide insertion refinement, 2026-09-16
+
+- Gap: the `MOVK` handler in `native-sim/arm64/arm64_sim_local_bpf.h` inlined a
+  variable-shift mask/insert pair (`0xffffULL << shift`,
+  `(dst & ~mask) | ((imm << shift) & mask)`) with no independent statement. MOVK
+  is the largest remaining non-memory, non-control handler in the emitted
+  subset: 184 sites at width 64 and 39 at width 32 across columns 16 (104
+  sites), 32 (68) and 48 (51).
+- Contract shape: the AArch64 `hw` field makes the insertion column one of the
+  four architectural columns 0/16/32/48, so the contract is a four-element
+  `MovkShift` enum rather than a free shift index. This is the same
+  finite-domain pattern as the branch and conditional-select contracts, and it
+  is what makes the refinement provable: `bv_decide` abstracts a symbolic
+  barrel shift (`BitVec.extractLsb'`/`<<< s`) as opaque and cannot discharge a
+  variable-shift MOVK (verified: it reports a spurious counterexample on both
+  the pre-mask and post-mask forms), while the four-column case split closes
+  every arm.
+- Generator: `native-sim/formal/generate_arm64_movk_spec.py` reads
+  `arm64_movk_spec.json` and emits `generated/arm64_movk.h`
+  (`KPROG_ARM64_MOVK_INSERT(DST, IMM, SHIFT, UNSUPPORTED)`, a statement
+  expression that resolves the column mask in a four-case switch with an
+  explicit `default: UNSUPPORTED;`) and
+  `KProgFormal/GeneratedArm64Movk.lean` (a self-contained
+  `namespace GeneratedArm64Movk` with `inductive MovkShift`, `column` and
+  `value`). `load()` re-reads `native-sim/arm64/arm64_sim.h` and exits 1 unless
+  `ARM64_AUX_MOVK(S)` is still the `(((__u32)(S) & 0xffU) << 16)` form, so the
+  contract's column set stays tied to the AUX encoding the shim reads back with
+  `ARM64_SIM_L_SHIFT(AUX)`. It has a `--check` mode and a `make check` line.
+- C wiring: `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated
+  header, gains `ARM64_SIM_L_MOVK_VALUE(DST, IMM, SHIFT)`, and the handler now
+  delegates to it, keeping the width-narrowing register write. Behavior is
+  unchanged for the four columns (the delegated expression is the same
+  clear-then-insert), and `ARM64_SIM_L_READ_REG(DST)` is now evaluated exactly
+  once.
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64Movk.lean` proves
+  `arm64_movk_refines` (the generated masked-shift insertion equals an
+  independent statement that narrows the immediate with `&&& 0xffff` and shifts
+  it into place, over all four columns), `arm64_movk_width_refines` (narrowing
+  commutes), `arm64_movk_column_is_architectural` (the column is always one of
+  0/16/32/48), `arm64_movk_column_dispatch`, and six `native_decide` examples
+  (one per column, plus destination-preservation and immediate-narrowing). No
+  `sorry`/`admit`. Both new modules are in the `KProgFormal.lean` root import
+  list and both have `lean` lines in the Makefile.
+- Lesson learned: a symbolic shift amount is the boundary of what `bv_decide`
+  can do in this toolchain; the fix is to make the shift a finite architectural
+  domain (here the four `hw` columns) and `cases` over it, exactly as the
+  conditional-select and branch contracts do over their finite kind sets. A
+  second lesson: an independent statement that keeps the immediate un-narrowed
+  (`imm <<< s`) is not a valid architectural MOVK; the `&&& 0xffff` narrowing is
+  what distinguishes the independent form from the generated one, so it is
+  load-bearing rather than cosmetic.
+- Host cross-check `native-sim/formal/test_arm64_movk_host.c`: compiles the
+  generated macro with zero warnings under `-Wall -Wextra` and compares it
+  against an oracle that writes the destination into a byte array and overwrites
+  the two bytes of the target halfword with the low two immediate bytes (never
+  the macro's shift/mask pair). It sweeps a 6×6 destination/immediate table over
+  all four columns, then a fixed-seed 20000-iteration LCG sweep (seed
+  `0x0f1e2d3c4b5a6978`), then a `fork`/`waitpid` check that column `8` aborts
+  with `SIGABRT` through the generated unsupported arm. Result:
+  `OK (20145 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, two `lean` lines, and the arm64 movk host cross-check step;
+  the csel step stays `OK (160161 cases)`, extrev `OK (120145 cases)`, branch
+  `OK (80256 cases)`, mul `OK (160161 cases)`, bitfield `OK (126246 cases)`,
+  mod `OK (225292 cases)`, ALU result `OK (120073 cases)`, flags
+  `OK (60144 cases)`, x86 memory-access `OK (40020 cases)`). Mutation checks:
+  changing a column in `arm64_movk_spec.json` makes `--check` exit 1; changing
+  the `ARM64_AUX_MOVK` shift in `arm64_sim.h` makes `--check` report
+  `ARM64_AUX_MOVK is not the expected … form` and exit 1; five independent
+  semantic mutations of `generated/arm64_movk.h` (column-16 mask shift,
+  column-32 mask shift, destination OR-ed instead of clear-then-set,
+  destination complement dropped, unsupported column not aborting) each make the
+  host cross-check exit 1 with a printed `MISMATCH`, while the pristine header
+  stays `OK`. `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts, all `ok`; `make -C native-sim/arm64 build`
+  produces the BPF object and `make -C native-sim/arm64 run` loads it
+  (`load-only`, fd=4).
+- Open AArch64 boundary after this increment: the load/store address and tag
+  paths, the vector/`.D0`/`.Q0` paths, the ALU op-step register-lane
+  compositions that remain hand-written, and native-byte equivalence.

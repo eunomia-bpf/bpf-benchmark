@@ -29,9 +29,10 @@ increment is committed and pushed immediately). Current state:
   AArch64 extract/reverse/extend (EXTR/REV/REV16/SXTH/SXTW/SXTB) value
   contract, the eight-operation AArch64 conditional-select family
   (CSEL/CINC/CSET/CSETM/CINV/CSINV/CSINC/CSNEG) value contract composed with
-  the condition table, and the four-kind AArch64 compare-and-branch
+  the condition table, the four-kind AArch64 compare-and-branch
   (CBZ/CBNZ/TBZ/TBNZ) predicate contract that completes the
-  condition-to-next-PC relation.
+  condition-to-next-PC relation, and the four-column AArch64 move-wide
+  (MOVK) insertion contract.
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag
@@ -53,9 +54,9 @@ increment is committed and pushed immediately). Current state:
   condition-to-next-PC relation (flag-based `arm64_conditional_branch_refines`
   and compare-and-branch `arm64_branch_next_pc_refines`) are now proved against
   independent statements over the emitted domain. The AArch64 condition table,
-  width/NZCV flag contract, decode tables, and
-  bitfield/multiply/extract/reverse/extend/conditional-select/branch contracts,
-  and pointer-add/ABI-load contracts are already shared. The `arm64_umulh`,
+  width/NZCV flag contract, decode tables, and bitfield/multiply/extract/
+  reverse/extend/conditional-select/branch/move-wide contracts, and
+  pointer-add/ABI-load contracts are already shared. The `arm64_umulh`,
   `arm64_reverse_bytes`, `arm64_reverse_bytes16`, `arm64_width_mask`,
   `arm64_width_bits`, `arm64_sign_bit`, `arm64_sign_extend` and
   `arm64_bits_mask` helpers were removed once
@@ -92,15 +93,28 @@ increment is committed and pushed immediately). Current state:
   the upstream Katran under KVM with a 10-second pktgen workload (raw thread pps
   858–879k baseline, 876–887k post). Single sample, one app, one pass: provenance,
   not a paper-grade speedup.
-- With the default policy, `make corpus` currently aborts in the load-time shim
-  because optimizer passes fail on this tree: `kop` fails even on a trivial
-  2-instruction program, and `map_inline` fails on `balancer_ingres`. The shim
-  reports the step failure and the app aborts, so no post-ReJIT workload is
-  produced. `bcc/set` and `cilium/agent` additionally fail at application
-  startup (BCC `capable` skeleton load `-22`; Cilium XDP compile canceled).
-  These are x86 pass-policy/app-startup issues, unrelated to the AArch64 proof
-  line, and are kept as raw failures. Run one corpus invocation at a time; runs
-  share `.cache/container-images/*.image.tar`.
+- With the default policy, `make corpus` still aborts in the load-time shim
+  because the `kop` pass cannot run: the host `bpfopt` (and the copy in the
+  runtime image) links the system LLVM-18, which lacks the
+  `-bpf-enable-kop-select`/`-bpf-kop-mode` options; those live in the
+  experimental `llvm-backend/llvm` fork under `llvm-backend/build-bpf-kop`,
+  which is only partially built (no `libLLVM`). Building that fork and pointing
+  `LLVM_DIR`/`RUN_LLVM_DIR` at it is the environment prerequisite; it is a long
+  build. The shim reports the step failure and the app aborts, so no post-ReJIT
+  workload is produced. `bcc/set` and `cilium/agent` additionally fail at
+  application startup (BCC `capable` skeleton load `-22`; Cilium XDP compile
+  canceled). These are x86 toolchain/pass-policy/app-startup issues, unrelated
+  to the AArch64 proof line, and are kept as raw failures.
+- The katran `map_inline` step previously failed for a separate, fixable reason:
+  `runner/config/passes/map_inline/katran.yaml` hardcoded an overlay directory
+  under `/home/yunwei37/...` that does not exist here, so the step's `jq`
+  overlay construction failed before `bpfopt` ran. It now resolves the path from
+  the injected `BPFREJIT_REPO_ROOT`. The same stale prefix remains in the two
+  non-default `const_mod_reduce*` policies (recorded as follow-up).
+- Run one corpus invocation at a time; runs share
+  `.cache/container-images/*.image.tar` and the framework kernel build. Under
+  host memory pressure, pass `JOBS=8 IMAGE_BUILD_JOBS=8` to `make corpus` so the
+  kernel `modules` build does not exhaust memory.
 
 ## Speculative-optimization line (paper B)
 
