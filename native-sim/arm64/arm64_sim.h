@@ -160,8 +160,4 @@
 #define ARM64_SKB_DATA_OFF 0xd0LL
 #define ARM64_SIM_STACK_BIAS 96LL
 
-static __always_inline __u64 arm64_apply_width(__u64 value, __u8 width)
-{
-	return KPROG_ARM64_APPLY_WIDTH(value, width);
-}
 #endif

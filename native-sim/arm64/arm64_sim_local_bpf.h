@@ -243,7 +243,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 
 #define ARM64_SIM_L_WRITE_REG_WIDTH(REG, VALUE, WIDTH)                      \
 	do {                                                               \
-		__u64 __a64_l_next = arm64_apply_width((VALUE), (WIDTH)); \
+		__u64 __a64_l_next = KPROG_ARM64_APPLY_WIDTH((VALUE), (WIDTH)); \
 		if ((REG) == ARM64_SP) {                                  \
 			__a64_sp = (__s64)__a64_l_next;                   \
 		} else if ((REG) != ARM64_XZR && (REG) != ARM64_REG_NONE) {\
@@ -461,7 +461,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	do {                                                               \
 		__u32 __a64_stw_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		__u8 __a64_stw_width = (WIDTH);                           \
-		__u64 __a64_stw_value = arm64_apply_width((VALUE), __a64_stw_width);\
+		__u64 __a64_stw_value = KPROG_ARM64_APPLY_WIDTH((VALUE), __a64_stw_width);\
 		if (__a64_stw_width == ARM64_WIDTH_64 &&                  \
 		    (__a64_stw_index & 7U) == 0) {                        \
 			__a64_stack.q[__a64_stw_index >> 3] = __a64_stw_value;\
@@ -530,7 +530,7 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	do {                                                               \
 		__u8 *__a64_sta_addr = (__u8 *)(ADDR);                   \
 		__u8 __a64_sta_width = (WIDTH);                           \
-		__u64 __a64_sta_value = arm64_apply_width((VALUE), __a64_sta_width);\
+		__u64 __a64_sta_value = KPROG_ARM64_APPLY_WIDTH((VALUE), __a64_sta_width);\
 		if (__a64_sta_width == ARM64_WIDTH_8)                     \
 			*(__u8 *)__a64_sta_addr = __a64_sta_value;        \
 		else if (__a64_sta_width == ARM64_WIDTH_16)               \
