@@ -2864,3 +2864,12 @@ not establish complete native-byte semantic equivalence.
   bodies (`ARM64_SIM_L_MEM_READ`/`WRITE` tag selection, the pre/post-index
   writeback and pointer-tag propagation), the stack load/store
   (`ARM64_SIM_L_STACK_READ`/`WRITE*`), and native-byte equivalence.
+
+- Follow-on de-duplication (same increment, 2026-09-16):
+  `ARM64_SIM_L_STACK_READ`'s non-qword branch repeated the byte ladder
+  byte-for-byte over `__a64_stack.b[]`. It now calls
+  `KPROG_ARM64_LOAD_BYTES(&__a64_stack.b[__a64_str_index], width)`, so the stack
+  ladder is covered by the same refined contract as the memory ladder and the
+  duplicated code is gone (14 lines removed, 4 added). `make -C
+  native-sim/arm64 micro-proofs-build` rebuilds all 30 artifacts, all `ok`;
+  `build`/`run` produce and load the BPF object.
