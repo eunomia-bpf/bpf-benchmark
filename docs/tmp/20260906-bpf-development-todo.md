@@ -2621,6 +2621,21 @@ not establish complete native-byte semantic equivalence.
   bytecode. Diagnosing that interaction (the `wide_mem` byte-ladder collapse
   assuming pre-`kop` instruction shapes) would let the entire default group
   complete in one two-start comparison.
+- Root cause of the `wide_mem` failure is now located precisely. Every
+  non-kop-non-specialized pass (including `wide_mem`, `const_prop`, `dce`,
+  `bounds_check_merge`, `skb_load_bytes_spec`) goes through
+  `run_llvm_roundtrip` (`bpfopt/llvm/src/main.cpp` -> `run_llvm_roundtrip` in
+  `bpfopt/llvm/src/llvm_mapinline.hpp`), which regenerates an LLVM module and
+  re-extracts BPF text via the vendored `llvmbpf` compiler. That compiler
+  handles BPF `MOV` with a nonzero `offset` as a sign-extending move and accepts
+  only offsets 8/16/32; any other offset returns
+  `"Invalid offset <n> for movsx at pc <pc>"` at
+  `vendor/llvmbpf/src/compiler.cpp` (the `is_mov_sx` / `CreateSExt` chain). So
+  the failure is the LLVM-roundtrip front end rejecting an instruction shape
+  that the `kop` output (or the input the pass sees after `kop`) contains, not a
+  measurement or framework problem. A faithful in-VM reproduction would need
+  `KEEP_WORKDIRS=1` to retain `/tmp/loadtime_<pid>_5/step5.log`; the local
+  reproduction is unreliable because it must supply a synthetic `--target` map.
 
 ### AArch64 memory address-offset refinement, 2026-09-16
 
