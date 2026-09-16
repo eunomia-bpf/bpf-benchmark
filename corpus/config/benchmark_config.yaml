@@ -11,9 +11,9 @@ policy:
            wide_mem, bounds_check_merge, skb_load_bytes_spec,
            noop, const_prop, dce]
     full-x86: [noop, map_inline, const_prop, dce,
-               kop,
                wide_mem, bounds_check_merge, skb_load_bytes_spec,
-               noop, const_prop, dce]
+               noop, const_prop, dce,
+               kop]
   platforms:
     x86_64: { passes: [full-x86] }
     arm64:  { passes: [full] }
