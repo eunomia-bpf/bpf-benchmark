@@ -3023,7 +3023,14 @@ not establish complete native-byte semantic equivalence.
   `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
   workload-derived artifacts, all `ok`; `build`/`run` produce and load the BPF
   object.
-- Open AArch64 boundary after this increment: the `ARM64_SIM_L_MEM_READ`
-  value-source body (the predicate is generated and refined, but the read body
-  still inlines its own chain), the pre/post-index writeback and pointer-tag
-  propagation, the stack pointer helper, and native-byte equivalence.
+- Follow-on wiring (same increment, 2026-09-16, committed `695c946e5`):
+  `ARM64_SIM_L_MEM_READ`'s value-source body now also switches on
+  `KPROG_ARM64_MEM_READ_SRC`, so both halves of the dispatch (value source and
+  result tag) are driven by the generated, refined classification and neither
+  predicate is dead. The emitted `xdp` program section stays byte-identical to
+  the pre-change object, `build`/`run` load the object, and the full formal
+  check and the 30 micro proofs remain green.
+- Open AArch64 boundary after this increment: the pre/post-index writeback and
+  pointer-tag propagation, the stack pointer helper, `ARM64_SIM_L_STACK_READ_TAG`
+  and `ARM64_SIM_L_STACK_WRITE`'s selection (byte-ladder part is already the
+  generated load contract), and native-byte equivalence.
