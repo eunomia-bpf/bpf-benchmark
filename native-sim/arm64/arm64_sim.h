@@ -160,16 +160,6 @@
 #define ARM64_SKB_DATA_OFF 0xd0LL
 #define ARM64_SIM_STACK_BIAS 96LL
 
-static __always_inline __u64 arm64_width_mask(__u8 width)
-{
-	return KPROG_ARM64_WIDTH_MASK(width);
-}
-
-static __always_inline __u8 arm64_width_bits(__u8 width)
-{
-	return (__u8)KPROG_ARM64_WIDTH_BITS(width);
-}
-
 static __always_inline __u64 arm64_bits_mask(__u8 bits)
 {
 	if (!bits)
@@ -177,11 +167,6 @@ static __always_inline __u64 arm64_bits_mask(__u8 bits)
 	if (bits >= 64)
 		return 0xffffffffffffffffULL;
 	return (1ULL << bits) - 1ULL;
-}
-
-static __always_inline __u64 arm64_sign_bit(__u8 width)
-{
-	return KPROG_ARM64_WIDTH_SIGN_MASK(width);
 }
 
 static __always_inline __u64 arm64_apply_width(__u64 value, __u8 width)
