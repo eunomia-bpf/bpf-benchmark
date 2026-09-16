@@ -2076,3 +2076,41 @@ not establish complete native-byte semantic equivalence.
   establish native-byte equivalence, and the Lean conditional-select contract is
   stated over `BitVec 64` while the C macro operates on `__u64`; the host
   cross-check bridges that C/Lean semantics gap for the tested vectors only.
+
+### AArch64 sign-extending-load composition, 2026-09-16
+
+- Gap: the LDRSB/LDRSW/LDRSH handlers in
+  `native-sim/arm64/arm64_sim_local_bpf.h` widened a byte/halfword/word memory
+  read through the private `arm64_sign_extend` helper in
+  `native-sim/arm64/arm64_sim.h`. That helper was the last caller of the private
+  `arm64_bits_mask` helper, and the same sign-extension formula is already
+  generated and proved in the extract/reverse/extend contract's SXTB/SXTH/SXTW
+  arms.
+- Composition: the handlers now delegate to
+  `ARM64_SIM_L_EXTREV_SIGNEXT(OP, VALUE, WIDTH)`, a thin wrapper over the
+  generated `KPROG_ARM64_EXTREV_VALUE` with the already loaded value as `SRC`.
+  No new generator or spec was needed; the delegated arm is exactly the proved
+  `((value & mask) ^ sign) - sign` form, so the change is a cutover onto an
+  existing theorem rather than a new contract. This is the composition pattern
+  the earlier increments set up: a new handler can reuse an already-proved
+  generated arm instead of restating it.
+- Dead code removed: with the last caller gone, `arm64_sign_extend` and its only
+  dependent `arm64_bits_mask` were deleted from `arm64_sim.h`. A `grep` over
+  `native-sim/` confirmed neither had another caller. This leaves
+  `native-sim/arm64/arm64_sim.h` with no private sign-extension or byte-reversal
+  helper; the remaining helpers (`arm64_apply_width`, `arm64_ror32/64`,
+  `arm64_lsl/lsr/asr/ror`, the popcount/horizontal-add vector helpers, and
+  `arm64_width_*` removal earlier) all still have callers.
+- Verification: full `make -C native-sim/formal check` green with no new lines
+  needed (the composition reuses the proved contract); `make -C
+  native-sim/arm64 build` exit 0; `make -C native-sim/arm64 micro-proofs-build`
+  rebuilds all 30 workload-derived artifacts, all `ok`; `make -C
+  native-sim/arm64 run` loads the object (`load-only`, fd=4). No new mutation
+  checks were added because no new generated artifact was introduced; the
+  existing `test_arm64_extrev_host.c` mutation suite already covers the SXTB/
+  SXTH/SXTW arms that the load handlers now use.
+- Open AArch64 boundary after this increment: condition-to-next-PC beyond the
+  condition contract (the value side of the conditional-select family is now
+  covered; what remains is tying the generated condition predicate to an actual
+  program-counter transition), and native bytes. These theorems do not establish
+  native-byte equivalence.

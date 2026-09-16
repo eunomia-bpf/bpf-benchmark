@@ -44,15 +44,16 @@ increment is committed and pushed immediately). Current state:
   multi-step control-flow traces, helpers, and specialization preservation.
 - Open on the AArch64 side: the ALU op-step and register-lane handler
   compositions (in progress), the remaining load/store handler compositions
-  (the LDRSB/LDRSW/LDRSH sign-extending loads still call the private
-  `arm64_sign_extend` helper), `MADD`/`MSUB`/`UMULH` flag consequences if any
-  (the multiply family writes no NZCV, matching the absence of
-  MADD/MSUB-with-flags opcodes), and condition-to-next-PC beyond the condition
-  contract. The AArch64 condition table, width/NZCV flag contract, decode
-  tables, bitfield/multiply/extract/reverse/extend/conditional-select value
-  contracts, and pointer-add/ABI-load contracts are already shared. The
-  `arm64_umulh`, `arm64_reverse_bytes`, `arm64_reverse_bytes16`,
-  `arm64_width_mask`, `arm64_width_bits` and `arm64_sign_bit` helpers were
+  (the LDRSB/LDRSW/LDRSH sign-extending loads now reuse the proved SXTB/SXTH/
+  SXTW arms, but the wider load/store address and tag paths are still
+  hand-written), `MADD`/`MSUB`/`UMULH` flag consequences if any (the multiply
+  family writes no NZCV, matching the absence of MADD/MSUB-with-flags opcodes),
+  and condition-to-next-PC beyond the condition contract. The AArch64 condition
+  table, width/NZCV flag contract, decode tables, bitfield/multiply/extract/
+  reverse/extend/conditional-select value contracts, and pointer-add/ABI-load
+  contracts are already shared. The `arm64_umulh`, `arm64_reverse_bytes`,
+  `arm64_reverse_bytes16`, `arm64_width_mask`, `arm64_width_bits`,
+  `arm64_sign_bit`, `arm64_sign_extend` and `arm64_bits_mask` helpers were
   removed once `native-sim/arm64/arm64_sim_local_bpf.h` delegated to the
   generated contracts.
 - The generation binding (verifier-accepted proof + native bytes bound to one
