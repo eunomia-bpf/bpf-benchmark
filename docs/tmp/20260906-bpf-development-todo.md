@@ -2114,3 +2114,43 @@ not establish complete native-byte semantic equivalence.
   covered; what remains is tying the generated condition predicate to an actual
   program-counter transition), and native bytes. These theorems do not establish
   native-byte equivalence.
+
+### Completed two-start KVM corpus with the noop policy, 2026-09-16
+
+- After the pass-specific failures recorded above, a completed two-start corpus
+  run was obtained by narrowing the policy to the pass that is pure bytecode
+  identity plus the map pass the tree already ships:
+  `BPFREJIT_CORPUS_APPS="katran" BPFREJIT_BENCH_PASSES="noop"
+  SAMPLES=1 WORKLOAD_DURATION=10 make corpus` (`EXIT 0`), artifact
+  `corpus/results/x86_kvm_corpus_20260916_031856_977978/`.
+- Result: `metadata.json` records `status: "completed"`; the app record is
+  `status: "ok"` with `rejit_result.status: "ok"` and a populated
+  `post_rejit`. Both phases ran the real upstream `katran_server_grpc` under
+  `KVM`/`virtme-ng` with a 10-second `kernel_pktgen` L2/UDP workload.
+- Raw per-phase descriptors for the sole tracked program `balancer_ingres`
+  (xdp): baseline `bytes_xlated=23840`, `bytes_jited=13641`,
+  `run_cnt_delta=25,919,459`, `run_time_ns_delta=4,390,702,012`; post-ReJIT
+  `bytes_xlated=24080`, `bytes_jited=14260`, `run_cnt_delta=26,343,662`,
+  `run_time_ns_delta=4,435,046,280`. The size **increase** is the expected
+  `noop` verifier-state step, which adds bytecode deliberately; the run is
+  evidence that the two-start load-time path completes, not that `noop`
+  optimizes.
+- Raw workload `pktgen` throughput lines (four 10-second threads per phase,
+  thread 3 is the unused/drain thread and reports 0 pps in both phases):
+  baseline `878541`, `858560`, `862303` pps; post-ReJIT `875900`, `886925`,
+  `879385` pps. These are single-sample raw values from one run; they are
+  recorded as provenance for the completed contract, not as a paper-grade
+  speedup (SAMPLES=1, one app, one pass, ~2% spread across threads).
+- Root cause of the earlier failures, now isolated: the default `full-x86`
+  policy's `kop` step fails inside the load-time shim
+  (`loadtime bpfopt step kop failed`, e.g. on the trivial `libbpf_nametest`
+  2-instruction program), and with `noop,map_inline` the `map_inline` step fails
+  on `balancer_ingres` (`loadtime bpfopt step map_inline failed`). In both cases
+  the shim reports the failure and the app aborts, so the two-start comparison
+  cannot complete. The `noop`-only policy exercises the same two-start
+  load-time contract without the failing optimizer pass. The optimizer-pass
+  failures are x86 pass-policy/backend issues on the current tree, unrelated to
+  the AArch64 proof line, and are recorded here as raw failures.
+- Concurrency caveat restated: run one corpus invocation at a time. Two of the
+  earlier attempts overlapped and raced on
+  `.cache/container-images/*.image.tar`.

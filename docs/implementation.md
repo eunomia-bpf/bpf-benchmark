@@ -79,13 +79,24 @@ increment is committed and pushed immediately). Current state:
   framework x86 `bzImage`, and both runner image tars. `make micro BENCH="simple"
   SAMPLES=1 WARMUPS=0 INNER_REPEAT=10` passes (result `12345678` on the native/
   kernel/llvmbpf runtimes; `micro/results/x86_kvm_micro_20260915_194201_705027/`).
-- `make corpus` runs end-to-end but the two attempted apps (`bcc/set`,
-  `cilium/agent`) fail at application startup inside the container before the
-  shim tracks any program (BCC `capable` skeleton load `-22`; Cilium XDP compile
-  canceled). Their load-time plans execute (`status: ok`) and baselines are
-  captured, but there is no post-ReJIT workload, so no paper-grade throughput
-  result has been obtained yet. Details, run paths and the concurrent-run
-  image-tar race are in the research log. Run one corpus invocation at a time.
+- `make corpus` completes a full two-start load-time comparison with a policy
+  that avoids the currently failing optimizer passes:
+  `BPFREJIT_CORPUS_APPS="katran" BPFREJIT_BENCH_PASSES="noop" SAMPLES=1
+  WORKLOAD_DURATION=10 make corpus` exits 0 and writes
+  `corpus/results/x86_kvm_corpus_20260916_031856_977978/` with suite
+  `status: "completed"` and app `status: "ok"`. Baseline and post-ReJIT both ran
+  the upstream Katran under KVM with a 10-second pktgen workload (raw thread pps
+  858–879k baseline, 876–887k post). Single sample, one app, one pass: provenance,
+  not a paper-grade speedup.
+- With the default policy, `make corpus` currently aborts in the load-time shim
+  because optimizer passes fail on this tree: `kop` fails even on a trivial
+  2-instruction program, and `map_inline` fails on `balancer_ingres`. The shim
+  reports the step failure and the app aborts, so no post-ReJIT workload is
+  produced. `bcc/set` and `cilium/agent` additionally fail at application
+  startup (BCC `capable` skeleton load `-22`; Cilium XDP compile canceled).
+  These are x86 pass-policy/app-startup issues, unrelated to the AArch64 proof
+  line, and are kept as raw failures. Run one corpus invocation at a time; runs
+  share `.cache/container-images/*.image.tar`.
 
 ## Speculative-optimization line (paper B)
 
