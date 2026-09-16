@@ -2410,3 +2410,83 @@ not establish complete native-byte semantic equivalence.
 - Open AArch64 boundary after this increment: the load/store address and tag
   paths, the vector/`.D0`/`.Q0` paths, the ALU op-step register-lane
   compositions that remain hand-written, and native-byte equivalence.
+
+### AArch64 shift-family refinement, 2026-09-16
+
+- Gap: the `ARM64_OP_SHIFT_IMM`/`ARM64_OP_SHIFT_REG` handler in
+  `native-sim/arm64/arm64_sim_local_bpf.h` dispatched to four hand-written
+  helpers, `arm64_lsl`/`arm64_lsr`/`arm64_asr`/`arm64_ror` (plus
+  `arm64_ror32`/`arm64_ror64`), with no independent statement. The shift table
+  had only a decode contract (mnemonic -> `ARM64_SHIFT_*` code), which is the
+  weakest remaining handler after MOVK.
+- Contract shape: the shift family shares the `ARM64_SHIFT_*` codes with the
+  decode table, so the shift contract is generated against that table rather
+  than against raw opcodes. `generate_arm64_shift_spec.py` `load()` re-reads
+  `arm64_decode_spec.json` and exits 1 unless the spec's `(mnemonic, macro,
+  code)` rows still equal the decode table's `shift` rows, which keeps the Lean
+  `Shift` codes and the C `case 0U..3U` tags pinned to one owner.
+- Generator: `native-sim/formal/generate_arm64_shift_spec.py` reads
+  `arm64_shift_spec.json` and emits `generated/arm64_shift.h`
+  (`KPROG_ARM64_SHIFT_VALUE(SHIFT, VALUE, AMOUNT, WIDTH, UNSUPPORTED)`, a
+  statement expression switching on the shift kind with an explicit
+  `default: UNSUPPORTED;`) and `KProgFormal/GeneratedArm64Shift.lean` (a
+  self-contained `namespace GeneratedArm64Shift` with `value`, `code`,
+  `mnemonic`). It has a `--check` mode and a `make check` line. The C rotations
+  are inlined exactly as the modifier contract inlines its rotate, so the
+  translated header calls no hand-written helper; it includes `arm64_width.h`
+  for `ARM64_WIDTH_32` and `KPROG_ARM64_WIDTH_MASK` so it is standalone.
+- C wiring: `arm64_sim_local_bpf.h` includes the generated header, gains
+  `ARM64_SIM_L_SHIFT_VALUE(KIND, VALUE, AMOUNT, WIDTH)`, and the handler now
+  delegates to it, keeping the width-narrowing register write. The six
+  hand-written helpers were then dead (each had exactly the one handler call
+  site) and were deleted from `arm64_sim.h` (`arm64_apply_width` stays; it has
+  other callers).
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64Shift.lean` proves
+  `arm64_shift_refines` (the generated form equals an independent statement over
+  all four kinds and both widths), `arm64_shift_amount_masked` (only the low
+  amount bits matter), `arm64_shift_code_in_range`, `arm64_shift_code_dispatch`,
+  and six `native_decide` examples. No `sorry`/`admit`.
+- The independent statement is not a restatement of the generated one. LSL masks
+  the operand before the shift (the mask commutes out); LSR masks the shifted
+  operand by the shifted mask (`mask >>> k`) instead of masking first; ASR uses
+  the sign-corrected `(v ^^^ sign) - sign` form then `sshiftRight'`; ROR is
+  stated as the left-complement rotation `(v <<< (w - k)) ||| (v >>> k)` while
+  the generated form writes the right rotation. Each is a structurally different
+  expression that `bv_decide` closes against the generated arms.
+- Lesson learned (extends the MOVK lesson): a symbolic shift *amount* is fine
+  for `bv_decide` when it stays a `BitVec` and the mask is explicit, but
+  Lean's `<<<`/`>>>` with a `BitVec` amount is **not** hardware-masked, and
+  stating a rotate through `BitVec.rotateRight (k &&& 63).toNat` gets abstracted
+  as an opaque variable (spurious counterexample). The provable form keeps the
+  amount as a `BitVec` in both sides and writes rotation as a shift pair, which
+  is why the independent ROR arm is also a shift pair (its distinctness comes
+  from the left-complement ordering, not from `rotateRight`).
+- Host cross-check `native-sim/formal/test_arm64_shift_host.c`: compiles the
+  generated macro with zero warnings under `-Wall -Wextra` and compares it
+  against an oracle written against a byte/width model (masked amount, explicit
+  width mask, arithmetic shift in the width's signed domain, right rotation of
+  the `bits`-wide word). It sweeps an 8-value x 8-amount x 2-width x 4-kind
+  boundary table, then a fixed-seed 20000-iteration LCG sweep (seed
+  `0x51f3a7c2d9e40b68`), then a `fork`/`waitpid` check that kind `4` aborts with
+  `SIGABRT`. **The oracle found two real bugs before commit**: the first ROR C
+  draft left the result at 0 for a 64-bit rotate by amount 0 (missing `else`),
+  and the oracle initially (wrongly) masked the ASR-32 result — the contract
+  sign-extends into the high bits and the caller's width write narrows, so the
+  oracle was corrected to match the architectural contract. Final result:
+  `OK (20513 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, two `lean` lines, and the shift host cross-check step; the
+  movk step stays `OK (20145 cases)`, branch `OK (80256 cases)`). Mutation
+  checks: changing a code in `arm64_shift_spec.json` or in
+  `arm64_decode_spec.json`'s `shift` table makes `--check` exit 1 with the
+  expected drift message; six independent semantic mutations of
+  `generated/arm64_shift.h` (wrong 32-bit amount mask, LSR shift direction,
+  ASR as an unsigned shift, wrong 32-bit rotation width, short 64-bit rotation,
+  unsupported kind not aborting) each make the host cross-check exit 1 with a
+  printed `MISMATCH`, while the pristine header stays `OK`.
+  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30 workload-derived
+  artifacts, all `ok`; `make -C native-sim/arm64 build` produces the BPF object
+  and `make -C native-sim/arm64 run` loads it.
+- Open AArch64 boundary after this increment: the load/store address and tag
+  paths, the vector/`.D0`/`.Q0` paths, the ALU op-step register-lane
+  compositions that remain hand-written, and native-byte equivalence.

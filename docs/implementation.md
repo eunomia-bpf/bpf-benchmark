@@ -31,8 +31,9 @@ increment is committed and pushed immediately). Current state:
   (CSEL/CINC/CSET/CSETM/CINV/CSINV/CSINC/CSNEG) value contract composed with
   the condition table, the four-kind AArch64 compare-and-branch
   (CBZ/CBNZ/TBZ/TBNZ) predicate contract that completes the
-  condition-to-next-PC relation, and the four-column AArch64 move-wide
-  (MOVK) insertion contract.
+  condition-to-next-PC relation, the four-column AArch64 move-wide
+  (MOVK) insertion contract, and the four-kind AArch64 shift
+  (LSL/LSR/ASR/ROR) value contract shared with the decode table.
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag
@@ -55,11 +56,13 @@ increment is committed and pushed immediately). Current state:
   and compare-and-branch `arm64_branch_next_pc_refines`) are now proved against
   independent statements over the emitted domain. The AArch64 condition table,
   width/NZCV flag contract, decode tables, and bitfield/multiply/extract/
-  reverse/extend/conditional-select/branch/move-wide contracts, and
+  reverse/extend/conditional-select/branch/move-wide/shift contracts, and
   pointer-add/ABI-load contracts are already shared. The `arm64_umulh`,
   `arm64_reverse_bytes`, `arm64_reverse_bytes16`, `arm64_width_mask`,
-  `arm64_width_bits`, `arm64_sign_bit`, `arm64_sign_extend` and
-  `arm64_bits_mask` helpers were removed once
+  `arm64_width_bits`, `arm64_sign_bit`, `arm64_sign_extend`,
+  `arm64_bits_mask` and the shift helpers
+  (`arm64_lsl`/`arm64_lsr`/`arm64_asr`/`arm64_ror`/`arm64_ror32`/
+  `arm64_ror64`) were removed once
   `native-sim/arm64/arm64_sim_local_bpf.h` delegated to the generated contracts.
 - The generation binding (verifier-accepted proof + native bytes bound to one
   immutable load generation) and the functional smokes establish different
