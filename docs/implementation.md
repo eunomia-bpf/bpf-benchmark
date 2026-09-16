@@ -93,6 +93,27 @@ increment is committed and pushed immediately). Current state:
   the upstream Katran under KVM with a 10-second pktgen workload (raw thread pps
   858–879k baseline, 876–887k post). Single sample, one app, one pass: provenance,
   not a paper-grade speedup.
+- `make corpus` now also completes a two-start load-time comparison where a real
+  optimizer pass applies:
+  `BPFREJIT_CORPUS_APPS="katran" BPFREJIT_BENCH_PASSES="noop,map_inline"
+  SAMPLES=1 WORKLOAD_DURATION=10 JOBS=8 IMAGE_BUILD_JOBS=8
+  VMLINUX_BTF="$(pwd)/vendor/build/x86/linux/vmlinux" make corpus` exits 0 and
+  writes `corpus/results/x86_kvm_corpus_20260916_131646_375109/` with suite
+  `status: "completed"`, app `status: "ok"`, and `map_inline` applying 16/16
+  sites on the `balancer_ingres` XDP program. Raw `balancer_ingres` counters:
+  168.98 ns/run baseline (4,437,801,179 ns / 26,261,979 runs) → 147.00 ns/run
+  post-ReJIT (4,136,441,567 ns / 28,139,200 runs), ratio 0.870; pktgen thread
+  throughput 2,632,791 → 2,819,605 pps, sum ratio 1.071. Single sample, one app,
+  one pass: provenance plus a consistent direction, not paper-grade.
+- The `VMLINUX_BTF` override is required in this workspace because the host
+  kernel changed to `7.3.0-070300rc3-generic`, whose BTF has no
+  `struct mm_struct::user_ns`; the regenerated x86 `vmlinux.h` therefore breaks
+  upstream tetragon. The framework kernel BTF (`7.0.0-rc2+`) has it. Note the
+  repo asymmetry worth a follow-up: `host-native-bpf-x86` passes no
+  `VMLINUX_BTF` (defaults to the host BTF), while `host-native-bpf-arm64` passes
+  the framework kernel's vmlinux; the native objects run under the framework
+  kernel, so x86 should match arm64. `runner/mk/build.mk` is frozen, so the fix
+  is not applied and the command-line override is used instead.
 - With the default policy, `make corpus` still aborts in the load-time shim
   because the `kop` pass cannot run: the host `bpfopt` (and the copy in the
   runtime image) links the system LLVM-18, which lacks the

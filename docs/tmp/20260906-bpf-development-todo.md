@@ -2192,6 +2192,60 @@ not establish complete native-byte semantic equivalence.
   `LLVM_DIR`/`RUN_LLVM_DIR` at it is the environment prerequisite for the
   default policy; it is a long build and was not completed in this session.
 
+### Completed two-start KVM corpus with the katran map_inline policy, 2026-09-16
+
+- With the overlay-path fix, the previously failing `noop,map_inline` policy now
+  completes end to end:
+  `BPFREJIT_CORPUS_APPS=katran BPFREJIT_BENCH_PASSES=noop,map_inline SAMPLES=1
+  WORKLOAD_DURATION=10 JOBS=8 IMAGE_BUILD_JOBS=8 VMLINUX_BTF=<framework
+  vmlinux> make corpus` exits 0 and writes
+  `corpus/results/x86_kvm_corpus_20260916_131646_375109/` with suite
+  `status: "completed"`, app `status: "ok"`, `rejit_result.status: "ok"`,
+  passes `["noop","map_inline"]`, mode `loadtime`.
+- The load-time report confirms `map_inline` actually ran and applied: of the 12
+  step reports, one `map_inline` step reports `sites_applied: 16` /
+  `sites_matched: 16` (the `balancer_ingres` XDP program) and five report
+  `0/0` (programs with no inlinable map sites); the three `noop` steps report
+  `1/1` and three `0/0`. This is the first run in this workspace where a real
+  optimizer pass (not `noop`) applied sites under the load-time contract.
+- Raw per-program counters (`balancer_ingres`, the 28.14M/26.26M-run XDP
+  program): baseline `run_time_ns_delta = 4,437,801,179` over
+  `run_cnt_delta = 26,261,979` (168.98 ns/run); post-ReJIT
+  `run_time_ns_delta = 4,136,441,567` over `run_cnt_delta = 28,139,200`
+  (147.00 ns/run). Ratio 0.870 (< 1: faster). `bytes_xlated` 19,616,
+  `bytes_jited` 11,975, type `xdp`.
+- Raw workload throughput (pktgen, four 10-second threads per phase; the
+  `pps`-parsing thread that reports `860`/`1099` is the pktgen control thread,
+  not a transmitter): baseline thread pps 883,074 + 870,014 + 879,703 =
+  2,632,791; post-ReJIT 948,108 + 912,572 + 958,925 = 2,819,605. Sum ratio
+  1.071. Single sample, one app, one pass: provenance plus a consistent
+  direction, not a paper-grade speedup.
+- The run needed `VMLINUX_BTF` pointed at the framework kernel's vmlinux
+  (`vendor/build/x86/linux/vmlinux`). Without it the host-BTF path fails: the
+  workspace host kernel changed to `7.3.0-070300rc3-generic` (BTF mtime
+  11:22), whose `struct mm_struct` has no `user_ns`, so the regenerated
+  `vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h` (and the bcc
+  `vmlinux.h`) break upstream tetragon's `_(&mm->user_ns)` at
+  `native-tetragon`, and `host-native-bpf-x86` aborts. The framework kernel BTF
+  (`7.0.0-rc2+`) has `user_ns`, and `make -C vendor/bpf native-tetragon
+  VMLINUX_BTF=<framework vmlinux>` exits 0.
+- Root cause of that environmental failure, which is also a repo asymmetry
+  worth recording: `host-native-bpf-x86` (`runner/mk/build.mk`) invokes
+  `make -C vendor/bpf native-artifacts` with no `VMLINUX_BTF`, so
+  `vendor/bpf/Makefile` defaults it to `/sys/kernel/btf/vmlinux` — the *host*
+  kernel — while the symmetric `host-native-bpf-arm64` rule explicitly passes
+  `VMLINUX_BTF="$(HOST_KERNEL_VMLINUX_ARM64)"` (the framework kernel's
+  vmlinux). The native objects are baked into the runtime image and run *under
+  the framework kernel*, so x86 should derive field offsets from the same BTF
+  as arm64. The one-line fix (add `$(HOST_KERNEL_VMLINUX_X86)` as a prerequisite
+  and pass `VMLINUX_BTF="$(HOST_KERNEL_VMLINUX_X86)"`) was verified to make
+  `native-tetragon` build, but `runner/mk/build.mk` is a frozen benchmark
+  Makefile under the repo rules, so the change was **not** applied; the runs
+  above pass `VMLINUX_BTF` on the `make` command line instead. Applying the
+  Makefile fix needs explicit user authorization.
+- Concurrency caveat repeated: run one corpus invocation at a time (runs share
+  `.cache/container-images/*.image.tar` and the framework kernel build).
+
 ### AArch64 compare-and-branch predicate refinement, 2026-09-16
 
 - Gap: the `CBZ`/`CBNZ`/`TBZ`/`TBNZ` control transfers in
