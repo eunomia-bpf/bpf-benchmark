@@ -2676,11 +2676,16 @@ not establish complete native-byte semantic equivalence.
   851,805 + 876,905 + 858,145 = 2,586,855; post-ReJIT 950,132 + 938,734 +
   949,317 = 2,838,183; sum ratio 1.097. Single sample, one app, eleven passes:
   provenance plus a consistent direction, not a paper-grade speedup.
-- The ordering change belongs in the `full-x86` policy group in
-  `corpus/config/benchmark_config.yaml`, which the repo treats as optimization
-  policy (the same file the repo rules allow changing); it is recorded here as
-  the demonstrated fix, with the repository edit itself left for a focused change
-  so the guard (b) alternative can be weighed.
+- The ordering change was applied to the `full-x86` group in
+  `corpus/config/benchmark_config.yaml` (`kop` moved to the end) and committed as
+  `557a5af54`; the repository default now completes without a
+  `BPFREJIT_BENCH_PASSES` override. The arm64 `full` group in the same file has
+  the identical hazard (its `rotate`/`cond_select`/`extract`/`endian_fusion`/
+  `ccmp`/`bulk_memory`/`prefetch` koperation passes precede `wide_mem`) and was
+  deliberately left unchanged pending an arm64/KVM verification, since the
+  reproduction here is x86. Reordering it the same way is the expected fix.
+  The other alternative, making the pure-bytecode passes kop-payload-aware, is
+  still open.
 
 ### AArch64 memory address-offset refinement, 2026-09-16
 
