@@ -362,6 +362,19 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 			       ARM64_SIM_L_READ_REG(SRC2), (TAKEN),         \
 			       ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
+/*
+ * Sign extension of an already loaded value (the LDRSB/LDRSW/LDRSH step that
+ * widens a byte/halfword/word read into the destination). Delegates to the
+ * generated AArch64 extract/reverse/extend contract's SXTB/SXTH/SXTW arms,
+ * which KProgFormal/Arm64Extrev.lean proves equal to the independent library
+ * sign extension. The load handlers already hold the value, so there is no
+ * register read to hoist; WIDTH selects the destination write width and is
+ * unused by the SXT arms.
+ */
+#define ARM64_SIM_L_EXTREV_SIGNEXT(OP, VALUE, WIDTH)                        \
+	KPROG_ARM64_EXTREV_VALUE((OP), (VALUE), 0, 0, (WIDTH),             \
+				 ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
 #define ARM64_SIM_L_STACK_INDEX(OFF) ((__u32)(ARM64_SIM_STACK_BIAS + (OFF)))
 
 #define ARM64_SIM_L_STACK_READ(OFF, WIDTH)                                  \
@@ -815,17 +828,17 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		} else if ((OP) == ARM64_OP_LDRSB) {                         \
 			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM));              \
 			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, ARM64_WIDTH_8);\
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), arm64_sign_extend(__a64_l_value & 0xffULL, 8), __a64_l_width);\
+			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EXTREV_SIGNEXT(ARM64_OP_SXTB, __a64_l_value, __a64_l_width), __a64_l_width);\
 			ARM64_SIM_L_MEM_POST((SRC), (AUX), (IMM));             \
 		} else if ((OP) == ARM64_OP_LDRSW) {                         \
 			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM));              \
 			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, ARM64_WIDTH_32);\
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), arm64_sign_extend(__a64_l_value & 0xffffffffULL, 32), __a64_l_width);\
+			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EXTREV_SIGNEXT(ARM64_OP_SXTW, __a64_l_value, __a64_l_width), __a64_l_width);\
 			ARM64_SIM_L_MEM_POST((SRC), (AUX), (IMM));             \
 		} else if ((OP) == ARM64_OP_LDRSH) {                         \
 			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM));              \
 			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, ARM64_WIDTH_16);\
-			ARM64_SIM_L_WRITE_REG_WIDTH((DST), arm64_sign_extend(__a64_l_value & 0xffffULL, 16), __a64_l_width);\
+			ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EXTREV_SIGNEXT(ARM64_OP_SXTH, __a64_l_value, __a64_l_width), __a64_l_width);\
 			ARM64_SIM_L_MEM_POST((SRC), (AUX), (IMM));             \
 		} else if ((OP) == ARM64_OP_STORE) {                           \
 			ARM64_SIM_L_MEM_PRE((DST), (AUX), (IMM));              \
