@@ -164,32 +164,4 @@ static __always_inline __u64 arm64_apply_width(__u64 value, __u8 width)
 {
 	return KPROG_ARM64_APPLY_WIDTH(value, width);
 }
-
-static __always_inline __u64 arm64_replicate_byte_popcounts(__u64 value)
-{
-	__u64 out = 0;
-
-	out |= ((__u64)__builtin_popcountll(value & 0xffULL)) << 0;
-	out |= ((__u64)__builtin_popcountll((value >> 8) & 0xffULL)) << 8;
-	out |= ((__u64)__builtin_popcountll((value >> 16) & 0xffULL)) << 16;
-	out |= ((__u64)__builtin_popcountll((value >> 24) & 0xffULL)) << 24;
-	out |= ((__u64)__builtin_popcountll((value >> 32) & 0xffULL)) << 32;
-	out |= ((__u64)__builtin_popcountll((value >> 40) & 0xffULL)) << 40;
-	out |= ((__u64)__builtin_popcountll((value >> 48) & 0xffULL)) << 48;
-	out |= ((__u64)__builtin_popcountll((value >> 56) & 0xffULL)) << 56;
-	return out;
-}
-
-static __always_inline __u64 arm64_horizontal_add_u8(__u64 value)
-{
-	return (value & 0xffULL) +
-	       ((value >> 8) & 0xffULL) +
-	       ((value >> 16) & 0xffULL) +
-	       ((value >> 24) & 0xffULL) +
-	       ((value >> 32) & 0xffULL) +
-	       ((value >> 40) & 0xffULL) +
-	       ((value >> 48) & 0xffULL) +
-	       ((value >> 56) & 0xffULL);
-}
-
 #endif

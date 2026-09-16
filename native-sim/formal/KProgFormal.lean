@@ -47,3 +47,5 @@ import KProgFormal.GeneratedArm64Movk
 import KProgFormal.Arm64Movk
 import KProgFormal.GeneratedArm64Shift
 import KProgFormal.Arm64Shift
+import KProgFormal.GeneratedArm64Reduction
+import KProgFormal.Arm64Reduction

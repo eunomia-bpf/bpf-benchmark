@@ -18,6 +18,7 @@
 #include "../formal/generated/arm64_branch.h"
 #include "../formal/generated/arm64_movk.h"
 #include "../formal/generated/arm64_shift.h"
+#include "../formal/generated/arm64_reduction.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -403,6 +404,18 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 #define ARM64_SIM_L_SHIFT_VALUE(KIND, VALUE, AMOUNT, WIDTH)                 \
 	KPROG_ARM64_SHIFT_VALUE((KIND), (VALUE), (AMOUNT), (WIDTH),        \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE())
+
+/*
+ * Byte-lane reduction (CNT/UADDLV) applied to the vector register. The two
+ * reductions and their per-byte definitions are the generated AArch64
+ * reduction contract in formal/generated/arm64_reduction.h, which
+ * KProgFormal/Arm64Reduction.lean proves equal to an independent byte-lane
+ * statement over both reductions. The value is already loaded from v0, so there
+ * is no register read to hoist; no arm writes NZCV.
+ */
+#define ARM64_SIM_L_REDUCTION_VALUE(OP, VALUE)                              \
+	KPROG_ARM64_REDUCTION_VALUE((OP), (VALUE),                         \
+				    ARM64_SIM_L_UNSUPPORTED_OPCODE())
 
 #define ARM64_SIM_L_STACK_INDEX(OFF) ((__u32)(ARM64_SIM_STACK_BIAS + (OFF)))
 
@@ -914,10 +927,8 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_v0, __a64_l_width);\
 			else                                                   \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE();              \
-		} else if ((OP) == ARM64_OP_CNT) {                             \
-			__a64_v0 = arm64_replicate_byte_popcounts(__a64_v0);   \
-		} else if ((OP) == ARM64_OP_UADDLV) {                          \
-			__a64_v0 = arm64_horizontal_add_u8(__a64_v0) & 0xffffULL;\
+		} else if (KPROG_ARM64_REDUCTION_HANDLED(OP)) {                \
+			__a64_v0 = ARM64_SIM_L_REDUCTION_VALUE((OP), __a64_v0);\
 		} else {                                                       \
 			ARM64_SIM_L_UNSUPPORTED_OPCODE();                      \
 		}                                                            \
