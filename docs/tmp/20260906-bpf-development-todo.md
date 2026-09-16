@@ -2575,6 +2575,29 @@ not establish complete native-byte semantic equivalence.
   image with the fork-LLVM `bpfopt` and re-run
   `BPFREJIT_BENCH_PASSES="default" make corpus` (the separate `map_inline`
   overlay fix and the `VMLINUX_BTF` framework-kernel override already apply).
+- The default corpus policy now runs the fork-LLVM `bpfopt` and reaches `kop`
+  end to end. With the runtime image rebuilt from the fork-LLVM `bpfopt`,
+  `BPFREJIT_CORPUS_APPS=katran SAMPLES=1 WORKLOAD_DURATION=10` (framework-kernel
+  `VMLINUX_BTF`, `LLVM_DIR=<fork>`) runs the `full-x86` group
+  `[noop, map_inline, const_prop, dce, kop, wide_mem, bounds_check_merge,
+  skb_load_bytes_spec, noop, const_prop, dce]` and `kop` now **applies 71 of 71
+  matched sites** on `balancer_ingres` (xdp), shrinking it 2217 -> 2174
+  instructions. Before this, `kop` aborted the app on the first program. The
+  per-pass applied-site totals recorded in the run's load-time report are
+  `noop: 3`, `map_inline: 16`, `const_prop: 1`, `dce: 1`, `kop: 71`.
+- The `full-x86` policy then fails at `wide_mem`
+  (`loadtime bpfopt step wide_mem failed` on `balancer_ingres`, after `kop`
+  succeeded), so the two-start comparison still does not complete for the full
+  group; the app exits before the workloads run. This is a new, more advanced
+  failure point than the previous `kop` blocker and it is an optimizer-pass
+  interaction (the `wide_mem` byte-ladder collapse on kop-modified bytecode),
+  not a framework or measurement-validity issue. It is reproduced outside the VM
+  on the balancer `.text`: `wide_mem` alone applies 1 site cleanly (224 -> 51
+  insns), while `wide_mem` on `kop`-modified bytecode reports
+  `Invalid offset 33 for movsx at pc 11` (the local reproduction uses a
+  synthetic target map, so this is an indication, not the exact in-VM state).
+  Running the same policy without `wide_mem` (i.e. through `kop`) is the next
+  measurement to complete.
 
 ### AArch64 memory address-offset refinement, 2026-09-16
 
