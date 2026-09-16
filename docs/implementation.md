@@ -166,6 +166,24 @@ increment is committed and pushed immediately). Current state:
   as `movsx` and fails (`Invalid offset -32623 for movsx at pc 7`, confirmed from
   the retained `KEEP_WORKDIRS=1` workdir). The `kop` pass itself bypasses the
   roundtrip for kop-bearing input; the pure-bytecode passes do not.
+- The `full-x86` ordering fix is committed (`557a5af54`, `kop` moved after the
+  LLVM-roundtrip passes), so the repository default policy now completes with no
+  `BPFREJIT_BENCH_PASSES` override:
+  `BPFREJIT_CORPUS_APPS=katran SAMPLES=1 WORKLOAD_DURATION=10` exits 0 and
+  writes `corpus/results/x86_kvm_corpus_20260916_192529_199370/` with suite
+  `status: "completed"` and app `status: "ok"` over all eleven passes. Raw
+  `balancer_ingres`: 170.86 -> 148.00 ns/run (ratio 0.866); pktgen throughput
+  2,626,908 -> 2,798,385 pps (ratio 1.065); `bytes_jited` 13,641 -> 11,545.
+- The default policy across all six apps
+  (`corpus/results/x86_kvm_corpus_20260916_214505_768159/`, `CORPUS_EXIT 0`)
+  leaves two apps `status: "ok"`: `katran` (`balancer_ingres` 169.58 -> 146.87
+  ns/run, `kop: 71` sites) and `bcc/set` (thirteen tracing programs, 342 applied
+  sites total: `map_inline: 60`, `kop: 72`, `noop: 55`, `const_prop: 28`,
+  `dce: 26`, `wide_mem: 13`, `bounds_check_merge: 13`,
+  `skb_load_bytes_spec: 13`). The remaining four (`cilium/agent`,
+  `otelcol-ebpf-profiler/profiling`, `tetragon/observer`, `tracee/monitor`) fail
+  at their own application startup before the shim tracks programs; those are
+  pre-existing app-startup failures, not measurement-validity gates.
 - The katran `map_inline` step previously failed for a separate, fixable reason:
   `runner/config/passes/map_inline/katran.yaml` hardcoded an overlay directory
   under `/home/yunwei37/...` that does not exist here, so the step's `jq`

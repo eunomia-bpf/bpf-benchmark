@@ -2878,3 +2878,35 @@ not establish complete native-byte semantic equivalence.
   duplicated code is gone (14 lines removed, 4 added). `make -C
   native-sim/arm64 micro-proofs-build` rebuilds all 30 artifacts, all `ok`;
   `build`/`run` produce and load the BPF object.
+
+### Default policy across all six apps, 2026-09-16
+
+- With the default `full-x86` policy
+  (`SAMPLES=1 WORKLOAD_DURATION=10`, framework-kernel `VMLINUX_BTF`,
+  fork-LLVM `LLVM_DIR`) the full six-app sweep
+  (`corpus/results/x86_kvm_corpus_20260916_214505_768159/`, `CORPUS_EXIT 0`)
+  completes with **two apps `status: "ok"`** under the all-passes policy:
+  - `katran`: `status: ok`; applied sites `noop: 4`, `map_inline: 16`,
+    `const_prop: 2`, `dce: 2`, `wide_mem: 1`, `bounds_check_merge: 1`,
+    `skb_load_bytes_spec: 1`, `kop: 71`; `balancer_ingres` 169.58 -> 146.87
+    ns/run (ratio 0.866).
+  - `bcc/set`: `status: ok`; the multi-program BCC bundle applies
+    `noop: 55`, `map_inline: 60`, `const_prop: 28`, `dce: 26`, `wide_mem: 13`,
+    `bounds_check_merge: 13`, `skb_load_bytes_spec: 13`, `kop: 72` across its
+    thirteen BPF programs (`sys_enter`/`sys_exit` tracepoints,
+    `sched_switch`/`sched_wakeup` tracepoints, `kprobe__cap_cap`,
+    `fentry_vfs_*`, `block_rq_*`). Per-program raw `run_time_ns_delta /
+    run_cnt_delta` for the high-run programs: `sys_enter` 78.11 -> 77.91,
+    `sys_exit` 85.04 -> 84.71, `sched_switch` 111.73 -> 112.70,
+    `sched_wakeup` 92.23 -> 89.38, `kprobe__cap_cap` (first) 62.54 -> 60.89.
+    This is the broadest completed all-passes run so far: one app is XDP and one
+    is a thirteen-program tracing bundle.
+- The other four apps fail at their own application startup, before the shim
+  tracks their programs, and are raw failures unrelated to the optimizer
+  ordering: `cilium/agent` (`Cilium API PUT /v1/endpoint/0 returned HTTP 500:
+  "timeout while waiting for initial endpoint generation to complete"`),
+  `otelcol-ebpf-profiler/profiling` (`native app exited before BPF programs were
+  tracked by shim`), `tetragon/observer` (`Tetragon exited before BPF programs
+  were tracked by shim`), `tracee/monitor` (`failed to launch Tracee`). These
+  match the pre-existing app-startup failures recorded earlier and are not
+  measurement-validity gates.
