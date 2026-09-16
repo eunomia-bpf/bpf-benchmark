@@ -16,6 +16,7 @@ check:
 	python3 generate_arm64_movk_spec.py --check
 	python3 generate_arm64_shift_spec.py --check
 	python3 generate_arm64_reduction_spec.py --check
+	python3 generate_arm64_mem_offset_spec.py --check
 	python3 generate_arm64_branch_spec.py --check
 	python3 generate_arm64_cond_spec.py --check
 	python3 generate_x86_cond_spec.py --check
@@ -107,4 +108,8 @@ check:
 	lake env lean KProgFormal/Arm64Reduction.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_reduction_host.c -o build/test_arm64_reduction_host
 	./build/test_arm64_reduction_host
+	lake env lean KProgFormal/GeneratedArm64MemOffset.lean
+	lake env lean KProgFormal/Arm64MemOffset.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_mem_offset_host.c -o build/test_arm64_mem_offset_host
+	./build/test_arm64_mem_offset_host
 	lake env lean KProgFormal/Arm64Decode.lean

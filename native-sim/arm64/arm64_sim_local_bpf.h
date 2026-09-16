@@ -19,6 +19,7 @@
 #include "../formal/generated/arm64_movk.h"
 #include "../formal/generated/arm64_shift.h"
 #include "../formal/generated/arm64_reduction.h"
+#include "../formal/generated/arm64_mem_offset.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -541,12 +542,16 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 
 #define ARM64_SIM_L_MEM_BASE_OFF(AUX, INDEX, IMM)                           \
 	({                                                                 \
-		__s64 __a64_mbo_off = 0;                                \
-		if (!(ARM64_SIM_L_MEM_FLAGS(AUX) & (ARM64_MEM_PRE | ARM64_MEM_POST)))\
-			__a64_mbo_off = (__s64)(IMM);                     \
-		if ((INDEX) != ARM64_REG_NONE)                           \
-			__a64_mbo_off += (__s64)ARM64_SIM_L_MOD_VALUE((INDEX),\
-				ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), ARM64_WIDTH_64);\
+		__s64 __a64_mbo_off = (__s64)KPROG_ARM64_MEM_OFFSET(      \
+			(ARM64_SIM_L_MEM_FLAGS(AUX) & (ARM64_MEM_PRE | ARM64_MEM_POST)),\
+			(INDEX) != ARM64_REG_NONE,                        \
+			(IMM),                                            \
+			((INDEX) != ARM64_REG_NONE                        \
+				 ? ARM64_SIM_L_MOD_VALUE((INDEX),         \
+					ARM64_SIM_L_MOD(AUX),             \
+					ARM64_SIM_L_SHIFT(AUX),           \
+					ARM64_WIDTH_64)                   \
+				 : 0));                                   \
 		__a64_mbo_off;                                            \
 	})
 
