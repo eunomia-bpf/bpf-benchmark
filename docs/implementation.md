@@ -33,8 +33,9 @@ increment is committed and pushed immediately). Current state:
   (CBZ/CBNZ/TBZ/TBNZ) predicate contract that completes the
   condition-to-next-PC relation, the four-column AArch64 move-wide
   (MOVK) insertion contract, the four-kind AArch64 shift
-  (LSL/LSR/ASR/ROR) value contract shared with the decode table, and the
-  two-kind AArch64 byte-lane reduction (CNT/UADDLV) contract.
+  (LSL/LSR/ASR/ROR) value contract shared with the decode table, the
+  two-kind AArch64 byte-lane reduction (CNT/UADDLV) contract, and the
+  four-form AArch64 load/store address-offset contract.
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag
@@ -57,8 +58,9 @@ increment is committed and pushed immediately). Current state:
   and compare-and-branch `arm64_branch_next_pc_refines`) are now proved against
   independent statements over the emitted domain. The AArch64 condition table,
   width/NZCV flag contract, decode tables, and bitfield/multiply/extract/
-  reverse/extend/conditional-select/branch/move-wide/shift/reduction contracts,
-  and pointer-add/ABI-load contracts are already shared. The `arm64_umulh`,
+  reverse/extend/conditional-select/branch/move-wide/shift/reduction/
+  address-offset contracts, and pointer-add/ABI-load contracts are already
+  shared. The `arm64_umulh`,
   `arm64_reverse_bytes`, `arm64_reverse_bytes16`, `arm64_width_mask`,
   `arm64_width_bits`, `arm64_sign_bit`, `arm64_sign_extend`,
   `arm64_bits_mask`, the shift helpers

@@ -24,9 +24,10 @@ eight-operation conditional-select (`CSEL`/`CINC`/`CSET`/`CSETM`/`CINV`/
 four-kind compare-and-branch (`CBZ`/`CBNZ`/`TBZ`/`TBNZ`) predicate contract, the
 four-column move-wide (`MOVK`) insertion contract, the four-kind shift
 (`LSL`/`LSR`/`ASR`/`ROR`) value contract shared with the decode table, the
-two-kind byte-lane reduction (`CNT`/`UADDLV`) contract, the
-ALU/shift/modifier/bitfield decode tables, the condition table, and the
-pointer-add/ABI-load contracts against independently stated specs
+two-kind byte-lane reduction (`CNT`/`UADDLV`) contract, the four-form
+load/store address-offset contract, the ALU/shift/modifier/bitfield decode
+tables, the condition table, and the pointer-add/ABI-load contracts against
+independently stated specs
 (`make -C ../formal check`), plus tag erasure for a four-operation shared
 fragment. Those per-step contracts are not yet mechanically tied to every C
 C macro in this directory and do not cover the full implemented subset. Verifier

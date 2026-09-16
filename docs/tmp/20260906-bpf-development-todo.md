@@ -2575,3 +2575,54 @@ not establish complete native-byte semantic equivalence.
   image with the fork-LLVM `bpfopt` and re-run
   `BPFREJIT_BENCH_PASSES="default" make corpus` (the separate `map_inline`
   overlay fix and the `VMLINUX_BTF` framework-kernel override already apply).
+
+### AArch64 memory address-offset refinement, 2026-09-16
+
+- Gap: `ARM64_SIM_L_MEM_BASE_OFF` in
+  `native-sim/arm64/arm64_sim_local_bpf.h` computed the offset a load/store adds
+  to its base register with an inline if/if-accumulate, the last hand-written
+  value computation in the memory handler.
+- Contract shape: the offset has two independent boolean inputs (pre/post-index,
+  indexed or not) and is a 64-bit two's-complement accumulation, so the contract
+  is a four-case table over `(prepost, hasIndex)` with `BitVec 64` addition.
+- Generator: `native-sim/formal/generate_arm64_mem_offset_spec.py` reads
+  `arm64_mem_offset_spec.json` and emits `generated/arm64_mem_offset.h`
+  (`KPROG_ARM64_MEM_OFFSET(PREPOST, HAS_INDEX, IMM, INDEX)`) and
+  `KProgFormal/GeneratedArm64MemOffset.lean` (`value` and an independent
+  `valueSpec` case table). It has a `--check` mode and a `make check` line.
+- C wiring: `arm64_sim_local_bpf.h` includes the generated header and
+  `ARM64_SIM_L_MEM_BASE_OFF` now delegates, keeping the `(INDEX) !=
+  ARM64_REG_NONE` guard for the source-modified index value. Behavior is
+  unchanged for all four addressing forms.
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64MemOffset.lean` proves
+  `arm64_mem_offset_refines` (the generated form equals the independent case
+  table over all four forms), `arm64_mem_offset_case_dispatch`, and
+  `arm64_mem_offset_prepost_ignores_immediate`, plus three `native_decide`
+  examples. No `sorry`/`admit`. A `signed-add == wrapping-add` theorem was
+  drafted and removed: it is definitionally true for `BitVec` addition, so it
+  added no information; the signed/wrapping equivalence is instead a property of
+  the *host oracle*, which accumulates in `__int128` and truncates.
+- Lesson learned: the C code adds `__s64` values, but signed two's-complement
+  addition and 64-bit wrapping addition produce identical bits, so the contract
+  is stated over `BitVec 64` and needs no sign model; `BitVec.ofInt`-based
+  signed statements were not provable here (`bv_decide` abstracts
+  `BitVec.ofInt 64 (a.toInt + b.toInt)`), confirming the wrapping formulation is
+  the right one.
+- Host cross-check `native-sim/formal/test_arm64_mem_offset_host.c`: compiles the
+  generated macro with zero warnings under `-Wall -Wextra` and compares it to an
+  oracle that accumulates in `__int128` (a different expression tree). It sweeps
+  a 2x2 x 7-imm x 6-index boundary table, then a fixed-seed 20000-iteration LCG
+  sweep (seed `0x2b9d4c77e1a05f38`). Result: `OK (20168 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, two `lean` lines, mem-offset host cross-check step; reduction
+  `OK (20017 cases)`). Mutation checks: changing a flag in
+  `arm64_mem_offset_spec.json` makes `--check` exit 1; three independent semantic
+  mutations of `generated/arm64_mem_offset.h` (pre/post keeps the immediate,
+  index subtracted, index replaced by the immediate) each make the host
+  cross-check exit 1 with a printed `MISMATCH`, while the pristine header stays
+  `OK`. `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts, all `ok`; `make -C native-sim/arm64 build`/`run`
+  produce and load the BPF object.
+- Open AArch64 boundary after this increment: the remaining load/store tag paths
+  (`ARM64_SIM_L_MEM_PRE`/`POST` writeback and the pointer-tag propagation), the
+  vector/`.D0`/`.Q0` move paths (`ARM64_OP_FMOV`), and native-byte equivalence.
