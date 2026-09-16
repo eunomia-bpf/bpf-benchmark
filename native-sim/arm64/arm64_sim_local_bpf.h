@@ -431,20 +431,10 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 		    (__a64_str_index & 7U) == 0) {                        \
 			__a64_str_value = __a64_stack.q[__a64_str_index >> 3];\
 		} else {                                                   \
-			__a64_str_value = __a64_stack.b[__a64_str_index];  \
-			if (__a64_str_width >= ARM64_WIDTH_16)            \
-				__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 1] << 8;\
-			if (__a64_str_width >= ARM64_WIDTH_32) {          \
-				__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 2] << 16;\
-				__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 3] << 24;\
-			}                                                 \
-			if (__a64_str_width == ARM64_WIDTH_64) {          \
-				__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 4] << 32;\
-				__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 5] << 40;\
-				__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 6] << 48;\
-				__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 7] << 56;\
-			}                                                 \
-		}                                                         \
+			__a64_str_value =                                  \
+				KPROG_ARM64_LOAD_BYTES(&__a64_stack.b[__a64_str_index],\
+						       __a64_str_width);   \
+		}                                                          \
 		__a64_str_value;                                          \
 	})
 
