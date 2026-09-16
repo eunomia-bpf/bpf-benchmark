@@ -41,3 +41,5 @@ import KProgFormal.GeneratedArm64Extrev
 import KProgFormal.Arm64Extrev
 import KProgFormal.GeneratedArm64Csel
 import KProgFormal.Arm64Csel
+import KProgFormal.GeneratedArm64Branch
+import KProgFormal.Arm64Branch

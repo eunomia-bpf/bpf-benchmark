@@ -15,6 +15,7 @@
 #include "../formal/generated/arm64_mul.h"
 #include "../formal/generated/arm64_extrev.h"
 #include "../formal/generated/arm64_csel.h"
+#include "../formal/generated/arm64_branch.h"
 
 #define ARM64_SIM_CONCAT2(A, B) A##B
 #define ARM64_SIM_CONCAT(A, B) ARM64_SIM_CONCAT2(A, B)
@@ -1340,47 +1341,50 @@ ARM64_SIM_CONCAT(__a64_sim_jcc_fallthrough_, ID):                            \
 #define ARM64_SIM_A64_JCC(COND, CURRENT, TARGET, LABEL)                     \
 	ARM64_SIM_A64_JCC_IMPL((COND), (CURRENT), (TARGET), LABEL, __LINE__)
 
-#define ARM64_SIM_A64_CBZ_IMPL(REG, ZERO, CURRENT, TARGET, LABEL, ID)       \
+#define ARM64_SIM_A64_CBZ_IMPL(REG, KIND, CURRENT, TARGET, LABEL, ID)        \
 	do {                                                               \
 		__u64 __a64_l_value = ARM64_SIM_L_READ_REG(REG);          \
+		int __a64_l_taken =                                        \
+			KPROG_ARM64_BRANCH_TEST((KIND), __a64_l_value, 0ULL);\
 		if ((TARGET) <= (CURRENT)) {                              \
-			if (((__a64_l_value == 0) != (ZERO))) {           \
+			if (!__a64_l_taken) {                             \
 				goto ARM64_SIM_CONCAT(__a64_sim_cb_fallthrough_, ID);\
 			}                                                 \
 			goto LABEL;                                      \
 ARM64_SIM_CONCAT(__a64_sim_cb_fallthrough_, ID):                             \
 			;                                                \
-		} else if ((__a64_l_value == 0) == (ZERO)) {             \
+		} else if (__a64_l_taken) {                               \
 			goto LABEL;                                      \
 		}                                                         \
 	} while (0)
 
 #define ARM64_SIM_A64_CBZ(REG, CURRENT, TARGET, LABEL)                      \
-	ARM64_SIM_A64_CBZ_IMPL((REG), 1, (CURRENT), (TARGET), LABEL, __LINE__)
+	ARM64_SIM_A64_CBZ_IMPL((REG), KPROG_ARM64_BRANCH_CBZ, (CURRENT), (TARGET), LABEL, __LINE__)
 
 #define ARM64_SIM_A64_CBNZ(REG, CURRENT, TARGET, LABEL)                     \
-	ARM64_SIM_A64_CBZ_IMPL((REG), 0, (CURRENT), (TARGET), LABEL, __LINE__)
+	ARM64_SIM_A64_CBZ_IMPL((REG), KPROG_ARM64_BRANCH_CBNZ, (CURRENT), (TARGET), LABEL, __LINE__)
 
-#define ARM64_SIM_A64_TBZ_IMPL(REG, BIT, ZERO, CURRENT, TARGET, LABEL, ID)  \
+#define ARM64_SIM_A64_TBZ_IMPL(REG, BIT, KIND, CURRENT, TARGET, LABEL, ID)  \
 	do {                                                               \
-		__u64 __a64_l_value = (ARM64_SIM_L_READ_REG(REG) >> (BIT)) & 1ULL;\
+		int __a64_l_taken =                                        \
+			KPROG_ARM64_BRANCH_TEST((KIND), ARM64_SIM_L_READ_REG(REG), (BIT));\
 		if ((TARGET) <= (CURRENT)) {                              \
-			if (((__a64_l_value == 0) != (ZERO))) {           \
+			if (!__a64_l_taken) {                             \
 				goto ARM64_SIM_CONCAT(__a64_sim_tb_fallthrough_, ID);\
 			}                                                 \
 			goto LABEL;                                      \
 ARM64_SIM_CONCAT(__a64_sim_tb_fallthrough_, ID):                             \
 			;                                                \
-		} else if ((__a64_l_value == 0) == (ZERO)) {             \
+		} else if (__a64_l_taken) {                               \
 			goto LABEL;                                      \
 		}                                                         \
 	} while (0)
 
 #define ARM64_SIM_A64_TBZ(REG, BIT, CURRENT, TARGET, LABEL)                 \
-	ARM64_SIM_A64_TBZ_IMPL((REG), (BIT), 1, (CURRENT), (TARGET), LABEL, __LINE__)
+	ARM64_SIM_A64_TBZ_IMPL((REG), (BIT), KPROG_ARM64_BRANCH_TBZ, (CURRENT), (TARGET), LABEL, __LINE__)
 
 #define ARM64_SIM_A64_TBNZ(REG, BIT, CURRENT, TARGET, LABEL)                \
-	ARM64_SIM_A64_TBZ_IMPL((REG), (BIT), 0, (CURRENT), (TARGET), LABEL, __LINE__)
+	ARM64_SIM_A64_TBZ_IMPL((REG), (BIT), KPROG_ARM64_BRANCH_TBNZ, (CURRENT), (TARGET), LABEL, __LINE__)
 
 #define ARM64_SIM_A64_CALL(LABEL, RETURN_ADDR)                              \
 	do {                                                               \

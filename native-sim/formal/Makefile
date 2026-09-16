@@ -13,6 +13,7 @@ check:
 	python3 generate_arm64_mul_spec.py --check
 	python3 generate_arm64_extrev_spec.py --check
 	python3 generate_arm64_csel_spec.py --check
+	python3 generate_arm64_branch_spec.py --check
 	python3 generate_arm64_cond_spec.py --check
 	python3 generate_x86_cond_spec.py --check
 	python3 generate_x86_logic_flags_spec.py --check
@@ -87,4 +88,8 @@ check:
 	lake env lean KProgFormal/Arm64Csel.lean
 	$(CC) -Wall -Wextra -O2 -I. test_arm64_csel_host.c -o build/test_arm64_csel_host
 	./build/test_arm64_csel_host
+	lake env lean KProgFormal/GeneratedArm64Branch.lean
+	lake env lean KProgFormal/Arm64Branch.lean
+	$(CC) -Wall -Wextra -O2 -I. test_arm64_branch_host.c -o build/test_arm64_branch_host
+	./build/test_arm64_branch_host
 	lake env lean KProgFormal/Arm64Decode.lean

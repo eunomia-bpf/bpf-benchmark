@@ -1,0 +1,1 @@
+{"schema_version":1,"operation":"arm64Branch","kinds":[{"name":"cbz","code":0,"lean":"decide (value = 0)"},{"name":"cbnz","code":1,"lean":"decide (value \u2260 0)"},{"name":"tbz","code":2,"lean":"decide (((value >>> (bit &&& 63).toNat) &&& 1) = 0)"},{"name":"tbnz","code":3,"lean":"decide (((value >>> (bit &&& 63).toNat) &&& 1) = 1)"}]}
