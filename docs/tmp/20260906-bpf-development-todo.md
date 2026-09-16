@@ -1916,3 +1916,58 @@ not establish complete native-byte semantic equivalence.
   extract/reverse/extend contract is stated over `BitVec 64` while the C macro
   operates on `__u64`; the host cross-check bridges that C/Lean semantics gap for
   the tested vectors only.
+
+### Make-backed x86 KVM corpus attempt, 2026-09-15/16
+
+- This session the runtime environment became fully available for the first time
+  here: writable `/dev/kvm`, a running `dockerd`, `virtme-ng` 1.41,
+  `qemu-system-{x86_64,aarch64}`, the framework x86 `bzImage`, and both runner
+  image tars. Two public Make-backed runs were therefore attempted to establish
+  real KVM evidence for the current tree (commit `9476539f0`, the AArch64
+  extract/reverse/extend increment; its diff touches only `native-sim/arm64/**`
+  and `native-sim/formal/**`, which the x86 corpus path does not consume).
+- `make micro BENCH="simple" SAMPLES=1 WARMUPS=0 INNER_REPEAT=10` completed exit 0
+  and wrote `micro/results/x86_kvm_micro_20260915_194201_705027/`
+  (`details/result.json`). The `simple` program ran on the `native`, `kernel` and
+  `llvmbpf` runtimes with result `12345678` and retval `2` (expected `12345678`).
+  This is a functional smoke of the KVM path, not a throughput measurement.
+- `make corpus BPFREJIT_CORPUS_APPS="bcc/set" SAMPLES=1 WORKLOAD_DURATION=10`
+  ran end-to-end (`CORPUS_EXIT 0`; a full framework-kernel rebuild, then a VM
+  workload) and wrote `corpus/results/x86_kvm_corpus_20260915_223707_648561/`.
+  The run's own `metadata.json` records `status: "error"` and the app records
+  `status: "error"` with `BCC tool capable exited before BPF programs were
+  tracked by shim` / `failed to load BPF skeleton 'capable_bpf': -22`. The
+  load-time step itself is `status: "ok"` and the baseline descriptor table is
+  present, but the BCC `capable` tool died before the shim tracked a program, so
+  no post-ReJIT workload or per-program delta exists. This is an app-side startup
+  failure, not a throughput result.
+- A second app was then run: `make corpus BPFREJIT_CORPUS_APPS="cilium/agent"
+  SAMPLES=1 WORKLOAD_DURATION=10` (`CORPUS_CILIUM_EXIT 0`;
+  `corpus/results/x86_kvm_corpus_20260915_230952_590418/`). It also records
+  `status: "error"`: `native app exited before BPF programs were tracked by
+  shim`, with the Cilium agent's stdout ending at
+  `level=fatal msg="Failed to compile XDP program" ... error="attaching XDP
+  program to interface bpfbench0: Failed to compile bpf_xdp.o: context
+  canceled"`. Again the load-time step is `status: "ok"` and the baseline is
+  captured, but the agent is canceled before shim tracking, so there is no
+  post-ReJIT workload.
+- A third attempt (`tetragon/observer`) failed during the runtime-image rebuild
+  itself: `docker save ... image.tar.tmp` then `mv: cannot stat ... .tmp`, i.e.
+  the `x86-runner-runtime-image-tar` rule's temp teardown raced with a
+  concurrent run because the earlier corpus invocations had started builds that
+  were still finishing. That is an operator sequencing mistake in this session,
+  not a repository defect; the image tar rebuilt from `23:09` is intact
+  (`tar -tf` succeeds) and `docker run --rm bpf-benchmark/runner-runtime:x86_64
+  ls /usr/local/lib/bpfrejit/` shows `libbpfrejit_shim.so` present.
+- Conclusion and caveats: the public Make-backed KVM path is functional
+  end-to-end (kernel boot, VM workload, artifact write) and the micro smoke
+  passes, but no paper-grade corpus throughput result was obtained this session
+  because both corpus apps fail at application startup in the container (BCC
+  skeleton load `-22`; Cilium XDP compile canceled). Those are x86-side runtime
+  issues unrelated to the AArch64 proof line, and they are recorded as raw
+  failures per the standing rule (keep all failures, no relabeling). The next
+  useful step on the benchmark side is to diagnose the container-local BCC/
+  Cilium startup failures; the next useful step on the proof side is the
+  remaining AArch64 load/store handler compositions. Concurrency caveat: run one
+  corpus invocation at a time, since parallel runs share
+  `.cache/container-images/*.image.tar` and the runtime kernel build.

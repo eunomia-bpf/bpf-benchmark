@@ -67,6 +67,21 @@ increment is committed and pushed immediately). Current state:
   and raw results. Performance claims come only from public Make-backed runs
   (`make micro`, `make corpus`, `make selftest`).
 
+### Runtime status (2026-09-15/16)
+
+- The KVM runtime path is operational in this Workspace: writable `/dev/kvm`,
+  running `dockerd`, `virtme-ng` 1.41, `qemu-system-{x86_64,aarch64}`, the
+  framework x86 `bzImage`, and both runner image tars. `make micro BENCH="simple"
+  SAMPLES=1 WARMUPS=0 INNER_REPEAT=10` passes (result `12345678` on the native/
+  kernel/llvmbpf runtimes; `micro/results/x86_kvm_micro_20260915_194201_705027/`).
+- `make corpus` runs end-to-end but the two attempted apps (`bcc/set`,
+  `cilium/agent`) fail at application startup inside the container before the
+  shim tracks any program (BCC `capable` skeleton load `-22`; Cilium XDP compile
+  canceled). Their load-time plans execute (`status: ok`) and baselines are
+  captured, but there is no post-ReJIT workload, so no paper-grade throughput
+  result has been obtained yet. Details, run paths and the concurrent-run
+  image-tar race are in the research log. Run one corpus invocation at a time.
+
 ## Speculative-optimization line (paper B)
 
 The stock-kernel speculative-optimization experiment line and its retained
