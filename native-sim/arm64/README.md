@@ -19,6 +19,8 @@ value contract, the five-kind bitfield (UBFX/SBFX/UBFIZ/BFXIL/BFI) value
 contract, the eight-operation multiply-family (MADD/MSUB/MUL/UMULL/UDIV/UMULH/
 UMADDL/SMADDL) value contract, the six-operation extract/reverse/extend
 (`EXTR`/`REV`/`REV16`/`SXTH`/`SXTW`/`SXTB`) value contract, the
+eight-operation conditional-select (`CSEL`/`CINC`/`CSET`/`CSETM`/`CINV`/
+`CSINV`/`CSINC`/`CSNEG`) value contract composed with the condition table, the
 ALU/shift/modifier/bitfield decode tables, the condition table, and the
 pointer-add/ABI-load contracts against independently stated specs
 (`make -C ../formal check`), plus tag erasure for a four-operation shared

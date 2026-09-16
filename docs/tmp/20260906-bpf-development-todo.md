@@ -1971,3 +1971,108 @@ not establish complete native-byte semantic equivalence.
   remaining AArch64 load/store handler compositions. Concurrency caveat: run one
   corpus invocation at a time, since parallel runs share
   `.cache/container-images/*.image.tar` and the runtime kernel build.
+
+### AArch64 conditional-select refinement, 2026-09-16
+
+- Gap: the eight AArch64 conditional-select arms (CSEL, CINC, CSET, CSETM,
+  CINV, CSINV, CSINC, CSNEG) were three hand-written if/else-if chains inside
+  `ARM64_SIM_L_EXEC_ALU` in `native-sim/arm64/arm64_sim_local_bpf.h`. They
+  restated the condition evaluation (`ARM64_SIM_L_EVAL_COND`) at each site and
+  read each source register inline, so a side-effecting operand read could be
+  evaluated more than once, and the value selection had no independently stated
+  contract. The previous increment's open AArch64 boundary named the remaining
+  register-lane handler compositions; this is the largest emitted one after the
+  already-shared families (30 CSEL sites, 35 CCMP_REG, 14 CCMP_IMM, 3 CSET,
+  2 CINC in the 29 micro kernels).
+- Generator: `native-sim/formal/generate_arm64_csel_spec.py` reads
+  `arm64_csel_spec.json` and emits the shared contract in two forms:
+  `generated/arm64_csel.h` (`KPROG_ARM64_CSEL_VALUE(OP, SRC, SRC2, TAKEN,
+  UNSUPPORTED)`, a statement expression switching on the eight raw numeric
+  opcodes `28U, 29U, 30U, 52U, 61U, 62U, 68U, 69U` with an explicit
+  `default: UNSUPPORTED; break;`) and
+  `KProgFormal/GeneratedArm64Csel.lean` (a self-contained
+  `namespace GeneratedArm64Csel` with `inductive Csel`, `code`, `mnemonic` and
+  `value`, whose arms are `if taken then <first> else <second>`). The family is
+  not contiguous in the ARM64_OP_* space, so the C macro uses the raw
+  architectural opcode values as case labels; `load()` parses `ARM64_OP_*` out
+  of `native-sim/arm64/arm64_sim.h` and exits 1 on drift, and the emitted
+  `_Static_assert`s pin the same eight values at compile time.
+  `KPROG_ARM64_CSEL_HANDLED(OP)` has one arm and one coverage assert per code.
+  It has a `--check` mode and a `make check` line.
+- C wiring: `native-sim/arm64/arm64_sim_local_bpf.h` includes the generated
+  header, gains the `ARM64_SIM_L_CSEL_VALUE(OP, SRC, SRC2, TAKEN)` wrapper, and
+  replaces the three chains with a single `else if (KPROG_ARM64_CSEL_HANDLED(OP))`
+  branch. The condition result is computed once into `__a64_l_taken`. **CSEL at
+  width 64 keeps its pointer-tag-preserving path**: when the condition holds it
+  writes `SRC`'s pointer and provenance tag, otherwise `SRC2`'s, exactly as
+  before, because the value contract is stated over `__u64` and cannot express
+  the tag lane. Every other arm — and CSEL at width 32 — delegates to the
+  generated value macro and the width-narrowing register write.
+  `ARM64_SIM_L_READ_REG` is now evaluated exactly once per source operand in the
+  delegated arms.
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64Csel.lean` proves
+  `arm64_csel_refines` (the generated ternary `value` equals an independently
+  stated bit-mask mux `arm64CselMux`, for all eight operations and both
+  condition outcomes), `arm64_csel_cond_refines` (the same composition when the
+  condition result comes from the generated `GeneratedArm64Cond.eval`, tying it
+  to the already-proven condition contract rather than restating it),
+  `arm64_csel_flags_unchanged` (the family reads flags but writes none),
+  `arm64_csel_code_in_range`, `arm64_csel_code_dispatch`, and a `native_decide`
+  example per operation. The two candidate values of each arm are named
+  separately from the selection, so the refinement relates two genuinely
+  different formulations (C ternary vs. architectural bit-mask mux). No
+  `sorry`/`admit`. Both new modules are in the `KProgFormal.lean` root import
+  list and both have `lean` lines in the Makefile.
+- Lesson learned: a `Bool`-valued selector is the one place `bv_decide` is
+  comfortable — `cases op <;> simp only [value, arm64CselValueSpec,
+  arm64CselMux] <;> (cases taken <;> bv_decide)` closes every arm, because the
+  goal stays inside `BitVec 64` and never bit-blasts a `Width` value (which is
+  what emitted the colliding `Width.enumToBitVec` helper in the
+  extract/reverse/extend increment). A second lesson: the pointer-tag lane at
+  width 64 is outside the value contract's domain; the honest cutover keeps that
+  one path hand-written and delegates the rest, instead of weakening the
+  contract to a `(value, tag)` pair that no other arm needs.
+- Flag obligation: all eight arms write no NZCV (the family only reads flags), so
+  `arm64CselFlagsSpec` is the identity and `arm64_csel_flags_unchanged` proves
+  it. This is a documentary obligation, not a new spec family.
+- Host cross-check `native-sim/formal/test_arm64_csel_host.c`: compiles the
+  generated macro with zero warnings under `-Wall -Wextra` and compares it
+  against an independent oracle that computes each arm's two candidate values
+  with architectural arithmetic and selects with a bit mask (never the macro's
+  ternary). It sweeps a 10-vector boundary table (`0`, all-ones, `1`,
+  `0x7fff…`, `0x8000…`, `0x80000000`/`0xffffffff`, mid-range vectors) over both
+  condition outcomes and all eight ops, then a fixed-seed 20000-iteration LCG
+  sweep (seed `0x0123456789abcdef`, distinct from the other increments' seeds),
+  then a `fork`/`waitpid` check that opcode `9U` aborts with `SIGABRT` through
+  the generated `default:` arm. Result: `OK (160161 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, two `lean` lines, and the arm64 conditional-select host
+  cross-check step; earlier steps stay green: arm64 extract/reverse/extend
+  `OK (120145 cases)`, arm64 mul `OK (160161 cases)`, arm64 bitfield
+  `OK (126246 cases)`, arm64 mod `OK (225292 cases)`, arm64 ALU result
+  `OK (120073 cases)`, arm64 flags `OK (60144 cases)`, x86 memory-access
+  `OK (40020 cases)`). Mutation checks: changing an opcode in
+  `arm64_csel_spec.json` makes `--check` exit 1; changing `ARM64_OP_CSNEG` in
+  `arm64_sim.h` makes the generator report `arm64 conditional-select opcodes
+  drift` and exit 1; nine independent semantic mutations of
+  `generated/arm64_csel.h` (CSEL swapped sources, CINC decrement, CSET constant,
+  CSETM mask, CINV no complement, CSINV complement-first, CSINC wrong addend,
+  CSNEG wrong source, `default` arm not aborting) each make the host cross-check
+  exit 1 with a printed `MISMATCH`, while the pristine header stays `OK`.
+  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30 workload-derived
+  artifacts, all `ok`; `make -C native-sim/arm64 build` produces the BPF object
+  from `arm64_sim_hardcoded.bpf.c` (which includes the changed headers) and
+  `make -C native-sim/arm64 run` loads it (`load-only`, fd=4).
+- Dead-code follow-up: the extract/reverse/extend cutover had left
+  `arm64_width_mask`, `arm64_width_bits` and `arm64_sign_bit` with no caller
+  (only their definitions remained). They were removed in a separate commit
+  (`native-sim: drop dead AArch64 width helpers after extract cutover`) after
+  the arm64 build, the 30 micro-proof artifacts, and the full formal check all
+  stayed green.
+- Open AArch64 boundary after this increment: the load/store handler
+  compositions (including the LDRSB/LDRSW/LDRSH sign-extending loads, whose
+  `arm64_sign_extend` helper is now the last private-helper caller) and
+  condition-to-next-PC beyond the condition contract. These theorems do not
+  establish native-byte equivalence, and the Lean conditional-select contract is
+  stated over `BitVec 64` while the C macro operates on `__u64`; the host
+  cross-check bridges that C/Lean semantics gap for the tested vectors only.

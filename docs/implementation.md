@@ -25,9 +25,11 @@ increment is committed and pushed immediately). Current state:
   register-register AND/OR/XOR/SHL/SHR/SAR/ROL handler compositions, the
   carry-sensitive handler classification (SBB/ADC routing through generated C
   predicates), the AArch64 NZCV flag and decode-table contracts, the
-  eight-operation AArch64 multiply-family value contract, and the six-operation
+  eight-operation AArch64 multiply-family value contract, the six-operation
   AArch64 extract/reverse/extend (EXTR/REV/REV16/SXTH/SXTW/SXTB) value
-  contract.
+  contract, and the eight-operation AArch64 conditional-select family
+  (CSEL/CINC/CSET/CSETM/CINV/CSINV/CSINC/CSNEG) value contract composed with
+  the condition table.
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag
@@ -41,16 +43,18 @@ increment is committed and pushed immediately). Current state:
   unsigned-semantics correspondence, compiler/native-byte correspondence,
   multi-step control-flow traces, helpers, and specialization preservation.
 - Open on the AArch64 side: the ALU op-step and register-lane handler
-  compositions (in progress), the remaining load/store handler compositions,
-  `MADD`/`MSUB`/`UMULH` flag consequences if any (the multiply family writes no
-  NZCV, matching the absence of MADD/MSUB-with-flags opcodes), and
-  condition-to-next-PC beyond the condition contract. The AArch64 condition
-  table, width/NZCV flag contract, decode tables, bitfield/multiply/extract/
-  reverse/extend value contracts, and pointer-add/ABI-load contracts are
-  already shared. The `arm64_umulh`, `arm64_reverse_bytes` and
-  `arm64_reverse_bytes16` helpers were removed once
-  `native-sim/arm64/arm64_sim_local_bpf.h` delegated to the generated
-  contracts; `arm64_sign_extend` remains for the LDRSB/LDRSW/LDRSH handlers.
+  compositions (in progress), the remaining load/store handler compositions
+  (the LDRSB/LDRSW/LDRSH sign-extending loads still call the private
+  `arm64_sign_extend` helper), `MADD`/`MSUB`/`UMULH` flag consequences if any
+  (the multiply family writes no NZCV, matching the absence of
+  MADD/MSUB-with-flags opcodes), and condition-to-next-PC beyond the condition
+  contract. The AArch64 condition table, width/NZCV flag contract, decode
+  tables, bitfield/multiply/extract/reverse/extend/conditional-select value
+  contracts, and pointer-add/ABI-load contracts are already shared. The
+  `arm64_umulh`, `arm64_reverse_bytes`, `arm64_reverse_bytes16`,
+  `arm64_width_mask`, `arm64_width_bits` and `arm64_sign_bit` helpers were
+  removed once `native-sim/arm64/arm64_sim_local_bpf.h` delegated to the
+  generated contracts.
 - The generation binding (verifier-accepted proof + native bytes bound to one
   immutable load generation) and the functional smokes establish different
   properties from these refinement theorems; none of them claims
