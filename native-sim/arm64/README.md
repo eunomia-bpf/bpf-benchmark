@@ -26,7 +26,8 @@ four-column move-wide (`MOVK`) insertion contract, the four-kind shift
 (`LSL`/`LSR`/`ASR`/`ROR`) value contract shared with the decode table, the
 two-kind byte-lane reduction (`CNT`/`UADDLV`) contract, the four-form
 load/store address-offset contract, the four-direction FMOV move contract, the
-four-width little-endian byte-ladder load contract, the
+four-width little-endian byte-ladder load contract, the eight-lane byte-lane
+scatter contract (proved inverse to the load ladder), the
 ALU/shift/modifier/bitfield decode tables, the condition table, and the
 pointer-add/ABI-load contracts against independently stated specs
 (`make -C ../formal check`), plus tag erasure for a four-operation shared

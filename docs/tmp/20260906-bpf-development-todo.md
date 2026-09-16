@@ -2910,3 +2910,61 @@ not establish complete native-byte semantic equivalence.
   were tracked by shim`), `tracee/monitor` (`failed to launch Tracee`). These
   match the pre-existing app-startup failures recorded earlier and are not
   measurement-validity gates.
+
+### AArch64 byte-lane scatter refinement, 2026-09-16
+
+- Gap: the stack byte scatter in `ARM64_SIM_L_STACK_WRITE_TAG`
+  (`native-sim/arm64/arm64_sim_local_bpf.h`) extracted each byte lane with an
+  inline `(__u8)(value >> 8*i)` expression, the mirror of the load ladder and
+  the last hand-written per-byte extraction in the AArch64 memory path.
+- Contract shape: the eight lanes are the closed set the scatter uses, so the
+  contract is an eight-way lane enumeration with the shift `8*lane`.
+- Generator: `native-sim/formal/generate_arm64_byte_lane_spec.py` reads
+  `arm64_byte_lane_spec.json` and emits `generated/arm64_byte_lane.h`
+  (`KPROG_ARM64_BYTE_AT(LANE, VALUE, UNSUPPORTED)`, an eight-case switch
+  resolving the lane shift, `default: UNSUPPORTED;`) and
+  `KProgFormal/GeneratedArm64ByteLane.lean` (a self-contained namespace with
+  `ByteLane`, `index`, `shift`, `byteAt`). It has a `--check` mode and a
+  `make check` line. A `KPROG_ARM64_BYTE_AT_HANDLED` predicate was drafted and
+  removed before commit because nothing called it (no dead code).
+- C wiring: `arm64_sim_local_bpf.h` includes the generated header and the stack
+  scatter now calls `KPROG_ARM64_BYTE_AT(i, value, ...)` for each lane. Every
+  call site passes a constant lane, so clang folds each switch to a single
+  shift; the emitted `arm64_sim_hardcoded.bpf.o` is **byte-identical** to the
+  pre-change object (same 11,168-byte size, `.text` disassembly diff shows only
+  the filename header), and `make -C native-sim/arm64 run` still loads it.
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64ByteLane.lean` proves
+  `arm64_byte_lane_refines` (the generated shift-then-narrow equals an
+  independent mask-shift form), `arm64_byte_lane_shift_dispatch`,
+  `arm64_byte_lane_load_inverse`, and two `native_decide` examples. No
+  `sorry`/`admit`.
+- Strongest content — `arm64_byte_lane_load_inverse`: it proves the eight-lane
+  byte-lane scatter reassembles exactly the **generated load contract's** value
+  for all four load widths, i.e. the extraction side and the assembly side of
+  the little-endian ladder are formally inverse on the emitted domain. This ties
+  two separately generated contracts together rather than proving each in
+  isolation.
+- Lesson learned: `native_decide` caught a wrong canonical example during
+  development (lane 2 of `0x0123456789abcdef` is `0xab`, not the `0xcd` typed by
+  hand); the tactic verified the corrected statement. Also, an inverse theorem
+  between two generated contracts is provable in one `cases width` chain with
+  `bv_decide`, so cross-contract composition does not need a shared
+  intermediate definition.
+- Host cross-check `native-sim/formal/test_arm64_byte_lane_host.c`: compiles the
+  generated macro with zero warnings under `-Wall -Wextra` and compares it to an
+  oracle that reads the lane through the value's byte view (never the macro's
+  shift). It sweeps seven boundary words over all eight lanes, then a fixed-seed
+  20000-iteration LCG sweep (seed `0xc4a1f70e95d3826b`), then a `fork`/`waitpid`
+  check that lane `8` aborts with `SIGABRT`. Result: `OK (20057 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, two `lean` lines, byte-lane host cross-check step; load bytes
+  `OK (20024 cases)`). Mutation checks: changing a lane index in
+  `arm64_byte_lane_spec.json` makes `--check` exit 1; four independent semantic
+  mutations of `generated/arm64_byte_lane.h` (lane-0/3/5 shift and unsupported
+  lane not aborting) each make the host cross-check exit 1 with a printed
+  `MISMATCH`, while the pristine header stays `OK`. `make -C native-sim/arm64
+  micro-proofs-build` rebuilds all 30 workload-derived artifacts, all `ok`.
+- Open AArch64 boundary after this increment: the memory tag-dispatch bodies
+  (`ARM64_SIM_L_MEM_READ`/`WRITE` tag selection, pre/post-index writeback and
+  pointer-tag propagation), the stack pointer helper, and native-byte
+  equivalence.
