@@ -146,9 +146,25 @@ increment is committed and pushed immediately). Current state:
   `map_inline: 16`, `const_prop: 1`, `dce: 1`, `kop: 71`. Raw
   `balancer_ingres`: 169.00 ns/run -> 146.01 ns/run (ratio 0.864); pktgen
   throughput 2,620,975 -> 2,799,206 pps (ratio 1.068). Single sample, one app:
-  provenance plus a consistent direction, not paper-grade. The entire
-  `full-x86` group still stops at `wide_mem`, which fails on `kop`-modified
-  bytecode.
+  provenance plus a consistent direction, not paper-grade.
+- The entire default `full-x86` group completes once `kop` is ordered after the
+  LLVM-roundtrip passes:
+  `BPFREJIT_BENCH_PASSES=noop,map_inline,const_prop,dce,wide_mem,
+  bounds_check_merge,skb_load_bytes_spec,noop,const_prop,dce,kop` exits 0 and
+  writes `corpus/results/x86_kvm_corpus_20260916_184607_120414/` with suite
+  `status: "completed"` and app `status: "ok"`. Applied sites: `noop: 4`,
+  `map_inline: 16`, `const_prop: 2`, `dce: 2`, `wide_mem: 1`,
+  `bounds_check_merge: 1`, `skb_load_bytes_spec: 1`, `kop: 71`. Raw
+  `balancer_ingres`: 175.79 -> 146.95 ns/run (ratio 0.836), `bytes_xlated`
+  23,840 -> 19,016, `bytes_jited` 13,641 -> 11,545; pktgen throughput
+  2,586,855 -> 2,838,183 pps (ratio 1.097). The original order in
+  `corpus/config/benchmark_config.yaml` (`kop` before `wide_mem`) cannot work:
+  the `kop` pass emits koperation payload pairs (a `BPF_MOV64_IMM` carrying the
+  encoded payload followed by `BPF_CALL`), and every other LLVM-roundtrip pass
+  feeds those words to the `llvmbpf` compiler, which misreads the payload word
+  as `movsx` and fails (`Invalid offset -32623 for movsx at pc 7`, confirmed from
+  the retained `KEEP_WORKDIRS=1` workdir). The `kop` pass itself bypasses the
+  roundtrip for kop-bearing input; the pure-bytecode passes do not.
 - The katran `map_inline` step previously failed for a separate, fixable reason:
   `runner/config/passes/map_inline/katran.yaml` hardcoded an overlay directory
   under `/home/yunwei37/...` that does not exist here, so the step's `jq`

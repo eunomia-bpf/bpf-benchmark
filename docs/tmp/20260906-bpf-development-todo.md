@@ -2636,6 +2636,51 @@ not establish complete native-byte semantic equivalence.
   measurement or framework problem. A faithful in-VM reproduction would need
   `KEEP_WORKDIRS=1` to retain `/tmp/loadtime_<pid>_5/step5.log`; the local
   reproduction is unreliable because it must supply a synthetic `--target` map.
+- **Exact confirmation with retained workdirs.** Re-running the full `full-x86`
+  group with `KEEP_WORKDIRS=1` retained
+  `corpus/results/x86_kvm_corpus_20260916_180914_166297/details/loadtime-workdirs/loadtime_2792_5/`,
+  whose `step5.log` reads exactly `error: Invalid offset -32623 for movsx at pc
+  7`. `input.bin` in that workdir is the `kop` step's output (2174 instructions;
+  `report.4.json` records `pass: kop, sites_applied: 71, insn_count_before:
+  2217, insn_count_after: 2174`). Decoding it shows the failing word at pc 7 is
+  `code=0xb7` (`BPF_MOV64_IMM`) with `off=-32623, imm=14`, immediately followed
+  by `pc8 code=0x85` (`BPF_CALL`): this is a **kop koperation payload pair**
+  (`MOV64_IMM` carrying the encoded payload + `CALL`), the wire form described
+  by `read_kop_sidecar_payload`/`decode_kop_payload` in
+  `bpfopt/llvm/src/main.cpp`. The `kop` pass itself knows this and bypasses the
+  LLVM roundtrip when the input already carries kop calls
+  (`if (kop_pass && count_kop_calls(input) > 0) output = input;`), but every
+  other LLVM-roundtrip pass (`wide_mem`, `const_prop`, `dce`,
+  `bounds_check_merge`, `skb_load_bytes_spec`) has no such guard, so running any
+  of them on `kop` output feeds a kop payload word into `llvmbpf`'s `movsx`
+  decoder and fails. This is a pass-ordering / kop-payload-awareness defect in
+  the optimizer, not a measurement-validity issue: the `full-x86` group lists
+  `kop` before `wide_mem`, which cannot work. The two viable fixes are (a) order
+  `kop` after the pure-bytecode passes, or (b) make the pure-bytecode passes
+  detect and preserve kop payload pairs. Verified alternative ordering
+  (kop moved to the end of the group) is recorded with its own run.
+- **Entire `full-x86` group completes with `kop` ordered last, 2026-09-16.**
+  `BPFREJIT_BENCH_PASSES=noop,map_inline,const_prop,dce,wide_mem,
+  bounds_check_merge,skb_load_bytes_spec,noop,const_prop,dce,kop` exits 0 and
+  writes `corpus/results/x86_kvm_corpus_20260916_184607_120414/` with suite
+  `status: "completed"`, app `status: "ok"`, error empty, and
+  `rejit_result.status: "ok"` over all eleven passes. This confirms the
+  ordering hypothesis: moving `kop` after the LLVM-roundtrip passes makes the
+  whole group run, because the pure-bytecode passes then never see a kop payload
+  word. Applied sites: `noop: 4`, `map_inline: 16`, `const_prop: 2`, `dce: 2`,
+  `wide_mem: 1`, `bounds_check_merge: 1`, `skb_load_bytes_spec: 1`, `kop: 71`.
+- Raw `balancer_ingres`: baseline 175.79 ns/run
+  (`run_cnt_delta = 25,818,384`), post-ReJIT 146.95 ns/run
+  (`run_cnt_delta = 28,317,888`), ratio 0.836 (faster); `bytes_xlated` 23,840 ->
+  19,016 and `bytes_jited` 13,641 -> 11,545. Raw pktgen thread pps: baseline
+  851,805 + 876,905 + 858,145 = 2,586,855; post-ReJIT 950,132 + 938,734 +
+  949,317 = 2,838,183; sum ratio 1.097. Single sample, one app, eleven passes:
+  provenance plus a consistent direction, not a paper-grade speedup.
+- The ordering change belongs in the `full-x86` policy group in
+  `corpus/config/benchmark_config.yaml`, which the repo treats as optimization
+  policy (the same file the repo rules allow changing); it is recorded here as
+  the demonstrated fix, with the repository edit itself left for a focused change
+  so the guard (b) alternative can be weighed.
 
 ### AArch64 memory address-offset refinement, 2026-09-16
 
