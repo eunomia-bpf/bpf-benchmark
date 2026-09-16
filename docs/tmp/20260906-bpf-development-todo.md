@@ -2490,3 +2490,88 @@ not establish complete native-byte semantic equivalence.
 - Open AArch64 boundary after this increment: the load/store address and tag
   paths, the vector/`.D0`/`.Q0` paths, the ALU op-step register-lane
   compositions that remain hand-written, and native-byte equivalence.
+
+### AArch64 byte-lane reduction refinement, 2026-09-16
+
+- Gap: the vector-register lane reductions `ARM64_OP_CNT` and `ARM64_OP_UADDLV`
+  in `native-sim/arm64/arm64_sim_local_bpf.h` called two hand-written helpers,
+  `arm64_replicate_byte_popcounts` and `arm64_horizontal_add_u8`, with no
+  independent statement. These are the last two hand-written value helpers in
+  the AArch64 emitted handler after the shift-family increment.
+- Contract shape: both reductions are byte-lane folds over the eight bytes of
+  the 64-bit value, so the contract is stated over the byte lanes and carries
+  the `ARM64_OP_CNT`/`ARM64_OP_UADDLV` numbers, which `load()` re-checks against
+  `native-sim/arm64/arm64_sim.h`.
+- Generator: `native-sim/formal/generate_arm64_reduction_spec.py` reads
+  `arm64_reduction_spec.json` and emits `generated/arm64_reduction.h`
+  (`KPROG_ARM64_REDUCTION_VALUE(OP, VALUE, UNSUPPORTED)`, a statement
+  expression switching on the opcode with an explicit `default: UNSUPPORTED;`)
+  and `KProgFormal/GeneratedArm64Reduction.lean` (a self-contained namespace
+  with `Reduction`, `popCountBits`, `code`, `mnemonic`, `value`). It has a
+  `--check` mode and a `make check` line. The popcount is written out per byte
+  (mask and `popcountll`) so the translated macro calls no hand-written helper.
+- C wiring: `arm64_sim_local_bpf.h` includes the generated header, gains
+  `ARM64_SIM_L_REDUCTION_VALUE(OP, VALUE)`, and the `CNT`/`UADDLV` handlers now
+  delegate to `KPROG_ARM64_REDUCTION_HANDLED`/the macro. The two helpers were
+  then dead and were deleted from `arm64_sim.h`.
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64Reduction.lean` proves
+  `arm64_reduction_refines` (the generated value equals an independent byte-lane
+  statement for both reductions), `arm64_reduction_code_in_range`, the CNT lane
+  bound (every replicated popcount is at most 8, so lanes never carry into each
+  other), the UADDLV bound (< 2048), and four `native_decide` examples. No
+  `sorry`/`admit`.
+- Independence: the generated CNT uses `extractLsb'` on each byte and ORs the
+  replicated popcounts; the independent CNT walks the eight bits of each byte
+  with masks and shifts (`(v >>> (8b+j)) &&& 1`) and ORs them, a different
+  extraction. The generated UADDLV is a left-associated sum; the independent
+  form is a right-associated sum (the associativity is itself part of what the
+  proof establishes).
+- Lesson learned: this toolchain's Mathlib-free Lean has no `BitVec.popCount`,
+  so a popcount contract must be built additively from bits; `bv_decide` closes
+  those additive byte models (including the bit-trick SWAR form) without
+  difficulty. Also, a single `switch` whose arms both declared the accumulator
+  broke the host compile (`redefinition`), so the accumulator is declared once
+  before the switch and reset per arm.
+- Host cross-check `native-sim/formal/test_arm64_reduction_host.c`: compiles the
+  generated macro with zero warnings under `-Wall -Wextra` and compares it
+  against an oracle that walks the eight bits of each byte lane directly. It
+  sweeps an 8-value x 2-op boundary table, then a fixed-seed 20000-iteration LCG
+  sweep (seed `0x7c3e9d15a2b8064f`), then a `fork`/`waitpid` check that an
+  unsupported opcode (0) aborts with `SIGABRT`. Result: `OK (20017 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, two `lean` lines, and the reduction host cross-check step;
+  shift `OK (20513 cases)`, movk `OK (20145 cases)`). Mutation checks: changing
+  a code in `arm64_reduction_spec.json` makes `--check` exit 1; five independent
+  semantic mutations of `generated/arm64_reduction.h` (CNT lane-3 source byte,
+  CNT lane-6 result byte, UADDLV dropping the top byte, UADDLV wrong lane shift,
+  unsupported opcode not aborting) each make the host cross-check exit 1 with a
+  printed `MISMATCH`, while the pristine header stays `OK`.
+  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30 workload-derived
+  artifacts, all `ok`; `make -C native-sim/arm64 build`/`run` produce and load
+  the BPF object.
+- Open AArch64 boundary after this increment: the load/store address and tag
+  paths, the vector/`.D0`/`.Q0` paths, and native-byte equivalence. All the
+  hand-written scalar value helpers in the emitted AArch64 handler are now gone.
+
+### Default-policy kop environment prerequisite resolved, 2026-09-16
+
+- The `kop` step's load-time failure was an LLVM-backend prerequisite, and it is
+  now built. `llvm-backend/build-bpf-kop` (the fork carrying
+  `lib/Target/BPF/BPFKopSelect.cpp` and the `-bpf-enable-kop-select` /
+  `-bpf-kop-mode` options) had only four static libraries; `ninja -C
+  llvm-backend/build-bpf-kop -j12` completed the full build (2116/2116 targets,
+  exit 0, 124 static libs including `libLLVMBPFCodeGen.a` and the
+  `lib/cmake/llvm/LLVMConfig.cmake` package).
+- Building `bpfopt` against it works: `cmake -S bpfopt/llvm -B <build>
+  -DLLVM_DIR=/workspaces/repository/llvm-backend/build-bpf-kop/lib/cmake/llvm`
+  configures and builds (exit 0), and the resulting `bpfopt` recognizes
+  `-bpf-enable-kop-select` (previously the system LLVM-18 build reported
+  `Unknown command line argument '-bpf-enable-kop-select'`). `runner/mk/build.mk`
+  already points `BPFOPT_LLVM_BUILD_X86` at `bpfopt/llvm/build-kop` and takes
+  `RUNNER_LLVM_DIR` from `LLVM_DIR`/`RUN_LLVM_DIR`, so the default policy can be
+  enabled by building the fork and setting `LLVM_DIR` to its `lib/cmake/llvm`
+  (no repository change required).
+- Remaining work to exercise the default corpus policy: rebuild the runtime
+  image with the fork-LLVM `bpfopt` and re-run
+  `BPFREJIT_BENCH_PASSES="default" make corpus` (the separate `map_inline`
+  overlay fix and the `VMLINUX_BTF` framework-kernel override already apply).

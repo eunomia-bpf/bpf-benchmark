@@ -32,8 +32,9 @@ increment is committed and pushed immediately). Current state:
   the condition table, the four-kind AArch64 compare-and-branch
   (CBZ/CBNZ/TBZ/TBNZ) predicate contract that completes the
   condition-to-next-PC relation, the four-column AArch64 move-wide
-  (MOVK) insertion contract, and the four-kind AArch64 shift
-  (LSL/LSR/ASR/ROR) value contract shared with the decode table.
+  (MOVK) insertion contract, the four-kind AArch64 shift
+  (LSL/LSR/ASR/ROR) value contract shared with the decode table, and the
+  two-kind AArch64 byte-lane reduction (CNT/UADDLV) contract.
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag
@@ -56,13 +57,14 @@ increment is committed and pushed immediately). Current state:
   and compare-and-branch `arm64_branch_next_pc_refines`) are now proved against
   independent statements over the emitted domain. The AArch64 condition table,
   width/NZCV flag contract, decode tables, and bitfield/multiply/extract/
-  reverse/extend/conditional-select/branch/move-wide/shift contracts, and
-  pointer-add/ABI-load contracts are already shared. The `arm64_umulh`,
+  reverse/extend/conditional-select/branch/move-wide/shift/reduction contracts,
+  and pointer-add/ABI-load contracts are already shared. The `arm64_umulh`,
   `arm64_reverse_bytes`, `arm64_reverse_bytes16`, `arm64_width_mask`,
   `arm64_width_bits`, `arm64_sign_bit`, `arm64_sign_extend`,
-  `arm64_bits_mask` and the shift helpers
+  `arm64_bits_mask`, the shift helpers
   (`arm64_lsl`/`arm64_lsr`/`arm64_asr`/`arm64_ror`/`arm64_ror32`/
-  `arm64_ror64`) were removed once
+  `arm64_ror64`) and the byte-lane helpers
+  (`arm64_replicate_byte_popcounts`/`arm64_horizontal_add_u8`) were removed once
   `native-sim/arm64/arm64_sim_local_bpf.h` delegated to the generated contracts.
 - The generation binding (verifier-accepted proof + native bytes bound to one
   immutable load generation) and the functional smokes establish different
@@ -117,18 +119,22 @@ increment is committed and pushed immediately). Current state:
   the framework kernel's vmlinux; the native objects run under the framework
   kernel, so x86 should match arm64. `runner/mk/build.mk` is frozen, so the fix
   is not applied and the command-line override is used instead.
-- With the default policy, `make corpus` still aborts in the load-time shim
-  because the `kop` pass cannot run: the host `bpfopt` (and the copy in the
-  runtime image) links the system LLVM-18, which lacks the
-  `-bpf-enable-kop-select`/`-bpf-kop-mode` options; those live in the
-  experimental `llvm-backend/llvm` fork under `llvm-backend/build-bpf-kop`,
-  which is only partially built (no `libLLVM`). Building that fork and pointing
-  `LLVM_DIR`/`RUN_LLVM_DIR` at it is the environment prerequisite; it is a long
-  build. The shim reports the step failure and the app aborts, so no post-ReJIT
-  workload is produced. `bcc/set` and `cilium/agent` additionally fail at
+- With the default policy, `make corpus` previously aborted in the load-time
+  shim because the `kop` pass could not run: `bpfopt` linked the system LLVM-18,
+  which lacks the `-bpf-enable-kop-select`/`-bpf-kop-mode` options carried by
+  the `llvm-backend/llvm` fork's `lib/Target/BPF/BPFKopSelect.cpp`. That
+  prerequisite is now satisfied in this workspace: `ninja -C
+  llvm-backend/build-bpf-kop -j12` completed the fork LLVM build (2116/2116,
+  124 static libs, `libLLVMBPFCodeGen.a`, `lib/cmake/llvm/LLVMConfig.cmake`),
+  and `cmake -S bpfopt/llvm -B <build> -DLLVM_DIR=<fork>/lib/cmake/llvm` builds
+  a `bpfopt` that recognizes `-bpf-enable-kop-select` (the LLVM-18 build reports
+  `Unknown command line argument`). `runner/mk/build.mk` already routes
+  `BPFOPT_LLVM_BUILD_X86` to `bpfopt/llvm/build-kop` and honors
+  `LLVM_DIR`/`RUN_LLVM_DIR`, so no repository change is needed; exercising the
+  default corpus policy still requires rebuilding the runtime image with the
+  fork-LLVM `bpfopt`. `bcc/set` and `cilium/agent` additionally fail at
   application startup (BCC `capable` skeleton load `-22`; Cilium XDP compile
-  canceled). These are x86 toolchain/pass-policy/app-startup issues, unrelated
-  to the AArch64 proof line, and are kept as raw failures.
+  canceled); those remain raw failures.
 - The katran `map_inline` step previously failed for a separate, fixable reason:
   `runner/config/passes/map_inline/katran.yaml` hardcoded an overlay directory
   under `/home/yunwei37/...` that does not exist here, so the step's `jq`

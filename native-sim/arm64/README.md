@@ -24,6 +24,7 @@ eight-operation conditional-select (`CSEL`/`CINC`/`CSET`/`CSETM`/`CINV`/
 four-kind compare-and-branch (`CBZ`/`CBNZ`/`TBZ`/`TBNZ`) predicate contract, the
 four-column move-wide (`MOVK`) insertion contract, the four-kind shift
 (`LSL`/`LSR`/`ASR`/`ROR`) value contract shared with the decode table, the
+two-kind byte-lane reduction (`CNT`/`UADDLV`) contract, the
 ALU/shift/modifier/bitfield decode tables, the condition table, and the
 pointer-add/ABI-load contracts against independently stated specs
 (`make -C ../formal check`), plus tag erasure for a four-operation shared
