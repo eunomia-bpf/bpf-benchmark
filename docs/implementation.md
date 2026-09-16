@@ -37,8 +37,9 @@ increment is committed and pushed immediately). Current state:
   two-kind AArch64 byte-lane reduction (CNT/UADDLV) contract, the
   four-form AArch64 load/store address-offset contract, the four-direction
   AArch64 FMOV move contract, the four-width AArch64 little-endian
-  byte-ladder load contract, and the eight-lane AArch64 byte-lane scatter
-  contract (proved inverse to the load ladder).
+  byte-ladder load contract, the eight-lane AArch64 byte-lane scatter
+  contract (proved inverse to the load ladder), and the four-space AArch64
+  memory tag-dispatch contract.
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag

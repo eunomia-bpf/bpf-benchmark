@@ -2968,3 +2968,62 @@ not establish complete native-byte semantic equivalence.
   (`ARM64_SIM_L_MEM_READ`/`WRITE` tag selection, pre/post-index writeback and
   pointer-tag propagation), the stack pointer helper, and native-byte
   equivalence.
+
+### AArch64 memory tag-dispatch refinement, 2026-09-16
+
+- Gap: `ARM64_SIM_L_MEM_READ_TAG` in `native-sim/arm64/arm64_sim_local_bpf.h`
+  classified a load by the base register's memory space (stack / ABI /
+  reloc-address / ordinary) and the access width with an inline `if/else` chain
+  that had no independent statement, and `ARM64_SIM_L_MEM_READ`'s value-source
+  selection had the same shape without its own contract.
+- Contract shape: the classification is a closed table over the four memory
+  spaces and the two width cases (32/64), so each predicate is total and has no
+  unsupported arm. The ABI packet tag itself stays in the already-generated
+  `KPROG_ABI_LOAD_TAG`; this contract selects *which* tag source applies.
+- Generator: `native-sim/formal/generate_arm64_mem_dispatch_spec.py` reads
+  `arm64_mem_dispatch_spec.json` and emits `generated/arm64_mem_dispatch.h`
+  (`KPROG_ARM64_MEM_READ_SRC` / `KPROG_ARM64_MEM_READ_TAG`, each a total
+  predicate returning a `KPROG_ARM64_MEM_SRC_*` / `KPROG_ARM64_MEM_TAG_*`
+  selector, plus the selector constants) and
+  `KProgFormal/GeneratedArm64MemDispatch.lean` (a namespace with `Space`,
+  `ValueSrc`, `ResultTag` and the two exhaustive tables). It has a `--check`
+  mode and a `make check` line. The tag macro names come from the spec
+  (`tag_macro`, e.g. `ARM64_SIM_TAG_RELOC_ADDR`), so the generator does not
+  guess the C constant names.
+- C wiring: `arm64_sim_local_bpf.h` includes the generated header and
+  `ARM64_SIM_L_MEM_READ_TAG` now switches on
+  `KPROG_ARM64_MEM_READ_TAG(sp, tag, width)`, with the four cases performing
+  exactly the operations the chain did (stack helper, `KPROG_ABI_LOAD_TAG`,
+  reloc map-pointer with the zero-offset check, scalar default). The emitted
+  `xdp` program section is byte-identical to the pre-change object (both
+  16 bytes), and `make -C native-sim/arm64 run` still loads it. The value-source
+  predicate is generated and available for the `MEM_READ` body; its
+  field-projection refinement is proved even though the read body still uses its
+  own chain (recorded as the remaining wiring).
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64MemDispatch.lean` proves
+  `arm64_mem_dispatch_src_refines` and `arm64_mem_dispatch_tag_refines` (each
+  generated table equals an independent **predicate-nesting** statement, not a
+  table restatement), `arm64_mem_dispatch_no_widening` (off width 64 only the
+  stack space changes the selection — the property the C chain's later
+  width-64 gates rely on), `arm64_mem_dispatch_stack_width_independent`, and
+  `arm64_mem_dispatch_reloc`. No `sorry`/`admit`.
+- Host cross-check `native-sim/formal/test_arm64_mem_dispatch_host.c`: compiles
+  the generated predicates with zero warnings under `-Wall -Wextra` and compares
+  them to an independent predicate-nesting oracle over **every** (is_sp, tag,
+  width) combination (2 x 9 x 4 = 72), also asserting the two classifications
+  select the same space family. Result: `OK (72 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, two `lean` lines, mem-dispatch host cross-check step; byte
+  lane `OK (20057 cases)`). Mutation checks: changing a space's `w64_only` flag
+  in `arm64_mem_dispatch_spec.json` makes `--check` exit 1; four independent
+  semantic mutations of `generated/arm64_mem_dispatch.h` (source ABI width gate
+  dropped, tag stack space mapped to scalar, reloc tag mapped to the ABI family,
+  source normal fallback mapped to reloc) each make the host cross-check exit 1
+  with a printed `MISMATCH`, while the pristine header stays `OK`.
+  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts, all `ok`; `build`/`run` produce and load the BPF
+  object.
+- Open AArch64 boundary after this increment: the `ARM64_SIM_L_MEM_READ`
+  value-source body (the predicate is generated and refined, but the read body
+  still inlines its own chain), the pre/post-index writeback and pointer-tag
+  propagation, the stack pointer helper, and native-byte equivalence.
