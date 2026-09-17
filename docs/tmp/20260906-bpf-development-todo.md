@@ -3087,3 +3087,47 @@ not establish complete native-byte semantic equivalence.
 - Open AArch64 boundary after this increment: the pre/post-index writeback and
   pointer-tag propagation, the stack pointer helper, and native-byte
   equivalence.
+
+### x86 ROR result refinement, 2026-09-17
+
+- Gap: `x86_ror` in `native-sim/x86/x86_sim.h` implemented the right-rotate used
+  by the `RORX`/`RORX_MEM` handlers (and `x86_alu_result` has no ROR arm, so it
+  is the only x86 right-rotate path) with an inline shift pair and no
+  independent statement. The generated x86 shift-result contract covered
+  SHL/SHR/SAR/ROL but not ROR.
+- Contract: `generate_x86_shift_result_spec.py` now emits
+  `GeneratedX86ShiftResult.ror` (the mirror of the generated `rol`) and
+  `kprog_x86_ror_result` in `generated/x86_shift_result.h`, and
+  `x86_shift_result_spec.json` lists `ror` in `operations`.
+- C wiring: `x86_ror` is now a one-line delegation to
+  `kprog_x86_ror_result`, matching how `x86_alu_result` already delegates
+  SHL/SHR/SAR/ROL to the generated functions.
+- Lean bridge: `native-sim/formal/KProgFormal/X86ShiftResult.lean` proves
+  `x86_ror_result_refines` and two `native_decide` examples. No `sorry`/`admit`.
+- Independence: the spec is `x86RorResultSpec`, which states x86 ROR as **the
+  generated `rol` applied at the complementary count `bits - k`** — the defining
+  identity of a right rotate — rather than mirroring the generated shift pair.
+  That makes the theorem a cross-operation statement (`ror` vs the already
+  generated `rol`) and, in the host cross-check, doubles as an executable
+  invariant (`ror(v,k) == rol(v, w-k)`) checked on every one of the 20,320
+  cases, not just asserted once.
+- Host cross-check `native-sim/formal/test_x86_ror_result_host.c`: this is the
+  first host test that compiles `generated/x86_shift_result.h` (the only
+  generated header that defines `__always_inline` functions), so it supplies the
+  attribute for the host build. It compares the generated function to an oracle
+  that rebuilds each destination bit from source bit `(i + k) mod w` (never the
+  macro's shift pair). It sweeps 8 operands x 10 shifts x 4 widths, then a
+  fixed-seed 20000-iteration LCG sweep (seed `0x3f8c2ea97164b0d5`). Result:
+  `OK (20320 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new host-test step
+  in the `check` target; arm64 steps unchanged). Mutation checks: dropping `ror`
+  from `x86_shift_result_spec.json` makes `--check` exit 1; four independent
+  mutations of the generated ROR function (shift direction flipped, complementary
+  count off by one, count mask widened, operand not narrowed) each make the host
+  cross-check exit 1 with a printed `MISMATCH`, while the pristine header stays
+  `OK`. `make -C native-sim/x86 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts, all `ok`; `make -C native-sim/x86 build`/`run`
+  produce and load the object.
+- Open x86 proof surface after this increment: `x86_bswap`, `x86_popcount64`,
+  `x86_shld`/`x86_shrd`, `x86_sign_extend`, `x86_signed_abs_width`, the
+  objdump/parser-to-AUX relation, and native-byte correspondence.

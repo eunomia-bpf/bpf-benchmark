@@ -22,7 +22,7 @@ increment is committed and pushed immediately). Current state:
   ADD/SUB/ADC/SBB/INC/DEC/NEG/NOT flag and result production, shift results
   and flags, register-lane AUX layout, register-destination immediate handler
   compositions for ADD/ADC/SUB/SBB/CMP/TEST/AND/OR/XOR/SHL/SHR/SAR/ROL,
-  register-register AND/OR/XOR/SHL/SHR/SAR/ROL handler compositions, the
+  register-register AND/OR/XOR/SHL/SHR/SAR/ROL/ROR handler compositions, the
   carry-sensitive handler classification (SBB/ADC routing through generated C
   predicates), the AArch64 NZCV flag and decode-table contracts, the
   eight-operation AArch64 multiply-family value contract, the six-operation
@@ -52,7 +52,9 @@ increment is committed and pushed immediately). Current state:
 - Open x86 proof surface: IMUL (immediate and register-register), memory
   lanes and stores, the objdump/parser-to-AUX selection relation, C-to-Lean
   unsigned-semantics correspondence, compiler/native-byte correspondence,
-  multi-step control-flow traces, helpers, and specialization preservation.
+  multi-step control-flow traces, the remaining value helpers (`x86_bswap`,
+  `x86_popcount64`, `x86_shld`/`x86_shrd`, `x86_sign_extend`,
+  `x86_signed_abs_width`), and specialization preservation.
 - Open on the AArch64 side: the ALU op-step and register-lane handler
   compositions (in progress), the remaining load/store address and tag paths,
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
