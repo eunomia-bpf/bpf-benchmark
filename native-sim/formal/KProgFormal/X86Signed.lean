@@ -1,10 +1,11 @@
 import KProgFormal.GeneratedX86Signed
+import KProgFormal.GeneratedX86ImulFlags
 import KProgFormal.GeneratedX86Width
 import Std.Tactic.BVDecide
 
 namespace KProgFormal
 
-open GeneratedX86Width (Width mask narrow signMask)
+open GeneratedX86Width (Width mask narrow signMask sign bits)
 
 /-- Independent statement of the x86 sign extension: widen the narrowed operand
 from the width's own low lane via `BitVec.signExtend`, rather than the generated
@@ -79,5 +80,19 @@ theorem x86_sign_extend_w64_example :
 /-- Canonical example: the magnitude of -5 in the 8-bit domain is 5. -/
 theorem x86_abs_width_w8_example :
     GeneratedX86Signed.absWidth 0xfb .w8 = 5 := by native_decide
+
+/-- **Cross-contract agreement.** The IMUL flag contract
+(`GeneratedX86ImulFlags.signedAbs`) and this contract's magnitude were generated
+independently, each with its own local signed-abs definition. They agree for all
+four widths, so the two generated contracts cannot drift apart on the magnitude
+they both depend on. -/
+theorem x86_abs_width_agrees_imul (value : BitVec 64) (width : Width) :
+    GeneratedX86ImulFlags.signedAbs value width =
+      GeneratedX86Signed.absWidth value width := by
+  cases width <;>
+    simp only [GeneratedX86ImulFlags.signedAbs,
+      GeneratedX86Signed.absWidth, mask, signMask, narrow, bits,
+      GeneratedX86Width.sign, GeneratedX86Width.bits] <;>
+    bv_decide
 
 end KProgFormal
