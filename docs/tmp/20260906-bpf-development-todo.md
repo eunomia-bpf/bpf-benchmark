@@ -3222,10 +3222,22 @@ not establish complete native-byte semantic equivalence.
   `make -C native-sim/x86 micro-proofs-build` rebuilds all 30 workload-derived
   artifacts, all `ok`; `build`/`run` produce and load the object.
 - Open x86 proof surface after this increment: `x86_popcount64`,
-  `x86_shld`/`x86_shrd` (blocked in this toolchain: the C helper branches on a
-  symbolic `amount >= bits`, and `bv_decide` abstracts the `toNat` comparison —
-  recorded, not attempted further), the objdump/parser-to-AUX relation, and
+  `x86_shld`/`x86_shrd`, the objdump/parser-to-AUX relation, and
   native-byte correspondence.
+- `x86_shld`/`x86_shrd` analysis (corrected 2026-09-17): an initial note here
+  claimed the helper's `amount >= bits` branch is dead because the count is
+  width-masked. That is **wrong** and was disproved by evaluation:
+  `KPROG_X86_SHIFT_COUNT` masks the shift to 31 for *every* width except 64
+  (`(RHS) & (WIDTH == 64 ? 63 : 31)`), so for an 8- or 16-bit SHLD the count can
+  exceed the width and the `amount >= bits` branch is **live** (`count 0xf…f .w8
+  = 0x1f`). The x86 ROR/ROL results avoid this because they re-mask with
+  `bits - 1` before rotating; SHLD/SHRD deliberately keep the 31-mask and take
+  the "shift by more than the width, keep low bits of `src`" branch. The
+  remaining obstacle to a contract is that `bv_decide` abstracts the
+  `BitVec.toNat`/`BitVec.ult` amount comparison, so both a `toNat`-based and an
+  `ult`-based statement yield spurious counterexamples; a future increment should
+  state the amount as a bounded `Nat` derived from the masked `BitVec` and prove
+  the equivalence as a separate counting lemma. The helpers are unchanged.
 
 ### x86 POPCNT refinement, 2026-09-17
 
@@ -3271,9 +3283,9 @@ not establish complete native-byte semantic equivalence.
   printed `MISMATCH`, while the pristine header stays `OK`.
   `make -C native-sim/x86 micro-proofs-build` rebuilds all 30 workload-derived
   artifacts, all `ok`; `build`/`run` produce and load the object.
-- Open x86 proof surface after this increment: `x86_shld`/`x86_shrd` (blocked in
-  this toolchain: the C helper branches on a symbolic `amount >= bits`, which
-  `bv_decide` abstracts — recorded, not attempted further), the
-  objdump/parser-to-AUX selection relation, compiler/native-byte correspondence,
-  and multi-step control-flow traces. All other x86 value helpers are now
-  generated with proven contracts.
+- Open x86 proof surface after this increment: `x86_shld`/`x86_shrd` (see the
+  corrected analysis in the signed-value section: the `amount >= bits` branch is
+  live for sub-64 widths because the count masks to 31, and `bv_decide`
+  abstracts the amount comparison), the objdump/parser-to-AUX selection
+  relation, compiler/native-byte correspondence, and multi-step control-flow
+  traces. All other x86 value helpers are now generated with proven contracts.
