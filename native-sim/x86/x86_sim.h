@@ -108,6 +108,7 @@
 #include "../formal/generated/x86_not.h"
 #include "../formal/generated/x86_shift_count.h"
 #include "../formal/generated/x86_shift_result.h"
+#include "../formal/generated/x86_bswap.h"
 
 #define X86_RAX 0U
 #define X86_RCX 1U
@@ -212,23 +213,7 @@ static __always_inline __u64 x86_ror(__u64 value, __u64 shift, __u8 width)
 
 static __always_inline __u64 x86_bswap(__u64 value, __u8 width)
 {
-	if (width == X86_WIDTH_8)
-		return value & 0xffULL;
-	if (width == X86_WIDTH_16)
-		return (((value & 0x00ffULL) << 8) |
-			((value & 0xff00ULL) >> 8));
-	__u64 swapped = ((value & 0x00000000000000ffULL) << 56) |
-			((value & 0x000000000000ff00ULL) << 40) |
-			((value & 0x0000000000ff0000ULL) << 24) |
-			((value & 0x00000000ff000000ULL) << 8) |
-			((value & 0x000000ff00000000ULL) >> 8) |
-			((value & 0x0000ff0000000000ULL) >> 24) |
-			((value & 0x00ff000000000000ULL) >> 40) |
-			((value & 0xff00000000000000ULL) >> 56);
-
-	if (width == X86_WIDTH_32)
-		return swapped >> 32;
-	return swapped;
+	return kprog_x86_bswap_value(value, width);
 }
 
 static __always_inline __u64 x86_popcount64(__u64 value)
