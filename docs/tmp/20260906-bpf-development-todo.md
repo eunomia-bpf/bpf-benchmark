@@ -3226,3 +3226,54 @@ not establish complete native-byte semantic equivalence.
   symbolic `amount >= bits`, and `bv_decide` abstracts the `toNat` comparison —
   recorded, not attempted further), the objdump/parser-to-AUX relation, and
   native-byte correspondence.
+
+### x86 POPCNT refinement, 2026-09-17
+
+- Gap: `x86_popcount64` in `native-sim/x86/x86_sim.h` implemented the 64-bit
+  population count used by the POPCNT handler with the standard SWAR reduction
+  and no independent statement.
+- Contract: `native-sim/formal/generate_x86_popcount_spec.py` reads
+  `x86_popcount_spec.json` and emits `generated/x86_popcount.h`
+  (`kprog_x86_popcount_value`) and `KProgFormal/GeneratedX86Popcount.lean`. It
+  has a `--check` mode and a `make check` line.
+- C wiring: `x86_sim.h` includes the generated header and `x86_popcount64` is a
+  one-line delegation.
+- Lean bridge: `native-sim/formal/KProgFormal/X86Popcount.lean` proves
+  `x86_popcount_refines` (the SWAR reduction equals an independent
+  **lane-grouped bit walk**: eight byte lanes, each counted bit by bit and
+  summed), `x86_popcount_bounded` (`BitVec.ule` against 64), and four
+  `native_decide` examples. No `sorry`/`admit`.
+- Independence and the proof-engineering result: the two obvious independent
+  statements both fail in this toolchain — a flat 64-term bit walk times the SAT
+  solver out (`The SAT solver timed out while solving the problem` at ~11 s), and
+  a per-byte statement driven by `>>> (8*i)` with a symbolic `i` yields a
+  spurious counterexample. Grouping the walk **by the eight concrete byte lanes**
+  (each lane's popcount sums at most 8, so lanes cannot interfere) is both
+  provable and a genuinely different expression from the SWAR constants; it
+  closes in one `bv_decide`.
+- A per-nibble intermediate statement was also tried and rejected: `v1 = x -
+  ((x >> 1) & 0x55)` borrows across nibble boundaries at `b = 0xff`, so
+  "stage-2 lane value == lane popcount" is false; only the completed reduction is
+  the true statement. Recorded so the stage-2 shortcut is not retried.
+- Host cross-check `native-sim/formal/test_x86_popcount_host.c`: compiles the
+  generated function with zero warnings under `-Wall -Wextra` and compares it to
+  a one-bit-at-a-time oracle, checking the `<= 64` bound and, on every random
+  iteration, additive consistency `popcount(x & ~y) + popcount(x & y) ==
+  popcount(x)`. It sweeps nine boundary words, then a fixed-seed
+  20000-iteration LCG sweep (seed `0x8e27c4a1f60d3b95`). Result:
+  `OK (40009 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, two `lean` lines, popcount host cross-check step; the x86
+  signed step still `OK (20036 cases)`). Mutation checks: changing a field in
+  `x86_popcount_spec.json` makes `--check` exit 1; four independent mutations of
+  `generated/x86_popcount.h` (stage-1 mask, stage-2 shift, stage-3 nibble mask,
+  byte-gather multiply constant) each make the host cross-check exit 1 with a
+  printed `MISMATCH`, while the pristine header stays `OK`.
+  `make -C native-sim/x86 micro-proofs-build` rebuilds all 30 workload-derived
+  artifacts, all `ok`; `build`/`run` produce and load the object.
+- Open x86 proof surface after this increment: `x86_shld`/`x86_shrd` (blocked in
+  this toolchain: the C helper branches on a symbolic `amount >= bits`, which
+  `bv_decide` abstracts — recorded, not attempted further), the
+  objdump/parser-to-AUX selection relation, compiler/native-byte correspondence,
+  and multi-step control-flow traces. All other x86 value helpers are now
+  generated with proven contracts.
