@@ -1,0 +1,1 @@
+{"schema_version": 1, "operation": "arm64StackTag", "cases": [{"name": "qword", "w64": true, "aligned": true, "tagged": true}, {"name": "sub_qword_aligned", "w64": false, "aligned": true, "tagged": false}, {"name": "qword_unaligned", "w64": true, "aligned": false, "tagged": false}, {"name": "sub_qword_unaligned", "w64": false, "aligned": false, "tagged": false}]}
