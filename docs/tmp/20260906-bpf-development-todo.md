@@ -3289,3 +3289,21 @@ not establish complete native-byte semantic equivalence.
   abstracts the amount comparison), the objdump/parser-to-AUX selection
   relation, compiler/native-byte correspondence, and multi-step control-flow
   traces. All other x86 value helpers are now generated with proven contracts.
+
+### x86 signed-abs cross-contract agreement, 2026-09-17
+
+- Follow-on to the signed-value increment, committed `79a34f502`. The IMUL flag
+  contract (`GeneratedX86ImulFlags.signedAbs`) and the new signed-value contract
+  (`GeneratedX86Signed.absWidth`) were generated independently, each with a local
+  signed-abs definition. `x86_abs_width_agrees_imul` proves them equal for all
+  four widths, so the two generated contracts cannot drift apart on the magnitude
+  they both depend on.
+- This is the second cross-contract tie in the x86 chain (the first is the
+  AArch64 `arm64_byte_lane_load_inverse` between the load ladder and the byte-lane
+  scatter). Both are cheap to state and catch a class of drift single-contract
+  refinements miss.
+- Proof note: the goal needs `GeneratedX86Width.sign` and
+  `GeneratedX86Width.bits` in the `simp only` set in addition to `narrow`/`mask`,
+  because the IMUL contract's `signedAbs` tests the sign through `sign` while the
+  signed contract tests the literal sign mask; `bv_decide` abstracts `sign` when
+  it is not unfolded.
