@@ -62,6 +62,8 @@ check:
 	lake env lean KProgFormal/X86Not.lean
 	lake env lean KProgFormal/X86ShiftCount.lean
 	lake env lean KProgFormal/X86ShiftResult.lean
+	$(CC) -Wall -Wextra -O2 -I. test_x86_ror_result_host.c -o build/test_x86_ror_result_host
+	./build/test_x86_ror_result_host
 	lake env lean KProgFormal/X86ShiftFlags.lean
 	lake env lean KProgFormal/X86ImulFlags.lean
 	lake env lean KProgFormal/X86RegWrite.lean

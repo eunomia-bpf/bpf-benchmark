@@ -25,4 +25,12 @@ def rol (value rhs : BitVec 64) (width : Width) : BitVec 64 :=
   if count = 0 then narrowed
   else narrow ((narrowed <<< count) |||
     (narrowed >>> (BitVec.ofNat 64 bits - count))) width
+def ror (value rhs : BitVec 64) (width : Width) : BitVec 64 :=
+  let bits := bits width
+  let count := BitVec.and (GeneratedX86ShiftCount.count rhs width)
+    (BitVec.ofNat 64 (bits - 1))
+  let narrowed := narrow value width
+  if count = 0 then narrowed
+  else narrow ((narrowed >>> count) |||
+    (narrowed <<< (BitVec.ofNat 64 bits - count))) width
 end KProgFormal.GeneratedX86ShiftResult

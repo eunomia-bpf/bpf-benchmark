@@ -78,6 +78,48 @@ theorem x86_rol_result_refines (value rhs : BitVec 64) (width : X86Width) :
     GeneratedX86Width.bits, x86RolResultSpec,
     narrow8, narrow16, narrow32, rol8, rol16, rol32, rol64] <;> bv_decide
 
+/-- Independent statement of the x86 ROR result: rotating right by `k` is
+rotating left by the complementary count `bits - k`, so the spec reaches the
+result *through the already-generated `rol`* rather than mirroring its shift
+pair. This is the property an x86 right-rotate has that a plain mirrored
+implementation does not state. -/
+def x86RorResultSpec (value rhs : BitVec 64) : X86Width -> BitVec 64
+  | .w8 => GeneratedX86ShiftResult.rol value
+      ((8 : BitVec 64) - GeneratedX86ShiftCount.count rhs .w8) .w8
+  | .w16 => GeneratedX86ShiftResult.rol value
+      ((16 : BitVec 64) - GeneratedX86ShiftCount.count rhs .w16) .w16
+  | .w32 => GeneratedX86ShiftResult.rol value
+      ((32 : BitVec 64) - GeneratedX86ShiftCount.count rhs .w32) .w32
+  | .w64 => GeneratedX86ShiftResult.rol value
+      ((64 : BitVec 64) - GeneratedX86ShiftCount.count rhs .w64) .w64
+
+/-- The generated ROR equals the independent complementary-count form for all
+four widths. -/
+theorem x86_ror_result_refines (value rhs : BitVec 64) (width : X86Width) :
+    GeneratedX86ShiftResult.ror value rhs width =
+      x86RorResultSpec value rhs width := by
+  cases width <;> simp only [GeneratedX86ShiftResult.ror,
+    GeneratedX86ShiftResult.rol, GeneratedX86ShiftCount.count,
+    GeneratedX86ShiftCount.mask, GeneratedX86Width.narrow,
+    GeneratedX86Width.mask, GeneratedX86Width.bits, x86RorResultSpec] <;>
+    bv_decide
+
+/-- Canonical example: an 8-bit right rotate by one moves the low bit to the top
+and the rest down. -/
+theorem x86_ror_w8_example :
+    GeneratedX86ShiftResult.ror 0x81 1 .w8 = 0xc0 := by native_decide
+
+/-- Canonical example: a 32-bit right rotate by 8 rotates the byte order of the
+low word and clears the high word. -/
+theorem x86_ror_w32_example :
+    GeneratedX86ShiftResult.ror 0x01020304 8 .w32 = 0x04010203 := by
+  native_decide
+
+/-- Canonical example: a 64-bit right rotate by 0 is the identity. -/
+theorem x86_ror_w64_zero_example :
+    GeneratedX86ShiftResult.ror 0x0123456789abcdef 0 .w64 =
+      0x0123456789abcdef := by native_decide
+
 theorem x86_shr_w8_discards_high_bits :
     GeneratedX86ShiftResult.shr 0x100 1 .w8 = 0 := by native_decide
 

@@ -48,4 +48,17 @@ static __always_inline __u64 kprog_x86_rol_result(__u64 value, __u64 rhs,
 		return narrowed;
 	return ((narrowed << count) | (narrowed >> (bits - count))) & mask;
 }
+
+static __always_inline __u64 kprog_x86_ror_result(__u64 value, __u64 rhs,
+                                                   __u8 width)
+{
+	__u32 bits = KPROG_X86_WIDTH_BITS(width);
+	__u64 mask = KPROG_X86_WIDTH_MASK(width);
+	__u64 count = KPROG_X86_SHIFT_COUNT(rhs, width) & (bits - 1);
+	__u64 narrowed = value & mask;
+
+	if (count == 0)
+		return narrowed;
+	return ((narrowed >> count) | (narrowed << (bits - count))) & mask;
+}
 #endif

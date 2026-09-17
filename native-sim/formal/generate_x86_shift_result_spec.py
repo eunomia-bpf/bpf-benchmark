@@ -13,7 +13,7 @@ C_HEADER = ROOT / "generated/x86_shift_result.h"
 EXPECTED = {
     "schema_version": 1,
     "operation": "x86ShiftResult",
-    "operations": ["shl", "shr", "sar", "rol"],
+    "operations": ["shl", "shr", "sar", "rol", "ror"],
     "count": "x86ShiftCount",
     "operand": "narrow",
     "sar": "unsigned_sign_fill",
@@ -54,6 +54,14 @@ def rol (value rhs : BitVec 64) (width : Width) : BitVec 64 :=
   if count = 0 then narrowed
   else narrow ((narrowed <<< count) |||
     (narrowed >>> (BitVec.ofNat 64 bits - count))) width
+def ror (value rhs : BitVec 64) (width : Width) : BitVec 64 :=
+  let bits := bits width
+  let count := BitVec.and (GeneratedX86ShiftCount.count rhs width)
+    (BitVec.ofNat 64 (bits - 1))
+  let narrowed := narrow value width
+  if count = 0 then narrowed
+  else narrow ((narrowed >>> count) |||
+    (narrowed <<< (BitVec.ofNat 64 bits - count))) width
 end KProgFormal.GeneratedX86ShiftResult
 '''
 
@@ -108,6 +116,19 @@ static __always_inline __u64 kprog_x86_rol_result(__u64 value, __u64 rhs,
 \tif (count == 0)
 \t\treturn narrowed;
 \treturn ((narrowed << count) | (narrowed >> (bits - count))) & mask;
+}
+
+static __always_inline __u64 kprog_x86_ror_result(__u64 value, __u64 rhs,
+                                                   __u8 width)
+{
+\t__u32 bits = KPROG_X86_WIDTH_BITS(width);
+\t__u64 mask = KPROG_X86_WIDTH_MASK(width);
+\t__u64 count = KPROG_X86_SHIFT_COUNT(rhs, width) & (bits - 1);
+\t__u64 narrowed = value & mask;
+
+\tif (count == 0)
+\t\treturn narrowed;
+\treturn ((narrowed >> count) | (narrowed << (bits - count))) & mask;
 }
 #endif
 '''

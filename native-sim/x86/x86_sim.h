@@ -207,14 +207,7 @@ static __always_inline __u64 x86_signed_abs_width(__u64 value, __u8 width)
 
 static __always_inline __u64 x86_ror(__u64 value, __u64 shift, __u8 width)
 {
-	__u32 bits = x86_width_bits(width);
-	__u64 mask = x86_width_mask(width);
-	__u64 amount = shift & (bits - 1);
-	__u64 narrowed = value & mask;
-
-	if (amount == 0)
-		return narrowed;
-	return ((narrowed >> amount) | (narrowed << (bits - amount))) & mask;
+	return kprog_x86_ror_result(value, shift, width);
 }
 
 static __always_inline __u64 x86_bswap(__u64 value, __u8 width)
