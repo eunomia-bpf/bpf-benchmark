@@ -3307,3 +3307,35 @@ not establish complete native-byte semantic equivalence.
   because the IMUL contract's `signedAbs` tests the sign through `sign` while the
   signed contract tests the literal sign mask; `bv_decide` abstracts `sign` when
   it is not unfolded.
+
+### AArch64 pre/post writeback: contract attempted and rejected, 2026-09-17
+
+- Attempted a generated contract for `ARM64_SIM_L_MEM_PRE`/`ARM64_SIM_L_MEM_POST`
+  (the load/store base-register writeback), the last AArch64 memory macro without
+  one. Built a full JSON->Lean+C pipeline (`GeneratedArm64Writeback` with a
+  three-way `Mode`, `classify`, `applies`, `value`, plus a refinement against an
+  independent flag-disjunction statement and a `KPROG_ARM64_WRITEBACK` macro).
+- **Rejected and fully removed** before commit, for two reasons, both structural
+  rather than toolchain difficulty:
+  1. The emitted C has *two independent single-bit macros*, not one combined
+     classification. `ARM64_SIM_L_MEM_PRE` tests `AUX & ARM64_MEM_PRE` and
+     `ARM64_SIM_L_MEM_POST` tests `AUX & ARM64_MEM_POST`, and a call site always
+     invokes exactly one of them. A three-way `Mode`/`classify` contract therefore
+     models structure the emitted code does not have, and the only C call site that
+     could consume a combined macro (applying `PRE || POST`) would double-apply the
+     delta if both bits were ever set.
+  2. The macro body is a bare `base + imm` with a pointer-tag writeback that
+     differs between the SP and general-register arms; there is no non-trivial
+     value computation to state independently, and the flag gate is the tautology
+     `bit ? 1 : 0`. The genuinely load-bearing part — "a pre/post access
+     contributes no separate immediate to the address" — is **already** generated
+     and proven by `GeneratedArm64MemOffset` (`valueSpec true _ => 0` /
+     `... => index`, with `arm64_mem_offset_prepost_ignores_immediate`).
+- Lesson learned: a contract needs an honest call site and a statement that is not
+  a restatement or a tautology. Both "PRESENT in the emitted code" and "the
+  independent form says something the generated form does not" are necessary
+  conditions; the writeback delta fails the first, and its only non-trivial
+  property is already owned by the mem-offset contract. Recorded so the same
+  contract is not rebuilt. All generated files, the spec, the generator, the two
+  Lean modules, and the `arm64_sim_local_bpf.h` include were removed; `make -C
+  native-sim/arm64 build` is green and `git status` shows no residual change.
