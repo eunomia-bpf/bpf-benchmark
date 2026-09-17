@@ -109,6 +109,7 @@
 #include "../formal/generated/x86_shift_count.h"
 #include "../formal/generated/x86_shift_result.h"
 #include "../formal/generated/x86_bswap.h"
+#include "../formal/generated/x86_signed.h"
 
 #define X86_RAX 0U
 #define X86_RCX 1U
@@ -180,15 +181,7 @@ static __always_inline __u64 x86_apply_width(__u64 value, __u8 width)
 
 static __always_inline __u64 x86_sign_extend(__u64 value, __u8 width)
 {
-	__u64 narrowed = x86_apply_width(value, width);
-
-	if (width == X86_WIDTH_8)
-		return (__u64)(__s64)(__s8)narrowed;
-	if (width == X86_WIDTH_16)
-		return (__u64)(__s64)(__s16)narrowed;
-	if (width == X86_WIDTH_32)
-		return (__u64)(__s64)(__s32)narrowed;
-	return narrowed;
+	return kprog_x86_sign_extend_value(value, width);
 }
 
 static __always_inline __u8 x86_shift_count(__u64 rhs, __u8 width)
@@ -198,12 +191,7 @@ static __always_inline __u8 x86_shift_count(__u64 rhs, __u8 width)
 
 static __always_inline __u64 x86_signed_abs_width(__u64 value, __u8 width)
 {
-	__u64 narrowed = x86_apply_width(value, width);
-	__u64 sign = 1ULL << (x86_width_bits(width) - 1);
-
-	if (!(narrowed & sign))
-		return narrowed;
-	return ((~narrowed) + 1) & x86_width_mask(width);
+	return kprog_x86_abs_width_value(value, width);
 }
 
 static __always_inline __u64 x86_ror(__u64 value, __u64 shift, __u8 width)

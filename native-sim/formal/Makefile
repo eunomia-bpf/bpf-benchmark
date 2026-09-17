@@ -33,6 +33,7 @@ check:
 	python3 generate_x86_shift_count_spec.py --check
 	python3 generate_x86_shift_result_spec.py --check
 	python3 generate_x86_bswap_spec.py --check
+	python3 generate_x86_signed_spec.py --check
 	python3 generate_x86_shift_flags_spec.py --check
 	python3 generate_x86_reg_write_spec.py --check
 	python3 generate_x86_reg_read_spec.py --check
@@ -69,6 +70,10 @@ check:
 	lake env lean KProgFormal/X86Bswap.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_bswap_host.c -o build/test_x86_bswap_host
 	./build/test_x86_bswap_host
+	lake env lean KProgFormal/GeneratedX86Signed.lean
+	lake env lean KProgFormal/X86Signed.lean
+	$(CC) -Wall -Wextra -O2 -I. test_x86_signed_host.c -o build/test_x86_signed_host
+	./build/test_x86_signed_host
 	lake env lean KProgFormal/X86ShiftFlags.lean
 	lake env lean KProgFormal/X86ImulFlags.lean
 	lake env lean KProgFormal/X86RegWrite.lean

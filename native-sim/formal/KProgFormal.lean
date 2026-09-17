@@ -18,6 +18,8 @@ import KProgFormal.X86ShiftCount
 import KProgFormal.X86ShiftResult
 import KProgFormal.GeneratedX86Bswap
 import KProgFormal.X86Bswap
+import KProgFormal.GeneratedX86Signed
+import KProgFormal.X86Signed
 import KProgFormal.X86ShiftFlags
 import KProgFormal.X86ImulFlags
 import KProgFormal.X86RegWrite
