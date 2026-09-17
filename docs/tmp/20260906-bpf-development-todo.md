@@ -3177,3 +3177,52 @@ not establish complete native-byte semantic equivalence.
 - Open x86 proof surface after this increment: `x86_popcount64`,
   `x86_shld`/`x86_shrd`, `x86_sign_extend`, `x86_signed_abs_width`, the
   objdump/parser-to-AUX relation, and native-byte correspondence.
+
+### x86 signed-value refinement (sign extension and magnitude), 2026-09-17
+
+- Gap: `x86_sign_extend` (six call sites) and `x86_signed_abs_width` (the two
+  IMUL-magnitude operands, `native-sim/x86/x86_sim.h`) implemented the width
+  sign extension and the width-domain magnitude with inline width `if` chains
+  and no independent statements.
+- Contract: `native-sim/formal/generate_x86_signed_spec.py` reads
+  `x86_signed_spec.json` and emits `generated/x86_signed.h`
+  (`kprog_x86_sign_extend_value`, `kprog_x86_abs_width_value`) and
+  `KProgFormal/GeneratedX86Signed.lean`. It has a `--check` mode and a
+  `make check` line.
+- C wiring: `x86_sim.h` includes the generated header and both helpers are
+  one-line delegations.
+- Lean bridge: `native-sim/formal/KProgFormal/X86Signed.lean` proves
+  `x86_sign_extend_refines` and `x86_abs_width_refines` (each generated form
+  equals an independent statement: `BitVec.signExtend` of the narrowed low lane,
+  and a negate-then-narrow magnitude, neither sharing the generated
+  complement-and-subtract form), `x86_abs_width_idempotent`,
+  `x86_abs_width_bounded` (the magnitude never exceeds the width's sign mask,
+  via `BitVec.ule`), and three `native_decide` examples. No `sorry`/`admit`.
+- Lesson learned: `BitVec.toNat` upper-bound goals are **outside**
+  `bv_decide`'s supported fragment ("None of the hypotheses are in the supported
+  BitVec fragment"); stating the same bound with `BitVec.ule` against a literal
+  discharges it immediately. A drafted `toNat`-bounded version was replaced for
+  this reason, and a `sign_clear` theorem whose `.w64` arm was a reflexive
+  `if p then x else x` was deleted as a tautology and replaced by the real bound.
+- Host cross-check `native-sim/formal/test_x86_signed_host.c`: compiles the
+  generated functions with zero warnings under `-Wall -Wextra` and compares them
+  to oracles that widen through the width's explicit `__s*` C type and take the
+  magnitude through a signed reinterpretation, asserting both are idempotent. It
+  sweeps nine boundary operands over all four widths, then a fixed-seed
+  20000-iteration LCG sweep (seed `0x6d41b0e793f28ac5`). Result:
+  `OK (20036 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, two `lean` lines, signed host cross-check step; the x86 BSWAP
+  step still `OK (20028 cases)`). Mutation checks: changing a width's bit count
+  in `x86_signed_spec.json` makes `--check` exit 1; five independent mutations of
+  `generated/x86_signed.h` (8-bit sign extension as unsigned, 32-bit extension
+  from the wrong type, 64-bit extension narrowing, magnitude dropping the sign
+  test, magnitude forgetting to re-narrow) each make the host cross-check exit 1
+  with a printed `MISMATCH`, while the pristine header stays `OK`.
+  `make -C native-sim/x86 micro-proofs-build` rebuilds all 30 workload-derived
+  artifacts, all `ok`; `build`/`run` produce and load the object.
+- Open x86 proof surface after this increment: `x86_popcount64`,
+  `x86_shld`/`x86_shrd` (blocked in this toolchain: the C helper branches on a
+  symbolic `amount >= bits`, and `bv_decide` abstracts the `toNat` comparison —
+  recorded, not attempted further), the objdump/parser-to-AUX relation, and
+  native-byte correspondence.
