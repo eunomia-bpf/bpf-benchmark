@@ -3034,3 +3034,56 @@ not establish complete native-byte semantic equivalence.
   pointer-tag propagation, the stack pointer helper, `ARM64_SIM_L_STACK_READ_TAG`
   and `ARM64_SIM_L_STACK_WRITE`'s selection (byte-ladder part is already the
   generated load contract), and native-byte equivalence.
+
+### AArch64 stack slot-tag refinement, 2026-09-16
+
+- Gap: `ARM64_SIM_L_STACK_READ_TAG` and the tag-slot gate in
+  `ARM64_SIM_L_STACK_WRITE_TAG` (`native-sim/arm64/arm64_sim_local_bpf.h`)
+  decided with an inline `width == 64 && (index & 7) == 0` conjunction whether a
+  stack slot carries its stored tag, with no independent statement.
+- Contract shape: the two conditions (access is 64-bit, slot is qword-aligned)
+  are a closed pair, so the contract is a four-case classification plus the
+  selection predicate; the predicate is total.
+- Generator: `native-sim/formal/generate_arm64_stack_tag_spec.py` reads
+  `arm64_stack_tag_spec.json` and emits `generated/arm64_stack_tag.h`
+  (`KPROG_ARM64_STACK_TAG(IS_W64, IS_ALIGNED)`) and
+  `KProgFormal/GeneratedArm64StackTag.lean` (a namespace with `Case`,
+  `classify`, `tagged`, and an independent `taggedSpec` conjunction). It has a
+  `--check` mode and a `make check` line.
+- C wiring: `arm64_sim_local_bpf.h` includes the generated header; the stack
+  read tag now selects on the predicate, and the stack write's slot-tag gate
+  uses it too. The emitted `xdp` program section stays byte-identical to the
+  pre-change object and `build`/`run` load the object.
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64StackTag.lean` proves
+  `arm64_stack_tag_classify_total`, `arm64_stack_tag_refines` (classify-then-
+  table equals the independent `isW64 && isAligned` conjunction),
+  `arm64_stack_tag_dispatch`, and `arm64_stack_tag_unaligned_never`. No
+  `sorry`/`admit`.
+- Lesson learned: Lean's equation-style `def f (a b : Bool) : C | p, q => ...`
+  does **not** elaborate for a two-binder non-recursive definition here
+  (`expected type Case` error); the working form is `def f (a b : Bool) : C :=
+  match a, b with | ...`. Also, a constructor named `of` collides with Lean core
+  notation — `classify` is used instead. Arm order is right-to-left (last binder
+  varies fastest), which matters for naming the cases correctly.
+- Host cross-check `native-sim/formal/test_arm64_stack_tag_host.c`: compiles the
+  generated predicate with zero warnings under `-Wall -Wextra` and compares it
+  to a plain-conjunction oracle over four widths x eight offsets plus the four
+  explicit combinations. Result: `OK (36 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, two `lean` lines, stack-tag host cross-check step; mem dispatch
+  `OK (72 cases)`). Mutation checks: changing the tagged flag in
+  `arm64_stack_tag_spec.json` makes `--check` exit 1; four independent mutations
+  of `generated/arm64_stack_tag.h` (OR instead of AND, alignment dropped, width
+  dropped, result inverted) each make the host cross-check exit 1 with a printed
+  `MISMATCH`, while the pristine header stays `OK`. `make -C native-sim/arm64
+  micro-proofs-build` rebuilds all 30 workload-derived artifacts, all `ok`.
+- `make micro BENCH=simple` note: the suite currently stops in
+  `host-native-bpf-x86` (upstream tetragon `_(&mm->user_ns)` against the host
+  7.3.0-rc3 BTF), the same pre-existing host-BTF drift the corpus runs work
+  around with `VMLINUX_BTF=<framework vmlinux>`. The override was passed and the
+  failure is unchanged, so it is a build-graph prerequisite (the x86 native rule
+  does not take the override through to `vendor/bpf`) rather than a measurement
+  gate; the micro-proofs step itself passes.
+- Open AArch64 boundary after this increment: the pre/post-index writeback and
+  pointer-tag propagation, the stack pointer helper, and native-byte
+  equivalence.
