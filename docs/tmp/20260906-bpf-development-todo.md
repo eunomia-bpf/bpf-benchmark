@@ -3131,3 +3131,49 @@ not establish complete native-byte semantic equivalence.
 - Open x86 proof surface after this increment: `x86_bswap`, `x86_popcount64`,
   `x86_shld`/`x86_shrd`, `x86_sign_extend`, `x86_signed_abs_width`, the
   objdump/parser-to-AUX relation, and native-byte correspondence.
+
+### x86 BSWAP byte-reversal refinement, 2026-09-17
+
+- Gap: `x86_bswap` in `native-sim/x86/x86_sim.h` implemented the byte reversal
+  used by the `BSWAP`, `MOVBE_LOAD`, and `MOVBE_STORE` handlers (three call
+  sites) with an inline mask/shift ladder and no independent statement.
+- Contract: `native-sim/formal/generate_x86_bswap_spec.py` reads
+  `x86_bswap_spec.json` and emits `generated/x86_bswap.h`
+  (`kprog_x86_bswap_value`) and `KProgFormal/GeneratedX86Bswap.lean`. It has a
+  `--check` mode and a `make check` line.
+- C wiring: `x86_sim.h` includes the generated header and `x86_bswap` is now a
+  one-line delegation. (The edit initially merged the helper's closing brace
+  into `x86_popcount64`; the region was repaired and `x86_popcount64` restored
+  verbatim before the build.)
+- Lean bridge: `native-sim/formal/KProgFormal/X86Bswap.lean` proves
+  `x86_bswap_refines` (the generated ladder equals an independent per-byte
+  **lane-extraction** assembly), `x86_bswap_involutive` (applying the reversal
+  twice restores the width-masked value), `x86_bswap_w32_clears_high`, and three
+  `native_decide` examples. No `sorry`/`admit`.
+- Independence: the generated form is a mask-and-shift ladder over the raw word;
+  the spec extracts each source byte as an `extractLsb'` lane and re-places it in
+  reverse lane order, sharing no mask constants with the generated form. The
+  involution theorem is a property the ladder form does not state and is checked
+  executably in the host cross-check on every case.
+- Host cross-check `native-sim/formal/test_x86_bswap_host.c`: compiles the
+  generated function with zero warnings under `-Wall -Wextra`, compares it to an
+  oracle that reverses the width's bytes through a byte array, and asserts both
+  the width invariant (no byte above the width survives) and involution. It
+  sweeps seven boundary words over all four widths, then a fixed-seed
+  20000-iteration LCG sweep (seed `0x1a6f83c2d50947be`). Result:
+  `OK (20028 cases)`.
+- Verification: full `make -C native-sim/formal check` green (new generator
+  `--check` line, two `lean` lines, bswap host cross-check step; the x86 ROR step
+  still `OK (20320 cases)`). Mutation checks: changing a width's byte count in
+  `x86_bswap_spec.json` makes `--check` exit 1; four independent mutations of
+  `generated/x86_bswap.h` (64-bit lane-0 not moved, 64-bit lane-1 to the wrong
+  lane, 32-bit case not shifted down, 16-bit case wrong shift) each make the host
+  cross-check exit 1 with a printed `MISMATCH`, while the pristine header stays
+  `OK`. A fifth candidate mutation (`& 0xff00` widened to `& 0xffff` in the
+  16-bit arm) was confirmed semantically equivalent and rejected as a mutation,
+  not a coverage gap. `make -C native-sim/x86 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts, all `ok`; `build`/`run` produce and load the
+  object.
+- Open x86 proof surface after this increment: `x86_popcount64`,
+  `x86_shld`/`x86_shrd`, `x86_sign_extend`, `x86_signed_abs_width`, the
+  objdump/parser-to-AUX relation, and native-byte correspondence.
