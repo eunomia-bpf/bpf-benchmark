@@ -110,6 +110,7 @@
 #include "../formal/generated/x86_shift_result.h"
 #include "../formal/generated/x86_bswap.h"
 #include "../formal/generated/x86_signed.h"
+#include "../formal/generated/x86_popcount.h"
 
 #define X86_RAX 0U
 #define X86_RCX 1U
@@ -206,11 +207,7 @@ static __always_inline __u64 x86_bswap(__u64 value, __u8 width)
 
 static __always_inline __u64 x86_popcount64(__u64 value)
 {
-	value = value - ((value >> 1) & 0x5555555555555555ULL);
-	value = (value & 0x3333333333333333ULL) +
-		((value >> 2) & 0x3333333333333333ULL);
-	value = (value + (value >> 4)) & 0x0f0f0f0f0f0f0f0fULL;
-	return (value * 0x0101010101010101ULL) >> 56;
+	return kprog_x86_popcount_value(value);
 }
 
 static __always_inline __u64 x86_alu_result(__u64 lhs, __u64 rhs,
