@@ -3459,3 +3459,45 @@ not establish complete native-byte semantic equivalence.
   selection relation, compiler/native-byte correspondence, and multi-step
   control-flow traces. All x86 value helpers are now generated with proven
   contracts.
+
+### Default corpus completes on the current tree; kop output rejected by the verifier, 2026-09-18
+
+- The repository default policy now completes end to end on the current working
+  tree with **no command-line overrides at all**:
+  `BPFREJIT_CORPUS_APPS=katran SAMPLES=1 WORKLOAD_DURATION=10 JOBS=8
+  IMAGE_BUILD_JOBS=8 make corpus` exits 0 and writes
+  `corpus/results/x86_kvm_corpus_20260918_063928_597786/` with suite
+  `status: "completed"`, app `status: "ok"`, and `rejit_result.status: "ok"` over
+  all eleven `full-x86` passes. The working tree at this point carries a
+  concurrent uncommitted change to `runner/mk/build.mk` that adds the
+  `VMLINUX_BTF`/`KERNEL_RELEASE` pin to `host-native-bpf-x86` (the exact fix this
+  log previously recorded as needing authorization), so the framework-kernel BTF
+  is now used by default and no override is needed.
+- **The `kop` step's optimized bytecode is rejected by the stock verifier.** The
+  shim log for that run records `loadtime verifier probe rejected candidate after
+  step kop errno=13`, after which it correctly passes the original
+  `BPF_PROG_LOAD` through (`PROG_LOAD -> fd=19 errno=0 kernel_prog_id=86`). So
+  although the plan contains all eleven steps including `kop` at index 10, no kop
+  site is installed: the xdp `balancer_ingres` step list ends at step 9 (`dce`),
+  and the applied-site totals for the run are `noop: 4`, `map_inline: 4`,
+  `const_prop: 2`, `dce: 2`, `wide_mem: 1`, `bounds_check_merge: 1`,
+  `skb_load_bytes_spec: 1`, `kop: 0`. This is a **correctness signal about the kop
+  pass output**, not a framework or measurement-validity problem: the shim did
+  exactly the right thing (reject the candidate, keep the original), and the
+  verifier error is the ground truth to act on.
+- Contrast with the earlier committed `kop`-through run
+  (`corpus/results/x86_kvm_corpus_20260916_172134_395628/`, 71 kop sites
+  installed, `balancer_ingres` 169.00 -> 146.01 ns/run). The two runs differ in
+  the concurrent `bpfopt/llvm/src/*` and `bpfopt/shim/*` WIP now in the tree, so
+  the kop backend changed between them. The current tree's kop output does not
+  survive the verifier; the earlier one did.
+- Raw counters for the completed (kop-not-installed) run: `balancer_ingres`
+  170.63 ns/run baseline -> 169.48 ns/run post, pktgen throughput 2,575,546 ->
+  2,621,341 pps. Consistent with kop contributing nothing on this tree.
+- Note on follow-up evidence capture: a second `KEEP_WORKDIRS=1` run
+  (`corpus/results/x86_kvm_corpus_20260918_074332_118383/`) failed before the BPF
+  work for an unrelated environmental reason (`modprobe tunnel4 failed: Module
+  tunnel4 not found in directory /artifacts/lib/modules/7.0.0-rc2+`), so the
+  in-VM `verifier_log_step10.log` from the first run was not retained. The
+  rejection line above is from the retained shim log, which is the authoritative
+  record of the outcome.
