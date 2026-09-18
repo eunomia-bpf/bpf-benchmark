@@ -16,6 +16,7 @@
 #include "../formal/generated/arm64_extrev.h"
 #include "../formal/generated/arm64_csel.h"
 #include "../formal/generated/arm64_branch.h"
+#include "../formal/generated/arm64_branch_emit.h"
 #include "../formal/generated/arm64_movk.h"
 #include "../formal/generated/arm64_shift.h"
 #include "../formal/generated/arm64_reduction.h"
@@ -1386,7 +1387,7 @@ ARM64_SIM_CONCAT(__a64_sim_jcc_fallthrough_, ID):                            \
 
 #define ARM64_SIM_A64_JCC_IMPL(COND, CURRENT, TARGET, LABEL, ID)            \
 	do {                                                               \
-		if ((TARGET) <= (CURRENT)) {                                \
+		if (KPROG_ARM64_BRANCH_BACKWARD((CURRENT), (TARGET))) {                                \
 			ARM64_SIM_A64_JCC_BACKWARD((COND), LABEL, ID);     \
 		} else if (ARM64_SIM_L_EVAL_COND(COND)) {                  \
 			ARM64_SIM_A64_JMP((CURRENT), (TARGET), LABEL);     \
@@ -1401,7 +1402,7 @@ ARM64_SIM_CONCAT(__a64_sim_jcc_fallthrough_, ID):                            \
 		__u64 __a64_l_value = ARM64_SIM_L_READ_REG(REG);          \
 		int __a64_l_taken =                                        \
 			KPROG_ARM64_BRANCH_TEST((KIND), __a64_l_value, 0ULL);\
-		if ((TARGET) <= (CURRENT)) {                              \
+		if (KPROG_ARM64_BRANCH_BACKWARD((CURRENT), (TARGET))) {                              \
 			if (!__a64_l_taken) {                             \
 				goto ARM64_SIM_CONCAT(__a64_sim_cb_fallthrough_, ID);\
 			}                                                 \
@@ -1423,7 +1424,7 @@ ARM64_SIM_CONCAT(__a64_sim_cb_fallthrough_, ID):                             \
 	do {                                                               \
 		int __a64_l_taken =                                        \
 			KPROG_ARM64_BRANCH_TEST((KIND), ARM64_SIM_L_READ_REG(REG), (BIT));\
-		if ((TARGET) <= (CURRENT)) {                              \
+		if (KPROG_ARM64_BRANCH_BACKWARD((CURRENT), (TARGET))) {                              \
 			if (!__a64_l_taken) {                             \
 				goto ARM64_SIM_CONCAT(__a64_sim_tb_fallthrough_, ID);\
 			}                                                 \
