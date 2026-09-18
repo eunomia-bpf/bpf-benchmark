@@ -3339,3 +3339,65 @@ not establish complete native-byte semantic equivalence.
   contract is not rebuilt. All generated files, the spec, the generator, the two
   Lean modules, and the `arm64_sim_local_bpf.h` include were removed; `make -C
   native-sim/arm64 build` is green and `git status` shows no residual change.
+
+### x86 BT/BZHI refinement, 2026-09-17
+
+- Gap: the `X86_SIM_L_EXEC_BT*` (three macros) and `X86_SIM_L_EXEC_BZHI*` (two
+  macros) handlers in `native-sim/x86/x86_sim_local_bpf.h` computed the indexed
+  bit and the zero-high-bits result with inline expressions and no independent
+  statements.
+- Contract: `native-sim/formal/generate_x86_bitops_spec.py` reads
+  `x86_bitops_spec.json` and emits `generated/x86_bitops.h`
+  (`kprog_x86_bt_value`, `kprog_x86_bzhi_value`) and
+  `KProgFormal/GeneratedX86Bitops.lean`. It has a `--check` mode and a
+  `make check` line.
+- C wiring: `x86_sim.h` includes the generated header and all five macros now
+  delegate their value computation to the generated helpers.
+- Lean bridge: `native-sim/formal/KProgFormal/X86Bitops.lean` proves
+  `x86_bt_refines`, `x86_bzhi_refines` (each against an independent
+  exponent-built mask rather than the generated match table),
+  `x86_bzhi_within_width`, `x86_bzhi_max_index_keeps`, and three `native_decide`
+  examples. No `sorry`/`admit`.
+- **A real precedence bug was caught by the host cross-check, not by Lean.** Lean's
+  `&&&` (infix priority 70) binds *tighter* than `>>>` (65), so the generated
+  `x >>> bit &&& 1` parsed as `x >>> (bit &&& 1)` — the opposite of the C reading
+  — and `x & (1 <<< c) - 1` parsed as `(x & (1 <<< c)) - 1`. Both were fixed with
+  explicit parentheses. The Lean-only `native_decide`/`bv_decide` checks passed on
+  the buggy form because they compared the generated def against itself; only the
+  independent host oracle, evaluating the *semantics*, exposed it.
+- **The BT index mask is the simulator's `63 : 31` pair, not the width's bit
+  count.** An 8-bit `bt` with offset 8 tests a bit the narrowed byte does not have
+  and yields false; the contract and the host oracle both encode this, and the
+  host oracle deliberately builds the mask from the C expression while the Lean
+  spec builds it from a predicate, so the two remain independent.
+- **Build-graph finding (pre-existing, important).** Adding a module that imports
+  `GeneratedX86Width` (an `inductive` with a `deriving` clause) alongside the
+  existing `X86ShiftResult` produced an intermittent
+  `environment already contains '…Width.enumToBitVec'` error through `lake
+  build`, even though every module compiled standalone. The robust fix was to
+  make the generated bitops module depend on the **numeric width code** rather
+  than the `Width` inductive, removing the diamond. A second, independent failure
+  surfaced during the clean rebuild: the committed `X86Popcount.lean:29`
+  `bv_decide` proof needs ~7 s CPU, which exceeds the default solver budget on a
+  loaded machine and failed a from-scratch build; it now passes
+  `bv_decide (config := { timeout := 120 })`. Both are recorded because they make
+  `make check` non-deterministic on a cold cache.
+- Host cross-check `native-sim/formal/test_x86_bitops_host.c`: compiles the
+  generated helpers with zero warnings under `-Wall -Wextra` and compares them to
+  an oracle that tests the indexed bit through a shifted one-bit mask and builds
+  the `bzhi` kept mask from the index. It sweeps eight operands x four widths x
+  all 64 indices, then a fixed-seed 20000-iteration LCG sweep (seed
+  `0x5b13f8a2e64c07d9`), plus the within-width and max-index invariants. Result:
+  `OK (22048 cases)`.
+- Verification: full `make -C native-sim/formal check` green **from a clean
+  `.lake`** (`MAKE 0`, popcount `OK (40009 cases)`, bitops `OK (22048 cases)`).
+  Mutation checks: changing a width's index mask in `x86_bitops_spec.json` makes
+  `--check` exit 1; five independent mutations of `generated/x86_bitops.h` (BT
+  index mask widened, BT base not narrowed, BZHI count mask dropped, BZHI result
+  not narrowed, BZHI clearing the low bits) each make the host cross-check exit 1
+  with a printed `MISMATCH`, while the pristine header stays `OK`.
+  `make -C native-sim/x86 micro-proofs-build` rebuilds all 30 workload-derived
+  artifacts, all `ok`; `build`/`run` produce and load the object.
+- Open x86 proof surface after this increment: `x86_shld`/`x86_shrd`, the
+  objdump/parser-to-AUX relation, compiler/native-byte correspondence, and
+  multi-step control-flow traces.

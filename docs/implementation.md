@@ -24,7 +24,8 @@ increment is committed and pushed immediately). Current state:
   compositions for ADD/ADC/SUB/SBB/CMP/TEST/AND/OR/XOR/SHL/SHR/SAR/ROL,
   register-register AND/OR/XOR/SHL/SHR/SAR/ROL/ROR handler compositions, the
   BSWAP/MOVBE byte-reversal contract, the sign-extension and width-magnitude
-  contract, the POPCNT population-count contract, the carry-sensitive handler
+  contract, the POPCNT population-count contract, the BT/BZHI bit-manipulation
+  contract, the carry-sensitive handler
   classification (SBB/ADC routing through generated C predicates), the AArch64
   NZCV flag and decode-table contracts, the
   eight-operation AArch64 multiply-family value contract, the six-operation
