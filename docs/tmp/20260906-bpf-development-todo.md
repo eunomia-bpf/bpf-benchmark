@@ -3583,3 +3583,32 @@ not establish complete native-byte semantic equivalence.
 - The authoritative **completed** evidence on the current tree remains run 1
   (`x86_kvm_corpus_20260918_063928_597786/`): default policy, no overrides, all
   eleven passes, suite `completed`, `kop` rejected by the verifier.
+
+### Root cause of the x86 `kop` step failure, fixed 2026-09-18
+
+- Both kop failure modes above (run 1 verifier rejection, run 4 `bpfopt step kop
+  failed`) had the same origin: **the x86 `bpfopt` binary was linked against the
+  devcontainer's unpatched LLVM 18**.
+- The kop backend's options `-bpf-enable-kop-select` and `-bpf-kop-mode` are
+  registered only by the patched BPF backend in `llvm-backend/llvm/llvm/`
+  (`BPFKopSelect.cpp`). `runner/mk/build.mk` built the x86 binary with
+  `-DLLVM_DIR="$(RUNNER_LLVM_DIR)"`, which defaults to
+  `/usr/lib/llvm-18/lib/cmake/llvm`. The arm64 rule already used the in-repo
+  cross-built `llvm-backend/build-bpf-kop-arm64`, so **kop worked on arm64 and
+  failed on x86**.
+- Evidence: `strings` finds `enable-kop-select` in
+  `llvm-backend/build-bpf-kop/lib/libLLVMBPFCodeGen.a` but not in
+  `/usr/lib/llvm-18/lib/libLLVMBPFCodeGen.a`; the old binary printed
+  `Unknown command line argument '-bpf-enable-kop-select'` and
+  `'-bpf-kop-mode=all=force,movbe-load=disable'` and exited 1, exactly the
+  `kop` failures the shim logged (that string is `main.cpp`'s default kop-mode
+  for the `kop` pass). Nothing was wrong with the pass logic or the framework.
+- Fix (commit `677aef815`): `host-bpfopt-llvm-x86` now depends on
+  `host-llvm-x86`, a new target that builds `llvm-libraries` in
+  `llvm-backend/build-bpf-kop`, and the x86 bpfopt rule passes
+  `-DLLVM_DIR="$(NATIVE_KOP_LLVM_DIR)"` — the same pattern as arm64.
+  `RUNNER_LLVM_DIR` is untouched because the runner's llvmbpf build still uses
+  system LLVM 18.
+- Verification: on a 2-instruction `socket_filter` and `tracepoint` program the
+  pass went `EXIT 1` -> `EXIT 0` with a well-formed report; the previously
+  failing `--pass kop` command now runs.
