@@ -1107,11 +1107,9 @@ struct x86_sim_state {
 		__u32 __x86_l_bits = x86_width_bits(__x86_l_width);       \
 		__u64 __x86_l_src = X86_SIM_L_READ_REG(SRC);             \
 		__u64 __x86_l_count = X86_SIM_L_READ_REG(COUNT) & 0xff;  \
-		__u64 __x86_l_result = __x86_l_src;                      \
-		if (__x86_l_count < __x86_l_bits)                         \
-			__x86_l_result &= (1ULL << __x86_l_count) - 1;    \
-		__x86_l_result = x86_apply_width(__x86_l_result,          \
-						 __x86_l_width);        \
+		__u64 __x86_l_result =                                   \
+			kprog_x86_bzhi_value(__x86_l_src, __x86_l_count,  \
+					     __x86_l_width);              \
 		__x86_cf = __x86_l_count >= __x86_l_bits;                 \
 		__x86_of = 0;                                             \
 		__x86_sf = 0;                                             \
@@ -1128,11 +1126,9 @@ struct x86_sim_state {
 			(IMM), __x86_l_width, 0);                         \
 		__u64 __x86_l_count = X86_SIM_L_READ_REG(                 \
 			X86_REG_AUX_GET_SRC_SHIFT(AUX)) & 0xff;           \
-		__u64 __x86_l_result = __x86_l_src;                      \
-		if (__x86_l_count < __x86_l_bits)                         \
-			__x86_l_result &= (1ULL << __x86_l_count) - 1;    \
-		__x86_l_result = x86_apply_width(__x86_l_result,          \
-						 __x86_l_width);        \
+		__u64 __x86_l_result =                                   \
+			kprog_x86_bzhi_value(__x86_l_src, __x86_l_count,  \
+					     __x86_l_width);              \
 		__x86_cf = __x86_l_count >= __x86_l_bits;                 \
 		__x86_of = 0;                                             \
 		__x86_sf = 0;                                             \
@@ -1146,20 +1142,17 @@ struct x86_sim_state {
 		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
 		__u64 __x86_l_base = X86_SIM_L_READ_REG(DST);            \
 		__u64 __x86_l_index = X86_SIM_L_READ_REG(SRC);           \
-		__u8 __x86_l_bit = __x86_l_index &                       \
-			(__x86_l_width == X86_WIDTH_64 ? 63 : 31);       \
-		__x86_cf = (x86_apply_width(__x86_l_base, __x86_l_width) >>\
-			    __x86_l_bit) & 1;                            \
+		__x86_cf = kprog_x86_bt_value(__x86_l_base,             \
+					      __x86_l_index,            \
+					      __x86_l_width);           \
 	} while (0)
 
 #define X86_SIM_L_EXEC_BT_IMM(DST, FLAGS, IMM)                              \
 	do {                                                               \
 		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
 		__u64 __x86_l_base = X86_SIM_L_READ_REG(DST);            \
-		__u8 __x86_l_bit = (IMM) &                               \
-			(__x86_l_width == X86_WIDTH_64 ? 63 : 31);       \
-		__x86_cf = (x86_apply_width(__x86_l_base, __x86_l_width) >>\
-			    __x86_l_bit) & 1;                            \
+		__x86_cf = kprog_x86_bt_value(__x86_l_base, (IMM),       \
+					      __x86_l_width);            \
 	} while (0)
 
 #define X86_SIM_L_EXEC_BT_MEM_IMM(DST, FLAGS, AUX, IMM)                     \
@@ -1167,11 +1160,9 @@ struct x86_sim_state {
 		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
 		__u64 __x86_l_base = X86_SIM_L_READ_MEM_VALUE((DST),     \
 			(AUX), x86_store_imm_disp(IMM), __x86_l_width, 1);\
-		__u8 __x86_l_bit = x86_store_imm_value((IMM),            \
-			X86_WIDTH_32) & (__x86_l_width == X86_WIDTH_64 ?  \
-					63 : 31);                         \
-		__x86_cf = (x86_apply_width(__x86_l_base, __x86_l_width) >>\
-			    __x86_l_bit) & 1;                            \
+		__x86_cf = kprog_x86_bt_value(__x86_l_base,              \
+			x86_store_imm_value((IMM), X86_WIDTH_32),    \
+			__x86_l_width);                              \
 	} while (0)
 
 #define X86_SIM_L_EXEC_IMUL_IMM(DST, SRC, FLAGS, IMM)                       \

@@ -111,6 +111,7 @@
 #include "../formal/generated/x86_bswap.h"
 #include "../formal/generated/x86_signed.h"
 #include "../formal/generated/x86_popcount.h"
+#include "../formal/generated/x86_bitops.h"
 
 #define X86_RAX 0U
 #define X86_RCX 1U

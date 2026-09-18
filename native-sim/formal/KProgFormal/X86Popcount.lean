@@ -26,7 +26,7 @@ def x86PopcountSpec (x : BitVec 64) : BitVec 64 :=
 theorem x86_popcount_refines (x : BitVec 64) :
     GeneratedX86Popcount.value x = x86PopcountSpec x := by
   unfold GeneratedX86Popcount.value x86PopcountSpec laneByte bytePop
-  bv_decide
+  bv_decide (config := { timeout := 120 })
 
 /-- The population count never exceeds 64: at most every bit is set. -/
 theorem x86_popcount_bounded (x : BitVec 64) :
