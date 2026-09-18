@@ -28,11 +28,13 @@ RUNNER_LLVM_DIR := $(if $(strip $(LLVM_DIR)),$(LLVM_DIR),$(if $(strip $(RUN_LLVM
 RUNNER_LIBBPF_CFLAGS := -O2 -fPIC -Werror -Wall -std=gnu89
 RUNNER_LIBBPF_OBJ_SUBDIR := vendor/libbpf/pic-obj
 ARM64_RUNNER_LLVM_SYSROOT := $(ROOT_DIR)/.cache/sysroots/arm64-llvm15
-# arm64 uses the in-repo kop LLVM cross-built for aarch64; x86 uses the
-# devcontainer's LLVM 18. The legacy arm64-llvm15 sysroot is retained only
-# for its -L/rpath link dirs below.
+# Both x86 and arm64 bpfopt link the in-repo kop LLVM: the `-bpf-enable-kop-select`
+# and `-bpf-kop-mode` options are registered only by the patched BPF backend in
+# llvm-backend/, not by the devcontainer LLVM 18. RUNNER_LLVM_DIR still stays on
+# the system LLVM for the runner's llvmbpf build.
 NATIVE_KOP_LLVM_BUILD_DIR := $(ROOT_DIR)/llvm-backend/build-bpf-kop
 NATIVE_KOP_LLVM_TBLGEN := $(NATIVE_KOP_LLVM_BUILD_DIR)/bin/llvm-tblgen
+NATIVE_KOP_LLVM_DIR := $(NATIVE_KOP_LLVM_BUILD_DIR)/lib/cmake/llvm
 ARM64_KOP_LLVM_BUILD_DIR := $(ROOT_DIR)/llvm-backend/build-bpf-kop-arm64
 ARM64_RUNNER_LLVM_DIR := $(ROOT_DIR)/llvm-backend/build-bpf-kop-arm64/lib/cmake/llvm
 ARM64_PKG_CONFIG_LIBDIR = $(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu/pkgconfig
@@ -86,7 +88,7 @@ HOST_KERNEL_MODULES_ORDER_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/modules.order
 
 .PHONY: \
 	host-kernel-x86 host-kernel-arm64 \
-	host-kop-x86 host-kop-arm64 host-native-link host-rust-x86 host-rust-arm64 host-llvm-arm64 host-bpfopt-llvm-x86 host-bpfopt-llvm-arm64 host-bpfperf-x86 \
+	host-kop-x86 host-kop-arm64 host-native-link host-rust-x86 host-rust-arm64 host-llvm-x86 host-llvm-arm64 host-bpfopt-llvm-x86 host-bpfopt-llvm-arm64 host-bpfperf-x86 \
 	host-shim-x86 host-shim-arm64 host-shim-artifacts \
 	host-runner-x86 host-runner-arm64 host-runner-docker-x86 \
 		host-micro-programs-x86 host-micro-programs-arm64 host-micro-programs-docker-x86 \
@@ -189,10 +191,15 @@ $(ARM64_KOP_LLVM_BUILD_DIR)/build.ninja: $(ROOT_DIR)/llvm-backend/llvm/llvm/CMak
 host-llvm-arm64: aarch64-sysroot $(ARM64_KOP_LLVM_BUILD_DIR)/build.ninja
 	cmake --build "$(ARM64_KOP_LLVM_BUILD_DIR)" --target llvm-libraries -j"$(JOBS)"
 
-host-bpfopt-llvm-x86: $(X86_BPFOPT_HOST_BIN_PATH)
+host-llvm-x86: $(NATIVE_KOP_LLVM_BUILD_DIR)/lib/libLLVMBPFCodeGen.a
 
-$(ROOT_DIR)/bpfopt/llvm/build-kop/bpfopt: $(ROOT_DIR)/bpfopt/llvm/CMakeLists.txt $(ROOT_DIR)/bpfopt/llvm/src/main.cpp $(ROOT_DIR)/bpfopt/llvm/src/bpf_bytecode.hpp $(ROOT_DIR)/bpfopt/llvm/src/bpf_kop_bytecode.hpp $(ROOT_DIR)/bpfopt/llvm/src/llvm_mapinline.hpp
-	cmake -S "$(ROOT_DIR)/bpfopt/llvm" -B "$(BPFOPT_LLVM_BUILD_X86)" -DCMAKE_BUILD_TYPE=Release -DLLVM_DIR="$(RUNNER_LLVM_DIR)"
+$(NATIVE_KOP_LLVM_BUILD_DIR)/lib/libLLVMBPFCodeGen.a: $(NATIVE_KOP_LLVM_TBLGEN)
+	cmake --build "$(NATIVE_KOP_LLVM_BUILD_DIR)" --target llvm-libraries -j"$(JOBS)"
+
+host-bpfopt-llvm-x86: host-llvm-x86 $(X86_BPFOPT_HOST_BIN_PATH)
+
+$(ROOT_DIR)/bpfopt/llvm/build-kop/bpfopt: host-llvm-x86 $(ROOT_DIR)/bpfopt/llvm/CMakeLists.txt $(ROOT_DIR)/bpfopt/llvm/src/main.cpp $(ROOT_DIR)/bpfopt/llvm/src/bpf_bytecode.hpp $(ROOT_DIR)/bpfopt/llvm/src/bpf_kop_bytecode.hpp $(ROOT_DIR)/bpfopt/llvm/src/llvm_mapinline.hpp
+	cmake -S "$(ROOT_DIR)/bpfopt/llvm" -B "$(BPFOPT_LLVM_BUILD_X86)" -DCMAKE_BUILD_TYPE=Release -DLLVM_DIR="$(NATIVE_KOP_LLVM_DIR)"
 	cmake --build "$(BPFOPT_LLVM_BUILD_X86)" -j"$(JOBS)"
 
 host-bpfopt-llvm-arm64: host-llvm-arm64 $(ARM64_BPFOPT_HOST_BIN_PATH)
