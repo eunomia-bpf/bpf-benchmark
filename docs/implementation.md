@@ -63,15 +63,17 @@ increment is committed and pushed immediately). Current state:
   compositions (in progress), the remaining load/store address and tag paths,
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
-  MADD/MSUB-with-flags opcodes), and the bridge from the proved branch
-  predicates to the generator's actual `goto`/label emission. Both halves of the
+  MADD/MSUB-with-flags opcodes). Both halves of the
   condition-to-next-PC relation (flag-based `arm64_conditional_branch_refines`
-  and compare-and-branch `arm64_branch_next_pc_refines`) are now proved against
-  independent statements over the emitted domain. The AArch64 condition table,
+  and compare-and-branch `arm64_branch_next_pc_refines`) are proved against
+  independent statements over the emitted domain, and the bridge from those
+  predicates to the generator's actual `goto`/label emission is now also proved
+  (`GeneratedArm64BranchEmit.shape`/`nextPc` with `arm64_branch_emit_refines`),
+  so the predicate-to-emitted-code chain is closed. The AArch64 condition table,
   width/NZCV flag contract, decode tables, and bitfield/multiply/extract/
-  reverse/extend/conditional-select/branch/move-wide/shift/reduction/
-  address-offset/FMOV/load-bytes contracts, and pointer-add/ABI-load contracts
-  are already shared. The `arm64_umulh`,
+  reverse/extend/conditional-select/branch/branch-emission/move-wide/shift/
+  reduction/address-offset/FMOV/load-bytes contracts, and pointer-add/ABI-load
+  contracts are already shared. The `arm64_umulh`,
   `arm64_reverse_bytes`, `arm64_reverse_bytes16`, `arm64_width_mask`,
   `arm64_width_bits`, `arm64_sign_bit`, `arm64_sign_extend`,
   `arm64_bits_mask`, the `arm64_apply_width` indirection, the shift helpers

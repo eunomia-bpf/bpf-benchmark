@@ -3501,3 +3501,43 @@ not establish complete native-byte semantic equivalence.
   in-VM `verifier_log_step10.log` from the first run was not retained. The
   rejection line above is from the retained shim log, which is the authoritative
   record of the outcome.
+
+### AArch64 branch-emission bridge, 2026-09-18
+
+- Gap (explicitly named as open in `docs/implementation.md`): the proved
+  condition and compare-and-branch predicates were stated over an abstract
+  `branchPc`, with no link to the `goto`/label code the generator actually emits
+  for control transfers.
+- Contract: `native-sim/formal/generate_arm64_branch_emit_spec.py` reads
+  `arm64_branch_emit_spec.json` and emits `generated/arm64_branch_emit.h`
+  (`KPROG_ARM64_BRANCH_BACKWARD(CURRENT, TARGET)`) and
+  `KProgFormal/GeneratedArm64BranchEmit.lean` (`Shape`, `backward`, `shape`,
+  `nextPc`). It has a `--check` mode and a `make check` line.
+- C wiring: the three identical direction tests in
+  `arm64_sim_local_bpf.h` (`ARM64_SIM_A64_JCC_IMPL`, `ARM64_SIM_A64_CBZ_IMPL`,
+  `ARM64_SIM_A64_TBZ_IMPL` — the `if ((TARGET) <= (CURRENT))` shape selector)
+  now call the generated macro. Behaviour is unchanged; `build`/`run` stay green.
+- Lean bridge: `native-sim/formal/KProgFormal/Arm64BranchEmit.lean` proves
+  `arm64_branch_emit_shape_refines` (the generated shape equals the independent
+  address-ordering predicate), **`arm64_branch_emit_refines`** (for both emitted
+  shapes the selected next PC equals `branchPc`), plus
+  `arm64_branch_emit_shape_irrelevant`, `arm64_branch_emit_taken` and
+  `arm64_branch_emit_not_taken`. Together with the existing
+  `arm64_condition_sound`/`arm64_branch_next_pc_refines`, this closes the chain
+  predicate -> emitted code -> architectural next PC. No `sorry`/`admit`.
+- Host cross-check `native-sim/formal/test_arm64_branch_emit_host.c`: compiles the
+  generated macro with zero warnings under `-Wall -Wextra`, compares the direction
+  test to a plain address-comparison oracle, and — for every ordered pair of eight
+  addresses and both predicate values — checks the emitted shape selects the same
+  next PC as the architectural model. Result: `OK (64 cases)`.
+- Verification: full `make -C native-sim/formal check` green (`MAKE 0`; branch
+  emit `OK (64 cases)`). Mutation checks: flipping a shape flag in
+  `arm64_branch_emit_spec.json` makes `--check` exit 1; three independent
+  mutations of `generated/arm64_branch_emit.h` (strict-less direction test,
+  reversed direction test, inverted result) each make the host cross-check exit 1
+  with a printed `MISMATCH`, while the pristine header stays `OK`.
+  `make -C native-sim/arm64 micro-proofs-build` rebuilds all 30 workload-derived
+  artifacts, all `ok`.
+- Open AArch64 boundary after this increment: the ALU op-step and register-lane
+  handler compositions that remain hand-written, the vector/`.D0`/`.Q0` paths, and
+  native-byte equivalence.

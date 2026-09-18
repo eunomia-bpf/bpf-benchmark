@@ -29,6 +29,8 @@ load/store address-offset contract, the four-direction FMOV move contract, the
 four-width little-endian byte-ladder load contract, the eight-lane byte-lane
 scatter contract (proved inverse to the load ladder), the four-space memory
 tag-dispatch contract, the two-condition stack slot-tag contract, the
+two-shape branch-emission contract (bridging the branch predicates to the
+generated `goto`/label emission), the
 ALU/shift/modifier/bitfield decode tables, the condition table, and the
 pointer-add/ABI-load contracts against independently stated specs
 (`make -C ../formal check`), plus tag erasure for a four-operation shared
