@@ -112,6 +112,7 @@
 #include "../formal/generated/x86_signed.h"
 #include "../formal/generated/x86_popcount.h"
 #include "../formal/generated/x86_bitops.h"
+#include "../formal/generated/x86_doubleshift.h"
 
 #define X86_RAX 0U
 #define X86_RCX 1U
@@ -252,33 +253,13 @@ static __always_inline __u64 x86_alu_result(__u64 lhs, __u64 rhs,
 static __always_inline __u64 x86_shld(__u64 dst, __u64 src, __u64 shift,
 				      __u8 width)
 {
-	__u32 bits = x86_width_bits(width);
-	__u64 mask = x86_width_mask(width);
-	__u64 amount = x86_shift_count(shift, width);
-	__u64 d = dst & mask;
-	__u64 s = src & mask;
-
-	if (amount == 0)
-		return d;
-	if (amount >= bits)
-		return (s << (amount - bits)) & mask;
-	return ((d << amount) | (s >> (bits - amount))) & mask;
+	return kprog_x86_shld_value(dst, src, shift, width);
 }
 
 static __always_inline __u64 x86_shrd(__u64 dst, __u64 src, __u64 shift,
 				      __u8 width)
 {
-	__u32 bits = x86_width_bits(width);
-	__u64 mask = x86_width_mask(width);
-	__u64 amount = x86_shift_count(shift, width);
-	__u64 d = dst & mask;
-	__u64 s = src & mask;
-
-	if (amount == 0)
-		return d;
-	if (amount >= bits)
-		return (s >> (amount - bits)) & mask;
-	return ((d >> amount) | (s << (bits - amount))) & mask;
+	return kprog_x86_shrd_value(dst, src, shift, width);
 }
 
 static __always_inline __s64 x86_simm(__u64 value)

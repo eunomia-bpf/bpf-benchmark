@@ -36,6 +36,7 @@ check:
 	python3 generate_x86_signed_spec.py --check
 	python3 generate_x86_popcount_spec.py --check
 	python3 generate_x86_bitops_spec.py --check
+	python3 generate_x86_doubleshift_spec.py --check
 	python3 generate_x86_shift_flags_spec.py --check
 	python3 generate_x86_reg_write_spec.py --check
 	python3 generate_x86_reg_read_spec.py --check
@@ -84,6 +85,10 @@ check:
 	lake env lean KProgFormal/X86Bitops.lean
 	$(CC) -Wall -Wextra -O2 -I. test_x86_bitops_host.c -o build/test_x86_bitops_host
 	./build/test_x86_bitops_host
+	lake env lean KProgFormal/GeneratedX86DoubleShift.lean
+	lake env lean KProgFormal/X86DoubleShift.lean
+	$(CC) -Wall -Wextra -O2 -I. test_x86_doubleshift_host.c -o build/test_x86_doubleshift_host
+	./build/test_x86_doubleshift_host
 	lake env lean KProgFormal/X86ShiftFlags.lean
 	lake env lean KProgFormal/X86ImulFlags.lean
 	lake env lean KProgFormal/X86RegWrite.lean

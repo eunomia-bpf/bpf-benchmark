@@ -18,6 +18,8 @@ import KProgFormal.X86ShiftCount
 import KProgFormal.X86ShiftResult
 import KProgFormal.GeneratedX86Bitops
 import KProgFormal.X86Bitops
+import KProgFormal.GeneratedX86DoubleShift
+import KProgFormal.X86DoubleShift
 import KProgFormal.GeneratedX86Bswap
 import KProgFormal.X86Bswap
 import KProgFormal.GeneratedX86Signed
