@@ -3401,3 +3401,61 @@ not establish complete native-byte semantic equivalence.
 - Open x86 proof surface after this increment: `x86_shld`/`x86_shrd`, the
   objdump/parser-to-AUX relation, compiler/native-byte correspondence, and
   multi-step control-flow traces.
+
+### x86 SHLD/SHRD double-shift refinement, 2026-09-17
+
+- Gap: `x86_shld` and `x86_shrd` in `native-sim/x86/x86_sim.h` implemented the
+  double-precision shifts used by the `X86_OP_SHLD_IMM`/`SHRD_IMM` handlers with
+  inline shift pairs and no independent statements. This closes the last
+  documented open x86 helper.
+- Contract: `native-sim/formal/generate_x86_doubleshift_spec.py` reads
+  `x86_doubleshift_spec.json` and emits `generated/x86_doubleshift.h`
+  (`kprog_x86_shld_value`, `kprog_x86_shrd_value`) and
+  `KProgFormal/GeneratedX86DoubleShift.lean`. It has a `--check` mode and a
+  `make check` line.
+- C wiring: `x86_sim.h` includes the generated header and both helpers are
+  one-line delegations.
+- Lean bridge: `native-sim/formal/KProgFormal/X86DoubleShift.lean` proves
+  `x86_shld_refines` and `x86_shrd_refines` (each against the independent
+  doubled-word statement: shift the `(dst:src)` / `(src:dst)` 2b-bit word and take
+  its high / low half), `x86_doubleshift_zero_count`, and two `native_decide`
+  examples. No `sorry`/`admit`.
+- **The `count >= bits` arm is live, not dead.** The count is
+  `KPROG_X86_SHIFT_COUNT` (63 for 64-bit, 31 otherwise), so for an 8- or 16-bit
+  SHLD the count can exceed the width and the result is taken wholly from `src`
+  shifted by `count - bits`. This is what the earlier SHLD investigation had
+  mis-analysed twice; both the generated arms and the refinement now encode it,
+  and `GeneratedX86DoubleShift.countMask` documents the mask explicitly.
+- **A real UB bug was caught by the host cross-check.** The first generated C
+  draft omitted the `count == 0` guard, so it evaluated `s >> (bits - 0)`, a
+  shift by 64 (`width`) or 32 — undefined behaviour in C. The oracle flagged it;
+  the guard is now emitted, and one of the mutation cases deletes it again to keep
+  it pinned.
+- **Build-graph (recurrence).** As with BT/BZHI, a module that both imported
+  `GeneratedX86Width` (a `deriving` inductive) and sat alongside `X86ShiftResult`
+  produced the intermittent `environment already contains '…Width.enumToBitVec'`
+  diamond through `lake build`. The generated double-shift module was again
+  rewritten to take the **numeric width code** and define its own
+  `widthMask`/`countMask`, which removes the diamond; the refinement module then
+  builds its independent mask from `2 ^ (8 * code)`. With both shifts
+  code-parameterised the full `make check` is green from a clean `.lake`.
+- Host cross-check `native-sim/formal/test_x86_doubleshift_host.c`: compiles the
+  generated helpers with zero warnings under `-Wall -Wextra` and compares them to
+  oracles that build the doubled words in `unsigned __int128` and shift them
+  there (never the macro's OR-of-two-shifts). It sweeps seven operands x four
+  widths x all 64 counts x seven sources, then a fixed-seed 20000-iteration LCG
+  sweep (seed `0x2c95e1b734af680d`), plus the within-width invariant. Result:
+  `OK (32544 cases)`.
+- Verification: full `make -C native-sim/formal check` green **from a clean
+  `.lake`** (`MAKE 0`; popcount `OK (40009 cases)`, bitops `OK (22048 cases)`,
+  doubleshift `OK (32544 cases)`). Mutation checks: flipping an operation's
+  direction in `x86_doubleshift_spec.json` makes `--check` exit 1; five
+  independent mutations of `generated/x86_doubleshift.h` (SHLD direction, SHLD
+  fill amount, SHRD direction, SHRD wide-count arm, zero-count guard) each make
+  the host cross-check exit 1 with a printed `MISMATCH`, while the pristine header
+  stays `OK`. `make -C native-sim/x86 micro-proofs-build` rebuilds all 30
+  workload-derived artifacts, all `ok`; `build`/`run` produce and load the object.
+- Open x86 proof surface after this increment: the objdump/parser-to-AUX
+  selection relation, compiler/native-byte correspondence, and multi-step
+  control-flow traces. All x86 value helpers are now generated with proven
+  contracts.

@@ -25,7 +25,7 @@ increment is committed and pushed immediately). Current state:
   register-register AND/OR/XOR/SHL/SHR/SAR/ROL/ROR handler compositions, the
   BSWAP/MOVBE byte-reversal contract, the sign-extension and width-magnitude
   contract, the POPCNT population-count contract, the BT/BZHI bit-manipulation
-  contract, the carry-sensitive handler
+  contract, the SHLD/SHRD double-shift contract, the carry-sensitive handler
   classification (SBB/ADC routing through generated C predicates), the AArch64
   NZCV flag and decode-table contracts, the
   eight-operation AArch64 multiply-family value contract, the six-operation
@@ -55,8 +55,10 @@ increment is committed and pushed immediately). Current state:
 - Open x86 proof surface: IMUL (immediate and register-register), memory
   lanes and stores, the objdump/parser-to-AUX selection relation, C-to-Lean
   unsigned-semantics correspondence, compiler/native-byte correspondence,
-  multi-step control-flow traces, the `x86_shld`/`x86_shrd` helpers, and
-  specialization preservation.
+  multi-step control-flow traces, and specialization preservation. All x86 value
+  helpers (`x86_bswap`, `x86_popcount64`, `x86_sign_extend`,
+  `x86_signed_abs_width`, `x86_shld`/`x86_shrd`, `x86_ror`, the BT/BZHI
+  predicates) now delegate to generated contracts with proven refinements.
 - Open on the AArch64 side: the ALU op-step and register-lane handler
   compositions (in progress), the remaining load/store address and tag paths,
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
