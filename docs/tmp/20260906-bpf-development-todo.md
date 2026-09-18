@@ -3541,3 +3541,45 @@ not establish complete native-byte semantic equivalence.
 - Open AArch64 boundary after this increment: the ALU op-step and register-lane
   handler compositions that remain hand-written, the vector/`.D0`/`.Q0` paths, and
   native-byte equivalence.
+
+### Default corpus run series on the 2026-09-18 tree, 2026-09-18
+
+- Ran the default policy (`BPFREJIT_CORPUS_APPS=katran SAMPLES=1
+  WORKLOAD_DURATION=10 JOBS=6 IMAGE_BUILD_JOBS=6 make corpus`) four times to get
+  authoritative two-start KVM evidence on the current tree. Results, in order:
+  1. `CORPUS_EXIT 0` (`x86_kvm_corpus_20260918_063928_597786/`): suite
+     `completed`, app `ok`; `kop` output **verifier-rejected**
+     (`verifier probe rejected candidate after step kop errno=13`), so no kop site
+     installed. Full numbers in the section above.
+  2. `CORPUS_EXIT 2`: `cp: cannot create .../modules-install/lib/modules/
+     7.0.0-rc2+/kernel/drivers/iommu/virtio-iommu.ko: No such file or directory`
+     during `host-kernel-x86`'s `modules_install`.
+  3. `CORPUS_EXIT 2`: the same `cp` failure one driver later
+     (`xen/xen-pciback/xen-pciback.ko`), with no competing build process.
+  4. `CORPUS_EXIT 0` (`x86_kvm_corpus_20260918_203721_967160/`): kernel and image
+     built cleanly, but the **post-ReJIT restart failed at application startup**
+     (`native app exited before BPF programs were tracked by shim`, katran
+     `Starting Katran` then exit), so suite `status: "error"` and app
+     `status: "error"`. The baseline phase did complete a full measurement
+     (`measure_start` -> `measure_finish`) with `balancer_ingres` 172.83 ns/run
+     and pktgen ~2,536,629 pps, but there is no post-ReJIT counterpart.
+- **New kop failure mode in run 4**: the post-ReJIT shim log records
+  `loadtime optimization failed: loadtime bpfopt step kop failed;
+  log=/tmp/loadtime_2819_2/step10.log` on the trivial 2-instruction
+  `socket_filter` and `tracepoint` programs. This differs from run 1's
+  verifier-rejection of the optimized candidate: here the `bpfopt --pass kop`
+  subprocess itself fails. Both are failures of the current tree's kop backend
+  and both leave the original bytecode in place (the framework behaves
+  correctly); they are recorded as raw failures, not measurement-validity gates.
+- **Two environment-level blockers, both outside the optimizer:**
+  - `modules_install` `cp` failures (runs 2 and 3) are a **SeaweedFS FUSE
+    flakiness** at deep pre-existing destination paths. Direct `mkdir`/`touch`
+    under the same tree succeeds, and a 200-iteration create sweep in a fresh
+    path under the same mount had 0 failures, so the mount is not broadly broken;
+    the large stale `modules-install` tree is the trigger. `vendor/build/**` is
+    gitignored, so removing that tree is a safe build-artifact cleanup.
+  - Run 4's katran startup failure is application/environment, not the load-time
+    shim. Run 1 on the same tree started katran fine, so it is intermittent.
+- The authoritative **completed** evidence on the current tree remains run 1
+  (`x86_kvm_corpus_20260918_063928_597786/`): default policy, no overrides, all
+  eleven passes, suite `completed`, `kop` rejected by the verifier.
