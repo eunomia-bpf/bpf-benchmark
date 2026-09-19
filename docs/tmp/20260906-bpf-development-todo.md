@@ -3670,3 +3670,33 @@ not establish complete native-byte semantic equivalence.
   generated x86 headers (`targets/x86/7.0.0-rc2+/vmlinux.h`,
   `tetragon/.../vmlinux_generated_x86.h`, `bcc/libbpf-tools/x86/vmlinux.h`) now
   define `mm_struct.user_ns`.
+
+### First completed default corpus run with `kop` installed, 2026-09-19
+
+- Run `corpus/results/x86_kvm_corpus_20260919_225748_512435/`, default policy
+  (`BPFREJIT_CORPUS_APPS=katran SAMPLES=1 WORKLOAD_DURATION=10 JOBS=6
+  IMAGE_BUILD_JOBS=6 make corpus`), on the tree with both fixes above
+  (`1a66f51b3` x86 VMLINUX_BTF, `677aef815` x86 kop LLVM). Suite `completed`,
+  app `katran` `status: ok`, `error: ""`.
+- **`kop` finally applied sites**: on the real katran `xdp` program,
+  `sites_matched: 71`, `sites_applied: 71`, `insn_count 2216 -> 2175`, with
+  `kop_calls_by_name = {bpf_x86_bextrq: 1, bpf_x86_bswapl: 4, bpf_x86_leaq: 41,
+  bpf_x86_roll: 20, bpf_x86_rolw: 5}`. The six trivial programs
+  (`socket_filter` x3, `kprobe`, `cgroup_sock`) correctly applied `0` (no
+  matching sites). This is the first corpus run on this tree in which `kop`
+  installs optimized bytecode end to end through the stock verifier.
+- **No kop failure signatures**: `0` occurrences of
+  `Unknown command line argument`, `bpfopt step kop failed`, or
+  `verifier probe rejected` in `details/shim-logs/katran.post_rejit.log`;
+  `rejit_result.status: ok`.
+- Two-start measurement (both phases present): `balancer_ingres` (xdp)
+  baseline `run_cnt_delta 21,487,673`, `169.56 ns/run`; post-ReJIT
+  `run_cnt_delta 28,232,777`, `147.85 ns/run`. Raw counters only; no framework
+  aggregation.
+- Other passes applied on the same program: `noop: 4`, `map_inline: 16`,
+  `const_prop: 2`, `dce: 2`, `wide_mem: 1`, `bounds_check_merge: 1`,
+  `skb_load_bytes_spec: 1`, `kop: 71` sites.
+- Run series context: `corpus_v11` attempt 1 still hit the SeaweedFS FUSE
+  `modules_install` `cp` drop (`acpi_ipmi.ko`); attempt 2 cleared it (kernel
+  `#6` built clean) and completed. The FUSE drop remains the only recurring
+  environment failure, and the `make corpus` retry loop is the mitigation.
