@@ -3645,9 +3645,16 @@ not establish complete native-byte semantic equivalence.
   `host-native-bpf-x86` fails compiling tetragon with
   `vendor/bpf/tetragon/bpf/process/bpf_process_event.h:260:49: error: no member
   named 'user_ns' in 'struct mm_struct'`. The tetragon
-  `vmlinux_generated_x86.h` is a large dirty WIP file
-  (`git diff --stat`: +7962/-4092) owned by the concurrent agent, and neither the
-  committed nor the working copy defines `mm_struct.user_ns`, so the
-  `bpf_core_field_exists(mm->user_ns)` guard cannot compile until that header is
-  regenerated from a BTF that has the field. Recorded as an observed failure, not
-  a measurement-validity gate.
+  `vmlinux_generated_x86.h` is a large dirty WIP file owned by the concurrent
+  agent (`git diff --stat`: +7962/-4092, mtime 2026-09-19 14:01).
+- **Decisive diff**: `git show HEAD:vendor/bpf/tetragon/bpf/include/
+  vmlinux_generated_x86.h` defines `struct mm_struct { ... struct user_namespace
+  *user_ns; ... }`, but the working-tree copy does not. The concurrent agent's
+  header regeneration (from the host `7.3.0-070300rc3-generic` BTF, which has no
+  `mm_struct.user_ns`; confirmed with `pahole`) dropped the field, so
+  `bpf_core_field_exists(mm->user_ns)` in
+  `tetragon/bpf/process/bpf_process_event.h:258` cannot compile.
+- This is the concurrent agent's unrelated dirty file (listed in `AGENTS.md` as
+  do-not-modify). It deterministically blocks `host-native-bpf-x86` and every
+  corpus run until their regeneration completes; it is not a defect in the
+  optimizer or the load-time shim.
