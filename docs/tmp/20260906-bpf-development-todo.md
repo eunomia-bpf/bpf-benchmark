@@ -3645,20 +3645,28 @@ not establish complete native-byte semantic equivalence.
 - **Reproduced `modules_install` success inside a corpus run**: corpus attempt 1
   of the v10 series cleared `host-kernel-x86` and advanced to
   `host-native-bpf-x86`, proving the kernel stage can pass end to end.
-- **Next blocking failure, unrelated to the optimizer and outside this scope**:
-  `host-native-bpf-x86` fails compiling tetragon with
-  `vendor/bpf/tetragon/bpf/process/bpf_process_event.h:260:49: error: no member
-  named 'user_ns' in 'struct mm_struct'`. The tetragon
-  `vmlinux_generated_x86.h` is a large dirty WIP file owned by the concurrent
-  agent (`git diff --stat`: +7962/-4092, mtime 2026-09-19 14:01).
-- **Decisive diff**: `git show HEAD:vendor/bpf/tetragon/bpf/include/
-  vmlinux_generated_x86.h` defines `struct mm_struct { ... struct user_namespace
-  *user_ns; ... }`, but the working-tree copy does not. The concurrent agent's
-  header regeneration (from the host `7.3.0-070300rc3-generic` BTF, which has no
-  `mm_struct.user_ns`; confirmed with `pahole`) dropped the field, so
-  `bpf_core_field_exists(mm->user_ns)` in
-  `tetragon/bpf/process/bpf_process_event.h:258` cannot compile.
-- This is the concurrent agent's unrelated dirty file (listed in `AGENTS.md` as
-  do-not-modify). It deterministically blocks `host-native-bpf-x86` and every
-  corpus run until their regeneration completes; it is not a defect in the
-  optimizer or the load-time shim.
+- **Blocking failure `host-native-bpf-x86`/tetragon: real build bug, fixed
+  2026-09-19 (commit `1a66f51b3`).** Initial attribution to the concurrent
+  agent's dirty `vmlinux_generated_x86.h` was wrong. Root cause:
+  `host-native-bpf-x86` ran `make -C vendor/bpf native-artifacts` with **no**
+  `VMLINUX_BTF`, so `vendor/bpf/Makefile:19` defaulted it to
+  `/sys/kernel/btf/vmlinux` — the **host** kernel BTF — and `KERNEL_RELEASE`
+  defaulted to `uname -r`. The runtime kernel is the in-repo
+  `vendor/linux-framework` build, whose BTF differs: `pahole -C mm_struct` on
+  the host BTF has no `user_ns`, while
+  `vendor/build/x86/linux/vmlinux` does. So `vmlinux.h` was generated without
+  `mm_struct.user_ns` and tetragon's
+  `bpf_core_field_exists(mm->user_ns)` could not compile. The arm64 sibling rule
+  already passed the built kernel's vmlinux, so **arm64 was fine and x86 broke**.
+- Fix: `host-native-bpf-x86` now depends on `$(HOST_KERNEL_VMLINUX_X86)` and
+  passes `VMLINUX_BTF="$(HOST_KERNEL_VMLINUX_X86)"` plus
+  `KERNEL_RELEASE=<built kernel release>` (`7.0.0-rc2+`), mirroring arm64. This
+  is also the semantically correct CO-RE binding: the VM runs the framework
+  kernel, so native BPF must bind against that kernel's BTF, keyed under its own
+  release dir (`vendor/bpf/targets/x86/7.0.0-rc2+/`).
+- Verification: `make -C vendor/bpf KERNEL_RELEASE=7.0.0-rc2+
+  VMLINUX_BTF=<built vmlinux> native-artifacts` -> `EXIT 0`, all six apps staged
+  (`bcc cilium katran otelcol-ebpf-profiler tetragon tracee`), and all three
+  generated x86 headers (`targets/x86/7.0.0-rc2+/vmlinux.h`,
+  `tetragon/.../vmlinux_generated_x86.h`, `bcc/libbpf-tools/x86/vmlinux.h`) now
+  define `mm_struct.user_ns`.
