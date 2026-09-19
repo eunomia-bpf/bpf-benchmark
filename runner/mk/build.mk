@@ -269,8 +269,11 @@ host-stage2-programs-docker-x86: host-micro-programs-docker-x86
 host-stage2-programs-arm64: host-micro-programs-arm64
 	$(MAKE) -C "$(STAGE2_PROGRAM_DIR)" OUTPUT_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)" KERNEL_OFFSETS="$(MICRO_PROGRAM_BUILD_ARM64)/kernel_offsets.h" NATIVE_TARGET=aarch64-linux-gnu NATIVE_ARCH=arm64 SYS_INCLUDE_FLAGS="$(ARM64_SYS_INCLUDE_FLAGS)" all
 
-host-native-bpf-x86: host-rust-x86
-	$(MAKE) -C "$(ROOT_DIR)/vendor/bpf" native-artifacts
+host-native-bpf-x86: host-rust-x86 $(HOST_KERNEL_VMLINUX_X86)
+	$(MAKE) -C "$(ROOT_DIR)/vendor/bpf" \
+		VMLINUX_BTF="$(HOST_KERNEL_VMLINUX_X86)" \
+		KERNEL_RELEASE="$$(cat '$(HOST_KERNEL_BUILD_DIR_X86)/include/config/kernel.release')" \
+		native-artifacts
 
 host-native-bpf-arm64: host-native-link host-rust-arm64 host-source-apps-arm64 $(HOST_KERNEL_VMLINUX_ARM64)
 	$(MAKE) -C "$(ROOT_DIR)/vendor/bpf" ARCH=arm64 GOARCH=arm64 \
