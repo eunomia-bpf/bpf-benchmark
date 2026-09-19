@@ -3612,3 +3612,26 @@ not establish complete native-byte semantic equivalence.
 - Verification: on a 2-instruction `socket_filter` and `tracepoint` program the
   pass went `EXIT 1` -> `EXIT 0` with a well-formed report; the previously
   failing `--pass kop` command now runs.
+
+### Root cause of the `modules_install` cp failures, 2026-09-19
+
+- The `cp: cannot create ... <mod>.ko: No such file or directory` failures in
+  `host-kernel-x86` (runs 2, 3, 5, 6 above; a different driver each time) are a
+  **SeaweedFS FUSE `mkdir`-drop**, not a kernel or Makefile bug.
+- `scripts/Makefile.modinst` creates every destination directory at **parse
+  time**, in one `$(foreach dir, ..., $(shell mkdir -p $(dir)))`. The
+  `/workspaces` SeaweedFS FUSE mount
+  (`fuse.seaweedfs ... on /workspaces`) silently fails some of those rapid
+  `mkdir` calls, so a later `cp` into that directory finds no parent.
+- Evidence: every failing destination directory is missing while its source
+  `.ko` exists; a direct `mkdir -p <dir>` + `cp` into the same path succeeds
+  immediately afterward; 200 iterations of `mkdir`+`touch` in a fresh path had
+  0 failures.
+- Workaround that works: pre-create the destination directory tree under
+  `vendor/build/x86/linux/modules-install/lib/modules/<release>/kernel/` for
+  every source module dir, then rerun. The parse-time `mkdir` then has nothing
+  to do and `modules_install` completes: `EXIT 0`, 842 `.ko` installed.
+- Removing a stale `modules-install` tree and letting it rebuild also reaches
+  `EXIT 0` (842 `.ko`), but the drop is intermittent, so a fresh tree is not a
+  complete guarantee. Both `vendor/build/x86/linux/**` paths are gitignored
+  build artifacts.
