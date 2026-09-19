@@ -3618,20 +3618,36 @@ not establish complete native-byte semantic equivalence.
 - The `cp: cannot create ... <mod>.ko: No such file or directory` failures in
   `host-kernel-x86` (runs 2, 3, 5, 6 above; a different driver each time) are a
   **SeaweedFS FUSE `mkdir`-drop**, not a kernel or Makefile bug.
-- `scripts/Makefile.modinst` creates every destination directory at **parse
-  time**, in one `$(foreach dir, ..., $(shell mkdir -p $(dir)))`. The
+- Exact mechanism: `vendor/linux-framework/scripts/Makefile.modinst` line 17
+  runs `$(shell rm -fr $(MODLIB)/kernel $(MODLIB)/build)` at **parse time** and
+  then recreates every destination directory in one
+  `$(foreach dir, ..., $(shell mkdir -p $(dir)))` sweep (line 121). The
   `/workspaces` SeaweedFS FUSE mount
   (`fuse.seaweedfs ... on /workspaces`) silently fails some of those rapid
-  `mkdir` calls, so a later `cp` into that directory finds no parent.
+  `mkdir` calls, so a later `cp` into that directory finds no parent. Because
+  `modinst` deletes the tree first, pre-creating it only helps for the run that
+  does not re-delete it, which is why the failure is intermittent rather than
+  deterministic.
 - Evidence: every failing destination directory is missing while its source
   `.ko` exists; a direct `mkdir -p <dir>` + `cp` into the same path succeeds
-  immediately afterward; 200 iterations of `mkdir`+`touch` in a fresh path had
-  0 failures.
-- Workaround that works: pre-create the destination directory tree under
-  `vendor/build/x86/linux/modules-install/lib/modules/<release>/kernel/` for
-  every source module dir, then rerun. The parse-time `mkdir` then has nothing
-  to do and `modules_install` completes: `EXIT 0`, 842 `.ko` installed.
-- Removing a stale `modules-install` tree and letting it rebuild also reaches
-  `EXIT 0` (842 `.ko`), but the drop is intermittent, so a fresh tree is not a
-  complete guarantee. Both `vendor/build/x86/linux/**` paths are gitignored
-  build artifacts.
+  immediately afterward; a `find`-driven loop with a 5-attempt `mkdir` retry
+  creates every directory (`434` source dirs, `0` hard failures); a 200-iteration
+  `mkdir`+`touch` sweep in a fresh path had 0 failures.
+- Confirmed good measurement: rerunning `modules_install` directly once the tree
+  is present completes with `EXIT 0`, `0` `cp` errors, `842` `.ko` installed.
+- This is vendored upstream kernel source plus an environment-level FUSE
+  deficiency; `vendor/build/x86/linux/**` is a gitignored build artifact. The
+  retry loop over `make corpus` is the practical mitigation, not a source change.
+- **Reproduced `modules_install` success inside a corpus run**: corpus attempt 1
+  of the v10 series cleared `host-kernel-x86` and advanced to
+  `host-native-bpf-x86`, proving the kernel stage can pass end to end.
+- **Next blocking failure, unrelated to the optimizer and outside this scope**:
+  `host-native-bpf-x86` fails compiling tetragon with
+  `vendor/bpf/tetragon/bpf/process/bpf_process_event.h:260:49: error: no member
+  named 'user_ns' in 'struct mm_struct'`. The tetragon
+  `vmlinux_generated_x86.h` is a large dirty WIP file
+  (`git diff --stat`: +7962/-4092) owned by the concurrent agent, and neither the
+  committed nor the working copy defines `mm_struct.user_ns`, so the
+  `bpf_core_field_exists(mm->user_ns)` guard cannot compile until that header is
+  regenerated from a BTF that has the field. Recorded as an observed failure, not
+  a measurement-validity gate.
