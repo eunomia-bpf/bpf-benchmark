@@ -3586,9 +3586,13 @@ not establish complete native-byte semantic equivalence.
 
 ### Root cause of the x86 `kop` step failure, fixed 2026-09-18
 
-- Both kop failure modes above (run 1 verifier rejection, run 4 `bpfopt step kop
-  failed`) had the same origin: **the x86 `bpfopt` binary was linked against the
-  devcontainer's unpatched LLVM 18**.
+- Scope correction: run 1's kop steps actually **ran** (the loadtime report has
+  all `kop_*` fields, `sites_applied: 0`, `elapsed_ms` ~6-7 per program); its
+  "verifier rejection" is a separate, later-stage effect on an optimized
+  candidate, not an argument-parsing failure. The `bpfopt step kop failed`
+  mode (run 4) is the argument-parsing failure described here, and it appeared
+  with the x86 `bpfopt` rebuilt at 2026-09-18 07:33, which was linked against
+  the devcontainer's unpatched LLVM 18.
 - The kop backend's options `-bpf-enable-kop-select` and `-bpf-kop-mode` are
   registered only by the patched BPF backend in `llvm-backend/llvm/llvm/`
   (`BPFKopSelect.cpp`). `runner/mk/build.mk` built the x86 binary with
