@@ -59,8 +59,11 @@ increment is committed and pushed immediately). Current state:
   helpers (`x86_bswap`, `x86_popcount64`, `x86_sign_extend`,
   `x86_signed_abs_width`, `x86_shld`/`x86_shrd`, `x86_ror`, the BT/BZHI
   predicates) now delegate to generated contracts with proven refinements.
-- Open on the AArch64 side: the ALU op-step and register-lane handler
-  compositions (in progress), the remaining load/store address and tag paths,
+- Open on the AArch64 side: the register-lane handler composition (the ALU
+  op-step half is proved: `arm64_add_step_refines`, `arm64_sub_step_refines`,
+  and `arm64_logic_step_refines` compose the generated result and generated flag
+  transition into the independent `Arm64AluStep` statement), the remaining
+  load/store address and tag paths,
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the
