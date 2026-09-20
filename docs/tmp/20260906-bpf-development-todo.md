@@ -3700,3 +3700,44 @@ not establish complete native-byte semantic equivalence.
   `modules_install` `cp` drop (`acpi_ipmi.ko`); attempt 2 cleared it (kernel
   `#6` built clean) and completed. The FUSE drop remains the only recurring
   environment failure, and the `make corpus` retry loop is the mitigation.
+
+### Full six-app default corpus run, 2026-09-20
+
+- Run `corpus/results/x86_kvm_corpus_20260920_045430_754822/`, default policy on
+  the fixed tree (`SAMPLES=1 WORKLOAD_DURATION=10 JOBS=6 IMAGE_BUILD_JOBS=6 make
+  corpus`, no `BPFREJIT_CORPUS_APPS` filter). `corpus_v12` attempt 2 `EXIT 0`,
+  all six app result files written. Attempt 1 hit the FUSE `modules_install`
+  drop (`zstd_compress.ko`).
+- App statuses: `bcc__set` ok, `katran` ok, `tetragon__observer` ok;
+  `cilium__agent` error (Cilium API `PUT /v1/endpoint/0` HTTP 500),
+  `otelcol-ebpf-profiler__profiling` error (native app exited before programs
+  were tracked), `tracee__monitor` error (Tracee launch failure). All six report
+  `rejit_result.status: ok`.
+- **`kop` applied sites in all six apps** (programs already carrying kop calls
+  are preserved; counts are newly applied sites):
+  `tracee/monitor 3089` (`leaq 2841`, `leal 191`, `shlxq 52`, `cmp_cmovb 4`,
+  `rolw 1`), `tetragon/observer 2824` (`leaq 2367`, `movq 234`, `movl 142`,
+  `movzwl 49`, `movb 16`, `movzbl 16`), `cilium/agent 1980` (`leaq 1142`,
+  `rolw 390`, `leal 246`, `cmp_cmovb 126`, `rorxl 28`, `bextrq 20`, `shlxl 19`,
+  `movbe16 9`), `otelcol 463` (`leaq 212`, `leal 121`, `cmp_cmovb 115`,
+  `bswapl 5`, `bswapq 5`, `shrxq 4`, `shlxq 1`), `katran 71`, `bcc/set 72`.
+  Total ~8,499 applied kop sites across the six apps.
+- Remaining observed failures, recorded raw (framework leaves the original
+  bytecode in place and reports them; not measurement gates):
+  - `cilium/agent`: `40` `bpfopt step kop failed` on `cil_to_netdev` and
+    `tail_nodeport_n` (kop runs after `noop/map_inline/const_prop/dce/...`), plus
+    `verifier probe rejected candidate after step kop errno=13` on a few
+    programs. `19` kop reports carry the diagnostic
+    `bytecode_kop_recovery_applied=1` (a partial-recovery path that still yields
+    applied sites, e.g. `sched_cls` 17 sites on 565->570 insns).
+  - `otelcol`: `2` `step kop failed`.
+  - `tetragon/observer`, `tracee/monitor`: `2` optimization failures each, on
+    `map_inline`/`const_prop` rather than kop.
+  - These are real remaining defects in the kop pass for specific
+    already-optimized bytecode, distinct from the argument-parsing bug fixed in
+    `677aef815`; they need the failing input bytecode captured (the framework's
+    `/tmp/loadtime_*` workdirs are removed) to reproduce offline.
+- Two-start raw counters for the three completing apps: `katran`
+  `balancer_ingres` 171.80 -> 148.34 ns/run; `bcc/set` `sys_enter` 82.29 ->
+  80.42, `sys_exit` 88.61 -> 86.50 ns/run; `tetragon/observer`
+  `generic_tracepoint` 426.65 ns/run baseline. Raw counters only.
