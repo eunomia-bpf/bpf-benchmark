@@ -3741,3 +3741,54 @@ not establish complete native-byte semantic equivalence.
   `balancer_ingres` 171.80 -> 148.34 ns/run; `bcc/set` `sys_enter` 82.29 ->
   80.42, `sys_exit` 88.61 -> 86.50 ns/run; `tetragon/observer`
   `generic_tracepoint` 426.65 ns/run baseline. Raw counters only.
+
+### Remaining kop step failures: root-caused, 2026-09-20
+
+I reproduced the failing `kop` steps offline from the checked-in canonicalized
+fixtures (`bpfopt/testbin/<app>/<n>/canonicalize_output.bin`) by running the
+configured pass chain (`noop, const_prop, dce, wide_mem, bounds_check_merge,
+skb_load_bytes_spec`) and then `kop`. Two independent defects, neither of which
+is the argument-parsing bug fixed in `677aef815`:
+
+1. **`bpf_x86_movw` was not probed — FIXED (`ccf9d3852`).**
+   `mov_store_target_for_width(2)` in `bpfopt/llvm/src/bpf_kop_bytecode.hpp`
+   emits `bpf_x86_movw` for a 2-byte memcpy store, and
+   `module/x86/bpf_x86_mov.c` registers it as a kfunc, but the name was missing
+   from `kopprober`'s `DEFAULT_KOP_NAMES` and from every runner pass yaml.
+   `kopprober` writes only the kfuncs it finds, so `target.json` had no entry and
+   `append_kop_pair` threw `target.json has no kop entry for bpf_x86_movw`,
+   failing the whole step. Fix: add the name to both lists.
+   Evidence: sweeping all 500 canonicalized program fixtures from
+   `bpfopt/testbin` through the chain, the old name list failed 4 kop steps and
+   2 were this bug; with `movw` probed only the 2 unrelated stack failures
+   remain.
+
+2. **LLVM roundtrip leaks stack-frame bytes — OPEN, in the llvmbpf submodule.**
+   The shared LLVM roundtrip grows the r10 frame on every invocation. Running
+   the same trivial pass repeatedly on `cilium_agent/202_cil_lxc_policy`
+   (`noop`, `const_prop`, `dce`, and `wide_mem` all behave identically — it is
+   the roundtrip, not the pass) gives max r10 depth
+   `257 -> 337 -> 369 -> 417 -> 449 -> 489 -> 513` with the 7th invocation
+   failing. Distinct r10 slots grow `16 -> 24 -> 26 -> 28 -> 29`, i.e. each
+   roundtrip allocates new slots and extends the frame downward.
+   - The pipeline runs six passes before `kop`, so a program whose raw frame is
+     `257` bytes reaches `257 + ~256 = 513` and `kop` (step 11, last) then fails.
+     The raw bytecode alone is fine: `kop` on the un-passed fixture succeeds
+     (`EXIT 0`).
+   - Failure surfaces from `vendor/llvmbpf/src/compiler.cpp:389`
+     (`Kernel-compatible lift requires N bytes of stack, exceeding the kernel
+     limit`), where `N = compute_kernel_stack_bytes(...)`.
+   - `compute_kernel_stack_bytes` also **overcounts by `access_size - 1`**
+     (`compiler.cpp:105-107`: `(-off) + access_size - 1`), e.g. an 8-byte access
+     at `-504` reports `511` instead of `504`, and a 2-byte access at `-512`
+     reports `513` instead of `512`. The true requirement is `-off`.
+   - `vendor/llvmbpf` is a **git submodule** (`eunomia-bpf/llvmbpf`, pinned at
+     `1fdc7b16`) and is not covered by the authorized edit scope, so this is
+     recorded for upstream rather than patched here.
+   - `bpfopt/llvm/src/main.cpp` already has `remap_out_of_range_stack_spills`,
+     but it only repairs *out-of-range* spills (`ref->off < -512`); a frame that
+     grows to exactly fill `512` bytes is considered valid and is not reclaimed.
+
+Effect on the six-app run: `cilium/agent` `40` kop failures and `otelcol` `2`
+are consistent with these two causes. Both are recorded as raw failures; the
+framework leaves the original bytecode in place and continues.
