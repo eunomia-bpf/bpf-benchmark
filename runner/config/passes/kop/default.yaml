@@ -45,6 +45,7 @@ koperation:
   - name: bpf_x86_movbe64
   - name: bpf_x86_movl
   - name: bpf_x86_movq
+  - name: bpf_x86_movw
   - name: bpf_x86_roll
   - name: bpf_x86_rolq
   - name: bpf_x86_rolw
