@@ -3761,7 +3761,14 @@ is the argument-parsing bug fixed in `677aef815`:
    Evidence: sweeping all 500 canonicalized program fixtures from
    `bpfopt/testbin` through the chain, the old name list failed 4 kop steps and
    2 were this bug; with `movw` probed only the 2 unrelated stack failures
-   remain.
+   remain. Two concrete programs were repaired:
+   `bpfopt/testbin/bcc_set/569_sys_dup_exit_tail` and
+   `bpfopt/testbin/bcc_set/582_syscall__accept4` both threw
+   `target.json has no kop entry for bpf_x86_movw` with the old name list; with
+   `movw` probed they apply `108` sites (`movw: 16`) and `73` sites
+   (`movw: 8`) respectively. Since all nine kop-family passes share
+   `apply_bytecode_kop_recovery`, the eight sibling yamls were updated too
+   (commit `da730ae39`).
 
 2. **LLVM roundtrip leaks stack-frame bytes — OPEN, in the llvmbpf submodule.**
    The shared LLVM roundtrip grows the r10 frame on every invocation. Running
