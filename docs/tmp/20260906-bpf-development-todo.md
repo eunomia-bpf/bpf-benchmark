@@ -3852,6 +3852,16 @@ framework leaves the original bytecode in place and continues.
   live program is 1897 insns and its frame exceeds 512 after the pass chain.
 - `bytecode_kop_recovery_applied` diagnostics: 39 (was 36); still a
   partial-recovery path, not a failure.
-- The `movw` fix is therefore confirmed by measurement as well as offline
-  sweep: the previously failing lowerings now install sites, and the residual
+- App statuses identical to the pre-fix run: `bcc/set`, `katran`,
+  `tetragon/observer` `ok`; `cilium/agent`, `otelcol`, `tracee/monitor` `error`
+  (Cilium API 500, native app exited, Tracee launch). All six
+  `rejit_result.status: ok`.
+- Raw two-start counters reproduce across the two completed runs (post-fix
+  `20260921_105241_827794` vs pre-fix `20260920_045430_754822`): katran
+  `balancer_ingres` `148.02` vs `148.34` ns/run (baseline `171.94` vs `171.80`);
+  bcc/set `sys_enter` `79.35` vs `80.42`, `sys_exit` `83.54` vs `86.50` ns/run;
+  tetragon baseline `generic_tracepoint` `449.61` vs `426.65` ns/run. Raw
+  counters only, no framework aggregation.
+- The `movw` fix is therefore confirmed by measurement as well as the offline
+  sweep: previously failing lowerings now install sites, and the residual
   failures are the separate, upstream, still-open stack-growth defect.
