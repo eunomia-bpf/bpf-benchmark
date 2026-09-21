@@ -3799,3 +3799,34 @@ is the argument-parsing bug fixed in `677aef815`:
 Effect on the six-app run: `cilium/agent` `40` kop failures and `otelcol` `2`
 are consistent with these two causes. Both are recorded as raw failures; the
 framework leaves the original bytecode in place and continues.
+
+### movw fix: static verification complete; KVM re-run blocked, 2026-09-20
+
+- Static verification of the `bpf_x86_movw` fix:
+  - All 46 string literals of `bpf_{x86,arm64}_*` across
+    `bpfopt/llvm/src/bpf_kop_bytecode.hpp` and `bpf_bytecode.hpp` are now present
+    in `kopprober`'s `DEFAULT_KOP_NAMES` (only `bpf_x86_movw` was missing).
+  - Every `const char *name` passed to `append_kop_pair` resolves to a literal or
+    to `bmi2_shift_name`/`bzhi_name_for_opcode`/`mov_store_target_for_width`,
+    each of which returns only literals; no name is built dynamically, so the
+    literal scan is exhaustive.
+  - `kopprober` rebuilds clean and its binary now contains `bpf_x86_movw`;
+    `bpfopt` CLI suite still `42/42 OK`.
+  - Two concrete repaired programs: `bcc_set/569_sys_dup_exit_tail` (108 sites,
+    `movw: 16`) and `bcc_set/582_syscall__accept4` (73 sites, `movw: 8`).
+  - `make -C native-sim/x86 micro-proofs-build` 30/30 OK;
+    `make -C native-sim/formal check` 25 host cross-checks OK, no errors.
+- **KVM re-run to confirm the fix in a measured corpus run did not complete**:
+  `corpus_v13` ran four attempts, and every one failed in `host-kernel-x86`
+  `modules_install` with the SeaweedFS FUSE `mkdir`-drop (`acpi_ipmi.ko`,
+  `ipmi_msghandler.ko`, `zstd_compress.ko`). Two follow-up `make
+  host-kernel-x86` retries were cut short by a 1500 s timeout while the kernel
+  was still rebuilding, and a concurrent agent re-started a `-j24` kernel build
+  on the same output tree, so the shared `vendor/build/x86/linux/**` tree was
+  contended. The measured confirmation of the `movw` fix therefore remains
+  outstanding; the offline 500-fixture sweep and the two named programs are the
+  current evidence.
+- Operational note for the next attempt: run the corpus retry loop with a
+  per-attempt timeout above the full kernel+image build time (roughly 1.5-2 h),
+  or pre-build `host-kernel-x86` to completion before starting, and do not
+  overlap with another agent's kernel build on the shared output tree.
