@@ -3897,3 +3897,29 @@ framework leaves the original bytecode in place and continues.
   per roundtrip (`256 -> 336 -> 368 -> 416 -> 448 -> 488 -> 512` true bytes) but
   only ever reached exactly `512`, never above; the rejections were the
   off-by-one, not unbounded growth.
+
+### Off-by-one fix validated in a measured KVM corpus run, 2026-09-21
+
+- Run `corpus/results/x86_kvm_corpus_20260921_211712_637406/`, default policy,
+  `corpus_v15` attempt 2 `EXIT 0` (attempt 1 hit the FUSE `modules_install`
+  drop once). All six app result files written.
+- **`kop` step failures are now `0` in all six apps** (previously
+  `cilium/agent 42`, `otelcol 2`). `kop` applied sites across the fix series:
+
+  | run | bcc | cilium | katran | otel | tetragon | tracee | total |
+  |---|---|---|---|---|---|---|---|
+  | pre-fix `20260920_045430` | 72 | 1980 | 71 | 463 | 2824 | 3089 | 8499 |
+  | +movw `20260921_105241` | 72 | 2494 | 71 | 463 | 2824 | 3089 | 9013 |
+  | +off-by-one `20260921_211712` | 72 | 2231 | 71 | 916 | 2824 | 4727 | 10841 |
+
+- App statuses: `bcc/set`, `cilium/agent`, `katran`, `otelcol`, `tetragon` all
+  `ok`; `tracee/monitor` `error` (Tracee launch). This is `5/6 ok`, up from
+  `3/6` in the pre-fix runs; all six `rejit_result.status: ok`. The cilium and
+  otel app-level errors that appeared in earlier runs did not recur.
+- Raw two-start counters: katran `balancer_ingres` `168.95 -> 148.15` ns/run;
+  bcc/set `sys_enter` `77.28`, `sys_exit` `82.59` ns/run post-ReJIT; tetragon
+  baseline `generic_tracepoint` `494.80`, `generic_kprobe` `607.61` ns/run. Raw
+  counters only.
+- With this run both kop defects found this session are fixed and confirmed by
+  measurement: the missing `bpf_x86_movw` probe and the llvmbpf kernel-stack
+  off-by-one.
