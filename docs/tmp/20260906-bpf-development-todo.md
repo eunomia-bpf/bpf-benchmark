@@ -3923,3 +3923,29 @@ framework leaves the original bytecode in place and continues.
 - With this run both kop defects found this session are fixed and confirmed by
   measurement: the missing `bpf_x86_movw` probe and the llvmbpf kernel-stack
   off-by-one.
+
+### Tracee app-level failure is pre-existing, not caused by this session
+
+- After the two kop fixes, the only remaining app error in the six-app run
+  `x86_kvm_corpus_20260921_211712_637406` is `tracee/monitor`:
+  `failed to launch Tracee: ... ebpf.(*Tracee).initBPF: failed to load BPF
+  object: invalid argument`, with libbpf reporting
+  `prog 'trace_security_file_mprotect': BPF program load failed: Invalid
+  argument` (`-22`).
+- **Not a regression**: the same failure appears in
+  `x86_kvm_corpus_20260916_214505_768159` (commit `38476c24f`, before any change
+  in this session) with the identical
+  `failed to load BPF object: invalid argument` error, and again in every
+  six-app run since (`20260920_045430`, `20260921_105241`, `20260921_211712`).
+  The only `ok` tracee result is the two-app run
+  `x86_kvm_corpus_20260919_035700_452954`, which does not exercise the same
+  program set.
+- The failing program name varies between runs (`trace_security_file_open`,
+  `trace_security_file_mprotect`), and it **never reaches the shim** — the
+  `BPF_PROG_LOAD` fails before interception, so no optimization step is
+  involved. The tracee `vmlinux.h` used by its BPF build is an unmodified copy
+  of `vendor/repos/tracee/pkg/ebpf/c/vmlinux.h` (unchanged since 2026-09-02), so
+  the x86 `VMLINUX_BTF` fix (`1a66f51b3`) does not affect it.
+- Recorded as an observed app-level failure outside the optimizer; it does not
+  gate the kop results, which are counted from the shim's own per-program
+  reports and are now zero-failure.
