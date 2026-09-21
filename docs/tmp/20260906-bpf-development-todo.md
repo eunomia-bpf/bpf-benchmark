@@ -3865,3 +3865,35 @@ framework leaves the original bytecode in place and continues.
 - The `movw` fix is therefore confirmed by measurement as well as the offline
   sweep: previously failing lowerings now install sites, and the residual
   failures are the separate, upstream, still-open stack-growth defect.
+
+### Residual kop failures: kernel-stack off-by-one in llvmbpf, fixed 2026-09-21
+
+- The remaining `kop` step failures (`cilium/agent` `42`, `otelcol` `2`) all
+  carried the same error from `vendor/llvmbpf/src/compiler.cpp`:
+  `Kernel-compatible lift requires N bytes of stack, exceeding the kernel limit`.
+- Root cause is a **one-off in `compute_kernel_stack_bytes`** (line 105-107):
+  it computed `(-inst.offset) + access_size - 1`. The deepest byte touched by an
+  access at `r10+off` of width `w` (`off + w <= 0`) is at depth `-off`, so the
+  `+ access_size - 1` overcounts by `w - 1`. An access whose deepest byte is
+  exactly `r10-512` therefore reported `513`, which `align_up_to_8` rounds to
+  `520` and the `> EBPF_STACK_SIZE` check rejects, although the frame fits the
+  512-byte limit exactly.
+- Measured across **every** canonicalized program fixture in `bpfopt/testbin`
+  (500-541 programs depending on which pass chain completes): the two kop
+  failures (`202_cil_lxc_policy`, `211_cil_lxc_policy`) have a **true** frame
+  requirement of exactly `512` but an overcounted `513`; the largest true frame
+  among passing programs is `496`. There is no fixture whose true requirement
+  exceeds 512, i.e. every failure was purely this off-by-one.
+- **Fix** (submodule `dd788ba`, parent gitlink bump `d4c4f4773`): compute the
+  requirement as `-inst.offset`. `vendor/llvmbpf` is a git submodule pinned to a
+  project-owned branch (`origin/codex/bpfopt-llvm-roundtrip-20260515`, all recent
+  commits project-authored), so landing a fix there follows existing practice;
+  the parent records the new pin.
+- Verification with the fix: sweeping all fixtures, kop step failures `2 -> 0`
+  with no previously passing program changed; the two repaired programs each
+  apply `49` sites; `bpfopt` CLI suite `42/42 OK`; `native-sim/x86`
+  `micro-proofs-build` `30/30`.
+- Supersedes the earlier "stack-growth" reading: the frame does grow a little
+  per roundtrip (`256 -> 336 -> 368 -> 416 -> 448 -> 488 -> 512` true bytes) but
+  only ever reached exactly `512`, never above; the rejections were the
+  off-by-one, not unbounded growth.
