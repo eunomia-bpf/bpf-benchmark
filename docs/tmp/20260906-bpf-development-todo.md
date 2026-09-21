@@ -3830,3 +3830,28 @@ framework leaves the original bytecode in place and continues.
   per-attempt timeout above the full kernel+image build time (roughly 1.5-2 h),
   or pre-build `host-kernel-x86` to completion before starting, and do not
   overlap with another agent's kernel build on the shared output tree.
+
+### movw fix confirmed in a measured KVM corpus run, 2026-09-21
+
+- Run `corpus/results/x86_kvm_corpus_20260921_105241_827794/`, default policy
+  (`SAMPLES=1 WORKLOAD_DURATION=10 JOBS=6 IMAGE_BUILD_JOBS=6 make corpus`),
+  `corpus_v14` attempt 2 `EXIT 0`, all six app result files written. Attempt 1
+  hit the FUSE `modules_install` drop once; the pre-create + retry loop cleared
+  it (`modules_install` `EXIT 0`, 842 `.ko`).
+- **`kop` applied sites rose in `cilium/agent` from `1980` to `2494` (`+514`)**
+  versus the pre-fix run `x86_kvm_corpus_20260920_045430_754822`. All other apps
+  are unchanged (`bcc/set 72`, `katran 71`, `otelcol 463`, `tetragon 2824`,
+  `tracee 3089`), which is the expected signature: only the programs whose
+  lowering emitted `bpf_x86_movw` changed, and cilium has by far the most such
+  programs.
+- Remaining `cilium/agent` kop step failures (`42`) are on `cil_to_netdev`,
+  `tail_nodeport_n`, `cilium_nodeport`, `cilium_calls_*`, `cil_bpf_policy`,
+  i.e. the large-frame programs, consistent with the open llvmbpf roundtrip
+  stack-growth defect rather than the fixed name gap. The checked-in
+  `193_cil_to_netdev` fixture (1307 insns, 313-byte frame) succeeds offline; the
+  live program is 1897 insns and its frame exceeds 512 after the pass chain.
+- `bytecode_kop_recovery_applied` diagnostics: 39 (was 36); still a
+  partial-recovery path, not a failure.
+- The `movw` fix is therefore confirmed by measurement as well as offline
+  sweep: the previously failing lowerings now install sites, and the residual
+  failures are the separate, upstream, still-open stack-growth defect.
