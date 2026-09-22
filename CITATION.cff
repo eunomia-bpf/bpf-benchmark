@@ -1,0 +1,71 @@
+cff-version: 1.2.0
+message: "If you use this artifact, please cite the paper and this repository."
+title: "BPF-Ext: Safely Extending the eBPF Compilation Pipeline with Native Operations (artifact)"
+abstract: >-
+  Artifact for the accepted ATC 2026 paper "BPF-Ext: Safely Extending the eBPF
+  Compilation Pipeline with Native Operations" (accepted paper #1160). Contains
+  the benchmark harness, the bpfopt bytecode optimizer and stock-kernel userspace
+  shim, the KOperation kernel modules, and the Lean 4 semantic-proof suite, plus
+  the evaluator guide in docs/atc26-artifact-evaluation.md.
+type: software
+license: MIT
+license-url: "https://github.com/eunomia-bpf/bpf-benchmark/blob/master/LICENSE"
+version: "atc26-ae-1"
+date-released: "2026-09-22"
+repository-code: "https://github.com/eunomia-bpf/bpf-benchmark"
+url: "https://github.com/eunomia-bpf/bpf-benchmark"
+keywords:
+  - eBPF
+  - JIT compilation
+  - kernel extensions
+  - instruction set extension
+  - verified compilation
+  - proof-carrying code
+authors:
+  - family-names: Zheng
+    given-names: Yusheng
+    affiliation: "University of California, Santa Cruz"
+  - family-names: Ji
+    given-names: Zhengjie
+    affiliation: "Virginia Tech"
+  - family-names: Tao
+    given-names: Weichen
+    affiliation: "Télécom Paris"
+  - family-names: Sun
+    given-names: Hao
+    affiliation: "ETH Zürich"
+  - family-names: Zhang
+    given-names: Wei
+    affiliation: "University of Connecticut"
+  - family-names: Williams
+    given-names: Dan
+    affiliation: "Virginia Tech"
+  - family-names: Quinn
+    given-names: Andi
+    affiliation: "University of California, Santa Cruz"
+preferred-citation:
+  type: conference-paper
+  title: "BPF-Ext: Safely Extending the eBPF Compilation Pipeline with Native Operations"
+  collection-title: "2026 ACM SIGOPS Annual Technical Conference (ATC '26)"
+  authors:
+    - family-names: Zheng
+      given-names: Yusheng
+      affiliation: "University of California, Santa Cruz"
+    - family-names: Ji
+      given-names: Zhengjie
+      affiliation: "Virginia Tech"
+    - family-names: Tao
+      given-names: Weichen
+      affiliation: "Télécom Paris"
+    - family-names: Sun
+      given-names: Hao
+      affiliation: "ETH Zürich"
+    - family-names: Zhang
+      given-names: Wei
+      affiliation: "University of Connecticut"
+    - family-names: Williams
+      given-names: Dan
+      affiliation: "Virginia Tech"
+    - family-names: Quinn
+      given-names: Andi
+      affiliation: "University of California, Santa Cruz"

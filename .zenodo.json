@@ -1,0 +1,55 @@
+{
+  "title": "BPF-Ext: Safely Extending the eBPF Compilation Pipeline with Native Operations (artifact, atc26-ae-1)",
+  "description": "<p>Artifact for the accepted ATC 2026 paper <strong>\"BPF-Ext: Safely Extending the eBPF Compilation Pipeline with Native Operations\"</strong> (accepted paper #1160).</p><p>The artifact contains the Make-backed benchmark harness, the <code>bpfopt</code> bytecode optimizer and stock-kernel userspace shim, the KOperation native-operation kernel modules, and the Lean 4 semantic-proof suite. The evaluator guide is <code>docs/atc26-artifact-evaluation.md</code>; artifact status, dependencies, commands per claim, expected outputs, raw-result locations, and honest boundaries are documented there.</p><p>Repository-original material is MIT licensed; third-party and vendored components keep their own licenses, listed with exact pinned revisions in <code>THIRD_PARTY_NOTICES.md</code>.</p>",
+  "license": "MIT",
+  "upload_type": "software",
+  "access_right": "open",
+  "version": "atc26-ae-1",
+  "publication_date": "2026-09-22",
+  "creators": [
+    {
+      "name": "Zheng, Yusheng",
+      "affiliation": "University of California, Santa Cruz"
+    },
+    {
+      "name": "Ji, Zhengjie",
+      "affiliation": "Virginia Tech"
+    },
+    {
+      "name": "Tao, Weichen",
+      "affiliation": "Télécom Paris"
+    },
+    {
+      "name": "Sun, Hao",
+      "affiliation": "ETH Zürich"
+    },
+    {
+      "name": "Zhang, Wei",
+      "affiliation": "University of Connecticut"
+    },
+    {
+      "name": "Williams, Dan",
+      "affiliation": "Virginia Tech"
+    },
+    {
+      "name": "Quinn, Andi",
+      "affiliation": "University of California, Santa Cruz"
+    }
+  ],
+  "keywords": [
+    "eBPF",
+    "JIT compilation",
+    "kernel extensions",
+    "instruction set extension",
+    "verified compilation",
+    "proof-carrying code"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isSupplementTo",
+      "identifier": "https://github.com/eunomia-bpf/bpf-benchmark",
+      "resource_type": "software"
+    }
+  ],
+  "notes": "Artifact-evaluation release for ACM ATC 2026. No DOI is asserted in this file; the DOI is assigned by Zenodo on deposit. The paper's reported x86 Xeon and ARM64 AWS figures were not re-measured while preparing this artifact."
+}

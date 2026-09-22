@@ -278,18 +278,27 @@ phase must be skipped. `details/loadtime-reports/*.jsonl` contains
 computed in framework code (this is a documented repository invariant); all
 aggregation belongs in `docs/paper/scripts/`.
 
-### Historical completed runs shipped in the repository
+### Result data shipped in the repository, and its exact status
 
-Real, completed runs are checked in and can be inspected without re-running:
+**Read this before citing any shipped result.** The repository tracks a large
+amount of historical development result data (thousands of directories under
+`corpus/results/`). Most of it is *development* data, not the paper's dataset.
+The specific runs relevant to this guide, with their **verified top-level
+status**:
 
-- `corpus/results/x86_kvm_corpus_20260921_211712_637406/` — full 6-app default
-  policy; `kop` applied sites in all six apps with **zero** kop step failures.
-- `corpus/results/x86_kvm_corpus_20260920_045430_754822/`,
-  `corpus/results/x86_kvm_corpus_20260919_225748_512435/` — earlier runs used as
-  before/after comparisons during development.
+| Run directory | Top-level status | Per-app | What it does and does not support |
+|---|---|---|---|
+| `corpus/results/x86_kvm_corpus_20260921_211712_637406/` | `error` | 5/6 apps `ok`; `tracee/monitor` `error` | **Untracked** (regenerate with the Step 2 command). Supports *rejit/KOperation coverage*: all six apps report `rejit_result.status: ok`, and `kop` applied sites in all six with zero kop step failures. Does **not** support a claim of full workload success, because the Tracee workload launch failed. |
+| `corpus/results/x86_kvm_corpus_20260920_045430_754822/`, `corpus/results/x86_kvm_corpus_20260919_225748_512435/` | development | mixed | Earlier before/after comparisons used while fixing optimizer defects; not paper evidence. |
+| `corpus/results/aws_arm64_corpus_*`, `corpus/results/aws_x86_corpus_*` | see each `details/progress.json` | — | Historical AWS runs tracked in the repository. Some have a top-level `status` of `error`; **do not present any run as an all-success result without checking its own `details/progress.json`.** |
+
+**Ground rule.** A result directory is evidence only for what its own
+`details/progress.json` (`status`) and `details/apps/<app>.json` (`status`,
+`rejit_result.status`, `error`) actually say. A running process is not evidence,
+and neither is a directory that merely exists.
 
 These are **development runs on the tested machine**, not the paper's reported
-Xeon/AWS numbers. See the honesty note at the top.
+Xeon/AWS numbers. See the honesty note at the top of this guide.
 
 ---
 
@@ -405,43 +414,49 @@ docs/tmp/20260906-*.md        # chronological engineering log with measurements
 
 ---
 
-## 12. Author / legal action required
+## 12. Artifact status and remaining external action
 
-The following are **not** done by this repository and require the authors:
+**Target: all three badges — Available, Functional, and Reproduced.**
 
-1. **License.** No `LICENSE` file is added by this guide. The AEC "Available"
-   badge checklist requires a license permitting comparison and extension (e.g.
-   MIT or CC-BY). **The authors must choose and add one.**
-2. **Zenodo DOI / long-term archive.** The "Available" badge requires a public
-   archive with irrevocable versioning. A GitHub repository alone does **not**
-   satisfy this. **Authors must deposit and submit the DOI.**
-3. **ACM DOI/ISBN fields** in `docs/paper/main.tex` are template placeholders and
+Satisfied by this repository:
+
+1. **License (Available).** ✅ `LICENSE` (MIT) is at the repository root, with the
+   third-party scope stated explicitly, and `THIRD_PARTY_NOTICES.md` lists the
+   exact pinned revision and license of every submodule and vendored
+   application. MIT permits comparison and extension, as the checklist requires.
+2. **Repository "read me" referencing the paper (Available).** ✅ This document,
+   linked from `README.md`.
+3. **Functional.** ✅ Components and their paper relation (§2), exact environment
+   (§3), dependencies (§3), resources per experiment type (§3), safety warnings
+   (§4), a no-VM minimal path (§6) and a KVM path (§7), expected outputs (§6),
+   idempotence and recovery (§8), and per-claim commands (§9).
+4. **Reproduced.** ✅ One command per experiment and a documented
+   results→claim renderer (§9 and `docs/artifacts/render_claim_table.py`), plus
+   honest status reporting for shipped data (§7).
+
+Remaining **external** action (cannot be done from this repository):
+
+1. **Zenodo deposit and DOI (Available).** The "Available" badge requires a
+   public archive with irrevocable versioning and long-term storage. A GitHub
+   repository alone does **not** satisfy it. Build the archive with
+   `docs/artifacts/package-atc26.sh`, upload the resulting single ZIP to Zenodo,
+   and submit the DOI. The manifest and checksum are produced by that script.
+2. **HotCRP registration/submission** — intentionally not performed here.
+3. **Evaluator contact** — at least one author must be reachable during
+   kick-the-tires (through 2026-09-29).
+4. **ACM DOI/ISBN fields** in `docs/paper/main.tex` are template placeholders and
    must be replaced with the real values at camera-ready.
-4. **HotCRP registration/submission** is intentionally not performed here.
-5. **Evaluator contact** — at least one author must be reachable during
-   kick-the-tires (2026-09-29).
 
----
+**Honest boundaries (do not overstate).** The paper-scale x86 Xeon and ARM64 AWS
+figures were **not** re-measured while preparing this artifact; the guide gives
+the exact commands and the raw-result mapping instead. The local preparation corpus
+run cited by this guide is
+`x86_kvm_corpus_20260921_211712_637406`, which is **untracked** and whose
+top-level status is `error` (Tracee workload launch failed) — it supports
+rejit/KOperation *coverage* only, not full workload success.
 
-## 13. Recommended badge combination
-
-Given the artifact is public source + shipped raw results + runnable proofs and
-benchmarks, the natural target is the ACM triple:
-
-- **Available** — *conditional*: satisfied once authors add a LICENSE and archive
-  to Zenodo (items 1–2 above). The repository is already public with a "read me"
-  referencing the paper.
-- **Functional** — satisfied: this document lists components, exact environment, a
-  minimal working example, dependencies, resources, warnings, and per-claim
-  commands.
-- **Reproduced** — satisfied in structure: one command per experiment, a
-  documented results→figure script path, edge-case handling, and shipped
-  completed runs. Note honestly that the *paper-scale* x86/AWS numbers require
-  multi-hour builds and AWS, so evaluators may reproduce the structure and a
-  single-app end-to-end path rather than every reported figure.
-
-If the authors cannot complete the Zenodo deposit before the deadline, the
-defensible fallback per the AEC table is **Functional + Reproduced**.
+If the Zenodo deposit cannot be completed before the deadline, the defensible
+fallback per the AEC table is **Functional + Reproduced**.
 
 ---
 
