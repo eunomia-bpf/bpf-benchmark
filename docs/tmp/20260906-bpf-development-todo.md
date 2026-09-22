@@ -3949,3 +3949,39 @@ framework leaves the original bytecode in place and continues.
 - Recorded as an observed app-level failure outside the optimizer; it does not
   gate the kop results, which are counted from the shim's own per-program
   reports and are now zero-failure.
+
+### Investigated and rejected: raising `-bpf-stack-size` for generic passes
+
+- Symptom: `const_prop` (and `noop`) fail on
+  `tracee_monitor/639_trace_security_file_mprotect` with the BPF backend's
+  `Looks like the BPF stack limit is exceeded ... -mllvm -bpf-stack-size`
+  diagnostic from `llvm-backend/llvm/llvm/lib/Target/BPF/BPFRegisterInfo.cpp:62`
+  (`WarnSize`), where `BPFStackSizeOption` defaults to `512`.
+- Hypothesis: the asymmetry is real — `configure_llvm_kop_select` passes
+  `-bpf-stack-size=4096`, while generic passes never call
+  `ParseCommandLineOptions`, so they run with the 512 default even though the
+  lifted register machine needs backend spill space. Confirming evidence: the
+  same fixture **succeeds** under `kop` (which sets 4096) and fails under
+  `const_prop`/`noop` (512).
+- Change tried: add a `configure_llvm_roundtrip_args()` that parses
+  `-bpf-stack-size=4096` once for the non-kop passes (placed after the existing
+  dispatch so the kop path keeps its single parse, since
+  `ParseCommandLineOptions` resets prior occurrences). It compiles and the
+  fixture's `const_prop` then gets past the backend check.
+- **Rejected on measurement.** A/B on all `542` canonicalized fixtures with a
+  HEAD-build binary and a patched-build binary gave *identical* results:
+  `541 OK / 1 FAIL` both ways, no improved and no regressed fixture. The single
+  failure simply moved from the backend's `WarnSize` to bpfopt's own
+  `remap_out_of_range_stack_spills` ("LLVM output has inconsistent
+  out-of-range stack slot width"), which fires for slots below `-512`.
+- Interpretation: the backend's 512 rejection was **correct** — the lift
+  genuinely exceeds the frame. Raising the limit only defers a correct
+  rejection to a later correct one, so it is not an improvement and was not
+  committed. `bpfopt/llvm/src/main.cpp` was reverted and rebuilt; the binary is
+  byte-identical to the HEAD build.
+- Conclusion: `tracee`'s `639_trace_security_file_mprotect` (and the live
+  7346-instruction variant seen in the KVM run) cannot be lifted within the
+  512-byte frame. It is a **real capacity limit of the lift**, not a
+  misconfigured option; a fix would have to reduce the lift's stack demand
+  (e.g. prompt `remap_out_of_range_stack_spills` to reclaim slots, or avoid
+  re-materializing the frame per roundtrip), not raise the limit.
