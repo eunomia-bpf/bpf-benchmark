@@ -3985,3 +3985,45 @@ framework leaves the original bytecode in place and continues.
   misconfigured option; a fix would have to reduce the lift's stack demand
   (e.g. prompt `remap_out_of_range_stack_spills` to reclaim slots, or avoid
   re-materializing the frame per roundtrip), not raise the limit.
+
+### Shim semantics: a failed optimizer step returns EINVAL to the application
+
+- Traced `tracee`'s `failed to load BPF object: invalid argument` to the shim,
+  not to the tracee program: in `bpfopt/shim/libbpfrejit_shim.c` the
+  intercepted `BPF_PROG_LOAD` is rewritten through
+  `loadtime_optimize_prog_load`, and when that returns `< 0` the shim sets
+  `errno = EINVAL` and returns `-1` **for the application's own load**:
+
+  ```
+  if (opt_rc < 0) {
+      in_shim = 0;
+      log_line("loadtime optimization failed: %s", opt_err);
+      prog_free(pending_prog);
+      errno = EINVAL;
+      return -1;
+  }
+  ```
+
+- The failure originates in `shim_loadtime.h`: a bpfopt step that exits
+  non-zero makes `loadtime_optimize_prog_load` `return -1`
+  (`loadtime bpfopt step <name> failed; log=...`).
+- This is a **different policy from candidate-verifier rejection**, which logs
+  `passing original BPF_PROG_LOAD through` and `return 0`, so the application
+  still loads its original bytecode.
+- Measured consequence in `20260921_211712_637406`: `tracee/monitor` had
+  `2` `const_prop` step failures and its app died fatally; `tetragon/observer`
+  had `2` `map_inline` step failures yet reports `ok`. So the EINVAL is real but
+  whether it is fatal depends on the application's own load handling.
+- The single failing tracee program is a `7346`-instruction
+  `trace_security_*` kprobe whose lift exceeds the 512-byte frame (see the
+  rejected-change entry above). Most `trace_security_*` programs optimize fine
+  in the same run (e.g. `6704 -> 5718`).
+- **Not changed.** AGENTS.md mandates fail-fast ("unsupported capability or
+  command failure must exit 1 with friendly stderr, never downgrade to other
+  logic, return partial results"), so the `return -1` is deliberate policy, not
+  an oversight. Aligning it with the verifier-rejection pass-through would be a
+  behaviour/policy change to the shim and needs explicit user authorization.
+  Recorded here so the decision is visible and reversible.
+- Scope note: this is an **application-survival** effect of a step failure, not
+  a measurement-validity gate. It does not affect the kop site counts, which the
+  shim records per program from its own reports (now zero-failure).
