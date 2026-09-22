@@ -120,10 +120,12 @@ $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf: $(HOST_KERNEL_BUILD_DIR_X
 
 host-kernel-x86: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
+	rm -rf "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_X86)/modules-install" INSTALL_MOD_STRIP=1 DEPMOD=true modules_install >/dev/null
 
 $(HOST_KERNEL_IMAGE_X86) $(HOST_KERNEL_VMLINUX_X86) $(HOST_KERNEL_MODULES_ORDER_X86) &: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
+	rm -rf "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_X86)/modules-install" INSTALL_MOD_STRIP=1 DEPMOD=true modules_install >/dev/null
 
 $(HOST_KERNEL_BUILD_DIR_ARM64)/.config: $(ARM64_DEFCONFIG_SRC)
@@ -135,17 +137,19 @@ $(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/auto.conf: $(HOST_KERNEL_BUILD_DIR
 
 host-kernel-arm64: $(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/auto.conf
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image vmlinuz.efi modules -j"$(IMAGE_BUILD_JOBS)"
+	rm -rf "$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install"
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install" INSTALL_MOD_STRIP=1 DEPMOD=true modules_install >/dev/null
 
 $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) $(HOST_KERNEL_VMLINUX_ARM64) $(HOST_KERNEL_MODULES_ORDER_ARM64) &: $(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/auto.conf
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image vmlinuz.efi modules -j"$(IMAGE_BUILD_JOBS)"
+	rm -rf "$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install"
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install" INSTALL_MOD_STRIP=1 DEPMOD=true modules_install >/dev/null
 
 host-kop-x86: host-kernel-x86
 	install -d "$(HOST_KOP_DIR_X86)"
 	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 M="$(ROOT_DIR)/module/x86" MO="$(HOST_KOP_DIR_X86)" modules -j"$(IMAGE_BUILD_JOBS)"
 
-host-kop-arm64: $(HOST_KERNEL_VMLINUX_ARM64)
+host-kop-arm64: host-kernel-arm64
 	install -d "$(HOST_KOP_DIR_ARM64)"
 	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M="$(ROOT_DIR)/module/arm64" MO="$(HOST_KOP_DIR_ARM64)" modules -j"$(IMAGE_BUILD_JOBS)"
 
@@ -251,13 +255,13 @@ host-runner-x86 host-runner-arm64 host-runner-docker-x86:
 	$(RUNNER_STRIP) --strip-unneeded "$(RUNNER_BUILD_DIR_ARCH)/micro_exec"
 	$(RUNNER_STRIP) --strip-unneeded "$(RUNNER_BUILD_DIR_ARCH)/native_loader/libnative_loader.so"
 
-host-micro-programs-x86: host-kernel-x86 $(HOST_KERNEL_VMLINUX_X86)
+host-micro-programs-x86: host-kernel-x86
 	$(MAKE) -C "$(MICRO_PROGRAM_DIR)" OUTPUT_DIR="$(MICRO_PROGRAM_BUILD_X86)" KERNEL_VMLINUX="$(HOST_KERNEL_BUILD_DIR_X86)/vmlinux" all
 
 host-micro-programs-docker-x86: host-docker-context-x86
 	$(MAKE) -C "$(MICRO_PROGRAM_DIR)" OUTPUT_DIR="$(HOST_DOCKER_MICRO_PROGRAM_BUILD_X86)" KERNEL_VMLINUX="$(HOST_DOCKER_BTF_CONTEXT_X86)/vmlinux" all
 
-host-micro-programs-arm64: $(HOST_KERNEL_VMLINUX_ARM64)
+host-micro-programs-arm64: host-kernel-arm64
 	$(MAKE) -C "$(MICRO_PROGRAM_DIR)" OUTPUT_DIR="$(MICRO_PROGRAM_BUILD_ARM64)" KERNEL_VMLINUX="$(HOST_KERNEL_BUILD_DIR_ARM64)/vmlinux" NATIVE_TARGET=aarch64-linux-gnu NATIVE_ARCH=arm64 SYS_INCLUDE_FLAGS="$(ARM64_SYS_INCLUDE_FLAGS)" all
 
 host-stage2-programs-x86: host-micro-programs-x86
@@ -299,7 +303,7 @@ host-docker-context-x86:
 	: >"$(HOST_DOCKER_KERNEL_MODULES_CONTEXT_X86)/lib/modules/$$(uname -r)/modules.order"
 	: >"$(HOST_DOCKER_KERNEL_MODULES_CONTEXT_X86)/lib/modules/$$(uname -r)/modules.builtin"
 
-x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kop-x86 host-rust-x86 host-bpfperf-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86 host-x86-sim-proofs host-bpfopt-llvm-x86 host-native-bpf-x86 host-merlin-runtime-context
+x86-runner-runtime-image-tar: host-kernel-x86 host-kop-x86 host-rust-x86 host-bpfperf-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86 host-x86-sim-proofs host-bpfopt-llvm-x86 host-native-bpf-x86 host-merlin-runtime-context
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	install -d "$(HOST_KERNEL_CONFIG_CONTEXT_X86)"
 	cp "$(HOST_KERNEL_BUILD_DIR_X86)/.config" "$(HOST_KERNEL_CONFIG_CONTEXT_X86)/config"
@@ -359,7 +363,7 @@ x86-runner-runtime-host-docker-image-tar: host-docker-context-x86 host-bpfperf-x
 	docker save -o "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"
 	mv -f "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE_TAR)"
 
-arm64-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) host-kop-arm64 host-rust-arm64 host-shim-arm64 host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64 host-arm64-sim-proofs host-bpfopt-llvm-arm64 host-native-bpf-arm64 host-merlin-runtime-context
+arm64-runner-runtime-image-tar: host-kernel-arm64 host-kop-arm64 host-rust-arm64 host-shim-arm64 host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64 host-arm64-sim-proofs host-bpfopt-llvm-arm64 host-native-bpf-arm64 host-merlin-runtime-context
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	install -d "$(HOST_KERNEL_CONFIG_CONTEXT_ARM64)"
 	cp "$(HOST_KERNEL_BUILD_DIR_ARM64)/.config" "$(HOST_KERNEL_CONFIG_CONTEXT_ARM64)/config"
