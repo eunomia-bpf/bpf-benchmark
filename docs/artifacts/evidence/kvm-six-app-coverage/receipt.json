@@ -1,0 +1,59 @@
+{
+  "apps": {
+    "bcc/set": {
+      "error": "",
+      "rejit_status": "ok",
+      "status": "ok"
+    },
+    "cilium/agent": {
+      "error": "",
+      "rejit_status": "ok",
+      "status": "ok"
+    },
+    "katran": {
+      "error": "",
+      "rejit_status": "ok",
+      "status": "ok"
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "error": "",
+      "rejit_status": "ok",
+      "status": "ok"
+    },
+    "tetragon/observer": {
+      "error": "",
+      "rejit_status": "ok",
+      "status": "ok"
+    },
+    "tracee/monitor": {
+      "error": "failed to launch Tracee: /artifacts/tracee/bin/tracee --events '*' --events -net_packet_raw,-print_mem_dump,-net_packet_ipv4,-net_packet_ipv6,-net_packet_tcp,-net_packet_udp,-net_packet_icmp,-net_packet_icmpv6,-net_packet_dns,-net_packet_dns_request,-net_packet_dns_response,-net_packet_http,-net_packet_http_request,-net_packet_http_response,-anti_debugging,-aslr_inspection,-cgroup_notify_on_release,-cgroup_release_agent,-core_pattern_modification,-default_loader_mod,-disk_mount,-docker_abuse,-dropped_executable,-dynamic_code_loading,-file_modification,-fileless_execution,-hidden_file_created,-hooked_seq_ops_detector,-hooked_syscall_detector,-illegitimate_shell,-k8s_service_account_token,-kernel_module_loading,-k8s_api_connection,-k8s_cert_theft,-ld_preload,-lsm_test,-proc_fops_hooking,-proc_kcore_read,-proc_mem_access,-proc_mem_code_injection,-process_vm_write_inject,-ptrace_code_injection,-rcd_modification,-sched_debug_recon,-scheduled_task_mod,-stack_pivot,-bpf_attach,-security_bpf,-security_bpf_map,-security_bpf_prog,-stdio_over_socket,-sudoers_modification,-syscall_hooking,-system_request_key_mod --output none --server healthz --server http-address=:3366 --signatures-dir /var/tmp/bpfrejit-runtime/a6bf56bb/tracee/signatures --capabilities bypass=true: command exited with code 1: {\"level\":\"warn\",\"ts\":1790026376.5812566,\"msg\":\"KConfig: could not check enabled kconfig features\",\"error\":\"could not read /boot/config-7.0.0-rc2+: stat /boot/config-7.0.0-rc2+: no such file or directory\"}\n{\"level\":\"warn\",\"ts\":1790026376.5813084,\"msg\":\"KConfig: assuming kconfig values, might have unexpected behavior\"}\n{\"level\":\"warn\",\"ts\":1790026377.9719937,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"missing_ksymbol\"}\n{\"level\":\"warn\",\"ts\":1790026377.9725025,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"multiple_fallbacks_test\"}\n{\"level\":\"error\",\"ts\":1790026378.4922054,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-1013\",\"error\":\"detector TRC-1013 requires enrichment \\\"environment\\\" which is not enabled\"}\n{\"level\":\"error\",\"ts\":1790026378.492398,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-107\",\"error\":\"detector TRC-107 requires enrichment \\\"environment\\\" which is not enabled\"}\n{\"level\":\"warn\",\"ts\":1790026510.4156802,\"msg\":\"libbpf: prog 'trace_security_file_mprotect': BPF program load failed: Invalid argument\"}\n{\"level\":\"warn\",\"ts\":1790026510.415713,\"msg\":\"libbpf: prog 'trace_security_file_mprotect': failed to load: -22\"}\n{\"level\":\"warn\",\"ts\":1790026510.4164066,\"msg\":\"libbpf: failed to load object ''\"}\n{\"level\":\"fatal\",\"ts\":1790026510.4171243,\"msg\":\"Tracee runner failed\",\"error\":\"cmd.Runner.Run: error initializing Tracee: ebpf.(*Tracee).Init: ebpf.(*Tracee).initBPF: failed to load BPF object: invalid argument\"}",
+      "rejit_status": "ok",
+      "status": "error"
+    }
+  },
+  "apps_observed": 6,
+  "apps_ok": 5,
+  "command": null,
+  "command_note": "The original shell command was not retained; this receipt makes no command-line claim.",
+  "evidence_kind": "historical_local_six_app_coverage",
+  "expected_apps": 6,
+  "files_sha256": {
+    "details/apps/bcc__set.json": "d3a5c13020d644c3abbf771acf56eadd1186ae7de8f4bdcc94a194c559d24031",
+    "details/apps/cilium__agent.json": "ab5974a4ace8d8100d2301453e9915f3e1c9137e1b8995dd936faf84b3f364ae",
+    "details/apps/katran.json": "bd32ff8aab46b6ad553b96fae362318e735c65031e467ceacddb9224ea872562",
+    "details/apps/otelcol-ebpf-profiler__profiling.json": "2c9bf795e904f9bcbbcf5cbe1d50a31135d8d15cfb6a4eca84440edcebf07b5f",
+    "details/apps/tetragon__observer.json": "01afa25d239487a1efa4e743217ed19fbc0f94ade982fae9557f1d4e7aa2d8b1",
+    "details/apps/tracee__monitor.json": "4ae6713860d872d35208a3a0da01102ba48a8cbfa4f3f0a69c833ac77916f3d1",
+    "details/progress.json": "940d79bcabf293e904d068a4c84de1d55369e174d9392eaae1d161eec92a3c12",
+    "details/result.json": "78f3a7a769ea7eb2c08cd37cb99c6a2f7847e8ea475287405fd85e33424d9484",
+    "metadata.json": "1faae0e8cd1f62bca8120cb0e4f461ef2aee62b2ad716d326c92d3db3dcebe5b"
+  },
+  "rejit_ok": 6,
+  "schema_version": 1,
+  "scope": "ReJIT/KOperation coverage only; not full six-application workload success.",
+  "source_generated_at": "2026-09-21T21:35:13.019014+00:00",
+  "source_path": "corpus/results/x86_kvm_corpus_20260921_211712_637406",
+  "source_run": "x86_kvm_corpus_20260921_211712_637406",
+  "source_started_at": "2026-09-21T21:17:12.637406+00:00",
+  "suite_status": "error"
+}

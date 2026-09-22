@@ -1,0 +1,39 @@
+{
+  "apps": {
+    "katran": {
+      "rejit_status": "ok",
+      "status": "ok"
+    }
+  },
+  "command": "BPFREJIT_CORPUS_APPS=katran SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=3000 make corpus",
+  "ended_at": "2026-09-22T21:35:38+00:00",
+  "environment": "tracked devcontainer toolchain; Docker-in-Docker; 8-vCPU/64-GiB KVM guest via virtme-ng",
+  "evidence_kind": "atc26-ae-kvm-single-app-smoke",
+  "exit_code": 0,
+  "files_sha256": {
+    "details/apps/katran.json": "8c3ede769191efdb8a3e56eb47d4cb60ee679788300790b486e5b80bcb964813",
+    "details/progress.json": "6cbd8d6b2f8459181342ca8d8d5f91f5630d6745f7941be86752211e076a2caf",
+    "details/result.json": "cb1cb3d77c73ae285774958cea95d3b51120e821ed97f229da0b4e6a62f22162",
+    "metadata.json": "fb8403c808618d5efbde797ed5302b5e24fb9ad8f54a5456cf54155ef6f65e8c"
+  },
+  "log_file": "make-corpus.log",
+  "log_normalization": "Guest-console carriage returns and trailing horizontal whitespace normalized in the retained copy.",
+  "log_sha256": "ad110fca4fcdd834fe32a4da66b6521dd1c0064b7adac853e884d31cd44bb8b6",
+  "result_directory_delta": {
+    "before_snapshot": "/workspaces/.agent-state/bpf-benchmark-ae-kvm/before-final3.txt",
+    "new_directory_count": 1
+  },
+  "schema_version": 1,
+  "scope": "Fresh local KVM smoke evidence for Katran only. It does not re-measure the paper-scale Xeon or AWS datasets.",
+  "source_commit": "c364daa4be4b6bc0caf07c60c2bf812916d28749",
+  "source_run": "corpus/results/x86_kvm_corpus_20260922_213414_889964",
+  "started_at": "2026-09-22T19:56:32+00:00",
+  "suite_status": "completed",
+  "tool_versions": {
+    "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+    "go": "go version go1.26.8 linux/amd64",
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "virtme_ng": "virtme-ng 1.41"
+  },
+  "wall_seconds": 5946
+}

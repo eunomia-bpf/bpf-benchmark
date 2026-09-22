@@ -45,6 +45,41 @@ git -C "$ROOT_DIR" archive --format=tar HEAD -- . \
 pin_for() {
     git -C "$ROOT_DIR" ls-tree HEAD -- "$1" | awk '{print $3}'
 }
+
+: > "$STAGE/.nested-submodules.tsv"
+embed_repo_tree() {
+    local repo_dir="$1" archive_prefix="$2" revision="$3"
+    local modules_file key name nested_path nested_url nested_revision nested_repo
+    mkdir -p "$STAGE/$archive_prefix"
+    git -C "$repo_dir" archive --format=tar "$revision" |
+        tar -x -C "$STAGE/$archive_prefix"
+
+    modules_file="$(mktemp)"
+    if git -C "$repo_dir" show "$revision:.gitmodules" > "$modules_file" 2>/dev/null; then
+        while read -r key nested_path; do
+            name="$(printf '%s' "$key" | sed 's/^submodule\.//;s/\.path$//')"
+            nested_url="$(git config -f "$modules_file" --get "submodule.$name.url")"
+            nested_revision="$(git -C "$repo_dir" ls-tree "$revision" -- "$nested_path" | awk '{print $3}')"
+            [ -n "$nested_revision" ] || {
+                echo "no pinned nested revision for $archive_prefix/$nested_path" >&2
+                rm -f "$modules_file"
+                exit 1
+            }
+            nested_repo="$repo_dir/$nested_path"
+            git -C "$nested_repo" cat-file -e "$nested_revision^{commit}" 2>/dev/null || {
+                echo "nested submodule object unavailable: $archive_prefix/$nested_path @ $nested_revision" >&2
+                echo "initialize recursively before packaging: git submodule update --init --recursive" >&2
+                rm -f "$modules_file"
+                exit 1
+            }
+            printf '%s\t%s\t%s\n' "$archive_prefix/$nested_path" "$nested_revision" "$nested_url" >> "$STAGE/.nested-submodules.tsv"
+            echo "    nested $archive_prefix/$nested_path @ $nested_revision"
+            embed_repo_tree "$nested_repo" "$archive_prefix/$nested_path" "$nested_revision"
+        done < <(git config -f "$modules_file" --get-regexp 'submodule\..*\.path' || true)
+    fi
+    rm -f "$modules_file"
+}
+
 embed_submodule() {
     local path="$1" pinned
     pinned="$(pin_for "$path")"
@@ -54,8 +89,7 @@ embed_submodule() {
         echo "initialize it before packaging: git submodule update --init --recursive" >&2
         exit 1
     }
-    mkdir -p "$STAGE/$path"
-    git -C "$ROOT_DIR/$path" archive --format=tar "$pinned" | tar -x -C "$STAGE/$path"
+    embed_repo_tree "$ROOT_DIR/$path" "$path" "$pinned"
     echo "  embedded $path @ $pinned"
 }
 
@@ -102,9 +136,11 @@ This is the single archival ZIP for accepted ATC 2026 paper #1160,
 Start with [docs/atc26-artifact-evaluation.md](docs/atc26-artifact-evaluation.md).
 The archive contains the exact source trees needed by the documented proof,
 microbenchmark, and six-application KVM paths, plus the five raw paper-result
-JSON datasets read by the included plotting scripts. ARTIFACT_MANIFEST.json
-records the superproject commit and every submodule pin. Historical bulk result
-trees are omitted; the guide gives the commands that regenerate them.
+JSON datasets read by the included plotting scripts. Compact retained evidence
+records the complete formal check, the six-application ReJIT coverage run, and
+the fresh Katran KVM smoke. ARTIFACT_MANIFEST.json records the superproject
+commit and every direct and nested submodule pin. Historical bulk result trees are omitted; the
+guide gives the commands that regenerate them.
 EOF
 
 # Build a machine-readable manifest without scanning submodule working trees.
@@ -131,12 +167,19 @@ for line in (stage / '.submodules.tsv').read_text().splitlines():
         'path': path, 'revision': revision, 'url': url,
         'embedded': embedded == 'true'
     })
+nested_submodules = []
+for line in (stage / '.nested-submodules.tsv').read_text().splitlines():
+    path, revision, url = line.split('	')
+    nested_submodules.append({
+        'path': path, 'revision': revision, 'url': url, 'embedded': True
+    })
 manifest = {
     'artifact': 'BPF-Ext ATC 2026 artifact for accepted paper #1160',
     'version': os.environ['VERSION_VALUE'],
     'superprojectCommit': os.environ['COMMIT_VALUE'],
     'entryPoint': 'docs/atc26-artifact-evaluation.md',
     'submodules': submodules,
+    'nestedSubmodules': nested_submodules,
     'paperResultFiles': [
         'micro/results/x86_kvm_micro_20260519_114214_364050/details/result.json',
         'micro/results/x86_kvm_micro_20260526_210351_224315/details/result.json',
@@ -144,10 +187,18 @@ manifest = {
         'micro/results/x86_kvm_micro_20260526_210952_650695/details/result.json',
         'micro/results/aws_arm64_micro_20260606_063319_954947/details/result.json',
     ],
+    'validationEvidence': [
+        'docs/artifacts/evidence/formal-check.json',
+        'docs/artifacts/evidence/formal-check.log',
+        'docs/artifacts/evidence/kvm-six-app-coverage/receipt.json',
+        'docs/artifacts/evidence/kvm-katran-smoke/receipt.json',
+        'docs/artifacts/evidence/kvm-katran-smoke/make-corpus.log',
+    ],
     'omittedGeneratedData': ['corpus/results', 'micro/results (except listed files)', 'tests/results'],
 }
 (stage / 'ARTIFACT_MANIFEST.json').write_text(json.dumps(manifest, indent=2) + '\n')
 (stage / '.submodules.tsv').unlink()
+(stage / '.nested-submodules.tsv').unlink()
 PY
 
 ( cd "$STAGE" && zip -q -r -X "$ZIP" . )
@@ -165,8 +216,21 @@ required=(
     llvm-backend/llvm/llvm/CMakeLists.txt vendor/repos/katran/CMakeLists.txt
     vendor/repos/tracee/Makefile vendor/repos/tetragon/Makefile
     vendor/repos/cilium/Makefile vendor/repos/bcc/CMakeLists.txt
+    vendor/repos/bcc/src/cc/libbpf/src/libbpf.c
+    vendor/repos/bcc/libbpf-tools/bpftool/src/main.c
+    vendor/repos/bcc/libbpf-tools/bpftool/libbpf/src/libbpf.c
+    vendor/repos/bcc/libbpf-tools/blazesym/Cargo.toml
+    vendor/repos/tracee/3rdparty/libbpf/src/libbpf.c
     vendor/repos/opentelemetry-ebpf-profiler/Makefile
     docs/artifacts/evidence/formal-check.json
+    docs/artifacts/evidence/formal-check.log
+    docs/artifacts/evidence/kvm-six-app-coverage/receipt.json
+    docs/artifacts/evidence/kvm-six-app-coverage/details/progress.json
+    docs/artifacts/evidence/kvm-six-app-coverage/details/apps/tracee__monitor.json
+    docs/artifacts/evidence/kvm-katran-smoke/receipt.json
+    docs/artifacts/evidence/kvm-katran-smoke/make-corpus.log
+    docs/artifacts/evidence/kvm-katran-smoke/details/progress.json
+    docs/artifacts/evidence/kvm-katran-smoke/details/apps/katran.json
     micro/results/x86_kvm_micro_20260519_114214_364050/details/result.json
 )
 for rel in "${required[@]}"; do

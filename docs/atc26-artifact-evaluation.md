@@ -86,14 +86,17 @@ The artifact was developed and validated on:
 | gcc, aarch64-linux-gnu-gcc | 13.3.0 |
 | cmake | 3.28.3 |
 | Python | 3.12.3 (PyYAML 6.0.1) |
+| Rust / Cargo | rustc 1.98.1 / cargo 1.98.1 |
+| Go | 1.26.8 |
 | qemu-system-aarch64 | 8.2.2 |
 | virtme-ng (`vng`) | 1.41 |
 | docker | 29.8.0 |
 | Lean (`lean-toolchain`) | `leanprover/lean4:v4.19.0` (pinned in `native-sim/formal/lean-toolchain`) |
 
-Rust (`cargo`) and Go are also required by the full build; they are installed
-through `rustup` and a Go toolchain respectively. Exact minimums are not pinned
-by this guide — see [Blockers](#remaining-blockers-and-author-action-items).
+Rust and Go are required by the full build and are pinned by the tracked
+`.devcontainer/Dockerfile`; the versions above were verified in the preparation
+Workspace.
+
 
 ### Minimum resources
 
@@ -154,10 +157,12 @@ for the kernel, `vendor/libbpf`, `vendor/llvmbpf`, and `llvm-backend/llvm`). The
 submodule commit pins are recorded in git, so `git submodule update` reproduces
 the tested revisions exactly.
 
-Install the Python dependency used by the harness:
+Install the Python dependency used by the harness. The two raw-data plotting
+scripts additionally need Matplotlib and NumPy:
 
 ```bash
 pip install pyyaml
+pip install matplotlib numpy  # only for regenerating the paper's micro figures
 ```
 
 ---
@@ -288,7 +293,8 @@ status**:
 
 | Run directory | Top-level status | Per-app | What it does and does not support |
 |---|---|---|---|
-| `corpus/results/x86_kvm_corpus_20260921_211712_637406/` | `error` | 5/6 apps `ok`; `tracee/monitor` `error` | **Untracked** (regenerate with the Step 2 command). Supports *rejit/KOperation coverage*: all six apps report `rejit_result.status: ok`, and `kop` applied sites in all six with zero kop step failures. Does **not** support a claim of full workload success, because the Tracee workload launch failed. |
+| `docs/artifacts/evidence/kvm-six-app-coverage/` (source run `x86_kvm_corpus_20260921_211712_637406`) | `error` | 5/6 apps `ok`; `tracee/monitor` `error` | **Tracked compact evidence.** Supports *rejit/KOperation coverage*: all six retained app records report `rejit_result.status: ok`. Does **not** support a claim of full workload success, because the Tracee workload launch failed. `receipt.json` binds every retained JSON by SHA256 and states that the original shell command was not retained. |
+| `docs/artifacts/evidence/kvm-katran-smoke/` (source run `x86_kvm_corpus_20260922_213414_889964`) | `completed` | Katran `status: ok`; `rejit_result.status: ok` | **Fresh tracked KVM smoke.** The exact command exited 0 after 5,946 seconds. `receipt.json` binds the command, source commit, log, and retained JSON files by SHA256. Supports both Katran rejit/KOperation coverage and a complete successful single-app workload run. |
 | `corpus/results/x86_kvm_corpus_20260920_045430_754822/`, `corpus/results/x86_kvm_corpus_20260919_225748_512435/` | development | mixed | Earlier before/after comparisons used while fixing optimizer defects; not paper evidence. |
 | `corpus/results/aws_arm64_corpus_*`, `corpus/results/aws_x86_corpus_*` | see each `details/progress.json` | — | Historical AWS runs tracked in the repository. Some have a top-level `status` of `error`; **do not present any run as an all-success result without checking its own `details/progress.json`.** |
 
@@ -312,10 +318,11 @@ Xeon/AWS numbers. See the honesty note at the top of this guide.
 - **Build caching.** Kernel, app, and image builds are cached under
   `vendor/build/` and `.cache/`. A second run is much faster than the first.
 - **Interrupted build.** Re-run the same `make` target; builds resume.
-- **`modules_install: cp: cannot create ...: No such file or directory`.** A known
-  environment flake on network/FUSE-backed workspaces (a dropped directory
-  create). Re-run the target; it succeeds on retry. This is documented in
-  `docs/tmp/20260906-bpf-development-todo.md`.
+- **Network/FUSE-backed workspaces.** The supported Make targets install kernel
+  modules serially into a temporary local directory, then copy the completed
+  tree into the build cache. This avoids the directory-creation race that raw
+  parallel `modules_install` can hit on FUSE. Use the repository Make targets
+  rather than invoking Kbuild's `modules_install` directly.
 - **`KEEP_WORKDIRS=1`** retains per-program workdir tarballs (including raw
   verifier logs and intermediate bytecode) for programs that hit real
   optimization failures:
@@ -356,14 +363,20 @@ corpus; `make terminate` stops managed remote instances.
 
 The paper's plots are produced by scripts in `docs/paper/scripts/`:
 
-- `docs/paper/scripts/plot_evaluation_koperation.py` — the RQ1 micro figures
-- `docs/paper/scripts/plot_app_case_studies.py` — the application case studies
-- `docs/paper/scripts/plot_characterization_pure_percase.py` — the \S3 characterization
+- `docs/paper/scripts/plot_evaluation_koperation.py` -- derives the RQ1 micro
+  figures from the three retained RQ1 JSON datasets
+- `docs/paper/scripts/plot_characterization_pure_percase.py` -- derives the
+  Section 3 characterization from the two retained pure-bytecode JSON datasets
+- `docs/paper/scripts/plot_app_case_studies.py` -- a declarative camera-ready
+  visualization of the four published summary points; its values are embedded
+  in `CONFIGS`, so this script is **not** reproduction evidence
 
-They read the raw result files described above and emit the PDFs referenced from
+The two raw-data scripts emit the PDFs referenced from
 `docs/paper/figures/sec-6-koperation-micro-rq1.tex` and
 `docs/paper/figures/sec-6-koperation-micro-rq3.tex`. They are **analysis-side**;
-per the repository rule, no such computation lives in the framework.
+per the repository rule, no aggregation lives in the measurement framework.
+The application case-study claims must instead be checked against corpus JSON
+and receipts; the renderer never treats the declarative plot as evidence.
 
 ---
 
@@ -449,11 +462,13 @@ Remaining **external** action (cannot be done from this repository):
 
 **Honest boundaries (do not overstate).** The paper-scale x86 Xeon and ARM64 AWS
 figures were **not** re-measured while preparing this artifact; the guide gives
-the exact commands and the raw-result mapping instead. The local preparation corpus
-run cited by this guide is
-`x86_kvm_corpus_20260921_211712_637406`, which is **untracked** and whose
-top-level status is `error` (Tracee workload launch failed) — it supports
-rejit/KOperation *coverage* only, not full workload success.
+the exact commands and the raw-result mapping instead. The retained six-app preparation run
+`x86_kvm_corpus_20260921_211712_637406` has top-level status `error`
+because the Tracee workload launch failed; its hash-bound compact evidence
+supports rejit/KOperation *coverage* only. The separately retained fresh Katran
+smoke `x86_kvm_corpus_20260922_213414_889964` completed successfully and
+supports full workload success for that single app. Neither run replaces the
+paper-scale Xeon or AWS measurements.
 
 If the Zenodo deposit cannot be completed before the deadline, the defensible
 fallback per the AEC table is **Functional + Reproduced**.

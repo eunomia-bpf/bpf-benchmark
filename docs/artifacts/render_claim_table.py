@@ -21,6 +21,7 @@ are the point of the table, so they do not fail the run.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 import tempfile
@@ -47,7 +48,12 @@ MICRO_RESULTS = {
     "RQ3 micro arm64 (pure bytecode)": "micro/results/aws_arm64_micro_20260606_063319_954947",
 }
 
-COVERAGE_RUN = "corpus/results/x86_kvm_corpus_20260921_211712_637406"
+COVERAGE_RUN = "docs/artifacts/evidence/kvm-six-app-coverage"
+SMOKE_RUN = "docs/artifacts/evidence/kvm-katran-smoke"
+SMOKE_COMMAND = (
+    "BPFREJIT_CORPUS_APPS=katran SAMPLES=1 WORKLOAD_DURATION=10 "
+    "TIMEOUT=3000 make corpus"
+)
 FORMAL_RECEIPT = "docs/artifacts/evidence/formal-check.json"
 
 
@@ -111,53 +117,116 @@ def micro_evidence(result_path: Path) -> tuple[str, str]:
     return PARTIAL, prov
 
 
-def corpus_evidence(root: Path, rel: str) -> list[Row]:
+def file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def retained_files_valid(root: Path, hashes) -> bool | None:
+    if not isinstance(hashes, dict) or not hashes:
+        return None
+    for rel, expected in hashes.items():
+        candidate = Path(rel)
+        if candidate.is_absolute() or ".." in candidate.parts:
+            return False
+        path = root / candidate
+        if not path.is_file() or file_sha256(path) != expected:
+            return False
+    return True
+
+
+def corpus_evidence(
+    root: Path,
+    rel: str,
+    *,
+    expected_apps: int,
+    claim_label: str,
+    required_command: str | None = None,
+) -> list[Row]:
     d = root / rel
+    claims = [
+        f"KVM corpus: rejit/KOperation coverage ({claim_label})",
+        f"KVM corpus: full workload success ({claim_label})",
+    ]
     if not d.is_dir():
+        command = required_command or (
+            "BPFREJIT_CORPUS_APPS=katran SAMPLES=1 "
+            "WORKLOAD_DURATION=10 TIMEOUT=3000 make corpus"
+        )
         return [
-            Row(
-                "KVM corpus: rejit/KOperation coverage (6 apps)",
-                UNAVAILABLE,
-                f"{rel} not present; run "
-                "`BPFREJIT_CORPUS_APPS=katran SAMPLES=1 WORKLOAD_DURATION=10 make corpus`",
-            ),
-            Row(
-                "KVM corpus: full workload success (6 apps)",
-                UNAVAILABLE,
-                f"{rel} not present",
-            ),
+            Row(claims[0], UNAVAILABLE, f"{rel} not present; run command: {command}"),
+            Row(claims[1], UNAVAILABLE, f"{rel} not present"),
         ]
+
     suite_status = (load_json(d / "details" / "progress.json") or {}).get("status")
     apps: dict[str, tuple] = {}
     apps_dir = d / "details" / "apps"
     if apps_dir.is_dir():
         for f in sorted(apps_dir.glob("*.json")):
             a = load_json(f) or {}
-            apps[f.stem] = (a.get("status"), (a.get("rejit_result") or {}).get("status"))
+            apps[f.stem] = (
+                a.get("status"),
+                (a.get("rejit_result") or {}).get("status"),
+            )
+
+    receipt_ok = True
+    receipt_detail = ""
+    receipt = load_json(d / "receipt.json")
+    retained_ok = retained_files_valid(
+        d, receipt.get("files_sha256") if isinstance(receipt, dict) else None
+    )
+    if retained_ok is not None:
+        receipt_ok = retained_ok
+        receipt_detail = f", retained hashes valid={retained_ok}"
+    if required_command is not None:
+        receipt = receipt or {}
+        log_rel = receipt.get("log_file")
+        log_path = d / log_rel if isinstance(log_rel, str) else None
+        source_commit = receipt.get("source_commit")
+        command_receipt_ok = (
+            receipt.get("command") == required_command
+            and receipt.get("exit_code") == 0
+            and isinstance(source_commit, str)
+            and len(source_commit) == 40
+            and log_path is not None
+            and log_path.is_file()
+            and receipt.get("log_sha256") == file_sha256(log_path)
+        )
+        receipt_ok = receipt_ok and command_receipt_ok
+        receipt_detail += f", command receipt valid={command_receipt_ok}"
 
     n = len(apps)
     rejit_ok = sum(1 for v in apps.values() if v[1] == REJIT_SUCCESS)
     apps_ok = sum(1 for v in apps.values() if v[0] == APP_SUCCESS)
-
-    # Coverage needs every app's rejit status ok; workload success additionally
-    # needs the suite to have completed with every app ok.
-    cov = PASS if n and rejit_ok == n else (PARTIAL if apps else UNAVAILABLE)
-    succ = PASS if (suite_status == SUITE_SUCCESS and n and apps_ok == n) else PARTIAL
+    complete_set = n == expected_apps
+    coverage_pass = complete_set and rejit_ok == n and receipt_ok
+    workload_pass = (
+        suite_status == SUITE_SUCCESS
+        and complete_set
+        and apps_ok == n
+        and receipt_ok
+    )
+    cov = PASS if coverage_pass else (PARTIAL if apps else UNAVAILABLE)
+    succ = PASS if workload_pass else (PARTIAL if apps else UNAVAILABLE)
 
     return [
         Row(
-            "KVM corpus: rejit/KOperation coverage (6 apps)",
+            claims[0],
             cov,
-            f"{rel}: suite status={suite_status!r}, rejit ok={rejit_ok}/{n}",
+            f"{rel}: suite status={suite_status!r}, rejit ok={rejit_ok}/{n}, "
+            f"expected apps={expected_apps}{receipt_detail}",
         ),
         Row(
-            "KVM corpus: full workload success (6 apps)",
+            claims[1],
             succ,
-            f"{rel}: suite status={suite_status!r}, apps ok={apps_ok}/{n}"
-            + ("" if succ == PASS else " (not all apps succeeded)"),
+            f"{rel}: suite status={suite_status!r}, apps ok={apps_ok}/{n}, "
+            f"expected apps={expected_apps}{receipt_detail}"
+            + ("" if succ == PASS else " (not a complete successful run)"),
         ),
     ]
-
 
 def formal_evidence(receipt_path: Path) -> tuple[str, str]:
     """Validate a retained receipt from the complete formal-check command."""
@@ -186,7 +255,16 @@ def build_rows(root: Path) -> list[Row]:
     for label, rel in MICRO_RESULTS.items():
         st, prov = micro_evidence(root / rel / "details" / "result.json")
         rows.append(Row(label, st, prov))
-    rows.extend(corpus_evidence(root, COVERAGE_RUN))
+    rows.extend(corpus_evidence(
+        root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
+    ))
+    rows.extend(corpus_evidence(
+        root,
+        SMOKE_RUN,
+        expected_apps=1,
+        claim_label="Katran smoke",
+        required_command=SMOKE_COMMAND,
+    ))
     st, prov = formal_evidence(root / FORMAL_RECEIPT)
     rows.append(Row("Semantic proofs: native emit == proof sequence", st, prov))
     return rows
@@ -272,7 +350,7 @@ def self_test() -> int:
         if st != PARTIAL:
             failures.append(f"mismatch expected PARTIAL, got {st}")
 
-        # corpus: suite completed + all apps ok -> both PASS
+        # Six-app coverage: all rejit statuses can pass while one workload fails.
         run = root / COVERAGE_RUN / "details"
         (run / "apps").mkdir(parents=True)
         (run / "progress.json").write_text(json.dumps({"status": "completed"}))
@@ -280,22 +358,73 @@ def self_test() -> int:
             (run / "apps" / f"app{i}.json").write_text(
                 json.dumps({"status": "ok", "rejit_result": {"status": "ok"}})
             )
-        rows = corpus_evidence(root, COVERAGE_RUN)
+        rows = corpus_evidence(
+            root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
+        )
         if [r.status for r in rows] != [PASS, PASS]:
-            failures.append(f"completed corpus expected [PASS, PASS], got {[r.status for r in rows]}")
+            failures.append(
+                f"completed corpus expected [PASS, PASS], got {[r.status for r in rows]}"
+            )
 
-        # corpus: suite error + one app failed -> coverage PARTIAL, success PARTIAL
         (run / "progress.json").write_text(json.dumps({"status": "error"}))
         (run / "apps" / "app0.json").write_text(
             json.dumps({"status": "error", "rejit_result": {"status": "ok"}})
         )
-        rows = corpus_evidence(root, COVERAGE_RUN)
-        if rows[1].status != PARTIAL:
-            failures.append(f"errored corpus expected success PARTIAL, got {rows[1].status}")
+        rows = corpus_evidence(
+            root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
+        )
+        if [r.status for r in rows] != [PASS, PARTIAL]:
+            failures.append(
+                "errored corpus with complete rejit coverage expected "
+                f"[PASS, PARTIAL], got {[r.status for r in rows]}"
+            )
+
+        # Fresh smoke PASS requires raw success plus an exit-0, hash-bound receipt.
+        smoke = root / SMOKE_RUN
+        (smoke / "details/apps").mkdir(parents=True)
+        (smoke / "details/progress.json").write_text(
+            json.dumps({"status": "completed"})
+        )
+        (smoke / "details/apps/katran.json").write_text(
+            json.dumps({"status": "ok", "rejit_result": {"status": "ok"}})
+        )
+        (smoke / "make-corpus.log").write_text("real run log")
+        (smoke / "receipt.json").write_text(json.dumps({
+            "command": SMOKE_COMMAND,
+            "exit_code": 0,
+            "source_commit": "a" * 40,
+            "log_file": "make-corpus.log",
+            "log_sha256": file_sha256(smoke / "make-corpus.log"),
+        }))
+        rows = corpus_evidence(
+            root,
+            SMOKE_RUN,
+            expected_apps=1,
+            claim_label="Katran smoke",
+            required_command=SMOKE_COMMAND,
+        )
+        if [r.status for r in rows] != [PASS, PASS]:
+            failures.append(
+                f"valid smoke receipt expected [PASS, PASS], got {[r.status for r in rows]}"
+            )
+        receipt = load_json(smoke / "receipt.json")
+        receipt["exit_code"] = 1
+        (smoke / "receipt.json").write_text(json.dumps(receipt))
+        rows = corpus_evidence(
+            root,
+            SMOKE_RUN,
+            expected_apps=1,
+            claim_label="Katran smoke",
+            required_command=SMOKE_COMMAND,
+        )
+        if [r.status for r in rows] != [PARTIAL, PARTIAL]:
+            failures.append(
+                f"failed smoke receipt expected [PARTIAL, PARTIAL], got {[r.status for r in rows]}"
+            )
 
         # Formal PASS requires a complete retained receipt, not source presence.
         receipt = root / FORMAL_RECEIPT
-        receipt.parent.mkdir(parents=True)
+        receipt.parent.mkdir(parents=True, exist_ok=True)
         receipt.write_text(json.dumps({
             "command": "make -C native-sim/formal check",
             "exit_code": 0,
@@ -317,7 +446,7 @@ def self_test() -> int:
         for f in failures:
             print("SELF-TEST FAIL:", f, file=sys.stderr)
         return 1
-    print("self-test: OK (6 checks)")
+    print("self-test: OK (8 evidence classes)")
     return 0
 
 
