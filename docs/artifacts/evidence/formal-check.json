@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-22T16:47:55Z",
+  "command": "make -C native-sim/formal check",
+  "commit": "1181c1726a42dafc63d71bdb060addb6b7782f5f",
+  "exit_code": 0,
+  "checks": {
+    "generated_contract_drift": true,
+    "generator_scripts": 47,
+    "lean_modules": true,
+    "lean_module_commands": 70,
+    "host_cross_checks": 25
+  },
+  "log": {
+    "path": "docs/artifacts/evidence/formal-check.log",
+    "sha256": "3171a937ed9c8e1d4d3ebbe9ef48b0a47168f95c3d39e64c88e94433536e85f0",
+    "bytes": 9843
+  }
+}
