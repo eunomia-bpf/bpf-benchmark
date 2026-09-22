@@ -1,5 +1,11 @@
 # bpf-bench
 
+> **Artifact evaluation (ATC 2026):** evaluator instructions for the accepted
+> paper *BPF-Ext: Safely Extending the eBPF Compilation Pipeline with Native
+> Operations* live in
+> [`docs/atc26-artifact-evaluation.md`](docs/atc26-artifact-evaluation.md).
+> Start there if you are evaluating the artifact.
+
 Auto-research framework and benchmark for agentic OS kernel extension
 optimization.
 
