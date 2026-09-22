@@ -4068,3 +4068,25 @@ framework leaves the original bytecode in place and continues.
 - Not attempted: (a) is a behavioural rewrite of the submodule's frame layout,
   and (b) alone is inert because at the `512` default no out-of-range slot is
   ever emitted. Both need a design decision, not an inference.
+
+### Measured and rejected: raising the limit AND relaxing the remapper guard
+
+- Tested the combination suggested above: (1) `configure_llvm_roundtrip_args()`
+  parsing `-bpf-stack-size=4096` for non-kop passes, and (2) replacing the
+  remapper's strict per-offset width guard (`inconsistent out-of-range stack
+  slot width`) with "keep the widest width seen at that offset" so it can
+  attempt a remap instead of throwing.
+- **Rejected on measurement.** A/B on all `542` fixtures, patched binary vs the
+  committed baseline binary, again gave identical totals: `541 OK / 1 FAIL`
+  both ways; no improved fixture, no regressed fixture. The single failure just
+  moved from `const_prop` to `kop`, i.e. from one correct rejection to another.
+- Reason: the failing program's lift genuinely needs more than the 512-byte
+  frame at every stage; no amount of tolerance in the *reclaim* step creates
+  space for it. `bpfopt/llvm/src/main.cpp` was reverted again and the rebuilt
+  binary is byte-identical to the committed baseline.
+- Net: two independent attempts to get `tracee`'s `639_trace_security_file_mprotect`
+  through the chain both failed to improve any measurable outcome, which
+  strengthens the conclusion that the real fix must **reduce the lift's stack
+  demand** (the +45 B mean inflation documented above), not relax any limit.
+- Nothing is left uncommitted: `bpfopt/llvm/src/main.cpp` matches HEAD and the
+  binary matches the HEAD build.
