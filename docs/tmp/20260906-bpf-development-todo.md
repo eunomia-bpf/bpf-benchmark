@@ -4027,3 +4027,44 @@ framework leaves the original bytecode in place and continues.
 - Scope note: this is an **application-survival** effect of a step failure, not
   a measurement-validity gate. It does not affect the kop site counts, which the
   shim records per program from its own reports (now zero-failure).
+
+### Systematic finding: the LLVM roundtrip inflates the r10 frame by ~45 bytes
+
+- Measured over all `542` canonicalized fixtures, running exactly one `noop`
+  roundtrip (a pure LLVM re-emit, no optimization) and comparing the deepest
+  `r10` access (`true frame = -min_off`; the fixture's own offsets):
+  - `405 / 542` fixtures **grow**, `137` are unchanged, `0` shrink.
+  - growth: min `+8` B, max `+104` B, mean `+45.1` B.
+  - worst cases: `bpftrace_set/731_cap_capable` `24 -> 128` (also `156 -> 166`
+    instructions), `otelcol/45_perf_unwind_hotspot` `400 -> 496`,
+    `bcc_set/40_trace_req_completion_tp` `8 -> 96`.
+- The inflation is bounded, not a leak: repeating `noop` on
+  `cilium_agent/166_tail_handle_snat_fwd_ipv4` gives
+  `264 -> 352 -> 384 -> 392 -> 392 ...` (converges after ~3 roundtrips).
+- Cumulative effect along the configured chain (`noop, const_prop, dce,
+  wide_mem, bounds_check_merge, skb_load_bytes_spec`): the true frame reaches
+  **exactly `512`** for `43` fixtures, and `0` exceed it, so the chain still
+  completes for `541 / 542`. But a program that starts near the limit crosses it
+  mid-pipeline.
+- This is exactly `tracee_monitor/639_trace_security_file_mprotect`: one `noop`
+  takes it `440 -> 512` and the *next* pass can no longer lift it. The live KVM
+  variant is `7346` instructions with the same shape.
+- Mechanism sketch (not yet pinned to a line): `vendor/llvmbpf/src/compiler.cpp`
+  allocates one `kernel_stack_bytes`-sized `stackBegin` for the whole module
+  (line ~475) and shifts `r10` by a fixed `STACK_SIZE = 64` per BPF-to-BPF call
+  (lines ~632, ~1527), so the lifted frame is a re-layout of the original with
+  per-call reservation rather than a byte-faithful copy — consistent with both
+  the instruction-count drop (`7490 -> 6122`) and the deeper offsets
+  (`-2, -16, -24` becoming `-120, -128, -16, -24`).
+- Consequence for the goal: `kop` runs **last** (step 11), after ~9 roundtrips,
+  so any program whose frame lands near 512 loses all optimization. It is
+  therefore worth reducing the lift's stack demand rather than raising the
+  kernel limit (which was measured to have no effect — see the rejected-change
+  entry above). Two candidate directions, both in scope:
+  (a) make the roundtrip preserve the original frame depth instead of
+  re-laying it out; (b) let `remap_out_of_range_stack_spills` reclaim the
+  over-allocated slots it already detects, which currently throws
+  `inconsistent out-of-range stack slot width` before it can try.
+- Not attempted: (a) is a behavioural rewrite of the submodule's frame layout,
+  and (b) alone is inert because at the `512` default no out-of-range slot is
+  ever emitted. Both need a design decision, not an inference.
