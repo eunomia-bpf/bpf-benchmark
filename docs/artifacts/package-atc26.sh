@@ -59,16 +59,21 @@ embed_submodule() {
     echo "  embedded $path @ $pinned"
 }
 
-# Submodules embedded in the ZIP. These are the ones an evaluator cannot get
-# verbatim from upstream: `vendor/llvmbpf` carries project patches (kernel-stack
-# fix, kop-mode support) and `docs/paper` carries this paper's scripts and figure
-# sources. Unmodified upstream trees (the Linux kernel, LLVM, libbpf, and the
-# application repos) are NOT embedded: they are large, they are pinned in
-# .gitmodules, and the documented checkout step fetches them with
-# `git submodule update --init --recursive`. ARTIFACT_MANIFEST.json records every
-# submodule pin and marks which are embedded.
+# Embed every source submodule required by the documented proof,
+# microbenchmark, and six-application corpus paths. This makes the archival ZIP
+# independent of the continued availability of mutable upstream hosting while
+# preserving every exact superproject pin in ARTIFACT_MANIFEST.json.
 EMBEDDED_SUBMODULES=(
     vendor/llvmbpf
+    vendor/libbpf
+    vendor/linux-framework
+    llvm-backend/llvm
+    vendor/repos/bcc
+    vendor/repos/opentelemetry-ebpf-profiler
+    vendor/repos/cilium
+    vendor/repos/tetragon
+    vendor/repos/katran
+    vendor/repos/tracee
     docs/paper
 )
 echo "embedding artifact submodules:"
@@ -156,14 +161,14 @@ required=(
     docs/atc26-artifact-evaluation.md docs/artifacts/render_claim_table.py
     docs/paper/scripts/plot_evaluation_koperation.py
     native-sim/formal/lean-toolchain vendor/llvmbpf/CMakeLists.txt
+    vendor/libbpf/src/libbpf.c vendor/linux-framework/Makefile
+    llvm-backend/llvm/llvm/CMakeLists.txt vendor/repos/katran/CMakeLists.txt
+    vendor/repos/tracee/Makefile vendor/repos/tetragon/Makefile
+    vendor/repos/cilium/Makefile vendor/repos/bcc/CMakeLists.txt
+    vendor/repos/opentelemetry-ebpf-profiler/Makefile
     docs/artifacts/evidence/formal-check.json
     micro/results/x86_kvm_micro_20260519_114214_364050/details/result.json
 )
-# These live in unembedded upstream submodules; the manifest must still name them.
-for rel in vendor/linux-framework/Makefile llvm-backend/llvm/llvm/CMakeLists.txt; do
-    grep -q "${rel%%/*}" "$VERIFY/ARTIFACT_MANIFEST.json" || {
-        echo "manifest does not mention unembedded submodule of $rel" >&2; exit 1; }
-done
 for rel in "${required[@]}"; do
     [ -e "$VERIFY/$rel" ] || { echo "missing from ZIP: $rel" >&2; exit 1; }
 done
