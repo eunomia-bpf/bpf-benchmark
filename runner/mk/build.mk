@@ -120,13 +120,21 @@ $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf: $(HOST_KERNEL_BUILD_DIR_X
 
 host-kernel-x86: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
-	rm -rf "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_X86)/modules-install" INSTALL_MOD_STRIP=1 DEPMOD=true modules_install >/dev/null
+	tmp="$$(mktemp -d /tmp/bpfext-modules-x86.XXXXXX)"; \
+	trap 'rm -rf "$$tmp"' EXIT; \
+	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$$tmp" INSTALL_MOD_STRIP=1 DEPMOD=true -j1 modules_install >/dev/null; \
+	rm -rf "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"; \
+	install -d "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"; \
+	cp -a "$$tmp/." "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install/"
 
 $(HOST_KERNEL_IMAGE_X86) $(HOST_KERNEL_VMLINUX_X86) $(HOST_KERNEL_MODULES_ORDER_X86) &: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
-	rm -rf "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_X86)/modules-install" INSTALL_MOD_STRIP=1 DEPMOD=true modules_install >/dev/null
+	tmp="$$(mktemp -d /tmp/bpfext-modules-x86.XXXXXX)"; \
+	trap 'rm -rf "$$tmp"' EXIT; \
+	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$$tmp" INSTALL_MOD_STRIP=1 DEPMOD=true -j1 modules_install >/dev/null; \
+	rm -rf "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"; \
+	install -d "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"; \
+	cp -a "$$tmp/." "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install/"
 
 $(HOST_KERNEL_BUILD_DIR_ARM64)/.config: $(ARM64_DEFCONFIG_SRC)
 	install -d "$(HOST_KERNEL_BUILD_DIR_ARM64)"
@@ -137,13 +145,21 @@ $(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/auto.conf: $(HOST_KERNEL_BUILD_DIR
 
 host-kernel-arm64: $(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/auto.conf
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image vmlinuz.efi modules -j"$(IMAGE_BUILD_JOBS)"
-	rm -rf "$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install"
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install" INSTALL_MOD_STRIP=1 DEPMOD=true modules_install >/dev/null
+	tmp="$$(mktemp -d /tmp/bpfext-modules-arm64.XXXXXX)"; \
+	trap 'rm -rf "$$tmp"' EXIT; \
+	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH="$$tmp" INSTALL_MOD_STRIP=1 DEPMOD=true -j1 modules_install >/dev/null; \
+	rm -rf "$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install"; \
+	install -d "$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install"; \
+	cp -a "$$tmp/." "$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install/"
 
 $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) $(HOST_KERNEL_VMLINUX_ARM64) $(HOST_KERNEL_MODULES_ORDER_ARM64) &: $(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/auto.conf
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image vmlinuz.efi modules -j"$(IMAGE_BUILD_JOBS)"
-	rm -rf "$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install"
-	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install" INSTALL_MOD_STRIP=1 DEPMOD=true modules_install >/dev/null
+	tmp="$$(mktemp -d /tmp/bpfext-modules-arm64.XXXXXX)"; \
+	trap 'rm -rf "$$tmp"' EXIT; \
+	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH="$$tmp" INSTALL_MOD_STRIP=1 DEPMOD=true -j1 modules_install >/dev/null; \
+	rm -rf "$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install"; \
+	install -d "$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install"; \
+	cp -a "$$tmp/." "$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install/"
 
 host-kop-x86: host-kernel-x86
 	install -d "$(HOST_KOP_DIR_X86)"
