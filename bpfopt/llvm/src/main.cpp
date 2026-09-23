@@ -1333,11 +1333,14 @@ int64_t remap_out_of_range_stack_spills(std::vector<uint8_t> &bytes,
 			throw std::runtime_error(
 				"LLVM output has non-remappable out-of-range stack access");
 		}
+		// A single out-of-range stack offset may be accessed at more than
+		// one width (e.g. an 8-byte slot read as both a double-word and a
+		// word). That is legal BPF, so reserve the slot at the widest
+		// access instead of rejecting the program.
 		const auto [it, inserted] =
 			invalid_slots.emplace(ref->off, ref->width);
-		if (!inserted && it->second != ref->width) {
-			throw std::runtime_error(
-				"LLVM output has inconsistent out-of-range stack slot width");
+		if (!inserted && ref->width > it->second) {
+			it->second = ref->width;
 		}
 		invalid_refs[ref->off].push_back(*ref);
 	}
