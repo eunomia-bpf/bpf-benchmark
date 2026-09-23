@@ -22,8 +22,8 @@ trap 'rm -rf "$STAGE" "$PACKAGE_DIR" "${VERIFY:-}"' EXIT
 COMMIT="$(git -C "$ROOT_DIR" rev-parse HEAD)"
 echo "packaging $VERSION at $COMMIT"
 
-# The parent repository is archived from HEAD, never from the working tree.
-git -C "$ROOT_DIR" archive --format=tar HEAD -- . \
+# Archive the frozen commit, never the working tree or a later moving HEAD.
+git -C "$ROOT_DIR" archive --format=tar "$COMMIT" -- . \
     ':(exclude)corpus/results' \
     ':(exclude)micro/results' \
     ':(exclude)tests/results' \
@@ -45,7 +45,7 @@ git -C "$ROOT_DIR" archive --format=tar HEAD -- . \
     | tar -x -C "$STAGE"
 
 pin_for() {
-    git -C "$ROOT_DIR" ls-tree HEAD -- "$1" | awk '{print $3}'
+    git -C "$ROOT_DIR" ls-tree "$COMMIT" -- "$1" | awk '{print $3}'
 }
 
 : > "$STAGE/.nested-submodules.tsv"
@@ -128,7 +128,7 @@ RESULTS=(
 echo "embedding paper-result datasets:"
 for rel in "${RESULTS[@]}"; do
     mkdir -p "$STAGE/$(dirname "$rel")"
-    git -C "$ROOT_DIR" show "HEAD:$rel" > "$STAGE/$rel"
+    git -C "$ROOT_DIR" show "$COMMIT:$rel" > "$STAGE/$rel"
     echo "  $rel"
 done
 # Keep status and environment provenance with each selected result.json.
@@ -137,7 +137,7 @@ for rel in "${RESULTS[@]}"; do
     for extra in metadata.json details/progress.json; do
         path="$run_dir/$extra"
         mkdir -p "$STAGE/$(dirname "$path")"
-        git -C "$ROOT_DIR" show "HEAD:$path" > "$STAGE/$path"
+        git -C "$ROOT_DIR" show "$COMMIT:$path" > "$STAGE/$path"
     done
 done
 
@@ -157,7 +157,7 @@ for run in "${CORPUS_RUNS[@]}"; do
     for extra in metadata.json details/progress.json details/result.json details/apps/cilium__agent.json; do
         path="corpus/results/$run/$extra"
         mkdir -p "$STAGE/$(dirname "$path")"
-        git -C "$ROOT_DIR" show "HEAD:$path" > "$STAGE/$path"
+        git -C "$ROOT_DIR" show "$COMMIT:$path" > "$STAGE/$path"
     done
 done
 
