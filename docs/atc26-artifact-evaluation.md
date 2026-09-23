@@ -202,7 +202,10 @@ pip install matplotlib numpy  # only for regenerating the paper's micro figures
 This path needs **no KVM, no Docker, and no AWS**, and it is the first thing an
 evaluator should run. It validates the artifact's *soundness* content: the
 generated contracts, the Lean 4 refinement theorems, and the independent C host
-cross-checks.
+cross-checks. These proofs cover the listed native-simulator emitter contracts;
+they do not prove equivalence of the optimizer's generic stack-offset remapper
+or branch-sensitive stack-slot reuse. Those transformations need separate
+semantic checks, beyond a passing fixture or kernel verifier result.
 
 ```bash
 
@@ -267,9 +270,18 @@ numbers are not claimed to have been re-measured here.
 
 ## 7. Step 2 — KVM / full validation, then the single-app smoke path
 
-Full validation requires the runtime image and a KVM-capable host:
+Full validation requires the runtime image and a KVM-capable host. Check the
+Rust toolchain before the first image build. The supplied
+`.devcontainer/Dockerfile` installs Rust under `/usr/local` and sets these
+variables; some existing Coder login shells omit them even though that
+toolchain is installed. In such a shell, use the installed paths shown below
+rather than downloading a second toolchain. On a different host, use that
+host's working Rust installation instead.
 
 ```bash
+# Existing Coder shell using the supplied image (needed if cargo reports no default):
+export RUSTUP_HOME=/usr/local/rustup CARGO_HOME=/usr/local/cargo
+cargo --version
 # Full Make-backed test validation (builds the runtime image; requires KVM).
 make check
 ```
