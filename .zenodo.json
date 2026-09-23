@@ -1,10 +1,10 @@
 {
-  "title": "BPF-Ext: Safely Extending the eBPF Compilation Pipeline with Native Operations (artifact, atc26-ae-1)",
+  "title": "BPF-Ext: Safely Extending the eBPF Compilation Pipeline with Native Operations (artifact, atc26-ae-2)",
   "description": "<p>Artifact for the accepted ATC 2026 paper <strong>\"BPF-Ext: Safely Extending the eBPF Compilation Pipeline with Native Operations\"</strong> (accepted paper #1160).</p><p>The artifact contains the Make-backed benchmark harness, the <code>bpfopt</code> bytecode optimizer and stock-kernel userspace shim, the KOperation native-operation kernel modules, and the Lean 4 semantic-proof suite. The evaluator guide is <code>docs/atc26-artifact-evaluation.md</code>; artifact status, dependencies, commands per claim, expected outputs, raw-result locations, and honest boundaries are documented there.</p><p>Repository-original material is MIT licensed; third-party and vendored components keep their own licenses, listed with exact pinned revisions in <code>THIRD_PARTY_NOTICES.md</code>.</p>",
   "license": "MIT",
   "upload_type": "software",
   "access_right": "open",
-  "version": "atc26-ae-1",
+  "version": "atc26-ae-2",
   "publication_date": "2026-09-22",
   "creators": [
     {

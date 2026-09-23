@@ -27,6 +27,7 @@ git -C "$ROOT_DIR" archive --format=tar HEAD -- . \
     ':(exclude)micro/results' \
     ':(exclude)tests/results' \
     ':(exclude)docs/tmp' \
+    ':(exclude)tmp-*' \
     ':(exclude)docs/source-opt' \
     ':(exclude)docs/reference' \
     ':(exclude)docs/research' \
@@ -127,6 +128,35 @@ for rel in "${RESULTS[@]}"; do
     git -C "$ROOT_DIR" show "HEAD:$rel" > "$STAGE/$rel"
     echo "  $rel"
 done
+# Keep status and environment provenance with each selected result.json.
+for rel in "${RESULTS[@]}"; do
+    run_dir="${rel%/details/result.json}"
+    for extra in metadata.json details/progress.json; do
+        path="$run_dir/$extra"
+        mkdir -p "$STAGE/$(dirname "$path")"
+        git -C "$ROOT_DIR" show "HEAD:$path" > "$STAGE/$path"
+    done
+done
+
+# Retain the compact Cilium RQ2/RQ4 records used by render_claim_table.py.
+# The paper's 4086-site and loader-count claims still lack their original logs;
+# do not infer them from these app records.
+CORPUS_RUNS=(
+    x86_kvm_corpus_20260604_070210_639497
+    x86_kvm_corpus_20260604_100557_313063
+    x86_kvm_corpus_20260529_033517_489159
+    x86_kvm_corpus_20260529_040554_604387
+    x86_kvm_corpus_20260529_043720_016160
+    x86_kvm_corpus_20260605_145112_835705
+    x86_kvm_corpus_20260605_160715_129437
+)
+for run in "${CORPUS_RUNS[@]}"; do
+    for extra in metadata.json details/progress.json details/result.json details/apps/cilium__agent.json; do
+        path="corpus/results/$run/$extra"
+        mkdir -p "$STAGE/$(dirname "$path")"
+        git -C "$ROOT_DIR" show "HEAD:$path" > "$STAGE/$path"
+    done
+done
 
 cat > "$STAGE/README-ARTIFACT.md" <<EOF
 # BPF-Ext ATC 2026 artifact $VERSION
@@ -136,7 +166,9 @@ This is the single archival ZIP for accepted ATC 2026 paper #1160,
 Start with [docs/atc26-artifact-evaluation.md](docs/atc26-artifact-evaluation.md).
 The archive contains the exact source trees needed by the documented proof,
 microbenchmark, and six-application KVM paths, plus the five raw paper-result
-JSON datasets read by the included plotting scripts. Compact retained evidence
+JSON datasets read by the included plotting scripts, plus selected Cilium
+RQ2/RQ4 raw app records and run-status provenance read by the claim renderer.
+Compact retained evidence
 records the complete formal check, the six-application ReJIT coverage run, and
 the fresh Katran KVM smoke. ARTIFACT_MANIFEST.json records the superproject
 commit and every direct and nested submodule pin. Historical bulk result trees are omitted; the
@@ -181,11 +213,19 @@ manifest = {
     'submodules': submodules,
     'nestedSubmodules': nested_submodules,
     'paperResultFiles': [
-        'micro/results/x86_kvm_micro_20260519_114214_364050/details/result.json',
-        'micro/results/x86_kvm_micro_20260526_210351_224315/details/result.json',
-        'micro/results/aws_arm64_micro_20260606_001225_821028/details/result.json',
-        'micro/results/x86_kvm_micro_20260526_210952_650695/details/result.json',
-        'micro/results/aws_arm64_micro_20260606_063319_954947/details/result.json',
+        str(path.relative_to(stage))
+        for pattern in ('micro/results/*/metadata.json',
+                        'micro/results/*/details/progress.json',
+                        'micro/results/*/details/result.json')
+        for path in sorted(stage.glob(pattern))
+    ],
+    'corpusResultFiles': [
+        str(path.relative_to(stage))
+        for pattern in ('corpus/results/*/metadata.json',
+                        'corpus/results/*/details/progress.json',
+                        'corpus/results/*/details/result.json',
+                        'corpus/results/*/details/apps/cilium__agent.json')
+        for path in sorted(stage.glob(pattern))
     ],
     'validationEvidence': [
         'docs/artifacts/evidence/formal-check.json',
@@ -202,7 +242,8 @@ manifest = {
 PY
 
 ( cd "$STAGE" && zip -q -r -X "$ZIP" . )
-sha256sum "$ZIP" > "$ZIP.sha256"
+( cd "$OUT_DIR" && sha256sum "$(basename "$ZIP")" > "$(basename "$ZIP").sha256" )
+( cd "$OUT_DIR" && sha256sum -c "$(basename "$ZIP").sha256" )
 
 VERIFY="$(mktemp -d)"
 unzip -q "$ZIP" -d "$VERIFY"
@@ -232,6 +273,9 @@ required=(
     docs/artifacts/evidence/kvm-katran-smoke/details/progress.json
     docs/artifacts/evidence/kvm-katran-smoke/details/apps/katran.json
     micro/results/x86_kvm_micro_20260519_114214_364050/details/result.json
+    corpus/results/x86_kvm_corpus_20260604_100557_313063/details/apps/cilium__agent.json
+    corpus/results/x86_kvm_corpus_20260529_033517_489159/details/apps/cilium__agent.json
+    corpus/results/x86_kvm_corpus_20260529_040554_604387/details/apps/cilium__agent.json
 )
 for rel in "${required[@]}"; do
     [ -e "$VERIFY/$rel" ] || { echo "missing from ZIP: $rel" >&2; exit 1; }
@@ -240,6 +284,9 @@ if find "$VERIFY" -name .git -print -quit | grep -q .; then
     echo "ZIP unexpectedly contains .git metadata" >&2
     exit 1
 fi
+# Check project Python and the evaluator entrypoint from the clean extraction.
+make -C "$VERIFY" lint
+python3 -m py_compile "$VERIFY/docs/artifacts/render_claim_table.py"
 python3 "$VERIFY/docs/artifacts/render_claim_table.py" --self-test
 python3 "$VERIFY/docs/artifacts/render_claim_table.py" "$VERIFY" > "$VERIFY/claim-table.txt"
 python3 -m json.tool "$VERIFY/ARTIFACT_MANIFEST.json" >/dev/null

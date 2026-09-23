@@ -23,6 +23,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
+import re
+import statistics
 import sys
 import tempfile
 from dataclasses import dataclass
@@ -98,6 +101,9 @@ def micro_evidence(result_path: Path) -> tuple[str, str]:
                 checked += 1
                 if expected is not None and s.get("result") != expected:
                     mismatches += 1
+                expected_retval = b.get("expected_retval")
+                if expected_retval is not None and s.get("retval") != expected_retval:
+                    mismatches += 1
                 ns = s.get("exec_ns")
                 if isinstance(ns, (int, float)):
                     ns_samples += 1
@@ -115,6 +121,225 @@ def micro_evidence(result_path: Path) -> tuple[str, str]:
     if mismatches == 0:
         return PARTIAL, prov + f" (missing exec_ns in {missing_ns} samples)"
     return PARTIAL, prov
+
+
+def median_runtime_ns(data: dict, runtime: str) -> dict[str, float]:
+    rows: dict[str, float] = {}
+    for bench in data.get("benchmarks") or []:
+        if not isinstance(bench, dict):
+            continue
+        for run in bench.get("runs") or []:
+            if not isinstance(run, dict) or run.get("runtime") != runtime:
+                continue
+            values = [
+                sample.get("exec_ns")
+                for sample in run.get("samples") or []
+                if isinstance(sample, dict)
+            ]
+            if values and all(isinstance(value, (int, float)) and value > 0 for value in values):
+                rows[bench["name"]] = statistics.median(values)
+            break
+    return rows
+
+
+def kop_applied_in_sample(sample: dict) -> int:
+    count = 0
+    for program in ((sample.get("rejit_result") or {}).get("per_program") or {}).values():
+        for result in program.get("passes") or []:
+            summary = result.get("bpfopt_summary") or {}
+            if summary.get("pass") == "kop":
+                count += int(summary.get("sites_applied") or 0)
+    return count
+
+
+def micro_claim_rows(root: Path) -> list[Row]:
+    """Calculate the paper's 27-case RQ1 ratios, separately from raw-file integrity."""
+    x86 = load_json(root / MICRO_RESULTS["RQ1 micro x86 (run)"] / "details/result.json")
+    stock = load_json(root / MICRO_RESULTS["RQ1 micro x86 (stock baseline)"] / "details/result.json")
+    arm = load_json(root / MICRO_RESULTS["RQ1 micro arm64"] / "details/result.json")
+    rows: list[Row] = []
+
+    if isinstance(x86, dict) and isinstance(stock, dict):
+        candidate = median_runtime_ns(x86, "kernel")
+        baseline = median_runtime_ns(stock, "kernel")
+        paper_cases = sorted((candidate.keys() & baseline.keys()) - {"simple", "simple_packet"})
+        ratios = [baseline[name] / candidate[name] for name in paper_cases]
+        if len(paper_cases) == 27 and ratios:
+            value = math.exp(sum(math.log(ratio) for ratio in ratios) / len(ratios))
+            status = PASS if f"{value:.3f}" == "1.242" else PARTIAL
+            rows.append(Row(
+                "RQ1 x86 paper 27-case speedup (1.242x)",
+                status,
+                f"median stock/candidate exec_ns, geomean={value:.6f}x over "
+                f"{len(paper_cases)} cases; excludes baseline-only simple and simple_packet; "
+                "source: two RQ1 x86 result.json files",
+            ))
+        else:
+            rows.append(Row("RQ1 x86 paper 27-case speedup (1.242x)", UNAVAILABLE,
+                            f"matched non-baseline cases={len(paper_cases)}, expected 27"))
+    else:
+        rows.append(Row("RQ1 x86 paper 27-case speedup (1.242x)", UNAVAILABLE,
+                        "RQ1 x86 candidate or stock result.json missing"))
+
+    if isinstance(arm, dict):
+        kernel = median_runtime_ns(arm, "kernel")
+        rejit = median_runtime_ns(arm, "kernel_rejit")
+        applied_names = []
+        for bench in arm.get("benchmarks") or []:
+            if not isinstance(bench, dict) or bench.get("name") not in kernel.keys() & rejit.keys():
+                continue
+            for run in bench.get("runs") or []:
+                if isinstance(run, dict) and run.get("runtime") == "kernel_rejit":
+                    counts = [kop_applied_in_sample(sample) for sample in run.get("samples") or []]
+                    if counts and statistics.median(counts) > 0:
+                        applied_names.append(bench["name"])
+                    break
+        ratios = [kernel[name] / rejit[name] for name in applied_names]
+        if len(applied_names) == 27 and ratios:
+            value = math.exp(sum(math.log(ratio) for ratio in ratios) / len(ratios))
+            status = PASS if f"{value:.3f}" == "1.222" else PARTIAL
+            rows.append(Row(
+                "RQ1 arm64 27 KOperation-bearing cases (1.222x)",
+                status,
+                f"median kernel/kernel_rejit exec_ns, geomean={value:.6f}x over "
+                f"{len(applied_names)} cases with median applied kop sites > 0; "
+                "source: RQ1 arm64 result.json",
+            ))
+        else:
+            rows.append(Row("RQ1 arm64 27 KOperation-bearing cases (1.222x)",
+                            UNAVAILABLE, f"KOperation-bearing cases={len(applied_names)}, expected 27"))
+    else:
+        rows.append(Row("RQ1 arm64 27 KOperation-bearing cases (1.222x)",
+                        UNAVAILABLE, "RQ1 arm64 result.json missing"))
+    return rows
+
+
+CILIUM_RQ2 = "corpus/results/x86_kvm_corpus_20260604_100557_313063"
+CILIUM_RQ4_ON = "corpus/results/x86_kvm_corpus_20260529_033517_489159"
+CILIUM_RQ4_OFF = "corpus/results/x86_kvm_corpus_20260529_040554_604387"
+PPS = re.compile(r"\n\s*(\d+)pps\s+[0-9]+Mb/sec .* errors: (\d+)")
+
+
+def cilium_app(
+    root: Path, run: str, *, passes: list[str] | None = None,
+    bpf_stats: bool | None = None, allow_suite_error: bool = False,
+    workload_seconds: float = 180.0,
+) -> dict | None:
+    path = root / run
+    metadata = load_json(path / "metadata.json") or {}
+    progress = load_json(path / "details/progress.json") or {}
+    app = load_json(path / "details/apps/cilium__agent.json")
+    allowed = {"completed", "error"} if allow_suite_error else {"completed"}
+    if (progress.get("status") not in allowed
+            or metadata.get("status") not in allowed
+            or metadata.get("run_type") != "x86_kvm_corpus"
+            or metadata.get("suite") != "corpus"
+            or metadata.get("samples") != 3
+            or metadata.get("workload_seconds") != workload_seconds
+            or (passes is not None and (metadata.get("config") or {}).get("enabled_passes") != passes)
+            or (bpf_stats is not None and metadata.get("bpf_stats") is not bpf_stats)
+            or not isinstance(app, dict)
+            or app.get("status") != "ok"
+            or app.get("error")):
+        return None
+    return app
+
+
+def workload_pps(workload: dict) -> float:
+    components = sum(workload_pps(c) for c in workload.get("components") or [])
+    text = "\n" + (workload.get("stdout") or "") + "\n" + (workload.get("stderr") or "")
+    return components + sum(float(match.group(1)) for match in PPS.finditer(text))
+
+
+def phase_pps(app: dict, phase: str) -> list[float]:
+    obj = app.get(phase) or {}
+    return [workload_pps(w) for w in obj.get("workloads") or []]
+
+
+def bpf_ns_per_run(app: dict, phase: str) -> float | None:
+    obj = app.get(phase) or {}
+    records = [
+        record for record in (obj.get("bpf") or {}).values()
+        if record.get("run_cnt_delta", 0) >= 100
+    ]
+    runs = sum(record.get("run_cnt_delta", 0) for record in records)
+    elapsed = sum(record.get("run_time_ns_delta", 0) for record in records)
+    return elapsed / runs if runs else None
+
+
+def cilium_claim_rows(root: Path) -> list[Row]:
+    """Derive selected RQ2/RQ4 Cilium claims from retained three-sample raw JSON."""
+    rows: list[Row] = []
+    rq2 = cilium_app(root, CILIUM_RQ2, passes=["kop"], bpf_stats=False)
+    baseline = phase_pps(rq2, "baseline") if rq2 else []
+    post = phase_pps(rq2, "post_rejit") if rq2 else []
+    if len(baseline) == len(post) == 3 and min(baseline + post) > 0:
+        ratio = statistics.median(post) / statistics.median(baseline)
+        rows.append(Row(
+            "RQ2 Cilium x86 throughput (1.074x)",
+            PASS if f"{ratio:.3f}" == "1.074" else PARTIAL,
+            f"post/baseline median pps={ratio:.6f}x, 3+3 samples; {CILIUM_RQ2}/details/apps/cilium__agent.json",
+        ))
+    else:
+        rows.append(Row("RQ2 Cilium x86 throughput (1.074x)", UNAVAILABLE,
+                        f"completed Cilium run with 3+3 positive pps samples missing: {CILIUM_RQ2}"))
+    rows.append(Row("RQ2 Cilium x86 applied sites (4086)", UNAVAILABLE,
+                    "original per-pass loadtime report is not retained; app JSON alone cannot prove site count"))
+
+    on = cilium_app(root, CILIUM_RQ4_ON, bpf_stats=True)
+    off = cilium_app(root, CILIUM_RQ4_OFF, bpf_stats=False)
+    on_meta = load_json(root / CILIUM_RQ4_ON / "metadata.json") or {}
+    off_meta = load_json(root / CILIUM_RQ4_OFF / "metadata.json") or {}
+    if (on_meta.get("config") or {}).get("enabled_passes") != (off_meta.get("config") or {}).get("enabled_passes"):
+        on = off = None
+    off_baseline = phase_pps(off, "baseline") if off else []
+    off_post = phase_pps(off, "post_rejit") if off else []
+    if len(off_baseline) == len(off_post) == 3 and min(off_baseline + off_post) > 0:
+        ratio = statistics.median(off_post) / statistics.median(off_baseline)
+        rows.append(Row(
+            "RQ4 Cilium native/eBPF throughput (2.358x)",
+            PASS if f"{ratio:.3f}" == "2.358" else PARTIAL,
+            f"native/eBPF median pps={ratio:.6f}x, 3+3 samples; {CILIUM_RQ4_OFF}/details/apps/cilium__agent.json",
+        ))
+    else:
+        rows.append(Row("RQ4 Cilium native/eBPF throughput (2.358x)", UNAVAILABLE,
+                        f"completed Cilium run with 3+3 positive pps samples missing: {CILIUM_RQ4_OFF}"))
+    ebpf_ns = bpf_ns_per_run(on, "baseline") if on else None
+    native_ns = bpf_ns_per_run(on, "post_rejit") if on else None
+    if ebpf_ns is not None and native_ns is not None:
+        rows.append(Row(
+            "RQ4 Cilium BPF cost (488.7 to 262.3 ns/run)",
+            PASS if f"{ebpf_ns:.1f}" == "488.7" and f"{native_ns:.1f}" == "262.3" else PARTIAL,
+            f"sum run_time_ns_delta / sum run_cnt_delta for records with >=100 runs: "
+            f"{ebpf_ns:.3f} to {native_ns:.3f} ns/run; {CILIUM_RQ4_ON}/details/apps/cilium__agent.json",
+        ))
+    else:
+        rows.append(Row("RQ4 Cilium BPF cost (488.7 to 262.3 ns/run)", UNAVAILABLE,
+                        f"retained >=100-run BPF records missing: {CILIUM_RQ4_ON}"))
+    rows.append(Row("RQ4 native loader counts (113/22/89)", UNAVAILABLE,
+                    "loader match/replacement raw logs are not retained in the selected Cilium JSON"))
+    full_run = "corpus/results/x86_kvm_corpus_20260605_145112_835705"
+    limited_run = "corpus/results/x86_kvm_corpus_20260605_160715_129437"
+    for label, run, policy, claimed in (
+        ("RQ3 Cilium full policy throughput (1.114x)", full_run, "kop_all_prefetch", "1.114"),
+        ("RQ3 Cilium no-bulk/no-prefetch throughput (0.999x)", limited_run,
+         "kop_all_no_bulk_no_prefetch", "0.999"),
+    ):
+        app = cilium_app(root, run, passes=[policy], bpf_stats=True,
+                         allow_suite_error=True, workload_seconds=30.0)
+        baseline = phase_pps(app, "baseline") if app else []
+        post = phase_pps(app, "post_rejit") if app else []
+        if len(baseline) == len(post) == 3 and min(baseline + post) > 0:
+            ratio = statistics.mean(post) / statistics.mean(baseline)
+            rows.append(Row(label, PASS if f"{ratio:.3f}" == claimed else PARTIAL,
+                            f"post/baseline mean pps={ratio:.6f}x, 3+3 Cilium samples; "
+                            f"{run}/details/apps/cilium__agent.json; full suite status=error"))
+        else:
+            rows.append(Row(label, UNAVAILABLE, f"verified Cilium samples missing: {run}"))
+    rows.append(Row("RQ3 prose: 3512 sites paired with 1.114x", UNAVAILABLE,
+                    "raw 1.114x is full policy, while no-bulk/no-prefetch is 0.999x; "
+                    "the per-pass site reports are not retained, so the prose pairing is unverified"))
+    return rows
 
 
 def file_sha256(path: Path) -> str:
@@ -255,6 +480,8 @@ def build_rows(root: Path) -> list[Row]:
     for label, rel in MICRO_RESULTS.items():
         st, prov = micro_evidence(root / rel / "details" / "result.json")
         rows.append(Row(label, st, prov))
+    rows.extend(micro_claim_rows(root))
+    rows.extend(cilium_claim_rows(root))
     rows.extend(corpus_evidence(
         root, COVERAGE_RUN, expected_apps=6, claim_label="6 apps"
     ))
@@ -282,6 +509,8 @@ def render(rows: list[Row], root: Path) -> None:
     print("PASS = evidence present and consistent; PARTIAL = evidence present but weaker")
     print("than the claim; UNAVAILABLE = regenerate using the PROVENANCE command.")
     print("This table is derived from the JSON files it names and never fabricates numbers.")
+    print("OVERALL AE EVIDENCE: " + ("INCOMPLETE" if any(r.status != PASS for r in rows)
+                                   else "all listed rows PASS; AEC badge decision remains external"))
 
 
 def self_test() -> int:

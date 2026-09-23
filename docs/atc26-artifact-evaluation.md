@@ -143,19 +143,47 @@ builds**, not by the measurement itself.
 
 ---
 
-## 5. Step 0 — checkout and submodules
+## 5. Step 0 — obtain and verify the artifact
+
+The stable archive homepage is [Zenodo concept DOI
+10.5281/zenodo.22907396](https://doi.org/10.5281/zenodo.22907396). It
+currently has a published `atc26-ae-1` version
+([version DOI 10.5281/zenodo.22907397](https://doi.org/10.5281/zenodo.22907397)).
+An `atc26-ae-2` version is being prepared; do not treat a draft as published
+evidence. Download the ZIP and its `.sha256` companion from the chosen published
+record. Compute the downloaded ZIP's SHA256 and compare it with that record's
+checksum before extraction. The `atc26-ae-2` companion `.sha256` file will use
+a portable basename and also supports `sha256sum -c`; the published
+`atc26-ae-1` companion contains the packager's absolute path, so its
+`sha256sum -c` command is not portable.
+
+```bash
+sha256sum atc26-ae-1.zip  # compare the digest with the selected Zenodo record
+mkdir bpf-ext-artifact
+unzip atc26-ae-1.zip -d bpf-ext-artifact
+cd bpf-ext-artifact
+python3 -m json.tool ARTIFACT_MANIFEST.json >/dev/null
+python3 docs/artifacts/render_claim_table.py .
+```
+
+The ZIP embeds the pinned source of every submodule required by the documented
+proof and benchmark paths. It deliberately has **no `.git` directory**; do not
+run `git checkout` or `git submodule update` inside it. The manifest records
+the superproject commit and direct/nested submodule pins. Check the package
+version and checksum before interpreting its evidence.
+
+For a live source checkout instead of the archival ZIP:
 
 ```bash
 git clone https://github.com/eunomia-bpf/bpf-benchmark.git
 cd bpf-benchmark
-git checkout master
 git submodule update --init --recursive
 ```
 
 The repository tracks submodules under `vendor/` (notably `vendor/linux-framework`
-for the kernel, `vendor/libbpf`, `vendor/llvmbpf`, and `llvm-backend/llvm`). The
-submodule commit pins are recorded in git, so `git submodule update` reproduces
-the tested revisions exactly.
+for the kernel, `vendor/libbpf`, `vendor/llvmbpf`, and `llvm-backend/llvm`).
+For a source checkout, use the commit in the archive manifest or an immutable
+release tag to match an archived version rather than using a moving branch.
 
 Install the Python dependency used by the harness. The two raw-data plotting
 scripts additionally need Matplotlib and NumPy:
@@ -375,8 +403,15 @@ The two raw-data scripts emit the PDFs referenced from
 `docs/paper/figures/sec-6-koperation-micro-rq1.tex` and
 `docs/paper/figures/sec-6-koperation-micro-rq3.tex`. They are **analysis-side**;
 per the repository rule, no aggregation lives in the measurement framework.
-The application case-study claims must instead be checked against corpus JSON
-and receipts; the renderer never treats the declarative plot as evidence.
+For RQ1, `docs/artifacts/render_claim_table.py` calculates the paper's x86
+27-case geomean from the two retained x86 JSONs by excluding the baseline-only
+`simple` and `simple_packet` cases (1.241736×, displayed as 1.242×). The
+same renderer calculates the ARM64 27-case KOperation-bearing geomean from the
+retained AWS JSON (1.222042×, displayed as 1.222×). The older plotting script
+currently includes all 29 x86 cases (1.215665×); do not substitute that
+all-case figure for the paper's 27-case claim. The application case-study
+claims must instead be checked against corpus JSON and receipts; the renderer
+never treats the declarative plot as evidence.
 
 ---
 
@@ -427,51 +462,35 @@ docs/tmp/20260906-*.md        # chronological engineering log with measurements
 
 ---
 
-## 12. Artifact status and remaining external action
+## 12. Artifact status and remaining action
 
-**Target: all three badges — Available, Functional, and Reproduced.**
+**Target: all three badges — Available, Functional, and Reproduced. A requested
+badge is not an awarded badge.** The following is the artifact author's
+evidence status, not an AEC decision.
 
-Satisfied by this repository:
+| Badge | Current evidence | Remaining acceptance work |
+|---|---|---|
+| Available | The public, immutable `atc26-ae-1` ZIP is deposited at [version DOI 10.5281/zenodo.22907397](https://doi.org/10.5281/zenodo.22907397); [concept DOI 10.5281/zenodo.22907396](https://doi.org/10.5281/zenodo.22907396) is the stable all-versions homepage. Repository-original material is MIT-licensed; third-party licenses and pins are in `THIRD_PARTY_NOTICES.md`. | The corrected `atc26-ae-2` draft must be packaged, independently checked and **published** before it can count as an available newer archive. Publishing a draft DOI alone does not publish its files. |
+| Functional | Component map, environment, dependencies, safety notes, no-VM formal path and a completed Katran KVM smoke are documented above. | Verify the new ZIP **after clean extraction** through the documented proof/build/smoke path; an archive self-test or a successful run in the authors' checkout alone is weaker evidence. |
+| Reproduced | The retained RQ1 JSONs reproduce 1.242× x86 and 1.222× ARM64 on the paper's specified 27-case subsets. The formal-check receipt and Katran smoke are hash-bound. | The retained six-app run is `error`: Tracee failed and only 5/6 workloads succeeded. RQ2–RQ4 need complete raw-to-paper mappings and evaluator-runnable result scripts in the archive. Existing result presence or six successful ReJIT statuses do not establish full workload success. |
 
-1. **License (Available).** ✅ `LICENSE` (MIT) is at the repository root, with the
-   third-party scope stated explicitly, and `THIRD_PARTY_NOTICES.md` lists the
-   exact pinned revision and license of every submodule and vendored
-   application. MIT permits comparison and extension, as the checklist requires.
-2. **Repository "read me" referencing the paper (Available).** ✅ This document,
-   linked from `README.md`.
-3. **Functional.** ✅ Components and their paper relation (§2), exact environment
-   (§3), dependencies (§3), resources per experiment type (§3), safety warnings
-   (§4), a no-VM minimal path (§6) and a KVM path (§7), expected outputs (§6),
-   idempotence and recovery (§8), and per-claim commands (§9).
-4. **Reproduced.** ✅ One command per experiment and a documented
-   results→claim renderer (§9 and `docs/artifacts/render_claim_table.py`), plus
-   honest status reporting for shipped data (§7).
+`docs/artifacts/render_claim_table.py` separates raw-file integrity, selected
+numeric claims, ReJIT coverage and full workload success. Its `PASS` is local to
+the named row; it is **not** a badge verdict. In particular, the current
+six-application full workload row is `PARTIAL`. The x86 micro dataset's 29
+available cases are not the paper's 27-case analysis population.
 
-Remaining **external** action (cannot be done from this repository):
+At least one author must be reachable during kick-the-tires (through
+2026-09-29). The `\acmDOI`/`\acmISBN` fields in `docs/paper/main.tex` are
+template placeholders and require the actual camera-ready identifiers.
 
-1. **Zenodo deposit and DOI (Available).** The "Available" badge requires a
-   public archive with irrevocable versioning and long-term storage. A GitHub
-   repository alone does **not** satisfy it. Build the archive with
-   `docs/artifacts/package-atc26.sh`, upload the resulting single ZIP to Zenodo,
-   and submit the DOI. The manifest and checksum are produced by that script.
-2. **HotCRP registration/submission** — intentionally not performed here.
-3. **Evaluator contact** — at least one author must be reachable during
-   kick-the-tires (through 2026-09-29).
-4. **ACM DOI/ISBN fields** in `docs/paper/main.tex` are template placeholders and
-   must be replaced with the real values at camera-ready.
-
-**Honest boundaries (do not overstate).** The paper-scale x86 Xeon and ARM64 AWS
-figures were **not** re-measured while preparing this artifact; the guide gives
-the exact commands and the raw-result mapping instead. The retained six-app preparation run
-`x86_kvm_corpus_20260921_211712_637406` has top-level status `error`
-because the Tracee workload launch failed; its hash-bound compact evidence
-supports rejit/KOperation *coverage* only. The separately retained fresh Katran
-smoke `x86_kvm_corpus_20260922_213414_889964` completed successfully and
-supports full workload success for that single app. Neither run replaces the
-paper-scale Xeon or AWS measurements.
-
-If the Zenodo deposit cannot be completed before the deadline, the defensible
-fallback per the AEC table is **Functional + Reproduced**.
+**Measurement boundary.** The paper-scale x86 Xeon and ARM64 AWS figures were
+not re-measured while preparing this package. The retained six-app preparation
+run `x86_kvm_corpus_20260921_211712_637406` has top-level status `error`; its
+hash-bound compact evidence supports ReJIT/KOperation *coverage* only. The
+separate Katran smoke `x86_kvm_corpus_20260922_213414_889964` completed and
+supports one successful workload. Neither substitutes for all six successful
+workloads or a matched paper-scale rerun.
 
 ---
 
