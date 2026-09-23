@@ -437,11 +437,20 @@ prose pairs 3512 sites with 1.114×, splicing in the no-bulk/no-prefetch
 policy's historical site count. The original per-pass reports are missing,
 so the site counts cannot be regenerated from the selected app JSON.
 
-For the paper's 62-case x86 object-load claim, a retained 63-case ReJIT run
-gives 0.995439×. Restricting it to the 62 benchmark names in an earlier
-retained run (the only extra name is `katran_like`) gives 0.995157×,
-conventionally rounded to 1.00×. The paper does not enumerate its 62 names
-and states 0.99×; the renderer therefore marks this claim `PARTIAL`.
+For the paper's 62-case x86 object-load claim, the two retained completed
+May 14 ReJIT runs each contain 63 cases. Restricting each to the exact 62
+benchmark names in the earlier April 29 run (the only extra name is
+`katran_like`) gives 0.995157× and 0.997839×, respectively. Both round to
+1.00× at two decimal places. The paper does not enumerate its 62 names and
+states 0.99×; no completed paired 62-case ReJIT run was found among the
+retained May/June x86 micro results. The renderer therefore marks this claim
+`PARTIAL`. This historical-name mapping is plausible, not proven to be the
+paper's exact population. A search across all current Git refs found no
+May/June `details/loadtime-reports`, `loadtime-plans`, or `shim-logs`
+files for the historical corpus runs; the original June 4 Cilium result
+commit contains only app, result, progress, and metadata JSON. The 4086
+site count remains a historical summary until the original per-pass raw log
+is recovered or the experiment is rerun with matched configuration.
 These are analysis-side computations. No aggregation lives in the
 measurement framework, and the declarative application plot is not evidence.
 

@@ -49,7 +49,8 @@ MICRO_RESULTS = {
     "RQ1 micro arm64": "micro/results/aws_arm64_micro_20260606_001225_821028",
     "Section 3 pure-bytecode x86": "micro/results/x86_kvm_micro_20260526_210952_650695",
     "Section 3 pure-bytecode arm64": "micro/results/aws_arm64_micro_20260606_063319_954947",
-    "RQ1 x86 historical load-time run": "micro/results/x86_kvm_micro_20260514_031744_210343",
+    "RQ1 x86 historical load-time run A": "micro/results/x86_kvm_micro_20260514_031744_210343",
+    "RQ1 x86 historical load-time run B": "micro/results/x86_kvm_micro_20260514_181806_133778",
     "RQ1 x86 historical 62-case population": "micro/results/x86_kvm_micro_20260429_035938_203074",
 }
 
@@ -313,35 +314,48 @@ def micro_claim_rows(root: Path) -> list[Row]:
     else:
         rows.append(Row("RQ1 arm64 generated code size (0.879x)", UNAVAILABLE,
                         "RQ1 arm64 result.json missing"))
-    load_rel = MICRO_RESULTS["RQ1 x86 historical load-time run"]
-    historical = load_json(root / load_rel / "details/result.json")
+    load_rels = [
+        MICRO_RESULTS["RQ1 x86 historical load-time run A"],
+        MICRO_RESULTS["RQ1 x86 historical load-time run B"],
+    ]
+    historical_runs = [load_json(root / rel / "details/result.json") for rel in load_rels]
     population_rel = MICRO_RESULTS["RQ1 x86 historical 62-case population"]
     population = load_json(root / population_rel / "details/result.json")
-    if isinstance(historical, dict) and isinstance(population, dict):
-        kernel_load = median_object_load_ns(historical, "kernel")
-        rejit_load = median_object_load_ns(historical, "kernel_rejit")
+    if all(isinstance(run, dict) for run in historical_runs) and isinstance(population, dict):
         population_names = {
             b["name"] for b in population.get("benchmarks") or []
             if isinstance(b, dict) and isinstance(b.get("name"), str)
         }
-        names = sorted(kernel_load.keys() & rejit_load.keys() & population_names)
-        if len(names) == 62:
-            value = math.exp(sum(math.log(rejit_load[n] / kernel_load[n]) for n in names) / len(names))
-            provenance_ok = micro_run_provenance_ok(root, load_rel, "x86_kvm_micro", "x86_64")
+        estimates = []
+        for rel, run in zip(load_rels, historical_runs):
+            kernel_load = median_object_load_ns(run, "kernel")
+            rejit_load = median_object_load_ns(run, "kernel_rejit")
+            names = sorted(kernel_load.keys() & rejit_load.keys() & population_names)
+            if len(names) != 62:
+                estimates = []
+                break
+            value = math.exp(sum(math.log(rejit_load[n] / kernel_load[n]) for n in names) / 62)
+            provenance_ok = micro_run_provenance_ok(root, rel, "x86_kvm_micro", "x86_64")
+            estimates.append((rel, value, provenance_ok))
+        if len(estimates) == 2:
+            detail = "; ".join(
+                f"{rel.rsplit('/', 1)[-1]}={value:.6f}x (rounds {value:.2f}x, "
+                f"provenance valid={provenance_ok})"
+                for rel, value, provenance_ok in estimates
+            )
             rows.append(Row(
                 "RQ1 x86 62-case object-load overhead (paper 0.99x)",
                 PARTIAL,
-                f"May14 ReJIT run restricted to Apr29 62-name set (excludes katran_like): {value:.6f}x over 62; "
-                f"rounds to {value:.2f}x, not paper 0.99x; "
-                f"run metadata/progress valid={provenance_ok}; "
-                f"{load_rel}/details/result.json; population={population_rel}/details/result.json",
+                f"May14 ReJIT runs restricted to Apr29 62-name set (excludes katran_like): "
+                f"{detail}; neither rounds to paper 0.99x; "
+                f"population={population_rel}/details/result.json",
             ))
         else:
             rows.append(Row("RQ1 x86 62-case object-load overhead (paper 0.99x)",
-                            UNAVAILABLE, f"historical Apr29-set matched cases={len(names)}, expected 62"))
+                            UNAVAILABLE, "historical Apr29-set matched cases are not 62 in both ReJIT runs"))
     else:
         rows.append(Row("RQ1 x86 62-case object-load overhead (paper 0.99x)",
-                        UNAVAILABLE, f"historical ReJIT or population result.json missing: {load_rel}, {population_rel}"))
+                        UNAVAILABLE, f"historical ReJIT or population result.json missing: {load_rels}, {population_rel}"))
     return rows
 
 

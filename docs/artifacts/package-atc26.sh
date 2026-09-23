@@ -123,6 +123,7 @@ RESULTS=(
     micro/results/x86_kvm_micro_20260526_210952_650695/details/result.json
     micro/results/aws_arm64_micro_20260606_063319_954947/details/result.json
     micro/results/x86_kvm_micro_20260514_031744_210343/details/result.json
+    micro/results/x86_kvm_micro_20260514_181806_133778/details/result.json
     micro/results/x86_kvm_micro_20260429_035938_203074/details/result.json
 )
 echo "embedding paper-result datasets:"
