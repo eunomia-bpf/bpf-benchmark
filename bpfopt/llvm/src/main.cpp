@@ -748,6 +748,25 @@ configure_llvm_kop_select(std::string_view pass,
 	return args;
 }
 
+// Generic (non-kop) passes run the same bpf->LLVM->bpf relift as kop passes,
+// but only the kop path parsed -bpf-stack-size.  At the 512-byte default LLVM
+// hard-errors ("Looks like the BPF stack limit is exceeded") when a program
+// whose frame is already near the BPF limit is relifted again, and it cannot
+// pack spills beyond -512.  Let LLVM address the frame with the same 4096-byte
+// budget the kop path uses; remap_out_of_range_stack_spills then squeezes every
+// out-of-range slot back into the free 512-byte BPF frame.
+void configure_llvm_generic_roundtrip()
+{
+	std::vector<std::string> args{ "bpfopt", "-bpf-stack-size=4096" };
+	std::vector<const char *> argv;
+	argv.reserve(args.size());
+	for (const auto &arg : args) {
+		argv.push_back(arg.c_str());
+	}
+	llvm::cl::ParseCommandLineOptions(static_cast<int>(argv.size()),
+					  argv.data(), "bpfopt LLVM roundtrip\n");
+}
+
 void apply_target_bytecode_policy_defaults(std::string_view pass,
 					   const KopTargetMap &kop_targets,
 					   KopTargetArch target_arch,
@@ -3321,7 +3340,11 @@ void run_pass(Cli &cli)
 		compact_unreachable_insns(output);
 	} else if (*cli.pass == "map_inline") {
 		output = run_map_inline_roundtrip(input, cli, inlined);
+
 	} else {
+		if (!kop_pass) {
+			configure_llvm_generic_roundtrip();
+		}
 		if (kop_pass && count_kop_calls(input) > 0) {
 			output = input;
 		} else {
