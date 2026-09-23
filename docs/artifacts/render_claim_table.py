@@ -152,6 +152,21 @@ def kop_applied_in_sample(sample: dict) -> int:
     return count
 
 
+def micro_run_provenance_ok(root: Path, rel: str, run_type: str, arch: str) -> bool:
+    d = root / rel
+    metadata = load_json(d / "metadata.json") or {}
+    progress = load_json(d / "details/progress.json") or {}
+    host = metadata.get("host") or {}
+    return (
+        metadata.get("status") == "completed"
+        and progress.get("status") == "completed"
+        and metadata.get("run_type") == run_type
+        and metadata.get("suite") == "micro_staged_codegen"
+        and arch in str(host.get("platform") or "")
+        and host.get("kernel_version") == "7.0.0-rc2+"
+    )
+
+
 def micro_claim_rows(root: Path) -> list[Row]:
     """Calculate the paper's 27-case RQ1 ratios, separately from raw-file integrity."""
     x86 = load_json(root / MICRO_RESULTS["RQ1 micro x86 (run)"] / "details/result.json")
@@ -166,13 +181,17 @@ def micro_claim_rows(root: Path) -> list[Row]:
         ratios = [baseline[name] / candidate[name] for name in paper_cases]
         if len(paper_cases) == 27 and ratios:
             value = math.exp(sum(math.log(ratio) for ratio in ratios) / len(ratios))
-            status = PASS if f"{value:.3f}" == "1.242" else PARTIAL
+            provenance_ok = all(micro_run_provenance_ok(root, rel, "x86_kvm_micro", "x86_64")
+                                for rel in (MICRO_RESULTS["RQ1 micro x86 (run)"],
+                                            MICRO_RESULTS["RQ1 micro x86 (stock baseline)"]))
+            status = PASS if f"{value:.3f}" == "1.242" and provenance_ok else PARTIAL
             rows.append(Row(
                 "RQ1 x86 paper 27-case speedup (1.242x)",
                 status,
                 f"median stock/candidate exec_ns, geomean={value:.6f}x over "
                 f"{len(paper_cases)} cases; excludes baseline-only simple and simple_packet; "
-                "source: two RQ1 x86 result.json files",
+                f"run metadata/progress valid={provenance_ok}; "
+                "historical git_sha=unknown; source: two RQ1 x86 result.json files",
             ))
         else:
             rows.append(Row("RQ1 x86 paper 27-case speedup (1.242x)", UNAVAILABLE,
@@ -197,13 +216,17 @@ def micro_claim_rows(root: Path) -> list[Row]:
         ratios = [kernel[name] / rejit[name] for name in applied_names]
         if len(applied_names) == 27 and ratios:
             value = math.exp(sum(math.log(ratio) for ratio in ratios) / len(ratios))
-            status = PASS if f"{value:.3f}" == "1.222" else PARTIAL
+            provenance_ok = micro_run_provenance_ok(
+                root, MICRO_RESULTS["RQ1 micro arm64"], "aws_arm64_micro", "aarch64"
+            )
+            status = PASS if f"{value:.3f}" == "1.222" and provenance_ok else PARTIAL
             rows.append(Row(
                 "RQ1 arm64 27 KOperation-bearing cases (1.222x)",
                 status,
                 f"median kernel/kernel_rejit exec_ns, geomean={value:.6f}x over "
                 f"{len(applied_names)} cases with median applied kop sites > 0; "
-                "source: RQ1 arm64 result.json",
+                f"run metadata/progress valid={provenance_ok}; "
+                "historical git_sha=unknown; source: RQ1 arm64 result.json",
             ))
         else:
             rows.append(Row("RQ1 arm64 27 KOperation-bearing cases (1.222x)",

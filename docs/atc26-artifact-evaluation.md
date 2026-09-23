@@ -158,9 +158,11 @@ a portable basename and also supports `sha256sum -c`; the published
 `sha256sum -c` command is not portable.
 
 ```bash
-sha256sum atc26-ae-1.zip  # compare the digest with the selected Zenodo record
+ZIP=atc26-ae-1.zip  # set to the ZIP from the selected *published* record; use ae-2 once published
+sha256sum "$ZIP"   # compare the digest with that Zenodo record
+# For ae-2 and later, also: sha256sum -c "$ZIP.sha256"
 mkdir bpf-ext-artifact
-unzip atc26-ae-1.zip -d bpf-ext-artifact
+unzip "$ZIP" -d bpf-ext-artifact
 cd bpf-ext-artifact
 python3 -m json.tool ARTIFACT_MANIFEST.json >/dev/null
 python3 docs/artifacts/render_claim_table.py .
