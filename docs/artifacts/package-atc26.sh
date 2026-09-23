@@ -13,12 +13,13 @@ done
 
 mkdir -p "$OUT_DIR"
 OUT_DIR="$(cd "$OUT_DIR" && pwd)"
-ZIP="$OUT_DIR/$VERSION.zip"
 STAGE="$(mktemp -d)"
+PACKAGE_DIR="$(mktemp -d)"
+ZIP="$PACKAGE_DIR/$VERSION.zip"
+FINAL_ZIP="$OUT_DIR/$VERSION.zip"
 VERIFY=""
-trap 'rm -rf "$STAGE" "${VERIFY:-}"' EXIT
+trap 'rm -rf "$STAGE" "$PACKAGE_DIR" "${VERIFY:-}"' EXIT
 COMMIT="$(git -C "$ROOT_DIR" rev-parse HEAD)"
-rm -f "$ZIP" "$ZIP.sha256"
 echo "packaging $VERSION at $COMMIT"
 
 # The parent repository is archived from HEAD, never from the working tree.
@@ -246,8 +247,8 @@ manifest = {
 PY
 
 ( cd "$STAGE" && zip -q -r -X "$ZIP" . )
-( cd "$OUT_DIR" && sha256sum "$(basename "$ZIP")" > "$(basename "$ZIP").sha256" )
-( cd "$OUT_DIR" && sha256sum -c "$(basename "$ZIP").sha256" )
+( cd "$PACKAGE_DIR" && sha256sum "$(basename "$ZIP")" > "$(basename "$ZIP").sha256" )
+( cd "$PACKAGE_DIR" && sha256sum -c "$(basename "$ZIP").sha256" )
 
 VERIFY="$(mktemp -d)"
 unzip -q "$ZIP" -d "$VERIFY"
@@ -297,5 +298,11 @@ python3 -m json.tool "$VERIFY/ARTIFACT_MANIFEST.json" >/dev/null
 python3 -m json.tool "$VERIFY/.zenodo.json" >/dev/null
 
 echo "clean-extraction verification OK"
-echo "wrote $ZIP"
-echo "wrote $ZIP.sha256"
+# SeaweedFS may remove an empty output directory during the long staging step.
+# Publish the checked archive only after it is complete, recreating that path.
+mkdir -p "$OUT_DIR"
+cp "$ZIP" "$FINAL_ZIP"
+cp "$ZIP.sha256" "$FINAL_ZIP.sha256"
+( cd "$OUT_DIR" && sha256sum -c "$(basename "$FINAL_ZIP").sha256" )
+echo "wrote $FINAL_ZIP"
+echo "wrote $FINAL_ZIP.sha256"

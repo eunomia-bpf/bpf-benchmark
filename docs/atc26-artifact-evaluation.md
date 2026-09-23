@@ -150,17 +150,17 @@ The stable archive homepage is [Zenodo concept DOI
 currently has a published `atc26-ae-1` version
 ([version DOI 10.5281/zenodo.22907397](https://doi.org/10.5281/zenodo.22907397)).
 An `atc26-ae-2` version is being prepared; do not treat a draft as published
-evidence. Download the ZIP and its `.sha256` companion from the chosen published
-record. Compute the downloaded ZIP's SHA256 and compare it with that record's
-checksum before extraction. The `atc26-ae-2` companion `.sha256` file will use
-a portable basename and also supports `sha256sum -c`; the published
-`atc26-ae-1` companion contains the packager's absolute path, so its
-`sha256sum -c` command is not portable.
+evidence. Download the ZIP from the selected **published** record. For the
+currently published `atc26-ae-1`, Zenodo lists only the ZIP and its MD5
+checksum; compare your downloaded file's MD5 with the checksum shown in that
+record. There is no public ae-1 `.sha256` companion. Once ae-2 is published,
+download both its ZIP and `.sha256` companion and run `sha256sum -c` in their
+directory. Do not use a draft's checksum as public verification.
 
 ```bash
-ZIP=atc26-ae-1.zip  # set to the ZIP from the selected *published* record; use ae-2 once published
-sha256sum "$ZIP"   # compare the digest with that Zenodo record
-# For ae-2 and later, also: sha256sum -c "$ZIP.sha256"
+ZIP=atc26-ae-1.zip  # select the ZIP from a published Zenodo record
+md5sum "$ZIP"       # ae-1: compare with the MD5 shown on its Zenodo Files page
+# Once ae-2 is published with both files: sha256sum -c "$ZIP.sha256"
 mkdir bpf-ext-artifact
 unzip "$ZIP" -d bpf-ext-artifact
 cd bpf-ext-artifact
