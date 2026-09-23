@@ -2,23 +2,24 @@
 
 This document is the **artifact "read me"** for the accepted ATC 2026 paper
 *"BPF-Ext: Safely Extending the eBPF Compilation Pipeline with Native
-Operations"* (`docs/paper/main.tex`). It is the chronological, evaluator-facing
-guide: follow the sections in order.
+Operations"*. The current supporting LaTeX source is `docs/paper/main.tex`;
+see the metadata caveat below. Follow this evaluator-facing guide in order.
 
-- Paper source: [`docs/paper/main.tex`](../docs/paper/main.tex)
+- Current supporting paper source: [`docs/paper/main.tex`](../docs/paper/main.tex)
 - Repository root: [`README.md`](../README.md)
 - Paper metadata authority: **accepted paper #1160** (see
   [Paper metadata](#1-paper-metadata)). No metadata is invented here.
 
-> **Status / honesty note.** The framework, optimizer, KOperation modules, the
-  Lean 4 proof suite, and the measurement harness are all in this repository and
-  are runnable. The **full paper-scale measurements require multi-hour KVM
-  builds and, for the ARM64 column, AWS instances**; the artifact therefore ships
-  (a) a fast **static + proof** path that needs no VM, (b) a **single-app KVM
-  smoke path**, and (c) the exact commands for the full experiments. Where a
-  number in the paper is not reproduced by a one-command path, the mapping table
-  in [Experiment → paper claim mapping](#9-reproducing-the-papers-experiments) says so
-  explicitly.
+> **Status / honesty note.** This repository contains the framework, optimizer,
+  KOperation modules, Lean 4 proofs, and measurement harness. The formal check
+  and a single-app Katran KVM smoke have completed; the retained six-app run
+  ended with one workload failure. Full paper-scale measurements require
+  multi-hour KVM builds and AWS instances for the ARM64 column. This guide gives
+  the no-VM proof path, the Katran smoke command, and available Make-backed
+  experiment commands. RQ3's two policy recipes have not been validated in a
+  fresh complete run, and RQ4 lacks a validated single-command recipe. The
+  [claim mapping](#9-reproducing-the-papers-experiments) marks the remaining
+  gaps explicitly.
 
 ---
 
