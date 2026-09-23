@@ -121,6 +121,8 @@ RESULTS=(
     micro/results/aws_arm64_micro_20260606_001225_821028/details/result.json
     micro/results/x86_kvm_micro_20260526_210952_650695/details/result.json
     micro/results/aws_arm64_micro_20260606_063319_954947/details/result.json
+    micro/results/x86_kvm_micro_20260514_031744_210343/details/result.json
+    micro/results/x86_kvm_micro_20260429_035938_203074/details/result.json
 )
 echo "embedding paper-result datasets:"
 for rel in "${RESULTS[@]}"; do
@@ -166,7 +168,9 @@ This is the single archival ZIP for accepted ATC 2026 paper #1160,
 Start with [docs/atc26-artifact-evaluation.md](docs/atc26-artifact-evaluation.md).
 The archive contains the exact source trees needed by the documented proof,
 microbenchmark, and six-application KVM paths, plus the five raw paper-result
-JSON datasets read by the included plotting scripts, plus selected Cilium
+JSON datasets read by the included plotting scripts, historical load-time and 62-name population
+JSON datasets whose pairing remains weaker than the paper's 0.99x claim,
+plus selected Cilium
 RQ2/RQ4 raw app records and run-status provenance read by the claim renderer.
 Compact retained evidence
 records the complete formal check, the six-application ReJIT coverage run, and

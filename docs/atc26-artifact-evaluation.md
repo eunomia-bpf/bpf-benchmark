@@ -378,11 +378,11 @@ Make-backed; do not call suite modules or binaries directly.**
 |---|---|---|---|---|
 | RQ1 x86 | micro speedup/geomean, code-size shrink | `make micro SAMPLES=3 WARMUPS=1 INNER_REPEAT=100000` | `micro/results/` | Yes (x86, on a KVM host) |
 | RQ1 arm64 | ARM64 micro speedup | `PLATFORM=aws ARCH=arm64 make micro` | `micro/results/` | Yes (needs AWS) |
-| RQ1 overhead | `object_load_ns` ratio | included in `make micro` | `micro/results/` | Yes |
+| RQ1 overhead | `object_load_ns` ratio | included in `make micro` | `micro/results/` | Command path yes; retained 62-case claim `PARTIAL` |
 | RQ2 Cilium x86 | 1.074× datapath throughput, 4086 sites | `BPFREJIT_CORPUS_APPS=cilium/agent make corpus` | `corpus/results/` | Path yes; exact number is a full-scale run |
 | RQ2 Katran arm64 | 1.073× throughput, 21 sites | `PLATFORM=aws ARCH=arm64 BPFREJIT_CORPUS_APPS=katran make corpus` | `corpus/results/` | Yes (needs AWS) |
-| RQ3 policy | site-count vs profitability | per-app pass policy via `BPFREJIT_BENCH_PASSES` + `runner/config/passes/` | `corpus/results/` | Path yes; the two policy points are configured runs |
-| RQ4 native bound | 2.358×, 488.7→262.3 ns/run | native-replacement configuration | `corpus/results/` | Configuration-dependent; see the paper's setup text |
+| RQ3 policy | site-count vs profitability | per-app pass policy via `BPFREJIT_BENCH_PASSES` + `runner/config/passes/` | `corpus/results/` | `PARTIAL`: throughput raw retained, per-pass site reports missing and accepted prose pairs distinct policies |
+| RQ4 native bound | 2.358×, 488.7→262.3 ns/run | native-replacement configuration | `corpus/results/` | Selected metrics derive from retained Cilium JSON; 113/22/89 loader counts unavailable |
 | Correctness | "zero correctness mismatches" | printed by `make micro` / `make test` | suite output | Yes |
 | Proofs | "emit computes the same result as its proof sequence" | `make -C native-sim/formal check` | stdout | **Yes** |
 
@@ -405,22 +405,41 @@ The two raw-data scripts emit the PDFs referenced from
 `docs/paper/figures/sec-6-koperation-micro-rq1.tex` and
 `docs/paper/figures/sec-6-koperation-micro-rq3.tex`. They are **analysis-side**;
 per the repository rule, no aggregation lives in the measurement framework.
-For RQ1, `docs/artifacts/render_claim_table.py` calculates the paper's x86
-27-case geomean from the two retained x86 JSONs by excluding the baseline-only
-`simple` and `simple_packet` cases (1.241736×, displayed as 1.242×). The
-same renderer calculates the ARM64 27-case KOperation-bearing geomean from the
-retained AWS JSON (1.222042×, displayed as 1.222×). The older plotting script
-currently includes all 29 x86 cases (1.215665×); do not substitute that
-all-case figure for the paper's 27-case claim. The application case-study
-claims must instead be checked against corpus JSON and receipts; the renderer
-never treats the declarative plot as evidence.
+For RQ1, `docs/artifacts/render_claim_table.py` calculates the accepted
+paper's x86 27-case execution geomean from the retained x86 pair, excluding
+the baseline-only `simple` and `simple_packet` cases (1.241736×, displayed
+as 1.242×). It derives ARM64's 27 KOperation-bearing execution cases as
+1.222042× (displayed as 1.222×). Generated native-code size uses **all 29**
+cases: 0.771807× x86 and 0.879116× ARM64, displayed as 0.772× and
+0.879×. The older plotting script includes all 29 x86 cases for execution
+time (1.215665×); that is a different population from the paper's 27 cases.
+
+The selected Cilium corpus JSON yields RQ2 throughput 1.074262× and RQ4
+native/eBPF throughput 2.357974× and BPF cost 488.676→262.298 ns/run.
+Their historical per-pass site and native-loader logs are missing, so the
+4086-site and 113/22/89-loader counts are **not** independently reproduced.
+The RQ3 full-policy Cilium app yields 1.114172×, while the
+no-bulk/no-prefetch app yields 0.999373×. The paper's table pairs the full
+policy with 4697 sites and 1.114×, matching the historical summary; its
+prose pairs 3512 sites with 1.114×, splicing in the no-bulk/no-prefetch
+policy's historical site count. The original per-pass reports are missing,
+so the site counts cannot be regenerated from the selected app JSON.
+
+For the paper's 62-case x86 object-load claim, a retained 63-case ReJIT run
+gives 0.995439×. Restricting it to the 62 benchmark names in an earlier
+retained run (the only extra name is `katran_like`) gives 0.995157×,
+conventionally rounded to 1.00×. The paper does not enumerate its 62 names
+and states 0.99×; the renderer therefore marks this claim `PARTIAL`.
+These are analysis-side computations. No aggregation lives in the
+measurement framework, and the declarative application plot is not evidence.
 
 ---
 
 ## 10. Known limitations and expected failures
 
-These are real and are documented here rather than hidden; none of them is an
-artifact defect you need to work around.
+These are real limitations and failures. Some currently block a complete
+Functional or Reproduced evaluation, so check each run's status rather than
+assuming a command or retained directory succeeded.
 
 1. **Some programs cannot be lifted within the 512-byte BPF frame.** The LLVM
    roundtrip that the optimizer uses re-lays out the stack and inflates the frame
@@ -432,8 +451,8 @@ artifact defect you need to work around.
 2. **`tracee/monitor` may report an app-level error.** The shim returns
    `errno=EINVAL` for an application's own `BPF_PROG_LOAD` when an optimizer step
    fails (deliberate fail-fast policy), and some applications treat that as
-   fatal. This is an application-survival effect, not a measurement gate; the
-   per-program reports are still recorded.
+   fatal. This is an application-survival failure and a full-corpus measurement
+   blocker; the per-program reports alone do not establish a successful run.
 3. **`branch_flip`** is production code but is intentionally **not** in the
    default benchmark policy; it requires real per-site PMU profile input from the
    external profiling toolchain.
@@ -474,7 +493,7 @@ evidence status, not an AEC decision.
 |---|---|---|
 | Available | The public, immutable `atc26-ae-1` ZIP is deposited at [version DOI 10.5281/zenodo.22907397](https://doi.org/10.5281/zenodo.22907397); [concept DOI 10.5281/zenodo.22907396](https://doi.org/10.5281/zenodo.22907396) is the stable all-versions homepage. Repository-original material is MIT-licensed; third-party licenses and pins are in `THIRD_PARTY_NOTICES.md`. | The corrected `atc26-ae-2` draft must be packaged, independently checked and **published** before it can count as an available newer archive. Publishing a draft DOI alone does not publish its files. |
 | Functional | Component map, environment, dependencies, safety notes, no-VM formal path and a completed Katran KVM smoke are documented above. | Verify the new ZIP **after clean extraction** through the documented proof/build/smoke path; an archive self-test or a successful run in the authors' checkout alone is weaker evidence. |
-| Reproduced | The retained RQ1 JSONs reproduce 1.242× x86 and 1.222× ARM64 on the paper's specified 27-case subsets. The formal-check receipt and Katran smoke are hash-bound. | The retained six-app run is `error`: Tracee failed and only 5/6 workloads succeeded. RQ2–RQ4 need complete raw-to-paper mappings and evaluator-runnable result scripts in the archive. Existing result presence or six successful ReJIT statuses do not establish full workload success. |
+| Reproduced | The retained RQ1 data derive 1.242×/1.222× speedup on the respective 27-case subsets and 0.772×/0.879× code size on all 29 cases. Selected raw Cilium app JSON derives RQ2 throughput 1.074× and RQ4 throughput 2.358× and 488.7→262.3 ns/run. The formal and Katran receipts are hash-bound. | RQ1's 62-case 0.99× object-load claim is `PARTIAL`; RQ2's 4086 sites, RQ3's accepted-prose 3512-sites/1.114× pairing, and RQ4's 113/22/89 counts lack independent raw derivations. The six-app run is `error` with only 5/6 successful workloads. Row-level PASS is not a full badge verdict. |
 
 `docs/artifacts/render_claim_table.py` separates raw-file integrity, selected
 numeric claims, ReJIT coverage and full workload success. Its `PASS` is local to

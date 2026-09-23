@@ -47,8 +47,10 @@ MICRO_RESULTS = {
     "RQ1 micro x86 (run)": "micro/results/x86_kvm_micro_20260519_114214_364050",
     "RQ1 micro x86 (stock baseline)": "micro/results/x86_kvm_micro_20260526_210351_224315",
     "RQ1 micro arm64": "micro/results/aws_arm64_micro_20260606_001225_821028",
-    "RQ3 micro x86 (pure bytecode)": "micro/results/x86_kvm_micro_20260526_210952_650695",
-    "RQ3 micro arm64 (pure bytecode)": "micro/results/aws_arm64_micro_20260606_063319_954947",
+    "Section 3 pure-bytecode x86": "micro/results/x86_kvm_micro_20260526_210952_650695",
+    "Section 3 pure-bytecode arm64": "micro/results/aws_arm64_micro_20260606_063319_954947",
+    "RQ1 x86 historical load-time run": "micro/results/x86_kvm_micro_20260514_031744_210343",
+    "RQ1 x86 historical 62-case population": "micro/results/x86_kvm_micro_20260429_035938_203074",
 }
 
 COVERAGE_RUN = "docs/artifacts/evidence/kvm-six-app-coverage"
@@ -142,6 +144,44 @@ def median_runtime_ns(data: dict, runtime: str) -> dict[str, float]:
     return rows
 
 
+def median_native_bytes(data: dict, runtime: str) -> dict[str, float]:
+    rows: dict[str, float] = {}
+    for bench in data.get("benchmarks") or []:
+        if not isinstance(bench, dict):
+            continue
+        for run in bench.get("runs") or []:
+            if not isinstance(run, dict) or run.get("runtime") != runtime:
+                continue
+            values = [
+                (sample.get("code_size") or {}).get("native_code_bytes")
+                for sample in run.get("samples") or []
+                if isinstance(sample, dict)
+            ]
+            if values and all(isinstance(v, (int, float)) and v > 0 for v in values):
+                rows[bench["name"]] = statistics.median(values)
+            break
+    return rows
+
+
+def median_object_load_ns(data: dict, runtime: str) -> dict[str, float]:
+    rows: dict[str, float] = {}
+    for bench in data.get("benchmarks") or []:
+        if not isinstance(bench, dict):
+            continue
+        for run in bench.get("runs") or []:
+            if not isinstance(run, dict) or run.get("runtime") != runtime:
+                continue
+            values = [
+                (sample.get("phases_ns") or {}).get("object_load_ns")
+                for sample in run.get("samples") or []
+                if isinstance(sample, dict)
+            ]
+            if values and all(isinstance(v, (int, float)) and v > 0 for v in values):
+                rows[bench["name"]] = statistics.median(values)
+            break
+    return rows
+
+
 def kop_applied_in_sample(sample: dict) -> int:
     count = 0
     for program in ((sample.get("rejit_result") or {}).get("per_program") or {}).values():
@@ -200,6 +240,26 @@ def micro_claim_rows(root: Path) -> list[Row]:
         rows.append(Row("RQ1 x86 paper 27-case speedup (1.242x)", UNAVAILABLE,
                         "RQ1 x86 candidate or stock result.json missing"))
 
+    if isinstance(x86, dict) and isinstance(stock, dict):
+        candidate_bytes = median_native_bytes(x86, "kernel")
+        stock_bytes = median_native_bytes(stock, "kernel")
+        names = sorted(candidate_bytes.keys() & stock_bytes.keys())
+        if len(names) == 29:
+            value = math.exp(sum(math.log(candidate_bytes[n] / stock_bytes[n]) for n in names) / len(names))
+            provenance_ok = all(micro_run_provenance_ok(root, rel, "x86_kvm_micro", "x86_64")
+                                for rel in (MICRO_RESULTS["RQ1 micro x86 (run)"],
+                                            MICRO_RESULTS["RQ1 micro x86 (stock baseline)"]))
+            rows.append(Row("RQ1 x86 generated code size (0.772x)",
+                            PASS if f"{value:.3f}" == "0.772" and provenance_ok else PARTIAL,
+                            f"geomean candidate/stock median native_code_bytes={value:.6f}x "
+                            f"over {len(names)} cases; run metadata/progress valid={provenance_ok}"))
+        else:
+            rows.append(Row("RQ1 x86 generated code size (0.772x)", UNAVAILABLE,
+                            f"matched code-size cases={len(names)}, expected 29"))
+    else:
+        rows.append(Row("RQ1 x86 generated code size (0.772x)", UNAVAILABLE,
+                        "RQ1 x86 candidate or stock result.json missing"))
+
     if isinstance(arm, dict):
         kernel = median_runtime_ns(arm, "kernel")
         rejit = median_runtime_ns(arm, "kernel_rejit")
@@ -234,6 +294,54 @@ def micro_claim_rows(root: Path) -> list[Row]:
     else:
         rows.append(Row("RQ1 arm64 27 KOperation-bearing cases (1.222x)",
                         UNAVAILABLE, "RQ1 arm64 result.json missing"))
+    if isinstance(arm, dict):
+        kernel_bytes = median_native_bytes(arm, "kernel")
+        rejit_bytes = median_native_bytes(arm, "kernel_rejit")
+        names = sorted(kernel_bytes.keys() & rejit_bytes.keys())
+        if len(names) == 29:
+            value = math.exp(sum(math.log(rejit_bytes[n] / kernel_bytes[n]) for n in names) / len(names))
+            provenance_ok = micro_run_provenance_ok(
+                root, MICRO_RESULTS["RQ1 micro arm64"], "aws_arm64_micro", "aarch64"
+            )
+            rows.append(Row("RQ1 arm64 generated code size (0.879x)",
+                            PASS if f"{value:.3f}" == "0.879" and provenance_ok else PARTIAL,
+                            f"geomean kernel_rejit/kernel median native_code_bytes={value:.6f}x "
+                            f"over {len(names)} cases; run metadata/progress valid={provenance_ok}"))
+        else:
+            rows.append(Row("RQ1 arm64 generated code size (0.879x)", UNAVAILABLE,
+                            f"matched code-size cases={len(names)}, expected 29"))
+    else:
+        rows.append(Row("RQ1 arm64 generated code size (0.879x)", UNAVAILABLE,
+                        "RQ1 arm64 result.json missing"))
+    load_rel = MICRO_RESULTS["RQ1 x86 historical load-time run"]
+    historical = load_json(root / load_rel / "details/result.json")
+    population_rel = MICRO_RESULTS["RQ1 x86 historical 62-case population"]
+    population = load_json(root / population_rel / "details/result.json")
+    if isinstance(historical, dict) and isinstance(population, dict):
+        kernel_load = median_object_load_ns(historical, "kernel")
+        rejit_load = median_object_load_ns(historical, "kernel_rejit")
+        population_names = {
+            b["name"] for b in population.get("benchmarks") or []
+            if isinstance(b, dict) and isinstance(b.get("name"), str)
+        }
+        names = sorted(kernel_load.keys() & rejit_load.keys() & population_names)
+        if len(names) == 62:
+            value = math.exp(sum(math.log(rejit_load[n] / kernel_load[n]) for n in names) / len(names))
+            provenance_ok = micro_run_provenance_ok(root, load_rel, "x86_kvm_micro", "x86_64")
+            rows.append(Row(
+                "RQ1 x86 62-case object-load overhead (paper 0.99x)",
+                PARTIAL,
+                f"May14 ReJIT run restricted to Apr29 62-name set (excludes katran_like): {value:.6f}x over 62; "
+                f"rounds to {value:.2f}x, not paper 0.99x; "
+                f"run metadata/progress valid={provenance_ok}; "
+                f"{load_rel}/details/result.json; population={population_rel}/details/result.json",
+            ))
+        else:
+            rows.append(Row("RQ1 x86 62-case object-load overhead (paper 0.99x)",
+                            UNAVAILABLE, f"historical Apr29-set matched cases={len(names)}, expected 62"))
+    else:
+        rows.append(Row("RQ1 x86 62-case object-load overhead (paper 0.99x)",
+                        UNAVAILABLE, f"historical ReJIT or population result.json missing: {load_rel}, {population_rel}"))
     return rows
 
 
