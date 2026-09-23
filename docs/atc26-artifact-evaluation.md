@@ -275,17 +275,19 @@ numbers are not claimed to have been re-measured here.
 ## 7. Step 2 — KVM / full validation, then the single-app smoke path
 
 Full validation requires the runtime image and a KVM-capable host. Check the
-Rust toolchain before the first image build. The supplied
-`.devcontainer/Dockerfile` installs Rust under `/usr/local` and sets these
-variables; some existing Coder login shells omit them even though that
-toolchain is installed. In such a shell, use the installed paths shown below
-rather than downloading a second toolchain. On a different host, use that
-host's working Rust installation instead.
+Rust and Go toolchains before the first image build. The supplied
+`.devcontainer/Dockerfile` installs both under `/usr/local` and sets these
+variables and paths; some existing Coder login shells omit them even though
+the toolchains are installed. In such a shell, use the installed paths shown
+below rather than downloading a second toolchain. On a different host, use
+that host's working Rust and Go installations instead.
 
 ```bash
-# Existing Coder shell using the supplied image (needed if cargo reports no default):
+# Existing Coder shell using the supplied image:
 export RUSTUP_HOME=/usr/local/rustup CARGO_HOME=/usr/local/cargo
+export PATH="/usr/local/go/bin:/usr/local/cargo/bin:$PATH"
 cargo --version
+go version
 # Full Make-backed test validation (builds the runtime image; requires KVM).
 make check
 ```
