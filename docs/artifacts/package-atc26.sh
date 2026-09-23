@@ -36,6 +36,9 @@ git -C "$ROOT_DIR" archive --format=tar "$COMMIT" -- . \
     ':(exclude)docs/kprog-simulator-in-ebpf' \
     ':(exclude)docs/speculative-optimization' \
     ':(exclude)docs/paper' \
+    ':(exclude).agents' \
+    ':(exclude).codex' \
+    ':(exclude).claude' \
     ':(exclude)vendor/academic-writing-skills' \
     ':(exclude)vendor/libbpf' \
     ':(exclude)vendor/linux-framework' \
@@ -162,6 +165,36 @@ for run in "${CORPUS_RUNS[@]}"; do
     done
 done
 
+# docs/tmp holds the engineering log and the analysis scripts several shipped
+# documents cite, but the bulk result trees under it are excluded above.
+# Re-add only the cited files so no shipped reference dangles.
+CITED_DOCS=(
+    docs/tmp/20260906-bpf-development-todo.md
+    docs/tmp/arm64_kop_micro_20260606_summary.md
+    docs/tmp/kop_all_force_eval_20260603.py
+    docs/tmp/kop_arm64_eval_20260605.py
+    docs/tmp/kop_arm64_eval_20260605_summary.md
+    docs/tmp/kop_eval_20260602.py
+    docs/tmp/kop_eval_20260604.py
+    docs/tmp/kop_eval_20260604_summary.md
+    docs/tmp/micro-bench-status-20260520-archive.md
+    docs/tmp/micro_characterization_20260606_summary.md
+    docs/tmp/native_eval_20260529.py
+    docs/tmp/native_eval_20260614.py
+    docs/tmp/native_eval_20260614_summary.md
+    docs/tmp/plot_arm64_kop_micro_20260605.py
+    docs/tmp/plot_arm64_kop_micro_20260606.py
+    docs/tmp/plot_kop_micro_20260527.py
+    docs/tmp/plot_micro_characterization_20260606.py
+    docs/tmp/q5_widemem_kernel_panic_20260507.md
+)
+for path in "${CITED_DOCS[@]}"; do
+    git -C "$ROOT_DIR" ls-tree "$COMMIT" -- "$path" | grep -q . || {
+        echo "cited doc missing from commit: $path" >&2; exit 1; }
+    mkdir -p "$STAGE/$(dirname "$path")"
+    git -C "$ROOT_DIR" show "$COMMIT:$path" > "$STAGE/$path"
+done
+
 cat > "$STAGE/README-ARTIFACT.md" <<EOF
 # BPF-Ext ATC 2026 artifact $VERSION
 
@@ -237,6 +270,8 @@ manifest = {
         'docs/artifacts/evidence/formal-check.json',
         'docs/artifacts/evidence/formal-check.log',
         'docs/artifacts/evidence/kvm-six-app-coverage/receipt.json',
+        'docs/artifacts/evidence/kvm-six-app-success/receipt.json',
+        'docs/artifacts/evidence/kvm-six-app-success/make-corpus.log',
         'docs/artifacts/evidence/kvm-katran-smoke/receipt.json',
         'docs/artifacts/evidence/kvm-katran-smoke/make-corpus.log',
     ],
@@ -274,6 +309,10 @@ required=(
     docs/artifacts/evidence/kvm-six-app-coverage/receipt.json
     docs/artifacts/evidence/kvm-six-app-coverage/details/progress.json
     docs/artifacts/evidence/kvm-six-app-coverage/details/apps/tracee__monitor.json
+    docs/artifacts/evidence/kvm-six-app-success/receipt.json
+    docs/artifacts/evidence/kvm-six-app-success/make-corpus.log
+    docs/artifacts/evidence/kvm-six-app-success/details/progress.json
+    docs/artifacts/evidence/kvm-six-app-success/details/apps/tracee__monitor.json
     docs/artifacts/evidence/kvm-katran-smoke/receipt.json
     docs/artifacts/evidence/kvm-katran-smoke/make-corpus.log
     docs/artifacts/evidence/kvm-katran-smoke/details/progress.json

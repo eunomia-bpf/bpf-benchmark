@@ -4,6 +4,41 @@ All notable changes to this artifact are recorded here. Versions are marked in
 git; the archival release for artifact evaluation is tagged
 `atc26-ae-<version>`.
 
+## atc26-ae-2 (unreleased)
+
+Artifact-evaluation update for the accepted ATC 2026 paper **"BPF-Ext: Safely
+Extending the eBPF Compilation Pipeline with Native Operations"** (accepted
+paper #1160). Supersedes `atc26-ae-1`; it must be published as a new immutable
+Zenodo version before it counts as an available archive.
+
+Optimizer fixes (both in `bpfopt/llvm/src/main.cpp`):
+
+- Out-of-range stack-slot remap at the widest width (`1df5b1369`).
+- Give the generic (non-`kop`) LLVM roundtrip the same `-bpf-stack-size=4096`
+budget that `kop` already used (`42cceb67e`), so the remapper can squeeze the
+relaid-out stack back into the 512-byte BPF frame. This fixed the real failure
+in the previous six-app run: `const_prop` step failure on the Tracee program
+`trace_security_`.
+
+Measured on the preparation machine (raw counters only; not a claim that the
+paper's Xeon/AWS numbers were re-measured):
+
+- Full six-application default corpus run
+  `corpus/results/x86_kvm_corpus_20260923_114624_121697` with
+  `SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=7200 make corpus`: exit 0 in 1,162
+  seconds, suite status `completed`, all six apps `status: ok` and
+  `rejit_result.status: ok`. Retained hash-bound at
+  `docs/artifacts/evidence/kvm-six-app-success/`.
+
+Added for artifact evaluation:
+
+- `docs/artifacts/evidence/kvm-six-app-success/` -- hash-bound receipt, command,
+  normalized `make corpus` log, and every retained JSON for the fresh complete
+  six-app run. `docs/artifacts/render_claim_table.py` derives the
+  "six-app full workload success" row from these raw files.
+- Evaluator-guide and package updates for the above; the package's clean
+  extraction still runs `make lint`, the renderer self-test, and the claim table.
+
 ## atc26-ae-1 (2026-09-22)
 
 Artifact-evaluation release for the accepted ATC 2026 paper

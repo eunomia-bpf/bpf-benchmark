@@ -11,13 +11,17 @@ see the metadata caveat below. Follow this evaluator-facing guide in order.
   [Paper metadata](#1-paper-metadata)). No metadata is invented here.
 
 > **Status / honesty note.** This repository contains the framework, optimizer,
-  KOperation modules, Lean 4 proofs, and measurement harness. The formal check
-  and a single-app Katran KVM smoke have completed; the retained six-app run
-  ended with one workload failure. Full paper-scale measurements require
+  KOperation modules, Lean 4 proofs, and measurement harness. The formal check,
+  a single-app Katran KVM smoke, and a fresh full six-application corpus run
+  have completed: the six-app run `x86_kvm_corpus_20260923_114624_121697`
+  finished with suite status `completed` and all six workloads `ok`. An earlier
+  retained six-app preparation run ended with one workload failure and is kept
+  as the honest negative record. Full paper-scale measurements require
   multi-hour KVM builds and AWS instances for the ARM64 column. This guide gives
-  the no-VM proof path, the Katran smoke command, and available Make-backed
-  experiment commands. RQ3's two policy recipes have not been validated in a
-  fresh complete run, and RQ4 lacks a validated single-command recipe. The
+  the no-VM proof path, the Katran smoke command, the six-application command,
+  and available Make-backed experiment commands. RQ3's two policy recipes have
+  not been validated in a fresh complete run, and RQ4 lacks a validated
+  single-command recipe. The
   [claim mapping](#9-reproducing-the-papers-experiments) marks the remaining
   gaps explicitly.
 
@@ -312,6 +316,19 @@ calls through the injected shim, runs the configured `bpfopt` pass chain
 through the application's normal stock-kernel `BPF_PROG_LOAD` path, and measures
 the workload in both phases.
 
+To measure **all six** applications to a terminal success, drop the
+`BPFREJIT_CORPUS_APPS` subset and keep the same single-sample, 10-second
+configuration:
+
+```bash
+SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=7200 make corpus
+```
+
+A fresh run of this exact command completed on 2026-09-23 in 1,162 seconds with
+suite status `completed` and all six applications `ok`; its retained,
+hash-bound evidence is `docs/artifacts/evidence/kvm-six-app-success/`.
+
+
 ### Where results land
 
 ```
@@ -348,6 +365,7 @@ status**:
 |---|---|---|---|
 | `docs/artifacts/evidence/kvm-six-app-coverage/` (source run `x86_kvm_corpus_20260921_211712_637406`) | `error` | 5/6 apps `ok`; `tracee/monitor` `error` | **Tracked compact evidence.** Supports *rejit/KOperation coverage*: all six retained app records report `rejit_result.status: ok`. Does **not** support a claim of full workload success, because the Tracee workload launch failed. `receipt.json` binds every retained JSON by SHA256 and states that the original shell command was not retained. |
 | `docs/artifacts/evidence/kvm-katran-smoke/` (source run `x86_kvm_corpus_20260922_213414_889964`) | `completed` | Katran `status: ok`; `rejit_result.status: ok` | **Fresh tracked KVM smoke.** The exact command exited 0 after 5,946 seconds. `receipt.json` binds the command, source commit, log, and retained JSON files by SHA256. Supports both Katran rejit/KOperation coverage and a complete successful single-app workload run. |
+| `docs/artifacts/evidence/kvm-six-app-success/` (source run `x86_kvm_corpus_20260923_114624_121697`) | `completed` | all six apps `ok`; all six `rejit_result.status: ok` | **Fresh tracked full six-application corpus run.** The exact command `SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=7200 make corpus` exited 0 after 1,162 seconds. `receipt.json` binds the command, source commit, normalized log, and every retained JSON by SHA256. Supports six successful workloads and full ReJIT/KOperation coverage under the default `full-x86` policy. It is a single-sample 10 s run, not a paper-scale Xeon/AWS rerun. |
 | `corpus/results/x86_kvm_corpus_20260920_045430_754822/`, `corpus/results/x86_kvm_corpus_20260919_225748_512435/` | development | mixed | Earlier before/after comparisons used while fixing optimizer defects; not paper evidence. |
 | `corpus/results/aws_arm64_corpus_*`, `corpus/results/aws_x86_corpus_*` | see each `details/progress.json` | — | Historical AWS runs tracked in the repository. Some have a top-level `status` of `error`; **do not present any run as an all-success result without checking its own `details/progress.json`.** |
 
@@ -502,14 +520,22 @@ assuming a command or retained directory succeeded.
    roundtrip that the optimizer uses re-lays out the stack and inflates the frame
    by ~45 bytes on average (measured over all 542 checked-in program fixtures;
    405 grew, 137 unchanged, none shrank). `kop` runs last in the pipeline, so a
-   program starting near the limit can lose all optimization. In the shipped
-   full run this affects 2 `tracee` programs (`map_inline`/`const_prop` step
-   failures). Quantified in `docs/tmp/20260906-bpf-development-todo.md`.
-2. **`tracee/monitor` may report an app-level error.** The shim returns
-   `errno=EINVAL` for an application's own `BPF_PROG_LOAD` when an optimizer step
-   fails (deliberate fail-fast policy), and some applications treat that as
-   fatal. This is an application-survival failure and a full-corpus measurement
-   blocker; the per-program reports alone do not establish a successful run.
+   program starting near the limit can lose all optimization. Two bpfopt fixes
+   committed on 2026-09-23 addressed this: an out-of-range stack-slot remap at
+   the widest width (`1df5b1369`) and giving the generic (non-`kop`) roundtrip
+   passes the same 4096-byte LLVM stack budget that `kop` already used
+   (`42cceb67e`), so the remapper can squeeze the layout back into the 512-byte
+   BPF frame. Quantified in `docs/tmp/20260906-bpf-development-todo.md`.
+2. **`tracee/monitor` app-level errors are fixed for the default policy.** The
+   shim returns `errno=EINVAL` for an application's own `BPF_PROG_LOAD` when an
+   optimizer step fails (deliberate fail-fast policy), and some applications
+   treat that as fatal. Before the two fixes above, `const_prop` failed on
+   `trace_security_` and the workload launch errored (run
+   `x86_kvm_corpus_20260921_211712_637406`). In the fresh run
+   `x86_kvm_corpus_20260923_114624_121697` the same program completes all 11
+   plan steps (`kop` applies 57/57 sites at step 10) and every app reports
+   `status: ok`. A single-sample run is not a paper-scale measurement; treat the
+   per-program reports as optimization evidence, not throughput evidence.
 3. **`branch_flip`** is production code but is intentionally **not** in the
    default benchmark policy; it requires real per-site PMU profile input from the
    external profiling toolchain.
@@ -550,29 +576,39 @@ evidence status, not an AEC decision.
 |---|---|---|
 | Available | The public, immutable `atc26-ae-1` ZIP is deposited at [version DOI 10.5281/zenodo.22907397](https://doi.org/10.5281/zenodo.22907397); [concept DOI 10.5281/zenodo.22907396](https://doi.org/10.5281/zenodo.22907396) is the stable all-versions homepage. Repository-original material is MIT-licensed; third-party licenses and pins are in `THIRD_PARTY_NOTICES.md`. | The corrected `atc26-ae-2` draft must be packaged, independently checked and **published** before it can count as an available newer archive. Publishing a draft DOI alone does not publish its files. |
 | Functional | Component map, environment, dependencies, safety notes, no-VM formal path and a completed Katran KVM smoke are documented above. | Verify the new ZIP **after clean extraction** through the documented proof/build/smoke path; an archive self-test or a successful run in the authors' checkout alone is weaker evidence. |
-| Reproduced | The retained RQ1 data derive 1.242×/1.222× speedup on the respective 27-case subsets and 0.772×/0.879× code size on all 29 cases. Selected raw Cilium app JSON derives RQ2 throughput 1.074× and RQ4 throughput 2.358× and 488.7→262.3 ns/run. The formal and Katran receipts are hash-bound. | RQ1's 62-case 0.99× object-load claim is `PARTIAL`; RQ2's 4086 sites, RQ3's accepted-prose 3512-sites/1.114× pairing, and RQ4's 113/22/89 counts lack independent raw derivations. The six-app run is `error` with only 5/6 successful workloads. Row-level PASS is not a full badge verdict. |
+| Reproduced | The retained RQ1 data derive 1.242×/1.222× speedup on the respective 27-case subsets and 0.772×/0.879× code size on all 29 cases. Selected raw Cilium app JSON derives RQ2 throughput 1.074× and RQ4 throughput 2.358× and 488.7→262.3 ns/run. The formal, Katran-smoke and six-app-success receipts are hash-bound. The six-app run `x86_kvm_corpus_20260923_114624_121697` completed with 6/6 successful workloads. | RQ1's 62-case 0.99× object-load claim is `PARTIAL`; RQ2's 4086 sites, RQ3's accepted-prose 3512-sites/1.114× pairing, and RQ4's 113/22/89 counts lack independent raw derivations. Row-level PASS is not a full badge verdict. |
 
 `docs/artifacts/render_claim_table.py` separates raw-file integrity, selected
 numeric claims, ReJIT coverage and full workload success. Its `PASS` is local to
-the named row; it is **not** a badge verdict. In particular, the current
-six-application full workload row is `PARTIAL`. The x86 micro dataset's 29
-available cases are not the paper's 27-case analysis population.
+the named row; it is **not** a badge verdict. The fresh six-app-success workload
+row is `PASS`; the earlier errored six-app preparation run is retained as an
+explicit `PARTIAL` workload row (ReJIT coverage `PASS`, 5/6 workloads). The x86
+micro dataset's 29 available cases are not the paper's 27-case analysis
+population.
 
 At least one author must be reachable during kick-the-tires (through
 2026-09-29). The `\acmDOI`/`\acmISBN` fields in `docs/paper/main.tex` are
 template placeholders and require the actual camera-ready identifiers.
 
 **Measurement boundary.** The paper-scale x86 Xeon and ARM64 AWS figures were
-not re-measured while preparing this package. The retained six-app preparation
-run `x86_kvm_corpus_20260921_211712_637406` has top-level status `error`; its
-hash-bound compact evidence supports ReJIT/KOperation *coverage* only. The
-separate Katran smoke `x86_kvm_corpus_20260922_213414_889964` completed and
-supports one successful workload. Neither substitutes for all six successful
-workloads or a matched paper-scale rerun.
+not re-measured while preparing this package. A fresh local KVM six-application
+corpus run `x86_kvm_corpus_20260923_114624_121697` reached terminal success
+(suite `completed`, all six apps `ok`, all six ReJIT `ok`) under the default
+`full-x86` policy and is retained, hash-bound, at
+`docs/artifacts/evidence/kvm-six-app-success/`. Its `make corpus` log shows every
+step of the 11-step load-time plan completing for the previously failing heavy
+Tracee program `trace_security_`. This establishes six successful workloads, but
+it is a single-sample 10-second configuration, not a paper-scale Xeon/AWS rerun.
+The earlier six-app preparation run `x86_kvm_corpus_20260921_211712_637406` has
+top-level status `error`; its hash-bound compact evidence
+(`docs/artifacts/evidence/kvm-six-app-coverage/`) supports ReJIT/KOperation
+*coverage* only and is retained as the honest negative record. The separate
+Katran smoke `x86_kvm_corpus_20260922_213414_889964` supports one successful
+workload.
 
 ---
 
-## 14. Reproducibility platform (short text for the submission form)
+## 13. Reproducibility platform (short text for the submission form)
 
 > BPF-Ext reproduces on Ubuntu 24.04 x86-64. A fast path requiring no VM runs the
 > Lean 4 proof suite, the generated-contract drift checks, and the independent C

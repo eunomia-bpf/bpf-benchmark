@@ -1,0 +1,60 @@
+{
+  "apps": {
+    "bcc__set": {
+      "rejit_status": "ok",
+      "status": "ok"
+    },
+    "cilium__agent": {
+      "rejit_status": "ok",
+      "status": "ok"
+    },
+    "katran": {
+      "rejit_status": "ok",
+      "status": "ok"
+    },
+    "otelcol-ebpf-profiler__profiling": {
+      "rejit_status": "ok",
+      "status": "ok"
+    },
+    "tetragon__observer": {
+      "rejit_status": "ok",
+      "status": "ok"
+    },
+    "tracee__monitor": {
+      "rejit_status": "ok",
+      "status": "ok"
+    }
+  },
+  "command": "SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=7200 make corpus",
+  "ended_at": "2026-09-23T12:05:46+00:00",
+  "environment": "tracked devcontainer toolchain; Docker-in-Docker; 8-vCPU/64-GiB KVM guest via virtme-ng",
+  "evidence_kind": "atc26-ae-kvm-six-app-success",
+  "exit_code": 0,
+  "files_sha256": {
+    "details/apps/bcc__set.json": "0c7f2d90db26a1f09f76bf4f03d918e0331e89801a9c8154bb06874754ef0585",
+    "details/apps/cilium__agent.json": "4b95e131cf74c369835707599c1685573b714ea22c63ef6da445b2e738c2acdf",
+    "details/apps/katran.json": "b97cf139e76021fd4724bc8bacf3d55a9102675ee66e06b579261459c30acdae",
+    "details/apps/otelcol-ebpf-profiler__profiling.json": "4bf18464ca8468dd9a614a263595cae86496d1a20a8326b076c3bb860e692fc3",
+    "details/apps/tetragon__observer.json": "fc305fa492b23655ba163bf5648dac77f896b70f80801e704b573c25baf1b15d",
+    "details/apps/tracee__monitor.json": "d7671967dd74e13e8af70b62ddceb0c7b1969b9efaaa14755cd5b060e5700fc9",
+    "details/progress.json": "4220aaa099abfb08c9704e2e9580a01490937fa4aea2f1733078b1a17525f6d0",
+    "details/result.json": "0c7d26e84c9e0dd895814dd04fd8a5bf27483e2d16514007f784524c761b7de1",
+    "metadata.json": "b71b2b5cf5dc17dfd47e20dd90ecfc0ef2cc7d3ecd71bc2b1962c2a195321c58"
+  },
+  "log_file": "make-corpus.log",
+  "log_normalization": "Guest-console carriage returns and trailing horizontal whitespace normalized in the retained copy.",
+  "log_sha256": "074ada44e0c0699535ed4cb09795f816edc53dcb55602680e23188c2ddccaad7",
+  "schema_version": 1,
+  "scope": "Fresh local KVM six-application corpus run to terminal success; supports six successful workloads under the default full-x86 policy. Does not re-measure the paper-scale Xeon or AWS datasets.",
+  "source_commit": "7cc9b92d823d852be436220d22d2f97b00018123",
+  "source_run": "corpus/results/x86_kvm_corpus_20260923_114624_121697",
+  "started_at": "2026-09-23T11:46:24+00:00",
+  "suite_status": "completed",
+  "tool_versions": {
+    "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+    "go": "go version go1.26.8 linux/amd64",
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "virtme_ng": "virtme-ng 1.41"
+  },
+  "wall_seconds": 1162
+}

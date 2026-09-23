@@ -55,6 +55,10 @@ MICRO_RESULTS = {
 }
 
 COVERAGE_RUN = "docs/artifacts/evidence/kvm-six-app-coverage"
+SIX_APP_SUCCESS_RUN = "docs/artifacts/evidence/kvm-six-app-success"
+SIX_APP_COMMAND = (
+    "SAMPLES=1 WORKLOAD_DURATION=10 TIMEOUT=7200 make corpus"
+)
 SMOKE_RUN = "docs/artifacts/evidence/kvm-katran-smoke"
 SMOKE_COMMAND = (
     "BPFREJIT_CORPUS_APPS=katran SAMPLES=1 WORKLOAD_DURATION=10 "
@@ -632,6 +636,13 @@ def build_rows(root: Path) -> list[Row]:
     ))
     rows.extend(corpus_evidence(
         root,
+        SIX_APP_SUCCESS_RUN,
+        expected_apps=6,
+        claim_label="6 apps success",
+        required_command=SIX_APP_COMMAND,
+    ))
+    rows.extend(corpus_evidence(
+        root,
         SMOKE_RUN,
         expected_apps=1,
         claim_label="Katran smoke",
@@ -750,6 +761,52 @@ def self_test() -> int:
         if [r.status for r in rows] != [PASS, PARTIAL]:
             failures.append(
                 "errored corpus with complete rejit coverage expected "
+                f"[PASS, PARTIAL], got {[r.status for r in rows]}"
+            )
+
+
+        # Six-app success requires six ok apps + a matching exit-0 receipt.
+        success = root / SIX_APP_SUCCESS_RUN
+        (success / "details/apps").mkdir(parents=True)
+        (success / "details/progress.json").write_text(
+            json.dumps({"status": "completed"})
+        )
+        for i in range(6):
+            (success / "details/apps" / f"app{i}.json").write_text(
+                json.dumps({"status": "ok", "rejit_result": {"status": "ok"}})
+            )
+        (success / "make-corpus.log").write_text("six app run log")
+        (success / "receipt.json").write_text(json.dumps({
+            "command": SIX_APP_COMMAND,
+            "exit_code": 0,
+            "source_commit": "b" * 40,
+            "log_file": "make-corpus.log",
+            "log_sha256": file_sha256(success / "make-corpus.log"),
+        }))
+        rows = corpus_evidence(
+            root,
+            SIX_APP_SUCCESS_RUN,
+            expected_apps=6,
+            claim_label="6 apps success",
+            required_command=SIX_APP_COMMAND,
+        )
+        if [r.status for r in rows] != [PASS, PASS]:
+            failures.append(
+                f"valid six-app success expected [PASS, PASS], got {[r.status for r in rows]}"
+            )
+        (success / "details/apps/app0.json").write_text(
+            json.dumps({"status": "error", "rejit_result": {"status": "ok"}})
+        )
+        rows = corpus_evidence(
+            root,
+            SIX_APP_SUCCESS_RUN,
+            expected_apps=6,
+            claim_label="6 apps success",
+            required_command=SIX_APP_COMMAND,
+        )
+        if [r.status for r in rows] != [PASS, PARTIAL]:
+            failures.append(
+                "one failed app under six-app success expected "
                 f"[PASS, PARTIAL], got {[r.status for r in rows]}"
             )
 
