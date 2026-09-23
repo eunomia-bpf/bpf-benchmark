@@ -4,7 +4,8 @@
 > paper *BPF-Ext: Safely Extending the eBPF Compilation Pipeline with Native
 > Operations* live in
 > [`docs/atc26-artifact-evaluation.md`](docs/atc26-artifact-evaluation.md).
-> Start there if you are evaluating the artifact.
+> Start with this GitHub guide; [Zenodo](https://doi.org/10.5281/zenodo.22907396)
+> holds the immutable archival backup.
 
 Auto-research framework and benchmark for agentic OS kernel extension
 optimization.

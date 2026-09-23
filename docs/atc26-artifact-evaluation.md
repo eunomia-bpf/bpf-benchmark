@@ -145,17 +145,33 @@ builds**, not by the measurement itself.
 
 ## 5. Step 0 — obtain and verify the artifact
 
-The stable archive homepage is [Zenodo concept DOI
-10.5281/zenodo.22907396](https://doi.org/10.5281/zenodo.22907396). It
-currently has a published `atc26-ae-1` version
-([version DOI 10.5281/zenodo.22907397](https://doi.org/10.5281/zenodo.22907397)).
+The primary evaluator entrypoint is the
+[GitHub repository](https://github.com/eunomia-bpf/bpf-benchmark) and this guide.
+For the current source, clone the repository and initialize its pinned
+submodules:
+
+```bash
+git clone https://github.com/eunomia-bpf/bpf-benchmark.git
+cd bpf-benchmark
+git submodule update --init --recursive
+```
+
+For a frozen version, use an
+[immutable GitHub release tag](https://github.com/eunomia-bpf/bpf-benchmark/releases)
+and run `git submodule update --init --recursive` after selecting that tag.
+The release notes identify the corresponding archive and source revision. The
+repository tracks submodules under `vendor/` (notably `vendor/linux-framework`
+for the kernel, `vendor/libbpf`, `vendor/llvmbpf`, and `llvm-backend/llvm`).
+
+[Zenodo concept DOI 10.5281/zenodo.22907396](https://doi.org/10.5281/zenodo.22907396)
+is the immutable archival backup. It currently has a published `atc26-ae-1`
+version ([version DOI 10.5281/zenodo.22907397](https://doi.org/10.5281/zenodo.22907397)).
 An `atc26-ae-2` version is being prepared; do not treat a draft as published
-evidence. Download the ZIP from the selected **published** record. For the
-currently published `atc26-ae-1`, Zenodo lists only the ZIP and its MD5
-checksum; compare your downloaded file's MD5 with the checksum shown in that
-record. There is no public ae-1 `.sha256` companion. Once ae-2 is published,
-download both its ZIP and `.sha256` companion and run `sha256sum -c` in their
-directory. Do not use a draft's checksum as public verification.
+evidence. To use an archived ZIP instead of GitHub, download it from a
+**published** Zenodo record. For ae-1, compare its MD5 with the checksum shown
+on that record; there is no public ae-1 `.sha256` companion. Once ae-2 is
+published, download both its ZIP and `.sha256` companion and run `sha256sum -c`
+in their directory. Do not use a draft's checksum as public verification.
 
 ```bash
 ZIP=atc26-ae-1.zip  # select the ZIP from a published Zenodo record
@@ -171,21 +187,9 @@ python3 docs/artifacts/render_claim_table.py .
 The ZIP embeds the pinned source of every submodule required by the documented
 proof and benchmark paths. It deliberately has **no `.git` directory**; do not
 run `git checkout` or `git submodule update` inside it. The manifest records
-the superproject commit and direct/nested submodule pins. Check the package
-version and checksum before interpreting its evidence.
-
-For a live source checkout instead of the archival ZIP:
-
-```bash
-git clone https://github.com/eunomia-bpf/bpf-benchmark.git
-cd bpf-benchmark
-git submodule update --init --recursive
-```
-
-The repository tracks submodules under `vendor/` (notably `vendor/linux-framework`
-for the kernel, `vendor/libbpf`, `vendor/llvmbpf`, and `llvm-backend/llvm`).
-For a source checkout, use the commit in the archive manifest or an immutable
-release tag to match an archived version rather than using a moving branch.
+the superproject commit and direct/nested submodule pins. Match the package
+version and checksum to the chosen GitHub release before interpreting its
+evidence.
 
 Install the Python dependency used by the harness. The two raw-data plotting
 scripts additionally need Matplotlib and NumPy:
