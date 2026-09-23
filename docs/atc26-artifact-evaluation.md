@@ -17,7 +17,7 @@ guide: follow the sections in order.
   (a) a fast **static + proof** path that needs no VM, (b) a **single-app KVM
   smoke path**, and (c) the exact commands for the full experiments. Where a
   number in the paper is not reproduced by a one-command path, the mapping table
-  in [Experiment → paper claim mapping](#experiment--paper-claim-mapping) says so
+  in [Experiment → paper claim mapping](#9-reproducing-the-papers-experiments) says so
   explicitly.
 
 ---
@@ -42,7 +42,7 @@ guide: follow the sections in order.
 
 The `\acmDOI`/`\acmISBN` fields in the current source are ACM template
 placeholders and are not real identifiers — see
-[Author/legal action required](#author--legal-action-required).
+[Author/legal action required](#12-artifact-status-and-remaining-action).
 
 ---
 
@@ -139,7 +139,7 @@ builds**, not by the measurement itself.
     return `errno=EINVAL` for the application's own `BPF_PROG_LOAD`, which some
     applications treat as fatal. This is deliberate repository policy, not a
     silent pass-through. See
-    [Known limitations](#known-limitations-and-expected-failures).
+    [Known limitations](#10-known-limitations-and-expected-failures).
 
 ---
 
@@ -228,7 +228,7 @@ make -C native-sim/x86 micro-proofs-build
 `make check` expands to `make validate` → `make test` (see `Makefile`), which is
 the Make-backed **KVM test suite** target. It requires the runtime image and a
 KVM-capable host, so it belongs to the full-validation stage in
-[Step 2](#7-step-2--the-kvm-single-app-smoke-path) and later, not here.
+[Step 2](#7-step-2--kvm--full-validation-then-the-single-app-smoke-path) and later, not here.
 
 ### What `make -C native-sim/formal check` does
 
@@ -274,8 +274,11 @@ numbers are not claimed to have been re-measured here.
 
 ## 7. Step 2 — KVM / full validation, then the single-app smoke path
 
-Full validation requires the runtime image and a KVM-capable host. Check the
-Rust and Go toolchains before the first image build. The supplied
+Full validation requires the runtime image and a KVM-capable host. The tracked
+`.devcontainer/devcontainer.json` and `.devcontainer/Dockerfile` provide the
+pinned build environment and start Docker; the host must separately expose
+`/dev/kvm` and permit Docker-in-Docker. Check the Rust and Go toolchains before
+the first image build. The supplied
 `.devcontainer/Dockerfile` installs both under `/usr/local` and sets these
 variables and paths; some existing Coder login shells omit them even though
 the toolchains are installed. In such a shell, use the installed paths shown
@@ -285,7 +288,8 @@ that host's working Rust and Go installations instead.
 ```bash
 # Existing Coder shell using the supplied image:
 export RUSTUP_HOME=/usr/local/rustup CARGO_HOME=/usr/local/cargo
-export PATH="/usr/local/go/bin:/usr/local/cargo/bin:$PATH"
+export PATH="/usr/lib/llvm-18/bin:/usr/local/go/bin:/usr/local/cargo/bin:$PATH"
+clang --version
 cargo --version
 go version
 # Full Make-backed test validation (builds the runtime image; requires KVM).
@@ -303,9 +307,9 @@ BPFREJIT_CORPUS_APPS=katran SAMPLES=1 WORKLOAD_DURATION=10 \
 This is a genuine two-start load-time experiment: the framework starts the real
 upstream application (never a synthetic loader), captures its `BPF_PROG_LOAD`
 calls through the injected shim, runs the configured `bpfopt` pass chain
-(including the KOperation-backed `kop` pass), reloads and re-attaches the
-optimized bytecode through stock kernel APIs, and measures the workload in both
-phases.
+(including the KOperation-backed `kop` pass), submits optimized bytecode
+through the application's normal stock-kernel `BPF_PROG_LOAD` path, and measures
+the workload in both phases.
 
 ### Where results land
 
@@ -389,8 +393,10 @@ Xeon/AWS numbers. See the honesty note at the top of this guide.
 
 ## 9. Reproducing the paper's experiments
 
-Each row is one command plus the paper artifact it feeds. **All of these are
-Make-backed; do not call suite modules or binaries directly.**
+Rows with runnable commands use the Make-backed entrypoints; do not call suite
+modules or binaries directly. The RQ3 policy comparison needs two runs, and a
+validated one-command RQ4 native-replacement recipe is not yet documented.
+Those gaps remain Reproduced work, regardless of historical metric rows.
 
 | # | Paper claim | Command | Where the output lands | Reproduced by a single command here? |
 |---|---|---|---|---|
@@ -399,10 +405,33 @@ Make-backed; do not call suite modules or binaries directly.**
 | RQ1 overhead | `object_load_ns` ratio | included in `make micro` | `micro/results/` | Command path yes; retained 62-case claim `PARTIAL` |
 | RQ2 Cilium x86 | 1.074× datapath throughput, 4086 sites | `BPFREJIT_CORPUS_APPS=cilium/agent make corpus` | `corpus/results/` | Path yes; exact number is a full-scale run |
 | RQ2 Katran arm64 | 1.073× throughput, 21 sites | `PLATFORM=aws ARCH=arm64 BPFREJIT_CORPUS_APPS=katran make corpus` | `corpus/results/` | Yes (needs AWS) |
-| RQ3 policy | site-count vs profitability | per-app pass policy via `BPFREJIT_BENCH_PASSES` + `runner/config/passes/` | `corpus/results/` | `PARTIAL`: throughput raw retained, per-pass site reports missing and accepted prose pairs distinct policies |
-| RQ4 native bound | 2.358×, 488.7→262.3 ns/run | native-replacement configuration | `corpus/results/` | Selected metrics derive from retained Cilium JSON; 113/22/89 loader counts unavailable |
+| RQ3 policy | site-count vs profitability | two policy-arm commands below | `corpus/results/` | `PARTIAL`: throughput raw retained, per-pass site reports missing and accepted prose pairs distinct policies |
+| RQ4 native bound | 2.358×, 488.7→262.3 ns/run | no validated single-command recipe retained | `corpus/results/` | `PARTIAL`: selected metrics derive from retained Cilium JSON; 113/22/89 loader counts unavailable |
 | Correctness | "zero correctness mismatches" | printed by `make micro` / `make test` | suite output | Yes |
 | Proofs | "emit computes the same result as its proof sequence" | `make -C native-sim/formal check` | stdout | **Yes** |
+
+The two RQ3 policy-arm commands below select the same pass names and 3-sample,
+30-second workload settings recorded in the retained Cilium run metadata. The
+original shell commands and per-pass site reports were not retained, and these
+re-run recipes have not been validated against a fresh completed run:
+
+```bash
+BPFREJIT_BENCH_PASSES=kop_all_prefetch BPFREJIT_CORPUS_APPS=cilium/agent \
+  SAMPLES=3 WORKLOAD_DURATION=30 make corpus
+BPFREJIT_BENCH_PASSES=kop_all_no_bulk_no_prefetch BPFREJIT_CORPUS_APPS=cilium/agent \
+  SAMPLES=3 WORKLOAD_DURATION=30 make corpus
+```
+
+To render the tracked raw JSON into a human-readable claim table, run:
+
+```bash
+python3 docs/artifacts/render_claim_table.py .
+```
+
+At this revision the expected final line is `OVERALL AE EVIDENCE: INCOMPLETE`:
+claim-level `PASS` rows coexist with missing site/loader evidence and a
+`PARTIAL` six-application workload row. Treat a process exit of 0 from this
+renderer as successful table generation, not successful reproduction.
 
 Composite helper targets exist for convenience: `make all` = test + micro +
 corpus; `make terminate` stops managed remote instances.
@@ -503,7 +532,7 @@ native-sim/
 micro/                        # microbenchmark programs + configs + results
 corpus/                       # production app corpus, workloads, results
 runner/                       # Make-backed suites, executors, images, libs
-docs/paper/                   # the accepted paper, figures, tables, plot scripts
+docs/paper/                   # current paper source and plots; see metadata caveat above
 docs/implementation.md        # current proof/coverage boundary (read this)
 docs/tmp/20260906-*.md        # chronological engineering log with measurements
 ```
