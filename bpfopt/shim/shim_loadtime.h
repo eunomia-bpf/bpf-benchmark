@@ -69,6 +69,50 @@ static int loadtime_write_file(const char *path, const void *data, size_t len) {
     return 0;
 }
 
+static int loadtime_write_all_fd(int fd, const char *data, size_t len);
+
+static int loadtime_copy_file(const char *source, const char *destination) {
+    int source_fd = open(source, O_RDONLY);
+    if (source_fd < 0) return -1;
+    int destination_fd = open(destination, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (destination_fd < 0) {
+        int saved_errno = errno;
+        if (real_close(source_fd) != 0 && saved_errno == 0)
+            saved_errno = errno;
+        errno = saved_errno;
+        return -1;
+    }
+
+    int rc = 0;
+    int saved_errno = 0;
+    char buffer[64 * 1024];
+    while (1) {
+        ssize_t n = read(source_fd, buffer, sizeof(buffer));
+        if (n < 0) {
+            if (errno == EINTR) continue;
+            saved_errno = errno;
+            rc = -1;
+            break;
+        }
+        if (n == 0) break;
+        if (loadtime_write_all_fd(destination_fd, buffer, (size_t)n) != 0) {
+            saved_errno = errno ? errno : EIO;
+            rc = -1;
+            break;
+        }
+    }
+    if (real_close(source_fd) != 0 && rc == 0) {
+        saved_errno = errno;
+        rc = -1;
+    }
+    if (real_close(destination_fd) != 0 && rc == 0) {
+        saved_errno = errno;
+        rc = -1;
+    }
+    if (rc != 0) errno = saved_errno;
+    return rc;
+}
+
 static int loadtime_write_all_fd(int fd, const char *data, size_t len) {
     size_t off = 0;
     while (off < len) {
@@ -1428,6 +1472,24 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
             free(plan_json);
             return -1;
         }
+        if (loadtime_keep_workdirs_enabled()) {
+            char retained_input[360];
+            snprintf(step_name_buf, sizeof(step_name_buf),
+                     "input.step.%d.bin", step_seq);
+            if (loadtime_join_path(retained_input, sizeof(retained_input),
+                                   workdir, step_name_buf,
+                                   err, err_sz) != 0 ||
+                loadtime_copy_file(cur, retained_input) != 0) {
+                snprintf(err, err_sz,
+                         "failed to retain loadtime input for step %s errno=%d",
+                         name[0] ? name : "<unnamed>", errno);
+                free(map_refs);
+                free(map_ids);
+                free(map_types);
+                free(plan_json);
+                return -1;
+            }
+        }
         unlink(nxt);
         unlink(report);
 
@@ -1512,7 +1574,10 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
             free(plan_json);
             return -1;
         }
-        if (rename(nxt, cur) != 0) {
+        int install_rc = loadtime_keep_workdirs_enabled()
+                             ? loadtime_copy_file(nxt, cur)
+                             : rename(nxt, cur);
+        if (install_rc != 0) {
             snprintf(err, err_sz,
                      "failed to install loadtime output for step %s errno=%d",
                      name[0] ? name : "<unnamed>", errno);

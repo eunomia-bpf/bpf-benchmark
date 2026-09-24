@@ -49,6 +49,19 @@ crossing one. Because stress-ng bogo ops have stressor-specific meanings, those
 sums remain internal boundary evidence and do not enter the reader-facing
 paper.
 
+A separate audit of the local September 19 Cilium `map_inline` run found 122
+changed reports paired with 122 successful stock `BPF_PROG_LOAD` results, but
+the then-current shim had renamed each step output over its input.  The actual
+before images were not retained, so that audit is `invalid/inconclusive` for a
+direct bytecode-transformation claim; its single `1.0295093736` throughput ratio
+is not a repeated estimate and is not a paper result.  The shim now preserves
+`input.step.N.bin` and `output.next.N.bin` when `KEEP_WORKDIRS=1`.  A new
+Make-backed run is required before using that mechanism evidence.  Exact audit
+commands and the independent review are in
+[`step-0005`](tmp/build-and-evaluate/step-0005-20260924T170452+0000/step-report.md)
+and the retention fix is recorded in
+[`step-0006`](tmp/build-and-evaluate/step-0006-20260924T172311+0000/step-report.md).
+
 ## 1. System Under Test
 
 - **What it does**: optimize programs loaded by real upstream applications
