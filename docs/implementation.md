@@ -45,7 +45,9 @@ increment is committed and pushed immediately). Current state:
   memory tag-dispatch contract, and the two-condition AArch64 stack slot-tag
   contract. The generic AArch64 ALU handler additionally composes all six ALU
   results with width-aware GPR/SP/XZR/NONE writeback and the
-  provenance-preserving pointer-ADD path. The arithmetic flag-handler theorem
+  provenance-preserving pointer-ADD path. The operand-handler theorem composes
+  immediate selection or all eleven register source modifiers into that full
+  state transition. The arithmetic flag-handler theorem
   composes ADDS/SUBS result writeback with NZCV and proves that CMN/CMP replace
   NZCV without changing modeled register/SP state. The logical flag-handler
   theorem similarly composes the AND/BIC result and logical-NZCV primitives:
@@ -68,12 +70,14 @@ increment is committed and pushed immediately). Current state:
   helpers (`x86_bswap`, `x86_popcount64`, `x86_sign_extend`,
   `x86_signed_abs_width`, `x86_shld`/`x86_shrd`, `x86_ror`, the BT/BZHI
   predicates) now delegate to generated contracts with proven refinements.
-- Open on the AArch64 side: source-modifier/register-selection composition
-  beyond typed operands, including CCMP AUX condition/fallback decoding. The
-  generic immediate/register
+- Open on the AArch64 side: parser/register-number and packed-AUX field
+  selection beyond typed operands, including CCMP condition/fallback decoding.
+  The generic immediate/register
   ALU handler is now composed by `arm64_alu_handler_refines`: it covers the
   pointer-preserving 64-bit ADD path, scalarized arithmetic writeback, width
-  narrowing, and GPR/SP/XZR/NONE destinations after typed operands are supplied.
+  narrowing, and GPR/SP/XZR/NONE destinations after typed operands are supplied;
+  `arm64_alu_operand_handler_refines` further composes immediate/register mode
+  selection and all eleven source modifiers into that theorem.
   The ALU flag op-step half is separately proved by `arm64_add_step_refines`,
   `arm64_sub_step_refines`, and `arm64_logic_step_refines`; the arithmetic
   handler theorem composes ADDS/SUBS writeback and CMN/CMP no-write behavior;

@@ -15,6 +15,7 @@
 #include "../formal/generated/arm64_logic_flag_handler.h"
 #include "../formal/generated/arm64_ccmp_handler.h"
 #include "../formal/generated/arm64_mod.h"
+#include "../formal/generated/arm64_alu_operand.h"
 #include "../formal/generated/arm64_bitfield.h"
 #include "../formal/generated/arm64_mul.h"
 #include "../formal/generated/arm64_extrev.h"
@@ -737,8 +738,10 @@ _Static_assert(__builtin_offsetof(struct arm64_sim_skb_abi, data_end) ==
 	do {                                                               \
 		__u8 __a64_alu_width = (FLAGS);                           \
 		__u64 __a64_alu_lhs = ARM64_SIM_L_READ_REG(SRC);          \
-		__u64 __a64_alu_rhs = (OP) == ARM64_OP_ALU_IMM ? (__u64)(IMM) :\
-			ARM64_SIM_L_MOD_VALUE((SRC2), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_alu_width);\
+		__u64 __a64_alu_rhs = KPROG_ARM64_ALU_RHS(              \
+			(OP) == ARM64_OP_ALU_IMM, (IMM), ARM64_SIM_L_MOD(AUX),\
+			ARM64_SIM_L_READ_REG(SRC2), ARM64_SIM_L_SHIFT(AUX),\
+			__a64_alu_width);                                  \
 		__u8 __a64_alu_op = (AUX) & 0xffU;                        \
 		__u8 __a64_alu_src_tag = ARM64_SIM_L_REG_TAG(SRC);        \
 		__u64 __a64_alu_result =                                  \

@@ -4220,3 +4220,37 @@ framework leaves the original bytecode in place and continues.
   compiler/native bytes, multi-step traces, helpers, specialization
   preservation, or full O1--O4. The architecture rebuild is regression
   evidence, not whole-simulator semantic equivalence.
+
+### AArch64 ALU operand-to-handler composition, 2026-09-24
+
+- Gap: `arm64_alu_handler_refines` proved the generic handler only after an
+  externally supplied RHS, while `arm64_mod_refines` separately proved the
+  eleven source modifiers. The actual immediate/register choice connecting
+  those layers remained outside the handler theorem.
+- Contract and C binding: `arm64_alu_operand_spec.json` defines immediate and
+  register forms, with the register form tied to the canonical eleven-entry
+  modifier table. Its generator emits `KPROG_ARM64_ALU_RHS` and the matching
+  Lean selector. The real `ARM64_SIM_L_EXEC_ALU` now uses that selector:
+  immediate form bypasses modifier evaluation and register form applies the
+  generated modifier to the selected register value.
+- Lean bridge: `arm64_alu_rhs_refines` proves the selector against an
+  independently stated immediate-or-`arm64ModValueSpec` RHS.
+  `arm64_alu_operand_handler_refines` composes it with the complete prior
+  handler theorem for both operand forms, all six ALU operations, eleven
+  modifiers, four widths and destination classes, every modeled source tag,
+  arbitrary state/operands, and arbitrary shift vectors. Concrete theorems pin
+  immediate bypass, signed-byte extension feeding pointer ADD, 32-bit shifted
+  register scalarization, and immediate SP writeback. There is no `sorry` or
+  `admit`.
+- Machine checks: `make -C native-sim/formal check` exits 0, including a new
+  independent 5632-case C oracle over both forms, all modifiers/widths, and
+  boundary values/shifts. With the installed Rust/Clang paths explicit,
+  `make -C native-sim/arm64 micro-proofs-build` exits 0 for the negative
+  artifact and all 29 workload-derived artifacts.
+- Preserved boundary: the theorem begins after the parser has supplied typed
+  opcode, width, selected register value/tag, destination class, and packed-AUX
+  modifier/shift. It does not prove register-number lookup, AUX extraction, the
+  C register switch, C/Lean language correspondence, compiler/native bytes,
+  multi-step traces, helpers, specialization preservation, or full O1--O4.
+  The architecture rebuild is regression evidence, not whole-simulator
+  semantic equivalence.

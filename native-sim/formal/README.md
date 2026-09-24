@@ -60,10 +60,16 @@ path, the generated ALU result, pointer-add bits/tag policy, width narrowing,
 GPR/SP/XZR/NONE write behavior, and scalarization on every other arithmetic
 path agree with an independently enumerated handler specification for all six
 ALU operations, four modeled widths, four destination classes, and all modeled
-provenance tags. The theorem starts after decoding, source-register selection,
-and source-modifier evaluation; those inputs, the C register switch itself,
-and native bytes remain boundaries. A host cross-check exhausts 168 numeric
-path-selection cases, including unsupported width/opcode values.
+provenance tags. `arm64_alu_operand_handler_refines` now closes its former
+free-RHS premise: immediate form selects the raw immediate, while register form
+applies any of the eleven proved source modifiers before the full handler
+transition. This composition is universal over both forms, operations, widths,
+destinations, tags, operands, modifiers, and shifts; a 5632-case host oracle
+checks the shared C selector. The theorem still starts after opcode, width,
+register value/tag, destination class, and packed-AUX modifier/shift selection;
+the parser, C register switch, those selections, and native bytes remain
+boundaries. The earlier path-only host cross-check exhausts 168 numeric
+selection cases, including unsupported width/opcode values.
 The flag-setting arithmetic handlers have a second composed contract.
 `arm64_flag_handler_spec.json` generates the ADD/SUB family dispatch used by
 the real ADDS/SUBS and CMN/CMP C branches and the matching Lean step.
