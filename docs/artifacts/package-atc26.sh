@@ -150,7 +150,10 @@ done
 # lack their original per-pass logs; do not infer them from these app records.
 # The x86_kvm_corpus_20260924_* runs are fresh-generation reruns of the
 # RQ3 Cilium single-pass policies that DO retain details/loadtime-reports, from
-# which render_claim_table.py derives applied-site counts. The
+# which render_claim_table.py derives applied-site counts, plus the fresh
+# native-post run whose run record gates the derived RQ4 native-loader row (its
+# shim log and manifest ship under docs/artifacts/evidence/, since
+# details/shim-logs/ is git-ignored). The
 # arm64_qemu_corpus_19700101_* runs are the equivalent fresh local-QEMU reruns
 # of the two RQ3 Katran ARM64 policies, retained with details/loadtime-reports
 # and details/apps/katran.json so those counts are derived too.
@@ -169,6 +172,7 @@ CORPUS_RUNS=(
     x86_kvm_corpus_20260924_085901_647044
     x86_kvm_corpus_20260924_095500_223221
     x86_kvm_corpus_20260924_114427_040291
+    x86_kvm_corpus_20260924_164153_955835
     aws_arm64_corpus_20260605_080836_924256
     aws_arm64_corpus_20260605_094729_221231
     arm64_qemu_corpus_19700101_000011_781867
