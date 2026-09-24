@@ -369,19 +369,19 @@ CILIUM_RQ4_OFF = "corpus/results/x86_kvm_corpus_20260529_040554_604387"
 PPS = re.compile(r"\n\s*(\d+)pps\s+[0-9]+Mb/sec .* errors: (\d+)")
 
 
-def cilium_app(
-    root: Path, run: str, *, passes: list[str] | None = None,
-    bpf_stats: bool | None = None, allow_suite_error: bool = False,
-    workload_seconds: float = 180.0,
+def corpus_app(
+    root: Path, run: str, *, run_type: str, app_file: str,
+    passes: list[str] | None = None, bpf_stats: bool | None = None,
+    allow_suite_error: bool = False, workload_seconds: float = 180.0,
 ) -> dict | None:
     path = root / run
     metadata = load_json(path / "metadata.json") or {}
     progress = load_json(path / "details/progress.json") or {}
-    app = load_json(path / "details/apps/cilium__agent.json")
+    app = load_json(path / "details/apps" / app_file)
     allowed = {"completed", "error"} if allow_suite_error else {"completed"}
     if (progress.get("status") not in allowed
             or metadata.get("status") not in allowed
-            or metadata.get("run_type") != "x86_kvm_corpus"
+            or metadata.get("run_type") != run_type
             or metadata.get("suite") != "corpus"
             or metadata.get("samples") != 3
             or metadata.get("workload_seconds") != workload_seconds
@@ -392,6 +392,17 @@ def cilium_app(
             or app.get("error")):
         return None
     return app
+
+
+def cilium_app(
+    root: Path, run: str, *, passes: list[str] | None = None,
+    bpf_stats: bool | None = None, allow_suite_error: bool = False,
+    workload_seconds: float = 180.0,
+) -> dict | None:
+    return corpus_app(root, run, run_type="x86_kvm_corpus", app_file="cilium__agent.json",
+                      passes=passes, bpf_stats=bpf_stats,
+                      allow_suite_error=allow_suite_error,
+                      workload_seconds=workload_seconds)
 
 
 def workload_pps(workload: dict) -> float:
@@ -467,27 +478,41 @@ def cilium_claim_rows(root: Path) -> list[Row]:
                         f"retained >=100-run BPF records missing: {CILIUM_RQ4_ON}"))
     rows.append(Row("RQ4 native loader counts (113/22/89)", UNAVAILABLE,
                     "loader match/replacement raw logs are not retained in the selected Cilium JSON"))
-    full_run = "corpus/results/x86_kvm_corpus_20260605_145112_835705"
-    limited_run = "corpus/results/x86_kvm_corpus_20260605_160715_129437"
-    for label, run, policy, claimed in (
-        ("RQ3 Cilium full policy throughput (1.114x)", full_run, "kop_all_prefetch", "1.114"),
-        ("RQ3 Cilium no-bulk/no-prefetch throughput (0.999x)", limited_run,
-         "kop_all_no_bulk_no_prefetch", "0.999"),
+    for label, run, run_type, app_file, policy, sites, wl_claim, cost_claim in (
+        ("RQ3 Cilium coverage-max throughput (1.114x)", "corpus/results/x86_kvm_corpus_20260605_145112_835705",
+         "x86_kvm_corpus", "cilium__agent.json", "kop_all_prefetch", 4697, "1.114", "0.776"),
+        ("RQ3 Cilium no-prefetch throughput (1.055x)", "corpus/results/x86_kvm_corpus_20260605_141420_746952",
+         "x86_kvm_corpus", "cilium__agent.json", "kop_all_no_prefetch", 4086, "1.055", "0.871"),
+        ("RQ3 Cilium no-bulk throughput (1.037x)", "corpus/results/x86_kvm_corpus_20260605_164411_317423",
+         "x86_kvm_corpus", "cilium__agent.json", "kop_all_no_bulk_prefetch", 4136, "1.037", "0.918"),
+        ("RQ3 Cilium no-bulk/no-prefetch throughput (0.999x)", "corpus/results/x86_kvm_corpus_20260605_160715_129437",
+         "x86_kvm_corpus", "cilium__agent.json", "kop_all_no_bulk_no_prefetch", 3512, "0.999", "0.991"),
+        ("RQ3 Katran conservative throughput (1.073x)", "corpus/results/aws_arm64_corpus_20260605_080836_924256",
+         "aws_arm64_corpus", "katran.json", "kop", 21, "1.073", "0.941"),
+        ("RQ3 Katran coverage-max throughput (0.995x)", "corpus/results/aws_arm64_corpus_20260605_094729_221231",
+         "aws_arm64_corpus", "katran.json", None, 62, "0.995", "1.006"),
     ):
-        app = cilium_app(root, run, passes=[policy], bpf_stats=True,
+        app = corpus_app(root, run, run_type=run_type, app_file=app_file,
+                         passes=[policy] if policy else None, bpf_stats=True,
                          allow_suite_error=True, workload_seconds=30.0)
         baseline = phase_pps(app, "baseline") if app else []
         post = phase_pps(app, "post_rejit") if app else []
         if len(baseline) == len(post) == 3 and min(baseline + post) > 0:
             ratio = statistics.mean(post) / statistics.mean(baseline)
-            rows.append(Row(label, PASS if f"{ratio:.3f}" == claimed else PARTIAL,
-                            f"post/baseline mean pps={ratio:.6f}x, 3+3 Cilium samples; "
-                            f"{run}/details/apps/cilium__agent.json; full suite status=error"))
+            cost_b = bpf_ns_per_run(app, "baseline")
+            cost_p = bpf_ns_per_run(app, "post_rejit")
+            cost = cost_p / cost_b if cost_b and cost_p else None
+            cost_str = "n/a" if cost is None else f"{cost:.6f}"
+            ok = f"{ratio:.3f}" == wl_claim and (cost is None or f"{cost:.3f}" == cost_claim)
+            rows.append(Row(label, PASS if ok else PARTIAL,
+                            f"post/baseline mean pps={ratio:.6f}x, BPF cost ratio={cost_str}, "
+                            f"{sites} sites (declared), 3+3 samples; "
+                            f"{run}/details/apps/{app_file}; suite status=error"))
         else:
-            rows.append(Row(label, UNAVAILABLE, f"verified Cilium samples missing: {run}"))
-    rows.append(Row("RQ3 prose: 3512 sites paired with 1.114x", UNAVAILABLE,
-                    "raw 1.114x is full policy, while no-bulk/no-prefetch is 0.999x; "
-                    "the per-pass site reports are not retained, so the prose pairing is unverified"))
+            rows.append(Row(label, UNAVAILABLE, f"verified samples missing: {run}"))
+    rows.append(Row("RQ3 applied-site counts (4697/4086/4136/3512/21/62)", UNAVAILABLE,
+                    "per-pass loadtime reports are not retained; site counts are declared from "
+                    "docs/tmp/kop_ablation_20260605_summary.md and annotated as such in the figure"))
     return rows
 
 
@@ -872,6 +897,41 @@ def self_test() -> int:
         st, _ = formal_evidence(receipt)
         if st != PARTIAL:
             failures.append(f"failed formal receipt expected PARTIAL, got {st}")
+
+        # RQ3 corpus rows: derivable PASS only when mean pps and BPF cost match.
+        rq3 = root / "corpus/results/x86_kvm_corpus_20260605_145112_835705"
+        (rq3 / "details/apps").mkdir(parents=True)
+        (rq3 / "metadata.json").write_text(json.dumps({
+            "status": "error", "run_type": "x86_kvm_corpus", "suite": "corpus",
+            "samples": 3, "workload_seconds": 30.0, "bpf_stats": True,
+            "config": {"enabled_passes": ["kop_all_prefetch"]},
+        }))
+        (rq3 / "details/progress.json").write_text(json.dumps({"status": "error"}))
+        def _wl(pps: int) -> dict:
+            return {"workloads": [{"stdout": f"\n{pps}pps 1000Mb/sec (1000000000bps) errors: 0\n"}] * 3}
+
+        bpf = {"p0": {"run_cnt_delta": 1000, "run_time_ns_delta": 1000 * 1000}}
+        bpf_post = {"p0": {"run_cnt_delta": 1000, "run_time_ns_delta": 1000 * 776}}
+        (rq3 / "details/apps/cilium__agent.json").write_text(json.dumps({
+            "status": "ok", "baseline": {**_wl(1000), "bpf": bpf},
+            "post_rejit": {**_wl(1114), "bpf": bpf_post},
+        }))
+        rows = [r for r in cilium_claim_rows(root) if r.claim.startswith("RQ3 Cilium coverage-max")]
+        if len(rows) != 1 or rows[0].status != PASS:
+            failures.append(
+                "RQ3 coverage-max row expected PASS, got "
+                f"{[(r.claim, r.status) for r in rows]}"
+            )
+        (rq3 / "details/apps/cilium__agent.json").write_text(json.dumps({
+            "status": "ok", "baseline": {**_wl(1000), "bpf": bpf},
+            "post_rejit": {**_wl(1200), "bpf": bpf_post},
+        }))
+        rows = [r for r in cilium_claim_rows(root) if r.claim.startswith("RQ3 Cilium coverage-max")]
+        if len(rows) != 1 or rows[0].status != PARTIAL:
+            failures.append(
+                "RQ3 coverage-max with wrong ratio expected PARTIAL, got "
+                f"{[(r.claim, r.status) for r in rows]}"
+            )
 
     if failures:
         for f in failures:

@@ -19,9 +19,9 @@ see the metadata caveat below. Follow this evaluator-facing guide in order.
   as the honest negative record. Full paper-scale measurements require
   multi-hour KVM builds and AWS instances for the ARM64 column. This guide gives
   the no-VM proof path, the Katran smoke command, the six-application command,
-  and available Make-backed experiment commands. RQ3's two policy recipes have
-  not been validated in a fresh complete run, and RQ4 lacks a validated
-  single-command recipe. The
+  and available Make-backed experiment commands. RQ3's family-ablation ladder
+  and Katran policy pair have not been validated in a fresh complete run, and
+  RQ4 lacks a validated single-command recipe. The
   [claim mapping](#9-reproducing-the-papers-experiments) marks the remaining
   gaps explicitly.
 
@@ -413,9 +413,10 @@ Xeon/AWS numbers. See the honesty note at the top of this guide.
 ## 9. Reproducing the paper's experiments
 
 Rows with runnable commands use the Make-backed entrypoints; do not call suite
-modules or binaries directly. The RQ3 policy comparison needs two runs, and a
-validated one-command RQ4 native-replacement recipe is not yet documented.
-Those gaps remain Reproduced work, regardless of historical metric rows.
+modules or binaries directly. The RQ3 policy comparison needs a family-ablation
+matrix of runs, and a validated one-command RQ4 native-replacement recipe is not
+yet documented. Those gaps remain Reproduced work, regardless of historical
+metric rows.
 
 | # | Paper claim | Command | Where the output lands | Reproduced by a single command here? |
 |---|---|---|---|---|
@@ -423,22 +424,30 @@ Those gaps remain Reproduced work, regardless of historical metric rows.
 | RQ1 arm64 | ARM64 micro speedup | `PLATFORM=aws ARCH=arm64 make micro` | `micro/results/` | Yes (needs AWS) |
 | RQ1 overhead | `object_load_ns` ratio | included in `make micro` | `micro/results/` | Command path yes; retained 62-case claim `PARTIAL` |
 | RQ2 Cilium x86 | 1.074× datapath throughput, 4086 sites | `BPFREJIT_CORPUS_APPS=cilium/agent make corpus` | `corpus/results/` | Path yes; exact number is a full-scale run |
-| RQ2 Katran arm64 | 1.073× throughput, 21 sites | `PLATFORM=aws ARCH=arm64 BPFREJIT_CORPUS_APPS=katran make corpus` | `corpus/results/` | Yes (needs AWS) |
-| RQ3 policy | site-count vs profitability | two policy-arm commands below | `corpus/results/` | `PARTIAL`: throughput raw retained, per-pass site reports missing and accepted prose pairs distinct policies |
+| RQ3 policy | site-count vs profitability | four-arm Cilium ladder + Katran pair below | `corpus/results/` | `PARTIAL`: all six throughput/cost points derive from retained raw JSON; per-pass site reports are missing, so site counts are declared |
 | RQ4 native bound | 2.358×, 488.7→262.3 ns/run | no validated single-command recipe retained | `corpus/results/` | `PARTIAL`: selected metrics derive from retained Cilium JSON; 113/22/89 loader counts unavailable |
 | Correctness | "zero correctness mismatches" | printed by `make micro` / `make test` | suite output | Yes |
 | Proofs | "emit computes the same result as its proof sequence" | `make -C native-sim/formal check` | stdout | **Yes** |
-
-The two RQ3 policy-arm commands below select the same pass names and 3-sample,
-30-second workload settings recorded in the retained Cilium run metadata. The
-original shell commands and per-pass site reports were not retained, and these
-re-run recipes have not been validated against a fresh completed run:
+The RQ3 policy-arm commands below select the pass names and 3-sample,
+30-second workload settings recorded in the retained Cilium/Katran run
+metadata. The Cilium ladder starts from the coverage-max arm and disables
+`prefetch`, then `bulk_memory`, then both; the Katran pair compares the
+conservative ARM64 pass with the all-selector pass list. Site counts are not
+derivable from the retained app JSON; they are declared from
+`docs/tmp/kop_ablation_20260605_summary.md`. These re-run recipes have not
+been validated against a fresh completed run:
 
 ```bash
-BPFREJIT_BENCH_PASSES=kop_all_prefetch BPFREJIT_CORPUS_APPS=cilium/agent \
-  SAMPLES=3 WORKLOAD_DURATION=30 make corpus
-BPFREJIT_BENCH_PASSES=kop_all_no_bulk_no_prefetch BPFREJIT_CORPUS_APPS=cilium/agent \
-  SAMPLES=3 WORKLOAD_DURATION=30 make corpus
+for arm in kop_all_prefetch kop_all_no_prefetch \
+           kop_all_no_bulk_prefetch kop_all_no_bulk_no_prefetch; do
+  BPFREJIT_BENCH_PASSES=$arm BPFREJIT_CORPUS_APPS=cilium/agent \
+    SAMPLES=3 WORKLOAD_DURATION=30 make corpus
+done
+PLATFORM=aws ARCH=arm64 BPFREJIT_BENCH_PASSES=kop \
+  BPFREJIT_CORPUS_APPS=katran SAMPLES=3 WORKLOAD_DURATION=30 make corpus
+PLATFORM=aws ARCH=arm64 \
+  BPFREJIT_BENCH_PASSES=rotate,extract,endian_fusion,bulk_memory,prefetch,cond_select,ccmp \
+  BPFREJIT_CORPUS_APPS=katran SAMPLES=3 WORKLOAD_DURATION=30 make corpus
 ```
 
 To render the tracked raw JSON into a human-readable claim table, run:
@@ -463,13 +472,15 @@ The paper's plots are produced by scripts in `docs/paper/scripts/`:
   figures from the three retained RQ1 JSON datasets
 - `docs/paper/scripts/plot_characterization_pure_percase.py` -- derives the
   Section 3 characterization from the two retained pure-bytecode JSON datasets
-- `docs/paper/scripts/plot_app_case_studies.py` -- a declarative camera-ready
-  visualization of the four published summary points; its values are embedded
-  in `CONFIGS`, so this script is **not** reproduction evidence
+- `docs/paper/scripts/plot_rq3_policy_probes.py` -- derives the RQ3
+  application policy-probe figure from the six retained corpus run directories
+- `docs/paper/scripts/plot_app_case_studies.py` -- the extended-abstract
+  rendering of the same six raw points; it reuses the RQ3 derivation above
 
-The two raw-data scripts emit the PDFs referenced from
-`docs/paper/figures/sec-6-koperation-micro-rq1.tex` and
-`docs/paper/figures/sec-6-koperation-micro-rq3.tex`. They are **analysis-side**;
+The RQ1, RQ3, and application scripts emit the PDFs referenced from
+`docs/paper/figures/sec-6-koperation-micro-rq1.tex`,
+`docs/paper/figures/sec-6-koperation-micro-rq3.tex`, and
+`extended-abstract.tex`, respectively. They are **analysis-side**;
 per the repository rule, no aggregation lives in the measurement framework.
 For RQ1, `docs/artifacts/render_claim_table.py` calculates the accepted
 paper's x86 27-case execution geomean from the retained x86 pair, excluding
@@ -480,16 +491,22 @@ cases: 0.771807× x86 and 0.879116× ARM64, displayed as 0.772× and
 0.879×. The older plotting script includes all 29 x86 cases for execution
 time (1.215665×); that is a different population from the paper's 27 cases.
 
-The selected Cilium corpus JSON yields RQ2 throughput 1.074262× and RQ4
-native/eBPF throughput 2.357974× and BPF cost 488.676→262.298 ns/run.
+The selected Cilium corpus JSON yields RQ2 throughput 1.074262× (median) and
+RQ4 native/eBPF throughput 2.357974× and BPF cost 488.676→262.298 ns/run.
 Their historical per-pass site and native-loader logs are missing, so the
 4086-site and 113/22/89-loader counts are **not** independently reproduced.
-The RQ3 full-policy Cilium app yields 1.114172×, while the
-no-bulk/no-prefetch app yields 0.999373×. The paper's table pairs the full
-policy with 4697 sites and 1.114×, matching the historical summary; its
-prose pairs 3512 sites with 1.114×, splicing in the no-bulk/no-prefetch
-policy's historical site count. The original per-pass reports are missing,
-so the site counts cannot be regenerated from the selected app JSON.
+The RQ3 family ladder reads the six retained corpus run directories and
+derives workload ratios as `mean(post pps)/mean(baseline pps)` and BPF cost
+ratios as `sum(run_time_ns_delta)/sum(run_cnt_delta)` over records with
+`run_cnt_delta >= 100`. On Cilium the ladder is monotone in the number of
+enabled families (coverage-max 1.114172×/0.776324, no-prefetch
+1.054652×/0.870897, no-bulk 1.036560×/0.918381, no-bulk+no-prefetch
+0.999373×/0.991438); on Katran the coverage-max policy is worse than the
+conservative one (1.072760×/0.940924 versus 0.994743×/1.005560). The
+applied-site counts (4697/4086/4136/3512/21/62) are **not** derivable from the
+retained app JSON, because the original per-pass reports are missing; they are
+declared from `docs/tmp/kop_ablation_20260605_summary.md` and the figures
+annotate them as declared.
 
 For the paper's 62-case x86 object-load claim, the two retained completed
 May 14 ReJIT runs each contain 63 cases. Restricting each to the exact 62
@@ -506,7 +523,8 @@ commit contains only app, result, progress, and metadata JSON. The 4086
 site count remains a historical summary until the original per-pass raw log
 is recovered or the experiment is rerun with matched configuration.
 These are analysis-side computations. No aggregation lives in the
-measurement framework, and the declarative application plot is not evidence.
+measurement framework; the plot scripts derive every plotted value except the
+declared site annotations.
 
 ---
 
@@ -541,6 +559,27 @@ assuming a command or retained directory succeeded.
    external profiling toolchain.
 4. **ARM64 numbers require AWS.** There is no local ARM64 KVM path for the
    reported configuration; QEMU is available but is not the measured platform.
+5. **The paper's "62 microbenchmarks" population is not the shipped RQ1
+   population.** Section 7.1's load-overhead sentence cites all 62
+   microbenchmarks; the 62-name dataset is
+   `micro/results/x86_kvm_micro_20260429_035938_203074`. The shipped RQ1
+   datasets hold 29 cases each, and the renderer's RQ1 execution claim uses 27
+   after excluding the baseline-only `simple` and `simple_packet`. The
+   load-overhead claim therefore cannot be re-derived from the RQ1 datasets.
+6. **Katran's per-app applied-site count differs from the corpus-wide family
+   sum.** `docs/tmp/kop_ablation_20260605_summary.md` records 21 Katran sites in
+   its per-app table (line 55) but 24 in its corpus-wide family tally (rotate 20
+   + extract 4). The paper quotes the per-app 21; the two are different
+   aggregations of the same run and the discrepancy is unresolved because the
+   per-pass report is not retained.
+7. **Site counts are declared, not derived.** The RQ3 figure and the renderer
+   annotate 4697/4086/4136/3512/21/62 as declared from the historical summary,
+   because no `details/loadtime-reports/` tree survives for those runs. Only the
+   throughput and BPF-cost axes are raw-derived.
+8. **RQ4's producers are retained analysis scripts, not Make targets.**
+   `docs/tmp/native_eval_20260529.py` and `docs/tmp/native_eval_20260614.py`
+   derive the native-in-kernel metrics; they are shipped as cited files and are
+   not reachable from a single `make` command.
 
 ---
 
@@ -562,6 +601,8 @@ runner/                       # Make-backed suites, executors, images, libs
 docs/paper/                   # current paper source and plots; see metadata caveat above
 docs/implementation.md        # current proof/coverage boundary (read this)
 docs/tmp/20260906-*.md        # chronological engineering log with measurements
+docs/artifacts/               # AEC renderer, packager, and compact receipts
+docs/paper/scripts/           # raw-deriving plot scripts (RQ1, RQ3, Section 3)
 ```
 
 ---
@@ -576,7 +617,7 @@ evidence status, not an AEC decision.
 |---|---|---|
 | Available | The public, immutable `atc26-ae-1` ZIP is deposited at [version DOI 10.5281/zenodo.22907397](https://doi.org/10.5281/zenodo.22907397); [concept DOI 10.5281/zenodo.22907396](https://doi.org/10.5281/zenodo.22907396) is the stable all-versions homepage. Repository-original material is MIT-licensed; third-party licenses and pins are in `THIRD_PARTY_NOTICES.md`. | The corrected `atc26-ae-2` draft must be packaged, independently checked and **published** before it can count as an available newer archive. Publishing a draft DOI alone does not publish its files. |
 | Functional | Component map, environment, dependencies, safety notes, no-VM formal path and a completed Katran KVM smoke are documented above. | Verify the new ZIP **after clean extraction** through the documented proof/build/smoke path; an archive self-test or a successful run in the authors' checkout alone is weaker evidence. |
-| Reproduced | The retained RQ1 data derive 1.242×/1.222× speedup on the respective 27-case subsets and 0.772×/0.879× code size on all 29 cases. Selected raw Cilium app JSON derives RQ2 throughput 1.074× and RQ4 throughput 2.358× and 488.7→262.3 ns/run. The formal, Katran-smoke and six-app-success receipts are hash-bound. The six-app run `x86_kvm_corpus_20260923_114624_121697` completed with 6/6 successful workloads. | RQ1's 62-case 0.99× object-load claim is `PARTIAL`; RQ2's 4086 sites, RQ3's accepted-prose 3512-sites/1.114× pairing, and RQ4's 113/22/89 counts lack independent raw derivations. Row-level PASS is not a full badge verdict. |
+| Reproduced | The retained RQ1 data derive 1.242×/1.222× speedup on the respective 27-case subsets and 0.772×/0.879× code size on all 29 cases. Selected raw Cilium app JSON derives RQ2 throughput 1.074× and RQ4 throughput 2.358× and 488.7→262.3 ns/run. All six RQ3 policy-probe throughput/cost points derive from retained raw JSON (Cilium ladder 1.114/1.055/1.037/0.999 with costs 0.776/0.871/0.918/0.991; Katran 1.073/0.995 with costs 0.941/1.006). The formal, Katran-smoke and six-app-success receipts are hash-bound. The six-app run `x86_kvm_corpus_20260923_114624_121697` completed with 6/6 successful workloads. | RQ1's 62-case 0.99× object-load claim is `PARTIAL`; RQ2's 4086 sites, RQ3's declared site counts, and RQ4's 113/22/89 counts lack independent per-pass raw derivations. Row-level PASS is not a full badge verdict. |
 
 `docs/artifacts/render_claim_table.py` separates raw-file integrity, selected
 numeric claims, ReJIT coverage and full workload success. Its `PASS` is local to

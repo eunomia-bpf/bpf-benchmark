@@ -145,9 +145,9 @@ for rel in "${RESULTS[@]}"; do
     done
 done
 
-# Retain the compact Cilium RQ2/RQ4 records used by render_claim_table.py.
-# The paper's 4086-site and loader-count claims still lack their original logs;
-# do not infer them from these app records.
+# Retain the compact Cilium/Katran RQ2/RQ3/RQ4 records used by
+# render_claim_table.py. The paper's 4086-site and loader-count claims still
+# lack their original per-pass logs; do not infer them from these app records.
 CORPUS_RUNS=(
     x86_kvm_corpus_20260604_070210_639497
     x86_kvm_corpus_20260604_100557_313063
@@ -155,11 +155,17 @@ CORPUS_RUNS=(
     x86_kvm_corpus_20260529_040554_604387
     x86_kvm_corpus_20260529_043720_016160
     x86_kvm_corpus_20260605_145112_835705
+    x86_kvm_corpus_20260605_141420_746952
+    x86_kvm_corpus_20260605_164411_317423
     x86_kvm_corpus_20260605_160715_129437
+    aws_arm64_corpus_20260605_080836_924256
+    aws_arm64_corpus_20260605_094729_221231
 )
 for run in "${CORPUS_RUNS[@]}"; do
-    for extra in metadata.json details/progress.json details/result.json details/apps/cilium__agent.json; do
+    for extra in metadata.json details/progress.json details/result.json \
+                 details/apps/cilium__agent.json details/apps/katran.json; do
         path="corpus/results/$run/$extra"
+        git -C "$ROOT_DIR" ls-tree "$COMMIT" -- "$path" | grep -q . || continue
         mkdir -p "$STAGE/$(dirname "$path")"
         git -C "$ROOT_DIR" show "$COMMIT:$path" > "$STAGE/$path"
     done
@@ -171,6 +177,7 @@ done
 CITED_DOCS=(
     docs/tmp/20260906-bpf-development-todo.md
     docs/tmp/arm64_kop_micro_20260606_summary.md
+    docs/tmp/kop_ablation_20260605_summary.md
     docs/tmp/kop_all_force_eval_20260603.py
     docs/tmp/kop_arm64_eval_20260605.py
     docs/tmp/kop_arm64_eval_20260605_summary.md
@@ -205,9 +212,8 @@ The archive contains the exact source trees needed by the documented proof,
 microbenchmark, and six-application KVM paths, plus the five raw paper-result
 JSON datasets read by the included plotting scripts, historical load-time and 62-name population
 JSON datasets whose pairing remains weaker than the paper's 0.99x claim,
-plus selected Cilium
-RQ2/RQ4 raw app records and run-status provenance read by the claim renderer.
-Compact retained evidence
+plus selected Cilium and Katran RQ2/RQ3/RQ4 raw app records and run-status
+provenance read by the claim renderer. Compact retained evidence
 records the complete formal check, the six-application ReJIT coverage run, and
 the fresh Katran KVM smoke. ARTIFACT_MANIFEST.json records the superproject
 commit and every direct and nested submodule pin. Historical bulk result trees are omitted; the
@@ -263,7 +269,8 @@ manifest = {
         for pattern in ('corpus/results/*/metadata.json',
                         'corpus/results/*/details/progress.json',
                         'corpus/results/*/details/result.json',
-                        'corpus/results/*/details/apps/cilium__agent.json')
+                        'corpus/results/*/details/apps/cilium__agent.json',
+                        'corpus/results/*/details/apps/katran.json')
         for path in sorted(stage.glob(pattern))
     ],
     'validationEvidence': [
@@ -293,6 +300,8 @@ required=(
     CITATION.cff .zenodo.json CHANGELOG.md Makefile
     docs/atc26-artifact-evaluation.md docs/artifacts/render_claim_table.py
     docs/paper/scripts/plot_evaluation_koperation.py
+    docs/paper/scripts/plot_rq3_policy_probes.py
+    docs/paper/scripts/plot_app_case_studies.py
     native-sim/formal/lean-toolchain vendor/llvmbpf/CMakeLists.txt
     vendor/libbpf/src/libbpf.c vendor/linux-framework/Makefile
     llvm-backend/llvm/llvm/CMakeLists.txt vendor/repos/katran/CMakeLists.txt
@@ -320,7 +329,12 @@ required=(
     micro/results/x86_kvm_micro_20260519_114214_364050/details/result.json
     corpus/results/x86_kvm_corpus_20260604_100557_313063/details/apps/cilium__agent.json
     corpus/results/x86_kvm_corpus_20260529_033517_489159/details/apps/cilium__agent.json
+    corpus/results/x86_kvm_corpus_20260605_145112_835705/details/apps/cilium__agent.json
+    corpus/results/x86_kvm_corpus_20260605_160715_129437/details/apps/cilium__agent.json
+    corpus/results/aws_arm64_corpus_20260605_080836_924256/details/apps/katran.json
+    corpus/results/aws_arm64_corpus_20260605_094729_221231/details/apps/katran.json
     corpus/results/x86_kvm_corpus_20260529_040554_604387/details/apps/cilium__agent.json
+    docs/tmp/kop_ablation_20260605_summary.md
 )
 for rel in "${required[@]}"; do
     [ -e "$VERIFY/$rel" ] || { echo "missing from ZIP: $rel" >&2; exit 1; }
