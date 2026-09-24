@@ -4154,3 +4154,36 @@ framework leaves the original bytecode in place and continues.
   cover instruction parsing, register-number selection, the C register switch,
   logical flag handlers, conditional compare, compiler/native bytes,
   multi-step traces, helpers, specialization preservation, or full O1--O4.
+
+### AArch64 logical flag-handler composition, 2026-09-24
+
+- Gap: the AND/BIC result and logical-NZCV primitives were separately generated
+  and proved, but the real ANDS/BICS/TST/TST-BIC branches still composed them
+  by hand. There was also no handler-state theorem distinguishing the
+  result-writing instructions from flag-only tests.
+- Contract and C binding: `arm64_logic_flag_handler_spec.json` defines the AND
+  and BIC families plus writeback and test modes, with family codes validated
+  against the shared ALU decode table. Its generator emits one C
+  `KPROG_ARM64_EXEC_LOGIC_FLAGS` step and the matching typed Lean step. The real
+  ANDS/BICS/TST/TST-BIC branches now capture both operands and call that step,
+  so result and NZCV observe the same immutable operands and operation family.
+- Lean bridge: `KProgFormal/Arm64LogicFlagHandler.lean` independently restates
+  AND/BIC results and logical NZCV. `arm64_logic_flag_step_refines` proves the
+  generated step; `arm64_logic_flag_handler_refines` proves both state modes
+  for every family, width, destination class, operand, and incoming state.
+  ANDS/BICS perform width-aware scalarizing writeback and replace NZCV;
+  TST/TST-BIC preserve the complete modeled GPR/SP state and replace only NZCV.
+  Concrete theorems pin 32-bit negative writeback, discarded XZR results with
+  live flags, TST state preservation, and TST-BIC flags. There is no `sorry` or
+  `admit`.
+- Machine checks: `make -C native-sim/formal check` exits 0, including a new
+  independent 64-case AND/BIC, four-width boundary-vector C oracle. With the
+  installed Rust/Clang paths made explicit, `make -C native-sim/arm64
+  micro-proofs-build` exits 0 for the negative artifact and all 29
+  workload-derived artifacts.
+- Preserved boundary: the theorem begins after typed operands, width,
+  destination class, and source-modifier evaluation are supplied. It does not
+  cover instruction parsing, register-number selection, the C register switch,
+  conditional compare, compiler/native bytes, multi-step traces, helpers,
+  specialization preservation, or full O1--O4. The architecture rebuild is
+  regression evidence, not whole-simulator semantic equivalence.

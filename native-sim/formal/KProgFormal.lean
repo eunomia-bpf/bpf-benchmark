@@ -45,6 +45,8 @@ import KProgFormal.GeneratedArm64AluHandler
 import KProgFormal.Arm64AluHandler
 import KProgFormal.GeneratedArm64FlagHandler
 import KProgFormal.Arm64FlagHandler
+import KProgFormal.GeneratedArm64LogicFlagHandler
+import KProgFormal.Arm64LogicFlagHandler
 import KProgFormal.GeneratedArm64Mod
 import KProgFormal.Arm64Mod
 import KProgFormal.GeneratedArm64Bitfield

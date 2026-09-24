@@ -1,0 +1,1 @@
+{"schema_version":1,"operation":"arm64LogicFlagHandler","families":[{"name":"and","code":2,"alu":"and"},{"name":"bic","code":3,"alu":"bic"}],"modes":[{"name":"writeback","writes_destination":true},{"name":"test","writes_destination":false}]}

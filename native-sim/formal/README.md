@@ -71,10 +71,18 @@ the real ADDS/SUBS and CMN/CMP C branches and the matching Lean step.
 ADDS/SUBS take one generated result/flag step, perform width-aware scalarizing
 writeback (including discarded XZR/NONE writes), and replace NZCV; CMN/CMP
 replace the same NZCV while preserving the complete modeled GPR/SP state.
-The theorem begins after operand and source-modifier selection. Logical
-flag-setting handlers, conditional compare, register-number selection, and
-native bytes remain separate obligations. A 64-case host oracle checks both
-generated C modes over ADD/SUB, all four widths, and boundary operands.
+The theorem begins after operand and source-modifier selection. A parallel
+logical flag-handler contract routes the real ANDS/BICS/TST/TST-BIC branches
+through one generated AND/BIC result-plus-NZCV step.
+`arm64_logic_flag_handler_refines` proves width-aware scalarizing writeback for
+ANDS/BICS, including discarded XZR/NONE results, and proves that TST/TST-BIC
+replace NZCV while preserving the complete modeled GPR/SP state. It covers
+both logical families, all modeled widths and destinations, arbitrary operands,
+and arbitrary incoming state. A separate 64-case host oracle checks the shared
+C step over boundary operands. Both handler theorems begin after typed operand,
+width, destination, and source-modifier selection; conditional compare,
+register-number selection, the C register switch, and native bytes remain
+separate obligations.
 The supported x86 condition-code table is likewise generated from
 `x86_cond_spec.json` into the C simulator predicate and Lean. Lean proves the
 same next-PC refinement for arbitrary flags and branch targets; parity
@@ -339,7 +347,8 @@ mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 little-endian memory
 load/store contract, and AArch64 width, generic ALU handler writeback/path
-selection, ADDS/SUBS/CMN/CMP composition, plus ADD/SUB/logical NZCV production;
+selection, ADDS/SUBS/CMN/CMP and ANDS/BICS/TST/TST-BIC composition, plus
+ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.
