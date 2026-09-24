@@ -38,6 +38,23 @@ Added for artifact evaluation:
   "six-app full workload success" row from these raw files.
 - Evaluator-guide and package updates for the above; the package's clean
   extraction still runs `make lint`, the renderer self-test, and the claim table.
+- RQ3 policy-probe reconciliation: the paper's prose paired the 3512-site
+  no-bulk/no-prefetch policy with the coverage-max 1.114x throughput, which
+  inverts the measured ladder. `docs/paper/sections/7-evaluation.tex`,
+  `docs/paper/figures/sec-6-koperation-micro-rq3.tex`,
+  `docs/paper/extended-abstract.tex`, the RQ2/RQ3 table, and the Q8 rebuttal
+  notes now report the monotone Cilium ladder (coverage-max 4697 sites/1.114x
+  at 0.776x BPF cost; no-prefetch 4086/1.055x/0.871x; no-bulk
+  4136/1.037x/0.918x; no-bulk+no-prefetch 3512/0.999x/0.991x) and the Katran
+  counterexample (conservative 21/1.073x/0.941x vs coverage-max
+  62/0.995x/1.006x).
+- `docs/paper/scripts/plot_rq3_policy_probes.py` derives the RQ3 figure from
+  the six retained corpus runs; `docs/paper/scripts/plot_app_case_studies.py`
+  now reuses that derivation for the extended-abstract figure instead of
+  embedded constants.
+- `docs/artifacts/render_claim_table.py` derives all six RQ3 throughput/cost
+  points from the retained app JSON. Applied-site counts remain declared from
+  `docs/tmp/kop_ablation_20260605_summary.md`, which is now shipped.
 
 ## atc26-ae-1 (2026-09-22)
 

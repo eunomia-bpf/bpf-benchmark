@@ -178,6 +178,15 @@ on that record; there is no public ae-1 `.sha256` companion. Once ae-2 is
 published, download both its ZIP and `.sha256` companion and run `sha256sum -c`
 in their directory. Do not use a draft's checksum as public verification.
 
+The `atc26-ae-2` candidate ZIP built from superproject commit
+`ea84bd45a1ec2c262dc3002f2d2212f2fb0acc8c` is 914,727,020 bytes and has SHA256
+`7b245f361dc295628bf1020aa6694345a859ab9f08018014f06c57bd34bfbcbf`.
+It passed the packager's clean-extraction verification (`make lint`,
+`py_compile`, renderer `--self-test`, table generation, manifest JSON parse,
+and the `required=(...)` file list). It is a local build, not a published
+record; the authors must upload this ZIP and its `.sha256` companion to Zenodo
+and publish the version before it counts as available evidence.
+
 ```bash
 ZIP=atc26-ae-1.zip  # select the ZIP from a published Zenodo record
 md5sum "$ZIP"       # ae-1: compare with the MD5 shown on its Zenodo Files page
@@ -196,12 +205,12 @@ the superproject commit and direct/nested submodule pins. Match the package
 version and checksum to the chosen GitHub release before interpreting its
 evidence.
 
-Install the Python dependency used by the harness. The two raw-data plotting
+Install the Python dependency used by the harness. The raw-data plotting
 scripts additionally need Matplotlib and NumPy:
 
 ```bash
 pip install pyyaml
-pip install matplotlib numpy  # only for regenerating the paper's micro figures
+pip install matplotlib numpy  # only for regenerating the paper's figures
 ```
 
 ---
