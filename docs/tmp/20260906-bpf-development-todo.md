@@ -4123,3 +4123,34 @@ framework leaves the original bytecode in place and continues.
   native instruction bytes, multi-step traces, helpers, specialization
   preservation, or full O1--O4. The artifact rebuild is regression evidence,
   not whole-simulator semantic equivalence.
+
+### AArch64 arithmetic flag-handler composition, 2026-09-24
+
+- Gap: ADD/SUB result and NZCV primitives were separately generated and proved,
+  but the actual ADDS/SUBS branches still composed them by hand, and the proof
+  did not state the crucial difference between result-writing ADDS/SUBS and
+  flag-only CMN/CMP.
+- Contract and C binding: `arm64_flag_handler_spec.json` defines ADD and SUB
+  families plus writeback and compare modes. Its generator emits the C
+  `KPROG_ARM64_EXEC_ARITH_WRITEBACK` / `...COMPARE` macros called by the real
+  ADDS/SUBS/CMN/CMP branches and a typed Lean family/step. The C branches first
+  capture both operands, so result and NZCV use the same immutable values.
+- Lean bridge: `KProgFormal/Arm64FlagHandler.lean` independently reconstructs
+  ADD/SUB result and NZCV statements. `arm64_flag_step_refines` proves the
+  generated family step; `arm64_flag_handler_refines` then proves both modes
+  over every ADD/SUB family, width, destination class, state, and operand.
+  ADDS/SUBS perform width-aware scalarizing writeback and replace NZCV; CMN/CMP
+  preserve the complete modeled GPR/SP state and replace only NZCV. Concrete
+  theorems pin 32-bit signed overflow, discarded XZR result with live flags,
+  CMP state preservation, and CMN carry/zero. There is no `sorry` or `admit`.
+- Machine checks: the full `make -C native-sim/formal check` exits 0. The new
+  independent host oracle checks 64 ADD/SUB family, width, and boundary-vector
+  combinations in both writeback and compare modes. With the installed
+  Rust/Clang paths made explicit, `make -C native-sim/arm64
+  micro-proofs-build` exits 0 for the negative artifact and all 29
+  workload-derived artifacts.
+- Preserved boundary: the theorem begins after typed operands, width,
+  destination class, and source-modifier evaluation are supplied. It does not
+  cover instruction parsing, register-number selection, the C register switch,
+  logical flag handlers, conditional compare, compiler/native bytes,
+  multi-step traces, helpers, specialization preservation, or full O1--O4.

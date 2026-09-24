@@ -45,7 +45,9 @@ increment is committed and pushed immediately). Current state:
   memory tag-dispatch contract, and the two-condition AArch64 stack slot-tag
   contract. The generic AArch64 ALU handler additionally composes all six ALU
   results with width-aware GPR/SP/XZR/NONE writeback and the
-  provenance-preserving pointer-ADD path.
+  provenance-preserving pointer-ADD path. The arithmetic flag-handler theorem
+  composes ADDS/SUBS result writeback with NZCV and proves that CMN/CMP replace
+  NZCV without changing modeled register/SP state.
 - The immediate-opcode handler composition pattern is: select the typed lane
   and raw immediate field, decode with the generated immediate contract,
   compute the generated result, write back the selected lane with tag
@@ -61,14 +63,16 @@ increment is committed and pushed immediately). Current state:
   helpers (`x86_bswap`, `x86_popcount64`, `x86_sign_extend`,
   `x86_signed_abs_width`, `x86_shld`/`x86_shrd`, `x86_ror`, the BT/BZHI
   predicates) now delegate to generated contracts with proven refinements.
-- Open on the AArch64 side: flag-setting and source-modifier handler
-  compositions beyond the generic ALU slice. The generic immediate/register
+- Open on the AArch64 side: logical flag-setting handlers (ANDS/BICS/TST),
+  conditional compare, and source-modifier/register-selection composition
+  beyond typed operands. The generic immediate/register
   ALU handler is now composed by `arm64_alu_handler_refines`: it covers the
   pointer-preserving 64-bit ADD path, scalarized arithmetic writeback, width
   narrowing, and GPR/SP/XZR/NONE destinations after typed operands are supplied.
   The ALU flag op-step half is separately proved by `arm64_add_step_refines`,
-  `arm64_sub_step_refines`, and `arm64_logic_step_refines`. Remaining work also
-  includes the load/store address and tag paths,
+  `arm64_sub_step_refines`, and `arm64_logic_step_refines`; the arithmetic
+  handler theorem composes ADDS/SUBS writeback and CMN/CMP no-write behavior.
+  Remaining work also includes the load/store address and tag paths,
   the vector/`.D0`/`.Q0` paths, `MADD`/`MSUB`/`UMULH` flag consequences if any
   (the multiply family writes no NZCV, matching the absence of
   MADD/MSUB-with-flags opcodes). Both halves of the

@@ -64,6 +64,17 @@ provenance tags. The theorem starts after decoding, source-register selection,
 and source-modifier evaluation; those inputs, the C register switch itself,
 and native bytes remain boundaries. A host cross-check exhausts 168 numeric
 path-selection cases, including unsupported width/opcode values.
+The flag-setting arithmetic handlers have a second composed contract.
+`arm64_flag_handler_spec.json` generates the ADD/SUB family dispatch used by
+the real ADDS/SUBS and CMN/CMP C branches and the matching Lean step.
+`arm64_flag_handler_refines` proves two modes against an independent statement:
+ADDS/SUBS take one generated result/flag step, perform width-aware scalarizing
+writeback (including discarded XZR/NONE writes), and replace NZCV; CMN/CMP
+replace the same NZCV while preserving the complete modeled GPR/SP state.
+The theorem begins after operand and source-modifier selection. Logical
+flag-setting handlers, conditional compare, register-number selection, and
+native bytes remain separate obligations. A 64-case host oracle checks both
+generated C modes over ADD/SUB, all four widths, and boundary operands.
 The supported x86 condition-code table is likewise generated from
 `x86_cond_spec.json` into the C simulator predicate and Lean. Lean proves the
 same next-PC refinement for arbitrary flags and branch targets; parity
@@ -328,7 +339,7 @@ mechanically binds the pointer-add bits/tag policy and ABI-load offset/tag
 policy, both ISA flag-to-control-flow decisions, x86 width narrowing, x86
 logical/ADD/SUB/ADC/SBB flag production, the x86 little-endian memory
 load/store contract, and AArch64 width, generic ALU handler writeback/path
-selection, plus ADD/SUB/logical NZCV production;
+selection, ADDS/SUBS/CMN/CMP composition, plus ADD/SUB/logical NZCV production;
 other flag production, the decoder-to-handler
 mapping, renderer, C compiler, and all other
 operations remain in the trusted computing base.

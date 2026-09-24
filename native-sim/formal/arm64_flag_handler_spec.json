@@ -1,0 +1,1 @@
+{"schema_version":1,"operation":"arm64ArithFlagHandler","families":[{"name":"add","code":0,"alu":"add","flags":"add"},{"name":"sub","code":1,"alu":"sub","flags":"sub"}],"modes":[{"name":"writeback","writes_destination":true},{"name":"compare","writes_destination":false}]}
