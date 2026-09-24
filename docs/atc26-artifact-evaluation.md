@@ -250,7 +250,7 @@ KVM-capable host, so it belongs to the full-validation stage in
 It is the paper's **soundness check for the "native emit == proof sequence"
 claim**. In order it:
 
-1. Runs `--check` on ~50 generator scripts (e.g.
+1. Runs `--check` on the 52 generator scripts (e.g.
    `generate_arm64_alu_result_spec.py --check`,
    `generate_x86_add_flags_spec.py --check`) that regenerate the shared
    Lean + C contracts from the JSON specs and **fail if any generated artifact
