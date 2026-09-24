@@ -6,6 +6,8 @@ results/*/details/*
 !results/*/details/progress.json
 !results/*/details/apps/
 !results/*/details/apps/*.json
+!results/*/details/loadtime-reports/
+!results/*/details/loadtime-reports/*.jsonl
 
 # Current oversized per-app result payloads. Git ignore is path-based, so
 # these need exact path ignores while smaller app JSON files stay trackable.

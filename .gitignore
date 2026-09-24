@@ -134,6 +134,8 @@ micro/results/*/*.bpf.o
 !**/results/*/details/progress.json
 !**/results/*/details/apps/
 !**/results/*/details/apps/*.json
+!**/results/*/details/loadtime-reports/
+!**/results/*/details/loadtime-reports/*.jsonl
 **/results/*/details/failures/
 **/results/*/details/workdirs/
 

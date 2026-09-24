@@ -434,7 +434,7 @@ metric rows.
 | RQ1 arm64 | ARM64 micro speedup | `PLATFORM=aws ARCH=arm64 make micro` | `micro/results/` | Yes (needs AWS) |
 | RQ1 overhead | `object_load_ns` ratio | included in `make micro` | `micro/results/` | Command path yes; retained 62-case claim `PARTIAL` |
 | RQ2 Cilium x86 | 1.074× datapath throughput, 4086 sites | `BPFREJIT_CORPUS_APPS=cilium/agent make corpus` | `corpus/results/` | Path yes; exact number is a full-scale run |
-| RQ3 policy | site-count vs profitability | four-arm Cilium ladder + Katran pair below | `corpus/results/` | `PARTIAL`: all six throughput/cost points derive from retained raw JSON; per-pass site reports are missing, so site counts are declared |
+| RQ3 policy | site-count vs profitability | four-arm Cilium ladder + Katran pair below | `corpus/results/` | `PARTIAL`: all six throughput/cost points and the four fresh Cilium site counts derive from retained raw JSON; the June per-pass site reports are missing, so the June/Katran counts are declared and the fresh ladder's ordering diverges from June's |
 | RQ4 native bound | 2.358×, 488.7→262.3 ns/run | no validated single-command recipe retained | `corpus/results/` | `PARTIAL`: selected metrics derive from retained Cilium JSON; 113/22/89 loader counts unavailable |
 | Correctness | "zero correctness mismatches" | printed by `make micro` / `make test` | suite output | Yes |
 | Proofs | "emit computes the same result as its proof sequence" | `make -C native-sim/formal check` | stdout | **Yes** |
@@ -442,10 +442,14 @@ The RQ3 policy-arm commands below select the pass names and 3-sample,
 30-second workload settings recorded in the retained Cilium/Katran run
 metadata. The Cilium ladder starts from the coverage-max arm and disables
 `prefetch`, then `bulk_memory`, then both; the Katran pair compares the
-conservative ARM64 pass with the all-selector pass list. Site counts are not
-derivable from the retained app JSON; they are declared from
-`docs/tmp/kop_ablation_20260605_summary.md`. These re-run recipes have not
-been validated against a fresh completed run:
+conservative ARM64 pass with the all-selector pass list. The Cilium arm
+commands have since been re-run to completion on the current host/toolchain
+generation (the four `corpus/results/x86_kvm_corpus_20260924_*` directories),
+and those runs retain `details/loadtime-reports/cilium__agent.jsonl`, from which
+the renderer derives 4017/3512/3517/2988 applied sites. The June and Katran site
+counts remain declared from `docs/tmp/kop_ablation_20260605_summary.md` because
+their runs retained no per-pass report. The Katran re-run recipes have not been
+validated against a fresh completed run:
 
 ```bash
 for arm in kop_all_prefetch kop_all_no_prefetch \
@@ -512,10 +516,29 @@ ratios as `sum(run_time_ns_delta)/sum(run_cnt_delta)` over records with
 enabled families (coverage-max 1.114172×/0.776324, no-prefetch
 1.054652×/0.870897, no-bulk 1.036560×/0.918381, no-bulk+no-prefetch
 0.999373×/0.991438); on Katran the coverage-max policy is worse than the
-conservative one (1.072760×/0.940924 versus 0.994743×/1.005560). The
-applied-site counts (4697/4086/4136/3512/21/62) are **not** derivable from the
-retained app JSON, because the original per-pass reports are missing; they are
-declared from `docs/tmp/kop_ablation_20260605_summary.md` and the figures
+conservative one (1.072760×/0.940924 versus 0.994743×/1.005560).
+
+The **Cilium** applied-site counts are additionally derived from raw shim
+report streams. The June ladder retained no per-pass reports, so the same four
+single-pass policies were rerun on the same host/toolchain generation as four
+fresh isolated `make corpus` invocations (the four
+`corpus/results/x86_kvm_corpus_20260924_*` directories) that do retain
+`details/loadtime-reports/cilium__agent.jsonl`. The renderer sums
+`report.sites_applied` over each stream, keyed by the policy name in
+`record.step`, giving 4017 (coverage-max), 3512 (no-prefetch), 3517 (no-bulk),
+and 2988 (no-bulk+no-prefetch) — a deterministic count that is independent of
+`SAMPLES` and `WORKLOAD_DURATION` (a `SAMPLES=1 WORKLOAD_DURATION=10` rerun of
+the coverage-max policy derives the same 4017). These fresh runs are a
+**different host/toolchain generation** from the June ladder, so both their
+absolute site counts and their throughput ordering differ: the June ladder is
+monotone (coverage-max fastest), while the fresh ladder's throughput order is
+the reverse (no-bulk+no-prefetch fastest at 1.138190×, coverage-max slowest at
+1.011866×). The renderer's `RQ3 Cilium June-vs-fresh ladder ordering (diverges)`
+row derives both orderings from retained raw JSON and reports the divergence;
+the fresh ladder is shipped as separate evidence and does not replace the June
+values. The Katran and the historical RQ2 counts (21/62, 4086) remain
+**declared** from `docs/tmp/kop_ablation_20260605_summary.md`, since no
+`details/loadtime-reports/` tree survives for those runs and the figures
 annotate them as declared.
 
 For the paper's 62-case x86 object-load claim, the two retained completed
@@ -530,8 +553,10 @@ paper's exact population. A search across all current Git refs found no
 May/June `details/loadtime-reports`, `loadtime-plans`, or `shim-logs`
 files for the historical corpus runs; the original June 4 Cilium result
 commit contains only app, result, progress, and metadata JSON. The 4086
-site count remains a historical summary until the original per-pass raw log
-is recovered or the experiment is rerun with matched configuration.
+site count remains a historical summary until its original per-pass raw log is
+recovered; the fresh-generation no-prefetch rerun that retains its report
+stream derives 3512 sites for the same family set, which is a different
+generation rather than a reproduction.
 These are analysis-side computations. No aggregation lives in the
 measurement framework; the plot scripts derive every plotted value except the
 declared site annotations.
@@ -582,11 +607,23 @@ assuming a command or retained directory succeeded.
    + extract 4). The paper quotes the per-app 21; the two are different
    aggregations of the same run and the discrepancy is unresolved because the
    per-pass report is not retained.
-7. **Site counts are declared, not derived.** The RQ3 figure and the renderer
-   annotate 4697/4086/4136/3512/21/62 as declared from the historical summary,
-   because no `details/loadtime-reports/` tree survives for those runs. Only the
-   throughput and BPF-cost axes are raw-derived.
-8. **RQ4's producers are retained analysis scripts, not Make targets.**
+7. **The June RQ3/RQ2 site counts are declared; the fresh Cilium counts are
+   derived.** No `details/loadtime-reports/` tree survives for the June ladder,
+   so its annotated counts (4697/4086/4136/3512), the Katran counts (21/62) and
+   the RQ2 4086 count are **declared** from
+   `docs/tmp/kop_ablation_20260605_summary.md`. The four fresh Cilium reruns
+   (`corpus/results/x86_kvm_corpus_20260924_*`) do retain their report streams
+   and the renderer derives 4017/3512/3517/2988 from them; those runs are a
+   different host/toolchain generation, so do not treat the derived counts as
+   reproducing the June numbers.
+8. **The fresh Cilium ladder does not reproduce the June ladder's ordering.**
+   On the same fresh generation the post/baseline throughput ordering is the
+   reverse of the June ladder (no-bulk+no-prefetch 1.138190× fastest,
+   coverage-max 1.011866× slowest), and baseline pps varies ~10% across arms.
+   The renderer derives both orderings and marks the comparison `PARTIAL`
+   (`RQ3 Cilium June-vs-fresh ladder ordering (diverges)`); the June rows are
+   kept and the fresh runs are shipped as a separate evidence set.
+9. **RQ4's producers are retained analysis scripts, not Make targets.**
    `docs/tmp/native_eval_20260529.py` and `docs/tmp/native_eval_20260614.py`
    derive the native-in-kernel metrics; they are shipped as cited files and are
    not reachable from a single `make` command.
@@ -627,7 +664,7 @@ evidence status, not an AEC decision.
 |---|---|---|
 | Available | The public, immutable `atc26-ae-1` ZIP is deposited at [version DOI 10.5281/zenodo.22907397](https://doi.org/10.5281/zenodo.22907397); [concept DOI 10.5281/zenodo.22907396](https://doi.org/10.5281/zenodo.22907396) is the stable all-versions homepage. Repository-original material is MIT-licensed; third-party licenses and pins are in `THIRD_PARTY_NOTICES.md`. An `atc26-ae-2` candidate ZIP was built by `docs/artifacts/package-atc26.sh` and replay-verified from clean extraction. | The `atc26-ae-2` candidate must be **published** on Zenodo, and an independent evaluator must verify that published ZIP from clean extraction, before it can count as an available newer archive. Publishing a draft DOI alone does not publish its files. |
 | Functional | Component map, environment, dependencies, safety notes, no-VM formal path and a completed Katran KVM smoke are documented above. The `atc26-ae-2` candidate passed the packager's clean-extraction replay (`make lint`, `py_compile`, renderer `--self-test`, table generation and manifest parse). | An independent evaluation must confirm the **published** ZIP through the documented proof/build/smoke path; a build-time self-test in the authors' checkout alone is weaker evidence. |
-| Reproduced | The retained RQ1 data derive 1.242×/1.222× speedup on the respective 27-case subsets and 0.772×/0.879× code size on all 29 cases. Selected raw Cilium app JSON derives RQ2 throughput 1.074× and RQ4 throughput 2.358× and 488.7→262.3 ns/run. All six RQ3 policy-probe throughput/cost points derive from retained raw JSON (Cilium ladder 1.114/1.055/1.037/0.999 with costs 0.776/0.871/0.918/0.991; Katran 1.073/0.995 with costs 0.941/1.006). The formal, Katran-smoke and six-app-success receipts are hash-bound. The six-app run `x86_kvm_corpus_20260923_114624_121697` completed with 6/6 successful workloads. | RQ1's 62-case 0.99× object-load claim is `PARTIAL`; RQ2's 4086 sites, RQ3's declared site counts, and RQ4's 113/22/89 counts lack independent per-pass raw derivations. Row-level PASS is not a full badge verdict. |
+| Reproduced | The retained RQ1 data derive 1.242×/1.222× speedup on the respective 27-case subsets and 0.772×/0.879× code size on all 29 cases. Selected raw Cilium app JSON derives RQ2 throughput 1.074× and RQ4 throughput 2.358× and 488.7→262.3 ns/run. All six RQ3 policy-probe throughput/cost points derive from retained raw JSON (Cilium ladder 1.114/1.055/1.037/0.999 with costs 0.776/0.871/0.918/0.991; Katran 1.073/0.995 with costs 0.941/1.006). The four fresh Cilium single-pass reruns retain their shim report streams and the renderer derives applied-site counts 4017/3512/3517/2988 from them, and derives a `PARTIAL` June-vs-fresh ordering divergence row. The formal, Katran-smoke and six-app-success receipts are hash-bound. The six-app run `x86_kvm_corpus_20260923_114624_121697` completed with 6/6 successful workloads. | RQ1's 62-case 0.99× object-load claim is `PARTIAL`; RQ2's 4086 sites, the June RQ3 site counts, and RQ4's 113/22/89 counts lack independent per-pass logs, and the fresh Cilium ladder's throughput ordering diverges from June's, so those rows are declared or `PARTIAL` rather than derived matches. |
 
 `docs/artifacts/render_claim_table.py` separates raw-file integrity, selected
 numeric claims, ReJIT coverage and full workload success. Its `PASS` is local to

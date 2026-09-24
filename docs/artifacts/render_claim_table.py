@@ -366,6 +366,15 @@ def micro_claim_rows(root: Path) -> list[Row]:
 CILIUM_RQ2 = "corpus/results/x86_kvm_corpus_20260604_100557_313063"
 CILIUM_RQ4_ON = "corpus/results/x86_kvm_corpus_20260529_033517_489159"
 CILIUM_RQ4_OFF = "corpus/results/x86_kvm_corpus_20260529_040554_604387"
+# Fresh isolated reruns of the four RQ3 Cilium single-pass policies. The June
+# ladder retained no per-pass loadtime reports, so site counts were declared;
+# these runs retain details/loadtime-reports/cilium__agent.jsonl.
+CILIUM_SITE_ARMS = (
+    ("RQ3 Cilium coverage-max applied sites", "corpus/results/x86_kvm_corpus_20260924_064817_392000", "kop_all_prefetch"),
+    ("RQ3 Cilium no-prefetch applied sites", "corpus/results/x86_kvm_corpus_20260924_074900_275227", "kop_all_no_prefetch"),
+    ("RQ3 Cilium no-bulk applied sites", "corpus/results/x86_kvm_corpus_20260924_085901_647044", "kop_all_no_bulk_prefetch"),
+    ("RQ3 Cilium no-bulk/no-prefetch applied sites", "corpus/results/x86_kvm_corpus_20260924_095500_223221", "kop_all_no_bulk_no_prefetch"),
+)
 PPS = re.compile(r"\n\s*(\d+)pps\s+[0-9]+Mb/sec .* errors: (\d+)")
 
 
@@ -427,6 +436,36 @@ def bpf_ns_per_run(app: dict, phase: str) -> float | None:
     return elapsed / runs if runs else None
 
 
+def loadtime_sites(path: Path) -> tuple[int, dict[str, int]] | None:
+    """Sum per-pass sites_applied from a retained shim loadtime report stream.
+
+    Returns None when the stream is absent or unparsable. The count is the same
+    quantity docs/tmp/kop_all_force_eval_20260603.py sums over
+    details/loadtime-reports/<stem>.jsonl.
+    """
+    try:
+        lines = path.read_text().splitlines()
+    except OSError:
+        return None
+    total = 0
+    per_pass: dict[str, int] = {}
+    seen = False
+    for line in lines:
+        if not line.strip():
+            continue
+        try:
+            record = json.loads(line)
+        except json.JSONDecodeError:
+            return None
+        seen = True
+        report = record.get("report") or {}
+        applied = int(report.get("sites_applied") or 0)
+        name = record.get("step") or report.get("pass") or "<none>"
+        total += applied
+        per_pass[name] = per_pass.get(name, 0) + applied
+    return (total, per_pass) if seen else None
+
+
 def cilium_claim_rows(root: Path) -> list[Row]:
     """Derive selected RQ2/RQ4 Cilium claims from retained three-sample raw JSON."""
     rows: list[Row] = []
@@ -444,7 +483,8 @@ def cilium_claim_rows(root: Path) -> list[Row]:
         rows.append(Row("RQ2 Cilium x86 throughput (1.074x)", UNAVAILABLE,
                         f"completed Cilium run with 3+3 positive pps samples missing: {CILIUM_RQ2}"))
     rows.append(Row("RQ2 Cilium x86 applied sites (4086)", UNAVAILABLE,
-                    "original per-pass loadtime report is not retained; app JSON alone cannot prove site count"))
+                    "original per-pass loadtime report is not retained; app JSON alone cannot prove site count. "
+                    "The fresh-generation equivalent family set (kop_all_no_prefetch) derives 3512 sites"))
 
     on = cilium_app(root, CILIUM_RQ4_ON, bpf_stats=True)
     off = cilium_app(root, CILIUM_RQ4_OFF, bpf_stats=False)
@@ -510,10 +550,100 @@ def cilium_claim_rows(root: Path) -> list[Row]:
                             f"{run}/details/apps/{app_file}; suite status=error"))
         else:
             rows.append(Row(label, UNAVAILABLE, f"verified samples missing: {run}"))
-    rows.append(Row("RQ3 applied-site counts (4697/4086/4136/3512/21/62)", UNAVAILABLE,
-                    "per-pass loadtime reports are not retained; site counts are declared from "
-                    "docs/tmp/kop_ablation_20260605_summary.md and annotated as such in the figure"))
+    rows.extend(cilium_site_rows(root))
     return rows
+
+
+def cilium_site_rows(root: Path) -> list[Row]:
+    """Derive RQ3 applied-site counts from retained shim loadtime reports.
+
+    The June throughput ladder retained no per-pass reports, so these are fresh
+    isolated runs of the identical single-pass policies; the derived count is
+    the sum of report.sites_applied over details/loadtime-reports/<stem>.jsonl.
+    """
+    rows: list[Row] = []
+    for label, run, policy in CILIUM_SITE_ARMS:
+        path = root / run / "details/loadtime-reports/cilium__agent.jsonl"
+        derived = loadtime_sites(path)
+        app = corpus_app(root, run, run_type="x86_kvm_corpus", app_file="cilium__agent.json",
+                         passes=[policy], bpf_stats=True, workload_seconds=30.0)
+        baseline = phase_pps(app, "baseline") if app else []
+        post = phase_pps(app, "post_rejit") if app else []
+        ratio = statistics.mean(post) / statistics.mean(baseline) if len(baseline) == len(post) == 3 and min(baseline + post) > 0 else None
+        cost_b = bpf_ns_per_run(app, "baseline") if app else None
+        cost_p = bpf_ns_per_run(app, "post_rejit") if app else None
+        cost = cost_p / cost_b if cost_b and cost_p else None
+        if derived is None:
+            rows.append(Row(label, UNAVAILABLE,
+                            f"retained loadtime report missing: {run}/details/loadtime-reports/cilium__agent.jsonl"))
+            continue
+        total, per_pass = derived
+        single = per_pass.get(policy) == total and total > 0
+        ok = single and ratio is not None
+        rows.append(Row(
+            f"{label} ({total} sites, {ratio:.3f}x)" if ratio is not None
+            else f"{label} ({total} sites)",
+            PASS if ok else PARTIAL,
+            f"sum of report.sites_applied over {run}/details/loadtime-reports/cilium__agent.jsonl "
+            f"= {total} across {len(per_pass)} step(s) {per_pass}; fresh {policy} run: "
+            + (f"post/baseline mean pps={ratio:.6f}x, BPF cost ratio={cost:.6f}" if cost is not None
+               else "workload ratio unavailable")
+            + f"; {run}/details/apps/cilium__agent.json",
+        ))
+    rows.append(corpus_divergence_row(root))
+    return rows
+
+
+# Fresh ladder run dirs keyed by the same arm labels as CILIUM_JUNE_ARMS.
+CILIUM_SITE_ARMS_ORDERED = tuple(
+    (label.split("applied sites")[0].replace("RQ3 Cilium ", "").strip(), run, policy)
+    for label, run, policy in CILIUM_SITE_ARMS
+)
+
+# June ladder run dirs by arm label, in the paper's coverage-narrowing order.
+CILIUM_JUNE_ARMS = (
+    ("coverage-max", "corpus/results/x86_kvm_corpus_20260605_145112_835705", "kop_all_prefetch"),
+    ("no-prefetch", "corpus/results/x86_kvm_corpus_20260605_141420_746952", "kop_all_no_prefetch"),
+    ("no-bulk", "corpus/results/x86_kvm_corpus_20260605_164411_317423", "kop_all_no_bulk_prefetch"),
+    ("no-bulk/no-prefetch", "corpus/results/x86_kvm_corpus_20260605_160715_129437", "kop_all_no_bulk_no_prefetch"),
+)
+
+
+def _arm_ratio(root: Path, run: str, policy: str, allow_suite_error: bool) -> float | None:
+    app = corpus_app(root, run, run_type="x86_kvm_corpus", app_file="cilium__agent.json",
+                     passes=[policy], bpf_stats=True,
+                     allow_suite_error=allow_suite_error, workload_seconds=30.0)
+    baseline = phase_pps(app, "baseline") if app else []
+    post = phase_pps(app, "post_rejit") if app else []
+    if len(baseline) == len(post) == 3 and min(baseline + post) > 0:
+        return statistics.mean(post) / statistics.mean(baseline)
+    return None
+
+
+def corpus_divergence_row(root: Path) -> Row:
+    """Derive the June-vs-fresh RQ3 ladder ordering from retained raw JSON only.
+
+    The fresh reruns are a different host/toolchain generation, so their site
+    counts and throughput ordering need not reproduce the June ladder; this row
+    derives both orderings and reports whether they agree.
+    """
+    fresh = {label: _arm_ratio(root, run, policy, allow_suite_error=False)
+             for label, run, policy in CILIUM_SITE_ARMS_ORDERED}
+    june = {label: _arm_ratio(root, run, policy, allow_suite_error=True)
+            for label, run, policy in CILIUM_JUNE_ARMS}
+    if any(v is None for v in fresh.values()) or any(v is None for v in june.values()):
+        return Row("RQ3 Cilium June-vs-fresh ladder ordering", UNAVAILABLE,
+                   "retained three-sample ratio missing for at least one ladder arm")
+    fresh_order = [l for l, _ in sorted(fresh.items(), key=lambda kv: -kv[1])]
+    june_order = [l for l, _ in sorted(june.items(), key=lambda kv: -kv[1])]
+    agree = fresh_order == june_order
+    return Row(
+        "RQ3 Cilium June-vs-fresh ladder ordering" + ("" if agree else " (diverges)"),
+        PASS if agree else PARTIAL,
+        f"throughput-descending order by post/baseline mean pps, derived from retained app JSON: "
+        f"June={june_order} " + "{" + ", ".join(f"{l}={june[l]:.4f}" for l in june_order) + "}; "
+        f"fresh={fresh_order} " + "{" + ", ".join(f"{l}={fresh[l]:.4f}" for l in fresh_order) + "}",
+    )
 
 
 def file_sha256(path: Path) -> str:
@@ -916,7 +1046,7 @@ def self_test() -> int:
             "status": "ok", "baseline": {**_wl(1000), "bpf": bpf},
             "post_rejit": {**_wl(1114), "bpf": bpf_post},
         }))
-        rows = [r for r in cilium_claim_rows(root) if r.claim.startswith("RQ3 Cilium coverage-max")]
+        rows = [r for r in cilium_claim_rows(root) if r.claim.startswith("RQ3 Cilium coverage-max throughput")]
         if len(rows) != 1 or rows[0].status != PASS:
             failures.append(
                 "RQ3 coverage-max row expected PASS, got "
@@ -926,11 +1056,55 @@ def self_test() -> int:
             "status": "ok", "baseline": {**_wl(1000), "bpf": bpf},
             "post_rejit": {**_wl(1200), "bpf": bpf_post},
         }))
-        rows = [r for r in cilium_claim_rows(root) if r.claim.startswith("RQ3 Cilium coverage-max")]
+        rows = [r for r in cilium_claim_rows(root) if r.claim.startswith("RQ3 Cilium coverage-max throughput")]
         if len(rows) != 1 or rows[0].status != PARTIAL:
             failures.append(
                 "RQ3 coverage-max with wrong ratio expected PARTIAL, got "
                 f"{[(r.claim, r.status) for r in rows]}"
+            )
+
+        # RQ3 applied-site rows: derivable only from a retained loadtime report.
+        arm = root / "corpus/results/x86_kvm_corpus_20260924_064817_392000"
+        reports = arm / "details/loadtime-reports"
+        reports.mkdir(parents=True)
+        (arm / "details/apps").mkdir(parents=True)
+        (arm / "metadata.json").write_text(json.dumps({
+            "status": "completed", "run_type": "x86_kvm_corpus", "suite": "corpus",
+            "samples": 3, "workload_seconds": 30.0, "bpf_stats": True,
+            "config": {"enabled_passes": ["kop_all_prefetch"]},
+        }))
+        (arm / "details/progress.json").write_text(json.dumps({"status": "completed"}))
+        (arm / "details/apps/cilium__agent.json").write_text(json.dumps({
+            "status": "ok", "baseline": {**_wl(1000), "bpf": bpf},
+            "post_rejit": {**_wl(1114), "bpf": bpf_post},
+        }))
+        site_rows = [r for r in cilium_site_rows(root) if r.claim.startswith("RQ3 Cilium coverage-max")]
+        if len(site_rows) != 1 or site_rows[0].status != UNAVAILABLE:
+            failures.append(
+                "RQ3 site row without report expected UNAVAILABLE, got "
+                f"{[(r.claim, r.status) for r in site_rows]}"
+            )
+        (reports / "cilium__agent.jsonl").write_text("\n".join(json.dumps({
+            "step": "kop_all_prefetch", "step_index": 0,
+            "report": {"pass": "kop", "sites_applied": sites},
+        }) for sites in (2000, 1017)) + "\n")
+        site_rows = [r for r in cilium_site_rows(root) if r.claim.startswith("RQ3 Cilium coverage-max")]
+        if len(site_rows) != 1 or site_rows[0].status != PASS or "3017 sites" not in site_rows[0].claim:
+            failures.append(
+                "RQ3 site row with matching single-step report expected PASS/3017, got "
+                f"{[(r.claim, r.status) for r in site_rows]}"
+            )
+        (reports / "cilium__agent.jsonl").write_text(
+            json.dumps({"step": "kop_all_prefetch", "report": {"pass": "kop", "sites_applied": 10}})
+            + "\n"
+            + json.dumps({"step": "other_step", "report": {"pass": "kop", "sites_applied": 10}})
+            + "\n"
+        )
+        site_rows = [r for r in cilium_site_rows(root) if r.claim.startswith("RQ3 Cilium coverage-max")]
+        if len(site_rows) != 1 or site_rows[0].status != PARTIAL:
+            failures.append(
+                "RQ3 site row spanning two steps expected PARTIAL, got "
+                f"{[(r.claim, r.status) for r in site_rows]}"
             )
 
     if failures:

@@ -148,6 +148,9 @@ done
 # Retain the compact Cilium/Katran RQ2/RQ3/RQ4 records used by
 # render_claim_table.py. The paper's 4086-site and loader-count claims still
 # lack their original per-pass logs; do not infer them from these app records.
+# The four x86_kvm_corpus_20260924_* runs are fresh-generation reruns of the
+# RQ3 single-pass policies that DO retain details/loadtime-reports, from which
+# render_claim_table.py derives applied-site counts.
 CORPUS_RUNS=(
     x86_kvm_corpus_20260604_070210_639497
     x86_kvm_corpus_20260604_100557_313063
@@ -158,12 +161,17 @@ CORPUS_RUNS=(
     x86_kvm_corpus_20260605_141420_746952
     x86_kvm_corpus_20260605_164411_317423
     x86_kvm_corpus_20260605_160715_129437
+    x86_kvm_corpus_20260924_064817_392000
+    x86_kvm_corpus_20260924_074900_275227
+    x86_kvm_corpus_20260924_085901_647044
+    x86_kvm_corpus_20260924_095500_223221
     aws_arm64_corpus_20260605_080836_924256
     aws_arm64_corpus_20260605_094729_221231
 )
 for run in "${CORPUS_RUNS[@]}"; do
     for extra in metadata.json details/progress.json details/result.json \
-                 details/apps/cilium__agent.json details/apps/katran.json; do
+                 details/apps/cilium__agent.json details/apps/katran.json \
+                 details/loadtime-reports/cilium__agent.jsonl; do
         path="corpus/results/$run/$extra"
         git -C "$ROOT_DIR" ls-tree "$COMMIT" -- "$path" | grep -q . || continue
         mkdir -p "$STAGE/$(dirname "$path")"
@@ -335,6 +343,10 @@ required=(
     corpus/results/aws_arm64_corpus_20260605_094729_221231/details/apps/katran.json
     corpus/results/x86_kvm_corpus_20260529_040554_604387/details/apps/cilium__agent.json
     docs/tmp/kop_ablation_20260605_summary.md
+    corpus/results/x86_kvm_corpus_20260924_064817_392000/details/loadtime-reports/cilium__agent.jsonl
+    corpus/results/x86_kvm_corpus_20260924_074900_275227/details/loadtime-reports/cilium__agent.jsonl
+    corpus/results/x86_kvm_corpus_20260924_085901_647044/details/loadtime-reports/cilium__agent.jsonl
+    corpus/results/x86_kvm_corpus_20260924_095500_223221/details/loadtime-reports/cilium__agent.jsonl
 )
 for rel in "${required[@]}"; do
     [ -e "$VERIFY/$rel" ] || { echo "missing from ZIP: $rel" >&2; exit 1; }
