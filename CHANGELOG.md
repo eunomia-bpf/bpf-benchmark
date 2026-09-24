@@ -63,6 +63,12 @@ Added for artifact evaluation:
   derives those counts from the retained log and requires them to agree with
   both the receipt and the `native-sim/formal/Makefile` at the current commit,
   so a stale receipt reports PARTIAL instead of passing on a hard-coded count.
+- `docs/artifacts/render_claim_table.py`'s RQ1 62-case object-load row now
+  derives its status from the two retained May 14 ReJIT ratios over the April
+  29 name set (PASS only when both round to the paper's 0.99x and both runs
+  pass their live metadata/progress provenance check; PARTIAL otherwise). It
+  was the last row whose status was a hard-coded literal, so a future paired
+  62-case run that reproduces 0.99x promotes it without an edit.
 
 ## atc26-ae-1 (2026-09-22)
 

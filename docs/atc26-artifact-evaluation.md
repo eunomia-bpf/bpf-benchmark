@@ -589,9 +589,11 @@ benchmark names in the earlier April 29 run (the only extra name is
 `katran_like`) gives 0.995157× and 0.997839×, respectively. Both round to
 1.00× at two decimal places. The paper does not enumerate its 62 names and
 states 0.99×; no completed paired 62-case ReJIT run was found among the
-retained May/June x86 micro results. The renderer therefore marks this claim
-`PARTIAL`. This historical-name mapping is plausible, not proven to be the
-paper's exact population. A search across all current Git refs found no
+retained May/June x86 micro results. The renderer derives this claim's status
+from those two ratios — `PASS` only if both round to 0.99× and both runs pass
+their live metadata/progress provenance check, otherwise `PARTIAL` — so it
+marks the claim `PARTIAL`. This historical-name mapping is plausible, not
+proven to be the paper's exact population. A search across all current Git
 May/June `details/loadtime-reports`, `loadtime-plans`, or `shim-logs`
 files for the historical corpus runs; the original June 4 Cilium result
 commit contains only app, result, progress, and metadata JSON. The 4086

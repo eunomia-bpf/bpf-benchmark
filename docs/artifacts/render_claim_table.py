@@ -354,11 +354,13 @@ def micro_claim_rows(root: Path) -> list[Row]:
                 f"provenance valid={provenance_ok})"
                 for rel, value, provenance_ok in estimates
             )
+            matched = all(f"{value:.2f}" == "0.99" and provenance_ok
+                          for _, value, provenance_ok in estimates)
             rows.append(Row(
                 "RQ1 x86 62-case object-load overhead (paper 0.99x)",
-                PARTIAL,
+                PASS if matched else PARTIAL,
                 f"May14 ReJIT runs restricted to Apr29 62-name set (excludes katran_like): "
-                f"{detail}; neither rounds to paper 0.99x; "
+                f"{detail}; both rounds to paper 0.99x={matched}; "
                 f"population={population_rel}/details/result.json",
             ))
         else:
@@ -1589,6 +1591,52 @@ def self_test() -> int:
                 "RQ4 manifest row with synthetic 3-object manifest expected PARTIAL/3 fresh, got "
                 f"{[(r.claim, r.status) for r in nat_rows]} {second.evidence!r}"
             )
+        # RQ1 62-case object-load row: status is derived from the ratio the
+        # two historical ReJIT runs produce over the population name set.
+        hist_rel = MICRO_RESULTS["RQ1 x86 historical load-time run A"]
+        hist_rel_b = MICRO_RESULTS["RQ1 x86 historical load-time run B"]
+        pop_rel = MICRO_RESULTS["RQ1 x86 historical 62-case population"]
+        names = [f"case{i}" for i in range(62)]
+        (root / pop_rel / "details").mkdir(parents=True, exist_ok=True)
+        (root / pop_rel / "details/result.json").write_text(json.dumps(
+            {"benchmarks": [{"name": n} for n in names]}))
+
+        def write_hist(rel: str, rejit_ns: int) -> None:
+            d = root / rel
+            (d / "details").mkdir(parents=True, exist_ok=True)
+            (d / "metadata.json").write_text(json.dumps({
+                "status": "completed", "run_type": "x86_kvm_micro",
+                "suite": "micro_staged_codegen",
+                "host": {"platform": "x86_64", "kernel_version": "7.0.0-rc2+"},
+            }))
+            (d / "details/progress.json").write_text(json.dumps({"status": "completed"}))
+            benches = []
+            for n in names:
+                benches.append({"name": n, "runs": [
+                    {"runtime": "kernel", "samples": [
+                        {"phases_ns": {"object_load_ns": 1000}}]},
+                    {"runtime": "kernel_rejit", "samples": [
+                        {"phases_ns": {"object_load_ns": rejit_ns}}]},
+                ]})
+            (d / "details/result.json").write_text(json.dumps({"benchmarks": benches}))
+
+        def object_load_row() -> Row:
+            return next(r for r in micro_claim_rows(root)
+                        if r.claim.startswith("RQ1 x86 62-case object-load overhead"))
+
+        write_hist(hist_rel, 990)
+        write_hist(hist_rel_b, 990)
+        row = object_load_row()
+        if row.status != PASS or "rounds to paper 0.99x=True" not in row.evidence:
+            failures.append(
+                f"62-case row with 0.99x ratios expected PASS, got {(row.status, row.evidence)!r}")
+
+        write_hist(hist_rel_b, 997)
+        row = object_load_row()
+        if row.status != PARTIAL or "rounds to paper 0.99x=False" not in row.evidence:
+            failures.append(
+                f"62-case row with a 1.00x run expected PARTIAL, got {(row.status, row.evidence)!r}")
+
 
     if failures:
         for f in failures:
